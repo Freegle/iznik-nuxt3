@@ -11,6 +11,8 @@ These commands can be run by Claude without asking for permission:
 - `npm list <package>` - Check installed package versions
 - `npx prettier --check <file>` - Check file formatting
 - `npm run typecheck` - Verify TypeScript types (if available)
+- `grep <pattern> <files>` - Search for patterns in files
+- `find <path> <options>` - Find files matching criteria
 
 IMPORTANT: After making code changes, always run `eslint --fix` on the specific files changed and remove any unused code detected by the linter.
 
@@ -149,6 +151,8 @@ Claude can automatically perform these operations without prompting:
 - Creating small utility functions
 - Refactoring code that maintains the same behavior
 - Removing unused code identified by the linter
+- Searching for code patterns using grep, find, or similar tools
+- Exploring the codebase to locate files or identify patterns
 
 Actions that require explicit user permission:
 - Installing production dependencies

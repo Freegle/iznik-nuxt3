@@ -2,7 +2,7 @@
 
 Iznik is a platform for online reuse of unwanted items.  This is the front-end client.  
 
-The old  version is [here](https://github.com/Freegle/iznik-nuxt).
+The old version is [here](https://github.com/Freegle/iznik-nuxt).
 
 The development has been funded by [Freegle](https://www.ilovefreegle.org) for use in the UK,
 but it is an open source platform which can be used or adapted by others.  Other contributors very welcome,
@@ -20,8 +20,7 @@ hear about it; you can mail <geeks@ilovefreegle.org>.
 
 # Development
 
-Currently only tested on node v18 and npm v9.7.  Won't work on v16 because it relies on fetch()
-which hasn't been fully backported to v16.
+Currently only tested on node v18 and npm v9.7.
 
 Then install all the dependencies:
 ```

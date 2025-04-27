@@ -40,15 +40,25 @@ jobs:
         environment:
           NODE_ENV: test
           TEST_BASE_URL: ${TEST_URL:-http://localhost:3002}
+    # Use a larger resource class with more CPU/RAM
+    resource_class: large
 
     steps:
       - checkout
 
       # Install dependencies
+      - run:
+          name: Optimize Node.js environment
+          command: |
+            # Set Node.js memory options
+            echo "export NODE_OPTIONS=\"--max-old-space-size=8192\"" >> $BASH_ENV
+            source $BASH_ENV
+            
+      # Install dependencies with optimized settings
       - node/install-packages:
           pkg-manager: npm
           cache-path: ~/project/node_modules
-          override-ci-command: npm ci
+          override-ci-command: npm ci --prefer-offline --no-audit
 
       # Install Playwright browsers and system dependencies
       - run:
@@ -61,12 +71,15 @@ jobs:
           command: |
             export IZNIK_API_V1=${API_V1_URL:-https://fdapilive.ilovefreegle.org/api}
             export IZNIK_API_V2=${API_V2_URL:-https://api.ilovefreegle.org/apiv2}
+            # Increase Node.js memory limit to 8GB
+            export NODE_OPTIONS="--max-old-space-size=8192"
             npm run build
 
       # Serve the built application in the background
       - run:
           name: Serve built application
           command: |
+            export NODE_OPTIONS="--max-old-space-size=8192"
             npm run start
           background: true
 
@@ -91,11 +104,25 @@ jobs:
             done
             echo "Server is up!"
 
+      # Monitor memory usage during build
+      - run:
+          name: Start memory monitor
+          background: true
+          command: |
+            while true; do
+              echo "Memory usage at $(date):"
+              free -h
+              echo "Node process memory:"
+              ps -o pid,vsz,rss,pmem,pcpu,cmd -e | grep node | grep -v grep
+              sleep 30
+            done
+            
       # Run Playwright tests
       - run:
           name: Run Playwright tests
           command: |
             mkdir -p test-results
+            export NODE_OPTIONS="--max-old-space-size=8192"
             npm run test:ci || true  # Continue even if tests fail
             # If test results don't exist in expected format, create a basic one to avoid failure
             if [ ! -f "test-results/junit.xml" ]; then
