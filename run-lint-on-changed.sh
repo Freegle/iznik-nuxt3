@@ -40,11 +40,11 @@ esac
 
 info "Finding changed files..."
 
-# Get all changed files that are staged for commit, excluding .ts files
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|tsx|vue)$' | grep -v '\.ts$' || true)
+# Get all changed files that are staged for commit, excluding .ts and .tsx files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|vue)$' | grep -v -E '\.(ts|tsx)$' || true)
 
 # Get all changed files that aren't staged (optional, uncomment if you want these too)
-# UNSTAGED_FILES=$(git diff --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|tsx|vue)$' | grep -v '\.ts$' || true)
+# UNSTAGED_FILES=$(git diff --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|vue)$' | grep -v -E '\.(ts|tsx)$' || true)
 # Combine files (uniquely)
 # ALL_CHANGED_FILES=$(printf "%s\n%s" "$STAGED_FILES" "$UNSTAGED_FILES" | sort | uniq)
 

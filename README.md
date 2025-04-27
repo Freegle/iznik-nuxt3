@@ -52,7 +52,7 @@ The project uses Git hooks to ensure code quality. These hooks are cross-platfor
 The hooks are installed automatically when you run `npm install` through the `prepare` script.
 
 Key features:
-- Pre-commit hook that runs ESLint on staged files
+- Pre-commit hook that runs ESLint on staged files (excludes TypeScript files)
 - Cross-platform compatibility with proper path handling
 - Automatic OS detection and environment-specific behavior
 - Proper handling of file paths with spaces
