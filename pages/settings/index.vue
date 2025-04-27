@@ -696,10 +696,9 @@
     </div>
   </client-only>
 </template>
-<script>
-import dayjs from 'dayjs'
+<script setup>
 import { useRoute } from 'vue-router'
-import { useMiscStore } from '../../stores/misc'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import { buildHead } from '../../composables/useBuildHead'
 import { useAddressStore } from '../../stores/address'
@@ -710,7 +709,6 @@ import SettingsPhone from '~/components/SettingsPhone'
 import SupporterInfo from '~/components/SupporterInfo'
 import ProfileImage from '~/components/ProfileImage'
 import PostCode from '~/components/PostCode'
-
 import SettingsGroup from '~/components/SettingsGroup'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurUploader from '~/components/OurUploader'
@@ -720,6 +718,468 @@ import PasswordEntry from '~/components/PasswordEntry'
 import { fetchMe } from '~/composables/useMe'
 import { useImageStore } from '~/stores/image'
 
+definePageMeta({
+  layout: 'login',
+})
+
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Settings',
+    'What people see about you, your email settings, all that good stuff...',
+    null,
+    {
+      class: 'overflow-y-scroll',
+    }
+  )
+)
+
+const authStore = useAuthStore()
+const addressStore = useAddressStore()
+const imageStore = useImageStore()
+
+// State
+const pc = ref(null)
+const showAdvanced = ref(false)
+const uploading = ref(false)
+const emailValid = ref(false)
+const cacheBust = ref(Date.now())
+const autoreposts = ref(true)
+const enterNewLine = ref(false)
+const showAddressModal = ref(false)
+const showAboutMeModal = ref(false)
+const showProfileModal = ref(false)
+const showEmailConfirmModal = ref(false)
+const currentAtts = ref([])
+const bump = ref(0)
+
+const showSupporter = computed(() => {
+  const settings = authStore.me.settings
+  return 'hidesupporter' in settings ? !settings.hidesupporter : true
+})
+
+const relevantallowed = computed({
+  get: () => Boolean(authStore.me.relevantallowed),
+  set: (val) => {
+    authStore.me.relevantallowed = val ? 1 : 0
+  },
+})
+
+const notificationSettings = computed(() => {
+  const ret = {
+    email: true,
+    emailmine: false,
+    push: true,
+    facebook: true,
+    app: true,
+  }
+
+  const settings = authStore.me?.settings?.notifications
+
+  if (settings) {
+    if ('email' in settings) {
+      ret.email = settings.email
+    }
+    if ('emailmine' in settings) {
+      ret.emailmine = settings.emailmine
+    }
+    if ('push' in settings) {
+      ret.push = settings.push
+    }
+    if ('facebook' in settings) {
+      ret.facebook = settings.facebook
+    }
+    if ('app' in settings) {
+      ret.app = settings.app
+    }
+  }
+
+  return ret
+})
+
+const notificationmails = computed({
+  get: () => Boolean(authStore.me.settings.notificationmails),
+  set: (val) => {
+    authStore.me.notificationmails = val ? 1 : 0
+  },
+})
+
+const newslettersallowed = computed({
+  get: () => Boolean(authStore.me.newslettersallowed),
+  set: (val) => {
+    authStore.me.newslettersallowed = val ? 1 : 0
+  },
+})
+
+const aboutme = computed(() => {
+  return authStore.me && authStore.me.aboutme ? authStore.me.aboutme.text : ''
+})
+
+const profileurl = computed(() => {
+  return authStore.me && useprofile.value && authStore.me.profile?.path
+    ? authStore.me.profile.path
+    : '/defaultprofile.png'
+})
+
+const useprofile = computed(() => {
+  let ret = true
+
+  if (authStore.me && authStore.me.settings) {
+    if (Object.keys(authStore.me.settings).includes('useprofile')) {
+      ret = authStore.me.settings.useprofile
+    }
+  }
+
+  return ret
+})
+
+const simpleEmailSetting = computed({
+  get: () => {
+    return authStore.me?.settings?.simplemail
+      ? authStore.me.settings.simplemail
+      : 'Full'
+  },
+  set: async (newVal) => {
+    await authStore.saveAndGet({
+      simplemail: newVal,
+    })
+  },
+})
+
+const checkSimplicity = computed(() => {
+  let ret = true
+  let first = true
+  let emailFrequency = 24
+  let communityEvents = null
+  let volunteering = null
+
+  // If we have the same settings on all groups, then we can show a simplified view.
+  if (authStore.myGroups) {
+    for (const group of authStore.myGroups) {
+      if (first) {
+        emailFrequency = group.emailfrequency
+        communityEvents = group.eventsallowed
+        volunteering = group.volunteeringallowed
+        first = false
+      } else if (
+        emailFrequency !== group.emailfrequency ||
+        communityEvents !== group.eventsallowed ||
+        volunteering !== group.volunteeringallowed
+      ) {
+        ret = false
+        emailFrequency = group.emailfrequency
+        communityEvents = group.eventsallowed
+        volunteering = group.volunteeringallowed
+        break
+      }
+    }
+  }
+
+  return {
+    ret,
+    emailFrequency,
+    communityEvents,
+    volunteering,
+  }
+})
+
+const simpleSettings = computed(() => {
+  if (authStore.me?.settings?.simplemail) {
+    // We know that we have simple settings.
+    return true
+  }
+
+  // Check whether our settings are the same on all groups
+  const simple = checkSimplicity.value
+  return simple.ret
+})
+
+const emailSimple = computed({
+  get: () => {
+    const simple = checkSimplicity.value
+    return simple.emailFrequency
+  },
+  set: (newValue) => {
+    changeAllGroups('emailfrequency', newValue)
+  },
+})
+
+const otheremails = computed(() => {
+  return authStore.me.emails
+    ? authStore.me.emails.filter((e) => {
+        return !e.ourdomain && e.email !== authStore.me.email
+      })
+    : []
+})
+
+// Methods
+const toggleSupporter = async () => {
+  const settings = authStore.me.settings
+  settings.hidesupporter = showSupporter.value
+
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const checkUser = () => {
+  // This is a hack. In the lost password case, we've seen that the login which is driven via the default
+  // layout completes after we have retrieved our user. The result is that we don't have the right info in "me".
+  if (!authStore.me || !authStore.me.settings || !notificationSettings.value) {
+    update()
+  } else {
+    setTimeout(checkUser, 200)
+  }
+}
+
+const fetch = async () => {
+  await authStore.fetchUser()
+}
+
+const update = async () => {
+  try {
+    await fetch()
+  } catch (e) {
+    console.error('Failed to fetch user', e)
+  }
+}
+
+const addAbout = async () => {
+  await fetch()
+  showAboutMeModal.value = true
+}
+
+const viewProfile = () => {
+  showProfileModal.value = true
+}
+
+const changeUseProfile = async (c) => {
+  const settings = authStore.me.settings
+  settings.useprofile = c
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const saveName = async () => {
+  await authStore.saveAndGet({
+    displayname: authStore.me.displayname,
+  })
+}
+
+const selectPostcode = (postcode) => {
+  pc.value = postcode
+}
+
+const clearPostcode = () => {
+  pc.value = null
+}
+
+const saveEmail = async (callback) => {
+  if (authStore.me.email) {
+    const data = await authStore.saveEmail({
+      email: authStore.me.email,
+    })
+
+    if (data && data.ret === 10) {
+      showEmailConfirmModal.value = true
+    }
+  }
+  callback()
+}
+
+const unbounce = async (callback) => {
+  if (authStore.me.email && authStore.me.bouncing) {
+    await authStore.unbounce(authStore.me.id)
+  }
+  callback()
+}
+
+const savePostcode = async (callback) => {
+  if (pc.value?.id) {
+    const settings = authStore.me.settings
+    if (!settings?.mylocation || settings?.mylocation.id !== pc.value.id) {
+      settings.mylocation = pc.value
+      await authStore.saveAndGet({
+        settings,
+      })
+    }
+  }
+
+  callback()
+}
+
+const toggleAdvanced = (e) => {
+  e.preventDefault()
+  showAdvanced.value = !showAdvanced.value
+}
+
+const changeAllGroups = async (param, value) => {
+  for (const group of authStore.myGroups) {
+    const params = {
+      userid: authStore.me.id,
+      groupid: group.id,
+    }
+    params[param] = value
+
+    // Don't fetch for each group.
+    await authStore.setGroup(params, true)
+  }
+
+  await fetch()
+}
+
+const changeNotification = async (e, type) => {
+  const settings = authStore.me.settings
+  settings.notifications[type] = e
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const changeRelevant = async (e) => {
+  await authStore.saveAndGet({
+    relevantallowed: e,
+  })
+}
+
+const changeNotifChitchat = async (e) => {
+  const settings = authStore.me.settings
+  settings.notificationmails = e
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const changeNewsletter = async (e) => {
+  await authStore.saveAndGet({
+    newslettersallowed: e,
+  })
+}
+
+const changeEngagement = async (e) => {
+  const settings = authStore.me.settings
+  settings.engagement = e
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const changeAutorepost = async (e) => {
+  const settings = authStore.me.settings
+  settings.autorepostsdisable = !e
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+const changeNewLine = async (e) => {
+  const settings = authStore.me.settings
+  settings.enterNewLine = e
+  await authStore.saveAndGet({
+    settings,
+  })
+  enterNewLine.value = e
+}
+
+const leaveGroup = async (id) => {
+  await authStore.leaveGroup(authStore.myid, id)
+}
+
+const addressBook = async () => {
+  await addressStore.fetch()
+  showAddressModal.value = true
+}
+
+const uploadProfile = () => {
+  uploading.value = true
+}
+
+const rotate = async (deg) => {
+  let curr = 0
+
+  if (authStore.me.profile.externaluid) {
+    curr = authStore.me.profile.externalmods?.rotate || 0
+  }
+
+  curr += deg
+
+  // Ensure between 0 and 360
+  curr = (curr + 360) % 360
+
+  await imageStore.post({
+    id: authStore.me.profile.id,
+    rotate: curr,
+    bust: Date.now(),
+    user: true,
+  })
+
+  // Refresh the user - which in turn should update the image displayed.
+  await fetchMe(true)
+
+  cacheBust.value = Date.now()
+}
+
+const rotateLeft = () => {
+  rotate(-90)
+}
+
+const rotateRight = () => {
+  rotate(90)
+}
+
+// Setup watchers and lifecycle hooks
+watch(
+  currentAtts,
+  async (newVal) => {
+    uploading.value = false
+
+    if (newVal?.length) {
+      // We want to replace our profile picture. The API for this is a bit odd - msgid will get used as the
+      // id of the user.
+      const atts = {
+        externaluid: newVal[0].ouruid,
+        externalmods: newVal[0].externalmods,
+        imgtype: 'User',
+        msgid: authStore.myid,
+      }
+
+      console.log('Post image', atts)
+      await imageStore.post(atts)
+    }
+
+    // Refresh the user - which in turn should update the image displayed.
+    await fetchMe(true)
+
+    bump.value++
+  },
+  { deep: true }
+)
+
+onMounted(async () => {
+  await update()
+  autoreposts.value = !authStore.me?.settings?.autorepostsdisable
+  enterNewLine.value = authStore.me?.settings?.enterNewLine
+
+  if (
+    simpleEmailSetting.value === 'Full' ||
+    simpleEmailSetting.value === 'Basic'
+  ) {
+    // Double check that we have chat notification emails enabled, as we should for this setting.
+    // If we don't then force display to advanced so that they can change this.
+    if (!notificationSettings.value.email) {
+      showAdvanced.value = true
+    }
+  }
+
+  setTimeout(checkUser, 200)
+})
+
+// Define async components
 const EmailConfirmModal = defineAsyncComponent(() =>
   import('~/components/EmailConfirmModal')
 )
@@ -732,501 +1192,6 @@ const AboutMeModal = defineAsyncComponent(() =>
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
-
-export default {
-  components: {
-    SettingsEmailInfo,
-    SupporterInfo,
-    SettingsPhone,
-    EmailOwn,
-    EmailValidator,
-    OurToggle,
-    EmailConfirmModal,
-    AboutMeModal,
-    AddressModal,
-    ProfileModal,
-    PostCode,
-    SettingsGroup,
-    NoticeMessage,
-    ProfileImage,
-    OurUploader,
-    DonationButton,
-    PasswordEntry,
-  },
-  setup() {
-    definePageMeta({
-      layout: 'login',
-    })
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Settings',
-        'What people see about you, your email settings, all that good stuff...',
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
-
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
-    const addressStore = useAddressStore()
-    const imageStore = useImageStore()
-
-    return {
-      miscStore,
-      authStore,
-      addressStore,
-      imageStore,
-    }
-  },
-  data() {
-    return {
-      pc: null,
-      showAdvanced: false,
-      savingPostcode: false,
-      savedPostcode: false,
-      uploading: false,
-      emailValid: false,
-      cacheBust: Date.now(),
-      userTimer: null,
-      autoreposts: true,
-      enterNewLine: false,
-      showAddressModal: false,
-      showAboutMeModal: false,
-      showProfileModal: false,
-      showEmailConfirmModal: false,
-      currentAtts: [],
-      bump: 0,
-    }
-  },
-  computed: {
-    today() {
-      return dayjs().format('YYYY-MM-DD')
-    },
-    aMonthFromNow() {
-      return dayjs().add(30, 'day').format('YYYY-MM-DD')
-    },
-    showSupporter() {
-      const settings = this.me.settings
-      return 'hidesupporter' in settings ? !settings.hidesupporter : true
-    },
-    relevantallowed: {
-      // This is 1/0 in the model whereas we want Boolean.
-      set(val) {
-        this.me.relevantallowed = val ? 1 : 0
-      },
-      get() {
-        return Boolean(this.me.relevantallowed)
-      },
-    },
-    notificationSettings() {
-      const ret = {
-        email: true,
-        emailmine: false,
-        push: true,
-        facebook: true,
-        app: true,
-      }
-
-      const settings = this.me?.settings?.notifications
-
-      if (settings) {
-        if ('email' in settings) {
-          ret.email = settings.email
-        }
-        if ('emailmine' in settings) {
-          ret.emailmine = settings.emailmine
-        }
-        if ('push' in settings) {
-          ret.push = settings.push
-        }
-        if ('facebook' in settings) {
-          ret.facebook = settings.facebook
-        }
-        if ('app' in settings) {
-          ret.app = settings.app
-        }
-      }
-
-      return ret
-    },
-    notificationmails: {
-      // This is 1/0 in the model whereas we want Boolean.
-      set(val) {
-        this.me.notificationmails = val ? 1 : 0
-      },
-      get() {
-        return Boolean(this.me.settings.notificationmails)
-      },
-    },
-    newslettersallowed: {
-      // This is 1/0 in the model whereas we want Boolean.
-      set(val) {
-        this.me.newslettersallowed = val ? 1 : 0
-      },
-      get() {
-        return Boolean(this.me.newslettersallowed)
-      },
-    },
-    aboutme() {
-      const ret = this.me && this.me.aboutme ? this.me.aboutme.text : ''
-      return ret
-    },
-    profileurl() {
-      return this.me && this.useprofile && this.me.profile?.path
-        ? this.me.profile.path
-        : '/defaultprofile.png'
-    },
-    useprofile() {
-      let ret = true
-
-      if (this.me && this.me.settings) {
-        if (Object.keys(this.me.settings).includes('useprofile')) {
-          ret = this.me.settings.useprofile
-        }
-      }
-
-      return ret
-    },
-    simpleEmailSetting: {
-      // There are three variants:
-      // - None.  All the options are off.
-      // - Basic.  OFFER/WANTED, chat messages,
-      // - Full.  OFFER/WANTED, community event, volunteer ops, chitchat, notifications,
-      get() {
-        return this.me?.settings?.simplemail
-          ? this.me.settings.simplemail
-          : 'Full'
-      },
-      async set(newVal) {
-        await this.authStore.saveAndGet({
-          simplemail: newVal,
-        })
-      },
-    },
-    checkSimplicity() {
-      let ret = true
-      let first = true
-      let emailFrequency = 24
-      let communityEvents = null
-      let volunteering = null
-
-      // If we have the same settings on all groups, then we can show a simplified view.
-      if (this.myGroups) {
-        for (const group of this.myGroups) {
-          if (first) {
-            emailFrequency = group.emailfrequency
-            communityEvents = group.eventsallowed
-            volunteering = group.volunteeringallowed
-            first = false
-          } else if (
-            emailFrequency !== group.emailfrequency ||
-            communityEvents !== group.eventsallowed ||
-            volunteering !== group.volunteeringallowed
-          ) {
-            ret = false
-            emailFrequency = group.emailfrequency
-            communityEvents = group.eventsallowed
-            volunteering = group.volunteeringallowed
-            break
-          }
-        }
-      }
-
-      return {
-        ret,
-        emailFrequency,
-        communityEvents,
-        volunteering,
-      }
-    },
-    simpleSettings() {
-      if (this.me?.settings?.simplemail) {
-        // We know that we have simple settings.
-        return true
-      }
-
-      // Check whether our settings are the same on all groups
-      const simple = this.checkSimplicity
-      return simple.ret
-    },
-    emailSimple: {
-      get() {
-        const simple = this.checkSimplicity
-        return simple.emailFrequency
-      },
-      set(newValue) {
-        this.changeAllGroups('emailfrequency', newValue)
-      },
-    },
-    volunteeringSimple: {
-      get() {
-        const simple = this.checkSimplicity
-        return Boolean(simple.volunteering)
-      },
-      set(newValue) {
-        this.changeAllGroups('volunteeringallowed', newValue)
-      },
-    },
-    eventSimple: {
-      get() {
-        const simple = this.checkSimplicity
-        return Boolean(simple.communityEvents)
-      },
-      set(newValue) {
-        this.changeAllGroups('eventsallowed', newValue)
-      },
-    },
-    otheremails() {
-      return this.me.emails
-        ? this.me.emails.filter((e) => {
-            return !e.ourdomain && e.email !== this.me.email
-          })
-        : []
-    },
-  },
-  watch: {
-    currentAtts: {
-      async handler(newVal) {
-        this.uploading = false
-
-        if (newVal?.length) {
-          // We want to replace our profile picture.  The API for this is a bit odd - msgid will get used as the
-          // id of the user.
-          const atts = {
-            externaluid: newVal[0].ouruid,
-            externalmods: newVal[0].externalmods,
-            imgtype: 'User',
-            msgid: this.myid,
-          }
-
-          console.log('Post image', atts)
-          await this.imageStore.post(atts)
-        }
-
-        // Refresh the user - which in turn should update the image displayed.
-        await fetchMe(true)
-
-        this.bump++
-      },
-      deep: true,
-    },
-  },
-  async mounted() {
-    await this.update()
-    this.autoreposts = !this.me?.settings?.autorepostsdisable
-    this.enterNewLine = this.me?.settings?.enterNewLine
-
-    if (
-      this.simpleEmailSetting === 'Full' ||
-      this.simpleEmailSetting === 'Basic'
-    ) {
-      // Double check that we have chat notification emails enabled, as we should for this setting.
-      // If we don't then force display to advanced so that they can change this.
-      if (!this.notificationSettings.email) {
-        this.showAdvanced = true
-      }
-    }
-
-    setTimeout(this.checkUser, 200)
-  },
-  methods: {
-    async toggleSupporter() {
-      const settings = this.me.settings
-      settings.hidesupporter = this.showSupporter
-
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    checkUser() {
-      // This is a hack.  In the lost password case, we've seen that the login which is driven via the default
-      // layout completes after we have retrieved our user.  The result is that we don't have the right info in "me".
-      // I have discovered a truly marvellous fix for this, which this comment is too short to contain.
-      if (!this.me || !this.me.settings || !this.notificationSettings) {
-        this.update()
-      } else {
-        setTimeout(this.checkUser, 200)
-      }
-    },
-    async fetch() {
-      await this.authStore.fetchUser()
-    },
-    async update() {
-      try {
-        await this.fetch()
-      } catch (e) {
-        console.error('Failed to fetch user', e)
-      }
-    },
-    async addAbout() {
-      await this.fetch()
-      this.showAboutMeModal = true
-    },
-    viewProfile() {
-      this.showProfileModal = true
-    },
-    async changeUseProfile(c, e) {
-      const settings = this.me.settings
-      settings.useprofile = c
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async saveName() {
-      await this.authStore.saveAndGet({
-        displayname: this.me.displayname,
-      })
-    },
-    selectPostcode(pc) {
-      this.pc = pc
-    },
-    clearPostcode() {
-      this.pc = null
-    },
-    async saveEmail(callback) {
-      if (this.me.email) {
-        const data = await this.authStore.saveEmail({
-          email: this.me.email,
-        })
-
-        if (data && data.ret === 10) {
-          this.showEmailConfirmModal = true
-        }
-      }
-      callback()
-    },
-    async unbounce(callback) {
-      if (this.me.email && this.me.bouncing) {
-        await this.authStore.unbounce(this.me.id)
-      }
-      callback()
-    },
-    async savePostcode(callback) {
-      if (this.pc?.id) {
-        const settings = this.me.settings
-        if (!settings?.mylocation || settings?.mylocation.id !== this.pc.id) {
-          settings.mylocation = this.pc
-          await this.authStore.saveAndGet({
-            settings,
-          })
-        }
-      }
-
-      callback()
-    },
-    toggleAdvanced(e) {
-      e.preventDefault()
-      this.showAdvanced = !this.showAdvanced
-    },
-    async changeAllGroups(param, value) {
-      for (const group of this.myGroups) {
-        const params = {
-          userid: this.me.id,
-          groupid: group.id,
-        }
-        params[param] = value
-
-        // Don't fetch for each group.
-        await this.authStore.setGroup(params, true)
-      }
-
-      await this.fetch()
-    },
-    async changeNotification(e, type) {
-      const settings = this.me.settings
-      settings.notifications[type] = e
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async changeRelevant(e) {
-      await this.authStore.saveAndGet({
-        relevantallowed: e,
-      })
-    },
-    async changeNotifChitchat(e) {
-      const settings = this.me.settings
-      settings.notificationmails = e
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async changeNewsletter(e) {
-      await this.authStore.saveAndGet({
-        newslettersallowed: e,
-      })
-    },
-    async changeEngagement(e) {
-      const settings = this.me.settings
-      settings.engagement = e
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async changeAutorepost(e) {
-      const settings = this.me.settings
-      settings.autorepostsdisable = !e
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    async changeNewLine(e) {
-      const settings = this.me.settings
-      settings.enterNewLine = e
-      await this.authStore.saveAndGet({
-        settings,
-      })
-      this.enterNewLine = e
-    },
-    async leaveGroup(id) {
-      await this.authStore.leaveGroup(this.myid, id)
-    },
-    async addressBook() {
-      await this.addressStore.fetch()
-      this.showAddressModal = true
-    },
-    uploadProfile() {
-      this.uploading = true
-    },
-    async rotate(deg) {
-      let curr = 0
-
-      if (this.me.profile.externaluid) {
-        curr = this.me.profile.externalmods?.rotate || 0
-      }
-
-      curr += deg
-
-      // Ensure between 0 and 360
-      curr = (curr + 360) % 360
-
-      await this.imageStore.post({
-        id: this.me.profile.id,
-        rotate: curr,
-        bust: Date.now(),
-        user: true,
-      })
-
-      // Refresh the user - which in turn should update the image displayed.
-      await fetchMe(true)
-
-      this.cacheBust = Date.now()
-    },
-    rotateLeft() {
-      this.rotate(-90)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
-  },
-}
 </script>
 <style scoped lang="scss">
 .groupprofile {

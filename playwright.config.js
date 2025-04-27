@@ -11,7 +11,7 @@ module.exports = defineConfig({
   // Retry tests once when they fail, even in development
   retries: process.env.CI ? 2 : 1,
   workers: 1,
-  reporter: 'html',
+  reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
   timeout: 60_000,
   use: {
     // Allow overriding the base URL via TEST_BASE_URL environment variable

@@ -1,6 +1,6 @@
-const base = require('@playwright/test')
 const fs = require('fs')
 const path = require('path')
+const base = require('@playwright/test')
 
 // Define the screenshots directory
 const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
@@ -27,24 +27,24 @@ const getScreenshotPath = (filename) => {
 // Function to remove screenshot files from the screenshots directory
 const cleanupScreenshots = () => {
   ensureScreenshotsDir()
-  
+
   // Find all PNG files in the screenshots directory
   fs.readdir(SCREENSHOTS_DIR, (err, files) => {
     if (err) {
       console.error('Error reading directory for cleanup:', err)
       return
     }
-    
+
     if (files.length === 0) {
       console.log('No screenshots to clean up')
       return
     }
-    
+
     let deletedCount = 0
-    
-    files.forEach(file => {
+
+    files.forEach((file) => {
       if (path.extname(file) === '.png') {
-        fs.unlink(path.join(SCREENSHOTS_DIR, file), err => {
+        fs.unlink(path.join(SCREENSHOTS_DIR, file), (err) => {
           if (err) {
             console.error(`Error deleting screenshot ${file}:`, err)
           } else {
@@ -121,7 +121,7 @@ const test = base.test.extend({
 
     page.checkTestRanOK = async () => {
       // Get error summary
-      const { allowed, notAllowed, allowedCount, notAllowedCount, total } =
+      const { notAllowed, allowedCount, notAllowedCount, total } =
         page.getErrorSummary()
 
       // If there are relevant (non-allowed) errors, fail the test
@@ -194,7 +194,9 @@ const test = base.test.extend({
         }
       } catch (error) {
         // Take a screenshot if navigation fails
-        await page.screenshot({ path: getScreenshotPath(`navigation-error-${Date.now()}.png`) })
+        await page.screenshot({
+          path: getScreenshotPath(`navigation-error-${Date.now()}.png`),
+        })
 
         // Re-throw with more context
         throw new Error(`Failed to navigate to ${path}: ${error.message}`)
@@ -212,7 +214,9 @@ const test = base.test.extend({
       } catch (error) {
         console.warn(`Teardown warning: ${error.message}`)
         // Take a screenshot if network doesn't become idle
-        await page.screenshot({ path: getScreenshotPath(`teardown-warning-${Date.now()}.png`) })
+        await page.screenshot({
+          path: getScreenshotPath(`teardown-warning-${Date.now()}.png`),
+        })
         return false
       }
     }
@@ -249,7 +253,7 @@ const test = base.test.extend({
 })
 
 // Add a global hook to cleanup screenshots after all tests
-test.afterAll(async () => {
+test.afterAll(() => {
   // Only clean up if the tests succeeded
   if (process.exitCode === undefined || process.exitCode === 0) {
     console.log('Tests completed successfully, cleaning up screenshots...')
