@@ -24,45 +24,37 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../../composables/useBuildHead'
+import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import SupportLink from '~/components/SupportLink'
 import { useGroupStore } from '~/stores/group'
 
-export default {
-  components: {
-    SupportLink,
-    PostMapAndList: defineAsyncComponent(() =>
-      import('~/components/PostMapAndList')
-    ),
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const PostMapAndList = defineAsyncComponent(() =>
+  import('~/components/PostMapAndList')
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Explore Freegle',
-        "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    const groupStore = useGroupStore()
-    const place = route.params.place ? JSON.parse(route.params.place) : null
-    const initialBounds = place && place.bbox ? place.bbox : null
-    const minZoom = place?.minZoom
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Explore Freegle',
+    "There are lots of lovely communities of freeglers across the UK. Shall we see what they're up to?",
+    null,
+    {
+      class: 'overflow-y-scroll',
+    }
+  )
+)
 
-    await groupStore.fetch()
+const groupStore = useGroupStore()
+const place = route.params.place ? JSON.parse(route.params.place) : null
+const initialBounds = place && place.bbox ? place.bbox : null
+const minZoom = place?.minZoom
 
-    return { groupStore, place, initialBounds, minZoom }
-  },
-}
+await groupStore.fetch()
 </script>

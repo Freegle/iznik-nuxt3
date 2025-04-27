@@ -5,37 +5,27 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
 import { useUserStore } from '../stores/user'
-import { useRouter } from '#imports'
+import { ref, onMounted, useRouter, useRoute } from '#imports'
 
-export default {
-  setup() {
-    const userStore = useUserStore()
+const userStore = useUserStore()
+const router = useRouter()
+const route = useRoute()
 
-    return {
-      userStore,
-    }
-  },
-  data: function () {
-    return {
-      engageid: null,
-      action: null,
-    }
-  },
-  created() {
-    this.engageid = this.$route.query.engageid
-    this.action = this.$route.query.action
-  },
-  async mounted() {
-    // Record the engagement.
-    if (this.engageid) {
-      await this.userStore?.engaged(this.engageid)
-    }
+const engageid = ref(null)
+const action = ref(null)
 
-    // Now route on to where we were supposed to go.
-    const router = useRouter()
-    router.push('/' + (this.action ? this.action : ''))
-  },
-}
+engageid.value = route.query.engageid
+action.value = route.query.action
+
+onMounted(async () => {
+  // Record the engagement.
+  if (engageid.value) {
+    await userStore?.engaged(engageid.value)
+  }
+
+  // Now route on to where we were supposed to go.
+  router.push('/' + (action.value ? action.value : ''))
+})
 </script>

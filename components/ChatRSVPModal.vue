@@ -39,75 +39,61 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
+import { useAuthStore } from '~/stores/auth'
 
-export default {
-  components: {},
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    user: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const chatStore = useChatStore()
+  user: {
+    type: Object,
+    required: true,
+  },
+})
 
-    const { modal, hide } = useOurModal()
+const chatStore = useChatStore()
+const authStore = useAuthStore()
+const { modal, hide } = useOurModal()
 
-    return {
-      chatStore,
-      modal,
-      hide,
+const chaseup = ref(false)
+const dohide = ref(false)
+const myid = computed(() => authStore.user?.id)
+
+const chatmessages = computed(() => chatStore?.messagesById(props.id))
+const mylast = computed(() => {
+  let ret = null
+
+  for (const msg of chatmessages.value) {
+    if (parseInt(msg.userid) === parseInt(myid.value)) {
+      ret = msg
     }
-  },
-  data() {
-    return {
-      chaseup: false,
-      dohide: false,
-    }
-  },
-  computed: {
-    chatmessages() {
-      return this.chatStore?.messagesById(this.id)
-    },
-    mylast() {
-      let ret = null
+  }
 
-      for (const msg of this.chatmessages) {
-        if (parseInt(msg.userid) === parseInt(this.myid)) {
-          ret = msg
-        }
-      }
+  return ret
+})
 
-      return ret
-    },
-  },
-  methods: {
-    async yes() {
-      if (this.mylast) {
-        await this.chatStore.rsvp(this.mylast.id, this.mylast.chatid, 1)
-      }
+async function yes() {
+  if (mylast.value) {
+    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, 1)
+  }
 
-      this.hide()
-    },
+  hide()
+}
 
-    async no() {
-      if (this.mylast) {
-        await this.chatStore.rsvp(this.mylast.id, this.mylast.chatid, 0)
-      }
+async function no() {
+  if (mylast.value) {
+    await chatStore.rsvp(mylast.value.id, mylast.value.chatid, 0)
+  }
 
-      if (this.dohide) {
-        await this.chatStore.hide(this.id)
-      }
+  if (dohide.value) {
+    await chatStore.hide(props.id)
+  }
 
-      this.hide()
-    },
-  },
+  hide()
 }
 </script>

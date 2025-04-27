@@ -30,9 +30,9 @@
                 We have an active service where there are changes happening
                 continuously, and we send out hundreds of thousands of emails a
                 day. You can certainly get a cheap and cheerful charity website
-                that doesn’t do much for a few quid a year, but you can’t run
-                something like Freegle that way. It’s a different kettle of
-                fish. It’s not even a kettle, and they’re not fish.
+                that doesn't do much for a few quid a year, but you can't run
+                something like Freegle that way. It's a different kettle of
+                fish. It's not even a kettle, and they're not fish.
               </p>
               <p v-if="false" class="font-weight-bold">
                 This month we're trying to raise &pound;{{ target }} from
@@ -229,52 +229,52 @@
     </b-row>
   </client-only>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDonationStore } from '../stores/donations'
+import { buildHead } from '~/composables/useBuildHead'
+import { useAuthStore } from '~/stores/auth'
 import DonationThermometer from '~/components/DonationThermometer'
 import DonationButton from '~/components/DonationButton'
 import ExternalLink from '~/components/ExternalLink'
-import { buildHead } from '~/composables/useBuildHead'
+import DonationThank from '~/components/DonationThank'
+import StripeDonate from '~/components/StripeDonate'
 
-export default {
-  components: {
-    ExternalLink,
-    DonationThermometer,
-    DonationButton,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+// Setup
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const donationStore = useDonationStore()
+const authStore = useAuthStore()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Donate to Freegle',
-        "We're free to use, but not free to run.  Can you help us keep going?"
-      )
-    )
-  },
-  data: function () {
-    return {
-      monthly: false,
-      success: false,
-      payPalFallback: false,
-      amount: 3,
-    }
-  },
-  ...mapState(useDonationStore, ['target']),
-  methods: {
-    succeeded() {
-      this.success = true
-    },
-    noMethods() {
-      this.payPalFallback = true
-    },
-  },
+// State
+const monthly = ref(false)
+const success = ref(false)
+const payPalFallback = ref(false)
+const amount = ref(3)
+
+// Computed properties
+const target = computed(() => donationStore.target)
+const myid = computed(() => authStore.user?.id)
+
+// Methods
+function succeeded() {
+  success.value = true
 }
+
+function noMethods() {
+  payPalFallback.value = true
+}
+
+// Page head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Donate to Freegle',
+    "We're free to use, but not free to run. Can you help us keep going?"
+  )
+)
 </script>
 <style scoped lang="scss">
 :deep(.form-check-input) {

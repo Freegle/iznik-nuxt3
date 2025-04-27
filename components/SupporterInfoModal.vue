@@ -35,22 +35,28 @@
     </template>
   </b-modal>
 </template>
-
 <script setup>
 import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
+import { computed } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
 import DonationButton from '~/components/DonationButton'
 
 const { modal, hide } = useOurModal()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+
+const amMicroVolunteering = computed(() => {
+  return !!miscStore.get('microvolunteeringinviteaccepted')
+})
 
 function donateTime() {
   // Turn microvolunteering on.
-  useMiscStore().set({
+  miscStore.set({
     key: 'microvolunteeringinviteaccepted',
     value: Date.now(),
   })
 
-  useAuthStore().saveMicrovolunteering('Basic')
+  authStore.saveMicrovolunteering('Basic')
 }
 </script>

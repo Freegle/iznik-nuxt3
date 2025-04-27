@@ -105,7 +105,8 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
 import { useNoticeboardStore } from '../stores/noticeboard'
 import NoticeMessage from './NoticeMessage'
@@ -114,71 +115,64 @@ import NoticeboardCheck from './NoticeboardCheck'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 
-export default {
-  components: { NoticeboardCheck, SpinButton, NoticeMessage },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const noticeboardStore = useNoticeboardStore()
-    await noticeboardStore.fetch(props.id)
+})
 
-    const noticeboard = computed(() => {
-      return noticeboardStore.byId(props.id)
-    })
+// Refs
+const map = ref(null)
+const comments = ref(null)
 
-    const center = computed(() => {
-      console.log('compute centre', noticeboard)
-      if (noticeboard.value) {
-        return [noticeboard?.value?.lat, noticeboard?.value?.lng]
-      } else {
-        return [53.945, -2.5209]
-      }
-    })
+// Store setup
+const noticeboardStore = useNoticeboardStore()
 
-    return {
-      noticeboardStore,
-      osmtile: osmtile(),
-      attribution: attribution(),
-      noticeboard,
-      center,
-    }
-  },
-  data() {
-    return {
-      comments: null,
-    }
-  },
-  computed: {
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
-    added() {
-      return this.noticeboard
-        ? dayjs(this.noticeboard.added).format('Do MMMM, YYYY')
-        : null
-    },
-  },
-  methods: {
-    async putup(callback) {
-      await this.noticeboardStore.refresh(this.id)
-      callback()
-    },
-    async shutup(callback) {
-      await this.noticeboardStore.decline(this.id)
-      callback()
-    },
-    async dead(callback) {
-      await this.noticeboardStore.inactive(this.id)
-      callback()
-    },
-    async saveComments(callback) {
-      await this.noticeboardStore.saveComments(this.id, this.comments)
-      callback()
-    },
-  },
+// Fetch data
+await noticeboardStore.fetch(props.id)
+
+// Computed properties
+const noticeboard = computed(() => {
+  return noticeboardStore.byId(props.id)
+})
+
+const center = computed(() => {
+  if (noticeboard.value) {
+    return [noticeboard.value?.lat, noticeboard.value?.lng]
+  } else {
+    return [53.945, -2.5209]
+  }
+})
+
+const maxZoom = computed(() => {
+  return MAX_MAP_ZOOM
+})
+
+const added = computed(() => {
+  return noticeboard.value
+    ? dayjs(noticeboard.value.added).format('Do MMMM, YYYY')
+    : null
+})
+
+// Methods
+async function putup(callback) {
+  await noticeboardStore.refresh(props.id)
+  callback()
+}
+
+async function shutup(callback) {
+  await noticeboardStore.decline(props.id)
+  callback()
+}
+
+async function dead(callback) {
+  await noticeboardStore.inactive(props.id)
+  callback()
+}
+
+async function saveComments(callback) {
+  await noticeboardStore.saveComments(props.id, comments.value)
+  callback()
 }
 </script>

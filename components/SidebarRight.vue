@@ -11,31 +11,26 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 import ExternalDa from '~/components/ExternalDa.vue'
 
-export default {
-  components: {
-    ExternalDa,
+defineProps({
+  showJobOpportunities: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    showJobOpportunities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    adUnitPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    adDivId: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  adUnitPath: {
+    type: String,
+    required: false,
+    default: null,
   },
-}
+  adDivId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

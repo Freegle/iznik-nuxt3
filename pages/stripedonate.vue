@@ -18,7 +18,9 @@
   </client-only>
 </template>
 <script setup>
+import { ref, onMounted } from '#imports'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
+import DonationAskModal from '~/components/DonationAskModal.vue'
 
 const showDonationAskModal = ref(false)
 

@@ -60,124 +60,124 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
 import minMax from 'dayjs/plugin/minMax'
-import { ref } from '#imports'
+import { ref, computed, watch, nextTick } from 'vue'
 
 dayjs.extend(minMax)
 
-export default {
-  components: {},
-  props: {
-    modelValue: {
-      type: Object,
-      required: true,
-    },
-    removable: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    fromLabel: {
-      type: String,
-      required: false,
-      default: 'Starts at:',
-    },
-    toLabel: {
-      type: String,
-      required: false,
-      default: 'Ends at:',
-    },
-    maxDurationDays: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    time: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
   },
-  setup(props) {
-    const current = ref(JSON.parse(JSON.stringify(props.modelValue)))
+  removable: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  fromLabel: {
+    type: String,
+    required: false,
+    default: 'Starts at:',
+  },
+  toLabel: {
+    type: String,
+    required: false,
+    default: 'Ends at:',
+  },
+  maxDurationDays: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  time: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      current,
+const emit = defineEmits(['update:modelValue', 'remove'])
+
+const current = ref(JSON.parse(JSON.stringify(props.modelValue)))
+
+const oneHourAfterStart = computed(() => {
+  return current.value?.start && current.value?.starttime
+    ? dayjs(current.value.start + ' ' + current.value.starttime).add(1, 'hour')
+    : null
+})
+
+const today = computed(() => {
+  return dayjs().format('YYYY-MM-DD')
+})
+
+const minEndDate = computed(() => {
+  const start = current.value?.start
+
+  if (start) {
+    return start
+  } else {
+    return today.value
+  }
+})
+
+const timeList = computed(() => {
+  const ret = []
+
+  for (let hour = 0; hour < 24; hour++) {
+    ;['00', 15, 30, 45].forEach((minute) => {
+      ret.push(`${hour.toString().padStart(2, '0')}:${minute}`)
+    })
+  }
+
+  return ret
+})
+
+function updateEndTime() {
+  if (current.value?.start) {
+    if (
+      !current.value?.end ||
+      dayjs(current.value.end).isBefore(current.value.start)
+    ) {
+      current.value.end = current.value.start
     }
-  },
-  computed: {
-    oneHourAfterStart() {
-      return this.current?.start && this.current?.starttime
-        ? dayjs(this.current.start + ' ' + this.current.starttime).add(
-            1,
-            'hour'
-          )
-        : null
-    },
-    today() {
-      return dayjs().format('YYYY-MM-DD')
-    },
-    minEndDate() {
-      const start = this.current?.start
+  }
 
-      if (start) {
-        return start
-      } else {
-        return this.today
-      }
-    },
-    timeList() {
-      const ret = []
-
-      for (let hour = 0; hour < 24; hour++) {
-        ;['00', 15, 30, 45].forEach((minute) => {
-          ret.push(`${hour.toString().padStart(2, '0')}:${minute}`)
-        })
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    'current.start'() {
-      this.$nextTick(this.updateEndTime)
-    },
-    'current.starttime'() {
-      this.$nextTick(this.updateEndTime)
-    },
-    current: {
-      handler: function (newVal) {
-        this.$emit('update:modelValue', newVal)
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    updateEndTime() {
-      if (this.current?.start) {
-        if (
-          !this.current?.end ||
-          dayjs(this.current.end).isBefore(this.current.start)
-        ) {
-          this.current.end = this.current.start
-        }
-      }
-
-      if (this.current?.start && this.current?.starttime) {
-        if (
-          !this.current?.endtime ||
-          dayjs(this.current.end + ' ' + this.current.endtime).isBefore(
-            this.current.start + ' ' + this.current.starttime
-          )
-        ) {
-          this.current.endtime = this.oneHourAfterStart.format('HH:mm')
-        }
-      }
-    },
-  },
+  if (current.value?.start && current.value?.starttime) {
+    if (
+      !current.value?.endtime ||
+      dayjs(current.value.end + ' ' + current.value.endtime).isBefore(
+        current.value.start + ' ' + current.value.starttime
+      )
+    ) {
+      current.value.endtime = oneHourAfterStart.value.format('HH:mm')
+    }
+  }
 }
+
+watch(
+  () => current.value.start,
+  () => {
+    nextTick(updateEndTime)
+  }
+)
+
+watch(
+  () => current.value.starttime,
+  () => {
+    nextTick(updateEndTime)
+  }
+)
+
+watch(
+  current,
+  (newVal) => {
+    emit('update:modelValue', newVal)
+  },
+  { deep: true }
+)
 </script>
 <style scoped lang="scss">
 .form__element {

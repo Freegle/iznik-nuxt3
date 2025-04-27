@@ -49,133 +49,121 @@
     </div>
   </client-only>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
 import { useRoute } from 'vue-router'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
-import JobOne from '~/components/JobOne'
 import { buildHead } from '~/composables/useBuildHead'
-import { ref } from '#imports'
+import {
+  ref,
+  computed,
+  watch,
+  nextTick,
+  onMounted,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete'
 import NoticeMessage from '~/components/NoticeMessage'
+import JobOne from '~/components/JobOne'
 
-export default {
-  components: {
-    PlaceAutocomplete,
-    NoticeMessage,
-    JobOne,
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Jobs',
-        'Freegle gets a little bit to help keep us going if you click on them.',
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
-
-    const jobStore = useJobStore()
-    const authStore = useAuthStore()
-
-    const me = authStore.user
-    const lat = ref(me?.lat)
-    const lng = ref(me?.lng)
-
-    const location = ref(me?.settings?.mylocation?.name || null)
-
-    if (location.value && lat && lng) {
-      await jobStore.fetch(lat.value, lng.value)
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Jobs',
+    'Freegle gets a little bit to help keep us going if you click on them.',
+    null,
+    {
+      class: 'overflow-y-scroll',
     }
+  )
+)
 
-    return {
-      jobStore,
-      location,
-      lat,
-      lng,
-    }
-  },
-  data() {
-    return {
-      category: null,
-      busy: false,
-    }
-  },
-  computed: {
-    ...mapState(useJobStore, ['list', 'blocked']),
-    categories() {
-      const ret = [
-        {
-          value: null,
-          text: 'All job categories',
-        },
-      ]
-      ;[
-        'Accounting/Financial/Insurance',
-        'Administration',
-        'Agriculture',
-        'Arts/Graphic Design',
-        'Automotive/Aerospace',
-        'Car',
-        'Catering',
-        'Charity',
-        'Construction',
-        'Consulting',
-        'Customer Services',
-        'Distribution',
-        'Electronics',
-        'Hospitality/Hotel',
-        'IT',
-        'Legal',
-        'Leisure/Tourism',
-        'Management',
-        'Manufacturing/Surveying',
-        'Marketing',
-        'Media',
-        'Medical/Pharmaceutical/Scientific',
-        'Military/Emergency/Government',
-        'Other',
-        'Personnel/Recruitment',
-        'Property Services',
-        'Public Sector',
-        'Retail/Purchasing',
-        'Sales',
-        'Social Care',
-        'Telecoms',
-      ].forEach((c) => {
-        ret.push({ value: c, text: c })
-      })
+const jobStore = useJobStore()
+const authStore = useAuthStore()
 
-      return ret
+const me = authStore.user
+const lat = ref(me?.lat)
+const lng = ref(me?.lng)
+const location = ref(me?.settings?.mylocation?.name || null)
+const category = ref(null)
+const busy = ref(false)
+
+const list = computed(() => jobStore.list)
+const blocked = computed(() => jobStore.blocked)
+
+const categories = computed(() => {
+  const ret = [
+    {
+      value: null,
+      text: 'All job categories',
     },
-  },
-  watch: {
-    category() {
-      this.$nextTick(this.doSearch)
-    },
-  },
-  methods: {
-    search(e) {
-      console.log('Got place', e.lat, e.lng)
-      if (e && (e.lat || e.lng)) {
-        this.lat = e.lat
-        this.lng = e.lng
-        this.doSearch()
-      }
-    },
-    async doSearch() {
-      this.busy = true
-      await this.jobStore.fetch(this.lat, this.lng, this.category, true)
-      this.busy = false
-    },
-  },
+  ]
+  ;[
+    'Accounting/Financial/Insurance',
+    'Administration',
+    'Agriculture',
+    'Arts/Graphic Design',
+    'Automotive/Aerospace',
+    'Car',
+    'Catering',
+    'Charity',
+    'Construction',
+    'Consulting',
+    'Customer Services',
+    'Distribution',
+    'Electronics',
+    'Hospitality/Hotel',
+    'IT',
+    'Legal',
+    'Leisure/Tourism',
+    'Management',
+    'Manufacturing/Surveying',
+    'Marketing',
+    'Media',
+    'Medical/Pharmaceutical/Scientific',
+    'Military/Emergency/Government',
+    'Other',
+    'Personnel/Recruitment',
+    'Property Services',
+    'Public Sector',
+    'Retail/Purchasing',
+    'Sales',
+    'Social Care',
+    'Telecoms',
+  ].forEach((c) => {
+    ret.push({ value: c, text: c })
+  })
+
+  return ret
+})
+
+watch(category, () => {
+  nextTick(doSearch)
+})
+
+function search(e) {
+  console.log('Got place', e.lat, e.lng)
+  if (e && (e.lat || e.lng)) {
+    lat.value = e.lat
+    lng.value = e.lng
+    doSearch()
+  }
 }
+
+async function doSearch() {
+  busy.value = true
+  await jobStore.fetch(lat.value, lng.value, category.value, true)
+  busy.value = false
+}
+
+onMounted(async () => {
+  if (location.value && lat.value && lng.value) {
+    await jobStore.fetch(lat.value, lng.value)
+  }
+})
 </script>

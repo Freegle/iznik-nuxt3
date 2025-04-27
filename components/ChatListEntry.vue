@@ -35,102 +35,93 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from '#imports'
 import SupporterInfo from '~/components/SupporterInfo'
 import { twem } from '~/composables/useTwem'
 import ProfileImage from '~/components/ProfileImage'
 import { useChatStore } from '~/stores/chat'
 import { datetime, timeago } from '~/composables/useTimeFormat'
 
-export default {
-  components: {
-    SupporterInfo,
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    active: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  active: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  setup() {
-    const chatStore = useChatStore()
+})
 
-    return {
-      chatStore,
-    }
-  },
-  data() {
-    return {
-      fetched: false,
-    }
-  },
-  computed: {
-    chat() {
-      return this.chatStore.byChatId(this.id)
-    },
-    dateFormatted() {
-      if (this.chat) {
-        return datetime(this.chat.lastdate)
-      }
+const chatStore = useChatStore()
+const fetched = ref(false)
 
-      return null
-    },
-    esnippet() {
-      if (this.chat.snippet === 'null') {
-        return '...'
-      }
+const chat = computed(() => {
+  return chatStore.byChatId(props.id)
+})
 
-      let ret = twem(this.chat.snippet)
-      // The way the snippet is constructed might lead to backslashes if we have an emoji.
-      ret = ret.replace(/\\*$/, '') + '...'
-      return ret
-    },
-    lastdateago() {
-      if (this.chat.lastdate) {
-        return timeago(this.chat.lastdate)
-      }
+const dateFormatted = computed(() => {
+  if (chat.value) {
+    return datetime(chat.value.lastdate)
+  }
 
-      return null
-    },
-  },
-  mounted() {
-    if (this.active) {
-      const cb = () => {
-        if (this.$el.scrollIntoViewIfNeeded) {
-          this.$el.scrollIntoViewIfNeeded({
+  return null
+})
+
+const esnippet = computed(() => {
+  if (chat.value?.snippet === 'null') {
+    return '...'
+  }
+
+  let ret = twem(chat.value?.snippet)
+  // The way the snippet is constructed might lead to backslashes if we have an emoji.
+  ret = ret.replace(/\\*$/, '') + '...'
+  return ret
+})
+
+const lastdateago = computed(() => {
+  if (chat.value?.lastdate) {
+    return timeago(chat.value.lastdate)
+  }
+
+  return null
+})
+
+const fetch = async () => {
+  fetched.value = true
+  await chatStore.fetchMessages(props.id)
+}
+
+onMounted(() => {
+  if (props.active) {
+    const cb = () => {
+      const element = document.querySelector('.clickme.noselect.mb-1.mt-1')
+      if (element) {
+        if (element.scrollIntoViewIfNeeded) {
+          element.scrollIntoViewIfNeeded({
             behavior: 'instant',
             block: 'start',
             inline: 'nearest',
           })
         } else {
-          this.$el.scrollIntoView({
+          element.scrollIntoView({
             behavior: 'instant',
             block: 'start',
             inline: 'nearest',
           })
         }
       }
-
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(cb)
-      } else {
-        setTimeout(cb, 100)
-      }
     }
-  },
-  methods: {
-    async fetch() {
-      this.fetched = true
-      await this.chatStore.fetchMessages(this.id)
-    },
-  },
-}
+
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(cb)
+    } else {
+      setTimeout(cb, 100)
+    }
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions.scss';

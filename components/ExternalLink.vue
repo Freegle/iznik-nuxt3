@@ -2,23 +2,23 @@
   <!-- eslint-disable-next-line -->
   <a :href="carefulHref" :target="target" rel="noopener noreferrer"><slot /></a>
 </template>
-<script>
-export default {
-  props: {
-    href: {
-      type: String,
-      required: true,
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  href: {
+    type: String,
+    required: true,
   },
-  computed: {
-    carefulHref() {
-      return this.href.startsWith('http') || this.href.startsWith('mailto')
-        ? this.href
-        : 'https://' + this.href
-    },
-    target() {
-      return this.href.startsWith('mailto') ? '_self' : '_blank'
-    },
-  },
-}
+})
+
+const carefulHref = computed(() => {
+  return props.href.startsWith('http') || props.href.startsWith('mailto')
+    ? props.href
+    : 'https://' + props.href
+})
+
+const target = computed(() => {
+  return props.href.startsWith('mailto') ? '_self' : '_blank'
+})
 </script>

@@ -199,202 +199,199 @@
   </b-modal>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, inject } from 'vue'
 import { useMessageStore } from '../stores/message'
-import { useChatStore } from '../stores/chat'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: { NoticeMessage, SpinButton, OutcomeBy },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    takenBy: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  emit: ['hidden'],
-  setup() {
-    const messageStore = useMessageStore()
-    const chatStore = useChatStore()
-
-    const { modal, hide } = useOurModal()
-
-    return { messageStore, chatStore, modal, hide }
+  takenBy: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  data() {
-    return {
-      happiness: null,
-      comments: null,
-      tookUsers: [],
-      selectedUser: null,
-      chooseError: false,
-      submittedWithNoSelectedUser: false,
-      completionMessage: null,
+  type: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const emit = defineEmits(['hidden'])
+
+const messageStore = useMessageStore()
+const { modal, hide } = useOurModal()
+const $bus = inject('$bus')
+
+const happiness = ref(null)
+const comments = ref(null)
+const tookUsers = ref([])
+const chooseError = ref(false)
+const submittedWithNoSelectedUser = ref(false)
+const completionMessage = ref(null)
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const left = computed(() => {
+  let leftVal = message.value.availablenow ? message.value.availablenow : 1
+
+  for (const u of tookUsers.value) {
+    if (u.userid >= 0) {
+      leftVal -= u.count
     }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    left() {
-      let left = this.message.availablenow ? this.message.availablenow : 1
+  }
 
-      for (const u of this.tookUsers) {
-        if (u.userid >= 0) {
-          left -= u.count
-        }
-      }
+  return leftVal
+})
 
-      return left
-    },
-    showCompletion() {
-      // We show for taken/received only when there are none left.
-      return (
-        this.type === 'Withdrawn' ||
-        this.message.availableinitially === 1 ||
-        this.left === 0
-      )
-    },
-    otherRepliers() {
-      const ret = []
+const showCompletion = computed(() => {
+  // We show for taken/received only when there are none left.
+  return (
+    props.type === 'Withdrawn' ||
+    message.value.availableinitially === 1 ||
+    left.value === 0
+  )
+})
 
-      if (this.message?.replies) {
-        this.message.replies.forEach((u) => {
-          if (u.userid > 0) {
-            let found = false
+const otherRepliers = computed(() => {
+  const ret = []
 
-            for (const t of this.tookUsers) {
-              if (t.userid === u.userid) {
-                found = true
-                break
-              }
-            }
+  if (message.value?.replies) {
+    message.value.replies.forEach((u) => {
+      if (u.userid > 0) {
+        let found = false
 
-            if (!found) {
-              ret.push({
-                userid: u.userid,
-                displayname: u.displayname,
-              })
-            }
-          }
-        })
-      }
-
-      return ret
-    },
-    submitDisabled() {
-      const ret =
-        this.type === 'Taken' &&
-        this.message.availableinitially === 1 &&
-        this.left === 1
-      return ret
-    },
-    groupid() {
-      let ret = null
-
-      if (this.message && this.message.groups && this.message.groups.length) {
-        ret = this.message.groups[0].groupid
-      }
-
-      return ret
-    },
-    buttonLabel() {
-      if (!this.type) {
-        return 'Submit'
-      } else if (this.type === 'Withdrawn') {
-        return 'Withdraw'
-      } else {
-        return 'Mark as ' + this.type.toUpperCase()
-      }
-    },
-  },
-  methods: {
-    took(users) {
-      this.tookUsers = users
-    },
-    async submit(callback) {
-      if (this.type === 'Taken' && !this.tookUsers.length) {
-        callback()
-        this.submittedWithNoSelectedUser = true
-        return
-      } else {
-        this.submittedWithNoSelectedUser = false
-      }
-
-      let complete = false
-      this.chooseError = false
-
-      if (this.submitDisabled) {
-        this.chooseError = true
-        callback()
-      } else {
-        if (this.type === 'Withdrawn' || this.type === 'Received') {
-          complete = true
-        } else {
-          complete = this.left === 0
-
-          for (const u of this.tookUsers) {
-            if (u.count > 0) {
-              await this.messageStore.addBy(
-                this.message.id,
-                u.userid > 0 ? u.userid : null,
-                u.count
-              )
-            } else {
-              await this.messageStore.removeBy(
-                this.message.id,
-                u.userid > 0 ? u.userid : null
-              )
-            }
+        for (const t of tookUsers.value) {
+          if (t.userid === u.userid) {
+            found = true
+            break
           }
         }
 
-        if (complete) {
-          // The post is being taken/received.
-          await this.messageStore.update({
-            action: 'Outcome',
-            id: this.id,
-            outcome: this.type,
-            happiness: this.happiness,
-            comment: this.comments,
-            message: this.completionMessage,
+        if (!found) {
+          ret.push({
+            userid: u.userid,
+            displayname: u.displayname,
           })
         }
-
-        callback()
-        this.hide()
       }
-    },
-    onHide() {
-      // We're having trouble capturing events from this modal, so use root as a bus.
-      this.$bus.$emit('outcome', {
-        groupid: this.groupid,
-        outcome: this.type,
-      })
+    })
+  }
 
-      this.tookUsers = []
-      this.happiness = null
-      this.$emit('hidden')
-    },
-    cancel() {
-      this.tookUsers = []
-      this.happiness = null
-      this.hide()
-    },
-  },
+  return ret
+})
+
+const submitDisabled = computed(() => {
+  const ret =
+    props.type === 'Taken' &&
+    message.value.availableinitially === 1 &&
+    left.value === 1
+  return ret
+})
+
+const groupid = computed(() => {
+  let ret = null
+
+  if (message.value && message.value.groups && message.value.groups.length) {
+    ret = message.value.groups[0].groupid
+  }
+
+  return ret
+})
+
+const buttonLabel = computed(() => {
+  if (!props.type) {
+    return 'Submit'
+  } else if (props.type === 'Withdrawn') {
+    return 'Withdraw'
+  } else {
+    return 'Mark as ' + props.type.toUpperCase()
+  }
+})
+
+function took(users) {
+  tookUsers.value = users
+}
+
+async function submit(callback) {
+  if (props.type === 'Taken' && !tookUsers.value.length) {
+    callback()
+    submittedWithNoSelectedUser.value = true
+    return
+  } else {
+    submittedWithNoSelectedUser.value = false
+  }
+
+  let complete = false
+  chooseError.value = false
+
+  if (submitDisabled.value) {
+    chooseError.value = true
+    callback()
+  } else {
+    if (props.type === 'Withdrawn' || props.type === 'Received') {
+      complete = true
+    } else {
+      complete = left.value === 0
+
+      for (const u of tookUsers.value) {
+        if (u.count > 0) {
+          await messageStore.addBy(
+            message.value.id,
+            u.userid > 0 ? u.userid : null,
+            u.count
+          )
+        } else {
+          await messageStore.removeBy(
+            message.value.id,
+            u.userid > 0 ? u.userid : null
+          )
+        }
+      }
+    }
+
+    if (complete) {
+      // The post is being taken/received.
+      await messageStore.update({
+        action: 'Outcome',
+        id: props.id,
+        outcome: props.type,
+        happiness: happiness.value,
+        comment: comments.value,
+        message: completionMessage.value,
+      })
+    }
+
+    callback()
+    hide()
+  }
+}
+
+function onHide() {
+  // We're having trouble capturing events from this modal, so use root as a bus.
+  $bus.$emit('outcome', {
+    groupid: groupid.value,
+    outcome: props.type,
+  })
+
+  tookUsers.value = []
+  happiness.value = null
+  emit('hidden')
+}
+
+function cancel() {
+  tookUsers.value = []
+  happiness.value = null
+  hide()
 }
 </script>
 <style scoped lang="scss">

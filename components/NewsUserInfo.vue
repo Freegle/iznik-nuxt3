@@ -29,46 +29,41 @@
     </span>
   </nuxt-link>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
+import { computed } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup(props) {
-    const newsfeedStore = useNewsfeedStore()
+})
 
-    return {
-      newsfeedStore,
-    }
-  },
-  computed: {
-    newsfeed() {
-      return this.newsfeedStore?.byId(this.id)
-    },
-    openoffers() {
-      let ret = null
+const newsfeedStore = useNewsfeedStore()
 
-      if (this.newsfeed.userinfo) {
-        ret = pluralize('OFFER', this.newsfeed.userinfo.openoffers, true)
-      }
+const newsfeed = computed(() => {
+  return newsfeedStore?.byId(props.id)
+})
 
-      return ret
-    },
-    openwanted() {
-      let ret = null
+const openoffers = computed(() => {
+  let ret = null
 
-      if (this.newsfeed.userinfo) {
-        ret = pluralize('WANTED', this.newsfeed.userinfo.openwanteds, true)
-      }
+  if (newsfeed.value?.userinfo) {
+    ret = pluralize('OFFER', newsfeed.value.userinfo.openoffers, true)
+  }
 
-      return ret
-    },
-  },
-}
+  return ret
+})
+
+const openwanted = computed(() => {
+  let ret = null
+
+  if (newsfeed.value?.userinfo) {
+    ret = pluralize('WANTED', newsfeed.value.userinfo.openwanteds, true)
+  }
+
+  return ret
+})
 </script>

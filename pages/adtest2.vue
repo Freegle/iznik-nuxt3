@@ -23,12 +23,6 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import ExternalDa from '~/components/ExternalDa.vue'
-
-export default {
-  components: {
-    ExternalDa,
-  },
-}
 </script>

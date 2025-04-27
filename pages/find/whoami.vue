@@ -109,99 +109,102 @@
     </div>
   </client-only>
 </template>
-<script>
-import { mapWritableState } from 'pinia'
-import { useRoute } from 'vue-router'
-import { useComposeStore } from '../../stores/compose'
-import { useUserStore } from '../../stores/user'
-import { buildHead } from '../../composables/useBuildHead'
-import { useRouter } from '#imports'
-import EmailValidator from '~/components/EmailValidator'
-import NoticeMessage from '~/components/NoticeMessage'
-import SupportLink from '~/components/SupportLink'
+<script setup>
+import {
+  ref,
+  onMounted,
+  useRoute,
+  useHead,
+  useRuntimeConfig,
+  useRouter,
+  storeToRefs,
+} from '#imports'
+import { useComposeStore } from '~/stores/compose'
+import { useUserStore } from '~/stores/user'
+import { buildHead } from '~/composables/useBuildHead'
+import EmailValidator from '~/components/EmailValidator.vue'
+import NoticeMessage from '~/components/NoticeMessage.vue'
+import SupportLink from '~/components/SupportLink.vue'
 import { setup, freegleIt } from '~/composables/useCompose'
-import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse'
-import PostLoggedInEmail from '~/components/PostLoggedInEmail'
-import WizardProgress from '~/components/WizardProgress'
+import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse.vue'
+import PostLoggedInEmail from '~/components/PostLoggedInEmail.vue'
+import WizardProgress from '~/components/WizardProgress.vue'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: {
-    SupportLink,
-    NoticeMessage,
-    EmailBelongsToSomeoneElse,
-    EmailValidator,
-    WizardProgress,
-    PostLoggedInEmail,
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const route = useRoute()
+const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
+const composeStore = useComposeStore()
+const userStore = useUserStore()
+const { me } = useMe()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'WANTED',
-        "Ask people nearby if they have what you're looking for"
-      )
-    )
+// Data properties
+const emailValid = ref(false)
+const emailBelongsToSomeoneElse = ref(false)
 
-    return await setup('Wanted')
-  },
-  data() {
-    return {
-      id: null,
-      postType: 'Wanted',
-      emailValid: false,
-      emailBelongsToSomeoneElse: false,
+// Get store state
+const { email, progress } = storeToRefs(composeStore)
+
+// Head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'WANTED',
+    "Ask people nearby if they have what you're looking for"
+  )
+)
+
+// Get setup data from composable
+const {
+  messageValid,
+  postcodeValid,
+  loggedIn,
+  emailIsntOurs,
+  submitting,
+  notAllowed,
+  unvalidatedEmail,
+  wentWrong,
+} = await setup('Wanted')
+
+// Methods
+async function next() {
+  emailBelongsToSomeoneElse.value = false
+
+  if (emailIsntOurs.value) {
+    // Need to check if it's ok to use.
+    console.log('Not ours')
+    const inuse = await userStore.emailIsInUse(email.value)
+
+    if (!inuse) {
+      // Not in use - that's ok.
+      console.log('Not in use')
+      await freegleIt('Wanted', router)
+    } else {
+      // We can't proceed.
+      console.log('Belongs to someone else')
+      emailBelongsToSomeoneElse.value = true
     }
-  },
-  computed: {
-    ...mapWritableState(useComposeStore, ['email', 'progress']),
-  },
-  mounted() {
-    const router = useRouter()
-
-    if (!this.messageValid) {
-      router.push('/find')
-    }
-
-    if (!this.postcodeValid) {
-      router.push('/find/whereami')
-    }
-
-    if (this.loggedIn) {
-      this.email = this.me.email
-      this.emailValid = this.email?.length
-    }
-  },
-  methods: {
-    async next() {
-      this.emailBelongsToSomeoneElse = false
-      const router = useRouter()
-
-      if (this.emailIsntOurs) {
-        // Need to check if it's ok to use.
-        console.log('Not ours')
-        const userStore = useUserStore()
-        const inuse = await userStore.emailIsInUse(this.email)
-
-        if (!inuse) {
-          // Not in use - that's ok.
-          console.log('Not in use')
-          await freegleIt.call(this, 'Wanted', router)
-        } else {
-          // We can't proceed.
-          console.log('Belongs to someone else')
-          this.emailBelongsToSomeoneElse = true
-        }
-      } else {
-        console.log('One of ours')
-        await freegleIt.call(this, 'Wanted', router)
-      }
-    },
-  },
+  } else {
+    console.log('One of ours')
+    await freegleIt('Wanted', router)
+  }
 }
+
+onMounted(() => {
+  if (!messageValid.value) {
+    router.push('/find')
+  }
+
+  if (!postcodeValid.value) {
+    router.push('/find/whereami')
+  }
+
+  if (loggedIn.value) {
+    email.value = me.value?.email
+    emailValid.value = email.value?.length > 0
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

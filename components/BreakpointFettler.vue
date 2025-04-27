@@ -8,37 +8,55 @@
     <span ref="xxl" className="d-none d-xxl-block" />
   </span>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import ResizeObserver from 'resize-observer-polyfill'
 import { useMiscStore } from '~/stores/misc'
-export default {
-  mounted() {
-    // Spot when the elements become visible/hidden.
-    const ro = new ResizeObserver(this.check)
-    ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
-      ro.observe(this.$refs[breakpoint])
-    })
 
-    this.check()
-  },
-  methods: {
-    check() {
-      const miscStore = useMiscStore()
-      const oldBreakpoint = miscStore.breakpoint
-      let currentBreakpoint = oldBreakpoint
-      ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
-        if (this.$refs[breakpoint]) {
-          if (getComputedStyle(this.$refs[breakpoint]).display === 'block') {
-            // This breakpoint is visible and is therefore the current one.
-            currentBreakpoint = breakpoint
-          }
-        }
+// Refs for breakpoint elements
+const xs = ref(null)
+const sm = ref(null)
+const md = ref(null)
+const lg = ref(null)
+const xl = ref(null)
+const xxl = ref(null)
 
-        if (currentBreakpoint !== oldBreakpoint) {
-          miscStore.setBreakpoint(currentBreakpoint)
-        }
-      })
-    },
-  },
+// Get store reference
+const miscStore = useMiscStore()
+
+// Function to check which breakpoint is active
+function check() {
+  const oldBreakpoint = miscStore.breakpoint
+  let currentBreakpoint = oldBreakpoint
+
+  ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
+    // eslint-disable-next-line no-eval
+    const refElement = eval(breakpoint).value
+    if (refElement) {
+      if (getComputedStyle(refElement).display === 'block') {
+        // This breakpoint is visible and is therefore the current one.
+        currentBreakpoint = breakpoint
+      }
+    }
+
+    if (currentBreakpoint !== oldBreakpoint) {
+      miscStore.setBreakpoint(currentBreakpoint)
+    }
+  })
 }
+
+// Set up observers when component is mounted
+onMounted(() => {
+  // Spot when the elements become visible/hidden.
+  const ro = new ResizeObserver(check)
+  ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
+    // eslint-disable-next-line no-eval
+    const refElement = eval(breakpoint).value
+    if (refElement) {
+      ro.observe(refElement)
+    }
+  })
+
+  check()
+})
 </script>

@@ -64,25 +64,21 @@
     </b-col>
   </b-row>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import { useHead, useRuntimeConfig } from '#imports'
 import ExternalLink from '~/components/ExternalLink'
 import { buildHead } from '~/composables/useBuildHead'
 
-export default {
-  components: { ExternalLink },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'PayPal Competition',
-        'Help Freegle win much-needed funds!'
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'PayPal Competition',
+    'Help Freegle win much-needed funds!'
+  )
+)
 </script>

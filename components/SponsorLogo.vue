@@ -10,35 +10,30 @@
   />
 </template>
 
-<script>
+<script setup>
 // This component should be imported, rather than using async require.  This is because async requires result in more
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
-export default {
-  name: 'SponsorLogo',
-  props: {
-    image: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    altText: {
-      type: String,
-      required: false,
-      default: 'Sponsor logo',
-    },
+import { ref } from 'vue'
+
+const props = defineProps({
+  image: {
+    type: String,
+    required: false,
+    default: '',
   },
-  data() {
-    return {
-      showImage: true,
-    }
+  altText: {
+    type: String,
+    required: false,
+    default: 'Sponsor logo',
   },
-  methods: {
-    brokenSponsorImage(event) {
-      console.log('Broken', this.image)
-      this.showImage = false
-    },
-  },
+})
+
+const showImage = ref(true)
+
+function brokenSponsorImage(event) {
+  console.log('Broken', props.image)
+  showImage.value = false
 }
 </script>
 

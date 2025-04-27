@@ -30,176 +30,187 @@
       >?
     </div>
     <div
-      v-if="email && email.indexOf('privaterelay.appleid.com') !== -1"
+      v-if="
+        props.email &&
+        props.email.indexOf &&
+        props.email.indexOf('privaterelay.appleid.com') !== -1
+      "
       class="text-muted small mb-3"
     >
       This means you use your Apple ID to log in.
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { Field, ErrorMessage, Form as VeeForm } from 'vee-validate'
+import { ref, computed, watch } from 'vue'
 import { useDomainStore } from '../stores/domain'
 import { uid } from '../composables/useId'
-import { ref } from '#imports'
+import { useRuntimeConfig } from '#app'
 import { EMAIL_REGEX } from '~/constants'
 
+const props = defineProps({
+  email: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  required: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  center: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'lg',
+  },
+  id: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  label: {
+    type: String,
+    required: false,
+    default: "What's your email address?",
+  },
+  inputClass: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+const emit = defineEmits(['update:email', 'update:valid'])
+
+// Setup
+const domainStore = useDomainStore()
+const currentEmail = ref(props.email)
+const suggestedDomains = ref([])
+const form = ref(null)
+
+// Create a domain validation cache outside of the component instance
 const domainValidationCache = new Map()
 
-export default {
-  components: { Field, ErrorMessage, VeeForm },
-  props: {
-    email: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    required: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    center: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'lg',
-    },
-    id: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    label: {
-      type: String,
-      required: false,
-      default: "What's your email address?",
-    },
-    inputClass: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
-  setup(props) {
-    const domainStore = useDomainStore()
-    const currentEmail = ref(props.email)
+// Computed properties
+const uniqueId = computed(() => {
+  return uid('login-')
+})
 
-    return {
-      domainStore,
-      currentEmail,
-    }
-  },
-  data() {
-    return {
-      suggestedDomains: [],
-    }
-  },
-  computed: {
-    uniqueId() {
-      return uid('login-')
-    },
-  },
-  watch: {
-    email(newVal) {
-      this.currentEmail = newVal
-    },
-    currentEmail: {
-      immediate: true,
-      async handler(newVal) {
-        this.$emit('update:email', newVal)
+// Watch for prop changes
+watch(
+  () => props.email,
+  (newVal) => {
+    currentEmail.value = newVal
+  }
+)
 
-        if (newVal && newVal.includes('@')) {
-          // Ask the server to spot typos in this domain.
-          const domain = newVal.substring(newVal.indexOf('@') + 1)
+// Watch for email changes
+watch(
+  currentEmail,
+  async (newVal) => {
+    emit('update:email', newVal)
 
-          // Wait for the first dot, as that will be long enough that we don't thrash the server.
-          if (domain.includes('.')) {
-            this.suggestedDomains = []
+    if (newVal && newVal?.includes('@')) {
+      // Ask the server to spot typos in this domain.
+      const domain = newVal.substring(newVal.indexOf('@') + 1)
 
-            const ret = await this.domainStore.fetch({
-              domain,
-            })
+      // Wait for the first dot, as that will be long enough that we don't thrash the server.
+      if (domain.includes('.')) {
+        suggestedDomains.value = []
 
-            if (ret && ret.ret === 0) {
-              this.suggestedDomains = ret.suggestions
-            }
-          }
+        const ret = await domainStore.fetch({
+          domain,
+        })
+
+        if (ret && ret.ret === 0) {
+          suggestedDomains.value = ret.suggestions
         }
-      },
-    },
+      }
+    }
   },
-  methods: {
-    requestGoogleDnsResolve(domain) {
-      const url = new URL('https://dns.google/resolve')
-      url.search = new URLSearchParams({ name: domain }).toString()
-      const abortController = new AbortController()
-      const timer = setTimeout(() => abortController.abort(), 10 * 1000)
+  { immediate: true }
+)
 
-      return fetch(url, { signal: abortController.signal })
-        .then((response) => response.json())
-        .finally(() => clearTimeout(timer))
-    },
-    async checkValidDomain(value) {
-      let isValidDomain = true
-      const domain = value.substring(value.indexOf('@') + 1)
+// Methods
+function requestGoogleDnsResolve(domain) {
+  const url = new URL('https://dns.google/resolve')
+  url.search = new URLSearchParams({ name: domain }).toString()
+  const abortController = new AbortController()
+  const timer = setTimeout(() => abortController.abort(), 10 * 1000)
 
-      const runtimeConfig = useRuntimeConfig()
-      const userDomain = runtimeConfig.public.USER_DOMAIN
-
-      if (domain?.indexOf(userDomain) !== -1) {
-        // Users can't add an email which is for our own domain.
-        return false
-      }
-
-      try {
-        const request = domainValidationCache.has(domain)
-          ? domainValidationCache.get(domain)
-          : this.requestGoogleDnsResolve(domain)
-
-        domainValidationCache.set(domain, request)
-
-        const { Status: status } = await request
-
-        isValidDomain = status === 0
-      } catch (_) {
-        // if something doesn't work with google domain check we ignore this check
-      }
-
-      return isValidDomain
-    },
-    async validateEmail(value) {
-      if (!value && !this.required) {
-        this.$emit('update:valid', true)
-        return
-      }
-
-      if (!value) {
-        this.$emit('update:valid', false)
-        return 'Please enter an email address.'
-      }
-
-      if (!new RegExp(EMAIL_REGEX).test(value)) {
-        this.$emit('update:valid', false)
-        return 'Please enter a valid email address.'
-      }
-
-      const isValidDomain = await this.checkValidDomain(value)
-      this.$emit('update:valid', isValidDomain)
-      return (
-        isValidDomain ||
-        "Please check your email domain - maybe you've made a typo?"
-      )
-    },
-    focus() {
-      this.$refs.form.validate()
-    },
-  },
+  return fetch(url, { signal: abortController.signal })
+    .then((response) => response.json())
+    .finally(() => clearTimeout(timer))
 }
+
+async function checkValidDomain(value) {
+  let isValidDomain = true
+  const domain = value.substring(value.indexOf('@') + 1)
+
+  const runtimeConfig = useRuntimeConfig()
+  const userDomain = runtimeConfig.public.USER_DOMAIN
+
+  if (domain?.indexOf(userDomain) !== -1) {
+    // Users can't add an email which is for our own domain.
+    return false
+  }
+
+  try {
+    const request = domainValidationCache.has(domain)
+      ? domainValidationCache.get(domain)
+      : requestGoogleDnsResolve(domain)
+
+    domainValidationCache.set(domain, request)
+
+    const { Status: status } = await request
+
+    isValidDomain = status === 0
+  } catch (_) {
+    // if something doesn't work with google domain check we ignore this check
+  }
+
+  return isValidDomain
+}
+
+async function validateEmail(value) {
+  if (!value && !props.required) {
+    emit('update:valid', true)
+    return
+  }
+
+  if (!value) {
+    emit('update:valid', false)
+    return 'Please enter an email address.'
+  }
+
+  if (!new RegExp(EMAIL_REGEX).test(value)) {
+    emit('update:valid', false)
+    return 'Please enter a valid email address.'
+  }
+
+  const isValidDomain = await checkValidDomain(value)
+  emit('update:valid', isValidDomain)
+  return (
+    isValidDomain ||
+    "Please check your email domain - maybe you've made a typo?"
+  )
+}
+
+function focus() {
+  form.value.validate()
+}
+
+// Expose methods to parent components
+defineExpose({
+  focus,
+})
 </script>
 <style scoped>
 .email {

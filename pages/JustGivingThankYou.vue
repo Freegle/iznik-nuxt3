@@ -39,33 +39,26 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useAuthStore } from '~/stores/auth'
 import { useDonationStore } from '~/stores/donations'
+import { computed } from '#imports'
 
-export default {
-  components: {},
-  async setup(props) {
-    definePageMeta({
-      layout: 'login',
-    })
+definePageMeta({
+  layout: 'login',
+})
 
-    const authStore = useAuthStore()
-    const donationStore = useDonationStore()
+const authStore = useAuthStore()
+const donationStore = useDonationStore()
 
-    console.log(authStore.user)
-    if (authStore.user?.id) {
-      // We don't get detailed reporting from JustGiving, so record a zero-value donation here.  This will trigger
-      // a Supporter button.  Obviously this would also allow non-donors to get the button if they were savvy enough,
-      // but if you're looking at this code and thinking about that, just ask yourself what your mother would want you
-      // to do.
-      await donationStore.add(authStore.user.id, 0, new Date().toISOString())
-    }
+const me = computed(() => authStore.user)
 
-    return {
-      authStore,
-      donationStore,
-    }
-  },
+console.log(authStore.user)
+if (authStore.user?.id) {
+  // We don't get detailed reporting from JustGiving, so record a zero-value donation here.  This will trigger
+  // a Supporter button.  Obviously this would also allow non-donors to get the button if they were savvy enough,
+  // but if you're looking at this code and thinking about that, just ask yourself what your mother would want you
+  // to do.
+  await donationStore.add(authStore.user.id, 0, new Date().toISOString())
 }
 </script>

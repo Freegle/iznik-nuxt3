@@ -55,130 +55,130 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import OurToggle from '~/components/OurToggle'
 
-export default {
-  components: {
-    OurToggle,
+const props = defineProps({
+  emailfrequency: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    emailfrequency: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    leave: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    label: {
-      type: String,
-      required: false,
-      default: 'OFFER and WANTED posts:',
-    },
-    eventshide: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    volunteerhide: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  setup() {
-    const authStore = useAuthStore()
+  leave: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  label: {
+    type: String,
+    required: false,
+    default: 'OFFER and WANTED posts:',
+  },
+  eventshide: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  volunteerhide: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      authStore,
-    }
-  },
-  data() {
-    return {
-      leaving: false,
-    }
-  },
-  computed: {
-    emailfreq: {
-      get() {
-        if (this.membership) {
-          return this.membership.emailfrequency.toString()
-        }
+const emit = defineEmits([
+  'update:emailfrequency',
+  'update:eventsallowed',
+  'update:volunteeringallowed',
+  'leave',
+])
 
-        return this.emailfrequency
-      },
-      async set(newval) {
-        await this.changeValue('emailfrequency', newval)
-      },
-    },
-    eventsallowed: {
-      get() {
-        return Boolean(this.membership?.eventsallowed)
-      },
-      async set(newval) {
-        console.log('Set eventsallowed', newval)
-        await this.changeValue('eventsallowed', newval ? 1 : 0)
-      },
-    },
-    volunteeringallowed: {
-      get() {
-        return Boolean(this.membership?.volunteeringallowed)
-      },
-      async set(newval) {
-        await this.changeValue('volunteeringallowed', newval ? 1 : 0)
-      },
-    },
-    membership() {
-      let ret = null
+const authStore = useAuthStore()
+const myGroups = computed(() => authStore.user?.groups)
+const myid = computed(() => authStore.user?.id)
 
-      if (this.myGroups) {
-        this.myGroups.forEach((g) => {
-          // Groupid can be null for the simple settings which are shared across all groups.
-          if (!this.groupid || g.id === this.groupid) {
-            ret = g
-          }
-        })
+const membership = computed(() => {
+  let ret = null
+
+  if (myGroups.value) {
+    myGroups.value.forEach((g) => {
+      // Groupid can be null for the simple settings which are shared across all groups.
+      if (!props.groupid || g.id === props.groupid) {
+        ret = g
       }
+    })
+  }
 
-      return ret
-    },
-    highlightEmailFrequencyIfOn() {
-      // 0 = Never receive email
-      // All other values are receiving email
-      return this.emailfrequency === 0
-        ? 'email-frequency__dropdown--off'
-        : 'email-frequency__dropdown--on'
-    },
+  return ret
+})
+
+const highlightEmailFrequencyIfOn = computed(() => {
+  // 0 = Never receive email
+  // All other values are receiving email
+  return props.emailfrequency === 0
+    ? 'email-frequency__dropdown--off'
+    : 'email-frequency__dropdown--on'
+})
+
+// Computed with getters and setters
+const emailfreq = computed({
+  get() {
+    if (membership.value) {
+      return membership.value.emailfrequency.toString()
+    }
+
+    return props.emailfrequency?.toString()
   },
-  methods: {
-    async changeValue(param, val) {
-      this.$emit('update:' + param, val)
-
-      if (this.groupid) {
-        const params = {
-          userid: this.myid,
-          groupid: this.groupid,
-        }
-
-        params[param] = parseInt(val)
-
-        await this.authStore.setGroup(params)
-      }
-    },
-    leaveGroup(callback) {
-      this.$emit('leave')
-      callback()
-    },
+  async set(newval) {
+    await changeValue('emailfrequency', newval)
   },
+})
+
+const eventsallowed = computed({
+  get() {
+    return Boolean(membership.value?.eventsallowed)
+  },
+  async set(newval) {
+    console.log('Set eventsallowed', newval)
+    await changeValue('eventsallowed', newval ? 1 : 0)
+  },
+})
+
+const volunteeringallowed = computed({
+  get() {
+    return Boolean(membership.value?.volunteeringallowed)
+  },
+  async set(newval) {
+    await changeValue('volunteeringallowed', newval ? 1 : 0)
+  },
+})
+
+// Methods
+async function changeValue(param, val) {
+  emit('update:' + param, val)
+
+  if (props.groupid) {
+    const params = {
+      userid: myid.value,
+      groupid: props.groupid,
+    }
+
+    params[param] = parseInt(val)
+
+    await authStore.setGroup(params)
+  }
+}
+
+function leaveGroup(callback) {
+  emit('leave')
+  callback()
 }
 </script>
 <style scoped lang="scss">

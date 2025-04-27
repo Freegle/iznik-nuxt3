@@ -22,15 +22,15 @@
     </b-row>
   </client-only>
 </template>
-<script>
-export default {
-  mounted() {
-    try {
-      console.log('Disable Google autoselect')
-      window?.google?.accounts?.id?.disableAutoSelect()
-    } catch (e) {
-      console.log('Ignore Google autoselect error', e)
-    }
-  },
-}
+<script setup>
+import { onMounted } from '#imports'
+
+onMounted(() => {
+  try {
+    console.log('Disable Google autoselect')
+    window?.google?.accounts?.id?.disableAutoSelect()
+  } catch (e) {
+    console.log('Ignore Google autoselect error', e)
+  }
+})
 </script>

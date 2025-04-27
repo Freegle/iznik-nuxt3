@@ -68,8 +68,11 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from '#imports'
 import { useMessageStore } from '~/stores/message'
+import { useAuthStore } from '~/stores/auth'
+
 const MessageFreegled = defineAsyncComponent(() =>
   import('~/components/MessageFreegled')
 )
@@ -80,123 +83,113 @@ const MessageItemLocation = defineAsyncComponent(() =>
   import('~/components/MessageItemLocation')
 )
 
-export default {
-  components: {
-    MessageFreegled,
-    MessagePromised,
-    MessageItemLocation,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    matchedon: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    expandButtonText: {
-      type: String,
-      required: false,
-      default: 'See details and reply',
-    },
-    replyable: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    bgClass: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    showFreegled: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showPromised: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showLocation: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    preload: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
-  },
-  data() {
-    return {}
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    classes() {
-      const ret = {
-        messagecard: true,
-        'pb-0': true,
-        freegled: this.message?.successful && this.showFreegled,
-        offer: this.message.type === 'Offer',
-        wanted: this.message.type === 'Wanted',
-        clickme: !this.message?.successful,
-        promisedfade:
-          this.showPromised &&
-          this.message?.promised &&
-          this.replyable &&
-          !this.message?.promisedtome &&
-          !this.message?.successful,
-        noAttachments: !this.message?.attachments?.length,
-      }
+const emit = defineEmits(['expand', 'attachments'])
 
-      if (this.bgClass) {
-        ret[this.bgClass] = true
-      }
-
-      return ret
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    async view() {
-      if (this.me && this.message?.unseen) {
-        await this.messageStore.view(this.id)
-      }
-    },
-    expand(e) {
-      if (this.message) {
-        this.$emit('expand')
-
-        if (e) {
-          e.preventDefault()
-          e.stopPropagation()
-        }
-      }
-    },
-    expandAndAttachments(e) {
-      // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
-      // on My Posts).
-      if (this.message) {
-        this.$emit('expand')
-        this.$emit('attachments')
-
-        if (e) {
-          e.preventDefault()
-          e.stopPropagation()
-        }
-      }
-    },
+  matchedon: {
+    type: Object,
+    required: false,
+    default: null,
   },
+  expandButtonText: {
+    type: String,
+    required: false,
+    default: 'See details and reply',
+  },
+  replyable: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  bgClass: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  showFreegled: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  showPromised: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  showLocation: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const messageStore = useMessageStore()
+const me = useAuthStore().user
+
+const message = computed(() => messageStore?.byId(props.id))
+
+const classes = computed(() => {
+  const ret = {
+    messagecard: true,
+    'pb-0': true,
+    freegled: message.value?.successful && props.showFreegled,
+    offer: message.value?.type === 'Offer',
+    wanted: message.value?.type === 'Wanted',
+    clickme: !message.value?.successful,
+    promisedfade:
+      props.showPromised &&
+      message.value?.promised &&
+      props.replyable &&
+      !message.value?.promisedtome &&
+      !message.value?.successful,
+    noAttachments: !message.value?.attachments?.length,
+  }
+
+  if (props.bgClass) {
+    ret[props.bgClass] = true
+  }
+
+  return ret
+})
+
+const view = async () => {
+  if (me && message.value?.unseen) {
+    await messageStore.view(props.id)
+  }
+}
+
+const expand = (e) => {
+  if (message.value) {
+    emit('expand')
+
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+}
+
+const expandAndAttachments = (e) => {
+  // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
+  // on My Posts).
+  if (message.value) {
+    emit('expand')
+    emit('attachments')
+
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
 }
 </script>
 <style scoped lang="scss">

@@ -30,7 +30,6 @@
           >.
         </b-alert>
         <EmailValidator
-          ref="email"
           v-model:email="email"
           v-model:valid="emailValid"
           size="lg"
@@ -53,68 +52,62 @@
     </b-row>
   </div>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
+import { useRoute, useRouter } from 'vue-router'
+import {
+  ref,
+  onMounted,
+  defineAsyncComponent,
+  useRuntimeConfig,
+  useHead,
+} from '#imports'
 import SpinButton from '~/components/SpinButton'
 import EmailValidator from '~/components/EmailValidator'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
+
 const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
 
-export default {
-  components: {
-    SpinButton,
-    EmailValidator,
-    ExternalLink,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+const { me } = useMe()
 
-    const authStore = useAuthStore()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Lost Password',
+    "Lost your password?  We'll help you log back in."
+  )
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Lost Password',
-        "Lost your password?  We'll help you log back in."
-      )
-    )
+const error = ref(null)
+const worked = ref(false)
+const unknown = ref(false)
+const email = ref(null)
+const emailValid = ref(false)
 
-    return {
-      authStore,
-    }
-  },
-  data() {
-    return {
-      error: null,
-      worked: false,
-      unknown: false,
-      email: null,
-      emailValid: false,
-    }
-  },
-  mounted() {
-    if (this.me) {
-      this.$router.push('/')
-    }
-  },
-  methods: {
-    async mail(callback) {
-      this.error = null
-      this.worked = false
-      this.unknown = false
+async function mail(callback) {
+  error.value = null
+  worked.value = false
+  unknown.value = false
 
-      const ret = await this.authStore.lostPassword(this.email)
+  const ret = await authStore.lostPassword(email.value)
 
-      this.error = !ret.worked && !ret.unknown
-      this.unknown = ret.unknown
-      this.worked = ret.worked
-      callback()
-    },
-  },
+  error.value = !ret.worked && !ret.unknown
+  unknown.value = ret.unknown
+  worked.value = ret.worked
+  callback()
 }
+
+onMounted(() => {
+  if (me.value) {
+    router.push('/')
+  }
+})
 </script>

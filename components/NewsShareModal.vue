@@ -92,54 +92,44 @@
   </b-modal>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useOurModal } from '~/composables/useOurModal'
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useRuntimeConfig } from '#app'
 
-export default {
-  props: {
-    newsfeed: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  newsfeed: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { modal, hide } = useOurModal()
+})
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+const { modal, hide } = useOurModal()
 
-    return { modal, hide }
-  },
-  data() {
-    return {
-      copied: false,
-      bump: 0,
-    }
-  },
-  computed: {
-    url() {
-      if (this.newsfeed) {
-        const runtimeConfig = useRuntimeConfig()
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+// case.
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-        return runtimeConfig.public.USER_SITE + '/chitchat/' + this.newsfeed.id
-      }
+const copied = ref(false)
+const bump = ref(0)
 
-      return null
-    },
-  },
-  methods: {
-    async doCopy() {
-      await navigator.clipboard.writeText(this.url)
-      this.copied = true
-    },
-    opened() {
-      this.bump++
-    },
-  },
+const url = computed(() => {
+  if (props.newsfeed) {
+    const runtimeConfig = useRuntimeConfig()
+    return runtimeConfig.public.USER_SITE + '/chitchat/' + props.newsfeed.id
+  }
+  return null
+})
+
+async function doCopy() {
+  await navigator.clipboard.writeText(url.value)
+  copied.value = true
+}
+
+function opened() {
+  bump.value++
 }
 </script>
 <style scoped lang="scss">

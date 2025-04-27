@@ -3,16 +3,8 @@ import { defineStore } from 'pinia'
 export const useReplyStore = defineStore({
   id: 'reply',
   persist: {
-    enabled: true,
-    strategies:
-      typeof localStorage === 'undefined'
-        ? []
-        : [
-            {
-              storage: localStorage,
-              paths: ['replyMsgId', 'replyMessage', 'replyingAt'],
-            },
-          ],
+    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    pick: ['replyMsgId', 'replyMessage', 'replyingAt'],
   },
   state: () => ({
     replyMsgId: null,

@@ -9,11 +9,11 @@
       class="mt-2"
     />
     <CommunityEventSidebar
-      v-if="showCommunityEvents"
+      v-if="me && showCommunityEvents"
       class="overflow-y-scroll border-bottom"
     />
     <VolunteerOpportunitySidebar
-      v-if="showVolunteerOpportunities"
+      v-if="me && showVolunteerOpportunities"
       class="overflow-y-scroll border-top border-bottom"
     />
   </div>
@@ -21,8 +21,9 @@
     <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
   </div>
 </template>
-<script>
+<script setup>
 import BotLeftBox from './BotLeftBox'
+import { useMe } from '~/composables/useMe'
 const CommunityEventSidebar = defineAsyncComponent(() =>
   import('~/components/CommunityEventSidebar')
 )
@@ -30,40 +31,35 @@ const VolunteerOpportunitySidebar = defineAsyncComponent(() =>
   import('~/components/VolunteerOpportunitySidebar')
 )
 
-export default {
-  components: {
-    BotLeftBox,
-    CommunityEventSidebar,
-    VolunteerOpportunitySidebar,
+const { me } = useMe()
+
+defineProps({
+  showCommunityEvents: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    showCommunityEvents: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showVolunteerOpportunities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showBotLeft: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    adUnitPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    adDivId: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  showVolunteerOpportunities: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-}
+  showBotLeft: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  adUnitPath: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  adDivId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

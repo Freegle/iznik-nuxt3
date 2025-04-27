@@ -164,12 +164,13 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
-import { ref } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const MicroVolunteeringFacebook = defineAsyncComponent(() =>
   import('./MicroVolunteeringFacebook')
@@ -190,226 +191,203 @@ const MicroVolunteeringInvite = defineAsyncComponent(() =>
   import('./MicroVolunteeringInvite')
 )
 
-export default {
-  components: {
-    MicroVolunteeringCheckMessage,
-    MicroVolunteeringPhotosRotate,
-    MicroVolunteeringSimilarTerms,
-    MicroVolunteeringFacebook,
-    MicroVolunteeringSurvey,
-    MicroVolunteeringInvite,
+const props = defineProps({
+  force: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    force: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  setup(props, { emit }) {
-    const microVolunteeringStore = useMicroVolunteeringStore()
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
-    const debug = false
+})
 
-    if (debug) {
-      miscStore.set({
-        key: 'microvolunteeringlastask',
-        value: null,
-      })
+const emit = defineEmits(['verified'])
+
+const microVolunteeringStore = useMicroVolunteeringStore()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+const { fetchMe } = useMe()
+const debug = false
+
+if (debug) {
+  miscStore.set({
+    key: 'microvolunteeringlastask',
+    value: null,
+  })
+}
+
+const me = authStore.user
+
+const showInvite = ref(false)
+const fetchTask = ref(false)
+const maybeShow = ref(false)
+const showTask = ref(false)
+const task = ref(null)
+const todo = ref(5)
+const done = ref(0)
+const types = ref(['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'])
+const bump = ref(1)
+
+const inviteAccepted = computed(() => {
+  return me?.trustlevel && me.trustlevel !== 'Declined'
+})
+
+const mod = computed(() => {
+  return me?.isModerator || me?.isAdmin
+})
+
+if (me) {
+  const now = dayjs()
+  const daysago = now.diff(dayjs(me.added), 'days')
+
+  // Ask no more than once per hour. Only want to ask if we're logged in, because otherwise a) we don't know if we've
+  // already declined and b) we couldn't save a decline.
+  const lastAsk = miscStore.get('microvolunteeringlastask')
+  const askDue =
+    !lastAsk ||
+    Date.now() - new Date(lastAsk).getTime() > 60 * 60 * 1000 ||
+    debug
+
+  // Check if we're on a group with microvolunteering enabled.
+  let allowed = debug
+  authStore.groups.forEach((g) => {
+    if (g.microvolunteeringallowed) {
+      allowed = true
     }
+  })
 
-    const me = authStore.user
+  console.log('Ask due', askDue, props.force, allowed, daysago, me?.trustlevel)
 
-    const showInvite = ref(false)
-    const fetchTask = ref(false)
-    const inviteAccepted = computed(() => {
-      return me?.trustlevel && me.trustlevel !== 'Declined'
+  if (!allowed) {
+    // Not on a group with this function enabled.
+  } else if (!askDue) {
+    // Challenged recently, so return verified. That's true even for if it's forced - we don't want to bombard
+    // people.
+    emit('verified')
+  } else if (props.force) {
+    // Forced. Get task in mounted().
+    fetchTask.value = true
+  } else if (daysago > 7 || debug) {
+    // They're not a new member. We might want to ask them.
+    if (me?.trustlevel === 'Declined' && !debug) {
+      // We're not forced to do this, and they've said they don't want to.
+      emit('verified')
+    } else if (inviteAccepted.value || debug) {
+      // They're up for this. Get a task in onMounted().
+      fetchTask.value = true
+    } else {
+      // We don't know if they want to. Ask.
+      showInvite.value = true
+    }
+  }
+}
+
+async function getTask() {
+  // Try to get a task.
+  task.value = await microVolunteeringStore.challenge({
+    types: types.value,
+  })
+
+  if (task.value) {
+    miscStore.set({
+      key: 'microvolunteeringlastask',
+      value: Date.now(),
     })
 
-    if (me) {
-      const now = dayjs()
-      const daysago = now.diff(dayjs(me.added), 'days')
-
-      // Ask no more than once per hour.  Only want to ask if we're logged in, because otherwise a) we don't know if we've
-      // already declined and b) we couldn't save a decline.
-      const lastAsk = miscStore.get('microvolunteeringlastask')
-      const askDue =
-        !lastAsk ||
-        Date.now() - new Date(lastAsk).getTime() > 60 * 60 * 1000 ||
-        debug
-
-      // Check if we're on a group with microvolunteering enabled.
-      let allowed = debug
-      authStore.groups.forEach((g) => {
-        if (g.microvolunteeringallowed) {
-          allowed = true
-        }
-      })
-
-      console.log(
-        'Ask due',
-        askDue,
-        props.force,
-        allowed,
-        daysago,
-        me?.trustlevel
-      )
-
-      if (!allowed) {
-        // Not on a group with this function enabled.
-      } else if (!askDue) {
-        // Challenged recently, so return verified.  That's true even for if it's forced - we don't want to bombard
-        // people.
-        emit('verified')
-      } else if (props.force) {
-        // Forced.  Get task in mounted().
-        fetchTask.value = true
-      } else if (daysago > 7 || debug) {
-        // They're not a new member.  We might want to ask them.
-        if (me?.trustlevel === 'Declined' && !debug) {
-          // We're not forced to do this, and they've said they don't want to.
-          emit('verified')
-        } else if (inviteAccepted.value || debug) {
-          // They're up for this.  Get a task in mounted().
-          fetchTask.value = true
-        } else {
-          // We don't know if they want to.  Ask.
-          showInvite.value = true
-        }
-      }
+    if (
+      task.value.type === 'CheckMessage' ||
+      task.value.type === 'SearchTerm' ||
+      task.value.type === 'Facebook' ||
+      task.value.type === 'PhotoRotate' ||
+      task.value.type === 'Survey2' ||
+      task.value.type === 'Invite'
+    ) {
+      showTask.value = true
+    } else {
+      doneForNow()
     }
 
-    return {
-      authStore,
-      microVolunteeringStore,
-      miscStore,
-      showInvite,
-      fetchTask,
-      inviteAccepted,
-    }
-  },
-  data() {
-    return {
-      maybeShow: false,
-      showTask: false,
-      task: null,
-      message: null,
-      todo: 5,
-      done: 0,
-      types: ['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'],
-      bump: 1,
-    }
-  },
-  async mounted() {
-    if (this.fetchTask) {
-      await this.getTask()
-    }
+    console.log('Show?', showTask.value)
+  } else {
+    // Nothing to do.
+    doneForNow()
+  }
 
-    this.maybeShow = this.showInvite
-  },
-  methods: {
-    async getTask() {
-      // Try to get a task.
-      this.task = await this.microVolunteeringStore.challenge({
-        types: this.types,
-      })
-
-      if (this.task) {
-        this.miscStore.set({
-          key: 'microvolunteeringlastask',
-          value: Date.now(),
-        })
-
-        if (this.task.type === 'CheckMessage') {
-          this.showTask = true
-        } else if (this.task.type === 'SearchTerm') {
-          this.showTask = true
-        } else if (this.task.type === 'Facebook') {
-          this.showTask = true
-        } else if (this.task.type === 'PhotoRotate') {
-          this.showTask = true
-        } else if (this.task.type === 'Survey2') {
-          this.showTask = true
-        } else if (this.task.type === 'Invite') {
-          this.showTask = true
-        } else {
-          this.doneForNow()
-        }
-
-        console.log('Show?', this.showTask)
-      } else {
-        // Nothing to do.
-        this.doneForNow()
-      }
-
-      this.bump++
-    },
-    async stopIt() {
-      this.miscStore.set({
-        key: 'microvolunteeringinviterejected',
-        value: Date.now(),
-      })
-
-      await this.authStore.saveMicrovolunteering('Declined')
-
-      this.doneForNow()
-    },
-    considerNext() {
-      this.todo--
-      this.done++
-
-      if (this.todo <= 0) {
-        this.doneForNow()
-      } else {
-        this.getTask()
-      }
-    },
-    async inviteResponse(response) {
-      if (response) {
-        this.miscStore.set({
-          key: 'microvolunteeringinviteaccepted',
-          value: Date.now(),
-        })
-
-        await this.authStore.saveMicrovolunteering('Basic')
-
-        // The wording in here covers us for marketing consent.
-        await this.authStore.saveAndGet({
-          marketingconsent: 1,
-        })
-
-        await this.getTask()
-      } else {
-        this.miscStore.set({
-          key: 'microvolunteeringinviterejected',
-          value: Date.now(),
-        })
-
-        await this.authStore.saveMicrovolunteering('Declined')
-      }
-
-      this.fetchMe(true)
-
-      this.showInvite = false
-    },
-    doneForNow() {
-      this.showTask = false
-      this.$emit('verified')
-
-      // Snooze this until tomorrow.
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0)
-      tomorrow.setMinutes(0)
-
-      this.miscStore.set({
-        key: 'microvolunteeringlastask',
-        value: tomorrow.getTime(),
-      })
-    },
-  },
+  bump.value++
 }
+
+async function stopIt() {
+  miscStore.set({
+    key: 'microvolunteeringinviterejected',
+    value: Date.now(),
+  })
+
+  await authStore.saveMicrovolunteering('Declined')
+
+  doneForNow()
+}
+
+function considerNext() {
+  todo.value--
+  done.value++
+
+  if (todo.value <= 0) {
+    doneForNow()
+  } else {
+    getTask()
+  }
+}
+
+async function inviteResponse(response) {
+  if (response) {
+    miscStore.set({
+      key: 'microvolunteeringinviteaccepted',
+      value: Date.now(),
+    })
+
+    await authStore.saveMicrovolunteering('Basic')
+
+    // The wording in here covers us for marketing consent.
+    await authStore.saveAndGet({
+      marketingconsent: 1,
+    })
+
+    await getTask()
+  } else {
+    miscStore.set({
+      key: 'microvolunteeringinviterejected',
+      value: Date.now(),
+    })
+
+    await authStore.saveMicrovolunteering('Declined')
+  }
+
+  await fetchMe(true)
+
+  showInvite.value = false
+}
+
+function doneForNow() {
+  showTask.value = false
+  emit('verified')
+
+  // Snooze this until tomorrow.
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0)
+  tomorrow.setMinutes(0)
+
+  miscStore.set({
+    key: 'microvolunteeringlastask',
+    value: tomorrow.getTime(),
+  })
+}
+
+onMounted(async () => {
+  if (fetchTask.value) {
+    await getTask()
+  }
+
+  maybeShow.value = showInvite.value
+})
 </script>
 <style scoped lang="scss">
 :deep(label) {

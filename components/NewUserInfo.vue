@@ -51,58 +51,47 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import SpinButton from './SpinButton'
+import SettingsGroup from './SettingsGroup'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: { SpinButton },
-  props: {
-    password: {
-      type: String,
-      required: true,
-    },
+defineProps({
+  password: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const authStore = useAuthStore()
-    const emailSimple = ref(-1)
+})
 
-    return {
-      authStore,
-      emailSimple,
+const authStore = useAuthStore()
+const { me, myGroups } = useMe()
+const emailSimple = ref(-1)
+const newPassword = ref(null)
+
+watch(emailSimple, async (value) => {
+  for (const group of myGroups.value) {
+    const params = {
+      userid: me.id,
+      groupid: group.id,
     }
-  },
-  data() {
-    return {
-      newPassword: null,
-    }
-  },
-  watch: {
-    async emailSimple(value) {
-      for (const group of this.myGroups) {
-        const params = {
-          userid: this.me.id,
-          groupid: group.id,
-        }
-        params.emailfrequency = value
+    params.emailfrequency = value
 
-        // Don't fetch for each group.
-        await this.authStore.setGroup(params, true)
-      }
+    // Don't fetch for each group.
+    await authStore.setGroup(params, true)
+  }
 
-      await this.authStore.fetchUser()
-    },
-  },
-  methods: {
-    async setPassword(callback) {
-      if (this.newPassword) {
-        await this.authStore.saveAndGet({
-          password: this.newPassword,
-        })
-      }
-      callback()
-    },
-  },
+  await authStore.fetchUser()
+})
+
+async function setPassword(callback) {
+  if (newPassword.value) {
+    await authStore.saveAndGet({
+      password: newPassword.value,
+    })
+  }
+  callback()
 }
 </script>
 <style scoped lang="scss">

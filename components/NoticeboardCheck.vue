@@ -29,24 +29,22 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import dayjs from 'dayjs'
 
-export default {
-  props: {
-    noticeboard: {
-      type: Object,
-      required: true,
-    },
-    check: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  noticeboard: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    checkedat() {
-      return dayjs(this.check.checkedat).format('Do MMMM, YYYY')
-    },
+  check: {
+    type: Object,
+    required: true,
   },
-}
+})
+
+const checkedat = computed(() => {
+  return dayjs(props.check.checkedat).format('Do MMMM, YYYY')
+})
 </script>

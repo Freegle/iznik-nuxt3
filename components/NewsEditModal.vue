@@ -22,50 +22,36 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    threadhead: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
-
-    const { modal, hide } = useOurModal()
-
-    return {
-      newsfeedStore,
-      modal,
-      hide,
-    }
+  threadhead: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      showModal: false,
-      message: null,
-    }
-  },
-  methods: {
-    async onShow() {
-      // Make sure we're up to date.
-      const newsfeed = await this.newsfeedStore.fetch(this.id, true)
-      this.message = newsfeed.message
-    },
+})
 
-    async save() {
-      await this.newsfeedStore.edit(this.id, this.message, this.threadhead)
+const newsfeedStore = useNewsfeedStore()
+const { modal, hide } = useOurModal()
+const editText = ref(null)
 
-      this.hide()
-    },
-  },
+const message = ref(null)
+
+async function onShow() {
+  // Make sure we're up to date.
+  const newsfeed = await newsfeedStore.fetch(props.id, true)
+  message.value = newsfeed.message
+}
+
+async function save() {
+  await newsfeedStore.edit(props.id, message.value, props.threadhead)
+  hide()
 }
 </script>

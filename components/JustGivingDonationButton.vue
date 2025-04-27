@@ -14,6 +14,8 @@
   </button>
 </template>
 <script setup>
+import { ref, watch, onMounted } from 'vue'
+
 const jgbutton = ref(null)
 
 onMounted(() => {

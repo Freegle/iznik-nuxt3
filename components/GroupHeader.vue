@@ -152,70 +152,66 @@
     </div>
   </b-card>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import SpinButton from './SpinButton'
 import ChatButton from '~/components/ChatButton'
 import { useAuthStore } from '~/stores/auth'
 
-export default {
-  components: {
-    SpinButton,
-    ChatButton,
+const props = defineProps({
+  group: {
+    type: Object,
+    required: true,
   },
-  props: {
-    group: {
-      type: Object,
-      required: true,
-    },
-    showJoin: {
-      type: Boolean,
-      required: true,
-    },
-    showGiveFind: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  showJoin: {
+    type: Boolean,
+    required: true,
   },
-  setup() {
-    const authStore = useAuthStore()
+  showGiveFind: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      authStore,
-    }
-  },
-  computed: {
-    amAMember() {
-      return this.authStore?.member(this.group?.id)
-    },
-    description() {
-      let description = this.group?.description
+const router = useRouter()
+const authStore = useAuthStore()
+const me = computed(() => authStore?.user)
+const myid = computed(() => authStore?.user?.id)
 
-      if (description) {
-        // Remove some whitespace which appears in some group descriptions.
-        description = description.replace(/<p><br><\/p>/g, '')
-        description = description.replace(/<p><\/p>/g, '')
-      }
+// Computed properties
+const amAMember = computed(() => {
+  return authStore?.member(props.group?.id)
+})
 
-      return description
-    },
-  },
-  methods: {
-    async leave(callback) {
-      await this.authStore.leaveGroup(this.myid, this.group.id)
-      callback()
-    },
-    async join(callback) {
-      if (!this.me) {
-        // We need to force them to log in.
-        callback()
-        this.$router.push('/explore/join/' + this.group.id)
-      } else {
-        await this.authStore.joinGroup(this.myid, this.group.id, true)
-        callback()
-      }
-    },
-  },
+const description = computed(() => {
+  let desc = props.group?.description
+
+  if (desc) {
+    // Remove some whitespace which appears in some group descriptions.
+    desc = desc.replace(/<p><br><\/p>/g, '')
+    desc = desc.replace(/<p><\/p>/g, '')
+  }
+
+  return desc
+})
+
+// Methods
+async function leave(callback) {
+  await authStore.leaveGroup(myid, props.group.id)
+  callback()
+}
+
+async function join(callback) {
+  if (!me.value) {
+    // We need to force them to log in.
+    callback()
+    router.push('/explore/join/' + props.group.id)
+  } else {
+    await authStore.joinGroup(myid, props.group.id, true)
+    callback()
+  }
 }
 </script>
 

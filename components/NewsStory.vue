@@ -106,15 +106,28 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
-import NewsBase from '~/components/NewsBase'
-
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+})
+
+defineEmits(['focus-comment'])
+
+// Define the variables that were supposed to be imported from NewsBase
+const showNewsPhotoModal = ref(false)
+const showNewsShareModal = ref(false)
+
 const NewsPhotoModal = defineAsyncComponent(() =>
   import('~/components/NewsPhotoModal')
 )
@@ -125,49 +138,48 @@ const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )
 
-export default {
-  components: {
-    NewsPhotoModal,
-    NewsUserIntro,
-    NewsLoveComment,
-    ReadMore,
-    StoryAddModal,
-    StoryShareModal,
-  },
-  extends: NewsBase,
-  async setup(props) {
-    const storyStore = useStoryStore()
-    const newsfeedStore = useNewsfeedStore()
+const storyStore = useStoryStore()
+const newsfeedStore = useNewsfeedStore()
 
-    const newsfeed = newsfeedStore.byId(props.id)
-    await storyStore.fetch(newsfeed.storyid)
+// Create a newsfeed reference
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
 
-    return {
-      storyStore,
-    }
-  },
-  data() {
-    return {
-      showAdd: false,
-    }
-  },
-  computed: {
-    story() {
-      return this.storyStore?.byId(this.newsfeed?.storyid)
-    },
-    body() {
-      let story = twem(this.story?.story)
-      story = story?.trim()
-      return story
-    },
-    headline() {
-      return this.story?.headline
-    },
-  },
-  methods: {
-    showAddModal() {
-      this.showAdd = true
-    },
-  },
+// Create a userid computed property
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
+
+// Fetch story data
+await storyStore.fetch(newsfeed.value?.storyid)
+
+const showAdd = ref(false)
+
+const story = computed(() => {
+  return storyStore?.byId(newsfeed.value?.storyid)
+})
+
+const body = computed(() => {
+  let storyText = twem(story.value?.story)
+  storyText = storyText?.trim()
+  return storyText
+})
+
+const headline = computed(() => {
+  return story.value?.headline
+})
+
+// Re-implement the functions from NewsBase
+function share() {
+  showNewsShareModal.value = true
+}
+
+function showPhotoModal() {
+  showNewsPhotoModal.value = true
+}
+
+function showAddModal() {
+  showAdd.value = true
 }
 </script>

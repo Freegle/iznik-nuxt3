@@ -42,8 +42,9 @@
     </div>
   </aside>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
 import JobOne from './JobOne'
@@ -55,63 +56,51 @@ const DonationButton = defineAsyncComponent(() =>
   import('~/components/DonationButton')
 )
 
-export default {
-  components: {
-    JobOne,
-    NoticeMessage,
-    InfiniteLoading,
-    DonationButton,
-  },
-  async setup() {
-    const jobStore = useJobStore()
-    const authStore = useAuthStore()
+const jobStore = useJobStore()
+const authStore = useAuthStore()
 
-    const me = authStore.user
-    const lat = me?.lat
-    const lng = me?.lng
+// Get list and blocked from jobStore
+const { list, blocked } = storeToRefs(jobStore)
 
-    const location = computed(() => me?.settings?.mylocation?.name || null)
+// Local state
+const show = ref(0)
 
-    if (location.value && lat && lng) {
-      await jobStore.fetch(lat, lng)
-    }
+// Get user info
+const me = authStore.user
+const lat = me?.lat
+const lng = me?.lng
 
-    return {
-      jobStore,
-      location,
-    }
-  },
-  data() {
-    return {
-      show: 0,
-    }
-  },
-  computed: {
-    ...mapState(useJobStore, ['list', 'blocked']),
-    visibleJobs() {
-      if (process.client) {
-        // We have an infinite scroll - return as many as we're currently showing.
-        //
-        // Don't prioritise otherwise this makes them jump around when scrolling down.
-        return this.list.slice(0, this.show)
-      } else {
-        // SSR - return all for SEO.
-        return this.job
-      }
-    },
-  },
-  methods: {
-    loadMore($state) {
-      // We use an infinite load for the list because it's a lot of DOM to add at initial page load.  Can't step up
-      // one at a time though, as we trigger an infinite loop test in the plugin.
-      if (this.show < this.list?.length) {
-        this.show += 3
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-  },
+// Location computed property
+const location = computed(() => me?.settings?.mylocation?.name || null)
+
+// Fetch data if needed
+if (location.value && lat && lng) {
+  await jobStore.fetch(lat, lng)
+}
+
+// Computed for visible jobs
+const visibleJobs = computed(() => {
+  if (process.client) {
+    // We have an infinite scroll - return as many as we're currently showing.
+    //
+    // Don't prioritise otherwise this makes them jump around when scrolling down.
+    return list.value.slice(0, show.value)
+  } else {
+    // SSR - return all for SEO.
+    return list.value
+  }
+})
+
+// Methods
+function loadMore($state) {
+  // We use an infinite load for the list because it's a lot of DOM to add at initial page load.  Can't step up
+  // one at a time though, as we trigger an infinite loop test in the plugin.
+  if (show.value < list.value?.length) {
+    show.value += 3
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
 }
 </script>
 <style scoped lang="scss">

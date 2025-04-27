@@ -48,96 +48,93 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useJobStore } from '../stores/job'
 import ExternalLink from '~/components/ExternalLink'
 
-export default {
-  components: { ExternalLink },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    summary: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    highlight: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showBody: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    className: {
-      type: String,
-      required: false,
-      default: '',
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const jobStore = useJobStore()
-
-    return {
-      jobStore,
-    }
+  summary: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    job() {
-      return this.jobStore?.byId(this.id)
-    },
-    title() {
-      if (!this.job?.title) {
-        return ''
-      }
-
-      return this.filterNonsense(this.job.title)
-    },
-    location() {
-      if (
-        this.job &&
-        this.job.location &&
-        this.job.location.indexOf(', ') === 0
-      ) {
-        return this.job.location.substring(2)
-      } else {
-        return this.job.location
-      }
-    },
-    body() {
-      if (!this.job || !this.job.body) {
-        return ''
-      }
-
-      return this.filterNonsense(this.job.body)
-    },
+  highlight: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    clicked() {
-      this.jobStore.log({
-        id: this.job.id,
-      })
-
-      // Route to jobs page to encourage viewing of more jobs.
-      if (this.$router?.currentRoute?.value?.path !== '/jobs') {
-        this.$router.push('/jobs')
-      }
-    },
-    filterNonsense(val) {
-      return val
-        .replace(/\\n/g, '\n')
-        .replace(/<br>/g, '\n')
-        .replace(/Â£/g, '£')
-        .trim()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036F]/g, '')
-    },
+  showBody: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
+  className: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+const router = useRouter()
+const jobStore = useJobStore()
+
+const job = computed(() => {
+  return jobStore?.byId(props.id)
+})
+
+const title = computed(() => {
+  if (!job.value?.title) {
+    return ''
+  }
+
+  return filterNonsense(job.value.title)
+})
+
+const location = computed(() => {
+  if (
+    job.value &&
+    job.value.location &&
+    job.value.location.indexOf(', ') === 0
+  ) {
+    return job.value.location.substring(2)
+  } else {
+    return job.value.location
+  }
+})
+
+const body = computed(() => {
+  if (!job.value || !job.value.body) {
+    return ''
+  }
+
+  return filterNonsense(job.value.body)
+})
+
+function clicked() {
+  jobStore.log({
+    id: job.value.id,
+  })
+
+  // Route to jobs page to encourage viewing of more jobs.
+  if (router?.currentRoute?.value?.path !== '/jobs') {
+    router.push('/jobs')
+  }
+}
+
+function filterNonsense(val) {
+  return val
+    .replace(/\\n/g, '\n')
+    .replace(/<br>/g, '\n')
+    .replace(/Â£/g, '£')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036F]/g, '')
 }
 </script>
 <style scoped>

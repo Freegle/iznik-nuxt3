@@ -265,6 +265,7 @@
 </template>
 <script setup>
 import { useNavbar } from '~/composables/useNavbar'
+import { useAuthStore } from '~/stores/auth'
 
 const {
   online,
@@ -298,6 +299,8 @@ const AboutMeModal = defineAsyncComponent(() =>
 const NotificationOptions = defineAsyncComponent(() =>
   import('~/components/NotificationOptions')
 )
+
+const loggedIn = computed(() => useAuthStore().user !== null)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';

@@ -90,65 +90,51 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
 // There are a bunch of icons we need only rarely.  By requiring them here we avoid
 // requiring them in the vue-awesome plugin.  That makes them available everywhere - but
 // increases the bundle size.  Putting them here allows better bundling.
 import VueSocialSharing from 'vue-social-sharing'
+import { ref, computed } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup() {
-    const storyStore = useStoryStore()
+})
 
-    const { modal, hide } = useOurModal()
+const storyStore = useStoryStore()
+const { modal, hide } = useOurModal()
+const copied = ref(false)
+const bump = ref(0)
 
-    try {
-      await this.storyStore.fetch(this.id, true)
-    } catch (e) {
-      // Must no longer exist on server.
-      hide()
-    }
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+// case.
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+try {
+  await storyStore.fetch(props.id, true)
+} catch (e) {
+  // Must no longer exist on server.
+  hide()
+}
 
-    return {
-      storyStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      copied: false,
-      bump: 0,
-    }
-  },
-  computed: {
-    story() {
-      return this.storyStore.byId(this.id)
-    },
-  },
-  methods: {
-    async doCopy() {
-      await navigator.clipboard.writeText(this.story.url)
-      this.copied = true
-    },
-    opened() {
-      this.bump++
-    },
-  },
+const story = computed(() => {
+  return storyStore.byId(props.id)
+})
+
+async function doCopy() {
+  await navigator.clipboard.writeText(story.value.url)
+  copied.value = true
+}
+
+function opened() {
+  bump.value++
 }
 </script>
 <style scoped lang="scss">

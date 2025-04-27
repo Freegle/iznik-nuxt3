@@ -12,62 +12,49 @@
     <h4 v-if="raised">&pound;{{ raised }}<br />Raised</h4>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useDonationStore } from '../stores/donations'
 import VueThermometer from '~/components/VueThermometer'
 
-export default {
-  components: {
-    VueThermometer,
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-  },
-  async setup(props) {
-    const donationStore = useDonationStore()
+})
 
-    await donationStore.fetch(props.groupid)
+const donationStore = useDonationStore()
+await donationStore.fetch(props.groupid)
 
-    return {
-      donationStore,
-      target: donationStore.target,
-      raised: donationStore.raised,
-    }
-  },
-  data() {
-    return {
-      thermOptions: {
-        thermo: {
-          color: 'darkgreen',
-          backgroundColor: 'white',
-          frameColor: 'black',
-          ticks: 11,
-          ticksEnabled: true,
-          tickColor: 'black',
-          tickWidth: '1',
-        },
-      },
-    }
-  },
-  computed: {
-    max() {
-      // If we've raised more than the target, stretch it a bit.
-      if (this.raised > this.target) {
-        let max = this.raised * 1.1
+const target = donationStore.target
+const raised = donationStore.raised
 
-        if (max > 500) {
-          max = Math.round((max + 0.5) / 500) * 500
-        }
-
-        return max
-      } else {
-        return this.target
-      }
-    },
+const thermOptions = {
+  thermo: {
+    color: 'darkgreen',
+    backgroundColor: 'white',
+    frameColor: 'black',
+    ticks: 11,
+    ticksEnabled: true,
+    tickColor: 'black',
+    tickWidth: '1',
   },
 }
+
+const max = computed(() => {
+  // If we've raised more than the target, stretch it a bit.
+  if (raised > target) {
+    let maxValue = raised * 1.1
+
+    if (maxValue > 500) {
+      maxValue = Math.round((maxValue + 0.5) / 500) * 500
+    }
+
+    return maxValue
+  } else {
+    return target
+  }
+})
 </script>

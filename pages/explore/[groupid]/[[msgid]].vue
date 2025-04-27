@@ -18,13 +18,18 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { computed, useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
+import ExploreGroup from '~/components/ExploreGroup'
+import NoticeMessage from '~/components/NoticeMessage'
+import { useMe } from '~/composables/useMe'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const id = route.params.groupid
 const msgid = parseInt(route.params.msgid)
+const { me } = useMe()
 
 const groupStore = useGroupStore()
 

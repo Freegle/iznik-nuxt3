@@ -166,13 +166,15 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useUserStore } from '../stores/user'
 import { milesAway } from '../composables/useDistance'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
+import { useAuthStore } from '~/stores/auth'
 
 import ReplyTime from '~/components/ReplyTime'
 import ProfileHeader from '~/components/ProfileHeader'
@@ -183,115 +185,109 @@ const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )
 
-export default {
-  components: {
-    SupporterInfoModal,
-    NoticeMessage,
-    ReplyTime,
-    MessageList,
-    ProfileHeader,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    header: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+  header: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  async setup(props) {
-    const userStore = useUserStore()
-    const messageStore = useMessageStore()
+})
 
-    // Get active messages
-    const messages = await messageStore.fetchByUser(props.id, true, true)
+const userStore = useUserStore()
+const messageStore = useMessageStore()
+const authStore = useAuthStore()
+const me = authStore.user
 
-    // Load them into store.
-    messages.forEach((message) => {
-      messageStore.fetch(message.id)
-    })
+const invalidUser = ref(false)
+const showSupporterInfo = ref(false)
+const supporterInfoModal = ref(null)
 
-    // Get public location.
-    await userStore.fetchPublicLocation(props.id)
+// Get active messages
+const messages = await messageStore.fetchByUser(props.id, true, true)
 
-    return {
-      userStore,
-      messageStore,
-      messages,
+// Load them into store.
+messages.forEach((message) => {
+  messageStore.fetch(message.id)
+})
+
+// Get public location.
+await userStore.fetchPublicLocation(props.id)
+
+const user = computed(() => {
+  return props.id ? userStore?.byId(props.id) : null
+})
+
+const publicLocation = computed(() => {
+  return props.id ? userStore?.publicLocationById(props.id) : null
+})
+
+function active(type) {
+  const ret = []
+
+  for (const message of messages) {
+    if (message.type === type && !message.successful) {
+      ret.push(message)
     }
-  },
-  data() {
-    return {
-      invalidUser: false,
-      showSupporterInfo: false,
-    }
-  },
-  computed: {
-    user() {
-      return this.id ? this.userStore?.byId(this.id) : null
-    },
-    publicLocation() {
-      return this.id ? this.userStore?.publicLocationById(this.id) : null
-    },
-    activeOffers() {
-      return this.active('Offer')
-    },
-    activeWanteds() {
-      return this.active('Wanted')
-    },
-    aboutme() {
-      return this.user?.aboutme ? twem(this.user.aboutme.text) : null
-    },
-    expectedreplies() {
-      pluralize.addIrregularRule('freegler is', 'freeglers are')
-      return pluralize('freegler is', this.user?.expectedreplies, true)
-    },
-    milesaway() {
-      return pluralize(
-        'mile',
-        milesAway(this.me?.lat, this.me?.lng, this.user?.lat, this.user?.lng),
-        true
-      )
-    },
-    activeOFFERCount() {
-      return pluralize('active OFFER', this.activeOffers.length, true)
-    },
-    activeWANTEDCount() {
-      return pluralize('active WANTED', this.activeWanteds.length, true)
-    },
-    recentOFFERCount() {
-      return pluralize('OFFER', this.user?.info?.offers, true)
-    },
-    recentWANTEDCount() {
-      return pluralize('WANTED', this.user?.info?.wanteds, true)
-    },
-    recentReplyCount() {
-      return pluralize('reply', this.user?.info?.replies, true)
-    },
-    recentCollectedCount() {
-      return pluralize('item', this.user?.info?.collected, true)
-    },
-  },
-  methods: {
-    active(type) {
-      const ret = []
+  }
 
-      for (const message of this.messages) {
-        if (message.type === type && !message.successful) {
-          ret.push(message)
-        }
-      }
+  return ret
+}
 
-      return ret
-    },
-    supporterInfo() {
-      this.showSupporterInfo = true
-    },
-  },
+const activeOffers = computed(() => {
+  return active('Offer')
+})
+
+const activeWanteds = computed(() => {
+  return active('Wanted')
+})
+
+const aboutme = computed(() => {
+  return user.value?.aboutme ? twem(user.value.aboutme.text) : null
+})
+
+const expectedreplies = computed(() => {
+  pluralize.addIrregularRule('freegler is', 'freeglers are')
+  return pluralize('freegler is', user.value?.expectedreplies, true)
+})
+
+const milesaway = computed(() => {
+  return pluralize(
+    'mile',
+    milesAway(me?.lat, me?.lng, user.value?.lat, user.value?.lng),
+    true
+  )
+})
+
+const activeOFFERCount = computed(() => {
+  return pluralize('active OFFER', activeOffers.value.length, true)
+})
+
+const activeWANTEDCount = computed(() => {
+  return pluralize('active WANTED', activeWanteds.value.length, true)
+})
+
+const recentOFFERCount = computed(() => {
+  return pluralize('OFFER', user.value?.info?.offers, true)
+})
+
+const recentWANTEDCount = computed(() => {
+  return pluralize('WANTED', user.value?.info?.wanteds, true)
+})
+
+const recentReplyCount = computed(() => {
+  return pluralize('reply', user.value?.info?.replies, true)
+})
+
+const recentCollectedCount = computed(() => {
+  return pluralize('item', user.value?.info?.collected, true)
+})
+
+function supporterInfo() {
+  showSupporterInfo.value = true
 }
 </script>
 <style scoped lang="scss">

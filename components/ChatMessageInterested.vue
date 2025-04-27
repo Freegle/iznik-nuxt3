@@ -147,67 +147,110 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { storeToRefs } from 'pinia'
 import Highlighter from 'vue-highlight-words'
-import { fetchReferencedMessage } from '../composables/useChat'
+import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
-import ChatBase from '~/components/ChatBase'
+import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-const OutcomeModal = () =>
-  defineAsyncComponent(() => import('~/components/OutcomeModal'))
+import { useUserStore } from '~/stores/user'
+
+const OutcomeModal = defineAsyncComponent(() =>
+  import('~/components/OutcomeModal')
+)
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
 
-export default {
-  components: {
-    ProfileImage,
-    OutcomeModal,
-    PromiseModal,
-    ChatMessageSummary,
-    Highlighter,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  async setup(props) {
-    await fetchReferencedMessage(props.chatid, props.id)
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      showOutcome: false,
-      outcomeType: null,
-      showPromise: false,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  methods: {
-    promise(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      this.showPromise = true
-    },
-    promised() {
-      // Might have a new chat message to show from promising.
-      this.showPromise = false
-      const chatStore = useChatStore()
-      chatStore.fetchChat(this.chatid)
-    },
-    async outcome(type, e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
+const messageStore = useMessageStore()
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const { myid } = storeToRefs(userStore)
 
-      // Make sure we're up to date.
-      const messageStore = useMessageStore()
-      await messageStore.fetch(this.refmsgid)
+// Data properties
+const showOutcome = ref(false)
+const outcomeType = ref(null)
+const showPromise = ref(false)
 
-      this.showOutcome = true
-      this.outcomeType = type
-    },
-  },
+// Get chat base functionality
+const {
+  chat,
+  chatmessage,
+  emessage,
+  messageIsFromCurrentUser,
+  chatMessageProfileImage,
+  regexEmail,
+  otheruser,
+} = useChatBase(props.chatid, props.id, props.pov)
+
+// Computed properties
+const refmsgid = computed(() => chatmessage.value?.refmsgid)
+const refmsg = computed(() =>
+  refmsgid.value ? messageStore.byId(refmsgid.value) : null
+)
+
+// Methods
+const fetchMessage = async () => {
+  if (refmsgid.value) {
+    await messageStore.fetch(refmsgid.value)
+  }
 }
+
+const promise = (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  showPromise.value = true
+}
+
+const promised = () => {
+  // Might have a new chat message to show from promising.
+  showPromise.value = false
+  chatStore.fetchChat(props.chatid)
+}
+
+const outcome = async (type, e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  // Make sure we're up to date.
+  await messageStore.fetch(refmsgid.value)
+
+  showOutcome.value = true
+  outcomeType.value = type
+}
+
+// On mount
+onMounted(async () => {
+  // Fetch the referenced message
+  await fetchReferencedMessage(props.chatid, props.id)
+})
 </script>

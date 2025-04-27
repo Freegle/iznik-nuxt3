@@ -7,19 +7,10 @@ import { useMiscStore } from '~/stores/misc'
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
-    enabled: true,
-    strategies:
-      typeof localStorage === 'undefined'
-        ? []
-        : [
-            {
-              storage: localStorage,
-
-              // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
-              // in, and information about which users have been used on this device.
-              paths: ['auth', 'userlist', 'loginCount', 'loggedInEver'],
-            },
-          ],
+    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
+    // in, and information about which users have been used on this device.
+    pick: ['auth', 'userlist', 'loginCount', 'loggedInEver'],
   },
   state: () => ({
     auth: {

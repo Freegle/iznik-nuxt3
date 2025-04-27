@@ -195,139 +195,135 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import NoticeMessage from './NoticeMessage'
+import { useAuthStore } from '~/stores/auth'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
+
 const VolunteerOpportunityModal = defineAsyncComponent(() =>
   import('./VolunteerOpportunityModal')
 )
 
-export default {
-  components: {
-    NoticeMessage,
-    VolunteerOpportunityModal,
-    ReadMore,
+const props = defineProps({
+  summary: {
+    type: Boolean,
+    required: true,
   },
-  props: {
-    summary: {
-      type: Boolean,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
-    filterGroup: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    titleTag: {
-      type: String,
-      required: false,
-      default: 'h3',
-    },
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const volunteeringStore = useVolunteeringStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
+  filterGroup: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  titleTag: {
+    type: String,
+    required: false,
+    default: 'h3',
+  },
+})
 
-    if (props.id) {
-      const v = await volunteeringStore.fetch(props.id)
-      if (v) {
-        await userStore.fetch(v.userid)
+const volunteeringStore = useVolunteeringStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const authStore = useAuthStore()
+const myid = computed(() => authStore.user?.id)
 
-        v.groups?.forEach(async (id) => {
-          await groupStore.fetch(id)
-        })
-      }
+const renewed = ref(false)
+const showModal = ref(false)
+
+// Initialize data from props
+if (props.id) {
+  const v = await volunteeringStore.fetch(props.id)
+  if (v) {
+    await userStore.fetch(v.userid)
+
+    v.groups?.forEach(async (id) => {
+      await groupStore.fetch(id)
+    })
+  }
+}
+
+// Computed properties
+const volunteering = computed(() => {
+  const v = volunteeringStore?.byId(props.id)
+
+  if (v) {
+    if (!props.filterGroup) {
+      return v
     }
 
-    return {
-      volunteeringStore,
-      userStore,
-      groupStore,
+    if (v.groups.includes(props.filterGroup)) {
+      return v
     }
-  },
-  data() {
-    return {
-      renewed: false,
-      showModal: false,
+  }
+
+  return null
+})
+
+const groups = computed(() => {
+  const ret = []
+  volunteering.value?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+
+    if (group) {
+      ret.push(group)
     }
-  },
-  computed: {
-    volunteering() {
-      const v = this.volunteeringStore?.byId(this.id)
+  })
 
-      if (v) {
-        if (!this.filterGroup) {
-          return v
-        }
+  return ret
+})
 
-        if (v.groups.includes(this.filterGroup)) {
-          return v
-        }
-      }
+const user = computed(() => {
+  return userStore?.byId(volunteering.value?.userid)
+})
 
-      return null
-    },
-    groups() {
-      const ret = []
-      this.volunteering?.groups?.forEach((id) => {
-        const group = this.groupStore?.get(id)
+const description = computed(() => {
+  let desc = volunteering.value?.description
+  desc = desc ? twem(desc) : ''
+  desc = desc.trim()
+  return desc
+})
 
-        if (group) {
-          ret.push(group)
-        }
-      })
+const warning = computed(() => {
+  const added = new Date(volunteering.value?.added).getTime()
+  const renewed = new Date(volunteering.value?.renewed).getTime()
+  const now = Date.now()
 
-      return ret
-    },
-    user() {
-      return this.userStore?.byId(this.volunteering?.userid)
-    },
-    description() {
-      let desc = this.volunteering?.description
-      desc = desc ? twem(desc) : ''
-      desc = desc.trim()
-      return desc
-    },
-    warning() {
-      const added = new Date(this.volunteering?.added).getTime()
-      const renewed = new Date(this.volunteering?.renewed).getTime()
-      const now = Date.now()
+  let warn = false
 
-      let warn = false
+  if (renewed) {
+    warn = now - renewed > 31 * 24 * 60 * 60 * 1000
+  } else {
+    warn = now - added > 31 * 24 * 60 * 60 * 1000
+  }
 
-      if (renewed) {
-        warn = now - renewed > 31 * 24 * 60 * 60 * 1000
-      } else {
-        warn = now - added > 31 * 24 * 60 * 60 * 1000
-      }
+  return warn
+})
 
-      return warn
-    },
-    mine() {
-      return this.user.id === this.myid
-    },
-  },
-  methods: {
-    showOpportunityModal() {
-      this.showModal = true
-    },
-    async renew() {
-      await this.volunteeringStore.renew(this.volunteering.id)
-      this.renewed = true
-    },
-    expire() {
-      this.volunteeringStore.expire(this.volunteering.id)
-    },
-  },
+const mine = computed(() => {
+  return user.value?.id === myid.value
+})
+
+// Methods
+function showOpportunityModal() {
+  showModal.value = true
+}
+
+async function renew() {
+  await volunteeringStore.renew(volunteering.value.id)
+  renewed.value = true
+}
+
+function expire() {
+  volunteeringStore.expire(volunteering.value.id)
 }
 </script>
 <style scoped lang="scss">

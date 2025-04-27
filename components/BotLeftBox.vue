@@ -52,14 +52,8 @@
     </div>
   </nav>
 </template>
-<script>
+<script setup>
 import ExternalLink from './ExternalLink'
-
-export default {
-  components: {
-    ExternalLink,
-  },
-}
 </script>
 <style scoped lang="scss">
 a {

@@ -66,232 +66,228 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { uid } from '../composables/useId'
 import { useAuthStore } from '../stores/auth'
 import { useLocationStore } from '../stores/location'
 import SpinButton from './SpinButton'
-import { ref } from '#imports'
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  useRuntimeConfig,
+} from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import AutoComplete from '~/components/AutoComplete'
 
-export default {
-  components: {
-    SpinButton,
-    AutoComplete,
+const props = defineProps({
+  value: {
+    type: String,
+    required: false,
+    default: null,
   },
-  props: {
-    value: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    label: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    focus: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    find: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'lg',
-    },
-    pconly: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    noStore: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    variant: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  label: {
+    type: String,
+    required: false,
+    default: null,
   },
-  setup(props) {
-    const composeStore = useComposeStore()
-    const authStore = useAuthStore()
-    const locationStore = useLocationStore()
-
-    const wip = ref(props.value)
-    const me = authStore.user
-
-    if (props.pconly && wip.value === null && me?.settings?.mylocation?.name) {
-      // If we are logged in then we may have a known location to use as the default.
-      wip.value = me?.settings?.mylocation?.name
-    }
-
-    if (props.pconly && !wip.value && !props.noStore) {
-      // We might have one we are composing.
-      const pc = composeStore.postcode
-
-      if (pc?.name) {
-        wip.value = pc.name
-      }
-    }
-
-    // Unique id
-    const id = uid('postcode')
-
-    return {
-      composeStore,
-      locationStore,
-      wip,
-      id,
-    }
+  focus: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      results: [],
-      locationFailed: false,
-      showLocated: false,
-      callbackToCall: null,
-    }
+  find: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  computed: {
-    source() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.APIv2 + '/location/typeahead'
-    },
+  size: {
+    type: String,
+    required: false,
+    default: 'lg',
   },
-  beforeUnmount() {
-    if (this.callbackToCall) {
-      this.callbackToCall()
-    }
+  pconly: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  mounted() {
-    if (this.$refs.autocomplete) {
-      if (this.focus) {
-        // Focus on postcode to grab their attention.
-        this.$refs.autocomplete.$refs.input.focus()
-      }
-
-      // We need some fettling of the input keystrokes.
-      const input = this.$refs.autocomplete.$refs.input
-      input.addEventListener('keydown', this.keydown, false)
-    } else {
-      // Not quite sure how this happens, but it does.
-    }
-
-    if (this.wip) {
-      this.select({
-        name: this.wip,
-      })
-    }
+  noStore: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  methods: {
-    invalid() {
-      // Parent might want to know that we don't have a valid postcode any more.
-      this.$emit('cleared')
-      this.wip = null
-      this.results = []
-    },
-    keydown(e) {
-      if (e.which === 8) {
-        // Backspace means we no longer have a full postcode.
-        this.invalid()
-      } else {
-        // Hide the tooltip in case it's showing from a use of the find button.
-        this.showLocated = false
-      }
-    },
-    process(results) {
-      const names = []
-      const ret = []
-
-      if (results) {
-        for (let i = 0; i < results.length && names.length < 5; i++) {
-          const loc = results[i]
-
-          if (!names.includes(loc.name)) {
-            names.push(loc.name)
-            ret.push(loc)
-          }
-        }
-      }
-
-      this.results = ret
-      return ret
-    },
-    async select(pc) {
-      console.log('Select', pc)
-      if (pc) {
-        if (pc.name && !pc.id) {
-          // Find the location this corresponds to.
-          const locs = await this.locationStore.typeahead(pc.name)
-
-          if (locs?.length) {
-            pc = locs[0]
-          }
-        }
-        this.$emit('selected', pc)
-      } else {
-        this.$emit('cleared')
-      }
-
-      this.locationFailed = false
-    },
-    findLoc(callback) {
-      this.callbackToCall = callback
-
-      try {
-        if (
-          navigator &&
-          navigator.geolocation &&
-          navigator.geolocation.getCurrentPosition
-        ) {
-          navigator.geolocation.getCurrentPosition(
-            async (position) => {
-              const res = await this.locationStore.fetchByLatLng(
-                position.coords.latitude,
-                position.coords.longitude
-              )
-
-              if ((res.lat || res.lng) && this.$refs.autocomplete) {
-                // Got it - put it in the autocomplete input, and indicate that we've selected it.
-                this.$refs.autocomplete.setValue(res.name)
-                await this.select(res)
-
-                // Show the user we've done this, and make them think.
-                this.showLocated = true
-                setTimeout(() => (this.showLocated = false), 10000)
-              } else {
-                this.locationFailed = true
-              }
-            },
-            (e) => {
-              console.error('Find location failed with', e)
-              this.locationFailed = true
-            }
-          )
-        } else {
-          console.log('Navigation not supported.  ')
-          this.locationFailed = true
-        }
-      } catch (e) {
-        console.error('Find location failed with', e)
-        this.locationFailed = true
-      } finally {
-        this.callbackToCall = null
-        callback()
-      }
-    },
+  variant: {
+    type: String,
+    required: false,
+    default: null,
   },
+})
+
+const emit = defineEmits(['selected', 'cleared'])
+
+const composeStore = useComposeStore()
+const authStore = useAuthStore()
+const locationStore = useLocationStore()
+const runtimeConfig = useRuntimeConfig()
+
+const wip = ref(props.value)
+const results = ref([])
+const locationFailed = ref(false)
+const showLocated = ref(false)
+const callbackToCall = ref(null)
+const autocomplete = ref(null)
+
+// Unique id
+const id = uid('postcode')
+
+const me = authStore.user
+
+if (props.pconly && wip.value === null && me?.settings?.mylocation?.name) {
+  // If we are logged in then we may have a known location to use as the default.
+  wip.value = me?.settings?.mylocation?.name
 }
+
+if (props.pconly && !wip.value && !props.noStore) {
+  // We might have one we are composing.
+  const pc = composeStore.postcode
+
+  if (pc?.name) {
+    wip.value = pc.name
+  }
+}
+
+const source = computed(() => {
+  return runtimeConfig.public.APIv2 + '/location/typeahead'
+})
+
+function invalid() {
+  // Parent might want to know that we don't have a valid postcode any more.
+  emit('cleared')
+  wip.value = null
+  results.value = []
+}
+
+function keydown(e) {
+  if (e.which === 8) {
+    // Backspace means we no longer have a full postcode.
+    invalid()
+  } else {
+    // Hide the tooltip in case it's showing from a use of the find button.
+    showLocated.value = false
+  }
+}
+
+function process(processResults) {
+  const names = []
+  const ret = []
+
+  if (processResults) {
+    for (let i = 0; i < processResults.length && names.length < 5; i++) {
+      const loc = processResults[i]
+
+      if (!names.includes(loc.name)) {
+        names.push(loc.name)
+        ret.push(loc)
+      }
+    }
+  }
+
+  results.value = ret
+  return ret
+}
+
+async function select(pc) {
+  console.log('Select', pc)
+  if (pc) {
+    if (pc.name && !pc.id) {
+      // Find the location this corresponds to.
+      const locs = await locationStore.typeahead(pc.name)
+
+      if (locs?.length) {
+        pc = locs[0]
+      }
+    }
+    emit('selected', pc)
+  } else {
+    emit('cleared')
+  }
+
+  locationFailed.value = false
+}
+
+function findLoc(callback) {
+  callbackToCall.value = callback
+
+  try {
+    if (
+      navigator &&
+      navigator.geolocation &&
+      navigator.geolocation.getCurrentPosition
+    ) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const res = await locationStore.fetchByLatLng(
+            position.coords.latitude,
+            position.coords.longitude
+          )
+
+          if ((res.lat || res.lng) && autocomplete.value) {
+            // Got it - put it in the autocomplete input, and indicate that we've selected it.
+            autocomplete.value.setValue(res.name)
+            await select(res)
+
+            // Show the user we've done this, and make them think.
+            showLocated.value = true
+            setTimeout(() => (showLocated.value = false), 10000)
+          } else {
+            locationFailed.value = true
+          }
+        },
+        (e) => {
+          console.error('Find location failed with', e)
+          locationFailed.value = true
+        }
+      )
+    } else {
+      console.log('Navigation not supported.  ')
+      locationFailed.value = true
+    }
+  } catch (e) {
+    console.error('Find location failed with', e)
+    locationFailed.value = true
+  } finally {
+    callbackToCall.value = null
+    callback()
+  }
+}
+
+onMounted(() => {
+  if (autocomplete.value) {
+    if (props.focus) {
+      // Focus on postcode to grab their attention.
+      autocomplete.value.$refs.input.focus()
+    }
+
+    // We need some fettling of the input keystrokes.
+    const input = autocomplete.value.$refs.input
+    input.addEventListener('keydown', keydown, false)
+  } else {
+    // Not quite sure how this happens, but it does.
+  }
+
+  if (wip.value) {
+    select({
+      name: wip.value,
+    })
+  }
+})
+
+onBeforeUnmount(() => {
+  if (callbackToCall.value) {
+    callbackToCall.value()
+  }
+})
 </script>
 <style scoped lang="scss">
 :deep(.listentry) {

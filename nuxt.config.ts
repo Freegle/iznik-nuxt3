@@ -172,6 +172,7 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',

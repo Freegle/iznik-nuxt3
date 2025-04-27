@@ -151,14 +151,23 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
+import { ref, computed, onMounted, useHead, useRuntimeConfig } from '#imports'
 import { useMessageStore } from '~/stores/message'
+import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
+import { useTimeFormat } from '~/composables/useTimeFormat'
 import MyMessage from '~/components/MyMessage'
-import { ref, onMounted } from '#imports'
+import OurMessage from '~/components/OurMessage'
+import GlobalMessage from '~/components/GlobalMessage'
+import VisibleWhen from '~/components/VisibleWhen'
+import ExternalDa from '~/components/ExternalDa'
+import MicroVolunteering from '~/components/MicroVolunteering'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const messageStore = useMessageStore()
+const authStore = useAuthStore()
+const { dateonlyNoYear } = useTimeFormat()
 
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
@@ -167,6 +176,10 @@ const id = parseInt(route.params.id)
 const showtaken = route.query.showtaken
 
 const failed = ref(false)
+const error = ref(false)
+const mountComplete = ref(false)
+
+const myid = computed(() => authStore.user?.id)
 
 try {
   await messageStore.fetch(id)
@@ -204,7 +217,6 @@ if (message.value) {
 
 // We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
 // contain the reply information correctly.
-const mountComplete = ref(false)
 
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because

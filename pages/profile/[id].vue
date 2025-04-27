@@ -11,40 +11,28 @@
     </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import { ref } from '#imports'
 import { useUserStore } from '~/stores/user'
 import ProfileInfo from '~/components/ProfileInfo'
+import NoticeMessage from '~/components/NoticeMessage'
 
-export default {
-  components: {
-    ProfileInfo,
-  },
-  props: {},
-  async setup(props) {
-    const userStore = useUserStore()
-    const route = useRoute()
-    const id = parseInt(route.params.id)
-    let notFound = false
+const userStore = useUserStore()
+const route = useRoute()
+const id = parseInt(route.params.id)
+const notFound = ref(false)
 
-    if (id) {
-      try {
-        await userStore.fetch(id)
-      } catch (e) {
-        if (e?.response?.status === 404) {
-          console.log('User not found')
-          notFound = true
-        } else {
-          throw e
-        }
-      }
+if (id) {
+  try {
+    await userStore.fetch(id)
+  } catch (e) {
+    if (e?.response?.status === 404) {
+      console.log('User not found')
+      notFound.value = true
+    } else {
+      throw e
     }
-
-    return {
-      id,
-      userStore,
-      notFound,
-    }
-  },
+  }
 }
 </script>

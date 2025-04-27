@@ -99,48 +99,41 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
+import { onMounted } from '#imports'
 
-export default {
-  components: {
-    NoticeMessage,
-    PostMessage,
-    WizardProgress,
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+// Setup
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'OFFER',
-        'OFFER something to people nearby and see who wants it'
-      )
-    )
+// Page head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'OFFER',
+    'OFFER something to people nearby and see who wants it'
+  )
+)
 
-    return await setup('Offer')
-  },
-  mounted() {
-    if (this.$gtm?.enabled()) {
-      this.$gtm.trackEvent({
-        event: 'Give an Item',
-        label: 'YqHzCIHbv7kZELy618UD',
-      })
-    }
-  },
-  methods: {
-    deleteItem,
-    addItem,
-  },
-}
+// Get composition data
+const { me, ids, messageValid, uploadingPhoto, notblank } = await setup('Offer')
+
+// Lifecycle hooks
+onMounted(() => {
+  if (globalThis.$gtm?.enabled()) {
+    globalThis.$gtm.trackEvent({
+      event: 'Give an Item',
+      label: 'YqHzCIHbv7kZELy618UD',
+    })
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

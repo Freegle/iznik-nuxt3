@@ -37,154 +37,144 @@
     <div />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, useRuntimeConfig } from '#imports'
 import AutoComplete from '~/components/AutoComplete'
 import { POSTCODE_REGEX } from '~/constants'
 import { useLocationStore } from '~/stores/location'
 
-export default {
-  components: {
-    AutoComplete,
+defineProps({
+  value: {
+    type: String,
+    required: false,
+    default: null,
   },
-  props: {
-    value: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    labeltext: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    labeltextSr: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'lg',
-    },
+  labeltext: {
+    type: String,
+    required: false,
+    default: null,
   },
-  setup() {
-    const locationStore = useLocationStore()
+  labeltextSr: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'lg',
+  },
+})
 
-    return {
-      locationStore,
+const emit = defineEmits(['selected', 'cleared'])
+
+const locationStore = useLocationStore()
+const runtimeConfig = useRuntimeConfig()
+
+const wip = ref(null)
+const autocomplete = ref(null)
+
+const source = computed(() => {
+  return runtimeConfig.public.GEOCODE
+})
+
+async function postcodeSearch(val) {
+  const ret = []
+
+  if (POSTCODE_REGEX.test(val)) {
+    // We have a probable postcode. We can search for it. This is because our list of postcodes is more
+    // reliable than the Photon geocoder handling of postcodes.
+    const loc = await locationStore.typeahead(val)
+
+    if (loc?.length) {
+      loc.forEach((l) => {
+        const bbox = [
+          [l.lat - 0.01, l.lng - 0.01],
+          [l.lat + 0.01, l.lng + 0.01],
+        ]
+
+        ret.push({
+          id: -l.id,
+          name: l.area?.name ? l.name + ', ' + l.area.name : l.name,
+          lat: l.lat,
+          lng: l.lng,
+          bbox,
+        })
+      })
     }
-  },
-  data() {
-    return {
-      results: [],
-      wip: null,
-    }
-  },
-  computed: {
-    source() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.GEOCODE
-    },
-  },
-  methods: {
-    async postcodeSearch(val) {
-      const ret = []
+  }
 
-      if (POSTCODE_REGEX.test(val)) {
-        // We have a probable postcode.  We can search for it.  This is because our list of postcodes is more
-        // reliable than the Photon geocoder handling of postcodes.
-        const loc = await this.locationStore.typeahead(val)
+  return ret
+}
 
-        if (loc?.length) {
-          loc.forEach((l) => {
-            const bbox = [
-              [l.lat - 0.01, l.lng - 0.01],
-              [l.lat + 0.01, l.lng + 0.01],
-            ]
+function process(processResults) {
+  const ret = []
 
-            ret.push({
-              id: -l.id,
-              name: l.area?.name ? l.name + ', ' + l.area.name : l.name,
-              lat: l.lat,
-              lng: l.lng,
-              bbox,
-            })
+  if (processResults && processResults.features) {
+    const feat = processResults.features.slice(0, 5)
+
+    feat.forEach((f) => {
+      if (f.geometry && f.geometry.coordinates && f.properties) {
+        // We want a bounding box. There may be one in properties.extent.
+        let bbox = null
+
+        if (f.properties.extent) {
+          // There is. That's what we need.
+          bbox = [
+            [f.properties.extent[1], f.properties.extent[0]],
+            [f.properties.extent[3], f.properties.extent[2]],
+          ]
+        } else if (f.geometry.type === 'Point') {
+          // No extent, so make up a bounding box very close to this point. PostMap will zoom out.
+          bbox = [
+            [
+              f.geometry.coordinates[1] - 0.01,
+              f.geometry.coordinates[0] - 0.01,
+            ],
+            [
+              f.geometry.coordinates[1] + 0.01,
+              f.geometry.coordinates[0] + 0.01,
+            ],
+          ]
+        }
+
+        if (bbox) {
+          let str = ''
+
+          // Take the bits we want and make a string.
+          ;['name', 'street', 'suburb', 'hamlet', 'town', 'city'].forEach(
+            (k) => {
+              if (k in f.properties) {
+                if (str === '') {
+                  str = f.properties[k]
+                } else {
+                  str += ', ' + f.properties[k]
+                }
+              }
+            }
+          )
+
+          ret.push({
+            id: f.properties.osm_id,
+            name: str,
+            bbox,
+            lat: f.geometry.coordinates[1],
+            lng: f.geometry.coordinates[0],
           })
         }
       }
+    })
+  }
 
-      return ret
-    },
-    process(results) {
-      const ret = []
+  return ret
+}
 
-      if (results && results.features) {
-        const feat = results.features.slice(0, 5)
-
-        feat.forEach((f) => {
-          if (f.geometry && f.geometry.coordinates && f.properties) {
-            // We want a bounding box.  There may be one in properties.extent.
-            let bbox = null
-
-            if (f.properties.extent) {
-              // There is.  That's what we need.
-              bbox = [
-                [f.properties.extent[1], f.properties.extent[0]],
-                [f.properties.extent[3], f.properties.extent[2]],
-              ]
-            } else if (f.geometry.type === 'Point') {
-              // No extent, so make up a bounding box very close to this point.  PostMap will zoom out.
-              bbox = [
-                [
-                  f.geometry.coordinates[1] - 0.01,
-                  f.geometry.coordinates[0] - 0.01,
-                ],
-                [
-                  f.geometry.coordinates[1] + 0.01,
-                  f.geometry.coordinates[0] + 0.01,
-                ],
-              ]
-            }
-
-            if (bbox) {
-              let str = ''
-
-              // Take the bits we want and make a string.
-              ;['name', 'street', 'suburb', 'hamlet', 'town', 'city'].forEach(
-                (k) => {
-                  if (k in f.properties) {
-                    if (str === '') {
-                      str = f.properties[k]
-                    } else {
-                      str += ', ' + f.properties[k]
-                    }
-                  }
-                }
-              )
-
-              ret.push({
-                id: f.properties.osm_id,
-                name: str,
-                bbox,
-                lat: f.geometry.coordinates[1],
-                lng: f.geometry.coordinates[0],
-              })
-            }
-          }
-        })
-      }
-
-      return ret
-    },
-    select(place) {
-      if (place) {
-        this.$emit('selected', place)
-      } else {
-        this.$emit('cleared')
-      }
-    },
-  },
+function select(place) {
+  if (place) {
+    emit('selected', place)
+  } else {
+    emit('cleared')
+  }
 }
 </script>
 <style scoped lang="scss">

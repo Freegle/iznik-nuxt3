@@ -42,7 +42,7 @@
     <div class="mt-2 d-flex justify-content-between">
       <NewsLoveComment
         :newsfeed="newsfeed"
-        @focus-comment="$emit('focus-comment')"
+        @focus-comment="emit('focus-comment')"
       />
       <div class="d-flex flex-wrap">
         <ChatButton
@@ -87,40 +87,69 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import ChatButton from './ChatButton'
+import { twem } from '~/composables/useTwem'
+import { URL_REGEX } from '~/constants'
 import ReadMore from '~/components/ReadMore'
-import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
-
 import NewsLoveComment from '~/components/NewsLoveComment'
-import { useMiscStore } from '~/stores/misc'
+import OurUploadedImage from '~/components/OurUploadedImage'
+
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
 
-export default {
-  components: {
-    ChatButton,
-    NewsShareModal,
-    NewsUserIntro,
-    NewsLoveComment,
-    ReadMore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
-  computed: {
-    width() {
-      const miscStore = useMiscStore()
+})
 
-      if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
-        // Full width image.
-        return process.server ? 400 : window.innerHeight
-      } else {
-        // 400px width image.
-        return 400
-      }
-    },
-  },
+const emit = defineEmits(['focus-comment'])
+
+const newsfeedStore = useNewsfeedStore()
+
+// Data properties
+const showNewsPhotoModal = ref(false)
+const showNewsShareModal = ref(false)
+
+// Computed properties
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
+
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
+
+const emessage = computed(() => {
+  let ret = newsfeed.value?.message ? twem(newsfeed.value.message) : null
+
+  if (ret) {
+    // Remove leading spaces/tabs.
+    let regExp = /^[\t ]+/gm
+    ret = ret.replace(regExp, '')
+
+    // Remove duplicate blank lines.
+    const EOL = ret.match(/\r\n/gm) ? '\r\n' : '\n'
+    regExp = new RegExp('(' + EOL + '){3,}', 'gm')
+    ret = ret.replace(regExp, EOL + EOL)
+  }
+
+  if (newsfeed.value?.type === 'Alert') {
+    // Make links clickable.
+    ret = ret.replace(URL_REGEX, '<a href="$1" target="_blank">$1</a>')
+  }
+
+  return ret
+})
+
+function share() {
+  showNewsShareModal.value = true
 }
 </script>
 <style scoped lang="scss">

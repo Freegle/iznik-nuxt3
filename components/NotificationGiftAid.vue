@@ -1,5 +1,5 @@
 <template>
-  <div class="clickme d-flex">
+  <div class="clickme d-flex" @click="goto">
     <div class="d-flex flex-column justify-content-around">
       <ProfileImage
         image="/icon.png"
@@ -18,28 +18,29 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { useRouter } from 'vue-router'
 import { setupNotification } from '../composables/useNotification'
+import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  components: {},
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
-  methods: {
-    goto() {
-      if (!this.notification?.seen) {
-        this.notificationStore.seen(this.id)
-      }
+})
 
-      this.$router.push('/giftaid')
-    },
-  },
+const router = useRouter()
+
+// Setup notification
+const { notification, notificationStore, notificationago } =
+  await setupNotification(props.id)
+
+function goto() {
+  if (!notification.value?.seen) {
+    notificationStore.seen(props.id)
+  }
+
+  router.push('/giftaid')
 }
 </script>

@@ -47,66 +47,54 @@
     </div>
   </client-only>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 import NoticeMessage from './NoticeMessage'
+import { ref, watch, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
 
-export default {
-  components: {
-    NoticeMessage,
-    SupportLink,
-  },
-  data() {
-    return {
-      showError: false,
-      showReload: false,
-      snoozeReload: false,
-      snoozeTimer: null,
-    }
-  },
-  computed: {
-    ...mapState(useMiscStore, [
-      'somethingWentWrong',
-      'needToReload',
-      'offline',
-      'unloading',
-    ]),
-  },
-  watch: {
-    somethingWentWrong(newVal) {
-      if (newVal) {
-        this.showError = true
-        setTimeout(() => {
-          this.showError = false
-        }, 10000)
-      }
-    },
-    needToReload(newVal) {
-      if (newVal) {
-        this.showReload = true
-      }
-    },
-  },
-  beforeUnmount() {
-    if (this.snoozeTimer) {
-      clearTimeout(this.snoozeTimer)
-    }
-  },
-  methods: {
-    reload() {
-      window.location.reload()
-    },
-    snooze() {
-      this.snoozeReload = true
+const showError = ref(false)
+const showReload = ref(false)
+const snoozeReload = ref(false)
+const snoozeTimer = ref(null)
 
-      this.snoozeTimer = setTimeout(() => {
-        this.snoozeReload = false
-      }, 120000)
-    },
-  },
+const miscStore = useMiscStore()
+const { somethingWentWrong, needToReload, offline, unloading } =
+  storeToRefs(miscStore)
+
+watch(somethingWentWrong, (newVal) => {
+  if (newVal) {
+    showError.value = true
+    setTimeout(() => {
+      showError.value = false
+    }, 10000)
+  }
+})
+
+watch(needToReload, (newVal) => {
+  if (newVal) {
+    showReload.value = true
+  }
+})
+
+function reload() {
+  window.location.reload()
 }
+
+function snooze() {
+  snoozeReload.value = true
+
+  snoozeTimer.value = setTimeout(() => {
+    snoozeReload.value = false
+  }, 120000)
+}
+
+onBeforeUnmount(() => {
+  if (snoozeTimer.value) {
+    clearTimeout(snoozeTimer.value)
+  }
+})
 </script>
 <style scoped lang="scss">
 .posit {

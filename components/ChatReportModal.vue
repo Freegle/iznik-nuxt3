@@ -26,58 +26,37 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useChatStore } from '../stores/chat'
 import GroupSelect from './GroupSelect'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: {
-    GroupSelect,
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    chatid: {
-      type: Number,
-      required: true,
-    },
+  chatid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const chatStore = useChatStore()
+})
 
-    const { modal, hide } = useOurModal()
+const chatStore = useChatStore()
+const { modal, hide } = useOurModal()
 
-    return {
-      chatStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      groupid: null,
-      reason: null,
-      comments: null,
-    }
-  },
-  methods: {
-    async send() {
-      if (this.groupid && this.reason && this.comments) {
-        const chatid = await this.chatStore.openChatToMods(this.groupid)
+const groupid = ref(null)
+const reason = ref(null)
+const comments = ref(null)
 
-        await this.chatStore.report(
-          chatid,
-          this.reason,
-          this.comments,
-          this.chatid
-        )
+async function send() {
+  if (groupid.value && reason.value && comments.value) {
+    const chatid = await chatStore.openChatToMods(groupid.value)
 
-        this.hide()
-      }
-    },
-  },
+    await chatStore.report(chatid, reason.value, comments.value, props.chatid)
+
+    hide()
+  }
 }
 </script>

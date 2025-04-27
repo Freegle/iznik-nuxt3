@@ -27,33 +27,25 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useShortlinkStore } from '../stores/shortlinks'
 import ExternalLink from './ExternalLink'
 
-export default {
-  components: { ExternalLink },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    nostats: {
-      type: Boolean,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const shortlinkStore = useShortlinkStore()
+  nostats: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-    return {
-      shortlinkStore,
-    }
-  },
-  computed: {
-    shortlink() {
-      return this.shortlinkStore.byId(this.id)
-    },
-  },
-}
+const shortlinkStore = useShortlinkStore()
+
+const shortlink = computed(() => {
+  return shortlinkStore.byId(props.id)
+})
 </script>

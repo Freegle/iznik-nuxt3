@@ -4,17 +4,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'NoticeMessage',
-  props: {
-    variant: {
-      type: String,
-      required: false,
-      default: 'info',
-    },
+<script setup>
+defineProps({
+  variant: {
+    type: String,
+    required: false,
+    default: 'info',
   },
-}
+})
 </script>
 
 <style scoped lang="scss">

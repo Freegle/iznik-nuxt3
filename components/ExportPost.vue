@@ -20,23 +20,18 @@
     <vue-json-pretty v-if="showJSON" :data="post" class="bg-white" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import VueJsonPretty from 'vue-json-pretty'
+import { useTimeFormat } from '~/composables/useTimeFormat'
 
-export default {
-  components: {
-    VueJsonPretty,
+defineProps({
+  post: {
+    type: Object,
+    required: true,
   },
-  props: {
-    post: {
-      type: Object,
-      required: true,
-    },
-  },
-  data: function () {
-    return {
-      showJSON: false,
-    }
-  },
-}
+})
+
+const { dateonly } = useTimeFormat()
+const showJSON = ref(false)
 </script>

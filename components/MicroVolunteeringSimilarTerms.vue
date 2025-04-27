@@ -38,43 +38,44 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import MicroVolunteeringSimilarTerm from '~/components/MicroVolunteeringSimilarTerm'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 
-export default {
-  components: { MicroVolunteeringSimilarTerm },
-  props: {
-    terms: {
-      type: Array,
-      required: true,
-    },
+defineProps({
+  terms: {
+    type: Array,
+    required: true,
   },
-  data() {
-    return {
-      similarTerms: [],
-    }
-  },
-  methods: {
-    considerNext() {
-      this.$emit('next')
-    },
-    similar(term) {
-      if (this.similarTerms.length < 2) {
-        this.similarTerms.push(term)
-      }
-    },
-    notSimilar(term) {
-      this.similarTerms = this.similarTerms.filter((t) => t.id !== term.id)
-    },
-    submitSimilar() {
-      this.microVolunteeringStore.respond({
-        searchterm1: this.similarTerms[0].id,
-        searchterm2: this.similarTerms[1].id,
-      })
+})
 
-      this.$emit('next')
-    },
-  },
+const emit = defineEmits(['next'])
+
+const microVolunteeringStore = useMicroVolunteeringStore()
+const similarTerms = ref([])
+
+function considerNext() {
+  emit('next')
+}
+
+function similar(term) {
+  if (similarTerms.value.length < 2) {
+    similarTerms.value.push(term)
+  }
+}
+
+function notSimilar(term) {
+  similarTerms.value = similarTerms.value.filter((t) => t.id !== term.id)
+}
+
+function submitSimilar() {
+  microVolunteeringStore.respond({
+    searchterm1: similarTerms.value[0].id,
+    searchterm2: similarTerms.value[1].id,
+  })
+
+  emit('next')
 }
 </script>
 <style scoped lang="scss">

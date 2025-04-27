@@ -61,7 +61,7 @@
         >
           <template #button-content>
             <ProfileImage
-              v-if="me.profile.path"
+              v-if="me?.profile?.path"
               :image="me.profile.path"
               class="m-0 inline"
               is-thumbnail
@@ -225,6 +225,7 @@ import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 
 const {
   online,
@@ -315,6 +316,8 @@ const navBarBottomHidden = computed(() => {
     navBarHidden.value
   )
 })
+
+const loggedIn = computed(() => useAuthStore().user !== null)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';

@@ -212,6 +212,7 @@ export function useNavbar() {
   const maybeReload = (route) => {
     if (router?.currentRoute?.value?.path === route) {
       // We have clicked to route to the page we're already on.  Force a full refresh.
+      console.log('maybeReload - reload')
       window.location.reload(true)
     }
   }

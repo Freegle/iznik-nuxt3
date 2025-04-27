@@ -8,13 +8,13 @@
     />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    url: {
-      type: String,
-      required: true,
-    },
+<script setup>
+defineProps({
+  url: {
+    type: String,
+    required: true,
   },
-}
+})
+
+defineEmits(['done'])
 </script>

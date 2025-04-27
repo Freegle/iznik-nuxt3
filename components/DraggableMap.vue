@@ -34,182 +34,178 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeMount, nextTick } from 'vue'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
-import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
+import {
+  attribution as getAttribution,
+  osmtile as getOsmTile,
+  loadLeaflet,
+} from '../composables/useMap'
 import SpinButton from './SpinButton'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useRuntimeConfig } from '#app'
 
-export default {
-  components: { SpinButton },
-  props: {
-    initialZoom: {
-      type: Number,
-      required: false,
-      default: 5,
-    },
-    maxZoom: {
-      type: Number,
-      required: false,
-      default: MAX_MAP_ZOOM,
-    },
+const props = defineProps({
+  initialZoom: {
+    type: Number,
+    required: false,
+    default: 5,
   },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const serviceUrl = runtimeConfig.public.GEOCODE
+  maxZoom: {
+    type: Number,
+    required: false,
+    default: MAX_MAP_ZOOM,
+  },
+})
 
-    let L = null
+// Elements refs
+const map = ref(null)
+const mapcont = ref(null)
 
-    if (process.client) {
-      L = await import('leaflet/dist/leaflet-src.esm')
-    }
+// State refs
+const locationFailed = ref(false)
+const mapObject = ref(null)
+const center = ref([53.945, -2.5209])
 
-    return {
-      L,
-      osmtile: osmtile(),
-      attribution: attribution(),
-      serviceUrl,
-    }
-  },
-  data() {
-    return {
-      locating: false,
-      locationFailed: false,
-      mapObject: null,
-      center: [53.945, -2.5209],
-      zoom: 14,
-    }
-  },
-  computed: {
-    mapWidth() {
-      const contWidth = this.$refs.mapcont?.$el.clientWidth
-      return contWidth
-    },
-    mapHeight() {
-      let height = 0
+function getCenter() {
+  return center.value
+}
 
-      if (process.client) {
-        height = Math.floor(window.innerHeight / 2)
-        height = height < 200 ? 200 : height
-      }
+// Expose getCenter method for component use
+defineExpose({
+  getCenter,
+})
 
-      return height
-    },
-  },
-  async mounted() {
-    await loadLeaflet()
-  },
-  created() {
-    this.zoom = this.initialZoom
-  },
-  methods: {
-    getCenter() {
-      return this.center
-    },
-    findLoc(callback) {
-      try {
-        if (
-          navigator &&
-          navigator.geolocation &&
-          navigator.geolocation.getCurrentPosition
-        ) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              // Show close to where we think they are.
-              this.mapObject.flyTo(
-                [position.coords.latitude, position.coords.longitude],
-                16
-              )
-              callback()
-            },
-            () => {
-              this.locationFailed = true
-              callback()
-            }
+const zoom = ref(14)
+
+// Setup
+const runtimeConfig = useRuntimeConfig()
+const serviceUrl = runtimeConfig.public.GEOCODE
+const osmtile = getOsmTile()
+const attribution = getAttribution()
+
+if (process.client) {
+  await import('leaflet/dist/leaflet-src.esm')
+}
+
+// Computed properties
+const mapWidth = computed(() => {
+  return mapcont.value?.$el.clientWidth
+})
+
+const mapHeight = computed(() => {
+  let height = 0
+
+  if (process.client) {
+    height = Math.floor(window.innerHeight / 2)
+    height = height < 200 ? 200 : height
+  }
+
+  return height
+})
+
+// Lifecycle hooks
+onBeforeMount(() => {
+  zoom.value = props.initialZoom
+})
+
+onMounted(async () => {
+  await loadLeaflet()
+})
+
+function findLoc(callback) {
+  try {
+    if (
+      navigator &&
+      navigator.geolocation &&
+      navigator.geolocation.getCurrentPosition
+    ) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Show close to where we think they are.
+          mapObject.value.flyTo(
+            [position.coords.latitude, position.coords.longitude],
+            16
           )
-        } else {
-          console.log('Navigation not supported.  ')
-          this.locationFailed = true
+          callback()
+        },
+        () => {
+          locationFailed.value = true
           callback()
         }
-      } catch (e) {
-        console.error('Find location failed with', e)
-        this.locationFailed = true
-        callback()
-      }
-    },
-    idle() {
-      this.center = this.mapObject.getCenter()
-    },
-    async ready() {
-      const self = this
+      )
+    } else {
+      console.log('Navigation not supported.  ')
+      locationFailed.value = true
+      callback()
+    }
+  } catch (e) {
+    console.error('Find location failed with', e)
+    locationFailed.value = true
+    callback()
+  }
+}
 
-      if (process.client) {
-        this.mapObject = this.$refs.map.leafletObject
+function idle() {
+  center.value = mapObject.value.getCenter()
+}
 
-        const { Geocoder } = await import(
-          'leaflet-control-geocoder/src/control'
-        )
-        const { Photon } = await import(
-          'leaflet-control-geocoder/src/geocoders/photon'
-        )
+async function ready() {
+  if (process.client) {
+    mapObject.value = map.value.leafletObject
 
-        new Geocoder({
-          placeholder: 'Search for a place...',
-          defaultMarkGeocode: false,
-          geocoder: new Photon({
-            geocodingQueryParams: {
-              bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-            },
-            nameProperties: [
-              'name',
-              'street',
-              'suburb',
-              'hamlet',
-              'town',
-              'city',
-            ],
-            serviceUrl: this.serviceUrl,
-          }),
-          collapsed: false,
-        })
-          .on('markgeocode', function (e) {
-            if (e && e.geocode && e.geocode.bbox) {
-              const bbox = e.geocode.bbox
+    const { Geocoder } = await import('leaflet-control-geocoder/src/control')
+    const { Photon } = await import(
+      'leaflet-control-geocoder/src/geocoders/photon'
+    )
 
-              const sw = bbox.getSouthWest()
-              const ne = bbox.getNorthEast()
-              console.log('BBOX', bbox, sw, ne)
+    new Geocoder({
+      placeholder: 'Search for a place...',
+      defaultMarkGeocode: false,
+      geocoder: new Photon({
+        geocodingQueryParams: {
+          bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+        },
+        nameProperties: ['name', 'street', 'suburb', 'hamlet', 'town', 'city'],
+        serviceUrl,
+      }),
+      collapsed: false,
+    })
+      .on('markgeocode', function (e) {
+        if (e && e.geocode && e.geocode.bbox) {
+          const bbox = e.geocode.bbox
 
-              const bounds = new window.L.LatLngBounds([
-                [sw.lat, sw.lng],
-                [ne.lat, ne.lng],
-              ]).pad(0.1)
+          const sw = bbox.getSouthWest()
+          const ne = bbox.getNorthEast()
+          console.log('BBOX', bbox, sw, ne)
 
-              // For reasons I don't understand, leaflet throws errors if we don't make these local here.
-              const swlat = bounds.getSouthWest().lat
-              const swlng = bounds.getSouthWest().lng
-              const nelat = bounds.getNorthEast().lat
-              const nelng = bounds.getNorthEast().lng
+          const bounds = new window.L.LatLngBounds([
+            [sw.lat, sw.lng],
+            [ne.lat, ne.lng],
+          ]).pad(0.1)
 
-              // Empty out the query box so that the dropdown closes.
-              this.setQuery('')
-              this.zoom = 14
+          // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+          const swlat = bounds.getSouthWest().lat
+          const swlng = bounds.getSouthWest().lng
+          const nelat = bounds.getNorthEast().lat
+          const nelng = bounds.getNorthEast().lng
 
-              self.$nextTick(() => {
-                // Move the map to the location we've found.
-                console.log('Fly to', swlat, swlng, nelat, nelng)
-                self.mapObject.flyToBounds([
-                  [swlat, swlng],
-                  [nelat, nelng],
-                ])
-              })
-            }
+          // Empty out the query box so that the dropdown closes.
+          this.setQuery('')
+          zoom.value = 14
+
+          nextTick(() => {
+            // Move the map to the location we've found.
+            console.log('Fly to', swlat, swlng, nelat, nelng)
+            mapObject.value.flyToBounds([
+              [swlat, swlng],
+              [nelat, nelng],
+            ])
           })
-          .addTo(this.mapObject)
-      }
-    },
-  },
+        }
+      })
+      .addTo(mapObject.value)
+  }
 }
 </script>

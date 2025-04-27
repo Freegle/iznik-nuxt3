@@ -106,108 +106,121 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
 import dayjs from 'dayjs'
-import { defineAsyncComponent } from 'vue'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
+import { timeago } from '~/composables/useTimeFormat'
 import ProfileImage from '~/components/ProfileImage'
 import NewsLoveComment from '~/components/NewsLoveComment'
-import NewsBase from '~/components/NewsBase'
+import OurUploadedImage from '~/components/OurUploadedImage'
+
 const CommunityEventModal = defineAsyncComponent(() =>
   import('~/components/CommunityEventModal')
 )
 
-export default {
-  components: {
-    NewsLoveComment,
-    CommunityEventModal,
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
-  async setup(props, ctx) {
-    const communityEventStore = useCommunityEventStore()
-    const newsfeedStore = useNewsfeedStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
+})
 
-    const newsfeed = newsfeedStore.byId(props.id)
-    await userStore.fetch(newsfeed.userid)
+const emit = defineEmits(['focus-comment', 'hide'])
 
-    try {
-      const event = await communityEventStore.fetch(newsfeed.eventid)
+const communityEventStore = useCommunityEventStore()
+const newsfeedStore = useNewsfeedStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
 
-      await event.groups.forEach(async (groupid) => {
-        await groupStore.fetch(groupid)
-      })
-    } catch (e) {
-      // Most likely doesn't exist.
-      ctx.emit('hide')
-    }
+const showAddEvent = ref(false)
+const showMoreInfo = ref(false)
 
-    return {
-      communityEventStore,
-      newsfeedStore,
-      userStore,
-      groupStore,
-    }
-  },
-  data: function () {
-    return {
-      showAddEvent: false,
-      showMoreInfo: false,
-    }
-  },
-  computed: {
-    event() {
-      return this.communityEventStore?.byId(this.newsfeed.eventid)
-    },
-    date() {
-      // Similar code to CommunityEvent
-      let ret = null
-      const dates = this.event.dates
-      let count = 0
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
 
-      if (dates) {
-        for (let i = 0; i < dates.length; i++) {
-          const date = dates[i]
-          const start = date.start + ' ' + date.starttime
-          const end = date.end + ' ' + date.endtime
-          if (dayjs(start).diff(end) < 0 || dayjs(start).isSame(end, 'day')) {
-            if (count === 0) {
-              const startm = dayjs(start)
-              let endm = dayjs(end)
-              endm = endm.isSame(startm, 'day')
-                ? endm.format('HH:mm')
-                : endm.format('ddd, Do MMM HH:mm')
-              ret = {
-                start: startm.format('ddd, Do MMM HH:mm'),
-                end: endm,
-              }
-            }
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
 
-            count++
+const user = computed(() => {
+  return userStore.byId(userid.value)
+})
+
+const event = computed(() => {
+  return communityEventStore?.byId(newsfeed.value.eventid)
+})
+
+const date = computed(() => {
+  // Similar code to CommunityEvent
+  let ret = null
+  const dates = event.value?.dates
+  let count = 0
+
+  if (dates) {
+    for (let i = 0; i < dates.length; i++) {
+      const date = dates[i]
+      const start = date.start + ' ' + date.starttime
+      const end = date.end + ' ' + date.endtime
+      if (dayjs(start).diff(end) < 0 || dayjs(start).isSame(end, 'day')) {
+        if (count === 0) {
+          const startm = dayjs(start)
+          let endm = dayjs(end)
+          endm = endm.isSame(startm, 'day')
+            ? endm.format('HH:mm')
+            : endm.format('ddd, Do MMM HH:mm')
+          ret = {
+            start: startm.format('ddd, Do MMM HH:mm'),
+            end: endm,
           }
         }
-      }
 
-      return ret
-    },
-  },
-  methods: {
-    moreInfo() {
-      this.showMoreInfo = true
-    },
-    addEvent() {
-      this.showAddEvent = true
-    },
-    group(groupid) {
-      return this.groupStore?.get(groupid)
-    },
-  },
+        count++
+      }
+    }
+  }
+
+  return ret
+})
+
+const addedago = computed(() => {
+  return timeago(newsfeed.value?.added)
+})
+
+function moreInfo() {
+  showMoreInfo.value = true
 }
+
+function addEvent() {
+  showAddEvent.value = true
+}
+
+function group(groupid) {
+  return groupStore?.get(groupid)
+}
+
+// Initialize data
+const initialize = async () => {
+  try {
+    await userStore.fetch(newsfeed.value.userid)
+    const currentEvent = await communityEventStore.fetch(newsfeed.value.eventid)
+
+    // Fetch group information for each group
+    for (const groupid of currentEvent.groups) {
+      await groupStore.fetch(groupid)
+    }
+  } catch (e) {
+    // Most likely doesn't exist.
+    emit('hide')
+  }
+}
+
+// Run initialization
+initialize()
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

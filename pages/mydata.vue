@@ -819,10 +819,18 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
 import ShowMore from '../components/ShowMore'
 import { useAuthStore } from '../stores/auth'
+import {
+  ref,
+  computed,
+  onMounted,
+  defineAsyncComponent,
+  useRuntimeConfig,
+  useMe,
+} from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 
 const NoticeMessage = defineAsyncComponent(() =>
@@ -837,108 +845,102 @@ const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
 
-export default {
-  components: {
-    ShowMore,
-    NoticeMessage,
-    ExportPost,
-    ExportChat,
-    UserRatings,
-    ProfileImage,
-    ExternalLink,
-  },
-  setup() {
-    const authStore = useAuthStore()
+const authStore = useAuthStore()
+const { me } = useMe()
+const mod = computed(() => me?.value?.isModerator)
+const runtimeConfig = useRuntimeConfig()
 
-    return {
-      authStore,
-    }
-  },
-  data: function () {
-    return {
-      status: null,
-      id: null,
-      tag: null,
-      error: false,
-      started: false,
-    }
-  },
-  computed: {
-    downloadlink() {
-      const runtimeConfig = useRuntimeConfig()
+const status = ref(null)
+const id = ref(null)
+const tag = ref(null)
+const error = ref(false)
+const started = ref(false)
 
-      return (
-        runtimeConfig.public.APIv1 +
-        '/export?id=' +
-        this.id +
-        '&tag=' +
-        this.tag +
-        '&persistent=' +
-        JSON.stringify(this.authStore?.auth?.persistent)
-      )
-    },
-  },
-  async mounted() {
-    try {
-      const runtimeConfig = useRuntimeConfig()
+const downloadlink = computed(() => {
+  return (
+    runtimeConfig.public.APIv1 +
+    '/export?id=' +
+    id.value +
+    '&tag=' +
+    tag.value +
+    '&persistent=' +
+    JSON.stringify(authStore?.auth?.persistent)
+  )
+})
 
-      const rsp = await fetch(runtimeConfig.public.APIv1 + '/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization:
-            'Iznik ' + JSON.stringify(this.authStore.auth?.persistent),
-        },
-        body: JSON.stringify({
-          dup: Date.now(),
-        }),
-      })
-      const ret = await rsp.json()
-      console.log('Fetch status', ret)
-      this.id = ret.id
-      this.tag = ret.tag
-      this.started = true
-      setTimeout(this.checkStatus, 3000)
-    } catch (e) {
-      this.error = true
-    }
-  },
-  methods: {
-    periodPlural(val) {
-      pluralize('hour', val, true)
-    },
-    async checkStatus() {
-      console.log('Check status')
-      const runtimeConfig = useRuntimeConfig()
-
-      try {
-        const rsp = await fetch(
-          runtimeConfig.public.APIv1 +
-            '/export?' +
-            new URLSearchParams({
-              id: this.id,
-              tag: this.tag,
-            }),
-          {
-            headers: {
-              Authorization:
-                'Iznik ' + JSON.stringify(this.authStore.auth?.persistent),
-            },
-          }
-        )
-
-        const ret = await rsp.json()
-        this.status = ret.export
-
-        if (!this.status.completed) {
-          // Not done yet.
-          setTimeout(this.checkStatus, 3000)
-        }
-      } catch (e) {
-        console.log('Error', e)
-        this.error = true
-      }
-    },
-  },
+function periodPlural(val) {
+  return pluralize('hour', val, true)
 }
+
+async function checkStatus() {
+  console.log('Check status')
+
+  try {
+    const rsp = await fetch(
+      runtimeConfig.public.APIv1 +
+        '/export?' +
+        new URLSearchParams({
+          id: id.value,
+          tag: tag.value,
+        }),
+      {
+        headers: {
+          Authorization: 'Iznik ' + JSON.stringify(authStore.auth?.persistent),
+        },
+      }
+    )
+
+    const ret = await rsp.json()
+    status.value = ret.export
+
+    if (!status.value.completed) {
+      // Not done yet.
+      setTimeout(checkStatus, 3000)
+    }
+  } catch (e) {
+    console.log('Error', e)
+    error.value = true
+  }
+}
+
+function dateonly(timestamp) {
+  if (!timestamp) {
+    return null
+  }
+
+  const date = new Date(timestamp)
+  return date.toLocaleDateString()
+}
+
+function datetime(timestamp) {
+  if (!timestamp) {
+    return null
+  }
+
+  const date = new Date(timestamp)
+  return date.toLocaleString()
+}
+
+onMounted(async () => {
+  try {
+    const rsp = await fetch(runtimeConfig.public.APIv1 + '/export', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Iznik ' + JSON.stringify(authStore.auth?.persistent),
+      },
+      body: JSON.stringify({
+        dup: Date.now(),
+      }),
+    })
+    const ret = await rsp.json()
+    console.log('Fetch status', ret)
+    id.value = ret.id
+    tag.value = ret.tag
+    started.value = true
+    setTimeout(checkStatus, 3000)
+  } catch (e) {
+    error.value = true
+  }
+})
 </script>

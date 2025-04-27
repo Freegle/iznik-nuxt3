@@ -3,38 +3,36 @@
     <b-img lazy :src="photo.path" fluid :class="rotatingClass" />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    photo: {
-      type: Object,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      rotate: 0,
-    }
-  },
-  computed: {
-    rotatingClass() {
-      return 'square clickme rotate' + this.rotate
-    },
-  },
-  created() {
-    this.rotate = this.photo.rotate
-  },
-  methods: {
-    rotateIt() {
-      this.rotate += 90
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue'
 
-      if (this.rotate > 270) {
-        this.rotate = 0
-      }
-
-      this.$emit('rotate', this.rotate)
-    },
+const props = defineProps({
+  photo: {
+    type: Object,
+    required: true,
   },
+})
+
+const emit = defineEmits(['rotate'])
+
+const rotate = ref(0)
+
+const rotatingClass = computed(() => {
+  return 'square clickme rotate' + rotate.value
+})
+
+onBeforeMount(() => {
+  rotate.value = props.photo.rotate
+})
+
+function rotateIt() {
+  rotate.value += 90
+
+  if (rotate.value > 270) {
+    rotate.value = 0
+  }
+
+  emit('rotate', rotate.value)
 }
 </script>
 <style scoped lang="scss">

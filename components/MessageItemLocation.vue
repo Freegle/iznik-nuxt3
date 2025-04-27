@@ -47,82 +47,81 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import Highlighter from 'vue-highlight-words'
+import { computed } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 
-export default {
-  components: { Highlighter },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    matchedon: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    expanded: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showLocation: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
+  matchedon: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    subject() {
-      return this.message ? this.message.subject : null
-    },
-    item() {
-      let ret = this.subject
-
-      if (this.subject) {
-        const matches = /(.*?):([^)].*)\((.*)\)/.exec(this.subject)
-
-        if (matches && matches.length > 0 && matches[2].length > 0) {
-          ret = matches[2]
-        }
-      }
-
-      return ret ? twem(ret) : 'unknown'
-    },
-    location() {
-      let ret = null
-
-      if (this.subject) {
-        const matches = /(.*?):([^)].*)\((.*)\)/.exec(this.subject)
-
-        if (matches && matches.length > 0 && matches[3].length > 0) {
-          ret = matches[3]
-        }
-      }
-
-      return ret ? twem(ret) : null
-    },
+  type: {
+    type: String,
+    required: false,
+    default: null,
   },
-  methods: {
-    block(e) {
-      e.preventDefault()
-    },
+  expanded: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+  showLocation: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+})
+
+const messageStore = useMessageStore()
+
+// Computed properties
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const subject = computed(() => {
+  return message.value ? message.value.subject : null
+})
+
+const item = computed(() => {
+  let ret = subject.value
+
+  if (subject.value) {
+    const matches = /(.*?):([^)].*)\((.*)\)/.exec(subject.value)
+
+    if (matches && matches.length > 0 && matches[2].length > 0) {
+      ret = matches[2]
+    }
+  }
+
+  return ret ? twem(ret) : 'unknown'
+})
+
+const location = computed(() => {
+  let ret = null
+
+  if (subject.value) {
+    const matches = /(.*?):([^)].*)\((.*)\)/.exec(subject.value)
+
+    if (matches && matches.length > 0 && matches[3].length > 0) {
+      ret = matches[3]
+    }
+  }
+
+  return ret ? twem(ret) : null
+})
+
+// Methods
+const block = (e) => {
+  e.preventDefault()
 }
 </script>
 <style scoped lang="scss">

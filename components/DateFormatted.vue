@@ -3,7 +3,7 @@
     {{ formatted }}
   </span>
 </template>
-<script>
+<script setup>
 import {
   dateonly,
   datetime,
@@ -13,48 +13,45 @@ import {
   dateonlyNoYear,
 } from '../composables/useTimeFormat'
 
-export default {
-  props: {
-    value: {
-      type: String,
-      required: true,
-    },
-    format: {
-      type: String,
-      required: false,
-      default: 'datetime',
-    },
+const props = defineProps({
+  value: {
+    type: String,
+    required: true,
   },
-  computed: {
-    formatted() {
-      let ret = null
-
-      switch (this.format) {
-        case 'dateonly':
-          ret = dateonly(this.value)
-          break
-        case 'dateonlyNoYear':
-          ret = dateonlyNoYear(this.value)
-          break
-        case 'dateshort':
-          ret = dateshort(this.value)
-          break
-        case 'datetime':
-          ret = datetime(this.value)
-          break
-        case 'datetimeshort':
-          ret = datetimeshort(this.value)
-          break
-        case 'weekdaytime':
-          ret = weekdayshort(this.value)
-          break
-        default:
-          ret = datetime(this.value)
-          break
-      }
-
-      return ret
-    },
+  format: {
+    type: String,
+    required: false,
+    default: 'datetime',
   },
-}
+})
+
+const formatted = computed(() => {
+  let ret = null
+
+  switch (props.format) {
+    case 'dateonly':
+      ret = dateonly(props.value)
+      break
+    case 'dateonlyNoYear':
+      ret = dateonlyNoYear(props.value)
+      break
+    case 'dateshort':
+      ret = dateshort(props.value)
+      break
+    case 'datetime':
+      ret = datetime(props.value)
+      break
+    case 'datetimeshort':
+      ret = datetimeshort(props.value)
+      break
+    case 'weekdaytime':
+      ret = weekdayshort(props.value)
+      break
+    default:
+      ret = datetime(props.value)
+      break
+  }
+
+  return ret
+})
 </script>

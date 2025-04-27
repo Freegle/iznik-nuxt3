@@ -22,78 +22,70 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { useMessageStore } from '../stores/message'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    summary: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
+  summary: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      messageStore,
-    }
-  },
-  data: function () {
-    return {
-      scrollHandler: null,
-      showing: false,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    title() {
-      let ret = null
+const messageStore = useMessageStore()
+const { myid } = useMe()
 
-      if (this.message.type === 'Offer') {
-        ret = 'Yay, someone took it!'
-      } else {
-        ret = 'Hurray, they got what they were looking for!'
-      }
+let scrollHandler = null
+const showing = ref(false)
 
-      ret += " Don't forget to Mark your posts as TAKEN/RECEIVED from My Posts."
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
 
-      return ret
-    },
-  },
-  beforeUnmount() {
-    if (this.scrollHandler) {
-      window.removeEventListener('scroll', this.scrollHandler)
-      this.scrollHandler = null
-    }
-  },
-  methods: {
-    shown() {
-      if (!this.scrollHandler) {
-        this.scrollHandler = window.addEventListener(
-          'scroll',
-          this.handleScroll
-        )
-      }
-    },
-    hidden() {
-      if (this.scrollHandler) {
-        window.removeEventListener('scroll', this.scrollHandler)
-        this.scrollHandler = null
-      }
-    },
-    handleScroll() {
-      this.showing = false
-    },
-  },
+const title = computed(() => {
+  let ret = null
+
+  if (message.value.type === 'Offer') {
+    ret = 'Yay, someone took it!'
+  } else {
+    ret = 'Hurray, they got what they were looking for!'
+  }
+
+  ret += " Don't forget to Mark your posts as TAKEN/RECEIVED from My Posts."
+
+  return ret
+})
+
+function shown() {
+  if (!scrollHandler) {
+    scrollHandler = window.addEventListener('scroll', handleScroll)
+  }
 }
+
+function hidden() {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', handleScroll)
+    scrollHandler = null
+  }
+}
+
+function handleScroll() {
+  showing.value = false
+}
+
+onBeforeUnmount(() => {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', scrollHandler)
+    scrollHandler = null
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';

@@ -4,17 +4,8 @@ import api from '~/api'
 export const useMiscStore = defineStore({
   id: 'misc',
   persist: {
-    enabled: true,
-    strategies:
-      typeof localStorage === 'undefined'
-        ? []
-        : [
-            // These are sticky preferences.
-            {
-              storage: localStorage,
-              paths: ['vals', 'source'],
-            },
-          ],
+    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    pick: ['vals', 'source'],
   },
   state: () => ({
     time: null,

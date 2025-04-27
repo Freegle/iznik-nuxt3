@@ -218,27 +218,23 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'
 
-export default {
-  components: { ExternalLink },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+// Setup page head
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Privacy',
-        'What data we keep and how we protect it'
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Privacy',
+    'What data we keep and how we protect it'
+  )
+)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

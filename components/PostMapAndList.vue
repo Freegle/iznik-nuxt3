@@ -122,12 +122,9 @@
     </div>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
-import { defineAsyncComponent } from 'vue'
+<script setup>
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { useGroupStore } from '../stores/group'
-import { useMessageStore } from '../stores/message'
-import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { getDistance } from '~/composables/useMap'
@@ -140,420 +137,394 @@ const AdaptiveMapGroup = defineAsyncComponent(() => import('./MapGroup'))
 const ExternalLink = defineAsyncComponent(() => import('./ExternalLink'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const GiveAsk = defineAsyncComponent(() => import('./GiveAsk'))
+const PostMap = defineAsyncComponent(() => import('~/components/PostMap'))
 
-export default {
-  components: {
-    GiveAsk,
-    MessageList,
-    JoinWithConfirm,
-    NoticeMessage,
-    ExternalLink,
-    AdaptiveMapGroup,
-    PostMap: defineAsyncComponent(() => import('~/components/PostMap')),
+const props = defineProps({
+  initialBounds: {
+    type: Array,
+    required: true,
   },
-  props: {
-    initialBounds: {
-      type: Array,
-      required: true,
-    },
-    startOnGroups: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    forceMessages: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    initialGroupIds: {
-      type: Array,
-      required: false,
-      default() {
-        return []
-      },
-    },
-    region: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    showStartMessage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    jobs: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    minZoom: {
-      type: Number,
-      required: false,
-      default: 5,
-    },
-    maxZoom: {
-      type: Number,
-      required: false,
-      default: MAX_MAP_ZOOM,
-    },
-    showMany: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    canHide: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    search: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    selectedType: {
-      type: String,
-      required: false,
-      default: 'All',
-    },
-    selectedGroup: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    selectedSort: {
-      type: String,
-      required: false,
-      default: 'Unseen',
-    },
-    showClosestGroups: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    isochroneOverride: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    authorityid: {
-      type: Number,
-      required: false,
-      default: null,
+  startOnGroups: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  forceMessages: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  initialGroupIds: {
+    type: Array,
+    required: false,
+    default() {
+      return []
     },
   },
-  setup(props) {
-    console.log('PostMapSetup')
-    const miscStore = useMiscStore()
-    const groupStore = useGroupStore()
-    const messageStore = useMessageStore()
-    const authStore = useAuthStore()
-    const isochroneStore = useIsochroneStore()
+  region: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  showStartMessage: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  jobs: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  minZoom: {
+    type: Number,
+    required: false,
+    default: 5,
+  },
+  maxZoom: {
+    type: Number,
+    required: false,
+    default: MAX_MAP_ZOOM,
+  },
+  showMany: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  canHide: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  search: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  selectedType: {
+    type: String,
+    required: false,
+    default: 'All',
+  },
+  selectedGroup: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  selectedSort: {
+    type: String,
+    required: false,
+    default: 'Unseen',
+  },
+  showClosestGroups: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  isochroneOverride: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  authorityid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
 
-    return {
-      miscStore,
-      groupStore,
-      messageStore,
-      authStore,
-      isochroneStore,
-      showGroups: ref(props.startOnGroups),
-      groupids: ref(props.initialGroupIds),
-      swlat: ref(props.initialBounds[0][0]),
-      swlng: ref(props.initialBounds[0][1]),
-      nelat: props.initialBounds[1][0],
-      nelng: props.initialBounds[1][1],
+const emit = defineEmits([
+  'update:selectedGroup',
+  'update:messagesOnMapCount',
+  'idle',
+])
+
+// Store instances
+const miscStore = useMiscStore()
+const groupStore = useGroupStore()
+const authStore = useAuthStore()
+const isochroneStore = useIsochroneStore()
+const me = computed(() => authStore.user)
+
+// Refs from setup
+const showGroups = ref(props.startOnGroups)
+const groupids = ref(props.initialGroupIds)
+
+// Data properties
+const heightFraction = ref(4)
+const loading = ref(false)
+const bounds = ref(null)
+const zoom = ref(null)
+const centre = ref(null)
+const mapready = ref(process.server)
+const mapVisible = ref(true)
+const postsVisible = ref(true)
+const mapMoved = ref(false)
+const updatedMessagesOnMap = ref(null)
+const firstSeenMessage = ref(null)
+const infiniteId = ref(+new Date())
+const noneFound = ref(false)
+
+// Computed properties
+const showIsochrones = computed(() => {
+  if (props.isochroneOverride) {
+    return true
+  } else {
+    return browseView.value === 'nearby'
+  }
+})
+
+const mapHidden = computed(() => {
+  return miscStore?.get('hidepostmap')
+})
+
+const browseView = computed(() => {
+  return me.value?.settings?.browseView
+    ? me.value.settings.browseView
+    : 'nearby'
+})
+
+const messagesOnMap = computed({
+  get() {
+    if (updatedMessagesOnMap.value !== null) {
+      // We have been told by the map to show a specific set of messages.
+      return updatedMessagesOnMap.value
+    } else {
+      // See if we have some from the isochrone, which we will have fetched in browse/index.
+      return isochroneStore?.messageList ?? []
     }
   },
-  data() {
-    return {
-      // Map stuff
-      heightFraction: 4,
-      postcode: null,
-      loading: false,
-      lat: null,
-      lng: null,
-      bounds: null,
-      zoom: null,
-      centre: null,
-      mapready: process.server,
-      mapVisible: true,
-      postsVisible: true,
-      joinVisible: false,
-      mapMoved: false,
-      updatedMessagesOnMap: null,
-      firstSeenMessage: null,
-
-      infiniteId: +new Date(),
-
-      context: null,
-      noneFound: false,
-    }
+  set(newVal) {
+    updatedMessagesOnMap.value = newVal
   },
-  computed: {
-    ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
-    showIsochrones() {
-      if (this.isochroneOverride) {
-        return true
-      } else {
-        return this.browseView === 'nearby'
+})
+
+const regions = computed(() => {
+  const regions = []
+
+  try {
+    const allGroups = groupStore?.list
+
+    for (const ix in allGroups) {
+      const group = allGroups[ix]
+
+      if (group.region && !regions.includes(group.region)) {
+        regions.push(group.region)
       }
-    },
-    mapHidden() {
-      return this.miscStore?.get('hidepostmap')
-    },
-    browseView() {
-      return this?.me?.settings?.browseView
-        ? this.me.settings.browseView
-        : 'nearby'
-    },
-    messagesOnMap: {
-      get() {
-        if (this.updatedMessagesOnMap !== null) {
-          // We have been told by the map to show a specific set of messages.
-          return this.updatedMessagesOnMap
+    }
+
+    regions.sort()
+  } catch (e) {
+    console.error('Exception', e)
+  }
+
+  return regions
+})
+
+const messagesForList = computed(() => {
+  let msgs = []
+
+  msgs = sortedMessagesOnMap.value
+
+  if (props.selectedGroup) {
+    msgs = msgs.filter((m) => m.groupid === props.selectedGroup)
+  }
+
+  return msgs
+})
+
+const filteredMessages = computed(() => {
+  let ret = []
+
+  if (!props.search) {
+    ret = messagesForList.value
+  } else {
+    // We are searching.
+    const messages = messagesForList.value
+
+    messages.forEach((message) => {
+      if (message) {
+        // Pass whether the message has been freegled, which in this case is returned as the outcomes in the
+        // message.
+        let successful = false
+
+        if (message.outcomes && message.outcomes.length) {
+          for (const outcome of message.outcomes) {
+            if (outcome.outcome === 'Taken' || outcome.outcome === 'Received') {
+              successful = true
+            }
+          }
+        }
+
+        message.successful = successful
+
+        if (
+          !message.deleted &&
+          (!message.outcomes || message.outcomes.length === 0)
+        ) {
+          ret.push(message)
+        }
+      }
+    })
+  }
+
+  return ret
+})
+
+const sortedMessagesOnMap = computed(() => {
+  if (messagesOnMap.value) {
+    return messagesOnMap.value.slice().sort((a, b) => {
+      if (props.selectedSort === 'Unseen') {
+        // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
+        // unseen otherwise they bob up to the top.
+        const aunseen = a.unseen && !a.successful
+        const bunseen = b.unseen && !b.successful
+
+        if (aunseen && !bunseen) {
+          return -1
+        } else if (!aunseen && bunseen) {
+          return 1
         } else {
-          // See if we have some from the isochrone, which we will have fetched in browse/index.
-          return this.isochroneStore?.messageList ?? []
+          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
         }
-      },
-      set(newVal) {
-        this.updatedMessagesOnMap = newVal
-      },
-    },
-    regions() {
-      const regions = []
-
-      try {
-        const allGroups = this.groupStore?.list
-
-        for (const ix in allGroups) {
-          const group = allGroups[ix]
-
-          if (group.region && !regions.includes(group.region)) {
-            regions.push(group.region)
-          }
-        }
-
-        regions.sort()
-      } catch (e) {
-        console.error('Exception', e)
-      }
-
-      return regions
-    },
-    messagesForList() {
-      let msgs = []
-
-      msgs = this.sortedMessagesOnMap
-
-      if (this.selectedGroup) {
-        msgs = msgs.filter((m) => m.groupid === this.selectedGroup)
-      }
-
-      return msgs
-    },
-    filteredMessages() {
-      let ret = []
-
-      if (!this.search) {
-        ret = this.messagesForList
       } else {
-        // We are searching.
-        const messages = this.messagesForList
-
-        messages.forEach((message) => {
-          if (message) {
-            // Pass whether the message has been freegled, which in this case is returned as the outcomes in the
-            // message.
-            let successful = false
-
-            if (message.outcomes && message.outcomes.length) {
-              for (const outcome of message.outcomes) {
-                if (
-                  outcome.outcome === 'Taken' ||
-                  outcome.outcome === 'Received'
-                ) {
-                  successful = true
-                }
-              }
-            }
-
-            message.successful = successful
-
-            if (
-              !message.deleted &&
-              (!message.outcomes || message.outcomes.length === 0)
-            ) {
-              ret.push(message)
-            }
-          }
-        })
+        // Descending date/time.
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
       }
+    })
+  } else {
+    return []
+  }
+})
 
-      return ret
-    },
-    sortedMessagesOnMap() {
-      if (this.messagesOnMap) {
-        return this.messagesOnMap.slice().sort((a, b) => {
-          if (this.selectedSort === 'Unseen') {
-            // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
-            // unseen otherwise they bob up to the top.
-            const aunseen = a.unseen && !a.successful
-            const bunseen = b.unseen && !b.successful
+const showRegions = computed(() => {
+  // We want to show the regions if we're zoomed out, or for SSR = SEO.
+  return process.server || zoom.value < 7
+})
 
-            if (aunseen && !bunseen) {
-              return -1
-            } else if (!aunseen && bunseen) {
-              return 1
-            } else {
-              return (
-                new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+const showGroupList = computed(() => {
+  // We want to show the list of groups for SSR = SEO, or if we are not showing the regions (because we're
+  // zoomed out)
+  return process.server || !showRegions.value
+})
+
+const closestGroups = computed(() => {
+  const ret = []
+  const distances = {}
+
+  if (centre.value) {
+    const allGroups = groupStore.list
+
+    for (const ix in allGroups) {
+      const group = allGroups[ix]
+
+      if (group) {
+        // See if the group is showing in the map area.
+        if (
+          bounds.value.contains([group.lat, group.lng]) ||
+          ((group.altlat || group.altlng) &&
+            bounds.value.contains([group.altlat, group.altlng]))
+        ) {
+          // Are we already a member?
+          const member = authStore.member(group.id)
+
+          if (!member) {
+            // Visible group?
+            if (group.onmap && group.publish) {
+              // How far away?
+              distances[group.id] = getDistance(
+                [centre.value.lat, centre.value.lng],
+                [group.lat, group.lng]
               )
-            }
-          } else {
-            // Descending date/time.
-            return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-          }
-        })
-      } else {
-        return []
-      }
-    },
-    showRegions() {
-      // We want to show the regions if we're zoomed out, or for SSR = SEO.
-      return process.server || this.zoom < 7
-    },
-    showGroupList() {
-      // We want to show the list of groups for SSR = SEO, or if we are not showing the regions (because we're
-      // zoomed out)
-      return process.server || !this.showRegions
-    },
-    closestGroups() {
-      const ret = []
-      const distances = {}
 
-      if (this.centre) {
-        const allGroups = this.groupStore.list
+              // Allowed to show?
+              if (
+                !group.showjoin ||
+                distances[group.id] <= group.showjoin * 1609.34
+              ) {
+                ret.push(group)
+              } else if (group.altlat || group.altlng) {
+                // A few groups have two centres because they are large.
+                distances[group.id] = getDistance(
+                  [centre.value.lat, centre.value.lng],
+                  [group.altlat, group.altlng]
+                )
 
-        for (const ix in allGroups) {
-          const group = allGroups[ix]
-
-          if (group) {
-            // See if the group is showing in the map area.
-            if (
-              this.bounds.contains([group.lat, group.lng]) ||
-              ((group.altlat || group.altlng) &&
-                this.bounds.contains([group.altlat, group.altlng]))
-            ) {
-              // Are we already a member?
-              const member = this.authStore.member(group.id)
-
-              if (!member) {
-                // Visible group?
-                if (group.onmap && group.publish) {
-                  // How far away?
-                  distances[group.id] = getDistance(
-                    [this.centre.lat, this.centre.lng],
-                    [group.lat, group.lng]
-                  )
-
-                  // Allowed to show?
-                  if (
-                    !group.showjoin ||
-                    distances[group.id] <= group.showjoin * 1609.34
-                  ) {
-                    ret.push(group)
-                  } else if (group.altlat || group.altlng) {
-                    // A few groups have two centres because they are large.
-                    distances[group.id] = getDistance(
-                      [this.centre.lat, this.centre.lng],
-                      [group.altlat, group.altlng]
-                    )
-
-                    if (distances[group.id] <= group.showjoin * 1609.34) {
-                      ret.push(group)
-                    }
-                  }
+                if (distances[group.id] <= group.showjoin * 1609.34) {
+                  ret.push(group)
                 }
               }
             }
           }
         }
-
-        ret.sort((a, b) => {
-          return distances[a.id] - distances[b.id]
-        })
       }
+    }
 
-      return ret.slice(0, 3)
-    },
-  },
-  watch: {
-    filteredMessages: {
-      handler(newVal) {
-        // We want to save the first message we have seen so that we show a message when we have scrolled down to it.
-        // We want that message to stay there until the page is reloaded, even as we read the messages and the seen
-        // state of the messages changes.
-        if (this.firstSeenMessage === null) {
-          for (const message of newVal) {
-            if (!message.unseen) {
-              this.firstSeenMessage = message.id
-              break
-            }
-          }
+    ret.sort((a, b) => {
+      return distances[a.id] - distances[b.id]
+    })
+  }
+
+  return ret.slice(0, 3)
+})
+
+// Watchers
+watch(
+  filteredMessages,
+  (newVal) => {
+    // We want to save the first message we have seen so that we show a message when we have scrolled down to it.
+    // We want that message to stay there until the page is reloaded, even as we read the messages and the seen
+    // state of the messages changes.
+    if (firstSeenMessage.value === null) {
+      for (const message of newVal) {
+        if (!message.unseen) {
+          firstSeenMessage.value = message.id
+          break
         }
-
-        this.infiniteId++
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    messagesChanged(messages) {
-      if (messages) {
-        let changed = false
-
-        if (!messages || !this.messagesOnMap) {
-          changed = true
-        } else {
-          const oldids = this.messagesOnMap.map((m) => m.id)
-          const newids = messages.map((m) => m.id)
-
-          if (JSON.stringify(oldids) !== JSON.stringify(newids)) {
-            changed = true
-          }
-        }
-
-        if (changed) {
-          this.messagesOnMap = messages
-          this.infiniteId++
-        }
-
-        this.$emit('update:messagesOnMapCount', this.messagesOnMap.length)
       }
-    },
-    groupsChanged(groupids) {
-      this.groupids = groupids
-    },
-    mapVisibilityChanged(visible) {
-      this.mapVisible = visible
-    },
-    wantMessage(m) {
-      return (
-        (this.selectedType === 'All' || this.selectedType === m.type) &&
-        (!this.selectedGroup ||
-          parseInt(m.groupid) === parseInt(this.selectedGroup)) &&
-        // Make the item filter also work to filter out the successful posts.
-        (this.selectedType === 'All' || !m.successful)
-      )
-    },
-    searched() {
-      // When we've searched on a place, we want to reset the selected group otherwise we won't show anything.
-      this.$emit('update:selectedGroup', 0)
-    },
+    }
+
+    infiniteId.value++
   },
+  { immediate: true }
+)
+
+// Methods
+function messagesChanged(messages) {
+  if (messages) {
+    let changed = false
+
+    if (!messages || !messagesOnMap.value) {
+      changed = true
+    } else {
+      const oldids = messagesOnMap.value.map((m) => m.id)
+      const newids = messages.map((m) => m.id)
+
+      if (JSON.stringify(oldids) !== JSON.stringify(newids)) {
+        changed = true
+      }
+    }
+
+    if (changed) {
+      messagesOnMap.value = messages
+      infiniteId.value++
+    }
+
+    emit('update:messagesOnMapCount', messagesOnMap.value.length)
+  }
+}
+
+function groupsChanged(groupidsParam) {
+  groupids.value = groupidsParam
+}
+
+function mapVisibilityChanged(visible) {
+  mapVisible.value = visible
+}
+
+function searched() {
+  // When we've searched on a place, we want to reset the selected group otherwise we won't show anything.
+  emit('update:selectedGroup', 0)
 }
 </script>
 <style scoped lang="scss">

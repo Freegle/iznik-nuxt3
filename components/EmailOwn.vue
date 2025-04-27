@@ -21,30 +21,23 @@
     </b-button>
   </div>
 </template>
-<script>
+<script setup>
 import { useAuthStore } from '~/stores/auth'
 
-export default {
-  props: {
-    email: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  email: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const authStore = useAuthStore()
+})
 
-    return {
-      authStore,
-    }
-  },
-  methods: {
-    async deleteIt() {
-      await this.authStore.removeEmail(this.email.email)
-    },
-    async makePrimary() {
-      await this.authStore.makeEmailPrimary(this.email.email)
-    },
-  },
+const authStore = useAuthStore()
+
+async function deleteIt() {
+  await authStore.removeEmail(props.email.email)
+}
+
+async function makePrimary() {
+  await authStore.makeEmailPrimary(props.email.email)
 }
 </script>

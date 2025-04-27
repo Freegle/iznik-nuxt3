@@ -136,7 +136,6 @@ watch(
   currentAtts,
   (newVal) => {
     try {
-      console.log('Current atts changed', props.id, newVal)
       composeStore.setAttachmentsForMessage(props.id, newVal)
 
       // const message = composeStore.message(props.id)

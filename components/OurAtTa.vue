@@ -8,6 +8,7 @@
 <script setup>
 // We use script setup because of https://github.com/nuxt/nuxt/issues/19964.  We put this into a subcomponent so that
 // we don't have to rework the other components which use it into script setup.
+import { computed } from 'vue'
 import 'floating-vue/dist/style.css'
 import { Mentionable } from 'vue-mention'
 

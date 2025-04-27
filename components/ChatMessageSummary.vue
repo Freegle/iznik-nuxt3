@@ -66,12 +66,15 @@
     </div>
   </div>
 </template>
-<script>
-// Need to import rather than async otherwise the render doesn't happen and ref isn't set.
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '../stores/group'
 import { useChatStore } from '../stores/chat'
-import { useMiscStore } from '~/stores/misc'
+import { useRouter } from '#imports'
+import { useAuthStore } from '~/stores/auth'
+import OurUploadedImage from '~/components/OurUploadedImage'
+import ProxyImage from '~/components/ProxyImage'
 
 const MessageHistory = defineAsyncComponent(() =>
   import('~/components/MessageHistory')
@@ -80,94 +83,80 @@ const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
 )
 
-export default {
-  components: {
-    MessageHistory,
-    NoticeMessage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    chatid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+  chatid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  async setup(props) {
-    const miscStore = useMiscStore()
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
+})
 
-    // Fetch the message info.
-    try {
-      await messageStore.fetch(props.id)
+const messageStore = useMessageStore()
+const groupStore = useGroupStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
-      const message = messageStore.byId(props.id)
+const imageBroken = ref(false)
+const myid = authStore.user?.id
 
-      if (message) {
-        message.groups.forEach(async (g) => {
-          await groupStore.fetch(g.groupid)
-        })
+// Fetch the message info.
+try {
+  await messageStore.fetch(props.id)
+
+  const message = messageStore.byId(props.id)
+
+  if (message) {
+    message.groups.forEach(async (g) => {
+      await groupStore.fetch(g.groupid)
+    })
+  }
+} catch (e) {
+  console.log('Message fetch failed', props.id, e)
+}
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const attachment = computed(() => {
+  return message.value?.attachments?.length
+    ? message.value.attachments[0]
+    : null
+})
+
+const chat = computed(() => {
+  const chatStore = useChatStore()
+  return props.chatid ? chatStore?.byChatId(props.chatid) : null
+})
+
+const promisedToThem = computed(() => {
+  let ret = false
+
+  if (message.value?.promises) {
+    for (const p of message.value?.promises) {
+      if (chat.value?.otheruid === p.userid) {
+        ret = true
       }
-    } catch (e) {
-      console.log('Message fetch failed', props.id, e)
     }
+  }
 
-    return {
-      miscStore,
-      messageStore,
-    }
-  },
-  data() {
-    return {
-      imageBroken: false,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    attachment() {
-      return this.message?.attachments?.length
-        ? this.message.attachments[0]
-        : null
-    },
-    sm() {
-      return this.miscStore?.breakpoint === 'sm'
-    },
-    chat() {
-      const chatStore = useChatStore()
-      return this.chatid ? chatStore?.byChatId(this.chatid) : null
-    },
-    promisedToThem() {
-      let ret = false
+  return ret
+})
 
-      if (this.message?.promises) {
-        for (const p of this.message?.promises) {
-          if (this.chat?.otheruid === p.userid) {
-            ret = true
-          }
-        }
-      }
+function brokenImage() {
+  imageBroken.value = true
+}
 
-      return ret
-    },
-  },
-  methods: {
-    brokenImage() {
-      this.imageBroken = true
-    },
-    click() {
-      if (this.myid && this.message.fromuser === this.myid) {
-        this.$router.push('/mypost/' + this.id)
-      } else {
-        this.$router.push('/message/' + this.id)
-      }
-    },
-  },
+function click() {
+  if (myid && message.value.fromuser === myid) {
+    router.push('/mypost/' + props.id)
+  } else {
+    router.push('/message/' + props.id)
+  }
 }
 </script>
 <style scoped lang="scss">

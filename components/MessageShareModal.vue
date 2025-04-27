@@ -100,69 +100,55 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 
-export default {
-  components: { NoticeMessage },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    maybe: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup() {
-    const messageStore = useMessageStore()
+  maybe: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    const { modal, hide } = useOurModal()
+const messageStore = useMessageStore()
+const { modal, hide } = useOurModal()
+const copied = ref(false)
+const bump = ref(0)
 
-    try {
-      await messageStore.fetch(this.id, true)
-    } catch (e) {
-      // Must no longer exist on server.
-      hide()
-    }
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline case
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+onMounted(async () => {
+  try {
+    await messageStore.fetch(props.id, true)
+  } catch (e) {
+    // Must no longer exist on server.
+    hide()
+  }
+})
 
-    return {
-      messageStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      copied: false,
-      bump: 0,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-  methods: {
-    async doCopy() {
-      await navigator.clipboard.writeText(this.message.url)
-      this.copied = true
-    },
-    opened() {
-      this.bump++
-    },
-  },
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+async function doCopy() {
+  await navigator.clipboard.writeText(message.value.url)
+  copied.value = true
+}
+
+function opened() {
+  bump.value++
 }
 </script>
 <style scoped lang="scss">
