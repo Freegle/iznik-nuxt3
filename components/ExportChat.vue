@@ -29,7 +29,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useTimeFormat } from '~/composables/useTimeFormat'
+import { dateonly } from '~/composables/useTimeFormat'
 
 defineProps({
   chat: {
@@ -38,6 +38,5 @@ defineProps({
   },
 })
 
-const { dateonly } = useTimeFormat()
 const showMessages = ref(false)
 </script>

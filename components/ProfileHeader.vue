@@ -62,7 +62,7 @@ import ProfileImage from '~/components/ProfileImage'
 import ChatButton from '~/components/ChatButton'
 import UserRatings from '~/components/UserRatings'
 import { useAuthStore } from '~/stores/auth'
-import { useTimeFormat } from '~/composables/useTimeFormat'
+import { dateonly } from '~/composables/useTimeFormat'
 
 const props = defineProps({
   id: {
@@ -81,7 +81,6 @@ const emit = defineEmits(['close'])
 const userStore = useUserStore()
 const authStore = useAuthStore()
 const myid = authStore.user?.id
-const { dateonly } = useTimeFormat()
 
 const user = computed(() => {
   return props.id ? userStore?.byId(props.id) : null

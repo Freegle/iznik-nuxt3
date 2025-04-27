@@ -23,7 +23,7 @@
 <script setup>
 import { ref } from 'vue'
 import VueJsonPretty from 'vue-json-pretty'
-import { useTimeFormat } from '~/composables/useTimeFormat'
+import { dateonly } from '~/composables/useTimeFormat'
 
 defineProps({
   post: {
@@ -32,6 +32,5 @@ defineProps({
   },
 })
 
-const { dateonly } = useTimeFormat()
 const showJSON = ref(false)
 </script>

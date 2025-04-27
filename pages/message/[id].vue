@@ -155,7 +155,7 @@ import { ref, computed, onMounted, useHead, useRuntimeConfig } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
-import { useTimeFormat } from '~/composables/useTimeFormat'
+import { dateonlyNoYear } from '~/composables/useTimeFormat'
 import MyMessage from '~/components/MyMessage'
 import OurMessage from '~/components/OurMessage'
 import GlobalMessage from '~/components/GlobalMessage'
@@ -167,7 +167,6 @@ const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const messageStore = useMessageStore()
 const authStore = useAuthStore()
-const { dateonlyNoYear } = useTimeFormat()
 
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
