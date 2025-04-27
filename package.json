@@ -8,7 +8,7 @@
     "postinstall": "patch-package",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.vue .",
     "lint-staged": "./run-lint-on-changed.sh",
-    "prepare": "./setup-hooks.sh",
+    "prepare": "chmod +x ./setup-hooks.sh;./setup-hooks.sh",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
