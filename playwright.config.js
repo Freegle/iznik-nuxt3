@@ -17,7 +17,7 @@ module.exports = defineConfig({
   use: {
     // Allow overriding the base URL via TEST_BASE_URL environment variable
     // Default to the development server if not specified
-    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3002',
+    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
     // Capture trace on retry (and first failure)
     trace: 'on-first-retry',
     // Always capture screenshots on failure

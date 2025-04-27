@@ -212,10 +212,10 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 ### CircleCI Environment Variables
 - `API_V1_URL` - API V1 URL (defaults to https://fdapilive.ilovefreegle.org/api)
 - `API_V2_URL` - API V2 URL (defaults to https://api.ilovefreegle.org/apiv2)
-- `TEST_URL` - URL for testing (defaults to http://localhost:3002)
-- `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 60)
+- `TEST_BASE_URL` - URL for testing (defaults to http://localhost:3002)
 - `TEST_POSTCODE` - Postcode to use for location-based tests (defaults to EH3 6SS)
 - `TEST_PLACE` - Place name to use for location-based tests (defaults to Edinburgh)
+- `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 60)
 
 ## Commenting Guidelines
 - Code should be self-documenting with clear naming
