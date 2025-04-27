@@ -140,6 +140,7 @@ const message = computed(() => messageStore?.byId(props.id))
 const classes = computed(() => {
   const ret = {
     messagecard: true,
+    'test-message-card': true,
     'pb-0': true,
     freegled: message.value?.successful && props.showFreegled,
     offer: message.value?.type === 'Offer',

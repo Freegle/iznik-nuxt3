@@ -1,9 +1,11 @@
 <template>
-  <div class="d-flex flex-column justify-content-between">
+  <div
+    class="d-flex flex-column justify-content-between ps-4 h-100 test-freegler-photos"
+  >
     <div class="flex-grow-1">
       <client-only fallback-tag="div">
         <BCarousel
-          class="carousel"
+          class="carousel test-photos-carousel"
           background="/landingpage/frame.png"
           ride="carousel"
           fade
@@ -14,13 +16,14 @@
               20, 21, 22, 23, 24, 25,
             ]"
             :key="'slide-' + img"
+            class="test-photo-slide"
           >
             <template #img>
               <div class="layout">
                 <ProxyImage
                   loading="lazy"
                   src="/landingpage/frame.png"
-                  class-name="frame"
+                  class-name="frame test-photo-frame"
                   alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
                   sizes="1px sm:576px md:768px"
                 />
@@ -28,10 +31,10 @@
                   loading="lazy"
                   :src="photo(img)"
                   alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
-                  class-name="image"
+                  class-name="image test-freegler-image"
                   sizes="1px sm:576px md:768px"
                 />
-                <p class="text-center text--smallest credit">
+                <p class="text-center text--smallest credit test-photo-credit">
                   Photos of real freeglers, kindly taken by
                   <ExternalLink href="https://www.alexbamford.com/"
                     >Alex Bamford</ExternalLink
@@ -46,7 +49,7 @@
             <ProxyImage
               preload
               src="/landingpage/frame.png"
-              class-name="frame"
+              class-name="frame test-photo-frame"
               alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
               sizes="1px sm:576px md:768px"
             />
@@ -54,10 +57,10 @@
               preload
               :src="photo(1)"
               alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
-              class-name="image"
+              class-name="image test-freegler-image"
               sizes="1px sm:576px md:768px"
             />
-            <p class="text-center text--smallest credit">
+            <p class="text-center text--smallest credit test-photo-credit">
               Photos of real freeglers, kindly taken by
               <ExternalLink href="https://www.alexbamford.com/"
                 >Alex Bamford</ExternalLink

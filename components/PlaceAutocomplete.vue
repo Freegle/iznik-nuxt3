@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="test-place-autocomplete">
     <label for="placeautocomplete" class="smaller font-weight-bold mb-1">
       <span v-if="labeltextSr" class="visually-hidden">
         {{ labeltextSr }}
@@ -21,9 +21,10 @@
       label=""
       placeholder="Type your location"
       :classes="{
-        input: 'form-control form-control-' + size + ' text-center',
-        list: 'locationlist',
-        listentry: 'w-100 listentry',
+        input:
+          'form-control form-control-' + size + ' text-center test-place-input',
+        list: 'locationlist test-place-suggestions',
+        listentry: 'w-100 listentry test-place-suggestion-item',
         listentrylist: 'listentrylist',
       }"
       :min="3"

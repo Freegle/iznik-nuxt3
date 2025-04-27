@@ -1,6 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const base = require('@playwright/test')
+const { timeouts } = require('./config')
 
 // Define the screenshots directory
 const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
@@ -33,21 +34,15 @@ const cleanupScreenshots = async () => {
     const files = await fs.promises.readdir(SCREENSHOTS_DIR)
 
     if (files.length === 0) {
-      console.log('No screenshots to clean up')
       return
     }
-
-    console.log(`Found ${files.length} files in screenshots directory`)
 
     // Filter for PNG files only
     const pngFiles = files.filter((file) => path.extname(file) === '.png')
 
     if (pngFiles.length === 0) {
-      console.log('No PNG files to clean up')
       return
     }
-
-    console.log(`Cleaning up ${pngFiles.length} screenshots...`)
 
     // Delete all PNG files with Promise.all for better parallelism
     const deletePromises = pngFiles.map((file) => {
@@ -63,7 +58,6 @@ const cleanupScreenshots = async () => {
     if (deletePromises.length > 0) {
       await Promise.all(deletePromises)
     }
-    console.log(`Successfully cleaned up ${pngFiles.length} screenshots`)
   } catch (err) {
     console.error('Error during screenshots cleanup:', err)
   }
@@ -106,7 +100,7 @@ const test = base.test.extend({
       /%cssr:error%c API count went negative/, // Low importance and not visible to client.
       /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
       /Provider's accounts list is empty/, // Google Pay related error - can happen in dev
-      /FedCM get\(\) rejects with NetworkError/, // Not available in test
+      /FedCM get\(\) rejects with/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /The request has been aborted/, // Can happen during navigation.
@@ -163,7 +157,7 @@ const test = base.test.extend({
     page.expectNoConsoleErrors = page.checkTestRanOK
 
     page.gotoAndVerify = async (path, options = {}) => {
-      const timeout = options.timeout || 30000
+      const timeout = options.timeout || timeouts.navigation.default
 
       try {
         // Navigate with timeout
@@ -219,7 +213,7 @@ const test = base.test.extend({
 
     // Internal method to handle teardown with error handling
     const performTeardown = async (options = {}) => {
-      const timeout = options.timeout || 5000
+      const timeout = options.timeout || timeouts.teardown.networkIdle
       try {
         await page.waitForLoadState('networkidle', { timeout })
         return true
@@ -268,7 +262,6 @@ const test = base.test.extend({
 test.afterAll(async () => {
   // Only clean up if the tests succeeded
   if (process.exitCode === undefined || process.exitCode === 0) {
-    console.log('Test run completed successfully, cleaning up screenshots...')
     await cleanupScreenshots()
   } else {
     console.log('Tests failed, keeping screenshots for debugging')

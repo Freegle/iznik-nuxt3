@@ -79,6 +79,12 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 
 ### Playwright Test Structure
 - Use the custom fixtures from `fixtures.js` for consistent behavior
+- IMPORTANT: Use the configuration from `config.js` for test parameters like timeouts, selectors, and breakpoints
+- Never use hardcoded timeout values - always use the constants from the config file
+- Timeouts are categorized (navigation, ui, api, teardown, assertion) in the config for clear intent
+- Timeouts are automatically extended by 50% in CI environments
+- Default timeouts are generous to accommodate slower CI environments and reduce flakiness
+- Selectors should be defined in the config file and referenced in tests
 - Navigation and verification should use `page.gotoAndVerify(path, options)` 
 - `gotoAndVerify` automatically checks for error pages, detecting both "Something went wrong" and 404 "page doesn't exist" errors
 - Console errors are automatically checked at the end of each test
@@ -93,7 +99,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Screenshots are automatically cleaned up after successful test runs
 - Failed test screenshots are preserved for debugging
 - Use `npm run test:clean` to remove all screenshots manually
-- Automatic teardown waits for network idle after each test (5s timeout)
+- Automatic teardown waits for network idle after each test (timeout from config)
 - Manual teardown available with `page.waitForTeardown(options)` when needed
 - For testing multiple pages, use parameterized tests with arrays of page data
 - Focus on testing public pages that don't require authentication
@@ -101,6 +107,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - No need for explicit console error checks, try-catch blocks, or screenshot capture
 - Code should be self-documenting with clear method and variable names
 - Test files should be concise and free of explanatory comments
+- When adding new timeouts or selectors, add them to the appropriate section in `config.js`
 
 ### Playwright Best Practices
 - WSL users: Run `sudo npx playwright install-deps` to install system dependencies

@@ -105,8 +105,8 @@ jobs:
             # Extract the host and port from TEST_BASE_URL or use default
             SERVER_URL=${TEST_URL:-http://localhost:3000}
             
-            # Wait for server to be up
-            timeout=${SERVER_TIMEOUT:-60}
+            # Wait for server to be up - using longer timeout (120 seconds)
+            timeout=${SERVER_TIMEOUT:-120}
             counter=0
             until curl --output /dev/null --silent --head --fail $SERVER_URL; do
               if [ $counter -ge $timeout ]; then

@@ -4,33 +4,12 @@
  */
 
 const { test, expect } = require('./fixtures')
-
-// Environment variables with defaults for location testing - set via CircleCI environment variables
-const TEST_POSTCODE = process.env.TEST_POSTCODE || 'EH3 6SS'
-const TEST_PLACE = process.env.TEST_PLACE || 'Edinburgh'
-
-/**
- * Bootstrap breakpoints:
- * - xs: < 576px
- * - sm: ≥ 576px and < 768px
- * - md: ≥ 768px and < 992px
- * - lg: ≥ 992px and < 1200px
- * - xl: ≥ 1200px
- * - xxl: ≥ 1400px
- */
-const breakpoints = [
-  { name: 'xs', width: 414, height: 896 }, // iPhone XR
-  { name: 'sm', width: 640, height: 960 },
-  { name: 'md', width: 820, height: 1180 }, // iPad Air
-  { name: 'lg', width: 1024, height: 768 }, // iPad Pro
-  { name: 'xl', width: 1280, height: 800 },
-  { name: 'xxl', width: 1920, height: 1080 },
-]
+const { timeouts, environment, selectors, breakpoints } = require('./config')
 
 test.describe('Homepage tests', () => {
   // Test from the original home.spec.js
   test('homepage should load without console errors', async ({ page }) => {
-    await page.gotoAndVerify('/', { timeout: 45000 })
+    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
     const title = await page.title()
     expect(title).toBe("Don't throw it away, give it away!")
@@ -48,7 +27,7 @@ test.describe('Homepage tests', () => {
       })
 
       // Go to the homepage with extended timeout for initial load
-      await page.gotoAndVerify('/', { timeout: 45000 })
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
       // Verify page title
       const title = await page.title()
@@ -70,7 +49,7 @@ test.describe('Homepage tests', () => {
       await expect(page.locator('a[href*="itunes.apple.com"]')).toBeVisible()
 
       // 4. Footer should always be visible
-      await expect(page.locator('.thefooter')).toBeVisible()
+      await expect(page.locator(selectors.common.mainFooter)).toBeVisible()
 
       // Breakpoint-specific tests
       if (bp.name === 'xs') {
@@ -84,9 +63,11 @@ test.describe('Homepage tests', () => {
           page.locator("text=Got things you don't need? Need stuff?")
         ).toBeVisible()
         // - VisualiseList component should be visible on mobile
-        await expect(page.locator('.mt-2.mb-2.d-block.d-sm-none')).toBeVisible()
+        await expect(page.locator(selectors.common.visualiseList)).toBeVisible()
         // - FreeglerPhotos should NOT be visible
-        await expect(page.locator('.ps-4.h-100')).not.toBeVisible()
+        await expect(
+          page.locator(selectors.common.freeglerPhotos)
+        ).not.toBeVisible()
         // - "Don't throw it away" tagline should NOT be visible
         await expect(
           page.locator("text=Don't throw it away, give it away!")
@@ -126,7 +107,9 @@ test.describe('Homepage tests', () => {
       // Specific checks for large and larger screens
       if (bp.name === 'lg' || bp.name === 'xl' || bp.name === 'xxl') {
         // FreeglerPhotos should be visible on lg screens and up
-        await expect(page.locator('.ps-4.h-100')).toBeVisible()
+        await expect(
+          page.locator(selectors.common.freeglerPhotos)
+        ).toBeVisible()
       }
 
       // Take a screenshot for visual verification
@@ -187,33 +170,54 @@ test.describe('Homepage tests', () => {
     await page.gotoAndVerify('/')
 
     // Locate the PlaceAutocomplete input field
-    const placeInput = page.locator('input[placeholder*="Enter your location"]')
+    const placeInput = page.locator(selectors.placeAutocomplete.input)
     await expect(placeInput).toBeVisible()
 
     // Clear any existing text and enter the test postcode
     await placeInput.click()
-    await placeInput.fill(TEST_POSTCODE)
+    await placeInput.fill(environment.postcode)
 
     // Wait for autocomplete dropdown to appear (might take a moment for API response)
-    await page.waitForSelector('li:has-text("' + TEST_PLACE + '")', {
-      timeout: 10000,
-    })
+    await page.waitForSelector(
+      `${selectors.placeAutocomplete.suggestionItem}:has-text("${environment.place}")`,
+      {
+        timeout: timeouts.ui.autocomplete,
+      }
+    )
 
     // Select the matching location from the dropdown
     const placeOption = page
-      .locator('li:has-text("' + TEST_PLACE + '")')
+      .locator(
+        `${selectors.placeAutocomplete.suggestionItem}:has-text("${environment.place}")`
+      )
       .first()
     await placeOption.click()
 
     // Wait for navigation to the explore page
-    await page.waitForURL(/\/explore\/place/, { timeout: 10000 })
+    await page.waitForURL(/\/explore\/place/, {
+      timeout: timeouts.navigation.default,
+    })
 
     // Verify we're on the explore page with our location
     expect(page.url()).toContain('/explore/place/')
 
     // Verify some content on the explore page related to our location
-    // This might need adjustment based on what content is actually shown for this location
-    await page.waitForSelector('h1, h2, h3', { timeout: 5000 })
+    await page.waitForSelector('h1, h2, h3', {
+      timeout: timeouts.ui.appearance,
+    })
+
+    // Check that at least one message card exists on the page
+    // We need to wait longer here as messages can take time to load from the API
+    await page.waitForSelector(selectors.common.messageCard, {
+      timeout: timeouts.api.slowApi,
+    })
+
+    // Count the message cards to verify we have at least one
+    const messageCardCount = await page
+      .locator(selectors.common.messageCard)
+      .count()
+    expect(messageCardCount).toBeGreaterThan(0)
+    console.log(`Found ${messageCardCount} message cards on the page`)
 
     // Take a screenshot to verify the explore page loaded correctly
     await page.screenshot({
