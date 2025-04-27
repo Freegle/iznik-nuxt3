@@ -21,6 +21,16 @@ const lg = ref(null)
 const xl = ref(null)
 const xxl = ref(null)
 
+// Create a mapping between breakpoint names and their refs
+const breakpointRefs = {
+  xs,
+  sm,
+  md,
+  lg,
+  xl,
+  xxl
+}
+
 // Get store reference
 const miscStore = useMiscStore()
 
@@ -29,34 +39,35 @@ function check() {
   const oldBreakpoint = miscStore.breakpoint
   let currentBreakpoint = oldBreakpoint
 
-  ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
-    // eslint-disable-next-line no-eval
-    const refElement = eval(breakpoint).value
-    if (refElement) {
-      if (getComputedStyle(refElement).display === 'block') {
-        // This breakpoint is visible and is therefore the current one.
-        currentBreakpoint = breakpoint
-      }
-    }
-
-    if (currentBreakpoint !== oldBreakpoint) {
-      miscStore.setBreakpoint(currentBreakpoint)
+  // Loop through all breakpoints
+  Object.entries(breakpointRefs).forEach(([breakpoint, elementRef]) => {
+    const refElement = elementRef.value
+    if (refElement && getComputedStyle(refElement).display === 'block') {
+      // This breakpoint is visible and is therefore the current one
+      currentBreakpoint = breakpoint
     }
   })
+  
+  // Only update if the breakpoint has changed
+  if (currentBreakpoint !== oldBreakpoint) {
+    miscStore.setBreakpoint(currentBreakpoint)
+  }
 }
 
 // Set up observers when component is mounted
 onMounted(() => {
   // Spot when the elements become visible/hidden.
   const ro = new ResizeObserver(check)
-  ;['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].forEach((breakpoint) => {
-    // eslint-disable-next-line no-eval
-    const refElement = eval(breakpoint).value
+  
+  // Add observers to each breakpoint element
+  Object.values(breakpointRefs).forEach((elementRef) => {
+    const refElement = elementRef.value
     if (refElement) {
       ro.observe(refElement)
     }
   })
 
+  // Initial check
   check()
 })
 </script>
