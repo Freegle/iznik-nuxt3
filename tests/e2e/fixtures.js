@@ -109,6 +109,7 @@ const test = base.test.extend({
       /FedCM get\(\) rejects with NetworkError/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
+      /The request has been aborted/, // Can happen during navigation.
     ]
 
     // Method to add additional allowed error patterns for specific tests

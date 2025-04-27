@@ -52,7 +52,7 @@ STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js
 ALL_CHANGED_FILES="$STAGED_FILES"
 
 if [ -z "$ALL_CHANGED_FILES" ]; then
-  success "No JavaScript/Vue files to lint (TypeScript files are excluded)."
+  success "No JavaScript/Vue files to lint (TypeScript .ts and .tsx files are excluded)."
   exit 0
 fi
 

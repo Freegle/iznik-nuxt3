@@ -7,7 +7,7 @@ orbs:
 # Define reusable commands
 commands:
   save-test-results:
-    description: "Save test results and artifacts"
+    description: "Save test results and artifacts (always runs)"
     steps:
       - run:
           name: Ensure test directories exist
@@ -16,18 +16,23 @@ commands:
             mkdir -p playwright-report
             mkdir -p screenshots
             mkdir -p playwright-screenshots
+          when: always
       - store_test_results:
           path: test-results
+          when: always
       - store_artifacts:
           path: test-results
           destination: test-results
+          when: always
       - store_artifacts:
           path: playwright-report
           destination: playwright-report
+          when: always
       # Store our dedicated screenshots directory
       - store_artifacts:
           path: playwright-screenshots
           destination: playwright-screenshots
+          when: always
       # Also look for any other screenshots that might have been created
       - run:
           name: Find and store additional screenshots
@@ -37,9 +42,11 @@ commands:
             find . -maxdepth 1 -name "*.png" -exec cp {} screenshots/ \; || true
             # Also try to find screenshots in test-results
             find test-results -name "*.png" -exec cp {} screenshots/ \; || true
+          when: always
       - store_artifacts:
           path: screenshots
           destination: screenshots
+          when: always
 
 # Define the jobs we want to run
 jobs:
@@ -176,8 +183,7 @@ jobs:
           when: always  # Make sure this runs even if tests fail
       
       # Save all test results and artifacts
-      - save-test-results:
-          when: always  # Make sure this runs even if tests fail
+      - save-test-results  # This custom command includes 'when: always' for all its steps
 
 # Orchestrate the workflow
 workflows:

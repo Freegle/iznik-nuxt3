@@ -57,7 +57,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 
 ### Git Hooks Setup
 - The project uses custom Git hooks for managing pre-commit hooks
-- Pre-commit hook automatically runs ESLint on staged files (TypeScript files are excluded)
+- Pre-commit hook automatically runs ESLint on staged files (TypeScript .ts and .tsx files are excluded)
 - Custom script `run-lint-on-changed.sh` handles the linting
 - This script is cross-platform compatible (works on both Linux and Windows)
 - Git hooks are installed using the `setup-hooks.sh` script (run via `npm run prepare`)
