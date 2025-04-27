@@ -1,0 +1,102 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+  browser-tools: circleci/browser-tools@1.4.1
+
+# Define reusable commands
+commands:
+  save-test-results:
+    description: "Save test results and artifacts"
+    steps:
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: test-results
+      - store_artifacts:
+          path: playwright-report
+          destination: playwright-report
+      - store_artifacts:
+          path: ./*.png
+          destination: screenshots
+
+# Define the jobs we want to run
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/node:18.20.8-browsers
+        environment:
+          NODE_ENV: test
+          TEST_BASE_URL: ${TEST_URL:-http://localhost:3002}
+
+    steps:
+      - checkout
+
+      # Install dependencies
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/project/node_modules
+          override-ci-command: npm ci
+
+      # Install Playwright browsers and system dependencies
+      - run:
+          name: Install Playwright browsers
+          command: npx playwright install --with-deps chromium
+
+      # Lint the project
+      - run:
+          name: Lint
+          command: npm run lint
+
+      # Build the project with environment variables
+      - run:
+          name: Build for testing
+          command: |
+            export IZNIK_API_V1=${API_V1_URL:-https://fdapilive.ilovefreegle.org/api}
+            export IZNIK_API_V2=${API_V2_URL:-https://api.ilovefreegle.org/apiv2}
+            npm run build
+
+      # Serve the built application in the background
+      - run:
+          name: Serve built application
+          command: |
+            npm run start
+          background: true
+
+      # Wait for the server to be responsive
+      - run:
+          name: Wait for server to be ready
+          command: |
+            # Extract the host and port from TEST_BASE_URL or use default
+            SERVER_URL=${TEST_URL:-http://localhost:3002}
+            
+            # Wait for server to be up
+            timeout=${SERVER_TIMEOUT:-60}
+            counter=0
+            until curl --output /dev/null --silent --head --fail $SERVER_URL; do
+              if [ $counter -ge $timeout ]; then
+                echo "Timed out waiting for server to start at $SERVER_URL"
+                exit 1
+              fi
+              counter=$((counter+1))
+              echo "Waiting for server to be ready at $SERVER_URL... ($counter/$timeout)"
+              sleep 1
+            done
+            echo "Server is up!"
+
+      # Run Playwright tests
+      - run:
+          name: Run Playwright tests
+          command: npm run test:ci
+
+      # Save test results
+      - save-test-results
+
+# Orchestrate the workflow
+workflows:
+  version: 2
+  build-test:
+    jobs:
+      # Run tests on all branches
+      - build-and-test

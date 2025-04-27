@@ -71,6 +71,10 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Use helper functions from `helpers.js` for common test operations
 - Page fixture automatically tracks and reports console errors
 - Automatic full-page screenshots are captured for any test failures
+- All screenshots are stored in the `playwright-screenshots` directory
+- Screenshots are automatically cleaned up after successful test runs
+- Failed test screenshots are preserved for debugging
+- Use `npm run test:clean` to remove all screenshots manually
 - Automatic teardown waits for network idle after each test (5s timeout)
 - Manual teardown available with `page.waitForTeardown(options)` when needed
 - For testing multiple pages, use parameterized tests with arrays of page data
