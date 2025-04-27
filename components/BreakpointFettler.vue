@@ -28,7 +28,7 @@ const breakpointRefs = {
   md,
   lg,
   xl,
-  xxl
+  xxl,
 }
 
 // Get store reference
@@ -47,7 +47,7 @@ function check() {
       currentBreakpoint = breakpoint
     }
   })
-  
+
   // Only update if the breakpoint has changed
   if (currentBreakpoint !== oldBreakpoint) {
     miscStore.setBreakpoint(currentBreakpoint)
@@ -58,7 +58,7 @@ function check() {
 onMounted(() => {
   // Spot when the elements become visible/hidden.
   const ro = new ResizeObserver(check)
-  
+
   // Add observers to each breakpoint element
   Object.values(breakpointRefs).forEach((elementRef) => {
     const refElement = elementRef.value
