@@ -39,7 +39,9 @@ jobs:
       - image: cimg/node:18.20.8-browsers
         environment:
           NODE_ENV: test
-          TEST_BASE_URL: ${TEST_URL:-http://localhost:3002}
+          TEST_BASE_URL: ${TEST_URL:-http://localhost:3000}
+          TEST_POSTCODE: ${TEST_POSTCODE:-EH3 6SS}
+          TEST_PLACE: ${TEST_PLACE:-Edinburgh}
     # Use a larger resource class with more CPU/RAM
     resource_class: large
 
@@ -88,7 +90,7 @@ jobs:
           name: Wait for server to be ready
           command: |
             # Extract the host and port from TEST_BASE_URL or use default
-            SERVER_URL=${TEST_URL:-http://localhost:3002}
+            SERVER_URL=${TEST_URL:-http://localhost:3000}
             
             # Wait for server to be up
             timeout=${SERVER_TIMEOUT:-60}
