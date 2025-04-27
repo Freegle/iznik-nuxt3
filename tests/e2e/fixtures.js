@@ -25,38 +25,48 @@ const getScreenshotPath = (filename) => {
 }
 
 // Function to remove screenshot files from the screenshots directory
-const cleanupScreenshots = () => {
+const cleanupScreenshots = async () => {
   ensureScreenshotsDir()
 
-  // Find all PNG files in the screenshots directory
-  fs.readdir(SCREENSHOTS_DIR, (err, files) => {
-    if (err) {
-      console.error('Error reading directory for cleanup:', err)
-      return
-    }
+  try {
+    // Read directory contents using promises
+    const files = await fs.promises.readdir(SCREENSHOTS_DIR)
 
     if (files.length === 0) {
       console.log('No screenshots to clean up')
       return
     }
 
-    let deletedCount = 0
+    console.log(`Found ${files.length} files in screenshots directory`)
 
-    files.forEach((file) => {
-      if (path.extname(file) === '.png') {
-        fs.unlink(path.join(SCREENSHOTS_DIR, file), (err) => {
-          if (err) {
-            console.error(`Error deleting screenshot ${file}:`, err)
-          } else {
-            deletedCount++
-            if (deletedCount === files.length) {
-              console.log(`Removed ${deletedCount} screenshots`)
-            }
-          }
-        })
-      }
+    // Filter for PNG files only
+    const pngFiles = files.filter((file) => path.extname(file) === '.png')
+
+    if (pngFiles.length === 0) {
+      console.log('No PNG files to clean up')
+      return
+    }
+
+    console.log(`Cleaning up ${pngFiles.length} screenshots...`)
+
+    // Delete all PNG files with Promise.all for better parallelism
+    const deletePromises = pngFiles.map((file) => {
+      const filePath = path.join(SCREENSHOTS_DIR, file)
+      return fs.promises
+        .unlink(filePath)
+        .catch((err) =>
+          console.error(`Error deleting screenshot ${file}:`, err)
+        )
     })
-  })
+
+    // Wait for all deletions to complete
+    if (deletePromises.length > 0) {
+      await Promise.all(deletePromises)
+    }
+    console.log(`Successfully cleaned up ${pngFiles.length} screenshots`)
+  } catch (err) {
+    console.error('Error during screenshots cleanup:', err)
+  }
 }
 
 // Define a custom test function that wraps the base test to add automatic screenshot capture
@@ -94,6 +104,7 @@ const test = base.test.extend({
     // List of allowed console error patterns (using regex)
     const allowedErrorPatterns = [
       /%cssr:error%c API count went negative/, // Low importance and not visible to client.
+      /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
       /Provider's accounts list is empty/, // Google Pay related error - can happen in dev
       /FedCM get\(\) rejects with NetworkError/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
@@ -253,11 +264,11 @@ const test = base.test.extend({
 })
 
 // Add a global hook to cleanup screenshots after all tests
-test.afterAll(() => {
+test.afterAll(async () => {
   // Only clean up if the tests succeeded
   if (process.exitCode === undefined || process.exitCode === 0) {
-    console.log('Tests completed successfully, cleaning up screenshots...')
-    cleanupScreenshots()
+    console.log('Test run completed successfully, cleaning up screenshots...')
+    await cleanupScreenshots()
   } else {
     console.log('Tests failed, keeping screenshots for debugging')
   }

@@ -15,6 +15,7 @@ commands:
             mkdir -p test-results
             mkdir -p playwright-report
             mkdir -p screenshots
+            mkdir -p playwright-screenshots
       - store_test_results:
           path: test-results
       - store_artifacts:
@@ -23,11 +24,19 @@ commands:
       - store_artifacts:
           path: playwright-report
           destination: playwright-report
+      # Store our dedicated screenshots directory
+      - store_artifacts:
+          path: playwright-screenshots
+          destination: playwright-screenshots
+      # Also look for any other screenshots that might have been created
       - run:
-          name: Find and store screenshots
+          name: Find and store additional screenshots
           command: |
             mkdir -p screenshots
+            # Copy root level screenshots
             find . -maxdepth 1 -name "*.png" -exec cp {} screenshots/ \; || true
+            # Also try to find screenshots in test-results
+            find test-results -name "*.png" -exec cp {} screenshots/ \; || true
       - store_artifacts:
           path: screenshots
           destination: screenshots
@@ -39,10 +48,7 @@ jobs:
       - image: cimg/node:18.20.8-browsers
         environment:
           NODE_ENV: test
-          TEST_BASE_URL: ${TEST_URL:-http://localhost:3000}
-          TEST_POSTCODE: ${TEST_POSTCODE:-EH3 6SS}
-          TEST_PLACE: ${TEST_PLACE:-Edinburgh}
-    # Use a larger resource class with more CPU/RAM
+    # Use a larger resource class with more CPU/RAM - otherwise build fails.
     resource_class: large
 
     steps:
@@ -125,15 +131,53 @@ jobs:
           command: |
             mkdir -p test-results
             export NODE_OPTIONS="--max-old-space-size=8192"
-            npm run test:ci || true  # Continue even if tests fail
-            # If test results don't exist in expected format, create a basic one to avoid failure
+            
+            # Run tests and capture exit code
+            npm run test:ci
+            TEST_EXIT_CODE=$?
+            
+            echo "Playwright test exit code: $TEST_EXIT_CODE"
+            
+            # Check for test results
             if [ ! -f "test-results/junit.xml" ]; then
-              echo "Creating default test report"
-              echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="Default" tests="1" failures="0" errors="0" skipped="0" time="0" timestamp="'$(date -Iseconds)'"><testcase name="Default" time="0"></testcase></testsuite></testsuites>' > test-results/junit.xml
+              echo "Test results not found at expected location: test-results/junit.xml"
+              echo "This likely indicates a failure in the test framework itself."
+              exit 1
+            fi
+            
+            # Print summary of test failures from junit report if tests failed
+            if [ $TEST_EXIT_CODE -ne 0 ]; then
+              echo "==== TEST FAILURES SUMMARY ===="
+              if command -v xmllint > /dev/null; then
+                # Get count of failing tests
+                FAILURE_COUNT=$(xmllint --xpath "count(//testcase[failure])" test-results/junit.xml || echo "unknown")
+                echo "Found $FAILURE_COUNT failing tests"
+                
+                # Extract specific failures
+                xmllint --xpath "//testcase[failure]/@name" test-results/junit.xml 2>/dev/null || echo "Could not extract failure details"
+              else
+                # Fallback if xmllint is not available
+                grep -A 2 "<failure" test-results/junit.xml || echo "No failure details found"
+              fi
+              echo "==== END OF FAILURES SUMMARY ===="
+              
+              echo "See CircleCI artifacts for full test reports and screenshots"
+              # Exit with the original test exit code to properly fail the build
+              exit $TEST_EXIT_CODE
             fi
                 
-      # Save test results
-      - save-test-results
+      # Save test results (always run this, even if tests fail)
+      - run:
+          name: Collect test artifacts
+          command: |
+            mkdir -p playwright-screenshots
+            # Ensure we have full screenshot info for debugging
+            find . -name "*.png" -type f -not -path "./node_modules/*" -exec cp {} playwright-screenshots/ \; || true
+          when: always  # Make sure this runs even if tests fail
+      
+      # Save all test results and artifacts
+      - save-test-results:
+          when: always  # Make sure this runs even if tests fail
 
 # Orchestrate the workflow
 workflows:

@@ -12,7 +12,8 @@ module.exports = defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
-  timeout: 60_000,
+  // Increase timeout for CircleCI environment which can be slower
+  timeout: 120_000,
   use: {
     // Allow overriding the base URL via TEST_BASE_URL environment variable
     // Default to the development server if not specified

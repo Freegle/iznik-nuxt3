@@ -45,6 +45,29 @@ This will serve up the site at [127.0.0.1:3002](http://127.0.0.1:3002).  **If yo
 It will watch for changes and do hot module reloading.  Occasionally you'll need to restart Vite when it doesn't 
 pick up a change.
 
+## Git Hooks
+
+The project uses Git hooks to ensure code quality. These hooks are cross-platform and work on both Linux and Windows environments (including Git Bash, WSL, and MINGW).
+
+The hooks are installed automatically when you run `npm install` through the `prepare` script.
+
+Key features:
+- Pre-commit hook that runs ESLint on staged files
+- Cross-platform compatibility with proper path handling
+- Automatic OS detection and environment-specific behavior
+- Proper handling of file paths with spaces
+- Clear, colorful status messages
+
+If you need to manually install or update the hooks:
+```
+./setup-hooks.sh
+```
+
+If you need to bypass the hooks for a specific commit:
+```
+git commit --no-verify
+```
+
 # Technologies
 
 Briefly:

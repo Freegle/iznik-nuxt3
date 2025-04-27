@@ -7,13 +7,20 @@
     "start": "node .output/server/index.mjs",
     "postinstall": "patch-package",
     "lint": "eslint --fix --ext .js,.jsx,.ts,.vue .",
+    "lint-staged": "./run-lint-on-changed.sh",
+    "prepare": "./setup-hooks.sh",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwright test",
     "test:clean": "rm -rf test-results && rm -rf playwright-report && rm -rf playwright-screenshots",
-    "test:ci": "npm run test:clean && playwright test"
+    "test:ci": "npm run test:clean && playwright test --reporter=junit,html",
+    "test:homepage": "playwright test tests/e2e/homepage.spec.js",
+    "test:location": "TEST_POSTCODE=\"EH3 6SS\" TEST_PLACE=\"Edinburgh\" playwright test tests/e2e/homepage.spec.js -g \"PlaceAutocomplete\""
+  },
+  "gitHooks": {
+    "pre-commit": "npm run lint-staged"
   },
   "engines": {
     "node": ">=17.9.1"

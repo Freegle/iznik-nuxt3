@@ -55,6 +55,22 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - **Comments**: Do NOT add explanatory comments for obvious concepts or standard operations
 - **Documentation**: Assume the reader understands Vue Single File Component structure and patterns
 
+### Git Hooks Setup
+- The project uses custom Git hooks for managing pre-commit hooks
+- Pre-commit hook automatically runs ESLint on staged files
+- Custom script `run-lint-on-changed.sh` handles the linting
+- This script is cross-platform compatible (works on both Linux and Windows)
+- Git hooks are installed using the `setup-hooks.sh` script (run via `npm run prepare`)
+- The custom pre-commit hook template is in the project root (`pre-commit`)
+- Key cross-platform features:
+  - Detects operating system (Windows vs. Unix-like)
+  - Sets up proper Node/npm paths for different environments
+  - Handles NVM if available on Unix systems
+  - Proper file path handling for Windows and Linux
+  - Spaces in filenames are handled correctly
+- All Git hooks scripts are tested on both Windows and Linux environments
+- Hook scripts provide clear status messages and error handling
+
 ## E2E Testing Guidelines
 - Place tests in `tests/e2e` directory
 - Use page object pattern for complex UI interactions
@@ -94,21 +110,83 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - If a test is temporarily problematic, use descriptive test naming like `test('FIXME: broken test - homepage should...', async...)`
 - Make tests that work with both development and production environments
 - Use try/catch blocks with screenshots for better error diagnosis
-- Set appropriate timeouts for heavy pages
 - Always retry tests once automatically to handle collect Playwright debug information and screenshots 
 
 ### Maintaining Page Tests
 - When adding new public pages, add them to the `publicPages` array in `pages.spec.js`
 - Ensure page titles in tests match the actual page titles (check the `buildHead` function in the page)
-- For pages with special requirements (auth, params), create specific test files
-- Test only public pages that don't require login or special parameters
 
 ## Development Workflow
 - After making code changes, always run `eslint --fix <changed-files>` to catch and fix style issues
 - Be specific about which files to lint rather than running on the entire codebase
 - Remove any unused variables, imports, or code identified by the linter rather than disabling warnings
-- Make small, focused commits with clear messages
-- Run tests after significant changes to verify functionality
+- Git hooks automatically run ESLint on changed files before commit
+
+### Cross-Platform Compatibility
+- **IMPORTANT**: Any scripts or Git hooks added to the project MUST work on both Windows and Linux environments
+- All shell scripts should use `#!/usr/bin/env bash` as the shebang line
+- Scripts should detect the OS environment and handle path differences accordingly:
+  ```bash
+  # Detect operating system
+  case "$(uname -s)" in
+    CYGWIN*|MINGW*|MSYS*)
+      IS_WINDOWS=1
+      echo "🖥️ Windows environment detected"
+      ;;
+    *)
+      IS_WINDOWS=0
+      echo "🐧 Unix-like environment detected"
+      ;;
+  esac
+  ```
+- Test Windows compatibility using Git Bash, WSL, or MINGW environments
+- Use Node.js scripts instead of shell scripts for complex operations
+- For file operations, use cross-platform libraries like `path` and `fs` modules
+- Always use relative paths from project root or environment variables
+- Avoid platform-specific commands or syntax
+- When running commands with file lists, handle spaces in filenames properly:
+  ```bash
+  # For Windows (create temp file with null separators)
+  if [ "$IS_WINDOWS" -eq 1 ]; then
+    # Create a temporary file with NUL-separated list for xargs
+    temp_file=$(mktemp -t filelist.XXXXXX)
+    printf "%s\0" "${files[@]}" > "$temp_file"
+    xargs -0 -a "$temp_file" npx eslint --fix
+    rm "$temp_file"
+  else
+    # For Unix systems, pass files directly
+    npx eslint --fix "${files[@]}"
+  fi
+  ```
+- For Windows/Node.js path handling, ensure paths work properly in Git hooks:
+  ```bash
+  # Find Node and npm binaries for both Windows and Unix
+  setup_path() {
+    # Add common paths where Node can be found
+    if [ "$IS_WINDOWS" -eq 1 ]; then
+      # Windows paths
+      export PATH="$PATH:/c/Program Files/nodejs:/c/Program Files (x86)/nodejs"
+      # Add npm global path
+      if [ -d "$APPDATA/npm" ]; then
+        export PATH="$PATH:$APPDATA/npm"
+      fi
+    else
+      # Unix paths
+      export PATH="$PATH:/usr/local/bin:/usr/local"
+      # Load NVM if available (Unix only)
+      if [ -f "$HOME/.nvm/nvm.sh" ]; then
+        export NVM_DIR="$HOME/.nvm"
+        # This loads nvm
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        # Use the project's Node version if .nvmrc exists
+        [ -f ".nvmrc" ] && nvm use
+      fi
+    fi
+  }
+  ```
+- Scripts should provide clear status output and error messages
+- When creating/installing Git hooks, use setup scripts to ensure cross-platform compatibility
+- All scripts should have proper error handling and exit codes
 
 ## CI Pipeline
 - CircleCI is configured to run on master, develop, production, and feature branches
@@ -129,6 +207,8 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - `API_V2_URL` - API V2 URL (defaults to https://api.ilovefreegle.org/apiv2)
 - `TEST_URL` - URL for testing (defaults to http://localhost:3002)
 - `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 60)
+- `TEST_POSTCODE` - Postcode to use for location-based tests (defaults to EH3 6SS)
+- `TEST_PLACE` - Place name to use for location-based tests (defaults to Edinburgh)
 
 ## Commenting Guidelines
 - Code should be self-documenting with clear naming
