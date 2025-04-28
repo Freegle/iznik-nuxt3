@@ -90,7 +90,7 @@ export const useChatStore = defineStore({
 
       if (me && me.id) {
         const newCount = await api(this.config).chat.unseenCountMT()
-        // console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
+        //console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
         
         if (newCount !== this.currentCountMT) {
           if( !this.lastSearchMT){
@@ -413,17 +413,20 @@ export const useChatStore = defineStore({
       return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
+      const miscStore = useMiscStore() // MT ADDED
+      if (miscStore.modtools) {
+        return state.currentCountMT
+      }
       // count chats with unseen messages
       let ret = 0
-      const miscStore = useMiscStore() // MT ADDED
       const authStore = useAuthStore()
       const myid = authStore.user?.id
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (miscStore.modtools) {
+        if (miscStore.modtools) { // TODO: Not now used, so remove
           const chat = state.listByChatId[key]
-          //console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
+          // console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
           // We count chats between mods, and chats between other members and mods.
           if (chat.chattype === 'Mod2Mod') {
             ret += chat.unseen
