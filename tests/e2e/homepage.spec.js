@@ -36,8 +36,8 @@ test.describe('Homepage tests', () => {
       // Check that essential elements that should always be visible are displayed
 
       // 1. Main buttons should always be visible
-      await expect(page.locator('text=Give Stuff')).toBeVisible()
-      await expect(page.locator('text=Ask for Stuff')).toBeVisible()
+      await expect(page.locator('.btn:has-text("Give Stuff")')).toBeVisible()
+      await expect(page.locator('.btn:has-text("Ask for Stuff")')).toBeVisible()
 
       // 2. PlaceAutocomplete should always be visible
       await expect(
@@ -129,12 +129,12 @@ test.describe('Homepage tests', () => {
     await page.gotoAndVerify('/')
 
     // Test 1: Clicking "Give Stuff" should navigate to /give
-    const giveStuffButton = page.locator('text=Give Stuff')
+    const giveStuffButton = page.locator('.btn:has-text("Give Stuff")')
     await expect(giveStuffButton).toBeVisible()
 
     // Create a navigation promise before clicking
     const giveStuffNavigation = page.waitForURL('/give')
-    await giveStuffButton.click()
+    await giveStuffButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
     await giveStuffNavigation
@@ -144,12 +144,12 @@ test.describe('Homepage tests', () => {
     await page.gotoAndVerify('/')
 
     // Test 2: Clicking "Ask for Stuff" should navigate to /find
-    const askStuffButton = page.locator('text=Ask for Stuff')
+    const askStuffButton = page.locator('.btn:has-text("Ask for Stuff")')
     await expect(askStuffButton).toBeVisible()
 
     // Create a navigation promise before clicking
     const askStuffNavigation = page.waitForURL('/find')
-    await askStuffButton.click()
+    await askStuffButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
     await askStuffNavigation

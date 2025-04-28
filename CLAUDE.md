@@ -85,11 +85,15 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Timeouts are automatically extended by 50% in CI environments
 - Default timeouts are generous to accommodate slower CI environments and reduce flakiness
 - Selectors should be defined in the config file and referenced in tests
+- Use built-in test fixtures for globally unique test data:
+  - `testEmail` - provides a random globally unique date-time stamped email for each test
+  - `getTestEmail` - function to generate custom prefixed emails (e.g., `getTestEmail('furniture')`)
 - Navigation and verification should use `page.gotoAndVerify(path, options)` 
 - `gotoAndVerify` automatically checks for error pages, detecting both "Something went wrong" and 404 "page doesn't exist" errors
 - Console errors are automatically checked at the end of each test
 - For manual console error checking, use `page.checkTestRanOK()` (previously `expectNoConsoleErrors`)
 - Whitelist expected/harmless console errors using regex patterns in `fixtures.js`
+- Ad-related 403 errors (with URLs containing "pagead", "googleads", "doubleclick", or "ads") are automatically ignored
 - Add test-specific allowed errors with `page.addAllowedErrorPattern(regex|string)`
 - View error summaries with `page.getErrorSummary()` for debugging
 - Use helper functions from `helpers.js` for common test operations
@@ -108,16 +112,50 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Code should be self-documenting with clear method and variable names
 - Test files should be concise and free of explanatory comments
 - When adding new timeouts or selectors, add them to the appropriate section in `config.js`
+- Use the test user utilities to create consistent test user data:
+  - `testUsers.getRandomUser()` returns a random test user with email, password, etc.
+  - `testUsers.getRegularUser()` returns a standard test user for login tests
+  - `testUsers.getModeratorUser()` returns a moderator test user
+  - Test email addresses use the domain from `environment.email.domain` (default test.yahoogroups.com)
+  - Generate custom test emails with `environment.email.getRandomEmail()` and `environment.email.getEmailForUser()`
+- IMPORTANT: Do NOT create separate example or demonstration spec.js files; implement tests in the appropriate existing test files
+- Each test file should focus on a specific feature or workflow, not just demonstrate API usage
+- When implementing new test fixtures or utilities:
+  - Document them in CLAUDE.md
+  - Add them to existing test files where they make sense
+  - Do not create "example" tests just to show how to use them
+  - Ensure all tests are fully functional, not partial demonstrations
 
 ### Playwright Best Practices
 - WSL users: Run `sudo npx playwright install-deps` to install system dependencies
 - Edit playwright.config.js to uncomment additional browsers when needed
 - For debugging: Use `--headed` flag to see browsers or `--debug` for step-by-step execution
-- NEVER use `.skip()` - all tests should be enabled at all times
-- If a test is temporarily problematic, use descriptive test naming like `test('FIXME: broken test - homepage should...', async...)`
+- **CRITICAL: NEVER use `.skip()` or `.only()` in committed tests** - all tests MUST be enabled at all times
+  - DO NOT add tests that are meant to be skipped
+  - DO NOT create placeholder or example tests
+  - If a test needs work, either fix it completely or don't commit it at all
+  - Never commit code with skipped, non-functional, or example-only tests
+- If a test is temporarily problematic but should remain in the suite, rename it with a descriptive prefix like `test('FIXME: broken test - homepage should...', async...)`
 - Make tests that work with both development and production environments
 - Use try/catch blocks with screenshots for better error diagnosis
-- Always retry tests once automatically to handle collect Playwright debug information and screenshots 
+- Always retry tests once automatically to collect Playwright debug information and screenshots 
+- **IMPORTANT**: For element selection, buttons are implemented as either `div` or `a` elements with the class `btn`, not as native `<button>` elements. Follow these guidelines:
+  1. Use selectors that match both possibilities, like `.btn:has-text("Button Text")` instead of `button:has-text("Button Text")` or `text=Button Text`
+  2. ALWAYS filter for visible elements and use `.first()` when clicking buttons:
+     - Use `.filter({ visible: true }).first()` to ensure you're only clicking visible elements
+     - This prevents tests from failing when there are hidden buttons with the same text
+  
+  ```javascript
+  // CORRECT: Use these formats for button selectors
+  page.locator('.btn:has-text("Save")').filter({ visible: true }).first().click();
+  
+  // WRONG: Do not use these formats
+  page.locator('button:has-text("Save")').click(); // Wrong element type
+  page.locator('text=Save').click(); // Too generic
+  page.locator('div.btn:has-text("Save")').click(); // Too specific, might miss <a> buttons
+  page.locator('.btn:has-text("Save")').click(); // Missing .first(), can be ambiguous
+  page.locator('.btn:has-text("Save")').first().click(); // Not filtered for visibility
+  ```
 
 ### Maintaining Page Tests
 - When adding new public pages, add them to the `publicPages` array in `pages.spec.js`
@@ -215,7 +253,9 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - `TEST_BASE_URL` - URL for testing (defaults to http://localhost:3002)
 - `TEST_POSTCODE` - Postcode to use for location-based tests (defaults to EH3 6SS)
 - `TEST_PLACE` - Place name to use for location-based tests (defaults to Edinburgh)
-- `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 60)
+- `TEST_EMAIL_DOMAIN` - Domain to use for test email addresses (defaults to test.yahoogroups.com)
+- `STRIPE_PUBLISHABLE_KEY` - Stripe test mode publishable key for payment testing
+- `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 120)
 
 ## Commenting Guidelines
 - Code should be self-documenting with clear naming
@@ -248,3 +288,18 @@ Actions that require explicit user permission:
 - Making API changes
 - Updating third-party integrations
 - Installing new frameworks or major dependencies
+
+## Automated Code Verification
+After making code changes, Claude should ALWAYS run these commands automatically:
+- `npm run lint` or `eslint --fix --ext .js,.jsx,.ts,.vue <specific-files>` - Fix code style issues
+- Check for any unused code and remove it as identified by the linter
+
+For specific files:
+```bash
+eslint --fix path/to/file1.vue path/to/file2.js
+```
+
+When modifying multiple files, use:
+```bash
+npm run lint
+```

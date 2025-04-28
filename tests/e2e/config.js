@@ -47,6 +47,27 @@ const environment = {
   // These can be overridden with environment variables
   postcode: process.env.TEST_POSTCODE || 'EH3 6SS',
   place: process.env.TEST_PLACE || 'Edinburgh',
+
+  // Test email configuration
+  email: {
+    // Default test domain for test email addresses
+    domain: process.env.TEST_EMAIL_DOMAIN || 'test.yahoogroups.com',
+
+    // Generate a random test email for this test run
+    getRandomEmail: (prefix = 'test') => {
+      const randomSuffix = Math.floor(Math.random() * 1000000)
+        .toString()
+        .padStart(6, '0')
+      return `${prefix}${randomSuffix}@${environment.email.domain}`
+    },
+
+    // Generate a test email with a specific username
+    getEmailForUser: (username) => {
+      return `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@${
+        environment.email.domain
+      }`
+    },
+  },
 }
 
 // CI-specific timeouts (even longer for CI environments)
@@ -87,9 +108,52 @@ const breakpoints = [
   { name: 'xxl', width: 1920, height: 1080 },
 ]
 
+// Test user data for consistent user information in tests
+const testUsers = {
+  // Generate a test user with a random ID
+  getRandomUser: () => {
+    const id = Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, '0')
+    const firstName = `TestUser${id}`
+    const email = environment.email.getRandomEmail(firstName.toLowerCase())
+
+    return {
+      id,
+      firstName,
+      lastName: 'Tester',
+      fullName: `${firstName} Tester`,
+      email,
+      postcode: environment.postcode,
+      password: 'Password1!',
+    }
+  },
+
+  // Predefined test users for specific test scenarios
+  getModeratorUser: () => ({
+    firstName: 'TestMod',
+    lastName: 'Moderator',
+    fullName: 'TestMod Moderator',
+    email: environment.email.getEmailForUser('testmod'),
+    postcode: environment.postcode,
+    password: 'Password1!',
+    isModerator: true,
+  }),
+
+  getRegularUser: () => ({
+    firstName: 'TestUser',
+    lastName: 'Regular',
+    fullName: 'TestUser Regular',
+    email: environment.email.getEmailForUser('testuser'),
+    postcode: environment.postcode,
+    password: 'Password1!',
+  }),
+}
+
 module.exports = {
   timeouts,
   environment,
   selectors,
   breakpoints,
+  testUsers,
 }

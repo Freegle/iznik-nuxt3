@@ -1,7 +1,8 @@
 const fs = require('fs')
 const path = require('path')
+const crypto = require('crypto')
 const base = require('@playwright/test')
-const { timeouts } = require('./config')
+const { timeouts, environment } = require('./config')
 
 // Define the screenshots directory
 const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
@@ -63,8 +64,39 @@ const cleanupScreenshots = async () => {
   }
 }
 
+// Generate a globally unique, date-time stamped test email
+const generateUniqueTestEmail = (prefix = 'test') => {
+  // Format: prefix-YYYYMMDD-HHMMSS-randomhash@domain
+  const now = new Date()
+  const datePart = now
+    .toISOString()
+    .replace(/[-:T.]/g, '')
+    .slice(0, 14) // YYYYMMDDHHmmSS format
+
+  // Add a random hash for global uniqueness (8 characters should be plenty)
+  const randomHash = crypto.randomBytes(4).toString('hex')
+
+  return `${prefix}-${datePart}-${randomHash}@${environment.email.domain}`
+}
+
 // Define a custom test function that wraps the base test to add automatic screenshot capture
 const test = base.test.extend({
+  // Add the testEmail fixture - basic version that just generates a random test email
+  testEmail: async (_, use) => {
+    // Generate a unique test email for this test
+    const email = generateUniqueTestEmail()
+
+    // Provide the email to the test
+    await use(email)
+  },
+
+  // Function to generate custom test emails with specific prefixes
+  getTestEmail: async (_, use) => {
+    // Return a function that generates test emails with custom prefixes
+    const emailGenerator = (prefix = 'test') => generateUniqueTestEmail(prefix)
+    await use(emailGenerator)
+  },
+
   page: async ({ page }, use) => {
     const consoleErrors = []
 
@@ -99,11 +131,16 @@ const test = base.test.extend({
     const allowedErrorPatterns = [
       /%cssr:error%c API count went negative/, // Low importance and not visible to client.
       /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
-      /Provider's accounts list is empty/, // Google Pay related error - can happen in dev
+      /Not signed in with the identity provider/, // Not available in test.
+      /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
       /FedCM get\(\) rejects with/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /The request has been aborted/, // Can happen during navigation.
+      /Failed to load resource: the server responded with a status of 403.*pagead/, // Google ad-related 403s are expected
+      /Failed to load resource: the server responded with a status of 403.*googleads/, // Google ad-related 403s
+      /Failed to load resource: the server responded with a status of 403.*doubleclick/, // More ad-related 403s
+      /Failed to load resource: the server responded with a status of 403.*ads/, // Generic ad-related 403s
     ]
 
     // Method to add additional allowed error patterns for specific tests
@@ -121,8 +158,12 @@ const test = base.test.extend({
     }
 
     // Helper to check if an error message matches any allowed pattern
+    // console.log each pattern and the errorText, and whether or not it matched
+    // This is useful for debugging
     const isAllowedError = (errorText) => {
-      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
+      return allowedErrorPatterns.some((pattern) => {
+        return pattern.test(errorText)
+      })
     }
 
     page.checkTestRanOK = async () => {
