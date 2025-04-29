@@ -2,6 +2,42 @@
 
 This document outlines best practices for writing Playwright tests for our Nuxt 3 application.
 
+## Critical Guidelines
+
+### ⚠️ NEVER Use Hardcoded Timeouts
+
+**NEVER EVER** use hardcoded timeout values or `page.waitForTimeout()`. Always use the timeout constants from the config file with `waitFor` methods:
+
+```javascript
+// ❌ EXTREMELY BAD: Never do this
+await page.waitForTimeout(500)
+
+// ❌ VERY BAD: Never use hardcoded values
+await element.waitFor({ state: 'visible', timeout: 5000 })
+
+// ✅ GOOD: Always use the timeout constants
+await element.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+```
+
+Instead of arbitrary waits, always wait for specific elements or conditions:
+
+```javascript
+// ❌ BAD APPROACH: Waiting for arbitrary time
+await page.waitForTimeout(1000) // Wait for modal to close
+
+// ✅ GOOD APPROACH: Wait for a specific condition
+await page.locator('.next-element').waitFor({ 
+  state: 'visible', 
+  timeout: timeouts.ui.appearance 
+})
+```
+
+This rule is critical because:
+1. Hardcoded timeouts make tests flaky and unpredictable
+2. They cause tests to run slower than necessary
+3. They often hide underlying issues with selectors or test logic
+4. They don't work consistently across different environments (local vs CI)
+
 ## Test Email Management
 
 The tests generate and track temporary email addresses that are used during test runs. These email addresses are recorded for later cleanup to prevent test user accounts from accumulating in the system.
@@ -58,7 +94,25 @@ test('Check registered emails', async ({ getRegisteredEmails }) => {
 
 All registered test emails are saved to `test-emails.json` in the project root after each test run.
 
-To manage these test emails, use the cleanup utility:
+#### Automatic Unsubscription
+
+The test framework automatically attempts to unsubscribe all registered test emails at the end of successful test runs. This is handled by the `unsubscribe-test-emails.js` script, which:
+
+1. Loads all emails from the `test-emails.json` file
+2. Navigates to the unsubscribe page for each email
+3. Submits the unsubscribe form
+4. Updates the test-emails.json file to remove successfully unsubscribed emails
+
+This happens automatically after test runs, but you can also trigger it manually:
+
+```bash
+# Manually unsubscribe all test emails
+npm run test:unsubscribe-emails
+```
+
+#### Database Cleanup
+
+For deeper cleanup that requires API access, use the cleanup utility:
 
 ```bash
 # List all test emails

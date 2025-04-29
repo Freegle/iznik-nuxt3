@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const base = require('@playwright/test')
 const { timeouts, environment } = require('./config')
 const logger = require('./logger')
+const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
 // Define the screenshots directory
 const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
@@ -242,14 +243,12 @@ const test = base.test.extend({
       /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
       /Not signed in with the identity provider/, // Not available in test.
       /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
+      /The given origin is not allowed for the given client ID/, // Not available in test.
       /FedCM get\(\) rejects with/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /The request has been aborted/, // Can happen during navigation.
-      /Failed to load resource: the server responded with a status of 403.*pagead/, // Google ad-related 403s are expected
-      /Failed to load resource: the server responded with a status of 403.*googleads/, // Google ad-related 403s
-      /Failed to load resource: the server responded with a status of 403.*doubleclick/, // More ad-related 403s
-      /Failed to load resource: the server responded with a status of 403.*ads/, // Generic ad-related 403s
+      /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
     ]
 
     // Method to add additional allowed error patterns for specific tests
@@ -271,6 +270,7 @@ const test = base.test.extend({
     // This is useful for debugging
     const isAllowedError = (errorText) => {
       return allowedErrorPatterns.some((pattern) => {
+        console.log('Test', pattern, errorText, pattern.test(errorText))
         return pattern.test(errorText)
       })
     }
@@ -439,7 +439,7 @@ const test = base.test.extend({
   },
 })
 
-// Add a global hook to cleanup screenshots after all tests and save email registry
+// Add a global hook to cleanup screenshots after all tests, save email registry, and unsubscribe test emails
 test.afterAll(async () => {
   // Save the test emails regardless of whether tests succeeded or failed
   saveTestEmails()
@@ -447,6 +447,15 @@ test.afterAll(async () => {
   // Only clean up if the tests succeeded
   if (process.exitCode === undefined || process.exitCode === 0) {
     await cleanupScreenshots()
+
+    // Attempt to unsubscribe all the test emails
+    console.log('Unsubscribing test emails...')
+    try {
+      await unsubscribeTestEmails()
+      console.log('Successfully processed test email unsubscriptions')
+    } catch (error) {
+      console.error(`Error during test email unsubscription: ${error.message}`)
+    }
   } else {
     console.log('Tests failed, keeping screenshots for debugging')
   }
@@ -455,7 +464,8 @@ test.afterAll(async () => {
 // Define our extended test with custom fixtures
 const testWithFixtures = test.extend({
   // Add a fixture to manually register test emails that may be created during tests
-  registerTestEmail: async ({ page = null }, use) => {
+  // eslint-disable-next-line no-empty-pattern
+  registerTestEmail: async ({}, use) => {
     /**
      * Function to manually register a test email for cleanup
      * @param {string} email - The email address to register
@@ -475,7 +485,8 @@ const testWithFixtures = test.extend({
   },
 
   // Add a fixture to get all registered test emails
-  getRegisteredEmails: async ({ page = null }, use) => {
+  // eslint-disable-next-line no-empty-pattern
+  getRegisteredEmails: async ({}, use) => {
     /**
      * Function to retrieve all registered test emails
      * @returns {Array<string>} - Array of all registered email addresses

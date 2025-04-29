@@ -16,8 +16,7 @@
     "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwright test",
     "test:clean": "rm -rf test-results && rm -rf playwright-report && rm -rf playwright-screenshots",
     "test:ci": "npm run test:clean && playwright test --reporter=junit,html",
-    "test:homepage": "playwright test tests/e2e/homepage.spec.js",
-    "test:location": "TEST_POSTCODE=\"EH3 6SS\" TEST_PLACE=\"Edinburgh\" playwright test tests/e2e/homepage.spec.js -g \"PlaceAutocomplete\""
+    "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js"
   },
   "gitHooks": {
     "pre-commit": "npm run lint-staged"
