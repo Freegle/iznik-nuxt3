@@ -21,14 +21,15 @@
         <b-col cols="12" xl="6" class="p-0">
           <div
             v-if="
-              failed ||
-              !message ||
-              (message &&
-                (message.outcomes?.length > 0 ||
-                  message.deleted ||
-                  (message.groups &&
-                    message.groups.length &&
-                    message.groups[0].collection === 'Rejected')))
+              !showtaken &&
+              (failed ||
+                !message ||
+                (message &&
+                  (message.outcomes?.length > 0 ||
+                    message.deleted ||
+                    (message.groups &&
+                      message.groups.length &&
+                      message.groups[0].collection === 'Rejected'))))
             "
             class="bg-white p-2"
           >
@@ -161,6 +162,9 @@ const messageStore = useMessageStore()
 
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
+
+// Get showtaken query parameter
+const showtaken = route.query.showtaken
 
 const failed = ref(false)
 

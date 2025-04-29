@@ -325,7 +325,7 @@ export default {
       }
 
       if (this.showAboutMeModal) {
-        this.miscStore.set({
+        useMiscStore().set({
           key: 'lastaboutmeask',
           value: now,
         })

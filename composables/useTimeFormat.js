@@ -1,4 +1,4 @@
-// Vue v3 doesn't support filters, so we have a global mixin which defines methods to achieve the same goal.
+// Vue v3 doesn't support filters, so we have a composable which defines methods to achieve the same goal.
 import dayjs from 'dayjs'
 import isToday from 'dayjs/plugin/isToday'
 import advancedFormat from 'dayjs/plugin/advancedFormat'

@@ -19,11 +19,23 @@
           />
         </span>
         <span v-else>
-            <span v-if="messageIsNew" class="font-weight-bold" v-html="highlightedEmails('highlight prewrap')">
-            </span>
-            <span v-else v-html="highlightedEmails('highlight preline forcebreak')">
-            </span>
-            <b-img
+          <span v-if="messageIsNew" class="font-weight-bold">
+            <Highlighter
+              :text-to-highlight="emessage"
+              :search-words="[regexEmailMT]"
+              highlight-class-name="highlight"
+              class="prewrap"
+            />
+          </span>
+          <span v-else>
+            <Highlighter
+              :text-to-highlight="emessage"
+              :search-words="[regexEmailMT]"
+              highlight-class-name="highlight"
+              class="preline forcebreak"
+            />
+          </span>
+          <b-img
             v-if="chatmessage?.image"
             fluid
             :src="chatmessage?.image.path"
@@ -32,7 +44,7 @@
           />
         </span>
       </div>
-      <!--div v-if="lat || lng">
+      <div v-if="lat || lng">
         <l-map
           ref="map"
           :zoom="16"
@@ -46,7 +58,7 @@
         <div class="small text-muted">
           (Map shows approximate location of {{ postcode }})
         </div>
-      </div-->
+      </div>
     </div>
     <div class="chatMessageProfilePic">
       <ProfileImage
@@ -65,7 +77,6 @@ import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 
 export default {
   components: {
@@ -109,6 +120,7 @@ export default {
     },
   },
   methods:{
+    // MTTODO: Use if need be or remove if not
     // Replace Highlighter with highlightedEmails as it does not support regex for emails
     makesafeforhtml(input) {
       input = input.replace(/&/g, '&amp;')
@@ -146,7 +158,6 @@ export default {
     if (this.postcode) {
       // Use typeahead to find the postcode location.
       const locationStore = useLocationStore()
-      if( locationStore && locationStore.typeahead){
       const locs = await locationStore.typeahead(this.postcode)
       console.log('Typeahead returned', locs)
 
@@ -154,7 +165,6 @@ export default {
         this.lat = locs[0].lat
         this.lng = locs[0].lng
       }
-    }
     }
   },
 }

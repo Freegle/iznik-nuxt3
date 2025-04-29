@@ -121,10 +121,10 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  groupid: {
-    type: Number,
+  recognise: {
+    type: Boolean,
     required: false,
-    default: null
+    default: false,
   },
 })
 
@@ -308,6 +308,7 @@ async function uploadSuccess(result) {
   if (result.successful) {
     // Iterate result.successful array
     const promises = []
+    let recognised = false
 
     result.successful.forEach((r) => {
       // We've uploaded a file.  Find what is after the last slash
@@ -326,8 +327,12 @@ async function uploadSuccess(result) {
           imgtype: props.type,
           externaluid: uid,
           externalmods: mods,
+          recognise: props.recognise && !recognised,
         }
         if( props.groupid) att.groupid = props.groupid
+
+        // Only recognise the first photo.
+        recognised = true
 
         const p = imageStore.post(att)
         promises.push(p)
@@ -346,6 +351,7 @@ async function uploadSuccess(result) {
             paththumb: ret.url,
             ouruid: ret.uid,
             externalmods: mods,
+            info: ret.info,
           })
           if( props.groupid) {
             emit('photoProcessed', ret.id)

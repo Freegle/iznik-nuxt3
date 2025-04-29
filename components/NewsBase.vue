@@ -6,6 +6,7 @@ import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { twem } from '~/composables/useTwem'
 import { URL_REGEX } from '~/constants'
+import { timeago } from '~/composables/useTimeFormat'
 
 export default {
   components: {},
@@ -55,6 +56,9 @@ export default {
     user() {
       const userStore = useUserStore()
       return userStore.byId(this.userid)
+    },
+    addedago() {
+      return timeago(this.newsfeed?.added)
     },
   },
   methods: {

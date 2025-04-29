@@ -50,14 +50,12 @@ export default {
 
       if (this.postcode && this.postcode.groupsnear) {
         for (const group of this.postcode.groupsnear) {
-          if (group.type === 'Freegle') {
-            ret.push({
-              value: group.id,
-              text: group.namedisplay ? group.namedisplay : group.nameshort,
-            })
+          ret.push({
+            value: group.id,
+            text: group.namedisplay ? group.namedisplay : group.nameshort,
+          })
 
-            ids[group.id] = true
-          }
+          ids[group.id] = true
         }
       }
 
@@ -82,12 +80,14 @@ export default {
     if (this.postcode) {
       const runtimeConfig = useRuntimeConfig()
 
-      const location = await api(runtimeConfig).location.fetch({
-        typeahead: this.postcode.name,
-      })
+      try {
+        const location = await api(runtimeConfig).location.typeahead(
+          this.postcode.name
+        )
 
-      if (location?.ret === 0 && location?.locations.length > 0) {
-        this.composeStore.postcode = location.locations[0]
+        this.composeStore.postcode = location[0]
+      } catch (e) {
+        console.error('Failed to fetch postcode', e)
       }
     }
   },

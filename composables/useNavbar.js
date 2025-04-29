@@ -217,10 +217,16 @@ export function useNavbar() {
   }
 
   const backButton = () => {
-    try {
-      router.back()
-    } catch (e) {
-      router.push('/')
+    if (router?.currentRoute?.value?.path?.includes('/chats/')) {
+      // From a single chat we should always go back to the chat list.  This can happen if we've clicked on an
+      // email notification and then clicked back.
+      router.push('/chats')
+    } else {
+      try {
+        router.back()
+      } catch (e) {
+        router.push('/')
+      }
     }
   }
 

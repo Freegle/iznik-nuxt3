@@ -12,20 +12,24 @@ import { useMiscStore } from '~/stores/misc'
 export default defineNuxtPlugin({
   setup(nuxtApp) {
     nuxtApp.hook('app:chunkError', (error) => {
-      console.log(
-        'Caught chunk error in ' +
-          window?.location?.pathname +
-          ', will reload: ' +
-          JSON.stringify(error)
-      )
+      if (!useMiscStore().unloading) {
+        console.log(
+          'Caught chunk error in ' +
+            window?.location?.pathname +
+            ', will reload: ' +
+            JSON.stringify(error)
+        )
 
-      // Flag as reloading to suppress errors.
-      useMiscStore().unloading = true
+        // Flag as reloading to suppress errors.
+        useMiscStore().unloading = true
 
-      reloadNuxtApp({
-        path: window?.location?.pathname ? window.location.pathname : '/',
-        persistState: true,
-      })
+        reloadNuxtApp({
+          path: window?.location?.pathname ? window.location.pathname : '/',
+          persistState: true,
+        })
+      } else {
+        console.log('Ignore chunk error during reload')
+      }
     })
   },
 })

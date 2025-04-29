@@ -60,20 +60,22 @@
                 <v-icon icon="arrow-left" /> Monthly donations are really
                 helpful
               </BFormCheckbox>
-              <DonationButton
-                v-if="payPalFallback"
-                :key="amount + '-fallback'"
-                :text="'Donate £' + amount"
-                :value="amount"
-              />
-              <StripeDonate
-                v-else
-                :key="amount + '-stripe'"
-                :price="amount"
-                :monthly="monthly"
-                @success="succeeded"
-                @no-payment-methods="noMethods"
-              />
+              <div v-if="parseFloat(amount)">
+                <DonationButton
+                  v-if="payPalFallback"
+                  :key="amount + '-fallback'"
+                  :text="'Donate £' + amount"
+                  :value="amount"
+                />
+                <StripeDonate
+                  v-else
+                  :key="amount + '-stripe'"
+                  :price="amount"
+                  :monthly="monthly"
+                  @success="succeeded"
+                  @no-payment-methods="noMethods"
+                />
+              </div>
             </div>
           </b-card-text>
         </b-card>

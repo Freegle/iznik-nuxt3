@@ -120,10 +120,10 @@
               "
               class="font-weight-bold"
             >
-              <!-- TODO FIX regexEmail which fails validator test in Highlighter -->
+              <!-- MTTODO FIX validator test in Highlighter -->
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmail.toString()]"
+                :search-words="[regexEmailMT]"
                 highlight-class-name="highlight"
                 class="prewrap"
               />
@@ -131,7 +131,7 @@
             <span v-else>
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmail.toString()]"
+                :search-words="[regexEmailMT]"
                 highlight-class-name="highlight"
                 class="preline forcebreak"
               />

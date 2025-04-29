@@ -1,0 +1,18 @@
+diff --git a/node_modules/postman-paf/src/conversion-rules/ruleConversionsHelper.js b/node_modules/postman-paf/src/conversion-rules/ruleConversionsHelper.js
+index 520cd1d..4d27ca9 100644
+--- a/node_modules/postman-paf/src/conversion-rules/ruleConversionsHelper.js
++++ b/node_modules/postman-paf/src/conversion-rules/ruleConversionsHelper.js
+@@ -146,13 +146,6 @@ const mapAddressElementsToUnstructuredAddress = (addressElements, postTown, post
+     convertedUnstructuredAddress.line5 = postTown;
+     convertedUnstructuredAddress.postcode = postcode;
+ 
+-    // Apply string formatting to each element of the unstructured address
+-    Object.entries(convertedUnstructuredAddress).forEach(([key, value]) => {
+-        if (value) {
+-            convertedUnstructuredAddress[key] = value.toUpperCase();
+-        }
+-    });
+-
+     return convertedUnstructuredAddress;
+ };
+ 

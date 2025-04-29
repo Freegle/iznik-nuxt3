@@ -379,6 +379,7 @@ import { useAddressStore } from '../stores/address'
 import { useUserStore } from '~/stores/user'
 import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
+import 'floating-vue/dist/style.css'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurUploader = defineAsyncComponent(() =>
@@ -947,8 +948,6 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-@import 'https://unpkg.com/floating-vue@^2.0.0-beta.1/dist/style.css';
-
 .mobtext {
   text-align: center !important;
 }

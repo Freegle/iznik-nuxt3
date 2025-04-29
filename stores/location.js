@@ -19,6 +19,12 @@ export const useLocationStore = defineStore({
         return response?.location ? response.location : response?.locations
       }
     },
+    async typeahead(query) {
+      return await api(this.config).location.typeahead(query)
+    },
+    async fetchByLatLng(lat, lng) {
+      return await api(this.config).location.latlng(lat, lng)
+    },
     async fetchv2(id) {
       const loc = await api(this.config).location.fetchv2(id)
 

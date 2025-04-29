@@ -7,7 +7,7 @@
     >
       <client-only>
         <span :title="group.arrival" class="time"
-          >{{ timeago(group.arrival, true) }}
+          >{{ grouparrivalago }}
           <span v-if="showSummaryDetails">on </span>
         </span>
       </client-only>
@@ -180,6 +180,9 @@ export default {
       } else {
         return this.message.source
       }
+    },
+    grouparrivalago() {
+      return timeago(this.message?.groups[0]?.arrival, true)
     },
   },
 }

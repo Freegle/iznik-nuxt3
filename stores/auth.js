@@ -274,7 +274,7 @@ export const useAuthStore = defineStore({
           throw new SignUpError(ret, status)
         }
       } catch (e) {
-        console.log('exception', e.response.data)
+        console.log('exception', e?.response?.data)
         if (e?.response?.data?.ret === 2) {
           throw new SignUpError(2, e.response.data.status)
         } else {

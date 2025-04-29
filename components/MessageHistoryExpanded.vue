@@ -64,7 +64,7 @@
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>
         <span class="ml-1 small text-muted" :title="group.arrival">{{
-          timeago(group.arrival)
+          grouparrivalago(group.arrival)
         }}</span>
       </div>
     </div>
@@ -174,6 +174,9 @@ export default {
   methods: {
     showProfileModal() {
       this.showProfile = true
+    },
+    grouparrivalago(val) {
+      return timeago(val)
     },
   },
 }
