@@ -47,6 +47,7 @@ export const useMiscStore = defineStore({
 
       if (this.apiCount < 0) {
         console.error('API count went negative')
+        console.trace()
         this.apiCount = 0
       }
     },

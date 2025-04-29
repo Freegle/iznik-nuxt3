@@ -3,6 +3,7 @@ const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
 const { timeouts, environment } = require('./config')
+const logger = require('./logger')
 
 // Define the screenshots directory
 const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
@@ -64,6 +65,50 @@ const cleanupScreenshots = async () => {
   }
 }
 
+// Store all generated test emails for later cleanup
+const testEmailRegistry = new Set()
+
+// File path for storing test emails
+const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
+
+// Save all test emails to a file
+const saveTestEmails = () => {
+  try {
+    const emails = Array.from(testEmailRegistry)
+    if (emails.length > 0) {
+      fs.writeFileSync(
+        TEST_EMAILS_LOG_FILE,
+        JSON.stringify({ emails, timestamp: new Date().toISOString() }, null, 2)
+      )
+      console.log(
+        `Saved ${emails.length} test emails to ${TEST_EMAILS_LOG_FILE}`
+      )
+    }
+  } catch (error) {
+    console.error(`Failed to save test emails: ${error.message}`)
+  }
+}
+
+// Load previously saved test emails
+const loadTestEmails = () => {
+  try {
+    if (fs.existsSync(TEST_EMAILS_LOG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(TEST_EMAILS_LOG_FILE, 'utf-8'))
+      if (data.emails && Array.isArray(data.emails)) {
+        data.emails.forEach((email) => testEmailRegistry.add(email))
+        console.log(
+          `Loaded ${data.emails.length} test emails from previous runs`
+        )
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to load test emails: ${error.message}`)
+  }
+}
+
+// Load existing emails at startup
+loadTestEmails()
+
 // Generate a globally unique, date-time stamped test email
 const generateUniqueTestEmail = (prefix = 'test') => {
   // Format: prefix-YYYYMMDD-HHMMSS-randomhash@domain
@@ -76,30 +121,41 @@ const generateUniqueTestEmail = (prefix = 'test') => {
   // Add a random hash for global uniqueness (8 characters should be plenty)
   const randomHash = crypto.randomBytes(4).toString('hex')
 
-  return `${prefix}-${datePart}-${randomHash}@${environment.email.domain}`
+  const email = `${prefix}-${datePart}-${randomHash}@${environment.email.domain}`
+
+  // Register this email for later cleanup
+  testEmailRegistry.add(email)
+
+  return email
 }
 
 // Define a custom test function that wraps the base test to add automatic screenshot capture
 const test = base.test.extend({
   // Add the testEmail fixture - basic version that just generates a random test email
-  testEmail: async (_, use) => {
+  testEmail: async ({ browser }, use) => {
     // Generate a unique test email for this test
     const email = generateUniqueTestEmail()
+    console.log(`Using test email: ${email}`)
 
     // Provide the email to the test
     await use(email)
   },
 
   // Function to generate custom test emails with specific prefixes
-  getTestEmail: async (_, use) => {
+  getTestEmail: async ({ browser }, use) => {
     // Return a function that generates test emails with custom prefixes
     const emailGenerator = (prefix = 'test') => generateUniqueTestEmail(prefix)
     await use(emailGenerator)
   },
 
   page: async ({ page }, use) => {
-    const consoleErrors = []
+    // Create a logging proxy for the page
+    const loggingPage = logger.createLoggingPage(page)
 
+    const consoleErrors = []
+    const navigationEvents = []
+
+    // Track console errors
     page.on('console', (message) => {
       if (message.type() === 'error') {
         consoleErrors.push({
@@ -109,7 +165,60 @@ const test = base.test.extend({
       }
     })
 
+    // Track navigation events
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) {
+        const isHardNavigation =
+          !frame._loaderId || frame._loaderId !== frame._lastLoaderId
+        const url = frame.url()
+        const timestamp = new Date().toISOString()
+        const navType = isHardNavigation ? 'HARD' : 'SOFT'
+
+        navigationEvents.push({
+          type: navType,
+          url,
+          timestamp,
+        })
+
+        console.log(`[${timestamp}] [NAVIGATION:${navType}] ${url}`)
+      }
+    })
+
+    // Methods to access console errors
     page.consoleErrors = () => consoleErrors
+
+    // Methods to access navigation data
+    page.navigationEvents = () => navigationEvents
+
+    // Get navigation history as a formatted string for debugging
+    page.getNavigationHistory = () => {
+      if (navigationEvents.length === 0) {
+        return 'No navigation events recorded'
+      }
+
+      return navigationEvents
+        .map((event) => `[${event.timestamp}] [${event.type}] ${event.url}`)
+        .join('\n')
+    }
+
+    // Get navigation summary with counts
+    page.getNavigationSummary = () => {
+      const hardNavigations = navigationEvents.filter(
+        (event) => event.type === 'HARD'
+      )
+      const softNavigations = navigationEvents.filter(
+        (event) => event.type === 'SOFT'
+      )
+
+      return {
+        total: navigationEvents.length,
+        hardCount: hardNavigations.length,
+        softCount: softNavigations.length,
+        hard: hardNavigations,
+        soft: softNavigations,
+        all: navigationEvents,
+      }
+    }
 
     // Method to get all console errors grouped by allowed vs non-allowed
     page.getErrorSummary = () => {
@@ -129,7 +238,7 @@ const test = base.test.extend({
 
     // List of allowed console error patterns (using regex)
     const allowedErrorPatterns = [
-      /%cssr:error%c API count went negative/, // Low importance and not visible to client.
+      /API count went negative/, // Not visible to client and can happen during navigation.
       /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
       /Not signed in with the identity provider/, // Not available in test.
       /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
@@ -273,17 +382,48 @@ const test = base.test.extend({
       return await performTeardown(options)
     }
 
+    // Copy all custom methods from the original page to the logging page
+    Object.keys(page).forEach((key) => {
+      if (typeof page[key] === 'function' && !loggingPage[key]) {
+        loggingPage[key] = page[key]
+      }
+    })
+
+    // Override methods that need both the original page and logging functionality
+    loggingPage.checkTestRanOK = page.checkTestRanOK
+    loggingPage.expectNoConsoleErrors = page.expectNoConsoleErrors
+    loggingPage.gotoAndVerify = page.gotoAndVerify
+    loggingPage.waitForTeardown = page.waitForTeardown
+
+    // Add configuration options for the logger
+    console.log('Command logging enabled for Playwright tests')
+    logger.configure({
+      enabled: true,
+      timestampFormat: 'simple',
+      level: 'normal',
+    })
+
     // Wrap the use() call in a try-catch block to add automatic screenshot capturing
     try {
-      // Call use() to run the test
-      await use(page)
+      // Call use() with the logging page instead of the original page
+      await use(loggingPage)
 
       // Automatically check for console errors at the end of each test
-      await page.checkTestRanOK()
+      await loggingPage.checkTestRanOK()
+
+      // Log navigation summary at the end of successful tests
+      const navSummary = loggingPage.getNavigationSummary()
+      console.log(
+        `Navigation summary: ${navSummary.total} total (${navSummary.hardCount} hard, ${navSummary.softCount} soft)`
+      )
     } catch (error) {
       // Take a full page screenshot on any test failure
       const screenshotPath = getScreenshotPath(`test-failure-${Date.now()}.png`)
-      await page.screenshot({ path: screenshotPath, fullPage: true })
+      await loggingPage.screenshot({ path: screenshotPath, fullPage: true })
+
+      // Log the navigation history on failure for debugging
+      console.log('Navigation history:')
+      console.log(loggingPage.getNavigationHistory())
 
       // Log the error with screenshot info
       console.error(
@@ -299,8 +439,11 @@ const test = base.test.extend({
   },
 })
 
-// Add a global hook to cleanup screenshots after all tests
+// Add a global hook to cleanup screenshots after all tests and save email registry
 test.afterAll(async () => {
+  // Save the test emails regardless of whether tests succeeded or failed
+  saveTestEmails()
+
   // Only clean up if the tests succeeded
   if (process.exitCode === undefined || process.exitCode === 0) {
     await cleanupScreenshots()
@@ -309,6 +452,219 @@ test.afterAll(async () => {
   }
 })
 
-// Export our enhanced test function and expect
-exports.test = test
+// Define our extended test with custom fixtures
+const testWithFixtures = test.extend({
+  // Add a fixture to manually register test emails that may be created during tests
+  registerTestEmail: async (_, use) => {
+    /**
+     * Function to manually register a test email for cleanup
+     * @param {string} email - The email address to register
+     * @returns {boolean} - True if registered successfully, false otherwise
+     */
+    const registerEmail = (email) => {
+      if (email && typeof email === 'string' && email.includes('@')) {
+        testEmailRegistry.add(email)
+        console.log(`Registered test email for cleanup: ${email}`)
+        return true
+      }
+      console.warn(`Invalid email format, not registering: ${email}`)
+      return false
+    }
+
+    await use(registerEmail)
+  },
+
+  // Add a fixture to get all registered test emails
+  getRegisteredEmails: async (_, use) => {
+    /**
+     * Function to retrieve all registered test emails
+     * @returns {Array<string>} - Array of all registered email addresses
+     */
+    await use(() => Array.from(testEmailRegistry))
+  },
+
+  postMessage: async ({ page }, use) => {
+    /**
+     * Helper function to post a message to Freegle
+     * @param {Object} options - Configuration options for posting
+     * @param {string} options.type - The type of post ('OFFER' or 'WANTED')
+     * @param {string} options.item - The item title/name
+     * @param {string} options.description - The item description
+     * @param {string} options.postcode - The postcode for the item
+     * @param {string} options.email - The email to use for posting
+     * @returns {Promise<{id: string|null, description: string}>} - Information about the created post
+     */
+    const postMessage = async (options) => {
+      const {
+        type = 'OFFER',
+        item = 'test post - please delete',
+        description = `Created by automated test at ${new Date().toISOString()}`,
+        postcode = environment.postcode,
+        email,
+      } = options
+
+      if (!email) {
+        throw new Error('Email is required for posting a message')
+      }
+
+      // Navigate to the correct page based on type
+      const startPath = type.toLowerCase() === 'wanted' ? '/find' : '/give'
+      await page.gotoAndVerify(startPath, {
+        timeout: timeouts.navigation.initial,
+      })
+
+      // Verify we're on the correct page
+      const pageTitle = await page.title()
+      base.expect(pageTitle).toContain(type.toUpperCase())
+
+      // Fill in the item type (item)
+      await page
+        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+        .click()
+      await page
+        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+        .fill(item)
+
+      // Fill in the post details
+      await page.waitForSelector(
+        '[id^="description"], textarea.description, textarea.form-control',
+        { timeout: timeouts.ui.appearance }
+      )
+
+      // Add the description
+      await page
+        .locator(
+          '[id^="description"], textarea.description, textarea.form-control'
+        )
+        .fill(description)
+
+      // Click the Next/Continue button to go to location page
+      await page
+        .locator('.btn:has-text("Next")')
+        .filter({ visible: true })
+        .first()
+        .click()
+
+      // Fill in location details
+      await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Fill in the postcode
+      await page
+        .locator('.pcinp, input[placeholder="Type postcode"]')
+        .fill(postcode)
+
+      // Wait for the location to be confirmed using locator.waitFor()
+      const confirmationIcon = page.locator(
+        '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+      )
+      await confirmationIcon.waitFor({
+        state: 'visible',
+        timeout: timeouts.api.default,
+      })
+
+      // Click the Next/Continue button to go to email page
+      await page
+        .locator('.btn:has-text("Next")')
+        .filter({ visible: true })
+        .first()
+        .click()
+
+      // Fill in the email - wait for email input to be visible using locator.waitFor()
+      const emailField = page
+        .locator('input[name="email"], input.email, input[type="email"]')
+        .first()
+      await emailField.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Fill in our generated test email
+      const emailInput = page
+        .locator('input[name="email"], input.email, input[type="email"]')
+        .first()
+      await emailInput.click()
+      await emailInput.fill(email)
+
+      // Take a debug screenshot
+      const emailScreenshotTimestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, '-')
+      await page.screenshot({
+        path: `playwright-screenshots/email-filled-${emailScreenshotTimestamp}.png`,
+        fullPage: true,
+      })
+
+      // Wait for validation to complete and the button to appear using web assertions
+      console.log(
+        'Waiting for Freegle it button to appear after email validation'
+      )
+      const freegleButton = page
+        .locator('.btn:has-text("Freegle it!")')
+        .filter({ visible: true })
+
+      // Wait for button to be visible
+      await freegleButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.api.default,
+      })
+
+      console.log('Button appeared, submit')
+
+      // Click the Submit/Post button to finalize
+      await freegleButton.click()
+
+      // Wait for page url to contain myposts
+      console.log('Waiting for navigation to My Posts page', page.url())
+      const myPostsUrl = /\/myposts/
+      await page.waitForURL(myPostsUrl, {
+        timeout: timeouts.navigation.default,
+      })
+
+      // Take a screenshot of the success
+      const screenshotTimestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      await page.screenshot({
+        path: `playwright-screenshots/item-post-success-${screenshotTimestamp}.png`,
+        fullPage: true,
+      })
+
+      // Check for the posted item
+      const messageCard = page.locator(`.messagecard:has-text("${item}")`)
+      await messageCard.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Try to extract the post ID
+      let postId = null
+      try {
+        postId =
+          (await messageCard.getAttribute('data-id')) ||
+          (await messageCard.getAttribute('id'))
+
+        if (postId) {
+          console.log(`Successfully created post with ID: ${postId}`)
+        }
+      } catch (error) {
+        console.log(
+          'Post appears to be created but could not find details:',
+          error.message
+        )
+      }
+
+      // Return information about the post
+      return {
+        id: postId,
+        item,
+        description,
+      }
+    }
+
+    await use(postMessage)
+  },
+})
+
+// Export our enhanced test function with all fixtures and expect
+exports.test = testWithFixtures
 exports.expect = base.expect

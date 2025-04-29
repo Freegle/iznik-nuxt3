@@ -110,6 +110,7 @@ import { useTrystStore } from '~/stores/tryst'
 import { useRuntimeConfig } from '#app'
 import Api from '~/api'
 
+console.log('My Posts page setup')
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )

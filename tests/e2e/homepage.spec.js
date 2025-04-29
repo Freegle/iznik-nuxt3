@@ -36,57 +36,77 @@ test.describe('Homepage tests', () => {
       // Check that essential elements that should always be visible are displayed
 
       // 1. Main buttons should always be visible
-      await expect(page.locator('.btn:has-text("Give Stuff")')).toBeVisible()
-      await expect(page.locator('.btn:has-text("Ask for Stuff")')).toBeVisible()
+      await page
+        .locator('.btn:has-text("Give Stuff")')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+      await page
+        .locator('.btn:has-text("Ask for Stuff")')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
       // 2. PlaceAutocomplete should always be visible
-      await expect(
-        page.locator("text=See what's being freegled near you")
-      ).toBeVisible()
+      await page
+        .locator("text=See what's being freegled near you")
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
       // 3. App download links should always be visible
-      await expect(page.locator('a[href*="play.google.com"]')).toBeVisible()
-      await expect(page.locator('a[href*="itunes.apple.com"]')).toBeVisible()
+      await page
+        .locator('a[href*="play.google.com"]')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+      await page
+        .locator('a[href*="itunes.apple.com"]')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
       // 4. Footer should always be visible
-      await expect(page.locator(selectors.common.mainFooter)).toBeVisible()
+      await page
+        .locator(selectors.common.mainFooter)
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
       // Breakpoint-specific tests
       if (bp.name === 'xs') {
         // On mobile (xs) we should see:
         // - Mobile header
-        await expect(
-          page.locator('text=Freegle - online dating for stuff')
-        ).toBeVisible()
+        await page
+          .locator('text=Freegle - online dating for stuff')
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
         // - Mobile description
-        await expect(
-          page.locator("text=Got things you don't need? Need stuff?")
-        ).toBeVisible()
+        await page
+          .locator("text=Got things you don't need? Need stuff?")
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
         // - VisualiseList component should be visible on mobile
-        await expect(page.locator(selectors.common.visualiseList)).toBeVisible()
+        await page
+          .locator(selectors.common.visualiseList)
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
         // - FreeglerPhotos should NOT be visible
-        await expect(
-          page.locator(selectors.common.freeglerPhotos)
-        ).not.toBeVisible()
+        const freeglerPhotosVisible = await page
+          .locator(selectors.common.freeglerPhotos)
+          .isVisible()
+        expect(freeglerPhotosVisible).toBe(false)
+
         // - "Don't throw it away" tagline should NOT be visible
-        await expect(
-          page.locator("text=Don't throw it away, give it away!")
-        ).not.toBeVisible()
+        const taglineVisible = await page
+          .locator("text=Don't throw it away, give it away!")
+          .isVisible()
+        expect(taglineVisible).toBe(false)
       } else {
         // On larger screens (sm and up):
         // - Desktop header
-        await expect(
-          page.locator('text=Freegle - like online dating for stuff')
-        ).toBeVisible()
+        await page
+          .locator('text=Freegle - like online dating for stuff')
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
         // - Desktop description
-        await expect(
-          page.locator("text=Got stuff you don't need? Looking for something?")
-        ).toBeVisible()
-        await expect(
-          page.locator(
+        await page
+          .locator("text=Got stuff you don't need? Looking for something?")
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
+        await page
+          .locator(
             "text=We'll match you with someone local. All completely free."
           )
-        ).toBeVisible()
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       }
 
       // Specific checks for medium and larger screens
@@ -97,19 +117,22 @@ test.describe('Homepage tests', () => {
         bp.name === 'xxl'
       ) {
         // "Don't throw it away" tagline should be visible on md screens and up
-        await expect(
-          page.locator("text=Don't throw it away, give it away!")
-        ).toBeVisible()
+        await page
+          .locator("text=Don't throw it away, give it away!")
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+
         // "Just looking?" heading should be visible on md screens and up
-        await expect(page.locator('text=Just looking?')).toBeVisible()
+        await page
+          .locator('text=Just looking?')
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       }
 
       // Specific checks for large and larger screens
       if (bp.name === 'lg' || bp.name === 'xl' || bp.name === 'xxl') {
         // FreeglerPhotos should be visible on lg screens and up
-        await expect(
-          page.locator(selectors.common.freeglerPhotos)
-        ).toBeVisible()
+        await page
+          .locator(selectors.common.freeglerPhotos)
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       }
 
       // Take a screenshot for visual verification
@@ -130,7 +153,10 @@ test.describe('Homepage tests', () => {
 
     // Test 1: Clicking "Give Stuff" should navigate to /give
     const giveStuffButton = page.locator('.btn:has-text("Give Stuff")')
-    await expect(giveStuffButton).toBeVisible()
+    await giveStuffButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
 
     // Create a navigation promise before clicking
     const giveStuffNavigation = page.waitForURL('/give')
@@ -145,7 +171,10 @@ test.describe('Homepage tests', () => {
 
     // Test 2: Clicking "Ask for Stuff" should navigate to /find
     const askStuffButton = page.locator('.btn:has-text("Ask for Stuff")')
-    await expect(askStuffButton).toBeVisible()
+    await askStuffButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
 
     // Create a navigation promise before clicking
     const askStuffNavigation = page.waitForURL('/find')
@@ -171,7 +200,10 @@ test.describe('Homepage tests', () => {
 
     // Locate the PlaceAutocomplete input field
     const placeInput = page.locator(selectors.placeAutocomplete.input)
-    await expect(placeInput).toBeVisible()
+    await placeInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
 
     // Clear any existing text and enter the test postcode
     await placeInput.click()

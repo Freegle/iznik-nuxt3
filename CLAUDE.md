@@ -54,6 +54,89 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - **Emits**: Define component emits with defineEmits()
 - **Comments**: Do NOT add explanatory comments for obvious concepts or standard operations
 - **Documentation**: Assume the reader understands Vue Single File Component structure and patterns
+- **Async Functions**: NEVER use the `async` keyword unless the function contains at least one `await` statement. Regular functions that return a Promise don't need the `async` keyword.
+  ```javascript
+  // CORRECT - Using async with await
+  const fetchData = async () => {
+    const result = await api.getData()
+    return result
+  }
+  
+  // CORRECT - No async keyword when no await is used
+  const handleClick = () => {
+    fetchData().then(result => {
+      // do something with result
+    })
+  }
+  
+  // WRONG - Using async without await
+  const processItem = async (item) => {
+    return item.id * 2 // No await, so async is unnecessary
+  }
+  
+  // WRONG - Event handler with no await statements shouldn't be async
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    submitForm().then(response => {
+      showSuccess()
+    })
+  }
+  
+  // CORRECT - The same handler without async
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    submitForm().then(response => {
+      showSuccess()
+    })
+  }
+  
+  // WRONG - Function that calls async functions but never awaits them
+  const processList = async (items) => {
+    items.forEach(item => {
+      processItem(item) // This returns a Promise but we're not awaiting it
+    })
+  }
+  
+  // CORRECT - Same function without async since there's no await
+  const processList = (items) => {
+    items.forEach(item => {
+      processItem(item)
+    })
+  }
+  ```
+  
+  This rule applies to ALL function types:
+  - Arrow functions
+  - Function declarations
+  - Method definitions
+  - Event handlers
+  - Callback functions
+  - Computed property setters
+
+### User Data Access
+Always use the `useMe` composable to access the current user information:
+
+```javascript
+// Import the composable
+import { useMe, fetchMe } from '~/composables/useMe'
+
+// Extract what you need
+const { me, myid, loggedIn, myGroups } = useMe()
+
+// Access user data with .value since it's a computed ref
+const username = me.value?.displayname
+
+// Use fetchMe(true) to force a server refresh when needed
+const updateUserData = async () => {
+  await fetchMe(true)
+}
+```
+
+Key benefits of using the useMe composable:
+- Provides consistent access to user data across components
+- Offers helper computed properties (myid, loggedIn, etc.)
+- Handles loading states and data fetching
+- Better performance than accessing the auth store directly
 
 ### Git Hooks Setup
 - The project uses custom Git hooks for managing pre-commit hooks
@@ -84,6 +167,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Timeouts are categorized (navigation, ui, api, teardown, assertion) in the config for clear intent
 - Timeouts are automatically extended by 50% in CI environments
 - Default timeouts are generous to accommodate slower CI environments and reduce flakiness
+- Sentry is automatically disabled during tests via environment variables in playwright.config.js to prevent error reporting during tests
 - Selectors should be defined in the config file and referenced in tests
 - Use built-in test fixtures for globally unique test data:
   - `testEmail` - provides a random globally unique date-time stamped email for each test
@@ -116,7 +200,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
   - `testUsers.getRandomUser()` returns a random test user with email, password, etc.
   - `testUsers.getRegularUser()` returns a standard test user for login tests
   - `testUsers.getModeratorUser()` returns a moderator test user
-  - Test email addresses use the domain from `environment.email.domain` (default test.yahoogroups.com)
+  - Test email addresses use the domain from `environment.email.domain` (default ahoogroups.com)
   - Generate custom test emails with `environment.email.getRandomEmail()` and `environment.email.getEmailForUser()`
 - IMPORTANT: Do NOT create separate example or demonstration spec.js files; implement tests in the appropriate existing test files
 - Each test file should focus on a specific feature or workflow, not just demonstrate API usage
@@ -253,7 +337,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - `TEST_BASE_URL` - URL for testing (defaults to http://localhost:3002)
 - `TEST_POSTCODE` - Postcode to use for location-based tests (defaults to EH3 6SS)
 - `TEST_PLACE` - Place name to use for location-based tests (defaults to Edinburgh)
-- `TEST_EMAIL_DOMAIN` - Domain to use for test email addresses (defaults to test.yahoogroups.com)
+- `TEST_EMAIL_DOMAIN` - Domain to use for test email addresses (defaults to yahoogroups.com)
 - `STRIPE_PUBLISHABLE_KEY` - Stripe test mode publishable key for payment testing
 - `SERVER_TIMEOUT` - Timeout for server startup in seconds (defaults to 120)
 

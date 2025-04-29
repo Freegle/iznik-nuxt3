@@ -180,22 +180,32 @@ async function checkValidDomain(value) {
 }
 
 async function validateEmail(value) {
+  console.log('Validating', value)
   if (!value && !props.required) {
+    console.log('No value and not required')
     emit('update:valid', true)
     return
   }
 
   if (!value) {
+    console.log('No value')
     emit('update:valid', false)
     return 'Please enter an email address.'
   }
 
   if (!new RegExp(EMAIL_REGEX).test(value)) {
+    console.log('Invalid email')
     emit('update:valid', false)
     return 'Please enter a valid email address.'
   }
 
   const isValidDomain = await checkValidDomain(value)
+  if (isValidDomain) {
+    console.log('Valid domain')
+  } else {
+    console.log('Invalid domain')
+  }
+
   emit('update:valid', isValidDomain)
   return (
     isValidDomain ||

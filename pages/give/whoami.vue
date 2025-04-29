@@ -45,7 +45,12 @@
       <div class="d-block d-md-none flex-grow-1" />
       <div class="mt-1 d-block d-md-none">
         <b-button
-          v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
+          v-if="
+            previousScreensValid &&
+            emailValid &&
+            !submitting &&
+            !emailBelongsToSomeoneElse
+          "
           variant="primary"
           size="lg"
           block
@@ -141,6 +146,9 @@ const { me } = useMe()
 // Data properties
 const emailValid = ref(false)
 const emailBelongsToSomeoneElse = ref(false)
+const previousScreensValid = computed(
+  () => messageValid && postcodeValid && loggedIn
+)
 
 // Get store state
 const { email, progress } = storeToRefs(composeStore)
@@ -192,14 +200,6 @@ async function next() {
 }
 
 onMounted(() => {
-  if (!messageValid.value) {
-    router.push('/give')
-  }
-
-  if (!postcodeValid.value) {
-    router.push('/give/whereami')
-  }
-
   if (loggedIn.value) {
     email.value = me.value?.email
     emailValid.value = email.value?.length > 0

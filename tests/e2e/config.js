@@ -51,7 +51,7 @@ const environment = {
   // Test email configuration
   email: {
     // Default test domain for test email addresses
-    domain: process.env.TEST_EMAIL_DOMAIN || 'test.yahoogroups.com',
+    domain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
 
     // Generate a random test email for this test run
     getRandomEmail: (prefix = 'test') => {

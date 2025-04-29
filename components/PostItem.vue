@@ -47,13 +47,11 @@
   </div>
 </template>
 <script setup>
-import { storeToRefs } from 'pinia'
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
-import { useUserStore } from '~/stores/user'
-import { computed } from '#imports'
+import { computed, useMe } from '#imports'
 
 const emit = defineEmits(['update:edititem'])
 
@@ -80,8 +78,7 @@ const props = defineProps({
 
 const composeStore = useComposeStore()
 const messageStore = useMessageStore()
-const userStore = useUserStore()
-const { myid } = storeToRefs(userStore)
+const { myid } = useMe()
 
 // Data properties
 const vagueness = [

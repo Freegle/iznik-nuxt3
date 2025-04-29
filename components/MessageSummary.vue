@@ -22,7 +22,7 @@
         @click="expand"
       />
     </template>
-    <div :class="classes" @click="expand">
+    <div :class="classes" :data-id="id" @click="expand">
       <MessageItemLocation
         :id="id"
         :matchedon="matchedon"

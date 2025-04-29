@@ -20,7 +20,7 @@ module.exports = defineConfig({
     baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
 
     // Test email domain for fake email addresses
-    testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'test.yahoogroups.com',
+    testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
 
     // Default viewport size - full HD (1920x1080)
     viewport: { width: 1920, height: 1080 },
@@ -31,6 +31,14 @@ module.exports = defineConfig({
     screenshot: 'only-on-failure',
     // Capture video only when retrying
     video: 'on-first-retry',
+  },
+
+  // Set environment variables for the tests
+  // Disable Sentry during tests to avoid unnecessary error reporting
+  env: {
+    SENTRY_DSN: '', // Empty string to disable Sentry
+    SENTRY_ENABLE_DEBUG: 'false',
+    SENTRY_TRACES_SAMPLE_RATE: '0', // Don't sample any traces
   },
   projects: [
     // Start with just Chromium to make it easier to run tests
