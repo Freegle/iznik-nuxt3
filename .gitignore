@@ -25,3 +25,4 @@ static/sw.js
 /test-results/.last-run.json
 /test-results/
 /.npmrc
+/test-emails.json
