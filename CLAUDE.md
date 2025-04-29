@@ -55,7 +55,6 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - **Comments**: Do NOT add explanatory comments for obvious concepts or standard operations
 - **Documentation**: Assume the reader understands Vue Single File Component structure and patterns
 - **Async Functions**: NEVER use the `async` keyword unless the function contains at least one `await` statement. Regular functions that return a Promise don't need the `async` keyword.
-- **Empty Parameters**: NEVER use an empty object literal `{}` as a parameter - use underscore `_` instead.
   ```javascript
   // CORRECT - Using async with await
   const fetchData = async () => {

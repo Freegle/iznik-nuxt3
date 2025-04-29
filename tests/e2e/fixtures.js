@@ -455,7 +455,7 @@ test.afterAll(async () => {
 // Define our extended test with custom fixtures
 const testWithFixtures = test.extend({
   // Add a fixture to manually register test emails that may be created during tests
-  registerTestEmail: async (_, use) => {
+  registerTestEmail: async ({ page = null }, use) => {
     /**
      * Function to manually register a test email for cleanup
      * @param {string} email - The email address to register
@@ -475,7 +475,7 @@ const testWithFixtures = test.extend({
   },
 
   // Add a fixture to get all registered test emails
-  getRegisteredEmails: async (_, use) => {
+  getRegisteredEmails: async ({ page = null }, use) => {
     /**
      * Function to retrieve all registered test emails
      * @returns {Array<string>} - Array of all registered email addresses
