@@ -12,6 +12,7 @@ const { test, expect } = require('@playwright/test')
 const { environment } = require('./config')
 const { unsubscribeManually } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
+const { unsubscribeTestEmails } = require('~/tests/e2e/unsubscribe-test-emails')
 
 // File path for storing test emails for later cleanup
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
@@ -87,5 +88,12 @@ test.describe('Registration and unsubscription flow', () => {
     console.log(
       'Test completed successfully - registered user and verified unsubscribe fails for non-existent user'
     )
+  })
+
+  test('should call unsubscribe tidy up', async ({ page }) => {
+    // Setup navigation helpers
+    setupNavigationHelpers(page)
+
+    await unsubscribeTestEmails()
   })
 })

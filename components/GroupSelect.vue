@@ -20,7 +20,7 @@ import { computed, watch, onMounted } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
-import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   /**
@@ -126,9 +126,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 const miscStore = useMiscStore()
 const groupStore = useGroupStore()
-const authStore = useAuthStore()
-const me = computed(() => authStore.user)
-const myGroups = computed(() => authStore.groups)
+const { me, myGroups } = useMe()
 
 const selectedGroup = computed({
   get: () => props.modelValue,

@@ -80,6 +80,7 @@
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useSearchStore } from '../stores/search'
+import { useMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'
 import { useFavoritePage } from '~/composables/useFavoritePage'
 import {
@@ -90,7 +91,6 @@ import {
   defineAsyncComponent,
   useHead,
   useRouter,
-  useMe,
 } from '#imports'
 
 import VisibleWhen from '~/components/VisibleWhen'
@@ -120,7 +120,8 @@ const messageStore = useMessageStore()
 const searchStore = useSearchStore()
 const trystStore = useTrystStore()
 const router = useRouter()
-const { me } = useMe()
+// Use me and myid computed properties from useMe composable for consistency
+const { me, myid } = useMe()
 
 const runtimeConfig = useRuntimeConfig()
 const api = Api(runtimeConfig)
@@ -149,8 +150,6 @@ useHead(
 useFavoritePage('myposts')
 
 const { showDonationAskModal } = await useDonationAskModal()
-
-const myid = computed(() => authStore.user?.id)
 
 // `posts` holds both OFFERs and WANTEDs (both old and active)
 const posts = computed(() => messageStore.byUserList[myid.value] || [])

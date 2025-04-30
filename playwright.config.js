@@ -30,7 +30,7 @@ module.exports = defineConfig({
     // Always capture screenshots on failure
     screenshot: 'only-on-failure',
     // Capture video only when retrying
-    video: 'on-first-retry',
+    video: 'retry-with-video',
   },
 
   // Set environment variables for the tests

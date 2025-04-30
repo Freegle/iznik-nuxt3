@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const base = require('@playwright/test')
 const { SCREENSHOTS_DIR, timeouts, environment } = require('./config')
 const logger = require('./logger')
+const { unsubscribeTestEmails } = require('~/tests/e2e/unsubscribe-test-emails')
 
 // Ensure the screenshots directory exists
 const ensureScreenshotsDir = () => {
@@ -128,6 +129,25 @@ const generateUniqueTestEmail = (prefix = 'test') => {
 
 // Define a custom test function that wraps the base test to add automatic screenshot capture
 const test = base.test.extend({
+  // Create a new isolated context for each test
+  context: async ({ browser }, use) => {
+    // Create a fresh context for this test
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: true, // Useful for local dev environments
+      acceptDownloads: true,
+      viewport: { width: 1280, height: 720 },
+    })
+
+    console.log(`Created new isolated browser context for test`)
+
+    // Use the context in the test
+    await use(context)
+
+    // Clean up the context after the test
+    await context.close()
+    console.log(`Closed browser context after test`)
+  },
+
   // Add the testEmail fixture - basic version that just generates a random test email
   testEmail: async ({ browser }, use) => {
     // Generate a unique test email for this test
@@ -145,7 +165,11 @@ const test = base.test.extend({
     await use(emailGenerator)
   },
 
-  page: async ({ page }, use) => {
+  // Override the page fixture to use our isolated context
+  page: async ({ context }, use) => {
+    // Create a page in our isolated context
+    const page = await context.newPage()
+    console.log(`Created new page in isolated context`)
     // Create a logging proxy for the page
     const loggingPage = logger.createLoggingPage(page)
 
@@ -425,6 +449,56 @@ const test = base.test.extend({
           console.log('Navigation inactivity timer cleared during teardown')
         }
 
+        // Clear browser storage before ending the test
+        try {
+          await page
+            .evaluate(() => {
+              localStorage.clear()
+              sessionStorage.clear()
+              console.log('Browser storage cleared during teardown')
+
+              // Safe IndexedDB cleanup
+              if (window.indexedDB) {
+                try {
+                  // Add common database names that might be used in the application
+                  // This approach is more reliable than indexedDB.databases() which is not widely supported
+                  const possibleDBNames = [
+                    'localforage',
+                    'keyval-store',
+                    'firebaseLocalStorageDb',
+                    'iznik-db', // Add app-specific DB names
+                    'app-state',
+                    'user-data',
+                  ]
+
+                  for (const dbName of possibleDBNames) {
+                    try {
+                      console.log(`Attempting to delete IndexedDB: ${dbName}`)
+                      indexedDB.deleteDatabase(dbName)
+                    } catch (e) {
+                      // Silent fail is acceptable for DB deletion attempts
+                    }
+                  }
+                } catch (e) {
+                  // Ignore IndexedDB errors during cleanup
+                }
+              }
+
+              // Clear all cookies via JavaScript as an extra precaution
+              if (document.cookie) {
+                const cookies = document.cookie.split(';')
+                cookies.forEach((cookie) => {
+                  const name = cookie.split('=')[0].trim()
+                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`
+                })
+              }
+            })
+            .catch((e) => console.warn(`Storage cleanup error: ${e.message}`))
+        } catch (err) {
+          // Log but continue if this fails
+          console.warn(`Unable to clear page storage: ${err.message}`)
+        }
+
         await page.waitForLoadState('networkidle', { timeout })
         return true
       } catch (error) {
@@ -534,7 +608,7 @@ test.afterAll(async () => {
     // Attempt to unsubscribe all the test emails
     console.log('Unsubscribing test emails...')
     try {
-      // await unsubscribeTestEmails()
+      await unsubscribeTestEmails()
       console.log('Successfully processed test email unsubscriptions')
     } catch (error) {
       console.error(`Error during test email unsubscription: ${error.message}`)

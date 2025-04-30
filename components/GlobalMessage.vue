@@ -48,10 +48,9 @@
 import { computed } from 'vue'
 import { useMiscStore } from '~/stores/misc'
 import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
-import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
-const authStore = useAuthStore()
 
 const warningid = 'hideglobalwarning202503072'
 
@@ -70,13 +69,17 @@ const oxfordshire = computed(() => {
     21555, 21671, 21579, 21694, 21317, 21464, 21324, 21235, 21256,
   ]
 
-  const myGroups = authStore.groups
+  // Use the myGroups computed from useMe composable for consistency
+  const { myGroups } = useMe()
 
-  myGroups.forEach((g) => {
-    if (groupids.includes(g.groupid)) {
-      ret = true
-    }
-  })
+  if (myGroups.value && myGroups.value.length) {
+    myGroups.value.forEach((g) => {
+      if (groupids.includes(g.id)) {
+        // Note: myGroups uses id, not groupid
+        ret = true
+      }
+    })
+  }
 
   return ret
 })

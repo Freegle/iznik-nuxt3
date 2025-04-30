@@ -158,6 +158,7 @@ import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
 import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
+import { useMe } from '~/composables/useMe'
 import VisibleWhen from '~/components/VisibleWhen'
 import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -235,8 +236,8 @@ if (existingHomepage !== 'news') {
   })
 }
 
-// User data
-const me = computed(() => authStore.user)
+// Use me computed property from useMe composable for consistency
+const { me } = useMe()
 const mod = computed(
   () =>
     me.value &&

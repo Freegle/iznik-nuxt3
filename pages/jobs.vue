@@ -52,7 +52,7 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { useJobStore } from '../stores/job'
-import { useAuthStore } from '../stores/auth'
+import { useMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'
 import {
   ref,
@@ -84,12 +84,12 @@ useHead(
 )
 
 const jobStore = useJobStore()
-const authStore = useAuthStore()
 
-const me = authStore.user
-const lat = ref(me?.lat)
-const lng = ref(me?.lng)
-const location = ref(me?.settings?.mylocation?.name || null)
+// Use me computed property from useMe composable for consistency
+const { me } = useMe()
+const lat = ref(me.value?.lat)
+const lng = ref(me.value?.lng)
+const location = ref(me.value?.settings?.mylocation?.name || null)
 const category = ref(null)
 const busy = ref(false)
 

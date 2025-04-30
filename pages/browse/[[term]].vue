@@ -114,6 +114,7 @@ import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
+import { useMe } from '~/composables/useMe'
 import { useIsochroneStore } from '~/stores/isochrone'
 import PostFilters from '~/components/PostFilters'
 import SidebarLeft from '~/components/SidebarLeft'
@@ -168,9 +169,8 @@ const lastCountUpdate = ref(0)
 const updatingCount = ref(false)
 const searchTerm = ref(route.params.term)
 
-// Computed
-const me = computed(() => authStore.user)
-const myGroups = computed(() => groupStore.getByUser(me.value?.id))
+// Use me and myGroups computed properties from useMe composable for consistency
+const { me, myGroups } = useMe()
 
 const browseView = computed(() => {
   return me.value?.settings?.browseView

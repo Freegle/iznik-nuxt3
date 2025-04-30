@@ -61,8 +61,8 @@ import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import ChatButton from '~/components/ChatButton'
 import UserRatings from '~/components/UserRatings'
-import { useAuthStore } from '~/stores/auth'
 import { dateonly } from '~/composables/useTimeFormat'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   id: {
@@ -79,8 +79,8 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const userStore = useUserStore()
-const authStore = useAuthStore()
-const myid = authStore.user?.id
+// Use myid computed property from useMe composable for consistency
+const { myid } = useMe()
 
 const user = computed(() => {
   return props.id ? userStore?.byId(props.id) : null

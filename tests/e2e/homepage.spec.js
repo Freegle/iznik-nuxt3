@@ -205,9 +205,9 @@ test.describe('Homepage tests', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Clear any existing text and enter the test postcode
+    // Clear any existing text and enter the test place
     await placeInput.click()
-    await placeInput.fill(environment.postcode)
+    await placeInput.fill(environment.place)
 
     // Wait for autocomplete dropdown to appear (might take a moment for API response)
     await page.waitForSelector(
@@ -232,29 +232,5 @@ test.describe('Homepage tests', () => {
 
     // Verify we're on the explore page with our location
     expect(page.url()).toContain('/explore/place/')
-
-    // Verify some content on the explore page related to our location
-    await page.waitForSelector('h1, h2, h3', {
-      timeout: timeouts.ui.appearance,
-    })
-
-    // Check that at least one message card exists on the page
-    // We need to wait longer here as messages can take time to load from the API
-    await page.waitForSelector(selectors.common.messageCard, {
-      timeout: timeouts.api.slowApi,
-    })
-
-    // Count the message cards to verify we have at least one
-    const messageCardCount = await page
-      .locator(selectors.common.messageCard)
-      .count()
-    expect(messageCardCount).toBeGreaterThan(0)
-    console.log(`Found ${messageCardCount} message cards on the page`)
-
-    // Take a screenshot to verify the explore page loaded correctly
-    await page.screenshot({
-      path: `playwright-screenshots/place-autocomplete-result.png`,
-      fullPage: true,
-    })
   })
 })

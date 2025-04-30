@@ -37,7 +37,7 @@
 </template>
 <script setup>
 import { useUserStore } from '../stores/user'
-import { useAuthStore } from '../stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const UserRatingsDownModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsDownModal')
@@ -71,8 +71,8 @@ const props = defineProps({
 })
 
 const userStore = useUserStore()
-const authStore = useAuthStore()
-const myid = computed(() => authStore.user?.id)
+// Use myid computed property from useMe composable for consistency
+const { myid } = useMe()
 
 const showDown = ref(false)
 const showRemove = ref(false)

@@ -29,8 +29,8 @@
 <script setup>
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '../stores/message'
-import { useAuthStore } from '../stores/auth'
-import { computed, useRouter } from '#imports'
+import { useRouter } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   size: {
@@ -83,11 +83,10 @@ const props = defineProps({
 const emit = defineEmits(['click', 'sent'])
 const chatStore = useChatStore()
 const messageStore = useMessageStore()
-const authStore = useAuthStore()
 const router = useRouter()
 
-const me = computed(() => authStore.user)
-const myid = computed(() => authStore.user?.id)
+// Use me and myid computed properties from useMe composable for consistency
+const { me, myid } = useMe()
 
 const gotoChat = () => {
   openChat(null, null, null)

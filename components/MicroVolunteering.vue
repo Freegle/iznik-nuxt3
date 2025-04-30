@@ -204,7 +204,8 @@ const emit = defineEmits(['verified'])
 const microVolunteeringStore = useMicroVolunteeringStore()
 const miscStore = useMiscStore()
 const authStore = useAuthStore()
-const { fetchMe } = useMe()
+// Use both fetchMe and me from useMe composable for consistency
+const { fetchMe, me } = useMe()
 const debug = false
 
 if (debug) {
@@ -213,8 +214,6 @@ if (debug) {
     value: null,
   })
 }
-
-const me = authStore.user
 
 const showInvite = ref(false)
 const fetchTask = ref(false)
@@ -227,16 +226,16 @@ const types = ref(['CheckMessage', 'PhotoRotate', 'Survey2', 'Invite'])
 const bump = ref(1)
 
 const inviteAccepted = computed(() => {
-  return me?.trustlevel && me.trustlevel !== 'Declined'
+  return me.value?.trustlevel && me.value.trustlevel !== 'Declined'
 })
 
 const mod = computed(() => {
-  return me?.isModerator || me?.isAdmin
+  return me.value?.isModerator || me.value?.isAdmin
 })
 
-if (me) {
+if (me.value) {
   const now = dayjs()
-  const daysago = now.diff(dayjs(me.added), 'days')
+  const daysago = now.diff(dayjs(me.value.added), 'days')
 
   // Ask no more than once per hour. Only want to ask if we're logged in, because otherwise a) we don't know if we've
   // already declined and b) we couldn't save a decline.
@@ -247,14 +246,26 @@ if (me) {
     debug
 
   // Check if we're on a group with microvolunteering enabled.
+  // Use the myGroups computed from useMe composable for consistency
+  const { myGroups } = useMe()
   let allowed = debug
-  authStore.groups.forEach((g) => {
-    if (g.microvolunteeringallowed) {
-      allowed = true
-    }
-  })
 
-  console.log('Ask due', askDue, props.force, allowed, daysago, me?.trustlevel)
+  if (myGroups.value && myGroups.value.length) {
+    myGroups.value.forEach((g) => {
+      if (g.microvolunteeringallowed) {
+        allowed = true
+      }
+    })
+  }
+
+  console.log(
+    'Ask due',
+    askDue,
+    props.force,
+    allowed,
+    daysago,
+    me.value?.trustlevel
+  )
 
   if (!allowed) {
     // Not on a group with this function enabled.
@@ -267,7 +278,7 @@ if (me) {
     fetchTask.value = true
   } else if (daysago > 7 || debug) {
     // They're not a new member. We might want to ask them.
-    if (me?.trustlevel === 'Declined' && !debug) {
+    if (me.value?.trustlevel === 'Declined' && !debug) {
       // We're not forced to do this, and they've said they don't want to.
       emit('verified')
     } else if (inviteAccepted.value || debug) {

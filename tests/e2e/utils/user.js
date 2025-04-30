@@ -2,8 +2,152 @@
  * User related utility functions for Playwright tests
  */
 
+const path = require('path')
 const { timeouts, DEFAULT_TEST_PASSWORD } = require('../config')
 const { waitForModal } = require('./ui')
+const { SCREENSHOTS_DIR } = require('~/tests/e2e/config')
+
+/**
+ * Logs out the current user if they are logged in
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @returns {Promise<boolean>} - Returns true if logout was performed, false if user wasn't logged in
+ */
+async function logoutIfLoggedIn(page) {
+  console.log('Checking if user is logged in')
+
+  // Try to find one of the common logout or user menu buttons
+  const logoutIndicators = [
+    '.test-user-dropdown', // User dropdown menu
+    'button:has-text("Sign out")',
+    'a:has-text("Log out")',
+    'a:has-text("Sign out")',
+    'button:has-text("Log out")',
+    '.dropdown-item:has-text("Sign out")',
+    '.dropdown-item:has-text("Log out")',
+  ]
+
+  let userIsLoggedIn = false
+  let userMenuLocator = null
+
+  // Check if any logout indicators are visible
+  for (const indicator of logoutIndicators) {
+    const locator = page.locator(indicator).first()
+
+    if (await locator.isVisible().catch(() => false)) {
+      userIsLoggedIn = true
+      userMenuLocator = locator
+      console.log(`Found logged in indicator: ${indicator}`)
+      break
+    }
+  }
+
+  // If user is not logged in, return false
+  if (!userIsLoggedIn) {
+    console.log('User is not logged in')
+    return false
+  }
+
+  // Try to logout
+  try {
+    // If we found the user dropdown, we need to click it first to reveal the logout button
+    if (
+      userMenuLocator &&
+      (await page
+        .locator('.test-user-dropdown')
+        .isVisible()
+        .catch(() => false))
+    ) {
+      console.log('Clicking user dropdown menu')
+      await userMenuLocator.click()
+
+      // Wait for dropdown menu animation
+      await page.waitForTimeout(500)
+
+      // Now look for logout option in the dropdown
+      const dropdownLogoutOptions = [
+        '.dropdown-item:has-text("Sign out")',
+        '.dropdown-item:has-text("Log out")',
+        'a:has-text("Sign out")',
+        'a:has-text("Log out")',
+      ]
+
+      let logoutFound = false
+      for (const option of dropdownLogoutOptions) {
+        const logoutButton = page.locator(option).first()
+
+        if (await logoutButton.isVisible().catch(() => false)) {
+          console.log(`Clicking logout option: ${option}`)
+          await logoutButton.click()
+          logoutFound = true
+          break
+        }
+      }
+
+      if (!logoutFound) {
+        console.warn('Could not find logout option in dropdown menu')
+        return false
+      }
+    } else {
+      // Direct logout button (not in dropdown)
+      console.log('Clicking logout button')
+      await userMenuLocator.click()
+    }
+
+    // Wait for logout to complete
+    console.log('Waiting for logout to complete')
+
+    // Wait for logged out state - check for login/sign-up buttons
+    const loginIndicators = [
+      '.btn:has-text("Sign in")',
+      '.btn:has-text("Sign up")',
+      'a:has-text("Sign in")',
+      'a:has-text("Sign up")',
+    ]
+
+    // Wait a bit for the logout operation to process
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1000)
+
+    // Check for any of the login indicators
+    for (const indicator of loginIndicators) {
+      try {
+        await page
+          .locator(indicator)
+          .first()
+          .waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance / 2,
+          })
+        console.log(`Logout confirmed - found login indicator: ${indicator}`)
+        return true
+      } catch (error) {
+        // This particular indicator not found, try the next one
+      }
+    }
+
+    // If we get here and don't see logged-in indicators anymore, assume success
+    for (const indicator of logoutIndicators) {
+      if (
+        await page
+          .locator(indicator)
+          .first()
+          .isVisible()
+          .catch(() => false)
+      ) {
+        console.warn(
+          'Logout appears to have failed - still seeing logged in indicators'
+        )
+        return false
+      }
+    }
+
+    console.log('Logout successful - no longer seeing logged in indicators')
+    return true
+  } catch (error) {
+    console.error(`Error during logout: ${error.message}`)
+    return false
+  }
+}
 
 /**
  * Signs up a new user through the login modal on the homepage
@@ -21,10 +165,18 @@ async function signUpViaHomepage(
 ) {
   console.log(`Starting signup process for email: ${email}`)
 
-  // Navigate to homepage if we're not already there
-  const currentUrl = page.url()
-  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+  // Check if already logged in and logout if needed
+  const wasLoggedIn = await logoutIfLoggedIn(page)
+  if (wasLoggedIn) {
+    console.log('Logged out existing user before signup')
+    // After logout, we should already be on the homepage, but just to be sure:
     await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+  } else {
+    // Navigate to homepage if we're not already there
+    const currentUrl = page.url()
+    if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+    }
   }
 
   // Find and click a sign-up/sign-in button on the homepage to open the login modal
@@ -224,10 +376,18 @@ async function signUpViaHomepage(
 async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   console.log(`Starting login process for email: ${email}`)
 
-  // Navigate to homepage if we're not already there
-  const currentUrl = page.url()
-  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+  // Check if already logged in and logout if needed
+  const wasLoggedIn = await logoutIfLoggedIn(page)
+  if (wasLoggedIn) {
+    console.log('Logged out existing user before login')
+    // After logout, we should already be on the homepage, but just to be sure:
     await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+  } else {
+    // Navigate to homepage if we're not already there
+    const currentUrl = page.url()
+    if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+    }
   }
 
   // Find and click a sign-in button on the homepage to open the login modal
@@ -427,6 +587,10 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   }
 }
 
+const getScreenshotPath = (filename) => {
+  return path.join(SCREENSHOTS_DIR, filename)
+}
+
 /**
  * Unsubscribes an email address manually by using the unsubscribe form
  * @param {import('@playwright/test').Page} page - Playwright page object
@@ -525,7 +689,62 @@ async function unsubscribeManually(page, email) {
     return true
   } catch (error) {
     console.error(`Failed to unsubscribe: ${error.message}`)
+
+    await page.screenshot({
+      path: getScreenshotPath(`failed-to-unsubscribe-${Date.now()}.png`),
+      fullPage: true,
+    })
+
     return false
+  }
+}
+
+/**
+ * Gets the current user's groups using the useMe composable
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @returns {Promise<Array>} - Array of the user's groups
+ */
+async function getMyGroups(page) {
+  console.log('Getting user groups using useMe composable')
+
+  try {
+    // Execute JavaScript in the browser context to use the useMe composable
+    const groups = await page.evaluate(() => {
+      // We need to access the composable from the Vue app
+      // This relies on the composable being exposed on the window for testing
+      if (!window.$nuxt) {
+        console.error('Nuxt app not available')
+        return []
+      }
+
+      // Use the composable through the Vue app
+      const { useMe } = window.$nuxt.$composables || {}
+
+      if (!useMe) {
+        console.error('useMe composable not found')
+        return []
+      }
+
+      const { myGroups } = useMe()
+
+      // Convert to plain array for serialization
+      return Array.isArray(myGroups.value)
+        ? JSON.parse(JSON.stringify(myGroups.value))
+        : []
+    })
+
+    console.log(`Found ${groups.length} groups for current user`)
+    return groups
+  } catch (error) {
+    console.error(`Error getting user groups: ${error.message}`)
+
+    // Take a screenshot to help debug
+    await page.screenshot({
+      path: getScreenshotPath(`get-my-groups-error-${Date.now()}.png`),
+      fullPage: true,
+    })
+
+    return []
   }
 }
 
@@ -533,4 +752,6 @@ module.exports = {
   signUpViaHomepage,
   loginViaHomepage,
   unsubscribeManually,
+  logoutIfLoggedIn,
+  getMyGroups,
 }
