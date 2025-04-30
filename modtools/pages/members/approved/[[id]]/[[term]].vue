@@ -149,6 +149,11 @@ export default {
         router.push('/members/approved/' + lastmod)
       }
     }
+    if( this.term){ // Turn off sorting for searches
+      this.sort = false
+    } else {
+      this.sort = true
+    }
     //this.bump++
   },
   methods: {
