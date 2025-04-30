@@ -68,26 +68,29 @@ if [ "$IS_WINDOWS" -eq 1 ]; then
   TEMP_FILE=$(mktemp -t eslint-files-XXXXXXXX)
   echo "$ALL_CHANGED_FILES" > "$TEMP_FILE"
   
-  # Read the file list one by one and run ESLint
-  ESLINT_STATUS=0
+  # Collect all files into a single array for faster processing
+  FILES_TO_LINT=()
   while IFS= read -r file; do
     # Skip empty lines
     [ -z "$file" ] && continue
     
-    # Run eslint on each file individually to avoid path issues
+    # Add file to array if it exists
     if [ -f "$file" ]; then
-      info "Linting: $file"
-      npx eslint --fix "$file"
-      CURRENT_STATUS=$?
-      
-      # Keep track of any failures
-      if [ $CURRENT_STATUS -ne 0 ]; then
-        ESLINT_STATUS=$CURRENT_STATUS
-      fi
+      FILES_TO_LINT+=("$file")
     else
       warn "File not found: $file"
     fi
   done < "$TEMP_FILE"
+  
+  # Process all files at once if we have any
+  ESLINT_STATUS=0
+  if [ ${#FILES_TO_LINT[@]} -gt 0 ]; then
+    info "Linting ${#FILES_TO_LINT[@]} files as a batch..."
+    npx eslint --fix "${FILES_TO_LINT[@]}"
+    ESLINT_STATUS=$?
+  else
+    warn "No valid files found to lint"
+  fi
   
   # Clean up temp file
   rm -f "$TEMP_FILE"

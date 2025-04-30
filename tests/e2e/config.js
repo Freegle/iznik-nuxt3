@@ -108,6 +108,9 @@ const breakpoints = [
   { name: 'xxl', width: 1920, height: 1080 },
 ]
 
+// Default test password (can be overridden by env variable)
+const DEFAULT_TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestPassword123!'
+
 // Test user data for consistent user information in tests
 const testUsers = {
   // Generate a test user with a random ID
@@ -125,7 +128,7 @@ const testUsers = {
       fullName: `${firstName} Tester`,
       email,
       postcode: environment.postcode,
-      password: 'Password1!',
+      password: DEFAULT_TEST_PASSWORD,
     }
   },
 
@@ -136,7 +139,7 @@ const testUsers = {
     fullName: 'TestMod Moderator',
     email: environment.email.getEmailForUser('testmod'),
     postcode: environment.postcode,
-    password: 'Password1!',
+    password: DEFAULT_TEST_PASSWORD,
     isModerator: true,
   }),
 
@@ -146,9 +149,13 @@ const testUsers = {
     fullName: 'TestUser Regular',
     email: environment.email.getEmailForUser('testuser'),
     postcode: environment.postcode,
-    password: 'Password1!',
+    password: DEFAULT_TEST_PASSWORD,
   }),
 }
+
+// Define the screenshots directory
+const path = require('path')
+const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
 
 module.exports = {
   timeouts,
@@ -156,4 +163,6 @@ module.exports = {
   selectors,
   breakpoints,
   testUsers,
+  DEFAULT_TEST_PASSWORD,
+  SCREENSHOTS_DIR,
 }

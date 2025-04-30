@@ -2,6 +2,69 @@
 
 This document outlines best practices for writing Playwright tests for our Nuxt 3 application.
 
+## Directory Structure
+
+```
+tests/e2e/
+├── config.js              # Test configuration (timeouts, selectors, etc.)
+├── helpers.js             # Legacy helper functions (maintained for backward compatibility)
+├── README.md              # This file
+├── unsubscribe-test-emails.js # Script to clean up test accounts
+└── utils/                 # Directory containing utility functions
+    ├── index.js           # Main export file for all utilities
+    ├── message.js         # Message-related utilities
+    ├── navigation.js      # Navigation helpers and extensions
+    ├── ui.js              # UI interaction utilities
+    └── user.js            # User authentication and account utilities
+```
+
+## Utility Functions
+
+The `utils` directory contains modular utility functions categorized by purpose:
+
+### UI Utilities (`ui.js`)
+
+Functions for interacting with UI elements:
+
+- `elementExists` - Check if an element exists on a page
+- `waitForAnimationEnd` - Wait for an element's animations to complete
+- `waitForModal` - Wait for a modal to appear and be fully rendered
+- `waitForElementWithText` - Wait for an element with specific text to appear
+
+### User Utilities (`user.js`)
+
+Functions for user account management:
+
+- `signUpViaHomepage` - Register a new user account
+- `loginViaHomepage` - Log in with existing credentials
+- `unsubscribeManually` - Unsubscribe a user account
+
+### Message Utilities (`message.js`)
+
+Functions for creating and interacting with messages:
+
+- `createMessage` - Create a new OFFER or WANTED message
+- `searchMessages` - Search for messages with specific criteria
+
+### Navigation Utilities (`navigation.js`)
+
+Functions for page navigation and state:
+
+- `setupNavigationHelpers` - Extends the Page object with custom navigation methods
+
+### Importing Utilities
+
+For new tests, import utilities directly from the utilities directory:
+
+```javascript
+// Import specific utilities
+const { loginViaHomepage, signUpViaHomepage } = require('./utils/user')
+const { waitForModal } = require('./utils/ui')
+
+// Or import everything
+const utils = require('./utils')
+```
+
 ## Critical Guidelines
 
 ### ⚠️ NEVER Use Hardcoded Timeouts

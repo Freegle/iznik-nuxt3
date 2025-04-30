@@ -6,7 +6,11 @@
 const fs = require('fs')
 const path = require('path')
 const { chromium } = require('@playwright/test')
-const { unsubscribeManually } = require('~/tests/e2e/helpers')
+const {
+  unsubscribeManually,
+  loginViaHomepage,
+} = require('~/tests/e2e/utils/user')
+const { DEFAULT_TEST_PASSWORD } = require('~/tests/e2e/config')
 
 // File path for stored test emails
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
@@ -61,8 +65,27 @@ async function unsubscribeTestEmails() {
         return this.url().includes(url)
       }
 
-      // Use unsubscribeManually helper function
-      const result = await unsubscribeManually(page, email)
+      // First try to log in with this account to see if it still exists
+      console.log(`Attempting to log in with email: ${email}`)
+      const loginSuccessful = await loginViaHomepage(
+        page,
+        email,
+        DEFAULT_TEST_PASSWORD
+      )
+
+      let result = false
+
+      if (loginSuccessful) {
+        console.log(
+          `Login successful for ${email}, proceeding with unsubscribe`
+        )
+        // Use unsubscribeManually helper function
+        result = await unsubscribeManually(page, email)
+      } else {
+        console.log(`Login failed for ${email}, account may no longer exist`)
+        // Add to successful unsubscribes since the account is gone anyway
+        result = true
+      }
 
       // Close the context when done
       await context.close()

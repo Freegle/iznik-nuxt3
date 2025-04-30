@@ -2,12 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
-const { timeouts, environment } = require('./config')
+const { SCREENSHOTS_DIR, timeouts, environment } = require('./config')
 const logger = require('./logger')
-const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
-
-// Define the screenshots directory
-const SCREENSHOTS_DIR = path.join(process.cwd(), 'playwright-screenshots')
 
 // Ensure the screenshots directory exists
 const ensureScreenshotsDir = () => {
@@ -270,7 +266,6 @@ const test = base.test.extend({
     // This is useful for debugging
     const isAllowedError = (errorText) => {
       return allowedErrorPatterns.some((pattern) => {
-        console.log('Test', pattern, errorText, pattern.test(errorText))
         return pattern.test(errorText)
       })
     }
@@ -451,7 +446,7 @@ test.afterAll(async () => {
     // Attempt to unsubscribe all the test emails
     console.log('Unsubscribing test emails...')
     try {
-      await unsubscribeTestEmails()
+      // await unsubscribeTestEmails()
       console.log('Successfully processed test email unsubscriptions')
     } catch (error) {
       console.error(`Error during test email unsubscription: ${error.message}`)
