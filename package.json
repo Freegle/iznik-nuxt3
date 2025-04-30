@@ -15,7 +15,7 @@
     "test:debug": "playwright test --debug",
     "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwright test",
     "test:clean": "rm -rf test-results && rm -rf playwright-report && rm -rf playwright-screenshots",
-    "test:ci": "npm run test:clean && playwright test --reporter=junit,html",
+    "test:ci": "npm run test:clean && playwright test --reporter=list,junit,html",
     "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js"
   },
   "gitHooks": {

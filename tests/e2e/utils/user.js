@@ -600,6 +600,15 @@ const getScreenshotPath = (filename) => {
 async function unsubscribeManually(page, email) {
   console.log(`Starting unsubscribe process for: ${email}`)
 
+  // Try to sign in.
+  const loggedIn = await loginViaHomepage(page, email, DEFAULT_TEST_PASSWORD)
+  if (loggedIn) {
+    console.log('Logged in successfully')
+  } else {
+    console.log('Login failed, assuming user is not registered')
+    return true
+  }
+
   // Navigate to the unsubscribe page
   await page.gotoAndVerify('/unsubscribe', {
     timeout: timeouts.navigation.default,
@@ -632,58 +641,25 @@ async function unsubscribeManually(page, email) {
       fullPage: true,
     })
 
-    // Check for error message about unrecognized email
-    const notRecognizedText = "We don't recognise that email address"
-    const notRecognizedMessage = page.locator(`text=${notRecognizedText}`)
-
-    // Wait a bit to see if the error message appears
-    const notRecognizedVisible = await notRecognizedMessage
-      .isVisible({ timeout: timeouts.ui.appearance / 2 })
-      .catch(() => false)
-
-    if (notRecognizedVisible) {
-      console.log(`Email not recognized: "${notRecognizedText}" message shown`)
-      // This is actually a "success" in terms of the account being removed already or never existing
-      return true
-    }
-
     // If no error message, look for the confirmation modal
     console.log('Waiting for confirmation modal in unsubscribe')
 
-    try {
-      // Wait for the confirmation modal to appear and animations to complete
-      await waitForModal(page, 'Permanently delete your account?')
+    // Wait for the confirmation modal to appear and animations to complete
+    await waitForModal(page, 'Permanently delete your account?')
 
-      console.log('Found confirmation modal, clicking Confirm button')
-      // Click the Confirm button
-      const confirmButton = page.locator(
-        '.btn:has-text("Confirm"), button:has-text("Confirm")'
-      )
-      await confirmButton.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-      await confirmButton.click()
+    console.log('Found confirmation modal, clicking Confirm button')
+    // Click the Confirm button
+    const confirmButton = page.locator(
+      '.btn:has-text("Confirm"), button:has-text("Confirm")'
+    )
+    await confirmButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await confirmButton.click()
 
-      console.log('Wait for confirmation')
-      await page.locator('div:has-text("removed your account")')
-    } catch (error) {
-      // One more check for the "don't recognize" message that might appear after clicking
-      const notRecognizedAfterClick = await page
-        .locator(`text=${notRecognizedText}`)
-        .isVisible({ timeout: timeouts.ui.appearance / 2 })
-        .catch(() => false)
-
-      if (notRecognizedAfterClick) {
-        console.log(
-          `Email not recognized (after modal check): "${notRecognizedText}" message shown`
-        )
-        return true
-      }
-
-      // If we get here, something went wrong with the unsubscribe process
-      throw error
-    }
+    console.log('Wait for confirmation')
+    await page.locator('div:has-text("removed your account")')
 
     console.log('Successfully unsubscribed email')
     return true
