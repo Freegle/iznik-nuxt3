@@ -162,7 +162,59 @@ const test = base.test.extend({
       }
     })
 
-    // Track navigation events
+    // Track navigation events and setup navigation inactivity timeout
+    let navigationInactivityTimer = null
+    const MAX_NAVIGATION_INACTIVITY =
+      timeouts.navigation.inactivity || 9 * 60 * 1000 // Default to 9 minutes in milliseconds
+
+    // Create a function to reset the inactivity timer
+    const resetNavigationInactivityTimer = () => {
+      // Clear any existing timer
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+      }
+
+      // Set a new timer
+      navigationInactivityTimer = setTimeout(() => {
+        const lastNavTimestamp =
+          navigationEvents.length > 0
+            ? new Date(navigationEvents[navigationEvents.length - 1].timestamp)
+            : new Date(0)
+
+        const inactivityDuration = Date.now() - lastNavTimestamp.getTime()
+
+        console.error(`\n\n==== NAVIGATION INACTIVITY TIMEOUT ====`)
+        console.error(
+          `No navigation events detected for ${
+            inactivityDuration / 1000
+          } seconds (threshold: ${MAX_NAVIGATION_INACTIVITY / 1000} seconds)`
+        )
+        console.error(`Last navigation: ${lastNavTimestamp.toISOString()}`)
+        console.error(`Current URL: ${page.url()}`)
+        console.error(
+          `==== TERMINATING TEST DUE TO NAVIGATION INACTIVITY ====\n\n`
+        )
+
+        // Take screenshot before failing
+        page
+          .screenshot({
+            path: getScreenshotPath(`navigation-inactivity-${Date.now()}.png`),
+            fullPage: true,
+          })
+          .catch((err) => console.error('Failed to capture screenshot:', err))
+
+        // Force test to fail
+        throw new Error(
+          `Navigation inactivity timeout: No navigation events detected for ${
+            inactivityDuration / 1000
+          } seconds. Test execution may be stuck.`
+        )
+      }, MAX_NAVIGATION_INACTIVITY)
+    }
+
+    // Start the initial timer
+    resetNavigationInactivityTimer()
+
     page.on('framenavigated', (frame) => {
       if (frame === page.mainFrame()) {
         const isHardNavigation =
@@ -178,8 +230,14 @@ const test = base.test.extend({
         })
 
         console.log(`[${timestamp}] [NAVIGATION:${navType}] ${url}`)
+
+        // Reset the inactivity timer whenever a navigation event occurs
+        resetNavigationInactivityTimer()
       }
     })
+
+    // Add method to manually reset navigation timer (useful for long operations)
+    page.resetNavigationTimer = resetNavigationInactivityTimer
 
     // Methods to access console errors
     page.consoleErrors = () => consoleErrors
@@ -360,9 +418,25 @@ const test = base.test.extend({
     const performTeardown = async (options = {}) => {
       const timeout = options.timeout || timeouts.teardown.networkIdle
       try {
+        // Clear the navigation inactivity timer during teardown
+        if (navigationInactivityTimer) {
+          clearTimeout(navigationInactivityTimer)
+          navigationInactivityTimer = null
+          console.log('Navigation inactivity timer cleared during teardown')
+        }
+
         await page.waitForLoadState('networkidle', { timeout })
         return true
       } catch (error) {
+        // Clear the navigation inactivity timer even if teardown fails
+        if (navigationInactivityTimer) {
+          clearTimeout(navigationInactivityTimer)
+          navigationInactivityTimer = null
+          console.log(
+            'Navigation inactivity timer cleared during teardown (after error)'
+          )
+        }
+
         console.warn(`Teardown warning: ${error.message}`)
         // Take a screenshot if network doesn't become idle
         await page.screenshot({
@@ -403,6 +477,13 @@ const test = base.test.extend({
       // Call use() with the logging page instead of the original page
       await use(loggingPage)
 
+      // Clear navigation inactivity timer after test completes successfully
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+        navigationInactivityTimer = null
+        console.log('Navigation inactivity timer cleared after successful test')
+      }
+
       // Automatically check for console errors at the end of each test
       await loggingPage.checkTestRanOK()
 
@@ -412,6 +493,13 @@ const test = base.test.extend({
         `Navigation summary: ${navSummary.total} total (${navSummary.hardCount} hard, ${navSummary.softCount} soft)`
       )
     } catch (error) {
+      // Clear navigation inactivity timer even if test fails
+      if (navigationInactivityTimer) {
+        clearTimeout(navigationInactivityTimer)
+        navigationInactivityTimer = null
+        console.log('Navigation inactivity timer cleared after test failure')
+      }
+
       // Take a full page screenshot on any test failure
       const screenshotPath = getScreenshotPath(`test-failure-${Date.now()}.png`)
       await loggingPage.screenshot({ path: screenshotPath, fullPage: true })
