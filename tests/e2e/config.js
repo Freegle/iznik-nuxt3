@@ -7,35 +7,35 @@
 const timeouts = {
   // Navigation timeouts
   navigation: {
-    default: 60000, // Default navigation timeout (60 seconds)
-    initial: 90000, // First page load timeout (90 seconds)
-    slowPage: 120000, // Extra long timeout for known slow pages (120 seconds)
+    default: 30000, // Default navigation timeout (30 seconds)
+    initial: 45000, // First page load timeout (45 seconds)
+    slowPage: 60000, // Extra long timeout for known slow pages (60 seconds)
   },
 
   // UI interaction timeouts
   ui: {
-    appearance: 10000, // Waiting for element to appear (10 seconds)
-    interaction: 20000, // Interaction with elements like clicks (20 seconds)
-    animation: 2000, // Waiting for animations to complete (2 seconds)
-    autocomplete: 20000, // Waiting for autocomplete results (20 seconds)
+    appearance: 5000, // Waiting for element to appear (5 seconds)
+    interaction: 10000, // Interaction with elements like clicks (10 seconds)
+    animation: 1000, // Waiting for animations to complete (1 second)
+    autocomplete: 10000, // Waiting for autocomplete results (10 seconds)
   },
 
   // API and data loading timeouts
   api: {
-    default: 30000, // Default API response timeout (30 seconds)
-    slowApi: 60000, // Slower API endpoints timeout (60 seconds)
+    default: 15000, // Default API response timeout (15 seconds)
+    slowApi: 30000, // Slower API endpoints timeout (30 seconds)
   },
 
   // Test teardown timeouts
   teardown: {
-    networkIdle: 10000, // Network idle wait during teardown (10 seconds)
+    networkIdle: 5000, // Network idle wait during teardown (5 seconds)
   },
 
   // Assertion timeouts
   assertion: {
-    quick: 2000, // Quick assertions (2 seconds)
-    normal: 10000, // Standard assertions (10 seconds)
-    slow: 30000, // Slow assertions for complex operations (30 seconds)
+    quick: 1000, // Quick assertions (1 second)
+    normal: 5000, // Standard assertions (5 seconds)
+    slow: 15000, // Slow assertions for complex operations (15 seconds)
   },
 }
 
