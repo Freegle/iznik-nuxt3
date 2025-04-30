@@ -287,10 +287,10 @@ export default {
         grouptype: 'Freegle'
       })
     }
-
+    //console.log('ModGroupSelect', this.remember, this.modelValue)
     if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)
-      //console.log('ModGroupSelect',this.modelValue,val)
+      //console.log('ModGroupSelect val',this.modelValue,val)
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)

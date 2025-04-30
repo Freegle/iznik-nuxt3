@@ -110,6 +110,8 @@ export default {
     this.memberTerm = ''
     this.messageTerm = ''
     if (('term' in route.params) && route.params.term) this.messageTerm = route.params.term
+    //const currentCount = Object.keys(this.messageStore.list).length
+    //console.log('messages [[term]]', this.id, this.messageTerm, currentCount)
     if (this.messageTerm) {
       this.searchedMessage(this.messageTerm)
     }

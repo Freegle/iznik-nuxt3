@@ -94,7 +94,7 @@ const loadMore = async function ($state) {
       filter: filter.value,
     }
     //console.log('UMM fetchMembers', params)
-    const received = await memberStore.fetchMembers(params)
+    await memberStore.fetchMembers(params)
     //console.log('UMM received', received)
     //console.log('UMM got', members.value.length)
     context.value = memberStore.context
@@ -106,15 +106,18 @@ const loadMore = async function ($state) {
       show.value = members.value.length
     }
     //if (received === 0 || (show.value === members.value.length)) {
-    if (received === 0) { // Search comes in one at a time
+    /*if (received === 0) { // Search comes in one at a time
       // console.log('UMM loadMore COMPLETE', received)
       $state.complete()
     }
     else {
       $state.loaded()
-    }
-    if (membersstart !== members.value.length) {
+    }*/
+    if (membersstart === members.value.length) {
       //bump.value++
+      $state.complete()
+    } else {
+      $state.loaded()
     }
     //console.log('UMM end', show.value, members.value.length)
   }

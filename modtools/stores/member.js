@@ -87,6 +87,7 @@ export const useMemberStore = defineStore({
         }
         received += members.length
         members.forEach(member => {
+          //console.log('member',member.displayname,member.id)
           member.rawindex = this.rawindex++
           this.list[member.id] = member
         })
