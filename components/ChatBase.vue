@@ -7,8 +7,7 @@ import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '../stores/message'
 import { useGroupStore } from '../stores/group'
 import { twem } from '~/composables/useTwem'
-import { EMAIL_REGEX } from '~/constants'
-import { MT_EMAIL_REGEX } from '~/constants'
+import { EMAIL_REGEX, MT_EMAIL_REGEX } from '~/constants'
 
 export default {
   props: {
@@ -41,7 +40,7 @@ export default {
       return EMAIL_REGEX
     },
     regexEmailMT() {
-      return MT_EMAIL_REGEX
+      return MT_EMAIL_REGEX.toString()
     },
     emessage() {
       const m = this.chatmessage?.message
