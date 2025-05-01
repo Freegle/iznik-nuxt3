@@ -73,6 +73,14 @@ onMounted(() => {
   // Assign the method to window for callback usage
   window.handleGoogleCredentialsResponse = handleGoogleCredentialsResponse
 
+  // Check if running in CircleCI environment and emit complete immediately
+  const isCI = process.env.CI === 'true' || process.env.CIRCLECI === 'true'
+  if (isCI) {
+    console.log('CircleCI environment detected, skipping Google One Tap')
+    emit('complete')
+    return
+  }
+
   // Fallback in case:
   // - When script load just quietly fails. We've seen this on some Firefox versions.
   // - The notification is not displayed. As of 2024 with OneTap migrating to FedCM we can't find this out.

@@ -327,6 +327,7 @@ const test = base.test.extend({
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /The request has been aborted/, // Can happen during navigation.
       /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
+      /stripe.com/, // Stripe related errors are expected in test
     ]
 
     // Method to add additional allowed error patterns for specific tests
