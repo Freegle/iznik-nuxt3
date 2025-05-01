@@ -72,6 +72,7 @@
 </template>
 <script>
 import Highlighter from 'vue-highlight-words'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
@@ -82,6 +83,9 @@ export default {
   components: {
     ProfileImage,
     Highlighter,
+    LMap,
+    LTileLayer,
+    LMarker,
   },
   extends: ChatBase,
   data: function () {
@@ -119,40 +123,6 @@ export default {
       return ret
     },
   },
-  methods:{
-    // MTTODO: Use if need be or remove if not
-    // Replace Highlighter with highlightedEmails as it does not support regex for emails
-    makesafeforhtml(input) {
-      input = input.replace(/&/g, '&amp;')
-      input = input.replace(/</g, '&lt;')
-      input = input.replace(/>/g, '&gt;')
-      return input;
-    },
-    highlightedEmails(c) {
-      const regex = new RegExp(this.regexEmailMT)
-      //let count = 0
-      const giventext = this.makesafeforhtml(this.emessage)
-      let highlightedText = ''
-      let lastix = 0
-      let match
-      while ((match = regex.exec(giventext))) {
-        let start = match.index
-        let end = regex.lastIndex
-        // Do not highlight zero-length matches
-        if (end > start) {
-          highlightedText += giventext.substring(lastix, start)
-          highlightedText += `<span class="${c}">` + giventext.substring(start, end) + '</span>'
-          lastix = end
-        }
-        //if (++count === 10) break
-      }
-      if (lastix < giventext.length) {
-        highlightedText += giventext.substring(lastix)
-      }
-
-      return highlightedText
-    }
-  },
   async mounted() {
     console.log('Mounted, postcode', this.postcode)
     if (this.postcode) {
@@ -166,6 +136,41 @@ export default {
         this.lng = locs[0].lng
       }
     }
+  },
+  methods: {
+    // MTTODO: Use if need be or remove if not
+    // Replace Highlighter with highlightedEmails as it does not support regex for emails
+    makesafeforhtml(input) {
+      input = input.replace(/&/g, '&amp;')
+      input = input.replace(/</g, '&lt;')
+      input = input.replace(/>/g, '&gt;')
+      return input
+    },
+    highlightedEmails(c) {
+      const regex = new RegExp(this.regexEmailMT)
+      // let count = 0
+      const giventext = this.makesafeforhtml(this.emessage)
+      let highlightedText = ''
+      let lastix = 0
+      let match
+      while ((match = regex.exec(giventext))) {
+        const start = match.index
+        const end = regex.lastIndex
+        // Do not highlight zero-length matches
+        if (end > start) {
+          highlightedText += giventext.substring(lastix, start)
+          highlightedText +=
+            `<span class="${c}">` + giventext.substring(start, end) + '</span>'
+          lastix = end
+        }
+        // if (++count === 10) break
+      }
+      if (lastix < giventext.length) {
+        highlightedText += giventext.substring(lastix)
+      }
+
+      return highlightedText
+    },
   },
 }
 </script>
