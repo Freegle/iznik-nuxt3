@@ -185,7 +185,11 @@ function visibilityChanged(visible) {
           if (success && tcData && tcData.tcString) {
             // The user has responded to the cookie banner.
             console.log('TC data loaded and TC String set')
-            if (!adSense.value && !window.pbjs?.version) {
+            if (
+              !playWire.value.valud &&
+              !adSense.value &&
+              !window.pbjs?.version
+            ) {
               // Prebid required but not loaded yet.
               prebidRetry++
 
