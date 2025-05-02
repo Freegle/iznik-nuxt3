@@ -27,31 +27,27 @@
                 adRendering: adRendering && !firstRender,
               }"
             >
-              <KeepAlive>
-                <VisibleWhen :at="['xs', 'sm']">
-                  <ExternalDa
-                    ad-unit-path="/22794232631/freegle_sticky"
-                    max-height="50px"
-                    max-width="100vw"
-                    min-width="100vw"
-                    div-id="div-gpt-ad-1699973618906-0"
-                    @rendered="adRendered"
-                    @failed="adFailed"
-                  />
-                </VisibleWhen>
-              </KeepAlive>
-              <KeepAlive>
-                <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
-                  <ExternalDa
-                    ad-unit-path="/22794232631/freegle_sticky_desktop"
-                    max-height="90px"
-                    max-width="100vw"
-                    min-width="100vw"
-                    div-id="div-gpt-ad-1707999304775-0"
-                    @rendered="adRendered"
-                  />
-                </VisibleWhen>
-              </KeepAlive>
+              <VisibleWhen :at="['xs', 'sm']">
+                <ExternalDa
+                  ad-unit-path="/22794232631/freegle_sticky"
+                  max-height="50px"
+                  max-width="100vw"
+                  min-width="100vw"
+                  div-id="div-gpt-ad-1699973618906-0"
+                  @rendered="adRendered"
+                  @failed="adFailed"
+                />
+              </VisibleWhen>
+              <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+                <ExternalDa
+                  ad-unit-path="/22794232631/freegle_sticky_desktop"
+                  max-height="90px"
+                  max-width="100vw"
+                  min-width="100vw"
+                  div-id="div-gpt-ad-1707999304775-0"
+                  @rendered="adRendered"
+                />
+              </VisibleWhen>
             </div>
           </div>
         </div>
@@ -274,10 +270,10 @@ export default {
       if (this.replyToSend?.replyMsgId) {
         // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
         // causes us to navigate away and back again.  Fetch the relevant message.
-        const messageStore = useMessageStore()
-        await messageStore.fetch(this.replyToSend.replyMsgId, true)
         this.interestedInOthersUserId = this.replyToUser
         this.interestedInOthersMsgid = this.replyToSend.replyMsgId
+        const messageStore = useMessageStore()
+        await messageStore.fetch(this.replyToSend.replyMsgId, true)
         this.replyToPost()
       }
 

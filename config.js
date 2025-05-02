@@ -56,13 +56,17 @@ const CONFIG = {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.2.22',
+  MOBILE_VERSION: '3.2.23',
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 
   GOOGLE_ADSENSE_ID: process.env.GOOGLE_ADSENSE_ID,
   GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
   STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+
+  // Playwire Ad Config
+  PLAYWIRE_PUB_ID: process.env.PLAYWIRE_PUB_ID,
+  PLAYWIRE_WEBSITE_ID: process.env.PLAYWIRE_WEBSITE_ID,
 
   AD_PREBID_CONFIG: [
     {

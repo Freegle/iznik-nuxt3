@@ -8,7 +8,6 @@
  *    --- DO NOT EDIT ---
  */
 
-import ActivityAPI from './ActivityAPI.js'
 import AddressAPI from './AddressAPI.js'
 import AdminsAPI from './AdminsAPI.js'
 import AlertAPI from './AlertAPI.js'
@@ -54,7 +53,6 @@ import VolunteeringAPI from './VolunteeringAPI.js'
 export default (config) => {
   const options = config
   return {
-    activity: new ActivityAPI(options),
     address: new AddressAPI(options),
     admins: new AdminsAPI(options),
     alert: new AlertAPI(options),

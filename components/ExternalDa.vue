@@ -32,6 +32,18 @@
             @rendered="rippleRendered"
             @borednow="setBored"
           />
+          <OurPlaywireDa
+            v-else-if="playWire"
+            ref="playwiread"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
           <OurGoogleDa
             v-else-if="adSense"
             ref="googlead"
@@ -114,8 +126,9 @@ const props = defineProps({
 
 const emit = defineEmits(['rendered', 'disabled'])
 
-// We can either run with Ad Sense or with Prebid.  Ad Sense is the default.
-const adSense = ref(true)
+// We can run with Playwire, Ad Sense or with Prebid.  Playwire is the default.
+const playWire = ref(true)
+const adSense = ref(false)
 const renderAd = ref(false)
 const adShown = ref(true)
 const boredWithJobs = computed(() => miscStore.boredWithJobs)
@@ -172,7 +185,7 @@ function visibilityChanged(visible) {
           if (success && tcData && tcData.tcString) {
             // The user has responded to the cookie banner.
             console.log('TC data loaded and TC String set')
-            if (!adSense.value && !window.pbjs?.version) {
+            if (!playWire.value && !adSense.value && !window.pbjs?.version) {
               // Prebid required but not loaded yet.
               prebidRetry++
 

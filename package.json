@@ -17,7 +17,8 @@
     "comment1": "switch to @codetrix-studio/capacitor-google-auth: ^4.0.0 when released",
     "comment2": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch",
     "comment3": "@whiteguru/capacitor-plugin-facebook-login not updated to capacitor 7+",
-    "comment4": "@freegle/capacitor-push-notifications-cap7 is a fork of sorts from https://github.com/ionic-team/capacitor-plugins"
+    "comment4": "@freegle/capacitor-push-notifications-cap7 is a fork of sorts from https://github.com/ionic-team/capacitor-plugins",
+    "comment5": "JAVA_HOME must be C:\\Program Files\\Android\\Android Studio\\jbr"
   },
   "overrides": {
     "vue-mention": {
@@ -124,6 +125,7 @@
     "pinia": "^2.0.17",
     "pinia-plugin-persist": "^1.0.0",
     "pluralize": "^8.0.0",
+    "postman-paf": "^1.0.1",
     "resize-observer-polyfill": "^1.5.1",
     "save-file": "^2.3.1",
     "simpleheat": "^0.4.0",
