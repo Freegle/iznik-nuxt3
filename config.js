@@ -53,6 +53,10 @@ const CONFIG = {
   GOOGLE_ADSENSE_TEST_MODE: process.env.GOOGLE_ADSENSE_TEST_MODE,
   STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
 
+  // Playwire Ad Config
+  PLAYWIRE_PUB_ID: process.env.PLAYWIRE_PUB_ID,
+  PLAYWIRE_WEBSITE_ID: process.env.PLAYWIRE_WEBSITE_ID,
+
   AD_PREBID_CONFIG: [
     {
       code: '/22794232631/freegle_sticky',

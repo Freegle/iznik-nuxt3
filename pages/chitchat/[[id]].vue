@@ -398,7 +398,6 @@ export default {
       // Fuck Off Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
       if (this.runChecks) {
         let msg = this.startThread
-        console.log('Check msg')
 
         if (msg) {
           msg = msg.toLowerCase()

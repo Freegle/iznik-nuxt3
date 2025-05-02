@@ -56,6 +56,7 @@ module.exports = {
     createApp: 'readonly',
     useNuxtApp: 'readonly',
     useLoadingIndicator: 'readonly',
+    useRuntimeHook: 'readonly',
     useHead: 'readonly',
     useRouter: 'readonly',
     ref: 'readonly',

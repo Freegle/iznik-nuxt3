@@ -16,6 +16,10 @@ export default class LocationAPI extends BaseAPI {
     return this.$getv2('/location/' + id)
   }
 
+  fetchAddresses(id) {
+    return this.$getv2('/location/' + id + '/addresses')
+  }
+
   add(data) {
     return this.$put('/locations', data)
   }
