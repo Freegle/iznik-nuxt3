@@ -16,7 +16,6 @@
   </div>
 </template>
 <script setup>
-import * as Sentry from '@sentry/browser'
 import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
 
 const props = defineProps({
@@ -123,20 +122,12 @@ function checkRendered() {
       adsBlocked.value = false
       emit('rendered', true)
       retry = false
-      Sentry.captureMessage(
-        "Ad looks like it's filled " +
-          props.adUnitPath +
-          ' ' +
-          theType.value +
-          ' ' +
-          childHeight
-      )
     } else {
-      console.log(
-        'Ad is rendered but not filled',
-        props.adUnitPath,
-        theType.value
-      )
+      // console.log(
+      //   'Ad is rendered but not filled',
+      //   props.adUnitPath,
+      //   theType.value
+      // )
     }
   }
 
