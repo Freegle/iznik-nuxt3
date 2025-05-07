@@ -16,6 +16,7 @@
   </div>
 </template>
 <script setup>
+import * as Sentry from '@sentry/browser'
 import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
 
 const props = defineProps({
@@ -88,18 +89,27 @@ const showAd = ref(false)
 
 const visibleTimer = null
 
-// We want to spot when an ad has been rendered and whether it's filled.  isUnfilled is supposed to be exposed
-// by the component, but that doesn't seem to work.
+// We want to spot when an ad has been rendered and whether it's filled.
 let fillTimer = null
-let renderRetry = 30
+let renderRetry = 10
 
 function checkRendered() {
   fillTimer = null
-  const retry = false
+  let retry = true
 
   // No need to refresh ad - Playwire ads do that themselves.
   // TODO How to check rendered.
-  emit('rendered', true)
+  console.log('Check rendered', props.adUnitPath, window.ramp?.isUnfilled)
+  if (!window.ramp.slots[props.adUnitPath]?.isEmpty) {
+    console.log('Ad is filled', props.adUnitPath)
+    adsBlocked.value = false
+    emit('rendered', true)
+    retry = false
+    Sentry.captureMessage('Ad is filled ' + props.adUnitPath)
+  } else {
+    console.log('Ad filled', props.adUnitPath)
+    adsBlocked.value = false
+  }
 
   if (retry) {
     renderRetry--
@@ -108,7 +118,9 @@ function checkRendered() {
       fillTimer = setTimeout(checkRendered, 100)
     } else {
       // Give up.
-      emit('rendered', false)
+      console.log('Giving up on ad fill', props.adUnitPath)
+      // TODO assume success until we've established that we can use isEmpty
+      emit('rendered', true)
     }
   }
 }
