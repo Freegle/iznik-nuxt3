@@ -124,7 +124,7 @@ function checkRendered() {
       emit('rendered', true)
       retry = false
       Sentry.captureMessage(
-        'Ad is filled ' +
+        "Ad looks like it's filled " +
           props.adUnitPath +
           ' ' +
           theType.value +
