@@ -120,10 +120,7 @@ function checkRendered() {
   }
 
   if (retry) {
-    if (window.ramp?.slots) {
-      // We don't want to give up too soon if the Playwire script is slow to load.
-      renderRetry--
-    }
+    renderRetry--
 
     if (renderRetry > 0) {
       fillTimer = setTimeout(checkRendered, 100)
