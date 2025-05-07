@@ -98,7 +98,12 @@ function checkRendered() {
   let retry = true
 
   // No need to refresh ad - Playwire ads do that themselves.
-  console.log('Check rendered', props.adUnitPath, theType.value)
+  // console.log(
+  //   'Check rendered',
+  //   props.adUnitPath,
+  //   theType.value,
+  //   window.ramp?.slots
+  // )
   if (window.ramp?.slots) {
     if (!window.ramp?.slots[theType.value]?.isEmpty) {
       console.log('Ad is filled', props.adUnitPath)
