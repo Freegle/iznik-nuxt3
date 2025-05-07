@@ -117,7 +117,7 @@ function checkRendered() {
     )
   ) {
     if (!window.ramp.settings.slots[theType.value].isEmpty) {
-      console.log('Ad is filled', props.adUnitPath, theType.value)
+      console.log("Ad looks like it's filled", props.adUnitPath, theType.value)
       adsBlocked.value = false
       emit('rendered', true)
       retry = false
