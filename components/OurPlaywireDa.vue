@@ -104,8 +104,8 @@ function checkRendered() {
   //   theType.value,
   //   window.ramp?.slots
   // )
-  if (window.ramp?.slots) {
-    if (!window.ramp?.slots[theType.value]?.isEmpty) {
+  if (window.ramp?.settings?.slots) {
+    if (!window.ramp?.settings?.slots[theType.value]?.isEmpty) {
       console.log('Ad is filled', props.adUnitPath)
       adsBlocked.value = false
       emit('rendered', true)
@@ -114,8 +114,7 @@ function checkRendered() {
         'Ad is filled ' + props.adUnitPath + ' ' + theType.value
       )
     } else {
-      console.log('Ad not filled', props.adUnitPath)
-      adsBlocked.value = false
+      console.log('Ad not filled yet', props.adUnitPath, theType.value)
     }
   }
 
@@ -127,6 +126,11 @@ function checkRendered() {
     } else {
       // Give up.
       console.log('Giving up on ad fill', props.adUnitPath)
+
+      if (!window.ramp?.settings?.slots) {
+        adsBlocked.value = true
+      }
+
       // TODO assume success until we've established that we can use isEmpty
       emit('rendered', true)
     }
