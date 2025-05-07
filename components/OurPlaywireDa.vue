@@ -91,7 +91,7 @@ const visibleTimer = null
 
 // We want to spot when an ad has been rendered and whether it's filled.
 let fillTimer = null
-let renderRetry = 10
+let renderRetry = 50
 
 function checkRendered() {
   fillTimer = null
