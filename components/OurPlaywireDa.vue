@@ -110,7 +110,11 @@ function checkRendered() {
   if (
     theType.value &&
     window.ramp?.settings?.slots &&
-    window.ramp?.settings?.slots[theType.value]
+    window.ramp?.settings?.slots[theType.value] &&
+    Object.prototype.hasOwnProperty.call(
+      window.ramp?.settings?.slots[theType.value],
+      'isEmpty'
+    )
   ) {
     if (!window.ramp.settings.slots[theType.value].isEmpty) {
       console.log('Ad is filled', props.adUnitPath, theType.value)
