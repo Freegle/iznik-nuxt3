@@ -153,8 +153,7 @@ function checkRendered() {
         adsBlocked.value = true
       }
 
-      // TODO assume success until we've established that we can use isEmpty
-      emit('rendered', true)
+      emit('rendered', false)
     }
   }
 }
