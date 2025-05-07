@@ -98,23 +98,27 @@ function checkRendered() {
   let retry = true
 
   // No need to refresh ad - Playwire ads do that themselves.
-  // TODO How to check rendered.
   console.log('Check rendered', props.adUnitPath, theType.value)
-  if (window.ramp?.slots && !window.ramp?.slots[theType.value]?.isEmpty) {
-    console.log('Ad is filled', props.adUnitPath)
-    adsBlocked.value = false
-    emit('rendered', true)
-    retry = false
-    Sentry.captureMessage(
-      'Ad is filled ' + props.adUnitPath + ' ' + theType.value
-    )
-  } else {
-    console.log('Ad filled', props.adUnitPath)
-    adsBlocked.value = false
+  if (window.ramp?.slots) {
+    if (!window.ramp?.slots[theType.value]?.isEmpty) {
+      console.log('Ad is filled', props.adUnitPath)
+      adsBlocked.value = false
+      emit('rendered', true)
+      retry = false
+      Sentry.captureMessage(
+        'Ad is filled ' + props.adUnitPath + ' ' + theType.value
+      )
+    } else {
+      console.log('Ad not filled', props.adUnitPath)
+      adsBlocked.value = false
+    }
   }
 
   if (retry) {
-    renderRetry--
+    if (window.ramp?.slots) {
+      // We don't want to give up too soon if the Playwire script is slow to load.
+      renderRetry--
+    }
 
     if (renderRetry > 0) {
       fillTimer = setTimeout(checkRendered, 100)
