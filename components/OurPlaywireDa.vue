@@ -98,34 +98,45 @@ function checkRendered() {
   let retry = true
 
   // No need to refresh ad - Playwire ads do that themselves.
-  console.log(
-    'Check rendered',
-    props.adUnitPath,
-    theType.value,
-    window.ramp?.settings?.slots
-      ? window.ramp.settings.slots[theType.value]
-      : null
-  )
+  console.log('Check rendered', props.adUnitPath, theType.value, daDiv.value)
 
-  if (
-    theType.value &&
-    window.ramp?.settings?.slots &&
-    window.ramp?.settings?.slots[theType.value] &&
-    Object.prototype.hasOwnProperty.call(
-      window.ramp?.settings?.slots[theType.value],
-      'isEmpty'
+  // Check if the element has a child
+  const hasChild = daDiv.value && daDiv.value.children.length > 0
+  if (hasChild) {
+    const childHeight = daDiv.value.children[0].offsetHeight
+    console.log(
+      'Ad has child',
+      props.adUnitPath,
+      theType.value,
+      daDiv.value,
+      childHeight
     )
-  ) {
-    if (!window.ramp.settings.slots[theType.value].isEmpty) {
-      console.log("Ad looks like it's filled", props.adUnitPath, theType.value)
+
+    if (childHeight > 0) {
+      console.log(
+        'Ad is rendered and filled',
+        props.adUnitPath,
+        theType.value,
+        daDiv.value,
+        childHeight
+      )
       adsBlocked.value = false
       emit('rendered', true)
       retry = false
       Sentry.captureMessage(
-        'Ad is filled ' + props.adUnitPath + ' ' + theType.value
+        'Ad is filled ' +
+          props.adUnitPath +
+          ' ' +
+          theType.value +
+          ' ' +
+          childHeight
       )
     } else {
-      console.log('Ad not filled yet', props.adUnitPath, theType.value)
+      console.log(
+        'Ad is rendered but not filled',
+        props.adUnitPath,
+        theType.value
+      )
     }
   }
 
