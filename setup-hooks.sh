@@ -49,10 +49,6 @@ cd "$PROJECT_ROOT" || {
   exit 1
 }
 
-# Make sure run-lint-on-changed.sh is executable
-chmod +x ./run-lint-on-changed.sh
-chmod +x ./pre-commit
-
 # Create git hooks directory if it doesn't exist
 mkdir -p .git/hooks
 
@@ -60,6 +56,27 @@ mkdir -p .git/hooks
 info "Installing pre-commit hook..."
 cp .git/hooks/pre-commit .git/hooks/pre-commit.bak 2>/dev/null || true
 cp ./pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+
+# Make files executable (platform-specific)
+if [ "$IS_WINDOWS" -eq 1 ]; then
+  # On Windows, set git config core.fileMode false to ignore executable bit
+  git config core.fileMode false
+  info "On Windows, executable permissions are handled by Git"
+else
+  # On Unix-like systems, use chmod
+  chmod +x ./run-lint-on-changed.sh
+  chmod +x ./pre-commit
+  chmod +x .git/hooks/pre-commit
+  success "File permissions set correctly"
+fi
+
+# Ensure the pre-commit hook script can run on Windows (convert line endings if needed)
+if [ "$IS_WINDOWS" -eq 1 ]; then
+  info "Converting line endings for Windows compatibility..."
+  # Use temporary files to avoid issues with in-place editing
+  tr -d '\r' < ./pre-commit > ./pre-commit.tmp && mv ./pre-commit.tmp ./pre-commit
+  tr -d '\r' < .git/hooks/pre-commit > .git/hooks/pre-commit.tmp && mv .git/hooks/pre-commit.tmp .git/hooks/pre-commit
+  tr -d '\r' < ./run-lint-on-changed.sh > ./run-lint-on-changed.sh.tmp && mv ./run-lint-on-changed.sh.tmp ./run-lint-on-changed.sh
+fi
 
 success "Git hooks installed successfully!"

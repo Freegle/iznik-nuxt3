@@ -98,6 +98,7 @@ async function logoutIfLoggedIn(page) {
 
     // Wait for logged out state - check for login/sign-up buttons
     const loginIndicators = [
+      '.test-signinbutton',
       '.btn:has-text("Sign in")',
       '.btn:has-text("Sign up")',
       'a:has-text("Sign in")',
@@ -182,6 +183,7 @@ async function signUpViaHomepage(
   // Find and click a sign-up/sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
   const signInButtons = [
+    '.test-signinbutton',
     '.btn:has-text("Sign up")',
     '.btn:has-text("Sign in")',
     'a:has-text("Sign up")',
@@ -393,6 +395,7 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   // Find and click a sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
   const signInButtons = [
+    '.test-signinbutton',
     '.btn:has-text("Sign in")',
     'a:has-text("Sign in")',
     'button:has-text("Sign in")',
@@ -511,7 +514,7 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   // Find and click the Login button in the modal
   console.log('Clicking login button')
   const loginButton = page.locator(
-    'button:has-text("Sign in"), .btn:has-text("Sign in")'
+    '.test-signinbutton, button:has-text("Sign in"), .btn:has-text("Sign in")'
   )
   await loginButton.waitFor({
     state: 'visible',

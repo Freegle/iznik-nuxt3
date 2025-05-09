@@ -53,53 +53,46 @@ async function unsubscribeTestEmails() {
 
   // Process each email
   for (const email of testEmails) {
-    try {
-      console.log(`Attempting to unsubscribe email: ${email}`)
-      // Create a new context for each email to ensure clean state
-      const context = await browser.newContext()
-      const page = await context.newPage()
+    console.log(`Attempting to unsubscribe email: ${email}`)
+    // Create a new context for each email to ensure clean state
+    const context = await browser.newContext()
+    const page = await context.newPage()
 
-      // Add gotoAndVerify navigation helper method
-      page.gotoAndVerify = async function (url, options) {
-        await this.goto(url, options)
-        return this.url().includes(url)
-      }
+    // Add gotoAndVerify navigation helper method
+    page.gotoAndVerify = async function (url, options) {
+      await this.goto(url, options)
+      return this.url().includes(url)
+    }
 
-      // First try to log in with this account to see if it still exists
-      console.log(`Attempting to log in with email: ${email}`)
-      const loginSuccessful = await loginViaHomepage(
-        page,
-        email,
-        DEFAULT_TEST_PASSWORD
-      )
+    // First try to log in with this account to see if it still exists
+    console.log(`Attempting to log in with email: ${email}`)
+    const loginSuccessful = await loginViaHomepage(
+      page,
+      email,
+      DEFAULT_TEST_PASSWORD
+    )
 
-      let result = false
+    let result = false
 
-      if (loginSuccessful) {
-        console.log(
-          `Login successful for ${email}, proceeding with unsubscribe`
-        )
-        // Use unsubscribeManually helper function
-        result = await unsubscribeManually(page, email)
-      } else {
-        console.log(`Login failed for ${email}, account may no longer exist`)
-        // Add to successful unsubscribes since the account is gone anyway
-        result = true
-      }
+    if (loginSuccessful) {
+      console.log(`Login successful for ${email}, proceeding with unsubscribe`)
+      // Use unsubscribeManually helper function
+      result = await unsubscribeManually(page, email)
+    } else {
+      console.log(`Login failed for ${email}, account may no longer exist`)
+      // Add to successful unsubscribes since the account is gone anyway
+      result = true
+    }
 
-      // Close the context when done
-      await context.close()
+    // Close the context when done
+    await context.close()
 
-      if (result) {
-        console.log(`✓ Successfully unsubscribed: ${email}`)
-        successfulUnsubscribes.push(email)
-      } else {
-        console.log(`✗ Failed to unsubscribe: ${email}`)
-        failedUnsubscribes.push({ email, error: 'Unsubscribe process failed' })
-      }
-    } catch (error) {
-      console.error(`✗ Failed to unsubscribe ${email}: ${error.message}`)
-      failedUnsubscribes.push({ email, error: error.message })
+    if (result) {
+      console.log(`✓ Successfully unsubscribed: ${email}`)
+      successfulUnsubscribes.push(email)
+    } else {
+      console.log(`✗ Failed to unsubscribe: ${email}`)
+      failedUnsubscribes.push({ email, error: 'Unsubscribe process failed' })
     }
   }
 
@@ -112,6 +105,15 @@ async function unsubscribeTestEmails() {
     `✓ Successfully unsubscribed: ${successfulUnsubscribes.length} emails`
   )
   console.log(`✗ Failed to unsubscribe: ${failedUnsubscribes.length} emails`)
+
+  // If any unsubscribes failed, throw an error to fail the test
+  if (failedUnsubscribes.length > 0) {
+    const errorMessage = `Failed to unsubscribe ${
+      failedUnsubscribes.length
+    } test emails: ${failedUnsubscribes.map((f) => f.email).join(', ')}`
+    console.error(errorMessage)
+    throw new Error(errorMessage)
+  }
 
   // Update the test emails file to remove successful unsubscribes
   if (successfulUnsubscribes.length > 0) {
@@ -142,11 +144,14 @@ async function unsubscribeTestEmails() {
 // Run the script if called directly
 if (require.main === module) {
   unsubscribeTestEmails()
-    .then(() => console.log('Unsubscribe process completed'))
-    .catch((error) =>
+    .then(() => {
+      console.log('Unsubscribe process completed')
+      process.exit(0)
+    })
+    .catch((error) => {
       console.error(`Unsubscribe process failed: ${error.message}`)
-    )
-    .finally(() => process.exit(0))
+      process.exit(1) // Exit with error code to indicate failure
+    })
 }
 
 // Export for use in fixtures.js

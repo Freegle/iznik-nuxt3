@@ -255,7 +255,12 @@
     </div>
     <div v-if="!loggedIn" class="navbar-nav ml-auto">
       <div class="nav-item" no-prefetch>
-        <b-button variant="white" class="mr-2" @click="requestLogin">
+        <b-button
+          variant="white"
+          class="mr-2 test-signinbutton"
+          :disabled="signInDisabled"
+          @click="requestLogin"
+        >
           Sign&nbsp;in
         </b-button>
       </div>
@@ -291,6 +296,13 @@ const {
   showAboutMe,
   maybeReload,
 } = useNavbar()
+
+const signInDisabled = ref(true)
+
+onMounted(() => {
+  // Keeping the button disabled until hygration has finished helps with Playwright tests.
+  signInDisabled.value = false
+})
 
 const AboutMeModal = defineAsyncComponent(() =>
   import('~/components/AboutMeModal')

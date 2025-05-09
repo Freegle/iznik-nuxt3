@@ -49,7 +49,8 @@
                 <div data-v-454188a5="" class="nav-item" no-prefetch="">
                   <button
                     data-v-454188a5=""
-                    class="btn btn-md btn-white mr-2"
+                    class="btn btn-md btn-white mr-2 test-signinbutton"
+                    disabled
                     type="button"
                   >
                     Sign&nbsp;in

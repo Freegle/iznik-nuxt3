@@ -45,7 +45,12 @@
         <div class="d-flex align-items-center">
           <b-nav>
             <b-nav-item>
-              <nuxt-link v-if="!loggedIn" no-prefetch>
+              <nuxt-link
+                v-if="!loggedIn"
+                no-prefetch
+                class="test-signinbutton"
+                :disabled="signInDisabled"
+              >
                 <div class="btn btn-white mr-2" @click="requestLogin">
                   Log in or Join
                 </div>
@@ -278,8 +283,13 @@ watch(notificationsShown, (newVal) => {
   }
 })
 
+const signInDisabled = ref(true)
+
 // We want to hide the navbars when you scroll down.
 onMounted(() => {
+  // Keeping the button disabled until hygration has finished helps with Playwright tests.
+  signInDisabled.value = false
+
   window.addEventListener('scroll', handleScroll)
 })
 
