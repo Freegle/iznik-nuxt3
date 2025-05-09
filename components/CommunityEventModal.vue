@@ -132,7 +132,7 @@
             Posted
             <span v-if="user?.id">by {{ user.displayname }} </span>
             <span v-for="(group, index) in groups" :key="index">
-              <span v-if="index > 0">, </span><span v-else>on </span>
+              <span v-if="index > 0">, </span><span v-else>&nbsp;on</span>
               {{ group.namedisplay }}
             </span>
           </p>

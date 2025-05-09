@@ -177,15 +177,16 @@ export default defineNuxtConfig({
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
-    [
-      '@nuxtjs/google-adsense',
-      {
-        id: process.env.GOOGLE_ADSENSE_ID,
-        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
-        hideUnfilled: false,
-        pauseOnLoad: true,
-      },
-    ],
+    // We are using Playwire so we don't load AdSense ourselves.
+    // [
+    //   '@nuxtjs/google-adsense',
+    //   {
+    //     id: process.env.GOOGLE_ADSENSE_ID,
+    //     test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+    //     hideUnfilled: false,
+    //     pauseOnLoad: true,
+    //   },
+    // ],
   ],
 
   hooks: {
@@ -234,6 +235,8 @@ export default defineNuxtConfig({
 
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
+      PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
+      PLAYWIRE_WEBSITE_ID: config.PLAYWIRE_WEBSITE_ID,
 
       ...(process.env.GTM_ID
         ? {

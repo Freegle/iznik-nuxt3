@@ -15,6 +15,9 @@
 /apple-touch-icon-precomposed.png /icons/apple-touch-icon.png
 /favicon.ico /icons/favicon.ico
 
+# Redirect ads.txt to Playwire (302 temporary redirect)
+/ads.txt https://config.playwire.com/dyn_ads/1025311/75051/ads.txt 302!
+
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 /sw.js* / 404!
 /robots.txt / 404!
