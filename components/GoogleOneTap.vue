@@ -74,8 +74,8 @@ onMounted(() => {
   window.handleGoogleCredentialsResponse = handleGoogleCredentialsResponse
 
   // Check if running in CircleCI environment and emit complete immediately
-  const isCI = process.env.CI === 'true' || process.env.CIRCLECI === 'true'
-  if (isCI) {
+  const runtimeConfig = useRuntimeConfig()
+  if (runtimeConfig.public.CIRCLECI) {
     console.log('CircleCI environment detected, skipping Google One Tap')
     emit('complete')
     return
