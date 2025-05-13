@@ -17,6 +17,7 @@
 </template>
 <script setup>
 import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
+import Api from '~/api'
 
 const props = defineProps({
   adUnitPath: {
@@ -144,12 +145,25 @@ function checkRendered() {
         adsBlocked.value = true
       }
 
+      api.bandit.shown({
+        uid: 'playwire',
+        variant: 'notfilled',
+      })
+
       emit('rendered', false)
     }
   }
 }
 
 const theType = ref(null)
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
+api.bandit.shown({
+  uid: 'playwire',
+  variant: 'loaded',
+})
 
 watch(
   () => props.renderAd,
@@ -192,6 +206,10 @@ watch(
             })
 
             console.log('Called spaAddAds', ret)
+            api.bandit.shown({
+              uid: 'playwire',
+              variant: 'added',
+            })
           } catch (e) {
             console.log('Failed to inject ad', e)
           }
@@ -205,7 +223,6 @@ watch(
           window.ramp.passiveMode = true
 
           // Load the Ramp configuration script
-          const runtimeConfig = useRuntimeConfig()
           const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
           const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
 
