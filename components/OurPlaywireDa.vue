@@ -169,6 +169,11 @@ watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
+      api.bandit.shown({
+        uid: 'playwire',
+        variant: 'askedToRender',
+      })
+
       fillTimer = setTimeout(checkRendered, 100)
       showAd.value = true
 
