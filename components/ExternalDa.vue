@@ -131,7 +131,7 @@ const playWire = ref(true)
 const adSense = ref(false)
 const renderAd = ref(false)
 const adShown = ref(true)
-const boredWithJobs = computed(() => miscStore.boredWithJobs)
+const boredWithJobs = computed(() => !props.jobs || miscStore.boredWithJobs)
 
 function setBored() {
   // Using the store, but non-persisted, means that we'll show job ads on initial page load, but then other ads
