@@ -79,7 +79,7 @@ watch(
       showAd.value = true
 
       // Playwire ads will always show something - we have house ads as a fallback.
-      emit('rendered')
+      emit('rendered', true)
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
