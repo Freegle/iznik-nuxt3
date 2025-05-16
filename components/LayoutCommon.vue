@@ -34,6 +34,7 @@
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
+                  :jobs="false"
                   @rendered="adRendered"
                   @failed="adFailed"
                 />
