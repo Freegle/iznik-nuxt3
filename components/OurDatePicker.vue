@@ -49,6 +49,7 @@ const date = ref(props.modelValue)
 const emit = defineEmits(['update:modelValue'])
 
 watch(date, (newVal) => {
+  console.log('New value', newVal)
   emit('update:modelValue', newVal)
 })
 </script>

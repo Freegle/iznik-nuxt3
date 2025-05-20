@@ -41,7 +41,6 @@ export function calculateMapHeight(heightFraction) {
 }
 
 export async function loadLeaflet() {
-  console.log('Load leaflet')
   if (process.client && !window.L) {
     // Rebuild the object to avoid "not extensible" issues when loading old-fashioned leaflet plugins.
     window.L = { ...(await import('leaflet/dist/leaflet-src.esm')) }

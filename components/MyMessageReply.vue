@@ -253,8 +253,6 @@ export default {
         return true
       })
 
-      console.log('Filtered chats', chats)
-
       // Sort by last date.
       chats.sort((a, b) => {
         if (a.lastdate && b.lastdate) {
@@ -329,7 +327,6 @@ export default {
     replyuserids: {
       immediate: true,
       handler(newVal) {
-        console.log('Ensure in store', newVal)
         newVal.forEach((uid) => {
           this.userStore.fetch(uid)
         })
