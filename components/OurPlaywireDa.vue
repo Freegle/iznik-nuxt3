@@ -1,11 +1,6 @@
 <template>
   <div v-if="showAd">
-    <div v-if="adsBlocked" class="bg-white text-center">
-      Maybe you're using an ad blocker? We don't like ads much either.
-      <DaDisableCTA />
-    </div>
     <div
-      v-else
       :id="divId"
       ref="daDiv"
       :style="adStyle"
@@ -17,6 +12,9 @@
 </template>
 <script setup>
 import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
+import Api from '~/api'
+
+const emit = defineEmits(['rendered'])
 
 const props = defineProps({
   adUnitPath: {
@@ -54,73 +52,34 @@ const props = defineProps({
 })
 
 const daDiv = ref(null)
-const emit = defineEmits(['rendered'])
-const adsBlocked = ref(false)
-
-const adStyle = computed(() => {
-  // See https://support.google.com/adsense/answer/9183363 for background.
-  const ret = {
-    width: '100%',
-  }
-
-  if (props.maxWidth !== null) {
-    ret['max-width'] = props.maxWidth
-    ret.width = props.maxWidth
-  }
-
-  if (props.minWidth !== null) {
-    ret['min-width'] = props.minWidth
-  }
-
-  if (props.minHeight !== null) {
-    ret['min-height'] = props.minHeight
-  }
-
-  if (props.maxHeight !== null) {
-    ret['max-height'] = props.maxHeight
-    ret.height = props.maxHeight
-  }
-
-  return ret
-})
 
 const showAd = ref(false)
 
-const visibleTimer = null
-
-// We want to spot when an ad has been rendered and whether it's filled.  isUnfilled is supposed to be exposed
-// by the component, but that doesn't seem to work.
-let fillTimer = null
-let renderRetry = 30
-
-function checkRendered() {
-  fillTimer = null
-  const retry = false
-
-  // No need to refresh ad - Playwire ads do that themselves.
-  // TODO How to check rendered.
-  emit('rendered', true)
-
-  if (retry) {
-    renderRetry--
-
-    if (renderRetry > 0) {
-      fillTimer = setTimeout(checkRendered, 100)
-    } else {
-      // Give up.
-      emit('rendered', false)
-    }
-  }
-}
+// No need to refresh ad - Playwire ads do that themselves.
 
 const theType = ref(null)
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
+api.bandit.shown({
+  uid: 'playwire',
+  variant: 'loaded',
+})
 
 watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
-      fillTimer = setTimeout(checkRendered, 100)
+      api.bandit.shown({
+        uid: 'playwire',
+        variant: 'askedToRender',
+      })
+
       showAd.value = true
+
+      // Playwire ads will always show something - we have house ads as a fallback.
+      emit('rendered', true)
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
@@ -145,17 +104,16 @@ watch(
               }
             }
 
-            console.log(
-              'Ad container really in DOM?',
-              window.document.getElementById(props.divId) !== null
-            )
-            console.log('Execute queued spaAddAds', theType.value)
+            console.log('Execute queued spaAddAds', theType.value, props.divId)
             window.ramp.spaAddAds({
               type: theType.value,
               selector: '#' + props.divId,
             })
 
-            console.log('Called spaAddAds')
+            api.bandit.shown({
+              uid: 'playwire',
+              variant: 'added',
+            })
           } catch (e) {
             console.log('Failed to inject ad', e)
           }
@@ -169,7 +127,6 @@ watch(
           window.ramp.passiveMode = true
 
           // Load the Ramp configuration script
-          const runtimeConfig = useRuntimeConfig()
           const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
           const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
 
@@ -202,16 +159,35 @@ watch(
   }
 )
 
+const adStyle = computed(() => {
+  // See https://support.google.com/adsense/answer/9183363 for background.
+  const ret = {
+    width: '100%',
+  }
+
+  if (props.maxWidth !== null) {
+    ret['max-width'] = props.maxWidth
+    ret.width = props.maxWidth
+  }
+
+  if (props.minWidth !== null) {
+    ret['min-width'] = props.minWidth
+  }
+
+  if (props.minHeight !== null) {
+    ret['min-height'] = props.minHeight
+  }
+
+  if (props.maxHeight !== null) {
+    ret['max-height'] = props.maxHeight
+    ret.height = props.maxHeight
+  }
+
+  return ret
+})
+
 async function leaving() {
   try {
-    if (fillTimer) {
-      clearTimeout(fillTimer)
-    }
-
-    if (visibleTimer) {
-      clearTimeout(visibleTimer)
-    }
-
     if (window.ramp?.destroyUnits) {
       // We need to destroy the ad unit.
       console.log('Destroying ad unit', props.adUnitPath)

@@ -105,7 +105,6 @@ const adStyle = computed(() => {
 const showAd = ref(false)
 
 let refreshTimer = null
-const visibleTimer = null
 const AD_REFRESH_TIMEOUT = 31000
 
 const adsbygoogle = ref(null)
@@ -263,10 +262,6 @@ onBeforeUnmount(() => {
 
     if (refreshTimer) {
       clearTimeout(refreshTimer)
-    }
-
-    if (visibleTimer) {
-      clearTimeout(visibleTimer)
     }
   } catch (e) {
     console.log('Exception in onBeforeUnmount', e)
