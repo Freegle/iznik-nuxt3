@@ -138,6 +138,7 @@ import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 import { ref } from '#imports'
 import { MAX_MAP_ZOOM } from '~/constants'
+import { LMap, LTileLayer, LMarker, LIcon, LGeoJson } from '@vue-leaflet/vue-leaflet'
 
 export default {
   components: { ExternalLink },
@@ -155,7 +156,8 @@ export default {
 
     // The addressid is (wrongly) stored in the message.
     const chatmsg = chatStore.messageById(props.id)
-    const addressid = ref(parseInt(chatmsg?.message))
+    // const addressid = ref(parseInt(chatmsg?.message))
+    const addressid = ref(chatmsg?.address?.id)
 
     const address = await addressStore.fetch(addressid.value)
     const showAddress = ref(false)

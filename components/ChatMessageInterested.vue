@@ -204,9 +204,14 @@ export default {
       return useMiscStore().modtools
     },
     modtoolsLink() {
-      //return '/message/'+this.chatmessage?.refmsgid
+      if( this.chatmessage.refmsg){
+        return '/messages/approved/'+this.chatmessage.refmsg.groups[0].groupid+'/'+this.chatmessage.refmsg.id+'?noguard=true'
+      }
       // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-      return '/messages/approved/'+this.chatmessage.group.id+'/'+this.chatmessage.refmsgid
+      if( this.chatmessage.group && this.chatmessage.refmsgid){
+        return '/messages/approved/'+this.chatmessage.group.id+'/'+this.chatmessage.refmsgid+'?noguard=true'
+      }
+      return false
     },
   },
   methods: {
