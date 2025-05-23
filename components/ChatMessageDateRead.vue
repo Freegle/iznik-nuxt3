@@ -22,6 +22,16 @@
       >
         RSVP - reply expected
       </b-badge>
+      <span
+        v-if="mod && chatmessage?.bymailid"
+        class="btn btn-sm btn-white mb-2 clickme"
+        :title="
+          'Received by email #' + chatmessage?.bymailid + ' click to view'
+        "
+        @click="viewOriginal"
+      >
+        <v-icon icon="info-circle" /> View original email
+      </span>
     </div>
     <div v-else class="d-flex justify-content-end chat__dateread--mine">
       <span v-if="chatmessage?.seenbyall" title="This message has been read.">

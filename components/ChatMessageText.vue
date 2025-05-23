@@ -44,13 +44,12 @@
           />
         </span>
       </div>
-      <div v-if="lat || lng">
+      <div v-if="lat || lng" :style="'width: 100%; height: 200px'">
         <l-map
           ref="map"
           :zoom="16"
           :max-zoom="maxZoom"
           :center="[lat, lng]"
-          :style="'width: 100%; height: 200px'"
         >
           <l-tile-layer :url="osmtile" :attribution="attribution" />
           <l-marker :lat-lng="[lat, lng]" :interactive="false" />
