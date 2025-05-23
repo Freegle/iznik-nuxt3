@@ -109,11 +109,12 @@ async function logoutIfLoggedIn(page) {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1000)
 
-    // Check for any of the login indicators
+    // Check for any of the login indicators where disabled=false
     for (const indicator of loginIndicators) {
       try {
         await page
           .locator(indicator)
+          .filter({ hasNot: page.locator('[disabled="true"]') })
           .first()
           .waitFor({
             state: 'visible',
