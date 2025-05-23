@@ -6,5 +6,7 @@ set TRUSTPILOT_LINK=https://uk.trustpilot.com/evaluate/ilovefreegle.org
 set NODE_OPTIONS=--max_old_space_size=6000
 set GOOGLE_ADSENSE_TEST_MODE=false
 set GOOGLE_ADSENSE_ID=ca-pub-9017028318226154
+set PLAYWIRE_PUB_ID=1025311
+set PLAYWIRE_WEBSITE_ID=75051
 set STRIPE_PUBLISHABLE_KEY=pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ
 npx update-browserslist-db@latest

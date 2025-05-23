@@ -174,16 +174,17 @@ export default defineNuxtConfig({
     '@nuxt/image',
     //'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
-    /*process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
-    [
-      '@nuxtjs/google-adsense',
-      {
-        id: process.env.GOOGLE_ADSENSE_ID,
-        test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
-        hideUnfilled: false,
-        pauseOnLoad: true,
-      },
-    ],*/
+    process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    // We are using Playwire so we don't load AdSense ourselves.
+    // [
+    //   '@nuxtjs/google-adsense',
+    //   {
+    //     id: process.env.GOOGLE_ADSENSE_ID,
+    //     test: process.env.GOOGLE_ADSENSE_TEST_MODE === 'true',
+    //     hideUnfilled: false,
+    //     pauseOnLoad: true,
+    //   },
+    // ],
   ],
 
   hooks: {
@@ -231,6 +232,22 @@ export default defineNuxtConfig({
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
+      PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
+      PLAYWIRE_WEBSITE_ID: config.PLAYWIRE_WEBSITE_ID,
+
+      ...(process.env.GTM_ID
+        ? {
+            gtm: {
+              id: process.env.GTM_ID,
+              defer: true,
+              compatibility: true,
+              debug: true,
+              enabled: !!process.env.GTM_ID,
+              enableRouterSync: false,
+              devtools: true,
+            },
+          }
+        : {}),
     },
   },
 
