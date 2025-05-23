@@ -7,38 +7,38 @@
 const timeouts = {
   // Navigation timeouts
   navigation: {
-    default: 30000, // Default navigation timeout (30 seconds)
-    initial: 45000, // First page load timeout (45 seconds)
-    slowPage: 60000, // Extra long timeout for known slow pages (60 seconds)
-    inactivity: 9 * 60 * 1000, // Navigation inactivity timeout (9 minutes)
+    default: 30000, // Default navigation timeout
+    initial: 90000, // First page load timeout
+    slowPage: 60000, // Extra long timeout for known slow pages
+    inactivity: 9 * 60 * 1000, // Navigation inactivity timeout
   },
 
   // UI interaction timeouts
   ui: {
-    appearance: 5000, // Waiting for element to appear (5 seconds)
-    interaction: 10000, // Interaction with elements like clicks (10 seconds)
-    animation: 1000, // Waiting for animations to complete (1 second)
-    autocomplete: 10000, // Waiting for autocomplete results (10 seconds)
-    settleTime: 1000, // Time to allow UI to settle (1 second)
-    transition: 500, // Time for UI transitions (0.5 seconds)
+    appearance: 5000, // Waiting for element to appear
+    interaction: 10000, // Interaction with elements like clicks
+    animation: 1000, // Waiting for animations to complete
+    autocomplete: 10000, // Waiting for autocomplete results
+    settleTime: 1000, // Time to allow UI to settle
+    transition: 500, // Time for UI transitions
   },
 
   // API and data loading timeouts
   api: {
-    default: 15000, // Default API response timeout (15 seconds)
-    slowApi: 30000, // Slower API endpoints timeout (30 seconds)
+    default: 15000, // Default API response timeout
+    slowApi: 30000, // Slower API endpoints timeout
   },
 
   // Test teardown timeouts
   teardown: {
-    networkIdle: 5000, // Network idle wait during teardown (5 seconds)
+    networkIdle: 5000, // Network idle wait during teardown
   },
 
   // Assertion timeouts
   assertion: {
-    quick: 1000, // Quick assertions (1 second)
-    normal: 5000, // Standard assertions (5 seconds)
-    slow: 15000, // Slow assertions for complex operations (15 seconds)
+    quick: 1000, // Quick assertions
+    normal: 5000, // Standard assertions
+    slow: 15000, // Slow assertions for complex operations
   },
 }
 

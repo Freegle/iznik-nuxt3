@@ -388,6 +388,7 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   } else {
     // Navigate to homepage if we're not already there
     const currentUrl = page.url()
+    console.log('Current URL:', currentUrl)
     if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
     }
@@ -514,9 +515,7 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
 
   // Find and click the Login button in the modal
   console.log('Clicking login button')
-  const loginButton = page.locator(
-    '.test-signinbutton, button:has-text("Sign in"), .btn:has-text("Sign in")'
-  )
+  const loginButton = page.locator('button:has-text("Log in to Freegle")')
   await loginButton.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,

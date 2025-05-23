@@ -73,6 +73,7 @@
                   :price="amount"
                   :monthly="monthly"
                   @success="succeeded"
+                  @error="payPalFallback = true"
                   @no-payment-methods="noMethods"
                 />
               </div>
