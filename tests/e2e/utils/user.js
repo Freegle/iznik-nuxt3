@@ -390,9 +390,15 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
     const currentUrl = page.url()
     console.log('Current URL:', currentUrl)
     if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+      console.log('Navigating to homepage')
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+      console.log('Navigated to homepage')
     }
   }
+
+  // Wait for 1s for page to settle.
+  console.log('Waiting for page to settle')
+  await page.waitForTimeout(1000)
 
   // Find and click a sign-in button on the homepage to open the login modal
   console.log('Opening login modal')

@@ -18,7 +18,7 @@ function setupNavigationHelpers(page) {
   page.gotoAndVerify = async function (url, options = {}) {
     const response = await this.goto(url, {
       timeout: options.timeout || timeouts.navigation.default,
-      waitUntil: options.waitUntil || 'networkidle',
+      waitUntil: options.waitUntil || 'domcontentloaded',
     })
 
     return response?.ok() ?? false

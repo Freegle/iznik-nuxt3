@@ -391,8 +391,7 @@ const test = base.test.extend({
         // Navigate with timeout
         await page.goto(path, { timeout })
 
-        // Wait for network idle with timeout
-        await page.waitForLoadState('networkidle', { timeout })
+        await page.waitForLoadState('domcontentloaded', { timeout })
 
         // Verify page content is visible
         const body = page.locator('body')
