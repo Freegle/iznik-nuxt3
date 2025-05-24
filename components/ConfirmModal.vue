@@ -31,7 +31,7 @@ const props = defineProps({
 
 const emit = defineEmits(['confirm'])
 
-const { modal, show:showmodal, hide } = useOurModal()
+const { modal, show: showmodal, hide } = useOurModal()
 
 function confirm() {
   emit('confirm')
