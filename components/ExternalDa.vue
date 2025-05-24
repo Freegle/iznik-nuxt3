@@ -116,7 +116,7 @@ const props = defineProps({
   },
   showLoggedOut: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   jobs: {
     type: Boolean,

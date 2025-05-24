@@ -94,3 +94,5 @@ this.checkWorkDeferGetMessages()
 <b-form-select v-model="whatever" @change="change"> needs v-model and newval is invalid but this.whatever has been updated
 
 npx eslint api/*.js --fix
+
+git reset --hard origin/production

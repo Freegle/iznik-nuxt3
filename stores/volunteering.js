@@ -18,7 +18,7 @@ export const useVolunteeringStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    clear(){
+    clear() {
       this.list = {}
       this.forUser = []
       this.forGroup = []
@@ -26,32 +26,30 @@ export const useVolunteeringStore = defineStore({
     async fetchMT(params) {
       if (!params) {
         params = {
-          systemwide: true
+          systemwide: true,
         }
       } else if (!params.groupid) {
         // Not a specific group - get all of them including systemwide ones.
         params.systemwide = true
       }
-  
-      const {
-        volunteering,
-        volunteerings,
-        context
-      } = await api(this.config).volunteering.fetchMT(params)
+
+      const { volunteering, volunteerings } = await api(
+        this.config
+      ).volunteering.fetchMT(params)
 
       if (params && params.id) {
         this.list[params.id] = volunteering
       } else {
         this.list = {}
-        for( const volunteering of volunteerings){
-          if( this.list[volunteering.id]) continue
+        for (const volunteering of volunteerings) {
+          if (this.list[volunteering.id]) continue
           const item = addStrings(volunteering, false)
           // Convert to v2 format
           item.image = item.photo
           item.userid = item.user?.id
           item.groupsmt = item.groups
           const groups = []
-          for( const group of item.groups){
+          for (const group of item.groups) {
             groups.push(group.id)
           }
           item.groups = groups
@@ -68,9 +66,9 @@ export const useVolunteeringStore = defineStore({
           }
           this.list[item.id] = item
         }
-        //this.context = context
+        // this.context = context
       }
-  },
+    },
     async fetch(id, force) {
       try {
         const miscStore = useMiscStore()
@@ -79,19 +77,22 @@ export const useVolunteeringStore = defineStore({
             await this.fetching[id]
             await nextTick()
           } else {
-            if( miscStore.modtools) {
-              this.fetching[id] = api(this.config).volunteering.fetchMT({ id, pending: true})
+            if (miscStore.modtools) {
+              this.fetching[id] = api(this.config).volunteering.fetchMT({
+                id,
+                pending: true,
+              })
             } else {
               this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             }
             let item = await this.fetching[id]
-            if( item.volunteering) {
+            if (item.volunteering) {
               item = item.volunteering
               item.image = item.photo
               item.userid = item.user.id
               item.groupsmt = item.groups
               const groups = []
-              for( const group of item.groups){
+              for (const group of item.groups) {
                 groups.push(group.id)
               }
               item.groups = groups

@@ -24,6 +24,26 @@ export default class ChatAPI extends BaseAPI {
     return await this.$get('/chat/rooms',params)
   }
 
+  fetchMessagesMT(chatid, params) {
+    return this.$get(`/chat/rooms/${chatid}/messages`, params)
+  }
+
+  async unseenCountMT() {
+    const { count } = await this.$get('/chatrooms', {
+      count: true,
+      chattypes: ['User2Mod', 'Mod2Mod'],
+    })
+    return count
+  }
+
+  async fetchReviewChatsMT(params) {
+    return await this.$get(`/chatmessages`, params)
+  }
+
+  async listChatsMT(params) {
+    return await this.$get('/chat/rooms', params)
+  }
+
   async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
       '/chat?includeClosed=true',
@@ -37,7 +57,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   fetchChatMT(chatid) {
-    return this.$get('/chatrooms', { id:chatid })
+    return this.$get('/chatrooms', { id: chatid })
   }
 
   fetchChat(chatid, logError) {

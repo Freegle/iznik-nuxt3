@@ -31,12 +31,12 @@ export const useTeamStore = defineStore({
 
       return this.list[team]
     },
-    async add(params){
+    async add(params) {
       await api(this.config).team.add(params)
     },
-    async remove(params){
+    async remove(params) {
       await api(this.config).team.remove(params)
-    }
+    },
   },
   getters: {
     get: (state) => (team, id) => {

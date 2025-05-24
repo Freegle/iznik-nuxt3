@@ -17,13 +17,20 @@
         <b-card v-else border-variant="warning">
           <b-card-title>
             <h4 v-if="otheruser">
-              <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{ otheruser.displayname }} reported someone
+              <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{
+                otheruser.displayname
+              }}
+              reported someone
             </h4>
           </b-card-title>
           <b-card-text>
             {{ emessage }}
-            {{ chatmessage.refchatid }} - {{  chatmessage.userid }}
-            <ModChatViewButton :id="chatmessage.refchatid" class="mt-2" :pov="chatmessage.userid" />
+            {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
+            <ModChatViewButton
+              :id="chatmessage.refchatid"
+              class="mt-2"
+              :pov="chatmessage.userid"
+            />
           </b-card-text>
         </b-card>
       </b-col>
@@ -40,7 +47,7 @@ export default {
     modtools() {
       const miscStore = useMiscStore()
       return miscStore.modtools
-    }
-  }
+    },
+  },
 }
 </script>

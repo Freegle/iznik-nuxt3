@@ -111,7 +111,10 @@ export default {
         // Open a chat to the mods.  If we are in FD then we just pass the group id and the chat opens from us to the
         // mods; if we're in MT we pass the groupid and userid and it opens from us mods to the user.
         const chatuserid = this.miscStore.modtools ? this.userid : 0
-        const chatid = await this.chatStore.openChatToMods(this.groupid, chatuserid)
+        const chatid = await this.chatStore.openChatToMods(
+          this.groupid,
+          chatuserid
+        )
 
         router.push('/chats/' + chatid)
       } else if (this.userid > 0) {

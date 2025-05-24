@@ -16,7 +16,6 @@ export const useGroupStore = defineStore({
       this.fetching = {}
     },
 
-
     async fetch(id, force) {
       if (id) {
         if (isNaN(id)) {
@@ -98,7 +97,7 @@ export const useGroupStore = defineStore({
     async confirmAffiliation(params) {
       await api(this.config).group.patch({
         id: params.id,
-        affiliationconfirmed: new Date().toISOString()
+        affiliationconfirmed: new Date().toISOString(),
       })
       await this.fetch(params.id)
     },
@@ -106,11 +105,11 @@ export const useGroupStore = defineStore({
       const id = await api(this.config).group.add({
         grouptype: 'Freegle',
         action: 'Create',
-        name: params.nameshort
+        name: params.nameshort,
       })
-  
+
       api(this.config).group.patch({
-        id: id,
+        id,
         namefull: params.namefull,
         publish: 0,
         polyofficial: params.cga,
@@ -122,9 +121,9 @@ export const useGroupStore = defineStore({
         ontn: 1,
         onlovejunk: 1,
         licenserequired: 0,
-        showonyahoo: 0
+        showonyahoo: 0,
       })
-  
+
       return id
     },
   },
