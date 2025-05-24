@@ -13,7 +13,7 @@
           {{ logs.length }}
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
-        <infinite-loading :distance="200" @infinite="fetchChunk">
+        <infinite-loading :distance="200" @infinite="fetchChunk" :identifier="bump">
           <template #no-results />
           <template #no-more />
           <template #spinner>
@@ -61,7 +61,8 @@ export default {
   data: function () {
     return {
       busy: false,
-      context: null
+      context: null,
+      bump: 0
     }
   },
   computed: {
@@ -108,6 +109,7 @@ export default {
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
+      this.bump++
       this.modal.show()
     },
     async fetchChunk($state) {
