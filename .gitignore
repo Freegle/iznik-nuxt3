@@ -39,3 +39,12 @@ public/js/prebid-base-*
 *.txt
 resources
 save
+/test-results/.last-run.json
+/.npmrc
+/playwright-report/index.html
+/test-results/junit.xml
+/test-emails.json
+
+# app
+android
+ios
