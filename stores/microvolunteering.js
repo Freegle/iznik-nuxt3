@@ -29,14 +29,16 @@ export const useMicroVolunteeringStore = defineStore({
       await api(this.config).microvolunteering.response(params)
     },
     async fetch(params) {
-      const { context, microvolunteerings } = await api(this.config).microvolunteering.fetch(params)
-  
-      for( const microvolunteering of microvolunteerings){
+      const { context, microvolunteerings } = await api(
+        this.config
+      ).microvolunteering.fetch(params)
+
+      for (const microvolunteering of microvolunteerings) {
         this.list[microvolunteering.id] = microvolunteering
       }
       return context
     },
-    },
+  },
   getters: {
     byId: (state) => (id) => {
       return state.list[id]

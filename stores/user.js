@@ -14,7 +14,8 @@ export const useUserStore = defineStore({
       this.fetching = {}
       this.fetchingLocation = {}
     },
-    clear() { // ModTools
+    clear() {
+      // ModTools
       console.log('uUS clear')
       this.list = {}
       this.locationList = {}
@@ -25,15 +26,16 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.user?.id
     },
-    async fetchMT(params){ // id, info, search, emailhistory
+    async fetchMT(params) {
+      // id, info, search, emailhistory
       params.info = true
       const { user, users } = await api(this.config).user.fetchMT(params)
-      if( user){
+      if (user) {
         this.list[user.id] = user
         return user
       }
-      if( users){
-        for( const user of users){
+      if (users) {
+        for (const user of users) {
           this.list[user.id] = user
         }
         return users
@@ -41,8 +43,8 @@ export const useUserStore = defineStore({
     },
     async fetch(id, force) {
       id = parseInt(id)
-      if( isNaN(id)){
-        console.log("USEUSERSTORE FETCH ID NULL")
+      if (isNaN(id)) {
+        console.log('USEUSERSTORE FETCH ID NULL')
         console.trace()
         return
       }
@@ -111,7 +113,11 @@ export const useUserStore = defineStore({
       await api(this.config).user.save(params)
     },
     async addEmail(params) {
-      await api(this.config).user.addEmail(params.id, params.email, params.primary)
+      await api(this.config).user.addEmail(
+        params.id,
+        params.email,
+        params.primary
+      )
       await this.fetch(params.id, true)
     },
     async add(params) {
@@ -128,9 +134,10 @@ export const useUserStore = defineStore({
   getters: {
     byId: (state) => {
       return (id) => {
-        if( !id) return null
+        if (!id) return null
         const user = state.list[id]
-        if( user && user.spammer && user.spammer.collection === 'Whitelisted') user.spammer = false
+        if (user && user.spammer && user.spammer.collection === 'Whitelisted')
+          user.spammer = false
         return user
       }
     },

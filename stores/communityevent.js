@@ -19,7 +19,7 @@ export const useCommunityEventStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    clear(){
+    clear() {
       this.list = {}
       this.forUser = []
       this.forGroup = []
@@ -50,17 +50,17 @@ export const useCommunityEventStore = defineStore({
           }
         }
         // Fix up userid
-        if( item.user) item.userid = item.user.id
+        if (item.user) item.userid = item.user.id
 
         // Convert array of groups to array of groupids
         const groups = []
-        for( const g of item.groups){
+        for (const g of item.groups) {
           groups.push(g.id)
         }
         item.groups = groups
 
         // Get photo into expected field
-        if( item.photo) item.image = item.photo
+        if (item.photo) item.image = item.photo
 
         this.list[item.id] = item
       }
@@ -68,11 +68,11 @@ export const useCommunityEventStore = defineStore({
     async fetch(id, force) {
       try {
         const miscStore = useMiscStore()
-        if( miscStore.modtools){
+        if (miscStore.modtools) {
           await this.fetchMT({
             id,
             limit: 1,
-            pending: true
+            pending: true,
           })
           return this.list[id]
         }
