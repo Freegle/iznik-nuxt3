@@ -4,6 +4,25 @@ export default class ChatAPI extends BaseAPI {
   fetchMessages(chatid) {
     return this.$getv2(`/chat/${chatid}/message`)
   }
+  fetchMessagesMT(chatid,params) {
+    return this.$get(`/chat/rooms/${chatid}/messages`,params)
+  }
+
+  async unseenCountMT() {
+    const { count } = await this.$get('/chatrooms', {
+      count: true,
+      chattypes: ['User2Mod', 'Mod2Mod']
+    })
+    return count
+  }
+
+  async fetchReviewChatsMT(params){
+    return await this.$get(`/chatmessages`, params)
+  }
+
+  async listChatsMT(params) {
+    return await this.$get('/chat/rooms',params)
+  }
 
   async listChats(since, search, keepChat, logError) {
     return await this.$getv2(
@@ -15,6 +34,10 @@ export default class ChatAPI extends BaseAPI {
       },
       logError
     )
+  }
+
+  fetchChatMT(chatid) {
+    return this.$get('/chatrooms', { id:chatid })
   }
 
   fetchChat(chatid, logError) {
@@ -39,6 +62,10 @@ export default class ChatAPI extends BaseAPI {
 
   async send(data) {
     return await this.$postv2('/chat/' + data.roomid + '/message', data)
+  }
+
+  async sendMT(data) {
+    return await this.$post('/chatmessages', data)
   }
 
   nudge(chatid) {
@@ -70,5 +97,9 @@ export default class ChatAPI extends BaseAPI {
 
   typing(chatid) {
     return this.$post('/chatrooms', { id: chatid, action: 'Typing' })
+  }
+
+  referToSupport(chatid) {
+    return this.$post('/chatrooms', { id: chatid, action: 'ReferToSupport' })
   }
 }

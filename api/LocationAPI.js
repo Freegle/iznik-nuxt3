@@ -12,6 +12,10 @@ export default class LocationAPI extends BaseAPI {
     })
   }
 
+  fetch(params) {
+    return this.$get('/locations', params)
+  }
+
   fetchv2(id) {
     return this.$getv2('/location/' + id)
   }
@@ -34,6 +38,13 @@ export default class LocationAPI extends BaseAPI {
       action: 'Exclude',
       byname: false,
       groupid,
+    })
+  }
+
+  convertKML(kml) {
+    return this.$post('/locations/kml', {
+      action: 'ConvertKML',
+      kml
     })
   }
 }

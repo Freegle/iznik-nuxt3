@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '@/stores/misc'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
@@ -11,14 +12,70 @@ export const useCommunityEventStore = defineStore({
     list: {},
     forUser: [],
     forGroup: [],
+    context: false,
   }),
   actions: {
     init(config) {
       this.config = config
       this.fetching = {}
     },
+    clear(){
+      this.list = {}
+      this.forUser = []
+      this.forGroup = []
+      this.context = false
+    },
+    async fetchMT(params) {
+      const data = await api(this.config).communityevent.fetchMT(params)
+      let items = []
+      if (params && params.id) {
+        items = [data.communityevent]
+      } else {
+        items = data.communityevents
+        this.context = data.context
+      }
+      for (let j = 0; j < items.length; j++) {
+        const item = items[j]
+        for (let i = 0; i < item.dates.length; i++) {
+          addStrings(item, true)
+          if (item.dates) {
+            item.earliestDate = earliestDate(item.dates)
+            item.earliestDateOfAll = earliestDate(item.dates, true)
+            item.dates.forEach((date, index) => {
+              item.dates[index].starttime = dayjs(date.start).format('HH:mm')
+              item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
+              item.dates[index].endtime = dayjs(date.end).format('HH:mm')
+              item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
+            })
+          }
+        }
+        // Fix up userid
+        if( item.user) item.userid = item.user.id
+
+        // Convert array of groups to array of groupids
+        const groups = []
+        for( const g of item.groups){
+          groups.push(g.id)
+        }
+        item.groups = groups
+
+        // Get photo into expected field
+        if( item.photo) item.image = item.photo
+
+        this.list[item.id] = item
+      }
+    },
     async fetch(id, force) {
       try {
+        const miscStore = useMiscStore()
+        if( miscStore.modtools){
+          await this.fetchMT({
+            id,
+            limit: 1,
+            pending: true
+          })
+          return this.list[id]
+        }
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
