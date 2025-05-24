@@ -92,3 +92,5 @@ this.checkWorkDeferGetMessages()
 // SEE WORK EXPLANATION IN useModMessages.js
 
 <b-form-select v-model="whatever" @change="change"> needs v-model and newval is invalid but this.whatever has been updated
+
+npx eslint api/*.js --fix
