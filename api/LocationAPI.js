@@ -44,7 +44,7 @@ export default class LocationAPI extends BaseAPI {
   convertKML(kml) {
     return this.$post('/locations/kml', {
       action: 'ConvertKML',
-      kml
+      kml,
     })
   }
 }

@@ -6,7 +6,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   async fetchMT(params) {
-    return await this.$get('/user',params)
+    return await this.$get('/user', params)
   }
 
   async fetchByEmail(email, logError = true) {

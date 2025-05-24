@@ -4,6 +4,7 @@ export default class MessageAPI extends BaseAPI {
   fetch(id, logError = true) {
     return this.$getv2('/message/' + id, {}, logError)
   }
+
   fetchMT(params, logError = true) {
     return this.$get('/message', params, logError)
   }
@@ -41,7 +42,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
-    //console.error('MessageAPI fetchMessages', params)
+    // console.error('MessageAPI fetchMessages', params)
     return this.$get('/messages', params)
   }
 
