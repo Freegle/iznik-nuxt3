@@ -6,11 +6,8 @@
 const fs = require('fs')
 const path = require('path')
 const { chromium } = require('@playwright/test')
-const {
-  unsubscribeManually,
-  loginViaHomepage,
-} = require('~/tests/e2e/utils/user')
-const { DEFAULT_TEST_PASSWORD } = require('~/tests/e2e/config')
+const { unsubscribeManually, loginViaHomepage } = require('./utils/user')
+const { DEFAULT_TEST_PASSWORD } = require('./config')
 
 // File path for stored test emails
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')

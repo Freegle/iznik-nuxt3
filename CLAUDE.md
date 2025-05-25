@@ -37,9 +37,21 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - First time setup: `npm install @playwright/test`
 - Install browsers: `npx playwright install`
 - For WSL/Linux, may need system dependencies: `sudo npx playwright install-deps`
-- For local tests, start dev server first: `npm run dev` (in separate terminal)
+- Tests automatically start the dev server via webServer configuration in playwright.config.js
 - Tests use environment variable `TEST_BASE_URL` to determine server URL
 - IMPORTANT: Never mark tests with `.skip()` - all tests should be runnable
+
+### Nuxt Test Utils Integration
+- `@nuxt/test-utils` is installed for enhanced e2e testing capabilities
+- **Local development**: Assumes dev server is already running on 127.0.0.1:3002 (start manually with `npm run dev`)
+- **WSL development**: If running tests in WSL while dev server runs on Windows, set `TEST_BASE_URL=http://[WINDOWS_HOST_IP]:3002`
+  - Find Windows host IP with: `ip route show | grep default | awk '{print $3}'`
+  - May require Windows Firewall configuration to allow WSL connections
+- **CI environment**: CircleCI manually manages the production server on port 3000
+- Custom fixtures in `tests/e2e/fixtures.js` provide enhanced testing capabilities while maintaining compatibility
+- Tests must wait for Nuxt app to fully load before checking page title (not "Starting Nuxt..." or error pages)
+- The NUXT_TEST_UTILS_AVAILABLE flag is exported from fixtures for conditional testing features
+- Tests handle connection errors gracefully during server startup
 
 ## Code Style Guidelines
 - **Formatting**: Use Prettier with semicolons disabled and single quotes

@@ -17,7 +17,8 @@ module.exports = defineConfig({
   use: {
     // Allow overriding the base URL via TEST_BASE_URL environment variable
     // Default to the development server if not specified
-    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
+    // For WSL: Set TEST_BASE_URL=http://[WINDOWS_HOST_IP]:3002 where WINDOWS_HOST_IP is your Windows machine's IP
+    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3002',
 
     // Test email domain for fake email addresses
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
@@ -40,6 +41,10 @@ module.exports = defineConfig({
     SENTRY_ENABLE_DEBUG: 'false',
     SENTRY_TRACES_SAMPLE_RATE: '0', // Don't sample any traces
   },
+
+  // Note: webServer configuration removed per user request
+  // In local development, assume dev server is already running on 127.0.0.1:3002
+  // In CI, the server is managed manually to test against the production build
   projects: [
     // Start with just Chromium to make it easier to run tests
     {

@@ -4,8 +4,8 @@
 
 const path = require('path')
 const { timeouts, DEFAULT_TEST_PASSWORD } = require('../config')
+const { SCREENSHOTS_DIR } = require('../config')
 const { waitForModal } = require('./ui')
-const { SCREENSHOTS_DIR } = require('~/tests/e2e/config')
 
 /**
  * Logs out the current user if they are logged in

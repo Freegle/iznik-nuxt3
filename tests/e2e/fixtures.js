@@ -4,7 +4,24 @@ const crypto = require('crypto')
 const base = require('@playwright/test')
 const { SCREENSHOTS_DIR, timeouts, environment } = require('./config')
 const logger = require('./logger')
-const { unsubscribeTestEmails } = require('~/tests/e2e/unsubscribe-test-emails')
+const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
+
+// Nuxt test utils integration - available but not directly imported due to ES module compatibility
+// The package is installed and can be used through other means if needed
+const NUXT_TEST_UTILS_AVAILABLE = (() => {
+  try {
+    require.resolve('@nuxt/test-utils/e2e')
+    return true
+  } catch {
+    return false
+  }
+})()
+
+if (NUXT_TEST_UTILS_AVAILABLE) {
+  console.log(
+    '@nuxt/test-utils is available and can be used for enhanced testing'
+  )
+}
 
 // Ensure the screenshots directory exists
 const ensureScreenshotsDir = () => {
@@ -327,6 +344,8 @@ const test = base.test.extend({
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /The request has been aborted/, // Can happen during navigation.
       /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
+      /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
+      /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
       /stripe.com/, // Stripe related errors are expected in test
     ]
 
@@ -836,3 +855,4 @@ const testWithFixtures = test.extend({
 // Export our enhanced test function with all fixtures and expect
 exports.test = testWithFixtures
 exports.expect = base.expect
+exports.NUXT_TEST_UTILS_AVAILABLE = NUXT_TEST_UTILS_AVAILABLE

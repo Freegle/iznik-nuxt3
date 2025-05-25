@@ -11,6 +11,19 @@ test.describe('Homepage tests', () => {
   test('homepage should load without console errors', async ({ page }) => {
     await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
+    // Wait for the page to load properly (not the error or loading page)
+    await page.waitForFunction(
+      () => {
+        return (
+          document.title !== 'Starting Nuxt... | Nuxt' &&
+          document.title !==
+            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+          document.title.length > 0
+        )
+      },
+      { timeout: 30000 }
+    )
+
     const title = await page.title()
     expect(title).toBe("Don't throw it away, give it away!")
   })
@@ -28,6 +41,19 @@ test.describe('Homepage tests', () => {
 
       // Go to the homepage with extended timeout for initial load
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+
+      // Wait for the page to load properly (not the error or loading page)
+      await page.waitForFunction(
+        () => {
+          return (
+            document.title !== 'Starting Nuxt... | Nuxt' &&
+            document.title !==
+              'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+            document.title.length > 0
+          )
+        },
+        { timeout: 30000 }
+      )
 
       // Verify page title
       const title = await page.title()
@@ -151,6 +177,19 @@ test.describe('Homepage tests', () => {
     // Go to the homepage
     await page.gotoAndVerify('/')
 
+    // Wait for the page to load properly
+    await page.waitForFunction(
+      () => {
+        return (
+          document.title !== 'Starting Nuxt... | Nuxt' &&
+          document.title !==
+            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+          document.title.length > 0
+        )
+      },
+      { timeout: 30000 }
+    )
+
     // Test 1: Clicking "Give Stuff" should navigate to /give
     const giveStuffButton = page.locator('.btn:has-text("Give Stuff")')
     await giveStuffButton.waitFor({
@@ -197,6 +236,19 @@ test.describe('Homepage tests', () => {
 
     // Go to the homepage
     await page.gotoAndVerify('/')
+
+    // Wait for the page to load properly
+    await page.waitForFunction(
+      () => {
+        return (
+          document.title !== 'Starting Nuxt... | Nuxt' &&
+          document.title !==
+            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+          document.title.length > 0
+        )
+      },
+      { timeout: 30000 }
+    )
 
     // Locate the PlaceAutocomplete input field
     const placeInput = page.locator(selectors.placeAutocomplete.input)
