@@ -91,17 +91,21 @@
       <div
         class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
       >
-        <PlaceAutocomplete
-          class="mb-2"
-          labeltext="See what's being freegled near you:"
-          labeltext-sr="Enter your location and"
-          @selected="explorePlace($event)"
-        />
+        <client-only>
+          <PlaceAutocomplete
+            class="mb-2"
+            labeltext="See what's being freegled near you:"
+            labeltext-sr="Enter your location and"
+            @selected="explorePlace($event)"
+          />
+        </client-only>
       </div>
-      <VisualiseList
-        v-if="!breakpoint || breakpoint === 'xs'"
-        class="mt-2 mb-2 d-block d-sm-none"
-      />
+      <client-only>
+        <VisualiseList
+          v-if="!breakpoint || breakpoint === 'xs'"
+          class="mt-2 mb-2 d-block d-sm-none"
+        />
+      </client-only>
     </div>
     <div class="app-download mt-2">
       <a
