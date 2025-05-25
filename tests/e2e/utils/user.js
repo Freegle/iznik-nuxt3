@@ -112,9 +112,10 @@ async function logoutIfLoggedIn(page) {
     // Check for any of the login indicators where disabled=false
     for (const indicator of loginIndicators) {
       try {
+        // Use CSS selector to exclude disabled elements directly
+        const modifiedIndicator = `${indicator}:not([disabled]):not([disabled="true"])`
         await page
-          .locator(indicator)
-          .filter({ hasNot: page.locator('[disabled="true"]') })
+          .locator(modifiedIndicator)
           .first()
           .waitFor({
             state: 'visible',
@@ -195,10 +196,9 @@ async function signUpViaHomepage(
   // Try each possible button until we find one
   let buttonFound = false
   for (const selector of signInButtons) {
-    const button = page
-      .locator(selector)
-      .filter({ hasNot: page.locator('[disabled="true"]') })
-      .first()
+    // Use CSS selector to exclude disabled elements directly
+    const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
+    const button = page.locator(modifiedSelector).first()
     if (
       (await button.count()) > 0 &&
       (await button.isVisible().catch(() => false))
@@ -418,10 +418,9 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   // Try each possible button until we find one
   let buttonFound = false
   for (const selector of signInButtons) {
-    const button = page
-      .locator(selector)
-      .filter({ hasNot: page.locator('[disabled="true"]') })
-      .first()
+    // Use CSS selector to exclude disabled elements directly
+    const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
+    const button = page.locator(modifiedSelector).first()
     if (
       (await button.count()) > 0 &&
       (await button.isVisible().catch(() => false))

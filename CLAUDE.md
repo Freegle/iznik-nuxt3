@@ -43,15 +43,16 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 
 ### Nuxt Test Utils Integration
 - `@nuxt/test-utils` is installed for enhanced e2e testing capabilities
-- **Local development**: Assumes dev server is already running on 127.0.0.1:3002 (start manually with `npm run dev`)
-- **WSL development**: If running tests in WSL while dev server runs on Windows, set `TEST_BASE_URL=http://[WINDOWS_HOST_IP]:3002`
-  - Find Windows host IP with: `ip route show | grep default | awk '{print $3}'`
-  - May require Windows Firewall configuration to allow WSL connections
+- **IMPORTANT**: Tests must be run from Windows (not WSL) and require dev server to be running first
+- **Local development**: 
+  1. Start dev server first: `npm run dev` (runs on port 3002)
+  2. Run tests from a separate terminal: `npm run test`
+  3. Tests expect server at `http://127.0.0.1:3002`
 - **CI environment**: CircleCI manually manages the production server on port 3000
 - Custom fixtures in `tests/e2e/fixtures.js` provide enhanced testing capabilities while maintaining compatibility
-- Tests must wait for Nuxt app to fully load before checking page title (not "Starting Nuxt..." or error pages)
+- Tests handle slow loading gracefully and provide clear error messages when dev server is not running
 - The NUXT_TEST_UTILS_AVAILABLE flag is exported from fixtures for conditional testing features
-- Tests handle connection errors gracefully during server startup
+- Tests include improved timeout handling and storage cleanup error prevention
 
 ## Code Style Guidelines
 - **Formatting**: Use Prettier with semicolons disabled and single quotes

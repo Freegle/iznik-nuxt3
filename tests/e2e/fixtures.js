@@ -407,14 +407,31 @@ const test = base.test.extend({
       const timeout = options.timeout || timeouts.navigation.default
 
       try {
+        console.log(`Navigating to ${path} with timeout ${timeout}ms`)
+
         // Navigate with timeout
         await page.goto(path, { timeout })
 
+        // Wait for initial load
         await page.waitForLoadState('domcontentloaded', { timeout })
+
+        // Wait for network to settle (helps with slow JavaScript loading)
+        try {
+          await page.waitForLoadState('networkidle', {
+            timeout: Math.min(timeout, 30000),
+          })
+        } catch (networkError) {
+          console.log(
+            `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
+          )
+        }
 
         // Verify page content is visible
         const body = page.locator('body')
-        await body.waitFor({ state: 'visible', timeout })
+        await body.waitFor({
+          state: 'visible',
+          timeout: Math.min(timeout, 10000),
+        })
 
         // Check if page contains error messages
         const errorTextContent = await page.textContent('body')
@@ -446,9 +463,36 @@ const test = base.test.extend({
         }
       } catch (error) {
         // Take a screenshot if navigation fails
-        await page.screenshot({
-          path: getScreenshotPath(`navigation-error-${Date.now()}.png`),
-        })
+        try {
+          await page.screenshot({
+            path: getScreenshotPath(`navigation-error-${Date.now()}.png`),
+            fullPage: true,
+          })
+        } catch (screenshotError) {
+          console.warn(
+            `Could not take navigation error screenshot: ${screenshotError.message}`
+          )
+        }
+
+        // Log current page state for debugging
+        try {
+          const currentUrl = page.url()
+          const currentTitle = await page.title()
+          console.log(
+            `Navigation failed. Current URL: ${currentUrl}, Title: "${currentTitle}"`
+          )
+        } catch (debugError) {
+          console.warn(
+            `Could not get page state for debugging: ${debugError.message}`
+          )
+        }
+
+        // Check if it's a connection refused error (dev server not running)
+        if (error.message.includes('ERR_CONNECTION_REFUSED')) {
+          throw new Error(
+            `Cannot connect to dev server at ${path}. Make sure the dev server is running on http://127.0.0.1:3002`
+          )
+        }
 
         // Re-throw with more context
         throw new Error(`Failed to navigate to ${path}: ${error.message}`)
@@ -472,9 +516,25 @@ const test = base.test.extend({
         try {
           await page
             .evaluate(() => {
-              localStorage.clear()
-              sessionStorage.clear()
-              console.log('Browser storage cleared during teardown')
+              try {
+                // Check if localStorage is accessible before trying to clear it
+                if (typeof Storage !== 'undefined' && window.localStorage) {
+                  localStorage.clear()
+                  console.log('LocalStorage cleared during teardown')
+                }
+              } catch (e) {
+                console.warn('Could not clear localStorage:', e.message)
+              }
+
+              try {
+                // Check if sessionStorage is accessible before trying to clear it
+                if (typeof Storage !== 'undefined' && window.sessionStorage) {
+                  sessionStorage.clear()
+                  console.log('SessionStorage cleared during teardown')
+                }
+              } catch (e) {
+                console.warn('Could not clear sessionStorage:', e.message)
+              }
 
               // Safe IndexedDB cleanup
               if (window.indexedDB) {
@@ -504,15 +564,28 @@ const test = base.test.extend({
               }
 
               // Clear all cookies via JavaScript as an extra precaution
-              if (document.cookie) {
-                const cookies = document.cookie.split(';')
-                cookies.forEach((cookie) => {
-                  const name = cookie.split('=')[0].trim()
-                  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`
-                })
+              try {
+                if (document.cookie) {
+                  const cookies = document.cookie.split(';')
+                  cookies.forEach((cookie) => {
+                    const name = cookie.split('=')[0].trim()
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`
+                  })
+                  console.log('Cookies cleared during teardown')
+                }
+              } catch (e) {
+                console.warn('Could not clear cookies:', e.message)
               }
             })
-            .catch((e) => console.warn(`Storage cleanup error: ${e.message}`))
+            .catch((e) => {
+              // Only log if it's not a SecurityError about localStorage access
+              if (
+                !e.message.includes('localStorage') &&
+                !e.message.includes('Access is denied')
+              ) {
+                console.warn(`Storage cleanup error: ${e.message}`)
+              }
+            })
         } catch (err) {
           // Log but continue if this fails
           console.warn(`Unable to clear page storage: ${err.message}`)

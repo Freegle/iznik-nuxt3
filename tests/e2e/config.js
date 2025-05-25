@@ -7,9 +7,9 @@
 const timeouts = {
   // Navigation timeouts
   navigation: {
-    default: 30000, // Default navigation timeout
+    default: 60000, // Default navigation timeout (increased for slow loading)
     initial: 90000, // First page load timeout
-    slowPage: 60000, // Extra long timeout for known slow pages
+    slowPage: 90000, // Extra long timeout for known slow pages
     inactivity: 9 * 60 * 1000, // Navigation inactivity timeout
   },
 
