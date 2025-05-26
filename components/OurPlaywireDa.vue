@@ -52,6 +52,7 @@ const props = defineProps({
 })
 
 const daDiv = ref(null)
+let addAdTimer = null
 
 const showAd = ref(false)
 
@@ -85,6 +86,13 @@ watch(
       nextTick(() => {
         function addAd() {
           try {
+            // Wait for daDiv to be in the DOM and not null before proceeding
+            if (!daDiv.value) {
+              console.log('daDiv not ready, retrying in 50ms')
+              addAdTimer = setTimeout(addAd, 50)
+              return
+            }
+
             // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
             //
             // We don't use spaNewPage as in the example because our ads are added more dynamically than
@@ -188,6 +196,11 @@ const adStyle = computed(() => {
 
 async function leaving() {
   try {
+    if (addAdTimer) {
+      clearTimeout(addAdTimer)
+      addAdTimer = null
+    }
+
     if (window.ramp?.destroyUnits) {
       // We need to destroy the ad unit.
       console.log('Destroying ad unit', props.adUnitPath)
