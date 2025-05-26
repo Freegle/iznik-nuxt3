@@ -19,6 +19,7 @@
       @confirm="removeConfirmed" />
     <ConfirmModal v-if="removeConfirm && !groupname" ref="removeConfirm" title="Please select a group first." />
     <ModBanMemberConfirmModal v-if="banConfirm" ref="banConfirm" :userid="userid" :groupid="groupid" @confirm="banConfirmed" />
+    BBB {{ groupid }}
     <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" :groupid="groupid" :groupname="groupname" @added="commentadded" />
     <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" :safelist="safelist" />
   </div>
@@ -138,7 +139,7 @@ export default {
     },
     async commentadded() {
       await this.userStore.fetchMT({
-        search: this.userid,
+        id: this.userid,
         emailhistory: true
       })
 
