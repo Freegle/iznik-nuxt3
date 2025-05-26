@@ -58,7 +58,7 @@ export default {
     this.bump++
   },
   methods: {
-    forcerefresh() {
+    forcerefresh() { // Does not always seem to work
       this.bump++
     }
   }
