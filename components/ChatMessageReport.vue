@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col>
-        <b-card border-variant="warning">
+        <b-card v-if="!modtools" border-variant="warning">
           <b-card-title>
             <h4>
               <v-icon icon="exclamation-triangle" scale="2" />&nbsp;You reported
@@ -14,14 +14,40 @@
             soon.
           </b-card-text>
         </b-card>
+        <b-card v-else border-variant="warning">
+          <b-card-title>
+            <h4 v-if="otheruser">
+              <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{
+                otheruser.displayname
+              }}
+              reported someone
+            </h4>
+          </b-card-title>
+          <b-card-text>
+            {{ emessage }}
+            {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
+            <ModChatViewButton
+              :id="chatmessage.refchatid"
+              class="mt-2"
+              :pov="chatmessage.userid"
+            />
+          </b-card-text>
+        </b-card>
       </b-col>
     </b-row>
   </div>
 </template>
 <script>
+import { useMiscStore } from '../stores/misc'
 import ChatBase from '~/components/ChatBase'
 
 export default {
   extends: ChatBase,
+  computed: {
+    modtools() {
+      const miscStore = useMiscStore()
+      return miscStore.modtools
+    },
+  },
 }
 </script>

@@ -10,10 +10,12 @@ export const useShortlinkStore = defineStore({
     init(config) {
       this.config = config
     },
-    async fetch(id) {
+    async fetch(id, groupid) {
+      if (groupid) this.clear()
       const { shortlinks, shortlink } = await api(this.config).shortlinks.fetch(
         {
           id,
+          groupid,
         }
       )
 

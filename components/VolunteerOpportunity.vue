@@ -313,7 +313,7 @@ export default {
       return warn
     },
     mine() {
-      return this.user.id === this.myid
+      return this.user?.id === this.myid
     },
   },
   methods: {

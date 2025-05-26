@@ -8,7 +8,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const originalErrorHandler = nuxtApp.vueApp.config.errorHandler
 
   nuxtApp.vueApp.config.errorHandler = (err, vm, info, ...rest) => {
-    console.log('Vue errorHandler', err)
+    console.log('Vue errorHandler', err.message)
     if (err instanceof MaintenanceError) {
       // This is thrown in response to API return codes from the server.
       throw err

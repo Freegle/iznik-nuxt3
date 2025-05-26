@@ -5,6 +5,10 @@ export default class UserAPI extends BaseAPI {
     return await this.$getv2('/user/' + id)
   }
 
+  async fetchMT(params) {
+    return await this.$get('/user', params)
+  }
+
   async fetchByEmail(email, logError = true) {
     return await this.$get(
       '/user',
