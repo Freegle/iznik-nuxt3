@@ -27,8 +27,8 @@
           @handle="ignore" label="Ignore" class="mr-2 mb-1" />
         <SpinButton v-if="!membership.heldby || membership.heldby.id === myid" icon-name="trash-alt" spinclass="success" variant="warning"
           @handle="remove" label="Remove" class="mr-2 mb-1" />
-        <ModMemberButton v-if="!membership.heldby" :member="membership" variant="warning" icon="pause" reviewhold label="Hold" class="mr-2 mb-1" />
-        <ModMemberButton v-else :member="membership" variant="warning" icon="play" reviewrelease label="Release" class="mr-2 mb-1" />
+        <ModMemberButton v-if="!membership.heldby" :member="membership" variant="warning" icon="pause" reviewhold :reviewgroupid="groupid" label="Hold" class="mr-2 mb-1" />
+        <ModMemberButton v-else :member="membership" variant="warning" icon="play" reviewrelease :reviewgroupid="groupid" label="Release" class="mr-2 mb-1" />
         <b-button :to="'/members/approved/' + membership.id + '/' + member.userid" variant="secondary" class="mb-1">
           Go to membership
         </b-button>

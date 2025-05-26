@@ -240,13 +240,13 @@ export default {
     async reviewHoldIt() {
       await this.memberStore.reviewHold({
         membershipid: this.member.membershipid,
-        groupid: this.reviewgroupid
+        groupid: this.reviewgroupid ?? this.member.id
       })
     },
     async reviewReleaseIt() {
       await this.memberStore.reviewRelease({
         membershipid: this.member.membershipid,
-        groupid: this.reviewgroupid
+        groupid: this.reviewgroupid ?? this.member.id
       })
     },
     async releaseIt() {
