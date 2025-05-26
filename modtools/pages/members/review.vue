@@ -59,7 +59,9 @@ export default {
   },
   methods: {
     forcerefresh() { // Does not always seem to work
-      this.bump++
+      this.$nextTick(() => {
+        this.bump++
+      })
     }
   }
 }
