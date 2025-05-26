@@ -55,8 +55,6 @@ jobs:
       - image: cimg/node:18.20.8-browsers
         environment:
           NODE_ENV: test
-          TEST_EMAIL_DOMAIN: ${TEST_EMAIL_DOMAIN:-yahoogroups.com}
-          STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
     # Use a larger resource class with more CPU/RAM - otherwise build fails.
     resource_class: large
 
@@ -141,6 +139,13 @@ jobs:
           command: |
             mkdir -p test-results
             export NODE_OPTIONS="--max-old-space-size=8192"
+            
+            # Set environment variables with defaults
+            export TEST_BASE_URL=${TEST_BASE_URL:-http://localhost:3000}
+            export TEST_POSTCODE=${TEST_POSTCODE:-EH3 6SS}
+            export TEST_PLACE=${TEST_PLACE:-Edinburgh}
+            export TEST_EMAIL_DOMAIN=${TEST_EMAIL_DOMAIN:-yahoogroups.com}
+            export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             
             # Run tests and capture exit code
             npm run test:ci
