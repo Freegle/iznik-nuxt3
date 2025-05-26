@@ -108,11 +108,10 @@ export default {
   },
   methods: {
     async updateComments() {
-      console.log('MC updateComments')
       const userid = this.user.userid ? this.user.userid : this.user.id
 
       await this.userStore.fetchMT({
-        search: userid,
+        id: userid,
         emailhistory: true
       })
 
