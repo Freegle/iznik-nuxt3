@@ -60,6 +60,7 @@ export default {
   methods: {
     forcerefresh() { // Does not always seem to work
       this.$nextTick(() => {
+        // this.memberStore.clear()
         this.bump++
       })
     }
