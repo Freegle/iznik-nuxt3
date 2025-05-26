@@ -130,6 +130,7 @@ export default {
       stdmsg: null
     }
   },
+  emits: ['pressed'],
   computed: {
     groupid() {
       // For member entries this is returned at the top level.
@@ -190,6 +191,7 @@ export default {
         this.$refs.stdmodal?.show()
       }
       if (callback) callback()
+      this.$emit('pressed')
     },
     async approveIt() {
       alert('MMB memberStore.approve NOT DEFINED')

@@ -94,7 +94,7 @@
           </div>
         </div>
         <ModMemberReviewActions :memberid="member.id" v-for="m in memberof" :key="'membership-' + m.membershipid" :membership="m" :member="member"
-          class="p-1 mr-1" />
+          class="p-1 mr-1" @forcerefresh="forcerefresh" />
         <b-badge v-if="hiddenmemberofs" variant="info" class="clickme mb-1" @click="allmemberships = !allmemberships">
           +{{ hiddenmemberofs }} groups
         </b-badge>
@@ -125,6 +125,7 @@ export default {
       required: true
     }
   },
+  emits: ['forcerefresh'],
   data: function () {
     return {
       saving: false,
@@ -283,6 +284,9 @@ export default {
       await nextTick()
       this.$refs.logs.show()
     },
+    forcerefresh() {
+      this.$emit('forcerefresh')
+    }
   }
 }
 </script>

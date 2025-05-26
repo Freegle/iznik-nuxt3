@@ -6,7 +6,7 @@
       <ModPostcodeTester />
 
       <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
-        <ModMemberReview :member="member" />
+        <ModMemberReview :member="member" @forcerefresh="forcerefresh" />
       </div>
 
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
@@ -56,6 +56,11 @@ export default {
     // reset infiniteLoading on return to page
     this.memberStore.clear()
     this.bump++
+  },
+  methods: {
+    forcerefresh() {
+      this.bump++
+    }
   }
 }
 </script>
