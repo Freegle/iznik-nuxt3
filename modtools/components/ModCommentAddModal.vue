@@ -133,7 +133,7 @@ export default {
 
       const userStore = useUserStore()
       await userStore.fetchMT({
-        search: this.user.id,
+        id: this.user.id,
         emailhistory: true
       })
       this.context = null
