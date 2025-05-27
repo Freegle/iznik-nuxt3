@@ -400,3 +400,6 @@ When modifying multiple files, use:
 ```bash
 npm run lint
 ```
+
+### Playwright Memory Notes
+- Use event driven Playwright tests not timers.
