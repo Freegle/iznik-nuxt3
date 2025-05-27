@@ -6,8 +6,6 @@ const { SCREENSHOTS_DIR, timeouts, environment } = require('./config')
 const logger = require('./logger')
 const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
-// Nuxt test utils integration - available but not directly imported due to ES module compatibility
-// The package is installed and can be used through other means if needed
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
     require.resolve('@nuxt/test-utils/e2e')
@@ -922,6 +920,80 @@ const testWithFixtures = test.extend({
     }
 
     await use(postMessage)
+  },
+
+  waitForNuxtPageLoad: async ({ page }, use) => {
+    const waitForNuxtPageLoad = async (options = {}) => {
+      const timeout = options.timeout || 30000
+      return await page.waitForFunction(
+        () => {
+          return (
+            document.title !== 'Starting Nuxt... | Nuxt' &&
+            document.title !==
+              'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+            document.title.length > 0 &&
+            document.body?.textContent?.includes('Loading... Stuck here') ===
+              false
+          )
+        },
+        { timeout }
+      )
+    }
+    await use(waitForNuxtPageLoad)
+  },
+
+  findAndClickButton: async ({ page }, use) => {
+    const findAndClickButton = async (selectors, options = {}) => {
+      for (const selector of selectors) {
+        const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
+        const button = page.locator(modifiedSelector).first()
+        if (
+          (await button.count()) > 0 &&
+          (await button.isVisible().catch(() => false))
+        ) {
+          await button.click()
+          return true
+        }
+      }
+      return false
+    }
+    await use(findAndClickButton)
+  },
+
+  setupTestPage: async ({ page }, use) => {
+    const setupTestPage = async (options = {}) => {
+      await page.setViewportSize(
+        options.viewport || { width: 1280, height: 800 }
+      )
+      await page.gotoAndVerify(options.path || '/', {
+        timeout: timeouts.navigation.initial,
+      })
+      if (options.waitForLoad !== false) {
+        await page.waitForFunction(
+          () => {
+            return (
+              document.title !== 'Starting Nuxt... | Nuxt' &&
+              document.title !==
+                'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+              document.title.length > 0 &&
+              document.body?.textContent?.includes('Loading... Stuck here') ===
+                false
+            )
+          },
+          { timeout: options.timeout || 30000 }
+        )
+      }
+    }
+    await use(setupTestPage)
+  },
+
+  takeTimestampedScreenshot: async ({ page }, use) => {
+    const takeTimestampedScreenshot = async (description, options = {}) => {
+      const timestamp = options.timestamp || Date.now()
+      const path = getScreenshotPath(`${description}-${timestamp}.png`)
+      return await page.screenshot({ path, fullPage: true, ...options })
+    }
+    await use(takeTimestampedScreenshot)
   },
 })
 

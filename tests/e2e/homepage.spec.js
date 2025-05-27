@@ -8,26 +8,14 @@ const { timeouts, environment, selectors, breakpoints } = require('./config')
 
 test.describe('Homepage tests', () => {
   // Test from the original home.spec.js
-  test('homepage should load without console errors', async ({ page }) => {
+  test('homepage should load without console errors', async ({
+    page,
+    waitForNuxtPageLoad,
+  }) => {
     await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
-    // Wait for the page to load properly (not the error or loading page)
     try {
-      await page.waitForFunction(
-        () => {
-          // Check if page has the expected title or is at least showing content
-          return (
-            document.title !== 'Starting Nuxt... | Nuxt' &&
-            document.title !==
-              'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
-            document.title.length > 0 &&
-            // Also check that basic content is loaded (not just loading screen)
-            document.body?.textContent?.includes('Loading... Stuck here') ===
-              false
-          )
-        },
-        { timeout: 30000 }
-      )
+      await waitForNuxtPageLoad({ timeout: 30000 })
     } catch (error) {
       const currentTitle = await page.title()
       const bodyText = await page
@@ -44,7 +32,6 @@ test.describe('Homepage tests', () => {
         console.log(
           'Page appears to be stuck loading JavaScript, but continuing with test...'
         )
-        // Don't throw error if it's just slow loading - let the test continue
       } else {
         throw error
       }
@@ -58,31 +45,18 @@ test.describe('Homepage tests', () => {
   for (const bp of breakpoints) {
     test(`homepage should display correctly at ${bp.name} breakpoint (${bp.width}x${bp.height})`, async ({
       page,
+      waitForNuxtPageLoad,
+      takeTimestampedScreenshot,
     }) => {
-      // Set viewport to match the breakpoint
       await page.setViewportSize({
         width: bp.width,
         height: bp.height,
       })
 
-      // Go to the homepage with extended timeout for initial load
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
-      // Wait for the page to load properly (not the error or loading page)
       try {
-        await page.waitForFunction(
-          () => {
-            return (
-              document.title !== 'Starting Nuxt... | Nuxt' &&
-              document.title !==
-                'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
-              document.title.length > 0 &&
-              document.body?.textContent?.includes('Loading... Stuck here') ===
-                false
-            )
-          },
-          { timeout: 30000 }
-        )
+        await waitForNuxtPageLoad({ timeout: 30000 })
       } catch (error) {
         const currentTitle = await page.title()
         const bodyText = await page
@@ -210,34 +184,18 @@ test.describe('Homepage tests', () => {
           .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       }
 
-      // Take a screenshot for visual verification
-      await page.screenshot({
-        path: `playwright-screenshots/homepage-${bp.name}.png`,
-        fullPage: true,
-      })
+      await takeTimestampedScreenshot(`homepage-${bp.name}`)
     })
   }
 
   // Interactive elements test with place autocomplete
-  test('homepage interactive elements work correctly', async ({ page }) => {
-    // Set a reasonable default viewport
-    await page.setViewportSize({ width: 1280, height: 800 })
-
-    // Go to the homepage
-    await page.gotoAndVerify('/')
-
-    // Wait for the page to load properly
-    await page.waitForFunction(
-      () => {
-        return (
-          document.title !== 'Starting Nuxt... | Nuxt' &&
-          document.title !==
-            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
-          document.title.length > 0
-        )
-      },
-      { timeout: 30000 }
-    )
+  test('homepage interactive elements work correctly', async ({
+    page,
+    setupTestPage,
+    waitForNuxtPageLoad,
+  }) => {
+    await setupTestPage({ path: '/', viewport: { width: 1280, height: 800 } })
+    await waitForNuxtPageLoad({ timeout: 30000 })
 
     // Test 1: Clicking "Give Stuff" should navigate to /give
     const giveStuffButton = page.locator('.btn:has-text("Give Stuff")')
@@ -279,25 +237,11 @@ test.describe('Homepage tests', () => {
   // Separate test for PlaceAutocomplete to allow focused testing
   test('PlaceAutocomplete should work correctly with configurable location', async ({
     page,
+    setupTestPage,
+    waitForNuxtPageLoad,
   }) => {
-    // Set a reasonable default viewport
-    await page.setViewportSize({ width: 1280, height: 800 })
-
-    // Go to the homepage
-    await page.gotoAndVerify('/')
-
-    // Wait for the page to load properly
-    await page.waitForFunction(
-      () => {
-        return (
-          document.title !== 'Starting Nuxt... | Nuxt' &&
-          document.title !==
-            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
-          document.title.length > 0
-        )
-      },
-      { timeout: 30000 }
-    )
+    await setupTestPage({ path: '/', viewport: { width: 1280, height: 800 } })
+    await waitForNuxtPageLoad({ timeout: 30000 })
 
     // Locate the PlaceAutocomplete input field
     const placeInput = page.locator(selectors.placeAutocomplete.input)
