@@ -176,11 +176,7 @@
         />
         <div v-if="mod && reply.hidden" class="text-danger small">
           This has been hidden by
-          <UserName
-            v-if="newsfeed?.hiddenby"
-            :id="newsfeed.hiddenby"
-            intro="by"
-          />
+          <UserName v-if="reply?.hiddenby" :id="reply.hiddenby" intro="by" />
           <span v-else>the system</span>
           and is only visible to volunteers and the person who posted it.
         </div>

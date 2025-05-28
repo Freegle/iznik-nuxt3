@@ -8,6 +8,7 @@
       :class="variant + ' toggle-' + size"
       :width="100"
       :height="50"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -38,6 +39,11 @@ const props = defineProps({
     required: false,
     default: 'green',
   },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])
@@ -61,6 +67,11 @@ watch(currentValue, (newVal) => {
 .green {
   --toggle-bg-on: #61ae24;
   --toggle-border-on: #61ae24;
+}
+
+.modgreen {
+  --toggle-bg-on: #338808;
+  --toggle-border-on: #338808;
 }
 
 :deep(.toggle-off) {

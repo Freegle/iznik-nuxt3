@@ -18,6 +18,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   fetchMembers(params) {
+    // console.error('MembershipsAPI fetchMembers', params)
     return this.$get('/memberships', params)
   }
 
@@ -90,6 +91,22 @@ export default class MembershipsAPI extends BaseAPI {
     return this.$post('/memberships', {
       action: 'Release',
       userid,
+      groupid,
+    })
+  }
+
+  reviewHold(membershipid, groupid) {
+    return this.$post('/memberships', {
+      action: 'ReviewHold',
+      membershipid,
+      groupid,
+    })
+  }
+
+  reviewRelease(membershipid, groupid) {
+    return this.$post('/memberships', {
+      action: 'ReviewRelease',
+      membershipid,
       groupid,
     })
   }

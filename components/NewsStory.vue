@@ -152,7 +152,11 @@ const userid = computed(() => {
 })
 
 // Fetch story data
-await storyStore.fetch(newsfeed.value?.storyid)
+try {
+  await storyStore.fetch(newsfeed.value.storyid)
+} catch (e) {
+  console.log('Error fetching story:', e)
+}
 
 const showAdd = ref(false)
 

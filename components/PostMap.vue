@@ -62,7 +62,7 @@
               />
             </div>
             <div v-if="showIsochrones">
-              <l-geojson
+              <l-geo-json
                 v-for="g in isochroneGEOJSONs"
                 :key="'isochrone' + g.id"
                 :geojson="g.json"

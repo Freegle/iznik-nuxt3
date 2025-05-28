@@ -13,7 +13,7 @@
         {{ theirs }} belongs to a different account from the one you're using
         right now.
         <span v-if="me?.email"> ({{ me.email }}) </span>
-        . But don't worry! You probably have two acounts, and we can merge them
+        . But don't worry! You probably have two accounts, and we can merge them
         together.
       </p>
       <p>

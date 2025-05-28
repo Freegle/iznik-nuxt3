@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col>
-        <b-card border-variant="warning">
+        <b-card v-if="!modtools" border-variant="warning">
           <b-card-title>
             <h4>
               <v-icon icon="exclamation-triangle" scale="2" />&nbsp;You reported
@@ -14,12 +14,32 @@
             soon.
           </b-card-text>
         </b-card>
+        <b-card v-else border-variant="warning">
+          <b-card-title>
+            <h4 v-if="otheruser">
+              <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{
+                otheruser.displayname
+              }}
+              reported someone
+            </h4>
+          </b-card-title>
+          <b-card-text>
+            {{ emessage }}
+            {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
+            <ModChatViewButton
+              :id="chatmessage.refchatid"
+              class="mt-2"
+              :pov="chatmessage.userid"
+            />
+          </b-card-text>
+        </b-card>
       </b-col>
     </b-row>
   </div>
 </template>
 <script setup>
 import { useChatBase } from '../composables/useChat'
+import { useMiscStore } from '../stores/misc'
 
 const props = defineProps({
   chatid: {
@@ -46,6 +66,9 @@ const props = defineProps({
     default: false,
   },
 })
+
+const miscStore = useMiscStore()
+const modtools = computed(() => miscStore.modtools)
 
 // Use the chat base composable (even though we don't use any of its properties in this component)
 useChatBase(props.chatid, props.id, props.pov)

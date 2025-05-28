@@ -29,6 +29,7 @@
 <script setup>
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '../stores/message'
+import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
 import { useMe } from '~/composables/useMe'
 
@@ -83,6 +84,7 @@ const props = defineProps({
 const emit = defineEmits(['click', 'sent'])
 const chatStore = useChatStore()
 const messageStore = useMessageStore()
+const miscStore = useMiscStore()
 const router = useRouter()
 
 // Use me and myid computed properties from useMe composable for consistency
@@ -105,7 +107,8 @@ const openChat = async (event, firstmessage, firstmsgid) => {
   if (props.groupid > 0) {
     // Open a chat to the mods. If we are in FD then we just pass the group id and the chat opens from us to the
     // mods; if we're in MT we pass the groupid and userid and it opens from us mods to the user.
-    const chatid = await chatStore.openChatToMods(props.groupid)
+    const chatuserid = miscStore.modtools ? props.userid : 0
+    const chatid = await chatStore.openChatToMods(props.groupid, chatuserid)
 
     router.push('/chats/' + chatid)
   } else if (props.userid > 0) {

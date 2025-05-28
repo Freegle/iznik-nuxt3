@@ -154,7 +154,7 @@ function closeModal() {
 
 const uploaderUid = ref(uid('uploader'))
 
-const emit = defineEmits(['update:modelValue', 'closed'])
+const emit = defineEmits(['update:modelValue', 'closed', 'photoProcessed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
 
@@ -331,6 +331,7 @@ async function uploadSuccess(result) {
           externalmods: mods,
           recognise: props.recognise && !recognised,
         }
+        if (props.groupid) att.groupid = props.groupid
 
         // Only recognise the first photo.
         recognised = true
@@ -354,6 +355,9 @@ async function uploadSuccess(result) {
             externalmods: mods,
             info: ret.info,
           })
+          if (props.groupid) {
+            emit('photoProcessed', ret.id)
+          }
         })
       }
     })

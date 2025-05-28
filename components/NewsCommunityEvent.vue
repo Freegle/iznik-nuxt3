@@ -1,6 +1,6 @@
 <template>
   <div v-if="event">
-    <div class="d-flex">
+    <div v-if="user" class="d-flex">
       <ProfileImage
         v-if="user.profile.paththumb"
         :image="user.profile.paththumb"
