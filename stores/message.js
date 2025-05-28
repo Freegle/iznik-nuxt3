@@ -449,8 +449,7 @@ export const useMessageStore = defineStore({
         params.stdmsgid,
         params.body
       )
-
-      this.remove({ id: params.id })
+      // Do not remove from list
     },
     async hold(params) {
       await api(this.config).message.hold(params.id)
