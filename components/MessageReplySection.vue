@@ -3,7 +3,6 @@
     <div v-if="!fromme" class="grey p-2">
       <EmailValidator
         v-if="!me"
-        ref="email"
         v-model:email="email"
         v-model:valid="emailValid"
         size="lg"
@@ -143,9 +142,11 @@
       scrollable
       ok-only
       ok-title="Close and Continue"
-      title="Welcome to Freegle!"
       @hide="sendReply(null)"
     >
+      <template #title>
+        <h2>Welcome to Freegle!</h2>
+      </template>
       <NewUserInfo :password="newUserPassword" />
     </b-modal>
     <span ref="breakpoint" class="d-inline d-sm-none" />
@@ -177,6 +178,7 @@ import ChatButton from '~/components/ChatButton'
 import SpinButton from '~/components/SpinButton.vue'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageDeadline from '~/components/MessageDeadline'
+import { FAR_AWAY } from '~/constants'
 
 const NewFreegler = defineAsyncComponent(() =>
   import('~/components/NewFreegler')
@@ -195,6 +197,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'sent'])
+
+const faraway = FAR_AWAY
 
 const messageStore = useMessageStore()
 const authStore = useAuthStore()

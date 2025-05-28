@@ -151,4 +151,9 @@ const openChat = async (event, firstmessage, firstmsgid) => {
     }
   }
 }
+
+// Expose the openChat method so it can be called from parent components
+defineExpose({
+  openChat,
+})
 </script>

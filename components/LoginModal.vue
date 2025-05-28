@@ -21,7 +21,7 @@
     <div v-if="signUp" class="d-flex justify-content-around mb-2">
       <b-button
         variant="link"
-        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none"
+        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none test-already-a-freegler"
         @click="clickShowSignIn"
       >
         Already a freegler? Log in
@@ -96,6 +96,15 @@
           <span v-if="signUp"> Create an account on Freegle </span>
           <span v-else>Continue with your Freegle account</span>
         </h3>
+        <div v-if="signUp" class="d-flex justify-content-around">
+          <b-button
+            variant="link"
+            class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block test-already-a-freegler"
+            @click="clickShowSignIn"
+          >
+            Already a freegler? Log in
+          </b-button>
+        </div>
         <b-form
           id="loginform"
           ref="form"
@@ -162,21 +171,12 @@
             <p class="mb-0 text-center">
               <b-button
                 variant="link"
-                class="ps-1 pe-0 py-0 border-0 align-top"
+                class="ps-1 pe-0 py-0 border-0 align-top test-new-freegler"
                 @click="clickShowSignUp"
               >
                 New freegler? Register
               </b-button>
             </p>
-          </div>
-          <div v-if="signUp" class="d-flex justify-content-around">
-            <b-button
-              variant="link"
-              class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block"
-              @click="clickShowSignIn"
-            >
-              Already a freegler? Log in
-            </b-button>
           </div>
         </b-form>
       </div>

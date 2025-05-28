@@ -2,7 +2,12 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
-const { SCREENSHOTS_DIR, timeouts, environment } = require('./config')
+const {
+  SCREENSHOTS_DIR,
+  timeouts,
+  environment,
+  DEFAULT_TEST_PASSWORD,
+} = require('./config')
 const logger = require('./logger')
 const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
@@ -344,7 +349,9 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
       /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
       /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
-      /stripe.com/, // Stripe related errors are expected in test
+      /stripe.com/, // Stripe related errors are expected in test.
+      /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
+      /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
     ]
 
     // Method to add additional allowed error patterns for specific tests
@@ -741,7 +748,7 @@ const testWithFixtures = test.extend({
     await use(() => Array.from(testEmailRegistry))
   },
 
-  postMessage: async ({ page }, use) => {
+  postMessage: async ({ page, setNewUserPassword }, use) => {
     /**
      * Helper function to post a message to Freegle
      * @param {Object} options - Configuration options for posting
@@ -911,6 +918,46 @@ const testWithFixtures = test.extend({
         )
       }
 
+      // Handle deadline modal if it appears
+      const deadlineModal = page.locator(
+        '.modal:has-text("Is there a deadline?")'
+      )
+      await deadlineModal.waitFor({
+        state: 'visible',
+        timeout: timeouts.navigation.default,
+      })
+      const noDeadlineButton = page.locator('.btn:has-text("No deadline")')
+      await noDeadlineButton.click()
+      console.log('Clicked "No deadline" in deadline modal')
+
+      // Handle delivery modal if it appears
+      const deliveryModal = page.locator(
+        '.modal:has-text("Could you deliver?")'
+      )
+      await deliveryModal.waitFor({
+        state: 'visible',
+        timeout: timeouts.navigation.default,
+      })
+      const maybeButton = page.locator('.btn:has-text("Maybe")')
+      await maybeButton.click()
+      console.log('Clicked "Maybe" in delivery modal')
+
+      // Set password to default test password in NewUserInfo component
+      await setNewUserPassword()
+
+      // Clear out the ids and type values from window.history.state to prevent modals showing again on renavigation
+      await page.evaluate(() => {
+        if (window.history.state) {
+          const newState = { ...window.history.state }
+          delete newState.ids
+          delete newState.type
+          window.history.replaceState(newState, '', window.location.href)
+        }
+      })
+      console.log(
+        'Cleared ids and type from history state to prevent modal reappearance'
+      )
+
       // Return information about the post
       return {
         id: postId,
@@ -994,6 +1041,282 @@ const testWithFixtures = test.extend({
       return await page.screenshot({ path, fullPage: true, ...options })
     }
     await use(takeTimestampedScreenshot)
+  },
+
+  withdrawPost: async ({ page }, use) => {
+    /**
+     * Finds a post on the My Posts page and withdraws it
+     * @param {Object} options - The withdrawal options
+     * @param {string} options.item - The item text to search for
+     * @returns {Promise<boolean>} - True if post was withdrawn successfully
+     */
+    const withdrawPost = async (options) => {
+      const { item } = options
+
+      if (!item) {
+        throw new Error('Item text is required for withdrawing a post')
+      }
+
+      // Load My Posts page from scratch
+      await page.goto('/myposts', {
+        timeout: timeouts.navigation.default,
+        waitUntil: 'load',
+      })
+
+      // Find the post we want to withdraw
+      const postSelector = `.card-body:has-text("${item}")`
+      const postCard = page.locator(postSelector)
+      await postCard.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Look for the withdraw button within the post card
+      const withdrawButton = postCard.locator('.btn:has-text("Withdraw")')
+      await withdrawButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Click the withdraw button
+      await withdrawButton.click()
+
+      // Wait for confirmation modal to appear if needed
+      const confirmButtons = ['.modal .btn:has-text("Withdraw")']
+
+      // Try to find and click any confirmation button that appears
+      for (const selector of confirmButtons) {
+        try {
+          const confirmButton = page.locator(selector).filter({ visible: true })
+          await confirmButton.waitFor({
+            state: 'visible',
+            timeout: 2000,
+          })
+          await confirmButton.first().click()
+          console.log(`Clicked confirmation button: ${selector}`)
+          break
+        } catch (error) {
+          // This confirmation button doesn't exist, try the next one
+          continue
+        }
+      }
+
+      // The post should disappear entirely
+      await postCard.waitFor({
+        state: 'detached',
+        timeout: timeouts.api.default,
+      })
+      console.log('Post successfully withdrawn and removed from page')
+
+      return true
+    }
+
+    await use(withdrawPost)
+  },
+
+  setNewUserPassword: async ({ page }, use) => {
+    /**
+     * Sets the password for a new user in the NewUserInfo component
+     * @param {string} [password=DEFAULT_TEST_PASSWORD] - The password to set
+     * @returns {Promise<boolean>} - True if password was set successfully
+     */
+    const setNewUserPassword = async (password = DEFAULT_TEST_PASSWORD) => {
+      console.log('Looking for password input field to set password')
+
+      try {
+        const passwordInput = page
+          .locator('input[type="password"]')
+          .filter({ visible: true })
+        const saveButton = page
+          .locator('.btn:has-text("Save")')
+          .filter({ visible: true })
+
+        // Check if password input is visible (NewUserInfo component)
+        if (
+          (await passwordInput.count()) > 0 &&
+          (await saveButton.count()) > 0
+        ) {
+          console.log('Found password input, setting password')
+          await passwordInput.fill(password)
+          await saveButton.click()
+          console.log('Set password successfully')
+
+          // Wait a moment for the password to be saved
+          await page.waitForTimeout(1000)
+          return true
+        } else {
+          console.log('Password input not visible, may not be needed')
+          return false
+        }
+      } catch (error) {
+        console.log('Password input not found or not needed:', error.message)
+        return false
+      }
+    }
+
+    await use(setNewUserPassword)
+  },
+
+  replyToMessageWithSignup: async ({ page }, use) => {
+    /**
+     * Navigates to a message page and replies with signup as a new user
+     * @param {Object} options - The reply options
+     * @param {string} options.messageId - The message ID to reply to
+     * @param {string} options.itemName - The item name to verify on the page
+     * @param {string} options.email - The email address to use for signup
+     * @param {string} [options.replyMessage] - The reply message text
+     * @param {string} [options.collectDetails] - Collection details for OFFER messages
+     * @returns {Promise<boolean>} - True if reply was sent successfully
+     */
+    const replyToMessageWithSignup = async (options) => {
+      const {
+        messageId,
+        itemName,
+        email,
+        replyMessage = 'I would love to have this item please! I can collect anytime this week.',
+        collectDetails = 'I can collect Monday-Friday after 6pm or weekends anytime',
+      } = options
+
+      if (!messageId || !itemName || !email) {
+        throw new Error(
+          'messageId, itemName, and email are required for replying to a message'
+        )
+      }
+
+      // Navigate to the specific message page
+      const messageUrl = `/message/${messageId}`
+      await page.gotoAndVerify(messageUrl)
+      console.log(`Navigated to message page: ${messageUrl}`)
+
+      // Wait for the message content to load
+      await page.locator('textarea[name="reply"]').waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+
+      // Fill in the email field (for non-logged-in users)
+      const emailInput = page
+        .locator('input[type="email"]')
+        .filter({ visible: true })
+      await emailInput.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await emailInput.fill(email)
+      console.log(`Filled email: ${email}`)
+
+      // Fill in the reply message
+      const replyTextarea = page
+        .locator('textarea[name="reply"]')
+        .filter({ visible: true })
+      await replyTextarea.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await replyTextarea.fill(replyMessage)
+      console.log('Filled reply message')
+
+      // Fill in collection details (for OFFER messages)
+      const collectTextarea = page
+        .locator('textarea[name="collect"]')
+        .filter({ visible: true })
+      await collectTextarea.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await collectTextarea.fill(collectDetails)
+      console.log('Filled collection details')
+
+      // Click the "Send your reply" button
+      const sendReplyButton = page
+        .locator('.btn:has-text("Send your reply")')
+        .filter({ visible: true })
+      await sendReplyButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await sendReplyButton.first().click()
+      console.log('Clicked Send your reply button')
+
+      // Wait for "Welcome to Freegle" modal containing "It looks like this is your first time"
+      console.log('Waiting for Welcome to Freegle modal')
+      try {
+        const welcomeModal = page
+          .locator('.modal-content')
+          .filter({
+            hasText: 'Welcome to Freegle',
+          })
+          .filter({
+            hasText: 'It looks like this is your first time',
+          })
+
+        await welcomeModal.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+
+        console.log('Welcome to Freegle modal appeared')
+
+        // Click "Close and Continue" button
+        const closeButton = welcomeModal.locator(
+          '.btn:has-text("Close and Continue")'
+        )
+        await closeButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+        await closeButton.click()
+        console.log('Clicked Close and Continue button')
+
+        // Wait for the modal to disappear (indicating success)
+        await welcomeModal.waitFor({
+          state: 'detached',
+          timeout: timeouts.ui.response,
+        })
+
+        // Look for "We've sent your message" text to confirm the reply was sent
+        console.log('Looking for message sent confirmation')
+        const messageSentText = page.locator("text=We've sent your message")
+        await messageSentText.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.response,
+        })
+
+        console.log('Reply sent confirmation found, now checking chats')
+
+        // Go to /chats to verify the chat appears there
+        await page.gotoAndVerify('/chats')
+
+        // Wait for the chat list to load and look for a chat entry
+        await page.waitForSelector('.chatentry', {
+          timeout: timeouts.ui.appearance,
+        })
+
+        // Check that there's one chat entry
+        const chatEntries = page.locator('.chatentry').filter({ visible: true })
+        const chatCount = await chatEntries.count()
+
+        if (chatCount > 1) {
+          console.log(`Found ${chatCount} chat entries in /chats after reply`)
+        } else {
+          console.log('Warning: No chat entries found in /chats after reply')
+          return false
+        }
+
+        console.log(
+          'Reply process completed successfully with signup - message sent confirmation found and chats verified'
+        )
+        return true
+      } catch (error) {
+        console.log(
+          'Welcome to Freegle modal did not appear or signup failed:',
+          error.message
+        )
+        return false
+      }
+    }
+
+    await use(replyToMessageWithSignup)
   },
 })
 

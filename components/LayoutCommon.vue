@@ -285,8 +285,9 @@ onMounted(async () => {
       interestedInOthersMsgid.value = replyToSend.value.replyMsgId
       const messageStore = useMessageStore()
       await messageStore.fetch(replyToSend.value.replyMsgId, true)
-      const replySent = await replyToPost(replyToPostChatButton.value)
-      if (replySent) {
+      console.log('Reply to post chat button', replyToPostChatButton.value)
+      const replyResult = await replyToPost(replyToPostChatButton.value)
+      if (replyResult) {
         replySent()
       }
     }

@@ -223,6 +223,23 @@ Key benefits of using the useMe composable:
   - Do not create "example" tests just to show how to use them
   - Ensure all tests are fully functional, not partial demonstrations
 
+#### Playwright Fixture Guidelines
+- **Reuse before recreate**: Before adding non-trivial logic directly to a test, first check if similar functionality exists in existing fixtures
+- **Create fixtures for complex flows**: When test logic becomes non-trivial (more than 10-15 lines of repeated code), extract it into a reusable fixture
+- **Common fixture patterns to look for**:
+  - User authentication flows (login, signup, logout)
+  - Form submissions and validation
+  - Navigation to specific pages with data setup
+  - Multi-step user workflows (post message, reply to message, etc.)
+  - Data cleanup and teardown operations
+- **Fixture naming conventions**: Use descriptive names that clearly indicate the action and outcome (e.g., `postMessage`, `replyToMessageWithSignup`, `withdrawPost`)
+- **Fixture parameters**: Design fixtures to accept configuration objects with required and optional parameters for flexibility
+- **Documentation**: Include JSDoc comments for fixtures explaining parameters, return values, and behavior
+- **Examples of good fixture extraction**:
+  - Instead of manually filling login forms in each test, use `loginViaHomepage(page, email, password)`
+  - Instead of repeating message posting logic, use `postMessage({ type, item, description, email })`
+  - Instead of manual post withdrawal, use `withdrawPost({ item })`
+
 ### Playwright Best Practices
 - WSL users: Run `sudo npx playwright install-deps` to install system dependencies
 - Edit playwright.config.js to uncomment additional browsers when needed

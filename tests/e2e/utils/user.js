@@ -8,147 +8,70 @@ const { SCREENSHOTS_DIR } = require('../config')
 const { waitForModal } = require('./ui')
 
 /**
- * Logs out the current user if they are logged in
- * @param {import('@playwright/test').Page} page - Playwright page object
- * @returns {Promise<boolean>} - Returns true if logout was performed, false if user wasn't logged in
+ * Clears all session data from the current page to simulate logout
+ * @param {import('@playwright/test').Page} page - Current Playwright page object
+ * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object with cleared session
  */
 async function logoutIfLoggedIn(page) {
-  console.log('Checking if user is logged in')
+  console.log('Clearing all session data to simulate fresh browser state')
 
-  // Try to find one of the common logout or user menu buttons
-  const logoutIndicators = [
-    '.test-user-dropdown', // User dropdown menu
-    'button:has-text("Sign out")',
-    'a:has-text("Log out")',
-    'a:has-text("Sign out")',
-    'button:has-text("Log out")',
-    '.dropdown-item:has-text("Sign out")',
-    '.dropdown-item:has-text("Log out")',
-  ]
-
-  let userIsLoggedIn = false
-  let userMenuLocator = null
-
-  // Check if any logout indicators are visible
-  for (const indicator of logoutIndicators) {
-    const locator = page.locator(indicator).first()
-
-    if (await locator.isVisible().catch(() => false)) {
-      userIsLoggedIn = true
-      userMenuLocator = locator
-      console.log(`Found logged in indicator: ${indicator}`)
-      break
-    }
-  }
-
-  // If user is not logged in, return false
-  if (!userIsLoggedIn) {
-    console.log('User is not logged in')
-    return false
-  }
-
-  // Try to logout
   try {
-    // If we found the user dropdown, we need to click it first to reveal the logout button
-    if (
-      userMenuLocator &&
-      (await page
-        .locator('.test-user-dropdown')
-        .isVisible()
-        .catch(() => false))
-    ) {
-      console.log('Clicking user dropdown menu')
-      await userMenuLocator.click()
+    // Clear all browser storage and cache data
+    await page.evaluate(() => {
+      // Clear localStorage
+      try {
+        localStorage.clear()
+      } catch (error) {
+        console.log('Could not clear localStorage:', error.message)
+      }
 
-      // Wait for dropdown menu animation
-      await page.waitForTimeout(500)
+      // Clear sessionStorage
+      try {
+        sessionStorage.clear()
+      } catch (error) {
+        console.log('Could not clear sessionStorage:', error.message)
+      }
 
-      // Now look for logout option in the dropdown
-      const dropdownLogoutOptions = [
-        '.dropdown-item:has-text("Sign out")',
-        '.dropdown-item:has-text("Log out")',
-        'a:has-text("Sign out")',
-        'a:has-text("Log out")',
-      ]
+      // Clear indexedDB
+      if (window.indexedDB && window.indexedDB.databases) {
+        window.indexedDB
+          .databases()
+          .then((databases) => {
+            databases.forEach((db) => {
+              window.indexedDB.deleteDatabase(db.name)
+            })
+          })
+          .catch(() => {
+            // Ignore errors
+          })
+      }
 
-      let logoutFound = false
-      for (const option of dropdownLogoutOptions) {
-        const logoutButton = page.locator(option).first()
-
-        if (await logoutButton.isVisible().catch(() => false)) {
-          console.log(`Clicking logout option: ${option}`)
-          await logoutButton.click()
-          logoutFound = true
-          break
+      // Clear any Pinia/Vuex stores if they exist
+      if (window.$nuxt && window.$nuxt.$pinia) {
+        // Reset all Pinia stores
+        for (const store of window.$nuxt.$pinia._s.values()) {
+          if (store.$reset) {
+            store.$reset()
+          }
         }
       }
+    })
 
-      if (!logoutFound) {
-        console.warn('Could not find logout option in dropdown menu')
-        return false
-      }
-    } else {
-      // Direct logout button (not in dropdown)
-      console.log('Clicking logout button')
-      await userMenuLocator.click()
-    }
+    // Clear all cookies
+    const context = page.context()
+    await context.clearCookies()
 
-    // Wait for logout to complete
-    console.log('Waiting for logout to complete')
+    // Clear any cached data by reloading
+    await page.goto('/', { waitUntil: 'networkidle' })
 
-    // Wait for logged out state - check for login/sign-up buttons
-    const loginIndicators = [
-      '.test-signinbutton',
-      '.btn:has-text("Sign in")',
-      '.btn:has-text("Sign up")',
-      'a:has-text("Sign in")',
-      'a:has-text("Sign up")',
-    ]
+    console.log(
+      'Successfully cleared all session data - page is now in fresh state'
+    )
 
-    // Wait a bit for the logout operation to process
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-
-    // Check for any of the login indicators where disabled=false
-    for (const indicator of loginIndicators) {
-      try {
-        // Use CSS selector to exclude disabled elements directly
-        const modifiedIndicator = `${indicator}:not([disabled]):not([disabled="true"])`
-        await page
-          .locator(modifiedIndicator)
-          .first()
-          .waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance / 2,
-          })
-        console.log(`Logout confirmed - found login indicator: ${indicator}`)
-        return true
-      } catch (error) {
-        // This particular indicator not found, try the next one
-      }
-    }
-
-    // If we get here and don't see logged-in indicators anymore, assume success
-    for (const indicator of logoutIndicators) {
-      if (
-        await page
-          .locator(indicator)
-          .first()
-          .isVisible()
-          .catch(() => false)
-      ) {
-        console.warn(
-          'Logout appears to have failed - still seeing logged in indicators'
-        )
-        return false
-      }
-    }
-
-    console.log('Logout successful - no longer seeing logged in indicators')
-    return true
+    return page
   } catch (error) {
-    console.error(`Error during logout: ${error.message}`)
-    return false
+    console.error(`Error clearing session data: ${error.message}`)
+    throw error
   }
 }
 
@@ -438,47 +361,29 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
 
   // Wait for login modal to appear
   console.log('Waiting for login modal')
-  await page
-    .locator(
-      '#loginModal, .modal-dialog:has-text("Sign in"), .modal-dialog:has-text("Let\'s get freegling")'
-    )
-    .first()
-    .waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
+  await page.locator('#loginModal').first().waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
 
   // Ensure we're in signin mode, not signup mode
   console.log('Checking if in signin mode')
 
-  // Look for "Already a freegler?" or similar text that would indicate we need to switch to login mode
-  const possibleLoginLinks = [
-    'text=Already a freegler?',
-    'text=Already have an account?',
-    'text=Already a member?',
-    'text=Sign in instead',
-    'text=Login instead',
-    'text=Already registered?',
-  ]
+  const loginLink = await page
+    .locator('.test-already-a-freegler')
+    .filter({ visible: true })
 
-  // Try each possible login link
-  for (const selector of possibleLoginLinks) {
-    const loginLink = page.locator(selector)
+  // Check if this link is visible
+  if (loginLink) {
+    // We're in register mode, click to switch to login mode
+    console.log(`Found login link, switching to login mode`)
+    await loginLink.click()
 
-    // Check if this link is visible
-    if (
-      await loginLink
-        .isVisible({ timeout: timeouts.ui.appearance / 2 })
-        .catch(() => false)
-    ) {
-      // We're in register mode, click to switch to login mode
-      console.log(`Found login link "${selector}", switching to login mode`)
-      await loginLink.click()
-
-      // Wait for the transition to complete
-      await page.waitForTimeout(500)
-      break // Exit the loop once we've found and clicked a link
-    }
+    // Wait for the transition to complete
+    await page.locator('.test-new-freegler').waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
   }
 
   // Check if we're in login mode by looking for the email and password inputs without fullname
@@ -495,7 +400,17 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
   const fullnameVisible = await fullnameField.isVisible().catch(() => false)
 
   if (!(emailVisible && passwordVisible && !fullnameVisible)) {
-    console.log('Could not find or switch to login mode')
+    console.log(
+      'Could not find or switch to login mode',
+      emailVisible,
+      passwordVisible,
+      fullnameVisible
+    )
+    // Capture a screenshot for debugging
+    await page.screenshot({
+      path: getScreenshotPath(`failed-login-${Date.now()}.png`),
+    })
+
     return false
   }
 

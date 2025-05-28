@@ -40,6 +40,8 @@ const timeouts = {
     normal: 5000, // Standard assertions
     slow: 15000, // Slow assertions for complex operations
   },
+
+  background: 120000, // For background tasks like processing chat messages.
 }
 
 // Environment-specific settings
