@@ -33,7 +33,7 @@
       </b-badge>
     </h4>
     <ModPostingHistoryModal v-if="showPostingHistoryModal" ref="history" :user="member" :type="type" @hidden="showPostingHistoryModal = false" />
-    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.id" modmailsonly @hidden="showLogsModal = false" />
+    <ModLogsModal v-if="showLogsModal" ref="logs" :userid="member.userid" modmailsonly @hidden="showLogsModal = false" />
   </div>
 </template>
 <script>
