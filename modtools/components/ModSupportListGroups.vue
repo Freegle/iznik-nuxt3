@@ -9,9 +9,8 @@
       <p>
         Groups with the ID in light blue are caretaker groups.
       </p>
-      <hot-table ref="hot" width="100%" :height="height + 'px'" :data="groups" license-key="non-commercial-and-evaluation"
-        class="bg-white" :dropdown-menu="true" :filters="true" :cells="cells" :manual-column-freeze="true" 
-        :after-render="afterRender">
+      <hot-table ref="hot" width="100%" :height="height + 'px'" :data="groups" license-key="non-commercial-and-evaluation" column-sorting="true"
+        class="bg-white" :dropdown-menu="true" :filters="true" :cells="cells" :manual-column-freeze="true" :after-render="afterRender">
         <hot-column title="ID" data="id" :renderer="idRenderer">
         </hot-column>
         <hot-column title="Short Name" data="nameshort">
@@ -68,7 +67,7 @@ registerAllModules()
 
 export default {
   components: {
-    HotTable, 
+    HotTable,
     HotColumn
   },
   setup() {
@@ -103,14 +102,14 @@ export default {
     }
   },
   methods: {
-    idRenderer(_instance, td, _row, _col, _prop, value){
+    idRenderer(_instance, td, _row, _col, _prop, value) {
       const group = this.modGroupStore.get(value)
       if (group && group.mentored) {
         td.style.backgroundColor = 'lightblue'
       }
       td.innerHTML = value
     },
-    dateRenderer(_instance, td, _row, _col, _prop, value){
+    dateRenderer(_instance, td, _row, _col, _prop, value) {
       let val = '-'
       td.style.textAlign = 'center'
 
@@ -119,7 +118,7 @@ export default {
       }
       td.innerHTML = val
     },
-    autoApprovesRenderer(_instance, td, _row, _col, _prop, value){
+    autoApprovesRenderer(_instance, td, _row, _col, _prop, value) {
       const group = this.groups[_row]
       let auto = parseInt(value)
       if (group && group.publish) {
@@ -132,21 +131,21 @@ export default {
       }
       td.style.textAlign = 'center'
       auto = Math.abs(auto)
-      td.innerHTML = auto+'%'
+      td.innerHTML = auto + '%'
     },
-    centreRenderer(_instance, td, _row, _col, _prop, value){
+    centreRenderer(_instance, td, _row, _col, _prop, value) {
       td.style.textAlign = 'center'
       td.innerHTML = value
     },
-    latlngRenderer(_instance, td, _row, _col, _prop, value){
+    latlngRenderer(_instance, td, _row, _col, _prop, value) {
       td.style.textAlign = 'center'
       let val = parseFloat(value)
-      val = Math.round(val*100)/100
+      val = Math.round(val * 100) / 100
       td.innerHTML = val
     },
-    boolRenderer(_instance, td, _row, _col, _prop, value){
+    boolRenderer(_instance, td, _row, _col, _prop, value) {
       td.style.textAlign = 'center'
-      td.innerHTML = value==1?'Y':'N'
+      td.innerHTML = value == 1 ? 'Y' : 'N'
     },
 
 
