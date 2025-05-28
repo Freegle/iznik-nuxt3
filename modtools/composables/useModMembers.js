@@ -70,7 +70,7 @@ const visibleMembers = computed(() => {
 })
 
 const loadMore = async function ($state) {
-  //console.log('UMM loadMore', show.value, groupid.value, members.value.length, visibleMembers.value.length)
+  //console.log('UMM loadMore', show.value, groupid.value, search.value, members.value.length, visibleMembers.value.length)
   //console.log('UMM loadMore', context.value)
   if (show.value < members.value.length) {
     //console.log('UMM loadMore inc show')

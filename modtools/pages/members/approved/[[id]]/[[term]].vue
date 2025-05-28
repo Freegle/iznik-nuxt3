@@ -59,6 +59,14 @@ export default {
     const modMembers = setupModMembers(true)
     modMembers.context.value = null
     modMembers.collection.value = 'Approved'
+    // Need to init groupid and search now
+    const route = useRoute()
+    let gid = 0
+    if (('id' in route.params) && route.params.id) gid = parseInt(route.params.id)
+    modMembers.groupid.value = gid
+    let term = ''
+    if (('term' in route.params) && route.params.term) term = route.params.term
+    modMembers.search.value = term
     return {
       memberStore,
       miscStore,
@@ -123,7 +131,7 @@ export default {
     this.chosengroupid = this.id
     this.search = ''
     if (('term' in route.params) && route.params.term) this.search = route.params.term
-    //console.log('members approved mounted', this.groupid, this.search)
+    //console.log('members approved mounted', this.groupid, this.search, Object.keys(this.memberStore.list).length)
 
     const modGroupStore = useModGroupStore()
     modGroupStore.getModGroups()
