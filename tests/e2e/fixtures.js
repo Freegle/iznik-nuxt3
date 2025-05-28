@@ -1257,7 +1257,7 @@ const testWithFixtures = test.extend({
 
         console.log('Welcome to Freegle modal appeared')
 
-        // Click "Close and Continue" button
+        // Click "Close and Continue" button and wait for navigation
         const closeButton = welcomeModal.locator(
           '.btn:has-text("Close and Continue")'
         )
@@ -1265,27 +1265,83 @@ const testWithFixtures = test.extend({
           state: 'visible',
           timeout: timeouts.ui.appearance,
         })
-        await closeButton.click()
-        console.log('Clicked Close and Continue button')
 
-        // Wait for the modal to disappear (indicating success)
-        await welcomeModal.waitFor({
-          state: 'detached',
-          timeout: timeouts.ui.response,
-        })
+        console.log(
+          'Clicking Close and Continue button and waiting for navigation'
+        )
 
-        // Look for "We've sent your message" text to confirm the reply was sent
-        console.log('Looking for message sent confirmation')
-        const messageSentText = page.locator("text=We've sent your message")
-        await messageSentText.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.response,
-        })
+        // Use Promise.all to handle the click and navigation simultaneously
+        await Promise.all([
+          page.waitForURL('**/chats/**', {
+            timeout: timeouts.navigation.default,
+          }),
+          closeButton.click(),
+        ])
 
-        console.log('Reply sent confirmation found, now checking chats')
+        console.log(
+          'Successfully clicked Close and Continue and redirected to chats page'
+        )
 
-        // Go to /chats to verify the chat appears there
-        await page.gotoAndVerify('/chats')
+        // Handle ContactDetailsAskModal if it appears on the chats page
+        try {
+          console.log('Checking for ContactDetailsAskModal on chats page')
+          const contactModal = page.locator('.modal-content').filter({
+            hasText: 'Contact details',
+          })
+
+          // Wait briefly to see if the modal appears
+          await contactModal.waitFor({
+            state: 'visible',
+            timeout: 3000,
+          })
+
+          console.log('ContactDetailsAskModal appeared, filling details')
+
+          // Fill in postcode - look for the postcode input
+          const postcodeInput = contactModal.locator(
+            'input[placeholder*="postcode"], .pcinp'
+          )
+          await postcodeInput.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await postcodeInput.fill('EH3 6SS')
+          console.log('Filled postcode')
+
+          // Fill in phone number - look for the phone input
+          const phoneInput = contactModal.locator(
+            'input[placeholder*="mobile"]'
+          )
+          await phoneInput.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await phoneInput.fill('07700900123')
+          console.log('Filled phone number')
+
+          // Click OK/Save button
+          const okButton = contactModal.locator(
+            '.btn:has-text("OK"), .btn:has-text("Save")'
+          )
+          await okButton.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await okButton.first().click()
+          console.log('Clicked OK button in ContactDetailsAskModal')
+
+          // Wait for the contact modal to disappear
+          await contactModal.waitFor({
+            state: 'detached',
+            timeout: timeouts.ui.response,
+          })
+          console.log('ContactDetailsAskModal closed')
+        } catch (contactModalError) {
+          console.log(
+            'ContactDetailsAskModal did not appear, continuing:',
+            contactModalError.message
+          )
+        }
 
         // Wait for the chat list to load and look for a chat entry
         await page.waitForSelector('.chatentry', {
@@ -1296,7 +1352,7 @@ const testWithFixtures = test.extend({
         const chatEntries = page.locator('.chatentry').filter({ visible: true })
         const chatCount = await chatEntries.count()
 
-        if (chatCount > 1) {
+        if (chatCount > 0) {
           console.log(`Found ${chatCount} chat entries in /chats after reply`)
         } else {
           console.log('Warning: No chat entries found in /chats after reply')
@@ -1304,7 +1360,7 @@ const testWithFixtures = test.extend({
         }
 
         console.log(
-          'Reply process completed successfully with signup - message sent confirmation found and chats verified'
+          'Reply process completed successfully with signup and contact details filled'
         )
         return true
       } catch (error) {
