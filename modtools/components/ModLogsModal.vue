@@ -61,7 +61,8 @@ export default {
     return {
       busy: false,
       context: null,
-      bump: 0
+      bump: 0,
+      firstignored: false
     }
   },
   computed: {
@@ -112,8 +113,13 @@ export default {
       this.modal.show()
     },
     async fetchChunk($state) {
+      if( !this.firstignored){
+        this.firstignored = true
+        return
+      }
       this.busy = true
       const currentCount = this.logs.length
+      // console.log('MLM fetchChunk',currentCount,this.userid,this.context,this.modmailsonly)
 
       this.context = await this.logsStore.fetch({
         logtype: 'user',
