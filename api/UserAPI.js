@@ -2,6 +2,10 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class UserAPI extends BaseAPI {
   async fetch(id) {
+    if (isNaN(id)) {
+      throw new TypeError('Invalid user ID: ' + id)
+    }
+
     return await this.$getv2('/user/' + id)
   }
 
