@@ -448,7 +448,7 @@ export default {
       milesstring,
     } = await setupChat(props.id)
 
-    console.log('ChatFooter',chat.value)
+    //console.log('ChatFooter',chat.value)
 
     const modchatuser = ref(null)
     if( chat.value.user1id){
@@ -934,7 +934,7 @@ export default {
       this.$refs.spamConfirm?.show()
     },
     async referToSupport() {
-      await this.chatStore.referToSupport({
+      this.$api.chat.referToSupport({
         id: this.id
       })
     },
