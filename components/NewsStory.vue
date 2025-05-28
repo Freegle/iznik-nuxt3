@@ -140,7 +140,12 @@ export default {
     const newsfeedStore = useNewsfeedStore()
 
     const newsfeed = newsfeedStore.byId(props.id)
-    await storyStore.fetch(newsfeed.storyid)
+
+    try {
+      await storyStore.fetch(newsfeed.storyid)
+    } catch (e) {
+      console.log('Error fetching story:', e)
+    }
 
     return {
       storyStore,
