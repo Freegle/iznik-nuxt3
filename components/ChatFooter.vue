@@ -38,8 +38,9 @@
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
           </notice-message>
+
           <notice-message
-            v-if="faraway"
+            v-if="faraway && !isMT"
             variant="warning"
             class="clickme"
             @click="showInfo"
@@ -498,6 +499,9 @@ export default {
   },
   computed: {
     ...mapWritableState(useMiscStore, ['lastTyping']),
+    isMT() {
+      return this.miscStore.modtools
+    },
     shrink() {
       return this.sendmessage?.length > 120
     },
