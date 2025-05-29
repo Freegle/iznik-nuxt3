@@ -472,6 +472,26 @@ export const useMessageStore = defineStore({
 
       this.remove({ id: params.id })
     },
+    async move(params) {
+      await api(this.config).message.update({
+        id: params.id,
+        groupid: params.groupid,
+        action: 'Move'
+      })
+
+      await this.fetch(params.id, true)
+
+      /*dispatch(
+        'auth/fetchUser',
+        {
+          components: ['work'],
+          force: true
+        },
+        {
+          root: true
+        }
+      )*/
+    },
     async searchMember(term, groupid) {
       const { messages } = await api(this.config).message.fetchMessages({
         subaction: 'searchmemb',
