@@ -474,6 +474,9 @@ export default {
       this.showChatBlock = true
     },
     showInfo() {
+      if( this.miscStore.modtools){
+        navigateTo('/members/approved/' + this.chat.group.id + '/' + this.chat.user1id)
+      } else
       this.showProfileModal = true
     },
     report() {
