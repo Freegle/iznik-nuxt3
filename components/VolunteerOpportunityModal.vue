@@ -757,6 +757,10 @@ export default {
 
         await this.volunteeringStore.save(wip)
 
+        const miscStore = useMiscStore()
+        if( miscStore.modtools){
+            this.hide()
+        } else
         this.added = true
       } else {
         // This is an add.  First create it to get the id.
