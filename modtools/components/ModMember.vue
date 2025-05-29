@@ -10,7 +10,7 @@
           <div v-else>
             {{ indexPlusOne }}
             <!-- eslint-disable-next-line -->
-            <v-icon icon="envelope" class="mr-1" />
+            <Clipboard class="mr-1" :value="email" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
           </div>
         </div>
