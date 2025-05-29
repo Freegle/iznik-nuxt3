@@ -7,6 +7,7 @@
 <script>
 import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
+import { useGroupStore } from '~/stores/group'
 import { useModGroupStore } from '~/stores/modgroup'
 
 export default {
@@ -112,9 +113,10 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
+    const groupStore = useGroupStore()
     const modGroupStore = useModGroupStore()
 
-    return { miscStore, modGroupStore }
+    return { miscStore, groupStore, modGroupStore }
   },
   computed: {
     selectedGroup: {
@@ -141,6 +143,15 @@ export default {
         })
       } else {
         ret = this.myGroups
+
+        // Get base group which has mysettings in - needed to see if we are active or not
+        for( const g of ret){
+          const g2 = this.groupStore.get(g.id)
+          if( g2 && g2.mysettings){
+            g.mysettings = g2.mysettings
+          }
+        }
+
         /* Used to be needed to get latest work but now not
         for( const g of ret){
           console.log('===GroupSelect group',g.work)
