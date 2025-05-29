@@ -378,7 +378,8 @@ export default {
       default: null
     }
   },
-  setup() {
+  setup(props) {
+    if( props.message.fromuser && (typeof props.message.fromuser === "number")) props.message.fromuser = null // TODO WHY & FIX
     const modGroupStore = useModGroupStore()
     const locationStore = useLocationStore()
     const modconfigStore = useModConfigStore()

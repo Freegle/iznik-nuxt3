@@ -75,9 +75,11 @@ export default {
         : this.chat?.icon
     },
     refmsgid() {
+      if( this.chatmessage?.refmsg) return this.chatmessage.refmsg.id
       return this.chatmessage?.refmsgid
     },
     refmsg() {
+      if( this.chatmessage?.refmsg) return this.chatmessage?.refmsg
       const messageStore = useMessageStore()
       return this.refmsgid ? messageStore?.byId(this.refmsgid) : null
     },
