@@ -60,13 +60,17 @@ export default {
     userStore.clear()
 
     if (this.id) {
+      console.log('mounted',this.id)
       this.searchuser = this.id
       this.usersearch()
     }
   },
   methods: {
     async usersearch() {
-      const val = this.searchuser.trim()
+      if( !this.searchuser){
+        return
+      }
+      const val = this.searchuser.toString().trim()
 
       if (val) {
         this.searching = true
