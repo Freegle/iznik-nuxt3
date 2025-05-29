@@ -511,6 +511,9 @@ export default {
 
       const configs = this.modconfigStore.configs
       ret = configs.find(config => config.id === configid)
+      if( !ret){
+        ret = configs.find(config => config.default)
+      }
 
       return ret
     },
