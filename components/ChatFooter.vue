@@ -546,6 +546,9 @@ export default {
     },
     enterNewLine: {
       get() {
+        if( this.miscStore.modtools){
+          return !this.miscStore?.get('enternewlinemt')
+        }
         return this.me?.settings?.enterNewLine
       },
       async set(newVal) {
