@@ -5,6 +5,8 @@
   </div>
 </template>
 <script>
+import { useAuthStore } from '~/stores/auth'
+
 export default {
   watch: {
     myid(newVal, oldVal) {
@@ -15,8 +17,16 @@ export default {
     }
   },
   mounted() {
-    console.log('modtools discourse mounted', this.myid)
+    console.log('modtools discourse mounted A', this.myid)
     if (this.myid) {
+      this.redirect()
+      return
+    }
+    console.log('modtools discourse mounted B')
+    const authStore = useAuthStore()
+    const me = authStore.user
+    if (me && me.id) {
+      console.log('modtools discourse mounted C', me.id)
       this.redirect()
     }
   },
