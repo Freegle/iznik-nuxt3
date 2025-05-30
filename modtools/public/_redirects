@@ -1,0 +1,8 @@
+# Proxy requests to the permlink scripts to the appropriate full Netlify url.  This works in conjunction with cdnUrl
+# in nuxt.config.ts.
+/netlify/* https://:splat 200!
+
+# .well-known folder needs to be exposed.
+/.well-known/*  /well-known/:splat 200!
+
+/api* https://fdapilive.ilovefreegle.org/api/:splat 200!
