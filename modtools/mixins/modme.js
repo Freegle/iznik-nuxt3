@@ -72,16 +72,35 @@ export default {
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
         console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
+        let currentTotal = 0
+        if (authStore.work) currentTotal += authStore.work.total
+        if (chatStore) currentTotal += Math.min(99, chatStore.unreadCount)
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
         const work = authStore.work
         const totalCount = work?.total + this.chatcount
+        if (work && (totalCount > currentTotal) && authStore.user &&
+          (!authStore.user.settings || !Object.keys(authStore.user.settings).includes('playbeep') || authStore.user.settings.playbeep)
+        ) {
+          console.log('Beep as new work', currentTotal, totalCount)
+          this.makebeep()
+        }
         const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
         document.title = title
       }
       miscStore.deferGetMessages = false
       miscStore.workTimer = setTimeout(this.checkWork, 30000)
+    },
+    async makebeep() {
+      const sound = new Audio('/alert.wav')
+      try {
+        // Some browsers prevent us using play unless in response to a
+        // user gesture, so catch any exception.
+        await sound.play()
+      } catch (e) {
+        console.log('Failed to play beep', e.message)
+      }
     },
   },
 }
