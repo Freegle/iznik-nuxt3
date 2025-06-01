@@ -26,7 +26,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       VERSION: version,
-      BUILD_DATE: new Date().toISOString(),
+      BUILD_DATE: new Date().toLocaleString()
     }
   },
   vite: {

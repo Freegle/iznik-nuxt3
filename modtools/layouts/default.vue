@@ -489,6 +489,6 @@ a:hover {
 
 #mtinfo {
   text-align: left;
-  font-size: 75%;
+  font-size: 65%;
 }
 </style>
