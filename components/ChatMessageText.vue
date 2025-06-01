@@ -5,8 +5,11 @@
   >
     <div class="chatMessage forcebreak chatMessage__owner">
       <div>
-        <span v-if="!highlightEmails">
-          <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
+        <span v-if="isMT && emessageMThasTNlinks">
+          <span v-html="emessageMTTN" class="preline forcebreak"></span>
+        </span>
+        <span v-else-if="!highlightEmails">
+          <span v-if="messageIsNew" class="prewrap font-weight-bold"> WWW {{
             emessage
           }}</span>
           <span v-else class="preline forcebreak">{{ emessage }}</span>
@@ -77,6 +80,7 @@ import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
+import { useMiscStore } from '../stores/misc'
 
 export default {
   components: {
@@ -94,6 +98,29 @@ export default {
     }
   },
   computed: {
+    isMT() {
+      const miscStore = useMiscStore()
+      return miscStore.modtools
+    },
+    emessageMThasTNlinks() {
+      return this.emessage.includes('https://trashnothing.com/fd/')
+    },
+    emessageMTTN() {
+      let ret = this.emessage
+      ret = ret.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      let tnpos = -1
+      while( true){
+        tnpos = ret.indexOf('https://trashnothing.com/fd/',tnpos+1)
+        if( tnpos===-1) break
+        const endtn = ret.indexOf('\n',tnpos)
+        if( endtn===-1) break
+        const tnurl = ret.substring(tnpos,endtn)
+        const tnlink = '<a href='+tnurl+' target="_blank">'+tnurl+'</a>'
+        ret = ret.substring(0,tnpos)+tnlink+ret.substring(endtn)
+        tnpos += tnlink.length
+      }
+      return ret
+    },
     osmtile: () => osmtile(),
     attribution: () => attribution(),
     maxZoom() {
@@ -124,6 +151,7 @@ export default {
   },
   async mounted() {
     console.log('Mounted, postcode', this.postcode)
+
     if (this.postcode) {
       // Use typeahead to find the postcode location.
       const locationStore = useLocationStore()
