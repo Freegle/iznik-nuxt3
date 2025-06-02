@@ -1,5 +1,7 @@
 <template>
   <div>
+    <SpinButton v-if="groupitems.length === 0" variant="primary" icon-name="refresh" label="Fetch communities" spinclass="text-white"
+      @handle="loadallgroups" />
     <AutocompleteLocal v-model="searchgroup" :items="groupitems" class="max" size="40" placeholder="Start typing a community name..."
       :disabled="loading" />
     <div v-if="group && group.url">
@@ -117,8 +119,6 @@ export default {
   async setup() {
     const modGroupStore = useModGroupStore()
     const memberStore = useMemberStore()
-
-    await modGroupStore.listMT({ grouptype: 'Freegle' })
 
     return { modGroupStore, memberStore }
   },
@@ -253,11 +253,15 @@ export default {
     }
   },
   methods: {
+    async loadallgroups(callback) {
+      await this.modGroupStore.listMT({ grouptype: 'Freegle' })
+      callback()
+    },
     canonGroupName(name) {
       return name ? name.toLowerCase().replace(/-|_| /g, '') : null
     },
     async saveCGA(callback) {
-      console.log('saveCGA',this.group.cga)
+      console.log('saveCGA', this.group.cga)
       this.CGAerror = null
       try {
         await this.modGroupStore.updateMT({
