@@ -61,11 +61,13 @@ export default {
   },
   mounted() {
     if (this.member.id) {
-      this.userStore.fetchMT({
-        id: this.member.userid,
-        info: true
-      })
-
+      if (!this.userStore.byId(this.member.id)) {
+        this.userStore.fetchMT({
+          search: this.member.id,
+          info: true,
+          emailhistory: true
+        })
+      }
     }
   },
   computed: {

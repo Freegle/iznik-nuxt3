@@ -425,15 +425,18 @@ export default {
   },
   async mounted() {
     this.expanded = this.expand
-    await this.fetchUser()
+    this.user = this.userStore.byId(this.id)
+    if (this.user) {
+      await this.fetchUser()
+    }
   },
   computed: {
-    preferredemail(){
-      if( this.user.email) return this.user.email
-      if( !this.user.emails) return false
-      if( this.user.emails.length===0) return false
+    preferredemail() {
+      if (this.user.email) return this.user.email
+      if (!this.user.emails) return false
+      if (this.user.emails.length === 0) return false
       const pref = this.user.emails.find(e => e.preferred)
-      if( pref) return pref.email
+      if (pref) return pref.email
       return this.user.emails[0].email
     },
     reportUser() {
@@ -560,10 +563,10 @@ export default {
   methods: {
     async fetchUser() {
       if (this.id) {
-        await this.userStore.fetchMT({ id: this.id, emailhistory: true, info: true })
+        await this.userStore.fetchMT({ search: this.id, emailhistory: true, info: true })
         this.user = this.userStore.byId(this.id)
         if (this.user && this.user.spammer && this.user.spammer.byuserid) {
-          await this.userStore.fetchMT({ id: this.user.spammer.byuserid })
+          await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
           this.user.spammer.byuser = await this.userStore.fetch(this.user.spammer.byuserid)
         }
       }

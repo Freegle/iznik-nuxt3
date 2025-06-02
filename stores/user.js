@@ -27,6 +27,14 @@ export const useUserStore = defineStore({
       return ret?.user?.id
     },
     async fetchMT(params) {
+      if (!params.id && !params.search) {
+        console.log('useUserStore params id and search not set')
+        console.trace()
+        return
+      }
+      if( typeof params.search === 'number'){
+        params.search = params.search.toString()
+      }
       // id, info, search, emailhistory
       params.info = true
       const { user, users } = await api(this.config).user.fetchMT(params)

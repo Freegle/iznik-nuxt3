@@ -166,7 +166,7 @@
                   {{ eBody }}
                 </span>
               </div>
-              <div v-if="attachments.length" class="w-100 d-flex flex-wrap">
+              <div v-if="attachments?.length" class="w-100 d-flex flex-wrap">
                 <div v-for="attachment in attachments" :key="'attachment-' + attachment.id"
                   :class="{ 'd-inline': true, 'pr-1': true, addedImage: imageAdded(attachment.id), removeImage: imageRemoved(attachment.id) }">
                   <div class="addedMessage pl-2 font-weight-bold text-success">
