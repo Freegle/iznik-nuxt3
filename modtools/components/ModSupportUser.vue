@@ -2,9 +2,9 @@
   <b-card v-if="user" no-body class="container p-0 m-0">
     <b-card-header class="clickme p-1" @click="maybeExpand">
       <b-row>
-        <b-col cols="10" lg="4" class="order-1 truncate2" :title="user.email">
+        <b-col cols="10" lg="4" class="order-1 truncate2" :title="preferredemail">
           <div>
-            <v-icon icon="envelope" />&nbsp;{{ user.email }}
+            <v-icon icon="envelope" />&nbsp;{{ preferredemail }}
           </div>
           <div v-if="user.tnuserid" class="text-muted small">
             TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
@@ -428,6 +428,14 @@ export default {
     await this.fetchUser()
   },
   computed: {
+    preferredemail(){
+      if( this.user.email) return this.user.email
+      if( !this.user.emails) return false
+      if( this.user.emails.length===0) return false
+      const pref = this.user.emails.find(e => e.preferred)
+      if( pref) return pref.email
+      return this.user.emails[0].email
+    },
     reportUser() {
       return {
         // Due to inconsistencies about userid vs id in objects.
