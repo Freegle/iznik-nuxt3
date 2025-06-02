@@ -4,7 +4,9 @@
       <b-img v-if="showVolunteersWeek" ref="volunteersWeek" fluid src="/VolunteersWeek.gif" />
     </div>
     <h2>Hello, {{ me.displayname }}</h2>
-    <p>Here's your dashboard, where you can see what your communities have been doing recently.</p>
+    <p>Here's your dashboard, where you can see what your communities have been doing recently.
+    Link to <a href="https://old.modtools.org/modtools" target="_blank">ModTools v2</a>
+    </p>
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>

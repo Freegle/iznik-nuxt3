@@ -137,7 +137,7 @@ export default {
     groups() {
       let ret = []
       if (this.listall) {
-        ret = Object.values(this.modGroupStore.list).filter((g) => {
+        ret = Object.values(this.modGroupStore.allGroups).filter((g) => {
           //console.log('===GroupSelect groups A',g.id)
           return g.id
         })
@@ -293,11 +293,13 @@ export default {
   },
   async mounted() {
     // MT CHANGED
-    if (this.listall) {
+    /*if (this.listall) {
+      console.error('MGS listMT mounted listall')
+      console.trace()
       await this.modGroupStore.listMT({
         grouptype: 'Freegle'
       })
-    }
+    }*/
     //console.log('ModGroupSelect', this.remember, this.modelValue)
     if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)

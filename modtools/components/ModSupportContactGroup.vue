@@ -1,5 +1,6 @@
 <template>
   <div>
+    <SpinButton v-if="!gotallgroups" variant="primary" icon-name="refresh" label="Fetch communities" spinclass="text-white" @handle="loadallgroups" />
     <label>From:</label>
     <b-form-select v-model="from">
       <option value="null">
@@ -113,6 +114,7 @@ import htmlEditButton from "quill-html-edit-button";
 
 import { useAlertStore } from './stores/alert'
 import ModAlertHistory from './ModAlertHistory'
+import { useModGroupStore } from '~/stores/modgroup'
 
 /*let VueEditor, htmlEditButton
 
@@ -131,12 +133,13 @@ export default {
   },
   setup() {
     const alertStore = useAlertStore()
+    const modGroupStore = useModGroupStore()
     const quillModules = {
       name: 'htmlEditButton',
       module: htmlEditButton,
       options: {} // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
     }
-    return { alertStore, quillModules }
+    return { alertStore, modGroupStore, quillModules }
   },
   data: function () {
     return {
@@ -164,6 +167,9 @@ export default {
     // this.alertStore.clear()
   },
   computed: {
+    gotallgroups() {
+      return Object.values(this.modGroupStore.allGroups) > 0
+    },
     valid() {
       return this.from && this.subject && this.text && this.groupid
     },
@@ -176,6 +182,10 @@ export default {
     }
   },
   methods: {
+    async loadallgroups(callback) {
+      await this.modGroupStore.listMT({ grouptype: 'Freegle' })
+      callback()
+    },
     async send(callback) {
       const data = {
         from: this.from,

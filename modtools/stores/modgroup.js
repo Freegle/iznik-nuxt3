@@ -94,7 +94,8 @@ export const useModGroupStore = defineStore({
       }
     },
     async listMT(params) {
-      console.log('uMGS listMT implemented: getting allGroups')
+      console.error('uMGS listMT implemented: getting allGroups')
+      //console.trace()
       const groups = await api(this.config).group.listMT(params)
       //this.list = {}
       this.allGroups = {}
