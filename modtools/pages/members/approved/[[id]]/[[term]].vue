@@ -23,19 +23,18 @@
         <p v-if="groupid && group" class="mt-1">
           This group has {{ pluralise('member', group.membercount, true) }}.
         </p>
-        <NoticeMessage v-if="!members.length" class="mt-2">
-          There are no members to show at the moment.
-        </NoticeMessage>
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <template #no-results>
-            There are no members to show at the moment.
-          </template>
           <template #no-more>
             <p class="p-2">END OF LIST</p>
           </template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+          <template #complete>
+            <notice-message v-if="!members?.length">
+              There are no members to show at the moment.
+            </notice-message>
           </template>
         </infinite-loading>
       </div>
@@ -157,7 +156,7 @@ export default {
         router.push('/members/approved/' + lastmod)
       }
     }
-    if( this.term){ // Turn off sorting for searches
+    if (this.term) { // Turn off sorting for searches
       this.sort = false
     } else {
       this.sort = true

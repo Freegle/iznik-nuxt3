@@ -10,14 +10,16 @@
       </div>
 
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-        <template #no-results>
-          <p class="p-2">There are no related members at the moment.</p>
-        </template>
         <template #no-more>
           <p class="p-2">There are no related members at the moment.</p>
         </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
+        </template>
+        <template #complete>
+          <notice-message v-if="!visibleMembers?.length">
+            There are no related members at the moment.
+          </notice-message>
         </template>
       </infinite-loading>
 
@@ -61,7 +63,7 @@ export default {
   },
   computed: {
     members() {
-      if( !this.memberStore) return []
+      if (!this.memberStore) return []
       console.log('members related all list')
       return Object.values(this.memberStore.list)
     },

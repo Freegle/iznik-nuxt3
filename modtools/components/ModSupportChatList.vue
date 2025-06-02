@@ -2,10 +2,10 @@
   <div>
     <ModSupportChat v-for="chat in chatsShown" :key="'chathistory-' + chat.id" :chat="chat" :pov="pov" />
     <infinite-loading :distance="10" @infinite="loadMoreChats">
-      <template #no-results>
-        <p class="text-left">
+      <template #complete>
+        <notice-message v-if="!chatsShown?.length">
           No chats.
-        </p>
+        </notice-message>
       </template>
     </infinite-loading>
   </div>
@@ -23,7 +23,7 @@ export default {
       default: null
     }
   },
-  data: function() {
+  data: function () {
     return {
       showChats: 0
     }

@@ -4,16 +4,18 @@
       <ModHelpChatReview />
       <div>
         <div v-for="message in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
-          <ModChatReview :id="message.chatid" :message="message" @reload="reload"/>
+          <ModChatReview :id="message.chatid" :message="message" @reload="reload" />
         </div>
 
         <infinite-loading direction="top" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <template #no-results>
-            <p class="p-2">There are no chat messages to review at the moment.</p>
-          </template>
           <template #no-more></template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+          <template #complete>
+            <notice-message v-if="!visibleMessages?.length">
+              There are no chat messages to review at the moment.
+            </notice-message>
           </template>
         </infinite-loading>
 
@@ -77,7 +79,7 @@ export default {
   watch: {
     work(newVal, oldVal) {
       // TODO: The page is always going to be visible so why might we not be?
-      console.log('TODO chats review work watch',newVal, oldVal)
+      console.log('TODO chats review work watch', newVal, oldVal)
       if (!this.modalOpen) {
         if (newVal > oldVal) {
           this.clearAndLoad()
@@ -132,7 +134,7 @@ export default {
           })*/
       }
     },
-    async reload(){
+    async reload() {
       await this.clearAndLoad()
     },
     async clearAndLoad() {

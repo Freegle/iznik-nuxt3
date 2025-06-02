@@ -63,8 +63,6 @@
         </b-tab>
       </b-tabs>
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-        <template #no-results>
-        </template>
         <template #no-more>
         </template>
         <template #spinner>

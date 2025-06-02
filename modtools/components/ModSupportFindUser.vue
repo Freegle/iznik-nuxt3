@@ -13,13 +13,13 @@
     <div v-if="!searching && searchuser && searched">
       <ModSupportUser v-for="user in visible" :id="user.id" :key="user.id" :expand="expand" />
       <infinite-loading :distance="200" @infinite="loadMoreUsers">
-        <template #no-results>
-          <p class="text-left">
-            No users found.
-          </p>
-        </template>
         <template #no-more />
         <template #spinner />
+        <template #complete>
+          <notice-message v-if="!visible?.length">
+            No users found.
+          </notice-message>
+        </template>
       </infinite-loading>
     </div>
   </div>
@@ -60,14 +60,14 @@ export default {
     userStore.clear()
 
     if (this.id) {
-      console.log('mounted',this.id)
+      console.log('mounted', this.id)
       this.searchuser = this.id
       this.usersearch()
     }
   },
   methods: {
     async usersearch() {
-      if( !this.searchuser){
+      if (!this.searchuser) {
         return
       }
       const val = this.searchuser.toString().trim()

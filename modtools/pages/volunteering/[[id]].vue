@@ -3,15 +3,15 @@
     <div v-for="volunteering in volunteerings" :key="'volunteeringlist-' + volunteering.id" class="p-0 mt-2">
       <ModVolunteerOpportunity :id="volunteering.id" :volunteering="volunteering" />
     </div>
-    <NoticeMessage v-if="!Object.keys(volunteerings).length && !busy" class="mt-2">
-      There are no volunteer opportunities to review at the moment. This will refresh automatically.
-    </NoticeMessage>
 
     <infinite-loading :distance="distance" @infinite="loadMore" :identifier="bump">
-      <template #no-results>
-      </template>
       <template #no-more />
       <template #spinner />
+      <template #complete>
+        <notice-message v-if="!volunteerings?.length">
+          There are no volunteer opportunities to review at the moment. This will refresh automatically.
+        </notice-message>
+      </template>
     </infinite-loading>
   </div>
 </template>
@@ -61,7 +61,7 @@ export default {
         this.bump++
       } else {
         //const visible = this.miscStore.get('visible')
-  
+
         //if (!visible) {
         //  this.volunteeringStore.clear()
         //}
