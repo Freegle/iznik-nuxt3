@@ -39,40 +39,40 @@
 
     <div :key="'nuxt2-' + bump" class="d-flex">
       <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
-        <ModMenuItemLeft link="/" name="Dashboard" />
+        <ModMenuItemLeft link="/" name="Dashboard" @mobilehidemenu="mobilehidemenu" />
         <hr>
         <div class="pl-1">
           Messages
         </div>
-        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent />
-        <ModMenuItemLeft link="/messages/approved" name="Approved" indent />
-        <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent />
+        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/messages/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent @mobilehidemenu="mobilehidemenu" />
         <hr>
         <div class="pl-1">
           Members
         </div>
-        <ModMenuItemLeft link="/members/approved" name="Approved" indent />
-        <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent />
-        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent />
-        <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent />
-        <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" />
-        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" />
-        <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" />
-        <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" />
-        <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" />
-        <ModMenuItemLeft link="/members/notes" name="Notes" indent />
+        <ModMenuItemLeft link="/members/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/members/notes" name="Notes" indent @mobilehidemenu="mobilehidemenu" />
         <hr>
         <hr>
-        <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" />
-        <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" />
-        <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" />
-        <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" />
-        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" />
+        <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" @mobilehidemenu="mobilehidemenu" />
         <hr>
-        <ModMenuItemLeft link="/logs" name="Logs" />
-        <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" />
-        <ModMenuItemLeft link="/settings" name="Settings" />
-        <ModMenuItemLeft link="/teams" name="Teams" />
+        <ModMenuItemLeft link="/logs" name="Logs" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/settings" name="Settings" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/teams" name="Teams" @mobilehidemenu="mobilehidemenu" />
         <div>
           <ExternalLink href="https://wiki.ilovefreegle.org/ModTools" class="pl-1">
             Help
@@ -311,6 +311,9 @@ export default {
         this.bumpLogin++
       }
     },
+    mobilehidemenu(){
+      this.showMenu = false
+    }
   }
 }
 </script>
