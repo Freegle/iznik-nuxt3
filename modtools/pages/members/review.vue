@@ -10,9 +10,6 @@
       </div>
 
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-        <template #no-more>
-          <p class="p-2">There are no members to review at the moment.</p>
-        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>

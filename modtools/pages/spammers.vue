@@ -48,10 +48,6 @@
         <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
         <ModMember v-for="(spammer, index) in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" :index="index" />
         <infinite-loading :distance="10" @infinite="loadMore" :identifier="infiniteId">
-          <template #no-results >
-            Nothing to show just now.
-          </template>
-          <template #no-more />
           <template #spinner >
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>

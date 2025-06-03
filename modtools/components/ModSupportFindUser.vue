@@ -13,7 +13,6 @@
     <div v-if="!searching && searchuser && searched">
       <ModSupportUser v-for="user in visible" :id="user.id" :key="user.id" :expand="expand" />
       <infinite-loading :distance="200" @infinite="loadMoreUsers">
-        <template #no-more />
         <template #spinner />
         <template #complete>
           <notice-message v-if="!visible?.length">

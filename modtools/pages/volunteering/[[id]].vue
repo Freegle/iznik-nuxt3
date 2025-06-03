@@ -5,7 +5,6 @@
     </div>
 
     <infinite-loading :distance="distance" @infinite="loadMore" :identifier="bump">
-      <template #no-more />
       <template #spinner />
       <template #complete>
         <notice-message v-if="!volunteerings?.length">

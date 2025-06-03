@@ -8,7 +8,6 @@
         </div>
 
         <infinite-loading direction="top" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <template #no-more></template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>

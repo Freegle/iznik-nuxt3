@@ -58,6 +58,7 @@ export default {
       required: true
     }
   },
+  emits: ['processed'],
   computed: {
     posted1() {
       return this.posted(this.user1)
@@ -264,6 +265,7 @@ export default {
     },
     updateWork() {
       this.fetchMe(true, ['work'])
+      this.$emit('processed')
     }
   }
 }

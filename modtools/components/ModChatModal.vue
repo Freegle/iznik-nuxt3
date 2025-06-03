@@ -40,8 +40,6 @@
       <template #default>
         <div v-if="chat2" ref="chatContent" class="m-0 chatContent" infinite-wrapper>
           <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore">
-            <template #no-results />
-            <template #no-more />
             <template #spinner>
               <b-img lazy src="/loader.gif" alt="Loading" />
             </template>

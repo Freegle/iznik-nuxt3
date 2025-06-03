@@ -6,13 +6,10 @@
       <ModGroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
 
       <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
-        <ModRelatedMember :member="member" />
+        <ModRelatedMember :member="member" @processed="bump++" />
       </div>
 
       <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-        <template #no-more>
-          <p class="p-2">There are no related members at the moment.</p>
-        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>

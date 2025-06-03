@@ -25,9 +25,6 @@
         </p>
         <ModMembers />
         <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
-          <template #no-more>
-            <p class="p-2">END OF LIST</p>
-          </template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>

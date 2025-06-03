@@ -8,8 +8,6 @@
     </NoticeMessage>
 
     <infinite-loading force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore">
-      <template #no-results />
-      <template #no-more />
       <template #spinner>
         <b-img lazy src="/loader.gif" alt="Loading" />
       </template>

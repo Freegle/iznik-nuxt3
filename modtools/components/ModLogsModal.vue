@@ -13,8 +13,6 @@
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
         <infinite-loading :distance="200" @infinite="fetchChunk" :identifier="bump">
-          <template #no-results />
-          <template #no-more />
           <template #spinner>
             <b-img src="/loader.gif" alt="Loading" width="100px" />
           </template>
