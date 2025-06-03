@@ -107,6 +107,10 @@ watch(
               theType.value = 'corner_ad_video'
             } else if (height === '50px' || height === '90px') {
               theType.value = 'leaderboard_atf'
+            } else if (height === '100px') {
+              theType.value = 'mobile_large_footer'
+            } else if (height === '250px') {
+              theType.value = 'desktop_large_footer'
             } else {
               // See if we already have a med_rect; if so we should use the alternate type value as Playwire
               // doesn't like multiple ads of the same type.
