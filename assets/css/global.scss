@@ -252,6 +252,14 @@ legend {
     height: calc(100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop - $ads-cta);
   }
 
+  @media (min-height: $desktop-tall) {
+    height: calc(100vh - var(--header-navbar-height) - $sticky-banner-height-desktop-tall - $ads-cta);
+
+    @supports (height: 100dvh) {
+      height: calc(100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop-tall - $ads-cta);
+    }
+  }
+
   overflow-y: scroll;
 
   .card-body .card {
@@ -331,8 +339,16 @@ form {
 
   max-height: calc(100% - $sticky-banner-height-mobile) !important;
 
+  @media (min-height: $mobile-tall) {
+    max-height: calc(100% - $sticky-banner-height-mobile-tall) !important;
+  }
+
   @include media-breakpoint-up(md) {
     max-height: calc(100% - $sticky-banner-height-desktop) !important;
+
+    @media (min-height: $desktop-tall) {
+      max-height: calc(100% - $sticky-banner-height-desktop-tall) !important;
+    }
   }
 }
 

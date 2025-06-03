@@ -23,8 +23,16 @@
 .adFallback {
   height: calc($sticky-banner-height-mobile - $ads-cta);
 
+  @media (min-height: $mobile-tall) {
+    height: calc($sticky-banner-height-mobile-tall - $ads-cta);
+  }
+
   @include media-breakpoint-up(md) {
     height: calc($sticky-banner-height-desktop - $ads-cta);
+
+    @media (min-height: $desktop-tall) {
+      height: calc($sticky-banner-height-desktop-tall - $ads-cta);
+    }
   }
 }
 </style>

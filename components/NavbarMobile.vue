@@ -334,8 +334,16 @@ const navBarBottomHidden = computed(() => {
 .navbot.stickyAdRendered {
   margin-bottom: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    margin-bottom: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     margin-bottom: $sticky-banner-height-desktop;
+
+    @media (min-height: $desktop-tall) {
+      margin-bottom: $sticky-banner-height-desktop-tall;
+    }
   }
 }
 

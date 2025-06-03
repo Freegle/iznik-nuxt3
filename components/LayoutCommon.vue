@@ -370,8 +370,16 @@ body.modal-open {
   width: 320px;
   height: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    height: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     height: $sticky-banner-height-desktop;
+
+    @media (min-height: $desktop-tall) {
+      height: $sticky-banner-height-desktop-tall;
+    }
   }
 }
 
@@ -379,8 +387,16 @@ body.modal-open {
   &.allowAd.stickyAdRendered {
     padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
+    @media (min-height: $mobile-tall) {
+      padding-bottom: calc($sticky-banner-height-mobile-tall + 2px);
+    }
+
     @include media-breakpoint-up(md) {
       padding-bottom: calc($sticky-banner-height-desktop + 2px);
+
+      @media (min-height: $desktop-tall) {
+        padding-bottom: calc($sticky-banner-height-desktop-tall + 2px);
+      }
     }
   }
 }

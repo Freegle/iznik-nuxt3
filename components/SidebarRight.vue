@@ -47,10 +47,22 @@ export default {
 .sidebar__wrapper {
   height: calc(100vh - $sticky-banner-height-desktop - $navbar-height - 10px);
 
+  @media (min-height: $desktop-tall) {
+    height: calc(
+      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+    );
+  }
+
   @supports (height: 100dvh) {
     height: calc(
       100dvh - $sticky-banner-height-desktop - $navbar-height - 10px
     );
+
+    @media (min-height: $desktop-tall) {
+      height: calc(
+        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+      );
+    }
   }
 
   display: grid;
