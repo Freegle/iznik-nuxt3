@@ -30,7 +30,7 @@
               <VisibleWhen :at="['xs', 'sm']">
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky"
-                  max-height="50px"
+                  :max-height="mobileMaxHeight"
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
@@ -42,7 +42,7 @@
               <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky_desktop"
-                  max-height="90px"
+                  :max-height="desktopMaxHeight"
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
@@ -89,6 +89,9 @@
           :msgid="interestedInOthersMsgid"
           :userid="interestedInOthersUserId"
         />
+        <!-- Height detection divs -->
+        <div ref="mobileTallDetector" class="mobile-tall-detector" />
+        <div ref="desktopTallDetector" class="desktop-tall-detector" />
       </div>
       <BreakpointFettler />
       <div id="here" />
@@ -152,6 +155,7 @@ export default {
       interestedInOthersMsgid: null,
       interestedInOthersUserId: null,
       showInterestedModal: false,
+      windowHeight: 0, // Track window height for reactivity
     }
   },
   computed: {
@@ -169,6 +173,30 @@ export default {
     },
     marginTop() {
       return navBarHidden.value ? '0px' : '60px'
+    },
+    desktopMaxHeight() {
+      // Use windowHeight to trigger reactivity on resize
+      // eslint-disable-next-line no-unused-expressions
+      this.windowHeight
+
+      // Check if desktop tall detector is visible (using CSS media queries)
+      if (process.client && this.$refs.desktopTallDetector) {
+        const computed = window.getComputedStyle(this.$refs.desktopTallDetector)
+        return computed.display === 'block' ? '250px' : '90px'
+      }
+      return '90px'
+    },
+    mobileMaxHeight() {
+      // Use windowHeight to trigger reactivity on resize
+      // eslint-disable-next-line no-unused-expressions
+      this.windowHeight
+
+      // Check if mobile tall detector is visible (using CSS media queries)
+      if (process.client && this.$refs.mobileTallDetector) {
+        const computed = window.getComputedStyle(this.$refs.mobileTallDetector)
+        return computed.display === 'block' ? '100px' : '50px'
+      }
+      return '50px'
     },
   },
   async mounted() {
@@ -250,11 +278,16 @@ export default {
       this.monitorTabVisibility()
 
       this.haveMounted = true
+
+      // Track window resize for height detection
+      this.updateWindowHeight()
+      window.addEventListener('resize', this.updateWindowHeight)
     }
   },
   beforeUnmount() {
     if (process.client) {
       clearTimeout(this.timeTimer)
+      window.removeEventListener('resize', this.updateWindowHeight)
     }
   },
   methods: {
@@ -306,6 +339,11 @@ export default {
     },
     replySent() {
       this.showInterestedModal = true
+    },
+    updateWindowHeight() {
+      if (process.client) {
+        this.windowHeight = window.innerHeight
+      }
     },
   },
 }
@@ -398,6 +436,23 @@ body.modal-open {
         padding-bottom: calc($sticky-banner-height-desktop-tall + 2px);
       }
     }
+  }
+}
+
+// Height detection divs - hidden but used to detect screen height breakpoints
+.mobile-tall-detector {
+  display: none;
+
+  @media (min-height: $mobile-tall) {
+    display: block;
+  }
+}
+
+.desktop-tall-detector {
+  display: none;
+
+  @media (min-height: $desktop-tall) {
+    display: block;
   }
 }
 </style>
