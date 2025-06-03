@@ -518,42 +518,6 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
 import api from '~/api'
-const unsetrulesX = {
-  fullymoderated: null,
-  requirefirstpostoffer: null,
-  limitconcurrentwanteds: null,
-  limitgroups: null,
-  restrictcrossposting: null,
-  allowloans: null,
-  suggesteddonations: null,
-  declareselling: null,
-  restrictpersonalinfo: null,
-  restrictdistance: null,
-  animalswanted: null,
-  animalsoffer: null,
-  weapons: null,
-  firearms: null,
-  knives: null,
-  knivesrestrict: null,
-  medicationsprescription: null,
-  medicationsotc: null,
-  medicationsanimals: null,
-  contactlenses: null,
-  contactlensessolutions: null,
-  tobacco: null,
-  vaping: null,
-  alcohol: null,
-  gascylinders: null,
-  tickets: null,
-  wastecarrier: null,
-  carboot: null,
-  chineselanterns: null,
-  carseats: null,
-  pondlife: null,
-  copyright: null,
-  porn: null,
-  other: null,
-}
 
 export default {
   components: {
