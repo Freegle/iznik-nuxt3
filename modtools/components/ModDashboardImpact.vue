@@ -1,16 +1,16 @@
 <template>
   <div>
-    groupid {{  groupid }}
-    <h2>Impact <span class="text-muted">on {{ groupName }}</span></h2>
+    groupid {{ groupid }}
+    <h2>
+      Impact <span class="text-muted">on {{ groupName }}</span>
+    </h2>
     <p>This is our estimate of the impact your active communities have had.</p>
     <b-card v-if="loading" no-body>
       <b-card-body>
         <b-row><b-col>&nbsp;</b-col></b-row>
         <b-row><b-col>&nbsp;</b-col></b-row>
         <b-row>
-          <b-col class="text-faded pulsate text-center">
-            Loading...
-          </b-col>
+          <b-col class="text-faded pulsate text-center"> Loading... </b-col>
         </b-row>
         <b-row><b-col>&nbsp;</b-col></b-row>
         <b-row><b-col>&nbsp;</b-col></b-row>
@@ -33,10 +33,10 @@ import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {
   extends: ModDashboardBase,
-  data: function() {
+  data: function () {
     return {
       askfor: ['Weight'],
-      Weight: null
+      Weight: null,
     }
   },
   computed: {
@@ -72,7 +72,7 @@ export default {
     },
     totalCO2() {
       return this.totalWeight * 0.51
-    }
-  }
+    },
+  },
 }
 </script>

@@ -33,7 +33,7 @@ export const useAdminsStore = defineStore({
     async approve(params) {
       await api(this.config).admins.patch({
         id: params.id,
-        pending: 0
+        pending: 0,
       })
       await this.fetch({ id: params.id })
     },
@@ -52,7 +52,7 @@ export const useAdminsStore = defineStore({
     async release(params) {
       await api(this.config).admins.release(params.id)
       await this.fetch({ id: params.id })
-    }
+    },
   },
   getters: {
     get: (state) => (id) => {

@@ -4,11 +4,32 @@
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
-            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>
-            <v-icon icon="arrow-circle-right" scale="2" class="mt-1 text-info" />
-            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id"  @reload="reload"/>
+            <ModChatReviewUser
+              :user="message.fromuser"
+              class="mr-2"
+              tag="From: "
+              :groupid="message.group.id"
+              @reload="reload"
+            />
+            <v-icon
+              icon="arrow-circle-right"
+              scale="2"
+              class="mt-1 text-info"
+            />
+            <ModChatReviewUser
+              :user="message.touser"
+              class="ml-2"
+              tag="To: "
+              :groupid="message.group.id"
+              @reload="reload"
+            />
           </div>
-          <b-button v-if="message.bymailid" size="lg" variant="white" @click="viewOriginal">
+          <b-button
+            v-if="message.bymailid"
+            size="lg"
+            variant="white"
+            @click="viewOriginal"
+          >
             <v-icon icon="info-circle" /> View original email
           </b-button>
         </div>
@@ -19,19 +40,32 @@
         </NoticeMessage>
         <NoticeMessage v-if="message.held" class="mb-2" variant="warning">
           <span v-if="me.id === message.held.id">
-            You held this {{ timeago(message.held.timestamp) }}. Others can't release it or act on it.
+            You held this {{ timeago(message.held.timestamp) }}. Others can't
+            release it or act on it.
           </span>
           <span v-else>
-            Held by <strong>
-              <ExternalLink :href="'mailto:' + message.held.email">{{ message.held.name }}</ExternalLink>
+            Held by
+            <strong>
+              <ExternalLink :href="'mailto:' + message.held.email">{{
+                message.held.name
+              }}</ExternalLink>
             </strong>
-            {{ timeago(message.held.timestamp) }}. Please check with them if you think it should be released.
+            {{ timeago(message.held.timestamp) }}. Please check with them if you
+            think it should be released.
           </span>
         </NoticeMessage>
-        <div class="rounded bg-white p-2 font-weight-bold border border-warning mb-2">
-          <ChatMessage :id="message.id" :chatid="message.chatid" last highlight-emails isMT />
+        <div
+          class="rounded bg-white p-2 font-weight-bold border border-warning mb-2"
+        >
+          <ChatMessage
+            :id="message.id"
+            :chatid="message.chatid"
+            last
+            highlight-emails
+            is-m-t
+          />
 
-          <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /--> 
+          <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /-->
           <!-- :chatusers="chatusers" -->
         </div>
         <ModSpammer v-if="message.touser.spammer" :user="message.touser" />
@@ -44,16 +78,28 @@
             <em>Quicker Chat Review</em>
           </span>
           <span>
-            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
-            <span v-if="!message.widerchatreview">, which you mod.
-              <b-button :to="'/members/approved/' + message.group.id + '/' + message.touser.id" variant="link"
-                class="p-0 border-0 align-top">
+            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on
+            {{ message.group.namedisplay }}
+            <span v-if="!message.widerchatreview"
+              >, which you mod.
+              <b-button
+                :to="
+                  '/members/approved/' +
+                  message.group.id +
+                  '/' +
+                  message.touser.id
+                "
+                variant="link"
+                class="p-0 border-0 align-top"
+              >
                 Go to membership
               </b-button>
             </span>
           </span>
           <span>
-            <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ message.id }}
+            <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+              message.id
+            }}
           </span>
         </div>
         <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
@@ -63,10 +109,20 @@
               <!-- eslint-disable-next-line -->
               <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
               <span>
-                <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod</span><span v-else>not on any groups which you
-                  actively mod.</span>
-                <b-button v-if="message.groupfrom" :to="'/members/approved/' + message.groupfrom.id + '/' + message.fromuser.id"
-                  variant="link" class="p-0 border-0 align-top">
+                <span v-if="message.groupfrom"
+                  >on {{ message.groupfrom.namedisplay }}, which you mod</span
+                ><span v-else>not on any groups which you actively mod.</span>
+                <b-button
+                  v-if="message.groupfrom"
+                  :to="
+                    '/members/approved/' +
+                    message.groupfrom.id +
+                    '/' +
+                    message.fromuser.id
+                  "
+                  variant="link"
+                  class="p-0 border-0 align-top"
+                >
                   Go to membership
                 </b-button>
               </span>
@@ -78,28 +134,92 @@
         <div class="d-flex flex-wrap justify-content-start">
           <template v-if="!message.widerchatreview">
             <ModChatViewButton :id="message.chatid" :pov="message.touser.id" />
-            <b-button v-if="message.held && me.id === message.held.id" variant="warning" class="mr-2 mb-1" @click="release">
+            <b-button
+              v-if="message.held && me.id === message.held.id"
+              variant="warning"
+              class="mr-2 mb-1"
+              @click="release"
+            >
               <v-icon icon="play" /> Release
             </b-button>
-            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="exclamation-triangle" label="Add Mod Message" variant="warning" class="mr-2 mb-1"
-              @handle="modnote" />
-            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="eraser" label="Remove highlighted emails" variant="warning" class="mr-2 mb-1"
-              @handle="redactEmails" />
+            <SpinButton
+              v-if="!message.held || me.id === message.held.id"
+              icon-name="exclamation-triangle"
+              label="Add Mod Message"
+              variant="warning"
+              class="mr-2 mb-1"
+              @handle="modnote"
+            />
+            <SpinButton
+              v-if="!message.held || me.id === message.held.id"
+              icon-name="eraser"
+              label="Remove highlighted emails"
+              variant="warning"
+              class="mr-2 mb-1"
+              @handle="redactEmails"
+            />
           </template>
-          <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="check" label="Approve - Not Spam" spinclass="text-white" variant="primary" class="mr-2 mb-1"
-            @handle="approve" />
+          <SpinButton
+            v-if="!message.held || me.id === message.held.id"
+            icon-name="check"
+            label="Approve - Not Spam"
+            spinclass="text-white"
+            variant="primary"
+            class="mr-2 mb-1"
+            @handle="approve"
+          />
           <template v-if="!message.widerchatreview">
-            <SpinButton v-if="!message.held" icon-name="check" label="Approve and whitelist" spinclass="text-white" variant="primary"
-              class="mr-2 mb-1" confirm @handle="whitelist" />
-            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="pause" label="Hold" variant="warning" class="mr-2 mb-1" @handle="hold" />
-            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="trash-alt" label="Delete" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
-            <SpinButton v-if="!message.held || me.id === message.held.id" icon-name="ban" label="Spam" variant="danger" class="mr-2 mb-1" confirm @handle="reject" />
+            <SpinButton
+              v-if="!message.held"
+              icon-name="check"
+              label="Approve and whitelist"
+              spinclass="text-white"
+              variant="primary"
+              class="mr-2 mb-1"
+              confirm
+              @handle="whitelist"
+            />
+            <SpinButton
+              v-if="!message.held || me.id === message.held.id"
+              icon-name="pause"
+              label="Hold"
+              variant="warning"
+              class="mr-2 mb-1"
+              @handle="hold"
+            />
+            <SpinButton
+              v-if="!message.held || me.id === message.held.id"
+              icon-name="trash-alt"
+              label="Delete"
+              variant="danger"
+              class="mr-2 mb-1"
+              confirm
+              @handle="reject"
+            />
+            <SpinButton
+              v-if="!message.held || me.id === message.held.id"
+              icon-name="ban"
+              label="Spam"
+              variant="danger"
+              class="mr-2 mb-1"
+              confirm
+              @handle="reject"
+            />
           </template>
         </div>
       </b-card-footer>
     </b-card>
-    <ModChatNoteModal v-if="showModChatNoteModal && message" ref="modnote" :chatid="message.chatid" @hidden="showModChatNoteModal = false" />
-    <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" ref="original" />
+    <ModChatNoteModal
+      v-if="showModChatNoteModal && message"
+      ref="modnote"
+      :chatid="message.chatid"
+      @hidden="showModChatNoteModal = false"
+    />
+    <ModMessageEmailModal
+      v-if="showOriginal"
+      :id="message.bymailid"
+      ref="original"
+    />
   </div>
 </template>
 <script>
@@ -109,32 +229,34 @@ import { useChatStore } from '~/stores/chat'
 const REVIEWCHAT = null
 
 export default {
-  //mixins: [chat],
+  props: {
+    id: {
+      // Was in mixins/chat.js
+      type: Number,
+      required: true,
+    },
+    message: {
+      type: Object,
+      required: true,
+    },
+  },
+  emits: ['reload'],
+  // mixins: [chat],
   setup() {
     const chatStore = useChatStore()
     return {
       chatStore,
     }
   },
-  emits: ['reload'],
-  props: {
-    id: { // Was in mixins/chat.js
-      type: Number,
-      required: true
-    },
-    message: {
-      type: Object,
-      required: true
-    }
-  },
   data: function () {
     return {
       showOriginal: false,
-      showModChatNoteModal: false
+      showModChatNoteModal: false,
     }
   },
   computed: {
-    chatusers() { // Was in mixins/chat.js
+    chatusers() {
+      // Was in mixins/chat.js
       // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
       // get it in each message we render.
       return this.chatStore.getUsers(this.id)
@@ -260,10 +382,10 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   methods: {
-    reload(){
+    reload() {
       this.$emit('reload')
     },
     async release() {
@@ -282,13 +404,16 @@ export default {
     },
     async reject(callback) {
       await this.$api.chat.sendMT({ id: this.message.id, action: 'Reject' })
-      //this.chatStore.removeMessageMT(REVIEWCHAT,this.message.id)
-      //console.log('reject',this.message.id, this.chatStore.messages[REVIEWCHAT])
+      // this.chatStore.removeMessageMT(REVIEWCHAT,this.message.id)
+      // console.log('reject',this.message.id, this.chatStore.messages[REVIEWCHAT])
       this.$emit('reload')
       callback()
     },
     async whitelist(callback) {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'ApproveAllFuture' })
+      await this.$api.chat.sendMT({
+        id: this.message.id,
+        action: 'ApproveAllFuture',
+      })
       this.$emit('reload')
       callback()
     },
@@ -308,8 +433,8 @@ export default {
       await nextTick()
       this.$refs.original?.show()
       callback()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

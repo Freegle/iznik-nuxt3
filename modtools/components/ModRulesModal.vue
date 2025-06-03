@@ -1,9 +1,15 @@
 <template>
   <div>
-    <b-modal ref="modal" id="modRulesModal" size="lg" no-stacking no-close-on-backdrop no-close-on-esc hide-header-close>
-      <template #title>
-        Please configure group rules
-      </template>
+    <b-modal
+      id="modRulesModal"
+      ref="modal"
+      size="lg"
+      no-stacking
+      no-close-on-backdrop
+      no-close-on-esc
+      hide-header-close
+    >
+      <template #title> Please configure group rules </template>
       <template #default>
         <ModMissingRules expanded />
       </template>
@@ -27,7 +33,7 @@ export default {
   data: function () {
     return {
       enableIn: 0,
-      timer: null
+      timer: null,
     }
   },
   computed: {
@@ -40,13 +46,13 @@ export default {
       const diff = now - start
       const oneDay = 1000 * 60 * 60 * 24
       return Math.floor(diff / oneDay)
-    }
+    },
   },
   mounted() {
     this.enableIn = this.delay
     this.timer = setTimeout(this.tick, 1000)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.timer) {
       clearTimeout(this.timer)
     }
@@ -58,7 +64,7 @@ export default {
         this.enableIn -= 1
         this.timer = setTimeout(this.tick, 1000)
       }
-    }
-  }
+    },
+  },
 }
 </script>

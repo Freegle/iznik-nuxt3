@@ -17,7 +17,7 @@ export const useStdmsgStore = defineStore({
       this.stdmsgs[stdmsg.id] = stdmsg
     },
     byid(id) {
-      return this.stdmsgs.find(msg => {
+      return this.stdmsgs.find((msg) => {
         return msg.id === id
       })
     },
@@ -31,23 +31,23 @@ export const useStdmsgStore = defineStore({
 
       await this.modConfigStore.fetchConfig({
         id: params.configid,
-        configuring: true
+        configuring: true,
       })
     },
     async update(params) {
       await api(this.config).modconfigs.patchStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
-        configuring: true
+        configuring: true,
       })
     },
     async add(params) {
       const { id } = await api(this.config).modconfigs.addStdMsg(params)
       await this.modConfigStore.fetchConfig({
         id: params.configid,
-        configuring: true
+        configuring: true,
       })
       return id
-    }
-  }
+    },
+  },
 })

@@ -3,13 +3,30 @@
     <client-only>
       <ScrollToTop />
       <ModHelpRelated />
-      <ModGroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
+      <ModGroupSelect
+        v-model="groupid"
+        all
+        modonly
+        systemwide
+        :work="['relatedmembers']"
+        remember="membersrelated"
+      />
 
-      <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+      <div
+        v-for="(member, ix) in visibleMembers"
+        :key="'memberlist-' + member.id"
+        class="p-0 mt-2"
+      >
         <ModRelatedMember :member="member" />
       </div>
 
-      <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
+      <infinite-loading
+        direction="top"
+        force-use-infinite-wrapper="true"
+        :distance="distance"
+        :identifier="bump"
+        @infinite="loadMore"
+      >
         <template #no-results>
           <p class="p-2">There are no related members at the moment.</p>
         </template>
@@ -20,23 +37,23 @@
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>
       </infinite-loading>
-
     </client-only>
   </div>
 </template>
 <script>
+import { useMemberStore } from '../stores/member'
+import { setupModMembers } from '../../composables/useModMembers'
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
-import { useMemberStore } from '../stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
-import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
   async setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const { bump, collection, distance, groupid, loadMore } = setupModMembers(true)
+    const { bump, collection, distance, groupid, loadMore } =
+      setupModMembers(true)
     collection.value = 'Related'
     return {
       groupStore,
@@ -50,36 +67,29 @@ export default {
     }
   },
   data: function () {
-    return {
-    }
-  },
-  mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
-    // reset infiniteLoading on return to page
-    this.memberStore.clear()
+    return {}
   },
   computed: {
     members() {
-      if( !this.memberStore) return []
+      if (!this.memberStore) return []
       console.log('members related all list')
       return Object.values(this.memberStore.list)
     },
     visibleMembers() {
-      const ret = this.members.filter(member => {
+      const ret = this.members.filter((member) => {
         if (this.groupid <= 0) {
           // No group filter
           return true
         }
 
         let found = false
-        member.memberof.forEach(group => {
+        member.memberof.forEach((group) => {
           if (parseInt(group.id) === this.groupid) {
             found = true
           }
         })
 
-        member.relatedto.memberof.forEach(group => {
+        member.relatedto.memberof.forEach((group) => {
           if (parseInt(group.id) === this.groupid) {
             found = true
           }
@@ -89,12 +99,18 @@ export default {
       })
 
       return ret
-    }
+    },
+  },
+  mounted() {
+    const modGroupStore = useModGroupStore()
+    modGroupStore.getModGroups()
+    // reset infiniteLoading on return to page
+    this.memberStore.clear()
   },
   methods: {
     active(member) {
       return member.messagehistory
-    }
-  }
+    },
+  },
 }
 </script>

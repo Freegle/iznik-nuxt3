@@ -2,8 +2,13 @@
   <client-only>
     <div class="maptools d-flex mb-1 justify-content-between">
       <div class="d-flex">
-        <v-icon icon="sync" :class="busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'
-          " scale="2" />
+        <v-icon
+          icon="sync"
+          :class="
+            busy ? 'text-success fa-spin ml-4 mt-1' : 'text-faded ml-4 mt-1'
+          "
+          scale="2"
+        />
       </div>
       <b-form-checkbox v-if="groups || groupid" v-model="cga" class="ml-2">
         <strong style="color: darkgreen">Show CGAs</strong>
@@ -11,17 +16,29 @@
       <b-form-checkbox v-if="groups || groupid" v-model="dpa" class="ml-2">
         <strong style="color: darkblue">Show DPAs</strong>
       </b-form-checkbox>
-      <b-form-checkbox v-if="groupid" v-model="labels" class="ml-2 font-weight-bold">
+      <b-form-checkbox
+        v-if="groupid"
+        v-model="labels"
+        class="ml-2 font-weight-bold"
+      >
         Labels
       </b-form-checkbox>
-      <b-form-checkbox v-model="shade" class="ml-2 font-weight-bold" @click="dobump">
+      <b-form-checkbox
+        v-model="shade"
+        class="ml-2 font-weight-bold"
+        @click="dobump"
+      >
         Shade areas
       </b-form-checkbox>
       <b-form-checkbox v-model="showDodgy" class="ml-2 font-weight-bold">
         Areas to Review
       </b-form-checkbox>
     </div>
-    <b-modal id="mappingChanges" ref="mappingChanges" v-model="showMappingChanges">
+    <b-modal
+      id="mappingChanges"
+      ref="mappingChanges"
+      v-model="showMappingChanges"
+    >
       <p>
         If you have the "Areas to Review" checkbox ticked, you'll see the red
         circles for postcodes which might need better mapping.
@@ -63,38 +80,103 @@
     <b-row class="m-0">
       <b-col ref="mapcont" cols="12" md="9" class="p-0">
         <div :style="'width: 100%; height: ' + mapHeight + 'px'">
-          <l-map ref="mapObject" :zoom="zoom" :min-zoom="5" :max-zoom="17" :options="{ dragging: dragging, touchZoom: true }"
-            :center="[53.945, -2.5209]" :use-global-leaflet="true" @update:bounds="boundsChanged" @update:zoom="boundsChanged" @ready="ready"
-            @moveend="idle"> <!-- centre on Dunsop Bridge so caretaker map loads -->
+          <l-map
+            ref="mapObject"
+            :zoom="zoom"
+            :min-zoom="5"
+            :max-zoom="17"
+            :options="{ dragging: dragging, touchZoom: true }"
+            :center="[53.945, -2.5209]"
+            :use-global-leaflet="true"
+            @update:bounds="boundsChanged"
+            @update:zoom="boundsChanged"
+            @ready="ready"
+            @moveend="idle"
+          >
+            <!-- centre on Dunsop Bridge so caretaker map loads -->
             <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <div v-if="cga" id="cgahere">
-              <l-geo-json ref="cgasjson" v-for="(c, i) in CGAs" :key="'cga-' + i" :geojson="c.json" :options="cgaOptions" :z-index-offset="2"
-                @click="selectCGA($event, c.group, i)" />
+              <l-geo-json
+                v-for="(c, i) in CGAs"
+                ref="cgasjson"
+                :key="'cga-' + i"
+                :geojson="c.json"
+                :options="cgaOptions"
+                :z-index-offset="2"
+                @click="selectCGA($event, c.group, i)"
+              />
             </div>
             <div v-if="dpa" id="dpahere">
-              <l-geo-json ref="dpasjson" v-for="(d, i) in DPAs" :key="'dpa-' + i" :geojson="d.json" :options="dpaOptions" :z-index-offset="1"
-                @click="selectDPA($event, d.group, i)" />
+              <l-geo-json
+                v-for="(d, i) in DPAs"
+                ref="dpasjson"
+                :key="'dpa-' + i"
+                :geojson="d.json"
+                :options="dpaOptions"
+                :z-index-offset="1"
+                @click="selectDPA($event, d.group, i)"
+              />
             </div>
             <div v-if="overlaps && showDodgy && !groupid" id="overlaphere">
-              <l-geo-json v-for="(d, i) in overlappingCGAs" :key="'cgaoverlap-' + i" :geojson="d" :options="cgaOverlapOptions" :z-index-offset="0" />
+              <l-geo-json
+                v-for="(d, i) in overlappingCGAs"
+                :key="'cgaoverlap-' + i"
+                :geojson="d"
+                :options="cgaOverlapOptions"
+                :z-index-offset="0"
+              />
             </div>
             <div v-if="groupid && zoom >= 12" id="maplocationshere">
-              <ModGroupMapLocation v-for="l in locationsInBounds" :key="'location-' + l.id" :ref="'location-' + l.id" :location="l"
-                :selected="selectedObj === l" :selectable="!selectedObj" :shade="shade" :labels="labels" @click="selectLocation(l)"
-                @edit="selectedWKT = $event" />
+              <ModGroupMapLocation
+                v-for="l in locationsInBounds"
+                :key="'location-' + l.id"
+                :ref="'location-' + l.id"
+                :location="l"
+                :selected="selectedObj === l"
+                :selectable="!selectedObj"
+                :shade="shade"
+                :labels="labels"
+                @click="selectLocation(l)"
+                @edit="selectedWKT = $event"
+              />
             </div>
             <div v-if="showDodgy && groupid" id="dodgyhere">
-              <ClusterMarker v-if="mapObject && zoom < 10" :markers="dodgyInBounds" :map="mapObject" />
+              <ClusterMarker
+                v-if="mapObject && zoom < 10"
+                :markers="dodgyInBounds"
+                :map="mapObject"
+              />
               <l-feature-group v-else>
-                <l-circle-marker v-if="highlighted" :key="'highlighted-' + highlighted.id" :lat-lng="[highlighted.lat, highlighted.lng]"
-                  :interactive="false" :radius="5" color="blue" />
-                <l-circle-marker v-for="d in dodgyInBounds" :key="d.id" :lat-lng="d" :radius="5" color="red" @click="selected = d" />
+                <l-circle-marker
+                  v-if="highlighted"
+                  :key="'highlighted-' + highlighted.id"
+                  :lat-lng="[highlighted.lat, highlighted.lng]"
+                  :interactive="false"
+                  :radius="5"
+                  color="blue"
+                />
+                <l-circle-marker
+                  v-for="d in dodgyInBounds"
+                  :key="d.id"
+                  :lat-lng="d"
+                  :radius="5"
+                  color="red"
+                  @click="selected = d"
+                />
               </l-feature-group>
             </div>
 
             <div v-if="groups && zoom > 7" id="groupcentershere">
-              <l-circle-marker v-for="g in allgroups" :key="'groupcentre-' + g.id" :lat-lng="[g.lat, g.lng]" :radius="10" color="darkgreen"
-                :fill="true" fill-color="darkgreen" :fill-opacity="1" />
+              <l-circle-marker
+                v-for="g in allgroups"
+                :key="'groupcentre-' + g.id"
+                :lat-lng="[g.lat, g.lng]"
+                :radius="10"
+                color="darkgreen"
+                :fill="true"
+                fill-color="darkgreen"
+                :fill-opacity="1"
+              />
             </div>
           </l-map>
         </div>
@@ -102,11 +184,13 @@
       <b-col cols="12" md="3">
         <b-input-group>
           <slot name="prepend">
-            <b-input v-model="searchplace" type="string" placeholder="Place to search for" />
+            <b-input
+              v-model="searchplace"
+              type="string"
+              placeholder="Place to search for"
+            />
           </slot>
-          <b-button variant="white" @click="search">
-            Search
-          </b-button>
+          <b-button variant="white" @click="search"> Search </b-button>
         </b-input-group>
         <b-card v-if="selectedName || selectedWKT" class="mb-2" no-body>
           <b-card-header class="bg-info"> Area Details </b-card-header>
@@ -115,22 +199,53 @@
               Zoom/pan locked while area selected. Use Cancel to free.
             </p>
             <div v-if="groupid">
-              <b-form-input v-model="selectedName" placeholder="Enter area name" size="lg" class="mb-1" />
-              <b-form-textarea v-if="selectedWKT" v-model="selectedWKT" rows="4" />
+              <b-form-input
+                v-model="selectedName"
+                placeholder="Enter area name"
+                size="lg"
+                class="mb-1"
+              />
+              <b-form-textarea
+                v-if="selectedWKT"
+                v-model="selectedWKT"
+                rows="4"
+              />
             </div>
             <div v-else>
               <h5>{{ selectedName }}</h5>
-              <b-form-textarea v-if="selectedWKT" v-model="selectedWKT" rows="4" readonly />
+              <b-form-textarea
+                v-if="selectedWKT"
+                v-model="selectedWKT"
+                rows="4"
+                readonly
+              />
             </div>
             <p v-if="intersects" class="text-danger">
               Crosses over itself - not valid
             </p>
           </b-card-body>
           <b-card-footer class="d-flex justify-content-between flex-wrap">
-            <SpinButton variant="primary" icon-name="save" label="Save" spinclass="text-white" :disabled="!selectedName || !selectedWKT || intersects"
-              @handle="saveArea" />
-            <SpinButton variant="white" icon-name="times" label="Cancel" @handle="clearSelection" />
-            <SpinButton v-if="selectedId" variant="danger" icon-name="trash-alt" label="Delete" @handle="deleteArea" />
+            <SpinButton
+              variant="primary"
+              icon-name="save"
+              label="Save"
+              spinclass="text-white"
+              :disabled="!selectedName || !selectedWKT || intersects"
+              @handle="saveArea"
+            />
+            <SpinButton
+              variant="white"
+              icon-name="times"
+              label="Cancel"
+              @handle="clearSelection"
+            />
+            <SpinButton
+              v-if="selectedId"
+              variant="danger"
+              icon-name="trash-alt"
+              label="Delete"
+              @handle="deleteArea"
+            />
           </b-card-footer>
         </b-card>
         <NoticeMessage v-if="zoom < 12" variant="danger" show class="mb-2">
@@ -138,7 +253,11 @@
         </NoticeMessage>
         <ModPostcodeTester />
         <ModConvertKML />
-        <b-card v-if="dodgyInBounds.length" no-body style="max-height: 600px; overflow-y: scroll">
+        <b-card
+          v-if="dodgyInBounds.length"
+          no-body
+          style="max-height: 600px; overflow-y: scroll"
+        >
           <b-card-header class="bg-warning d-flex justify-content-between">
             Mapping Changes
             <b-button variant="white" @click="showMappingChanges = true">
@@ -147,7 +266,13 @@
           </b-card-header>
           <b-card-body>
             <div v-if="dodgyInBounds.length < 200">
-              <ModChangedMapping v-for="d in dodgyInBounds" :key="d.id" :changed="d" :highlighted="highlighted" @click="highlightPostcode(d)" />
+              <ModChangedMapping
+                v-for="d in dodgyInBounds"
+                :key="d.id"
+                :changed="d"
+                :highlighted="highlighted"
+                @click="highlightPostcode(d)"
+              />
             </div>
             <p v-else>Too many changes to show; zoom in.</p>
           </b-card-body>
@@ -270,12 +395,8 @@ watch(shade, async (newVal, oldVal) => {
 const supportOrAdmin = computed(() => {
   const authStore = useAuthStore()
   const me = authStore.user
-  return (
-    me &&
-    (me.systemrole === 'Support' || me.systemrole === 'Admin')
-  )
+  return me && (me.systemrole === 'Support' || me.systemrole === 'Admin')
 })
-
 
 const mapHeight = computed(() => {
   let height = 0
@@ -355,7 +476,7 @@ const overlappingCGAs = computed(() => {
         const p2 = turfpolygon(CGAs.value[j].json.coordinates)
         const intersection = turfintersect(p1, p2)
         if (intersection) {
-          //console.log('intersection',intersection)
+          // console.log('intersection',intersection)
           /* TODO FIX if (turfarea(intersection) > 500) {
             console.log(
               'Intersection',
@@ -368,7 +489,7 @@ const overlappingCGAs = computed(() => {
 
             // Don't return too many for the same polygon.
             break
-          }*/
+          } */
           ret.push(intersection)
         }
       } catch (e) {
@@ -393,7 +514,7 @@ const locationsInBounds = computed(() => {
       ) {
         const wkt = new Wkt.Wkt()
         try {
-          //console.log('Wkt.Wkt C') // , location.polygon
+          // console.log('Wkt.Wkt C') // , location.polygon
           wkt.read(location.polygon)
           location.json = wkt.toJson()
           ret.push(location)
@@ -504,7 +625,7 @@ function selectCGA(e, g, i) {
       console.log('CGA pm:edit', json)
       //emit('edit', json)
     })
-  }*/
+  } */
 }
 
 function selectDPA(e, g, i) {
@@ -538,7 +659,7 @@ function selectDPA(e, g, i) {
 
 function selectLocation(l) {
   // Don't allow multiple selections.
-  //console.log('Select location', l, JSON.stringify(selectedWKT.value))
+  // console.log('Select location', l, JSON.stringify(selectedWKT.value))
   if (!selectedWKT.value) {
     selectedId.value = l.id
     selectedObj.value = l
@@ -556,7 +677,7 @@ function selectLocation(l) {
 }
 
 function ready() {
-  //console.log('Map ready', mapObject.value)
+  // console.log('Map ready', mapObject.value)
   mapObject.value.leafletObject.pm.setLang('en_gb')
   mapObject.value.leafletObject.pm.setGlobalOptions({
     allowSelfIntersection: false,
@@ -586,10 +707,10 @@ function ready() {
   })
 
   mapObject.value.leafletObject.on('pm:drawend', (e) => {
-    //console.log('MGM pm:drawend')
+    // console.log('MGM pm:drawend')
     // We've created a new polygon.  Extract the WKT and show it in the box.
     const drawLayers = mapObject.value.leafletObject.pm.getGeomanDrawLayers()
-    //console.log('MGM pm:drawend', drawLayers.length)
+    // console.log('MGM pm:drawend', drawLayers.length)
 
     if (drawLayers.length) {
       const wkt = new Wkt.Wkt()
@@ -597,10 +718,10 @@ function ready() {
       selectedWKT.value = wkt.write()
       selectedObj.value = null
       bump.value++
-      //console.log('MGM pm:drawend Z', selectedWKT.value)
+      // console.log('MGM pm:drawend Z', selectedWKT.value)
     }
   })
-  
+
   if (props.groups) {
     zoom.value = 5
   } else {
@@ -611,21 +732,21 @@ function ready() {
 }
 
 function idle() {
-  //console.log('Map idle', zoom.value, props.groupid)
+  // console.log('Map idle', zoom.value, props.groupid)
   if (props.groupid) {
     const thegroup = group.value
 
     if (thegroup) {
-      //console.log('Map idle thegroup', thegroup)
+      // console.log('Map idle thegroup', thegroup)
       let bounds
 
       if (!initialGroupZoomed.value) {
         // Zoom the map to fit the DPA/CGA of the group.  We need to do this before fetching the locations so that
         // we don't fetch them for the whole country.
         initialGroupZoomed.value = true
-        //console.log('===idle thegroup',thegroup.id)
+        // console.log('===idle thegroup',thegroup.id)
         const area = thegroup.poly || thegroup.polyofficial
-        //console.log('Zoom to area', area)
+        // console.log('Zoom to area', area)
         if (area) {
           const wkt = new Wkt.Wkt()
           wkt.read(area)
@@ -635,9 +756,10 @@ function idle() {
             [bounds.getSouthWest().lat, bounds.getSouthWest().lng],
             [bounds.getNorthEast().lat, bounds.getNorthEast().lng],
           ]
-          //console.log('===idle fitBounds A',abounds)
-          setTimeout(() => { // Delay so initial move works
-            //console.log('===idle fitBounds B',abounds)
+          // console.log('===idle fitBounds A',abounds)
+          setTimeout(() => {
+            // Delay so initial move works
+            // console.log('===idle fitBounds B',abounds)
             mapObject.value.leafletObject.fitBounds(abounds)
           }, 1000)
         }
@@ -731,14 +853,14 @@ async function fetchLocations(data) {
   const thisFetch = JSON.stringify(data)
 
   if (lastLocationFetch.value === thisFetch) {
-    //console.log('Already fetching, skip')
+    // console.log('Already fetching, skip')
   } else {
-    //console.log('===Fetch', thisFetch, lastLocationFetch.value)
+    // console.log('===Fetch', thisFetch, lastLocationFetch.value)
     lastLocationFetch.value = thisFetch
 
     if (zoom.value >= 12) {
       const ret = await locationStore.fetch(data)
-      //console.log('Fetch returned', ret)
+      // console.log('Fetch returned', ret)
 
       if (ret?.locations) {
         locations.value = ret.locations
@@ -765,10 +887,10 @@ const customParams = {
 }
 
 function composeParams(val) {
-  const encode = val => (encodeParams ? encodeURIComponent(val) : val)
+  const encode = (val) => (encodeParams ? encodeURIComponent(val) : val)
   let params = `q=${encode(val)}`
   if (customParams) {
-    Object.keys(customParams).forEach(key => {
+    Object.keys(customParams).forEach((key) => {
       params += `&${key}=${encode(customParams[key])}`
     })
   }
@@ -806,15 +928,22 @@ async function search() {
   const params = composeParams(searchplace.value)
   const ajax = new XMLHttpRequest()
   ajax.open('GET', `${gc}?${params}`, true)
-  ajax.addEventListener('loadend', e => {
+  ajax.addEventListener('loadend', (e) => {
     const { status, responseText } = e.target
 
     if (status === 200) {
       const json = JSON.parse(responseText)
-      if( Array.isArray(json.features) && (json.features.length>0)){
+      if (Array.isArray(json.features) && json.features.length > 0) {
         const f0 = json.features[0]
-        if( f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length==2){
-          const latlng = new window.L.LatLng(f0.geometry.coordinates[1], f0.geometry.coordinates[0])
+        if (
+          f0.geometry &&
+          f0.geometry.coordinates &&
+          f0.geometry.coordinates.length == 2
+        ) {
+          const latlng = new window.L.LatLng(
+            f0.geometry.coordinates[1],
+            f0.geometry.coordinates[0]
+          )
           mapObject.value.leafletObject.setView(latlng, 14)
         }
       }

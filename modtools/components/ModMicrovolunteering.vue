@@ -1,8 +1,8 @@
 <template>
   <div>
-    {{id}}
+    {{ id }}
     <span v-if="!item">NO ITEM</span>
-    <b-card  v-if="item" no-body>
+    <b-card v-if="item" no-body>
       <b-card-body>
         <div class="layout">
           <div class="date small">
@@ -13,9 +13,12 @@
               <span v-if="item.result === 'Approve'">
                 no need to rotate photo
               </span>
-              <span v-if="item.result === 'Reject'" class="text-danger font-weight-bold">
+              <span
+                v-if="item.result === 'Reject'"
+                class="text-danger font-weight-bold"
+              >
                 rotated photo
-                <br><span class="text-muted">(current photo shown)</span>
+                <br /><span class="text-muted">(current photo shown)</span>
               </span>
             </div>
             <div v-else-if="item.message">
@@ -23,30 +26,43 @@
                 thinks message looks ok
               </span>
               <span v-if="item.result === 'Reject'">
-                <span v-if="item.msgcategory === 'CouldBeBetter'" class="text-warning font-weight-bold">
+                <span
+                  v-if="item.msgcategory === 'CouldBeBetter'"
+                  class="text-warning font-weight-bold"
+                >
                   thinks this message could be better
                 </span>
-                <span v-else-if="item.msgcategory === 'ShouldntBeHere'" class="text-danger font-weight-bold">
+                <span
+                  v-else-if="item.msgcategory === 'ShouldntBeHere'"
+                  class="text-danger font-weight-bold"
+                >
                   thinks this message shouldn't be on Freegle
                 </span>
               </span>
             </div>
-            <div v-else-if="item.item1">
-              marked as related
-            </div>
+            <div v-else-if="item.item1">marked as related</div>
           </div>
           <div class="object">
-            <nuxt-link v-if="item.rotatedimage" :to="'/message/' + item.rotatedimage.msgid">
+            <nuxt-link
+              v-if="item.rotatedimage"
+              :to="'/message/' + item.rotatedimage.msgid"
+            >
               <b-img thumbnail :src="item.rotatedimage.thumb" class="thumb" />
             </nuxt-link>
-            <nuxt-link v-else-if="item.message" :to="'/message/' + item.message.id">
-              <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ item.message.id }} {{ item.message.subject }}
+            <nuxt-link
+              v-else-if="item.message"
+              :to="'/message/' + item.message.id"
+            >
+              <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+                item.message.id
+              }}
+              {{ item.message.subject }}
             </nuxt-link>
             <div v-else-if="item.item1">
-              <em>{{ item.item1.name }}</em> <span class="text-muted">and</span> <em>{{ item.item2.name }}</em>
+              <em>{{ item.item1.name }}</em>
+              <span class="text-muted">and</span> <em>{{ item.item2.name }}</em>
             </div>
-            <div v-else>
-            </div>
+            <div v-else></div>
           </div>
         </div>
       </b-card-body>
@@ -59,8 +75,8 @@ export default {
   props: {
     id: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     const microVolunteeringStore = useMicroVolunteeringStore()
@@ -76,7 +92,7 @@ export default {
       let ret = null
 
       if (this.item.user && this.item.user.emails) {
-        this.item.user.emails.forEach(e => {
+        this.item.user.emails.forEach((e) => {
           if (!e.ourdomain && (!ret || e.preferred)) {
             ret = e.email
           }
@@ -84,8 +100,8 @@ export default {
       }
 
       return ret
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

@@ -5,7 +5,7 @@ export const usePublicityStore = defineStore({
   id: 'publicity',
   state: () => ({
     list: [],
-    popularposts: []
+    popularposts: [],
   }),
   actions: {
     init(config) {
@@ -16,17 +16,15 @@ export const usePublicityStore = defineStore({
       this.context = null
     },
     async fetch(params) {
-      const {
-        socialaction,
-        socialactions,
-        popularposts
-      } = await api(this.config).socialactions.fetch(params)
+      const { socialaction, socialactions, popularposts } = await api(
+        this.config
+      ).socialactions.fetch(params)
       if (params.id) {
         this.socialaction = socialaction
       } else {
         if (socialactions) {
           for (const item of socialactions) {
-            item.iframe = item.iframe.replace('height="500"','height="550"') // Tell Ed to fix at server
+            item.iframe = item.iframe.replace('height="500"', 'height="550"') // Tell Ed to fix at server
             this.list[item.id] = item
           }
         }
@@ -50,11 +48,17 @@ export const usePublicityStore = defineStore({
     },
 
     async sharePopularPost(params) {
-      await api(this.config).socialactions.sharePopularPost(params.groupid, params.msgid)
+      await api(this.config).socialactions.sharePopularPost(
+        params.groupid,
+        params.msgid
+      )
     },
 
     async hidePopularPost(params) {
-      await api(this.config).socialactions.hidePopularPost(params.groupid, params.msgid)
-    }
-  }
+      await api(this.config).socialactions.hidePopularPost(
+        params.groupid,
+        params.msgid
+      )
+    },
+  },
 })

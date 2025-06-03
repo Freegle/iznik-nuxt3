@@ -1,20 +1,38 @@
 <template>
-  <span title="Platform Status - click for more info" class="clickme" @click="clicked">
+  <span
+    title="Platform Status - click for more info"
+    class="clickme"
+    @click="clicked"
+  >
     <span v-if="!tried" class="trying" />
     <span v-else-if="error" class="error" />
     <span v-else-if="warning && supportOrAdmin" class="warning" />
     <span v-else class="fine" />
-    <b-modal ref="modal" id="statusmmodal" no-stacking size="lg" :title="'Platform Status: ' + headline">
+    <b-modal
+      id="statusmmodal"
+      ref="modal"
+      no-stacking
+      size="lg"
+      :title="'Platform Status: ' + headline"
+    >
       <template #default>
-        <NoticeMessage v-if="(warning || error) && supportOrAdmin" variant="warning" class="mb-2">
-          There is a problem. If this just mentions <strong>security patches or reboots</strong>, you can ignore it,
-          but if it's something else please alert geeks@ilovefreegle.org if this persists for more than an hour.
+        <NoticeMessage
+          v-if="(warning || error) && supportOrAdmin"
+          variant="warning"
+          class="mb-2"
+        >
+          There is a problem. If this just mentions
+          <strong>security patches or reboots</strong>, you can ignore it, but
+          if it's something else please alert geeks@ilovefreegle.org if this
+          persists for more than an hour.
         </NoticeMessage>
         <NoticeMessage v-else-if="error" variant="warning" class="mb-2">
-          There's a problem, and parts of the system may not be working. The Geeks will be on the case.
+          There's a problem, and parts of the system may not be working. The
+          Geeks will be on the case.
         </NoticeMessage>
         <NoticeMessage v-else-if="warning" variant="warning" class="mb-2">
-          There's a problem, but the system should still be working. The Geeks will be on the case.
+          There's a problem, but the system should still be working. The Geeks
+          will be on the case.
         </NoticeMessage>
         <NoticeMessage v-else variant="primary">
           Everything seems fine.
@@ -33,9 +51,7 @@
         </div>
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="white" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </span>
@@ -53,7 +69,7 @@ export default {
       overall: 'green',
       status: null,
       updated: null,
-      tried: false
+      tried: false,
     }
   },
   computed: {
@@ -80,13 +96,13 @@ export default {
       } else {
         return 'Fine'
       }
-    }
+    },
   },
   mounted() {
     this.checkStatus()
     this.hide()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.timer) {
       clearTimeout(this.timer)
     }
@@ -107,8 +123,8 @@ export default {
       this.modal.show()
       e.preventDefault()
       e.stopPropagation()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

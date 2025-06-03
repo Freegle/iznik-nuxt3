@@ -1,18 +1,14 @@
 <template>
   <div>
     <b-row>
-      <b-col cols="3" lg="2" class="font-weight-bold">
-        Date / Time
-      </b-col>
-      <b-col cols="9" lg="4" class="forcebreak font-weight-bold">
-        User
-      </b-col>
+      <b-col cols="3" lg="2" class="font-weight-bold"> Date / Time </b-col>
+      <b-col cols="9" lg="4" class="forcebreak font-weight-bold"> User </b-col>
       <b-col cols="12" lg="6" class="forcebreak font-weight-bold">
         Action
       </b-col>
     </b-row>
 
-    <hr class="d-block d-md-none">
+    <hr class="d-block d-md-none" />
 
     <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
 
@@ -29,33 +25,32 @@
 import { useLogsStore } from './stores/logs'
 
 export default {
-  setup() {
-    const logsStore = useLogsStore()
-    return { logsStore }
-  },
-  emits: ['busy', 'idle'],
-  props:{
+  props: {
     groupid: {
       type: Number,
       required: false,
       default: null,
     },
   },
+  emits: ['busy', 'idle'],
+  setup() {
+    const logsStore = useLogsStore()
+    return { logsStore }
+  },
   data: function () {
     return {
       distance: 1000,
       limit: 50,
       show: 0,
-      busy: false
+      busy: false,
     }
   },
 
   computed: {
     logs() {
       return this.logsStore.list
-    }
+    },
   },
-
 
   methods: {
     async loadMore($state) {
@@ -73,7 +68,7 @@ export default {
             limit: this.limit,
             groupid: this.groupid,
             logtype: params.type,
-            search: params.search
+            search: params.search,
           })
 
           const logs = this.logsStore.list
@@ -92,7 +87,7 @@ export default {
 
       this.busy = false
       this.$emit('idle')
-    }
-  }
+    },
+  },
 }
 </script>

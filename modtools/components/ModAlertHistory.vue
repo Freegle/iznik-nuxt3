@@ -21,27 +21,34 @@
       <b-button variant="white" class="mr-1" @click="stats">
         Show Stats
       </b-button>
-      <b-button variant="white" @click="details">
-        Show Details
-      </b-button>
+      <b-button variant="white" @click="details"> Show Details </b-button>
     </b-col>
-    <ModAlertHistoryDetailsModal v-if="showDetails" :id="alert.id" ref="detailsModal" @hidden="showDetails = false" />
-    <ModAlertHistoryStatsModal v-if="showStats" :id="alert.id" ref="statsModal" @hidden="showStats = false" />
+    <ModAlertHistoryDetailsModal
+      v-if="showDetails"
+      :id="alert.id"
+      ref="detailsModal"
+      @hidden="showDetails = false"
+    />
+    <ModAlertHistoryStatsModal
+      v-if="showStats"
+      :id="alert.id"
+      ref="statsModal"
+      @hidden="showStats = false"
+    />
   </b-row>
 </template>
 <script>
-
 export default {
   props: {
     alert: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data: function () {
     return {
       showDetails: false,
-      showStats: false
+      showStats: false,
     }
   },
   methods: {
@@ -52,7 +59,7 @@ export default {
     stats() {
       this.showStats = true
       this.$refs.statsModal?.show()
-    }
-  }
+    },
+  },
 }
 </script>

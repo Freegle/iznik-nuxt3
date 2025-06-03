@@ -25,7 +25,8 @@ export default {
       return this.hasPermission('GiftAid')
     },
     // Needed for some modtoolstasks but /mixins/me.js/myGroups() OK for most mod tasks as it is a copy of modgroup.list
-    myModGroups() { // But do we need to do other stuff in myGroups() eg sorting?
+    myModGroups() {
+      // But do we need to do other stuff in myGroups() eg sorting?
       const modGroupStore = useModGroupStore()
       return Object.values(modGroupStore.list)
     },
@@ -33,10 +34,10 @@ export default {
   methods: {
     hasPermission(perm) {
       const perms = this.me ? this.me.permissions : null
-      return perms && perms.indexOf(perm) !== -1
+      return perms && perms.includes(perm)
     },
     myModGroup(groupid) {
-      //console.log("modme.js myModGroup",groupid)
+      // console.log("modme.js myModGroup",groupid)
       const modGroupStore = useModGroupStore()
       return modGroupStore.get(groupid)
     },
@@ -70,8 +71,12 @@ export default {
 
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
-      if (force || (bodyoverflow !== 'hidden')) {
-        console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
+      if (force || bodyoverflow !== 'hidden') {
+        console.log(
+          'CHECKWORK modme',
+          force ?? '',
+          now.toISOString().substring(11)
+        )
         await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0

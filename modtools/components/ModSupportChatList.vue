@@ -1,11 +1,14 @@
 <template>
   <div>
-    <ModSupportChat v-for="chat in chatsShown" :key="'chathistory-' + chat.id" :chat="chat" :pov="pov" />
+    <ModSupportChat
+      v-for="chat in chatsShown"
+      :key="'chathistory-' + chat.id"
+      :chat="chat"
+      :pov="pov"
+    />
     <infinite-loading :distance="10" @infinite="loadMoreChats">
       <template #no-results>
-        <p class="text-left">
-          No chats.
-        </p>
+        <p class="text-left">No chats.</p>
       </template>
     </infinite-loading>
   </div>
@@ -15,23 +18,23 @@ export default {
   props: {
     chats: {
       type: Array,
-      required: true
+      required: true,
     },
     pov: {
       type: Number,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
-  data: function() {
+  data: function () {
     return {
-      showChats: 0
+      showChats: 0,
     }
   },
   computed: {
     chatsShown() {
       return this.chats ? this.chats.slice(0, this.showChats) : []
-    }
+    },
   },
   methods: {
     loadMoreChats($state) {
@@ -42,7 +45,7 @@ export default {
       } else {
         $state.complete()
       }
-    }
-  }
+    },
+  },
 }
 </script>

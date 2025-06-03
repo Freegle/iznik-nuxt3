@@ -18,12 +18,12 @@ export default {
   props: {
     groupid: {
       type: Number,
-      required: true
+      required: true,
     },
     facebook: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     const groupStore = useGroupStore()
@@ -33,9 +33,9 @@ export default {
     async unlink() {
       await this.groupStore.removeFacebook({
         uid: this.facebook.uid,
-        groupid: this.groupid
+        groupid: this.groupid,
       })
-    }
-  }
+    },
+  },
 }
 </script>

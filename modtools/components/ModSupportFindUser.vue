@@ -1,8 +1,16 @@
 <template>
   <div>
     <b-input-group class="mb-2">
-      <b-form-input v-model="searchuser" placeholder="Email, numerical id, or ~- encoded id" class="max" :disabled="searching" autocapitalize="none"
-        autocomplete="off" @keyup="searched = false" @keyup.enter.exact="usersearch" />
+      <b-form-input
+        v-model="searchuser"
+        placeholder="Email, numerical id, or ~- encoded id"
+        class="max"
+        :disabled="searching"
+        autocapitalize="none"
+        autocomplete="off"
+        @keyup="searched = false"
+        @keyup.enter.exact="usersearch"
+      />
       <slot name="append">
         <b-button variant="primary" @click="usersearch">
           <v-icon v-if="searching" icon="sync" class="fa-spin" />
@@ -11,12 +19,15 @@
       </slot>
     </b-input-group>
     <div v-if="!searching && searchuser && searched">
-      <ModSupportUser v-for="user in visible" :id="user.id" :key="user.id" :expand="expand" />
+      <ModSupportUser
+        v-for="user in visible"
+        :id="user.id"
+        :key="user.id"
+        :expand="expand"
+      />
       <infinite-loading :distance="200" @infinite="loadMoreUsers">
         <template #no-results>
-          <p class="text-left">
-            No users found.
-          </p>
+          <p class="text-left">No users found.</p>
         </template>
         <template #no-more />
         <template #spinner />
@@ -32,8 +43,8 @@ export default {
     id: {
       type: Number,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   data: function () {
     return {
@@ -41,7 +52,7 @@ export default {
       searchuser: null,
       show: 0,
       searched: false,
-      searchresults: []
+      searchresults: [],
     }
   },
   computed: {
@@ -52,7 +63,7 @@ export default {
       return this.searchresults && this.searchresults.length
         ? this.searchresults.slice(0, this.show)
         : []
-    }
+    },
   },
   mounted() {
     // Clear the user cache to make sure we don't display any results before we've searched.
@@ -77,7 +88,7 @@ export default {
 
         await userStore.fetchMT({
           search: val,
-          emailhistory: true
+          emailhistory: true,
         })
         this.searching = false
         this.searched = true
@@ -105,8 +116,8 @@ export default {
       } else {
         $state.loaded()
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

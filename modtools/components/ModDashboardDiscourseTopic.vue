@@ -9,8 +9,11 @@
       />
       <div>
         <div class="d-flex">
-          <strong>{{ topic.name }}</strong>&nbsp;
-          <div class="text-muted small d-flex flex-column justify-content-center">
+          <strong>{{ topic.name }}</strong
+          >&nbsp;
+          <div
+            class="text-muted small d-flex flex-column justify-content-center"
+          >
             &nbsp;posted
             {{ timeago(topic.updated_at) }}
             on&nbsp;
@@ -30,8 +33,8 @@ export default {
   props: {
     topic: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     avatar() {
@@ -63,7 +66,7 @@ export default {
         '/' +
         this.topic.post_number
       )
-    }
-  }
+    },
+  },
 }
 </script>

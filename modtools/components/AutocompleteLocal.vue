@@ -84,7 +84,7 @@ export default {
   mounted() {
     document.addEventListener('click', this.handleClickOutside)
   },
-  destroyed() {
+  unmounted() {
     document.removeEventListener('click', this.handleClickOutside)
   },
 
@@ -106,7 +106,7 @@ export default {
     filterResults() {
       // first uncapitalize all the things
       this.results = this.items.filter(item => {
-        return item.toLowerCase().indexOf(this.search.toLowerCase()) > -1
+        return item.toLowerCase().includes(this.search.toLowerCase())
       })
     },
     setResult(result) {

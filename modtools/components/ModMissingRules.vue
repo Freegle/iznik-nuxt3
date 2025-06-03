@@ -3,24 +3,32 @@
     <NoticeMessage v-if="newRulesMissing.length" variant="danger">
       <p>
         We are collecting information about which rules groups have - see
-        <ExternalLink href="https://discourse.ilovefreegle.org/t/collecting-information-about-group-rules/8070">
-          here
-        </ExternalLink>.
-        We'll use this to help freeglers get things right more often.
+        <ExternalLink
+          href="https://discourse.ilovefreegle.org/t/collecting-information-about-group-rules/8070"
+        >
+          here </ExternalLink
+        >. We'll use this to help freeglers get things right more often.
       </p>
       <p>
-        Based on your feedback, we've added some more rule questions. Please respond to each question
-        in Settings which is flagged with <span class="text-danger font-weight-bold">New</span>. You can copy the rules if you have
-        multiple groups and they are the same.
+        Based on your feedback, we've added some more rule questions. Please
+        respond to each question in Settings which is flagged with
+        <span class="text-danger font-weight-bold">New</span>. You can copy the
+        rules if you have multiple groups and they are the same.
       </p>
-      <a v-for="(inv) of newRulesMissing" :key="'fbinvalid-' + inv.id" :href="'/settings/' + inv.id">
-        Click to add rules for {{ inv.namedisplay }} (missing: {{ inv.missing }})<br>
+      <a
+        v-for="inv of newRulesMissing"
+        :key="'fbinvalid-' + inv.id"
+        :href="'/settings/' + inv.id"
+      >
+        Click to add rules for {{ inv.namedisplay }} (missing:
+        {{ inv.missing }})<br />
       </a>
     </NoticeMessage>
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
         <div>
-          <v-icon icon="exclamation-triangle" /> {{ invalid.length }} groups are missing group rules. Please add them.
+          <v-icon icon="exclamation-triangle" /> {{ invalid.length }} groups are
+          missing group rules. Please add them.
         </div>
         <b-button variant="white" class="mt-2" @click="expand">
           Click to view
@@ -29,14 +37,20 @@
       <div v-else>
         <p>
           We are collecting information about which rules groups have - see
-          <ExternalLink href="https://discourse.ilovefreegle.org/t/collecting-information-about-group-rules/8070">
-            here
-          </ExternalLink>.
-          We'll use this to help freeglers get things right more often.
-          Please go to the <em>Rules</em> section of the group settings and respond to each question. You can
-          copy the rules if you have multiple groups.
+          <ExternalLink
+            href="https://discourse.ilovefreegle.org/t/collecting-information-about-group-rules/8070"
+          >
+            here </ExternalLink
+          >. We'll use this to help freeglers get things right more often.
+          Please go to the <em>Rules</em> section of the group settings and
+          respond to each question. You can copy the rules if you have multiple
+          groups.
         </p>
-        <NuxtLink v-for="(inv) of invalid" :to="'/settings/' + inv.id + '?noguard=true'">Click to add rules for {{ inv.namedisplay }}<br></NuxtLink>
+        <NuxtLink
+          v-for="inv of invalid"
+          :to="'/settings/' + inv.id + '?noguard=true'"
+          >Click to add rules for {{ inv.namedisplay }}<br
+        /></NuxtLink>
       </div>
     </NoticeMessage>
   </div>
@@ -45,21 +59,21 @@
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
+  props: {
+    expanded: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup() {
     const modGroupStore = useModGroupStore()
     return {
       modGroupStore,
     }
   },
-  props: {
-    expanded: {
-      type: Boolean,
-      default: false
-    }
-  },
   data: function () {
     return {
-      summary: true
+      summary: true,
     }
   },
   computed: {
@@ -102,15 +116,15 @@ export default {
           // Check if the rules object is missing any values from ['A', 'B', 'C']
           const missingRules = group.rules
             ? [
-              'limitgroups',
-              'wastecarrier',
-              'carboot',
-              'chineselanterns',
-              'carseats',
-              'pondlife',
-              'copyright',
-              'porn'
-            ].filter(rule => !Object.keys(rules).includes(rule))
+                'limitgroups',
+                'wastecarrier',
+                'carboot',
+                'chineselanterns',
+                'carseats',
+                'pondlife',
+                'copyright',
+                'porn',
+              ].filter((rule) => !Object.keys(rules).includes(rule))
             : null
 
           if (missingRules.length > 0) {
@@ -126,7 +140,7 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   async mounted() {
     for (const g of this.myGroups) {
@@ -140,7 +154,7 @@ export default {
   methods: {
     expand() {
       this.summary = false
-    }
-  }
+    },
+  },
 }
 </script>

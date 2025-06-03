@@ -1,9 +1,19 @@
 <template>
   <div>
     <b-input-group>
-      <b-form-input v-model="term" placeholder="Email/name/id" @keyup.native.enter="search" />
+      <b-form-input
+        v-model="term"
+        placeholder="Email/name/id"
+        @keyup.native.enter="search"
+      />
       <slot name="append">
-        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" />
+        <SpinButton
+          variant="primary"
+          icon-name="search"
+          label="Search"
+          spinclass="text-white"
+          @handle="search"
+        />
       </slot>
     </b-input-group>
   </div>

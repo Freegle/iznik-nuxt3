@@ -1,7 +1,14 @@
 <template>
   <div>
-    <ModComment v-for="comment in comments" :key="'modcomments-' + user.id + '-' + comment.id" :comment="comment" :user="user"
-      :expand-comments="expandComments" @updated="updated" @editing="editing" />
+    <ModComment
+      v-for="comment in comments"
+      :key="'modcomments-' + user.id + '-' + comment.id"
+      :comment="comment"
+      :user="user"
+      :expand-comments="expandComments"
+      @updated="updated"
+      @editing="editing"
+    />
     <div v-if="sortedComments.length > 1" class="mb-1">
       <b-button v-if="!showAll" variant="white" @click="showAll = true">
         <v-icon icon="tag" /> Show {{ showMore }}
@@ -19,17 +26,17 @@ export default {
   props: {
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     expandComments: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   data: function () {
     return {
-      showAll: false
+      showAll: false,
     }
   },
   computed: {
@@ -73,7 +80,7 @@ export default {
     },
     editing() {
       this.$emit('editing')
-    }
-  }
+    },
+  },
 }
 </script>

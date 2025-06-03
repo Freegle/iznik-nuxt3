@@ -1,6 +1,12 @@
 <template>
   <div>
-    <b-modal ref="modal" id="modcakemodal" title="Would you like some cake?" size="lg" no-stacking>
+    <b-modal
+      id="modcakemodal"
+      ref="modal"
+      title="Would you like some cake?"
+      size="lg"
+      no-stacking
+    >
       <template #default>
         <ModCake />
         <p class="mt-2 text-muted">
@@ -9,9 +15,7 @@
         </p>
       </template>
       <template #footer>
-        <b-button variant="primary" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="primary" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </div>

@@ -4,7 +4,7 @@ import api from '~/api'
 export const useAlertStore = defineStore({
   id: 'alert',
   state: () => ({
-    list: {}
+    list: {},
   }),
   actions: {
     init(config) {
@@ -32,7 +32,7 @@ export const useAlertStore = defineStore({
     async record(params) {
       await api(this.config).alert.record({
         trackid: params.id,
-        action: 'clicked'
+        action: 'clicked',
       })
     },
   },

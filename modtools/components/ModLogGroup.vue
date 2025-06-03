@@ -1,7 +1,11 @@
 <template>
   <span v-if="loggroup">
     {{ tag }}
-    <a :href="'https://www.ilovefreegle.org/explore/' + loggroup.nameshort" target="_blank">{{ groupname }}</a>
+    <a
+      :href="'https://www.ilovefreegle.org/explore/' + loggroup.nameshort"
+      target="_blank"
+      >{{ groupname }}</a
+    >
   </span>
 </template>
 <script>
@@ -10,13 +14,13 @@ export default {
     log: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     tag: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   computed: {
     loggroup() {
@@ -52,7 +56,7 @@ export default {
     },
     groupname() {
       return this.loggroup.nameshort || this.loggroup.namedisplay
-    }
+    },
   },
   methods: {
     scanUserForGroup(user) {
@@ -60,7 +64,7 @@ export default {
 
       if (user) {
         if (user.applied) {
-          user.applied.forEach(g => {
+          user.applied.forEach((g) => {
             if (g.id === this.log.groupid) {
               ret = g
             }
@@ -68,7 +72,7 @@ export default {
         }
 
         if (!ret && user.memberof) {
-          user.memberof.forEach(g => {
+          user.memberof.forEach((g) => {
             if (g.id === this.log.groupid) {
               ret = g
             }
@@ -77,7 +81,7 @@ export default {
       }
 
       return ret
-    }
-  }
+    },
+  },
 }
 </script>

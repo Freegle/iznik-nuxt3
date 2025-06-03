@@ -3,15 +3,19 @@
     <ScrollToTop />
     <b-tabs content-class="mt-3" card>
       <b-tab active @click="clear('messages', true)">
-        <template v-slot:title>
-          <h2 class="ml-2 mr-2">
-            Messages
-          </h2>
+        <template #title>
+          <h2 class="ml-2 mr-2">Messages</h2>
         </template>
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
-            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
+            <b-form-input
+              v-model="term"
+              type="text"
+              placeholder="Search name/email/subject"
+              autocapitalize="none"
+              @keyup.native.enter="search"
+            />
             <b-button variant="primary" :disabled="busy" @click="search">
               <v-icon icon="search" />
             </b-button>
@@ -19,15 +23,19 @@
         </div>
       </b-tab>
       <b-tab to="/logs/members" @click="clear('memberships', true)">
-        <template v-slot:title>
-          <h2 class="ml-2 mr-2">
-            Members
-          </h2>
+        <template #title>
+          <h2 class="ml-2 mr-2">Members</h2>
         </template>
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
-            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
+            <b-form-input
+              v-model="term"
+              type="text"
+              placeholder="Search name/email/subject"
+              autocapitalize="none"
+              @keyup.native.enter="search"
+            />
             <b-button variant="primary" @click="search">
               <v-icon icon="search" />
             </b-button>
@@ -35,7 +43,15 @@
         </div>
       </b-tab>
     </b-tabs>
-    <ModLogs v-if="groupid" ref="logs" :key="'modlogs-' + bump" class="bg-white" :groupid="groupid" @busy="busy = true" @idle="busy = false" />
+    <ModLogs
+      v-if="groupid"
+      ref="logs"
+      :key="'modlogs-' + bump"
+      class="bg-white"
+      :groupid="groupid"
+      @busy="busy = true"
+      @idle="busy = false"
+    />
   </div>
 </template>
 <script>
@@ -53,13 +69,13 @@ export default {
       groupid: null,
       type: 'messages',
       term: null,
-      busy: false
+      busy: false,
     }
   },
   watch: {
     groupid() {
       this.clear(this.type)
-    }
+    },
   },
   mounted() {
     const modGroupStore = useModGroupStore()
@@ -76,16 +92,16 @@ export default {
       }
 
       this.logsStore.setParams({
-        type: type,
-        search: this.term ? this.term.trim() : null
+        type,
+        search: this.term ? this.term.trim() : null,
       })
 
       this.logsStore.clear()
     },
     search() {
       this.clear(this.type)
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

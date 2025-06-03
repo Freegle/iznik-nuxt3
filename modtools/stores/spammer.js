@@ -12,7 +12,7 @@ export const useSpammerStore = defineStore({
     context: null,
 
     // For spotting when we clear under the feet of an outstanding fetch
-    instance: 1
+    instance: 1,
   }),
   actions: {
     init(config) {
@@ -39,7 +39,9 @@ export const useSpammerStore = defineStore({
         params['context[id]'] = this.context.id
       }
 
-      const { spammers, context } = await api(this.config).spammers.fetch(params)
+      const { spammers, context } = await api(this.config).spammers.fetch(
+        params
+      )
       if (this.instance === instance) {
         this.addAll(spammers)
         this.context = context
@@ -47,10 +49,10 @@ export const useSpammerStore = defineStore({
     },
 
     addAll(items) {
-      items.forEach(item => {
+      items.forEach((item) => {
         item.user.userid = item.user.id
 
-        const existing = this.list.findIndex(obj => {
+        const existing = this.list.findIndex((obj) => {
           return parseInt(obj.id) === parseInt(item.id)
         })
 
@@ -62,7 +64,7 @@ export const useSpammerStore = defineStore({
       })
     },
     removeFromList(itemid) {
-      this.list = this.list.filter(obj => {
+      this.list = this.list.filter((obj) => {
         return parseInt(itemid) !== parseInt(obj.id)
       })
     },
@@ -71,19 +73,19 @@ export const useSpammerStore = defineStore({
       await api(this.config).spammers.add({
         userid: params.userid,
         collection: 'PendingAdd',
-        reason: params.reason
+        reason: params.reason,
       })
 
-      await fetchMe(true, ['work','group'])
+      await fetchMe(true, ['work', 'group'])
     },
     async confirm(params) {
       await api(this.config).spammers.patch({
         id: params.id,
         userid: params.userid,
-        collection: 'Spammer'
+        collection: 'Spammer',
       })
 
-      await fetchMe(true, ['work','group'])
+      await fetchMe(true, ['work', 'group'])
 
       this.removeFromList(params.id)
     },
@@ -92,20 +94,20 @@ export const useSpammerStore = defineStore({
       await api(this.config).spammers.add({
         id: params.id,
         userid: params.userid,
-        collection: 'PendingRemove'
+        collection: 'PendingRemove',
       })
 
       this.removeFromList(params.id)
 
-      await fetchMe(true, ['work','group'])
+      await fetchMe(true, ['work', 'group'])
     },
     async remove(params) {
       await api(this.config).spammers.del({
         id: params.id,
-        userid: params.userid
+        userid: params.userid,
       })
 
-      await fetchMe(true, ['work','group'])
+      await fetchMe(true, ['work', 'group'])
 
       this.removeFromList(params.id)
     },
@@ -114,10 +116,10 @@ export const useSpammerStore = defineStore({
         id: params.id,
         userid: params.userid,
         reason: params.reason,
-        collection: 'Whitelisted'
+        collection: 'Whitelisted',
       })
 
-      await fetchMe(true, ['work','group'])
+      await fetchMe(true, ['work', 'group'])
 
       this.removeFromList(params.id)
     },
@@ -128,13 +130,13 @@ export const useSpammerStore = defineStore({
         userid: params.userid,
         reason: params.reason,
         collection: 'PendingAdd',
-        heldby: params.myid
+        heldby: params.myid,
       })
 
       this.context = null
 
       this.fetch({
-        collection: 'PendingAdd'
+        collection: 'PendingAdd',
       })
     },
 
@@ -144,20 +146,19 @@ export const useSpammerStore = defineStore({
         id: params.id,
         userid: params.userid,
         reason: params.reason,
-        collection: 'PendingAdd'
+        collection: 'PendingAdd',
       })
 
       this.context = null
 
       this.fetch({
-        collection: 'PendingAdd'
+        collection: 'PendingAdd',
       })
     },
-
   },
   getters: {
     getList: (state) => (collection) => {
-      return state.list.filter(s => s.collection === collection)
+      return state.list.filter((s) => s.collection === collection)
     },
 
     getContext: (state) => () => {

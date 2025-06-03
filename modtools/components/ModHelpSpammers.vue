@@ -4,14 +4,15 @@
       Hide Help
     </b-button>
     <p>
-      Spammer reports are reviewed before a member appears on the list.  Once someone is on this list, they will
-      automatically be removed from communities unless you've disabled
-      that in Settings.  If you think someone is on this list wrongly, you can request that they be removed using
-      the button below.
+      Spammer reports are reviewed before a member appears on the list. Once
+      someone is on this list, they will automatically be removed from
+      communities unless you've disabled that in Settings. If you think someone
+      is on this list wrongly, you can request that they be removed using the
+      button below.
     </p>
     <p>
-      Safelisted people are those who have good reasons to join many groups, who we flag up so that you don't
-      accidentally think they're spammers.
+      Safelisted people are those who have good reasons to join many groups, who
+      we flag up so that you don't accidentally think they're spammers.
     </p>
     <p>
       <!-- eslint-disable-next-line-->
@@ -32,5 +33,4 @@ const id = ref('spammers')
 onMounted(() => {
   hide()
 })
-
 </script>

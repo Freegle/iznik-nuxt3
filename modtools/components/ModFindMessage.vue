@@ -1,9 +1,19 @@
 <template>
   <div>
     <b-input-group>
-      <b-form-input v-model="term" placeholder="Message id/subject" @keyup.native.enter="search" />
+      <b-form-input
+        v-model="term"
+        placeholder="Message id/subject"
+        @keyup.native.enter="search"
+      />
       <slot name="append">
-        <SpinButton variant="primary" icon-name="search" label="Search" spinclass="text-white" @handle="search" />
+        <SpinButton
+          variant="primary"
+          icon-name="search"
+          label="Search"
+          spinclass="text-white"
+          @handle="search"
+        />
       </slot>
     </b-input-group>
   </div>
@@ -14,13 +24,13 @@ const props = defineProps({
   messageTerm: {
     type: String,
     required: false,
-    default: null
+    default: null,
   },
   groupid: {
     type: Number,
     required: false,
-    default: null
-  }
+    default: null,
+  },
 })
 
 const emit = defineEmits(['searched', 'changed'])
@@ -41,7 +51,6 @@ const search = async (callback) => {
     callback()
   }
 }
-
 </script>
 <style scoped>
 input {

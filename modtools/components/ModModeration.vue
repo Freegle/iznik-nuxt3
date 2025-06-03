@@ -1,25 +1,18 @@
 <template>
   <div class="d-inline d-flex justify-content-start flex-wrap">
-    <b-form-select v-model="postingStatus" :options="options" class="sel" :size="size" />
+    <b-form-select
+      v-model="postingStatus"
+      :options="options"
+      class="sel"
+      :size="size"
+    />
     <b-form-select v-model="trustlevel" class="sel" :size="size" readyonly>
-      <option :value="null">
-        Volunteering - not asked
-      </option>
-      <option value="Basic">
-        Volunteering - basic
-      </option>
-      <option value="Moderate">
-        Volunteering - moderate
-      </option>
-      <option value="Advanced">
-        Volunteering - advanced
-      </option>
-      <option value="Declined">
-        Volunteering - declined
-      </option>
-      <option value="Excluded">
-        Volunteering - disabled
-      </option>
+      <option :value="null">Volunteering - not asked</option>
+      <option value="Basic">Volunteering - basic</option>
+      <option value="Moderate">Volunteering - moderate</option>
+      <option value="Advanced">Volunteering - advanced</option>
+      <option value="Declined">Volunteering - declined</option>
+      <option value="Excluded">Volunteering - disabled</option>
     </b-form-select>
   </div>
 </template>
@@ -30,17 +23,17 @@ export default {
   props: {
     membership: {
       type: Object,
-      required: true
+      required: true,
     },
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     size: {
       type: String,
       required: false,
-      default: 'lg'
-    }
+      default: 'lg',
+    },
   },
   setup() {
     const userStore = useUserStore()
@@ -56,9 +49,9 @@ export default {
         await this.userStore.edit({
           id: this.user.id,
           groupid,
-          ourPostingStatus: val
+          ourPostingStatus: val,
         })
-      }
+      },
     },
     trustlevel: {
       get() {
@@ -69,27 +62,27 @@ export default {
         await this.userStore.edit({
           id: this.user.id,
           groupid,
-          trustlevel: val
+          trustlevel: val,
         })
-      }
+      },
     },
     options() {
       return [
         {
           value: 'MODERATED',
-          text: 'Moderated'
+          text: 'Moderated',
         },
         {
           value: 'DEFAULT',
-          text: 'Group Settings'
+          text: 'Group Settings',
         },
         {
           value: 'PROHIBITED',
-          text: "Can't Post"
-        }
+          text: "Can't Post",
+        },
       ]
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

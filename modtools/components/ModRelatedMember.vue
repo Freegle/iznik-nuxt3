@@ -38,16 +38,14 @@
         <b-button variant="secondary" @click="ask">
           Ask member what they want
         </b-button>
-        <b-button variant="white" @click="ignore">
-          Ignore
-        </b-button>
+        <b-button variant="white" @click="ignore"> Ignore </b-button>
       </div>
     </b-card-footer>
   </b-card>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
 import dayjs from 'dayjs'
+import { useMemberStore } from '../stores/member'
 
 const LONG_THRESHOLD = 4
 
@@ -55,8 +53,8 @@ export default {
   props: {
     member: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     posted1() {
@@ -107,11 +105,11 @@ export default {
       )
     },
     groupsInCommon() {
-      const common = this.user1.memberof.filter(group => {
+      const common = this.user1.memberof.filter((group) => {
         const gid = group.id
         let found = false
 
-        this.user2.memberof.forEach(group2 => {
+        this.user2.memberof.forEach((group2) => {
           if (group2.id === gid) {
             found = true
           }
@@ -144,7 +142,7 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   methods: {
     posted(member) {
@@ -172,8 +170,8 @@ export default {
       const removeDistinct = (s1, s2) =>
         s1
           .split('')
-          .filter(c => {
-            ; (s2 + '').includes(c)
+          .filter((c) => {
+            ;(s2 + '').includes(c)
           })
           .join('')
       const findFirstSeq = (s1, s2) => {
@@ -235,7 +233,7 @@ export default {
       let ret = member.email
 
       if (!member.email && member.emails) {
-        member.emails.forEach(e => {
+        member.emails.forEach((e) => {
           if (!e.ourdomain && (!ret || e.preferred)) {
             ret = e.email
           }
@@ -248,7 +246,7 @@ export default {
       const memberStore = useMemberStore()
       await memberStore.askMerge({
         user1: this.user1.id,
-        user2: this.user2.id
+        user2: this.user2.id,
       })
 
       this.updateWork()
@@ -257,15 +255,15 @@ export default {
       const memberStore = useMemberStore()
       await memberStore.ignoreMerge({
         user1: this.user1.id,
-        user2: this.user2.id
+        user2: this.user2.id,
       })
 
       this.updateWork()
     },
     updateWork() {
       this.fetchMe(true, ['work'])
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

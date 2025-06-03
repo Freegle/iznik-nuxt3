@@ -6,13 +6,25 @@
     <b-input-group v-if="type === 'input'">
       <b-form-input v-model="value" />
       <slot name="append">
-        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+        <SpinButton
+          variant="white"
+          icon-name="save"
+          label="Save"
+          :disabled="readonly"
+          @handle="save"
+        />
       </slot>
     </b-input-group>
     <b-input-group v-if="type === 'number'">
       <b-form-input v-model="value" type="number" :step="step" />
       <slot name="append">
-        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" :disabled="readonly" />
+        <SpinButton
+          variant="white"
+          icon-name="save"
+          label="Save"
+          :disabled="readonly"
+          @handle="save"
+        />
       </slot>
     </b-input-group>
     <div v-else-if="type === 'textarea'">
@@ -23,13 +35,30 @@
       </b-row>
       <b-row>
         <b-col>
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="save" class="mt-2" :disabled="readonly" />
+          <SpinButton
+            variant="white"
+            icon-name="save"
+            label="Save"
+            class="mt-2"
+            :disabled="readonly"
+            @handle="save"
+          />
         </b-col>
       </b-row>
     </div>
     <div v-else-if="type === 'toggle'">
-      <OurToggle v-model="value" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="readonly" @change="save" />
+      <OurToggle
+        v-model="value"
+        class="mt-2"
+        :height="30"
+        :width="toggleWidth"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }"
+        variant="modgreen"
+        :disabled="readonly"
+        @change="save"
+      />
     </div>
   </b-form-group>
 </template>
@@ -37,63 +66,63 @@
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  setup() {
-    const modGroupStore = useModGroupStore()
-    return { modGroupStore }
-  },
   props: {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     groupid: {
       type: Number,
-      required: true
+      required: true,
     },
     label: {
       type: String,
-      required: true
+      required: true,
     },
     description: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     type: {
       type: String,
       required: false,
-      default: 'input'
+      default: 'input',
     },
     step: {
       type: Number,
       required: false,
-      default: 1
+      default: 1,
     },
     rows: {
       type: Number,
       required: false,
-      default: 3
+      default: 3,
     },
     toggleWidth: {
       type: Number,
       required: false,
-      default: 150
+      default: 150,
     },
     toggleChecked: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     toggleUnchecked: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
+  },
+  setup() {
+    const modGroupStore = useModGroupStore()
+    return { modGroupStore }
   },
   data: function () {
     return {
       value: null,
-      mounted: false // Stops save during load process
+      mounted: false, // Stops save during load process
     }
   },
   computed: {
@@ -102,12 +131,12 @@ export default {
     },
     group() {
       return this.modGroupStore.get(this.groupid)
-    }
+    },
   },
   watch: {
     groupid(newval) {
       this.getValueFromGroup()
-    }
+    },
   },
   mounted() {
     this.getValueFromGroup()
@@ -154,11 +183,12 @@ export default {
     async save(callbackorvalue) {
       if (this.mounted) {
         const data = {
-          id: this.groupid
+          id: this.groupid,
         }
 
         const p = this.name.indexOf('.')
-        let val = typeof callbackorvalue !== 'function' ? callbackorvalue : this.value
+        let val =
+          typeof callbackorvalue !== 'function' ? callbackorvalue : this.value
 
         if (typeof val === 'boolean') {
           val = val ? 1 : 0
@@ -208,8 +238,8 @@ export default {
           }
         } while (p !== -1 && obj)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

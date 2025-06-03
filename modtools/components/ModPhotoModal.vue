@@ -1,34 +1,45 @@
 <template>
-  <b-modal ref="modal" :id="'photoModal-' + attachment.id" :title="message.subject" size="lg" no-stacking ok-only>
+  <b-modal
+    :id="'photoModal-' + attachment.id"
+    ref="modal"
+    :title="message.subject"
+    size="lg"
+    no-stacking
+    ok-only
+  >
     <template #default>
-      <PostPhoto v-bind="attachment" :thumbnail="false" @remove="removePhoto" @updated="updatedPhoto" :externalmods="externalmods" />
+      <PostPhoto
+        v-bind="attachment"
+        :thumbnail="false"
+        :externalmods="externalmods"
+        @remove="removePhoto"
+        @updated="updatedPhoto"
+      />
     </template>
 
     <template #footer>
-      <b-button variant="white" @click="hide">
-        Close
-      </b-button>
+      <b-button variant="white" @click="hide"> Close </b-button>
     </template>
   </b-modal>
 </template>
 
 <script>
-import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '../../stores/message'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   props: {
     attachment: {
       type: Object,
-      required: true
+      required: true,
     },
     message: {
       type: Object,
-      required: true
+      required: true,
     },
     externalmods: {
       type: Object,
-      required: true
+      required: true,
     },
   },
   setup() {
@@ -43,15 +54,15 @@ export default {
     async removePhoto(id) {
       const attachments = []
 
-      this.message.attachments.forEach(a => {
+      this.message.attachments.forEach((a) => {
         if (a.id !== id) {
           attachments.push(a.id)
         }
       })
 
       await this.messageStore.patch({ id: this.message.id, attachments })
-    }
-  }
+    },
+  },
 }
 </script>
 

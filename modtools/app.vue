@@ -47,9 +47,9 @@ import { useCommentStore } from './stores/comment'
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useSpammerStore } from './stores/spammer'
 import { useStdmsgStore } from './stores/stdmsg'
+import { useModGroupStore } from '@/stores/modgroup'
 import { usePublicityStore } from '@/stores/publicity'
 
 const route = useRoute()

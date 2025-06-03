@@ -7,7 +7,7 @@ export const useModConfigStore = defineStore({
     configs: [],
     // We have a current one.  This is so that we can configure it without interfering with our main list until
     // we save it.
-    current: null
+    current: null,
   }),
   actions: {
     init(config) {
@@ -18,7 +18,7 @@ export const useModConfigStore = defineStore({
     async fetch(params) {
       const { configs } = await api(this.config).session.fetch({
         components: params.all ? ['allconfigs'] : ['configs'],
-        modtools: true
+        modtools: true,
       })
 
       if (configs) {
@@ -38,7 +38,7 @@ export const useModConfigStore = defineStore({
       await api(this.config).modconfigs.patchConfig(params)
       const config = await this.fetchConfig({
         id: params.id,
-        configuring: true
+        configuring: true,
       })
       if (config) {
         this.current = config
@@ -50,7 +50,7 @@ export const useModConfigStore = defineStore({
 
       await this.fetchConfig({
         id,
-        configuring: true
+        configuring: true,
       })
 
       return id
@@ -59,5 +59,5 @@ export const useModConfigStore = defineStore({
     async delete(params) {
       await api(this.config).modconfigs.deleteConfig(params)
     },
-  }
+  },
 })
