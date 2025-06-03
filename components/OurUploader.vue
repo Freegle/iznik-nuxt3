@@ -51,6 +51,7 @@ import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
 import { useImageStore } from '~/stores/image'
 import { useMiscStore } from '~/stores/misc'
+import { captureConsoleIntegration } from '@sentry/integrations'
 
 const runtimeConfig = useRuntimeConfig()
 
@@ -123,6 +124,11 @@ const props = defineProps({
   },
   recognise: {
     type: Boolean,
+    required: false,
+    default: false,
+  },
+  groupid: {
+    type: Number,
     required: false,
     default: false,
   },
