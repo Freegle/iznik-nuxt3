@@ -204,7 +204,7 @@ export default {
       return useMiscStore().modtools
     },
     modtoolsLink() {
-      if( this.chatmessage.refmsg){
+      if( this.chatmessage.refmsg && this.chatmessage.refmsg.groups && this.chatmessage.refmsg.groups.length>0){
         return '/messages/approved/'+this.chatmessage.refmsg.groups[0].groupid+'/'+this.chatmessage.refmsg.id+'?noguard=true'
       }
       // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
