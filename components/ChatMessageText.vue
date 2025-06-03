@@ -9,7 +9,7 @@
           <span v-html="emessageMTTN" class="preline forcebreak"></span>
         </span>
         <span v-else-if="!highlightEmails">
-          <span v-if="messageIsNew" class="prewrap font-weight-bold"> WWW {{
+          <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
             emessage
           }}</span>
           <span v-else class="preline forcebreak">{{ emessage }}</span>
