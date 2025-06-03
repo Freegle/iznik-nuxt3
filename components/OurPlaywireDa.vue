@@ -49,6 +49,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  video: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const daDiv = ref(null)
@@ -72,6 +76,7 @@ watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
+      console.log('Render ad', props.adUnitPath)
       api.bandit.shown({
         uid: 'playwire',
         variant: 'askedToRender',
@@ -98,7 +103,9 @@ watch(
             // We don't use spaNewPage as in the example because our ads are added more dynamically than
             // that.
             const height = window.getComputedStyle(daDiv.value, null).maxHeight
-            if (height === '50px' || height === '90px') {
+            if (props.video) {
+              theType.value = 'corner_ad_video'
+            } else if (height === '50px' || height === '90px') {
               theType.value = 'leaderboard_atf'
             } else {
               // See if we already have a med_rect; if so we should use the alternate type value as Playwire
@@ -113,10 +120,17 @@ watch(
             }
 
             console.log('Execute queued spaAddAds', theType.value, props.divId)
-            window.ramp.spaAddAds({
-              type: theType.value,
-              selector: '#' + props.divId,
-            })
+            if (props.video) {
+              // No div for corner video.
+              window.ramp.spaAddAds({
+                type: theType.value,
+              })
+            } else {
+              window.ramp.spaAddAds({
+                type: theType.value,
+                selector: '#' + props.divId,
+              })
+            }
 
             api.bandit.shown({
               uid: 'playwire',

@@ -26,3 +26,5 @@ static/sw.js
 /playwright-report/index.html
 /test-results/junit.xml
 /test-emails.json
+/CLAUDE.local.md
+/.claude/settings.local.json

@@ -93,6 +93,14 @@
       <BreakpointFettler />
       <div id="here" />
       <SomethingWentWrong />
+      <div id="videoda">
+        <ExternalDa
+          video
+          :jobs="false"
+          ad-unit-path="video"
+          div-id="div-da-video"
+        />
+      </div>
     </client-only>
   </div>
 </template>
