@@ -25,7 +25,6 @@
           </b-card-title>
           <b-card-text>
             {{ emessage }}
-            {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
             <ModChatViewButton
               :id="chatmessage.refchatid"
               class="mt-2"
