@@ -10,9 +10,10 @@
 
 const path = computed(() => {
   const route = useRoute()
-  const folder = ('folder' in route.params) ? route.params.folder : ''
-  const option = ('id' in route.params) ? route.params.id : ''
-  const path = '/' + folder + (option === '' ? '' : '/' + option)
+  let path = ''
+  for( const p of route.params.slug){
+    path += '/'+p
+  }
   return path
 })
 
