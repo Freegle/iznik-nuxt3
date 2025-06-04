@@ -101,7 +101,7 @@ export default {
       this.memberStore.clear()
     },
     chosengroupid(newVal) {
-      //console.log('chosengroupid', newVal)
+      //console.log('chosengroupid', newVal, this.search.length)
       const router = useRouter()
       if (newVal !== this.id) {
         if (newVal === 0) {
@@ -109,7 +109,9 @@ export default {
           router.push('/members/approved/')
         } else {
           //console.log('chosengroupid GOTO',newVal)
-          router.push('/members/approved/' + newVal)
+          let path = '/members/approved/' + newVal
+          if (this.search.length > 0) path += '/' + this.search
+          router.push(path)
         }
       } else {
         //console.log('chosengroupid SAME')
