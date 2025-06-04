@@ -79,8 +79,9 @@ export default {
     reportUser() {
       return {
         // Due to inconsistencies about userid vs id in objects.
-        userid: this.user.id,
-        displayname: this.user.displayname
+        userid: this.user?.id,
+        id: this.user?.id,
+        displayname: this.user?.displayname
       }
     }
   },
