@@ -51,8 +51,15 @@ export const useMemberStore = defineStore({
         params.stdmsgid,
         params.body
       )
-
-      delete this.list[params.id]
+      let foundid = false
+      for (const membership of Object.values(this.list)) {
+        if ((membership.userid === params.id) && (membership.groupid === params.groupid)) {
+          foundid = membership.id
+        }
+      }
+      if (foundid) {
+        delete this.list[foundid]
+      }
     },
     async fetchMembers(params) {
       //console.log('useMemberStore fetchMembers',params)
