@@ -42,6 +42,9 @@
             You can't merge TrashNothing members. Please either remove the least active of them, or add Notes to each
             one to say that they're the same real person.
           </NoticeMessage>
+          <NoticeMessage v-if="error" variant="danger">
+            {{ error }}
+          </NoticeMessage>
         </div>
       </template>
       <template #footer slot-scope="{ hide }">
@@ -68,7 +71,8 @@ export default {
       id2: null,
       reason: null,
       merged: false,
-      byemail: true
+      byemail: true,
+      error: null
     }
   },
   setup() {
@@ -105,23 +109,31 @@ export default {
       this.$emit('hidden')
     },
     async merge() {
-      console.log('merge', this.byemail, this.email1, this.email2, this.id1, this.id2, this.reason)
+      this.error = false
       const authStore = useAuthStore()
-      if (this.byemail) {
-        await authStore.merge({
-          email1: this.email1,
-          email2: this.email2,
-          reason: this.reason
-        })
-      } else {
-        await authStore.merge({
-          id1: this.id1,
-          id2: this.id2,
-          reason: this.reason
-        })
-      }
+      try {
+        if (this.byemail) {
+          await authStore.merge({
+            email1: this.email1,
+            email2: this.email2,
+            reason: this.reason
+          })
+        } else {
+          await authStore.merge({
+            id1: this.id1,
+            id2: this.id2,
+            reason: this.reason
+          })
+        }
 
-      this.merged = true
+        this.merged = true
+      } catch (e) {
+        this.error = e.message
+        const statuspos = e.message.indexOf('status:')
+        if( statuspos!==-1){
+          this.error = e.message.substring(statuspos)
+        }
+      }
     }
   }
 }
