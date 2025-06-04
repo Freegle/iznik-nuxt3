@@ -941,9 +941,7 @@ export default {
       this.$refs.spamConfirm?.show()
     },
     async referToSupport() {
-      this.$api.chat.referToSupport({
-        id: this.id
-      })
+      this.$api.chat.referToSupport(this.id)
     },
     confirmReferToSupport() {
       this.showConfirmModal = true
