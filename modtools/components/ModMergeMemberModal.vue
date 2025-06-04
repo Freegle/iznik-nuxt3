@@ -105,6 +105,7 @@ export default {
       this.$emit('hidden')
     },
     async merge() {
+      console.log('merge', this.byemail, this.email1, this.email2, this.id1, this.id2, this.reason)
       const authStore = useAuthStore()
       if (this.byemail) {
         await authStore.merge({
