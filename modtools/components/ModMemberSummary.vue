@@ -111,8 +111,7 @@ export default {
       this.modmailsonly = true
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     }
   }
 }

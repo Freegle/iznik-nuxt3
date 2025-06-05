@@ -102,15 +102,13 @@ export default {
       this.modmailsonly = false
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
     async showModmails() {
       this.modmailsonly = true
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     }
   }
 }

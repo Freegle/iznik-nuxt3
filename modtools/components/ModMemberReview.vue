@@ -281,8 +281,7 @@ export default {
     async showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
     forcerefresh() {
       this.$emit('forcerefresh')
