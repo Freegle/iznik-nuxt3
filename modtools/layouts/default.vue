@@ -44,7 +44,8 @@
         <div class="pl-1">
           Messages
         </div>
-        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent
+          @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/messages/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent @mobilehidemenu="mobilehidemenu" />
         <hr>
@@ -53,10 +54,12 @@
         </div>
         <ModMenuItemLeft link="/members/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent
+          @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']"
+          @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" @mobilehidemenu="mobilehidemenu" />
@@ -67,7 +70,8 @@
         <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []"
+          @mobilehidemenu="mobilehidemenu" />
         <hr>
         <ModMenuItemLeft link="/logs" name="Logs" @mobilehidemenu="mobilehidemenu" />
         <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" @mobilehidemenu="mobilehidemenu" />
@@ -201,6 +205,15 @@ export default {
     },
   },
   watch: {
+    $route(newVal, oldVal) {
+      if (this.$refs.sizer && (newVal.fullPath != oldVal.fullPath)) {
+        const el = document.getElementById('sizer')
+        if (getComputedStyle(el).display !== 'block') {
+          // Not large screen, hide menu on move.
+          this.showMenu = false
+        }
+      }
+    },
     loginStateKnown: {
       immediate: true,
       handler(newVal) {
@@ -311,7 +324,7 @@ export default {
         this.bumpLogin++
       }
     },
-    mobilehidemenu(){
+    mobilehidemenu() {
       this.showMenu = false
     }
   }

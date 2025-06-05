@@ -78,12 +78,6 @@ export default {
           e.stopPropagation()
           this.$router.go()
         } else {
-          try {
-            // Tell layout to collapse menu if  viewport is less than 768 pixels wide
-            if (window.matchMedia("(max-width: 767px)").matches) {
-              this.$emit('mobilehidemenu')
-            }
-          } catch (e) { }
           this.$router.push(this.link)
         }
       }
