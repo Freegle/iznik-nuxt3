@@ -4,9 +4,9 @@
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
-            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>
+            <ModChatReviewUser v-if="message.group" :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>
             <v-icon icon="arrow-circle-right" scale="2" class="mt-1 text-info" />
-            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id"  @reload="reload"/>
+            <ModChatReviewUser v-if="message.group" :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id"  @reload="reload"/>
           </div>
           <b-button v-if="message.bymailid" size="lg" variant="white" @click="viewOriginal">
             <v-icon icon="info-circle" /> View original email
@@ -44,9 +44,9 @@
             <em>Quicker Chat Review</em>
           </span>
           <span>
-            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
+            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group?.namedisplay }}
             <span v-if="!message.widerchatreview">, which you mod.
-              <b-button :to="'/members/approved/' + message.group.id + '/' + message.touser.id" variant="link"
+              <b-button :to="'/members/approved/' + message.group?.id + '/' + message.touser.id" variant="link"
                 class="p-0 border-0 align-top">
                 Go to membership
               </b-button>
