@@ -2,6 +2,7 @@
   <div>
     <b-card no-body>
       <b-card-header>
+        <div v-if="!message.group">DEBUG NO GROUP TELL CHRIS</div>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser v-if="message.group" :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>

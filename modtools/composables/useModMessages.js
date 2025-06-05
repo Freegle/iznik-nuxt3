@@ -121,6 +121,7 @@ export function setupModMessages(reset) {
     if (workCount) params.limit = Math.max(limit.value, workCount)
     //console.log('uMM getMessages',params.limit)
     //params.debug = 'uMM getMessages',
+    messageStore.clear()
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.
@@ -168,7 +169,7 @@ export function setupModMessages(reset) {
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {
-      if (newVal > oldVal) {
+      if (newVal !== oldVal) {
         // There's new stuff to fetch.
         //console.log('Fetch')
         doFetch = true

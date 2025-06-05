@@ -105,6 +105,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '@/stores/modconfig'
 
 import { buildHead } from '~/composables/useMTBuildHead'
@@ -118,6 +119,7 @@ export default {
     const jwt = authStore.auth.jwt
     const chatStore = useChatStore()
     const miscStore = useMiscStore()
+    const modGroupStore = useModGroupStore()
     const modConfigStore = useModConfigStore()
     const persistent = authStore.auth.persistent
 
@@ -162,7 +164,7 @@ export default {
       }
     })
 
-    return { authStore, chatStore, googleReady, miscStore, modConfigStore, oneTap }
+    return { authStore, chatStore, googleReady, miscStore, modConfigStore, modGroupStore, oneTap }
   },
   data: function () {
     return {
@@ -205,14 +207,35 @@ export default {
     },
   },
   watch: {
-    $route(newVal, oldVal) {
-      if (this.$refs.sizer && (newVal.fullPath != oldVal.fullPath)) {
-        const el = document.getElementById('sizer')
-        if (getComputedStyle(el).display !== 'block') {
-          // Not large screen, hide menu on move.
-          this.showMenu = false
+    $route: {
+      async handler(newVal, oldVal) {
+        const routechanged = newVal.fullPath != oldVal.fullPath
+        if (this.$refs.sizer && routechanged) {
+          const el = document.getElementById('sizer')
+          if (getComputedStyle(el).display !== 'block') {
+            // Not large screen, hide menu on move.
+            this.showMenu = false
+          }
         }
-      }
+
+        if (routechanged) {
+          try {
+            //console.log('LAYOUT ROUTE CHANGE GET GROUPS WORK')
+            const me = this.authStore.user
+            if (me && me.id) {
+              const ret = await this.$api.session.fetch({
+                components: ['groups'],
+              })
+              if (ret && ret.groups) {
+                this.modGroupStore.sessionGroups = ret.groups
+              }
+            }
+          } catch (e) {
+            console.error('MT layout get session groups fail', e.message)
+          }
+        }
+
+      },
     },
     loginStateKnown: {
       immediate: true,

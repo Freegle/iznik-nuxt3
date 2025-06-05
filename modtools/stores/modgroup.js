@@ -10,7 +10,8 @@ export const useModGroupStore = defineStore({
     list: {},
     getting: [], // To avoid repeat gettings
     allGroups: {},
-    received: false
+    received: false,
+    sessionGroups: false
   }),
   actions: {
     init(config) {
@@ -72,12 +73,9 @@ export const useModGroupStore = defineStore({
 
       const group = await api(this.config).group.fetchGroupMT(id, polygon, showmods, sponsors, tnkey)
       if (group) {
-        const ret = await api(this.config).session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components: ['groups'],
-        })
-        if (ret && ret.groups) {
-          const g = ret.groups.find((g) => g.id === group.id)
+        // Get work from session info received when route first called in layout default.vue watch $route handler
+        if( this.sessionGroups){
+          const g = this.sessionGroups.find((g) => g.id === group.id)
           if (g && g.work) {
             //console.log('useGroupStore g.work',g.work)
             group.work = g.work
@@ -106,20 +104,21 @@ export const useModGroupStore = defineStore({
       }
     },
     async fetchIfNeedBeMT(id) {
+      //console.log('uMGS fetchIfNeedBeMT A', id)
       if (!id) return
       if (this.list[id]) return
       if (this.getting.includes(id)) {
-        //console.error('uMGS fetchIfNeedBeMT getting', id)
+        //console.log('uMGS fetchIfNeedBeMT B', id)
         const until = (predFn) => {
           const poll = (done) => (predFn() ? done() : setTimeout(() => poll(done), 100))
           return new Promise(poll)
         }
         const self = this
         await until(() => self.list[id]) // Wait until group has arrived
-        //console.error('uMGS fetchIfNeedBeMT GOT', this.list[id])
+        //console.log('uMGS fetchIfNeedBeMT GOT', id)
         return
       }
-      //console.error('uMGS fetchIfNeedBeMT get', id)
+      //console.error('uMGS fetchIfNeedBeMT CCC', id)
       this.getting.push(id)
       await this.fetchGroupMT(id)
     },
