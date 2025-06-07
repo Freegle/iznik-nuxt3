@@ -1,8 +1,16 @@
 <template>
   <div class="layout">
     <div class="type">
-      <v-icon v-if="chat.chattype === 'User2User'" class="text-success pr-1" icon="user" />
-      <v-icon v-else-if="chat.chattype === 'User2Mod' || chat.chattype === 'Mod2Mod'" class="text-warning pr-1 mb-2" icon="crown" />
+      <v-icon
+        v-if="chat.chattype === 'User2User'"
+        class="text-success pr-1"
+        icon="user"
+      />
+      <v-icon
+        v-else-if="chat.chattype === 'User2Mod' || chat.chattype === 'Mod2Mod'"
+        class="text-warning pr-1 mb-2"
+        icon="crown"
+      />
     </div>
     <div class="id text-muted">
       Chat <v-icon icon="hashtag" scale="0.5" class="text-muted" />{{ chat.id }}
@@ -29,13 +37,13 @@ export default {
   props: {
     chat: {
       type: Object,
-      required: true
+      required: true,
     },
     pov: {
       type: Number,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   computed: {
     otheruser() {
@@ -44,8 +52,8 @@ export default {
       } else {
         return this.chat.user1 === this.pov ? this.chat.user2 : this.chat.user1
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

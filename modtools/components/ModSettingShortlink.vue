@@ -15,8 +15,8 @@ export default {
   props: {
     shortlink: {
       type: Object,
-      required: true
-    }
-  }
+      required: true,
+    },
+  },
 }
 </script>

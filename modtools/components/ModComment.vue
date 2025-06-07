@@ -1,28 +1,52 @@
 <template>
   <div>
     <NoticeMessage v-if="savedComment" variant="danger" class="mb-2">
-      <div v-for="n in 10" :key="'modcomments-' + user.id + '-' + savedComment.id + '-' + n">
+      <div
+        v-for="n in 10"
+        :key="'modcomments-' + user.id + '-' + savedComment.id + '-' + n"
+      >
         <div class="d-flex">
           <div v-if="n === 1 && savedComment.flag">
-            <v-icon v-if="savedComment.flag" icon="exclamation-triangle" class="mr-1" />
+            <v-icon
+              v-if="savedComment.flag"
+              icon="exclamation-triangle"
+              class="mr-1"
+            />
           </div>
-          <read-more v-if="savedComment['user' + n]" :text="savedComment['user' + n]" :max-chars="expandComments ? 1000 : 80"
-            class="font-weight-bold nopara" />
+          <read-more
+            v-if="savedComment['user' + n]"
+            :text="savedComment['user' + n]"
+            :max-chars="expandComments ? 1000 : 80"
+            class="font-weight-bold nopara"
+          />
         </div>
       </div>
       <div class="small">
-        <span v-if="savedComment.byuser"><v-icon icon="tag" /> by {{ savedComment.byuser.displayname }} -</span>
+        <span v-if="savedComment.byuser"
+          ><v-icon icon="tag" /> by
+          {{ savedComment.byuser.displayname }} -</span
+        >
         <span v-if="savedComment.date !== savedComment.reviewed">
-          Created <span :title="datetimeshort(savedComment.date)">{{ datetimeshort(savedComment.date) }}</span> reviewed <span
-            :title="datetimeshort(savedComment.reviewed)">{{ datetimeshort(savedComment.reviewed) }}</span>
+          Created
+          <span :title="datetimeshort(savedComment.date)">{{
+            datetimeshort(savedComment.date)
+          }}</span>
+          reviewed
+          <span :title="datetimeshort(savedComment.reviewed)">{{
+            datetimeshort(savedComment.reviewed)
+          }}</span>
         </span>
         <span v-else :title="datetimeshort(savedComment.date)">
           {{ timeadapt(savedComment.date) }}
         </span>
-        <span v-if="savedComment.groupid">
-          on {{ groupname }}
-        </span>
-        <span v-if="amAModOn(savedComment.groupid) || supportOrAdmin || savedComment.byuserid === myid">
+        <span v-if="savedComment.groupid"> on {{ groupname }} </span>
+        <span
+          v-if="
+            amAModOn(savedComment.groupid) ||
+            supportOrAdmin ||
+            savedComment.byuserid === myid
+          "
+        >
           <b-button variant="link" size="sm" @click="editIt">
             <v-icon icon="pen" /> Edit
           </b-button>
@@ -31,23 +55,51 @@
           </b-button>
         </span>
       </div>
-      <ConfirmModal v-if="showConfirmDelete" ref="confirm" @confirm="deleteConfirmed" @hidden="showConfirmDelete = false" />
-      <ModCommentEditModal v-if="showCommentEditModal" ref="editComment" :user="user" :comment="comment" :groupname="groupname"
-        @edited="updateComments" @hidden="showCommentEditModal = false" />
+      <ConfirmModal
+        v-if="showConfirmDelete"
+        ref="confirm"
+        @confirm="deleteConfirmed"
+        @hidden="showConfirmDelete = false"
+      />
+      <ModCommentEditModal
+        v-if="showCommentEditModal"
+        ref="editComment"
+        :user="user"
+        :comment="comment"
+        :groupname="groupname"
+        @edited="updateComments"
+        @hidden="showCommentEditModal = false"
+      />
     </NoticeMessage>
   </div>
 </template>
 
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
-import { useGroupStore } from '~/stores/group'
-import { useMemberStore } from '../stores/member'
-import { useUserStore } from '~/stores/user'
 import cloneDeep from 'lodash.clonedeep'
+import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../composables/useModMembers'
+import { useGroupStore } from '~/stores/group'
+import { useUserStore } from '~/stores/user'
 
 export default {
   components: { ReadMore },
+
+  props: {
+    comment: {
+      type: Object,
+      required: true,
+    },
+    user: {
+      type: Object,
+      required: true,
+    },
+    expandComments: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
 
   setup() {
     const groupStore = useGroupStore()
@@ -56,27 +108,11 @@ export default {
     const { bump, context } = setupModMembers()
     return { bump, context, groupStore, memberStore, userStore }
   },
-
-  props: {
-    comment: {
-      type: Object,
-      required: true
-    },
-    user: {
-      type: Object,
-      required: true
-    },
-    expandComments: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
-  },
   data: function () {
     return {
       showConfirmDelete: false,
       showCommentEditModal: false,
-      savedComment: null
+      savedComment: null,
     }
   },
   computed: {
@@ -95,7 +131,7 @@ export default {
     },
     groupname() {
       return this.group ? this.group.namedisplay : '#' + this.comment.groupid
-    }
+    },
   },
   mounted() {
     // To stop it updating on screen when editing in a modal.
@@ -113,14 +149,14 @@ export default {
 
       await this.userStore.fetchMT({
         search: userid,
-        emailhistory: true
+        emailhistory: true,
       })
 
       const user = this.userStore.byId(userid)
       const savedCommentId = this.savedComment.id
       this.savedComment = false
       if (user.comments) {
-        this.savedComment = user.comments.find(comm => {
+        this.savedComment = user.comments.find((comm) => {
           return comm.id === savedCommentId
         })
       }
@@ -142,6 +178,6 @@ export default {
       this.showCommentEditModal = true
       this.$emit('editing')
     },
-  }
+  },
 }
 </script>

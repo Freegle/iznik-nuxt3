@@ -4,18 +4,21 @@
       <b-card-header>
         <b-row>
           <b-col cols="6" md="4">
-            Opportunity <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ volunteering.id }}
+            Opportunity
+            <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
+              volunteering.id
+            }}
           </b-col>
           <b-col cols="6" md="4">
             <span v-if="volunteering.user">
               {{ volunteering.user.displayname }}
               <span class="text-muted">
-                <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ volunteering.user.id }}
+                <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
+                  volunteering.user.id
+                }}
               </span>
             </span>
-            <span v-else>
-              System added
-            </span>
+            <span v-else> System added </span>
           </b-col>
           <b-col cols="12" md="4">
             <span v-if="volunteering.groupsmt && volunteering.groupsmt.length">
@@ -25,10 +28,21 @@
         </b-row>
       </b-card-header>
       <b-card-body>
-        <NoticeMessage v-if="volunteering.groups.length && volunteering.groups[0].ourPostingStatus === 'PROHIBITED'" variant="danger" class="mb-2">
+        <NoticeMessage
+          v-if="
+            volunteering.groups.length &&
+            volunteering.groups[0].ourPostingStatus === 'PROHIBITED'
+          "
+          variant="danger"
+          class="mb-2"
+        >
           This member is set not to be able to post OFFERs/WANTEDs.
         </NoticeMessage>
-        <VolunteerOpportunity :id="volunteering.id" :item="volunteering" :summary="false" />
+        <VolunteerOpportunity
+          :id="volunteering.id"
+          :item="volunteering"
+          :summary="false"
+        />
       </b-card-body>
       <b-card-footer>
         <b-button variant="primary" class="mr-1" @click="approve">
@@ -41,7 +55,11 @@
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <ChatButton
-          v-if="volunteering.groups && volunteering.groups.length && volunteering.user"
+          v-if="
+            volunteering.groups &&
+            volunteering.groups.length &&
+            volunteering.user
+          "
           :userid="volunteering.user.id"
           :groupid="volunteering.groups[0]"
           title="Chat"
@@ -51,28 +69,28 @@
       </b-card-footer>
     </b-card>
     <VolunteerOpportunityModal
-        v-if="modalShown"
-        :id="volunteering.id"
-        :volunteering="volunteering"
-        :start-edit="true"
-        @hidden="modalShown = false"
-      />
+      v-if="modalShown"
+      :id="volunteering.id"
+      :volunteering="volunteering"
+      :start-edit="true"
+      @hidden="modalShown = false"
+    />
   </div>
 </template>
 <script>
 import { useVolunteeringStore } from '@/stores/volunteering'
 
 export default {
+  props: {
+    volunteering: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const volunteeringStore = useVolunteeringStore()
     return {
       volunteeringStore,
-    }
-  },
-  props: {
-    volunteering: {
-      type: Object,
-      required: true
     }
   },
   data: function () {
@@ -91,9 +109,9 @@ export default {
     approve() {
       this.volunteeringStore.save({
         id: this.volunteering.id,
-        pending: false
+        pending: false,
       })
-    }
-  }
+    },
+  },
 }
 </script>

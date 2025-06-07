@@ -58,10 +58,11 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'edit'])
 
-const locationOptions = computed(() => ({ // Needs to be set using setStyle ie not reactive
+const locationOptions = computed(() => ({
+  // Needs to be set using setStyle ie not reactive
   fillColor: AREA_FILL_COLOUR,
   fillOpacity: props.shade ? FILL_OPACITY : 0,
-  color: AREA_BOUNDARY_COLOUR // Just keep always as blue: props.selected ? SELECTED : AREA_BOUNDARY_COLOUR,
+  color: AREA_BOUNDARY_COLOUR, // Just keep always as blue: props.selected ? SELECTED : AREA_BOUNDARY_COLOUR,
 }))
 
 const centre = computed(() => {
@@ -98,7 +99,8 @@ const geojson = ref(null)
 watch(
   () => props.shade,
   (shade) => {
-    if( geojson.value) geojson.value.leafletObject.setStyle(locationOptions.value)
+    if (geojson.value)
+      geojson.value.leafletObject.setStyle(locationOptions.value)
   },
   {
     immediate: true,
@@ -107,7 +109,7 @@ watch(
 watch(
   () => props.selected,
   (selected) => {
-    if( !geojson.value) return
+    if (!geojson.value) return
     if (selected) {
       // Enable this object for editing and watch for changes.
       geojson.value.leafletObject.pm.enable({

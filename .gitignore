@@ -26,4 +26,5 @@ static/sw.js
 /test-results/
 /.npmrc
 /test-emails.json
+/CLAUDE.local.md
 /.claude/settings.local.json

@@ -3,24 +3,50 @@
     <client-only>
       <ModHelpChatReview />
       <div>
-        <div v-for="message in visibleMessages" :key="'messagelist-' + message.id" class="p-0 mt-2">
-          <ModChatReview :id="message.chatid" :message="message" @reload="reload"/>
+        <div
+          v-for="message in visibleMessages"
+          :key="'messagelist-' + message.id"
+          class="p-0 mt-2"
+        >
+          <ModChatReview
+            :id="message.chatid"
+            :message="message"
+            @reload="reload"
+          />
         </div>
 
-        <infinite-loading direction="top" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore" :identifier="bump">
+        <infinite-loading
+          direction="top"
+          force-use-infinite-wrapper="body"
+          :distance="distance"
+          :identifier="bump"
+          @infinite="loadMore"
+        >
           <template #no-results>
-            <p class="p-2">There are no chat messages to review at the moment.</p>
+            <p class="p-2">
+              There are no chat messages to review at the moment.
+            </p>
           </template>
           <template #no-more></template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
         </infinite-loading>
-
       </div>
-      <SpinButton v-if="visibleMessages && visibleMessages.length > 1" class="mt-2" icon-name="trash-alt" label="Delete All" variant="white"
-        @handle="deleteAll" />
-      <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" title="Delete all chat messages?" @confirm="deleteConfirmed" />
+      <SpinButton
+        v-if="visibleMessages && visibleMessages.length > 1"
+        class="mt-2"
+        icon-name="trash-alt"
+        label="Delete All"
+        variant="white"
+        @handle="deleteAll"
+      />
+      <ConfirmModal
+        v-if="showDeleteModal"
+        ref="deleteConfirm"
+        title="Delete all chat messages?"
+        @confirm="deleteConfirmed"
+      />
     </client-only>
   </div>
 </template>
@@ -51,13 +77,13 @@ export default {
       limit: 5,
       show: 0,
       bump: 0,
-      showDeleteModal: false
+      showDeleteModal: false,
     }
   },
   computed: {
     visibleMessages() {
-      //console.log('visibleMessages',this.show, this.messages.length)
-      return this.messages.slice(0, this.show).filter(message => {
+      // console.log('visibleMessages',this.show, this.messages.length)
+      return this.messages.slice(0, this.show).filter((message) => {
         return message !== null
       })
     },
@@ -66,18 +92,18 @@ export default {
     },
     work() {
       const work = this.authStore.work
-      //console.log('chats review work',work?.chatreview)
+      // console.log('chats review work',work?.chatreview)
       return work?.chatreview
     },
     modalOpen() {
       const bodyoverflow = document.body.style.overflow
       return bodyoverflow === 'hidden'
-    }
+    },
   },
   watch: {
     work(newVal, oldVal) {
       // TODO: The page is always going to be visible so why might we not be?
-      console.log('TODO chats review work watch',newVal, oldVal)
+      console.log('TODO chats review work watch', newVal, oldVal)
       if (!this.modalOpen) {
         if (newVal > oldVal) {
           this.clearAndLoad()
@@ -90,7 +116,7 @@ export default {
           }
         }
       }
-    }
+    },
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
@@ -99,7 +125,7 @@ export default {
   },
   methods: {
     loadMore: function ($state) {
-      //console.log('review loadMore', this.show, this.messages.length)
+      // console.log('review loadMore', this.show, this.messages.length)
       if (this.show < this.messages.length) {
         // This means that we will gradually add the messages that we have fetched from the server into the DOM.
         // Doing that means that we will complete our initial render more rapidly and thus appear faster.
@@ -109,7 +135,7 @@ export default {
         const currentCount = this.messages.length
         $state.complete()
 
-        /*this.$store
+        /* this.$store
           .dispatch('chatmessages/fetch', {
             chatid: REVIEWCHAT,
             context: this.context,
@@ -129,10 +155,10 @@ export default {
           .catch(e => {
             $state.complete()
             console.log('Complete on error', e)
-          })*/
+          }) */
       }
     },
-    async reload(){
+    async reload() {
       await this.clearAndLoad()
     },
     async clearAndLoad() {
@@ -142,7 +168,7 @@ export default {
       await this.chatStore.clear()
 
       await this.chatStore.fetchReviewChatsMT(REVIEWCHAT, {
-        limit: this.limit
+        limit: this.limit,
       })
 
       this.bump++
@@ -152,15 +178,15 @@ export default {
       callback()
     },
     async deleteConfirmed() {
-      await this.visibleMessages.forEach(async m => {
+      await this.visibleMessages.forEach(async (m) => {
         if (!m.widerchatreview) {
           await this.$store.dispatch('chatmessages/reject', {
             id: m.id,
-            chatid: null
+            chatid: null,
           })
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>

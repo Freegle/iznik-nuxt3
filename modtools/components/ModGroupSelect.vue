@@ -1,7 +1,18 @@
 <template>
   <div>
-    <label v-if="label" for="communitieslist" :class="labelSrOnly ? 'visually-hidden' : ''">{{ label }}</label>
-    <b-form-select id="communitieslist" v-model="selectedGroup" :size="size" :options="groupOptions" :disabled="disabled" />
+    <label
+      v-if="label"
+      for="communitieslist"
+      :class="labelSrOnly ? 'visually-hidden' : ''"
+      >{{ label }}</label
+    >
+    <b-form-select
+      id="communitieslist"
+      v-model="selectedGroup"
+      :size="size"
+      :options="groupOptions"
+      :disabled="disabled"
+    />
   </div>
 </template>
 <script>
@@ -136,7 +147,7 @@ export default {
       let ret = []
       if (this.listall) {
         ret = Object.values(this.modGroupStore.list).filter((g) => {
-          //console.log('===GroupSelect groups A',g.id)
+          // console.log('===GroupSelect groups A',g.id)
           return g.id
         })
       } else {
@@ -147,7 +158,7 @@ export default {
           if( this.modGroupStore.list[g.id]){
             g.work = this.modGroupStore.list[g.id].work
           }
-        }*/
+        } */
       }
 
       ret = ret || []
@@ -169,7 +180,7 @@ export default {
       return groups
     },
     groupOptions() {
-      //console.log('MGS groupOptions')
+      // console.log('MGS groupOptions')
       const groups = []
 
       if (this.customName) {
@@ -186,8 +197,8 @@ export default {
           text: this.active
             ? '-- My active communities --'
             : this.allMy
-              ? '-- All my communities --'
-              : '-- All communities --',
+            ? '-- All my communities --'
+            : '-- All communities --',
           selected: this.selectedGroup === 0,
         })
       } else {
@@ -219,7 +230,7 @@ export default {
           group.role === 'Owner' ||
           group.role === 'Moderator'
         ) {
-          //console.log('MGS groupOptions group',group.namedisplay, group.work)
+          // console.log('MGS groupOptions group',group.namedisplay, group.work)
           let text = group.namedisplay
 
           if (this.work) {
@@ -284,13 +295,13 @@ export default {
     // MT CHANGED
     if (this.listall) {
       await this.modGroupStore.listMT({
-        grouptype: 'Freegle'
+        grouptype: 'Freegle',
       })
     }
-    //console.log('ModGroupSelect', this.remember, this.modelValue)
+    // console.log('ModGroupSelect', this.remember, this.modelValue)
     if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)
-      //console.log('ModGroupSelect val',this.modelValue,val)
+      // console.log('ModGroupSelect val',this.modelValue,val)
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)

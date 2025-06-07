@@ -8,9 +8,9 @@
 // - which in turn stops useModMessages watch(work) from updating the messages list
 // - until another timed update occurs
 
+import { useMessageStore } from '../../stores/message'
 import { useAuthStore } from '@/stores/auth'
 import { useModGroupStore } from '@/stores/modgroup'
-import { useMessageStore } from '../../stores/message'
 import { useMiscStore } from '@/stores/misc'
 
 // All values need to be reset by one caller of setupModMessages()
@@ -46,27 +46,27 @@ const messages = computed(() => {
   } else {
     messages = messageStore.all
   }
-  //console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
+  // console.log('---messages groupid:', groupid.value, 'messages:', messages.length)
   // We need to sort as otherwise new messages may appear at the end.
   messages.sort((a, b) => {
     if (a.groups && b.groups) {
-      //console.log('---messages sort:', a.groups[0].arrival, b.groups[0].arrival)
+      // console.log('---messages sort:', a.groups[0].arrival, b.groups[0].arrival)
       return (
         new Date(b.groups[0].arrival).getTime() -
         new Date(a.groups[0].arrival).getTime()
       )
     } else {
-      //console.log('###messages sort:', a.arrival, b.arrival)
+      // console.log('###messages sort:', a.arrival, b.arrival)
       return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
     }
   })
-  //console.log('###messages sort:', messages[0]?.groups[0]?.arrival)
+  // console.log('###messages sort:', messages[0]?.groups[0]?.arrival)
   return messages
 })
 
 const visibleMessages = computed(() => {
   const msgs = messages.value
-  //console.log('---visibleMessages', show.value, msgs?.length)
+  // console.log('---visibleMessages', show.value, msgs?.length)
   if (show.value === 0 || !msgs || msgs.length === 0) return []
   return msgs.slice(0, show.value)
 })
@@ -74,7 +74,7 @@ const visibleMessages = computed(() => {
 export function setupModMessages(reset) {
   // Do not include any watch in here as a separate watch is called for each time setupModMessages() is called
 
-  /*watch(group, async (newValue, oldValue) => {
+  /* watch(group, async (newValue, oldValue) => {
     console.log("===useModMessages watch group", newValue?.id, oldValue?.id, groupid.value)
     // We have this watch because we may need to fetch a group that we have remembered.  The mounted()
     // call may happen before we have restored the persisted state, so we can't initiate the fetch there.
@@ -82,7 +82,7 @@ export function setupModMessages(reset) {
       const modGroupStore = useModGroupStore()
       await modGroupStore.get(groupid.value)
     }
-  })*/
+  }) */
 
   // CAREFUL: All refs are remembered from the previous page so one caller has to reset all unused ref
   if (reset) {
@@ -101,11 +101,10 @@ export function setupModMessages(reset) {
     nextAfterRemoved.value = null
 
     distance.value = 10
-
   }
 
   const getMessages = async (workCount) => {
-    //console.log('<><><> getMessages', collection.value, groupid.value, workCount)
+    // console.log('<><><> getMessages', collection.value, groupid.value, workCount)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -116,11 +115,11 @@ export function setupModMessages(reset) {
       collection: collection.value, // Pending also gets PendingOther
       modtools: true,
       summary: false,
-      //limit: Math.max(limit.value, newVal)
+      // limit: Math.max(limit.value, newVal)
     }
     if (workCount) params.limit = Math.max(limit.value, workCount)
-    //console.log('uMM getMessages',params.limit)
-    //params.debug = 'uMM getMessages',
+    // console.log('uMM getMessages',params.limit)
+    // params.debug = 'uMM getMessages',
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.
@@ -157,7 +156,7 @@ export function setupModMessages(reset) {
   })
 
   watch(work, async (newVal, oldVal) => {
-    //console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+    // console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
     // if( collection.value!=='Pending') return
     let doFetch = false
 
@@ -170,7 +169,7 @@ export function setupModMessages(reset) {
     if (bodyoverflow !== 'hidden') {
       if (newVal > oldVal) {
         // There's new stuff to fetch.
-        //console.log('Fetch')
+        // console.log('Fetch')
         doFetch = true
       } else {
         /* In Nuxt 2 miscStore visible was set if we are visible
@@ -183,7 +182,7 @@ export function setupModMessages(reset) {
           console.log('Clear')
           await messageStore.clear()
           doFetch = true
-        }*/
+        } */
       }
 
       if (doFetch) {
@@ -211,6 +210,6 @@ export function setupModMessages(reset) {
     messages,
     visibleMessages,
     work,
-    getMessages
+    getMessages,
   }
 }

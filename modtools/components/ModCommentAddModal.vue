@@ -1,16 +1,25 @@
 <template>
   <div>
-    <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking>
+    <b-modal
+      :id="'modCommentModal-' + user.id"
+      ref="modal"
+      size="lg"
+      no-stacking
+    >
       <template #title class="w-100">
-        Add Note for {{ user.displayname }} <span v-if="groupname">on</span> {{ groupname }}
+        Add Note for {{ user.displayname }} <span v-if="groupname">on</span>
+        {{ groupname }}
       </template>
       <template #default>
         <p>
-          You can add one or more notes about members. They'll appear in a coloured box next to the user.
+          You can add one or more notes about members. They'll appear in a
+          coloured box next to the user.
         </p>
         <p>
-          These comments can be seen by moderators, and also by members who choose to download their data under
-          GDPR. So keep them objective, polite and factual, and without identifiable personal information please.
+          These comments can be seen by moderators, and also by members who
+          choose to download their data under GDPR. So keep them objective,
+          polite and factual, and without identifiable personal information
+          please.
         </p>
         <p>
           <!-- eslint-disable-next-line -->
@@ -28,19 +37,29 @@
         <b-form-input v-model="user10" :placeholder="placeholders[10]" />
         <b-form-input v-model="user11" :placeholder="placeholders[11]" />
         <p class="mt-2">
-          You can choose for this note to be be alerted to other groups, which will put the member in <em>Member->Review</em>
-          if they are an existing member or join a group. Please use this only for serious issues.
+          You can choose for this note to be be alerted to other groups, which
+          will put the member in <em>Member->Review</em>
+          if they are an existing member or join a group. Please use this only
+          for serious issues.
         </p>
-        <OurToggle :value="flag" class="mt-2" :height="30" :width="250" :font-size="14" :sync="true"
-          :labels="{ checked: 'Will alert other groups', unchecked: 'Will not alert other groups' }" variant="modgreen" @change="toggleFlag" />
+        <OurToggle
+          :value="flag"
+          class="mt-2"
+          :height="30"
+          :width="250"
+          :font-size="14"
+          :sync="true"
+          :labels="{
+            checked: 'Will alert other groups',
+            unchecked: 'Will not alert other groups',
+          }"
+          variant="modgreen"
+          @change="toggleFlag"
+        />
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide">
-          Close
-        </b-button>
-        <b-button variant="primary" @click="save">
-          Add
-        </b-button>
+        <b-button variant="white" @click="hide"> Close </b-button>
+        <b-button variant="primary" @click="save"> Add </b-button>
       </template>
     </b-modal>
   </div>
@@ -54,16 +73,16 @@ export default {
   props: {
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     groupid: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     groupname: {
-      type: String
-    }
+      type: String,
+    },
   },
   setup() {
     const { bump, context } = setupModMembers()
@@ -88,9 +107,9 @@ export default {
         'Add a comment about this member here',
         '...and more information here',
         '...and here',
-        '...you get the idea'
+        '...you get the idea',
       ],
-      flag: false
+      flag: false,
     }
   },
   methods: {
@@ -128,20 +147,20 @@ export default {
         user9: this.user9,
         user10: this.user10,
         user11: this.user11,
-        flag: this.flag
+        flag: this.flag,
       })
 
       const userStore = useUserStore()
       await userStore.fetchMT({
         search: this.user.id,
-        emailhistory: true
+        emailhistory: true,
       })
       this.context = null
       this.bump++
 
       this.$emit('added')
       this.hide()
-    }
-  }
+    },
+  },
 }
 </script>

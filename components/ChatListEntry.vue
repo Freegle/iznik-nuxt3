@@ -143,10 +143,22 @@ onMounted(() => {
 
   @include media-breakpoint-up(sm) {
     grid-template-columns: min-content calc(98% - $sticky-banner-height-mobile);
+
+    @media (min-height: $mobile-tall) {
+      grid-template-columns: min-content calc(
+          98% - $sticky-banner-height-mobile-tall
+        );
+    }
   }
 
   @include media-breakpoint-up(md) {
     grid-template-columns: min-content calc(98% - $sticky-banner-height-desktop);
+
+    @media (min-height: $desktop-tall) {
+      grid-template-columns: min-content calc(
+          98% - $sticky-banner-height-desktop-tall
+        );
+    }
   }
 }
 </style>

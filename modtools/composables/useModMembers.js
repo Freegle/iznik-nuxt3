@@ -1,7 +1,7 @@
 // Simplified from MT2 mixin/modMembersPage
 
-import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '../stores/member'
+import { useModGroupStore } from '@/stores/modgroup'
 
 const bump = ref(0)
 const busy = ref(false)
@@ -22,9 +22,8 @@ const nextAfterRemoved = ref(null)
 
 const distance = ref(10)
 
-
 const members = computed(() => {
-  //console.log('UMM members',groupid.value, bump.value)
+  // console.log('UMM members',groupid.value, bump.value)
   const memberStore = useMemberStore()
   let members
 
@@ -32,7 +31,7 @@ const members = computed(() => {
     members = memberStore.getByGroup(groupid.value)
   } else {
     members = Object.values(memberStore.list)
-    //console.log('UMM members all list', members.length)
+    // console.log('UMM members all list', members.length)
   }
   if (!members) {
     return []
@@ -55,25 +54,25 @@ const members = computed(() => {
     })
   }
 
-  //console.log('UMM members sorted', members.length)
-  //for( const member of members){
+  // console.log('UMM members sorted', members.length)
+  // for( const member of members){
   //  console.log('UMM', member)
-  //}
+  // }
   return members
 })
 
 const visibleMembers = computed(() => {
   const mbrs = members.value
-  //console.log('UMM visibleMembers', show.value, mbrs?.length)
+  // console.log('UMM visibleMembers', show.value, mbrs?.length)
   if (show.value === 0 || !mbrs || mbrs.length === 0) return []
   return mbrs.slice(0, show.value)
 })
 
 const loadMore = async function ($state) {
-  //console.log('UMM loadMore', show.value, groupid.value, members.value.length, visibleMembers.value.length)
-  //console.log('UMM loadMore', context.value)
+  // console.log('UMM loadMore', show.value, groupid.value, members.value.length, visibleMembers.value.length)
+  // console.log('UMM loadMore', context.value)
   if (show.value < members.value.length) {
-    //console.log('UMM loadMore inc show')
+    // console.log('UMM loadMore inc show')
     show.value++
     $state.loaded()
   } else {
@@ -81,7 +80,7 @@ const loadMore = async function ($state) {
     if (limit.value === distance.value) {
       limit.value += distance.value
     }
-    //console.log('UMM actually loadMore show', show.value, 'groupid', groupid.value, 'members', members.value.length, 'limit', limit.value, 'search', search.value, 'filter', filter.value)
+    // console.log('UMM actually loadMore show', show.value, 'groupid', groupid.value, 'members', members.value.length, 'limit', limit.value, 'search', search.value, 'filter', filter.value)
     const memberStore = useMemberStore()
     const params = {
       groupid: groupid.value,
@@ -93,37 +92,38 @@ const loadMore = async function ($state) {
       search: search.value,
       filter: filter.value,
     }
-    //console.log('UMM fetchMembers', params)
+    // console.log('UMM fetchMembers', params)
     await memberStore.fetchMembers(params)
-    //console.log('UMM received', received)
-    //console.log('UMM got', members.value.length)
+    // console.log('UMM received', received)
+    // console.log('UMM got', members.value.length)
     context.value = memberStore.context
 
-    if (show.value < members.value.length) { // Just inc by one rather than set to members.value.length
+    if (show.value < members.value.length) {
+      // Just inc by one rather than set to members.value.length
       show.value++
     }
     if (show.value > members.value.length) {
       show.value = members.value.length
     }
-    //if (received === 0 || (show.value === members.value.length)) {
-    /*if (received === 0) { // Search comes in one at a time
+    // if (received === 0 || (show.value === members.value.length)) {
+    /* if (received === 0) { // Search comes in one at a time
       // console.log('UMM loadMore COMPLETE', received)
       $state.complete()
     }
     else {
       $state.loaded()
-    }*/
+    } */
     if (membersstart === members.value.length) {
-      //bump.value++
+      // bump.value++
       $state.complete()
     } else {
       $state.loaded()
     }
-    //console.log('UMM end', show.value, members.value.length)
+    // console.log('UMM end', show.value, members.value.length)
   }
 }
 
-/*watch(groupid, async (newVal) => {
+/* watch(groupid, async (newVal) => {
   console.log("UMM watch groupid", newVal)
   context.value = null
   show.value = 0
@@ -136,7 +136,7 @@ const loadMore = async function ($state) {
     group.value = await modGroupStore.get(newVal)
   }
   bump.value++
-})*/
+}) */
 
 export function setupModMembers(reset) {
   // CAREFUL: All refs are remembered from the previous page so one caller has to reset all unused ref
@@ -172,7 +172,7 @@ export function setupModMembers(reset) {
     console.log('>>>>UMM exception', e.message)
     return 0
   }
-})*/
+}) */
 
   return {
     bump, // Y
@@ -194,6 +194,6 @@ export function setupModMembers(reset) {
     members,
     visibleMembers, // Y
     // work, // N
-    loadMore // Y
+    loadMore, // Y
   }
 }

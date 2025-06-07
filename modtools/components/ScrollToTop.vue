@@ -15,12 +15,12 @@ export default {
     prepend: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
-  data: function() {
+  data: function () {
     return {
-      scrollY: 0
+      scrollY: 0,
     }
   },
   mounted() {
@@ -28,7 +28,7 @@ export default {
       window.addEventListener('scroll', this.handleScroll)
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (process.client) {
       window.removeEventListener('scroll', this.handleScroll)
       this.scrollY = 0
@@ -40,8 +40,8 @@ export default {
     },
     scrollToTop() {
       window.scrollTo(0, 0)
-    }
-  }
+    },
+  },
 }
 </script>
 <style>

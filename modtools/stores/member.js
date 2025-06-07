@@ -26,9 +26,10 @@ export const useMemberStore = defineStore({
       this.rawindex = 0
     },
     reviewHeld(params) {
-      Object.keys(this.list).forEach(key => {
+      Object.keys(this.list).forEach((key) => {
         if (
-          parseInt(this.list[key].membershipid) === parseInt(params.membershipid)
+          parseInt(this.list[key].membershipid) ===
+          parseInt(params.membershipid)
         ) {
           this.list[key].heldby = params.heldby
         }
@@ -55,30 +56,28 @@ export const useMemberStore = defineStore({
       delete this.list[params.id]
     },
     async fetchMembers(params) {
-      //console.log('useMemberStore fetchMembers',params)
+      // console.log('useMemberStore fetchMembers',params)
       let received = 0
       // Watch out for the store being cleared under the feet of this fetch. If that happens then we throw away the
       // results.
       const instance = this.instance
 
-      //if (!params.context) {
+      // if (!params.context) {
       //  params.context = this.context
-      //}
+      // }
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
       }
-      //if (params.context) {
+      // if (params.context) {
       //  console.log('fetchMembers params.context', params.context)
-      //}
+      // }
 
-      const {
-        members,
-        context,
-        ratings
-      } = await api(this.config).memberships.fetchMembers(params)
+      const { members, context, ratings } = await api(
+        this.config
+      ).memberships.fetchMembers(params)
 
-      //console.log('fetchMembers', this.instance, instance, members.length)
+      // console.log('fetchMembers', this.instance, instance, members.length)
 
       if (this.instance === instance) {
         for (let i = 0; i < members.length; i++) {
@@ -86,8 +85,8 @@ export const useMemberStore = defineStore({
           members[i].collection = params.collection
         }
         received += members.length
-        members.forEach(member => {
-          //console.log('member',member.displayname,member.id)
+        members.forEach((member) => {
+          // console.log('member',member.displayname,member.id)
           member.rawindex = this.rawindex++
           this.list[member.id] = member
         })
@@ -98,18 +97,18 @@ export const useMemberStore = defineStore({
 
         this.context = context
       }
-      //console.log('useMemberStore fetchMembers this.list',this.list)
+      // console.log('useMemberStore fetchMembers this.list',this.list)
       return received
     },
     async fetch(params) {
       // Don't log errors on fetches of individual members
-      //console.log('useMemberStore fetch', params)
+      // console.log('useMemberStore fetch', params)
       const { member } = await api(this.config).memberships.fetch(params)
-      //const { member } = await this.$api.memberships.fetch(params, data => {
+      // const { member } = await this.$api.memberships.fetch(params, data => {
       //  return data.ret !== 3
-      //})
+      // })
       this.list[member.id] = member
-      //console.log('useMemberStore fetch this.list',this.list)
+      // console.log('useMemberStore fetch this.list',this.list)
     },
 
     async spamignore(params) {
@@ -117,11 +116,12 @@ export const useMemberStore = defineStore({
         id: params.userid,
         groupid: params.groupid,
         suspectcount: 0,
-        suspectreason: null
+        suspectreason: null,
       })
     },
 
-    async remove(userid, groupid, membershipid) { // membershipid may be undefined
+    async remove(userid, groupid, membershipid) {
+      // membershipid may be undefined
       // Remove approved member.
       this.context = null
       await api(this.config).memberships.remove(userid, groupid)
@@ -133,7 +133,7 @@ export const useMemberStore = defineStore({
       } else {
         let foundid = false
         for (const membership of Object.values(this.list)) {
-          if ((membership.userid === userid) && (membership.groupid === groupid)) {
+          if (membership.userid === userid && membership.groupid === groupid) {
             foundid = membership.id
           }
         }
@@ -162,26 +162,32 @@ export const useMemberStore = defineStore({
         userid: params.userid,
         groupid: params.groupid,
         happinessid: params.happinessid,
-        action: 'HappinessReviewed'
+        action: 'HappinessReviewed',
       })
     },
     async reviewHold(params) {
-      await api(this.config).memberships.reviewHold(params.membershipid, params.groupid)
+      await api(this.config).memberships.reviewHold(
+        params.membershipid,
+        params.groupid
+      )
       const authStore = useAuthStore()
       const me = authStore.user
       this.reviewHeld({
         heldby: {
-          id: me.id
+          id: me.id,
         },
-        membershipid: params.membershipid
+        membershipid: params.membershipid,
       })
     },
 
     async reviewRelease(params) {
-      await api(this.config).memberships.reviewRelease(params.membershipid, params.groupid)
+      await api(this.config).memberships.reviewRelease(
+        params.membershipid,
+        params.groupid
+      )
       this.reviewHeld({
         heldby: null,
-        membershipid: params.membershipid
+        membershipid: params.membershipid,
       })
     },
     async askMerge(params) {
@@ -195,19 +201,19 @@ export const useMemberStore = defineStore({
   },
   getters: {
     getByGroup: (state) => (groupid) => {
-      const ret = Object.values(state.list).filter(member => {
+      const ret = Object.values(state.list).filter((member) => {
         return parseInt(member.groupid) === parseInt(groupid)
       })
-      //console.log('memberStore:',groupid, ret.length)
+      // console.log('memberStore:',groupid, ret.length)
       return ret
     },
     get: (state) => (id) => {
-      const ret = Object.values(state.list).filter(member => {
+      const ret = Object.values(state.list).filter((member) => {
         return parseInt(member.id) === parseInt(id)
       })
       if (ret) return ret[0]
       return ret
     },
-    //getRatings: state => state.ratings
+    // getRatings: state => state.ratings
   },
 })

@@ -1,73 +1,44 @@
 <template>
   <div>
-    <b-modal ref="modal" id="stdmsgmodal" :title="title" size="lg" no-stacking>
+    <b-modal id="stdmsgmodal" ref="modal" :title="title" size="lg" no-stacking>
       <template #default>
         <label>Title</label>
         <b-form-input v-model="stdmsg.title" />
         <label>Action</label>
         <b-form-select v-model="stdmsg.action" :options="options" />
         <label>Edit Text</label>
-        <b-form-select v-if="stdmsg.action === 'Edit'" v-model="stdmsg.edittext">
-          <option value="Unchanged">
-            Unchanged
-          </option>
-          <option value="Correct Case">
-            Correct Case
-          </option>
+        <b-form-select
+          v-if="stdmsg.action === 'Edit'"
+          v-model="stdmsg.edittext"
+        >
+          <option value="Unchanged">Unchanged</option>
+          <option value="Correct Case">Correct Case</option>
         </b-form-select>
         <label>Autosend?</label>
         <b-form-select v-model="stdmsg.autosend">
-          <option :value="0">
-            Edit before send
-          </option>
-          <option :value="1">
-            Send Immediately
-          </option>
+          <option :value="0">Edit before send</option>
+          <option :value="1">Send Immediately</option>
         </b-form-select>
         <label>How often do you use this?</label>
         <b-form-select v-model="stdmsg.rarelyused">
-          <option :value="0">
-            Frequently
-          </option>
-          <option :value="1">
-            Rarely
-          </option>
+          <option :value="0">Frequently</option>
+          <option :value="1">Rarely</option>
         </b-form-select>
         <label>Change Moderation Status *</label>
         <b-form-select v-model="stdmsg.newmodstatus">
-          <option value="UNCHANGED">
-            Unchanged
-          </option>
-          <option value="MODERATED">
-            Moderated
-          </option>
-          <option value="DEFAULT">
-            Group Settings
-          </option>
-          <option value="PROHIBITED">
-            Can't Post
-          </option>
-          <option value="UNMODERATED">
-            Unmoderated
-          </option>
+          <option value="UNCHANGED">Unchanged</option>
+          <option value="MODERATED">Moderated</option>
+          <option value="DEFAULT">Group Settings</option>
+          <option value="PROHIBITED">Can't Post</option>
+          <option value="UNMODERATED">Unmoderated</option>
         </b-form-select>
         <label>Change Delivery Settings *</label>
         <b-form-select v-model="stdmsg.newdelstatus">
-          <option value="UNCHANGED">
-            Unchanged
-          </option>
-          <option value="DIGEST">
-            Daily Digest
-          </option>
-          <option value="NONE">
-            Web Only
-          </option>
-          <option value="SINGLE">
-            Individual Emails
-          </option>
-          <option value="ANNOUNCEMENT">
-            Special Notices
-          </option>
+          <option value="UNCHANGED">Unchanged</option>
+          <option value="DIGEST">Daily Digest</option>
+          <option value="NONE">Web Only</option>
+          <option value="SINGLE">Individual Emails</option>
+          <option value="ANNOUNCEMENT">Special Notices</option>
         </b-form-select>
         <label>Subject Prefix</label>
         <b-form-input v-model="stdmsg.subjpref" />
@@ -75,12 +46,8 @@
         <b-form-input v-model="stdmsg.subjsuff" />
         <label>Insert Text</label>
         <b-form-select v-model="stdmsg.insert">
-          <option value="Top">
-            Top
-          </option>
-          <option value="Bottom">
-            Bottom
-          </option>
+          <option value="Top">Top</option>
+          <option value="Bottom">Bottom</option>
         </b-form-select>
         <label>Message Body</label>
         <b-form-textarea v-model="stdmsg.body" rows="10" />
@@ -96,7 +63,12 @@
             <b-button variant="white" class="mr-2" @click="hide">
               Cancel
             </b-button>
-            <b-button v-if="!locked" variant="primary" :disabled="!stdmsg.title" @click="save">
+            <b-button
+              v-if="!locked"
+              variant="primary"
+              :disabled="!stdmsg.title"
+              @click="save"
+            >
               <span v-if="id">Save</span>
               <span v-else>Add</span>
             </b-button>
@@ -107,28 +79,28 @@
   </div>
 </template>
 <script>
-import { useOurModal } from '~/composables/useOurModal'
 import { useModConfigStore } from '../stores/modconfig'
 import { useStdmsgStore } from '../stores/stdmsg'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
+  props: {
+    id: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+    types: {
+      type: Array,
+      required: false,
+      default: null,
+    },
+  },
   setup() {
     const modConfigStore = useModConfigStore()
     const stdmsgStore = useStdmsgStore()
     const { modal, hide } = useOurModal()
     return { modConfigStore, stdmsgStore, modal, hide }
-  },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null
-    },
-    types: {
-      type: Array,
-      required: false,
-      default: null
-    }
   },
   data: function () {
     const ret = {
@@ -145,12 +117,12 @@ export default {
         { value: 'Leave Approved Message', text: 'Reply' },
         { value: null, text: '-- Approved Members --' },
         { value: 'Delete Approved Member', text: 'Remove' },
-        { value: 'Leave Approved Member', text: 'Reply' }
-      ]
+        { value: 'Leave Approved Member', text: 'Reply' },
+      ],
     }
 
     if (this.types) {
-      ret.options = ret.options.filter(o => this.types.includes(o.value))
+      ret.options = ret.options.filter((o) => this.types.includes(o.value))
     }
 
     return ret
@@ -173,9 +145,9 @@ export default {
       } else {
         // Existing - find it in the config.
         return this.config
-          ? this.config.stdmsgs.find(s => {
-            return s.id === this.id
-          })
+          ? this.config.stdmsgs.find((s) => {
+              return s.id === this.id
+            })
           : null
       }
     },
@@ -187,7 +159,7 @@ export default {
       } else {
         return 'Edit ' + this.stdmsg.title
       }
-    }
+    },
   },
   methods: {
     async show() {
@@ -204,11 +176,11 @@ export default {
       if (!this.id) {
         await this.stdmsgStore.add({
           ...this.stdmsg,
-          configid: this.config.id
+          configid: this.config.id,
         })
       } else {
         await this.stdmsgStore.update({
-          ...this.stdmsg
+          ...this.stdmsg,
         })
       }
 
@@ -217,12 +189,12 @@ export default {
     async deleteIt() {
       await this.stdmsgStore.delete({
         id: this.stdmsg.id,
-        configid: this.config.id
+        configid: this.config.id,
       })
 
       this.hide()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

@@ -12,14 +12,14 @@
         volunteers for a natter. Link will be here 2pm-5pm.</ExternalLink>
     </div>
     <div v-else class="d-flex">
-      ZoomStock Thursdays @ 2pm-5pm, next {{ timeago(fromNow) }}. Join other volunteers for a natter. Link will be here.
+      ZoomStock Thursdays @ 2pm-5pm, next {{ timeago(fromNow) }}. Join other
+      volunteers for a natter. Link will be here.
     </div>
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import { useMiscStore } from '~/stores/misc'
-
 
 const DAY_OF_WEEK = 4
 const START = '1400'
@@ -31,28 +31,24 @@ export default {
     colorClass: {
       type: String,
       required: false,
-      default: 'text-white'
-    }
-  },
-  data: function () {
-    return {
-      nextOne: null
-    }
+      default: 'text-white',
+    },
   },
   setup() {
     const miscStore = useMiscStore()
     return { miscStore }
   },
+  data: function () {
+    return {
+      nextOne: null,
+    }
+  },
   computed: {
     timeNow() {
-      return this.miscStore.time
-        ? dayjs().format('HHmm')
-        : ''
+      return this.miscStore.time ? dayjs().format('HHmm') : ''
     },
     fromNow() {
-      return this.miscStore.time && this.nextOne
-        ? this.nextOne
-        : null
+      return this.miscStore.time && this.nextOne ? this.nextOne : null
     },
     today() {
       const d = dayjs()
@@ -64,7 +60,7 @@ export default {
         this.timeNow >= START &&
         this.timeNow <= END
       )
-    }
+    },
   },
   mounted() {
     let d = dayjs().hour(STARTHOUR).minute(0).second(0)
@@ -75,6 +71,6 @@ export default {
       d = d.add(1, 'week').day(DAY_OF_WEEK)
     }
     this.nextOne = d
-  }
+  },
 }
 </script>

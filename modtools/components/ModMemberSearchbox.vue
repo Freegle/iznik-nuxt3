@@ -1,6 +1,12 @@
 <template>
   <b-input-group class="flex max">
-    <b-form-input v-model="term" type="text" placeholder="Search email/name/id" autocapitalize="none" @keyup.native.enter="dosearch" />
+    <b-form-input
+      v-model="term"
+      type="text"
+      placeholder="Search email/name/id"
+      autocapitalize="none"
+      @keyup.native.enter="dosearch"
+    />
     <slot name="append">
       <b-button variant="primary" @click="dosearch">
         <v-icon icon="search" />
@@ -10,18 +16,18 @@
 </template>
 <script>
 export default {
+  props: {
+    search: {
+      type: String,
+      required: false,
+      default: null,
+    },
+  },
   emits: ['search'],
   data: function () {
     return {
       term: null,
     }
-  },
-  props: {
-    search: {
-      type: String,
-      required: false,
-      default: null
-    },
   },
   mounted() {
     this.term = this.search
@@ -29,8 +35,8 @@ export default {
   methods: {
     dosearch() {
       this.$emit('search', this.term)
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

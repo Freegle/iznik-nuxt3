@@ -1,7 +1,11 @@
 <template>
   <div>
     <ScrollToTop />
-    <NoticeMessage v-if="!stories || !stories.length" variant="info" class="mt-2">
+    <NoticeMessage
+      v-if="!stories || !stories.length"
+      variant="info"
+      class="mt-2"
+    >
       There are no stories to review at the moment.
     </NoticeMessage>
     <div v-for="story in stories" :key="'story-' + story.id" class="mt-2">
@@ -29,7 +33,7 @@ export default {
       }
 
       return []
-    }
+    },
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
@@ -40,6 +44,6 @@ export default {
     })
   },
 
-  methods: {}
+  methods: {},
 }
 </script>

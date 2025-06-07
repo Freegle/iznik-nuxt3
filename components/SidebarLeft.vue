@@ -73,10 +73,23 @@ defineProps({
     100vh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
   );
 
+  @media (min-height: $desktop-tall) {
+    height: calc(
+      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 75px - 10px
+    );
+  }
+
   @supports (height: 100dvh) {
     height: calc(
       100dvh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
     );
+
+    @media (min-height: $desktop-tall) {
+      height: calc(
+        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 75px -
+          10px
+      );
+    }
   }
 
   display: grid;
@@ -93,5 +106,9 @@ defineProps({
 .sidebar__botleft {
   position: fixed;
   bottom: $sticky-banner-height-desktop;
+
+  @media (min-height: $desktop-tall) {
+    bottom: $sticky-banner-height-desktop-tall;
+  }
 }
 </style>

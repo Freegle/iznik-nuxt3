@@ -1,12 +1,16 @@
 <template>
   <div v-if="RecentCounts">
-    <p v-if="loading" class="text-faded pulsate">
-      Loading...
-    </p>
+    <p v-if="loading" class="text-faded pulsate">Loading...</p>
     <p v-else>
       During this time there have been
-      <strong>{{ pluralise('new post', RecentCounts.newmessages, true) }}</strong> and
-      <strong>{{ pluralise('new member', RecentCounts.newmembers, true) }}</strong>.
+      <strong>{{
+        pluralise('new post', RecentCounts.newmessages, true)
+      }}</strong>
+      and
+      <strong>{{
+        pluralise('new member', RecentCounts.newmembers, true)
+      }}</strong
+      >.
     </p>
   </div>
 </template>
@@ -19,8 +23,8 @@ export default {
   data: function () {
     return {
       askfor: ['RecentCounts'],
-      RecentCounts: null
+      RecentCounts: null,
     }
-  }
+  },
 }
 </script>

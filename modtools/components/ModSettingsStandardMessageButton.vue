@@ -3,7 +3,12 @@
     <b-button :variant="variant(stdmsg)" class="mb-1 mr-2" @click="click">
       <v-icon :icon="icon(stdmsg)" /> {{ stdmsg.title }}
     </b-button>
-    <ModSettingsStandardMessageModal v-if="showModal" ref="stdMsgModal" :id="stdmsg.id" @hidden="showModal = false" />
+    <ModSettingsStandardMessageModal
+      v-if="showModal"
+      :id="stdmsg.id"
+      ref="stdMsgModal"
+      @hidden="showModal = false"
+    />
   </div>
 </template>
 <script>
@@ -15,19 +20,19 @@ export default {
   props: {
     stdmsg: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data: function () {
     return {
-      showModal: false
+      showModal: false,
     }
   },
   methods: {
     click() {
       this.showModal = true
       this.$refs.stdMsgModal?.show()
-    }
-  }
+    },
+  },
 }
 </script>

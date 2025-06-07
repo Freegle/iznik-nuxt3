@@ -1,14 +1,20 @@
 <template>
   <div>
-    <b-modal ref="modal" :id="'modLogsModal-' + userid + '-' + modmailsonly" :title="title" size="xl" no-stacking>
+    <b-modal
+      :id="'modLogsModal-' + userid + '-' + modmailsonly"
+      ref="modal"
+      :title="title"
+      size="xl"
+      no-stacking
+    >
       <template #default>
         <NoticeMessage v-if="!busy && !logs.length" variant="info">
           There are no logs to show.
         </NoticeMessage>
         <div v-else>
           <p class="text-muted">
-            Some old logs are removed to save space: login/logout after 1 year, bounces over 90 days, logs about deleted messages,
-            deleted users.
+            Some old logs are removed to save space: login/logout after 1 year,
+            bounces over 90 days, logs about deleted messages, deleted users.
           </p>
           {{ logs.length }}
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
@@ -23,23 +29,32 @@
       </template>
 
       <template #footer>
-        <b-button variant="primary" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="primary" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </div>
 </template>
 
 <script>
-import { useOurModal } from '~/composables/useOurModal'
-import InfiniteLoading from '~/components/InfiniteLoading'
 import { useLogsStore } from '../stores/logs'
 import { useUserStore } from '../../stores/user'
 import { useMemberStore } from '../stores/member'
+import InfiniteLoading from '~/components/InfiniteLoading'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: { InfiniteLoading },
+  props: {
+    userid: {
+      type: Number,
+      required: true,
+    },
+    modmailsonly: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   setup() {
     const userStore = useUserStore()
     const logsStore = useLogsStore()
@@ -47,21 +62,10 @@ export default {
     const { modal, hide } = useOurModal(227)
     return { logsStore, memberStore, userStore, modal, hide }
   },
-  props: {
-    userid: {
-      type: Number,
-      required: true
-    },
-    modmailsonly: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
-  },
   data: function () {
     return {
       busy: false,
-      context: null
+      context: null,
     }
   },
   computed: {
@@ -98,7 +102,7 @@ export default {
       ret += this.user ? 'for ' + this.user.displayname : ''
 
       return ret
-    }
+    },
   },
   mounted() {
     this.logsStore.clear()
@@ -118,7 +122,7 @@ export default {
         logtype: 'user',
         userid: this.userid,
         context: this.context,
-        modmailsonly: this.modmailsonly
+        modmailsonly: this.modmailsonly,
       })
 
       if (this.logs.length === currentCount) {
@@ -129,7 +133,7 @@ export default {
       }
 
       this.busy = false
-    }
-  }
+    },
+  },
 }
 </script>

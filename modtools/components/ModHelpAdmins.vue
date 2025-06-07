@@ -4,11 +4,12 @@
       Hide Help
     </b-button>
     <p>
-      ADMINs are sent to everyone on your group, no matter what their mail settings are, including members
-      flagged as bouncing.
+      ADMINs are sent to everyone on your group, no matter what their mail
+      settings are, including members flagged as bouncing.
     </p>
     <p>
-      Sometimes you will see centrally suggested ADMINs here for you to edit/approve/reject as you choose.
+      Sometimes you will see centrally suggested ADMINs here for you to
+      edit/approve/reject as you choose.
     </p>
     <p>
       Read more about ADMINs
@@ -30,5 +31,4 @@ const id = ref('admins')
 onMounted(() => {
   hide()
 })
-
 </script>

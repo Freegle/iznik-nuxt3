@@ -1,34 +1,32 @@
 <template>
   <div />
 </template>
-
 <script>
-import pluralize from 'pluralize'
 export default {
   props: {
     groupid: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     groupName: {
       type: String,
-      required: true
+      required: true,
     },
     start: {
       type: Date,
-      required: true
+      required: true,
     },
     end: {
       type: Date,
-      required: true
-    }
+      required: true,
+    },
   },
   data: function () {
     return {
       askfor: null,
       loading: false,
-      grouprequired: false
+      grouprequired: false,
     }
   },
   watch: {
@@ -40,7 +38,7 @@ export default {
     },
     end(newVal, oldVal) {
       this.maybeFetch()
-    }
+    },
   },
   mounted() {
     this.fetch()
@@ -71,16 +69,15 @@ export default {
           end: this.end.toISOString(),
           allgroups: !this.groupid,
           group: this.groupid > 0 ? this.groupid : null,
-          systemwide: this.groupid < 0
+          systemwide: this.groupid < 0,
         })
 
-        Object.keys(res).forEach(comp => {
+        Object.keys(res).forEach((comp) => {
           this[comp] = res[comp]
         })
-
       }
       this.loading = false
     },
-  }
+  },
 }
 </script>

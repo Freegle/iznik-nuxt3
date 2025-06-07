@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash.clonedeep'
+import { defineStore } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
-import { defineStore } from 'pinia'
 import api from '~/api'
 
 export const useModGroupStore = defineStore({
@@ -10,7 +10,7 @@ export const useModGroupStore = defineStore({
     list: {},
     getting: [], // To avoid repeat gettings
     allGroups: {},
-    received: false
+    received: false,
   }),
   actions: {
     init(config) {
@@ -22,8 +22,9 @@ export const useModGroupStore = defineStore({
       this.getting = []
       this.received = false
     },
-    getModGroups() { // Do not clear groups info but (start to) get all again
-      //console.log('--- uMGS getModGroups')
+    getModGroups() {
+      // Do not clear groups info but (start to) get all again
+      // console.log('--- uMGS getModGroups')
       const authStore = useAuthStore()
       const me = authStore.user
       let myGroups = []
@@ -45,7 +46,7 @@ export const useModGroupStore = defineStore({
         })
       }
 
-      //this.clear()
+      // this.clear()
       this.getting = []
       const self = this
       for (const g of myGroups) {
@@ -54,7 +55,7 @@ export const useModGroupStore = defineStore({
       for (const g of myGroups) {
         this.fetchGroupMT(g.id) // This returns immediately so non-blocking
       }
-      //console.log('--- uMGS getModGroups DONE', this.getting)
+      // console.log('--- uMGS getModGroups DONE', this.getting)
     },
 
     // Called by getModGroups at page mount to get mod's groups
@@ -62,15 +63,24 @@ export const useModGroupStore = defineStore({
     // And called to reload after any changes
     // (still may have duplicate requests at page start if fetchIfNeedBeMT too quick)
     async fetchGroupMT(id) {
-      if (!id) { console.error('fetchGroupMT with zero id'); return }
+      if (!id) {
+        console.error('fetchGroupMT with zero id')
+        return
+      }
       const groupStore = useGroupStore()
-      //console.log('--- uMGS fetchGroupMT', id)
+      // console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
       const sponsors = true
       const showmods = true
       const tnkey = true
 
-      const group = await api(this.config).group.fetchGroupMT(id, polygon, showmods, sponsors, tnkey)
+      const group = await api(this.config).group.fetchGroupMT(
+        id,
+        polygon,
+        showmods,
+        sponsors,
+        tnkey
+      )
       if (group) {
         const ret = await api(this.config).session.fetch({
           webversion: this.config.public.BUILD_DATE,
@@ -79,14 +89,14 @@ export const useModGroupStore = defineStore({
         if (ret && ret.groups) {
           const g = ret.groups.find((g) => g.id === group.id)
           if (g && g.work) {
-            //console.log('useGroupStore g.work',g.work)
+            // console.log('useGroupStore g.work',g.work)
             group.work = g.work
           }
         }
         this.list[group.id] = group
         groupStore.list[group.id] = group // Set in root group store as well
       }
-      //console.log('=== uMGS fetchGroupMT', id, group !== null)
+      // console.log('=== uMGS fetchGroupMT', id, group !== null)
       const gettingix = this.getting.indexOf(id)
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
       if (this.getting.length === 0) {
@@ -96,7 +106,7 @@ export const useModGroupStore = defineStore({
     async listMT(params) {
       console.log('uMGS listMT implemented: getting allGroups')
       const groups = await api(this.config).group.listMT(params)
-      //this.list = {}
+      // this.list = {}
       this.allGroups = {}
       if (groups) {
         groups.forEach((g) => {
@@ -108,23 +118,24 @@ export const useModGroupStore = defineStore({
       if (!id) return
       if (this.list[id]) return
       if (this.getting.includes(id)) {
-        //console.error('uMGS fetchIfNeedBeMT getting', id)
+        // console.error('uMGS fetchIfNeedBeMT getting', id)
         const until = (predFn) => {
-          const poll = (done) => (predFn() ? done() : setTimeout(() => poll(done), 100))
+          const poll = (done) =>
+            predFn() ? done() : setTimeout(() => poll(done), 100)
           return new Promise(poll)
         }
         const self = this
         await until(() => self.list[id]) // Wait until group has arrived
-        //console.error('uMGS fetchIfNeedBeMT GOT', this.list[id])
+        // console.error('uMGS fetchIfNeedBeMT GOT', this.list[id])
         return
       }
-      //console.error('uMGS fetchIfNeedBeMT get', id)
+      // console.error('uMGS fetchIfNeedBeMT get', id)
       this.getting.push(id)
       await this.fetchGroupMT(id)
     },
 
     async updateMT(params) {
-      //console.log('useModGroupStore updateMT', params)
+      // console.log('useModGroupStore updateMT', params)
       await api(this.config).group.patch(params)
       await this.fetchGroupMT(params.id)
     },
@@ -134,11 +145,11 @@ export const useModGroupStore = defineStore({
       const idwas = id
       id = parseInt(id)
       if (!id) {
-        //console.error('uMGS id not present', idwas)
+        // console.error('uMGS id not present', idwas)
         return null
       }
       const g = state.list[id] ? state.list[id] : null
-      //console.log('uMGS get', id, g)
+      // console.log('uMGS get', id, g)
       // OK if not found initially as it should appear soon enough
       // if (!g) console.error('uMGS group not found for id', id)
       return g
@@ -147,6 +158,5 @@ export const useModGroupStore = defineStore({
       if (!id) return null
       return state.allGroups[id] ? state.allGroups[id] : null
     },
-
-  }
+  },
 })

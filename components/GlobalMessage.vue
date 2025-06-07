@@ -1,7 +1,7 @@
 <template>
   <div>
     <PrivacyUpdate />
-    <div v-if="oxfordshire">
+    <div v-if="relevantGroup">
       <b-card v-if="show">
         <div class="grid">
           <div class="hide">
@@ -16,23 +16,21 @@
             </b-button>
           </div>
           <div class="banner">
-            <b-img
-              lazy
-              alt="Brand The Bus"
-              src="https://images-oxfordbus.passenger-website.com/inline-images/1024x512%20Logos%20only_0.png"
-              style="width: 200px"
-              class="rounded mr-2"
-            />
             <div>
-              <p class="header--size2 mb-0">Please vote for us!</p>
-              <p>Help Freegle get free ads on the side of Oxfordshire buses!</p>
+              <p class="header--size2 mb-0">
+                Quick survey - win a £25 voucher!
+              </p>
+              <p>
+                We're asking freeglers on Wandsworth a few questions. Can you
+                help?
+              </p>
               <b-button
                 variant="primary"
                 size="lg"
-                href="https://forms.office.com/Pages/ResponsePage.aspx?id=G4CaewiZuk6gbSGK0YIk47DitQdE945DlWwLZDtsWnBUNDNNNURMNUxEWVY3WERZMENFN1NZRUxCUSQlQCN0PWcu"
+                href="https://ilovefreegle.org/shortlink/WandsworthSurvey"
                 target="_blank"
               >
-                Click to vote - we're Entry 61
+                Click to open survey
               </b-button>
             </div>
           </div>
@@ -45,64 +43,62 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
-import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
+const authStore = useAuthStore()
 
-const warningid = 'hideglobalwarning202503072'
+const warningid = ref('hideglobalwarning20250530')
 
-const oxfordshire = computed(() => {
-  // Is the current date before 1st April 2025?
+const relevantGroup = computed(() => {
   const now = new Date()
-  const apr2025 = new Date('2025-04-01')
+  const active = new Date('2025-06-22')
 
-  if (now >= apr2025) {
+  if (now >= active) {
     return false
   }
 
   let ret = false
 
-  const groupids = [
-    21555, 21671, 21579, 21694, 21317, 21464, 21324, 21235, 21256,
-  ]
+  const groupids = [126719]
 
-  // Use the myGroups computed from useMe composable for consistency
-  const { myGroups } = useMe()
+  const myGroups = authStore.groups
 
-  if (myGroups.value && myGroups.value.length) {
-    myGroups.value.forEach((g) => {
-      if (groupids.includes(g.id)) {
-        // Note: myGroups uses id, not groupid
+  myGroups.forEach((g) => {
+    if (groupids.includes(g.groupid)) {
+      // If joined since 2024-09-01
+      if (new Date(g.added).getTime() >= new Date('2024-09-01').getTime()) {
         ret = true
       }
-    })
-  }
+    }
+  })
 
   return ret
 })
 
 const show = computed(() => {
-  return !miscStore?.get(warningid)
+  return !miscStore?.get(warningid.value)
 })
 
 const hideIt = (e) => {
   e.preventDefault()
   miscStore.set({
-    key: warningid,
+    key: warningid.value,
     value: true,
   })
 }
 
 const showit = () => {
   miscStore.set({
-    key: warningid,
+    key: warningid.value,
     value: false,
   })
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions.scss';
 @import 'bootstrap/scss/_variables.scss';

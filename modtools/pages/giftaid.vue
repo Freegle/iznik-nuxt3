@@ -4,26 +4,39 @@
     <b-card no-body class="mb-2">
       <b-card-body>
         <p>
-          You can search for existing Gift Aid details by someone's name, address or gift aid ID.
+          You can search for existing Gift Aid details by someone's name,
+          address or gift aid ID.
         </p>
         <b-input-group>
-          <b-form-input v-model="search" placeholder="Search for gift aid record" @keyup="checkSearch" />
+          <b-form-input
+            v-model="search"
+            placeholder="Search for gift aid record"
+            @keyup="checkSearch"
+          />
           <slot name="append">
-            <SpinButton variant="white" icon-name="search" label="Search" @handle="doSearch" />
+            <SpinButton
+              variant="white"
+              icon-name="search"
+              label="Search"
+              @handle="doSearch"
+            />
           </slot>
         </b-input-group>
         <div v-for="result in results" :key="result.id" class="mt-2">
           <div class="d-flex flex-wrap">
-            Gift aid ID&nbsp;<v-icon icon="hashtag" class="text-muted mt-1" />{{ result.id }}
-            {{ result.fullname }}&nbsp;
-            (<ExternalLink :href="'mailto:' + result.email" class="text-muted small mt-1 mr-1 ml-1">
-              {{ result.email }}
-            </ExternalLink>)
-            user ID&nbsp;<v-icon icon="hashtag" class="text-muted mt-1" />{{ result.userid }}
+            Gift aid ID&nbsp;<v-icon icon="hashtag" class="text-muted mt-1" />{{
+              result.id
+            }}
+            {{ result.fullname }}&nbsp; (<ExternalLink
+              :href="'mailto:' + result.email"
+              class="text-muted small mt-1 mr-1 ml-1"
+            >
+              {{ result.email }} </ExternalLink
+            >) user ID&nbsp;<v-icon icon="hashtag" class="text-muted mt-1" />{{
+              result.userid
+            }}
             -&nbsp;
-            <span v-if="result.period === 'Declined'">
-              Gift Aid declined
-            </span>
+            <span v-if="result.period === 'Declined'"> Gift Aid declined </span>
             <span v-if="result.period === 'Since'">
               Gift Aid consent for all since {{ dateonly(result.timestamp) }}
             </span>
@@ -31,16 +44,31 @@
               Gift Aid consent for only {{ dateonly(result.timestamp) }}
             </span>
             <span v-if="result.period === 'Future'">
-              Gift Aid consent for all future from {{ dateonly(result.timestamp) }}
+              Gift Aid consent for all future from
+              {{ dateonly(result.timestamp) }}
             </span>
             <span v-if="result.period === 'Past4YearsAndFuture'">
-              Gift Aid consent for four years before {{ dateonly(result.timestamp) }} and all future.
+              Gift Aid consent for four years before
+              {{ dateonly(result.timestamp) }} and all future.
             </span>
             &nbsp;{{ result.homeaddress }}
           </div>
-          <div v-for="d in result.donations" :key="'donation-' + d.id" class="pl-4 small">
-            &bull;&nbsp;&pound;{{ d.GrossAmount }} on {{ dateshort(d.timestamp) }} <span class="small text-muted">via {{ d.source }}</span>
-            <span v-if="d.source === 'PayPalGivingFund' || d.source === 'eBay' || d.source === 'Facebook'" class="small text-muted">
+          <div
+            v-for="d in result.donations"
+            :key="'donation-' + d.id"
+            class="pl-4 small"
+          >
+            &bull;&nbsp;&pound;{{ d.GrossAmount }} on
+            {{ dateshort(d.timestamp) }}
+            <span class="small text-muted">via {{ d.source }}</span>
+            <span
+              v-if="
+                d.source === 'PayPalGivingFund' ||
+                d.source === 'eBay' ||
+                d.source === 'Facebook'
+              "
+              class="small text-muted"
+            >
               (Gift Aid claimed by them not us)
             </span>
           </div>
@@ -51,46 +79,90 @@
     <b-card no-body class="mb-2">
       <b-card-body>
         <p>
-          You can record a donation which wasn't made via PayPal, e.g. a bank transfer or cheque. Please use this
-          carefully. A manual thank you will be requested (not just for larger amounts), a Supporter Badge will be
-          added, and the user will be prompted to complete a Gift Aid form if appropriate.
+          You can record a donation which wasn't made via PayPal, e.g. a bank
+          transfer or cheque. Please use this carefully. A manual thank you will
+          be requested (not just for larger amounts), a Supporter Badge will be
+          added, and the user will be prompted to complete a Gift Aid form if
+          appropriate.
         </p>
         <p>
-          If you put an amount of 0, then this will trigger the Supporter badge and ad-suppression. This is useful
-          if someone has donated using PayPal top up and checkout, where we don't get their details, and then contacted
-          us.
+          If you put an amount of 0, then this will trigger the Supporter badge
+          and ad-suppression. This is useful if someone has donated using PayPal
+          top up and checkout, where we don't get their details, and then
+          contacted us.
         </p>
-        <b-form-input v-model="userid" type="number" placeholder="User's ID from Support Tools" class="mt-2" />
-        <b-form-input v-model="amount" type="number" placeholder="Amount e.g. 1.50. No pound sign" class="mt-2" />
-        <OurDatePicker v-model="date" lang="en" type="date" format="DD/MM/YYYY" placeholder="Date of donation" />
-        <SpinButton variant="white" icon-name="save" label="Record external donation" @handle="recordDonation" class="mt-4" />
+        <b-form-input
+          v-model="userid"
+          type="number"
+          placeholder="User's ID from Support Tools"
+          class="mt-2"
+        />
+        <b-form-input
+          v-model="amount"
+          type="number"
+          placeholder="Amount e.g. 1.50. No pound sign"
+          class="mt-2"
+        />
+        <OurDatePicker
+          v-model="date"
+          lang="en"
+          type="date"
+          format="DD/MM/YYYY"
+          placeholder="Date of donation"
+        />
+        <SpinButton
+          variant="white"
+          icon-name="save"
+          label="Record external donation"
+          class="mt-4"
+          @handle="recordDonation"
+        />
       </b-card-body>
     </b-card>
 
     <b-card no-body class="mb-2">
       <b-card-body>
         <p>
-          You can also paste in a CSV file of donations from Xero. The first line must be the
-          headers, which must always be:
+          You can also paste in a CSV file of donations from Xero. The first
+          line must be the headers, which must always be:
         </p>
         <p class="text-monospace">
-          Date,Amt,"Name on Xero",ID / GA from Mod Tools,email address if known,"212 Reg, 213 One off",GA?,Name & Ref on bank statement
+          Date,Amt,"Name on Xero",ID / GA from Mod Tools,email address if
+          known,"212 Reg, 213 One off",GA?,Name & Ref on bank statement
         </p>
         <b-form-textarea v-model="csv" rows="10" />
-        <SpinButton variant="white" icon-name="play" label="Validate CSV" @handle="validateCSVDonations" class="mt-4 mb-2" />
+        <SpinButton
+          variant="white"
+          icon-name="play"
+          label="Validate CSV"
+          class="mt-4 mb-2"
+          @handle="validateCSVDonations"
+        />
         <NoticeMessage v-if="csvError" variant="danger">
           {{ csvError }}
         </NoticeMessage>
         <!-- eslint-disable-next-line -->
         <NoticeMessage v-else-if="csvTrace" v-html="csvTrace" />
-        <SpinButton v-if="showSubmitCSV" variant="white" icon-name="save" :disabled="disableSubmitCSV" label="Submit donations"
-          @handle="submitCSVDonations" class="mt-4 mb-2" />
+        <SpinButton
+          v-if="showSubmitCSV"
+          variant="white"
+          icon-name="save"
+          :disabled="disableSubmitCSV"
+          label="Submit donations"
+          class="mt-4 mb-2"
+          @handle="submitCSVDonations"
+        />
         <!-- eslint-disable-next-line -->
         <NoticeMessage v-if="csvTrace2" v-html="csvTrace2" />
       </b-card-body>
     </b-card>
 
-    <ModGiftAid v-for="giftaid in giftaids" :key="'giftaid-' + giftaid.id" :giftaid="giftaid" class="mt-1" />
+    <ModGiftAid
+      v-for="giftaid in giftaids"
+      :key="'giftaid-' + giftaid.id"
+      :giftaid="giftaid"
+      class="mt-1"
+    />
     <p v-if="!giftaids.length" class="mt-2 font-weight-bold">
       No gift aid to review.
     </p>
@@ -126,13 +198,13 @@ export default {
       csvTrace2: null,
       showSubmitCSV: false,
       disableSubmitCSV: false,
-      csvDonations: []
+      csvDonations: [],
     }
   },
   async mounted() {
     const modGroupStore = useModGroupStore()
     modGroupStore.getModGroups()
-    //this.date = dayjs()
+    // this.date = dayjs()
     await this.getGiftAid()
   },
   methods: {
@@ -143,12 +215,12 @@ export default {
       this.giftaids = giftaid.sort((a, b) => {
         if (
           (a.postcode && !b.postcode) ||
-          (a.fullname.indexOf(' ') !== -1 && b.fullname.indexOf(' ') === -1)
+          (a.fullname.includes(' ') && !b.fullname.includes(' '))
         ) {
           return -1
         } else if (
           (b.postcode && !a.postcode) ||
-          (b.fullname.indexOf(' ') !== -1 && a.fullname.indexOf(' ') === -1)
+          (b.fullname.includes(' ') && !a.fullname.includes(' '))
         ) {
           return 1
         } else {
@@ -170,7 +242,7 @@ export default {
         this.donationStore.add({
           userid: this.userid,
           amount: this.amount,
-          date: this.date
+          date: this.date,
         })
       }
       callback()
@@ -255,7 +327,7 @@ export default {
 
         // Check if the userid matches a valid user.
         this.userStore.fetch({
-          id: userid
+          id: userid,
         })
 
         const user = this.userStore.byId(userid)
@@ -292,10 +364,10 @@ export default {
         }
 
         this.csvDonations.push({
-          date: date,
-          amount: amount,
-          userid: userid,
-          email: email
+          date,
+          amount,
+          userid,
+          email,
         })
 
         this.csvTrace +=
@@ -323,7 +395,7 @@ export default {
         const id = await this.donationStore.add({
           userid: donation.userid,
           amount: donation.amount,
-          date: donation.date.format('YYYY-MM-DD')
+          date: donation.date.format('YYYY-MM-DD'),
         })
 
         if (id) {
@@ -352,7 +424,7 @@ export default {
 
       this.disableSubmitCSV = true
       callback()
-    }
-  }
+    },
+  },
 }
 </script>

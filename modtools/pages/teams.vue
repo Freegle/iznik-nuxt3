@@ -1,15 +1,20 @@
 <template>
   <div class="bg-white pl-2">
     <client-only>
-      <h1>
-        Teams
-      </h1>
+      <h1>Teams</h1>
       <p>
-        Freegle has a number of internal teams. Click to find out more about them, and who's on each one.
+        Freegle has a number of internal teams. Click to find out more about
+        them, and who's on each one.
       </p>
 
       <div class="d-flex flex-wrap">
-        <b-button v-for="t in teams" :key="'team-' + t.name" variant="white" class="m-1" @click="selectTeam(t)">
+        <b-button
+          v-for="t in teams"
+          :key="'team-' + t.name"
+          variant="white"
+          class="m-1"
+          @click="selectTeam(t)"
+        >
           {{ t.name }}
         </b-button>
       </div>
@@ -22,10 +27,20 @@
           Members of this team don't need Support Tools access.
         </p>
         <b-input-group v-if="supportOrAdmin" class="mt-2 mb-2">
-          <b-form-input v-model="memberToAdd" type="number" placeholder="Add member by ID" />
+          <b-form-input
+            v-model="memberToAdd"
+            type="number"
+            placeholder="Add member by ID"
+          />
           <slot name="append">
-            <SpinButton variant="primary" icon-name="plus" label="Add" spinclass="text-white" @handle="addMember($event, team.name)"
-              :disabled="!memberToAdd" />
+            <SpinButton
+              variant="primary"
+              icon-name="plus"
+              label="Add"
+              spinclass="text-white"
+              :disabled="!memberToAdd"
+              @handle="addMember($event, team.name)"
+            />
           </slot>
         </b-input-group>
         <NoticeMessage v-if="!team.active" variant="info">
@@ -37,9 +52,18 @@
           <ExternalLink :href="team.wikiurl">on the wiki</ExternalLink>.
         </p>
         <p v-if="team.email">
-          Contact email: <ExternalLink :href="'mailto:' + team.email">{{ team.email }}</ExternalLink>
+          Contact email:
+          <ExternalLink :href="'mailto:' + team.email">{{
+            team.email
+          }}</ExternalLink>
         </p>
-        <ModTeamMember v-for="member in team.members" :key="'member-' + member.id" :teamid="team.id" :member="member" @removed="removed(team.name)" />
+        <ModTeamMember
+          v-for="member in team.members"
+          :key="'member-' + member.id"
+          :teamid="team.id"
+          :member="member"
+          @removed="removed(team.name)"
+        />
       </div>
     </client-only>
   </div>
@@ -73,7 +97,7 @@ const addMember = async (callback, name) => {
   if (memberToAdd.value && selected.value) {
     await teamStore.add({
       id: selected.value,
-      userid: memberToAdd.value
+      userid: memberToAdd.value,
     })
     team.value = await teamStore.fetch(name)
     callback()
@@ -82,5 +106,4 @@ const addMember = async (callback, name) => {
 const removed = async (name) => {
   team.value = await teamStore.fetch(name)
 }
-
 </script>

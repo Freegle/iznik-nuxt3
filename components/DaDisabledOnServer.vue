@@ -20,8 +20,16 @@
 .adDisabled {
   height: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    height: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     height: $sticky-banner-height-desktop;
+
+    @media (min-height: $desktop-tall) {
+      height: $sticky-banner-height-desktop-tall;
+    }
   }
 }
 </style>

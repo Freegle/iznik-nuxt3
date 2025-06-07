@@ -3,7 +3,13 @@
     <client-only>
       <ScrollToTop />
       <ModHelpMicrovolunteering />
-      <ModGroupSelect v-model="groupid" modonly all remember="membersmicrovol" :disabled="busy" />
+      <ModGroupSelect
+        v-model="groupid"
+        modonly
+        all
+        remember="membersmicrovol"
+        :disabled="busy"
+      />
 
       <div v-if="busy" class="d-flex justify-content-around">
         <b-img lazy src="/loader.gif" alt="Loading" />
@@ -29,7 +35,9 @@
           <b-tbody>
             <b-tr v-for="user in topUsers" :key="user.userid">
               <b-td>
-                <nuxt-link :to="'/members/approved/' + groupid + '/' + user.userid">
+                <nuxt-link
+                  :to="'/members/approved/' + groupid + '/' + user.userid"
+                >
                   <v-icon icon="hashtag" scale="0.8" />{{ user.userid }}
                 </nuxt-link>
               </b-td>
@@ -41,9 +49,7 @@
               </b-td>
               <b-td>
                 <div v-if="accuracyTotal(userActivity[user.userid]) === 0">
-                  <span class="small text-muted">
-                    No data
-                  </span>
+                  <span class="small text-muted"> No data </span>
                 </div>
                 <div v-else>
                   {{ accuracyPercentage(userActivity[user.userid]) }}%
@@ -53,11 +59,18 @@
                 </div>
               </b-td>
               <b-td>
-                <GChart type="AreaChart" :data="activityData(userActivity[user.userid])" :options="activityOptions"
-                  style="width: 300px; height: 100px;" />
+                <GChart
+                  type="AreaChart"
+                  :data="activityData(userActivity[user.userid])"
+                  :options="activityOptions"
+                  style="width: 300px; height: 100px"
+                />
               </b-td>
               <b-td>
-                <ModMicrovolunteeringDetailsButton :user="userActivity[user.userid][0].user" :items="userActivity[user.userid]" />
+                <ModMicrovolunteeringDetailsButton
+                  :user="userActivity[user.userid][0].user"
+                  :items="userActivity[user.userid]"
+                />
               </b-td>
             </b-tr>
           </b-tbody>
@@ -67,10 +80,10 @@
   </div>
 </template>
 <script>
-import { useModGroupStore } from '@/stores/modgroup'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   components: {
@@ -85,7 +98,7 @@ export default {
   data() {
     return {
       groupid: 0,
-      busy: true
+      busy: true,
     }
   },
   computed: {
@@ -95,11 +108,11 @@ export default {
         legend: { position: 'none' },
         vAxis: { viewWindow: { min: 0 } },
         hAxis: {
-          format: 'MMM yyyy'
+          format: 'MMM yyyy',
         },
         series: {
-          0: { color: 'blue' }
-        }
+          0: { color: 'blue' },
+        },
       }
     },
     items() {
@@ -113,7 +126,7 @@ export default {
     userCounts() {
       const ret = {}
 
-      this.items.forEach(i => {
+      this.items.forEach((i) => {
         if (i.user) {
           if (ret[i.user.id]) {
             ret[i.user.id]++
@@ -129,7 +142,7 @@ export default {
         if (ret[r]) {
           ret2.push({
             userid: r,
-            count: ret[r]
+            count: ret[r],
           })
         }
       }
@@ -146,7 +159,7 @@ export default {
     userActivity() {
       const ret = {}
 
-      this.items.forEach(i => {
+      this.items.forEach((i) => {
         if (i.user) {
           if (ret[i.user.id]) {
             ret[i.user.id].push(i)
@@ -157,13 +170,13 @@ export default {
       })
 
       return ret
-    }
+    },
   },
   watch: {
     groupid(newVal) {
       this.microVolunteeringStore.clear()
       this.fetch()
-    }
+    },
   },
   mounted() {
     const modGroupStore = useModGroupStore()
@@ -176,15 +189,13 @@ export default {
       this.busy = true
 
       if (this.groupid) {
-        const start = dayjs()
-          .subtract(90, 'day')
-          .format('YYYY-MM-DD')
+        const start = dayjs().subtract(90, 'day').format('YYYY-MM-DD')
 
         this.microVolunteeringStore.fetch({
           list: true,
           groupid: this.groupid,
           limit: 10000,
-          start: start
+          start,
         })
       }
 
@@ -195,14 +206,10 @@ export default {
 
       // Empty out the series so that we get data at each point.
       for (let i = 0; i <= 90; i++) {
-        dates[
-          dayjs()
-            .subtract(i, 'day')
-            .format('YYYY-MM-DD')
-        ] = 0
+        dates[dayjs().subtract(i, 'day').format('YYYY-MM-DD')] = 0
       }
 
-      data.forEach(d => {
+      data.forEach((d) => {
         const date = dayjs(d.timestamp).format('YYYY-MM-DD')
 
         if (!dates[date]) {
@@ -224,7 +231,7 @@ export default {
       let right = 0
       let wrong = 0
 
-      data.forEach(d => {
+      data.forEach((d) => {
         if (d.score_positive) {
           right++
         } else if (d.score_negative) {
@@ -241,8 +248,8 @@ export default {
     accuracyTotal(data) {
       const score = this.accuracy(data)
       return score[0] + score[1]
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

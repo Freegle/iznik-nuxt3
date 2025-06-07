@@ -5,11 +5,21 @@
       <ModHelpMemberReview />
       <ModPostcodeTester />
 
-      <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+      <div
+        v-for="(member, ix) in visibleMembers"
+        :key="'memberlist-' + member.id"
+        class="p-0 mt-2"
+      >
         <ModMemberReview :member="member" />
       </div>
 
-      <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
+      <infinite-loading
+        direction="top"
+        force-use-infinite-wrapper="true"
+        :distance="distance"
+        :identifier="bump"
+        @infinite="loadMore"
+      >
         <template #no-results>
           <p class="p-2">There are no members to review at the moment.</p>
         </template>
@@ -24,10 +34,10 @@
   </div>
 </template>
 <script>
-import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '../stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '../../composables/useModMembers'
+import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   async setup() {
@@ -42,12 +52,12 @@ export default {
     return {
       memberStore,
       miscStore,
-      ...modMembers // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
+      ...modMembers, // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
     }
   },
   data: function () {
     return {
-      bump: 0
+      bump: 0,
     }
   },
   mounted() {
@@ -56,6 +66,6 @@ export default {
     // reset infiniteLoading on return to page
     this.memberStore.clear()
     this.bump++
-  }
+  },
 }
 </script>

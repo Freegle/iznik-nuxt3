@@ -1,16 +1,47 @@
 <template>
   <div class="d-inline">
     <div class="position-relative d-inline">
-      <SpinButton :variant="variant" :spinclass="spinclass" :icon-name="icon" :label="label" :flex="false" class="mb-1 me-1 d-inline-block"
-        iconClass="pe-1" :disabled="disabled" @handle="click" :confirm="confirmButton" />
-      <v-icon v-if="autosend" icon="chevron-circle-right" title="Autosend - configured to send immediately without edit" class="autosend" />
+      <SpinButton
+        :variant="variant"
+        :spinclass="spinclass"
+        :icon-name="icon"
+        :label="label"
+        :flex="false"
+        class="mb-1 me-1 d-inline-block"
+        icon-class="pe-1"
+        :disabled="disabled"
+        :confirm="confirmButton"
+        @handle="click"
+      />
+      <v-icon
+        v-if="autosend"
+        icon="chevron-circle-right"
+        title="Autosend - configured to send immediately without edit"
+        class="autosend"
+      />
     </div>
-    <ConfirmModal v-if="showDeleteModal" ref="deleteConfirm" :title="'Delete: ' + message.subject" @confirm="deleteConfirmed"
-      @hidden="showDeleteModal = false" />
-    <ConfirmModal v-if="showSpamModal" ref="spamConfirm" :title="'Mark as Spam: ' + message.subject" @confirm="spamConfirmed"
-      @hidden="showSpamModal = false" />
-    <ModStdMessageModal v-if="showStdMsgModal" ref="stdmodal" :stdmsg="stdmsg" :message="message" :autosend="autosend"
-      @hidden="showStdMsgModal = false" />
+    <ConfirmModal
+      v-if="showDeleteModal"
+      ref="deleteConfirm"
+      :title="'Delete: ' + message.subject"
+      @confirm="deleteConfirmed"
+      @hidden="showDeleteModal = false"
+    />
+    <ConfirmModal
+      v-if="showSpamModal"
+      ref="spamConfirm"
+      :title="'Mark as Spam: ' + message.subject"
+      @confirm="spamConfirmed"
+      @hidden="showSpamModal = false"
+    />
+    <ModStdMessageModal
+      v-if="showStdMsgModal"
+      ref="stdmodal"
+      :stdmsg="stdmsg"
+      :message="message"
+      :autosend="autosend"
+      @hidden="showStdMsgModal = false"
+    />
   </div>
 </template>
 <script>
@@ -23,85 +54,85 @@ export default {
   props: {
     message: {
       type: Object,
-      required: true
+      required: true,
     },
     stdmsgid: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     variant: {
       type: String,
-      required: true
+      required: true,
     },
     label: {
       type: String,
-      required: true
+      required: true,
     },
     icon: {
       type: String,
-      required: true
+      required: true,
     },
     disabled: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     approve: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     delete: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     hold: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     holdMessage: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     release: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     reject: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     leave: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     spam: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     approveedits: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     revertedits: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     autosend: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -113,7 +144,7 @@ export default {
       showDeleteModal: false,
       showStdMsgModal: false,
       showSpamModal: false,
-      stdmsg: null
+      stdmsg: null,
     }
   },
   computed: {
@@ -137,7 +168,7 @@ export default {
     confirmButton() {
       // We confirm any actions on held messages, except where we have a separate confirm.
       return this.message.heldby && !this.spam && !this.delete
-    }
+    },
   },
   methods: {
     async click(callback) {
@@ -164,11 +195,11 @@ export default {
         // We want to show a modal.
         if (this.reject) {
           this.stdmsg = {
-            action: 'Reject'
+            action: 'Reject',
           }
         } else if (this.leave) {
           this.stdmsg = {
-            action: 'Leave'
+            action: 'Leave',
           }
         } else if (this.stdmsgid) {
           // We have a standard message.  Fetch it.
@@ -184,7 +215,7 @@ export default {
     async approveIt() {
       await this.messageStore.approve({
         id: this.message.id,
-        groupid: this.groupid
+        groupid: this.groupid,
       })
       this.checkWorkDeferGetMessages()
     },
@@ -194,42 +225,42 @@ export default {
     async deleteConfirmed() {
       await this.messageStore.delete({
         id: this.message.id,
-        groupid: this.groupid
+        groupid: this.groupid,
       })
       this.checkWorkDeferGetMessages()
     },
     async spamConfirmed() {
       await this.messageStore.spam({
         id: this.message.id,
-        groupid: this.groupid
+        groupid: this.groupid,
       })
       this.checkWorkDeferGetMessages()
     },
     async holdIt() {
       await this.messageStore.hold({
-        id: this.message.id
+        id: this.message.id,
       })
       this.checkWorkDeferGetMessages()
     },
     async releaseIt() {
       await this.messageStore.release({
-        id: this.message.id
+        id: this.message.id,
       })
       this.checkWorkDeferGetMessages()
     },
     async approveEdits() {
       await this.messageStore.approveedits({
-        id: this.message.id
+        id: this.message.id,
       })
       this.checkWorkDeferGetMessages()
     },
     async revertEdits() {
       await this.messageStore.revertedits({
-        id: this.message.id
+        id: this.message.id,
       })
       this.checkWorkDeferGetMessages()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
