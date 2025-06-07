@@ -314,15 +314,18 @@ onMounted(async () => {
 
     // Track window resize for height detection
     updateWindowHeight()
-    window.addEventListener('resize', this.updateWindowHeight)
+    window.addEventListener('resize', updateWindowHeight)
   }
 })
+
+const mobileTallDetector = ref(null)
+const desktopTallDetector = ref(null)
 
 const desktopMaxHeight = computed(() => {
   // Use windowHeight to trigger reactivity on resize
   // Check if desktop tall detector is visible (using CSS media queries)
-  if (windowHeight.value && process.client && this.$refs.desktopTallDetector) {
-    const computed = window.getComputedStyle(this.$refs.desktopTallDetector)
+  if (windowHeight.value && process.client && desktopTallDetector.value) {
+    const computed = window.getComputedStyle(desktopTallDetector.value)
     return computed.display === 'block' ? '250px' : '90px'
   }
   return '90px'
@@ -341,7 +344,7 @@ const mobileMaxHeight = computed(() => {
 onBeforeUnmount(() => {
   if (process.client) {
     clearTimeout(timeTimer)
-    window.removeEventListener('resize', this.updateWindowHeight)
+    window.removeEventListener('resize', updateWindowHeight)
   }
 })
 </script>
