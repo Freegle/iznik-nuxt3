@@ -184,7 +184,6 @@ export default {
       return discourse
         ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
         : 0
-      //return 77
     },
     slideclass() {
       return this.showMenu ? 'slide-in' : 'slide-out'
@@ -219,22 +218,9 @@ export default {
         }
 
         if (routechanged) {
-          try {
-            //console.log('LAYOUT ROUTE CHANGE GET GROUPS WORK')
-            const me = this.authStore.user
-            if (me && me.id) {
-              const ret = await this.$api.session.fetch({
-                components: ['groups'],
-              })
-              if (ret && ret.groups) {
-                this.modGroupStore.sessionGroups = ret.groups
-              }
-            }
-          } catch (e) {
-            console.error('MT layout get session groups fail', e.message)
-          }
+          // Get per-group-work and ensure all current groups are in modGroupStore
+          await this.modGroupStore.getModGroups()
         }
-
       },
     },
     loginStateKnown: {

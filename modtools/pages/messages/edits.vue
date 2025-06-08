@@ -45,9 +45,5 @@ export default {
     return {
     }
   },
-  mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
-  },
 }
 </script>

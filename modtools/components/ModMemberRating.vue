@@ -60,7 +60,7 @@ export default {
 
       if (this.rating.rater) {
         const rater = this.userStore.byId(this.rating.rater)
-        if (rater) {
+        if (rater && rater.memberof) {
           rater.memberof.forEach(g => {
             if (g.id === this.rating.groupid && this.amAModOn(g.id)) {
               ret = g.namedisplay

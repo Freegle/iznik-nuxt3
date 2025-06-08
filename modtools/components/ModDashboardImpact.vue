@@ -1,6 +1,5 @@
 <template>
   <div>
-    groupid {{  groupid }}
     <h2>Impact <span class="text-muted">on {{ groupName }}</span></h2>
     <p>This is our estimate of the impact your active communities have had.</p>
     <b-card v-if="loading" no-body>

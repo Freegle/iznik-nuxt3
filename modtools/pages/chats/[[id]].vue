@@ -47,7 +47,6 @@ import dayjs from 'dayjs'
 import { pluralise } from '../composables/usePluralise'
 import { useChatStore } from '~/stores/chat'
 import { useAuthStore } from '../../stores/auth'
-import { useModGroupStore } from '@/stores/modgroup'
 //import { setupChat } from '../composables/useChat'
 import { useRouter } from '#imports'
 
@@ -178,8 +177,6 @@ export default {
     },
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.chatStore.clear()
     await this.listChats()
   },

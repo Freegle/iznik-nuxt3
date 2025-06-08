@@ -179,9 +179,6 @@ export const useAuthStore = defineStore({
 
           return logIt
         })
-        console.log('auth login',res)
-        console.log('auth login user',res.user)
-        console.log('auth login user permissions',res.user?.permissions)
 
         const { ret, status, persistent, jwt } = res
 
@@ -291,8 +288,9 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
+      if( !components) components = [] // MT ADDED
+      components = [ 'me', ...components] // MT ADDED
 
-      /* TODO
       if (this.auth.jwt || this.auth.persistent) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
@@ -317,7 +315,7 @@ export const useAuthStore = defineStore({
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
-                components: ['me'],
+                components,
               })
               .then((ret) => {
                 let persistent = null
@@ -329,6 +327,8 @@ export const useAuthStore = defineStore({
                     if (!this.auth.jwt) {
                       this.setAuth(jwt, persistent)
                     }
+                    this.work = ret.work // MT added
+                    this.discourse = ret.discourse // MT added
                   } else {
                     // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
                     // which will then force a login when required and sort this out.
@@ -345,27 +345,22 @@ export const useAuthStore = defineStore({
               })
           }
         }
-      }*/
+      }
 
       if (!me) {
-        if( !components) components = [] // MT ADDED
-        components = [ 'me', ...components] // MT ADDED
-        //console.log('### useAuthStore fetchUser',components)
-
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components
+          components,
         })
 
         let persistent = null
         let jwt = null
 
         if (ret) {
-          ;({ me, groups, persistent, jwt } = ret) // MT added
-          //console.log('### useAuthStore groups',groups)
-          this.work = ret.work
-          this.discourse = ret.discourse
+          ;({ me, persistent, jwt } = ret)
+          this.work = ret.work // MT added
+          this.discourse = ret.discourse // MT added
 
           if (me) {
             this.setAuth(jwt, persistent)
@@ -373,30 +368,17 @@ export const useAuthStore = defineStore({
 
           if (jwt) {
             // Now use the JWT on the new API.
-            let mev2 = null
             try {
-              mev2 = await this.$api.session.fetchv2({
+              me = await this.$api.session.fetchv2({
                 webversion: this.config.public.BUILD_DATE,
               })
             } catch (e) {
               console.log('exception')
             }
 
-            if (mev2) {
-              if( groups){ // TODO Check: MT needs group info in groups/memberships
-                for( const membership of mev2.memberships){
-                  const group = groups.find(g => g.id === membership.groupid)
-                  if( group) {
-                    membership.configid = group.configid
-                    membership.type = group.type
-                    membership.facebook = group.facebook
-                    membership.work =  group.work
-                  }
-                }
-              }
-
-              groups = mev2.memberships
-              delete mev2.memberships
+            if (me) {
+              groups = me.memberships
+              delete me.memberships
             }
           }
         }
@@ -480,9 +462,6 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0
     },
-    async unbounceMT(id) {
-      await this.$api.user.unbounce(id)
-    },
     async saveAndGet(params) {
       await this.$api.session.save(params, function (data) {
         let logIt
@@ -535,9 +514,6 @@ export const useAuthStore = defineStore({
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
-    },
-    async merge(params) {
-      await api(this.config).user.merge(params.email1, params.email2, params.id1, params.id2, params.reason)
     },
   },
   getters: {

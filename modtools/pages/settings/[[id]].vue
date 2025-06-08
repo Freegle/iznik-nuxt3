@@ -44,7 +44,6 @@
 </template>
 
 <script setup>
-import { useModGroupStore } from '@/stores/modgroup'
 
 const tabIndex = ref(0)
 const loadGroup = ref(null)
@@ -53,8 +52,6 @@ const route = useRoute()
 loadGroup.value = parseInt(route.params.id) || null
 
 onMounted(() => {
-  const modGroupStore = useModGroupStore()
-  modGroupStore.getModGroups()
   if (loadGroup.value) {
     // We've been asked to load group setting.
     tabIndex.value = 1

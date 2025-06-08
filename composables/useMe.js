@@ -26,10 +26,10 @@ export async function fetchMe(hitServer, components) {
   // calls down and return earlier if we happen to already be fetching what we need.
 
   if (!components) components = [] // MT ADDED..
-  const miscStore = useMiscStore()
-  if (miscStore.modtools) {
-    components.push('expectedreplies')
-  }
+  //const miscStore = useMiscStore()
+  //if (miscStore.modtools) { // TODO Why did I add this?
+  //  components.push('expectedreplies')
+  //}
 
   let needToFetch = false
 

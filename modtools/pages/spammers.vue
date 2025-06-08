@@ -58,7 +58,6 @@
 </template>
 <script>
 import { useAuthStore } from '../../stores/auth'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useSpammerStore } from '../stores/spammer'
 
 export default {
@@ -133,8 +132,6 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // Start in Pending Add if they have rights to see it.
     this.spammerStore.clear()
 

@@ -44,7 +44,6 @@
 <script>
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '@/composables/useModMembers'
 import { pluralise } from '@/composables/usePluralise'
 
@@ -129,10 +128,7 @@ export default {
     this.chosengroupid = this.id
     this.search = ''
     if (('term' in route.params) && route.params.term) this.search = route.params.term
-    //console.log('members approved mounted', this.groupid, this.search, Object.keys(this.memberStore.list).length)
-
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
+    //console.log('members approved mounted', this.groupid, '-', this.search, '-', Object.keys(this.memberStore.list).length)
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()

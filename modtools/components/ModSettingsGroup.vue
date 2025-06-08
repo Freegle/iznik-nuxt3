@@ -673,7 +673,7 @@ export default {
     }
   },
   watch: {
-    groupid() {
+    groupid(newval) {
       this.fetchGroup()
     }
   },
@@ -687,8 +687,8 @@ export default {
       this.editingDescription = false
 
       await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
-
-      let rules = this.modGroupStore.get(this.groupid).rules || {}
+      let group = this.modGroupStore.get(this.groupid)
+      let rules = group?.rules || {}
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
       const unsetrules = {}
       for (const rule of this.rulelist) {

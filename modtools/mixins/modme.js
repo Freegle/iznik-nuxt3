@@ -72,10 +72,14 @@ export default {
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
         console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
+        const modGroupStore = useModGroupStore()
+        //console.log('CHECKWORK modGroupStore.list', Object.keys(modGroupStore.list).length)
+
         let currentTotal = 0
         if (authStore.work) currentTotal += authStore.work.total
         if (chatStore) currentTotal += Math.min(99, chatStore.unreadCount)
-        await this.fetchMe(true, ['work', 'group']) // MT ADDED 'group'
+        await this.fetchMe(true, ['work'])
+        await modGroupStore.getModGroups()
 
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
         const work = authStore.work

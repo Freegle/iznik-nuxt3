@@ -25,7 +25,6 @@
 <script>
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '../stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
@@ -50,8 +49,6 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
     this.bump++

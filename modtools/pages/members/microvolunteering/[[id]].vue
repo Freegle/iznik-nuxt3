@@ -67,7 +67,6 @@
   </div>
 </template>
 <script>
-import { useModGroupStore } from '@/stores/modgroup'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
@@ -166,8 +165,6 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.microVolunteeringStore.clear()
     this.fetch()
   },

@@ -63,7 +63,7 @@ export default {
     if (this.member.id) {
       if (!this.userStore.byId(this.member.id)) {
         this.userStore.fetchMT({
-          search: this.member.id,
+          id: this.member.id,
           info: true,
           emailhistory: true
         })

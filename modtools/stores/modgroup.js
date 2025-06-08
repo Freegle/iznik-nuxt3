@@ -4,6 +4,9 @@ import { useGroupStore } from '~/stores/group'
 import { defineStore } from 'pinia'
 import api from '~/api'
 
+// authStore.work has total work counts across all group - re-got every 30s in modme->checkWork
+// this.list has all mod groups, with group.work updated in getModGroups() ie on route change and every 30s
+
 export const useModGroupStore = defineStore({
   id: 'modgroups',
   state: () => ({
@@ -23,48 +26,56 @@ export const useModGroupStore = defineStore({
       this.getting = []
       this.received = false
     },
-    getModGroups() { // Do not clear groups info but (start to) get all again
-      //console.log('--- uMGS getModGroups')
-      const authStore = useAuthStore()
-      const me = authStore.user
-      let myGroups = []
+    // Called from default layout at every route change
+    // And by modme->checkWork every 30s
+    // Start by getting latest per-group work counts
+    // Do not clear groups info but get any extra again
+    async getModGroups() {
+      try {
+        //console.log('--- uMGS getModGroups A')
 
-      if (me) {
-        myGroups = authStore.groups.map((g) => {
-          // Memberships have an id of the membership whereas we want the groups to have the id of the group.
-          const g2 = cloneDeep(g)
-          g2.id = g.groupid
-          delete g2.groupid
-          return g2
-        })
+        // Get base groups
+        const groupStore = useGroupStore()
+        await groupStore.fetch()
 
-        // Sort by namedisplay case insensitive
-        myGroups.sort((a, b) => {
-          const aName = a.namedisplay.toLowerCase()
-          const bName = b.namedisplay.toLowerCase()
-          return aName < bName ? -1 : aName > bName ? 1 : 0
-        })
-      }
+        // Get work for each group
+        const authStore = useAuthStore()
+        const me = authStore.user
+        this.sessionGroups = false
+        if (me && me.id) {
+          const ret = await this.$api.session.fetch({
+            components: ['groups'],
+          })
+          if (ret && ret.groups) {
+            //console.log('uMGS getModGroups work', ret.groups)
+            this.sessionGroups = ret.groups
 
-      //this.clear()
-      this.getting = []
-      const self = this
-      for (const g of myGroups) {
-        this.getting.push(g.id)
+            for (const group of Object.values(this.list)) {
+              const g = this.sessionGroups.find((g) => g.id === group.id)
+              if (g && g.work) {
+                group.work = g.work
+              }
+            }
+          }
+        }
+
+        // Go through all our groups, load the full MT group info if need be.
+        // Do not clear our store first: this.clear()
+        this.getting = []
+        for (const g of Object.values(authStore.groups)) {
+          //console.log('--- uMGS getModGroups g', g.groupid)
+          this.fetchIfNeedBeMT(g.groupid)
+        }
+      } catch (e) {
+        console.error('getModGroups() fail', e.message)
       }
-      for (const g of myGroups) {
-        this.fetchGroupMT(g.id) // This returns immediately so non-blocking
-      }
-      //console.log('--- uMGS getModGroups DONE', this.getting)
     },
 
-    // Called by getModGroups at page mount to get mod's groups
-    // Also called if need be fetchIfNeedBeMT
-    // And called to reload after any changes
-    // (still may have duplicate requests at page start if fetchIfNeedBeMT too quick)
+    // Actually get full group infor for MT
+    // Called by fetchIfNeedBeMT and when group needs reloading after changes
     async fetchGroupMT(id) {
+      //console.error('uMGS fetchGroupMT', id)
       if (!id) { console.error('fetchGroupMT with zero id'); return }
-      const groupStore = useGroupStore()
       //console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
       const sponsors = true
@@ -73,18 +84,28 @@ export const useModGroupStore = defineStore({
 
       const group = await api(this.config).group.fetchGroupMT(id, polygon, showmods, sponsors, tnkey)
       if (group) {
-        // Get work from session info received when route first called in layout default.vue watch $route handler
-        if( this.sessionGroups){
+        if (!this.sessionGroups) {
+          const ret = await this.$api.session.fetch({
+            components: ['groups'],
+          })
+          if (ret && ret.groups) {
+            this.sessionGroups = ret.groups
+          }
+        }
+        // Get work and role from session info received when route first called in layout default.vue watch $route handler
+        if (this.sessionGroups) {
           const g = this.sessionGroups.find((g) => g.id === group.id)
-          if (g && g.work) {
-            //console.log('useGroupStore g.work',g.work)
-            group.work = g.work
+          if (g) {
+            if (g.work) {
+              group.work = g.work
+            }
+            if (g.role) {
+              group.role = g.role
+            }
           }
         }
         this.list[group.id] = group
-        groupStore.list[group.id] = group // Set in root group store as well
       }
-      //console.log('=== uMGS fetchGroupMT', id, group !== null)
       const gettingix = this.getting.indexOf(id)
       if (gettingix !== -1) this.getting.splice(gettingix, 1)
       if (this.getting.length === 0) {
@@ -124,7 +145,6 @@ export const useModGroupStore = defineStore({
     },
 
     async updateMT(params) {
-      //console.log('useModGroupStore updateMT', params)
       await api(this.config).group.patch(params)
       await this.fetchGroupMT(params.id)
     },

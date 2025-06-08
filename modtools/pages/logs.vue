@@ -40,7 +40,6 @@
 </template>
 <script>
 import { useLogsStore } from './stores/logs'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -62,8 +61,6 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.clear(this.type)
   },
   methods: {

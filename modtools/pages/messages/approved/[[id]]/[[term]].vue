@@ -36,7 +36,6 @@
 
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '@/stores/message'
-import { useModGroupStore } from '@/stores/modgroup'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '@/composables/useModMessages'
 import { captureConsoleIntegration } from '@sentry/integrations'
@@ -98,8 +97,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     const route = useRoute()
     this.groupid = this.id
     this.chosengroupid = this.id

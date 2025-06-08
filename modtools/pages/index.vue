@@ -152,8 +152,6 @@ watch(showInfo, () => {
 })
 
 onMounted(async () => {
-  modGroupStore.getModGroups()
-
   // Volunteers' Week is between 1st and 7th June every year.
   if (
     dayjs().get('month') === 5 &&

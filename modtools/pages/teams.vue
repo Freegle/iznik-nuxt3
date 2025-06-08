@@ -46,9 +46,7 @@
 </template>
 
 <script setup>
-import { useModGroupStore } from '@/stores/modgroup'
 import { useTeamStore } from '@/stores/team'
-const modGroupStore = useModGroupStore()
 const teamStore = useTeamStore()
 
 const team = ref(null)
@@ -60,7 +58,6 @@ const teams = computed(() => {
 })
 
 onMounted(() => {
-  modGroupStore.getModGroups()
   teamStore.fetch()
 })
 

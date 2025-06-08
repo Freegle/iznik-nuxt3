@@ -102,7 +102,6 @@ import customParseFormat from 'dayjs/plugin/customParseFormat'
 import dayjs from 'dayjs'
 import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   async setup() {
@@ -131,8 +130,6 @@ export default {
     }
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     //this.date = dayjs()
     dayjs.extend(customParseFormat)
     await this.getGiftAid()

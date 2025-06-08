@@ -196,8 +196,6 @@ export default {
     }
   },
   mounted() {
-    this.modGroupStore.getModGroups()
-
     this.fetch(this.groupidshow)
   },
   methods: {

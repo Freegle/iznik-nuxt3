@@ -73,7 +73,6 @@
 <script>
 import dayjs from 'dayjs'
 import { useMemberStore } from '@/stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useUserStore } from '../stores/user'
 import { GChart } from 'vue-google-charts'
 import { setupModMembers } from '../../composables/useModMembers'
@@ -117,8 +116,6 @@ export default {
     }
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.filter = 'Comments'
     await this.getHappiness()
   },

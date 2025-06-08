@@ -14,7 +14,6 @@
   </div>
 </template>
 <script>
-import { useModGroupStore } from '@/stores/modgroup'
 import { usePublicityStore } from '@/stores/publicity'
 
 export default {
@@ -47,8 +46,6 @@ export default {
     }
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     await this.publicityStore.clear()
     await this.publicityStore.fetch({ reviewed: 0 })
     console.log('Fetched publicity')

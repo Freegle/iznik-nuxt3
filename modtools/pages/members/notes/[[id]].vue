@@ -21,7 +21,6 @@
 </template>
 <script>
 import { useCommentStore } from '../stores/comment'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -68,8 +67,6 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.commentStore.clear()
   },
   methods: {

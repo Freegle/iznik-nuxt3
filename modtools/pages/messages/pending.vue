@@ -123,9 +123,6 @@ export default {
     }
   },
   async mounted() {
-    // Get groups with MT info
-    this.modGroupStore.getModGroups()
-
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
     const now = new Date().getTime()
