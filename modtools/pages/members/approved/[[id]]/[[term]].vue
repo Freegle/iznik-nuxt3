@@ -45,7 +45,6 @@
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
-import { pluralise } from '@/composables/usePluralise'
 
 export default {
   async setup() {

@@ -291,7 +291,8 @@ export const useAuthStore = defineStore({
       if( !components) components = [] // MT ADDED
       components = [ 'me', ...components] // MT ADDED
 
-      if (this.auth.jwt || this.auth.persistent) {
+      const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
+      if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2(
@@ -324,7 +325,7 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
-                    if( me.permissions){
+                    if( me.permissions && this.user){
                       this.user.permissions = me.permissions
                     }
                     if (!this.auth.jwt) {
@@ -351,7 +352,7 @@ export const useAuthStore = defineStore({
       }
 
       if (!me) {
-        // Try the older API which will authenticate via the persistent token and PHP session.
+        // Try the older API which will authenticate via the persistent token and PHP session. Used by MT for now
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
           components,
@@ -361,7 +362,10 @@ export const useAuthStore = defineStore({
         let jwt = null
 
         if (ret) {
-          ;({ me, persistent, jwt } = ret)
+          ;({ me, groups, persistent, jwt } = ret)
+          const permissions = me.permissions
+          const v1groups = ret.groups
+
           this.work = ret.work // MT added
           this.discourse = ret.discourse // MT added
 
@@ -380,7 +384,16 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
+              me.permissions = permissions
               groups = me.memberships
+              if( v1groups) { // Set each group configid
+                for( const g of groups){
+                  const group = v1groups.find(v1g => v1g.id === g.groupid)
+                  if( group) {
+                    g.configid = group.configid
+                  }
+                }
+              }
               delete me.memberships
             }
           }
