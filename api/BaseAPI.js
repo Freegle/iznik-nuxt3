@@ -133,7 +133,7 @@ export default class BaseAPI {
         headers,
       })
 
-      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent && (path.substring(0,5)!='/user')) { // Stop MT add user from switching identity
+      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent && (path.substring(0,5)!=='/user')) { // Stop MT add user from switching identity
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
         // we renew the JWT.
         authStore.setAuth(data.jwt, data.persistent)

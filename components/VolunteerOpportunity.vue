@@ -220,6 +220,7 @@ export default {
     item: {
       type: Object,
       required: false,
+      default: null,
     },
     id: {
       type: Number,

@@ -1,5 +1,5 @@
 import { useAuthStore } from '~/stores/auth'
-import { useMiscStore } from '@/stores/misc'
+import { useMiscStore } from './stores/misc'
 
 let fetchingPromise = null
 
@@ -26,10 +26,12 @@ export async function fetchMe(hitServer, components) {
   // calls down and return earlier if we happen to already be fetching what we need.
 
   if (!components) components = [] // MT ADDED..
-  //const miscStore = useMiscStore()
-  //if (miscStore.modtools) { // TODO Why did I add this?
+  const miscStore = useMiscStore()
+  if (miscStore.modtools) { // TODO Why did I add this?
   //  components.push('expectedreplies')
-  //}
+  //  components.push('me')
+  //  components.push('work')
+  }
 
   let needToFetch = false
 

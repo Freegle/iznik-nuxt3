@@ -13,7 +13,7 @@
       </div>
       <span v-if="email">
         (<ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
-        <Clipboard :value="email" />)
+        <ModClipboard :value="email" />)
       </span>
     </div>
     <b-button variant="white" size="xs" class="mt-1" @click="addAComment">

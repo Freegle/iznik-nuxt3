@@ -324,6 +324,9 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
+                    if( me.permissions){
+                      this.user.permissions = me.permissions
+                    }
                     if (!this.auth.jwt) {
                       this.setAuth(jwt, persistent)
                     }

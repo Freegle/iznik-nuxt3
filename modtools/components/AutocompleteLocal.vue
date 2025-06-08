@@ -1,35 +1,13 @@
 <template>
   <div class="autocomplete">
-    <input
-      v-model="search"
-      class="form-control"
-      type="text"
-      :size="size"
-      :placeholder="placeholder"
-      @input="onChange"
-      @keydown.down="onArrowDown"
-      @keydown.up="onArrowUp"
-      @keydown.enter="onEnter"
-    >
-    <ul
-      v-show="isOpen"
-      id="autocomplete-results"
-      class="autocomplete-results"
-    >
-      <li
-        v-if="isLoading"
-        class="loading"
-      >
+    <input v-model="search" class="form-control" type="text" :size="size" :placeholder="placeholder" @input="onChange" @keydown.down="onArrowDown"
+      @keydown.up="onArrowUp" @keydown.enter="onEnter">
+    <ul v-show="isOpen" id="autocomplete-results" class="autocomplete-results">
+      <li v-if="isLoading" class="loading">
         Loading results...
       </li>
-      <li
-        v-for="(result, i) in results"
-        v-else
-        :key="i"
-        class="autocomplete-result"
-        :class="{ 'is-active': i === arrowCounter }"
-        @click="setResult(result)"
-      >
+      <li v-for="(result, i) in results" v-else :key="i" class="autocomplete-result" :class="{ 'is-active': i === arrowCounter }"
+        @click="setResult(result)">
         {{ result }}
       </li>
     </ul>
@@ -73,7 +51,7 @@ export default {
     }
   },
   watch: {
-    items: function(val, oldValue) {
+    items: function (val, oldValue) {
       // actually compare them
       if (val.length !== oldValue.length) {
         this.results = val

@@ -940,14 +940,14 @@ export default {
       this.showSpamModal = true
       this.$refs.spamConfirm?.show()
     },
-    async referToSupport() {
+    referToSupport() {
       this.$api.chat.referToSupport(this.id)
     },
     confirmReferToSupport() {
       this.showConfirmModal = true
     },
-    async addAComment() {
-    console.log("addAComment")
+    addAComment() {
+      console.log("addAComment")
       this.addComment = true
       this.$refs.addComment?.show()
     }

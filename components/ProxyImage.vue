@@ -89,6 +89,7 @@ const props = defineProps({
   },
 })
 
+// eslint-disable-next-line no-unused-vars
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
 if (props.src.includes('gimg_0.jpg')) {
@@ -109,12 +110,13 @@ const fullSrc = computed(() => {
     const encodedQuery = encodeURIComponent(query)
     ret = base + '?' + encodedQuery
   }
-  if( props.src!=ret) console.log('fullSrc', ret)
+  if( props.src!==ret) console.log('fullSrc', ret)
   return ret
 })
 
 const emit = defineEmits(['error'])
 
+// eslint-disable-next-line no-unused-vars
 function brokenImage(e) {
   console.log('===', props.src, fullSrc.value, props.src, props.modifiers, props.preload, props.loading, props.className, props.fluid, props.fit, props.format, props.alt, props.width, props.height, props.sizes, props.placeholder)
   console.log('Proxy image broken', e)

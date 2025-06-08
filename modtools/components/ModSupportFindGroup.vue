@@ -31,16 +31,16 @@
       Group id <v-icon icon="hashtag" class="text-muted" scale="0.75" /><strong>{{ group.id }}</strong>.
       <br>
       <br>
-      <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
       Explore page:
       <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
       <br>
-      <Clipboard v-if="group.modsemail" class="mr-3 mb-1" :value="group.modsemail" />
+      <ModClipboard v-if="group.modsemail" class="mr-3 mb-1" :value="group.modsemail" />
       Volunteers email:
       <!-- eslint-disable-next-line -->
       <ExternalLink :href="'mailto:' + group.modsemail">{{ group.modsemail }}</ExternalLink>
       <br>
-      <Clipboard v-if="group.groupemail" class="mr-3 mb-1" :value="group.groupemail" />
+      <ModClipboard v-if="group.groupemail" class="mr-3 mb-1" :value="group.groupemail" />
       Posting address:
       <!-- eslint-disable-next-line -->
       <ExternalLink v-if="group.groupemail" :href="'mailto:' + group.groupemail">{{ group.groupemail }}</ExternalLink>
@@ -51,7 +51,7 @@
       <div v-else>
         <div v-for="facebook in group.facebook" :key="'facebook-' + facebook.id">
           <div v-if="facebook.type === 'Page'">
-            <Clipboard class="mr-3 mb-1" :value="'https://facebook.com/pg/' + facebook.id" />
+            <ModClipboard class="mr-3 mb-1" :value="'https://facebook.com/pg/' + facebook.id" />
             Facebook:
             <ExternalLink :href="'https://facebook.com/pg/' + facebook.id">
               {{ facebook.name }}

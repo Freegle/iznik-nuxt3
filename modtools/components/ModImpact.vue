@@ -50,7 +50,7 @@
             <component :is="heading" class="purple">
               {{ totalGifts.toLocaleString() }}
               <br>
-              {{ totalGifts | pluralize(['GIFT', 'GIFTS'], { includeNumber: false }) }}
+              {{ totalGiftsPlural }}
               <span v-if="range">
                 <br>
                 <span class="text-muted small">
@@ -64,7 +64,7 @@
             <component :is="heading" class="text-primary">
               {{ totalMembers.toLocaleString() }}
               <br>
-              {{ totalMembers | pluralize(['MEMBER', 'MEMBERS'], { includeNumber: false }) }}
+              {{  totalMembersPlural }}
               <span v-if="range">
                 <br>
                 <span class="text-muted small">
@@ -78,10 +78,10 @@
             <component :is="heading" class="green">
               {{ groupCount.toLocaleString() }}
               <br>
-              {{ groupCount | pluralize(['COMMUNITY', 'COMMUNITIES'], { includeNumber: false }) }}
+              {{ groupCountCommunties }}
               <br>
               <span class="text-muted small">
-                {{ groupCount | pluralize(['SERVES', 'SERVE'], { includeNumber: false }) }} THIS AREA
+              {{ groupCountServes }} THIS AREA
               </span>
             </component>
           </b-col>
@@ -190,6 +190,7 @@
   </div>
 </template>
 <script>
+import pluralize from 'pluralize'
 export default {
   props: {
     totalWeight: {
@@ -250,9 +251,25 @@ export default {
     },
     heading() {
       return this.fullStats ? 'h5' : 'h2'
-    }
+    },
   },
   methods: {
+    groupCountCommunties() {
+      pluralize.addIrregularRule('COMMUNITY', 'COMMUNITIES')
+      return pluralize('COMMUNITY', this.groupCount, true)
+    },
+    groupCountServes() {
+      pluralize.addIrregularRule('SERVES', 'SERVE')
+      return pluralize('SERVES', this.groupCount, true)
+    },
+    totalGiftsPlural() {
+      pluralize.addIrregularRule('GIFT', 'GIFTS')
+      return pluralize('GIFT', this.totalGifts, true)
+    },
+    totalMembersPlural() {
+      pluralize.addIrregularRule('MEMBER', 'MEMBERS')
+      return pluralize('MEMBER', this.totalMembers, true)
+    },
     roundIt(val) {
       let ret = null
 

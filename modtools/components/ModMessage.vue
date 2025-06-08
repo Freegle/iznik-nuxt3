@@ -31,7 +31,7 @@
                 <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
               </div>
             </div>
-            <Diff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
+            <ModDiff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
             <div v-else :class="subjectClass + ' font-weight-bold'">
               <Highlighter v-if="message.matchedon" :search-words="[message.matchedon.word]" :text-to-highlight="eSubject"
                 highlight-class-name="highlight" auto-escape />
@@ -154,7 +154,7 @@
               <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
               <div v-else-if="editreview">
                 <h4>Differences:</h4>
-                <Diff class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold" :old="oldBody" :new="newBody" />
+                <ModDiff class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold" :old="oldBody" :new="newBody" />
                 <h4>New version:</h4>
                 <div class="mb-3 rounded border border-success p-2 preline forcebreak font-weight-bold">{{ newBody }}</div>
               </div>

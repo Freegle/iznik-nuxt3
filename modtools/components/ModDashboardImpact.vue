@@ -16,7 +16,7 @@
         <b-row><b-col>&nbsp;</b-col></b-row>
       </b-card-body>
     </b-card>
-    <Impact
+    <ModImpact
       v-else
       :range="startf + ' - ' + endf"
       :total-benefit="totalBenefit"

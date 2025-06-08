@@ -159,13 +159,13 @@
 </template>
 <script>
 import Highlighter from 'vue-highlight-words'
-import { fetchReferencedMessage } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
+import { setupChat } from '../composables/useChat'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
 const PromiseModal = defineAsyncComponent(() =>
