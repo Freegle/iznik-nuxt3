@@ -95,8 +95,9 @@ export default {
   watch: {
     filter(newVal) {
       //console.log('[[term]] filter', newVal)
-      this.bump++
+      this.context = null
       this.memberStore.clear()
+      this.bump++
     },
     chosengroupid(newVal) {
       //console.log('chosengroupid', newVal, this.search.length)
