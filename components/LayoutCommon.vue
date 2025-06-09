@@ -98,6 +98,7 @@
       <SomethingWentWrong />
       <div id="videoda">
         <ExternalDa
+          v-if="videoAd"
           video
           :jobs="false"
           ad-unit-path="video"
@@ -156,6 +157,7 @@ export default {
       interestedInOthersUserId: null,
       showInterestedModal: false,
       windowHeight: 0, // Track window height for reactivity
+      videoAd: false,
     }
   },
   computed: {
