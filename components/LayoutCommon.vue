@@ -98,6 +98,7 @@
       <SomethingWentWrong />
       <div id="videoda">
         <ExternalDa
+          v-if="videoAd"
           video
           :jobs="false"
           ad-unit-path="video"
@@ -154,6 +155,7 @@ const firstRender = ref(true)
 const interestedInOthersMsgid = ref(null)
 const interestedInOthersUserId = ref(null)
 const showInterestedModal = ref(false)
+const videoAd = ref(false)
 
 // Store access
 const miscStore = useMiscStore()
