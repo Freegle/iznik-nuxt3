@@ -46,12 +46,12 @@ export const useChatStore = defineStore({
       this.lastSearchMT = params.search
   
       try {
-        let current = null
+        //let current = null
   
         // We might have a current chat selected.  We want to make sure that we don't lose it.  This can happen if
         // we search for an old chat that we wouldn't normally return.
-        const chatid = parseInt(this.currentChatMT)
-        current = chatid && this.list[chatid] ? this.list[chatid] : null
+        //const chatid = parseInt(this.currentChatMT)
+        //current = chatid && this.list[chatid] ? this.list[chatid] : null
   
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
         //console.log('uCS listChatsMT',chatrooms)
@@ -84,7 +84,7 @@ export const useChatStore = defineStore({
       }
     },
     async fetchLatestChatsMT() { // MT ADDED
-      const now = new Date()
+      //const now = new Date()
       
       const authStore = useAuthStore()
       const me = authStore.user
@@ -111,7 +111,7 @@ export const useChatStore = defineStore({
     },
     async fetchReviewChatsMT(id, params){
       this.clear()
-      const { chatmessages, chatreports } = await api(this.config).chat.fetchReviewChatsMT(params)
+      const { chatmessages } = await api(this.config).chat.fetchReviewChatsMT(params)
       const messages = chatmessages
       const deduped = [] // Chat review seems to have duplicate message id so only save last
 
@@ -131,7 +131,7 @@ export const useChatStore = defineStore({
       this.messages[id] = deduped
     },
     removeMessageMT(chatid,id){
-      const foundix = this.messages[chatid].findIndex((m) => m.id==id)
+      const foundix = this.messages[chatid].findIndex((m) => m.id===id)
       console.log('removeMessageMT',foundix)
       if( foundix!==-1) delete this.messages[chatid][foundix]
     },

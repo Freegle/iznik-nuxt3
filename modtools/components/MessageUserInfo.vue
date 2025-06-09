@@ -26,7 +26,7 @@
               {{ openWantedsPlural }}
             </span>
           </span>
-          <Supporter v-if="user.supporter" class="d-inline" />
+          <ModSupporter v-if="user.supporter" class="d-inline" />
         </span>
       </span>
     </nuxt-link>
@@ -45,17 +45,18 @@
 </template>
 
 <script>
+import pluralize from 'pluralize'
 import dayjs from 'dayjs'
 import ModPostingHistory from './ModPostingHistory'
 import ModMemberships from './ModMemberships'
-import Supporter from '~/components/Supporter'
+import ModSupporter from '~/components/ModSupporter'
 import ProfileImage from '~/components/ProfileImage'
 const ModModeration = () => import('./ModModeration')
 import { useMiscStore } from '../../stores/misc'
 
 export default {
   components: {
-    Supporter,
+    ModSupporter,
     ModMemberships,
     ModPostingHistory,
     ModModeration,
@@ -141,7 +142,7 @@ export default {
     openWantedsPlural() {
       if (this.user?.info?.openwanteds) {
         pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
-        return pluralize('open WANTED', user.info.openwanteds, true)
+        return pluralize('open WANTED', this.user.info.openwanteds, true)
       }
       return ''
     }

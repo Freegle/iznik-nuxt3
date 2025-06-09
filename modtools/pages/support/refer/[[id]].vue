@@ -15,11 +15,12 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '~/stores/message'
 
 export default {
-  async setup() {
+  setup() {
     const chatStore = useChatStore()
     const messageStore = useMessageStore()
     return { chatStore, messageStore }
@@ -32,7 +33,7 @@ export default {
       pov: null
     }
   },
-  async created() {
+  created() {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
   },

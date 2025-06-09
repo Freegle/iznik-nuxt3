@@ -9,7 +9,7 @@
 // - until another timed update occurs
 
 import { useAuthStore } from '@/stores/auth'
-import { useModGroupStore } from '@/stores/modgroup'
+//import { useModGroupStore } from '@/stores/modgroup'
 import { useMessageStore } from '../../stores/message'
 import { useMiscStore } from '@/stores/misc'
 
@@ -157,12 +157,11 @@ export function setupModMessages(reset) {
     }
   })
 
-  watch(work, async (newVal, oldVal) => {
+  watch(work, (newVal, oldVal) => {
     //console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
     // if( collection.value!=='Pending') return
     let doFetch = false
 
-    const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     // console.log('uMM getMessages',miscStore.deferGetMessages)
     if (miscStore.deferGetMessages) return

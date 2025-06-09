@@ -93,7 +93,7 @@ export default {
       return ret
     },
   },
-  async mounted() {
+  mounted() {
     this.checkHeight()
   },
   beforeDestroy() {
@@ -145,7 +145,7 @@ export default {
     },
     boolRenderer(_instance, td, _row, _col, _prop, value) {
       td.style.textAlign = 'center'
-      td.innerHTML = value == 1 ? 'Y' : 'N'
+      td.innerHTML = value === 1 ? 'Y' : 'N'
     },
 
 

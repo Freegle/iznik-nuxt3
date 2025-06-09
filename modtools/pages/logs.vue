@@ -11,7 +11,7 @@
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
-            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
+            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.enter="search" />
             <b-button variant="primary" :disabled="busy" @click="search">
               <v-icon icon="search" />
             </b-button>
@@ -27,7 +27,7 @@
         <div class="d-flex flex-wrap">
           <ModGroupSelect v-model="groupid" modonly />
           <b-input-group class="flex max">
-            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.native.enter="search" />
+            <b-form-input v-model="term" type="text" placeholder="Search name/email/subject" autocapitalize="none" @keyup.enter="search" />
             <b-button variant="primary" @click="search">
               <v-icon icon="search" />
             </b-button>

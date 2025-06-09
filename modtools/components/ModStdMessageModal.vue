@@ -2,7 +2,6 @@
   <b-modal id="stdmsgmodal" ref="modal" :title="message ? message.subject : ('Message to ' + member.displayname)" no-stacking no-close-on-backdrop
     size="lg">
     <template #default>
-        {{ stdmsg.action }}
       <div v-if="stdmsg.action !== 'Edit'" class="d-flex">
         <div>
           From:&nbsp;
@@ -19,7 +18,9 @@
         </div>
       </div>
       <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
+        <!-- eslint-disable-next-line -->
         <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+        <!-- eslint-disable-next-line -->
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <PostCode :value="message.location.name" :find="false" @selected="postcodeSelect" />
@@ -464,6 +465,7 @@ export default {
           if (history.length) {
             history.forEach(msg => {
               if (msg.daysago < self.recentDays) {
+                // eslint-disable-next-line new-cap
                 recentmsg +=
                   dayjs(msg.postdate).format('lll') +
                   ' - ' +
@@ -486,6 +488,7 @@ export default {
                 const daysago = dayjs().diff(postdate, 'day')
 
                 if (msg.type === keyword && daysago < self.recentDays) {
+                  // eslint-disable-next-line new-cap
                   recentmsg +=
                     dayjs(msg.postdate).format('lll') +
                     ' - ' +

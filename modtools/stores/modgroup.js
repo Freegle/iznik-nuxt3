@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { defineStore } from 'pinia'
@@ -151,7 +150,7 @@ export const useModGroupStore = defineStore({
   },
   getters: {
     get: (state) => (id) => {
-      const idwas = id
+      //const idwas = id
       id = parseInt(id)
       if (!id) {
         //console.error('uMGS id not present', idwas)

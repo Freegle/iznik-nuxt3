@@ -37,7 +37,7 @@ import me from '~/mixins/me.js'
 import { setupModMessages } from '../../composables/useModMessages'
 
 export default {
-  async setup() {
+  setup() {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
     const modGroupStore = useModGroupStore()
@@ -116,6 +116,7 @@ export default {
         }
       }
       if (ret && !this.shownRulePopup) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.shownRulePopup = true
         this.$refs.rules?.show()
       }

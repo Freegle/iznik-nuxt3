@@ -104,7 +104,7 @@ export default {
         this.show++
         $state.loaded()
       } else {
-        const currentCount = this.messages.length
+        //const currentCount = this.messages.length
         $state.complete()
 
         /*this.$store

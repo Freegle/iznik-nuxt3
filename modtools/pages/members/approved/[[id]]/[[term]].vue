@@ -42,12 +42,13 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
 
 export default {
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers(true)
@@ -159,7 +160,7 @@ export default {
     //this.bump++
   },
   methods: {
-    async addMember() {
+    addMember() {
       this.showAddMember = true
       this.$refs.addmodal?.show()
     },

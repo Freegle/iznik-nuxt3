@@ -13,7 +13,7 @@
 import { useStoryStore } from '@/stores/stories'
 
 export default {
-  async setup() {
+  setup() {
     const storyStore = useStoryStore()
     return {
       storyStore,

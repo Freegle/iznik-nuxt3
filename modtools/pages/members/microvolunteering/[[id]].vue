@@ -169,7 +169,7 @@ export default {
     this.fetch()
   },
   methods: {
-    async fetch() {
+    fetch() {
       this.busy = true
 
       if (this.groupid) {

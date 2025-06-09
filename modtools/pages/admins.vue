@@ -121,9 +121,9 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-const noAdmin = val => {
-  return !!(val && val.toLowerCase().indexOf('admin') === -1)
-}
+//const noAdmin = val => {
+//  return !!(val && val.toLowerCase().indexOf('admin') === -1)
+//}
 
 export default {
   components: {

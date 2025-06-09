@@ -1,8 +1,7 @@
 <template>
   <div class="autocomplete">
-    <!-- eslint-disable-next-line -->
     <input v-model="search" class="form-control" type="text" :size="size" :placeholder="placeholder" @input="onChange" @keydown.down="onArrowDown"
-      @keydown.up="onArrowUp" @keydown.enter="onEnter">
+      @keydown.up="onArrowUp" @keydown.enter="onEnter" />
     <ul v-show="isOpen" id="autocomplete-results" class="autocomplete-results">
       <li v-if="isLoading" class="loading">
         Loading results...
@@ -12,7 +11,6 @@
         {{ result }}
       </li>
     </ul>
-    </input>
   </div>
 </template>
 <script>

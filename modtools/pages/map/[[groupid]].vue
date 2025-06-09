@@ -28,8 +28,6 @@ const all = computed(() => {
   return ('groupid' in route.params) ? route.params.groupid === "all" : false
 }) */
 const caretaker = computed(() => {
-  const caretaker =
-    'groupid' in route.params ? route.params.groupid === 'caretaker' : false
   return 'groupid' in route.params
     ? route.params.groupid === 'caretaker'
     : false

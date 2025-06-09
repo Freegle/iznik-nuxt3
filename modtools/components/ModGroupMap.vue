@@ -177,7 +177,6 @@ import ClusterMarker from '../components/ClusterMarker'
 import { attribution, osmtile } from '../composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '~/stores/location'
-import { useAuthStore } from '@/stores/auth'
 import { POSTCODE_REGEX } from '~/constants'
 
 let Wkt = null

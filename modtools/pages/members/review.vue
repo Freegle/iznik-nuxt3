@@ -5,7 +5,7 @@
       <ModHelpMemberReview />
       <ModPostcodeTester />
 
-      <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+      <div v-for="member in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
         <ModMemberReview :member="member" @forcerefresh="forcerefresh" />
       </div>
 
@@ -28,7 +28,7 @@ import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers(true)

@@ -29,6 +29,7 @@
         </b-row>
         <div class="d-flex flex-wrap pt-1">
           <b-form-group label="OFFER and WANTED posts:" class="mr-5">
+            <!-- eslint-disable-next-line -->
             <b-form-select v-model="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">
                 Immediately
@@ -54,6 +55,7 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Moderation status:" class="mr-5">
+            <!-- eslint-disable-next-line -->
             <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
               <option value="MODERATED">
                 Moderated

@@ -32,7 +32,7 @@ export default {
     }
   },
   methods: {
-    async showModal() {
+    showModal() {
       this.showMicrovolunteeringModal = true
       this.$refs.microvolunteering?.show()
     }

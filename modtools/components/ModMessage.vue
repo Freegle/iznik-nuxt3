@@ -151,6 +151,7 @@
             </div>
             <ModMessageWorry v-if="message.worry" :message="message" />
             <div v-if="expanded">
+              <!-- eslint-disable-next-line -->
               <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
               <div v-else-if="editreview">
                 <h4>Differences:</h4>
@@ -380,6 +381,7 @@ export default {
   setup(props) {
     if( props.message.fromuser && (typeof props.message.fromuser === "number")) {
       console.error('ModMessage props.message.fromuser is Number')
+      // eslint-disable-next-line vue/no-mutating-props
       props.message.fromuser = null // TODO WHY & FIX
     }
     const modGroupStore = useModGroupStore()
@@ -677,6 +679,7 @@ export default {
   },
   methods: {
     updateComments() {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.fromuser = this.userStore.byId(this.message.fromuser.id)
     },
     imageAdded(id) {
@@ -723,6 +726,7 @@ export default {
       return ret
     },
     postcodeSelect(pc) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.location = pc
     },
     startEdit() {

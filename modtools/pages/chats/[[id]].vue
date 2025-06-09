@@ -44,14 +44,15 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { pluralise } from '../composables/usePluralise'
+import { useRoute } from 'vue-router'
+//import { pluralise } from '../composables/usePluralise'
 import { useChatStore } from '~/stores/chat'
 import { useAuthStore } from '../../stores/auth'
 //import { setupChat } from '../composables/useChat'
 import { useRouter } from '#imports'
 
 export default {
-  async setup(props) {
+  setup() {
     const chatStore = useChatStore()
     const authStore = useAuthStore()
     /*const {
@@ -94,7 +95,7 @@ export default {
       //adsVisible: false,
     }
   },
-  async created() {
+  created() {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     if (isNaN(this.id)) this.id = 0
@@ -126,10 +127,10 @@ export default {
       this.authStore.user?.lng,
       otheruser?.value?.lat,
       otheruser?.value?.lng
-    ),*/
+    ),
     milesstring() {
       return pluralise('mile', milesaway.value, true) + ' away'
-    },
+    },*/
     chats() {
       return this.chatStore?.list ? this.chatStore.list : []
     },

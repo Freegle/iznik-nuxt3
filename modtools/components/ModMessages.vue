@@ -23,8 +23,7 @@ const {
   context, groupid, limit, show, collection, messageTerm, nextAfterRemoved, summary, messages, visibleMessages, work,
 } = modMessages
 
-
-
+// eslint-disable-next-line no-unused-vars
 const props = defineProps({
   editreview: { type: Boolean, required: false, default: false },
 })

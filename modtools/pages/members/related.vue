@@ -5,7 +5,7 @@
       <ModHelpRelated />
       <ModGroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
 
-      <div v-for="(member, ix) in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+      <div v-for="member in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
         <ModRelatedMember :member="member" @processed="bump++" />
       </div>
 
@@ -30,7 +30,7 @@ import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 
 export default {
-  async setup() {
+  setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
@@ -43,7 +43,6 @@ export default {
       groupid,
       bump,
       distance,
-      groupid,
       loadMore,
     }
   },

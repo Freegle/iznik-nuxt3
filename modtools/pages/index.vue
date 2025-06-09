@@ -80,7 +80,7 @@
 <script setup>
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import { buildHead } from '~/composables/useMTBuildHead'
+//import { buildHead } from '~/composables/useMTBuildHead'
 import dayjs from 'dayjs'
 
 const miscStore = useMiscStore()
@@ -99,7 +99,7 @@ const starti = ref(null)
 const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
-const dateFormat = ref(null)
+//const dateFormat = ref(null)
 
 const groupid = computed({
   get: () => {
@@ -151,7 +151,7 @@ watch(showInfo, () => {
   update()
 })
 
-onMounted(async () => {
+onMounted(() => {
   // Volunteers' Week is between 1st and 7th June every year.
   if (
     dayjs().get('month') === 5 &&

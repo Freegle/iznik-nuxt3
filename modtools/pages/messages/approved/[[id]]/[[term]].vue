@@ -34,14 +34,14 @@
 //  - Email/name/id search doesn't change URL
 //  - Message id/subject search changes URL <term>
 
+import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '@/stores/message'
 import me from '~/mixins/me.js'
 import { setupModMessages } from '@/composables/useModMessages'
-import { captureConsoleIntegration } from '@sentry/integrations'
 
 export default {
-  async setup() {
+  setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages(true)

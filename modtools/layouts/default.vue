@@ -102,6 +102,7 @@
 </template>
 
 <script lang="ts">
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
@@ -208,7 +209,7 @@ export default {
   watch: {
     $route: {
       async handler(newVal, oldVal) {
-        const routechanged = newVal.fullPath != oldVal.fullPath
+        const routechanged = newVal.fullPath !== oldVal.fullPath
         if (this.$refs.sizer && routechanged) {
           const el = document.getElementById('sizer')
           if (getComputedStyle(el).display !== 'block') {

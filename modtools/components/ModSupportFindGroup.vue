@@ -116,7 +116,7 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '../stores/member'
 
 export default {
-  async setup() {
+  setup() {
     const modGroupStore = useModGroupStore()
     const memberStore = useMemberStore()
 
@@ -285,7 +285,7 @@ export default {
       }
       callback()
     },
-    async saveCentres(callback) {
+    saveCentres(callback) {
       this.modGroupStore.updateMT({
         id: this.groupid,
         lat: this.group.lat,

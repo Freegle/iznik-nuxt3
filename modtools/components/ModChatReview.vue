@@ -293,7 +293,7 @@ export default {
       this.$emit('reload')
       callback()
     },
-    async modnote(callback) {
+    modnote(callback) {
       this.showModChatNoteModal = true
       this.$refs.modnote?.show()
       callback()
@@ -303,7 +303,7 @@ export default {
       this.$emit('reload')
       callback()
     },
-    async viewOriginal() {
+    viewOriginal() {
       this.showOriginal = true
       this.$refs.original?.show()
     }

@@ -13,7 +13,7 @@
         <div>
           <ProfileImage :image="member.profile.turl" class="ml-1 mb-1 inline" is-thumbnail size="sm" />
           {{ member.displayname }}
-          <Supporter v-if="member.supporter" class="d-inline" />
+          <ModSupporter v-if="member.supporter" class="d-inline" />
         </div>
         <div v-if="member.joined">
           <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}

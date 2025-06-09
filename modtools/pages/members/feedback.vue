@@ -81,7 +81,7 @@ export default {
   components: {
     GChart,
   },
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modMembers = setupModMembers(true)
@@ -156,7 +156,7 @@ export default {
       this.memberStore.clear()
       this.bump++
     },
-    async groupid() {
+    groupid() {
       this.getHappiness()
       this.bump++
     },
