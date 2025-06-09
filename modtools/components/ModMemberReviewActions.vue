@@ -100,7 +100,7 @@ export default {
     }
   },
   methods: {
-    async remove(callback) {
+    remove(callback) {
       this.showConfirmModal = true
       this.$refs.removeConfirm?.show()
 

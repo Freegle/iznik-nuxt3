@@ -53,7 +53,7 @@ import { usePublicityStore } from '@/stores/publicity'
 import { computed, watch, reloadNuxtApp } from '#imports'
 
 const route = useRoute()
-const loadingIndicatorThrottle = ref(5000)
+//const loadingIndicatorThrottle = ref(5000)
 //const { isLoading } = useLoadingIndicator({
 //  throttle: loadingIndicatorThrottle.value,
 //})

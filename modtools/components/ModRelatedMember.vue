@@ -170,6 +170,7 @@ export default {
       s1 = s1 + ''
       s2 = s2 + ''
 
+      // eslint-disable-next-line array-callback-return
       const removeDistinct = (s1, s2) =>
         s1
           .split('')

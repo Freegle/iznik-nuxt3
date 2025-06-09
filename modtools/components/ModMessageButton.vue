@@ -176,8 +176,9 @@ export default {
         }
 
         this.showStdMsgModal = true
-        await nextTick()
         this.$refs.stdmodal?.show()
+        await this.$nextTick()
+        this.$refs.stdmodal?.fillin()
       }
       if (callback) callback()
     },
@@ -188,7 +189,7 @@ export default {
       })
       this.checkWorkDeferGetMessages()
     },
-    async deleteIt() {
+    deleteIt() {
       this.showDeleteModal = true
     },
     async deleteConfirmed() {

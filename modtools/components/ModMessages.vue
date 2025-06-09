@@ -10,21 +10,17 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group';
 import { useMessageStore } from '~/stores/message'
-import { useMiscStore } from '~/stores/misc';
 import { setupModMessages } from '../composables/useModMessages'
 
-const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const messageStore = useMessageStore()
-const miscStore = useMiscStore()
 
 // composables/modMessagesPage
 const modMessages = setupModMessages()
 const {
-  busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, nextAfterRemoved, distance, summary, messages, visibleMessages, work,
+  context, groupid, limit, show, collection, messageTerm, nextAfterRemoved, summary, messages, visibleMessages, work,
 } = modMessages
 
 

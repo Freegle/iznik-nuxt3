@@ -36,7 +36,7 @@
           Please go to the <em>Rules</em> section of the group settings and respond to each question. You can
           copy the rules if you have multiple groups.
         </p>
-        <NuxtLink v-for="(inv) of invalid" :to="'/settings/' + inv.id + '?noguard=true'">Click to add rules for {{ inv.namedisplay }}<br></NuxtLink>
+        <NuxtLink :key="inv.id" v-for="(inv) of invalid" :to="'/settings/' + inv.id + '?noguard=true'">Click to add rules for {{ inv.namedisplay }}<br></NuxtLink>
       </div>
     </NoticeMessage>
   </div>

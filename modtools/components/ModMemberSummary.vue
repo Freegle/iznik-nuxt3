@@ -37,8 +37,6 @@
   </div>
 </template>
 <script>
-import { pluralise } from '../composables/usePluralise'
-
 import { useUserStore } from '../stores/user'
 
 export default {
@@ -101,13 +99,12 @@ export default {
 
       return count
     },
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showModmails() {
+    showModmails() {
       this.modmailsonly = true
 
       this.showLogsModal = true

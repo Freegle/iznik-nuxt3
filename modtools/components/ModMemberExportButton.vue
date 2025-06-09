@@ -67,14 +67,13 @@ export default {
     }
   },
   methods: {
-    async download() {
+    download() {
       this.modalButtonLabel = 'Cancel'
       this.context = null
       this.cancelled = false
       this.exportList = []
       this.fetched = 0
       this.showExportModal = true
-      await nextTick()
       this.$refs.exportmodal?.show()
       this.exportChunk()
     },

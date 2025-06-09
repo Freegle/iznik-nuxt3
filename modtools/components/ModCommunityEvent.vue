@@ -50,7 +50,7 @@ import { useCommunityEventStore } from '../stores/communityevent'
 import { useGroupStore } from '../stores/group'
 
 export default {
-  async setup(props) {
+  setup(props) {
     const communityEventStore = useCommunityEventStore()
     const groupStore = useGroupStore()
     return {

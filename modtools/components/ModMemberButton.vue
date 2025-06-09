@@ -187,13 +187,14 @@ export default {
         }
 
         this.showStdMsgModal = true
-        await this.$nextTick()
         this.$refs.stdmodal?.show()
+        await this.$nextTick()
+        this.$refs.stdmodal?.fillin()
       }
       if (callback) callback()
       this.$emit('pressed')
     },
-    async approveIt() {
+    approveIt() {
       alert('MMB memberStore.approve NOT DEFINED')
       /*await this.memberStore.approve({
         id: this.member.userid,

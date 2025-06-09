@@ -517,7 +517,6 @@ import { useAuthStore } from '../stores/auth'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
-import api from '~/api'
 
 export default {
   components: {

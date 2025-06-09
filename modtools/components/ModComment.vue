@@ -137,7 +137,7 @@ export default {
       this.updateComments()
     },
 
-    async editIt() {
+    editIt() {
       this.showCommentEditModal = true
       this.$emit('editing')
     },

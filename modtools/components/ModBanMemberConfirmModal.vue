@@ -41,7 +41,6 @@ import Wkt from 'wicket'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useUserStore } from '../../stores/user'
 import { useOurModal } from '~/composables/useOurModal'
-import cloneDeep from 'lodash.clonedeep'
 
 export default {
   setup() {
@@ -75,7 +74,7 @@ export default {
       return this.userStore.byId(this.userid)
     }
   },
-  async mounted() {
+  mounted() {
     //console.log('mounted', cloneDeep(this.group))
     // TODO: Why: await this.modGroupStore.listMT({
     //  grouptype: 'Freegle'

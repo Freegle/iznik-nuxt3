@@ -44,7 +44,7 @@
 <script>
 import { useMessageStore } from '../../stores/message'
 import { useStdmsgStore } from '../stores/stdmsg'
-import { icon, variant, copyStdMsgs } from '../composables/useStdMsgs'
+import { copyStdMsgs } from '../composables/useStdMsgs'
 
 export default {
   props: {

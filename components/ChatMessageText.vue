@@ -6,6 +6,7 @@
     <div class="chatMessage forcebreak chatMessage__owner">
       <div>
         <span v-if="isMT && emessageMThasTNlinks">
+          <!-- eslint-disable-next-line-->
           <span v-html="emessageMTTN" class="preline forcebreak"></span>
         </span>
         <span v-else-if="!highlightEmails">

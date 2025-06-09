@@ -1,6 +1,6 @@
 <template>
   <b-input-group class="flex max">
-    <b-form-input v-model="term" type="text" placeholder="Search email/name/id" autocapitalize="none" @keyup.native.enter="dosearch" />
+    <b-form-input v-model="term" type="text" placeholder="Search email/name/id" autocapitalize="none" @keyup.enter="dosearch" />
     <slot name="append">
       <b-button variant="primary" @click="dosearch">
         <v-icon icon="search" />

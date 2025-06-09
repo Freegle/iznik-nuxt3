@@ -39,7 +39,6 @@
 <script>
 import { useOurModal } from '~/composables/useOurModal'
 import { useAlertStore } from './stores/alert'
-import { pluralise } from '../composables/usePluralise'
 import { GChart } from 'vue-google-charts'
 
 export default {

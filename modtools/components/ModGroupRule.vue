@@ -33,7 +33,6 @@
 </template>
 <script>
 import { useModGroupStore } from '@/stores/modgroup'
-import { captureConsoleIntegration } from '@sentry/integrations'
 
 export default {
   setup() {

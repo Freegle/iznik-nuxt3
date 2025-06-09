@@ -33,7 +33,7 @@
 <script>
 import { useModConfigStore } from '../stores/modconfig'
 import draggable from 'vuedraggable'
-import { icon, variant, copyStdMsgs } from '../composables/useStdMsgs'
+import { copyStdMsgs } from '../composables/useStdMsgs'
 
 export default {
   setup() {

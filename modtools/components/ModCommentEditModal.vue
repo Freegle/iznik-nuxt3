@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-modal ref="modal" :id="'modCommentModal-' + user.id" size="lg" no-stacking @hidden="onHide">
-      <template #title class="w-100">
-        Edit Note for {{ user.displayname }} <span v-if="groupname">on</span> {{  groupname }}
+      <template #title>
+        Edit Note for {{ user.displayname }} <span v-if="groupname">on</span> {{ groupname }}
       </template>
       <template #default>
         <p>
@@ -12,22 +12,22 @@
           These comments can be seen by moderators, and also by members who choose to download their data under
           GDPR. So keep them objective, polite and factual, and without identifiable personal information please.
         </p>
-        <b-form-input v-model="comment.user1" :placeholder="placeholders[1]" />
-        <b-form-input v-model="comment.user2" :placeholder="placeholders[2]" />
-        <b-form-input v-model="comment.user3" :placeholder="placeholders[3]" />
-        <b-form-input v-model="comment.user4" :placeholder="placeholders[4]" />
-        <b-form-input v-model="comment.user5" :placeholder="placeholders[5]" />
-        <b-form-input v-model="comment.user6" :placeholder="placeholders[6]" />
-        <b-form-input v-model="comment.user7" :placeholder="placeholders[7]" />
-        <b-form-input v-model="comment.user8" :placeholder="placeholders[8]" />
-        <b-form-input v-model="comment.user9" :placeholder="placeholders[9]" />
-        <b-form-input v-model="comment.user10" :placeholder="placeholders[10]" />
-        <b-form-input v-model="comment.user11" :placeholder="placeholders[11]" />
+        <b-form-input v-model="editcomment.user1" :placeholder="placeholders[1]" />
+        <b-form-input v-model="editcomment.user2" :placeholder="placeholders[2]" />
+        <b-form-input v-model="editcomment.user3" :placeholder="placeholders[3]" />
+        <b-form-input v-model="editcomment.user4" :placeholder="placeholders[4]" />
+        <b-form-input v-model="editcomment.user5" :placeholder="placeholders[5]" />
+        <b-form-input v-model="editcomment.user6" :placeholder="placeholders[6]" />
+        <b-form-input v-model="editcomment.user7" :placeholder="placeholders[7]" />
+        <b-form-input v-model="editcomment.user8" :placeholder="placeholders[8]" />
+        <b-form-input v-model="editcomment.user9" :placeholder="placeholders[9]" />
+        <b-form-input v-model="editcomment.user10" :placeholder="placeholders[10]" />
+        <b-form-input v-model="editcomment.user11" :placeholder="placeholders[11]" />
         <p class="mt-2">
           You can choose for this note to be be alerted to other groups, which will put the member in <em>Member->Review</em>
           if they are an existing member or join a group. Please use this only for serious issues.
         </p>
-        <OurToggle :value="comment.flag" class="mt-2" :height="30" :width="250" :font-size="14" :sync="true"
+        <OurToggle :value="editcomment.flag" class="mt-2" :height="30" :width="250" :font-size="14" :sync="true"
           :labels="{ checked: 'Will alert other groups', unchecked: 'Will not alert other groups' }" variant="modgreen" @change="toggleFlag" />
       </template>
       <template #footer>
@@ -61,11 +61,20 @@ export default {
       required: true
     },
     groupname: {
-      type: String
+      type: String,
+      required: false,
+      default: null
     }
+  },
+  mounted() {
+    this.editcomment = this.comment
+  },
+  computed: {
+
   },
   data: function () {
     return {
+      editcomment: false,
       placeholders: [
         null,
         'Add a comment about this member here',
@@ -80,10 +89,10 @@ export default {
       this.$emit('hidden')
     },
     toggleFlag() {
-      this.comment.flag = !this.comment.flag
+      this.editcomment.flag = !this.editcomment.flag
     },
     async save() {
-      await this.userStore.saveComment(this.comment)
+      await this.userStore.saveComment(this.editcomment)
       this.$emit('edited')
       this.hide()
     }

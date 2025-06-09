@@ -2,6 +2,7 @@
   <b-modal id="stdmsgmodal" ref="modal" :title="message ? message.subject : ('Message to ' + member.displayname)" no-stacking no-close-on-backdrop
     size="lg">
     <template #default>
+        {{ stdmsg.action }}
       <div v-if="stdmsg.action !== 'Edit'" class="d-flex">
         <div>
           From:&nbsp;
@@ -120,7 +121,7 @@ export default {
     }
   },
   setup() {
-    const { modal, hide } = useOurModal()
+    const { modal, show, hide } = useOurModal()
     const modGroupStore = useModGroupStore()
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()
@@ -128,7 +129,7 @@ export default {
     const {
       typeOptions
     } = setupKeywords()
-    return { modGroupStore, memberStore, messageStore, userStore, typeOptions, modal, hide }
+    return { modGroupStore, memberStore, messageStore, userStore, typeOptions, modal, hide, show }
   },
   data: function () {
     return {
@@ -306,7 +307,7 @@ export default {
     }
   },
   methods: {
-    async show() {
+    async fillin() {
       // Calculate initial subject.  Everything apart from Edits adds a Re:.
       const defpref = this.stdmsg.action === 'Edit' ? '' : 'Re:'
 
@@ -369,6 +370,7 @@ export default {
                 matches[3] +
                 ')'
 
+              // eslint-disable-next-line vue/no-mutating-props
               this.message.item.name = matches[2].toLowerCase().trim()
             } else {
               this.subject = this.subject.toLowerCase().trim()
@@ -431,6 +433,7 @@ export default {
 
       if (group && text) {
         text = text.replace(/\$networkname/g, 'Freegle')
+        // eslint-disable-next-line prefer-regex-literals
         const re = new RegExp('Freegle', 'ig')
         text = text.replace(
           /\$groupnonetwork/g,
@@ -512,6 +515,7 @@ export default {
         }
 
         if (this.user && this.user.joined) {
+          // eslint-disable-next-line new-cap
           text = text.replace(
             /\$membersubdate/g,
             new dayjs(this.user.joined).format('lll')
@@ -543,10 +547,12 @@ export default {
 
         if (this.message && this.message.duplicates) {
           this.message.duplicates.forEach(m => {
+            // eslint-disable-next-line new-cap
             summ +=
               new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
           })
 
+          // eslint-disable-next-line prefer-regex-literals
           const regex = new RegExp('\\$duplicatemessages', 'gim')
           text = text.replace(regex, summ)
         }
@@ -701,6 +707,7 @@ export default {
       if (callback) callback()
     },
     postcodeSelect(newpc) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.location = newpc
     },
     moveLeft() {

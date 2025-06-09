@@ -52,13 +52,13 @@
 <script setup>
 // We can't easily go back from a postvisibility polygon to the scale value.  
 // So: display correct postvisibility polygon but scale is always reset to just group
-import { useModGroupStore } from '@/stores/modgroup'
 import turfbuffer from 'turf-buffer'
 import Wkt from 'wicket'
 import 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { attribution, osmtile } from '../composables/useMap'
 import { LMap, LTileLayer, LGeoJson } from '@vue-leaflet/vue-leaflet'
+import { useModGroupStore } from '@/stores/modgroup'
 
 const modGroupStore = useModGroupStore()
 
@@ -84,7 +84,7 @@ watch(
   }
 )
 
-watch(scale, async (newVal) => {
+watch(scale, (newVal) => {
   changed.value = true
 })
 
@@ -138,7 +138,7 @@ const visibilityOptions = computed(() => {
   }
 })
 
-onMounted(async () => {
+onMounted(() => {
   getValueFromGroup()
 })
 
@@ -160,7 +160,7 @@ function toggleView(c, e) {
   }
 }
 
-async function ready() {
+function ready() {
   if (process.client) {
     zoomToCGA()
   }

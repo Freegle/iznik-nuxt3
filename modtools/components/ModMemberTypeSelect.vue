@@ -22,7 +22,8 @@ export default {
   props: {
     value: {
       type: String,
-      required: false
+      required: false,
+      default: '0'
     }
   },
   computed: {

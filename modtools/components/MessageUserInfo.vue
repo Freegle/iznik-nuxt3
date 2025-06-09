@@ -11,19 +11,19 @@
             {{ user.displayname }}
           </span>
           <span v-if="milesaway" class="align-middle">
-            &bull; <strong>about {{ milesaway | pluralize('mile', { includeNumber: true }) }} away</strong>
+            &bull; <strong>about {{ milesAwayPlural }} away</strong>
           </span>
           <br class="d-block d-sm-none">
           <span v-if="!modinfo && (user.info.openoffers + user.info.openwanteds > 0)" class="align-middle">
             <span class="d-none d-sm-inline">&bull;</span>
             <span v-if="user.info.openoffers" class="text-success">
-              {{ user.info.openoffers | pluralize([ 'open OFFER', 'open OFFERs' ], { includeNumber: true }) }}
+              {{ openOffersPlural }}
             </span>
             <span v-if="user.info.openoffers && user.info.openwanteds">
               &bull;
             </span>
             <span v-if="user.info.openwanteds" class="text-success">
-              {{ user.info.openwanteds | pluralize([ 'open WANTED', 'open WANTEDs' ], { includeNumber: true }) }}
+              {{ openWantedsPlural }}
             </span>
           </span>
           <Supporter v-if="user.supporter" class="d-inline" />
@@ -112,10 +112,8 @@ export default {
     },
     joinedAge() {
       if (this.membership) {
-        return new dayjs().diff(
-          new dayjs(this.membership.added),
-          'days'
-        )
+        // eslint-disable-next-line new-cap
+        return new dayjs().diff(new dayjs(this.membership.added), 'days')
       }
 
       return null
@@ -127,6 +125,25 @@ export default {
       } else {
         return '/profile/' + this.user.id
       }
+    }
+  },
+  methods: {
+    milesAwayPlural() {
+      return pluralize('mile', this.milesaway, true)
+    },
+    openOffersPlural() {
+      if (this.user?.info?.openoffers) {
+        pluralize.addIrregularRule('open OFFER', 'open OFFERs')
+        return pluralize('open OFFER', this.user.info.openoffers, true)
+      }
+      return ''
+    },
+    openWantedsPlural() {
+      if (this.user?.info?.openwanteds) {
+        pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
+        return pluralize('open WANTED', user.info.openwanteds, true)
+      }
+      return ''
     }
   }
 }

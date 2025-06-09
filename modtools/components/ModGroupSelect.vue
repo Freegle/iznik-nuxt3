@@ -288,7 +288,7 @@ export default {
     //   },
     // },
   },
-  async mounted() {
+  mounted() {
     // MT CHANGED
     /*if (this.listall) {
       console.error('MGS listMT mounted listall')
@@ -302,10 +302,10 @@ export default {
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)
-        let found = false
+        //let found = false
         this.groups.forEach((g) => {
           if (g.id === val) {
-            found = true
+            //found = true
             this.selectedGroup = g.id
           }
         })

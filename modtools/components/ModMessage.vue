@@ -12,23 +12,23 @@
                 <PostCode class="mt-2" value="" :find="false" @selected="postcodeSelect" />
               </b-input-group>
             </NoticeMessage>
-            <div v-if="editing" class="d-flex flex-wrap">
+            <div v-if="editing && editmessage" class="d-flex flex-wrap">
               <ModGroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds"
-                :disabled="message.fromuser.tnuserid" />
-              <div v-if="message.item && message.location" class="d-flex justify-content-start">
-                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
-                <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
+                :disabled="editmessage.fromuser.tnuserid" />
+              <div v-if="editmessage.item && editmessage.location" class="d-flex justify-content-start">
+                <b-form-select v-model="editmessage.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-input v-model="editmessage.item.name" size="lg" class="mr-1" />
               </div>
-              <div v-if="message.item && message.location">
+              <div v-if="editmessage.item && editmessage.location">
                 <b-input-group>
-                  <PostCode :value="message.location.name" :find="false" @selected="postcodeSelect" />
+                  <PostCode :value="editmessage.location.name" :find="false" @selected="postcodeSelect" />
                 </b-input-group>
               </div>
               <div v-else class="flex-grow-1 pl-0 pl-md-2 pr-0 pr-md-2 fullsubject">
                 <label class="mr-2">Subject:</label>
-                <b-form-input v-model="message.subject" size="lg" />
+                <b-form-input v-model="editmessage.subject" size="lg" />
                 <label class="mr-2">Post type:</label>
-                <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+                <b-form-select v-model="editmessage.type" :options="typeOptions" class="type mr-1" size="lg" />
               </div>
             </div>
             <ModDiff v-else-if="editreview && oldSubject && newSubject" :old="oldSubject" :new="newSubject" class="font-weight-bold" />
@@ -318,7 +318,6 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 
-import { pluralise } from '../composables/usePluralise'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '../../stores/location'
 import { useModConfigStore } from '../stores/modconfig'
@@ -379,7 +378,10 @@ export default {
     }
   },
   setup(props) {
-    if( props.message.fromuser && (typeof props.message.fromuser === "number")) props.message.fromuser = null // TODO WHY & FIX
+    if( props.message.fromuser && (typeof props.message.fromuser === "number")) {
+      console.error('ModMessage props.message.fromuser is Number')
+      props.message.fromuser = null // TODO WHY & FIX
+    }
     const modGroupStore = useModGroupStore()
     const locationStore = useLocationStore()
     const modconfigStore = useModConfigStore()
@@ -407,7 +409,8 @@ export default {
       attachments: [],
       homegroup: null,
       homegroupontn: false,
-      historyGroups: {}
+      historyGroups: {},
+      editmessage: false
     }
   },
   computed: {
@@ -664,7 +667,7 @@ export default {
       }
     }
   },
-  async mounted() {
+  mounted() {
     this.expanded = !this.summary
     this.attachments = this.message.attachments
     this.findHomeGroup()
@@ -723,8 +726,9 @@ export default {
       this.message.location = pc
     },
     startEdit() {
+      this.editmessage = this.message
       this.editing = true
-      this.message.groups.forEach(group => {
+      this.editmessage.groups.forEach(group => {
         this.editgroup = group.groupid
       })
     },
@@ -737,30 +741,30 @@ export default {
         attids.push(att.id)
       }
 
-      if (this.message.item && this.message.location) {
+      if (this.editmessage.item && this.editmessage.location) {
         // Well-structured message
         await this.messageStore.patch({
-          id: this.message.id,
-          msgtype: this.message.type,
-          item: this.message.item.name,
-          location: this.message.location.name,
+          id: this.editmessage.id,
+          msgtype: this.editmessage.type,
+          item: this.editmessage.item.name,
+          location: this.editmessage.location.name,
           attachments: attids,
-          textbody: this.message.textbody
+          textbody: this.editmessage.textbody
         })
       } else {
         // Not
         await this.messageStore.patch({
-          id: this.message.id,
-          msgtype: this.message.type,
-          subject: this.message.subject,
+          id: this.editmessage.id,
+          msgtype: this.editmessage.type,
+          subject: this.editmessage.subject,
           attachments: attids,
-          textbody: this.message.textbody
+          textbody: this.editmessage.textbody
         })
       }
 
       let alreadyon = false
 
-      this.message.groups.forEach(g => {
+      this.editmessage.groups.forEach(g => {
         if (g.groupid === this.editgroup) {
           alreadyon = true
         }
@@ -768,7 +772,7 @@ export default {
 
       if (!alreadyon) {
         await this.messageStore.move({
-          id: this.message.id,
+          id: this.editmessage.id,
           groupid: this.editgroup
         })
       }
@@ -795,10 +799,9 @@ export default {
         await this.userStore.fetch(this.message.fromuser.id)
       }
     },
-    async viewSource() {
+    viewSource() {
       this.showEmailSourceModal = true
-      await nextTick()
-      this.$refs.original.show()
+      this.$refs.original?.show()
     },
     canonSubj(message) {
       let subj = message.subject

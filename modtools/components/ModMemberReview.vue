@@ -106,7 +106,6 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { pluralise } from '../composables/usePluralise'
 import { useUserStore } from '../stores/user'
 
 const MEMBERSHIPS_SHOW = 3
@@ -262,7 +261,7 @@ export default {
       }
     }
   },
-  async mounted() {
+  mounted() {
     if (!this.member.info) {
       // Fetch with info so that we can display more.
       this.userStore.fetchMT({
@@ -272,13 +271,12 @@ export default {
     }
   },
   methods: {
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showLogs() {
+    showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
       this.$refs.logs?.show()

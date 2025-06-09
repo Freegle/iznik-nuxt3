@@ -478,6 +478,9 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0
     },
+    async unbounceMT(id) {
+      await this.$api.user.unbounce(id)
+    },
     async saveAndGet(params) {
       await this.$api.session.save(params, function (data) {
         let logIt
@@ -530,6 +533,9 @@ export const useAuthStore = defineStore({
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
+    },
+    async merge(params) {
+      await api(this.config).user.merge(params.email1, params.email2, params.id1, params.id2, params.reason)
     },
   },
   getters: {

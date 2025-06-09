@@ -25,8 +25,6 @@ import { useHelpBox } from '~/composables/useHelpBox'
 
 const { hide, toggleHelp, showHelp } = useHelpBox()
 
-const id = ref('admins')
-
 onMounted(() => {
   hide()
 })

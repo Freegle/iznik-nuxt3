@@ -52,7 +52,7 @@
 import { useMemberStore } from '../stores/member'
 
 export default {
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     return {
       memberStore,

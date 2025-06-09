@@ -140,8 +140,6 @@
   </div>
 </template>
 <script>
-import { pluralise } from '../composables/usePluralise'
-
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 import { useModConfigStore } from '../stores/modconfig'
@@ -161,7 +159,8 @@ export default {
     },
     index: {
       type: Number,
-      required: false
+      required: false,
+      default: 0
     },
     spammerlist: {
       type: Boolean,
@@ -320,13 +319,12 @@ export default {
     }
   },
   methods: {
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showLogs() {
+    showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
       this.$refs.logs?.show()

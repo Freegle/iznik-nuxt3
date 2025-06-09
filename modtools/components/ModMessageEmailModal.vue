@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal ref="modal" id="modEmailMessageModal" size="lg" @hidden="onHide">
-      <template #title class="w-100">
+      <template #title>
         Message received by email
       </template>
       <template #default>

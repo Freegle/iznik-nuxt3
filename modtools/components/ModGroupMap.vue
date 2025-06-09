@@ -173,7 +173,6 @@ import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
-import turfarea from 'turf-area'
 import ClusterMarker from '../components/ClusterMarker'
 import { attribution, osmtile } from '../composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
@@ -250,7 +249,7 @@ const editingcga = ref(null)
 const dpasjson = ref(null)
 const editingdpa = ref(null)
 
-watch(shade, async (newVal, oldVal) => {
+watch(shade, (newVal, oldVal) => {
   const allcgas = cgasjson.value
   if (allcgas) {
     const cgaoptions = cgaOptions.value
@@ -267,14 +266,14 @@ watch(shade, async (newVal, oldVal) => {
   }
 })
 
-const supportOrAdmin = computed(() => {
+/*const supportOrAdmin = computed(() => {
   const authStore = useAuthStore()
   const me = authStore.user
   return (
     me &&
     (me.systemrole === 'Support' || me.systemrole === 'Admin')
   )
-})
+})*/
 
 
 const mapHeight = computed(() => {
@@ -813,7 +812,7 @@ async function search() {
       const json = JSON.parse(responseText)
       if( Array.isArray(json.features) && (json.features.length>0)){
         const f0 = json.features[0]
-        if( f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length==2){
+        if( f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length===2){
           const latlng = new window.L.LatLng(f0.geometry.coordinates[1], f0.geometry.coordinates[0])
           mapObject.value.leafletObject.setView(latlng, 14)
         }

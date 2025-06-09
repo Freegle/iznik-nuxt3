@@ -107,7 +107,7 @@
 import { useChatStore } from '~/stores/chat'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
-const REVIEWCHAT = null
+// const REVIEWCHAT = null
 
 export default {
   //mixins: [chat],
@@ -295,7 +295,6 @@ export default {
     },
     async modnote(callback) {
       this.showModChatNoteModal = true
-      await nextTick()
       this.$refs.modnote?.show()
       callback()
     },
@@ -306,9 +305,7 @@ export default {
     },
     async viewOriginal() {
       this.showOriginal = true
-      await nextTick()
       this.$refs.original?.show()
-      callback()
     }
   }
 }

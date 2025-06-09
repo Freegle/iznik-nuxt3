@@ -47,7 +47,7 @@
           </NoticeMessage>
         </div>
       </template>
-      <template #footer slot-scope="{ hide }">
+      <template #footer>
         <b-button variant="white" @click="hide">
           Close
         </b-button>
