@@ -133,7 +133,6 @@ import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
 
-// Import the useReplyToPost composable
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
 const SupportLink = defineAsyncComponent(() =>
