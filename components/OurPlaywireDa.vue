@@ -89,7 +89,7 @@ watch(
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
-        function addAd() {
+        async function addAd() {
           try {
             // Wait for daDiv to be in the DOM and not null before proceeding
             if (!daDiv.value) {
@@ -112,21 +112,21 @@ watch(
             } else if (height === '50px' || height === '90px') {
               theType.value = 'leaderboard_atf'
               try {
-                window.ramp.setPath('ROS')
+                await window.ramp.setPath('ROS')
               } catch (e) {
                 console.log('Failed to set path for ROS', e)
               }
             } else if (height === '100px') {
               theType.value = 'mobile_large_footer'
               try {
-                window.ramp.setPath('mobile_large_footer')
+                await window.ramp.setPath('mobile_large_footer')
               } catch (e) {
                 console.log('Failed to set path for ROS', e)
               }
             } else if (height === '250px') {
               theType.value = 'desktop_large_footer'
               try {
-                window.ramp.setPath('desktop_large_footer')
+                await window.ramp.setPath('desktop_large_footer')
               } catch (e) {
                 console.log('Failed to set path for ROS', e)
               }
