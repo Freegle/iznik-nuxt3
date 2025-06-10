@@ -518,9 +518,9 @@ export default {
         }
 
         if (this.user && this.user.joined) {
-          // eslint-disable-next-line new-cap
           text = text.replace(
             /\$membersubdate/g,
+            // eslint-disable-next-line new-cap
             new dayjs(this.user.joined).format('lll')
           )
         }
@@ -551,8 +551,7 @@ export default {
         if (this.message && this.message.duplicates) {
           this.message.duplicates.forEach(m => {
             // eslint-disable-next-line new-cap
-            summ +=
-              new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
+            summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
           })
 
           // eslint-disable-next-line prefer-regex-literals

@@ -189,7 +189,7 @@
             <div :key="rulesBump">
               <h4>Rules about the group</h4>
               <SpinButton variant="white" icon-name="save" label="Save all rule changes" @handle="saverules" :disabled="readonly" />
-              <div v-for="rule in rulelist">
+              <div v-for="rule in rulelist" :key="rule[0]">
                 <ModGroupRule v-if="rule[0]" :setting="rules[rule[0]]" :name="rule[0]" :label="rule[2]" :readonly="readonly" :type="rule[1]"
                   :toggle-checked="rule[3]" :toggle-unchecked="rule[4]" @change="changedrule(rule, $event)" :newRule="rule[5] == 'New'" />
                 <h4 v-else>{{ rule[1] }}</h4>
@@ -402,9 +402,8 @@
               :rows="3" />
             <b-form-text class="mb-2">
               You can visualise these areas by cutting and pasting the data into
-              <!-- eslint-disable-next-line -->
-              <ExternalLink href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html">this tool</ExternalLink>.
-              You can also view all community areas
+              <ExternalLink href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html">this tool</ExternalLink>
+              - You can also view all community areas
               <!-- eslint-disable-next-line -->
               <nuxt-link to="/map">here</nuxt-link>,
               or all caretaker communities

@@ -104,7 +104,7 @@ import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
 
 export default {
-  async setup() {
+  setup() {
     const donationStore = useDonationStore()
     const userStore = useUserStore()
     return {
