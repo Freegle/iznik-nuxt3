@@ -102,25 +102,22 @@ watch(
             //
             // We don't use spaNewPage as in the example because our ads are added more dynamically than
             // that.
+            //
+            // The setPath settings have been advised by Playwire for the different sizes of
+            // sticky footer ads.
             const height = window.getComputedStyle(daDiv.value, null).maxHeight
 
             if (props.video) {
               theType.value = 'corner_ad_video'
-              // window.ramp.setPath('ROS')
-            } else if (
-              height === '50px' ||
-              height === '90px' ||
-              height === '100px' ||
-              height === '250px'
-            ) {
+            } else if (height === '50px' || height === '90px') {
               theType.value = 'leaderboard_atf'
-              // window.ramp.setPath('ROS')
-              // } else if (height === '100px') {
-              //   theType.value = 'mobile_large_footer'
-              //   window.ramp.setPath('mobile_large_footer')
-              // } else if (height === '250px') {
-              //   theType.value = 'desktop_large_footer'
-              //   window.ramp.setPath('desktop_large_footer')
+              window.ramp.setPath('ROS')
+            } else if (height === '100px') {
+              theType.value = 'mobile_large_footer'
+              window.ramp.setPath('mobile_large_footer')
+            } else if (height === '250px') {
+              theType.value = 'desktop_large_footer'
+              window.ramp.setPath('desktop_large_footer')
             } else {
               // See if we already have a med_rect; if so we should use the alternate type value as Playwire
               // doesn't like multiple ads of the same type.
@@ -131,8 +128,6 @@ watch(
               } else {
                 theType.value = 'med_rect_atf'
               }
-
-              // window.ramp.setPath('ROS')
             }
 
             console.log('Execute queued spaAddAds', theType.value, props.divId)
