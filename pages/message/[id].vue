@@ -1,9 +1,11 @@
 <template>
-  <client-only>
-    <b-col>
+  <b-col>
+    <client-only>
       <MicroVolunteering />
-      <b-row class="m-0">
-        <b-col cols="0" xl="3" class="d-none d-xl-block">
+    </client-only>
+    <b-row class="m-0">
+      <b-col cols="0" xl="3" class="d-none d-xl-block">
+        <client-only>
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -17,8 +19,21 @@
               show-logged-out
             />
           </VisibleWhen>
-        </b-col>
-        <b-col cols="12" xl="6" class="p-0">
+        </client-only>
+      </b-col>
+      <b-col cols="12" xl="6" class="p-0">
+        <client-only>
+          <template #fallback>
+            <OurMessage
+              :id="id"
+              class="mt-3"
+              :start-expanded="true"
+              hide-close
+              :record-view="false"
+              @not-found="error = true"
+            />
+          </template>
+
           <div
             v-if="
               !showtaken &&
@@ -127,8 +142,10 @@
               />
             </VisibleWhen>
           </div>
-        </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
+        </client-only>
+      </b-col>
+      <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
+        <client-only>
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -143,10 +160,10 @@
               :jobs="false"
             />
           </VisibleWhen>
-        </b-col>
-      </b-row>
-    </b-col>
-  </client-only>
+        </client-only>
+      </b-col>
+    </b-row>
+  </b-col>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
