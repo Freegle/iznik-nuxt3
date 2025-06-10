@@ -448,8 +448,19 @@ const test = base.test.extend({
             path: getScreenshotPath(`error-page-${Date.now()}.png`),
             fullPage: true,
           })
+
+          // Extract the "Error was" text if present
+          let errorDetails = ''
+          const errorWasMatch = errorTextContent.match(
+            /Error was[:\s]*(.*?)(?=\n|$)/i
+          )
+          if (errorWasMatch) {
+            errorDetails = ` - Error was: ${errorWasMatch[1].trim()}`
+            console.log(`Error details extracted: ${errorWasMatch[1].trim()}`)
+          }
+
           throw new Error(
-            `Page loaded with 'Something went wrong' error message at ${path}`
+            `Page loaded with 'Something went wrong' error message at ${path}${errorDetails}`
           )
         }
 
