@@ -335,8 +335,8 @@ const desktopMaxHeight = computed(() => {
 const mobileMaxHeight = computed(() => {
   // Use windowHeight to trigger reactivity on resize
   // Check if mobile tall detector is visible (using CSS media queries)
-  if (windowHeight.value && process.client && this.$refs.mobileTallDetector) {
-    const computed = window.getComputedStyle(this.$refs.mobileTallDetector)
+  if (windowHeight.value && process.client && mobileTallDetector.value) {
+    const computed = window.getComputedStyle(mobileTallDetector.value)
     return computed.display === 'block' ? '100px' : '50px'
   }
   return '50px'
