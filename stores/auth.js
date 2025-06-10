@@ -363,13 +363,14 @@ export const useAuthStore = defineStore({
 
         if (ret) {
           ;({ me, groups, persistent, jwt } = ret)
-          const permissions = me.permissions
+          let permissions = null
           const v1groups = ret.groups
 
           this.work = ret.work // MT added
           this.discourse = ret.discourse // MT added
 
           if (me) {
+            permissions = me.permissions
             this.setAuth(jwt, persistent)
           }
 
