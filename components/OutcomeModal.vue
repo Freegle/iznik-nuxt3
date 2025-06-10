@@ -198,9 +198,8 @@
     </template>
   </b-modal>
 </template>
-
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, computed } from 'vue'
 import { useMessageStore } from '../stores/message'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
@@ -228,7 +227,8 @@ const emit = defineEmits(['hidden'])
 
 const messageStore = useMessageStore()
 const { modal, hide } = useOurModal()
-const $bus = inject('$bus')
+
+const { $bus } = useNuxtApp()
 
 const happiness = ref(null)
 const comments = ref(null)
