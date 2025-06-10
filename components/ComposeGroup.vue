@@ -29,7 +29,8 @@ const postcode = computed(() => {
 })
 
 const myGroups = computed(() => {
-  return authStore.user?.groups || []
+  console.log('Compute myGroups', authStore.groups)
+  return authStore.groups || []
 })
 
 const group = computed({
@@ -51,28 +52,30 @@ const group = computed({
 
 const groupOptions = computed(() => {
   const ret = []
-  const ids = []
+  const ids = {}
 
   if (postcode.value && postcode.value.groupsnear) {
     for (const group of postcode.value.groupsnear) {
-      ret.push({
-        value: group.id,
-        text: group.namedisplay ? group.namedisplay : group.nameshort,
-      })
+      if (!ids[group.id]) {
+        ret.push({
+          value: group.id,
+          text: group.namedisplay ? group.namedisplay : group.nameshort,
+        })
 
-      ids[group.id] = true
+        ids[group.id] = true
+      }
     }
   }
 
   // Add any other groups we are a member of and might want to select.
   for (const group of myGroups.value) {
-    if (!ids[group.id]) {
+    if (!ids[group.groupid]) {
       ret.push({
-        value: group.id,
+        value: group.groupid,
         text: group.namedisplay ? group.namedisplay : group.nameshort,
       })
 
-      ids[group.id] = true
+      ids[group.groupid] = true
     }
   }
 
@@ -93,5 +96,9 @@ onMounted(async () => {
       console.error('Failed to fetch postcode', e)
     }
   }
+
+  console.log('Fetch user')
+  await authStore.fetchUser()
+  console.log('Fetched user', authStore.user, authStore.groups)
 })
 </script>
