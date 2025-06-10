@@ -116,6 +116,7 @@
     "pluralize": "^8.0.0",
     "postman-paf": "^1.0.1",
     "resize-observer-polyfill": "^1.5.1",
+    "rollup": "^4.42.0",
     "save-file": "^2.3.1",
     "simpleheat": "^0.4.0",
     "supercluster": "^7.1.5",
