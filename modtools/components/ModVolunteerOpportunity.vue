@@ -93,6 +93,7 @@ export default {
         id: this.volunteering.id,
         pending: false
       })
+      this.volunteeringStore.remove(this.volunteering.id)
     }
   }
 }
