@@ -37,14 +37,14 @@
               }"
               placeholder="What have you given, what have you received, how does it feel, who have you met...?"
             />
-            <h3>Add a photo</h3>
+            <h3>Please add a photo</h3>
           </b-col>
         </b-row>
         <b-row>
           <b-col>
             <p>
-              If you like, you can add a photo. It's nice to see people and what
-              they've freegled. Take a selfie!
+              Photos are option but help make a story more engaging. It's nice to see people and what
+              they've freegled, or just take a selfie!
             </p>
             <b-button
               variant="secondary"
