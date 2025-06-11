@@ -14,12 +14,40 @@ export const useUserStore = defineStore({
       this.fetching = {}
       this.fetchingLocation = {}
     },
+    clear() {
+      // ModTools
+      console.log('uUS clear')
+      this.list = {}
+      this.locationList = {}
+      this.fetching = {}
+      this.fetchingLocation = {}
+    },
     async emailIsInUse(email) {
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.user?.id
     },
+    async fetchMT(params) {
+      // id, info, search, emailhistory
+      params.info = true
+      const { user, users } = await api(this.config).user.fetchMT(params)
+      if (user) {
+        this.list[user.id] = user
+        return user
+      }
+      if (users) {
+        for (const user of users) {
+          this.list[user.id] = user
+        }
+        return users
+      }
+    },
     async fetch(id, force) {
       id = parseInt(id)
+      if (isNaN(id)) {
+        console.log('USEUSERSTORE FETCH ID NULL')
+        console.trace()
+        return
+      }
 
       if (force || !this.list[id]) {
         if (this.fetching[id]) {
@@ -75,10 +103,43 @@ export const useUserStore = defineStore({
     async unMuteOnChitChat(userid) {
       await api(this.config).user.unMuteOnChitChat(userid)
     },
+    async deleteComment(id) {
+      await api(this.config).comment.del(id)
+    },
+    async saveComment(comment) {
+      await api(this.config).comment.save(comment)
+    },
+    async edit(params) {
+      await api(this.config).user.save(params)
+    },
+    async addEmail(params) {
+      await api(this.config).user.addEmail(
+        params.id,
+        params.email,
+        params.primary
+      )
+      await this.fetch(params.id, true)
+    },
+    async add(params) {
+      const ret = await api(this.config).user.add(params.email)
+      return ret.id
+    },
+    async purge(id) {
+      await api(this.config).user.purge(id)
+    },
+    async ratingReviewed(params) {
+      await api(this.config).user.ratingReviewed(params.id)
+    },
   },
   getters: {
     byId: (state) => {
-      return (id) => state.list[id]
+      return (id) => {
+        if (!id) return null
+        const user = state.list[id]
+        if (user && user.spammer && user.spammer.collection === 'Whitelisted')
+          user.spammer = false
+        return user
+      }
     },
     publicLocationById: (state) => {
       return (id) => state.locationList[id]

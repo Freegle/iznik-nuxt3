@@ -162,8 +162,18 @@ select {
     //mobile browsers.
     min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
 
+    @media (min-height: $mobile-tall) {
+      min-height: calc(100vh - 84px - $sticky-banner-height-mobile-tall - 84px);
+    }
+
     @supports (height: 100dvh) {
       min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+
+      @media (min-height: $mobile-tall) {
+        min-height: calc(
+          100dvh - 84px - $sticky-banner-height-mobile-tall - 84px
+        );
+      }
     }
 
     display: flex;

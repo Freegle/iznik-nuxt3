@@ -30,7 +30,9 @@
         size="sm"
         :to="'/message/' + message.id"
       >
-        <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
+        <client-only>
+          <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
+        </client-only>
       </b-button>
     </div>
     <MessageShareModal

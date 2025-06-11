@@ -30,7 +30,7 @@
               <VisibleWhen :at="['xs', 'sm']">
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky"
-                  max-height="50px"
+                  :max-height="mobileMaxHeight"
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
@@ -42,7 +42,7 @@
               <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky_desktop"
-                  max-height="90px"
+                  :max-height="desktopMaxHeight"
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
@@ -89,10 +89,22 @@
           :msgid="interestedInOthersMsgid"
           :userid="interestedInOthersUserId"
         />
+        <!-- Height detection divs -->
+        <div ref="mobileTallDetector" class="mobile-tall-detector" />
+        <div ref="desktopTallDetector" class="desktop-tall-detector" />
       </div>
       <BreakpointFettler />
       <div id="here" />
       <SomethingWentWrong />
+      <div id="videoda">
+        <ExternalDa
+          v-if="videoAd"
+          video
+          :jobs="false"
+          ad-unit-path="video"
+          div-id="div-da-video"
+        />
+      </div>
     </client-only>
   </div>
 </template>
@@ -145,6 +157,8 @@ export default {
       interestedInOthersMsgid: null,
       interestedInOthersUserId: null,
       showInterestedModal: false,
+      windowHeight: 0, // Track window height for reactivity
+      videoAd: false,
     }
   },
   computed: {
@@ -162,6 +176,30 @@ export default {
     },
     marginTop() {
       return navBarHidden.value ? '0px' : '60px'
+    },
+    desktopMaxHeight() {
+      // Use windowHeight to trigger reactivity on resize
+      // eslint-disable-next-line no-unused-expressions
+      this.windowHeight
+
+      // Check if desktop tall detector is visible (using CSS media queries)
+      if (process.client && this.$refs.desktopTallDetector) {
+        const computed = window.getComputedStyle(this.$refs.desktopTallDetector)
+        return computed.display === 'block' ? '250px' : '90px'
+      }
+      return '90px'
+    },
+    mobileMaxHeight() {
+      // Use windowHeight to trigger reactivity on resize
+      // eslint-disable-next-line no-unused-expressions
+      this.windowHeight
+
+      // Check if mobile tall detector is visible (using CSS media queries)
+      if (process.client && this.$refs.mobileTallDetector) {
+        const computed = window.getComputedStyle(this.$refs.mobileTallDetector)
+        return computed.display === 'block' ? '100px' : '50px'
+      }
+      return '50px'
     },
   },
   async mounted() {
@@ -282,11 +320,16 @@ export default {
       this.monitorTabVisibility()
 
       this.haveMounted = true
+
+      // Track window resize for height detection
+      this.updateWindowHeight()
+      window.addEventListener('resize', this.updateWindowHeight)
     }
   },
   beforeUnmount() {
     if (process.client) {
       clearTimeout(this.timeTimer)
+      window.removeEventListener('resize', this.updateWindowHeight)
     }
   },
   methods: {
@@ -338,6 +381,11 @@ export default {
     },
     replySent() {
       this.showInterestedModal = true
+    },
+    updateWindowHeight() {
+      if (process.client) {
+        this.windowHeight = window.innerHeight
+      }
     },
   },
 }
@@ -402,8 +450,16 @@ body.modal-open {
   width: 320px;
   height: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    height: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     height: $sticky-banner-height-desktop;
+
+    @media (min-height: $desktop-tall) {
+      height: $sticky-banner-height-desktop-tall;
+    }
   }
 }
 
@@ -411,9 +467,34 @@ body.modal-open {
   &.allowAd.stickyAdRendered {
     padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
+    @media (min-height: $mobile-tall) {
+      padding-bottom: calc($sticky-banner-height-mobile-tall + 2px);
+    }
+
     @include media-breakpoint-up(md) {
       padding-bottom: calc($sticky-banner-height-desktop + 2px);
+
+      @media (min-height: $desktop-tall) {
+        padding-bottom: calc($sticky-banner-height-desktop-tall + 2px);
+      }
     }
+  }
+}
+
+// Height detection divs - hidden but used to detect screen height breakpoints
+.mobile-tall-detector {
+  display: none;
+
+  @media (min-height: $mobile-tall) {
+    display: block;
+  }
+}
+
+.desktop-tall-detector {
+  display: none;
+
+  @media (min-height: $desktop-tall) {
+    display: block;
   }
 }
 </style>

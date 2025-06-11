@@ -63,7 +63,7 @@ const loading = ref('')
 
 // const modalOpen = ref(props.startOpen)
 
-const emit = defineEmits(['update:modelValue', 'closed'])
+const emit = defineEmits(['update:modelValue', 'closed', 'photoProcessed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
 
@@ -174,7 +174,7 @@ function uploadOneFile(file){
           externalmods: mods,
           recognise: props.recognise && !recognised,
         }
-        // console.log('att', att)
+        if (props.groupid) att.groupid = props.groupid
 
         // Only recognise the first photo.
         recognised = true
@@ -198,6 +198,9 @@ function uploadOneFile(file){
             externalmods: mods,
             info: ret.info,
           })
+          if (props.groupid) {
+            emit('photoProcessed', ret.id)
+          }
         })
         // console.log('pushed')
         await Promise.all(promises)

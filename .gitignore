@@ -45,6 +45,9 @@ save
 /test-results/junit.xml
 /test-emails.json
 
+/CLAUDE.local.md
+/.claude/settings.local.json
+
 # app
 android
 ios

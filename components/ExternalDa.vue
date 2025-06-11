@@ -13,7 +13,7 @@
       }"
     >
       <div
-        v-if="isVisible"
+        v-if="isVisible || video"
         :class="{
           boredWithJobs,
           jobs,
@@ -42,6 +42,7 @@
             :max-height="maxHeight"
             :div-id="divId"
             :render-ad="renderAd"
+            :video="video"
             @rendered="rippleRendered"
           />
           <OurGoogleDa
@@ -121,6 +122,10 @@ const props = defineProps({
   jobs: {
     type: Boolean,
     default: true,
+  },
+  video: {
+    type: Boolean,
+    default: false,
   },
 })
 

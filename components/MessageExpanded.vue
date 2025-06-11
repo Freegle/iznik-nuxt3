@@ -34,13 +34,15 @@
       <MessageTextBody :id="id" />
       <MessageReplyInfo :message="message" />
       <div v-if="validPosition" class="mt-2 d-flex">
-        <MessageMap
-          v-if="showMap && adRendered"
-          :home="home"
-          :position="{ lat: message.lat, lng: message.lng }"
-          class="messagemap flex-grow-1"
-          :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
-        />
+        <client-only>
+          <MessageMap
+            v-if="showMap && adRendered"
+            :home="home"
+            :position="{ lat: message.lat, lng: message.lng }"
+            class="messagemap flex-grow-1"
+            :height="breakpoint === 'xs' || breakpoint === 'sm' ? 150 : 250"
+          />
+        </client-only>
       </div>
       <MessageHistoryExpanded :id="id" class="d-block d-md-none mt-2 mt-md-0" />
       <VisibleWhen v-if="showAd && adId && !noAd" :at="['xs', 'sm']">
@@ -56,13 +58,15 @@
           />
         </div>
       </VisibleWhen>
-      <MessageReplySection
-        v-if="replyable && !replied"
-        :id="id"
-        class="mt-3"
-        @close="$emit('close')"
-        @sent="sent"
-      />
+      <client-only>
+        <MessageReplySection
+          v-if="replyable && !replied"
+          :id="id"
+          class="mt-3"
+          @close="$emit('close')"
+          @sent="sent"
+        />
+      </client-only>
       <b-alert
         v-if="replied"
         variant="info"

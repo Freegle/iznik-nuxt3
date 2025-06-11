@@ -548,6 +548,10 @@ export default {
 .adpad.stickyAdRendered {
   margin-bottom: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    margin-bottom: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     padding-bottom: $sticky-banner-height-desktop;
   }

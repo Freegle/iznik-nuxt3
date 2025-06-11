@@ -56,7 +56,7 @@ const CONFIG = {
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
   ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
-  MOBILE_VERSION: '3.2.23',
+  MOBILE_VERSION: '3.2.24',
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 

@@ -3742,6 +3742,10 @@ a.uppy-Dashboard-poweredBy {
 .uppy-Webcam-buttonContainer {
   padding-bottom: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    padding-bottom: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
       padding-bottom: 0;
   }

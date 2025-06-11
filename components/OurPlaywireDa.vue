@@ -49,9 +49,14 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  video: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const daDiv = ref(null)
+let addAdTimer = null
 
 const showAd = ref(false)
 
@@ -71,6 +76,7 @@ watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
+      console.log('Render ad', props.adUnitPath)
       api.bandit.shown({
         uid: 'playwire',
         variant: 'askedToRender',
@@ -83,15 +89,47 @@ watch(
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
-        function addAd() {
+        async function addAd() {
           try {
+            // Wait for daDiv to be in the DOM and not null before proceeding
+            if (!daDiv.value) {
+              console.log('daDiv not ready, retrying in 50ms')
+              addAdTimer = setTimeout(addAd, 50)
+              return
+            }
+
             // See https://support.playwire.com/docs/ad-units-array-for-ads-api for the types.
             //
             // We don't use spaNewPage as in the example because our ads are added more dynamically than
             // that.
+            //
+            // The setPath settings have been advised by Playwire for the different sizes of
+            // sticky footer ads.
             const height = window.getComputedStyle(daDiv.value, null).maxHeight
-            if (height === '50px' || height === '90px') {
+
+            if (props.video) {
+              theType.value = 'corner_ad_video'
+            } else if (height === '50px' || height === '90px') {
               theType.value = 'leaderboard_atf'
+              try {
+                await window.ramp.setPath('ROS')
+              } catch (e) {
+                console.log('Failed to set path for ROS', e)
+              }
+            } else if (height === '100px') {
+              theType.value = 'mobile_large_footer'
+              try {
+                await window.ramp.setPath('mobile_large_footer')
+              } catch (e) {
+                console.log('Failed to set path for ROS', e)
+              }
+            } else if (height === '250px') {
+              theType.value = 'desktop_large_footer'
+              try {
+                await window.ramp.setPath('desktop_large_footer')
+              } catch (e) {
+                console.log('Failed to set path for ROS', e)
+              }
             } else {
               // See if we already have a med_rect; if so we should use the alternate type value as Playwire
               // doesn't like multiple ads of the same type.
@@ -105,10 +143,17 @@ watch(
             }
 
             console.log('Execute queued spaAddAds', theType.value, props.divId)
-            window.ramp.spaAddAds({
-              type: theType.value,
-              selector: '#' + props.divId,
-            })
+            if (props.video) {
+              // No div for corner video.
+              window.ramp.spaAddAds({
+                type: theType.value,
+              })
+            } else {
+              window.ramp.spaAddAds({
+                type: theType.value,
+                selector: '#' + props.divId,
+              })
+            }
 
             api.bandit.shown({
               uid: 'playwire',
@@ -188,6 +233,11 @@ const adStyle = computed(() => {
 
 async function leaving() {
   try {
+    if (addAdTimer) {
+      clearTimeout(addAdTimer)
+      addAdTimer = null
+    }
+
     if (window.ramp?.destroyUnits) {
       // We need to destroy the ad unit.
       console.log('Destroying ad unit', props.adUnitPath)

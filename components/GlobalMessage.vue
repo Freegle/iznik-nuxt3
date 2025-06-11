@@ -1,7 +1,7 @@
 <template>
   <div>
     <PrivacyUpdate />
-    <div v-if="oxfordshire">
+    <div v-if="relevantGroup">
       <b-card v-if="show">
         <div class="grid">
           <div class="hide">
@@ -16,23 +16,21 @@
             </b-button>
           </div>
           <div class="banner">
-            <b-img
-              lazy
-              alt="Brand The Bus"
-              src="https://images-oxfordbus.passenger-website.com/inline-images/1024x512%20Logos%20only_0.png"
-              style="width: 200px"
-              class="rounded mr-2"
-            />
             <div>
-              <p class="header--size2 mb-0">Please vote for us!</p>
-              <p>Help Freegle get free ads on the side of Oxfordshire buses!</p>
+              <p class="header--size2 mb-0">
+                Quick survey - win a £25 voucher!
+              </p>
+              <p>
+                We're asking freeglers on Wandsworth a few questions. Can you
+                help?
+              </p>
               <b-button
                 variant="primary"
                 size="lg"
-                href="https://forms.office.com/Pages/ResponsePage.aspx?id=G4CaewiZuk6gbSGK0YIk47DitQdE945DlWwLZDtsWnBUNDNNNURMNUxEWVY3WERZMENFN1NZRUxCUSQlQCN0PWcu"
+                href="https://ilovefreegle.org/shortlink/WandsworthSurvey"
                 target="_blank"
               >
-                Click to vote - we're Entry 61
+                Click to open survey
               </b-button>
             </div>
           </div>
@@ -60,30 +58,30 @@ export default {
   data: function () {
     return {
       thanks: false,
-      warningid: 'hideglobalwarning202503072',
+      warningid: 'hideglobalwarning20250530',
     }
   },
   computed: {
-    oxfordshire() {
-      // Is the current date before 1st April 2025?
+    relevantGroup() {
       const now = new Date()
-      const apr2025 = new Date('2025-04-01')
+      const active = new Date('2025-06-22')
 
-      if (now >= apr2025) {
+      if (now >= active) {
         return false
       }
 
       let ret = false
 
-      const groupids = [
-        21555, 21671, 21579, 21694, 21317, 21464, 21324, 21235, 21256,
-      ]
+      const groupids = [126719]
 
       const myGroups = this.authStore.groups
 
       myGroups.forEach((g) => {
         if (groupids.includes(g.groupid)) {
-          ret = true
+          // If joined since 2024-09-01
+          if (new Date(g.added).getTime() >= new Date('2024-09-01').getTime()) {
+            ret = true
+          }
         }
       })
 
@@ -110,19 +108,6 @@ export default {
         key: this.warningid,
         value: false,
       })
-    },
-    async pledge() {
-      const authStore = useAuthStore()
-
-      if (authStore.user) {
-        const settings = authStore.user.settings
-        settings.pledge2025 = true
-        await authStore.saveAndGet({
-          settings,
-        })
-
-        this.thanks = true
-      }
     },
   },
 }
