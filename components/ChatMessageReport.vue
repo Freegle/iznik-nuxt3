@@ -18,7 +18,7 @@
           <b-card-title>
             <h4 v-if="otheruser">
               <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{
-                otheruser.displayname
+                otheruser?.displayname
               }}
               reported someone
             </h4>

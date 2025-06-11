@@ -14,7 +14,7 @@
             </NoticeMessage>
             <div v-if="editing && editmessage" class="d-flex flex-wrap">
               <ModGroupSelect v-model="editgroup" modonly class="mr-1" size="lg" :disabled-except-for="memberGroupIds"
-                :disabled="editmessage.fromuser.tnuserid" />
+                :disabled="editmessage.fromuser?.tnuserid" />
               <div v-if="editmessage.item && editmessage.location" class="d-flex justify-content-start">
                 <b-form-select v-model="editmessage.type" :options="typeOptions" class="type mr-1" size="lg" />
                 <b-form-input v-model="editmessage.item.name" size="lg" class="mr-1" />
@@ -125,7 +125,7 @@
             <div v-if="message.fromuser">
               <ModComments :user="message.fromuser" @updateComments="updateComments" />
               <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
-              <NoticeMessage v-if="message.fromuser && message.fromuser.activedistance > 50" variant="warning" class="mb-2">
+              <NoticeMessage v-if="message.fromuser.activedistance > 50" variant="warning" class="mb-2">
                 This freegler recently active on groups {{ message.fromuser.activedistance }} miles apart.
               </NoticeMessage>
             </div>
@@ -379,10 +379,10 @@ export default {
     }
   },
   setup(props) {
+    // If viewing message within chat then fromuser is a number and so must be zapped
     if( props.message.fromuser && (typeof props.message.fromuser === "number")) {
-      console.error('ModMessage props.message.fromuser is Number')
       // eslint-disable-next-line vue/no-mutating-props
-      props.message.fromuser = null // TODO WHY & FIX
+      props.message.fromuser = null
     }
     const modGroupStore = useModGroupStore()
     const locationStore = useLocationStore()

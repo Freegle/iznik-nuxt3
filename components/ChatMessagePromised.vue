@@ -110,7 +110,7 @@
               size="sm"
             />
             <div class="small black">
-              You promised <strong>{{ otheruser.displayname }}</strong
+              You promised <strong>{{ otheruser?.displayname }}</strong
               >:
             </div>
           </div>

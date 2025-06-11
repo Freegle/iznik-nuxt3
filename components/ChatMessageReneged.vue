@@ -82,7 +82,7 @@
               />
               <span class="small black"
                 >You cancelled your promise to
-                <strong>{{ otheruser.displayname }}</strong> for:</span
+                <strong>{{ otheruser?.displayname }}</strong> for:</span
               >
               <br />
               <h4>
