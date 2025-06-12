@@ -78,10 +78,11 @@ export default {
 
     async send() {
       if (this.reason) {
+        const userid = this.user.id ?? this.user.userid
         if (this.safelist) {
-          await this.spammerStore.safelist({ userid: this.user.id, reason: this.reason })
+          await this.spammerStore.safelist({ userid: userid, reason: this.reason })
         } else {
-          await this.spammerStore.report({ userid: this.user.id, reason: this.reason })
+          await this.spammerStore.report({ userid: userid, reason: this.reason })
         }
 
         this.hide()
