@@ -72,13 +72,13 @@ export default {
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
       if (force || (bodyoverflow !== 'hidden')) {
-        console.log('========================================')
+        //console.log('========================================')
         console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
-        const groupStore = useGroupStore()
+        //const groupStore = useGroupStore()
         const modGroupStore = useModGroupStore()
-        console.log('CHECKWORK auth.groups',authStore.groups?.length, 
-          'groupStore.list',Object.keys(groupStore.list).length,
-          'modGroupStore.list', Object.keys(modGroupStore.list).length)
+        //console.log('CHECKWORK auth.groups',authStore.groups?.length, 
+        //  'groupStore.list',Object.keys(groupStore.list).length,
+        //  'modGroupStore.list', Object.keys(modGroupStore.list).length)
 
         let currentTotal = 0
         if (authStore.work) currentTotal += authStore.work.total
