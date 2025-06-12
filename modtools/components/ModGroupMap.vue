@@ -554,9 +554,12 @@ function selectLocation(l) {
 }
 
 function ready() {
-  if( !mapObject || !mapObject.value || !mapObject.value.leafletObject || !mapObject.value.leafletObject.pm){
+  if (!mapObject || !mapObject.value || !mapObject.value.leafletObject || !mapObject.value.leafletObject.pm) {
     console.log('Map not quite ready')
-    setTimeout(ready,1000)
+    setTimeout(function () {
+      console.log('Map not quite ready: reload')
+      window.location.reload()
+    }, 1000)
     return
   }
   console.log('Map ready')
@@ -603,7 +606,7 @@ function ready() {
       //console.log('MGM pm:drawend Z', selectedWKT.value)
     }
   })
-  
+
   if (props.groups) {
     zoom.value = 5
   } else {
@@ -814,9 +817,9 @@ async function search() {
 
     if (status === 200) {
       const json = JSON.parse(responseText)
-      if( Array.isArray(json.features) && (json.features.length>0)){
+      if (Array.isArray(json.features) && (json.features.length > 0)) {
         const f0 = json.features[0]
-        if( f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length===2){
+        if (f0.geometry && f0.geometry.coordinates && f0.geometry.coordinates.length === 2) {
           const latlng = new window.L.LatLng(f0.geometry.coordinates[1], f0.geometry.coordinates[0])
           mapObject.value.leafletObject.setView(latlng, 14)
         }
