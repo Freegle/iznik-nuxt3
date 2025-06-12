@@ -221,7 +221,6 @@
     <div v-else>You're not a member of any communities yet.</div>
   </b-card>
 </template>
-
 <script setup>
 import { ref, computed, defineProps, defineEmits, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
@@ -229,6 +228,9 @@ import SettingsGroup from '~/components/SettingsGroup'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurToggle from '~/components/OurToggle'
+import { useMe } from '~/composables/useMe'
+
+const { myGroups } = useMe()
 
 const props = defineProps({
   me: {
@@ -257,7 +259,6 @@ const newslettersallowedLocal = ref(true)
 const engagementSettings = ref(true)
 
 // Computed properties
-const myGroups = computed(() => authStore.myGroups)
 
 const simpleEmailSetting = computed(() => {
   return props.me?.settings?.simplemail ? props.me.settings.simplemail : 'Full'
@@ -271,8 +272,8 @@ const checkSimplicity = computed(() => {
   let volunteering = null
 
   // If we have the same settings on all groups, then we can show a simplified view.
-  if (authStore.myGroups) {
-    for (const group of authStore.myGroups) {
+  if (myGroups.value) {
+    for (const group of myGroups.value) {
       if (first) {
         emailFrequency = group.emailfrequency
         communityEvents = group.eventsallowed

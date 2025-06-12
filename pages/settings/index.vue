@@ -44,7 +44,6 @@
     </div>
   </client-only>
 </template>
-
 <script setup>
 import { useRoute } from 'vue-router'
 import { ref, onMounted, defineAsyncComponent } from 'vue'

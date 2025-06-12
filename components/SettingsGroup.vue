@@ -59,6 +59,7 @@
 import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import OurToggle from '~/components/OurToggle'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   emailfrequency: {
@@ -101,7 +102,7 @@ const emit = defineEmits([
 ])
 
 const authStore = useAuthStore()
-const myGroups = computed(() => authStore.user?.groups)
+const { myGroups } = useMe()
 const myid = computed(() => authStore.user?.id)
 
 const membership = computed(() => {

@@ -82,6 +82,7 @@ import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
 import { storeToRefs } from 'pinia'
 import Wkt from 'wicket'
+import { LGeoJson, LTooltip } from '@vue-leaflet/vue-leaflet'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
 import {
@@ -743,7 +744,7 @@ async function getMessages() {
           nelng
         )
       }
-    } else if (myGroups?.length) {
+    } else if (myGroups.value?.length) {
       // We don't, which will be because we don't have a location.
       // Use the bounding boxes of the groups we are in.
       const groupbounds = myGroupsBoundingBox
@@ -801,7 +802,7 @@ async function getMessages() {
       )
       ret = await messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
     }
-  } else if (myGroups?.length) {
+  } else if (myGroups.value?.length) {
     if (props.search) {
       const groupbounds = myGroupsBoundingBox
 
