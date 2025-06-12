@@ -77,8 +77,12 @@ export default {
   },
   computed: {
     id() {
-      const route = useRoute()
-      if (('id' in route.params) && route.params.id) return parseInt(route.params.id)
+      try { // Weirdly we get inject error here when clicking the link to view profile of shown member eg to /profile/12345678
+        const route = useRoute()
+        if (('id' in route.params) && route.params.id) return parseInt(route.params.id)
+      } catch( e){
+        console.error('members [[term]] id',e.message)
+      }
       return 0
     },
     term() {
