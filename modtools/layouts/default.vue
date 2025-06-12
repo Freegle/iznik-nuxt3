@@ -280,7 +280,7 @@ export default {
       } catch (e) { }
 
       await this.authStore.logout()
-      this.authStore.forceLogin = false
+      this.authStore.forceLogin = true
 
       // Go to the landing page.
       this.$router.push('/')
