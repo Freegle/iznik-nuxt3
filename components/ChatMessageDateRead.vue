@@ -85,7 +85,8 @@
 import { useUserStore } from '../stores/user'
 import { useChatBase } from '../composables/useChat'
 import { datetimeshort, timeadapt } from '../composables/useTimeFormat'
-import { ref, computed, onMounted, useMe } from '#imports'
+import { ref, computed, onMounted } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   chatid: {

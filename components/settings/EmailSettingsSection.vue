@@ -222,7 +222,7 @@
   </b-card>
 </template>
 <script setup>
-import { ref, computed, defineProps, defineEmits, watch } from 'vue'
+import { ref, computed, defineEmits, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import SettingsGroup from '~/components/SettingsGroup'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
@@ -230,14 +230,7 @@ import NoticeMessage from '~/components/NoticeMessage'
 import OurToggle from '~/components/OurToggle'
 import { useMe } from '~/composables/useMe'
 
-const { myGroups } = useMe()
-
-const props = defineProps({
-  me: {
-    type: Object,
-    required: true,
-  },
-})
+const { me, myGroups } = useMe()
 
 const emit = defineEmits(['update'])
 
@@ -261,7 +254,7 @@ const engagementSettings = ref(true)
 // Computed properties
 
 const simpleEmailSetting = computed(() => {
-  return props.me?.settings?.simplemail ? props.me.settings.simplemail : 'Full'
+  return me.value?.settings?.simplemail ? me.value.settings.simplemail : 'Full'
 })
 
 const checkSimplicity = computed(() => {
@@ -302,7 +295,7 @@ const checkSimplicity = computed(() => {
 })
 
 const simpleSettings = computed(() => {
-  if (props.me?.settings?.simplemail) {
+  if (me.value?.settings?.simplemail) {
     // We know that we have simple settings.
     return true
   }
@@ -331,7 +324,7 @@ const notificationSettings = computed(() => {
     app: true,
   }
 
-  const settings = props.me?.settings?.notifications
+  const settings = me.value?.settings?.notifications
 
   if (settings) {
     if ('email' in settings) {
@@ -355,15 +348,15 @@ const notificationSettings = computed(() => {
 })
 
 const notificationmails = computed(() => {
-  return Boolean(props.me?.settings?.notificationmails)
+  return Boolean(me.value?.settings?.notificationmails)
 })
 
 const relevantallowed = computed(() => {
-  return Boolean(props.me?.relevantallowed)
+  return Boolean(me.value?.relevantallowed)
 })
 
 const newslettersallowed = computed(() => {
-  return Boolean(props.me?.newslettersallowed)
+  return Boolean(me.value?.newslettersallowed)
 })
 
 // Methods
@@ -375,7 +368,7 @@ const toggleAdvanced = (e) => {
 const changeAllGroups = async (param, value) => {
   for (const group of authStore.myGroups) {
     const params = {
-      userid: props.me.id,
+      userid: me.value.id,
       groupid: group.id,
     }
     params[param] = value
@@ -388,7 +381,7 @@ const changeAllGroups = async (param, value) => {
 }
 
 const changeNotification = async (e, type) => {
-  const settings = props.me.settings
+  const settings = me.value.settings
   settings.notifications[type] = e
   await authStore.saveAndGet({
     settings,
@@ -406,7 +399,7 @@ const changeRelevant = async (e) => {
 }
 
 const changeNotifChitchat = async (e) => {
-  const settings = props.me.settings
+  const settings = me.value.settings
   settings.notificationmails = e
   await authStore.saveAndGet({
     settings,
@@ -424,7 +417,7 @@ const changeNewsletter = async (e) => {
 }
 
 const changeEngagement = async (e) => {
-  const settings = props.me.settings
+  const settings = me.value.settings
   settings.engagement = e
   await authStore.saveAndGet({
     settings,
@@ -434,13 +427,13 @@ const changeEngagement = async (e) => {
 }
 
 const leaveGroup = async (id) => {
-  await authStore.leaveGroup(props.me.id, id)
+  await authStore.leaveGroup(me.value.id, id)
   emit('update')
 }
 
 // Update local refs when props change
 watch(
-  () => props.me,
+  () => me.value,
   (newVal) => {
     if (newVal) {
       simpleEmailSettingLocal.value = simpleEmailSetting.value

@@ -804,7 +804,7 @@ async function getMessages() {
     }
   } else if (myGroups.value?.length) {
     if (props.search) {
-      const groupbounds = myGroupsBoundingBox
+      const groupbounds = myGroupsBoundingBox.value
 
       console.log(
         'GetMessages - some groups, search within group bounds',

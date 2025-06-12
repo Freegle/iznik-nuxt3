@@ -260,8 +260,9 @@ import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
 import { datetimeshort, timeago } from '../composables/useTimeFormat'
-import { onMounted, ref, computed, watch, useRouter, useMe } from '#imports'
+import { onMounted, ref, computed, watch, useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
+import { useMe } from '~/composables/useMe'
 
 const MyMessageReply = defineAsyncComponent(() =>
   import('./MyMessageReply.vue')

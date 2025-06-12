@@ -13,7 +13,7 @@
             :center="center"
             :style="'width: 100%; height: 200px'"
           >
-            <l-tile-layer :url="osmtile" :attribution="attribution" />
+            <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <l-marker
               :lat-lng="[noticeboard.lat, noticeboard.lng]"
               :interactive="false"

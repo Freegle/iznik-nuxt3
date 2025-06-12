@@ -13,7 +13,10 @@
       <div
         v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
       >
-        <MessageListCounts v-if="browseCount" @mark-seen="markSeen" />
+        <MessageListCounts
+          v-if="browseCount && !search"
+          @mark-seen="markSeen"
+        />
       </div>
       <VisibleWhen :at="['xs', 'sm']">
         <div
@@ -188,6 +191,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  search: {
+    type: String,
+    required: false,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['update:none', 'update:visible'])
@@ -316,6 +324,7 @@ const filteredMessagesInStore = computed(() => {
 const deDuplicatedMessages = computed(() => {
   let ret = []
   const dups = []
+  const ids = {}
 
   filteredMessagesToShow.value.forEach((m) => {
     // Filter out dups by subject (for crossposting).
@@ -325,9 +334,12 @@ const deDuplicatedMessages = computed(() => {
       // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
       // then we'll come back through here.
       ret.push(m)
+    } else if (m.id in ids) {
+      // We have already got this id in our list
     } else if (m.id !== props.exclude) {
       // We don't want our duplicate-detection to be confused by different keywords on different groups, so strip
       // out the keyword and put in the type.
+      ids[m.id] = true
       let key = message.fromuser + '|' + message.subject
       const p = message.subject.indexOf(':')
 

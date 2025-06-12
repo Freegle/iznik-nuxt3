@@ -109,6 +109,7 @@
           :key="'messagelist-' + infiniteId"
           v-model:visible="postsVisible"
           v-model:none="noneFound"
+          :search="search"
           show-counts-unseen
           :selected-group="selectedGroup"
           :selected-type="selectedType"

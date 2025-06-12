@@ -7,7 +7,7 @@
     :options="mapOptions"
     @ready="idle"
   >
-    <l-tile-layer :url="osmtile" :attribution="attribution" />
+    <l-tile-layer :url="osmtile()" :attribution="attribution()" />
     <l-marker v-if="home" :lat-lng="home">
       <l-icon>
         <HomeIcon />

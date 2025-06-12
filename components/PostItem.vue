@@ -51,7 +51,8 @@ import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
-import { computed, useMe } from '#imports'
+import { computed } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const emit = defineEmits(['update:edititem'])
 

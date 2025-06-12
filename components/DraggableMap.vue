@@ -26,7 +26,7 @@
             @ready="ready"
             @moveend="idle"
           >
-            <l-tile-layer :url="osmtile" :attribution="attribution" />
+            <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <l-marker :lat-lng="center" :interactive="false" />
           </l-map>
         </client-only>

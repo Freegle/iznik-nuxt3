@@ -28,7 +28,7 @@
           :min-zoom="minZoom"
           :max-zoom="maxZoom"
         >
-          <l-tile-layer :url="osmtile" :attribution="attribution" />
+          <l-tile-layer :url="osmtile()" :attribution="attribution()" />
           <LeafletHeatmap
             v-if="weightedData?.length && zoom"
             :lat-lngs="weightedData"

@@ -289,7 +289,7 @@
                   :max-zoom="maxZoom"
                   @ready="idle"
                 >
-                  <l-tile-layer :url="osmtile" :attribution="attribution" />
+                  <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <GroupMarker
                     v-for="g in markers"
                     :key="'marker-' + g.id + '-' + zoom"

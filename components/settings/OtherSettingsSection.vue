@@ -60,22 +60,17 @@
     </b-card-body>
   </b-card>
 </template>
-
 <script setup>
-import { ref, defineProps, defineEmits, watch } from 'vue'
+import { ref, defineEmits, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import OurToggle from '~/components/OurToggle'
-
-const props = defineProps({
-  me: {
-    type: Object,
-    required: true,
-  },
-})
+import { useMe } from '~/composables/useMe'
 
 const emit = defineEmits(['update'])
 
 const authStore = useAuthStore()
+
+const { me } = useMe()
 
 // State
 const autorepostsLocal = ref(true)
@@ -83,7 +78,7 @@ const enterNewLineLocal = ref(false)
 
 // Methods
 const changeNewLine = async (e) => {
-  const settings = props.me.settings
+  const settings = me.value.settings
   settings.enterNewLine = e
   await authStore.saveAndGet({
     settings,
@@ -94,7 +89,7 @@ const changeNewLine = async (e) => {
 }
 
 const changeAutorepost = async (e) => {
-  const settings = props.me.settings
+  const settings = me.value.settings
   settings.autorepostsdisable = !e
   await authStore.saveAndGet({
     settings,
@@ -105,7 +100,7 @@ const changeAutorepost = async (e) => {
 
 // Update local refs when props change
 watch(
-  () => props.me,
+  () => me.value,
   (newVal) => {
     if (newVal) {
       autorepostsLocal.value = !newVal.settings?.autorepostsdisable

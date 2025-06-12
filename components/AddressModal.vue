@@ -16,13 +16,13 @@
         mail.
       </p>
       <h4 v-if="!props.choose">Your addresses</h4>
-      <div v-if="addressOptions.value && addressOptions.value.length">
+      <div v-if="addressOptions?.length">
         <p v-if="!props.choose">These are your current addresses.</p>
         <b-row>
           <b-col cols="12" sm="8">
             <b-form-select
               v-model="selectedAddress"
-              :options="addressOptions.value"
+              :options="addressOptions"
               class="mb-2 font-weight-bold"
             />
           </b-col>
@@ -40,16 +40,16 @@
             <b-col cols="12" sm="8">
               <div :style="'width: 100%; height: 200px'">
                 <l-map
-                  v-if="showMap && selectedAddressObject.value"
+                  v-if="showMap && selectedAddressObject"
                   ref="map"
                   :zoom="16"
                   :max-zoom="16"
                   :center="[
-                    selectedAddressObject.value.lat,
-                    selectedAddressObject.value.lng,
+                    selectedAddressObject.lat,
+                    selectedAddressObject.lng,
                   ]"
                 >
-                  <l-tile-layer :url="osmtile" :attribution="attribution" />
+                  <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <l-marker
                     :lat-lng="markerLatLng"
                     draggable
@@ -156,8 +156,9 @@ import { constructSingleLine } from '../composables/usePAF'
 import { useAuthStore } from '../stores/auth'
 import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
-import { ref, computed, watch, useNuxtApp } from '#imports'
+import { ref, computed, watch } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 import PostCode from '~/components/PostCode'
 
 const props = defineProps({
@@ -173,7 +174,8 @@ const emit = defineEmits(['hidden', 'chosen'])
 const addressStore = useAddressStore()
 const authStore = useAuthStore()
 const { modal, hide } = useOurModal()
-const { $me } = useNuxtApp()
+
+const { me } = useMe()
 
 // Data properties
 const showAdd = ref(false)
@@ -229,7 +231,7 @@ const propertyOptions = computed(() => {
 const selectedAddress = computed({
   // We remember the preferred address.
   get() {
-    const selected = $me?.settings?.selectedAddress
+    const selected = me.value?.settings?.selectedAddress
 
     if (addresses.value?.find((address) => address.id === selected)) {
       return selected
@@ -238,7 +240,7 @@ const selectedAddress = computed({
     }
   },
   async set(newValue) {
-    const settings = $me.settings
+    const settings = me.value.settings
     showMap.value = false
     settings.selectedAddress = newValue
 
