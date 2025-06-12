@@ -13,7 +13,8 @@ export const useModGroupStore = defineStore({
     getting: [], // To avoid repeat gettings
     allGroups: {},
     received: false,
-    sessionGroups: false
+    sessionGroups: false,
+    failedGroups: []
   }),
   actions: {
     init(config) {
@@ -24,6 +25,7 @@ export const useModGroupStore = defineStore({
       this.list = {}
       this.getting = []
       this.received = false
+      this.failedGroups = []
     },
     // Called from default layout at every route change
     // And by modme->checkWork every 30s
@@ -35,10 +37,30 @@ export const useModGroupStore = defineStore({
 
         // Get base groups
         const groupStore = useGroupStore()
-        await groupStore.fetch()
+        //await groupStore.fetch()
+        const authStore = useAuthStore()
+        //console.log('--- uMGS getModGroups AA', authStore.groups.length)
+        if( authStore.groups.length===0){
+          groupStore.clear()
+          this.clear()
+        }
+        for (const authgroup of authStore.groups) {
+          const group = groupStore.get(authgroup.groupid)
+          if( this.failedGroups.includes(authgroup.groupid)) continue
+          //console.log('--- uMGS getModGroups AAA', authgroup.groupid, authgroup.nameshort, group ? 'GOT' : 'NOT')
+          if (!group && (authgroup.role === 'Moderator' || authgroup.role === 'Owner')) {
+            try {
+              await groupStore.fetch(authgroup.groupid)
+            } catch (e) {
+              this.failedGroups.push(authgroup.groupid)
+              console.error('--- uMGS fetch base group fail', authgroup.nameshort, e.message)
+            }
+          }
+        }
+        //console.log('--- uMGS getModGroups AAAA', Object.keys(groupStore.list).length)
 
         // Get work for each group
-        const authStore = useAuthStore()
+        //console.log('--- uMGS getModGroups B')
         const me = authStore.user
         this.sessionGroups = false
         if (me && me.id) {
@@ -58,6 +80,7 @@ export const useModGroupStore = defineStore({
           }
         }
 
+        //console.log('--- uMGS getModGroups C')
         // Go through all our groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
         this.getting = []
