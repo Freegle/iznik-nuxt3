@@ -1073,7 +1073,8 @@
               <!-- eslint-disable-next-line -->
               <ExternalLink href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html">this tool</ExternalLink>.
               >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >.
-              >. >. >. >. >. >. >. >. You can also view all community areas
+              >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. >. You can also
+              view all community areas
               <!-- eslint-disable-next-line -->
               <nuxt-link to="/map">here</nuxt-link>,
               or all caretaker communities
