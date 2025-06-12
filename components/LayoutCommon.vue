@@ -157,7 +157,7 @@ export default {
       interestedInOthersUserId: null,
       showInterestedModal: false,
       windowHeight: 0, // Track window height for reactivity
-      videoAd: false,
+      videoAd: true,
     }
   },
   computed: {
