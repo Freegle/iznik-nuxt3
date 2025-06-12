@@ -43,8 +43,8 @@
         <b-row>
           <b-col>
             <p>
-              Photos are option but help make a story more engaging. It's nice to see people and what
-              they've freegled, or just take a selfie!
+              Photos are option but help make a story more engaging. It's nice
+              to see people and what they've freegled, or just take a selfie!
             </p>
             <b-button
               variant="secondary"
