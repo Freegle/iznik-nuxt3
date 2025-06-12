@@ -554,7 +554,12 @@ function selectLocation(l) {
 }
 
 function ready() {
-  //console.log('Map ready', mapObject.value)
+  if( !mapObject || !mapObject.value || !mapObject.value.leafletObject || !mapObject.value.leafletObject.pm){
+    console.log('Map not quite ready')
+    setTimeout(ready,1000)
+    return
+  }
+  console.log('Map ready')
   mapObject.value.leafletObject.pm.setLang('en_gb')
   mapObject.value.leafletObject.pm.setGlobalOptions({
     allowSelfIntersection: false,
