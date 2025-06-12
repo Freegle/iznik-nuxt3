@@ -181,9 +181,7 @@
               <strong class="mr-1 mt-2">Copy rules from:</strong>
               <ModGroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
               <div>
-                <b-button variant="secondary" :disabled="copyfrom <= 0 || copyfrom === groupid" @click="copy">
-                  <v-icon icon="copy" /> Copy to {{ group.nameshort }}
-                </b-button>
+                <SpinButton variant="white" icon-name="copy" :label="'Copy to '+group.nameshort" @handle="copy" :disabled="copyfrom <= 0 || copyfrom === groupid" />
               </div>
             </div>
             <div :key="rulesBump">
@@ -687,6 +685,7 @@ export default {
       await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
       let group = this.modGroupStore.get(this.groupid)
       let rules = group?.rules || {}
+      //console.log('fetchGroup rules',rules)
       rules = typeof rules === 'string' ? JSON.parse(rules) : rules
       const unsetrules = {}
       for (const rule of this.rulelist) {
@@ -712,11 +711,11 @@ export default {
       }
     },
     async saverules(callback) {
-      console.log('saverules', this.rules['declareselling'])
       await this.modGroupStore.updateMT({
         id: this.groupid,
         rules: this.rules
       })
+      this.fetchGroup()
       callback()
     },
     async saveMembershipSetting(name, val) {
@@ -766,7 +765,7 @@ export default {
       this.editingDescription = false
       callback()
     },
-    async copy() {
+    async copy(callback) {
       await this.modGroupStore.fetchIfNeedBeMT(this.copyfrom)
 
       const copyfrom = this.modGroupStore.get(this.copyfrom)
@@ -781,9 +780,11 @@ export default {
         })
 
         await this.modGroupStore.fetchGroupMT(this.groupid) // Reload group
+        this.fetchGroup()
 
         this.rulesBump++
       }
+      callback()
     }
   }
 }
