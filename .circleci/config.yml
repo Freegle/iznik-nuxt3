@@ -47,6 +47,11 @@ commands:
           path: screenshots
           destination: screenshots
           when: always
+      # Store server output logs
+      - store_artifacts:
+          path: server.out
+          destination: server.out
+          when: always
 
 # Define the jobs we want to run
 jobs:
@@ -96,7 +101,7 @@ jobs:
           name: Serve built application
           command: |
             export NODE_OPTIONS="--max-old-space-size=8192"
-            npm run start
+            npm run start > server.out 2>&1
           background: true
 
       # Wait for the server to be responsive
