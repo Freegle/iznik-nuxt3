@@ -601,7 +601,6 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      //const g = this.modGroupStore.get(this.groupid)
       return this.modGroupStore.get(this.groupid)
     },
     shortlinks() {
