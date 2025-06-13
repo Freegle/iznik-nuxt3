@@ -102,7 +102,6 @@
 </template>
 
 <script lang="ts">
-import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
@@ -150,10 +149,9 @@ export default {
       oneTap.value = true
     }
     const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
     useHead(
       buildHead(
-        route,
+        null, // useRoute() not allowed here
         runtimeConfig,
         'ModTools',
         'Moderation tool for Freegle volunteers'
