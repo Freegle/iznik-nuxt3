@@ -35,27 +35,16 @@ export const useModGroupStore = defineStore({
       try {
         //console.log('--- uMGS getModGroups A')
 
-        // Get base groups
+        // Get all base groups once - but clear if not logged in
         const groupStore = useGroupStore()
-        //await groupStore.fetch()
         const authStore = useAuthStore()
         //console.log('--- uMGS getModGroups AA', authStore.groups.length)
         if( authStore.groups.length===0){
           groupStore.clear()
           this.clear()
         }
-        for (const authgroup of authStore.groups) {
-          const group = groupStore.get(authgroup.groupid)
-          if( this.failedGroups.includes(authgroup.groupid)) continue
-          //console.log('--- uMGS getModGroups AAA', authgroup.groupid, authgroup.nameshort, group ? 'GOT' : 'NOT')
-          if (!group && (authgroup.role === 'Moderator' || authgroup.role === 'Owner')) {
-            try {
-              await groupStore.fetch(authgroup.groupid)
-            } catch (e) {
-              this.failedGroups.push(authgroup.groupid)
-              console.error('--- uMGS fetch base group fail', authgroup.nameshort, e.message)
-            }
-          }
+        if( Object.keys(groupStore.list).length===0){
+          await groupStore.fetch()
         }
         //console.log('--- uMGS getModGroups AAAA', Object.keys(groupStore.list).length)
 
