@@ -248,7 +248,7 @@ export default {
     },
     async ask() {
       const memberStore = useMemberStore()
-      await memberStore.askMerge({
+      await memberStore.askMerge(this.member.id, {
         user1: this.user1.id,
         user2: this.user2.id
       })
@@ -257,7 +257,7 @@ export default {
     },
     async ignore() {
       const memberStore = useMemberStore()
-      await memberStore.ignoreMerge({
+      await memberStore.ignoreMerge(this.member.id, {
         user1: this.user1.id,
         user2: this.user2.id
       })
@@ -265,7 +265,7 @@ export default {
       this.updateWork()
     },
     updateWork() {
-      this.fetchMe(true, ['work'])
+      //this.fetchMe(true, ['work'])
       this.$emit('processed')
     }
   }

@@ -191,13 +191,15 @@ export const useMemberStore = defineStore({
         membershipid: params.membershipid
       })
     },
-    async askMerge(params) {
+    async askMerge(id, params) {
+      console.log('useMemberStore askMerge', id, params)
       await api(this.config).merge.ask(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
-    async ignoreMerge(params) {
+    async ignoreMerge(id, params) {
+      console.log('useMemberStore ignoreMerge', id, params)
       await api(this.config).merge.ignore(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
   },
   getters: {
