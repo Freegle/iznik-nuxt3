@@ -45,20 +45,23 @@ export default {
     emessage() {
       const m = this.chatmessage?.message
 
-      if (m) {
-        const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+      try {
+        if (m) {
+          const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
 
-        try {
-          twem(trim)
-        } catch (e) {
-          console.error(e, trim, m)
+          try {
+            twem(trim)
+          } catch (e) {
+            console.error('emessage A',e.message)
+          }
+          const ret = twem(trim)
+
+          return ret
         }
-        const ret = twem(trim)
-
-        return ret
-      } else {
-        return null
+      } catch (e) {
+        console.error('emessage B',e.message)
       }
+      return ''
     },
     chatMessageUser() {
       const userStore = useUserStore()
