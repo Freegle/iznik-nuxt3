@@ -16,9 +16,9 @@
       v-if="me && showVolunteerOpportunities"
       class="overflow-y-scroll border-top border-bottom"
     />
-  </div>
-  <div class="sidebar__botleft align-content-end">
-    <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+    <div class="sidebar__botleft align-content-end col-lg-3 col-0">
+      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+    </div>
   </div>
 </template>
 <script setup>
