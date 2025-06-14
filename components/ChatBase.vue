@@ -47,16 +47,18 @@ export default {
 
       try {
         if (m) {
-          const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+          if (typeof m === 'number') {
+            // This can happen if people post just numeric values.
+            m += ''
+          }
+          const tidied = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
 
           try {
-            twem(trim)
+            return twem(tidied)
           } catch (e) {
             console.error('emessage A',e.message)
           }
-          const ret = twem(trim)
-
-          return ret
+          return tidied
         }
       } catch (e) {
         console.error('emessage B',e.message)
