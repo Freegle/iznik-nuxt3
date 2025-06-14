@@ -29,7 +29,7 @@ export const useComposeStore = defineStore({
     emailAt: null,
     postcode: null,
     group: null,
-    messages: {},
+    messages: [],
     attachmentBump: 1,
     _progress: 1,
     max: 4,
