@@ -12,6 +12,7 @@ export const useMiscStore = defineStore({
     breakpoint: null,
     vals: {},
     somethingWentWrong: false,
+    errorDetails: null,
     needToReload: false,
     visible: true,
     apiCount: 0,
@@ -41,6 +42,20 @@ export const useMiscStore = defineStore({
     setSource(val) {
       this.source = val
       api(this.config).logs.src(val)
+    },
+    setErrorDetails(error) {
+      this.somethingWentWrong = true
+      this.errorDetails = {
+        message: error?.message || 'Unknown error',
+        stack: error?.stack || null,
+        timestamp: new Date().toISOString(),
+        name: error?.name || 'Error',
+        cause: error?.cause || null,
+      }
+    },
+    clearError() {
+      this.somethingWentWrong = false
+      this.errorDetails = null
     },
     api(diff) {
       this.apiCount += diff

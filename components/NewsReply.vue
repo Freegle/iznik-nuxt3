@@ -569,14 +569,16 @@ function newlineReply() {
   if (replybox.value && replybox.value.$el) {
     const p = replybox.value.$el.selectionStart
     if (p) {
-      replybox.value =
-        replybox.value.substring(0, p) + '\n' + replybox.value.substring(p)
+      replybox.value.$el.value =
+        replybox.value.$el.value.substring(0, p) +
+        '\n' +
+        replybox.value.$el.value.substring(p)
       nextTick(() => {
         replybox.value.$el.selectionStart = p + 1
         replybox.value.$el.selectionEnd = p + 1
       })
     } else {
-      replybox.value += '\n'
+      replybox.value.$el.value += '\n'
     }
   }
 }

@@ -507,16 +507,16 @@ function newlineComment() {
   if (threadcomment.value?.$el) {
     const p = threadcomment.value.$el.selectionStart
     if (p) {
-      threadcomment.value =
-        threadcomment.value.substring(0, p) +
+      threadcomment.value.$el.value =
+        threadcomment.value.$el.value.substring(0, p) +
         '\n' +
-        threadcomment.value.substring(p)
+        threadcomment.value.$el.value.substring(p)
       nextTick(() => {
         threadcomment.value.$el.selectionStart = p + 1
         threadcomment.value.$el.selectionEnd = p + 1
       })
     } else {
-      threadcomment.value += '\n'
+      threadcomment.value.$el.value += '\n'
     }
   }
 }

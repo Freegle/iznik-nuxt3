@@ -24,10 +24,6 @@
 import { computed, ref } from 'vue'
 import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
-import {
-  attribution as getAttribution,
-  osmtile as getOsmTile,
-} from '~/composables/useMap'
 
 const props = defineProps({
   home: {
@@ -62,8 +58,6 @@ const props = defineProps({
 })
 
 const map = ref(null)
-const osmtile = getOsmTile()
-const attribution = getAttribution()
 let L = null
 
 if (process.client) {
@@ -115,9 +109,14 @@ function idle(themap) {
     themap.setZoom(MAX_MAP_ZOOM)
   }
 
-  const zoomControl = map.value.$el.querySelector('.leaflet-top.leaflet-left')
-  if (zoomControl) {
-    zoomControl.className = 'leaflet-top leaflet-right'
+  try {
+    console.log('Add map Zoom Control', map.value)
+    const zoomControl = map.value.$el.querySelector('.leaflet-top.leaflet-left')
+    if (zoomControl) {
+      zoomControl.className = 'leaflet-top leaflet-right'
+    }
+  } catch (e) {
+    console.log('Failed to add MessageMap zoom control', e)
   }
 }
 </script>
