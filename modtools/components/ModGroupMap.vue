@@ -557,9 +557,9 @@ function ready() {
   if (!mapObject || !mapObject.value || !mapObject.value.leafletObject || !mapObject.value.leafletObject.pm) {
     console.log('Map not quite ready')
     setTimeout(function () {
-      console.log('Map not quite ready: reload')
-      window.location.reload()
-    }, 1000)
+      console.log('Map try ready again')
+      ready()
+    }, 2000)
     return
   }
   console.log('Map ready')
