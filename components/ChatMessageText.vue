@@ -136,6 +136,7 @@ export default {
     postcode() {
       let ret = null
 
+      try{
       const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
 
       if (postcode?.length) {
@@ -145,6 +146,9 @@ export default {
         } else {
           ret = postcode[0]
         }
+      }
+      } catch( e) {
+        console.error('postcode catch', e.message)
       }
 
       return ret
