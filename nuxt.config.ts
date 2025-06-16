@@ -7,13 +7,13 @@ import fs from 'fs'
 import https from 'https'
 
 // Mobile version change:
-// - config.js: MOBILE_VERSION eg 3.1.9
+// - config.js: MOBILE_VERSION eg 3.2.24
 // - android\app\build.gradle
 //    - versionCode eg 1202
-//    - versionName eg "3.2.0"
+//    - versionName eg "3.2.4"
 // - ios\App\App.xcodeproj\project.pbxproj
 //    - CURRENT_PROJECT_VERSION eg 1200 TWICE
-//    - MARKETING_VERSION eg 3.1.9 TWICE
+//    - MARKETING_VERSION eg 3.2.24 TWICE
 //
 // If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
 // Ensure in here android\app\src\main\AndroidManifest.xml
