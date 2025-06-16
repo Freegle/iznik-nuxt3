@@ -39,10 +39,10 @@ const config: CapacitorConfig = {
     }
   },
   server: {
-    // hostname: 'ilovefreegle.org', localhost by default
+    hostname: 'ilovefreegle.org', // localhost by default
     //hostname: 'www.ilovefreegle.org', // localhost by default
     //androidScheme: "http" // https by default but keep as http for backwards compatibility
-    //androidScheme: "https" // https by default but keep as http for backwards compatibility
+    androidScheme: "https" // https by default but keep as http for backwards compatibility
   },
   android: {
     includePlugins: [
