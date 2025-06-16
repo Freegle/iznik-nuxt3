@@ -118,5 +118,12 @@
 	<string>To save Freegle handover appointments to your calendar</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>To save Freegle handover appointments to your calendar</string>
+  <key>WKAppBoundDomains</key>
+  <array>
+    <string>ilovefreegle.org</string>
+    <string>www.ilovefreegle.org</string>
+    <string>www.googletagmanager.com</string>
+    <string>www.google.com</string>
+  </array>
 </dict>
 </plist>
