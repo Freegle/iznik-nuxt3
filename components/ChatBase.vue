@@ -43,7 +43,7 @@ export default {
       return MT_EMAIL_REGEX.toString()
     },
     emessage() {
-      const m = this.chatmessage?.message
+      let m = this.chatmessage?.message
 
       try {
         if (m) {

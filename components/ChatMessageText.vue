@@ -148,15 +148,13 @@ export default {
         }
       }
       } catch( e) {
-        console.error('postcode catch', e.message)
+        // Gets here if message is a number, so OK to ignore
       }
 
       return ret
     },
   },
   async mounted() {
-    console.log('Mounted, postcode', this.postcode)
-
     if (this.postcode) {
       // Use typeahead to find the postcode location.
       const locationStore = useLocationStore()
