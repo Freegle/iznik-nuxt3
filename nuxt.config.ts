@@ -34,7 +34,7 @@ console.log('config.NODE_ENV',config.NODE_ENV)
 console.log('config.APP_ENV',config.APP_ENV)
 const production = config.APP_ENV ? config.APP_ENV=='production' : true
 
-/*if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
+if (config.COOKIEYES) {
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
 
@@ -52,7 +52,6 @@ const production = config.APP_ENV ? config.APP_ENV=='production' : true
 
   }).on("error", (error) => { console.error(error.message) })
 } else { console.error('config.COOKIEYES not set') }
- */
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -439,7 +438,7 @@ export default defineNuxtConfig({
               ` +
             (config.COOKIEYES
               ? `window.googletag.pubads().disableInitialLoad()`
-              : '') +
+              : ``) +
             `
                 window.googletag.pubads().enableSingleRequest()
                 window.googletag.enableServices()
@@ -539,13 +538,14 @@ export default defineNuxtConfig({
             `)
               });
 
-            function loadScript(url, block) {
+            function loadScript(url, block, onload) {
               if (url && url.length) {
                 console.log('Load script:', url);
                 var script = document.createElement('script');
                 script.defer = true;
                 script.type = 'text/javascript';
                 script.src = url;
+                if( onload) script.onload = onload
                 
                 if (block) {
                   // Block loading of this script until CookieYes has been authorised.
@@ -588,18 +588,32 @@ export default defineNuxtConfig({
             `' != 'null') {
                 // First we load CookieYes, which needs to be loaded before anything else, so that
                 // we have the cookie consent.
+            ` +
+            (config.ISAPP ? `
+                console.log("APP ADD COOKIEYES")
+                const cookieScript = document.getElementById('cookieyes')
+                if (!cookieScript) {
+                  const script = document.createElement('script')
+                  script.id = 'cookieyes'
+                  script.setAttribute('src', '/js/cookieyesapp.js')
+                  document.head.appendChild(script)
+                }
+                `: (`
                 console.log('Load CookieYes');
                 loadScript('` +
             config.COOKIEYES +
-            `', false)
+            `', false)`)) + `
               
+                console.log("WAIT FOR COOKIEYES")
                 // Now we wait until the CookieYes script has set its own cookie.  
                 // This might be later than when the script has loaded in pure JS terms, but we
                 // need to be sure it's loaded before we can move on.
                 var retries = 10
                 
                 function checkCookieYes() {
-                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                var cookies = localStorage.getItem('cookies') // IS_APP
+                if (cookies.indexOf('cookieyes-consent') > -1) {
+                //if (document.cookie.indexOf('cookieyes-consent') > -1) {
                     console.log('CookieYes cookie is set, so CookieYes is loaded');
                     
                     // Check that we have set the TCF string.  This only happens once the user 
@@ -658,15 +672,19 @@ export default defineNuxtConfig({
                 window.postCookieYes();
               }
             }
-            
-            // config.ISAPP Do not load GSI client script as Google login uses Capacitor plugin: so just run postGSI
-            //window.onGoogleLibraryLoad = postGSI
+           `+(config.ISAPP?
+            `
+            loadScript('https://accounts.google.com/gsi/client')
+            setTimeout(postGSI, 100)
+            `:`
+            window.onGoogleLibraryLoad = postGSI
             
             // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
             // render.
-            // loadScript('https://accounts.google.com/gsi/client')
-            setTimeout(postGSI, 100)
+            loadScript('https://accounts.google.com/gsi/client')
+            `) +`
           } catch (e) {
+            console.log("======== Z")
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
         },
