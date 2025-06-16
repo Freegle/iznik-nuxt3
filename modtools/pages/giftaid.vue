@@ -317,11 +317,11 @@ export default {
       for (let i = 0; i < this.csvDonations.length; i++) {
         const donation = this.csvDonations[i]
 
-        const id = await this.donationStore.add({
-          userid: donation.userid,
-          amount: donation.amount,
-          date: donation.date.format('YYYY-MM-DD')
-        })
+        const id = await this.donationStore.add(
+          donation.userid,
+          donation.amount,
+          donation.date.format('YYYY-MM-DD')
+        )
 
         if (id) {
           this.csvTrace2 +=
