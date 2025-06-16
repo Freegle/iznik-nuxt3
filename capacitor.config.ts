@@ -109,6 +109,9 @@ const config: CapacitorConfig = {
       "persist": true,
       "autoClear": false
     },
+    "CapacitorCookies": { // https://capacitorjs.com/docs/apis/cookies
+      "enabled": true
+    }
   },
 };
 
