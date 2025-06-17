@@ -32,6 +32,7 @@ import https from 'https'
 console.log('config.STRIPE_PUBLISHABLE_KEY',config.STRIPE_PUBLISHABLE_KEY)
 console.log('config.NODE_ENV',config.NODE_ENV)
 console.log('config.APP_ENV',config.APP_ENV)
+console.log('config.USE_COOKIES',config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV=='production' : true
 
 /*if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
@@ -279,6 +280,7 @@ export default defineNuxtConfig({
       NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
+      USE_COOKIES: config.USE_COOKIES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
@@ -665,7 +667,9 @@ export default defineNuxtConfig({
             // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
             // render.
             // loadScript('https://accounts.google.com/gsi/client')
-            setTimeout(postGSI, 100)
+            ` +
+            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) + `
+            //}
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,

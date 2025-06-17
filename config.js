@@ -5,6 +5,7 @@ const ADS_SQUARISH_SIZES = [[300, 250]]
 const CONFIG = {
   APP_ENV: process.env.APP_ENV,
   NODE_ENV: process.env.NODE_ENV,
+  USE_COOKIES: process.env.USE_COOKIES==='True', // 'True' or 'False'
 
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',

@@ -38,12 +38,12 @@ const config: CapacitorConfig = {
       AndroidLaunchMode: "singleTask"
     }
   },
-  server: {
-    hostname: 'ilovefreegle.org', // localhost by default
-    //hostname: 'www.ilovefreegle.org', // localhost by default
-    //androidScheme: "http" // https by default but keep as http for backwards compatibility
-    iosScheme: 'https',
-    androidScheme: 'https' // https by default but keep as http for backwards compatibility
+  server: { // SET BELOW FOR ANDROID
+    //hostname: 'ilovefreegle.org', // localhost by default
+    ////hostname: 'www.ilovefreegle.org', // localhost by default
+    ////androidScheme: "http" // https by default but keep as http for backwards compatibility
+    ////iosScheme: 'https', // https: cannot be used - becomes capacitor:
+    //androidScheme: 'https' // https by default but keep as http for backwards compatibility
   },
   android: {
     includePlugins: [
@@ -114,5 +114,11 @@ const config: CapacitorConfig = {
     //}
   },
 };
+
+if( process.env['USE_COOKIES']==='True') {
+  console.log('SET CAPACITOR base to https://ilovefreegle.org')
+  config.server.hostname = 'ilovefreegle.org'
+  config.server.androidScheme = 'https'
+}
 
 export default config;

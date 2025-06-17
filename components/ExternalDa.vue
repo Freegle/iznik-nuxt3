@@ -12,6 +12,11 @@
         'bg-white': adShown,
       }"
     >
+      <div v-if="fallbackAdVisible" class="d-flex w-100 justify-content-md-around">
+        <nuxt-link to="/adsoff"><img src="/donate/SupportFreegle_970x250px_20May20215.png" alt="Please donate to help keep Freegle running"
+          style="max-width: 100%; display: block; margin: auto;" /></nuxt-link>
+      </div>
+      <div v-else>
       <div
         v-if="isVisible || video"
         :class="{
@@ -70,6 +75,7 @@
             @rendered="rippleRendered"
           />
         </div>
+      </div>
       </div>
     </div>
   </client-only>
@@ -150,6 +156,7 @@ let prebidRetry = 0
 let tcDataRetry = 0
 let visibleAndScriptsLoadedTimer = null
 const isVisible = ref(false)
+const fallbackAdVisible = ref(false)
 let firstBecomeVisible = false
 
 function visibilityChanged(visible) {
@@ -161,6 +168,24 @@ function visibilityChanged(visible) {
 
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
+
+    if( runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) { // Give up in iOS app
+      console.error('Running in iOS with no cookies or served ads')
+      const me = useAuthStore().user
+      const recentDonor =
+        me &&
+        me.donated &&
+        new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
+      if (recentDonor) {
+        console.log('Ads disabled in iOS as recent donor')
+        emit('rendered', false)
+      } else {
+        fallbackAdVisible.value = true
+        adShown.value = true
+        emit('rendered', true)
+      }
+      return
+    }
 
     if (!runtimeConfig.public.COOKIEYES) {
       // Not using CookieYes, e.g. in dev.
