@@ -358,6 +358,15 @@ onMounted(() => {
 })
 
 // Methods
+
+function setValue(val) {
+  type.value = val
+}
+
+defineExpose({
+  setValue
+})
+
 function getClassName(part) {
   const { classes, className } = props
   if (classes[part]) return `${classes[part]}`
@@ -464,10 +473,6 @@ function handleKeyDown(e) {
   if (outOfRangeBottom) nextFocusList = topItemIndex
   if (outOfRangeTop) nextFocusList = bottomItemIndex
   focusList.value = nextFocusList
-}
-
-function setValue(val) {
-  type.value = val
 }
 
 /* ==============================
