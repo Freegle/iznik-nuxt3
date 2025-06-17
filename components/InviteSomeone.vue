@@ -34,7 +34,7 @@
           @open="chosen"
         >
           <b-button variant="secondary" class="mt-1 twitter">
-            <v-icon :icon="['fab', 'twitter']" /> Twitter
+            <v-icon :icon="['fab', 'twitter']" /> X
           </b-button>
         </ShareNetwork>
       </b-list-group-item>
