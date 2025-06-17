@@ -7,14 +7,25 @@
     </p>
   </div>
 </template>
-<script>
-import NewsBase from '~/components/NewsBase'
+<script setup>
+import { computed } from 'vue'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
-export default {
-  components: {
-    NewsUserIntro,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
-}
+})
+
+const newsfeedStore = useNewsfeedStore()
+
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
+
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
 </script>

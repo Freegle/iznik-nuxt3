@@ -29,29 +29,33 @@
     </form>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    variant: {
-      type: String,
-      required: true,
-    },
-  },
-  mounted() {
-    this.$api.bandit.shown({
-      uid: 'donationmonthy',
-      variant: this.variant,
-    })
-  },
-  methods: {
-    async submit() {
-      await this.$api.bandit.chosen({
-        uid: 'donationmonthy',
-        variant: this.variant,
-      })
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useNuxtApp } from '#app'
 
-      this.$refs.donateform.submit()
-    },
+const props = defineProps({
+  variant: {
+    type: String,
+    required: true,
   },
+})
+
+const { $api } = useNuxtApp()
+const donateform = ref(null)
+
+onMounted(() => {
+  $api.bandit.shown({
+    uid: 'donationmonthy',
+    variant: props.variant,
+  })
+})
+
+async function submit() {
+  await $api.bandit.chosen({
+    uid: 'donationmonthy',
+    variant: props.variant,
+  })
+
+  donateform.value.submit()
 }
 </script>

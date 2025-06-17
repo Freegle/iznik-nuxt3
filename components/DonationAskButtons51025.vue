@@ -47,51 +47,43 @@
     <DonationThermometer ref="thermo" :groupid="groupid" class="ml-md-4" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import DonationButton from './DonationButton'
 import SupporterInfo from './SupporterInfo'
 
-export default {
-  components: {
-    DonationButton,
-    SupporterInfo,
+defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupname: {
-      type: String,
-      required: true,
-    },
-    target: {
-      type: Number,
-      default: 2000,
-    },
-    raised: {
-      type: Number,
-      default: 0,
-    },
-    targetMet: {
-      type: Boolean,
-      default: false,
-    },
-    donated: {
-      type: String,
-      default: null,
-    },
+  groupname: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      monthly: false,
-    }
+  target: {
+    type: Number,
+    default: 2000,
   },
-  methods: {
-    score(amount) {
-      this.$emit('score', amount)
-    },
+  raised: {
+    type: Number,
+    default: 0,
   },
+  targetMet: {
+    type: Boolean,
+    default: false,
+  },
+  donated: {
+    type: String,
+    default: null,
+  },
+})
+
+const emit = defineEmits(['score'])
+const thermo = ref(null)
+
+function score(amount) {
+  emit('score', amount)
 }
 </script>

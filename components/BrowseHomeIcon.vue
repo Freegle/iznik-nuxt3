@@ -5,8 +5,8 @@
     </span>
   </div>
 </template>
-<script>
-export default {}
+<script setup>
+// This component has no script logic
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

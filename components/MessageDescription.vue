@@ -14,51 +14,39 @@
     <MessageDeadline :id="id" class="mt-2" />
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import Highlighter from 'vue-highlight-words'
 import { useMessageStore } from '~/stores/message'
 import { twem } from '~/composables/useTwem'
 import MessageDeadline from '~/components/MessageDeadline.vue'
 
-export default {
-  components: { MessageDeadline, Highlighter },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    matchedon: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
+  matchedon: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  computed: {
-    clamp() {
-      if (this.me) {
-        return 2
-      } else {
-        return 10
-      }
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    textbody() {
-      return this.message ? twem(this.message.textbody) : null
-    },
-    description() {
-      // Descriptions that are too long give Google errors.
-      return this.message
-        ? twem(this.message.textbody)?.substring(0, 160)
-        : null
-    },
-  },
-}
+})
+
+const messageStore = useMessageStore()
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const textbody = computed(() => {
+  return message.value ? twem(message.value.textbody) : null
+})
+
+const description = computed(() => {
+  // Descriptions that are too long give Google errors.
+  return message.value ? twem(message.value.textbody)?.substring(0, 160) : null
+})
 </script>
 <style scoped lang="scss">
 .textbody {

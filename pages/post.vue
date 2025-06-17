@@ -87,14 +87,13 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  methods: {
-    goto(path) {
-      const router = useRouter()
-      router.push(path)
-    },
-  },
+<script setup>
+import { useRouter } from '#imports'
+
+const router = useRouter()
+
+function goto(path) {
+  router.push(path)
 }
 </script>
 <style scoped lang="scss">

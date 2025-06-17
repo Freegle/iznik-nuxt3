@@ -10,19 +10,17 @@
   </l-marker>
 </template>
 
-<script>
-export default {
-  props: {
-    text: {
-      type: String,
-      required: true,
-    },
-    latLng: {
-      type: Array,
-      required: true,
-    },
+<script setup>
+defineProps({
+  text: {
+    type: String,
+    required: true,
   },
-}
+  latLng: {
+    type: Array,
+    required: true,
+  },
+})
 </script>
 
 <style scoped lang="scss">

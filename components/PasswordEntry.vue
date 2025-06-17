@@ -42,65 +42,60 @@
     </b-input-group>
   </b-form-group>
 </template>
-<script>
+<script setup>
+import { ref, watch, onMounted } from 'vue'
 import SpinButton from './SpinButton'
 import { useAuthStore } from '~/stores/auth'
 
-export default {
-  components: {
-    SpinButton,
+const props = defineProps({
+  originalPassword: {
+    type: String,
+    required: false,
+    default: '',
   },
-  props: {
-    originalPassword: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showSaveOption: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    placeholder: {
-      type: String,
-      required: false,
-      default: 'Choose password',
-    },
-    errorBorder: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  showSaveOption: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      password: null,
-      showPassword: false,
-    }
+  placeholder: {
+    type: String,
+    required: false,
+    default: 'Choose password',
   },
-  watch: {
-    password(newVal) {
-      this.$emit('update:modelValue', newVal)
-    },
+  errorBorder: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  mounted() {
-    this.password = this.originalPassword
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword
-    },
-    async savePassword(callback) {
-      if (this.password) {
-        const authStore = useAuthStore()
-        await authStore.saveAndGet({
-          password: this.password,
-        })
-      }
-      callback()
-    },
-  },
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const password = ref(null)
+const showPassword = ref(false)
+
+function togglePassword() {
+  showPassword.value = !showPassword.value
 }
+
+async function savePassword(callback) {
+  if (password.value) {
+    const authStore = useAuthStore()
+    await authStore.saveAndGet({
+      password: password.value,
+    })
+  }
+  callback()
+}
+
+watch(password, (newVal) => {
+  emit('update:modelValue', newVal)
+})
+
+onMounted(() => {
+  password.value = props.originalPassword
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';

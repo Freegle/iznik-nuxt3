@@ -52,7 +52,7 @@
           :center="[lat, lng]"
           :style="'width: 100%; height: 200px'"
         >
-          <l-tile-layer :url="osmtile" :attribution="attribution" />
+          <l-tile-layer :url="osmtile()" :attribution="attribution()" />
           <l-marker :lat-lng="[lat, lng]" :interactive="false" />
         </l-map>
         <div class="small text-muted">
@@ -70,68 +70,88 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import Highlighter from 'vue-highlight-words'
-import ChatBase from '~/components/ChatBase'
+import { useChatBase } from '../composables/useChat'
+import { ref, computed, onMounted } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
 
-export default {
-  components: {
-    ProfileImage,
-    Highlighter,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  data: function () {
-    return {
-      lat: null,
-      lng: null,
+  id: {
+    type: Number,
+    required: true,
+  },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+// Use properties from ChatBase component via composable
+const {
+  chat,
+  chatmessage,
+  emessage,
+  messageIsFromCurrentUser,
+  chatMessageProfileImage,
+  regexEmail,
+} = useChatBase(props.chatid, props.id, props.pov)
+
+// Data properties
+const lat = ref(null)
+const lng = ref(null)
+
+// Computed properties
+const maxZoom = computed(() => MAX_MAP_ZOOM)
+
+const messageIsNew = computed(() => {
+  return (
+    chatmessage.value?.secondsago < 60 ||
+    chatmessage.value?.id > chat.value?.lastmsgseen
+  )
+})
+
+const postcode = computed(() => {
+  let ret = null
+
+  const postcodeMatch = chatmessage.value?.message.match(POSTCODE_REGEX)
+
+  if (postcodeMatch?.length) {
+    if (!postcodeMatch[0].includes(' ')) {
+      // Make sure we have a space in the right place, because this helps with autocomplete
+      ret = postcodeMatch[0].replace(/^(.*)(\d)/, '$1 $2')
+    } else {
+      ret = postcodeMatch[0]
     }
-  },
-  computed: {
-    osmtile: () => osmtile(),
-    attribution: () => attribution(),
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
-    messageIsNew() {
-      return (
-        this.chatmessage?.secondsago < 60 ||
-        this.chatmessage?.id > this.chat?.lastmsgseen
-      )
-    },
-    postcode() {
-      let ret = null
+  }
 
-      const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
+  return ret
+})
 
-      if (postcode?.length) {
-        if (!postcode[0].includes(' ')) {
-          // Make sure we have a space in the right place, because this helps with autocomplete
-          ret = postcode[0].replace(/^(.*)(\d)/, '$1 $2')
-        } else {
-          ret = postcode[0]
-        }
-      }
+// Lifecycle hooks
+onMounted(async () => {
+  if (postcode.value) {
+    // Use typeahead to find the postcode location.
+    const locationStore = useLocationStore()
+    const locs = await locationStore.typeahead(postcode.value)
 
-      return ret
-    },
-  },
-  async mounted() {
-    console.log('Mounted, postcode', this.postcode)
-    if (this.postcode) {
-      // Use typeahead to find the postcode location.
-      const locationStore = useLocationStore()
-      const locs = await locationStore.typeahead(this.postcode)
-      console.log('Typeahead returned', locs)
-
-      if (locs?.length) {
-        this.lat = locs[0].lat
-        this.lng = locs[0].lng
-      }
+    if (locs?.length) {
+      lat.value = locs[0].lat
+      lng.value = locs[0].lng
     }
-  },
-}
+  }
+})
 </script>

@@ -62,7 +62,8 @@
   </div>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ExternalLink from '~/components/ExternalLink'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import NoticeboardDetails from '~/components/NoticeboardDetails'
@@ -76,13 +77,41 @@ const PosterModal = defineAsyncComponent(() =>
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
+const router = useRouter()
 const id = route.params.id ? parseInt(route.params.id) : null
 const noticeboardStore = useNoticeboardStore()
 
-await noticeboardStore.clear()
+// State
+const center = ref([53.945, -2.5209])
+const showPosterModal = ref(false)
 
+// Computed
 const noticeboard = computed(() => (id ? noticeboardStore.byId(id) : null))
 const noticeboards = computed(() => noticeboardStore.list)
+const maxZoom = MAX_MAP_ZOOM
+
+const mapWidth = computed(() => {
+  let width = 0
+
+  if (process.client) {
+    width = Math.floor(window.innerHeight / 2)
+    width = width < 200 ? 200 : width
+  }
+
+  return width
+})
+
+// Methods
+const added = () => {
+  showPosterModal.value = true
+}
+
+const goto = (noteboardId) => {
+  router.push('/noticeboards/' + noteboardId)
+}
+
+// Setup
+await noticeboardStore.clear()
 
 if (!id || !noticeboardStore.list?.length) {
   await noticeboardStore.fetch()
@@ -106,38 +135,7 @@ if (!id || !noticeboardStore.list?.length) {
   )
 }
 
-const mapWidth = computed(() => {
-  let width = 0
-
-  if (process.client) {
-    width = Math.floor(window.innerHeight / 2)
-    width = width < 200 ? 200 : width
-  }
-
-  return width
+onMounted(async () => {
+  await loadLeaflet()
 })
-
-const maxZoom = MAX_MAP_ZOOM
-</script>
-<script>
-export default {
-  data() {
-    return {
-      center: [53.945, -2.5209],
-      showPosterModal: false,
-    }
-  },
-  computed: {},
-  async mounted() {
-    await loadLeaflet()
-  },
-  methods: {
-    added() {
-      this.showPosterModal = true
-    },
-    goto(id) {
-      this.$router.push('/noticeboards/' + id)
-    },
-  },
-}
 </script>

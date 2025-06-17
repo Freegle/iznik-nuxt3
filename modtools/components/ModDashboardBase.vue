@@ -1,9 +1,7 @@
 <template>
   <div />
 </template>
-
 <script>
-import pluralize from 'pluralize'
 export default {
   props: {
     groupid: {

@@ -28,9 +28,8 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
-import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
-const authStore = useAuthStore()
 const miscStore = useMiscStore()
 
 // Set this true to ensure that something always fills a slot.  Useful for testing ad layout.
@@ -134,13 +133,14 @@ const pageUrl = computed(() => {
   //
   // This isn't quite as good as using the home group, but it's quick and good enough for most
   // users.
-  const myGroups = authStore.groups
+  // Use the myGroups computed from useMe composable for consistency
+  const { myGroups } = useMe()
 
   let added = null
   let nameshort = null
 
-  if (myGroups?.length) {
-    myGroups.forEach((g) => {
+  if (myGroups.value?.length) {
+    myGroups.value.forEach((g) => {
       if (!added || g.added > added) {
         added = g.added
         nameshort = g.nameshort

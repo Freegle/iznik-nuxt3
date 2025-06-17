@@ -172,6 +172,7 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
@@ -232,6 +233,7 @@ export default defineNuxtConfig({
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
 
+      CIRCLECI: process.env.CIRCLECI,
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
       PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
@@ -260,6 +262,9 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    build: {
+      minify: false,
+    },
     css: {
       preprocessorOptions: {
         scss: {

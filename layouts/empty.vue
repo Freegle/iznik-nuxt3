@@ -6,6 +6,7 @@
     />
   </client-only>
 </template>
+<script setup></script>
 <style scoped lang="scss">
 html {
   box-sizing: border-box;

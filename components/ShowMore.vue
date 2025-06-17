@@ -12,37 +12,31 @@
     </b-button>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    items: {
-      type: Array,
-      required: true,
-    },
-    limit: {
-      type: Number,
-      required: false,
-      default: 10,
-    },
-    keyfield: {
-      type: String,
-      required: false,
-      default: 'id',
-    },
+<script setup>
+const props = defineProps({
+  items: {
+    type: Array,
+    required: true,
   },
-  data: function () {
-    return {
-      expanded: false,
-    }
+  limit: {
+    type: Number,
+    required: false,
+    default: 10,
   },
-  computed: {
-    itemsToShow() {
-      if (this.expanded || this.items.length < this.limit) {
-        return this.items
-      } else {
-        return this.items.slice(0, this.limit)
-      }
-    },
+  keyfield: {
+    type: String,
+    required: false,
+    default: 'id',
   },
-}
+})
+
+const expanded = ref(false)
+
+const itemsToShow = computed(() => {
+  if (expanded.value || props.items.length < props.limit) {
+    return props.items
+  } else {
+    return props.items.slice(0, props.limit)
+  }
+})
 </script>

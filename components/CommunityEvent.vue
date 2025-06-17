@@ -149,131 +149,100 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
+
 const CommunityEventModal = defineAsyncComponent(() =>
   import('./CommunityEventModal')
 )
 
-export default {
-  components: {
-    CommunityEventModal,
-    ReadMore,
+const props = defineProps({
+  summary: {
+    type: Boolean,
+    required: true,
   },
-  props: {
-    summary: {
-      type: Boolean,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
-    filterGroup: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    titleTag: {
-      type: String,
-      required: false,
-      default: 'h3',
-    },
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const communityEventStore = useCommunityEventStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
+  filterGroup: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  titleTag: {
+    type: String,
+    required: false,
+    default: 'h3',
+  },
+})
 
-    if (props.id) {
-      const v = await communityEventStore.fetch(props.id)
+// Store references
+const communityEventStore = useCommunityEventStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
 
-      if (v) {
-        await userStore.fetch(v.userid)
+// State
+const showModal = ref(false)
 
-        v.groups?.forEach(async (id) => {
-          await groupStore.fetch(id)
-        })
-      }
+// Fetch data
+if (props.id) {
+  const v = await communityEventStore.fetch(props.id)
+
+  if (v) {
+    await userStore.fetch(v.userid)
+
+    v.groups?.forEach(async (id) => {
+      await groupStore.fetch(id)
+    })
+  }
+}
+
+// Computed properties
+const event = computed(() => {
+  const v = communityEventStore?.byId(props.id)
+
+  if (v) {
+    if (!props.filterGroup) {
+      return v
     }
 
-    return {
-      communityEventStore,
-      userStore,
-      groupStore,
+    if (v.groups.includes(props.filterGroup)) {
+      return v
     }
-  },
-  data() {
-    return {
-      renewed: false,
-      showModal: false,
+  }
+
+  return null
+})
+
+const groups = computed(() => {
+  const ret = []
+  event.value?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+
+    if (group) {
+      ret.push(group)
     }
-  },
-  computed: {
-    event() {
-      const v = this.communityEventStore?.byId(this.id)
+  })
 
-      if (v) {
-        if (!this.filterGroup) {
-          return v
-        }
+  return ret
+})
 
-        if (v.groups.includes(this.filterGroup)) {
-          return v
-        }
-      }
+const description = computed(() => {
+  let desc = event.value?.description
+  desc = desc ? twem(desc) : ''
+  desc = desc.trim()
+  return desc
+})
 
-      return null
-    },
-    groups() {
-      const ret = []
-      this.event?.groups?.forEach((id) => {
-        const group = this.groupStore?.get(id)
-
-        if (group) {
-          ret.push(group)
-        }
-      })
-
-      return ret
-    },
-    user() {
-      return this.userStore?.byId(this.event?.userid)
-    },
-    description() {
-      let desc = this.event?.description
-      desc = desc ? twem(desc) : ''
-      desc = desc.trim()
-      return desc
-    },
-    warning() {
-      const added = new Date(this.event?.added).getTime()
-      const renewed = new Date(this.event?.renewed).getTime()
-      const now = Date.now()
-
-      let warn = false
-
-      if (renewed) {
-        warn = now - renewed > 31 * 24 * 60 * 60 * 1000
-      } else {
-        warn = now - added > 31 * 24 * 60 * 60 * 1000
-      }
-
-      return warn
-    },
-    mine() {
-      return this.user?.id === this.myid
-    },
-  },
-  methods: {
-    showEventModal() {
-      this.showModal = true
-    },
-  },
+// Methods
+function showEventModal() {
+  showModal.value = true
 }
 </script>
 <style scoped lang="scss">

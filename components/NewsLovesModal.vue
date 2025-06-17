@@ -20,63 +20,42 @@
   </b-modal>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useUserStore } from '../stores/user'
 import NewsLovesUserInfo from './NewsLovesUserInfo'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: {
-    NewsLovesUserInfo,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const newsfeedStore = useNewsfeedStore()
-    const userStore = useUserStore()
+})
 
-    const { modal, hide } = useOurModal()
+const newsfeedStore = useNewsfeedStore()
+const { modal, hide } = useOurModal()
 
-    await newsfeedStore.fetch(props.id, true, true)
+// Fetch the newsfeed data with lovers
+await newsfeedStore.fetch(props.id, true, true)
 
-    return {
-      newsfeedStore,
-      userStore,
-      modal,
-      hide,
-    }
-  },
-  computed: {
-    newsfeed() {
-      return this.newsfeedStore?.byId(this.id)
-    },
-    title() {
-      let ret = null
+const newsfeed = computed(() => {
+  return newsfeedStore?.byId(props.id)
+})
 
-      if (this.newsfeed) {
-        ret =
-          this.newsfeed.loves +
-          ' freegler' +
-          (this.newsfeed.loves !== 1 ? 's' : '') +
-          ' love' +
-          (this.newsfeed.loves === 1 ? 's' : '') +
-          ' this'
-      }
+const title = computed(() => {
+  let ret = null
 
-      return ret
-    },
-  },
-  methods: {
-    goToProfile(id) {
-      this.$nextTick(() => {
-        this.$router.push('/profile/' + id)
-      })
-    },
-  },
-}
+  if (newsfeed.value) {
+    ret =
+      newsfeed.value.loves +
+      ' freegler' +
+      (newsfeed.value.loves !== 1 ? 's' : '') +
+      ' love' +
+      (newsfeed.value.loves === 1 ? 's' : '') +
+      ' this'
+  }
+
+  return ret
+})
 </script>

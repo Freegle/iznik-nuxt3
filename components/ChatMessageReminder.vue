@@ -29,15 +29,56 @@
     </b-row>
   </div>
 </template>
-<script>
-import ChatBase from '~/components/ChatBase'
+<script setup>
+import { computed } from 'vue'
+import { useChatBase } from '../composables/useChat'
 
-export default {
-  extends: ChatBase,
-  computed: {
-    amUser() {
-      return this.chat && this.chat.user && this.chat.user.id === this.myid
-    },
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-}
+  id: {
+    type: Number,
+    required: true,
+  },
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+// Use the chat base composable
+const { chat, chatmessage, emessage, myid } = useChatBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
+
+const amUser = computed(() => {
+  return chat.value && chat.value.user && chat.value.user.id === myid
+})
 </script>
+<style scoped lang="scss">
+.chatMessage {
+  border: 1px solid $color-gray--light;
+  border-radius: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 2px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+</style>

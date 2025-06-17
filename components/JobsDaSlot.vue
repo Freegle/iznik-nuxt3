@@ -77,9 +77,9 @@
   </div>
 </template>
 <script setup>
+import { computed, onMounted, onBeforeUnmount, defineAsyncComponent } from 'vue'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
-import { onBeforeUnmount } from '#imports'
 const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))

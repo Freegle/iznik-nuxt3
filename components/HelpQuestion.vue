@@ -11,27 +11,23 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true,
-    },
-    matches: {
-      type: Array,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  id: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      expanded: false,
-    }
+  matches: {
+    type: Array,
+    required: true,
   },
-  methods: {
-    expand() {
-      this.expanded = !this.expanded
-    },
-  },
+})
+
+const expanded = ref(false)
+
+function expand() {
+  expanded.value = !expanded.value
 }
 </script>

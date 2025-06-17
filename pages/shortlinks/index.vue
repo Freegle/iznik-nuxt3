@@ -59,7 +59,8 @@
     </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import ShortLinks from '../../components/ShortLinks'
 import NoticeMessage from '../../components/NoticeMessage'
 import { useShortlinkStore } from '../../stores/shortlinks'
@@ -67,111 +68,98 @@ import { useGroupStore } from '../../stores/group'
 import ShortLink from '../../components/ShortLink'
 import SpinButton from '~/components/SpinButton'
 
-export default {
-  components: { ShortLink, NoticeMessage, ShortLinks, SpinButton },
-  async setup() {
-    definePageMeta({
-      layout: 'login',
+definePageMeta({
+  layout: 'login',
+})
+
+const shortlinkStore = useShortlinkStore()
+const groupStore = useGroupStore()
+await shortlinkStore.fetch()
+await groupStore.fetch()
+
+// State
+const groupid = ref(-1)
+const name = ref(null)
+const error = ref(null)
+const id = ref(null)
+
+// Computed properties
+const groups = computed(() => groupStore?.list)
+const shortlinks = computed(() => shortlinkStore?.list)
+
+const sortedLinks = computed(() => {
+  if (shortlinks.value) {
+    const freeglegroups = Object.values(shortlinks.value)
+      .concat()
+      .filter((item) => {
+        return item.type === 'Group'
+      })
+    const sorted = freeglegroups.sort((a, b) => {
+      if (a.type === 'Group' && b.type === 'Group') {
+        return a.nameshort
+          .toLowerCase()
+          .localeCompare(b.nameshort.toLowerCase())
+      }
+
+      return 0
     })
-    const shortlinkStore = useShortlinkStore()
-    const groupStore = useGroupStore()
-    await shortlinkStore.fetch()
-    await groupStore.fetch()
 
-    return {
-      shortlinkStore,
-      groupStore,
-    }
-  },
-  data: function () {
-    return {
-      groupid: -1,
-      name: null,
-      error: null,
-      id: null,
-    }
-  },
-  computed: {
-    groups() {
-      return this.groupStore?.list
-    },
-    shortlinks() {
-      return this.shortlinkStore?.list
-    },
-    sortedLinks() {
-      if (this.shortlinks) {
-        const freeglegroups = Object.values(this.shortlinks)
-          .concat()
-          .filter((item) => {
-            return item.type === 'Group'
-          })
-        const sorted = freeglegroups.sort((a, b) => {
-          if (a.type === 'Group' && b.type === 'Group') {
-            return a.nameshort
-              .toLowerCase()
-              .localeCompare(b.nameshort.toLowerCase())
-          }
+    return sorted
+  }
 
-          return 0
-        })
+  return null
+})
 
-        return sorted
-      }
+const groupOptions = computed(() => {
+  const options = []
 
-      return null
-    },
-    groupOptions() {
-      const options = []
+  options.push({
+    value: -1,
+    html: '<em>-- Please choose --</em>',
+  })
 
+  if (groups.value) {
+    for (const group in groups.value) {
       options.push({
-        value: -1,
-        html: '<em>-- Please choose --</em>',
+        value: groups.value[group].id,
+        text: groups.value[group].namedisplay,
       })
+    }
+  }
 
-      if (this.groups) {
-        for (const group in this.groups) {
-          options.push({
-            value: this.groups[group].id,
-            text: this.groups[group].namedisplay,
-          })
-        }
+  options.sort((a, b) => {
+    if (a.value === -1) {
+      return -1
+    } else if (b.value === -1) {
+      return 1
+    } else {
+      return a.text.toLowerCase().localeCompare(b.text.toLowerCase())
+    }
+  })
+
+  return options
+})
+
+// Methods
+const create = async (callback) => {
+  if (groupid.value && name.value) {
+    try {
+      id.value = await shortlinkStore.add(groupid.value, name.value)
+
+      if (!id.value) {
+        error.value =
+          'Failed to create. Please make sure the link name is unique.'
+      }
+    } catch (e) {
+      if (e?.response?.data) {
+        // Duplicate
+        error.value = e.response.data.status
       }
 
-      options.sort((a, b) => {
-        if (a.value === -1) {
-          return -1
-        } else if (b.value === -1) {
-          return 1
-        } else {
-          return a.text.toLowerCase().localeCompare(b.text.toLowerCase())
-        }
-      })
-
-      return options
-    },
-  },
-  methods: {
-    async create(callback) {
-      if (this.groupid && this.name) {
-        try {
-          this.id = await this.shortlinkStore.add(this.groupid, this.name)
-
-          if (!this.id) {
-            this.error =
-              'Failed to create.  Please make sure the link name is unique.'
-          }
-        } catch (e) {
-          if (e?.response?.data) {
-            // Duplicate
-            this.error = e.response.data.status
-          }
-
-          console.log('Failed to create shortlink', e.response)
-        }
-      }
-      callback()
-    },
-  },
+      console.log('Failed to create shortlink', e.response)
+    }
+  }
+  callback()
 }
 </script>
 <style scoped>

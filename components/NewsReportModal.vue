@@ -22,39 +22,24 @@
   </b-modal>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
+})
 
-    const { modal, hide } = useOurModal()
+const newsfeedStore = useNewsfeedStore()
+const { modal, hide } = useOurModal()
+const reason = ref(null)
 
-    return {
-      newsfeedStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      reason: null,
-    }
-  },
-  methods: {
-    async report() {
-      await this.newsfeedStore.report(this.id, this.reason)
-
-      this.hide()
-    },
-  },
+async function report() {
+  await newsfeedStore.report(props.id, reason.value)
+  hide()
 }
 </script>

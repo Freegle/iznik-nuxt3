@@ -1,5 +1,5 @@
 <template>
-  <div class="promised" @click="$emit('click')">
+  <div class="promised" @click="clicked">
     <div v-if="summary">
       <b-img lazy src="/promised.jpg" class="promised__image" />
       <b-popover
@@ -26,75 +26,76 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, ref, onBeforeUnmount } from 'vue'
+import NoticeMessage from './NoticeMessage'
 import { useMessageStore } from '~/stores/message'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    toMe: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    summary: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
+  toMe: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  summary: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return { messageStore }
-  },
-  data: function () {
-    return {
-      scrollHandler: null,
-      showing: false,
-    }
-  },
-  computed: {
-    title() {
-      if (!this.toMe) {
-        return "This item has already been promised to someone. You can still reply, but you'll probably only get it if someone else drops out."
-      } else {
-        return 'This has been promised to you.'
-      }
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-  beforeUnmount() {
-    if (this.scrollHandler) {
-      window.removeEventListener('scroll', this.scrollHandler)
-      this.scrollHandler = null
-    }
-  },
-  methods: {
-    shown() {
-      if (!this.scrollHandler) {
-        this.scrollHandler = window.addEventListener(
-          'scroll',
-          this.handleScroll
-        )
-      }
-    },
-    hidden() {
-      if (this.scrollHandler) {
-        window.removeEventListener('scroll', this.scrollHandler)
-        this.scrollHandler = null
-      }
-    },
-    handleScroll() {
-      this.showing = false
-    },
-  },
+const emit = defineEmits(['click'])
+
+const { myid } = useMe()
+const messageStore = useMessageStore()
+
+let scrollHandler = null
+const showing = ref(false)
+
+const title = computed(() => {
+  if (!props.toMe) {
+    return "This item has already been promised to someone. You can still reply, but you'll probably only get it if someone else drops out."
+  } else {
+    return 'This has been promised to you.'
+  }
+})
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+function shown() {
+  if (!scrollHandler) {
+    scrollHandler = window.addEventListener('scroll', handleScroll)
+  }
 }
+
+function hidden() {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', handleScroll)
+    scrollHandler = null
+  }
+}
+
+function handleScroll() {
+  showing.value = false
+}
+
+function clicked() {
+  emit('click')
+}
+
+onBeforeUnmount(() => {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', scrollHandler)
+    scrollHandler = null
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';

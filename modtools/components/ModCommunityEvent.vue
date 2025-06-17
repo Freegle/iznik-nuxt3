@@ -77,7 +77,7 @@ export default {
       required: true,
     },
   },
-  async setup(props) {
+  setup(props) {
     const communityEventStore = useCommunityEventStore()
     const groupStore = useGroupStore()
     return {

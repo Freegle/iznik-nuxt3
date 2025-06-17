@@ -3,38 +3,35 @@
     <slot />
   </div>
 </template>
-<script>
+<script setup>
 import { useMiscStore } from '~/stores/misc'
 
-export default {
-  props: {
-    at: {
-      type: Array,
-      required: false,
-      default: null,
-    },
-    not: {
-      type: Array,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  at: {
+    type: Array,
+    required: false,
+    default: null,
   },
-  computed: {
-    breakpoint() {
-      const store = useMiscStore()
-      return store.breakpoint
-    },
-    show() {
-      if (process.server) {
-        // Drop all optional components for SSR, otherwise we might start to render them on the client when we
-        // don't need to.
-        return false
-      } else if (this.at) {
-        return this.at.includes(this.breakpoint)
-      } else {
-        return !this.not.includes(this.breakpoint)
-      }
-    },
+  not: {
+    type: Array,
+    required: false,
+    default: null,
   },
-}
+})
+
+const store = useMiscStore()
+
+const breakpoint = computed(() => store.breakpoint)
+
+const show = computed(() => {
+  if (process.server) {
+    // Drop all optional components for SSR, otherwise we might start to render them on the client when we
+    // don't need to.
+    return false
+  } else if (props.at) {
+    return props.at.includes(breakpoint.value)
+  } else {
+    return !props.not.includes(breakpoint.value)
+  }
+})
 </script>

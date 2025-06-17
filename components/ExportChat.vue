@@ -27,18 +27,16 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    chat: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+import { dateonly } from '~/composables/useTimeFormat'
+
+defineProps({
+  chat: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      showMessages: false,
-    }
-  },
-}
+})
+
+const showMessages = ref(false)
 </script>

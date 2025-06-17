@@ -155,7 +155,7 @@ import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import { useMiscStore } from '../stores/misc'
 import { useAuthStore } from '../stores/auth'
 import { ref } from '#imports'
-import { fetchMe } from '~/composables/useMe'
+import { useMe } from '~/composables/useMe'
 
 const MicroVolunteeringFacebook = defineAsyncComponent(() =>
   import('~/components/MicroVolunteeringFacebook')
@@ -192,19 +192,26 @@ if (debug) {
   })
 }
 
-const me = authStore.user
+// Use me and myGroups computed properties from useMe composable for consistency
+const { me, myGroups, fetchMe } = useMe()
 
-const inviteAccepted = ref(me?.trustlevel && me.trustlevel !== 'Declined')
+const inviteAccepted = ref(
+  me.value?.trustlevel && me.value.trustlevel !== 'Declined'
+)
 
 const allowed = ref(debug)
 
-if (me) {
+if (me.value) {
   // Check if we're on a group with microvolunteering enabled.
-  authStore.groups.forEach((g) => {
-    if (g.microvolunteeringallowed) {
-      allowed.value = true
-    }
-  })
+  // myGroups already destructured from useMe() above
+
+  if (myGroups.value && myGroups.value.length) {
+    myGroups.value.forEach((g) => {
+      if (g.microvolunteeringallowed) {
+        allowed.value = true
+      }
+    })
+  }
 }
 
 const showTask = ref(false)
@@ -287,11 +294,13 @@ async function inviteResponse(callback, response) {
 
     inviteAccepted.value = true
 
-    authStore.groups.forEach((g) => {
-      if (g.microvolunteeringallowed) {
-        allowed.value = true
-      }
-    })
+    if (myGroups.value && myGroups.value.length) {
+      myGroups.value.forEach((g) => {
+        if (g.microvolunteeringallowed) {
+          allowed.value = true
+        }
+      })
+    }
 
     await getTask()
   } else {

@@ -20,32 +20,32 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { useRouter } from 'vue-router'
 import { setupNotification } from '../composables/useNotification'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  components: {
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
+})
 
-  methods: {
-    click() {
-      // Make sure we have the up to date iem in the store fairly soon.
-      useNewsfeedStore().fetch(this.newsfeed.id, true)
-      this.$router.push('/chitchat/' + this.newsfeed.id)
-    },
-  },
+const router = useRouter()
+
+// Setup notification
+const { fromuser, newsfeed, notificationago } = await setupNotification(
+  props.id
+)
+
+function click() {
+  // Make sure we have the up-to-date item in the store
+  if (newsfeed?.value?.id) {
+    useNewsfeedStore().fetch(newsfeed.value.id, true)
+    router.push('/chitchat/' + newsfeed.value.id)
+  }
 }
 </script>
 

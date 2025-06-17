@@ -35,8 +35,9 @@
     <UserRatingsRemoveModal v-if="showRemove" :id="id" />
   </span>
 </template>
-<script>
+<script setup>
 import { useUserStore } from '../stores/user'
+import { useMe } from '~/composables/useMe'
 
 const UserRatingsDownModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsDownModal')
@@ -46,104 +47,100 @@ const UserRatingsRemoveModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsRemoveModal')
 )
 
-export default {
-  components: { UserRatingsDownModal, UserRatingsRemoveModal },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showName: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  setup(props) {
-    const userStore = useUserStore()
-
-    userStore.fetch(props.id)
-
-    return { userStore }
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  data() {
-    return {
-      showDown: false,
-      showRemove: false,
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  showName: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const userStore = useUserStore()
+// Use myid computed property from useMe composable for consistency
+const { myid } = useMe()
+
+const showDown = ref(false)
+const showRemove = ref(false)
+
+// Fetch user data
+userStore.fetch(props.id)
+
+const user = computed(() => {
+  let ret = null
+
+  if (props.id) {
+    const user = userStore?.byId(props.id)
+
+    if (user && user.info) {
+      ret = user
     }
-  },
-  computed: {
-    user() {
-      let ret = null
+  }
 
-      if (this.id) {
-        const user = this.userStore?.byId(this.id)
+  return ret
+})
 
-        if (user && user.info) {
-          ret = user
-        }
-      }
+const uptitle = computed(() => {
+  if (user.value?.info?.ratings?.Mine === 'Up') {
+    return 'You gave them a thumbs up.  Click to undo.'
+  } else {
+    return (
+      user.value?.info?.ratings?.Up +
+      ' freegler' +
+      (user.value?.info?.ratings?.Up !== 1 ? 's' : '') +
+      '  gave them a thumbs up.  Click to rate, click again to undo.'
+    )
+  }
+})
 
-      return ret
-    },
-    uptitle() {
-      if (this.user.info.ratings.Mine === 'Up') {
-        return 'You gave them a thumbs up.  Click to undo.'
-      } else {
-        return (
-          this.user.info.ratings.Up +
-          ' freegler' +
-          (this.user.info.ratings.Up !== 1 ? 's' : '') +
-          '  gave them a thumbs up.  Click to rate, click again to undo.'
-        )
-      }
-    },
-    downtitle() {
-      if (this.user.info.ratings.Mine === 'Down') {
-        return 'You gave them a thumbs down.  Click to undo.'
-      } else {
-        return (
-          this.user.info.ratings.Down +
-          ' freegler' +
-          (this.user.info.ratings.Down !== 1 ? 's' : '') +
-          '  gave them a thumbs down.  Click to rate, click again to undo.'
-        )
-      }
-    },
-  },
-  methods: {
-    async rate(rating, reason, text) {
-      await this.userStore.rate(this.id, rating, reason, text)
-    },
-    async up() {
-      this.showDown = false
-      if (this.user.info.ratings.Mine === 'Up') {
-        this.showRemove = true
-      } else {
-        await this.rate('Up')
-      }
-    },
-    down() {
-      this.showDown = false
+const downtitle = computed(() => {
+  if (user.value?.info?.ratings?.Mine === 'Down') {
+    return 'You gave them a thumbs down.  Click to undo.'
+  } else {
+    return (
+      user.value?.info?.ratings?.Down +
+      ' freegler' +
+      (user.value?.info?.ratings?.Down !== 1 ? 's' : '') +
+      '  gave them a thumbs down.  Click to rate, click again to undo.'
+    )
+  }
+})
 
-      if (this.user.info.ratings.Mine === 'Down') {
-        this.showRemove = true
-      } else {
-        this.showDown = true
-      }
-    },
-  },
+const rate = async (rating, reason, text) => {
+  await userStore.rate(props.id, rating, reason, text)
+}
+
+const up = async () => {
+  showDown.value = false
+  if (user.value?.info?.ratings?.Mine === 'Up') {
+    showRemove.value = true
+  } else {
+    await rate('Up')
+  }
+}
+
+const down = () => {
+  showDown.value = false
+
+  if (user.value?.info?.ratings?.Mine === 'Down') {
+    showRemove.value = true
+  } else {
+    showDown.value = true
+  }
 }
 </script>
 <style scoped lang="scss">

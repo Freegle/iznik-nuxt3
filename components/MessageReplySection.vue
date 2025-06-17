@@ -3,7 +3,6 @@
     <div v-if="!fromme" class="grey p-2">
       <EmailValidator
         v-if="!me"
-        ref="email"
         v-model:email="email"
         v-model:valid="emailValid"
         size="lg"
@@ -143,9 +142,11 @@
       scrollable
       ok-only
       ok-title="Close and Continue"
-      title="Welcome to Freegle!"
       @hide="sendReply(null)"
     >
+      <template #title>
+        <h2>Welcome to Freegle!</h2>
+      </template>
       <NewUserInfo :password="newUserPassword" />
     </b-modal>
     <span ref="breakpoint" class="d-inline d-sm-none" />
@@ -154,280 +155,293 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
-import { mapWritableState } from 'pinia'
-import { nextTick } from 'vue'
+import {
+  defineAsyncComponent,
+  ref,
+  computed,
+  watch,
+  nextTick,
+  getCurrentInstance,
+} from 'vue'
+import { storeToRefs } from 'pinia'
 import { useMessageStore } from '../stores/message'
 import { useAuthStore } from '../stores/auth'
 import { useReplyStore } from '../stores/reply'
 import { milesAway } from '../composables/useDistance'
-import { FAR_AWAY } from '../constants'
-import replyToPost from '@/mixins/replyToPost'
+import { useMe } from '~/composables/useMe'
+import { useReplyToPost } from '~/composables/useReplyToPost'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
 import SpinButton from '~/components/SpinButton.vue'
+import NoticeMessage from '~/components/NoticeMessage'
+import MessageDeadline from '~/components/MessageDeadline'
+import { FAR_AWAY } from '~/constants'
 
 const NewFreegler = defineAsyncComponent(() =>
   import('~/components/NewFreegler')
 )
 
-export default {
-  components: {
-    ChatButton,
-    EmailValidator,
-    NewFreegler,
-    NewUserInfo,
-    SpinButton,
-    VeeForm,
-    Field,
-    ErrorMessage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  mixins: [replyToPost],
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    messageOverride: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+  messageOverride: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  async setup(props) {
-    const messageStore = useMessageStore()
-    const authStore = useAuthStore()
+})
 
-    await messageStore.fetch(props.id)
+const emit = defineEmits(['close', 'sent'])
 
-    return {
-      messageStore,
-      authStore,
-    }
-  },
-  data() {
-    return {
-      reply: null,
-      collect: null,
-      replying: false,
-      email: null,
-      emailValid: false,
-      showNewUser: false,
-      newUserPassword: null,
-    }
-  },
-  computed: {
-    faraway() {
-      return FAR_AWAY
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    milesaway() {
-      return milesAway(
-        this.me?.lat,
-        this.me?.lng,
-        this.message?.lat,
-        this.message?.lng
-      )
-    },
-    disableSend() {
-      return this.replying
-    },
-    fromme() {
-      return this.message?.fromuser === this.myid
-    },
-    alreadyAMember() {
-      let found = false
+const faraway = FAR_AWAY
 
-      if (this.message?.groups) {
-        for (const messageGroup of this.message?.groups) {
-          Object.keys(this.myGroups).forEach((key) => {
-            const group = this.myGroups[key]
+const messageStore = useMessageStore()
+const authStore = useAuthStore()
+const replyStore = useReplyStore()
+const { me, myid, myGroups, fetchMe } = useMe()
+const { loggedInEver, forceLogin } = storeToRefs(authStore)
+const instance = getCurrentInstance()
 
-            if (messageGroup.groupid === group.id) {
-              found = true
-            }
-          })
+// References
+const email = ref(null)
+const emailValid = ref(false)
+const form = ref(null)
+const newUserModal = ref(null)
+const replyToPostChatButton = ref(null)
+const breakpoint = ref(null)
+
+// Data
+const reply = ref(null)
+const collect = ref(null)
+const replying = ref(false)
+const showNewUser = ref(false)
+const newUserPassword = ref(null)
+
+// Fetch the message data
+await messageStore.fetch(props.id)
+
+// Use the replyToPost composable
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const milesaway = computed(() => {
+  return milesAway(me?.lat, me?.lng, message.value?.lat, message.value?.lng)
+})
+
+const disableSend = computed(() => {
+  return replying.value
+})
+
+const fromme = computed(() => {
+  return message.value?.fromuser === myid.value
+})
+
+const alreadyAMember = computed(() => {
+  let found = false
+
+  if (message.value?.groups) {
+    for (const messageGroup of message.value.groups) {
+      Object.keys(myGroups.value).forEach((key) => {
+        const group = myGroups.value[key]
+
+        if (messageGroup.groupid === group.id) {
+          found = true
         }
+      })
+    }
+  }
+
+  return found
+})
+
+const replyToUser = computed(() => {
+  return message.value?.fromuser
+})
+
+// Watch for changes in login state
+watch(me, (newVal, oldVal) => {
+  console.log('Login change', newVal, oldVal)
+  if (!oldVal && newVal && reply.value) {
+    // We have now logged in - resume our send.
+    console.log('Resume send')
+    sendReply()
+  }
+})
+
+function validateCollect(value) {
+  if (value && value.trim()) {
+    return true
+  }
+  return 'Please suggest some days and times when you could collect.'
+}
+
+function validateReply(value) {
+  if (!value?.trim()) {
+    return 'Please fill out your reply.'
+  }
+
+  if (
+    message.value?.type === 'Offer' &&
+    value &&
+    value.length <= 35 &&
+    value.toLowerCase().includes('still available')
+  ) {
+    return (
+      "You don't need to ask if things are still available. Just write whatever you " +
+      "would have said next - explain why you'd like it and when you could collect."
+    )
+  }
+
+  return true
+}
+
+async function registerOrSend(callback) {
+  if (!me && !emailValid.value) {
+    email.value?.focus()
+  }
+
+  // We've got a reply and an email address. Maybe the email address is a registered user, maybe it's new. If
+  // it's a registered user then we want to force them to log in.
+  //
+  // We attempt to register the user. If the user already exists, then we'll be told about that as an error.
+  console.log('Register or send', email.value)
+  const validate = await form.value.validate()
+
+  if (validate.valid) {
+    try {
+      const ret = await instance.proxy.$api.user.add(email.value, false)
+
+      console.log('Returned', ret)
+      if (ret.ret === 0 && ret.password) {
+        // We registered a new user and logged in.
+        loggedInEver.value = true
+
+        await fetchMe(true)
+
+        // Show the new user modal.
+        newUserPassword.value = ret.password
+        showNewUser.value = true
+
+        await nextTick()
+        callback()
+
+        // Now that we are logged in, we can reply.
+        newUserModal.value?.show()
+
+        // Once the modal is closed, we will send the reply.
+      } else {
+        // If anything else happens, then we call sendReply which will force us to log in. Then the watch will
+        // spot that we're logged in and trigger the send, so we don't need to do that here.
+        console.log('Failed to register - force login', ret)
+        callback()
+        forceLogin.value = true
+      }
+    } catch (e) {
+      // Probably an existing user. Force ourselves to log in as above.
+      console.log('Register exception, force login', e.message)
+      callback()
+      forceLogin.value = true
+    }
+  } else {
+    callback()
+  }
+}
+
+async function sendReply(callback) {
+  console.log('sendReply', reply.value)
+  const validate = await form.value.validate()
+  let called = false
+
+  if (validate.valid) {
+    if (reply.value) {
+      // Save the reply
+      replyStore.replyMsgId = props.id
+      replyStore.replyMessage = reply.value
+
+      if (collect.value) {
+        replyStore.replyMessage +=
+          '\r\n\r\nPossible collection times: ' + collect.value
       }
 
-      return found
-    },
-    ...mapWritableState(useAuthStore, ['loggedInEver', 'forceLogin']),
-  },
-  watch: {
-    me(newVal, oldVal) {
-      console.log('Login change', newVal, oldVal)
-      if (!oldVal && newVal && this.reply) {
-        // We have now logged in - resume our send.
-        console.log('Resume send')
-        this.sendReply()
-      }
-    },
-  },
-  methods: {
-    validateCollect(value) {
-      if (value && value.trim()) {
-        return true
-      }
-      return 'Please suggest some days and times when you could collect.'
-    },
-    validateReply(value) {
-      if (!value?.trim()) {
-        return 'Please fill out your reply.'
-      }
+      replyStore.replyingAt = Date.now()
+      console.log(
+        'State',
+        replyStore.replyMsgId,
+        replyStore.replyMessage,
+        replyStore.replyingAt
+      )
 
-      if (
-        this.message?.type === 'Offer' &&
-        value &&
-        value.length <= 35 &&
-        value.toLowerCase().includes('still available')
-      ) {
-        return (
-          "You don't need to ask if things are still available. Just write whatever you " +
-          "would have said next - explain why you'd like it and when you could collect."
-        )
-      }
+      if (me) {
+        // We have several things to do:
+        // - join a group if need be (doesn't matter which)
+        // - post our reply
+        // - show/go to the open the popup chat so they see what happened
+        replying.value = true
+        let found = false
+        let tojoin = null
 
-      return true
-    },
-    async registerOrSend(callback) {
-      if (!this.me && !this.emailValid) {
-        this.$refs.email.focus()
-      }
+        // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
+        const msg = await messageStore.fetch(props.id, true)
 
-      // We've got a reply and an email address.  Maybe the email address is a registered user, maybe it's new.  If
-      // it's a registered user then we want to force them to log in.
-      //
-      // We attempt to register the user.  If the user already exists, then we'll be told about that as an error.
-      console.log('Register or send', this.email)
-      const validate = await this.$refs.form.validate()
+        if (msg?.groups) {
+          for (const messageGroup of msg.groups) {
+            tojoin = messageGroup.groupid
+            Object.keys(myGroups.value).forEach((key) => {
+              const group = myGroups.value[key]
 
-      if (validate.valid) {
-        try {
-          const ret = await this.$api.user.add(this.email, false)
-
-          console.log('Returned', ret)
-          if (ret.ret === 0 && ret.password) {
-            // We registered a new user and logged in.
-            this.loggedInEver = true
-
-            await this.fetchMe(true)
-
-            // Show the new user modal.
-            this.newUserPassword = ret.password
-            this.showNewUser = true
-
-            await nextTick()
-            callback()
-
-            // Now that we are logged in, we can reply.
-            this.$refs.newUserModal?.show()
-
-            // Once the modal is closed, we will send the reply.
-          } else {
-            // If anything else happens, then we call sendReply which will force us to log in.  Then the watch will
-            // spot that we're logged in and trigger the send, so we don't need to do that here.
-            console.log('Failed to register - force login', ret)
-            callback()
-            this.forceLogin = true
+              if (messageGroup.groupid === group.id) {
+                found = true
+              }
+            })
           }
-        } catch (e) {
-          // Probably an existing user.  Force ourselves to log in as above.
-          console.log('Register exception, force login', e.message)
-          callback()
-          this.forceLogin = true
+
+          if (!found) {
+            // Not currently a member.
+            await authStore.joinGroup(myid.value, tojoin, false)
+          }
+
+          // Now we can send the reply via chat.
+          await nextTick()
+          if (callback) {
+            callback()
+            called = true
+          }
+
+          // Use the composable's replyToPost function passing the chat button reference
+          const { replyToPost: composableReplyToPost } = useReplyToPost()
+          const replySent = await composableReplyToPost(
+            replyToPostChatButton.value
+          )
+          if (replySent) {
+            sent()
+          }
         }
       } else {
-        callback()
+        // We're not logged in yet. We need to force a log in. Once that completes then either the watch in here
+        // or default.vue will spot we have a reply to send and make it happen.
+        console.log('Force login')
+        forceLogin.value = true
       }
-    },
-    async sendReply(callback) {
-      console.log('sendReply', this.reply)
-      const validate = await this.$refs.form.validate()
-      let called = false
+    }
+  }
 
-      if (validate.valid) {
-        if (this.reply) {
-          // Save the reply
-          const replyStore = useReplyStore()
-          replyStore.replyMsgId = this.id
-          replyStore.replyMessage = this.reply
+  if (!called && callback) {
+    callback()
+  }
+}
 
-          if (this.collect) {
-            replyStore.replyMessage +=
-              '\r\n\r\nPossible collection times: ' + this.collect
-          }
+function close() {
+  emit('close')
+}
 
-          replyStore.replyingAt = Date.now()
-          console.log(
-            'State',
-            useReplyStore().replyMsgId,
-            useReplyStore().replyMessage,
-            useReplyStore().replyingAt
-          )
-
-          if (this.me) {
-            // We have several things to do:
-            // - join a group if need be (doesn't matter which)
-            // - post our reply
-            // - show/go to the open the popup chat so they see what happened
-            this.replying = true
-            let found = false
-            let tojoin = null
-
-            // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
-            const msg = await this.messageStore.fetch(this.id, true)
-
-            if (msg?.groups) {
-              for (const messageGroup of msg.groups) {
-                tojoin = messageGroup.groupid
-                Object.keys(this.myGroups).forEach((key) => {
-                  const group = this.myGroups[key]
-
-                  if (messageGroup.groupid === group.id) {
-                    found = true
-                  }
-                })
-              }
-
-              if (!found) {
-                // Not currently a member.
-                await this.authStore.joinGroup(this.myid, tojoin, false)
-              }
-
-              // Now we can send the reply via chat.
-              await this.$nextTick()
-              if (callback) {
-                callback()
-                called = true
-              }
-
-              await this.replyToPost()
-            }
-          } else {
-            // We're not logged in yet.  We need to force a log in.  Once that completes then either the watch in here
-            // or default.vue will spot we have a reply to send and make it happen.
-            console.log('Force login')
-            this.forceLogin = true
-          }
-        }
-      }
-
-      if (!called && callback) {
-        callback()
-      }
-    },
-    close() {
-      this.$emit('close')
-    },
-    sent() {
-      this.$emit('sent')
-    },
-  },
+function sent() {
+  emit('sent')
 }
 </script>
 <style scoped lang="scss">

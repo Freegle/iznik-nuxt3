@@ -146,202 +146,199 @@
     </template>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useLocationStore } from '../stores/location'
 import { useMessageStore } from '../stores/message'
-import { ref } from '#imports'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
 import { useIsochroneStore } from '~/stores/isochrone'
+import { useAuthStore } from '~/stores/auth'
 
-export default {
-  components: {
-    PostCode,
-    SpinButton,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    addButton: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    last: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  addButton: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  async setup(props) {
-    const isochroneStore = useIsochroneStore()
-    const locationStore = useLocationStore()
-    const messageStore = useMessageStore()
-
-    const minutes = ref(20)
-    const transport = ref('Drive')
-    if (props.id) {
-      minutes.value = isochroneStore.get(props.id).minutes
-      transport.value = isochroneStore.get(props.id).transport
-    }
-
-    const isochrone = computed(() => {
-      if (props.id) {
-        return isochroneStore.get(props.id)
-      } else {
-        return {
-          minutes: minutes.value,
-          transport: transport.value,
-        }
-      }
-    })
-
-    const location = computed(() => {
-      if (isochrone.value.locationid) {
-        return locationStore.byId(isochrone.value.locationid)
-      }
-
-      return null
-    })
-
-    if (isochrone.value.locationid) {
-      await locationStore.fetchv2(isochrone.value.locationid)
-    }
-
-    const deleteLocation = async (callback) => {
-      await isochroneStore.delete({ id: props.id })
-      callback()
-    }
-
-    return {
-      isochroneStore,
-      locationStore,
-      messageStore,
-      minutes,
-      transport,
-      isochrone,
-      location,
-      deleteLocation,
-    }
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      minMinutes: 5,
-      maxMinutes: 45,
-      pc: null,
-      nickname: null,
-      step: 5,
-    }
-  },
-  computed: {
-    ...mapState(useIsochroneStore, ['list']),
-    pcname() {
-      return this.pc ? this.pc.name : ''
-    },
-    showAdd() {
-      let ret = false
+})
 
-      if (
-        !this.id &&
-        this.pc &&
-        this.minutes &&
-        this.transport &&
-        this.nickname
-      ) {
-        // Check the postcode doesn't already appear.
-        ret = true
+const emit = defineEmits(['add', 'cancel', 'added'])
 
-        Object.values(this.list).forEach((i) => {
-          if (i.location?.name === this.pc) {
-            ret = false
-          }
-        })
-      }
+const isochroneStore = useIsochroneStore()
+const locationStore = useLocationStore()
+const messageStore = useMessageStore()
 
-      return ret
-    },
-    nameState() {
-      if (this.id) {
-        return null
-      } else if (this.nickname) {
-        return true
-      } else if (!this.pcname) {
-        return null
-      } else {
-        // We're adding, we have a postcode but no name.
-        return false
-      }
-    },
-  },
-  watch: {
-    minutes(newVal) {
-      this.changeMinutes(newVal)
-    },
-  },
-  methods: {
-    increment() {
-      this.minutes = Math.min(this.minutes + this.step, this.maxMinutes)
-      this.changeMinutes(this.minutes)
-    },
-    decrement() {
-      this.minutes = Math.max(this.minutes - this.step, this.minMinutes)
-      this.changeMinutes(this.minutes)
-    },
-    changeMinutes(newVal) {
-      if (this.id) {
-        this.isochroneStore.edit({
-          id: this.id,
-          minutes: newVal,
-          transport: this.isochrone.transport,
-        })
+// Get the list from store
+const { list } = storeToRefs(isochroneStore)
 
-        if (this.me?.settings?.browseView) {
-          // This might change the count we should see
-          this.messageStore.fetchCount(this.me?.settings?.browseView, false)
-        }
-      }
+// Local refs
+const minutes = ref(20)
+const transport = ref('Drive')
+const minMinutes = ref(5)
+const maxMinutes = ref(45)
+const pc = ref(null)
+const nickname = ref(null)
+const step = ref(5)
 
-      this.minutes = newVal
-    },
-    changeTransport(type) {
-      if (this.id) {
-        this.isochroneStore.edit({
-          id: this.id,
-          minutes: this.minutes,
-          transport: type,
-        })
-      }
-
-      this.transport = type
-    },
-    selectPostcode(pc) {
-      this.pc = pc
-    },
-    clearPostcode() {
-      this.pc = null
-    },
-    async add() {
-      if (this.pc?.id) {
-        await this.isochroneStore.add({
-          minutes: this.minutes,
-          transport: this.transport,
-          locationid: this.pc.id,
-          nickname: this.nickname,
-        })
-
-        this.minutes = 25
-        this.transport = null
-        this.pc = null
-        this.nickname = null
-        this.$emit('added')
-      }
-    },
-  },
+// Initialize from store if id is provided
+if (props.id) {
+  minutes.value = isochroneStore.get(props.id).minutes
+  transport.value = isochroneStore.get(props.id).transport
 }
+
+// Computed properties
+const isochrone = computed(() => {
+  if (props.id) {
+    return isochroneStore.get(props.id)
+  } else {
+    return {
+      minutes: minutes.value,
+      transport: transport.value,
+    }
+  }
+})
+
+const location = computed(() => {
+  if (isochrone.value.locationid) {
+    return locationStore.byId(isochrone.value.locationid)
+  }
+
+  return null
+})
+
+const pcname = computed(() => {
+  return pc.value ? pc.value.name : ''
+})
+
+const showAdd = computed(() => {
+  let ret = false
+
+  if (
+    !props.id &&
+    pc.value &&
+    minutes.value &&
+    transport.value &&
+    nickname.value
+  ) {
+    // Check the postcode doesn't already appear.
+    ret = true
+
+    Object.values(list.value).forEach((i) => {
+      if (i.location?.name === pc.value) {
+        ret = false
+      }
+    })
+  }
+
+  return ret
+})
+
+const nameState = computed(() => {
+  if (props.id) {
+    return null
+  } else if (nickname.value) {
+    return true
+  } else if (!pcname.value) {
+    return null
+  } else {
+    // We're adding, we have a postcode but no name.
+    return false
+  }
+})
+
+// Fetch location data if needed
+if (isochrone.value.locationid) {
+  await locationStore.fetchv2(isochrone.value.locationid)
+}
+
+// Methods
+function increment() {
+  minutes.value = Math.min(minutes.value + step.value, maxMinutes.value)
+  changeMinutes(minutes.value)
+}
+
+function decrement() {
+  minutes.value = Math.max(minutes.value - step.value, minMinutes.value)
+  changeMinutes(minutes.value)
+}
+
+const me = computed(() => useAuthStore().user)
+
+function changeMinutes(newVal) {
+  if (props.id) {
+    isochroneStore.edit({
+      id: props.id,
+      minutes: newVal,
+      transport: isochrone.value.transport,
+    })
+
+    if (me.value?.settings?.browseView) {
+      // This might change the count we should see
+      messageStore.fetchCount(me.value.settings.browseView, false)
+    }
+  }
+
+  minutes.value = newVal
+}
+
+function changeTransport(type) {
+  if (props.id) {
+    isochroneStore.edit({
+      id: props.id,
+      minutes: minutes.value,
+      transport: type,
+    })
+  }
+
+  transport.value = type
+}
+
+function selectPostcode(postcode) {
+  pc.value = postcode
+}
+
+function clearPostcode() {
+  pc.value = null
+}
+
+async function add() {
+  if (pc.value?.id) {
+    await isochroneStore.add({
+      minutes: minutes.value,
+      transport: transport.value,
+      locationid: pc.value.id,
+      nickname: nickname.value,
+    })
+
+    minutes.value = 25
+    transport.value = null
+    pc.value = null
+    nickname.value = null
+    emit('added')
+  }
+}
+
+async function deleteLocation(callback) {
+  await isochroneStore.delete({ id: props.id })
+  callback()
+}
+
+// Watch for changes to minutes
+watch(minutes, (newVal) => {
+  changeMinutes(newVal)
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

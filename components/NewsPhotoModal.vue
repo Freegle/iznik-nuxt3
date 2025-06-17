@@ -26,44 +26,28 @@
     </template>
   </b-modal>
 </template>
-<script>
-import { useNewsfeedStore } from '../stores/newsfeed'
-import { useImageStore } from '../stores/image'
+<script setup>
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    newsfeedid: {
-      type: Number,
-      required: true,
-    },
-    src: {
-      type: String,
-      required: true,
-    },
+defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
-    const imageStore = useImageStore()
+  newsfeedid: {
+    type: Number,
+    required: true,
+  },
+  src: {
+    type: String,
+    required: true,
+  },
+})
 
-    const { modal, hide } = useOurModal()
+const { modal, hide } = useOurModal()
 
-    return {
-      newsfeedStore,
-      imageStore,
-      modal,
-      hide,
-    }
-  },
-  methods: {
-    brokenImage(event) {
-      event.target.src = '/placeholder.jpg'
-    },
-  },
+function brokenImage(event) {
+  event.target.src = '/placeholder.jpg'
 }
 </script>
 <style scoped lang="scss">

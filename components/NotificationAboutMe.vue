@@ -32,24 +32,23 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { setupNotification } from '../composables/useNotification'
+import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  components: {},
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
-  methods: {
-    showModal() {
-      this.$emit('showModal')
-    },
-  },
+})
+
+const emit = defineEmits(['showModal'])
+
+// Setup notification
+const { notification, notificationago } = await setupNotification(props.id)
+
+function showModal() {
+  emit('showModal')
 }
 </script>

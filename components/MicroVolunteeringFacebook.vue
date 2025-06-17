@@ -35,52 +35,55 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import { useNuxtApp } from '#app'
 
-export default {
-  props: {
-    id: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const microVolunteeringStore = useMicroVolunteeringStore()
+})
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+const emit = defineEmits(['next'])
 
-    return {
-      microVolunteeringStore,
-    }
-  },
-  computed: {
-    postId() {
-      return this.id.substring(this.id.indexOf('_') + 1)
-    },
-  },
-  methods: {
-    async skip() {
-      await this.microVolunteeringStore.respond({
-        facebook: this.id,
-        response: 'Reject',
-      })
+const microVolunteeringStore = useMicroVolunteeringStore()
 
-      this.considerNext()
-    },
-    async done() {
-      await this.microVolunteeringStore.respond({
-        facebook: this.id,
-        response: 'Approve',
-      })
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline case
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-      this.considerNext()
-    },
-  },
+const postId = computed(() => {
+  return props.id.substring(props.id.indexOf('_') + 1)
+})
+
+async function skip() {
+  await microVolunteeringStore.respond({
+    facebook: props.id,
+    response: 'Reject',
+  })
+
+  considerNext()
+}
+
+async function done() {
+  await microVolunteeringStore.respond({
+    facebook: props.id,
+    response: 'Approve',
+  })
+
+  considerNext()
+}
+
+function considerNext() {
+  emit('next')
+}
+
+function close() {
+  // Called when the social sharing dialog is closed
+  done()
 }
 </script>

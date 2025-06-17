@@ -331,20 +331,27 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
+import {
+  ref,
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  watch,
+} from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
-import { useUserStore } from '../stores/user'
 import { useMiscStore } from '../stores/misc'
 import SpinButton from './SpinButton'
 import { twem, untwem } from '~/composables/useTwem'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'
-
 import ChatButton from '~/components/ChatButton'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
 import { timeago } from '~/composables/useTimeFormat'
+import { useAuthStore } from '~/stores/auth'
 
 const NewsPhotoModal = defineAsyncComponent(() =>
   import('./NewsPhotoModal.vue')
@@ -364,291 +371,310 @@ const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
-export default {
-  name: 'NewsReply',
-  components: {
-    NewsPhotoModal,
-    NewsEditModal,
-    NewsReplies,
-    SpinButton,
-    OurUploader,
-    NewsLovesModal,
-    NewsUserInfo,
-    NewsHighlight,
-    ProfileModal,
-    ChatButton,
-    NewsPreviews,
-    ProfileImage,
-    ConfirmModal,
-    OurAtTa,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    threadhead: {
-      type: Number,
-      required: true,
-    },
-    scrollTo: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    depth: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
-    const userStore = useUserStore()
-    const miscStore = useMiscStore()
 
-    return {
-      userStore,
-      newsfeedStore,
-      miscStore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+  threadhead: {
+    type: Number,
+    required: true,
+  },
+  scrollTo: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  depth: {
+    type: Number,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['rendered'])
+
+// Stores
+const newsfeedStore = useNewsfeedStore()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+const me = computed(() => authStore.user)
+const myid = computed(() => me.value?.id)
+
+// Refs
+const at = ref(null)
+const replybox = ref(null)
+const showReplyBox = ref(false)
+const replyingTo = ref(null)
+const uploading = ref(false)
+const imageid = ref(null)
+const imageuid = ref(null)
+const imagemods = ref(null)
+const showDeleteModal = ref(false)
+const showLoveModal = ref(false)
+const showEditModal = ref(false)
+const hasBecomeVisible = ref(false)
+const isVisible = ref(false)
+const showProfileModal = ref(false)
+const showNewsPhotoModal = ref(false)
+const currentAtts = ref([])
+const bump = ref(0) // Used to force re-renders
+
+// Computed properties
+const enterNewLine = computed(() => {
+  return me.value?.settings?.enterNewLine
+})
+
+const userid = computed(() => {
+  return reply.value?.userid
+})
+
+const reply = computed(() => {
+  return newsfeedStore?.byId(props.id)
+})
+
+const replyaddedago = computed(() => {
+  return timeago(reply.value.added)
+})
+
+const tagusers = computed(() => {
+  return newsfeedStore?.tagusers?.map((u) => u.displayname)
+})
+
+const mod = computed(() => {
+  return (
+    me.value &&
+    (me.value.systemrole === 'Moderator' ||
+      me.value.systemrole === 'Admin' ||
+      me.value.systemrole === 'Support')
+  )
+})
+
+const admin = computed(() => {
+  return (
+    me.value &&
+    (me.value.systemrole === 'Admin' || me.value.systemrole === 'Support')
+  )
+})
+
+const chitChatMod = computed(() => {
+  return mod.value
+})
+
+const emessage = computed(() => {
+  return reply.value.message ? (twem(reply.value.message) + '').trim() : null
+})
+
+const threadUsers = computed(() => {
+  const ret = []
+  for (const user in tagusers.value) {
+    ret.push('@' + tagusers.value[user])
+  }
+  return ret
+})
+
+const scrollToThis = computed(() => {
+  return parseInt(props.scrollTo) === props.id
+})
+
+const getShowLovesLabel = computed(() => {
+  return (
+    'This comment has ' +
+    pluralize('love', reply.value.loves, true) +
+    '. Who loves this?'
+  )
+})
+
+// Watchers
+watch(
+  () => props.scrollTo,
+  (newVal) => {
+    if (parseInt(props.scrollTo) === props.id && scrollIntoView) {
+      scrollIntoView()
+    }
+  }
+)
+
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal.length > 0) {
+      uploading.value = false
+      imageid.value = newVal[0].id
+      imageuid.value = newVal[0].ouruid
+      imagemods.value = newVal[0].externalmods
     }
   },
-  data() {
-    return {
-      showReplyBox: false,
-      replyingTo: null,
-      replybox: null,
-      showAllReplies: false,
-      uploading: false,
-      imageid: null,
-      imageuid: null,
-      imagemods: null,
-      showDeleteModal: false,
-      showLoveModal: false,
-      showEditModal: false,
-      hasBecomeVisible: false,
-      isVisible: false,
-      showProfileModal: false,
-      showNewsPhotoModal: false,
-      currentAtts: [],
+  { deep: true }
+)
+
+// Lifecycle hooks
+onMounted(() => {
+  // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
+  // rendered.  We'll then come through the watch above.
+  emit('rendered', props.id)
+})
+
+// Methods
+function showInfo() {
+  showProfileModal.value = true
+}
+
+async function replyReply() {
+  replyingTo.value = props.id
+  showReplyBox.value = true
+
+  await nextTick()
+  if (replybox.value && replybox.value.$el) {
+    replybox.value.$el.focus()
+  }
+
+  // Reply with tag.
+  replybox.value = '@' + reply.value.displayname + ' '
+}
+
+async function sendReply(callback) {
+  // Encode up any emojis.
+  if (replybox.value && replybox.value.trim()) {
+    const msg = untwem(replybox.value)
+
+    await newsfeedStore.send(
+      msg,
+      replyingTo.value,
+      props.threadhead,
+      imageid.value
+    )
+
+    // New message will be shown because it's in the store and we have a computed property.
+
+    // Clear and hide the textarea now it's sent.
+    replybox.value = null
+    showReplyBox.value = false
+
+    // And any image id
+    imageid.value = null
+    imageuid.value = null
+    imagemods.value = null
+
+    // Force re-render. Store reactivity doesn't seem to work nicely with the nested reply structure we have.
+    bump.value++
+  }
+
+  if (typeof callback === 'function') {
+    callback()
+  }
+}
+
+function newlineReply() {
+  if (replybox.value && replybox.value.$el) {
+    const p = replybox.value.$el.selectionStart
+    if (p) {
+      replybox.value.$el.value =
+        replybox.value.$el.value.substring(0, p) +
+        '\n' +
+        replybox.value.$el.value.substring(p)
+      nextTick(() => {
+        replybox.value.$el.selectionStart = p + 1
+        replybox.value.$el.selectionEnd = p + 1
+      })
+    } else {
+      replybox.value.$el.value += '\n'
     }
-  },
-  computed: {
-    enterNewLine() {
-      return this.me?.settings?.enterNewLine
-    },
-    userid() {
-      return this.reply?.userid
-    },
-    reply() {
-      return this.newsfeedStore?.byId(this.id)
-    },
-    replyaddedago() {
-      return timeago(this.reply.added)
-    },
-    ids() {
-      return this.reply?.replies
-    },
-    tagusers() {
-      return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
-    },
-    mod() {
-      const me = this.me
-      return (
-        me &&
-        (me.systemrole === 'Moderator' ||
-          me.systemrole === 'Admin' ||
-          me.systemrole === 'Support')
-      )
-    },
-    emessage() {
-      return this.reply.message ? (twem(this.reply.message) + '').trim() : null
-    },
-    threadUsers() {
-      const ret = []
-      for (const user in this.tagusers) {
-        ret.push('@' + this.tagusers[user])
-      }
-      return ret
-    },
-    scrollToThis() {
-      return parseInt(this.scrollTo) === this.id
-    },
-    getShowLovesLabel() {
-      return (
-        'This comment has ' +
-        pluralize('love', this.reply.loves, true) +
-        '. Who loves this?'
-      )
-    },
-  },
-  watch: {
-    scrollTo(newVal) {
-      if (parseInt(this.scrollTo) === this.id && this.$el.scrollIntoView) {
-        this.scrollIntoView()
-      }
-    },
-    currentAtts: {
-      handler(newVal) {
-        this.uploading = false
+  }
+}
 
-        this.imageid = newVal[0].id
-        this.imageuid = newVal[0].ouruid
-        this.imagemods = newVal[0].externalmods
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    // This will get propogated up the stack so that we know if the reply to which we'd like to scroll has been
-    // rendered.  We'll then come through the watch above.
-    this.$emit('rendered', this.id)
-  },
-  methods: {
-    showInfo() {
-      this.showProfileModal = true
-    },
-    async replyReply() {
-      this.replyingTo = this.id
-      this.showReplyBox = true
+async function love(e) {
+  const el = e.target
+  el.classList.add('pulsate')
 
-      await this.$nextTick()
-      this.$refs.replybox.$el.focus()
+  await newsfeedStore.love(props.id, props.threadhead)
 
-      // Reply with tag.
-      this.replybox = '@' + this.reply.displayname + ' '
-    },
-    focusReply() {
-      this.$refs.replybox.focus()
-    },
-    focusedReply() {
-      this.replyingTo = this.id
-    },
-    async sendReply(callback) {
-      // Encode up any emojis.
-      if (this.replybox && this.replybox.trim()) {
-        const msg = untwem(this.replybox)
+  el.classList.remove('pulsate')
+}
 
-        await this.newsfeedStore.send(
-          msg,
-          this.replyingTo,
-          this.threadhead,
-          this.imageid
-        )
+async function unlove(e) {
+  const el = e.target
+  el.classList.add('pulsate')
 
-        // New message will be shown because it's in the store and we have a computed property.
+  await newsfeedStore.unlove(props.id, props.threadhead)
 
-        // Clear and hide the textarea now it's sent.
-        this.replybox = null
-        this.showReplyBox = false
+  el.classList.remove('pulsate')
+}
 
-        // And any image id
-        this.imageid = null
-        this.imageuid = null
-        this.imagemods = null
+async function unHideReply() {
+  await newsfeedStore.unhide(props.id)
+}
 
-        // Force re-render.  Store reactivity doesn't seem to work nicely with the nested reply structure we have.
-        this.bump++
-      }
+async function hideReply() {
+  await newsfeedStore.hide(props.id)
+}
 
-      if (typeof callback === 'function') {
-        callback()
-      }
-    },
-    newlineReply() {
-      const p = this.$refs.replybox.selectionStart
-      if (p) {
-        this.replybox =
-          this.replybox.substring(0, p) + '\n' + this.replybox.substring(p)
-        this.$nextTick(() => {
-          this.$refs.replybox.selectionStart = p + 1
-          this.$refs.replybox.selectionEnd = p + 1
-        })
-      } else {
-        this.replybox += '\n'
-      }
-    },
-    async love(e) {
-      const el = e.target
-      el.classList.add('pulsate')
+function deleteReply() {
+  showDeleteModal.value = true
+}
 
-      await this.newsfeedStore.love(this.id, this.threadhead)
+async function deleteConfirm() {
+  await newsfeedStore.delete(props.id, props.threadhead)
+}
 
-      el.classList.remove('pulsate')
-    },
-    async unlove(e) {
-      const el = e.target
-      el.classList.add('pulsate')
+function showEdit() {
+  showEditModal.value = true
+}
 
-      await this.newsfeedStore.unlove(this.id, this.threadhead)
+function showLove() {
+  showLoveModal.value = true
+}
 
-      el.classList.remove('pulsate')
-    },
-    async unHideReply() {
-      await this.newsfeedStore.unhide(this.id)
-    },
-    async hideReply() {
-      await this.newsfeedStore.hide(this.id)
-    },
-    deleteReply() {
-      this.showDeleteModal = true
-    },
-    async deleteConfirm() {
-      await this.newsfeedStore.delete(this.id, this.threadhead)
-    },
-    brokenImage(event) {
-      event.target.src = '/defaultprofile.png'
-    },
-    showEdit() {
-      this.showEditModal = true
-    },
-    showLove() {
-      this.showLoveModal = true
-    },
-    filterMatch(name, chunk) {
-      // Only match at start of string.
-      return name.toLowerCase().indexOf(chunk.toLowerCase()) === 0
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    scrollIntoView() {
-      const api = this.miscStore.apiCount
+function filterMatch(name, chunk) {
+  // Only match at start of string.
+  return name.toLowerCase().indexOf(chunk.toLowerCase()) === 0
+}
 
-      if (api) {
-        // Try later
-        setTimeout(this.scrollIntoView, 100)
-      } else {
-        // No outstanding requests, so we can scroll.
-        this.$el.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'nearest',
-        })
+function photoAdd() {
+  // Flag that we're uploading. This will trigger the render of the filepond instance and subsequently the
+  // init callback below.
+  uploading.value = true
+}
 
-        this.$nextTick(() => {
-          if (!this.isVisible) {
-            setTimeout(this.scrollIntoView, 200)
-          } else {
-            this.hasBecomeVisible = true
-          }
-        })
-      }
-    },
-    visibilityChanged(visible) {
-      if (parseInt(this.scrollTo) === this.id && !this.hasBecomeVisible) {
-        this.isVisible = visible
+function scrollIntoView() {
+  const api = miscStore.apiCount
 
-        if (!visible) {
-          this.scrollIntoView()
+  if (api) {
+    // Try later
+    setTimeout(scrollIntoView, 100)
+  } else {
+    // No outstanding requests, so we can scroll.
+    const el = document.getElementById(`newsreply-${props.id}`)
+    if (el) {
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest',
+      })
+
+      nextTick(() => {
+        if (!isVisible.value) {
+          setTimeout(scrollIntoView, 200)
+        } else {
+          hasBecomeVisible.value = true
         }
-      }
-    },
-    showReplyPhotoModal() {
-      this.showNewsPhotoModal = true
-    },
-  },
+      })
+    }
+  }
+}
+
+function visibilityChanged(visible) {
+  if (parseInt(props.scrollTo) === props.id && !hasBecomeVisible.value) {
+    isVisible.value = visible
+
+    if (!visible) {
+      scrollIntoView()
+    }
+  }
+}
+
+function showReplyPhotoModal() {
+  showNewsPhotoModal.value = true
 }
 </script>
 <style scoped lang="scss">

@@ -97,75 +97,68 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { buildHead } from '~/composables/useBuildHead'
 import { useRoute, useRouter } from '#imports'
+
 const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
 
-export default {
-  components: { ExternalLink },
-  setup() {
-    definePageMeta({
-      layout: 'login',
-    })
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const key = route.params.key
+definePageMeta({
+  layout: 'login',
+})
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Confirm Email',
-        'Confirm your email address so that we send mails to the right place.'
-      )
-    )
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const router = useRouter()
+const key = route.params.key
 
-    const authStore = useAuthStore()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Confirm Email',
+    'Confirm your email address so that we send mails to the right place.'
+  )
+)
 
-    return {
-      authStore,
-      key,
-    }
-  },
-  data() {
-    return {
-      succeeded: false,
-      failed: false,
-      resent: false,
-      email: null,
-    }
-  },
-  async mounted() {
-    this.email = this.me?.email
+const authStore = useAuthStore()
 
-    try {
-      await this.authStore.saveAndGet({
-        key: this.key,
-      })
+// State
+const succeeded = ref(false)
+const failed = ref(false)
+const resent = ref(false)
+const email = ref(null)
 
-      this.succeeded = true
-    } catch (e) {
-      this.failed = true
-    }
-  },
-  methods: {
-    closed() {
-      const router = useRouter()
-      router.push('/chitchat')
-    },
-    async resend() {
-      const data = await this.authStore.saveEmail({
-        email: this.me.email,
-      })
-
-      if (data && (data.ret === 0 || data.ret === 10)) {
-        this.resent = true
-      }
-    },
-  },
+// Methods
+const closed = () => {
+  router.push('/chitchat')
 }
+
+const resend = async () => {
+  const data = await authStore.saveEmail({
+    email: authStore.me.email,
+  })
+
+  if (data && (data.ret === 0 || data.ret === 10)) {
+    resent.value = true
+  }
+}
+
+onMounted(async () => {
+  email.value = authStore.me?.email
+
+  try {
+    await authStore.saveAndGet({
+      key,
+    })
+
+    succeeded.value = true
+  } catch (e) {
+    failed.value = true
+  }
+})
 </script>

@@ -3,20 +3,13 @@
     <div></div>
   </client-only>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
+import { useRoute, onMounted } from '#imports'
 
-export default {
-  setup() {
-    const route = useRoute()
-    const id = route.params.id
+const route = useRoute()
+const id = route.params.id
 
-    return {
-      id,
-    }
-  },
-  mounted() {
-    window.location = 'https://freegle.in/' + this.id
-  },
-}
+onMounted(() => {
+  window.location = 'https://freegle.in/' + id
+})
 </script>

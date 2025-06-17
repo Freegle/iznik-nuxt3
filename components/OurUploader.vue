@@ -38,6 +38,7 @@
   </client-only>
 </template>
 <script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
 import Uppy from '@uppy/core'
@@ -49,6 +50,7 @@ import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
 import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
+import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
 import { useMiscStore } from '~/stores/misc'
 

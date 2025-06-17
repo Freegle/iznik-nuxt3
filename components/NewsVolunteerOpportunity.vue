@@ -102,76 +102,89 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useVolunteeringStore } from '../stores/volunteering'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
-import NewsBase from '~/components/NewsBase'
+import { timeago } from '~/composables/useTimeFormat'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['focus-comment', 'hide'])
+
 const VolunteerOpportunityModal = defineAsyncComponent(() =>
   import('./VolunteerOpportunityModal')
 )
 
-export default {
-  components: {
-    VolunteerOpportunityModal,
-    NewsLoveComment,
-    ProfileImage,
-  },
-  extends: NewsBase,
-  async setup(props, ctx) {
-    const volunteeringStore = useVolunteeringStore()
-    const newsfeedStore = useNewsfeedStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
+// Store setup
+const volunteeringStore = useVolunteeringStore()
+const newsfeedStore = useNewsfeedStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
 
-    const newsfeed = newsfeedStore.byId(props.id)
-    await userStore.fetch(newsfeed.userid)
+// Reactive state
+const showAddOpportunity = ref(false)
+const showMoreInfo = ref(false)
 
-    try {
-      const volunteering = await volunteeringStore.fetch(
-        newsfeed.volunteeringid
-      )
+// Computed properties
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
 
-      await volunteering.groups.forEach(async (groupid) => {
-        await groupStore.fetch(groupid)
-      })
-    } catch (e) {
-      // Most likely doesn't exist.
-      ctx.emit('hide')
+const user = computed(() => {
+  if (newsfeed.value?.userid) {
+    return userStore.byId(newsfeed.value.userid)
+  }
+  return null
+})
+
+const volunteering = computed(() => {
+  return volunteeringStore?.byId(newsfeed.value?.volunteeringid)
+})
+
+const addedago = computed(() => {
+  return timeago(newsfeed.value?.added)
+})
+
+// Methods
+function moreInfo() {
+  showMoreInfo.value = true
+}
+
+function addOpportunity() {
+  showAddOpportunity.value = true
+}
+
+function group(groupid) {
+  return groupStore?.get(groupid)
+}
+
+// Fetch data
+try {
+  const currentNewsfeed = newsfeedStore.byId(props.id)
+  await userStore.fetch(currentNewsfeed.userid)
+
+  const volunteeringData = await volunteeringStore.fetch(
+    currentNewsfeed.volunteeringid
+  )
+
+  if (volunteeringData?.groups) {
+    for (const groupid of volunteeringData.groups) {
+      await groupStore.fetch(groupid)
     }
-
-    return {
-      volunteeringStore,
-      newsfeedStore,
-      userStore,
-      groupStore,
-    }
-  },
-  data: function () {
-    return {
-      showAddOpportunity: false,
-      showMoreInfo: false,
-    }
-  },
-  computed: {
-    volunteering() {
-      return this.volunteeringStore?.byId(this.newsfeed.volunteeringid)
-    },
-  },
-  methods: {
-    moreInfo() {
-      this.showMoreInfo = true
-    },
-    addOpportunity() {
-      this.showAddOpportunity = true
-    },
-    group(groupid) {
-      return this.groupStore?.get(groupid)
-    },
-  },
+  }
+} catch (e) {
+  // Most likely doesn't exist.
+  emit('hide')
 }
 </script>
 <style scoped lang="scss">

@@ -13,27 +13,21 @@
     </b-col>
   </b-row>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import { useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import DonationThank from '~/components/DonationThank.vue'
 
-export default {
-  components: {
-    DonationThank,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Donate to Freegle',
-        "We're free to use, but not free to run.  Can you help us keep going?"
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Donate to Freegle',
+    "We're free to use, but not free to run.  Can you help us keep going?"
+  )
+)
 </script>

@@ -81,171 +81,135 @@
     </div>
   </div>
 </template>
-<script>
-import { useReplyStore } from '../stores/reply'
+<script setup>
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import MessageReplyInfo from './MessageReplyInfo'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import MessagePromised from '~/components/MessagePromised'
 import MessageActions from '~/components/MessageActions'
 import MessageTextBody from '~/components/MessageTextBody'
-
 import MessageTag from '~/components/MessageTag'
 import MessageItemLocation from '~/components/MessageItemLocation'
 import MessageAttachments from '~/components/MessageAttachments'
+import { useMe } from '~/composables/useMe'
 
-const MessageHistoryExpanded = () =>
+const MessageHistoryExpanded = defineAsyncComponent(() =>
   import('~/components/MessageHistoryExpanded')
+)
 
-export default {
-  components: {
-    MessageTag,
-    MessageTextBody,
-    MessageActions,
-    MessagePromised,
-    MessageItemLocation,
-    MessageAttachments,
-    MessageReplyInfo,
-    MessageHistoryExpanded,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    showMap: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showAd: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    hideClose: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    replyable: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    actions: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    adUnitPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    adId: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    inModal: {
-      type: Boolean,
-      default: false,
-    },
+  showMap: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  setup(props) {
-    const messageStore = useMessageStore()
-    const miscStore = useMiscStore()
+  showAd: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  hideClose: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  replyable: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  actions: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  adUnitPath: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  adId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  inModal: {
+    type: Boolean,
+    default: false,
+  },
+})
 
-    return { messageStore, miscStore }
-  },
-  data() {
-    return {
-      replied: false,
-      adRendered: false,
-      noAd: false,
+const emit = defineEmits(['zoom', 'close'])
+
+const messageStore = useMessageStore()
+const miscStore = useMiscStore()
+const { me } = useMe()
+
+// Data
+const replied = ref(false)
+const adRendered = ref(false)
+const noAd = ref(false)
+
+// Computed
+const breakpoint = computed(() => {
+  return miscStore.breakpoint
+})
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const gotAttachments = computed(() => {
+  return (
+    message.value &&
+    message.value.attachments &&
+    message.value.attachments?.length
+  )
+})
+
+const validPosition = computed(() => {
+  return message.value.lat || message.value.lng
+})
+
+const home = computed(() => {
+  let ret = null
+
+  if (me.value?.lat || me.value?.lng) {
+    ret = {
+      lat: me.value.lat,
+      lng: me.value.lng,
+    }
+  }
+
+  return ret
+})
+
+// Watch
+watch(
+  breakpoint,
+  (newVal) => {
+    // The ad is only shown on xs and sm, so for others we need to pretend it has been.
+    if (newVal !== 'xs' && newVal !== 'sm') {
+      adRendered.value = true
     }
   },
-  computed: {
-    breakpoint() {
-      const store = useMiscStore()
-      return store.breakpoint
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    gotAttachments() {
-      return (
-        this.message &&
-        this.message.attachments &&
-        this.message.attachments?.length
-      )
-    },
-    validPosition() {
-      return this.message.lat || this.message.lng
-    },
-    home() {
-      let ret = null
+  { immediate: true }
+)
 
-      if (this.me?.lat || this.me?.lng) {
-        ret = {
-          lat: this.me.lat,
-          lng: this.me.lng,
-        }
-      }
+// Methods
+function sent() {
+  emit('close')
+  replied.value = true
+}
 
-      return ret
-    },
-    replyToSend() {
-      let ret = null
-
-      if (this.me) {
-        const replyStore = useReplyStore()
-        ret = replyStore.state
-      }
-
-      return ret
-    },
-    position() {
-      let ret = null
-
-      if (this.message) {
-        if (this.message.location) {
-          // This is what we put in for message submitted on FD.
-          ret = this.message.location
-        } else if (this.message.lat || this.message.lng) {
-          // This happens for TN messages
-          ret = {
-            lat: this.message.lat,
-            lng: this.message.lng,
-          }
-        }
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    breakpoint: {
-      immediate: true,
-      handler(newVal) {
-        // The ad is only shown on xs and sm, so for others we need to pretend it has been.
-        if (newVal !== 'xs' && newVal !== 'sm') {
-          this.adRendered = true
-        }
-      },
-    },
-  },
-  methods: {
-    sent() {
-      this.$emit('close')
-      this.replied = true
-    },
-    rendered(shown) {
-      this.adRendered = true
-      this.noAd = !shown
-    },
-  },
+function rendered(shown) {
+  adRendered.value = true
+  noAd.value = !shown
 }
 </script>
 <style scoped lang="scss">

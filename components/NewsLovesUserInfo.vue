@@ -39,59 +39,58 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import pluralize from 'pluralize'
 import { useUserStore } from '../stores/user'
+import ProfileImage from './ProfileImage'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const userStore = useUserStore()
+})
 
-    await userStore.fetch(props.id)
+const emit = defineEmits(['goto'])
 
-    // Get public location.  Don't wait, as a bit slow.
-    userStore.fetchPublicLocation(props.id)
+const userStore = useUserStore()
 
-    return {
-      userStore,
-    }
-  },
-  computed: {
-    user() {
-      return this.userStore?.byId(this.id)
-    },
-    publicLocation() {
-      return this.id ? this.userStore?.publicLocationById(this.id) : null
-    },
-    openoffers() {
-      let ret = null
+// Initialize - fetch user data
+await userStore.fetch(props.id)
 
-      if (this.user.info) {
-        ret = pluralize('OFFER', this.user.info.openoffers, true)
-      }
+// Get public location. Don't wait, as a bit slow.
+userStore.fetchPublicLocation(props.id)
 
-      return ret
-    },
-    openwanted() {
-      let ret = null
+const user = computed(() => {
+  return userStore?.byId(props.id)
+})
 
-      if (this.user.info) {
-        ret = pluralize('WANTED', this.user.info.openwanteds, true)
-      }
+const publicLocation = computed(() => {
+  return props.id ? userStore?.publicLocationById(props.id) : null
+})
 
-      return ret
-    },
-  },
-  methods: {
-    goto(e) {
-      this.$emit('goto')
-    },
-  },
+const openoffers = computed(() => {
+  let ret = null
+
+  if (user.value?.info) {
+    ret = pluralize('OFFER', user.value.info.openoffers, true)
+  }
+
+  return ret
+})
+
+const openwanted = computed(() => {
+  let ret = null
+
+  if (user.value?.info) {
+    ret = pluralize('WANTED', user.value.info.openwanteds, true)
+  }
+
+  return ret
+})
+
+function goto(e) {
+  emit('goto')
 }
 </script>

@@ -289,7 +289,7 @@
                   :max-zoom="maxZoom"
                   @ready="idle"
                 >
-                  <l-tile-layer :url="osmtile" :attribution="attribution" />
+                  <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <GroupMarker
                     v-for="g in markers"
                     :key="'marker-' + g.id + '-' + zoom"
@@ -389,24 +389,32 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 // There are a bunch of icons we need only on this page.  By requiring them here we avoid
 // requiring them in the vue-awesome plugin.  That makes them available everywhere - but
 // increases the bundle size.  Putting them here allows better bundling.
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import { useRoute } from 'vue-router'
 import Wkt from 'wicket'
-import OurDatePicker from '../../../components/OurDatePicker'
+import {
+  ref,
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  useRoute,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
+import OurDatePicker from '~/components/OurDatePicker.vue'
 import { loadLeaflet, attribution, osmtile } from '~/composables/useMap'
 import { useAuthorityStore } from '~/stores/authority'
 import { MAX_MAP_ZOOM } from '~/constants'
-import StatsImpact from '~/components/StatsImpact'
+import StatsImpact from '~/components/StatsImpact.vue'
 import { buildHead } from '~/composables/useBuildHead'
 import { useStatsStore } from '~/stores/stats'
 
 const GroupMarker = defineAsyncComponent(() =>
-  import('~/components/GroupMarker')
+  import('~/components/GroupMarker.vue')
 )
 
 // Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
@@ -414,660 +422,680 @@ const GroupMarker = defineAsyncComponent(() =>
 const BENEFIT_PER_TONNE = 711
 const CO2_PER_TONNE = 0.51
 
-export default {
-  components: {
-    OurDatePicker,
-    GroupMarker,
-    StatsImpact,
-    GChart,
+// Setup stores and route
+const statsStore = useStatsStore()
+const authorityStore = useAuthorityStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const map = ref(null)
+const mapcont = ref(null)
+
+// Set page head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Statistics',
+    'See stats and graphs for Freegle'
+  )
+)
+
+// Data properties
+const id = route.params.id
+const maxZoom = MAX_MAP_ZOOM
+const zoom = ref(5)
+const tables = ref(false)
+const startDate = ref(null)
+const endDate = ref(null)
+const authority = ref(null)
+const stats = ref(null)
+const groupcount = ref(null)
+const addedPolygons = ref(false)
+
+// No animations as we want the SSR to return the whole thing.
+const weightOptions = {
+  interpolateNulls: false,
+  legend: { position: 'none' },
+  chartArea: { width: '80%', height: '80%' },
+  bar: { groupWidth: '100%' },
+  vAxis: { viewWindow: { min: 0 } },
+  hAxis: {
+    format: 'MMM yyyy',
   },
-  setup() {
-    const statsStore = useStatsStore()
-    const authorityStore = useAuthorityStore()
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+  series: {
+    0: { color: 'green' },
+  },
+}
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Statistics',
-        'See stats and graphs for Freegle'
-      )
-    )
+const memberOptions = {
+  interpolateNulls: false,
+  legend: { position: 'none' },
+  chartArea: { width: '80%', height: '80%' },
+  vAxis: { viewWindow: { min: 0 } },
+  hAxis: {
+    format: 'MMM yyyy',
+  },
+  series: {
+    0: { color: 'blue' },
+  },
+}
 
-    return {
-      statsStore,
-      authorityStore,
-      osmtile: osmtile(),
-      attribution: attribution(),
+const fields = [
+  {
+    key: 'location',
+    label: 'Community Location',
+  },
+  {
+    key: 'members',
+    label: 'Membership',
+  },
+  {
+    key: 'monthly',
+    label: 'Average Kgs Reused Monthly',
+  },
+]
+
+// Computed properties
+const mapWidth = computed(() => {
+  const contWidth = mapcont.value?.$el.clientWidth
+  return contWidth
+})
+
+const mapHeight = computed(() => {
+  let height = 0
+
+  if (process.client) {
+    height = Math.floor(window.innerHeight / 2)
+    height = height < 200 ? 200 : height
+  }
+
+  return height
+})
+
+const totalWeightUnRounded = computed(() => {
+  let total = 0
+
+  for (const groupid in stats.value) {
+    const overlapValue = overlap(groupid)
+    const stat = stats.value[groupid]
+    for (const w of stat.Weights) {
+      total += w.count * overlapValue
     }
-  },
-  data() {
-    return {
-      maxZoom: MAX_MAP_ZOOM,
-      zoom: 5,
-      tables: false,
-      startDate: null,
-      endDate: null,
-      authority: null,
-      stats: null,
-      groupcount: null,
-      // No animations as we want the SSR to return the whole thing.
-      weightOptions: {
-        interpolateNulls: false,
-        legend: { position: 'none' },
-        chartArea: { width: '80%', height: '80%' },
-        bar: { groupWidth: '100%' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'green' },
-        },
-      },
-      memberOptions: {
-        interpolateNulls: false,
-        legend: { position: 'none' },
-        chartArea: { width: '80%', height: '80%' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'blue' },
-        },
-      },
-      fields: [
-        {
-          key: 'location',
-          label: 'Community Location',
-        },
-        {
-          key: 'members',
-          label: 'Membership',
-        },
-        {
-          key: 'monthly',
-          label: 'Average Kgs Reused Monthly',
-        },
-      ],
+  }
+
+  return total
+})
+
+const totalWeight = computed(() => {
+  return Math.round(totalWeightUnRounded.value / 100) / 10
+})
+
+// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
+// https://wrap.org.uk/resources/tool/benefits-reuse-tool
+const totalBenefit = computed(() => {
+  return (totalWeightUnRounded.value * BENEFIT_PER_TONNE) / 1000
+})
+
+const totalCO2 = computed(() => {
+  return (totalWeightUnRounded.value * CO2_PER_TONNE) / 1000
+})
+
+const totalGifts = computed(() => {
+  let count = 0
+
+  for (const groupid in stats.value) {
+    const overlapValue = overlap(groupid)
+    const stat = stats.value[groupid]
+    const outcomes = stat.OutcomesPerMonth
+
+    const start = dayjs(startDate.value)
+    const end = dayjs(endDate.value)
+
+    for (const outcome of outcomes) {
+      const m = dayjs(outcome.date + '-01')
+
+      if (!m.isBefore(start) && !m.isAfter(end)) {
+        count += outcome.count * overlapValue
+      }
     }
-  },
-  computed: {
-    mapWidth() {
-      const contWidth = this.$refs.mapcont?.$el.clientWidth
-      return contWidth
-    },
-    mapHeight() {
-      let height = 0
+  }
 
-      if (process.client) {
-        height = Math.floor(window.innerHeight / 2)
-        height = height < 200 ? 200 : height
+  return Math.round(count)
+})
+
+const weightByMonth = computed(() => {
+  const bymonth = []
+
+  for (const groupid in stats.value) {
+    const overlapValue = overlap(groupid)
+    const stat = stats.value[groupid]
+    const weight = stat.Weights
+
+    for (const a of weight) {
+      const mon = a.date.substring(0, 7)
+
+      if (!bymonth[mon]) {
+        bymonth[mon] = 0
       }
 
-      return height
-    },
-    totalWeightUnRounded() {
-      let total = 0
+      bymonth[mon] += a.count * overlapValue
+    }
+  }
 
-      for (const groupid in this.stats) {
-        const overlap = this.overlap(groupid)
-        const stat = this.stats[groupid]
-        for (const w of stat.Weights) {
-          total += w.count * overlap
+  return bymonth
+})
+
+const weightData = computed(() => {
+  const ret = [['Date', 'Count']]
+  for (const mon in weightByMonth.value) {
+    ret.push([new Date(mon + '-01'), weightByMonth.value[mon]])
+  }
+
+  return ret
+})
+
+const memberData = computed(() => {
+  const ret = [['Date', 'Count']]
+  const dates = []
+
+  for (const groupid in stats.value) {
+    const overlapValue = overlap(groupid)
+    const stat = stats.value[groupid]
+    const members = stat.ApprovedMemberCount
+
+    if (members) {
+      for (const a of members) {
+        if (!dates[a.date]) {
+          dates[a.date] = 0
+        }
+
+        dates[a.date] += Math.round(parseInt(a.count) * overlapValue)
+      }
+    }
+  }
+
+  for (const date in dates) {
+    ret.push([new Date(date), Math.round(dates[date])])
+  }
+
+  return ret
+})
+
+const totalMembers = computed(() => {
+  let ret = 0
+  const data = memberData.value
+  if (data && data.length > 1) {
+    const last = [...data].pop()
+    ret = last[1]
+  }
+  return ret
+})
+
+const range = computed(() => {
+  const start = dayjs(startDate.value).format('MMM YY').toUpperCase()
+  const end = dayjs(endDate.value).format('MMM YY').toUpperCase()
+  return start + ' - ' + end
+})
+
+const monthsCovered = computed(() => {
+  const ret = dayjs(endDate.value).diff(dayjs(startDate.value), 'months')
+  return ret + 1
+})
+
+const start = computed(() => {
+  const start = dayjs(startDate.value).format('MMM YY').toUpperCase()
+  return start
+})
+
+const end = computed(() => {
+  const end = dayjs(endDate.value).format('MMM YY').toUpperCase()
+  return end
+})
+
+const someoverlap = computed(() => {
+  let someoverlaps = false
+
+  if (stats.value) {
+    const groups = Object.values(stats.value)
+
+    if (groups) {
+      for (const ix in groups) {
+        const group = groups[ix]
+        if (group.overlap < 1) {
+          someoverlaps = true
         }
       }
+    }
+  }
 
-      return total
-    },
-    totalWeight() {
-      return Math.round(this.totalWeightUnRounded / 100) / 10
-    },
-    // Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
-    // https://wrap.org.uk/resources/tool/benefits-reuse-tool
-    totalBenefit() {
-      return (this.totalWeightUnRounded * BENEFIT_PER_TONNE) / 1000
-    },
-    totalCO2() {
-      return (this.totalWeightUnRounded * CO2_PER_TONNE) / 1000
-    },
-    totalGifts() {
-      let count = 0
+  return someoverlaps
+})
 
-      for (const groupid in this.stats) {
-        const overlap = this.overlap(groupid)
-        const stat = this.stats[groupid]
-        const outcomes = stat.OutcomesPerMonth
+const items = computed(() => {
+  const ret = []
 
-        const start = dayjs(this.startDate)
-        const end = dayjs(this.endDate)
+  if (stats.value) {
+    const groups = Object.values(stats.value)
+    groups.sort(function (a, b) {
+      return b.avpermonth - a.avpermonth
+    })
 
-        for (const outcome of outcomes) {
-          const m = dayjs(outcome.date + '-01')
+    for (const ix in groups) {
+      const group = groups[ix]
 
-          if (!m.isBefore(start) && !m.isAfter(end)) {
-            count += outcome.count * overlap
-          }
-        }
-      }
-
-      return Math.round(count)
-    },
-    weightByMonth() {
-      const bymonth = []
-
-      for (const groupid in this.stats) {
-        const overlap = this.overlap(groupid)
-        const stat = this.stats[groupid]
-        const weight = stat.Weights
-
-        for (const a of weight) {
-          const mon = a.date.substring(0, 7)
-
-          if (!bymonth[mon]) {
-            bymonth[mon] = 0
-          }
-
-          bymonth[mon] += a.count * overlap
-        }
-      }
-
-      return bymonth
-    },
-    weightData() {
-      const ret = [['Date', 'Count']]
-      for (const mon in this.weightByMonth) {
-        ret.push([new Date(mon + '-01'), this.weightByMonth[mon]])
-      }
-
-      return ret
-    },
-    memberData() {
-      const ret = [['Date', 'Count']]
-      const dates = []
-
-      for (const groupid in this.stats) {
-        const overlap = this.overlap(groupid)
-        const stat = this.stats[groupid]
-        const members = stat.ApprovedMemberCount
-
-        if (members) {
-          for (const a of members) {
-            if (!dates[a.date]) {
-              dates[a.date] = 0
-            }
-
-            dates[a.date] += Math.round(parseInt(a.count) * overlap)
-          }
-        }
-      }
-
-      for (const date in dates) {
-        ret.push([new Date(date), Math.round(dates[date])])
-      }
-
-      return ret
-    },
-    totalMembers() {
-      let ret = 0
-      const data = this.memberData
-      if (data) {
-        const last = data.pop()
-        ret = last[1]
-      }
-      return ret
-    },
-    range() {
-      const start = dayjs(this.startDate).format('MMM YY').toUpperCase()
-      const end = dayjs(this.endDate).format('MMM YY').toUpperCase()
-      return start + ' - ' + end
-    },
-    monthsCovered() {
-      const ret = dayjs(this.endDate).diff(dayjs(this.startDate), 'months')
-      return ret + 1
-    },
-    start() {
-      const start = dayjs(this.startDate).format('MMM YY').toUpperCase()
-      return start
-    },
-    end() {
-      const end = dayjs(this.endDate).format('MMM YY').toUpperCase()
-      return end
-    },
-    someoverlap() {
-      let someoverlaps = false
-
-      if (this.stats) {
-        const groups = Object.values(this.stats)
-
-        if (groups) {
-          for (const ix in groups) {
-            const group = groups[ix]
-            if (group.overlap < 1) {
-              someoverlaps = true
-            }
-          }
-        }
-      }
-
-      return someoverlaps
-    },
-    items() {
-      const ret = []
-
-      if (this.stats) {
-        const groups = Object.values(this.stats)
-        groups.sort(function (a, b) {
-          return b.avpermonth - a.avpermonth
-        })
-
-        for (const ix in groups) {
-          const group = groups[ix]
-
-          if (group.ApprovedMemberCount.length > 0) {
-            ret.push({
-              location:
-                '<a class="black" href="/explore/' +
-                group.group.nameshort +
-                '">' +
-                group.group.namedisplay +
-                (group.overlap < 1 ? ' *' : '') +
-                '</a>',
-              members:
+      if (group.ApprovedMemberCount.length > 0) {
+        ret.push({
+          location:
+            '<a class="black" href="/explore/' +
+            group.group.nameshort +
+            '">' +
+            group.group.namedisplay +
+            (group.overlap < 1 ? ' *' : '') +
+            '</a>',
+          members:
+            Math.round(
+              group.ApprovedMemberCount[group.ApprovedMemberCount.length - 1]
+                .count * group.overlap
+            ).toLocaleString() +
+            (group.overlap < 1
+              ? ' (<span class="text-muted small">of ' +
                 Math.round(
                   group.ApprovedMemberCount[
                     group.ApprovedMemberCount.length - 1
-                  ].count * group.overlap
+                  ].count
                 ).toLocaleString() +
-                (group.overlap < 1
-                  ? ' (<span class="text-muted small">of ' +
-                    Math.round(
-                      group.ApprovedMemberCount[
-                        group.ApprovedMemberCount.length - 1
-                      ].count
-                    ).toLocaleString() +
-                    ')</span>'
-                  : ''),
-              monthly:
-                Math.round(group.avpermonth * group.overlap) +
-                (group.overlap < 1
-                  ? ' (<span class="text-muted small">of ' +
-                    Math.round(group.avpermonth) +
-                    ')</span>'
-                  : ''),
-            })
-          }
-        }
-      }
-
-      return ret
-    },
-    markers() {
-      const ret = []
-
-      for (const groupid in this.stats) {
-        ret.push(this.stats[groupid].group)
-      }
-
-      return ret
-    },
-    last3Months() {
-      const now = dayjs()
-      const end = dayjs(this.endDate)
-
-      if (end.isSame(now, 'month')) {
-        // We're in the current month.  Want to start from last month, as that is complete.
-        return [
-          now.subtract(3, 'month').startOf('month'),
-          now.subtract(2, 'month').startOf('month'),
-          now.subtract(1, 'month').startOf('month'),
-        ]
-      } else {
-        // Start from the supplied month.
-        return [
-          end.subtract(2, 'month').startOf('month'),
-          end.subtract(1, 'month').startOf('month'),
-          end.startOf('month'),
-        ]
-      }
-    },
-    last3MonthsLabels() {
-      return [
-        this.last3Months[0].format('MMM-YY'),
-        this.last3Months[1].format('MMM-YY'),
-        this.last3Months[2].format('MMM-YY'),
-      ]
-    },
-    last3MonthsMembersTotal() {
-      const ret = []
-
-      this.memberData.forEach((data) => {
-        if (typeof data[0] !== 'string') {
-          for (let mon = 2; mon >= 0; mon--) {
-            // Need to use isSame(,'day') to handle DST.
-            if (this.last3Months[mon].isSame(dayjs(data[0]), 'day')) {
-              ret[mon] = data[1]
-            }
-          }
-        }
-      })
-
-      return ret
-    },
-    last3MonthsUsersTotal() {
-      if (!this.last3MonthsMembersTotal) {
-        return [0, 0, 0]
-      }
-
-      // We use a systemwide average of 70.5%.
-      const factor = 0.705
-
-      return [
-        Math.round(this.last3MonthsMembersTotal[0] * factor),
-        Math.round(this.last3MonthsMembersTotal[1] * factor),
-        Math.round(this.last3MonthsMembersTotal[2] * factor),
-      ]
-    },
-    last3MonthsKgsTotal() {
-      const ret = []
-
-      for (const datamon in this.weightByMonth) {
-        for (let mon = 2; mon >= 0; mon--) {
-          if (this.last3Months[mon].format('YYYY-MM') === datamon) {
-            ret[mon] = Math.round(this.weightByMonth[datamon])
-          }
-        }
-      }
-
-      return ret
-    },
-    last3MonthsBenefitTotal() {
-      return [
-        Math.round((this.last3MonthsKgsTotal[0] * BENEFIT_PER_TONNE) / 1000),
-        Math.round((this.last3MonthsKgsTotal[1] * BENEFIT_PER_TONNE) / 1000),
-        Math.round((this.last3MonthsKgsTotal[2] * BENEFIT_PER_TONNE) / 1000),
-      ]
-    },
-    last3MonthsCO2Total() {
-      return [
-        Math.round((this.last3MonthsKgsTotal[0] * CO2_PER_TONNE) / 10) / 100,
-        Math.round((this.last3MonthsKgsTotal[1] * CO2_PER_TONNE) / 10) / 100,
-        Math.round((this.last3MonthsKgsTotal[2] * CO2_PER_TONNE) / 10) / 100,
-      ]
-    },
-    last3MonthsGiftsTotal() {
-      const ret = []
-
-      for (let mon = 2; mon >= 0; mon--) {
-        let count = 0
-
-        for (const groupid in this.stats) {
-          const overlap = this.overlap(groupid)
-          const stat = this.stats[groupid]
-          const outcomes = stat.OutcomesPerMonth
-          let thisone = 0
-
-          const start = this.last3Months[mon].startOf('month')
-          const end = this.last3Months[mon].endOf('month')
-
-          for (const outcome of outcomes) {
-            const m = dayjs(outcome.date + '-01')
-
-            if (!m.isBefore(start) && !m.isAfter(end)) {
-              thisone += outcome.count * overlap
-              count += thisone
-            }
-          }
-        }
-
-        ret[mon] = Math.round(count)
-      }
-
-      return ret
-    },
-    last3MonthsGroups() {
-      const groups = Object.values(this.stats)
-      groups.sort(function (a, b) {
-        return a.group.namedisplay
-          .toLowerCase()
-          .localeCompare(b.group.namedisplay.toLowerCase())
-      })
-
-      const ret = []
-
-      for (const ix in groups) {
-        const group = groups[ix]
-        const thisone = [
-          group.group.namedisplay + (group.overlap < 1 ? ' *' : ''),
-        ]
-
-        if (group.ApprovedMemberCount.length > 0) {
-          for (let mon = 2; mon >= 0; mon--) {
-            const end = this.last3Months[mon].endOf('month')
-            for (let i = 0; i < group.ApprovedMemberCount.length; i++) {
-              const thisdate = dayjs(group.ApprovedMemberCount[i].date).endOf(
-                'day'
-              )
-
-              // Sometimes there are gaps in data.  We know the stats are in ascending date order.  So just keep
-              // overwriting so that we get the latest.
-              if (end.format('YYYY-MMM') === thisdate.format('YYYY-MMM')) {
-                thisone[mon + 1] = group.ApprovedMemberCount[i].count
-              }
-            }
-          }
-
-          thisone[4] = thisone[3] - thisone[1]
-
-          for (let i = 1; i < 5; i++) {
-            if (thisone[i]) {
-              thisone[i] = thisone[i].toLocaleString()
-            }
-          }
-        }
-
-        if (group.Weights.length > 0) {
-          for (let mon = 2; mon >= 0; mon--) {
-            const end = this.last3Months[mon].endOf('month')
-            thisone[mon + 5] = 0
-
-            for (let i = 0; i < group.Weights.length; i++) {
-              const thisdate = dayjs(group.ApprovedMemberCount[i].date).endOf(
-                'day'
-              )
-
-              if (end.format('YYYY-MMM') === thisdate.format('YYYY-MMM')) {
-                thisone[mon + 5] += group.Weights[i].count
-              }
-            }
-          }
-
-          thisone[8] = thisone[5] + thisone[6] + thisone[7]
-
-          for (let i = 5; i < 9; i++) {
-            if (thisone[i]) {
-              thisone[i] = thisone[i].toLocaleString()
-            }
-          }
-        }
-
-        ret.push(thisone)
-      }
-
-      return ret
-    },
-  },
-  created() {
-    this.id = this.$route.params.id
-
-    // Default end is last complete month, and start is a year before that, so we cover twelve months.
-    this.endDate = dayjs().subtract(1, 'month').endOf('month').format()
-    this.startDate = dayjs(this.endDate)
-      .subtract(1, 'year')
-      .add(1, 'month')
-      .startOf('month')
-      .format()
-  },
-  async mounted() {
-    await loadLeaflet()
-    this.fetchData(this.id)
-  },
-  methods: {
-    mapPoly(poly, options) {
-      let bounds = null
-
-      try {
-        const wkt = new Wkt.Wkt()
-        wkt.read(poly)
-
-        const mapobj = this.$refs.map.leafletObject
-        const obj = wkt.toObject(mapobj.defaults)
-
-        if (obj) {
-          // This might be a multipolygon.
-          if (Array.isArray(obj)) {
-            for (const ent of obj) {
-              ent.addTo(mapobj)
-              ent.setStyle(options)
-              const thisbounds = ent.getBounds()
-              bounds = bounds || thisbounds
-              bounds.extend(thisbounds.getNorthEast())
-              bounds.extend(thisbounds.getSouthWest())
-            }
-          } else {
-            obj.addTo(mapobj)
-            obj.setStyle(options)
-            bounds = obj.getBounds()
-          }
-        }
-      } catch (e) {
-        console.log('Map poly failed', poly, e)
-      }
-
-      return bounds
-    },
-    async fetchData(id) {
-      await this.authorityStore.fetch(id)
-
-      let groupcount = 0
-      const stats = []
-
-      const authority = this.authorityStore.byId(id)
-
-      // We only query in full months, and the server expects the end date to be exclusive.
-      const start = dayjs(this.startDate).startOf('month').format('YYYY-MM-DD')
-
-      const end = dayjs(this.endDate)
-        .endOf('month')
-        .add(1, 'day')
-        .format('YYYY-MM-DD')
-
-      for (const group of authority.groups) {
-        await this.statsStore.clear()
-        await this.statsStore.fetch({
-          group: group.id,
-          grouptype: 'Freegle',
-          start,
-          end,
-          force: true,
+                ')</span>'
+              : ''),
+          monthly:
+            Math.round(group.avpermonth * group.overlap) +
+            (group.overlap < 1
+              ? ' (<span class="text-muted small">of ' +
+                Math.round(group.avpermonth) +
+                ')</span>'
+              : ''),
         })
+      }
+    }
+  }
 
-        const overlap = group.overlap
-        const weights = this.statsStore.Weight
+  return ret
+})
 
-        let totalWeight = 0
-        for (const w of weights) {
-          totalWeight += w.count * overlap
+const markers = computed(() => {
+  const ret = []
+
+  if (stats.value) {
+    for (const groupid in stats.value) {
+      ret.push(stats.value[groupid].group)
+    }
+  }
+
+  return ret
+})
+
+const last3Months = computed(() => {
+  const now = dayjs()
+  const end = dayjs(endDate.value)
+
+  if (end.isSame(now, 'month')) {
+    // We're in the current month. Want to start from last month, as that is complete.
+    return [
+      now.subtract(3, 'month').startOf('month'),
+      now.subtract(2, 'month').startOf('month'),
+      now.subtract(1, 'month').startOf('month'),
+    ]
+  } else {
+    // Start from the supplied month.
+    return [
+      end.subtract(2, 'month').startOf('month'),
+      end.subtract(1, 'month').startOf('month'),
+      end.startOf('month'),
+    ]
+  }
+})
+
+const last3MonthsLabels = computed(() => {
+  return [
+    last3Months.value[0].format('MMM-YY'),
+    last3Months.value[1].format('MMM-YY'),
+    last3Months.value[2].format('MMM-YY'),
+  ]
+})
+
+const last3MonthsMembersTotal = computed(() => {
+  const ret = []
+
+  memberData.value.forEach((data) => {
+    if (typeof data[0] !== 'string') {
+      for (let mon = 2; mon >= 0; mon--) {
+        // Need to use isSame(,'day') to handle DST.
+        if (last3Months.value[mon].isSame(dayjs(data[0]), 'day')) {
+          ret[mon] = data[1]
         }
+      }
+    }
+  })
 
-        const avpermonth = totalWeight / this.monthsCovered
+  return ret
+})
 
-        // If there is only one group in the area we're looking at, or the group is entirely contained within the
-        // area, then show it irrespective of activity otherwise it looks silly.
-        for (let i = 0; i < 2; i++) {
-          if (
-            i === 1 ||
-            avpermonth > 1 ||
-            authority.groups.length === 1 ||
-            overlap === 1
-          ) {
-            groupcount++
+const last3MonthsUsersTotal = computed(() => {
+  if (!last3MonthsMembersTotal.value || !last3MonthsMembersTotal.value.length) {
+    return [0, 0, 0]
+  }
 
-            stats[group.id] = {
-              overlap,
-              avpermonth,
-              totalweight: totalWeight,
-              Weights: weights,
-              ApprovedMemberCount: this.statsStore.ApprovedMemberCount,
-              OutcomesPerMonth: this.statsStore.OutcomesPerMonth,
-              group,
-            }
+  // We use a systemwide average of 70.5%.
+  const factor = 0.705
+
+  return [
+    Math.round(last3MonthsMembersTotal.value[0] * factor),
+    Math.round(last3MonthsMembersTotal.value[1] * factor),
+    Math.round(last3MonthsMembersTotal.value[2] * factor),
+  ]
+})
+
+const last3MonthsKgsTotal = computed(() => {
+  const ret = []
+
+  for (const datamon in weightByMonth.value) {
+    for (let mon = 2; mon >= 0; mon--) {
+      if (last3Months.value[mon].format('YYYY-MM') === datamon) {
+        ret[mon] = Math.round(weightByMonth.value[datamon])
+      }
+    }
+  }
+
+  return ret
+})
+
+const last3MonthsBenefitTotal = computed(() => {
+  return [
+    Math.round((last3MonthsKgsTotal.value[0] * BENEFIT_PER_TONNE) / 1000),
+    Math.round((last3MonthsKgsTotal.value[1] * BENEFIT_PER_TONNE) / 1000),
+    Math.round((last3MonthsKgsTotal.value[2] * BENEFIT_PER_TONNE) / 1000),
+  ]
+})
+
+const last3MonthsCO2Total = computed(() => {
+  return [
+    Math.round((last3MonthsKgsTotal.value[0] * CO2_PER_TONNE) / 10) / 100,
+    Math.round((last3MonthsKgsTotal.value[1] * CO2_PER_TONNE) / 10) / 100,
+    Math.round((last3MonthsKgsTotal.value[2] * CO2_PER_TONNE) / 10) / 100,
+  ]
+})
+
+const last3MonthsGiftsTotal = computed(() => {
+  const ret = []
+
+  for (let mon = 2; mon >= 0; mon--) {
+    let count = 0
+
+    for (const groupid in stats.value) {
+      const overlapValue = overlap(groupid)
+      const stat = stats.value[groupid]
+      const outcomes = stat.OutcomesPerMonth
+      let thisone = 0
+
+      const start = last3Months.value[mon].startOf('month')
+      const end = last3Months.value[mon].endOf('month')
+
+      for (const outcome of outcomes) {
+        const m = dayjs(outcome.date + '-01')
+
+        if (!m.isBefore(start) && !m.isAfter(end)) {
+          thisone += outcome.count * overlapValue
+          count += thisone
+        }
+      }
+    }
+
+    ret[mon] = Math.round(count)
+  }
+
+  return ret
+})
+
+const last3MonthsGroups = computed(() => {
+  if (!stats.value) return []
+
+  const groups = Object.values(stats.value)
+  groups.sort(function (a, b) {
+    return a.group.namedisplay
+      .toLowerCase()
+      .localeCompare(b.group.namedisplay.toLowerCase())
+  })
+
+  const ret = []
+
+  for (const ix in groups) {
+    const group = groups[ix]
+    const thisone = [group.group.namedisplay + (group.overlap < 1 ? ' *' : '')]
+
+    if (group.ApprovedMemberCount.length > 0) {
+      for (let mon = 2; mon >= 0; mon--) {
+        const end = last3Months.value[mon].endOf('month')
+        for (let i = 0; i < group.ApprovedMemberCount.length; i++) {
+          const thisdate = dayjs(group.ApprovedMemberCount[i].date).endOf('day')
+
+          // Sometimes there are gaps in data. We know the stats are in ascending date order. So just keep
+          // overwriting so that we get the latest.
+          if (end.format('YYYY-MMM') === thisdate.format('YYYY-MMM')) {
+            thisone[mon + 1] = group.ApprovedMemberCount[i].count
           }
+        }
+      }
 
-          if (groupcount > 0) {
-            // If we found some data abive our threshold, stop.  Otherwise try again so that we show no activity
-            // but at least which groups overlap.
-            break
+      thisone[4] = thisone[3] - thisone[1]
+
+      for (let i = 1; i < 5; i++) {
+        if (thisone[i]) {
+          thisone[i] = thisone[i].toLocaleString()
+        }
+      }
+    }
+
+    if (group.Weights.length > 0) {
+      for (let mon = 2; mon >= 0; mon--) {
+        const end = last3Months.value[mon].endOf('month')
+        thisone[mon + 5] = 0
+
+        for (let i = 0; i < group.Weights.length; i++) {
+          const thisdate = dayjs(group.ApprovedMemberCount[i].date).endOf('day')
+
+          if (end.format('YYYY-MMM') === thisdate.format('YYYY-MMM')) {
+            thisone[mon + 5] += group.Weights[i].count
           }
         }
       }
 
-      this.authority = authority
-      this.stats = stats
-      this.groupcount = groupcount
-    },
-    overlap(groupid) {
-      for (const group of this.authority.groups) {
-        if (parseInt(group.id) === parseInt(groupid)) {
-          return group.overlap
+      thisone[8] = thisone[5] + thisone[6] + thisone[7]
+
+      for (let i = 5; i < 9; i++) {
+        if (thisone[i]) {
+          thisone[i] = thisone[i].toLocaleString()
         }
       }
+    }
 
-      return 0
-    },
-    idle() {
-      if (this.stats && this.authority && !this.addedPolygons) {
-        this.addedPolygons = true
+    ret.push(thisone)
+  }
 
-        if (this.authority) {
-          const bounds = this.mapPoly(this.authority.polygon, {
-            fillColor: 'blue',
-            weight: 0,
-            fillOpacity: 0.2,
-          })
+  return ret
+})
 
-          this.$refs.map.leafletObject.fitBounds(bounds)
+// Initialize date range
+// Default end is last complete month, and start is a year before that, so we cover twelve months.
+endDate.value = dayjs().subtract(1, 'month').endOf('month').format()
+startDate.value = dayjs(endDate.value)
+  .subtract(1, 'year')
+  .add(1, 'month')
+  .startOf('month')
+  .format()
 
-          for (const groupid in this.stats) {
-            const polygon = this.stats[groupid].group.poly
+// Methods
+function mapPoly(poly, options) {
+  let bounds = null
 
-            this.mapPoly(polygon, {
-              fillColor: 'grey',
-              weight: 0,
-              fillOpacity: 0.2,
-            })
-          }
+  try {
+    const wkt = new Wkt.Wkt()
+    wkt.read(poly)
+
+    const mapobj = map.value.leafletObject
+    const obj = wkt.toObject(mapobj.defaults)
+
+    if (obj) {
+      // This might be a multipolygon.
+      if (Array.isArray(obj)) {
+        for (const ent of obj) {
+          ent.addTo(mapobj)
+          ent.setStyle(options)
+          const thisbounds = ent.getBounds()
+          bounds = bounds || thisbounds
+          bounds.extend(thisbounds.getNorthEast())
+          bounds.extend(thisbounds.getSouthWest())
         }
+      } else {
+        obj.addTo(mapobj)
+        obj.setStyle(options)
+        bounds = obj.getBounds()
       }
-    },
-    reloadData() {
-      if (
-        this.startDate &&
-        this.endDate &&
-        dayjs(this.endDate).isAfter(dayjs(this.startDate))
-      ) {
-        this.stats = null
-        this.fetchData(this.id)
-      }
-    },
-    toggle() {
-      this.tables = !this.tables
-    },
-  },
+    }
+  } catch (e) {
+    console.log('Map poly failed', poly, e)
+  }
+
+  return bounds
 }
+
+async function fetchData(id) {
+  await authorityStore.fetch(id)
+
+  let groupcountValue = 0
+  const statsValue = []
+
+  const authorityValue = authorityStore.byId(id)
+
+  // We only query in full months, and the server expects the end date to be exclusive.
+  const start = dayjs(startDate.value).startOf('month').format('YYYY-MM-DD')
+
+  const end = dayjs(endDate.value)
+    .endOf('month')
+    .add(1, 'day')
+    .format('YYYY-MM-DD')
+
+  for (const group of authorityValue.groups) {
+    await statsStore.clear()
+    await statsStore.fetch({
+      group: group.id,
+      grouptype: 'Freegle',
+      start,
+      end,
+      force: true,
+    })
+
+    const overlapValue = group.overlap
+    const weights = statsStore.Weight
+
+    let totalWeight = 0
+    for (const w of weights) {
+      totalWeight += w.count * overlapValue
+    }
+
+    const avpermonth = totalWeight / monthsCovered.value
+
+    // If there is only one group in the area we're looking at, or the group is entirely contained within the
+    // area, then show it irrespective of activity otherwise it looks silly.
+    for (let i = 0; i < 2; i++) {
+      if (
+        i === 1 ||
+        avpermonth > 1 ||
+        authorityValue.groups.length === 1 ||
+        overlapValue === 1
+      ) {
+        groupcountValue++
+
+        statsValue[group.id] = {
+          overlap: overlapValue,
+          avpermonth,
+          totalweight: totalWeight,
+          Weights: weights,
+          ApprovedMemberCount: statsStore.ApprovedMemberCount,
+          OutcomesPerMonth: statsStore.OutcomesPerMonth,
+          group,
+        }
+      }
+
+      if (groupcountValue > 0) {
+        // If we found some data above our threshold, stop. Otherwise try again so that we show no activity
+        // but at least which groups overlap.
+        break
+      }
+    }
+  }
+
+  authority.value = authorityValue
+  stats.value = statsValue
+  groupcount.value = groupcountValue
+}
+
+function overlap(groupid) {
+  if (!authority.value) return 0
+
+  for (const group of authority.value.groups) {
+    if (parseInt(group.id) === parseInt(groupid)) {
+      return group.overlap
+    }
+  }
+
+  return 0
+}
+
+function idle() {
+  if (stats.value && authority.value && !addedPolygons.value) {
+    addedPolygons.value = true
+
+    if (authority.value) {
+      const bounds = mapPoly(authority.value.polygon, {
+        fillColor: 'blue',
+        weight: 0,
+        fillOpacity: 0.2,
+      })
+
+      map.value.leafletObject.fitBounds(bounds)
+
+      for (const groupid in stats.value) {
+        const polygon = stats.value[groupid].group.poly
+
+        mapPoly(polygon, {
+          fillColor: 'grey',
+          weight: 0,
+          fillOpacity: 0.2,
+        })
+      }
+    }
+  }
+}
+
+function reloadData() {
+  if (
+    startDate.value &&
+    endDate.value &&
+    dayjs(endDate.value).isAfter(dayjs(startDate.value))
+  ) {
+    stats.value = null
+    fetchData(id)
+  }
+}
+
+function toggle() {
+  tables.value = !tables.value
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  await loadLeaflet()
+  fetchData(id)
+})
 </script>
 <style scoped lang="scss">
 .title {

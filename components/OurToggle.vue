@@ -12,59 +12,55 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 // This is a separate component partly because the toggle we use is not SSR-safe, and by async loading this component
 // we can avoid importing it until we're on the client.
 import Toggle from '@vueform/toggle'
-import { ref } from '#imports'
+import { ref, watch } from '#imports'
 
-export default {
-  components: {
-    Toggle,
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    labels: {
-      type: Object,
-      required: false,
-      default: () => ({ checked: 'On', unchecked: 'Off' }),
-    },
-    variant: {
-      type: String,
-      required: false,
-      default: 'green',
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  setup(props) {
-    return {
-      currentValue: ref(props.modelValue),
-    }
+  labels: {
+    type: Object,
+    required: false,
+    default: () => ({ checked: 'On', unchecked: 'Off' }),
   },
-  watch: {
-    modelValue(newVal) {
-      this.currentValue = newVal
-    },
-    currentValue(newVal) {
-      // Older calling code uses @change event.
-      this.$emit('change', newVal)
-      this.$emit('update:modelValue', newVal)
-    },
+  variant: {
+    type: String,
+    required: false,
+    default: 'green',
   },
-}
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['change', 'update:modelValue'])
+const currentValue = ref(props.modelValue)
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    currentValue.value = newVal
+  }
+)
+
+watch(currentValue, (newVal) => {
+  // Older calling code uses @change event.
+  emit('change', newVal)
+  emit('update:modelValue', newVal)
+})
 </script>
 <style src="@vueform/toggle/themes/default.css"></style>
 <style scoped lang="scss">

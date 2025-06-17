@@ -37,49 +37,38 @@
     </div>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { computed, defineAsyncComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useJobStore } from '../stores/job'
 import { useAuthStore } from '../stores/auth'
-import { useMiscStore } from '../stores/misc'
 const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))
 
-export default {
-  components: {
-    NoticeMessage,
-    JobOne,
-    DonationButton,
-  },
-  async setup() {
-    const jobStore = useJobStore()
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
+const jobStore = useJobStore()
+const authStore = useAuthStore()
 
-    const me = authStore.user
-    const lat = me?.lat
-    const lng = me?.lng
+// Get blocked from jobStore
+const { blocked } = storeToRefs(jobStore)
 
-    const location = computed(() => me?.settings?.mylocation?.name || null)
+// Get user info
+const me = authStore.user
+const lat = me?.lat
+const lng = me?.lng
 
-    if (location.value && lat && lng) {
-      await jobStore.fetch(lat, lng)
-    }
+// Location computed property
+const location = computed(() => me?.settings?.mylocation?.name || null)
 
-    return {
-      jobStore,
-      location,
-      miscStore,
-    }
-  },
-  computed: {
-    ...mapState(useJobStore, ['blocked']),
-    list() {
-      return this.jobStore.list.slice(0, 3)
-    },
-  },
+// Fetch data if needed
+if (location.value && lat && lng) {
+  await jobStore.fetch(lat, lng)
 }
+
+// Computed for list
+const list = computed(() => {
+  return jobStore.list.slice(0, 3)
+})
 </script>
 <style scoped lang="scss">
 :deep(a) {

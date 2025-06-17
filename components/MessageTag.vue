@@ -13,77 +13,73 @@
     {{ tagForGroup }}
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '~/stores/message'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    def: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    inline: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
+  def: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  inline: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    const message = await messageStore.fetch(props.id)
-    const fetching = []
+const messageStore = useMessageStore()
+const groupStore = useGroupStore()
 
-    if (message?.groups) {
-      message.groups.forEach((group) => {
-        fetching.push(groupStore.fetch(group.groupid))
-      })
+// Fetch data on mount
+onMounted(async () => {
+  const message = await messageStore.fetch(props.id)
+  const fetching = []
+
+  if (message?.groups) {
+    message.groups.forEach((group) => {
+      fetching.push(groupStore.fetch(group.groupid))
+    })
+  }
+
+  await Promise.all(fetching)
+})
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const tagForGroup = computed(() => {
+  let ret = null
+
+  message.value?.groups?.forEach((g) => {
+    const group = groupStore?.get(g.groupid)
+
+    if (group) {
+      switch (message.value?.type) {
+        case 'Offer':
+          ret = group.settings?.keywords?.offer
+            ? group.settings.keywords.offer
+            : 'OFFER'
+          break
+        case 'Wanted':
+          ret = group.settings?.keywords?.wanted
+            ? group.settings.keywords.wanted
+            : 'WANTED'
+          break
+      }
     }
+  })
 
-    await Promise.all(fetching)
-
-    return { messageStore, groupStore }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    group() {
-      return this.groupStore?.get(this.message.groups[0].groupid)
-    },
-    tagForGroup() {
-      let ret = null
-
-      this.message?.groups?.forEach((g) => {
-        const group = this.groupStore?.get(g.groupid)
-
-        if (group) {
-          switch (this.message?.type) {
-            case 'Offer':
-              ret = group.settings?.keywords?.offer
-                ? group.settings.keywords.offer
-                : 'OFFER'
-              break
-            case 'Wanted':
-              ret = group.settings?.keywords?.wanted
-                ? group.settings.keywords.wanted
-                : 'WANTED'
-              break
-          }
-        }
-      })
-
-      return ret
-    },
-  },
-}
+  return ret
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

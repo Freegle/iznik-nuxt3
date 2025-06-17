@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-around minheight">
+  <div class="d-flex justify-content-around minheight test-visualise-list">
     <MessageSummary
       v-if="msgid"
       :id="msgid"
@@ -8,7 +8,7 @@
       :show-freegled="false"
       :show-promised="false"
       :show-location="false"
-      class="w-100 mb-2"
+      class="w-100 mb-2 test-visualise-message"
       preload
       wide
       @click.prevent.self

@@ -32,6 +32,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import ProfileImage from './ProfileImage.vue'
+import MessageList from './MessageList.vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'

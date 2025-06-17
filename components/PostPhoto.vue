@@ -29,7 +29,7 @@
         :modifiers="mods"
         alt="Item Photo"
         :width="width"
-        @click="$emit('click')"
+        @click="emit('click')"
       />
       <NuxtPicture
         v-else-if="externaluid"
@@ -41,7 +41,7 @@
         alt="Item Photo"
         :width="width"
         :height="width"
-        @click="$emit('click')"
+        @click="emit('click')"
       />
       <b-img
         v-else-if="thumbnail"
@@ -50,9 +50,9 @@
         rounded
         thumbnail
         class="square"
-        @click="$emit('click')"
+        @click="emit('click')"
       />
-      <b-img v-else lazy :src="path" rounded @click="$emit('click')" />
+      <b-img v-else lazy :src="path" rounded @click="emit('click')" />
     </div>
     <ConfirmModal
       v-if="confirm"
@@ -62,112 +62,104 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { useImageStore } from '../stores/image'
 import OurUploadedImage from '~/components/OurUploadedImage.vue'
 import { useMiscStore } from '~/stores/misc'
-const ConfirmModal = () =>
-  defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
-export default {
-  components: { OurUploadedImage, ConfirmModal },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    path: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    paththumb: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    thumbnail: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    primary: {
-      type: Boolean,
-      default: false,
-    },
-    externaluid: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    ouruid: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    externalmods: {
-      type: Object,
-      required: false,
-      default: () => {},
-    },
-  },
-  setup() {
-    const imageStore = useImageStore()
-    const miscStore = useMiscStore()
+const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal.vue'))
 
-    return {
-      imageStore,
-      miscStore,
-    }
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      confirm: false,
-      mods: {},
-    }
+  path: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {
-    width() {
-      return this.miscStore.breakpoint === 'xs' ? 100 : 200
-    },
+  paththumb: {
+    type: String,
+    required: false,
+    default: null,
   },
-  watch: {
-    externalmods: {
-      handler(newVal) {
-        this.mods = newVal
-      },
-      immediate: true,
-    },
+  thumbnail: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  methods: {
-    remove() {
-      this.confirm = true
-    },
-    removeConfirmed() {
-      this.$emit('remove', this.id)
-    },
-    async rotate(deg) {
-      this.mods = this.mods ? this.mods : {}
-      const curr = this.mods.rotate || 0
-      this.mods.rotate = curr + deg
+  primary: {
+    type: Boolean,
+    default: false,
+  },
+  externaluid: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  ouruid: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  externalmods: {
+    type: Object,
+    required: false,
+    default: () => {},
+  },
+})
 
-      // Ensure between 0 and 360
-      this.mods.rotate = (this.mods.rotate + 360) % 360
+const emit = defineEmits(['remove', 'click'])
+const imageStore = useImageStore()
+const miscStore = useMiscStore()
 
-      await this.imageStore.post({
-        id: this.id,
-        rotate: this.mods.rotate,
-        bust: Date.now(),
-        type: 'Message',
-      })
-    },
-    rotateLeft() {
-      this.rotate(-90)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
+const confirm = ref(false)
+const mods = ref({})
+
+const width = computed(() => {
+  return miscStore.breakpoint === 'xs' ? 100 : 200
+})
+
+watch(
+  () => props.externalmods,
+  (newVal) => {
+    mods.value = newVal
   },
+  { immediate: true }
+)
+
+function remove() {
+  confirm.value = true
+}
+
+function removeConfirmed() {
+  emit('remove', props.id)
+}
+
+async function rotate(deg) {
+  mods.value = mods.value ? mods.value : {}
+  const curr = mods.value.rotate || 0
+  mods.value.rotate = curr + deg
+
+  // Ensure between 0 and 360
+  mods.value.rotate = (mods.value.rotate + 360) % 360
+
+  await imageStore.post({
+    id: props.id,
+    rotate: mods.value.rotate,
+    bust: Date.now(),
+    type: 'Message',
+  })
+}
+
+function rotateLeft() {
+  rotate(-90)
+}
+
+function rotateRight() {
+  rotate(90)
 }
 </script>
 <style scoped lang="scss">

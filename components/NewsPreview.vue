@@ -58,31 +58,27 @@
     </b-card-body>
   </b-card>
 </template>
-<script>
+<script setup>
 import ReadMore from '~/components/ReadMore'
-export default {
-  components: {
-    ReadMore,
+
+const props = defineProps({
+  preview: {
+    type: Object,
+    required: true,
   },
-  props: {
-    preview: {
-      type: Object,
-      required: true,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  methods: {
-    open() {
-      window.open(this.preview.url)
-    },
-    brokenImage(event) {
-      event.target.src = '/placeholder.jpg'
-    },
-  },
+})
+
+function open() {
+  window.open(props.preview.url)
+}
+
+function brokenImage(event) {
+  event.target.src = '/placeholder.jpg'
 }
 </script>
 <style scoped lang="scss">

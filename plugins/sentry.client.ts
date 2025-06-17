@@ -23,6 +23,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   // CookieYes banner.
   function checkCMPComplete() {
     const runTimeConfig = useRuntimeConfig()
+
+    // Skip Sentry initialization if DSN is empty (disabled)
+    if (!config.public.SENTRY_DSN) {
+      console.log('Sentry disabled - skipping initialization')
+      return
+    }
+
     if (runTimeConfig.public.COOKIEYES && !window.weHaveLoadedGPT) {
       setTimeout(checkCMPComplete, 100)
     } else {

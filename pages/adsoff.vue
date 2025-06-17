@@ -61,10 +61,15 @@
   </client-only>
 </template>
 <script setup>
+import { ref, onMounted, useRuntimeConfig } from '#imports'
 import { useConfigStore } from '~/stores/config'
+import { useAuthStore } from '~/stores/auth'
 import Api from '~/api'
+import DonationButton from '~/components/DonationButton.vue'
+import VueThermometer from '~/components/VueThermometer.vue'
 
 const configStore = useConfigStore()
+const authStore = useAuthStore()
 const showingAds = await configStore.fetch('ads_off_target')
 
 const adsOffTarget = ref(
@@ -78,6 +83,8 @@ const target = await configStore.fetch('ads_off_target_max')
 const adsOffTargetMax = ref(
   target?.length && parseInt(target[0].value) ? parseInt(target[0].value) : null
 )
+
+const recentDonor = ref(authStore.user?.donor === 1)
 
 const thermOptions = {
   thermo: {

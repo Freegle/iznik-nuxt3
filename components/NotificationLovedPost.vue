@@ -24,44 +24,45 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { setupNotification } from '../composables/useNotification'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  components: {
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
-  computed: {
-    noticeboardname() {
-      if (this.newsfeed?.type === 'Noticeboard') {
-        try {
-          return JSON.parse(this.newsfeed.message)?.name
-        } catch (e) {
-          console.log('Invalid', this.newsfeed)
-        }
-      }
+})
 
-      return null
-    },
-  },
-  methods: {
-    click() {
-      // Make sure we have the up to date iem in the store fairly soon.
-      useNewsfeedStore().fetch(this.newsfeed.id, true)
-      this.$router.push('/chitchat/' + this.newsfeed.id)
-    },
-  },
+const router = useRouter()
+
+// Setup notification
+const { fromuser, newsfeed, notificationago } = await setupNotification(
+  props.id
+)
+
+const noticeboardname = computed(() => {
+  if (newsfeed.value?.type === 'Noticeboard') {
+    try {
+      return JSON.parse(newsfeed.value.message)?.name
+    } catch (e) {
+      console.log('Invalid', newsfeed.value)
+    }
+  }
+
+  return null
+})
+
+function click() {
+  // Make sure we have the up-to-date item in the store
+  if (newsfeed?.value?.id) {
+    useNewsfeedStore().fetch(newsfeed.value.id, true)
+    router.push('/chitchat/' + newsfeed.value.id)
+  }
 }
 </script>
 

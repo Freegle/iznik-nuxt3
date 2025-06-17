@@ -101,7 +101,11 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { onMounted, definePageMeta, useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
+import ProxyImage from '~/components/ProxyImage.vue'
+import SupportLink from '~/components/SupportLink.vue'
+import NationalReuseDayBox from '~/components/NationalReuseDayBox.vue'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()

@@ -14,16 +14,10 @@
     </b-col>
   </b-row>
 </template>
-<script>
+<script setup>
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
 )
-
-export default {
-  components: {
-    NoticeMessage,
-  },
-}
 </script>
 <style scoped>
 .bottom {
