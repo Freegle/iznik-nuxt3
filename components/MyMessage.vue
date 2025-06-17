@@ -773,7 +773,7 @@ watch(replyuserids, (newVal) => {
 onMounted(() => {
   expanded.value = props.expand
 
-  if (me) {
+  if (me.value) {
     switch (props.action) {
       case 'repost':
         if (message.value?.canrepost) {

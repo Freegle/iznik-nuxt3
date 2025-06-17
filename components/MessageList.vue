@@ -458,7 +458,7 @@ async function loadMore($state) {
     // We're showing all the messages
     $state.complete()
 
-    if (me) {
+    if (me.value) {
       // Kick off a fetch of the unread count - normally done when we scroll down but we might skip if we've done
       // too frequently.
       messageStore.fetchCount(me.settings?.browseView, false)
