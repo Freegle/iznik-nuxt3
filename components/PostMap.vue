@@ -747,7 +747,7 @@ async function getMessages() {
     } else if (myGroups.value?.length) {
       // We don't, which will be because we don't have a location.
       // Use the bounding boxes of the groups we are in.
-      const groupbounds = myGroupsBoundingBox
+      const groupbounds = myGroupsBoundingBox.value
 
       if (props.search) {
         console.log('GetMessages - search within group bounds')
