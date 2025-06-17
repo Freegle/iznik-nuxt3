@@ -367,6 +367,24 @@ const chatStore = useChatStore()
 const miscStore = useMiscStore()
 const router = useRouter()
 
+const collapsed = computed({
+  get: () => miscStore?.get('chatinfoheader'),
+  set: (newVal) => {
+    miscStore.set({
+      key: 'chatinfoheader',
+      value: newVal,
+    })
+  },
+})
+
+function collapse(val) {
+  collapsed.value = val
+}
+
+defineExpose({
+  collapse,
+})
+
 // Set up chat data
 const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
   props.id
@@ -379,16 +397,6 @@ miscStore.set({
 })
 
 // Computed properties
-const collapsed = computed({
-  get: () => miscStore?.get('chatinfoheader'),
-  set: (newVal) => {
-    miscStore.set({
-      key: 'chatinfoheader',
-      value: newVal,
-    })
-  },
-})
-
 const replytime = computed(() => {
   let ret = null
   let secs = null
