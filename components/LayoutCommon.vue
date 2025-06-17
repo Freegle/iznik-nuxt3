@@ -248,7 +248,7 @@ onMounted(async () => {
     miscStore.startOnlineCheck()
   }
 
-  if (me) {
+  if (me.value) {
     // Get chats and poll regularly for new ones
     const chatStore = useChatStore()
     chatStore.pollForChatUpdates()

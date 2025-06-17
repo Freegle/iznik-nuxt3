@@ -392,7 +392,7 @@ async function sendReply(callback) {
         replyStore.replyingAt
       )
 
-      if (me) {
+      if (myid.value) {
         // We have several things to do:
         // - join a group if need be (doesn't matter which)
         // - post our reply
