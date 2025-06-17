@@ -36,7 +36,7 @@
             <b-card-body class="text-center p-2">
               <div :key="bump" class="d-flex justify-content-around">
                 <ProfileImage
-                  v-if="!me.value || !useProfile"
+                  v-if="!me || !useProfile"
                   image="/defaultprofile.png"
                   class="mr-1 mb-1 mt-1 inline"
                   is-thumbnail
@@ -44,9 +44,9 @@
                   alt-text="Default profile image"
                 />
                 <ProfileImage
-                  v-else-if="me.value?.profile?.externaluid"
-                  :externaluid="me.value.profile.externaluid"
-                  :externalmods="me.value.profile.externalmods"
+                  v-else-if="me?.profile?.externaluid"
+                  :externaluid="me.profile.externaluid"
+                  :externalmods="me.profile.externalmods"
                   class="mr-1 mb-1 mt-1 inline"
                   is-thumbnail
                   size="xl"
@@ -72,8 +72,7 @@
               <div class="d-flex justify-content-around align-items-center">
                 <div
                   v-if="
-                    (me.value?.profile?.ours ||
-                      me.value?.profile?.externaluid) &&
+                    (me?.profile?.ours || me?.profile?.externaluid) &&
                     useProfile &&
                     !showProfileModal &&
                     !uploading
@@ -101,8 +100,7 @@
                 </b-button>
                 <div
                   v-if="
-                    (me.value?.profile?.ours ||
-                      me.value?.profile?.externaluid) &&
+                    (me?.profile?.ours || me?.profile?.externaluid) &&
                     useProfile &&
                     !showProfileModal &&
                     !uploading
@@ -325,7 +323,7 @@ watch(
         externaluid: newVal[0].ouruid,
         externalmods: newVal[0].externalmods,
         imgtype: 'User',
-        msgid: me?.value,
+        msgid: me?.value.id,
       }
 
       console.log('Post image', atts)

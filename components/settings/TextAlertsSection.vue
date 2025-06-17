@@ -18,7 +18,7 @@
         Freegle or a handover soon.
       </p>
       <SettingsPhone class="mb-3" />
-      <div v-if="me.value?.phone">
+      <div v-if="me?.phone">
         <NoticeMessage
           v-if="!notificationSettings.email"
           variant="warning"
@@ -28,9 +28,8 @@
         </NoticeMessage>
         <NoticeMessage
           v-else-if="
-            me.value.phonelastsent &&
-            (!me.value.phonelastclicked ||
-              me.value.phonelastclicked < me.value.phonelastsent)
+            me.phonelastsent &&
+            (!me.phonelastclicked || me.phonelastclicked < me.phonelastsent)
           "
           variant="warning"
           class="mb-2"

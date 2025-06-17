@@ -45,7 +45,7 @@
           :email="email"
         />
       </div>
-      <NoticeMessage v-if="me.value?.bouncing" variant="danger" class="mb-2">
+      <NoticeMessage v-if="me?.bouncing" variant="danger" class="mb-2">
         <p>
           We can't send to your email address. Please change it to a valid one
           and press <em>Save</em>.

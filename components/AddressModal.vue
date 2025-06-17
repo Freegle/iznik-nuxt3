@@ -111,11 +111,11 @@
         </b-row>
         <div v-if="postcode">
           <p class="mt-2">Choose an address:</p>
-          <b-row v-if="propertyOptions.value && propertyOptions.value.length">
+          <b-row v-if="propertyOptions && propertyOptions.length">
             <b-col cols="12" sm="8">
               <b-form-select
                 v-model="selectedProperty"
-                :options="propertyOptions.value"
+                :options="propertyOptions"
                 class="mb-2 font-weight-bold"
               />
             </b-col>
