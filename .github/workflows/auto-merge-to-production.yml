@@ -17,14 +17,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Get the latest commit SHA from master
-            const { data: commit } = await github.rest.repos.getCommit({
+            // Get commit statuses (this is where CircleCI reports)
+            const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: context.sha
             });
             
-            // Get all check runs for this commit
+            console.log(`Found ${statuses.length} commit statuses for commit ${context.sha}`);
+            
+            // Also get check runs in case CircleCI uses both
             const { data: checkRuns } = await github.rest.checks.listForRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -33,33 +35,58 @@ jobs:
             
             console.log(`Found ${checkRuns.check_runs.length} check runs for commit ${context.sha}`);
             
-            // Look for CircleCI check runs (they typically have names like "ci/circleci: build-and-test")
+            // Look for CircleCI in commit statuses (typical format: "ci/circleci: build-and-test")
+            const circleciStatuses = statuses.filter(status => 
+              status.context.includes('circleci') || 
+              status.context.includes('build-and-test')
+            );
+            
+            // Also look for CircleCI in check runs
             const circleciChecks = checkRuns.check_runs.filter(check => 
               check.name.includes('circleci') || 
               check.name.includes('build-and-test') ||
               check.app?.name === 'CircleCI'
             );
             
+            console.log(`Found ${circleciStatuses.length} CircleCI commit statuses`);
             console.log(`Found ${circleciChecks.length} CircleCI check runs`);
             
-            if (circleciChecks.length === 0) {
+            // Log what we found
+            circleciStatuses.forEach(status => {
+              console.log(`Status: ${status.context} - ${status.state} - ${status.description}`);
+            });
+            
+            circleciChecks.forEach(check => {
+              console.log(`Check: ${check.name} - ${check.status}/${check.conclusion}`);
+            });
+            
+            if (circleciStatuses.length === 0 && circleciChecks.length === 0) {
               console.log('No CircleCI checks found, tests may still be running');
               core.setOutput('tests-passed', 'false');
               return;
             }
             
-            // Check if all CircleCI checks passed
-            const allPassed = circleciChecks.every(check => check.conclusion === 'success');
-            const anyRunning = circleciChecks.some(check => check.status === 'in_progress' || check.status === 'queued');
+            // Check statuses (CircleCI typically uses this)
+            const statusesAllPassed = circleciStatuses.length === 0 || circleciStatuses.every(status => status.state === 'success');
+            const statusesAnyRunning = circleciStatuses.some(status => status.state === 'pending');
+            const statusesAnyFailed = circleciStatuses.some(status => status.state === 'failure' || status.state === 'error');
             
-            if (anyRunning) {
+            // Check runs (backup check)
+            const checksAllPassed = circleciChecks.length === 0 || circleciChecks.every(check => check.conclusion === 'success');
+            const checksAnyRunning = circleciChecks.some(check => check.status === 'in_progress' || check.status === 'queued');
+            const checksAnyFailed = circleciChecks.some(check => check.conclusion === 'failure');
+            
+            if (statusesAnyRunning || checksAnyRunning) {
               console.log('Some tests are still running');
               core.setOutput('tests-passed', 'false');
-            } else if (allPassed) {
+            } else if (statusesAnyFailed || checksAnyFailed) {
+              console.log('Some tests failed');
+              core.setOutput('tests-passed', 'false');
+            } else if (statusesAllPassed && checksAllPassed) {
               console.log('All tests passed!');
               core.setOutput('tests-passed', 'true');
             } else {
-              console.log('Some tests failed');
+              console.log('Tests status unclear, will wait');
               core.setOutput('tests-passed', 'false');
             }
 
@@ -79,11 +106,24 @@ jobs:
             while (Date.now() - startTime < maxWaitTime) {
               console.log('Checking test status...');
               
+              // Get commit statuses (where CircleCI reports)
+              const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: context.sha
+              });
+              
+              // Also get check runs as backup
               const { data: checkRuns } = await github.rest.checks.listForRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 ref: context.sha
               });
+              
+              const circleciStatuses = statuses.filter(status => 
+                status.context.includes('circleci') || 
+                status.context.includes('build-and-test')
+              );
               
               const circleciChecks = checkRuns.check_runs.filter(check => 
                 check.name.includes('circleci') || 
@@ -91,15 +131,27 @@ jobs:
                 check.app?.name === 'CircleCI'
               );
               
-              if (circleciChecks.length === 0) {
+              console.log(`Found ${circleciStatuses.length} CircleCI statuses, ${circleciChecks.length} CircleCI check runs`);
+              
+              if (circleciStatuses.length === 0 && circleciChecks.length === 0) {
                 console.log('No CircleCI checks found yet, continuing to wait...');
                 await new Promise(resolve => setTimeout(resolve, checkInterval));
                 continue;
               }
               
-              const allPassed = circleciChecks.every(check => check.conclusion === 'success');
-              const anyFailed = circleciChecks.some(check => check.conclusion === 'failure');
-              const anyRunning = circleciChecks.some(check => check.status === 'in_progress' || check.status === 'queued');
+              // Check statuses
+              const statusesAllPassed = circleciStatuses.length === 0 || circleciStatuses.every(status => status.state === 'success');
+              const statusesAnyFailed = circleciStatuses.some(status => status.state === 'failure' || status.state === 'error');
+              const statusesAnyRunning = circleciStatuses.some(status => status.state === 'pending');
+              
+              // Check runs
+              const checksAllPassed = circleciChecks.length === 0 || circleciChecks.every(check => check.conclusion === 'success');
+              const checksAnyFailed = circleciChecks.some(check => check.conclusion === 'failure');
+              const checksAnyRunning = circleciChecks.some(check => check.status === 'in_progress' || check.status === 'queued');
+              
+              const allPassed = statusesAllPassed && checksAllPassed;
+              const anyFailed = statusesAnyFailed || checksAnyFailed;
+              const anyRunning = statusesAnyRunning || checksAnyRunning;
               
               if (allPassed) {
                 console.log('All tests passed!');
