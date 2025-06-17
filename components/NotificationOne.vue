@@ -90,7 +90,7 @@ function click() {
 
   if (notification.value?.url) {
     window.open(notification.value.url)
-  } else if (newsfeed.value) {
+  } else if (newsfeed?.value) {
     router.push('/chitchat/' + newsfeed.value.id)
   }
 }

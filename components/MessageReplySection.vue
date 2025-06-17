@@ -221,6 +221,7 @@ const collect = ref(null)
 const replying = ref(false)
 const showNewUser = ref(false)
 const newUserPassword = ref(null)
+const pendingReply = ref(false)
 
 // Fetch the message data
 await messageStore.fetch(props.id)
@@ -271,6 +272,20 @@ watch(me, (newVal, oldVal) => {
     // We have now logged in - resume our send.
     console.log('Resume send')
     sendReply()
+  }
+})
+
+// Watch for chat button ref to become available when we have a pending reply
+watch(replyToPostChatButton, async (newVal) => {
+  if (newVal && pendingReply.value) {
+    console.log('Chat button ref now available, executing pending reply')
+    pendingReply.value = false
+
+    const { replyToPost: composableReplyToPost } = useReplyToPost()
+    const replySent = await composableReplyToPost(newVal)
+    if (replySent) {
+      sent()
+    }
   }
 })
 
@@ -413,13 +428,20 @@ async function sendReply(callback) {
             called = true
           }
 
-          // Use the composable's replyToPost function passing the chat button reference
-          const { replyToPost: composableReplyToPost } = useReplyToPost()
-          const replySent = await composableReplyToPost(
-            replyToPostChatButton.value
-          )
-          if (replySent) {
-            sent()
+          // Check if chat button ref is available, if not set pending flag for watch to handle
+          if (replyToPostChatButton.value) {
+            const { replyToPost: composableReplyToPost } = useReplyToPost()
+            const replySent = await composableReplyToPost(
+              replyToPostChatButton.value
+            )
+            if (replySent) {
+              sent()
+            }
+          } else {
+            console.log(
+              'Chat button ref not available yet, setting pending flag'
+            )
+            pendingReply.value = true
           }
         }
       } else {
