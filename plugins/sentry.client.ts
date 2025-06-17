@@ -125,6 +125,9 @@ export default defineNuxtPlugin((nuxtApp) => {
               // There's basically no info to report, so there's nothing we can do.  Suppress it.
               console.log('No info - suppress exception')
               return null
+            } else if (originalExceptionStack?.include('frame_ant')) {
+              // Chrome extension giving errors.
+              return null
             } else if (originalExceptionStack?.includes('/gpt/')) {
               // Google ads are not our problem.
               console.log('Google ads - suppress exception')
