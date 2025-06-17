@@ -357,6 +357,7 @@ import SpinButton from './SpinButton'
 import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
 import Api from '~/api'
+import { useMe } from '~/composables/useMe'
 
 // Define props
 const props = defineProps({
@@ -398,7 +399,7 @@ const MicroVolunteering = defineAsyncComponent(() =>
   import('~/components/MicroVolunteering')
 )
 
-const me = useAuthStore().user
+const { me, myid } = useMe()
 
 // Setup stores
 const authStore = useAuthStore()
@@ -706,8 +707,7 @@ const send = async (callback) => {
         chatmessages.value.length &&
         chatmessages.value[chatmessages.value.length - 1].type ===
           'Interested' &&
-        chatmessages.value[chatmessages.value.length - 1].userid !==
-          me.value.id &&
+        chatmessages.value[chatmessages.value.length - 1].userid !== myid &&
         chat.value.chattype === 'User2User'
 
       // Encode up any emojis.

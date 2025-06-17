@@ -123,19 +123,13 @@
 </template>
 <script setup>
 import dayjs from 'dayjs'
-import {
-  ref,
-  computed,
-  watch,
-  nextTick,
-  defineAsyncComponent,
-  inject,
-} from 'vue'
+import { ref, computed, watch, nextTick, defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import SpinButton from './SpinButton'
 import { useOurModal } from '~/composables/useOurModal'
 import { useAuthStore } from '~/stores/auth'
+import Api from '~/api'
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
@@ -170,7 +164,10 @@ const props = defineProps({
 const trystStore = useTrystStore()
 const messageStore = useMessageStore()
 const { modal, hide } = useOurModal()
-const $api = inject('$api')
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
 const authStore = useAuthStore()
 const myid = authStore.user?.id
 
@@ -339,7 +336,7 @@ async function promise(callback) {
     }
 
     if (props.maybe) {
-      await $api.bandit.chosen({
+      await api.bandit.chosen({
         uid: 'promise',
         variant: 'AfterAddress',
       })
@@ -374,7 +371,7 @@ async function onShow(showDate) {
   }
 
   if (props.maybe) {
-    $api.bandit.shown({
+    api.bandit.shown({
       uid: 'promise',
       variant: 'AfterAddress',
     })
