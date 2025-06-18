@@ -2,12 +2,12 @@
   <div>
     <b-card no-body>
       <b-card-header>
-        <div v-if="!message.group">DEBUG NO GROUP TELL CHRIS</div>
+        <div v-if="!message.group">MESSAGE HAS NO GROUP - SO HAS BEEN REMOVED EG AS SPAMMER.</div>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
-            <ModChatReviewUser v-if="message.group" :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group.id" @reload="reload"/>
+            <ModChatReviewUser :user="message.fromuser" class="mr-2" tag="From: " :groupid="message.group ? message.group.id : 0" @reload="reload"/>
             <v-icon icon="arrow-circle-right" scale="2" class="mt-1 text-info" />
-            <ModChatReviewUser v-if="message.group" :user="message.touser" class="ml-2" tag="To: " :groupid="message.group.id"  @reload="reload"/>
+            <ModChatReviewUser :user="message.touser" class="ml-2" tag="To: " :groupid="message.group ? message.group.id : 0"  @reload="reload"/>
           </div>
           <b-button v-if="message.bymailid" size="lg" variant="white" @click="viewOriginal">
             <v-icon icon="info-circle" /> View original email
@@ -44,10 +44,10 @@
             <v-icon icon="info-circle" />
             <em>Quicker Chat Review</em>
           </span>
-          <span>
-            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group?.namedisplay }}
-            <span v-if="!message.widerchatreview">, which you mod.
-              <b-button :to="'/members/approved/' + message.group?.id + '/' + message.touser.id" variant="link"
+          <span v-if="message.group">
+            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on {{ message.group.namedisplay }}
+            <span v-if="!message.widerchatreview"> which you mod.
+              <b-button :to="'/members/approved/' + message.group.id + '/' + message.touser.id" variant="link"
                 class="p-0 border-0 align-top">
                 Go to membership
               </b-button>
@@ -64,8 +64,8 @@
               <!-- eslint-disable-next-line -->
               <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
               <span>
-                <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod</span><span v-else>not on any groups which you
-                  actively mod.</span>
+                <span v-if="message.groupfrom">on {{ message.groupfrom.namedisplay }}, which you mod. </span><span v-else>not on any groups which you
+                  actively mod. </span>
                 <b-button v-if="message.groupfrom" :to="'/members/approved/' + message.groupfrom.id + '/' + message.fromuser.id"
                   variant="link" class="p-0 border-0 align-top">
                   Go to membership

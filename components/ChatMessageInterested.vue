@@ -13,11 +13,6 @@
         />
         <div v-if="modtools && modtoolsLink">
           <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
-          <!--ExternalLink v-if="modtoolsLink" :href="modtoolsLink">
-            <b-button variant="white">
-              View message on ModTools
-            </b-button>
-          </ExternalLink-->
         </div>
         <div>
           <!-- eslint-disable-next-line -->
