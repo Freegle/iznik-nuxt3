@@ -40,8 +40,7 @@ A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and 
 
 ## TODO
 
-* Loads of TODOs to check inc some in base code
-* Cope on mobile ie left menu
+* Various TODOs to check inc some in base code
 
 * components/ProxyImage.vue Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
   <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
