@@ -69,6 +69,13 @@ const focused = () => {
   emit('focus')
 }
 
+function focus() {
+  ta.value.$el.focus()
+}
+
+defineExpose({
+  focus,
+})
 const checkRows = () => {
   if (ta.value) {
     const hasScroll = ta.value.$el.scrollHeight > ta.value.$el.clientHeight

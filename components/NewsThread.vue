@@ -136,6 +136,7 @@
                   </span>
                 </slot>
                 <AutoHeightTextarea
+                  ref="threadcommentautoheight"
                   v-model="threadcomment"
                   size="sm"
                   rows="1"
@@ -174,6 +175,7 @@
                   </span>
                 </slot>
                 <AutoHeightTextarea
+                  ref="threadcommentautoheight"
                   v-model="threadcomment"
                   size="sm"
                   rows="1"
@@ -321,6 +323,8 @@ const myid = computed(() => me.value?.id)
 // References
 const at = ref(null)
 const threadcomment = ref(null)
+const threadcommentref = ref(null)
+const threadcommentautoheight = ref(null)
 
 // Reactive state
 const scrollDownTo = ref(null)
@@ -471,8 +475,13 @@ function rendered(id) {
 }
 
 function focusComment() {
-  if (threadcomment.value?.$el) {
-    threadcomment.value.$el.focus()
+  console.log('Focus comment', threadcommentref.value)
+  if (threadcommentref.value?.$el) {
+    threadcommentref.value.$el.focus()
+  }
+
+  if (threadcommentautoheight.value) {
+    threadcommentautoheight.value.focus()
   }
 }
 
