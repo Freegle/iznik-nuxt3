@@ -210,7 +210,7 @@
             </span>
           </template>
           <b-form-textarea
-            ref="replybox"
+            ref="replyboxref"
             v-model="replybox"
             size="sm"
             rows="1"
@@ -248,7 +248,7 @@
               </span>
             </slot>
             <b-form-textarea
-              ref="replybox"
+              ref="replyboxref"
               v-model="replybox"
               size="sm"
               rows="1"
@@ -404,6 +404,7 @@ const myid = computed(() => me.value?.id)
 // Refs
 const at = ref(null)
 const replybox = ref(null)
+const replyboxref = ref(null)
 const showReplyBox = ref(false)
 const replyingTo = ref(null)
 const uploading = ref(false)
@@ -520,14 +521,20 @@ function showInfo() {
   showProfileModal.value = true
 }
 
-async function replyReply() {
+function focusedReply() {
   replyingTo.value = props.id
   showReplyBox.value = true
+}
 
-  await nextTick()
-  if (replybox.value && replybox.value.$el) {
-    replybox.value.$el.focus()
+watch(replyboxref, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    newVal.$el.focus()
   }
+})
+
+function replyReply() {
+  replyingTo.value = props.id
+  showReplyBox.value = true
 
   // Reply with tag.
   replybox.value = '@' + reply.value.displayname + ' '
