@@ -115,10 +115,12 @@ const config: CapacitorConfig = {
   },
 };
 
-if( process.env['USE_COOKIES']==='True') {
+if( process.env['USE_COOKIES']==='True') { // Android
   console.log('SET CAPACITOR base to https://ilovefreegle.org')
   config.server.hostname = 'ilovefreegle.org'
   config.server.androidScheme = 'https'
+} else { // iOS
+  config.appId = 'org.ilovefreegle.iphone'
 }
 
 export default config;
