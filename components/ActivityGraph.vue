@@ -319,12 +319,15 @@ const approvedSplit = (type) => {
     (MessageBreakdown.value.Offer + MessageBreakdown.value.Wanted)
 
   const ret = []
-  ApprovedMessageCount.value.forEach((ent) => {
-    ret.push({
-      date: ent.date,
-      count: Math.round(ent.count) * factor,
+
+  if (ApprovedMessageCount.value) {
+    ApprovedMessageCount.value.forEach((ent) => {
+      ret.push({
+        date: ent.date,
+        count: Math.round(ent.count) * factor,
+      })
     })
-  })
+  }
 
   return ret
 }
