@@ -748,7 +748,7 @@ export default {
 
       // We also want to trigger an update in the chat list.
       if( this.miscStore.modtools){
-        await this.chatStore.listChatsMT()
+        await this.chatStore.listChatsMT(false,this.id)
       } else {
         await this.chatStore.fetchChat(this.id)
       }
