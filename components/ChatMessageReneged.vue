@@ -4,7 +4,10 @@
       <b-col>
         <div v-if="chatmessage?.userid != myid" class="media">
           <div v-if="!refmsg">
-            This chat message refers to a post which has been deleted.
+            This chat message refers to a post (<v-icon
+              icon="hashtag"
+              class="text-muted fa-0-8x"
+            />{{ chatmessage.refmsgid }}) which has been deleted.
           </div>
           <b-card v-else border-variant="warning" class="ml-2">
             <b-card-title>
@@ -59,7 +62,10 @@
         </div>
         <div v-else class="media float-end">
           <div v-if="!refmsg">
-            This chat message refers to a post which has been deleted.
+            This chat message refers to a post (<v-icon
+              icon="hashtag"
+              class="text-muted fa-0-8x"
+            />{{ chatmessage.refmsgid }}) which has been deleted.
           </div>
           <b-card v-else border-variant="warning">
             <b-card-title>
@@ -120,6 +126,7 @@
 <script setup>
 import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
+import { useMessageStore } from '~/stores/message'
 
 const props = defineProps({
   chatid: {
@@ -153,11 +160,16 @@ const {
   chatmessage,
   emessage,
   refmsg,
+  refmsgid,
   me,
   myid,
   otheruser,
   brokenImage,
 } = useChatBase(props.chatid, props.id, props.pov)
+
+if (refmsgid.value) {
+  useMessageStore().fetch(refmsgid.value)
+}
 
 // Setup
 await fetchReferencedMessage(props.chatid, props.id)
