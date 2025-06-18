@@ -12,11 +12,14 @@
         'bg-white': adShown,
       }"
     >
+    DONATED {{ me?.donated }}
       <div v-if="fallbackAdVisible" class="d-flex w-100 justify-content-md-around">
+      FALLBACK
         <nuxt-link to="/adsoff"><img src="/donate/SupportFreegle_970x250px_20May20215.png" alt="Please donate to help keep Freegle running"
           style="max-width: 100%; display: block; margin: auto;" /></nuxt-link>
       </div>
       <div v-else>
+        NOT FALL
       <div
         v-if="isVisible || video"
         :class="{
