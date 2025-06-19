@@ -57,7 +57,7 @@
             </template>
             <template #footer>
               <b-button variant="white" @click="closed"> Cancel </b-button>
-              <b-button variant="primary" @click="resend">
+              <b-button variant="primary" :disabled="!email" @click="resend">
                 Resend verification mail
               </b-button>
             </template>
@@ -140,7 +140,7 @@ const closed = () => {
 
 const resend = async () => {
   const data = await authStore.saveEmail({
-    email: authStore.me.email,
+    email: email.value,
   })
 
   if (data && (data.ret === 0 || data.ret === 10)) {
