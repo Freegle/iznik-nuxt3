@@ -809,6 +809,7 @@ export default {
     },
     canonSubj(message) {
       let subj = message.subject
+      if( !subj) subj = ''
       const group = this.historyGroups[message.groupid]
 
       if (group && group.settings && group.settings.keywords) { // TODO: MT group does not have settings

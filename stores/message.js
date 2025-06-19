@@ -394,12 +394,14 @@ export const useMessageStore = defineStore({
       }
       for (const message of messages) {
         //console.log('GOT message',message.id, typeof message.fromuser)
+        if( !message.subject) message.subject = ''
         this.list[message.id] = message
       }
       //console.log('---fetchMessMT',this.context?.Date,this.context?.id, Object.values(this.list).length, messages.length)
     },
     async fetchMT(params) { // Added for ModTools
       const { message } = await api(this.config).message.fetchMT(params)
+      if( message && !message.subject) message.subject = ''
       return message
     },
     async approveedits(params) {
