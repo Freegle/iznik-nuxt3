@@ -155,7 +155,7 @@ const repliestoshow = computed(() => {
       for (let i = 0; i < visiblereplies.value.length; i++) {
         const reply = newsfeedStore.byId(visiblereplies.value[i])
 
-        if (reply.id === props.replyTo || seen) {
+        if (reply?.id === props.replyTo || seen) {
           seen = true
           ret.push(reply)
         }
