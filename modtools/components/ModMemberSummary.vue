@@ -76,8 +76,10 @@ export default {
       return this.countType('Wanted')
     },
     userinfo() {
+      if( this.member.info){
+        return this.member.info
+      }
       const user = this.userStore.byId(this.member.userid)
-
       if (user && user.info) {
         return user.info
       }

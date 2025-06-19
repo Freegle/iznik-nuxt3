@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
+import { useMiscStore } from './stores/misc'
 import api from '~/api'
 
 export const useUserStore = defineStore({
@@ -55,6 +56,15 @@ export const useUserStore = defineStore({
         console.log('USEUSERSTORE FETCH ID NULL')
         console.trace()
         return
+      }
+      const miscStore = useMiscStore()
+      if( miscStore.modtools) {
+        await this.fetchMT({
+          id: id,
+          info: true,
+          emailhistory: true
+        })
+        return this.list[id]
       }
 
       if (force || !this.list[id]) {
