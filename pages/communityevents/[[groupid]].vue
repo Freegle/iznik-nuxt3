@@ -135,7 +135,7 @@ watch(
 
       const authStore = useAuthStore()
       const me = useAuthStore().user
-      const settings = me?.settings
+      const settings = me?.settings || {}
 
       settings.lastCommunityEvent = max
       authStore.saveAndGet({
