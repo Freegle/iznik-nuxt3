@@ -53,6 +53,8 @@
 <script setup>
 import { useAuthStore } from '../stores/auth'
 import { timeago } from '~/composables/useTimeFormat'
+import { useMe } from '~/composables/useMe'
+const { me } = useMe()
 
 const authStore = useAuthStore()
 
@@ -78,7 +80,7 @@ async function rejoin() {
 }
 
 const medeleted = computed(() => {
-  return authStore?.me?.deleted ? timeago(authStore.me.deleted) : null
+  return me.deleted ? timeago(me.deleted) : null
 })
 </script>
 <style scoped>
