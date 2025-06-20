@@ -501,13 +501,14 @@ export default {
     ...mapWritableState(useMiscStore, ['lastTyping']),
     okToChat() {
       if( this.otheruser?.deleted){
-        if( this.miscStore.modtools){
-          if( this.otheruser.forgotten) {
-            return false
-          }
-        } else {
-          return false
-        }
+        return false
+        //if( this.miscStore.modtools){
+        //  if( this.otheruser.forgotten) {
+        //    return false
+        //  }
+        //} else {
+        //  return false
+        //}
       }
       return true
     },
