@@ -1,7 +1,7 @@
 <template>
   <div class="cont bg-white">
     <div>
-      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+      <notice-message v-if="!okToChat" variant="info" class="mb-2">
         This freegler has deleted their account, so you can't chat to them.
       </notice-message>
       <div v-else-if="showNotices && noticesToShow" class="d-flex">
@@ -70,7 +70,7 @@
           <v-icon icon="times-circle" scale="1.5" />
         </b-button>
       </div>
-      <div v-if="!otheruser?.deleted">
+      <div v-if="okToChat">
         <div v-if="uploading" class="bg-white">
           <OurUploader
             v-model="currentAtts"
@@ -136,7 +136,7 @@
       </div>
     </div>
     <div
-      v-if="!otheruser?.spammer && !otheruser?.deleted"
+      v-if="!otheruser?.spammer && okToChat"
       class="bg-white pt-1 pb-1"
     >
       <div class="d-none d-lg-block">
@@ -499,6 +499,18 @@ export default {
   },
   computed: {
     ...mapWritableState(useMiscStore, ['lastTyping']),
+    okToChat() {
+      if( this.otheruser?.deleted){
+        if( this.miscStore.modtools){
+          if( this.otheruser.forgotten) {
+            return false
+          }
+        } else {
+          return false
+        }
+      }
+      return true
+    },
     isMT() {
       return this.miscStore.modtools
     },
