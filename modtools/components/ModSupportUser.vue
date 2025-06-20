@@ -67,6 +67,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
+      <ModDeletedOrForgotten v-if="user" :user="user" />
       <h3 class="mt-2">
         Trust Level
       </h3>
