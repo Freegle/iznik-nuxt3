@@ -86,9 +86,10 @@
 <script setup>
 import { GChart } from 'vue-google-charts'
 import dayjs from 'dayjs'
+import { nextTick } from 'vue'
 import { useNuxtApp } from '#app'
 
-const { $api, $nextTick } = useNuxtApp()
+const { $api } = useNuxtApp()
 
 const props = defineProps({
   groupid: {
@@ -452,7 +453,7 @@ const maybeFetch = (nodef) => {
   if (!loading.value) {
     loading.value = true
 
-    $nextTick(() => {
+    nextTick(() => {
       fetch(nodef)
     })
   }

@@ -277,8 +277,8 @@ async function checkStillVisible() {
     console.log('Consider system', myEmail, userSite, userSite2)
 
     if (
-      (myEmail && myEmail.includes(userSite)) ||
-      myEmail.includes(userSite2)
+      myEmail &&
+      (myEmail.includes(userSite) || myEmail.includes(userSite2))
     ) {
       console.log('Ads disabled as system account')
       emit('rendered', false)
