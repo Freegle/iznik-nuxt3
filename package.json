@@ -40,7 +40,6 @@
     "@stripe/stripe-js": "^4.9.0",
     "@vue-leaflet/vue-leaflet": "^0.6.1",
     "@zadigetvoltaire/nuxt-gtm": "^0.0.13",
-    "caniuse-lite": "^1.0.30001718",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
