@@ -27,6 +27,7 @@
         <div
           v-if="
             refmsg &&
+            refmsg.fromuser === myid &&
             refmsg.type === 'Offer' &&
             (!refmsg.outcomes || !refmsg.outcomes.length)
           "
