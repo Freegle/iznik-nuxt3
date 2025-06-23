@@ -152,13 +152,37 @@ export function setupModMessages(reset) {
       }
       return work[workType.value]
     } catch (e) {
-      console.log('>>>>useModMessages exception', e.message)
+      console.log('>>>>useModMessages work exception', e.message)
       return 0
     }
   })
 
-  watch(work, (newVal, oldVal) => {
-    //console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+  const workdetail = computed(() => {
+    //console.log('uMM workdetail',workType.value)
+    const ret = {}
+    try {
+      const authStore = useAuthStore()
+      const work = authStore.work
+      if (!work) return ret
+      if (!workType.value) return ret
+      if (Array.isArray(workType.value)) {
+        for (const worktype of workType.value) {
+          ret[worktype] = work[worktype]
+        }
+      } else {
+        ret[workType.value] = work[workType.value]
+      }
+      //console.log('uMM workdetail',ret)
+      return ret
+    } catch (e) {
+      console.log('>>>>useModMessages workdetail exception', e.message)
+      return {}
+    }
+  })
+
+
+  watch(workdetail, (newVal, oldVal) => {
+    //console.log('<<<<useModMessages watch workdetail. oldVal:', oldVal, 'newVal:', newVal)
     // if( collection.value!=='Pending') return
     let doFetch = false
 
