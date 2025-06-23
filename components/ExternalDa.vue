@@ -269,7 +269,17 @@ async function checkStillVisible() {
       me.donated &&
       new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
 
-    if (recentDonor) {
+    const myEmail = me.email
+
+    const runtimeConfig = useRuntimeConfig()
+    const userSite = runtimeConfig.public.USER_SITE
+    const userSite2 = userSite.replace('www.', '')
+    console.log('Consider system', myEmail, userSite, userSite2)
+
+    if (myEmail.includes(userSite) || myEmail.includes(userSite2)) {
+      console.log('Ads disabled as system account')
+      emit('rendered', false)
+    } else if (recentDonor) {
       console.log('Ads disabled as recent donor')
       emit('rendered', false)
     } else if (showingAds?.length && parseInt(showingAds[0].value)) {
