@@ -294,7 +294,7 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
-        <div v-if="pending" v-for="group in message?.groups" class="text-end mb-1">
+        <div v-if="pending && (!message.heldby || message.heldby && message.heldby.id === myid) && !editing" v-for="group in message?.groups" class="text-end mb-1">
           <b-button variant="danger" @click="spamReport">
             <v-icon icon="ban" /> Report Spammer
           </b-button>

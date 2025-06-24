@@ -10,12 +10,12 @@
       <ModMessageButton :message="message" variant="warning" icon="times" reject label="Reject" />
       <ModMessageButton :message="message" variant="danger" icon="trash-alt" delete label="Delete" />
       <ModMessageButton v-if="!message.heldby" :message="message" variant="warning" icon="pause" hold label="Hold" />
-      <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Delete Spam" />
+      <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Delete as Spam" />
     </div>
     <div v-else-if="approved" class="d-inline">
       <ModMessageButton :message="message" variant="primary" icon="envelope" leave label="Blank Reply" />
       <ModMessageButton :message="message" variant="danger" icon="trash-alt" delete label="Delete" />
-      <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Delete Spam" />
+      <ModMessageButton :message="message" variant="danger" icon="ban" spam label="Delete as Spam" />
       <SpinButton v-if="message.type === 'Offer' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as TAKEN"
         @handle="outcome($event, 'Taken')" confirm :flex="false" />
       <SpinButton v-if="message.type === 'Wanted' && !message.outcomes.length" variant="white" class="m-1" icon-name="check" label="Mark as RECEIVED"
