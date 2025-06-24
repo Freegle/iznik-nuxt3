@@ -183,6 +183,7 @@ export function setupModMessages(reset) {
 
   watch(workdetail, (newVal, oldVal) => {
     //console.log('<<<<useModMessages watch workdetail. oldVal:', oldVal, 'newVal:', newVal)
+    if( JSON.stringify(oldVal) === JSON.stringify(newVal)) return // Not actually changed
     // if( collection.value!=='Pending') return
     let doFetch = false
 
