@@ -5,7 +5,8 @@
     </NoticeMessage>
     <NoticeMessage v-else variant="danger" class="mb-2">
       <p>
-        <a :href="user.email">{{ user.email }}</a> is bouncing - see logs for details.
+        <a :href="user.email">{{ user.email }}</a> is bouncing - see logs for
+        details.
       </p>
       <div v-if="user.role === 'Member' || supportOrAdmin">
         <p>If you think the email is valid, you can:</p>
@@ -29,13 +30,13 @@ export default {
   props: {
     user: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       unbouncing: false,
-      unbounced: false
+      unbounced: false,
     }
   },
   methods: {
@@ -47,7 +48,7 @@ export default {
 
       this.unbouncing = false
       this.unbounced = true
-    }
-  }
+    },
+  },
 }
 </script>

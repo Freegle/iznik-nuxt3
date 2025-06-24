@@ -1,33 +1,70 @@
 <template>
   <div>
-    <SpinButton variant="primary" icon-name="users" label="Fetch communities" spinclass="text-white" @handle="fetchCommunities" />
+    <SpinButton
+      variant="primary"
+      icon-name="users"
+      label="Fetch communities"
+      spinclass="text-white"
+      @handle="fetchCommunities"
+    />
     <div v-if="fetched && groups && groups.length" class="mt-2">
       <p>
-        Here you can see info about all Freegle groups. Click on the column headings to sort. Click on the dropdown
-        arrow to filter.
+        Here you can see info about all Freegle groups. Click on the column
+        headings to sort. Click on the dropdown arrow to filter.
       </p>
-      <p>
-        Groups with the ID in light blue are caretaker groups.
-      </p>
-      <hot-table ref="hot" width="100%" :height="height + 'px'" :data="groups" license-key="non-commercial-and-evaluation" column-sorting="true"
-        class="bg-white" :dropdown-menu="true" :filters="true" :cells="cells" :manual-column-freeze="true" :after-render="afterRender">
-        <hot-column title="ID" data="id" :renderer="idRenderer">
+      <p>Groups with the ID in light blue are caretaker groups.</p>
+      <hot-table
+        ref="hot"
+        width="100%"
+        :height="height + 'px'"
+        :data="groups"
+        license-key="non-commercial-and-evaluation"
+        column-sorting="true"
+        class="bg-white"
+        :dropdown-menu="true"
+        :filters="true"
+        :cells="cells"
+        :manual-column-freeze="true"
+        :after-render="afterRender"
+      >
+        <hot-column title="ID" data="id" :renderer="idRenderer"> </hot-column>
+        <hot-column title="Short Name" data="nameshort"> </hot-column>
+        <hot-column title="Display Name" data="namedisplay"> </hot-column>
+        <hot-column
+          title="Last Auto-Approve"
+          data="lastautoapprove"
+          :renderer="dateRenderer"
+        >
         </hot-column>
-        <hot-column title="Short Name" data="nameshort">
+        <hot-column
+          title="Auto-Approve %"
+          data="recentautoapprovespercent"
+          :renderer="autoApprovesRenderer"
+        >
         </hot-column>
-        <hot-column title="Display Name" data="namedisplay">
+        <hot-column
+          title="Auto-Approves"
+          data="recentautoapproves"
+          :renderer="centreRenderer"
+        >
         </hot-column>
-        <hot-column title="Last Auto-Approve" data="lastautoapprove" :renderer="dateRenderer">
+        <hot-column
+          title="Active-owner"
+          data="activeownercount"
+          :renderer="centreRenderer"
+        >
         </hot-column>
-        <hot-column title="Auto-Approve %" data="recentautoapprovespercent" :renderer="autoApprovesRenderer">
+        <hot-column
+          title="Active Mods"
+          data="activemodcount"
+          :renderer="centreRenderer"
+        >
         </hot-column>
-        <hot-column title="Auto-Approves" data="recentautoapproves" :renderer="centreRenderer">
-        </hot-column>
-        <hot-column title="Active-owner" data="activeownercount" :renderer="centreRenderer">
-        </hot-column>
-        <hot-column title="Active Mods" data="activemodcount" :renderer="centreRenderer">
-        </hot-column>
-        <hot-column title="Last Moderated" data="lastmoderated" :renderer="dateRenderer">
+        <hot-column
+          title="Last Moderated"
+          data="lastmoderated"
+          :renderer="dateRenderer"
+        >
         </hot-column>
         <hot-column title="Publish?" data="publish" :renderer="boolRenderer">
         </hot-column>
@@ -37,19 +74,29 @@
         </hot-column>
         <hot-column title="LJ?" data="onlovejunk" :renderer="boolRenderer">
         </hot-column>
-        <hot-column title="Region" data="region">
-        </hot-column>
+        <hot-column title="Region" data="region"> </hot-column>
         <hot-column title="Lat" data="lat" :renderer="latlngRenderer">
         </hot-column>
         <hot-column title="Lng" data="lng" :renderer="latlngRenderer">
         </hot-column>
-        <hot-column title="Founded" data="founded">
+        <hot-column title="Founded" data="founded"> </hot-column>
+        <hot-column
+          title="Affiliation Confirmed"
+          data="affiliationconfirmed"
+          :renderer="dateRenderer"
+        >
         </hot-column>
-        <hot-column title="Affiliation Confirmed" data="affiliationconfirmed" :renderer="dateRenderer">
+        <hot-column
+          title="Backup Owners Active"
+          data="backupownersactive"
+          :renderer="centreRenderer"
+        >
         </hot-column>
-        <hot-column title="Backup Owners Active" data="backupownersactive" :renderer="centreRenderer">
-        </hot-column>
-        <hot-column title="Backup Mods Active" data="backupmodsactive" :renderer="centreRenderer">
+        <hot-column
+          title="Backup Mods Active"
+          data="backupmodsactive"
+          :renderer="centreRenderer"
+        >
         </hot-column>
       </hot-table>
     </div>
@@ -57,9 +104,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useModGroupStore } from '@/stores/modgroup'
 import { HotTable, HotColumn } from '@handsontable/vue3'
 import { registerAllModules } from 'handsontable/registry'
+import { useModGroupStore } from '@/stores/modgroup'
 import 'handsontable/dist/handsontable.full.css'
 
 registerAllModules()
@@ -68,7 +115,7 @@ registerAllModules()
 export default {
   components: {
     HotTable,
-    HotColumn
+    HotColumn,
   },
   setup() {
     const modGroupStore = useModGroupStore()
@@ -96,7 +143,7 @@ export default {
   mounted() {
     this.checkHeight()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.heightTimer) {
       clearTimeout(this.heightTimer)
     }
@@ -122,7 +169,6 @@ export default {
       const group = this.groups[_row]
       let auto = parseInt(value)
       if (group && group.publish) {
-
         if (auto >= 50) {
           td.style.backgroundColor = 'orange'
         }
@@ -148,11 +194,10 @@ export default {
       td.innerHTML = value === 1 ? 'Y' : 'N'
     },
 
-
     async fetchCommunities(callback) {
       await this.modGroupStore.listMT({
         grouptype: 'Freegle',
-        support: true
+        support: true,
       })
 
       // This prevents us rendering partial data that happens to be in store.
@@ -161,7 +206,7 @@ export default {
     },
     cells(row, col, prop) {
       return {
-        editor: false
+        editor: false,
       }
     },
     afterRender() {
@@ -183,8 +228,8 @@ export default {
 
         this.heightTimer = setTimeout(this.checkHeight, 100)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

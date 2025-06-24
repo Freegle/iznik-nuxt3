@@ -15,7 +15,7 @@ export const useGroupStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    clear(){
+    clear() {
       this.list = {}
       this.messages = {}
       this.allGroups = {}

@@ -2,87 +2,148 @@
   <div class="scrollinplace">
     <b-form-group label="Your visible name">
       <b-form-text class="mb-2">
-        This is your name as displayed publicly to other users, including in the <em>$myname</em> substitution string.
+        This is your name as displayed publicly to other users, including in the
+        <em>$myname</em> substitution string.
       </b-form-text>
       <b-input-group>
         <b-form-input v-model="me.displayname" placeholder="Your name" />
         <slot name="append">
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="saveName" />
+          <SpinButton
+            variant="white"
+            icon-name="save"
+            label="Save"
+            @handle="saveName"
+          />
         </slot>
       </b-input-group>
     </b-form-group>
     <b-form-group label="Your email address">
-      <EmailConfirmModal v-if="showEmailConfirmModal" @hidden="showEmailConfirmModal = false" />
+      <EmailConfirmModal
+        v-if="showEmailConfirmModal"
+        @hidden="showEmailConfirmModal = false"
+      />
       <b-form-text class="mb-2">
         Anything we mail to you, we'll mail to this email address.
       </b-form-text>
       <b-input-group id="input-email">
-        <b-form-input v-model="me.email" placeholder="Your email" label="Your email address" type="email" />
+        <b-form-input
+          v-model="me.email"
+          placeholder="Your email"
+          label="Your email address"
+          type="email"
+        />
         <slot name="append">
-          <SpinButton variant="white" icon-name="save" label="Save" @handle="saveEmail" />
+          <SpinButton
+            variant="white"
+            icon-name="save"
+            label="Save"
+            @handle="saveEmail"
+          />
         </slot>
       </b-input-group>
     </b-form-group>
     <b-form-group label="Moderation Notifications (Active)">
       <b-form-text class="mb-2">
-        For groups that you're an active mod on, we will mail you when there is moderation work to do which has been
-        outstanding for more than a certain time. You can control the frequency or disable this here. We only mail you
-        between 8am and 10pm.
+        For groups that you're an active mod on, we will mail you when there is
+        moderation work to do which has been outstanding for more than a certain
+        time. You can control the frequency or disable this here. We only mail
+        you between 8am and 10pm.
       </b-form-text>
-      <b-form-select v-model="modnotifs" :options="modNotifOptions" class="mb-2 font-weight-bold" />
+      <b-form-select
+        v-model="modnotifs"
+        :options="modNotifOptions"
+        class="mb-2 font-weight-bold"
+      />
     </b-form-group>
     <b-form-group label="Moderation Notifications (Backup)">
       <b-form-text class="mb-2">
-        This is for groups where you're a backup mod. You'd usually set this to a higher value than the previous
-        setting so that the active mods will get notified first.
+        This is for groups where you're a backup mod. You'd usually set this to
+        a higher value than the previous setting so that the active mods will
+        get notified first.
       </b-form-text>
-      <b-form-select v-model="backupmodnotifs" :options="modNotifOptions" class="mb-2 font-weight-bold" />
+      <b-form-select
+        v-model="backupmodnotifs"
+        :options="modNotifOptions"
+        class="mb-2 font-weight-bold"
+      />
     </b-form-group>
     <b-form-group label="Play Beep">
       <b-form-text class="mb-2">
         Play beep when new ModTools work arrives.
       </b-form-text>
-      <OurToggle v-model="beep" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Play beep', unchecked: 'Stay quiet' }" variant="modgreen" />
+      <OurToggle
+        v-model="beep"
+        class="mt-2"
+        :height="30"
+        :width="150"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: 'Play beep', unchecked: 'Stay quiet' }"
+        variant="modgreen"
+      />
     </b-form-group>
     <b-form-group label="Show me as a volunteer?">
       <b-form-text class="mb-2">
-        We can show members who the volunteers on a group are, to make it seem more friendly. You can choose whether we show you.
+        We can show members who the volunteers on a group are, to make it seem
+        more friendly. You can choose whether we show you.
       </b-form-text>
-      <OurToggle v-model="showme" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Show me', unchecked: 'Hide me' }" variant="modgreen" />
+      <OurToggle
+        v-model="showme"
+        class="mt-2"
+        :height="30"
+        :width="150"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: 'Show me', unchecked: 'Hide me' }"
+        variant="modgreen"
+      />
     </b-form-group>
     <b-form-group label="Email me about ChitChat?">
       <b-form-text class="mb-2">
-        Your members may post in the ChitChat, perhaps to introduce themselves, or perhaps because they have
-        problems. Replying to these posts helps them and makes Freegle friendlier. We only mail you about communities
+        Your members may post in the ChitChat, perhaps to introduce themselves,
+        or perhaps because they have problems. Replying to these posts helps
+        them and makes Freegle friendlier. We only mail you about communities
         you are an active mod on.
       </b-form-text>
-      <OurToggle v-model="modnotifnewsfeed" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Mail me', unchecked: 'Don\'t mail' }" variant="modgreen" />
+      <OurToggle
+        v-model="modnotifnewsfeed"
+        class="mt-2"
+        :height="30"
+        :width="150"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: 'Mail me', unchecked: 'Don\'t mail' }"
+        variant="modgreen"
+      />
     </b-form-group>
     <b-form-group label="Enter send vs newline">
       <b-form-text class="mb-2">
-        On ModTools, normally enter/return adds a new line. This the opposite way round from on the Freegle site,
-        where sending the message is the best compromise option given the limitations of what is technically possible
-        for websites when used from mobiles. If you prefer enter to send on ModTools too, you can change the setting on
-        this device.
+        On ModTools, normally enter/return adds a new line. This the opposite
+        way round from on the Freegle site, where sending the message is the
+        best compromise option given the limitations of what is technically
+        possible for websites when used from mobiles. If you prefer enter to
+        send on ModTools too, you can change the setting on this device.
       </b-form-text>
-      <OurToggle v-model="enterAddsNewLine" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-        :labels="{ checked: 'Send message', unchecked: 'Insert new line' }" variant="modgreen" />
+      <OurToggle
+        v-model="enterAddsNewLine"
+        class="mt-2"
+        :height="30"
+        :width="150"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: 'Send message', unchecked: 'Insert new line' }"
+        variant="modgreen"
+      />
     </b-form-group>
     <b-form-group label="Would you like some cake?">
       <ModCake />
     </b-form-group>
-    <h5 class="mt-3">
-      Unsubscribe
-    </h5>
+    <h5 class="mt-3">Unsubscribe</h5>
     <p>
-      If you want to completely leave ModTools and Freegle and remove all your data, click here.
+      If you want to completely leave ModTools and Freegle and remove all your
+      data, click here.
     </p>
-    <b-button variant="primary" to="/unsubscribe">
-      Unsubscribe
-    </b-button>
+    <b-button variant="primary" to="/unsubscribe"> Unsubscribe </b-button>
   </div>
 </template>
 <script>
@@ -90,6 +151,15 @@ import { useAuthStore } from '../stores/auth'
 import { useMiscStore } from '@/stores/misc'
 
 export default {
+  setup() {
+    const authStore = useAuthStore()
+    const miscStore = useMiscStore()
+
+    return {
+      authStore,
+      miscStore,
+    }
+  },
   data: function () {
     return {
       showEmailConfirmModal: false,
@@ -100,19 +170,9 @@ export default {
         { text: 'After 2 hours', value: 2 },
         { text: 'After 1 hour', value: 1 },
         { text: 'Immediately', value: 0 },
-        { text: 'Never', value: -1 }
-      ]
+        { text: 'Never', value: -1 },
+      ],
     }
-  },
-  setup() {
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-
-    return {
-      authStore,
-      miscStore
-    }
-
   },
   computed: {
     beep: {
@@ -123,7 +183,7 @@ export default {
       },
       set(newval) {
         this.saveSetting('playbeep', newval)
-      }
+      },
     },
     showme: {
       get() {
@@ -133,7 +193,7 @@ export default {
       },
       set(newval) {
         this.saveSetting('showmod', newval)
-      }
+      },
     },
     modnotifnewsfeed: {
       get() {
@@ -143,7 +203,7 @@ export default {
       },
       set(newval) {
         this.saveSetting('modnotifnewsfeed', newval)
-      }
+      },
     },
     modnotifs: {
       get() {
@@ -153,7 +213,7 @@ export default {
       },
       set(newval) {
         this.saveSetting('modnotifs', newval)
-      }
+      },
     },
     backupmodnotifs: {
       get() {
@@ -163,7 +223,7 @@ export default {
       },
       set(newval) {
         this.saveSetting('backupmodnotifs', newval)
-      }
+      },
     },
     enterAddsNewLine: {
       get() {
@@ -174,20 +234,20 @@ export default {
           key: 'enternewlinemt',
           value: newval,
         })
-      }
-    }
+      },
+    },
   },
   methods: {
     async saveName(callback) {
       await this.authStore.saveAndGet({
-        displayname: this.me.displayname
+        displayname: this.me.displayname,
       })
       callback()
     },
     async saveEmail(callback) {
       if (this.me.email) {
         const data = await this.authStore.saveEmail({
-          email: this.me.email
+          email: this.me.email,
         })
 
         if (data && data.ret === 10) {
@@ -200,10 +260,10 @@ export default {
       const settings = this.me.settings
       settings[name] = val
       await this.authStore.saveAndGet({
-        settings
+        settings,
       })
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

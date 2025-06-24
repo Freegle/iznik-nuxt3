@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
-import { defineStore } from 'pinia'
 import api from '~/api'
 
 // authStore.work has total work counts across all group - re-got every 30s in modme->checkWork
@@ -14,7 +14,7 @@ export const useModGroupStore = defineStore({
     allGroups: {},
     received: false,
     sessionGroups: false,
-    failedGroups: []
+    failedGroups: [],
   }),
   actions: {
     init(config) {
@@ -33,23 +33,23 @@ export const useModGroupStore = defineStore({
     // Do not clear groups info but get any extra again
     async getModGroups() {
       try {
-        //console.log('--- uMGS getModGroups A')
+        // console.log('--- uMGS getModGroups A')
 
         // Get all base groups once - but clear if not logged in
         const groupStore = useGroupStore()
         const authStore = useAuthStore()
-        //console.log('--- uMGS getModGroups AA', authStore.groups.length)
-        if( authStore.groups.length===0){
+        // console.log('--- uMGS getModGroups AA', authStore.groups.length)
+        if (authStore.groups.length === 0) {
           groupStore.clear()
           this.clear()
         }
-        if( Object.keys(groupStore.list).length===0){
+        if (Object.keys(groupStore.list).length === 0) {
           await groupStore.fetch()
         }
-        //console.log('--- uMGS getModGroups AAAA', Object.keys(groupStore.list).length)
+        // console.log('--- uMGS getModGroups AAAA', Object.keys(groupStore.list).length)
 
         // Get work for each group
-        //console.log('--- uMGS getModGroups B')
+        // console.log('--- uMGS getModGroups B')
         const me = authStore.user
         this.sessionGroups = false
         if (me && me.id) {
@@ -57,7 +57,7 @@ export const useModGroupStore = defineStore({
             components: ['groups'],
           })
           if (ret && ret.groups) {
-            //console.log('uMGS getModGroups work', ret.groups)
+            // console.log('uMGS getModGroups work', ret.groups)
             this.sessionGroups = ret.groups
 
             for (const group of Object.values(this.list)) {
@@ -69,12 +69,12 @@ export const useModGroupStore = defineStore({
           }
         }
 
-        //console.log('--- uMGS getModGroups C')
+        // console.log('--- uMGS getModGroups C')
         // Go through all our groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
         this.getting = []
         for (const g of Object.values(authStore.groups)) {
-          //console.log('--- uMGS getModGroups g', g.groupid)
+          // console.log('--- uMGS getModGroups g', g.groupid)
           this.fetchIfNeedBeMT(g.groupid)
         }
       } catch (e) {
@@ -85,15 +85,24 @@ export const useModGroupStore = defineStore({
     // Actually get full group infor for MT
     // Called by fetchIfNeedBeMT and when group needs reloading after changes
     async fetchGroupMT(id) {
-      //console.error('uMGS fetchGroupMT', id)
-      if (!id) { console.error('fetchGroupMT with zero id'); return }
-      //console.log('--- uMGS fetchGroupMT', id)
+      // console.error('uMGS fetchGroupMT', id)
+      if (!id) {
+        console.error('fetchGroupMT with zero id')
+        return
+      }
+      // console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
       const sponsors = true
       const showmods = true
       const tnkey = true
 
-      const group = await api(this.config).group.fetchGroupMT(id, polygon, showmods, sponsors, tnkey)
+      const group = await api(this.config).group.fetchGroupMT(
+        id,
+        polygon,
+        showmods,
+        sponsors,
+        tnkey
+      )
       if (group) {
         if (!this.sessionGroups) {
           const ret = await this.$api.session.fetch({
@@ -125,9 +134,9 @@ export const useModGroupStore = defineStore({
     },
     async listMT(params) {
       console.error('uMGS listMT implemented: getting allGroups')
-      //console.trace()
+      // console.trace()
       const groups = await api(this.config).group.listMT(params)
-      //this.list = {}
+      // this.list = {}
       this.allGroups = {}
       if (groups) {
         groups.forEach((g) => {
@@ -136,21 +145,22 @@ export const useModGroupStore = defineStore({
       }
     },
     async fetchIfNeedBeMT(id) {
-      //console.log('uMGS fetchIfNeedBeMT A', id)
+      // console.log('uMGS fetchIfNeedBeMT A', id)
       if (!id) return
       if (this.list[id]) return
       if (this.getting.includes(id)) {
-        //console.log('uMGS fetchIfNeedBeMT B', id)
+        // console.log('uMGS fetchIfNeedBeMT B', id)
         const until = (predFn) => {
-          const poll = (done) => (predFn() ? done() : setTimeout(() => poll(done), 100))
+          const poll = (done) =>
+            predFn() ? done() : setTimeout(() => poll(done), 100)
           return new Promise(poll)
         }
         const self = this
         await until(() => self.list[id]) // Wait until group has arrived
-        //console.log('uMGS fetchIfNeedBeMT GOT', id)
+        // console.log('uMGS fetchIfNeedBeMT GOT', id)
         return
       }
-      //console.error('uMGS fetchIfNeedBeMT CCC', id)
+      // console.error('uMGS fetchIfNeedBeMT CCC', id)
       this.getting.push(id)
       await this.fetchGroupMT(id)
     },
@@ -162,14 +172,14 @@ export const useModGroupStore = defineStore({
   },
   getters: {
     get: (state) => (id) => {
-      //const idwas = id
+      // const idwas = id
       id = parseInt(id)
       if (!id) {
-        //console.error('uMGS id not present', idwas)
+        // console.error('uMGS id not present', idwas)
         return null
       }
       const g = state.list[id] ? state.list[id] : null
-      //console.log('uMGS get', id, g)
+      // console.log('uMGS get', id, g)
       // OK if not found initially as it should appear soon enough
       // if (!g) console.error('uMGS group not found for id', id)
       return g
@@ -178,6 +188,5 @@ export const useModGroupStore = defineStore({
       if (!id) return null
       return state.allGroups[id] ? state.allGroups[id] : null
     },
-
-  }
+  },
 })

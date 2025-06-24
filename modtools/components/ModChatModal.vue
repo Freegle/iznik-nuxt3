@@ -1,18 +1,31 @@
 <template>
   <div>
-    <b-modal ref="modal" :id="'messageReportModal-' + id" size="lg" hide-header-close no-close-on-esc>
+    <b-modal
+      :id="'messageReportModal-' + id"
+      ref="modal"
+      size="lg"
+      hide-header-close
+      no-close-on-esc
+    >
       <template #header>
-        <div v-if="user1 && pov == user1.id" class="d-flex justify-content-between w-100">
+        <div
+          v-if="user1 && pov == user1.id"
+          class="d-flex justify-content-between w-100"
+        >
           <div v-if="user2">
             {{ user2.displayname }}
             <span class="text-muted small">
-              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                user2.id
+              }}
             </span>
           </div>
           <div v-if="user1">
             {{ user1.displayname }}
             <span class="text-muted small">
-              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                user1.id
+              }}
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
@@ -23,13 +36,17 @@
           <div v-if="user1">
             {{ user1.displayname }}
             <span class="text-muted small">
-              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user1.id }}
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                user1.id
+              }}
             </span>
           </div>
           <div v-if="user2">
             {{ user2.displayname }}
             <span class="text-muted small">
-              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{ user2.id }}
+              <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                user2.id
+              }}
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
@@ -38,24 +55,44 @@
         </div>
       </template>
       <template #default>
-        <div v-if="chat2" ref="chatContent" class="m-0 chatContent" infinite-wrapper>
-          <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="10" @infinite="loadMore">
+        <div
+          v-if="chat2"
+          ref="chatContent"
+          class="m-0 chatContent"
+          infinite-wrapper
+        >
+          <infinite-loading
+            direction="top"
+            force-use-infinite-wrapper="true"
+            :distance="10"
+            @infinite="loadMore"
+          >
             <template #spinner>
               <b-img lazy src="/loader.gif" alt="Loading" />
             </template>
           </infinite-loading>
-          <ul v-for="chatmessage in chatmessages" :key="'chatmessage-' + chatmessage.id" class="p-0 pt-1 list-unstyled mb-1">
+          <ul
+            v-for="chatmessage in chatmessages"
+            :key="'chatmessage-' + chatmessage.id"
+            class="p-0 pt-1 list-unstyled mb-1"
+          >
             <li v-if="chatmessage">
-              <ChatMessage :key="'chatmessage-' + chatmessage.id" :id="chatmessage.id" :chatid="chatmessage.chatid"
-                :last="chatmessage.id === chatmessages[chatmessages.length - 1].id" :pov="pov" class="mb-1" />
+              <ChatMessage
+                :id="chatmessage.id"
+                :key="'chatmessage-' + chatmessage.id"
+                :chatid="chatmessage.chatid"
+                :last="
+                  chatmessage.id === chatmessages[chatmessages.length - 1].id
+                "
+                :pov="pov"
+                class="mb-1"
+              />
             </li>
           </ul>
         </div>
       </template>
       <template #footer>
-        <b-button variant="white" @click="closeit">
-          Close
-        </b-button>
+        <b-button variant="white" @click="closeit"> Close </b-button>
       </template>
     </b-modal>
   </div>
@@ -63,16 +100,28 @@
 <script>
 import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
-//import chatCollate from '@/mixins/chatCollate.js'
-//import chat from '@/mixins/chat.js'
-//const ChatMessage = () => import('~/components/ChatMessage')
+// import chatCollate from '@/mixins/chatCollate.js'
+// import chat from '@/mixins/chat.js'
+// const ChatMessage = () => import('~/components/ChatMessage')
 
 export default {
-  //components: { ChatMessage },
+  // mixins: [chatCollate, chat, modal],
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+    pov: {
+      type: Number,
+      required: true,
+    },
+  },
+  // components: { ChatMessage },
   async setup(props) {
     const { modal, hide } = useOurModal()
 
-    const { // TODO Returns wrong chat
+    const {
+      // TODO Returns wrong chat
       chat,
       otheruser,
       tooSoonToNudge,
@@ -90,18 +139,8 @@ export default {
       chatmessages,
       milesaway,
       milesstring,
-      modal, hide
-    }
-  },
-  //mixins: [chatCollate, chat, modal],
-  props: {
-    id: {
-      type: Number,
-      required: true
-    },
-    pov: {
-      type: Number,
-      required: true
+      modal,
+      hide,
     }
   },
   data: function () {
@@ -109,10 +148,6 @@ export default {
       busy: true,
       chat2: null,
     }
-  },
-  async mounted() {
-    await this.show()
-
   },
   computed: {
     // Construct basic user details by hand. u1settings and u2settings also available
@@ -141,11 +176,14 @@ export default {
       }
 
       return ret
-    }
+    },
+  },
+  async mounted() {
+    await this.show()
   },
   methods: {
     async show() {
-      //await this.chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, this.id)
+      // await this.chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, this.id)
       await this.chatStore.fetchChat(this.id)
       await this.chatStore.fetchMessages(this.id)
       this.chat2 = this.chatStore.byChatId(this.id)
@@ -167,8 +205,8 @@ export default {
     },
     loadMore($state) {
       $state.complete()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

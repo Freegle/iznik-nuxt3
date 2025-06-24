@@ -2,20 +2,31 @@
   <div>
     <NoticeMessage v-if="invalid.length" variant="danger">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook {{ pluralise(['page has', 'pages have'], invalid.length) }} become
+        <v-icon icon="exclamation-triangle" /> {{ invalid.length }} Facebook
+        {{ pluralise(['page has', 'pages have'], invalid.length) }} become
         unlinked.
-        <b-button variant="white" @click="expand">
-          Click to view
-        </b-button>
+        <b-button variant="white" @click="expand"> Click to view </b-button>
       </div>
       <div v-else>
-        <div v-for="(inv) of invalid" :key="'fbinvalid-' + inv.page.uid">
+        <div v-for="inv of invalid" :key="'fbinvalid-' + inv.page.uid">
           <p>
-            Facebook page <a :href="'https://facebook.com/' + inv.page.id" target="_blank" rel="noopener nofollower">{{ inv.page.name }}</a>
+            Facebook page
+            <a
+              :href="'https://facebook.com/' + inv.page.id"
+              target="_blank"
+              rel="noopener nofollower"
+              >{{ inv.page.name }}</a
+            >
             for community
             <strong>{{ inv.group.namedisplay }}</strong>
           </p>
-          <ExternalLink class="btn btn-white mb-2" :href="'https://modtools.org/facebook/facebook_request.php?type=Page&groupid=' + inv.group.id">
+          <ExternalLink
+            class="btn btn-white mb-2"
+            :href="
+              'https://modtools.org/facebook/facebook_request.php?type=Page&groupid=' +
+              inv.group.id
+            "
+          >
             Relink
           </ExternalLink>
         </div>
@@ -23,16 +34,27 @@
     </NoticeMessage>
     <NoticeMessage v-if="notlinked.length" variant="warning" class="mt-1">
       <div v-if="summary">
-        <v-icon icon="exclamation-triangle" /> {{ pluralise(['community needs', 'communities need'], notlinked.length, true) }} to be linked to a
-        Facebook page.
-        <b-button variant="white" @click="expand">
-          Click to view
-        </b-button>
+        <v-icon icon="exclamation-triangle" />
+        {{
+          pluralise(
+            ['community needs', 'communities need'],
+            notlinked.length,
+            true
+          )
+        }}
+        to be linked to a Facebook page.
+        <b-button variant="white" @click="expand"> Click to view </b-button>
       </div>
       <div v-else>
-        <p>Communities can be linked to a Facebook page, to get extra publicity. Some of your groups aren't.</p>
-        <p>Please click to go to the Settings page where you can link from the <em>Social Media</em> section.</p>
-        <div v-for="(inv) of notlinked" :key="'fbnotlinked-' + inv.group.id">
+        <p>
+          Communities can be linked to a Facebook page, to get extra publicity.
+          Some of your groups aren't.
+        </p>
+        <p>
+          Please click to go to the Settings page where you can link from the
+          <em>Social Media</em> section.
+        </p>
+        <div v-for="inv of notlinked" :key="'fbnotlinked-' + inv.group.id">
           <nuxt-link :to="'/settings/' + inv.group.id">
             {{ inv.group.namedisplay }}
           </nuxt-link>
@@ -42,11 +64,10 @@
   </div>
 </template>
 <script>
-
 export default {
   data: function () {
     return {
-      summary: true
+      summary: true,
     }
   },
   computed: {
@@ -64,7 +85,7 @@ export default {
             if (!fb.valid && fb.type === 'Page') {
               ret.push({
                 page: fb,
-                group: group
+                group,
               })
             }
           }
@@ -84,11 +105,11 @@ export default {
         ) {
           if (!group.facebook) {
             ret.push({
-              group: group
+              group,
             })
           } else {
             let valid = true
-            group.facebook.forEach(f => {
+            group.facebook.forEach((f) => {
               if (!f.valid) {
                 valid = false
               }
@@ -96,7 +117,7 @@ export default {
 
             if (!valid) {
               ret.push({
-                group: group
+                group,
               })
             }
           }
@@ -104,12 +125,12 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   methods: {
     expand() {
       this.summary = false
     },
-  }
+  },
 }
 </script>

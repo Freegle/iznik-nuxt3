@@ -1,16 +1,14 @@
 <template>
   <b-row>
-    <b-col cols="4" md="2" class="order-1 ">
-      <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ volunteer.userid }}
+    <b-col cols="4" md="2" class="order-1">
+      <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+        volunteer.userid
+      }}
     </b-col>
     <b-col cols="12" md="3" class="order-4 order-md-2">
       {{ volunteer.displayname }}
-      <span v-if="active" class="font-weight-bold">
-        (Active)
-      </span>
-      <span v-else class="text-muted">
-        (Backup)
-      </span>
+      <span v-if="active" class="font-weight-bold"> (Active) </span>
+      <span v-else class="text-muted"> (Backup) </span>
     </b-col>
     <b-col cols="12" md="3" class="order-5 order-md-3">
       <ModClipboard class="mr-3" :value="volunteer.email" />
@@ -18,7 +16,11 @@
       <ExternalLink :href="'mailto:' + volunteer.email">{{ volunteer.email }}</ExternalLink>
     </b-col>
     <b-col cols="4" md="2" class="order-2 order-md-4">
-      <ModRole :userid="volunteer.userid" :groupid="groupid" :role="volunteer.role" />
+      <ModRole
+        :userid="volunteer.userid"
+        :groupid="groupid"
+        :role="volunteer.role"
+      />
     </b-col>
     <b-col cols="4" md="2" class="order-3 order-md-5">
       <span v-if="volunteer.lastmoderated">
@@ -32,12 +34,12 @@ export default {
   props: {
     volunteer: {
       type: Object,
-      required: true
+      required: true,
     },
     groupid: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     active() {
@@ -51,7 +53,7 @@ export default {
       }
 
       return false
-    }
-  }
+    },
+  },
 }
 </script>

@@ -1,17 +1,13 @@
 <template>
   <div>
     <p>
-      Paste in email addresses, one per line, and check whether they are still volunteers.  This is useful for
-      checking membership of our legal entity.
+      Paste in email addresses, one per line, and check whether they are still
+      volunteers. This is useful for checking membership of our legal entity.
     </p>
     <b-form-textarea v-model="emails" rows="10" />
-    <b-button variant="primary" class="mt-2" @click="check">
-      Check
-    </b-button>
+    <b-button variant="primary" class="mt-2" @click="check"> Check </b-button>
     <div v-if="results.length">
-      <h2>
-        Results
-      </h2>
+      <h2>Results</h2>
       <div v-for="result in results" :key="result">
         <div v-if="result.error" class="text-danger">
           {{ result.text }}
@@ -30,22 +26,22 @@ export default {
   data() {
     return {
       emails: null,
-      results: []
+      results: [],
     }
   },
   methods: {
     check() {
       this.results = []
-      const emails = this.emails.split('\n').map(email => email.trim())
-      emails.forEach(async email => {
+      const emails = this.emails.split('\n').map((email) => email.trim())
+      emails.forEach(async (email) => {
         if (email) {
           const userStore = useUserStore()
           userStore.clear()
 
-          console.log('check fetchMT',email)
+          console.log('check fetchMT', email)
           const ret = await userStore.fetchMT({
             search: email,
-            emailhistory: false
+            emailhistory: false,
           })
 
           if (ret.length === 1) {
@@ -56,29 +52,29 @@ export default {
             ) {
               this.results.push({
                 text: email + ': Volunteer',
-                error: false
+                error: false,
               })
             } else {
               this.results.push({
                 text: email + ': Not a volunteer',
-                error: true
+                error: true,
               })
             }
           } else if (ret.length > 1) {
             console.log('More than 1 match found', ret)
             this.results.push({
               text: email + ': More than 1 match found - check email',
-              error: true
+              error: true,
             })
           } else {
             this.results.push({
               text: email + ': Not found',
-              error: true
+              error: true,
             })
           }
         }
       })
-    }
-  }
+    },
+  },
 }
 </script>

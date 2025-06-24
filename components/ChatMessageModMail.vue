@@ -22,7 +22,10 @@
               <h4 v-else>Message from Freegle Volunteers</h4>
               <div v-if="realMod" class="text-muted small">
                 <div class="small">
-                  (Sent by <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{ chatmessage.userid }})
+                  (Sent by
+                  <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+                    chatmessage.userid
+                  }})
                 </div>
               </div>
             </b-card-title>
@@ -58,7 +61,7 @@
                 </b-button>
               </div>
               <NoticeMessage
-                v-else-if="!modtools && (chat.chattype === 'User2User')"
+                v-else-if="!modtools && chat.chattype === 'User2User'"
                 variant="warning"
                 class="mt-2"
               >
@@ -89,10 +92,10 @@
 </template>
 <script>
 import { useComposeStore } from '../stores/compose'
-import { useMiscStore } from '~/stores/misc'
 import { fetchReferencedMessage } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
+import { useMiscStore } from '~/stores/misc'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import { useRouter } from '#imports'
@@ -117,7 +120,7 @@ export default {
     }
   },
   computed: {
-    modtools(){
+    modtools() {
       const miscStore = useMiscStore()
       return miscStore.modtools
     },
@@ -134,7 +137,7 @@ export default {
           this.realMe.systemrole === 'Support' ||
           this.realMe.systemrole === 'Admin')
       )
-    }
+    },
   },
   methods: {
     async repost() {

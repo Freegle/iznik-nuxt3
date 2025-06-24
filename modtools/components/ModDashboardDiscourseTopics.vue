@@ -1,13 +1,15 @@
 <template>
   <b-card v-if="DiscourseTopics" no-body>
     <b-card-body>
-      <b-card-title>
-        Latest Discourse Topics
-      </b-card-title>
+      <b-card-title> Latest Discourse Topics </b-card-title>
       <p>
-        Discourse is where we can chat to each other and ask questions.  Join in!
+        Discourse is where we can chat to each other and ask questions. Join in!
       </p>
-      <ModDashboardDiscourseTopic v-for="topic in top5" :key="topic.id" :topic="topic" />
+      <ModDashboardDiscourseTopic
+        v-for="topic in top5"
+        :key="topic.id"
+        :topic="topic"
+      />
       <NoticeMessage variant="info">
         We also have a couple of groups on WhatsApp for
         <!-- eslint-disable-next-line -->
@@ -24,11 +26,11 @@ import ModDashboardBase from './ModDashboardBase'
 
 export default {
   extends: ModDashboardBase,
-  data: function() {
+  data: function () {
     return {
       askfor: ['DiscourseTopics'],
       DiscourseTopics: null,
-      refreshTimer: null
+      refreshTimer: null,
     }
   },
   computed: {
@@ -43,12 +45,12 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   mounted() {
     this.refreshTimer = setTimeout(this.doRefresh, 10 * 60 * 1000)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer)
       this.refreshTimer = null
@@ -58,7 +60,7 @@ export default {
     doRefresh() {
       this.maybeFetch()
       this.refreshTimer = setTimeout(this.doRefresh, 10 * 60 * 1000)
-    }
-  }
+    },
+  },
 }
 </script>

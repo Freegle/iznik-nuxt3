@@ -18,10 +18,10 @@ export const useChatStore = defineStore({
     showClosed: false,
     currentChatMT: null,
     lastSearchMT: null,
-    currentCountMT: 0
+    currentCountMT: 0,
   }),
   actions: {
-    clear(){
+    clear() {
       this.list = []
       this.listByChatId = {}
       this.listByChatMessageId = {}
@@ -35,29 +35,29 @@ export const useChatStore = defineStore({
       this.config = config
       this.route = useRoute()
     },
-    async listChatsMT(params, selectedChatId){
+    async listChatsMT(params, selectedChatId) {
       params = params || {
         chattypes: ['User2Mod', 'Mod2Mod'],
-        search: params && params.search ? params.search : null
+        search: params && params.search ? params.search : null,
       }
       params.summary = true
       // console.log('uCS listChatsMT', params)
-  
+
       this.lastSearchMT = params.search
-  
+
       try {
-        //let current = null
-  
+        // let current = null
+
         // We might have a current chat selected.  We want to make sure that we don't lose it.  This can happen if
         // we search for an old chat that we wouldn't normally return.
-        //const chatid = parseInt(this.currentChatMT)
-        //current = chatid && this.list[chatid] ? this.list[chatid] : null
-  
+        // const chatid = parseInt(this.currentChatMT)
+        // current = chatid && this.list[chatid] ? this.list[chatid] : null
+
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
-        //console.log('uCS listChatsMT',chatrooms)
+        // console.log('uCS listChatsMT',chatrooms)
         this.list = chatrooms
         chatrooms.forEach((c) => {
-          //console.log('uCS listChatsMT',c.unseen)
+          // console.log('uCS listChatsMT',c.unseen)
           // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
           // component updates for no good reason.
           if (
@@ -65,14 +65,16 @@ export const useChatStore = defineStore({
             this.listByChatId[c.id].lastdate !== c.lastdate
           ) {
             this.listByChatId[c.id] = c
-          // console.log('uCS listChatsMT',c.id, c)
-        }
+            // console.log('uCS listChatsMT',c.id, c)
+          }
         })
-  
-        if( selectedChatId){
-          //console.log('uCS listChatsMT selectedChatId', selectedChatId)
-          const { chatroom } = await api(this.config).chat.fetchChatMT(selectedChatId)
-          //console.log('uCS listChatsMT selectedChat', chatroom)
+
+        if (selectedChatId) {
+          // console.log('uCS listChatsMT selectedChatId', selectedChatId)
+          const { chatroom } = await api(this.config).chat.fetchChatMT(
+            selectedChatId
+          )
+          // console.log('uCS listChatsMT selectedChat', chatroom)
           this.listByChatId[chatroom.id] = chatroom
         }
       } catch (e) {
@@ -83,23 +85,24 @@ export const useChatStore = defineStore({
         }
       }
     },
-    async fetchLatestChatsMT() { // MT ADDED
-      //const now = new Date()
-      
+    async fetchLatestChatsMT() {
+      // MT ADDED
+      // const now = new Date()
+
       const authStore = useAuthStore()
       const me = authStore.user
 
       if (me && me.id) {
         const newCount = await api(this.config).chat.unseenCountMT()
-        //console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
-        
+        // console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
+
         if (newCount !== this.currentCountMT) {
-          if( !this.lastSearchMT){
+          if (!this.lastSearchMT) {
             this.currentCountMT = newCount
             this.listChatsMT({
               chattypes: ['User2Mod', 'Mod2Mod'],
               summary: true,
-              noerror: true
+              noerror: true,
             })
           }
         }
@@ -109,19 +112,21 @@ export const useChatStore = defineStore({
       // No need to clear the timeout
       setTimeout(this.fetchLatestChatsMT, 30000)
     },
-    async fetchReviewChatsMT(id, params){
+    async fetchReviewChatsMT(id, params) {
       this.clear()
-      const { chatmessages } = await api(this.config).chat.fetchReviewChatsMT(params)
+      const { chatmessages } = await api(this.config).chat.fetchReviewChatsMT(
+        params
+      )
       const messages = chatmessages
       const deduped = [] // Chat review seems to have duplicate message id so only save last
 
       const messageStore = useMessageStore()
       messages.forEach((m) => {
-        const foundIndex = deduped.findIndex((m2) => m2.id===m.id)
-        if( foundIndex===-1) deduped.push(m)
+        const foundIndex = deduped.findIndex((m2) => m2.id === m.id)
+        if (foundIndex === -1) deduped.push(m)
         else deduped[foundIndex] = m
 
-        if( m.refmsg) {
+        if (m.refmsg) {
           m.refmsgid = m.refmsg.id
           messageStore.fetch(m.refmsg.id, true)
         }
@@ -130,10 +135,10 @@ export const useChatStore = defineStore({
       })
       this.messages[id] = deduped
     },
-    removeMessageMT(chatid,id){
-      const foundix = this.messages[chatid].findIndex((m) => m.id===id)
-      console.log('removeMessageMT',foundix)
-      if( foundix!==-1) delete this.messages[chatid][foundix]
+    removeMessageMT(chatid, id) {
+      const foundix = this.messages[chatid].findIndex((m) => m.id === id)
+      console.log('removeMessageMT', foundix)
+      if (foundix !== -1) delete this.messages[chatid][foundix]
     },
     async fetchChats(search, logError, keepChat) {
       let since = null
@@ -145,22 +150,23 @@ export const useChatStore = defineStore({
       // TODO Amend ChatAPI v2 to support chattypes
       let chats = []
       const miscStore = useMiscStore() // MT ADDED
-      if( miscStore.modtools){
-        const { chatrooms } = await api(this.config).chat.listChatsMT({ // v1: /chat/rooms
-          chattypes: ['User2Mod', 'Mod2Mod']
+      if (miscStore.modtools) {
+        const { chatrooms } = await api(this.config).chat.listChatsMT({
+          // v1: /chat/rooms
+          chattypes: ['User2Mod', 'Mod2Mod'],
         })
         chats = chatrooms
-      }
-      else {
-        chats = await api(this.config).chat.listChats( // v2: /chat
+      } else {
+        chats = await api(this.config).chat.listChats(
+          // v2: /chat
           since,
           search,
           keepChat,
           logError
         )
       }
-      if( !chats) return
-    
+      if (!chats) return
+
       this.list = chats
 
       chats.forEach((c) => {
@@ -177,8 +183,8 @@ export const useChatStore = defineStore({
     async fetchChat(id) {
       if (id > 0) {
         const miscStore = useMiscStore() // MT ADDED
-        if( miscStore.modtools){
-          //console.log('uCS fetchChat',id)
+        if (miscStore.modtools) {
+          // console.log('uCS fetchChat',id)
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
           this.list[id] = chatroom
           this.listByChatId[id] = chatroom
@@ -191,14 +197,17 @@ export const useChatStore = defineStore({
     async fetchMessages(id, force) {
       let messages = []
       const miscStore = useMiscStore() // MT ADDED
-      if( miscStore.modtools){
+      if (miscStore.modtools) {
         const params = {
-          //limit: 10, // NO: so new messages are picked up
-          modtools: true
+          // limit: 10, // NO: so new messages are picked up
+          modtools: true,
         }
-        const { chatmessages } = await api(this.config).chat.fetchMessagesMT(id,params)
+        const { chatmessages } = await api(this.config).chat.fetchMessagesMT(
+          id,
+          params
+        )
         messages = chatmessages
-      } else{
+      } else {
         messages = await api(this.config).chat.fetchMessages(id)
       }
 
@@ -335,7 +344,7 @@ export const useChatStore = defineStore({
       const id = await this.openChat({
         chattype: 'User2Mod',
         groupid,
-        userid
+        userid,
       })
 
       return id
@@ -405,7 +414,7 @@ export const useChatStore = defineStore({
     byChatId: (state) => {
       return (id) => {
         const chatroom = state.listByChatId[id]
-        if( chatroom && !chatroom.user1id && chatroom.user1){
+        if (chatroom && !chatroom.user1id && chatroom.user1) {
           chatroom.user1id = chatroom.user1.id
         }
         return chatroom
@@ -429,7 +438,8 @@ export const useChatStore = defineStore({
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (miscStore.modtools) { // TODO: Not now used, so remove
+        if (miscStore.modtools) {
+          // TODO: Not now used, so remove
           const chat = state.listByChatId[key]
           // console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
           // We count chats between mods, and chats between other members and mods.

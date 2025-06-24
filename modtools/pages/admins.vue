@@ -5,7 +5,7 @@
         <ModHelpAdmins />
         <b-tabs content-class="mt-3" card>
           <b-tab active>
-            <template v-slot:title>
+            <template #title>
               <h2 class="ml-2 mr-2" @click="fetchPending">
                 Pending
                 <b-badge v-if="pendingcount" variant="danger">
@@ -13,97 +13,183 @@
                 </b-badge>
               </h2>
             </template>
-            <ModGroupSelect v-model="groupidshow" all modonly :work="['pendingadmins']" class="mb-2" />
+            <ModGroupSelect
+              v-model="groupidshow"
+              all
+              modonly
+              :work="['pendingadmins']"
+              class="mb-2"
+            />
             <div v-if="pending.length">
-              <ModAdmin v-for="admin in pending" :id="admin.id" :key="'pendingadmin-' + admin.id" :open="pending.length === 1" />
+              <ModAdmin
+                v-for="admin in pending"
+                :id="admin.id"
+                :key="'pendingadmin-' + admin.id"
+                :open="pending.length === 1"
+              />
             </div>
-            <div v-else>
-              No ADMINs to review just now.
-            </div>
+            <div v-else>No ADMINs to review just now.</div>
           </b-tab>
           <b-tab>
-            <template v-slot:title>
-              <h2 class="ml-2 mr-2">
-                Create
-              </h2>
+            <template #title>
+              <h2 class="ml-2 mr-2">Create</h2>
             </template>
-            <ModGroupSelect v-model="groupidcreate" modonly :systemwide="supportOrAdmin" class="mb-2" />
-            <NoticeMessage v-if="groupidcreate < 0" class="mt-1 mb-1" variant="danger">
-              This is a suggested ADMIN. All local communities will get "copies" of this (unless they've opted out),
-              and mods can then edit/approve/reject them. Members won't receive multiple copies.
+            <ModGroupSelect
+              v-model="groupidcreate"
+              modonly
+              :systemwide="supportOrAdmin"
+              class="mb-2"
+            />
+            <NoticeMessage
+              v-if="groupidcreate < 0"
+              class="mt-1 mb-1"
+              variant="danger"
+            >
+              This is a suggested ADMIN. All local communities will get "copies"
+              of this (unless they've opted out), and mods can then
+              edit/approve/reject them. Members won't receive multiple copies.
             </NoticeMessage>
             <VeeForm ref="form">
-              <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
-                <p>
-                  ADMINs come in two flavours:
-                </p>
+              <b-form-group
+                label="Subject of ADMIN:"
+                label-for="subject"
+                label-class="mb-0"
+              >
+                <p>ADMINs come in two flavours:</p>
                 <ul>
                   <li>
-                    Essential - everyone must receive them. These are important announcements about the running
-                    of the group.
+                    Essential - everyone must receive them. These are important
+                    announcements about the running of the group.
                   </li>
                   <li>
-                    Newsletter - people can opt out (via the setting which mentions "to remind you"). These
-                    are less important or encouragements to freegle more.
+                    Newsletter - people can opt out (via the setting which
+                    mentions "to remind you"). These are less important or
+                    encouragements to freegle more.
                   </li>
                 </ul>
-                <OurToggle v-model="essential" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-                  :labels="{ checked: 'Essential', unchecked: 'Newsletter' }" variant="modgreen" />
+                <OurToggle
+                  v-model="essential"
+                  class="mt-2"
+                  :height="30"
+                  :width="150"
+                  :font-size="14"
+                  :sync="true"
+                  :labels="{ checked: 'Essential', unchecked: 'Newsletter' }"
+                  variant="modgreen"
+                />
               </b-form-group>
-              <b-form-group label="Subject of ADMIN:" label-for="subject" label-class="mb-0">
-                <Field id="subject" v-model="subject" name="subject" type="text" placeholder="Subject (don't include ADMIN - added automatically)"
-                  :rules="validateSubject" class="form-control" />
-                <ErrorMessage name="subject" class="text-danger font-weight-bold" />
+              <b-form-group
+                label="Subject of ADMIN:"
+                label-for="subject"
+                label-class="mb-0"
+              >
+                <Field
+                  id="subject"
+                  v-model="subject"
+                  name="subject"
+                  type="text"
+                  placeholder="Subject (don't include ADMIN - added automatically)"
+                  :rules="validateSubject"
+                  class="form-control"
+                />
+                <ErrorMessage
+                  name="subject"
+                  class="text-danger font-weight-bold"
+                />
               </b-form-group>
-              <b-form-group label="Body of ADMIN:" label-for="body" label-class="mb-0">
-                <Field as="textarea" id="body" v-model="body" name="body" rows="15" max-rows="8" spellcheck="true" type="textarea"
-                  placeholder="Put your message in here.  Plain-text only." :rules="validateBody" class="form-control" />
-                <ErrorMessage name="body" class="text-danger font-weight-bold" />
+              <b-form-group
+                label="Body of ADMIN:"
+                label-for="body"
+                label-class="mb-0"
+              >
+                <Field
+                  id="body"
+                  v-model="body"
+                  as="textarea"
+                  name="body"
+                  rows="15"
+                  max-rows="8"
+                  spellcheck="true"
+                  type="textarea"
+                  placeholder="Put your message in here.  Plain-text only."
+                  :rules="validateBody"
+                  class="form-control"
+                />
+                <ErrorMessage
+                  name="body"
+                  class="text-danger font-weight-bold"
+                />
               </b-form-group>
               <p>
-                You can optionally add a big button into the ADMIN, and specify where it will go.
+                You can optionally add a big button into the ADMIN, and specify
+                where it will go.
               </p>
-              <b-form-group label="Call To Action text:" label-for="ctatext" label-class="mb-0">
-                <b-form-input id="ctatext" v-model="ctatext" class="mb-3" placeholder="(Option) Text for a big button" />
+              <b-form-group
+                label="Call To Action text:"
+                label-for="ctatext"
+                label-class="mb-0"
+              >
+                <b-form-input
+                  id="ctatext"
+                  v-model="ctatext"
+                  class="mb-3"
+                  placeholder="(Option) Text for a big button"
+                />
               </b-form-group>
-              <b-form-group label="Call To Action link:" label-for="ctalink" label-class="mb-0">
-                <b-form-input id="ctalink" v-model="ctalink" class="mb-3" placeholder="(Optional) Link for a big button" />
+              <b-form-group
+                label="Call To Action link:"
+                label-for="ctalink"
+                label-class="mb-0"
+              >
+                <b-form-input
+                  id="ctalink"
+                  v-model="ctalink"
+                  class="mb-3"
+                  placeholder="(Optional) Link for a big button"
+                />
               </b-form-group>
             </VeeForm>
-            <b-button class="mt-2 mb-2" size="lg" :variant="groupidcreate < 0 ? 'danger' : 'primary'"
-              :disabled="groupidcreate <= 0 && groupidcreate !== -2" @click="create">
+            <b-button
+              class="mt-2 mb-2"
+              size="lg"
+              :variant="groupidcreate < 0 ? 'danger' : 'primary'"
+              :disabled="groupidcreate <= 0 && groupidcreate !== -2"
+              @click="create"
+            >
               <v-icon v-if="created" icon="check" />
               <v-icon v-else-if="creating" icon="sync" class="fa-spin" />
               <v-icon v-else icon="save" />
-              <span v-if="groupidcreate < 0">
-                Send to all communities
-              </span>
-              <span v-else>
-                Send to Pending ADMINs
-              </span>
+              <span v-if="groupidcreate < 0"> Send to all communities </span>
+              <span v-else> Send to Pending ADMINs </span>
             </b-button>
-            <p>It's a good idea to have a fellow mod take a look at an ADMIN before it goes out, to spot typos.</p>
+            <p>
+              It's a good idea to have a fellow mod take a look at an ADMIN
+              before it goes out, to spot typos.
+            </p>
           </b-tab>
           <b-tab>
-            <template v-slot:title>
-              <h2 class="ml-2 mr-2" @click="fetchPrevious">
-                Previous
-              </h2>
+            <template #title>
+              <h2 class="ml-2 mr-2" @click="fetchPrevious">Previous</h2>
             </template>
             <ModGroupSelect v-model="groupidprevious" modonly class="mb-2" />
             <p>
-              If an ADMIN shows as queued for send, it usually takes a few minutes. If we are sending a lot of
-              ADMINs it can take a few hours.
+              If an ADMIN shows as queued for send, it usually takes a few
+              minutes. If we are sending a lot of ADMINs it can take a few
+              hours.
             </p>
             <p>
-              If a suggested ADMIN doesn't show here it will be because you deleted it.
+              If a suggested ADMIN doesn't show here it will be because you
+              deleted it.
             </p>
             <div v-if="previous.length">
-              <ModAdmin v-for="admin in previous" :id="admin.id" :key="'pendingadmin-' + admin.id" :open="previous.length === 1" />
+              <ModAdmin
+                v-for="admin in previous"
+                :id="admin.id"
+                :key="'pendingadmin-' + admin.id"
+                :open="previous.length === 1"
+              />
             </div>
-            <div v-else-if="groupidprevious > 0">
-              No previous ADMINs.
-            </div>
+            <div v-else-if="groupidprevious > 0">No previous ADMINs.</div>
           </b-tab>
         </b-tabs>
       </div>
@@ -121,9 +207,9 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-//const noAdmin = val => {
+// const noAdmin = val => {
 //  return !!(val && val.toLowerCase().indexOf('admin') === -1)
-//}
+// }
 
 export default {
   components: {
@@ -147,7 +233,7 @@ export default {
       ctalink: null,
       creating: false,
       created: false,
-      essential: true
+      essential: true,
     }
   },
   computed: {
@@ -159,9 +245,8 @@ export default {
         if (group) {
           if (
             group.type === 'Freegle' &&
-            //(!this.modonly ||
-            (group.role === 'Owner' ||
-              group.role === 'Moderator')
+            // (!this.modonly ||
+            (group.role === 'Owner' || group.role === 'Moderator')
           ) {
             if (group.work && group.work.pendingadmins) {
               count += group.work.pendingadmins
@@ -174,18 +259,18 @@ export default {
     },
     pending() {
       return this.adminsStore.list
-        .filter(a => a.pending)
+        .filter((a) => a.pending)
         .sort(function (a, b) {
           return new Date(b.created).getTime() - new Date(a.created).getTime()
         })
     },
     previous() {
       return this.adminsStore.list
-        .filter(a => !a.pending)
+        .filter((a) => !a.pending)
         .sort(function (a, b) {
           return new Date(b.created).getTime() - new Date(a.created).getTime()
         })
-    }
+    },
   },
   watch: {
     groupidshow(newval) {
@@ -193,7 +278,7 @@ export default {
     },
     groupidprevious(newval) {
       this.fetch(newval)
-    }
+    },
   },
   mounted() {
     this.fetch(this.groupidshow)
@@ -220,7 +305,7 @@ export default {
           text: this.body,
           ctatext: this.ctatext,
           ctalink: this.ctalink,
-          essential: this.essential
+          essential: this.essential,
         })
 
         this.creating = false
@@ -236,7 +321,7 @@ export default {
     async fetch(groupid) {
       await this.adminsStore.clear()
       await this.adminsStore.fetch({
-        groupid: groupid
+        groupid,
       })
     },
     validateSubject(value) {
@@ -244,7 +329,7 @@ export default {
         return 'Please enter a subject.'
       }
 
-      if (value.toLowerCase().indexOf('admin') !== -1) {
+      if (value.toLowerCase().includes('admin')) {
         return 'Do not include ADMIN in your subject.'
       }
 

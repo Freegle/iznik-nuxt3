@@ -51,7 +51,7 @@ export const useAuthStore = defineStore({
       // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
-      //console.log('setAuth',jwt, persistent)
+      // console.log('setAuth',jwt, persistent)
       this.auth.jwt = jwt
       this.auth.persistent = persistent
     },
@@ -285,19 +285,20 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser(components) { // MT ADDED components
-      //console.log('authstore.fetchUser A',components)
+    async fetchUser(components) {
+      // MT ADDED components
+      // console.log('authstore.fetchUser A',components)
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      if( !components) components = [] // MT ADDED
-      components = [ 'me', ...components] // MT ADDED
+      if (!components) components = [] // MT ADDED
+      components = ['me', ...components] // MT ADDED
 
       const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
       if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
-          //console.log('authstore.fetchUser B fetchv2')
+          // console.log('authstore.fetchUser B fetchv2')
           me = await this.$api.session.fetchv2(
             {
               webversion: this.config.public.BUILD_DATE,
@@ -311,13 +312,13 @@ export const useAuthStore = defineStore({
 
         if (me) {
           groups = me.memberships
-          //console.log('authstore.fetchUser C groups',groups)
+          // console.log('authstore.fetchUser C groups',groups)
           delete me.memberships
 
           if (process.client) {
             // Check the old API.  Partly in case we need a JWT, partly to check we are
             // logged in on both.  No need to wait, though.
-            //console.log('authstore.fetchUser D fetchv1')
+            // console.log('authstore.fetchUser D fetchv1')
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
@@ -330,8 +331,8 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
-                    //console.log('authstore.fetchUser E fetchv1 got me')
-                    if( me.permissions && this.user){
+                    // console.log('authstore.fetchUser E fetchv1 got me')
+                    if (me.permissions && this.user) {
                       this.user.permissions = me.permissions
                     }
                     if (!this.auth.jwt) {
@@ -358,7 +359,7 @@ export const useAuthStore = defineStore({
       }
 
       if (!me) {
-        //console.log('authstore.fetchUser F fetchv1')
+        // console.log('authstore.fetchUser F fetchv1')
         // Try the older API which will authenticate via the persistent token and PHP session. Used by MT for now
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
@@ -377,7 +378,7 @@ export const useAuthStore = defineStore({
           this.discourse = ret.discourse // MT added
 
           if (me) {
-            //console.log('authstore.fetchUser G fetchv1 got me')
+            // console.log('authstore.fetchUser G fetchv1 got me')
             permissions = me.permissions
             this.setAuth(jwt, persistent)
           }
@@ -385,7 +386,7 @@ export const useAuthStore = defineStore({
           if (jwt) {
             // Now use the JWT on the new API.
             try {
-              //console.log('authstore.fetchUser H fetchv2')
+              // console.log('authstore.fetchUser H fetchv2')
               me = await this.$api.session.fetchv2({
                 webversion: this.config.public.BUILD_DATE,
               })
@@ -394,18 +395,19 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
-              //console.log('authstore.fetchUser I fetchv2 got me')
+              // console.log('authstore.fetchUser I fetchv2 got me')
               me.permissions = permissions
               groups = me.memberships
-              if( v1groups) { // Set each group configid
-                for( const g of groups){
-                  const group = v1groups.find(v1g => v1g.id === g.groupid)
-                  if( group) {
+              if (v1groups) {
+                // Set each group configid
+                for (const g of groups) {
+                  const group = v1groups.find((v1g) => v1g.id === g.groupid)
+                  if (group) {
                     g.configid = group.configid
                   }
                 }
               }
-              //console.log('authstore.fetchUser J groups',groups)
+              // console.log('authstore.fetchUser J groups',groups)
               delete me.memberships
             }
           }
@@ -414,7 +416,7 @@ export const useAuthStore = defineStore({
 
       if (me) {
         if (groups && groups.length) {
-          //console.log('authstore.fetchUser K groups',groups)
+          // console.log('authstore.fetchUser K groups',groups)
           this.groups = groups
         } else {
           // We asked for groups but got none, so we're not a member of any.
@@ -548,7 +550,13 @@ export const useAuthStore = defineStore({
       }
     },
     async merge(params) {
-      await api(this.config).user.merge(params.email1, params.email2, params.id1, params.id2, params.reason)
+      await api(this.config).user.merge(
+        params.email1,
+        params.email2,
+        params.id1,
+        params.id2,
+        params.reason
+      )
     },
   },
   getters: {

@@ -1,6 +1,9 @@
 <template>
   <div class="bg-white">
-    <p>This should redirect you back to Discourse. If it doesn't, mail geeks@ilovefreegle.org.</p>
+    <p>
+      This should redirect you back to Discourse. If it doesn't, mail
+      geeks@ilovefreegle.org.
+    </p>
     <b-img src="~/static/loader.gif" alt="Loading" />
   </div>
 </template>
@@ -14,7 +17,7 @@ export default {
       if (!oldVal && newVal) {
         this.redirect()
       }
-    }
+    },
   },
   mounted() {
     console.log('modtools discourse mounted A', this.myid)
@@ -34,7 +37,7 @@ export default {
     redirect() {
       console.log('modtools discourse redirect')
       window.location = 'https://discourse.ilovefreegle.org'
-    }
-  }
+    },
+  },
 }
 </script>

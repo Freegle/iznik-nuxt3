@@ -267,7 +267,7 @@ export default {
   },
   computed: {
     volunteering() {
-      if( this.item) return this.item
+      if (this.item) return this.item
       const v = this.volunteeringStore?.byId(this.id)
 
       if (v) {

@@ -1,29 +1,45 @@
 <template>
-  <b-modal id="stdmsgmodal" ref="modal" :title="message ? message.subject : ('Message to ' + member.displayname)" no-stacking no-close-on-backdrop
-    size="lg">
+  <b-modal
+    id="stdmsgmodal"
+    ref="modal"
+    :title="message ? message.subject : 'Message to ' + member.displayname"
+    no-stacking
+    no-close-on-backdrop
+    size="lg"
+  >
     <template #default>
       <div v-if="stdmsg.action !== 'Edit'" class="d-flex">
         <div>
           From:&nbsp;
-          <br>
+          <br />
           To:&nbsp;
         </div>
         <div>
           {{ fromName }}
-          <br>
+          <br />
           {{ message ? message.fromuser.displayname : member.displayname }}
-          <span v-if="toEmail">
-            &lt;{{ toEmail }}&gt;
-          </span>
+          <span v-if="toEmail"> &lt;{{ toEmail }}&gt; </span>
         </div>
       </div>
-      <div v-if="message && stdmsg.action === 'Edit' && message.item && message.location" class="d-flex justify-content-start">
+      <div
+        v-if="
+          message &&
+          stdmsg.action === 'Edit' &&
+          message.item &&
+          message.location
+        "
+        class="d-flex justify-content-start"
+      >
         <!-- eslint-disable-next-line -->
         <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
         <!-- eslint-disable-next-line -->
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
-          <PostCode :value="message.location.name" :find="false" @selected="postcodeSelect" />
+          <PostCode
+            :value="message.location.name"
+            :find="false"
+            @selected="postcodeSelect"
+          />
         </b-input-group>
       </div>
       <div v-else>
@@ -38,15 +54,37 @@
         </p>
       </NoticeMessage>
       <b-form-textarea v-model="body" rows="10" class="mt-2" />
-      <div v-if="stdmsg.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'" class="mt-1">
-        <v-icon v-if="changingNewDelStatus" icon="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="changedNewDelStatus" icon="check" class="text-success" />
+      <div
+        v-if="stdmsg.newdelstatus && stdmsg.newdelstatus !== 'UNCHANGED'"
+        class="mt-1"
+      >
+        <v-icon
+          v-if="changingNewDelStatus"
+          icon="sync"
+          class="text-success fa-spin"
+        />
+        <v-icon
+          v-else-if="changedNewDelStatus"
+          icon="check"
+          class="text-success"
+        />
         <v-icon v-else icon="cog" />
         Change email frequency to <em>{{ emailfrequency }}</em>
       </div>
-      <div v-if="stdmsg.newmodstatus && stdmsg.newmodstatus !== 'UNCHANGED'" class="mt-1">
-        <v-icon v-if="changingNewModStatus" icon="sync" class="text-success fa-spin" />
-        <v-icon v-else-if="changedNewModStatus" icon="check" class="text-success" />
+      <div
+        v-if="stdmsg.newmodstatus && stdmsg.newmodstatus !== 'UNCHANGED'"
+        class="mt-1"
+      >
+        <v-icon
+          v-if="changingNewModStatus"
+          icon="sync"
+          class="text-success fa-spin"
+        />
+        <v-icon
+          v-else-if="changedNewModStatus"
+          icon="check"
+          class="text-success"
+        />
         <v-icon v-else icon="cog" />
         Change moderation status to <em>{{ modstatus }}</em>
       </div>
@@ -57,8 +95,9 @@
         Hold message
       </div>
       <NoticeMessage v-if="replyTooShort" variant="danger" class="mt-1 mb-1">
-        This is a very short reply, so it may come across as a bit abrupt and unhelpful. Please make it a bit longer.
-      </noticemessage>
+        This is a very short reply, so it may come across as a bit abrupt and
+        unhelpful. Please make it a bit longer.
+      </NoticeMessage>
     </template>
     <template #footer>
       <div class="d-flex justify-content-between w-100">
@@ -66,7 +105,12 @@
           <b-button variant="white" class="nohover" size="xs" @click="moveLeft">
             <v-icon icon="arrow-left" />
           </b-button>
-          <b-button variant="white" class="nohover" size="xs" @click="moveRight">
+          <b-button
+            variant="white"
+            class="nohover"
+            size="xs"
+            @click="moveRight"
+          >
             <v-icon icon="arrow-right" />
           </b-button>
           <b-button variant="white" class="nohover" size="xs" @click="moveUp">
@@ -77,49 +121,55 @@
           </b-button>
         </div>
         <div>
-          <SpinButton ref="process" :label="processLabel" icon-name="envelope" spinclass="success" variant="primary" @handle="process" :flex="false"
-            iconClass="pe-1" class="m-1 d-inline-block" />
-          <b-button variant="white" @click="hide">
-            Cancel
-          </b-button>
+          <SpinButton
+            ref="process"
+            :label="processLabel"
+            icon-name="envelope"
+            spinclass="success"
+            variant="primary"
+            :flex="false"
+            icon-class="pe-1"
+            class="m-1 d-inline-block"
+            @handle="process"
+          />
+          <b-button variant="white" @click="hide"> Cancel </b-button>
         </div>
       </div>
     </template>
   </b-modal>
 </template>
 <script>
+import dayjs from 'dayjs'
+import { useUserStore } from '../stores/user'
+import { setupKeywords } from '../composables/useKeywords'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
-import { useUserStore } from '../stores/user'
-import dayjs from 'dayjs'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
-import { setupKeywords } from '../composables/useKeywords'
 
 export default {
-  components: {
-  },
+  components: {},
   props: {
     message: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     member: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     stdmsg: {
       type: Object,
-      required: true
+      required: true,
     },
     autosend: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   setup() {
     const { modal, show, hide } = useOurModal()
@@ -127,10 +177,17 @@ export default {
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    const {
-      typeOptions
-    } = setupKeywords()
-    return { modGroupStore, memberStore, messageStore, userStore, typeOptions, modal, hide, show }
+    const { typeOptions } = setupKeywords()
+    return {
+      modGroupStore,
+      memberStore,
+      messageStore,
+      userStore,
+      typeOptions,
+      modal,
+      hide,
+      show,
+    }
   },
   data: function () {
     return {
@@ -147,7 +204,7 @@ export default {
       changingHold: false,
       changedHold: false,
       margTop: 0,
-      margLeft: 0
+      margLeft: 0,
     }
   },
   computed: {
@@ -186,10 +243,10 @@ export default {
       if (this.member) {
         ret = this.member.email
       } else {
-        this.message.fromuser.emails.forEach(email => {
+        this.message.fromuser.emails.forEach((email) => {
           if (
             email.email &&
-            email.email.indexOf('users.ilovefreegle.org') === -1 &&
+            !email.email.includes('users.ilovefreegle.org') &&
             (ret === null || email.preferred)
           ) {
             ret = email.email
@@ -275,15 +332,14 @@ export default {
             'Republisher is old and any mention of it is probably not valid any more.',
           messagemaker:
             'The Message Maker is no longer a separate tool; please just refer people to www.ilovefreegle.org.',
-          cafe:
-            'The ChitChat area of the site is the place for cafe-type requests now.',
+          cafe: 'The ChitChat area of the site is the place for cafe-type requests now.',
           newsfeed: 'Newsfeed is now called ChitChat.',
           freegledirect:
             'Freegle Direct is no longer an active term; we just talk about "our website" or "www.ilovefreegle.org" now.',
           'www.freegle.in':
             "www.freegle.in should just be freegle.in - it won't work with the www.",
           'http://':
-            "It's better to use https:// links rather than http:// links."
+            "It's better to use https:// links rather than http:// links.",
         }
 
         // Remove groups.ilovefreegle.org, which is the volunteers address.
@@ -293,19 +349,19 @@ export default {
         trimmed = trimmed.replace('@yahoo', '')
 
         for (const keyword in checks) {
-          if (trimmed.indexOf(keyword) !== -1) {
+          if (trimmed.includes(keyword)) {
             ret = checks[keyword]
           }
         }
       }
 
       return ret
-    }
+    },
   },
   watch: {
     body() {
       this.replyTooShort = false
-    }
+    },
   },
   methods: {
     async fillin() {
@@ -450,8 +506,10 @@ export default {
         text = text.replace(/\$myname/g, this.me.displayname)
         text = text.replace(/\$nummembers/g, group.membercount)
         text = text.replace(/\$nummods/g, group.modcount)
-        if (group.settings && group.settings.reposts) text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
-        if (group.settings && group.settings.reposts) text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
+        if (group.settings && group.settings.reposts)
+          text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
+        if (group.settings && group.settings.reposts)
+          text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
 
         text = text.replace(
           /\$origsubj/g,
@@ -463,14 +521,10 @@ export default {
           let recentmsg = ''
           let count = 0
           if (history.length) {
-            history.forEach(msg => {
+            history.forEach((msg) => {
               if (msg.daysago < self.recentDays) {
-                // eslint-disable-next-line new-cap
                 recentmsg +=
-                  dayjs(msg.postdate).format('lll') +
-                  ' - ' +
-                  msg.subject +
-                  '\n'
+                  dayjs(msg.postdate).format('lll') + ' - ' + msg.subject + '\n'
                 count++
               }
             })
@@ -478,17 +532,16 @@ export default {
           text = text.replace(/\$recentmsg/gim, recentmsg)
           text = text.replace(/\$numrecentmsg/gim, count)
 
-          this.keywordList.forEach(keyword => {
+          this.keywordList.forEach((keyword) => {
             let recentmsg = ''
             let count = 0
 
             if (history.length) {
-              history.forEach(msg => {
+              history.forEach((msg) => {
                 const postdate = dayjs(msg.postdate)
                 const daysago = dayjs().diff(postdate, 'day')
 
                 if (msg.type === keyword && daysago < self.recentDays) {
-                  // eslint-disable-next-line new-cap
                   recentmsg +=
                     dayjs(msg.postdate).format('lll') +
                     ' - ' +
@@ -549,7 +602,7 @@ export default {
         let summ = ''
 
         if (this.message && this.message.duplicates) {
-          this.message.duplicates.forEach(m => {
+          this.message.duplicates.forEach((m) => {
             // eslint-disable-next-line new-cap
             summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
           })
@@ -579,7 +632,7 @@ export default {
           await this.userStore.edit({
             id: this.userid,
             groupid: this.groupid,
-            emailfrequency: this.emailfrequency
+            emailfrequency: this.emailfrequency,
           })
           this.changingNewDelStatus = false
           this.changedNewDelStatus = true
@@ -593,7 +646,7 @@ export default {
           await this.userStore.edit({
             id: this.userid,
             groupid: this.groupid,
-            ourPostingStatus: this.stdmsg.newmodstatus
+            ourPostingStatus: this.stdmsg.newmodstatus,
           })
           this.changingNewModStatus = false
           this.changedNewModStatus = true
@@ -608,8 +661,8 @@ export default {
               id: this.message.id,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Leave':
@@ -618,15 +671,15 @@ export default {
               id: this.message.id,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Hold Message':
             this.changingHold = true
 
             await this.messageStore.hold({
-              id: this.message.id
+              id: this.message.id,
             })
 
             this.changingHold = false
@@ -636,8 +689,8 @@ export default {
               id: this.message.id,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Leave Member':
@@ -646,8 +699,8 @@ export default {
               id: this.member.userid,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Reject':
@@ -655,8 +708,8 @@ export default {
               id: this.message.id,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Delete':
@@ -665,8 +718,8 @@ export default {
               id: this.message.id,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Delete Member':
@@ -675,8 +728,8 @@ export default {
               id: this.member.userid,
               groupid: this.groupid,
               subject: subj,
-              body: body,
-              stdmsgid: this.stdmsg.id
+              body,
+              stdmsgid: this.stdmsg.id,
             })
             break
           case 'Edit':
@@ -688,14 +741,14 @@ export default {
                   msgtype: this.message.type,
                   item: this.message.item.name,
                   location: this.message.location.name,
-                  textbody: body
+                  textbody: body,
                 })
               } else {
                 // Not
                 await this.messageStore.patch({
                   id: this.message.id,
                   subject: subj,
-                  textbody: body
+                  textbody: body,
                 })
               }
             }
@@ -731,7 +784,7 @@ export default {
       this.margTop += 10
       window.document.getElementById('stdmsgmodal').style.top =
         this.margTop + 'px'
-    }
-  }
+    },
+  },
 }
 </script>

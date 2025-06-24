@@ -7,8 +7,8 @@ export default {
   props: {
     part: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     getClass() {
@@ -28,7 +28,7 @@ export default {
       } else {
         return 'Unchanged'
       }
-    }
-  }
+    },
+  },
 }
 </script>

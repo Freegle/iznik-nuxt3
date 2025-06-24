@@ -5,8 +5,13 @@
     </b-form-text>
     <b-input-group v-if="type === 'input'">
       <b-form-input v-model="value" :disabled="disabled" />
-      <slot name="append" v-if="!disabled">
-        <SpinButton variant="white" icon-name="save" label="Save" @handle="save" />
+      <slot v-if="!disabled" name="append">
+        <SpinButton
+          variant="white"
+          icon-name="save"
+          label="Save"
+          @handle="save"
+        />
       </slot>
     </b-input-group>
     <div v-else-if="type === 'textarea'">
@@ -17,16 +22,39 @@
       </b-row>
       <b-row>
         <b-col>
-          <SpinButton v-if="!disabled" variant="white" icon-name="save" label="Save" @handle="save" class="mt-2" />
+          <SpinButton
+            v-if="!disabled"
+            variant="white"
+            icon-name="save"
+            label="Save"
+            class="mt-2"
+            @handle="save"
+          />
         </b-col>
       </b-row>
     </div>
     <div v-else-if="type === 'toggle'">
-      <OurToggle v-model="toggleValue" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }" variant="modgreen" :disabled="disabled" @change="save" />
+      <OurToggle
+        v-model="toggleValue"
+        class="mt-2"
+        :height="30"
+        :width="toggleWidth"
+        :font-size="14"
+        :sync="true"
+        :labels="{ checked: toggleChecked, unchecked: toggleUnchecked }"
+        variant="modgreen"
+        :disabled="disabled"
+        @change="save"
+      />
     </div>
     <div v-else-if="type === 'select'">
-      <b-form-select v-model="value" :options="options" class="mt-2" :disabled="disabled" @change="save" />
+      <b-form-select
+        v-model="value"
+        :options="options"
+        class="mt-2"
+        :disabled="disabled"
+        @change="save"
+      />
     </div>
   </b-form-group>
 </template>
@@ -34,78 +62,78 @@
 import { useModConfigStore } from '../stores/modconfig'
 
 export default {
+  props: {
+    name: {
+      type: String,
+      required: true,
+    },
+    configid: {
+      type: Number,
+      required: true,
+    },
+    label: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    type: {
+      type: String,
+      required: false,
+      default: 'input',
+    },
+    rows: {
+      type: Number,
+      required: false,
+      default: 3,
+    },
+    toggleWidth: {
+      type: Number,
+      required: false,
+      default: 150,
+    },
+    toggleChecked: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    toggleUnchecked: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    valueChecked: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    valueUnchecked: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    options: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
   setup() {
     const modConfigStore = useModConfigStore()
 
     return { modConfigStore }
   },
-  props: {
-    name: {
-      type: String,
-      required: true
-    },
-    configid: {
-      type: Number,
-      required: true
-    },
-    label: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: false,
-      default: null
-    },
-    type: {
-      type: String,
-      required: false,
-      default: 'input'
-    },
-    rows: {
-      type: Number,
-      required: false,
-      default: 3
-    },
-    toggleWidth: {
-      type: Number,
-      required: false,
-      default: 150
-    },
-    toggleChecked: {
-      type: String,
-      required: false,
-      default: null
-    },
-    toggleUnchecked: {
-      type: String,
-      required: false,
-      default: null
-    },
-    valueChecked: {
-      type: String,
-      required: false,
-      default: null
-    },
-    valueUnchecked: {
-      type: String,
-      required: false,
-      default: null
-    },
-    options: {
-      type: Array,
-      required: false,
-      default: () => []
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
-  },
   data: function () {
     return {
-      forSave: null
+      forSave: null,
     }
   },
   computed: {
@@ -131,7 +159,7 @@ export default {
       },
       set(newval) {
         this.forSave = newval
-      }
+      },
     },
     toggleValue: {
       get() {
@@ -139,13 +167,13 @@ export default {
       },
       set(newval) {
         this.value = newval
-      }
-    }
+      },
+    },
   },
   methods: {
     async save(callbackorvalue) {
       const data = {
-        id: this.configid
+        id: this.configid,
       }
 
       if (this.type === 'toggle') {
@@ -164,8 +192,8 @@ export default {
 
       await this.modConfigStore.updateConfig(data)
       if (typeof callbackorvalue === 'function') callbackorvalue()
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

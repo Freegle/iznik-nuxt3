@@ -1,34 +1,44 @@
 <template>
   <div>
-    <b-modal id="banMemberModal" ref="modal" title="Ban Member" size="lg" no-stacking>
+    <b-modal
+      id="banMemberModal"
+      ref="modal"
+      title="Ban Member"
+      size="lg"
+      no-stacking
+    >
       <template #default>
         <NoticeMessage v-if="homefail" variant="danger" class="mb-2">
           TO DO: Get code working to check if this group is user's home group
         </NoticeMessage>
         <NoticeMessage v-if="homeGroup" variant="danger" class="mb-2">
           <p>
-            You are banning this member on their home group. This should be an absolute last resort - it's
-            basically stopping them using Freegle at all.
+            You are banning this member on their home group. This should be an
+            absolute last resort - it's basically stopping them using Freegle at
+            all.
           </p>
           <p>
-            Please don't ban members on their home group because they've joined other groups. Let those other
-            groups ban them if they wish.
+            Please don't ban members on their home group because they've joined
+            other groups. Let those other groups ban them if they wish.
           </p>
         </NoticeMessage>
         <NoticeMessage v-else variant="info" class="mb-2">
-          Please be responsible in how you use this feature - it should
-          be a last resort.
+          Please be responsible in how you use this feature - it should be a
+          last resort.
         </NoticeMessage>
         <p>
-          You must enter a reason for banning a member.  This will be flagged to any other groups that a
-          member is on.
+          You must enter a reason for banning a member. This will be flagged to
+          any other groups that a member is on.
         </p>
-        <b-form-input v-model="reason" type="text" placeholder="Enter a reason" class="mt-2 mb-2" />
+        <b-form-input
+          v-model="reason"
+          type="text"
+          placeholder="Enter a reason"
+          class="mt-2 mb-2"
+        />
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="white" @click="hide"> Close </b-button>
         <b-button variant="primary" :disabled="!userid" @click="ban">
           Ban
         </b-button>
@@ -38,26 +48,26 @@
 </template>
 <script>
 import Wkt from 'wicket'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useUserStore } from '../../stores/user'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {
+  props: {
+    userid: {
+      type: Number,
+      required: true,
+    },
+    groupid: {
+      type: Number,
+      required: true,
+    },
+  },
   setup() {
     const modGroupStore = useModGroupStore()
     const userStore = useUserStore()
     const { modal, show, hide } = useOurModal()
     return { modGroupStore, userStore, modal, show, hide }
-  },
-  props: {
-    userid: {
-      type: Number,
-      required: true
-    },
-    groupid: {
-      type: Number,
-      required: true
-    }
   },
   data: function () {
     return {
@@ -72,10 +82,10 @@ export default {
     },
     user() {
       return this.userStore.byId(this.userid)
-    }
+    },
   },
   mounted() {
-    //console.log('mounted', cloneDeep(this.group))
+    // console.log('mounted', cloneDeep(this.group))
     // TODO: Why: await this.modGroupStore.listMT({
     //  grouptype: 'Freegle'
     // })
@@ -115,7 +125,7 @@ export default {
         this.$emit('confirm', this.reason)
         this.hide()
       }
-    }
-  }
+    },
+  },
 }
 </script>

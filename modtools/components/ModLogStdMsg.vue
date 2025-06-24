@@ -9,8 +9,8 @@ export default {
     log: {
       type: Object,
       required: false,
-      default: null
-    }
-  }
+      default: null,
+    },
+  },
 }
 </script>

@@ -2,9 +2,7 @@
   <b-card v-if="someleft" no-body>
     <b-card-header>
       <div class="d-flex justify-content-between">
-        <div>
-          Share to community Facebook pages
-        </div>
+        <div>Share to community Facebook pages</div>
         <div class="small text-muted">
           {{ timeago(item.date) }}
         </div>
@@ -17,8 +15,14 @@
         <v-icon icon="share-alt" />
         Share all
       </b-button>
-      <b-button v-for="group in groups" :key="'socialaction-' + group.id" :variant="isActioned(group.id) ? 'white' : 'primary'" class="mb-1 mr-1"
-        :disabled="isActioned(group.id)" @click="share(group)">
+      <b-button
+        v-for="group in groups"
+        :key="'socialaction-' + group.id"
+        :variant="isActioned(group.id) ? 'white' : 'primary'"
+        class="mb-1 mr-1"
+        :disabled="isActioned(group.id)"
+        @click="share(group)"
+      >
         <v-icon v-if="isActioned(group.id)" icon="check" />
         <v-icon v-else-if="isBusy(group.id)" icon="sync" class="fa-spin" />
         <v-icon v-else icon="share-alt" />
@@ -36,20 +40,20 @@ import cloneDeep from 'lodash.clonedeep'
 import { usePublicityStore } from '@/stores/publicity'
 
 export default {
+  props: {
+    item: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     const publicityStore = usePublicityStore()
     return { publicityStore }
   },
-  props: {
-    item: {
-      type: Object,
-      required: true
-    }
-  },
   data: function () {
     return {
       busy: [],
-      actioned: []
+      actioned: [],
     }
   },
   computed: {
@@ -59,10 +63,10 @@ export default {
       // Cloning to avoid some strange issues which cause loops.
       const groups = cloneDeep(this.myGroups)
 
-      this.item.uids.forEach(uid => {
+      this.item.uids.forEach((uid) => {
         for (const group of groups) {
           if (group.type === 'Freegle' && group.facebook) {
-            group.facebook.forEach(facebook => {
+            group.facebook.forEach((facebook) => {
               if (parseInt(facebook.uid) === parseInt(uid)) {
                 group.facebookuid = facebook.uid
                 ret.push(group)
@@ -84,14 +88,14 @@ export default {
     someleft() {
       let ret = false
 
-      this.groups.forEach(group => {
-        if (this.actioned.indexOf(group.id) === -1) {
+      this.groups.forEach((group) => {
+        if (!this.actioned.includes(group.id)) {
           ret = true
         }
       })
 
       return ret
-    }
+    },
   },
   methods: {
     async share(group) {
@@ -99,10 +103,10 @@ export default {
 
       await this.publicityStore.share({
         id: this.item.id,
-        uid: group.facebookuid
+        uid: group.facebookuid,
       })
 
-      this.busy = this.busy.filter(g => {
+      this.busy = this.busy.filter((g) => {
         return g.id !== group.id
       })
 
@@ -113,10 +117,10 @@ export default {
 
       await this.publicityStore.hide({
         id: this.item.id,
-        uid: group.facebookuid
+        uid: group.facebookuid,
       })
 
-      this.busy = this.busy.filter(g => {
+      this.busy = this.busy.filter((g) => {
         return g.id !== group.id
       })
 
@@ -129,8 +133,8 @@ export default {
     async shareAll() {
       const promises = []
 
-      this.groups.forEach(group => {
-        if (this.actioned.indexOf(group.id) === -1) {
+      this.groups.forEach((group) => {
+        if (!this.actioned.includes(group.id)) {
           promises.push(this.share(group, false))
         }
       })
@@ -140,21 +144,21 @@ export default {
       this.updateWork()
     },
     hideAll() {
-      this.groups.forEach(group => {
-        if (this.actioned.indexOf(group.id) === -1) {
+      this.groups.forEach((group) => {
+        if (!this.actioned.includes(group.id)) {
           this.hide(group)
         }
       })
     },
     isActioned(groupid) {
-      return this.actioned.indexOf(groupid) !== -1
+      return this.actioned.includes(groupid)
     },
     isBusy(groupid) {
-      return this.busy.indexOf(groupid) !== -1
+      return this.busy.includes(groupid)
     },
     updateWork() {
       this.checkWork()
-    }
-  }
+    },
+  },
 }
 </script>

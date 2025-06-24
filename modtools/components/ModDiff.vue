@@ -1,6 +1,10 @@
 <template>
   <div>
-    <DiffPart v-for="part in diff" :key="'diff-' + JSON.stringify(part)" :part="part" />
+    <DiffPart
+      v-for="part in diff"
+      :key="'diff-' + JSON.stringify(part)"
+      :part="part"
+    />
   </div>
 </template>
 <script>
@@ -11,13 +15,13 @@ export default {
     old: {
       type: String,
       required: false,
-      default: ''
+      default: '',
     },
     new: {
       type: String,
       required: false,
-      default: ''
-    }
+      default: '',
+    },
   },
   computed: {
     diff() {
@@ -27,7 +31,7 @@ export default {
 
       const ret = diffChars(this.old, this.new)
       return ret
-    }
-  }
+    },
+  },
 }
 </script>

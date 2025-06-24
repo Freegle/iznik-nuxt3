@@ -6,7 +6,7 @@ export function pluralise(word, count, withnumber) {
     rv = rv.substring(0, rv.length - 4) + ',' + rv.substring(rv.length - 4)
   }
   if (Array.isArray(word)) {
-    return rv + ((count === 1) ? word[0] : word[1])
+    return rv + (count === 1 ? word[0] : word[1])
   }
-  return rv + ((count === 1) ? word : word + 's')
+  return rv + (count === 1 ? word : word + 's')
 }

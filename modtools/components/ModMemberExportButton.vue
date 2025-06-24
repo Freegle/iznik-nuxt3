@@ -1,18 +1,30 @@
 <template>
   <div>
-    <b-button :disabled="!admin" variant="white"
-      :title="admin ? 'Export' : 'This is now disabled for GDPR reasons.  If you wish to diaffiliate from Freegle please mail newgroups@ilovefreegle.org'"
-      @click="download">
+    <b-button
+      :disabled="!admin"
+      variant="white"
+      :title="
+        admin
+          ? 'Export'
+          : 'This is now disabled for GDPR reasons.  If you wish to diaffiliate from Freegle please mail newgroups@ilovefreegle.org'
+      "
+      @click="download"
+    >
       <v-icon icon="download" /> Export
     </b-button>
-    <b-modal v-if="showExportModal" ref="exportmodal" id="exportmodal" title="Member Export" no-stacking>
+    <b-modal
+      v-if="showExportModal"
+      id="exportmodal"
+      ref="exportmodal"
+      title="Member Export"
+      no-stacking
+    >
       <template #default>
         <p>
-          This will export the members of this community. It's very slow, but you probably won't need to do it often.
+          This will export the members of this community. It's very slow, but
+          you probably won't need to do it often.
         </p>
-        <p>
-          Export in progress...
-        </p>
+        <p>Export in progress...</p>
         <b-progress height="48px" class="mt-2" animate variant="success">
           <b-progress-bar :value="progressValue" />
         </b-progress>
@@ -26,24 +38,24 @@
   </div>
 </template>
 <script>
-import { useOurModal } from '~/composables/useOurModal'
 import saveAs from 'save-file'
 import { createObjectCsvWriter } from 'csv-writer'
 import { useGroupStore } from '../stores/group'
 import { useMemberStore } from '../stores/member'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
+  props: {
+    groupid: {
+      type: Number,
+      required: true,
+    },
+  },
   setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const { modal, show, hide } = useOurModal()
     return { groupStore, memberStore, modal, show, hide }
-  },
-  props: {
-    groupid: {
-      type: Number,
-      required: true
-    }
   },
   data: function () {
     return {
@@ -53,7 +65,7 @@ export default {
       limit: 100,
       fetched: 0,
       exportList: [],
-      modalButtonLabel: 'Cancel'
+      modalButtonLabel: 'Cancel',
     }
   },
   computed: {
@@ -64,7 +76,7 @@ export default {
       return this.group && this.group.membercount
         ? Math.round((100 * this.fetched) / this.group.membercount)
         : 0
-    }
+    },
   },
   methods: {
     download() {
@@ -91,7 +103,7 @@ export default {
           modtools: true,
           summary: false,
           context: this.context,
-          limit: this.limit
+          limit: this.limit,
         })
       }
 
@@ -112,20 +124,20 @@ export default {
           { id: 'postingstatus', title: 'Posting Status' },
           { id: 'bouncing', title: 'Bouncing' },
           { id: 'trustlevel', title: 'MicroVolunteering' },
-          { id: 'comments', title: 'Comments' }
-        ]
+          { id: 'comments', title: 'Comments' },
+        ],
       })
 
-      members.forEach(member => {
+      members.forEach((member) => {
         const otheremails = []
-        member.otheremails.forEach(email => {
+        member.otheremails.forEach((email) => {
           if (email.email !== member.email) {
             otheremails.push(email.email)
           }
         })
 
         const comments = []
-        member.comments.forEach(comment => {
+        member.comments.forEach((comment) => {
           if (comment.user1) {
             comments.push(comment.user1)
           }
@@ -173,7 +185,7 @@ export default {
           postingstatus: member.ourpostingstatus,
           bouncing: member.bouncing,
           trustlevel: member.trustlevel,
-          comments: comments.join('; ')
+          comments: comments.join('; '),
         })
       })
 
@@ -187,13 +199,14 @@ export default {
       } else {
         // Got them all.
         const str =
-          writer.csvStringifier.getHeaderString() + writer.csvStringifier.stringifyRecords(this.exportList)
+          writer.csvStringifier.getHeaderString() +
+          writer.csvStringifier.stringifyRecords(this.exportList)
         const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
         this.modalButtonLabel = 'Done'
         await saveAs(blob, 'members.csv')
         this.showExportModal = false
       }
-    }
-  }
+    },
+  },
 }
 </script>

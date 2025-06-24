@@ -1,13 +1,25 @@
 <template>
-  <l-map ref="map" v-model:zoom="zoom" v-model:center="center" :style="'width: 100%; height: ' + height + 'px'" :max-zoom="maxZoom"
-    :options="mapOptions" :use-global-leaflet="true" @ready="ready">
+  <l-map
+    ref="map"
+    v-model:zoom="zoom"
+    v-model:center="center"
+    :style="'width: 100%; height: ' + height + 'px'"
+    :max-zoom="maxZoom"
+    :options="mapOptions"
+    :use-global-leaflet="true"
+    @ready="ready"
+  >
     <l-tile-layer :url="osmtile()" :attribution="attribution()" />
     <l-marker v-if="home" :lat-lng="home">
       <l-icon>
         <HomeIcon />
       </l-icon>
     </l-marker>
-    <l-marker :lat-lng="[position.lat, position.lng]" :interactive="false" :icon="blurmarker" />
+    <l-marker
+      :lat-lng="[position.lat, position.lng]"
+      :interactive="false"
+      :icon="blurmarker"
+    />
     <l-geo-json v-if="boundary" :geojson="boundaryJSON" :options="cgaOptions" />
   </l-map>
 </template>
@@ -15,7 +27,13 @@
 import 'leaflet'
 import Wkt from 'wicket'
 import { computed } from 'vue'
-import { LMap, LTileLayer, LMarker, LIcon, LGeoJson } from '@vue-leaflet/vue-leaflet'
+import {
+  LMap,
+  LTileLayer,
+  LMarker,
+  LIcon,
+  LGeoJson,
+} from '@vue-leaflet/vue-leaflet'
 import HomeIcon from './HomeIcon'
 import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
@@ -68,17 +86,16 @@ const CGA_BOUNDARY_COLOUR = 'darkblue'
 const cgaOptions = computed(() => ({
   fillColor: AREA_FILL_COLOUR,
   fillOpacity: 0,
-  color: CGA_BOUNDARY_COLOUR
+  color: CGA_BOUNDARY_COLOUR,
 }))
-
 
 const blurmarker = computed(() => {
   const modtools = miscStore.modtools
   return window.L
     ? new window.L.Icon({
-      iconUrl: modtools ? '/bluering.png' : '/blurmarker.png',
-      iconSize: [100, 100],
-    })
+        iconUrl: modtools ? '/bluering.png' : '/blurmarker.png',
+        iconSize: [100, 100],
+      })
     : null
 })
 
@@ -93,7 +110,6 @@ const boundaryJSON = computed(() => {
 
   return null
 })
-
 
 const map = ref(null)
 const center = ref(new window.L.LatLng(props.position.lat, props.position.lng))

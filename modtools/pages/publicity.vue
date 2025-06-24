@@ -2,7 +2,13 @@
   <div>
     <ModHelpPublicity />
     <ModMissingFacebook />
-    <NoticeMessage v-if="(!items || !items.length) && (!popularPosts || !popularPosts.length)" variant="info" class="mt-2">
+    <NoticeMessage
+      v-if="
+        (!items || !items.length) && (!popularPosts || !popularPosts.length)
+      "
+      variant="info"
+      class="mt-2"
+    >
       There are no publicity items to review at the moment.
     </NoticeMessage>
     <div v-for="item in items" :key="'item-' + item.id" class="mt-2">
@@ -43,12 +49,12 @@ export default {
       }
 
       return []
-    }
+    },
   },
   async mounted() {
     await this.publicityStore.clear()
     await this.publicityStore.fetch({ reviewed: 0 })
     console.log('Fetched publicity')
-  }
+  },
 }
 </script>

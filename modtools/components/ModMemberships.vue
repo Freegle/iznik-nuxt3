@@ -1,24 +1,64 @@
 <template>
   <div class="mt-2 small">
     <div v-if="memberof && memberof.length">
-      <div v-for="m in memberof" :key="'membership-' + m.membershipid" class="p-1 me-1">
-        <strong class="me-1">{{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
-        <span :class="'small ' + (daysago(m.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">{{ timeago(m.added) }}</span>
+      <div
+        v-for="m in memberof"
+        :key="'membership-' + m.membershipid"
+        class="p-1 me-1"
+      >
+        <strong class="me-1">{{
+          m.namedisplay.length > 32
+            ? m.namedisplay.substring(0, 32) + '...'
+            : m.namedisplay
+        }}</strong>
+        <span
+          :class="
+            'small ' +
+            (daysago(m.added) < 31
+              ? 'text-danger font-weight-bold'
+              : 'text-muted')
+          "
+          >{{ timeago(m.added) }}</span
+        >
       </div>
     </div>
-    <div v-else class="p-1 me-1">
-      Not on any communities
-    </div>
-    <b-badge v-if="hiddenmemberofs" variant="info" class="clickme mb-1" @click="allmemberships = !allmemberships">
+    <div v-else class="p-1 me-1">Not on any communities</div>
+    <b-badge
+      v-if="hiddenmemberofs"
+      variant="info"
+      class="clickme mb-1"
+      @click="allmemberships = !allmemberships"
+    >
       +{{ hiddenmemberofs }} groups
     </b-badge>
     <div v-if="visibleApplied && visibleApplied.length">
-      <div v-for="m in visibleApplied" :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added" class="p-1 me-1">
-        <strong class="me-1">{{ m.namedisplay.length > 32 ? (m.namedisplay.substring(0, 32) + '...') : m.namedisplay }}</strong>
-        <span :class="'small ' + (daysago(m.added) < 31 ? 'text-danger font-weight-bold' : 'text-muted')">joined {{ timeago(m.added) }}</span>
+      <div
+        v-for="m in visibleApplied"
+        :key="'memberapplied-' + m.id + '-' + m.userid + '-' + m.added"
+        class="p-1 me-1"
+      >
+        <strong class="me-1">{{
+          m.namedisplay.length > 32
+            ? m.namedisplay.substring(0, 32) + '...'
+            : m.namedisplay
+        }}</strong>
+        <span
+          :class="
+            'small ' +
+            (daysago(m.added) < 31
+              ? 'text-danger font-weight-bold'
+              : 'text-muted')
+          "
+          >joined {{ timeago(m.added) }}</span
+        >
       </div>
     </div>
-    <b-badge v-if="hiddenapplieds" variant="info" class="clickme mb-1" @click="allapplied= !allapplied">
+    <b-badge
+      v-if="hiddenapplieds"
+      variant="info"
+      class="clickme mb-1"
+      @click="allapplied = !allapplied"
+    >
       +{{ hiddenapplieds }} applied
     </b-badge>
   </div>
@@ -31,13 +71,13 @@ export default {
   props: {
     user: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       allmemberships: false,
-      allapplied: false
+      allapplied: false,
     }
   },
   computed: {
@@ -48,7 +88,7 @@ export default {
 
       const ms = this.user.memberof
 
-      ms.sort(function(a, b) {
+      ms.sort(function (a, b) {
         return new Date(b.added).getTime() - new Date(a.added).getTime()
       })
 
@@ -64,8 +104,8 @@ export default {
         : this.user &&
           this.user.memberof &&
           this.user.memberof.length > MEMBERSHIPS_SHOW
-          ? this.user.memberof.length - MEMBERSHIPS_SHOW
-          : 0
+        ? this.user.memberof.length - MEMBERSHIPS_SHOW
+        : 0
     },
     filteredApplied() {
       if (!this.user || !this.user.applied || !this.user.memberof) {
@@ -73,9 +113,9 @@ export default {
       }
 
       // Filter out anything we're already on.
-      const ms = this.user.applied.filter(g => {
+      const ms = this.user.applied.filter((g) => {
         let member = false
-        this.user.memberof.forEach(h => {
+        this.user.memberof.forEach((h) => {
           if (h.id === g.id) {
             member = true
           }
@@ -84,7 +124,7 @@ export default {
         return !member
       })
 
-      ms.sort(function(a, b) {
+      ms.sort(function (a, b) {
         return new Date(b.added).getTime() - new Date(a.added).getTime()
       })
 
@@ -101,14 +141,14 @@ export default {
       return this.allapplied
         ? 0
         : this.filteredApplied.length > MEMBERSHIPS_SHOW
-          ? this.filteredApplied.length - MEMBERSHIPS_SHOW
-          : 0
-    }
+        ? this.filteredApplied.length - MEMBERSHIPS_SHOW
+        : 0
+    },
   },
   methods: {
     daysago(d) {
       return dayjs().diff(dayjs(d), 'days')
-    }
-  }
+    },
+  },
 }
 </script>

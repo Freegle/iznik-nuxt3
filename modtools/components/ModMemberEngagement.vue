@@ -1,10 +1,11 @@
 <template>
   <div v-if="member">
-    <div v-if="member.lastaccess" :class="'mb-1 ' + (inactive ? 'text-danger': '')">
+    <div
+      v-if="member.lastaccess"
+      :class="'mb-1 ' + (inactive ? 'text-danger' : '')"
+    >
       Last active: {{ timeago(member.lastaccess) }}
-      <span v-if="inactive">
-        - won't send mails
-      </span>
+      <span v-if="inactive"> - won't send mails </span>
       <b-badge :variant="variant">
         {{ engagement }}
       </b-badge>
@@ -19,8 +20,8 @@ export default {
   props: {
     member: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     inactive() {
@@ -28,8 +29,7 @@ export default {
       return (
         this.member &&
         this.member.lastaccess &&
-        dayjs().diff(dayjs(this.member.lastaccess), 'days') >=
-          365 / 2
+        dayjs().diff(dayjs(this.member.lastaccess), 'days') >= 365 / 2
       )
     },
     engagement() {
@@ -90,7 +90,7 @@ export default {
       }
 
       return ret
-    }
-  }
+    },
+  },
 }
 </script>

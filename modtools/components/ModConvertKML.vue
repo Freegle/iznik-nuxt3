@@ -1,11 +1,10 @@
 <template>
   <b-card no-body>
-    <b-card-header class="bg-info">
-      KML Converter
-    </b-card-header>
+    <b-card-header class="bg-info"> KML Converter </b-card-header>
     <b-card-body>
       <p>
-        This converts KML to WKT.  It is mostly useful for NGT when changing group areas.
+        This converts KML to WKT. It is mostly useful for NGT when changing
+        group areas.
       </p>
       <b-form-textarea v-model="kml" rows="2" placeholder="Enter KML here" />
       <b-button variant="white" class="mt-2" @click="convert">
@@ -28,16 +27,16 @@ export default {
       locationStore,
     }
   },
-  data: function() {
+  data: function () {
     return {
       kml: null,
-      wkt: null
+      wkt: null,
     }
   },
   methods: {
     async convert() {
       this.wkt = await this.locationStore.convertKML(this.kml)
-    }
-  }
+    },
+  },
 }
 </script>

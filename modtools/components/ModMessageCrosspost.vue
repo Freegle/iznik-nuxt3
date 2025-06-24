@@ -1,6 +1,6 @@
 <template>
   <div class="small">
-    <span class="text-danger ">
+    <span class="text-danger">
       Crosspost
       <v-icon icon="hashtag" class="text-muted" scale="0.5" />
       {{ message.id }}
@@ -15,7 +15,8 @@
         {{ message.collection }}
       </span>
     </span>
-    <span v-else-if="message.outcome">, now {{ message.outcome }}</span><span v-else class="text-normal">, still open</span>
+    <span v-else-if="message.outcome">, now {{ message.outcome }}</span
+    ><span v-else class="text-normal">, still open</span>
   </div>
 </template>
 <script>
@@ -24,8 +25,8 @@ export default {
   props: {
     message: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     const groupStore = useGroupStore()
@@ -37,7 +38,7 @@ export default {
     },
     groupname() {
       return this.group ? this.group.namedisplay : null
-    }
+    },
   },
   mounted() {
     const group = this.groupStore.get(this.message.groupid)
@@ -45,6 +46,6 @@ export default {
     if (!group) {
       this.groupStore.fetch(this.message.groupid)
     }
-  }
+  },
 }
 </script>

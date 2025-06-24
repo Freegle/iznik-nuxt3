@@ -1,4 +1,4 @@
-//import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -273,7 +273,7 @@ export default defineNuxtConfig({
       splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      //eslintPlugin(),
+      eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',
@@ -282,7 +282,7 @@ export default defineNuxtConfig({
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
-  /*legacy: {
+  /* legacy: {
     targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
     modernPolyfills: [
       'es.global-this',
@@ -291,7 +291,7 @@ export default defineNuxtConfig({
       'es.array.flat',
       'es.string.replace-all',
     ],
-  },*/
+  }, */
 
   // Sentry needs sourcemaps.
   sourcemap: {

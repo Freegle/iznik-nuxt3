@@ -56,12 +56,12 @@ export default {
           try {
             return twem(tidied)
           } catch (e) {
-            console.error('emessage A',e.message)
+            console.error('emessage A', e.message)
           }
           return tidied
         }
       } catch (e) {
-        console.error('emessage B',e.message)
+        console.error('emessage B', e.message)
       }
       return ''
     },
@@ -80,11 +80,11 @@ export default {
         : this.chat?.icon
     },
     refmsgid() {
-      if( this.chatmessage?.refmsg) return this.chatmessage.refmsg.id
+      if (this.chatmessage?.refmsg) return this.chatmessage.refmsg.id
       return this.chatmessage?.refmsgid
     },
     refmsg() {
-      if( this.chatmessage?.refmsg) return this.chatmessage?.refmsg
+      if (this.chatmessage?.refmsg) return this.chatmessage?.refmsg
       const messageStore = useMessageStore()
       return this.refmsgid ? messageStore?.byId(this.refmsgid) : null
     },

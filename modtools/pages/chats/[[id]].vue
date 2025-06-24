@@ -1,40 +1,79 @@
 <template>
   <client-only>
     <b-row class="m-0">
-      <b-col id="chatlist" cols="12" md="4" :class="'chatlist p-0 bg-white ' + (selectedChatId ? 'd-none d-md-block' : '') + ' ' + selectedChatId">
+      <b-col
+        id="chatlist"
+        cols="12"
+        md="4"
+        :class="
+          'chatlist p-0 bg-white ' +
+          (selectedChatId ? 'd-none d-md-block' : '') +
+          ' ' +
+          selectedChatId
+        "
+      >
         <b-card class="p-0">
           <b-card-body class="p-0">
             <div class="d-flex justify-content-between flex-wrap">
-              <b-form-input v-model="search" placeholder="Search chats (e.g. 'Joe' or 'mods')" class="flex-shrink-1" />
+              <b-form-input
+                v-model="search"
+                placeholder="Search chats (e.g. 'Joe' or 'mods')"
+                class="flex-shrink-1"
+              />
               <b-button class="mt-1" variant="white" @click="markAllRead">
                 <v-icon icon="check" /> Mark all read
               </b-button>
             </div>
           </b-card-body>
         </b-card>
-        <ChatListEntry v-for="chat in visibleChats" :id="chat.id" :key="'chat-' + chat.id + bump"
-          :class="{ active: chat && selectedChatId === parseInt(chat.id) }" @click="gotoChat(chat.id)" />
+        <ChatListEntry
+          v-for="chat in visibleChats"
+          :id="chat.id"
+          :key="'chat-' + chat.id + bump"
+          :class="{ active: chat && selectedChatId === parseInt(chat.id) }"
+          @click="gotoChat(chat.id)"
+        />
         <p v-if="!visibleChats || !visibleChats.length" class="ml-2">
-          <span v-if="searching" class="pulsate">
-            Searching...
-          </span>
-          <span v-else>
-            No chats to show.
-          </span>
+          <span v-if="searching" class="pulsate"> Searching... </span>
+          <span v-else> No chats to show. </span>
         </p>
-        <infinite-loading :identifier="bump" force-use-infinite-wrapper="#chatlist" :distance="distance" @infinite="loadMore">
-          <span slot="no-results" />
-          <span slot="no-more" />
+        <infinite-loading
+          :identifier="bump"
+          force-use-infinite-wrapper="#chatlist"
+          :distance="distance"
+          @infinite="loadMore"
+        >
+          <template #no-results>
+            <span />
+          </template>
+          <template #no-more>
+            <span />
+          </template>
         </infinite-loading>
         <div class="d-flex justify-content-around">
-          <b-button v-if="search && complete" variant="white" class="mt-2" @click="searchMore">
+          <b-button
+            v-if="search && complete"
+            variant="white"
+            class="mt-2"
+            @click="searchMore"
+          >
             <v-icon v-if="searching" icon="sync" class="text-success fa-spin" />
             <v-icon v-else icon="search" /> Search old chats
           </b-button>
         </div>
       </b-col>
-      <b-col cols="12" md="8" :class="'chatback p-0 ' + (selectedChatId ? 'd-block' : 'd-none d-md-block')">
-        <ChatPane v-if="selectedChatId" :id="selectedChatId" :key="'chatpane-' + selectedChatId" />
+      <b-col
+        cols="12"
+        md="8"
+        :class="
+          'chatback p-0 ' + (selectedChatId ? 'd-block' : 'd-none d-md-block')
+        "
+      >
+        <ChatPane
+          v-if="selectedChatId"
+          :id="selectedChatId"
+          :key="'chatpane-' + selectedChatId"
+        />
         <p v-else class="text-center text-muted mt-2">
           Please click on a chat in the left pane.
         </p>
@@ -45,84 +84,62 @@
 <script>
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
-//import { pluralise } from '../composables/usePluralise'
-import { useChatStore } from '~/stores/chat'
+// import { pluralise } from '../composables/usePluralise'
 import { useAuthStore } from '../../stores/auth'
-//import { setupChat } from '../composables/useChat'
+import { useChatStore } from '~/stores/chat'
+// import { setupChat } from '../composables/useChat'
 import { useRouter } from '#imports'
 
 export default {
   setup() {
     const chatStore = useChatStore()
     const authStore = useAuthStore()
-    /*const {
+    /* const {
       chat,
       otheruser,
       tooSoonToNudge,
       chatStore,
       chatmessages,
       milesaway,
-    } = await setupChat(props.id)*/
+    } = await setupChat(props.id) */
 
     return {
       authStore,
       chatStore,
-      //chat,
-      //otheruser,
-      //tooSoonToNudge,
-      //miscStore,
-      //messageStore,
-      //addressStore,
-      //chatmessages,
+      // chat,
+      // otheruser,
+      // tooSoonToNudge,
+      // miscStore,
+      // messageStore,
+      // addressStore,
+      // chatmessages,
       // milesaway,
     }
   },
   data: function () {
     return {
       id: 0,
-      //showHideAllModal: false,
-      //minShowChats: 20,
+      // showHideAllModal: false,
+      // minShowChats: 20,
       showChats: 20,
       search: null,
       searching: false,
       searchlast: null,
-      //complete: false,
+      // complete: false,
       limit: 5,
       bump: 1,
       distance: 1000,
       selectedChatId: null,
       showClosed: false,
-      //adsVisible: false,
-    }
-  },
-  created() {
-    const route = useRoute()
-    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-    if (isNaN(this.id)) this.id = 0
-    if (this.id) this.selectedChatId = this.id
-    console.log('[[id]] created', route.params.id, this.id)
-  },
-  watch: {
-    search(newVal, oldVal) {
-      console.log('search changed to', newVal)
-      this.showChats = 0
-      this.bump = Date.now()
-
-      if (!newVal) {
-        // Force a refresh to remove any old chats.
-        this.listChats()
-      } else {
-        // Force a server search to pick up old chats or more subtle matches.
-        this.searchMore()
-      }
+      // adsVisible: false,
     }
   },
   computed: {
     messages() {
       return []
-      //return this.chatStore.getMessages(REVIEWCHAT)
+      // return this.chatStore.getMessages(REVIEWCHAT)
     },
-    /*milesaway(){
+    /* milesaway(){
       this.authStore.user?.lat,
       this.authStore.user?.lng,
       otheruser?.value?.lat,
@@ -130,7 +147,7 @@ export default {
     ),
     milesstring() {
       return pluralise('mile', milesaway.value, true) + ' away'
-    },*/
+    }, */
     chats() {
       return this.chatStore?.list ? this.chatStore.list : []
     },
@@ -177,15 +194,37 @@ export default {
       return false
     },
   },
+  watch: {
+    search(newVal, oldVal) {
+      console.log('search changed to', newVal)
+      this.showChats = 0
+      this.bump = Date.now()
+
+      if (!newVal) {
+        // Force a refresh to remove any old chats.
+        this.listChats()
+      } else {
+        // Force a server search to pick up old chats or more subtle matches.
+        this.searchMore()
+      }
+    },
+  },
+  created() {
+    const route = useRoute()
+    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
+    if (isNaN(this.id)) this.id = 0
+    if (this.id) this.selectedChatId = this.id
+    console.log('[[id]] created', route.params.id, this.id)
+  },
   async mounted() {
     this.chatStore.clear()
     await this.listChats()
   },
   methods: {
     async listChats(age, search) {
-      //console.log('chats [[id]] listChats', this.id)
+      // console.log('chats [[id]] listChats', this.id)
       const params = {
-        chattypes: ['User2Mod', 'Mod2Mod']
+        chattypes: ['User2Mod', 'Mod2Mod'],
       }
       if (age) {
         params.age = age
@@ -198,7 +237,7 @@ export default {
       this.bump++
     },
     scanChats(closed, chats) {
-      //console.log('scanChats', closed, chats.length,this.id)
+      // console.log('scanChats', closed, chats.length,this.id)
       // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
       if (chats && this.search && this.searching) {
         const l = this.search.toLowerCase()
@@ -247,14 +286,14 @@ export default {
         }
       })
 
-      //console.log('scanChats return', chats)
+      // console.log('scanChats return', chats)
       return chats
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
       // we render onscreen the faster vue is to do so.
       const chats = this.filteredChats
-      //console.log('loadMore', this.showChats, chats.length)
+      // console.log('loadMore', this.showChats, chats.length)
       this.showChats++
 
       if (this.showChats > chats.length) {
@@ -281,7 +320,7 @@ export default {
       router.push('/chats/' + id)
     },
     async searchMore() {
-      //console.log('searchMore', this.search, this.searchlast)
+      // console.log('searchMore', this.search, this.searchlast)
       if (this.searching) {
         // Queue until we've finished.
         this.searchlast = this.search
@@ -300,8 +339,8 @@ export default {
 
         this.searching = null
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

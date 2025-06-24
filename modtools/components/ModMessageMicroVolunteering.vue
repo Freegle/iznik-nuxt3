@@ -1,38 +1,52 @@
 <template>
   <div>
-    <div v-if="microvolunteering.result === 'Reject'" class="border border-warning rounded p-2">
+    <div
+      v-if="microvolunteering.result === 'Reject'"
+      class="border border-warning rounded p-2"
+    >
       <nuxt-link :to="'/members/approved/0/' + microvolunteering.userid">
-        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ microvolunteering.userid }}
+        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+          microvolunteering.userid
+        }}
       </nuxt-link>
       <span v-if="user">
         <strong>{{ user.displayname }}</strong>
-        <span v-if="email">
-          ({{ email }})
-        </span>
+        <span v-if="email"> ({{ email }}) </span>
       </span>
       thinks this post
-      <strong v-if="microvolunteering.msgcategory === 'CouldBeBetter'" class="text-warning">
+      <strong
+        v-if="microvolunteering.msgcategory === 'CouldBeBetter'"
+        class="text-warning"
+      >
         Could be better
       </strong>
-      <strong v-else-if="microvolunteering.msgcategory === 'ShouldntBeHere'" class="text-danger">
+      <strong
+        v-else-if="microvolunteering.msgcategory === 'ShouldntBeHere'"
+        class="text-danger"
+      >
         shouldn't be here
       </strong>
-      <br>
-      <span v-if="microvolunteering.comments" class="font-weight-bold">"{{ microvolunteering.comments }}"</span>
+      <br />
+      <span v-if="microvolunteering.comments" class="font-weight-bold"
+        >"{{ microvolunteering.comments }}"</span
+      >
       <em v-else>No comment supplied.</em>
     </div>
-    <div v-if="microvolunteering.result === 'Approve'" class="border border-success rounded p-2">
+    <div
+      v-if="microvolunteering.result === 'Approve'"
+      class="border border-success rounded p-2"
+    >
       <nuxt-link :to="'/members/approved/0/' + microvolunteering.userid">
-        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ microvolunteering.userid }}
+        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{
+          microvolunteering.userid
+        }}
       </nuxt-link>
       <span v-if="user">
         <strong>&nbsp;{{ user.displayname }}</strong>
-        <span v-if="email">
-          ({{ email }})
-        </span>
+        <span v-if="email"> ({{ email }}) </span>
       </span>
       thinks this post is ok.
-      <br>
+      <br />
     </div>
   </div>
 </template>
@@ -44,12 +58,12 @@ export default {
   props: {
     message: {
       type: Object,
-      required: true
+      required: true,
     },
     microvolunteering: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     const userStore = useUserStore()
@@ -63,7 +77,7 @@ export default {
       let ret = null
 
       if (this.user && this.user.emails) {
-        this.user.emails.forEach(e => {
+        this.user.emails.forEach((e) => {
           if (!e.ourdomain && (!ret || e.preferred)) {
             ret = e.email
           }
@@ -71,10 +85,10 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   mounted() {
     this.userStore.fetch(this.microvolunteering.userid)
-  }
+  },
 }
 </script>

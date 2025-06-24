@@ -5,7 +5,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import { useGroupStore } from '~/stores/group'
 
 export default {
   data: function () {
@@ -26,7 +25,8 @@ export default {
       return this.hasPermission('GiftAid')
     },
     // Needed for some modtoolstasks but /mixins/me.js/myGroups() OK for most mod tasks as it is a copy of modgroup.list
-    myModGroups() { // But do we need to do other stuff in myGroups() eg sorting?
+    myModGroups() {
+      // But do we need to do other stuff in myGroups() eg sorting?
       const modGroupStore = useModGroupStore()
       return Object.values(modGroupStore.list)
     },
@@ -34,10 +34,10 @@ export default {
   methods: {
     hasPermission(perm) {
       const perms = this.me ? this.me.permissions : null
-      return perms && perms.indexOf(perm) !== -1
+      return perms && perms.includes(perm)
     },
     myModGroup(groupid) {
-      //console.log("modme.js myModGroup",groupid)
+      // console.log("modme.js myModGroup",groupid)
       const modGroupStore = useModGroupStore()
       return modGroupStore.get(groupid)
     },
@@ -71,12 +71,16 @@ export default {
 
       // Do not check for work and therefore refresh while any modal is open
       const bodyoverflow = document.body.style.overflow
-      if (force || (bodyoverflow !== 'hidden')) {
-        //console.log('========================================')
-        console.log('CHECKWORK modme', force ?? '', now.toISOString().substring(11))
-        //const groupStore = useGroupStore()
+      if (force || bodyoverflow !== 'hidden') {
+        // console.log('========================================')
+        console.log(
+          'CHECKWORK modme',
+          force ?? '',
+          now.toISOString().substring(11)
+        )
+        // const groupStore = useGroupStore()
         const modGroupStore = useModGroupStore()
-        //console.log('CHECKWORK auth.groups',authStore.groups?.length, 
+        // console.log('CHECKWORK auth.groups',authStore.groups?.length,
         //  'groupStore.list',Object.keys(groupStore.list).length,
         //  'modGroupStore.list', Object.keys(modGroupStore.list).length)
 
@@ -89,8 +93,13 @@ export default {
         this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
         const work = authStore.work
         const totalCount = work?.total + this.chatcount
-        if (work && (totalCount > currentTotal) && authStore.user &&
-          (!authStore.user.settings || !Object.keys(authStore.user.settings).includes('playbeep') || authStore.user.settings.playbeep)
+        if (
+          work &&
+          totalCount > currentTotal &&
+          authStore.user &&
+          (!authStore.user.settings ||
+            !Object.keys(authStore.user.settings).includes('playbeep') ||
+            authStore.user.settings.playbeep)
         ) {
           console.log('Beep as new work', currentTotal, totalCount)
           this.makebeep()

@@ -1,13 +1,11 @@
 <template>
   <div>
-    <b-modal ref="modal" id="modEmailMessageModal" size="lg" @hidden="onHide">
-      <template #title>
-        Message received by email
-      </template>
+    <b-modal id="modEmailMessageModal" ref="modal" size="lg" @hidden="onHide">
+      <template #title> Message received by email </template>
       <template #default>
         <p>
-          Sometimes messages which arrive by email aren't translated into Chat correctly. Here you can see a bit
-          more of the original email.
+          Sometimes messages which arrive by email aren't translated into Chat
+          correctly. Here you can see a bit more of the original email.
         </p>
         <b-tabs content-class="mt-3">
           <b-tab title="Pretty View" active>
@@ -15,8 +13,10 @@
           </b-tab>
           <b-tab title="Raw Message Source">
             <NoticeMessage variant="info" class="mb-1">
-              This is the raw email we received. It may have had large attachments removed for space reasons. The body
-              of the email is sometimes encoded, and you might not be able to read it. If you need help, ask on Tech.
+              This is the raw email we received. It may have had large
+              attachments removed for space reasons. The body of the email is
+              sometimes encoded, and you might not be able to read it. If you
+              need help, ask on Tech.
             </NoticeMessage>
             <!-- eslint-disable-next-line-->
             <pre v-if="message">{{ message.message }}</pre>
@@ -24,44 +24,41 @@
         </b-tabs>
       </template>
       <template #footer>
-        <b-button variant="white" @click="hide">
-          Close
-        </b-button>
+        <b-button variant="white" @click="hide"> Close </b-button>
       </template>
     </b-modal>
   </div>
 </template>
 <script>
 import { Letter } from 'vue-letter'
-import { useOurModal } from '~/composables/useOurModal'
-import { useMessageStore } from '../../stores/message'
-
 import { extract } from 'letterparser'
+import { useMessageStore } from '../../stores/message'
+import { useOurModal } from '~/composables/useOurModal'
 
 export default {
   components: { Letter },
-  setup() {
-    const { modal, hide } = useOurModal()
-    const messageStore = useMessageStore()
-    return { messageStore, modal, hide }
-  },
   props: {
     id: {
       type: Number,
-      required: true
+      required: true,
     },
     collection: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
+  },
+  emits: ['hidden'],
+  setup() {
+    const { modal, hide } = useOurModal()
+    const messageStore = useMessageStore()
+    return { messageStore, modal, hide }
   },
   data() {
     return {
       message: null,
     }
   },
-  emits: ['hidden'],
   computed: {
     parsed() {
       if (this.message) {
@@ -76,15 +73,14 @@ export default {
     },
     html() {
       return this.parsed ? this.parsed.html : null
-    }
+    },
   },
   methods: {
     async show() {
-
       // Get message directly rather than via store, to get message mail source
       this.message = await this.messageStore.fetchMT({
         id: this.id,
-        messagehistory: true
+        messagehistory: true,
       })
 
       this.showModal = true
@@ -92,6 +88,6 @@ export default {
     onHide() {
       this.$emit('hidden')
     },
-  }
+  },
 }
 </script>

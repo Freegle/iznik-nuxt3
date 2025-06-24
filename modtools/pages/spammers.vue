@@ -5,14 +5,12 @@
       <div>
         <b-tabs v-model="tabIndex" content-class="mt-3" card lazy>
           <b-tab id="Spammers" :active="!hasPermissionSpamAdmin">
-            <template v-slot:title>
-              <h2 class="ml-2 mr-2">
-                Confirmed Spammers
-              </h2>
+            <template #title>
+              <h2 class="ml-2 mr-2">Confirmed Spammers</h2>
             </template>
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="PendingAdd">
-            <template v-slot:title>
+            <template #title>
               <h2 class="ml-2 mr-2">
                 Pending Add
                 <b-badge v-if="pendingaddcount" variant="danger">
@@ -22,14 +20,12 @@
             </template>
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="Safelisted">
-            <template v-slot:title>
-              <h2 class="ml-2 mr-2">
-                Safelisted
-              </h2>
+            <template #title>
+              <h2 class="ml-2 mr-2">Safelisted</h2>
             </template>
           </b-tab>
           <b-tab v-if="hasPermissionSpamAdmin" id="PendingRemove">
-            <template v-slot:title>
+            <template #title>
               <h2 class="ml-2 mr-2">
                 Pending Remove
                 <b-badge v-if="pendingremovecount" variant="danger">
@@ -39,16 +35,32 @@
             </template>
           </b-tab>
         </b-tabs>
-        <p v-if="tabIndex === 0" spam class="p-2" >
+        <p v-if="tabIndex === 0" spam class="p-2">
           To remove from spammer list, please mail geeks.
         </p>
-        <p v-if="tabIndex === 2" spam class="p-2" >
+        <p v-if="tabIndex === 2" spam class="p-2">
           To remove from safe list, please mail geeks.
         </p>
-        <ModMemberSearchbox v-if="tabIndex === 0" spam class="mb-2" @search="searched" />
-        <ModMember v-for="(spammer, index) in visibleSpammers" :key="'spammer-' + tabIndex + '-' + spammer.id" :member="spammer.user" :sameip="spammer.sameip" class="mb-1" :index="index" />
-        <infinite-loading :distance="10" @infinite="loadMore" :identifier="infiniteId">
-          <template #spinner >
+        <ModMemberSearchbox
+          v-if="tabIndex === 0"
+          spam
+          class="mb-2"
+          @search="searched"
+        />
+        <ModMember
+          v-for="(spammer, index) in visibleSpammers"
+          :key="'spammer-' + tabIndex + '-' + spammer.id"
+          :member="spammer.user"
+          :sameip="spammer.sameip"
+          class="mb-1"
+          :index="index"
+        />
+        <infinite-loading
+          :distance="10"
+          :identifier="infiniteId"
+          @infinite="loadMore"
+        >
+          <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
         </infinite-loading>
@@ -72,21 +84,21 @@ export default {
       tabIndex: 0,
       show: 0,
       busy: false,
-      search: null
+      search: null,
     }
   },
   computed: {
     pendingaddcount() {
-      return this.authStore.work? this.authStore.work.spammerpendingadd : 0
+      return this.authStore.work ? this.authStore.work.spammerpendingadd : 0
     },
     pendingremovecount() {
-      return this.authStore.work? this.authStore.work.spammerpendingremove : 0
+      return this.authStore.work ? this.authStore.work.spammerpendingremove : 0
     },
     spammers() {
       const ret = this.spammerStore.getList(this.collection)
 
       // Need to move the byuser into the spammer object so that ModSpammer finds it.
-      ret.forEach(s => {
+      ret.forEach((s) => {
         s.user.spammer.byuser = s.byuser
       })
 
@@ -119,7 +131,7 @@ export default {
 
       console.log('Spammer collection', this.tabIndex, ret)
       return ret
-    }
+    },
   },
   watch: {
     tabIndex(newVal) {
@@ -129,7 +141,7 @@ export default {
     $route(to, from) {
       // Clear store when we move away to prevent items showing again when we come back on potentially a different tab.
       this.spammerStore.clear()
-    }
+    },
   },
   mounted() {
     // Start in Pending Add if they have rights to see it.
@@ -146,13 +158,13 @@ export default {
     }
   },
   methods: {
-    searched(term){
+    searched(term) {
       this.spammerStore.clear()
       this.search = term
       this.infiniteId++
     },
     async loadMore($state) {
-      //console.log('Spammers loadMore', this.show, this.spammers.length)
+      // console.log('Spammers loadMore', this.show, this.spammers.length)
       this.busy = true
 
       if (this.show < this.spammers.length) {
@@ -163,11 +175,11 @@ export default {
         this.busy = false
       } else {
         const currentCount = this.spammers.length
-        //console.log('fetch',this.search)
+        // console.log('fetch',this.search)
         await this.spammerStore.fetch({
           collection: this.collection,
           search: this.search,
-          modtools: true
+          modtools: true,
         })
         this.context = this.spammerStore.getContext()
 
@@ -180,7 +192,7 @@ export default {
           this.show++
         }
       }
-    }
-  }
+    },
+  },
 }
 </script>

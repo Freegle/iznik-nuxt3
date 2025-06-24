@@ -87,7 +87,7 @@ export function setupChat(selectedChatId, chatMessageId) {
   })
 
   const milesaway = computed(() => {
-    if( authStore.user?.lat && otheruser?.value?.lat){
+    if (authStore.user?.lat && otheruser?.value?.lat) {
       return milesAway(
         authStore.user?.lat,
         authStore.user?.lng,
@@ -95,10 +95,10 @@ export function setupChat(selectedChatId, chatMessageId) {
         otheruser?.value?.lng
       )
     }
-    if( otheruser?.value?.info?.milesaway) return otheruser?.value?.info?.milesaway
+    if (otheruser?.value?.info?.milesaway)
+      return otheruser?.value?.info?.milesaway
     return null
-  }
-  )
+  })
 
   const milesstring = computed(
     () => pluralize('mile', milesaway.value, true) + ' away'

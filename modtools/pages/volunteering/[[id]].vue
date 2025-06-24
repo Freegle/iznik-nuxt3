@@ -1,14 +1,26 @@
 <template>
   <div>
-    <div v-for="volunteering in volunteerings" :key="'volunteeringlist-' + volunteering.id" class="p-0 mt-2">
-      <ModVolunteerOpportunity :id="volunteering.id" :volunteering="volunteering" />
+    <div
+      v-for="volunteering in volunteerings"
+      :key="'volunteeringlist-' + volunteering.id"
+      class="p-0 mt-2"
+    >
+      <ModVolunteerOpportunity
+        :id="volunteering.id"
+        :volunteering="volunteering"
+      />
     </div>
 
-    <infinite-loading :distance="distance" @infinite="loadMore" :identifier="bump">
+    <infinite-loading
+      :distance="distance"
+      :identifier="bump"
+      @infinite="loadMore"
+    >
       <template #spinner />
       <template #complete>
         <notice-message v-if="!volunteerings?.length">
-          There are no volunteer opportunities to review at the moment. This will refresh automatically.
+          There are no volunteer opportunities to review at the moment. This
+          will refresh automatically.
         </notice-message>
       </template>
     </infinite-loading>
@@ -36,7 +48,7 @@ export default {
       limit: 2,
       show: 0,
       bump: 0,
-      busy: false
+      busy: false,
     }
   },
   computed: {
@@ -45,7 +57,10 @@ export default {
     },
     volwork() {
       // Count for the type of work we're interested in.
-      console.log('TODO volunteering volwork', this.authStore.work?.pendingvolunteering)
+      console.log(
+        'TODO volunteering volwork',
+        this.authStore.work?.pendingvolunteering
+      )
       return this.authStore.work ? this.authStore.work.pendingvolunteering : 0
     },
   },
@@ -53,18 +68,17 @@ export default {
     volwork(newVal, oldVal) {
       // TODO: The page is always going to be visible so why might we not be?
       console.log('volunteering watch volwork', newVal, oldVal)
-      if (newVal && oldVal && (newVal > oldVal)) {
+      if (newVal && oldVal && newVal > oldVal) {
         // There's new stuff to do.  Reload.
         this.volunteeringStore.clear()
         this.bump++
       } else {
-        //const visible = this.miscStore.get('visible')
-
-        //if (!visible) {
+        // const visible = this.miscStore.get('visible')
+        // if (!visible) {
         //  this.volunteeringStore.clear()
-        //}
+        // }
       }
-    }
+    },
   },
   mounted() {
     // We don't want to pick up any approved volunteerings.
@@ -84,11 +98,11 @@ export default {
         this.busy = false
 
         await this.volunteeringStore.fetchMT({
-          //context: this.context,
+          // context: this.context,
           limit: this.limit,
-          pending: true
+          pending: true,
         })
-        //console.log('volunteering loadMore got', currentCount, this.volunteerings.length)
+        // console.log('volunteering loadMore got', currentCount, this.volunteerings.length)
         if (currentCount === this.volunteerings.length) {
           this.complete = true
           $state.complete()
@@ -98,9 +112,10 @@ export default {
         }
         this.busy = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';</style>
+//@import 'color-vars';
+</style>

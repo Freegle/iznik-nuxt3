@@ -4,17 +4,33 @@
       <ScrollToTop />
       <ModHelpComments />
       <ModGroupSelect v-model="groupid" modonly all />
-      <ModCommentUser v-for="comment in visibleComments" :key="'commentlist-' + comment.id" :comment="comment" class="p-0 mt-2" />
+      <ModCommentUser
+        v-for="comment in visibleComments"
+        :key="'commentlist-' + comment.id"
+        :comment="comment"
+        class="p-0 mt-2"
+      />
       <NoticeMessage v-if="!comments.length && !busy" class="mt-2">
         There are no comments to show at the moment.
       </NoticeMessage>
 
-      <infinite-loading :key="bump" force-use-infinite-wrapper="body" :distance="distance" @infinite="loadMore">
-        <span slot="no-results" />
-        <span slot="no-more" />
-        <span slot="spinner">
-          <b-img lazy src="/loader.gif" alt="Loading" />
-        </span>
+      <infinite-loading
+        :key="bump"
+        force-use-infinite-wrapper="body"
+        :distance="distance"
+        @infinite="loadMore"
+      >
+        <template #no-results>
+          <span />
+        </template>
+        <template #no-more>
+          <span />
+        </template>
+        <template #spinner>
+          <span>
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </span>
+        </template>
       </infinite-loading>
     </client-only>
   </div>
@@ -29,7 +45,7 @@ export default {
       commentStore,
     }
   },
-  data: function() {
+  data: function () {
     return {
       context: null,
       distance: 1000,
@@ -38,12 +54,12 @@ export default {
       busy: false,
       complete: false,
       groupid: null,
-      bump: 1
+      bump: 1,
     }
   },
   computed: {
     filteredComments() {
-      return this.comments.filter(c => {
+      return this.comments.filter((c) => {
         return (
           this.groupid === null ||
           this.groupid === c.groupid ||
@@ -57,14 +73,14 @@ export default {
     },
     comments() {
       return this.commentStore.sortedList
-    }
+    },
   },
   watch: {
     groupid() {
       this.bump++
       this.commentStore.clear()
       this.context = null
-    }
+    },
   },
   mounted() {
     this.commentStore.clear()
@@ -84,7 +100,7 @@ export default {
         try {
           await this.commentStore.fetch({
             context: this.context,
-            groupid: this.groupid
+            groupid: this.groupid,
           })
 
           this.context = this.commentStore.context
@@ -104,8 +120,8 @@ export default {
           console.log('Complete on error', e)
         }
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

@@ -59,7 +59,12 @@
               this freegler a thumbs down.
             </p>
           </notice-message>
-          <ModComments v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser" :user="otheruser" class="mt-1" @editing="editing" />
+          <ModComments
+            v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
+            :user="otheruser"
+            class="mt-1"
+            @editing="editing"
+          />
         </div>
         <b-button
           variant="warning"
@@ -135,10 +140,7 @@
         </Dropdown>
       </div>
     </div>
-    <div
-      v-if="!otheruser?.spammer && okToChat"
-      class="bg-white pt-1 pb-1"
-    >
+    <div v-if="!otheruser?.spammer && okToChat" class="bg-white pt-1 pb-1">
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -182,7 +184,11 @@
           <b-button v-if="mod" variant="secondary" @click="spamReport">
             <v-icon icon="ban" /> Spammer
           </b-button>
-          <external-link v-if="chat && chat.chattype === 'User2Mod' && mod" href="https://discourse.ilovefreegle.org/c/central" class="nocolor btn btn-secondary">
+          <external-link
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            href="https://discourse.ilovefreegle.org/c/central"
+            class="nocolor btn btn-secondary"
+          >
             <v-icon icon="question-circle" /> Central
           </external-link>
           <b-button
@@ -360,9 +366,25 @@
       @hidden="showNudgeWarningModal = false"
     />
     <MicroVolunteering v-if="showMicrovolunteering" />
-    <ConfirmModal v-if="showConfirmModal" title="Refer this chat to Support?" message="The Support volunteers will have a look at the chat and get back to you by email." @confirm="referToSupport" @hidden="showConfirmModal = false"/>
-    <ModSpammerReport v-if="showSpamModal && modchatuser" ref="spamConfirm" :user="modchatuser" @hidden="showSpamModal = false" />
-    <ModCommentAddModal v-if="addComment && modchatuser" ref="addComment" :user="modchatuser" :groupid="chat.group.id" />
+    <ConfirmModal
+      v-if="showConfirmModal"
+      title="Refer this chat to Support?"
+      message="The Support volunteers will have a look at the chat and get back to you by email."
+      @confirm="referToSupport"
+      @hidden="showConfirmModal = false"
+    />
+    <ModSpammerReport
+      v-if="showSpamModal && modchatuser"
+      ref="spamConfirm"
+      :user="modchatuser"
+      @hidden="showSpamModal = false"
+    />
+    <ModCommentAddModal
+      v-if="addComment && modchatuser"
+      ref="addComment"
+      :user="modchatuser"
+      :groupid="chat.group.id"
+    />
   </div>
 </template>
 <script>
@@ -377,8 +399,8 @@ import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
-import { useUserStore } from '~/stores/user'
 import SpinButton from './SpinButton'
+import { useUserStore } from '~/stores/user'
 import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
 
@@ -449,10 +471,10 @@ export default {
       milesstring,
     } = await setupChat(props.id)
 
-    //console.log('ChatFooter',chat.value)
+    // console.log('ChatFooter',chat.value)
 
     const modchatuser = ref(null)
-    if( chat.value.user1id){
+    if (chat.value.user1id) {
       await userStore.fetch(chat.value.user1id)
       modchatuser.value = userStore.byId(chat.value.user1id)
     }
@@ -500,15 +522,15 @@ export default {
   computed: {
     ...mapWritableState(useMiscStore, ['lastTyping']),
     okToChat() {
-      if( this.otheruser?.deleted){
+      if (this.otheruser?.deleted) {
         return false
-        //if( this.miscStore.modtools){
+        // if( this.miscStore.modtools){
         //  if( this.otheruser.forgotten) {
         //    return false
         //  }
-        //} else {
+        // } else {
         //  return false
-        //}
+        // }
       }
       return true
     },
@@ -559,7 +581,7 @@ export default {
     },
     enterNewLine: {
       get() {
-        if( this.miscStore.modtools){
+        if (this.miscStore.modtools) {
           return !this.miscStore?.get('enternewlinemt')
         }
         return this.me?.settings?.enterNewLine
@@ -709,11 +731,11 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      if( !this.dontHideNotices) this.showNotices = false
+      if (!this.dontHideNotices) this.showNotices = false
     }, 30000)
   },
   methods: {
-    editing(){
+    editing() {
       this.dontHideNotices = true
     },
     updateCaretPosition() {
@@ -760,8 +782,8 @@ export default {
       this.$emit('scrollbottom')
 
       // We also want to trigger an update in the chat list.
-      if( this.miscStore.modtools){
-        await this.chatStore.listChatsMT(false,this.id)
+      if (this.miscStore.modtools) {
+        await this.chatStore.listChatsMT(false, this.id)
       } else {
         await this.chatStore.fetchChat(this.id)
       }
@@ -960,10 +982,10 @@ export default {
       this.showConfirmModal = true
     },
     addAComment() {
-      console.log("addAComment")
+      console.log('addAComment')
       this.addComment = true
       this.$refs.addComment?.show()
-    }
+    },
   },
 }
 </script>

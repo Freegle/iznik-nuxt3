@@ -163,7 +163,7 @@ export default {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .breakgrid,
-.breakgrid .ProfileImage__moderator{
+.breakgrid .ProfileImage__moderator {
   display: inline !important;
 }
 

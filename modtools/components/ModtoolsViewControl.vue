@@ -1,7 +1,16 @@
 <template>
   <div>
-  <OurToggle v-model="summary" class="mt-2" :height="30" :width="150" :font-size="14" :sync="true"
-    :labels="{ checked: 'Summary View', unchecked: 'Detailed View' }" variant="modgreen" @change="toggleView" />
+    <OurToggle
+      v-model="summary"
+      class="mt-2"
+      :height="30"
+      :width="150"
+      :font-size="14"
+      :sync="true"
+      :labels="{ checked: 'Summary View', unchecked: 'Detailed View' }"
+      variant="modgreen"
+      @change="toggleView"
+    />
   </div>
 </template>
 
@@ -18,12 +27,10 @@ const summary = computed({
     const ret = miscStore.get(props.misckey)
     return typeof ret === 'undefined' ? false : ret
   },
-  set: (newValue) => {
-  }
+  set: (newValue) => {},
 })
 
 const toggleView = (c, e) => {
   miscStore.set({ key: props.misckey, value: c })
 }
-
 </script>

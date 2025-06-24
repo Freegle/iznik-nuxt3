@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-//import api from '~/api' // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
+// import api from '~/api' // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
 
 export const useMiscStore = defineStore({
   id: 'misc',
@@ -52,7 +52,7 @@ export const useMiscStore = defineStore({
     },
     setSource(val) {
       this.source = val
-      //api(this.config).logs.src(val) // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
+      // api(this.config).logs.src(val) // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
     },
     api(diff) {
       this.apiCount += diff

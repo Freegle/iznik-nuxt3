@@ -8,10 +8,9 @@
             <v-icon :icon="icon" scale="2" />
           </b-col>
           <b-col cols="6">
-            <v-icon icon="hashtag" scale="0.75" />{{ member.user.id }} {{ member.user.displayname }}
-            <span v-if="member.user.email">
-              ({{ member.user.email }})
-            </span>
+            <v-icon icon="hashtag" scale="0.75" />{{ member.user.id }}
+            {{ member.user.displayname }}
+            <span v-if="member.user.email"> ({{ member.user.email }}) </span>
           </b-col>
           <b-col cols="4">
             {{ timeago(member.timestamp) }}
@@ -28,12 +27,13 @@
             {{ member.message.subject }}
           </b-col>
           <b-col cols="4">
-            <b-button :to="'/members/approved/' + member.groupid + '/' + member.user.id" variant="link"
-              :class="(icon === 'meh' ? 'text-dark' : 'text-white') + ' p-0'">
+            <b-button
+              :to="'/members/approved/' + member.groupid + '/' + member.user.id"
+              variant="link"
+              :class="(icon === 'meh' ? 'text-dark' : 'text-white') + ' p-0'"
+            >
               <v-icon icon="hashtag" scale="0.75" />{{ member.message.id }}
-              <span v-if="groupname">
-                on {{ groupname }}
-              </span>
+              <span v-if="groupname"> on {{ groupname }} </span>
             </b-button>
           </b-col>
         </b-row>
@@ -41,7 +41,13 @@
       <b-card-body>
         <div class="d-flex justify-content-between flex-wrap">
           {{ member.comments }}&nbsp;
-          <ChatButton :userid="member.user.id" :groupid="member.groupid" chattype="User2Mod" title="Chat" variant="white" />
+          <ChatButton
+            :userid="member.user.id"
+            :groupid="member.groupid"
+            chattype="User2Mod"
+            title="Chat"
+            variant="white"
+          />
         </div>
       </b-card-body>
     </b-card>
@@ -52,16 +58,16 @@
 import { useMemberStore } from '../stores/member'
 
 export default {
+  props: {
+    id: {
+      type: Number,
+      required: true,
+    },
+  },
   setup() {
     const memberStore = useMemberStore()
     return {
       memberStore,
-    }
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true
     }
   },
   computed: {
@@ -106,10 +112,9 @@ export default {
       }
 
       return ret
-    }
+    },
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     visibilityChanged(visible) {
       if (visible && !this.member.reviewed) {
@@ -117,11 +122,11 @@ export default {
         this.memberStore.happinessReviewed({
           userid: this.member.user.id,
           groupid: this.member.groupid,
-          happinessid: this.member.id
+          happinessid: this.member.id,
         })
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

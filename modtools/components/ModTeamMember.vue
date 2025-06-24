@@ -1,11 +1,7 @@
 <template>
   <b-row class="mb-2">
     <b-col cols="4">
-      <ProfileImage
-        :image="member.profile.turl"
-        class="mr-2"
-        size="lg"
-      />
+      <ProfileImage :image="member.profile.turl" class="mr-2" size="lg" />
     </b-col>
     <b-col cols="6">
       <strong>{{ member.displayname }}</strong>
@@ -27,23 +23,23 @@ export default {
   props: {
     teamid: {
       type: Number,
-      required: true
+      required: true,
     },
     member: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     async remove() {
       const teamStore = useTeamStore()
       await teamStore.remove({
         id: this.teamid,
-        userid: this.member.id
+        userid: this.member.id,
       })
       this.$emit('removed')
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

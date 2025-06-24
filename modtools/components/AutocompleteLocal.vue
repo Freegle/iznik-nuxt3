@@ -1,13 +1,26 @@
 <template>
   <div class="autocomplete">
-    <input v-model="search" class="form-control" type="text" :size="size" :placeholder="placeholder" @input="onChange" @keydown.down="onArrowDown"
-      @keydown.up="onArrowUp" @keydown.enter="onEnter" />
+    <input
+      v-model="search"
+      class="form-control"
+      type="text"
+      :size="size"
+      :placeholder="placeholder"
+      @input="onChange"
+      @keydown.down="onArrowDown"
+      @keydown.up="onArrowUp"
+      @keydown.enter="onEnter"
+    />
     <ul v-show="isOpen" id="autocomplete-results" class="autocomplete-results">
-      <li v-if="isLoading" class="loading">
-        Loading results...
-      </li>
-      <li v-for="(result, i) in results" v-else :key="i" class="autocomplete-result" :class="{ 'is-active': i === arrowCounter }"
-        @click="setResult(result)">
+      <li v-if="isLoading" class="loading">Loading results...</li>
+      <li
+        v-for="(result, i) in results"
+        v-else
+        :key="i"
+        class="autocomplete-result"
+        :class="{ 'is-active': i === arrowCounter }"
+        @click="setResult(result)"
+      >
         {{ result }}
       </li>
     </ul>
@@ -21,23 +34,23 @@ export default {
     items: {
       type: Array,
       required: false,
-      default: () => []
+      default: () => [],
     },
     isAsync: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     size: {
       type: String,
       required: false,
-      default: '20'
+      default: '20',
     },
     placeholder: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
 
   data() {
@@ -46,7 +59,7 @@ export default {
       results: [],
       search: '',
       isLoading: false,
-      arrowCounter: 0
+      arrowCounter: 0,
     }
   },
   watch: {
@@ -56,12 +69,12 @@ export default {
         this.results = val
         this.isLoading = false
       }
-    }
+    },
   },
   mounted() {
     document.addEventListener('click', this.handleClickOutside)
   },
-  destroyed() {
+  unmounted() {
     document.removeEventListener('click', this.handleClickOutside)
   },
 
@@ -82,8 +95,8 @@ export default {
 
     filterResults() {
       // first uncapitalize all the things
-      this.results = this.items.filter(item => {
-        return item.toLowerCase().indexOf(this.search.toLowerCase()) > -1
+      this.results = this.items.filter((item) => {
+        return item.toLowerCase().includes(this.search.toLowerCase())
       })
     },
     setResult(result) {
@@ -112,8 +125,8 @@ export default {
         this.isOpen = false
         this.arrowCounter = -1
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

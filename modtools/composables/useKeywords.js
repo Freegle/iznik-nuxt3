@@ -6,22 +6,24 @@ const typeOptions = computed(() => {
   return [
     {
       value: 'Offer',
-      text: thegroup &&
+      text:
+        thegroup &&
         thegroup.settings &&
         thegroup.settings.keywords &&
         thegroup.settings.keywords.offer
-        ? thegroup.settings.keywords.offer
-        : 'OFFER'
+          ? thegroup.settings.keywords.offer
+          : 'OFFER',
     },
     {
       value: 'Wanted',
-      text: thegroup &&
+      text:
+        thegroup &&
         thegroup.settings &&
         thegroup.settings.keywords &&
         thegroup.settings.keywords.wanted
-        ? thegroup.settings.keywords.wanted
-        : 'WANTED'
-    }
+          ? thegroup.settings.keywords.wanted
+          : 'WANTED',
+    },
   ]
 })
 
@@ -46,10 +48,9 @@ const keywordGroupid = computed(() => {
   }
 
   return ret
-})*/
+}) */
 
 export function setupKeywords() {
-
   return {
     typeOptions,
     // keywordGroup,

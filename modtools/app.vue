@@ -46,19 +46,19 @@ import { useCommentStore } from './stores/comment'
 import { useLogsStore } from './stores/logs'
 import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useSpammerStore } from './stores/spammer'
 import { useStdmsgStore } from './stores/stdmsg'
+import { useModGroupStore } from '@/stores/modgroup'
 import { usePublicityStore } from '@/stores/publicity'
 import { computed, watch, reloadNuxtApp } from '#imports'
 
 const route = useRoute()
-//const loadingIndicatorThrottle = ref(5000)
-//const { isLoading } = useLoadingIndicator({
+// const loadingIndicatorThrottle = ref(5000)
+// const { isLoading } = useLoadingIndicator({
 //  throttle: loadingIndicatorThrottle.value,
-//})
+// })
 // Don't render the app until we've done everything in here.
-//let ready = false
+// let ready = false
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -227,9 +227,9 @@ if (process.client) {
     return chatStore.unreadCount
   })
 
-  //const notificationCount = computed(() => {
+  // const notificationCount = computed(() => {
   //  return notificationStore.count
-  //})
+  // })
 
   useHead({
     titleTemplate: (titleChunk) => {
@@ -247,7 +247,7 @@ if (process.client) {
     },
   })
 }
-//ready = true
+// ready = true
 </script>
 
 <style lang="scss">

@@ -1,29 +1,38 @@
 <template>
-  <div :class="{
-    hidden: hidden
-  }">
-    <b-badge variant="primary rounded supporter" :class="'clickme ' + 'size-' + size" title="Kindly supports Freegle - click for more info?"
-      @click="showModal">
+  <div
+    :class="{
+      hidden: hidden,
+    }"
+  >
+    <b-badge
+      variant="primary rounded supporter"
+      :class="'clickme ' + 'size-' + size"
+      title="Kindly supports Freegle - click for more info?"
+      @click="showModal"
+    >
       <v-icon icon="trophy" />
       Supporter
     </b-badge>
-    <SupporterInfoModal v-if="showSupporterInfoModal" ref="modal" @hidden="showSupporterInfoModal = false" />
+    <SupporterInfoModal
+      v-if="showSupporterInfoModal"
+      ref="modal"
+      @hidden="showSupporterInfoModal = false"
+    />
   </div>
 </template>
 <script>
-
 export default {
   props: {
     size: {
       type: String,
       required: false,
-      default: 'md'
+      default: 'md',
     },
     hidden: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -35,8 +44,8 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       this.showSupporterInfoModal = true
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

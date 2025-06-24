@@ -33,7 +33,7 @@ export const useUserStore = defineStore({
         console.trace()
         return
       }
-      if( typeof params.search === 'number'){
+      if (typeof params.search === 'number') {
         params.search = params.search.toString()
       }
       // id, info, search, emailhistory
@@ -58,11 +58,11 @@ export const useUserStore = defineStore({
         return
       }
       const miscStore = useMiscStore()
-      if( miscStore.modtools) {
+      if (miscStore.modtools) {
         await this.fetchMT({
-          id: id,
+          id,
           info: true,
-          emailhistory: true
+          emailhistory: true,
         })
         return this.list[id]
       }

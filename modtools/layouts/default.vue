@@ -1,93 +1,245 @@
 <template>
   <div class="pageback">
-    <b-navbar id="navbar" :key="'nuxt1-' + bump" type="dark" class="navback p-0 p-sm-1 justify-content-between" fixed="top">
+    <b-navbar
+      id="navbar"
+      :key="'nuxt1-' + bump"
+      type="dark"
+      class="navback p-0 p-sm-1 justify-content-between"
+      fixed="top"
+    >
       <b-navbar-brand class="p-0 pr-2 d-flex">
-        <b-img class="logo clickme" fluid rounded :src="logo" alt="Home" @click="clicklogo" />
+        <b-img
+          class="logo clickme"
+          fluid
+          rounded
+          :src="logo"
+          alt="Home"
+          @click="clicklogo"
+        />
         <ModStatus class="status" />
       </b-navbar-brand>
       <!--ModZoomStock class="d-none d-md-block text-white" /-->
       <b-navbar-nav class="d-flex align-items-center">
-        <b-nav-item v-if="loggedIn" id="menu-option-modtools-discourse2" class="text-center p-0 mr-4" @click="discourse">
+        <b-nav-item
+          v-if="loggedIn"
+          id="menu-option-modtools-discourse2"
+          class="text-center p-0 mr-4"
+          @click="discourse"
+        >
           <div id="discourseIcon" class="position-relative">
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
-            <div class="d-none d-xl-block">
-              Us
-            </div>
-            <b-badge v-show="discourseCount" variant="success" class="discourseBadge">
+            <div class="d-none d-xl-block">Us</div>
+            <b-badge
+              v-show="discourseCount"
+              variant="success"
+              class="discourseBadge"
+            >
               {{ discourseCount }}
             </b-badge>
           </div>
         </b-nav-item>
-        <ChatMenu v-if="loggedIn" id="menu-option-modtools-chat2" :is-list-item="true" class="mr-4" />
+        <ChatMenu
+          v-if="loggedIn"
+          id="menu-option-modtools-chat2"
+          :is-list-item="true"
+          class="mr-4"
+        />
         <b-nav-item v-if="loggedIn">
           <div class="position-relative">
             <b-button variant="white" class="menu" @click="toggleMenu">
               <v-icon icon="bars" class="" />
             </b-button>
-            <b-badge v-show="menuCount" v-if="!showMenu" variant="danger" class="menuCount position-absolute" @click="toggleMenu">
+            <b-badge
+              v-show="menuCount"
+              v-if="!showMenu"
+              variant="danger"
+              class="menuCount position-absolute"
+              @click="toggleMenu"
+            >
               {{ menuCount }}
             </b-badge>
           </div>
         </b-nav-item>
         <b-nav-item v-if="!loggedIn">
-          <b-button variant="white" @click="requestLogin">
-            Log in
-          </b-button>
+          <b-button variant="white" @click="requestLogin"> Log in </b-button>
         </b-nav-item>
       </b-navbar-nav>
     </b-navbar>
 
     <div :key="'nuxt2-' + bump" class="d-flex">
       <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
-        <ModMenuItemLeft link="/" name="Dashboard" @mobilehidemenu="mobilehidemenu" />
-        <hr>
-        <div class="pl-1">
-          Messages
-        </div>
-        <ModMenuItemLeft link="/messages/pending" name="Pending" :count="['pending']" :othercount="['pendingother']" indent
-          @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/messages/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/messages/edits" name="Edits" :count="['editreview']" indent @mobilehidemenu="mobilehidemenu" />
-        <hr>
-        <div class="pl-1">
-          Members
-        </div>
-        <ModMenuItemLeft link="/members/approved" name="Approved" indent @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/review" name="Member Review" :count="['spammembers']" indent @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/chats/review" name="Chat Review" :count="['chatreview']" :othercount="['chatreviewother']" indent
-          @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/related" name="Related" :count="['relatedmembers']" indent @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/stories" name="Stories" indent :count="['stories']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft v-if="hasPermissionNewsletter" link="/members/newsletter" name="Newsletter" indent :count="['newsletterstories']"
-          @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft v-if="hasPermissionGiftAid" link="/giftaid" name="Gift Aid" indent :count="['giftaid']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/feedback" name="Feedback" indent :othercount="['happiness']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/microvolunteering" indent name="MicroVols" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/members/notes" name="Notes" indent @mobilehidemenu="mobilehidemenu" />
-        <hr>
-        <hr>
-        <ModMenuItemLeft link="/communityevents" name="Events" :count="['pendingevents']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/volunteering" name="Volunteering" :count="['pendingvolunteering']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/publicity" name="Publicity" :count="['socialactions', 'popularposts']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/admins" name="Admins" :count="['pendingadmins']" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/spammers" name="Spammers" :count="hasPermissionSpamAdmin ? ['spammerpendingadd', 'spammerpendingremove'] : []"
-          @mobilehidemenu="mobilehidemenu" />
-        <hr>
-        <ModMenuItemLeft link="/logs" name="Logs" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/settings" name="Settings" @mobilehidemenu="mobilehidemenu" />
-        <ModMenuItemLeft link="/teams" name="Teams" @mobilehidemenu="mobilehidemenu" />
+        <ModMenuItemLeft
+          link="/"
+          name="Dashboard"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <hr />
+        <div class="pl-1">Messages</div>
+        <ModMenuItemLeft
+          link="/messages/pending"
+          name="Pending"
+          :count="['pending']"
+          :othercount="['pendingother']"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/messages/approved"
+          name="Approved"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/messages/edits"
+          name="Edits"
+          :count="['editreview']"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <hr />
+        <div class="pl-1">Members</div>
+        <ModMenuItemLeft
+          link="/members/approved"
+          name="Approved"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/review"
+          name="Member Review"
+          :count="['spammembers']"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/chats/review"
+          name="Chat Review"
+          :count="['chatreview']"
+          :othercount="['chatreviewother']"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/related"
+          name="Related"
+          :count="['relatedmembers']"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/stories"
+          name="Stories"
+          indent
+          :count="['stories']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          v-if="hasPermissionNewsletter"
+          link="/members/newsletter"
+          name="Newsletter"
+          indent
+          :count="['newsletterstories']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          v-if="hasPermissionGiftAid"
+          link="/giftaid"
+          name="Gift Aid"
+          indent
+          :count="['giftaid']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/feedback"
+          name="Feedback"
+          indent
+          :othercount="['happiness']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/microvolunteering"
+          indent
+          name="MicroVols"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/members/notes"
+          name="Notes"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <hr />
+        <hr />
+        <ModMenuItemLeft
+          link="/communityevents"
+          name="Events"
+          :count="['pendingevents']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/volunteering"
+          name="Volunteering"
+          :count="['pendingvolunteering']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/publicity"
+          name="Publicity"
+          :count="['socialactions', 'popularposts']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/admins"
+          name="Admins"
+          :count="['pendingadmins']"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/spammers"
+          name="Spammers"
+          :count="
+            hasPermissionSpamAdmin
+              ? ['spammerpendingadd', 'spammerpendingremove']
+              : []
+          "
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <hr />
+        <ModMenuItemLeft
+          link="/logs"
+          name="Logs"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          v-if="supportOrAdmin"
+          link="/support"
+          name="Support"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/settings"
+          name="Settings"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/teams"
+          name="Teams"
+          @mobilehidemenu="mobilehidemenu"
+        />
         <div>
-          <ExternalLink href="https://wiki.ilovefreegle.org/ModTools" class="pl-1">
+          <ExternalLink
+            href="https://wiki.ilovefreegle.org/ModTools"
+            class="pl-1"
+          >
             Help
           </ExternalLink>
         </div>
         <div>
-          <a href="#" class="pl-1" @click="logOut">
-            Logout
-          </a>
+          <a href="#" class="pl-1" @click="logOut"> Logout </a>
         </div>
-        <div id="mtinfo" :title="buildDate">MT-{{ version }} <br />{{ buildDate }}</div>
+        <div id="mtinfo" :title="buildDate">
+          MT-{{ version }} <br />{{ buildDate }}
+        </div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
@@ -159,11 +311,19 @@ export default {
     )
     useHead({
       bodyAttrs: {
-        class: 'bodyMT'
-      }
+        class: 'bodyMT',
+      },
     })
 
-    return { authStore, chatStore, googleReady, miscStore, modConfigStore, modGroupStore, oneTap }
+    return {
+      authStore,
+      chatStore,
+      googleReady,
+      miscStore,
+      modConfigStore,
+      modGroupStore,
+      oneTap,
+    }
   },
   data: function () {
     return {
@@ -174,7 +334,7 @@ export default {
       chatCount: 0,
       // complete: true,  // CC
       bump: 0,
-      bumpLogin: 0
+      bumpLogin: 0,
     }
   },
   computed: {
@@ -261,7 +421,7 @@ export default {
     // Get chats and poll regularly for new ones
     this.chatStore.fetchLatestChatsMT()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     const miscStore = useMiscStore()
     if (miscStore.workTimer) {
       clearTimeout(miscStore.workTimer)
@@ -275,7 +435,7 @@ export default {
       console.log('Logout')
       try {
         this.$cookies.removeAll()
-      } catch (e) { }
+      } catch (e) {}
 
       await this.authStore.logout()
       this.authStore.forceLogin = true
@@ -334,8 +494,8 @@ export default {
     },
     mobilehidemenu() {
       this.showMenu = false
-    }
-  }
+    },
+  },
 }
 </script>
 

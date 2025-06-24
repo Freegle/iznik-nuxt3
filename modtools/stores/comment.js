@@ -5,7 +5,7 @@ export const useCommentStore = defineStore({
   id: 'comment',
   state: () => ({
     list: {},
-    context: null
+    context: null,
   }),
   actions: {
     init(config) {
@@ -45,6 +45,6 @@ export const useCommentStore = defineStore({
           return new Date(b.reviewed).getTime() - new Date(a.reviewed).getTime()
         }
       })
-    }
+    },
   },
 })

@@ -167,10 +167,10 @@ export const useMessageStore = defineStore({
         subaction: 'searchall',
         search: params.term,
         exactonly: true,
-        groupid: params.groupid
+        groupid: params.groupid,
       })
       for (const message of messages) {
-        //console.log('GOT message',message.id, typeof message.fromuser)
+        // console.log('GOT message',message.id, typeof message.fromuser)
         this.list[message.id] = message
       }
     },
@@ -279,7 +279,8 @@ export const useMessageStore = defineStore({
 
       return data
     },
-    async updateMT(params) { // Rely on refresh elsewhere
+    async updateMT(params) {
+      // Rely on refresh elsewhere
       return await api(this.config).message.update(params)
     },
     async patch(params) {
@@ -291,9 +292,12 @@ export const useMessageStore = defineStore({
       })
 
       const miscStore = useMiscStore()
-      if( miscStore.modtools){
-        const message = await this.fetchMT({ id: params.id, messagehistory: true })
-        if( message){
+      if (miscStore.modtools) {
+        const message = await this.fetchMT({
+          id: params.id,
+          messagehistory: true,
+        })
+        if (message) {
           this.list[message.id] = message
         }
       } else {
@@ -365,59 +369,62 @@ export const useMessageStore = defineStore({
 
       delete this.list[params.id]
     },
-    clearContext() { // Added for ModTools
+    clearContext() {
+      // Added for ModTools
       this.context = null
     },
-    async fetchMessagesMT(params) { // Added for ModTools
-      //console.error("===useMessageStore fetchMessagesMT",params)
+    async fetchMessagesMT(params) {
+      // Added for ModTools
+      // console.error("===useMessageStore fetchMessagesMT",params)
 
-      //if (!params.context) {
+      // if (!params.context) {
       //  params.context = this.context
-      //}
+      // }
       if (params.context) {
         // Ensure the context is a real object, in case it has been in the store.
         params.context = cloneDeep(params.context)
       }
       if (!params.context) params.context = null
-      //console.log(">>> fetchMessMT params",params)
+      // console.log(">>> fetchMessMT params",params)
 
       const data = await api(this.config).message.fetchMessages(params)
-      if( !data.messages) return
+      if (!data.messages) return
       const messages = data.messages
       const context = data.context // Can be undefined if search complete
-      //console.log("===fetchMessMT context",context)
-      //console.log("<<< fetchMessMT messages",messages.length)
+      // console.log("===fetchMessMT context",context)
+      // console.log("<<< fetchMessMT messages",messages.length)
 
       if (params.collection !== 'Draft') {
         // We don't use context for drafts - there aren't many.
         this.context = context
       }
       for (const message of messages) {
-        //console.log('GOT message',message.id, typeof message.fromuser)
-        if( !message.subject) message.subject = ''
+        // console.log('GOT message',message.id, typeof message.fromuser)
+        if (!message.subject) message.subject = ''
         this.list[message.id] = message
       }
-      //console.log('---fetchMessMT',this.context?.Date,this.context?.id, Object.values(this.list).length, messages.length)
+      // console.log('---fetchMessMT',this.context?.Date,this.context?.id, Object.values(this.list).length, messages.length)
     },
-    async fetchMT(params) { // Added for ModTools
+    async fetchMT(params) {
+      // Added for ModTools
       const { message } = await api(this.config).message.fetchMT(params)
-      if( message && !message.subject) message.subject = ''
+      if (message && !message.subject) message.subject = ''
       return message
     },
     async approveedits(params) {
       await api(this.config).message.approveEdits(params.id)
-  
+
       this.remove({ id: params.id })
     },
     async revertedits(params) {
       await api(this.config).message.revertEdits(params.id)
-  
+
       this.remove({ id: params.id })
     },
-    async backToPending(id){
+    async backToPending(id) {
       await api(this.config).message.update({
         id,
-        action: 'BackToPending'
+        action: 'BackToPending',
       })
       this.remove({ id })
     },
@@ -457,7 +464,7 @@ export const useMessageStore = defineStore({
       await api(this.config).message.hold(params.id)
       const { message } = await api(this.config).message.fetchMT({
         id: params.id,
-        messagehistory: true
+        messagehistory: true,
       })
       this.list[message.id] = message
     },
@@ -465,7 +472,7 @@ export const useMessageStore = defineStore({
       await api(this.config).message.release(params.id)
       const { message } = await api(this.config).message.fetchMT({
         id: params.id,
-        messagehistory: true
+        messagehistory: true,
       })
       this.list[message.id] = message
     },
@@ -478,12 +485,12 @@ export const useMessageStore = defineStore({
       await api(this.config).message.update({
         id: params.id,
         groupid: params.groupid,
-        action: 'Move'
+        action: 'Move',
       })
 
       await this.fetch(params.id, true)
 
-      /*dispatch(
+      /* dispatch(
         'auth/fetchUser',
         {
           components: ['work'],
@@ -492,13 +499,13 @@ export const useMessageStore = defineStore({
         {
           root: true
         }
-      )*/
+      ) */
     },
     async searchMember(term, groupid) {
       const { messages } = await api(this.config).message.fetchMessages({
         subaction: 'searchmemb',
         search: term,
-        groupid: groupid
+        groupid,
       })
       await this.clear()
       for (const message of messages) {
@@ -520,8 +527,9 @@ export const useMessageStore = defineStore({
     byUser: (state) => (userid) => {
       return state.byUserList[userid] || []
     },
-    getByGroup: (state) => (groupid) => { // Added for ModTools
-      const ret = Object.values(state.list).filter(message => {
+    getByGroup: (state) => (groupid) => {
+      // Added for ModTools
+      const ret = Object.values(state.list).filter((message) => {
         return (
           message.groups.length > 0 &&
           parseInt(message.groups[0].groupid) === parseInt(groupid)

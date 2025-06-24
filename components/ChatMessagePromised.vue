@@ -24,7 +24,8 @@
               @error="brokenImage"
             />
           </nuxt-link>
-          <ProfileImage v-if="otheruser"
+          <ProfileImage
+            v-if="otheruser"
             :image="otheruser.profile.paththumb"
             class="mr-1 mb-1 mt-1 inline"
             is-thumbnail
@@ -103,7 +104,8 @@
             />
           </nuxt-link>
           <div class="d-flex justify-content-start align-items-center">
-            <ProfileImage v-if="me"
+            <ProfileImage
+              v-if="me"
               :image="me.profile.path"
               class="mr-1 inline"
               is-thumbnail

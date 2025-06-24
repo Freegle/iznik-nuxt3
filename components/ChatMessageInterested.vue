@@ -156,11 +156,11 @@
 import Highlighter from 'vue-highlight-words'
 import { useMessageStore } from '../stores/message'
 import { useMiscStore } from '../stores/misc'
+import { setupChat } from '../composables/useChat'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-import { setupChat } from '../composables/useChat'
 const OutcomeModal = () =>
   defineAsyncComponent(() => import('~/components/OutcomeModal'))
 const PromiseModal = defineAsyncComponent(() =>
@@ -199,12 +199,28 @@ export default {
       return useMiscStore().modtools
     },
     modtoolsLink() {
-      if( this.chatmessage.refmsg && this.chatmessage.refmsg.groups && this.chatmessage.refmsg.groups.length>0){
-        return '/messages/approved/'+this.chatmessage.refmsg.groups[0].groupid+'/'+this.chatmessage.refmsg.id+'?noguard=true'
+      if (
+        this.chatmessage.refmsg &&
+        this.chatmessage.refmsg.groups &&
+        this.chatmessage.refmsg.groups.length > 0
+      ) {
+        return (
+          '/messages/approved/' +
+          this.chatmessage.refmsg.groups[0].groupid +
+          '/' +
+          this.chatmessage.refmsg.id +
+          '?noguard=true'
+        )
       }
       // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-      if( this.chatmessage.group && this.chatmessage.refmsgid){
-        return '/messages/approved/'+this.chatmessage.group.id+'/'+this.chatmessage.refmsgid+'?noguard=true'
+      if (this.chatmessage.group && this.chatmessage.refmsgid) {
+        return (
+          '/messages/approved/' +
+          this.chatmessage.group.id +
+          '/' +
+          this.chatmessage.refmsgid +
+          '?noguard=true'
+        )
       }
       return false
     },

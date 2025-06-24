@@ -1,27 +1,41 @@
 <template>
   <span class="clickme">
-    <PostPhoto v-bind="attachment" @remove="removePhoto" @updated="updatedPhoto" @clicked="showModal" :externalmods="mods"/>
-    <ModPhotoModal v-if="zoom" ref="modphotomodal" :attachment="attachment" :message="message" :externalmods="mods"/>
+    <PostPhoto
+      v-bind="attachment"
+      :externalmods="mods"
+      @remove="removePhoto"
+      @updated="updatedPhoto"
+      @clicked="showModal"
+    />
+    <ModPhotoModal
+      v-if="zoom"
+      ref="modphotomodal"
+      :attachment="attachment"
+      :message="message"
+      :externalmods="mods"
+    />
   </span>
 </template>
 
 <script>
 import { useMessageStore } from '../../stores/message'
-const PostPhoto = defineAsyncComponent(() => import('../../components/PostPhoto'))
+const PostPhoto = defineAsyncComponent(() =>
+  import('../../components/PostPhoto')
+)
 
 export default {
   components: {
-    PostPhoto
+    PostPhoto,
   },
   props: {
     attachment: {
       type: Object,
-      required: true
+      required: true,
     },
     message: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     const messageStore = useMessageStore()
@@ -29,18 +43,18 @@ export default {
   },
   data: function () {
     return {
-      zoom: false
+      zoom: false,
     }
   },
   computed: {
-    mods(){
-      if( this.attachment.mods){
+    mods() {
+      if (this.attachment.mods) {
         const jsonmods = JSON.parse(this.attachment.mods)
-        if( !jsonmods) return {}
+        if (!jsonmods) return {}
         return jsonmods
       }
       return {}
-    }
+    },
   },
   methods: {
     showModal() {
@@ -51,7 +65,7 @@ export default {
       console.log('MP removePhoto', id, this.message.id)
       const attachments = []
 
-      this.message.attachments.forEach(a => {
+      this.message.attachments.forEach((a) => {
         if (a.id !== id) {
           attachments.push(a.id)
         }
@@ -61,8 +75,8 @@ export default {
     },
     async updatedPhoto() {
       await this.messageStore.patch({ id: this.message.id })
-    }
-  }
+    },
+  },
 }
 </script>
 

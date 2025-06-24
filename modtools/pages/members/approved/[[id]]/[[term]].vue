@@ -3,17 +3,41 @@
     <client-only>
       <ScrollToTop :prepend="groupName" />
       <div class="d-flex justify-content-between flex-wrap">
-        <ModGroupSelect v-model="chosengroupid" modonly remember="membersapproved" />
+        <ModGroupSelect
+          v-model="chosengroupid"
+          modonly
+          remember="membersapproved"
+        />
         <div v-if="groupid" class="d-flex">
           <ModMemberTypeSelect v-model="filter" />
-          <b-button v-if="groupid" variant="white" class="ml-2" @click="addMember">
+          <b-button
+            v-if="groupid"
+            variant="white"
+            class="ml-2"
+            @click="addMember"
+          >
             <v-icon icon="plus" /> Add
           </b-button>
-          <b-button v-if="groupid" variant="white" class="ml-2" @click="banMember">
+          <b-button
+            v-if="groupid"
+            variant="white"
+            class="ml-2"
+            @click="banMember"
+          >
             <v-icon icon="trash-alt" /> Ban
           </b-button>
-          <ModAddMemberModal v-if="showAddMember" ref="addmodal" :groupid="groupid" @hidden="showAddMember = false" />
-          <ModBanMemberModal v-if="showBanMember" ref="banmodal" :groupid="groupid" @hidden="showBanMember = false" />
+          <ModAddMemberModal
+            v-if="showAddMember"
+            ref="addmodal"
+            :groupid="groupid"
+            @hidden="showAddMember = false"
+          />
+          <ModBanMemberModal
+            v-if="showBanMember"
+            ref="banmodal"
+            :groupid="groupid"
+            @hidden="showBanMember = false"
+          />
           <ModMergeButton class="ml-2" />
           <ModMemberExportButton class="ml-2" :groupid="groupid" />
         </div>
@@ -24,7 +48,13 @@
           This group has {{ pluralise('member', group.membercount, true) }}.
         </p>
         <ModMembers />
-        <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
+        <infinite-loading
+          direction="top"
+          force-use-infinite-wrapper="true"
+          :distance="distance"
+          :identifier="bump"
+          @infinite="loadMore"
+        >
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
@@ -36,7 +66,8 @@
         </infinite-loading>
       </div>
       <NoticeMessage v-else variant="info" class="mt-2">
-        Please select a community or search for someone across all your communities.
+        Please select a community or search for someone across all your
+        communities.
       </NoticeMessage>
     </client-only>
   </div>
@@ -57,15 +88,15 @@ export default {
     // Need to init groupid and search now
     const route = useRoute()
     let gid = 0
-    if (('id' in route.params) && route.params.id) gid = parseInt(route.params.id)
+    if ('id' in route.params && route.params.id) gid = parseInt(route.params.id)
     modMembers.groupid.value = gid
     let term = ''
-    if (('term' in route.params) && route.params.term) term = route.params.term
+    if ('term' in route.params && route.params.term) term = route.params.term
     modMembers.search.value = term
     return {
       memberStore,
       miscStore,
-      ...modMembers // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
+      ...modMembers, // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
     }
   },
   data: function () {
@@ -77,17 +108,19 @@ export default {
   },
   computed: {
     id() {
-      try { // Weirdly we get inject error here when clicking the link to view profile of shown member eg to /profile/12345678
+      try {
+        // Weirdly we get inject error here when clicking the link to view profile of shown member eg to /profile/12345678
         const route = useRoute()
-        if (('id' in route.params) && route.params.id) return parseInt(route.params.id)
-      } catch( e){
-        console.error('members [[term]] id',e.message)
+        if ('id' in route.params && route.params.id)
+          return parseInt(route.params.id)
+      } catch (e) {
+        console.error('members [[term]] id', e.message)
       }
       return 0
     },
     term() {
       const route = useRoute()
-      if (('term' in route.params) && route.params.term) return route.params.term
+      if ('term' in route.params && route.params.term) return route.params.term
       return null
     },
     groupName() {
@@ -95,45 +128,46 @@ export default {
         return this.group.namedisplay
       }
       return null
-    }
+    },
   },
   watch: {
     filter(newVal) {
-      //console.log('[[term]] filter', newVal)
+      // console.log('[[term]] filter', newVal)
       this.context = null
       this.memberStore.clear()
       this.bump++
     },
     chosengroupid(newVal) {
-      //console.log('chosengroupid', newVal, this.search.length)
+      // console.log('chosengroupid', newVal, this.search.length)
       const router = useRouter()
       if (newVal !== this.id) {
         if (newVal === 0) {
-          //console.log('chosengroupid GO HOME')
+          // console.log('chosengroupid GO HOME')
           router.push('/members/approved/')
         } else {
-          //console.log('chosengroupid GOTO',newVal)
+          // console.log('chosengroupid GOTO',newVal)
           let path = '/members/approved/' + newVal
           if (this.search.length > 0) path += '/' + this.search
           router.push(path)
         }
       } else {
-        //console.log('chosengroupid SAME')
+        // console.log('chosengroupid SAME')
       }
     },
-    /*groupid(newVal) {
+    /* groupid(newVal) {
       console.log('[[term]] groupid', newVal)
       this.bump++
       this.memberStore.clear()
-    },*/
+    }, */
   },
   mounted() {
     const route = useRoute()
     this.groupid = this.id
     this.chosengroupid = this.id
     this.search = ''
-    if (('term' in route.params) && route.params.term) this.search = route.params.term
-    //console.log('members approved mounted', this.groupid, '-', this.search, '-', Object.keys(this.memberStore.list).length)
+    if ('term' in route.params && route.params.term)
+      this.search = route.params.term
+    // console.log('members approved mounted', this.groupid, '-', this.search, '-', Object.keys(this.memberStore.list).length)
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()
@@ -143,7 +177,7 @@ export default {
       // we don't need to bother selecting it.
       let countmod = 0
       let lastmod = null
-      this.myGroups.forEach(g => {
+      this.myGroups.forEach((g) => {
         if (g.role === 'Moderator' || g.role === 'Owner') {
           countmod++
           lastmod = g.id
@@ -156,12 +190,13 @@ export default {
         router.push('/members/approved/' + lastmod)
       }
     }
-    if (this.term) { // Turn off sorting for searches
+    if (this.term) {
+      // Turn off sorting for searches
       this.sort = false
     } else {
       this.sort = true
     }
-    //this.bump++
+    // this.bump++
   },
   methods: {
     addMember() {
@@ -173,7 +208,7 @@ export default {
       this.$refs.banmodal?.show()
     },
     startsearch(search) {
-      //console.log('[[term]] startsearch', search)
+      // console.log('[[term]] startsearch', search)
       // Initiate search again even if search has not changed
       search = search.trim()
       this.search = search
@@ -191,7 +226,7 @@ export default {
       } else {
         this.bump++
       }
-    }
-  }
+    },
+  },
 }
 </script>

@@ -30,14 +30,13 @@ export default {
       id: null,
       notfound: false,
       chat: null,
-      pov: null
+      pov: null,
     }
   },
+  computed: {},
   created() {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-  },
-  computed: {
   },
   async mounted() {
     await this.messageStore.clear()
@@ -49,13 +48,12 @@ export default {
 
     this.chat = this.chatStore.byChatId(this.id)
 
-    if( this.chat){
+    if (this.chat) {
       this.pov = this.chat.user1.id
     } else {
       this.notfound = true
     }
   },
-  methods: {
-  }
+  methods: {},
 }
 </script>

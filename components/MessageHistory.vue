@@ -38,25 +38,35 @@
           <span v-if="message.fromip.length > 16">
             hash {{ message.fromip }}
           </span>
-          <span v-else>
-            address {{ message.fromip }}
-          </span>
+          <span v-else> address {{ message.fromip }} </span>
           <span v-if="message.fromcountry">
             in
-            <span :class="message.fromcountry === 'United Kingdom' ? '' : 'text-danger'">{{ message.fromcountry }}.</span>
+            <span
+              :class="
+                message.fromcountry === 'United Kingdom' ? '' : 'text-danger'
+              "
+              >{{ message.fromcountry }}.</span
+            >
           </span>
         </span>
-        <span v-else>
-          IP unavailable.
-        </span>
+        <span v-else> IP unavailable. </span>
       </span>
       <div v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
       </div>
     </div>
-    <div v-if="modinfo && message.postings && message.postings.length && message.postings[0].date !== message.date" class="small">
+    <div
+      v-if="
+        modinfo &&
+        message.postings &&
+        message.postings.length &&
+        message.postings[0].date !== message.date
+      "
+      class="small"
+    >
       <span v-if="!today">
-        First posted on {{ message.postings[0].namedisplay }} on {{ datetime(message.postings[0].date) }}
+        First posted on {{ message.postings[0].namedisplay }} on
+        {{ datetime(message.postings[0].date) }}
       </span>
     </div>
   </div>
@@ -85,11 +95,11 @@ export default {
     },
     displayMessageLink: {
       type: Boolean,
-      default: false
+      default: false,
     },
     modinfo: {
       type: Boolean,
-      default: false
+      default: false,
     },
   },
   setup(props) {
@@ -113,7 +123,9 @@ export default {
         // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
         for (const group of message.groups) {
           if (group?.approvedby) {
-            const approver = Number.isInteger(group.approvedby) ? group.approvedby : group.approvedby.id
+            const approver = Number.isInteger(group.approvedby)
+              ? group.approvedby
+              : group.approvedby.id
             userStore.fetch(approver)
           }
         }

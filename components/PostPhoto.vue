@@ -140,7 +140,7 @@ export default {
     },
   },
   methods: {
-    clicked(){
+    clicked() {
       this.$emit('click')
       this.$emit('clicked') // for MT
     },

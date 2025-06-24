@@ -21,86 +21,95 @@
         </b-row>
       </div>
       <div v-else-if="type === 'toggle'">
-        <OurToggle v-model="bsetting" class="mt-2" :height="30" :width="toggleWidth" :font-size="14" :sync="true"
-          :labels="{ checked: haveValue ? toggleChecked : 'N/A', unchecked: haveValue ? toggleUnchecked : 'N/A' }" variant="modgreen"
-          :disabled="readonly"/>
+        <OurToggle
+          v-model="bsetting"
+          class="mt-2"
+          :height="30"
+          :width="toggleWidth"
+          :font-size="14"
+          :sync="true"
+          :labels="{
+            checked: haveValue ? toggleChecked : 'N/A',
+            unchecked: haveValue ? toggleUnchecked : 'N/A',
+          }"
+          variant="modgreen"
+          :disabled="readonly"
+        />
       </div>
     </b-form-group>
-    <div v-if="newRule" class="text-danger font-weight-bold">
-      &nbsp;New
-    </div>
+    <div v-if="newRule" class="text-danger font-weight-bold">&nbsp;New</div>
   </div>
 </template>
 <script>
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  setup() {
-    const modGroupStore = useModGroupStore()
-    return { modGroupStore }
-  },
   props: {
     setting: {
       type: null,
-      required: true
+      required: true,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     label: {
       type: String,
-      required: true
+      required: true,
     },
     description: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     type: {
       type: String,
       required: false,
-      default: 'input'
+      default: 'input',
     },
     step: {
       type: Number,
       required: false,
-      default: 1
+      default: 1,
     },
     rows: {
       type: Number,
       required: false,
-      default: 3
+      default: 3,
     },
     toggleWidth: {
       type: Number,
       required: false,
-      default: 150
+      default: 150,
     },
     toggleChecked: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     toggleUnchecked: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     newRule: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     readonly: {
       type: Boolean,
       required: true,
-      default: false
+      default: false,
     },
+  },
+  setup() {
+    const modGroupStore = useModGroupStore()
+    return { modGroupStore }
   },
   data: function () {
     return {
-      value: null
+      value: null,
     }
   },
   computed: {
@@ -108,19 +117,17 @@ export default {
       return this.setting != null
     },
     bsetting: {
-      get(){
+      get() {
         const bs = this.setting
         return bs
       },
-      set(newval){
+      set(newval) {
         this.$emit('change', newval)
-      }
+      },
     },
   },
-  mounted() {
-  },
-  methods: {
-  }
+  mounted() {},
+  methods: {},
 }
 </script>
 <style scoped lang="scss">

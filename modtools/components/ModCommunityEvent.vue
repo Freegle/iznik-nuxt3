@@ -4,16 +4,18 @@
       <b-card-header>
         <b-row>
           <b-col cols="6" md="4">
-            Event <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ event.id }}
+            Event <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
+              event.id
+            }}
           </b-col>
           <b-col cols="6" md="4">
-            <span v-if="!event.user.id">
-              Added by the system
-            </span>
+            <span v-if="!event.user.id"> Added by the system </span>
             <span v-else>
               {{ event.user.displayname }}
               <span class="text-muted">
-                <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{ event.user.id }}
+                <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
+                  event.user.id
+                }}
               </span>
             </span>
           </b-col>
@@ -23,7 +25,13 @@
         </b-row>
       </b-card-header>
       <b-card-body>
-        <NoticeMessage v-if="groups.length > 0 && groups[0].ourPostingStatus === 'PROHIBITED'" variant="danger" class="mb-2">
+        <NoticeMessage
+          v-if="
+            groups.length > 0 && groups[0].ourPostingStatus === 'PROHIBITED'
+          "
+          variant="danger"
+          class="mb-2"
+        >
           This member is set not to be able to post OFFERs/WANTEDs.
         </NoticeMessage>
         <CommunityEvent :id="event.id" :summary="false" />
@@ -38,11 +46,24 @@
         <b-button variant="danger" class="mr-1" @click="deleteme">
           <v-icon icon="trash-alt" /> Delete
         </b-button>
-        <ChatButton v-if="groups.length > 0 && event.user.id" :userid="event.user.id" :groupid="groups[0].id" title="Chat" variant="white"
-          class="mr-1" />
+        <ChatButton
+          v-if="groups.length > 0 && event.user.id"
+          :userid="event.user.id"
+          :groupid="groups[0].id"
+          title="Chat"
+          variant="white"
+          class="mr-1"
+        />
       </b-card-footer>
     </b-card>
-    <CommunityEventModal v-if="showModal" ref="eventmodal" :startEdit="true" :ismod="true" :id="event.id" @hidden="showModal = false" />
+    <CommunityEventModal
+      v-if="showModal"
+      :id="event.id"
+      ref="eventmodal"
+      :start-edit="true"
+      :ismod="true"
+      @hidden="showModal = false"
+    />
   </div>
 </template>
 <script>
@@ -50,6 +71,12 @@ import { useCommunityEventStore } from '../stores/communityevent'
 import { useGroupStore } from '../stores/group'
 
 export default {
+  props: {
+    event: {
+      type: Object,
+      required: true,
+    },
+  },
   setup(props) {
     const communityEventStore = useCommunityEventStore()
     const groupStore = useGroupStore()
@@ -58,15 +85,9 @@ export default {
       groupStore,
     }
   },
-  props: {
-    event: {
-      type: Object,
-      required: true
-    }
-  },
   data: function () {
     return {
-      showModal: false
+      showModal: false,
     }
   },
   computed: {
@@ -81,7 +102,6 @@ export default {
       })
       return ret
     },
-
   },
   methods: {
     edit() {
@@ -94,9 +114,9 @@ export default {
     approve() {
       this.communityEventStore.save({
         id: this.event.id,
-        pending: false
+        pending: false,
       })
-    }
-  }
+    },
+  },
 }
 </script>

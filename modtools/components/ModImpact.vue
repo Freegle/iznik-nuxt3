@@ -4,13 +4,17 @@
       <b-card-body class="pb-0">
         <b-row class="p-0">
           <b-col class="text-center">
-            <v-icon icon="balance-scale-left" :class="fullStats ? 'gold titleicon' : 'purple'" :scale="scale" />
+            <v-icon
+              icon="balance-scale-left"
+              :class="fullStats ? 'gold titleicon' : 'purple'"
+              :scale="scale"
+            />
             <component :is="heading" :class="fullStats ? 'gold' : 'purple'">
               {{ roundIt(totalWeight).toLocaleString() }}
-              <br>
+              <br />
               TONNES
               <span v-if="range && fullStats">
-                <br>
+                <br />
                 <span class="text-muted small">
                   {{ range }}
                 </span>
@@ -18,13 +22,17 @@
             </component>
           </b-col>
           <b-col class="text-center">
-            <v-icon icon="calculator" :class="'gold ' + (fullStats ? 'titleicon' : '')" :scale="scale" />
+            <v-icon
+              icon="calculator"
+              :class="'gold ' + (fullStats ? 'titleicon' : '')"
+              :scale="scale"
+            />
             <component :is="heading" class="gold">
               £{{ roundIt(totalBenefit).toLocaleString() }}
-              <br>
+              <br />
               BENEFIT
               <span v-if="range && fullStats">
-                <br>
+                <br />
                 <span class="text-muted small">
                   {{ range }}
                 </span>
@@ -32,13 +40,17 @@
             </component>
           </b-col>
           <b-col class="text-center">
-            <v-icon icon="cloud" :class="fullStats ? 'gold titleicon' : 'green'" :scale="scale" />
+            <v-icon
+              icon="cloud"
+              :class="fullStats ? 'gold titleicon' : 'green'"
+              :scale="scale"
+            />
             <component :is="heading" :class="fullStats ? 'gold' : 'green'">
               {{ roundIt(totalCO2).toLocaleString() }}
-              <br>
+              <br />
               TONNES CO2
               <span v-if="range && fullStats">
-                <br>
+                <br />
                 <span class="text-muted small">
                   {{ range }}
                 </span>
@@ -49,10 +61,10 @@
             <v-icon icon="gift" class="purple titleicon" :scale="scale" />
             <component :is="heading" class="purple">
               {{ totalGifts.toLocaleString() }}
-              <br>
+              <br />
               {{ totalGiftsPlural }}
               <span v-if="range">
-                <br>
+                <br />
                 <span class="text-muted small">
                   {{ range }}
                 </span>
@@ -60,13 +72,17 @@
             </component>
           </b-col>
           <b-col v-if="fullStats" class="text-center">
-            <v-icon icon="users" class="text-primary titleicon" :scale="scale" />
+            <v-icon
+              icon="users"
+              class="text-primary titleicon"
+              :scale="scale"
+            />
             <component :is="heading" class="text-primary">
               {{ totalMembers.toLocaleString() }}
-              <br>
-              {{  totalMembersPlural }}
+              <br />
+              {{ totalMembersPlural }}
               <span v-if="range">
-                <br>
+                <br />
                 <span class="text-muted small">
                   {{ end }}
                 </span>
@@ -74,14 +90,18 @@
             </component>
           </b-col>
           <b-col v-if="groupCount" class="text-center">
-            <v-icon icon="map-marker-alt" class="green titleicon" :scale="scale" />
+            <v-icon
+              icon="map-marker-alt"
+              class="green titleicon"
+              :scale="scale"
+            />
             <component :is="heading" class="green">
               {{ groupCount.toLocaleString() }}
-              <br>
+              <br />
               {{ groupCountCommunties }}
-              <br>
+              <br />
               <span class="text-muted small">
-              {{ groupCountServes }} THIS AREA
+                {{ groupCountServes }} THIS AREA
               </span>
             </component>
           </b-col>
@@ -195,51 +215,51 @@ export default {
   props: {
     totalWeight: {
       type: Number,
-      required: true
+      required: true,
     },
     totalBenefit: {
       type: Number,
-      required: true
+      required: true,
     },
     totalCO2: {
       type: Number,
-      required: true
+      required: true,
     },
     totalGifts: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     totalMembers: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     groupCount: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     range: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     start: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     end: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     border: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     fullStats() {
@@ -280,12 +300,11 @@ export default {
       }
 
       return ret
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped lang="scss">
-
 .purple {
   color: $color-purple !important;
 }

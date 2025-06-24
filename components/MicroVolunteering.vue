@@ -226,7 +226,8 @@ export default {
     const inviteAccepted = computed(() => {
       return me?.trustlevel && me.trustlevel !== 'Declined'
     })
-    if (me && !miscStore.modtools) { // MT ADDED
+    if (me && !miscStore.modtools) {
+      // MT ADDED
       const now = dayjs()
       const daysago = now.diff(dayjs(me.added), 'days')
 

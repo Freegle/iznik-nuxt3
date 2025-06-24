@@ -3,13 +3,30 @@
     <client-only>
       <ScrollToTop />
       <ModHelpRelated />
-      <ModGroupSelect v-model="groupid" all modonly systemwide :work="['relatedmembers']" remember="membersrelated" />
+      <ModGroupSelect
+        v-model="groupid"
+        all
+        modonly
+        systemwide
+        :work="['relatedmembers']"
+        remember="membersrelated"
+      />
 
-      <div v-for="member in visibleMembers" :key="'memberlist-' + member.id" class="p-0 mt-2">
+      <div
+        v-for="member in visibleMembers"
+        :key="'memberlist-' + member.id"
+        class="p-0 mt-2"
+      >
         <ModRelatedMember :member="member" @processed="bump++" />
       </div>
 
-      <infinite-loading direction="top" force-use-infinite-wrapper="true" :distance="distance" @infinite="loadMore" :identifier="bump">
+      <infinite-loading
+        direction="top"
+        force-use-infinite-wrapper="true"
+        :distance="distance"
+        :identifier="bump"
+        @infinite="loadMore"
+      >
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>
@@ -19,22 +36,22 @@
           </notice-message>
         </template>
       </infinite-loading>
-
     </client-only>
   </div>
 </template>
 <script>
-import { useGroupStore } from '@/stores/group'
-import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
+import { useGroupStore } from '@/stores/group'
+import { useMiscStore } from '@/stores/misc'
 
 export default {
   setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
-    const { bump, collection, distance, groupid, loadMore } = setupModMembers(true)
+    const { bump, collection, distance, groupid, loadMore } =
+      setupModMembers(true)
     collection.value = 'Related'
     return {
       groupStore,
@@ -47,12 +64,7 @@ export default {
     }
   },
   data: function () {
-    return {
-    }
-  },
-  mounted() {
-    // reset infiniteLoading on return to page
-    this.memberStore.clear()
+    return {}
   },
   computed: {
     members() {
@@ -61,20 +73,20 @@ export default {
       return Object.values(this.memberStore.list)
     },
     visibleMembers() {
-      const ret = this.members.filter(member => {
+      const ret = this.members.filter((member) => {
         if (this.groupid <= 0) {
           // No group filter
           return true
         }
 
         let found = false
-        member.memberof.forEach(group => {
+        member.memberof.forEach((group) => {
           if (parseInt(group.id) === this.groupid) {
             found = true
           }
         })
 
-        member.relatedto.memberof.forEach(group => {
+        member.relatedto.memberof.forEach((group) => {
           if (parseInt(group.id) === this.groupid) {
             found = true
           }
@@ -84,12 +96,16 @@ export default {
       })
 
       return ret
-    }
+    },
+  },
+  mounted() {
+    // reset infiniteLoading on return to page
+    this.memberStore.clear()
   },
   methods: {
     active(member) {
       return member.messagehistory
-    }
-  }
+    },
+  },
 }
 </script>

@@ -6,7 +6,7 @@ export const useLogsStore = defineStore({
   state: () => ({
     list: [],
     context: null,
-    params: null
+    params: null,
   }),
   actions: {
     init(config) {
@@ -20,7 +20,7 @@ export const useLogsStore = defineStore({
       let ret = null
       delete params.context
       if (this.context) {
-        params['context'] = { id: this.context.id }
+        params.context = { id: this.context.id }
       }
       const data = await api(this.config).logs.fetch(params)
 
@@ -42,10 +42,10 @@ export const useLogsStore = defineStore({
     async add(params) {
       console.log('useLogsStore add')
       return 0
-    },*/
+    }, */
     setParams(params) {
       this.params = params
-    }
+    },
   },
   getters: {
     get: (state) => (id) => {

@@ -15,12 +15,38 @@
     <b-button v-if="groupid" variant="white" @click="addAComment">
       <v-icon icon="tag" /> Add note
     </b-button>
-    <ConfirmModal v-if="removeConfirm && groupname" ref="removeConfirm" :title="'Remove ' + displayname + ' from ' + groupname + '?'"
-      @confirm="removeConfirmed" />
-    <ConfirmModal v-if="removeConfirm && !groupname" ref="removeConfirm" title="Please select a group first." />
-    <ModBanMemberConfirmModal v-if="banConfirm" ref="banConfirm" :userid="userid" :groupid="groupid" @confirm="banConfirmed" />
-    <ModCommentAddModal v-if="addComment" ref="addComment" :user="user" :groupid="groupid" :groupname="groupname" @added="commentadded" />
-    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="reportUser" :safelist="safelist" />
+    <ConfirmModal
+      v-if="removeConfirm && groupname"
+      ref="removeConfirm"
+      :title="'Remove ' + displayname + ' from ' + groupname + '?'"
+      @confirm="removeConfirmed"
+    />
+    <ConfirmModal
+      v-if="removeConfirm && !groupname"
+      ref="removeConfirm"
+      title="Please select a group first."
+    />
+    <ModBanMemberConfirmModal
+      v-if="banConfirm"
+      ref="banConfirm"
+      :userid="userid"
+      :groupid="groupid"
+      @confirm="banConfirmed"
+    />
+    <ModCommentAddModal
+      v-if="addComment"
+      ref="addComment"
+      :user="user"
+      :groupid="groupid"
+      :groupname="groupname"
+      @added="commentadded"
+    />
+    <ModSpammerReport
+      v-if="showSpamModal"
+      ref="spamConfirm"
+      :user="reportUser"
+      :safelist="safelist"
+    />
   </div>
 </template>
 <script>
@@ -32,23 +58,23 @@ export default {
   props: {
     userid: {
       type: Number,
-      required: true
+      required: true,
     },
     groupid: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     banned: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     spam: {
       type: Object,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   setup() {
     const groupStore = useGroupStore()
@@ -63,7 +89,7 @@ export default {
       addComment: false,
       user: null,
       showSpamModal: false,
-      safelist: false
+      safelist: false,
     }
   },
   computed: {
@@ -81,9 +107,9 @@ export default {
         // Due to inconsistencies about userid vs id in objects.
         userid: this.user?.id,
         id: this.user?.id,
-        displayname: this.user?.displayname
+        displayname: this.user?.displayname,
       }
-    }
+    },
   },
   methods: {
     async fetchUser() {
@@ -126,7 +152,7 @@ export default {
           this.me.displayname +
           ' reason: ' +
           reason,
-        flag: true
+        flag: true,
       })
     },
     async addAComment() {
@@ -140,7 +166,7 @@ export default {
     async commentadded() {
       await this.userStore.fetchMT({
         id: this.userid,
-        emailhistory: true
+        emailhistory: true,
       })
 
       this.$emit('commentadded')
@@ -162,7 +188,7 @@ export default {
       this.safelist = true
       this.showSpamModal = true
       this.$refs.spamConfirm?.show()
-    }
-  }
+    },
+  },
 }
 </script>

@@ -3,9 +3,7 @@
     <div v-if="me">
       <NuxtLink to="/">Go to dashboard</NuxtLink>
     </div>
-    <div v-else class="p-2">
-      Please login
-    </div>
+    <div v-else class="p-2">Please login</div>
   </div>
 </template>
 
@@ -20,13 +18,11 @@ onMounted(() => {
   const me = authStore.user
   if (me && me.id) {
     const router = useRouter()
-    if( route.query?.return){
+    if (route.query?.return) {
       router.push(route.query.return)
     } else {
       router.push('/')
     }
   }
 })
-
-
 </script>

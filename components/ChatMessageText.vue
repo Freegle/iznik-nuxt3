@@ -49,12 +49,7 @@
         </span>
       </div>
       <div v-if="lat || lng" :style="'width: 100%; height: 200px'">
-        <l-map
-          ref="map"
-          :zoom="16"
-          :max-zoom="maxZoom"
-          :center="[lat, lng]"
-        >
+        <l-map ref="map" :zoom="16" :max-zoom="maxZoom" :center="[lat, lng]">
           <l-tile-layer :url="osmtile" :attribution="attribution" />
           <l-marker :lat-lng="[lat, lng]" :interactive="false" />
         </l-map>
@@ -76,12 +71,12 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import { useMiscStore } from '../stores/misc'
 import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
-import { useMiscStore } from '../stores/misc'
 
 export default {
   components: {
@@ -108,16 +103,21 @@ export default {
     },
     emessageMTTN() {
       let ret = this.emessage
-      ret = ret.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      ret = ret
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
       let tnpos = -1
-      while( true){
-        tnpos = ret.indexOf('https://trashnothing.com/fd/',tnpos+1)
-        if( tnpos===-1) break
-        const endtn = ret.indexOf('\n',tnpos)
-        if( endtn===-1) break
-        const tnurl = ret.substring(tnpos,endtn)
-        const tnlink = '<a href='+tnurl+' target="_blank">'+tnurl+'</a>'
-        ret = ret.substring(0,tnpos)+tnlink+ret.substring(endtn)
+      while (true) {
+        tnpos = ret.indexOf('https://trashnothing.com/fd/', tnpos + 1)
+        if (tnpos === -1) break
+        const endtn = ret.indexOf('\n', tnpos)
+        if (endtn === -1) break
+        const tnurl = ret.substring(tnpos, endtn)
+        const tnlink = '<a href=' + tnurl + ' target="_blank">' + tnurl + '</a>'
+        ret = ret.substring(0, tnpos) + tnlink + ret.substring(endtn)
         tnpos += tnlink.length
       }
       return ret
@@ -136,18 +136,18 @@ export default {
     postcode() {
       let ret = null
 
-      try{
-      const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
+      try {
+        const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
 
-      if (postcode?.length) {
-        if (!postcode[0].includes(' ')) {
-          // Make sure we have a space in the right place, because this helps with autocomplete
-          ret = postcode[0].replace(/^(.*)(\d)/, '$1 $2')
-        } else {
-          ret = postcode[0]
+        if (postcode?.length) {
+          if (!postcode[0].includes(' ')) {
+            // Make sure we have a space in the right place, because this helps with autocomplete
+            ret = postcode[0].replace(/^(.*)(\d)/, '$1 $2')
+          } else {
+            ret = postcode[0]
+          }
         }
-      }
-      } catch( e) {
+      } catch (e) {
         // Gets here if message is a number, so OK to ignore
       }
 

@@ -42,12 +42,9 @@
 </template>
 <script>
 import Supercluster from 'supercluster/dist/supercluster'
+import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet'
 import ClusterIcon from './ClusterIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
-import {
-  LMarker,
-  LIcon,
-} from '@vue-leaflet/vue-leaflet'
 
 export default {
   components: { ClusterIcon, LMarker, LIcon },

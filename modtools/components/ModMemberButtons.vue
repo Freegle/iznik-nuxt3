@@ -5,7 +5,7 @@
         v-if="actions && member.groupid"
         :userid="member.userid"
         :groupid="member.groupid"
-        :banned="(Boolean)(member.bandate)"
+        :banned="Boolean(member.bandate)"
         class="mr-1"
         :spam="spam"
       />
@@ -62,7 +62,10 @@
           label="Hold"
         />
       </div>
-      <div v-else-if="member.spammer.collection === 'Approved'" class="d-flex flex-wrap">
+      <div
+        v-else-if="member.spammer.collection === 'Approved'"
+        class="d-flex flex-wrap"
+      >
         <ModMemberButton
           v-if="hasPermissionSpamAdmin"
           :member="member"
@@ -82,7 +85,13 @@
       </div>
     </div>
     <div v-else-if="approved" class="d-flex flex-wrap">
-      <ModMemberActions v-if="actions" :userid="member.userid" :groupid="member.groupid" :banned="(Boolean)(member.bandate)" class="mr-1" />
+      <ModMemberActions
+        v-if="actions"
+        :userid="member.userid"
+        :groupid="member.groupid"
+        :banned="Boolean(member.bandate)"
+        class="mr-1"
+      />
       <ModMemberButton
         v-if="spamignore && member.suspectreason"
         :member="member"
@@ -110,7 +119,7 @@
         :stdmsgid="stdmsg.id"
         :member="member"
         class="mr-1"
-        :autosend="(Boolean)(stdmsg.autosend && allowAutoSend)"
+        :autosend="Boolean(stdmsg.autosend && allowAutoSend)"
       />
       <b-button
         v-if="rareToShow && !showRare"
@@ -130,11 +139,12 @@
           :font-size="14"
           :sync="true"
           class="mr-1"
-          :labels="{checked: 'Allow autosend', unchecked: 'Edit first'}"
+          :labels="{ checked: 'Allow autosend', unchecked: 'Edit first' }"
           variant="modgreen"
         />
         <div class="small text-muted mt-1">
-          Standard messages can be configured to send in a single click.  This toggle temporarily disables that so you can edit first.
+          Standard messages can be configured to send in a single click. This
+          toggle temporarily disables that so you can edit first.
         </div>
       </div>
       <ModCommentAddModal v-if="addComment" ref="addComment" :user="member" />
@@ -153,35 +163,35 @@ export default {
     ModCommentAddModal,
     ModMemberActions,
     ModMemberButton,
-    OurToggle
+    OurToggle,
   },
 
   props: {
     member: {
       type: Object,
-      required: true
+      required: true,
     },
     modconfig: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     spamignore: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     actions: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       showRare: false,
       allowAutoSend: true,
-      addComment: false
+      addComment: false,
     }
   },
   computed: {
@@ -204,8 +214,8 @@ export default {
     },
     filterByAction() {
       if (this.modconfig) {
-        return this.modconfig.stdmsgs.filter(stdmsg => {
-          return this.validActions.indexOf(stdmsg.action) !== -1
+        return this.modconfig.stdmsgs.filter((stdmsg) => {
+          return this.validActions.includes(stdmsg.action)
         })
       }
 
@@ -213,13 +223,13 @@ export default {
     },
     filtered() {
       if (this.modconfig) {
-        return this.filterByAction.filter(stdmsg => {
+        return this.filterByAction.filter((stdmsg) => {
           return this.showRare || !parseInt(stdmsg.rarelyused)
         })
       }
 
       return []
-    }
+    },
   },
   methods: {
     icon(stdmsg) {
@@ -260,7 +270,7 @@ export default {
       let ret = false
 
       if (this.member.memberof) {
-        this.member.memberof.forEach(group => {
+        this.member.memberof.forEach((group) => {
           if (group.id === this.member.groupid && group.collection === coll) {
             ret = true
           }
@@ -274,7 +284,7 @@ export default {
       this.waitForRef('addComment', () => {
         this.$refs.addComment.show()
       })
-    }
-  }
+    },
+  },
 }
 </script>

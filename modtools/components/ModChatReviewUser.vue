@@ -9,7 +9,9 @@
         TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
       </div>
       <div v-if="user.ljuserid" class="text-muted small">
-        LoveJunk user id <v-icon icon="hashtag" scale="0.6" />{{ user.ljuserid }}
+        LoveJunk user id <v-icon icon="hashtag" scale="0.6" />{{
+          user.ljuserid
+        }}
       </div>
       <span v-if="email">
         (<ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
@@ -20,32 +22,44 @@
       <v-icon icon="tag" /> Add note
     </b-button>
     <div v-if="user.comments" class="mt-1">
-      <ModComment v-for="comment in user.comments" :key="'comment-' + comment.id" :comment="comment" :user="user" @updated="updateComments" />
+      <ModComment
+        v-for="comment in user.comments"
+        :key="'comment-' + comment.id"
+        :comment="comment"
+        :user="user"
+        @updated="updateComments"
+      />
     </div>
-    <ModCommentAddModal v-if="addComment && groupid" ref="addComment" :user="user" :groupid="groupid" @added="updateComments" />
+    <ModCommentAddModal
+      v-if="addComment && groupid"
+      ref="addComment"
+      :user="user"
+      :groupid="groupid"
+      @added="updateComments"
+    />
   </div>
 </template>
 <script>
 export default {
-  emits: ['reload'],
   props: {
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     tag: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     groupid: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
+  emits: ['reload'],
   data: function () {
     return {
-      addComment: false
+      addComment: false,
     }
   },
   computed: {
@@ -53,7 +67,7 @@ export default {
       let ret = null
 
       if (this.user && this.user.emails) {
-        this.user.emails.forEach(e => {
+        this.user.emails.forEach((e) => {
           if (!e.ourdomain && (!ret || e.preferred)) {
             ret = e.email
           }
@@ -61,7 +75,7 @@ export default {
       }
 
       return ret
-    }
+    },
   },
   methods: {
     addAComment() {
@@ -70,7 +84,7 @@ export default {
     },
     updateComments() {
       this.$emit('reload')
-    }
-  }
+    },
+  },
 }
 </script>

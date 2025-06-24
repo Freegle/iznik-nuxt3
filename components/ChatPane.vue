@@ -37,7 +37,7 @@
               v-if="index < messagesToShow"
               :id="chatmessage.id"
               :chatid="chatmessage.chatid"
-              :pov="chatmessage.userid" 
+              :pov="chatmessage.userid"
               :last="
                 chatmessage.id === chatmessages[chatmessages.length - 1].id
               "
@@ -114,21 +114,22 @@ if (props.id) {
     chatStore.fetchMessages(props.id)
 
     // Fetch the user.
-    if( miscStore.modtools){
-      if( chat.value.user1id){
+    if (miscStore.modtools) {
+      if (chat.value.user1id) {
         // Need to get user.info using api v2 but user.comments using api v1
         chat.value.otheruid = chat.value.user1id
         await userStore.fetch(chat.value.otheruid)
-        if( chat.value.otheruid){ // otheruid can disappear from under us
+        if (chat.value.otheruid) {
+          // otheruid can disappear from under us
           const userv2 = userStore.byId(chat.value.otheruid)
-          await userStore.fetchMT({ id: chat.value.otheruid})
+          await userStore.fetchMT({ id: chat.value.otheruid })
           const user = userStore.byId(chat.value.otheruid)
-          if( user && !user.info && userv2) {
+          if (user && !user.info && userv2) {
             user.info = userv2.info
           }
         }
       }
-    } else  if (chat?.value?.otheruid) {
+    } else if (chat?.value?.otheruid) {
       await userStore.fetch(chat.value.otheruid)
     }
   }

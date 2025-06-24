@@ -23,10 +23,13 @@
         />
       </b-col>
       <b-col v-if="moderation && membership">
-        <b-form-group
-          label="Moderation status:"
-        >
-          <ModModeration v-if="user" :membership="membership" :user="user" size="md" />
+        <b-form-group label="Moderation status:">
+          <ModModeration
+            v-if="user"
+            :membership="membership"
+            :user="user"
+            size="md"
+          />
         </b-form-group>
       </b-col>
     </b-row>
@@ -64,7 +67,7 @@
 </template>
 <script>
 import { useAuthStore } from '../stores/auth'
-//import { useMiscStore } from '../stores/misc'
+// import { useMiscStore } from '../stores/misc'
 import { useUserStore } from '../stores/user'
 import OurToggle from '~/components/OurToggle'
 
@@ -106,12 +109,12 @@ export default {
     moderation: {
       type: String,
       required: false,
-      default: null
+      default: null,
     },
     userid: {
       type: Number,
       required: false,
-      default: null
+      default: null,
     },
     label: {
       type: String,
@@ -133,7 +136,7 @@ export default {
     const authStore = useAuthStore()
     const userStore = useUserStore()
 
-    if( props.userid){
+    if (props.userid) {
       await userStore.fetch(props.userid)
     }
 
@@ -148,9 +151,9 @@ export default {
     }
   },
   computed: {
-    //modtools() {
+    // modtools() {
     //  return useMiscStore().modtools
-    //},
+    // },
     user() {
       return this.userid ? this.userStore.byId(this.userid) : null
     },
@@ -168,7 +171,7 @@ export default {
     },
     eventsallowed: {
       get() {
-        if( this.eventsallowedMT) return Boolean(this.eventsallowedMT)
+        if (this.eventsallowedMT) return Boolean(this.eventsallowedMT)
         return Boolean(this.membership?.eventsallowed)
       },
       async set(newval) {
@@ -177,7 +180,8 @@ export default {
     },
     volunteeringallowed: {
       get() {
-        if( this.volunteeringallowedMT) return Boolean(this.volunteeringallowedMT)
+        if (this.volunteeringallowedMT)
+          return Boolean(this.volunteeringallowedMT)
         return Boolean(this.membership?.volunteeringallowed)
       },
       async set(newval) {
@@ -186,7 +190,7 @@ export default {
     },
     membership() {
       let ret = null
-      if( this.membershipMT) return this.membershipMT
+      if (this.membershipMT) return this.membershipMT
 
       if (this.myGroups) {
         this.myGroups.forEach((g) => {

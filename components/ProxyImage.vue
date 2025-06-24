@@ -1,7 +1,14 @@
 <template>
   <!-- TODO: Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
   <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
-  <span :class="className"><img :src="src" :alt="alt" :width="width" :height="height":placeholder="placeholder"/></span>
+  <span :class="className"
+    ><img
+      :src="src"
+      :alt="alt"
+      :width="width"
+      :height="height"
+      :placeholder="placeholder"
+  /></span>
   <!--NuxtPicture
     :format="format"
     :fit="fit"
@@ -110,7 +117,7 @@ const fullSrc = computed(() => {
     const encodedQuery = encodeURIComponent(query)
     ret = base + '?' + encodedQuery
   }
-  if( props.src!==ret) console.log('fullSrc', ret)
+  if (props.src !== ret) console.log('fullSrc', ret)
   return ret
 })
 
@@ -118,7 +125,24 @@ const emit = defineEmits(['error'])
 
 // eslint-disable-next-line no-unused-vars
 function brokenImage(e) {
-  console.log('===', props.src, fullSrc.value, props.src, props.modifiers, props.preload, props.loading, props.className, props.fluid, props.fit, props.format, props.alt, props.width, props.height, props.sizes, props.placeholder)
+  console.log(
+    '===',
+    props.src,
+    fullSrc.value,
+    props.src,
+    props.modifiers,
+    props.preload,
+    props.loading,
+    props.className,
+    props.fluid,
+    props.fit,
+    props.format,
+    props.alt,
+    props.width,
+    props.height,
+    props.sizes,
+    props.placeholder
+  )
   console.log('Proxy image broken', e)
   emit('error', e)
 }

@@ -223,7 +223,11 @@
                     v-else-if="volunteering.image"
                     fluid
                     :src="
-                      volunteering.image.paththumb + '?volunteering=' + id + '-' + cacheBust
+                      volunteering.image.paththumb +
+                      '?volunteering=' +
+                      id +
+                      '-' +
+                      cacheBust
                     "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
@@ -574,7 +578,8 @@ export default {
       if (!ret) {
         ret = initialVolunteering()
       }
-      if( ret) {
+      if (ret) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.description = ret.description
       }
 
@@ -758,10 +763,9 @@ export default {
         await this.volunteeringStore.save(wip)
 
         const miscStore = useMiscStore()
-        if( miscStore.modtools){
-            this.hide()
-        } else
-        this.added = true
+        if (miscStore.modtools) {
+          this.hide()
+        } else this.added = true
       } else {
         // This is an add.  First create it to get the id.
         const dates = this.volunteering.dates

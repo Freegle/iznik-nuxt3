@@ -1,7 +1,18 @@
 <template>
   <div>
-    <label v-if="label" for="communitieslist" :class="labelSrOnly ? 'visually-hidden' : ''">{{ label }}</label>
-    <b-form-select id="communitieslist" v-model="selectedGroup" :size="size" :options="groupOptions" :disabled="disabled" />
+    <label
+      v-if="label"
+      for="communitieslist"
+      :class="labelSrOnly ? 'visually-hidden' : ''"
+      >{{ label }}</label
+    >
+    <b-form-select
+      id="communitieslist"
+      v-model="selectedGroup"
+      :size="size"
+      :options="groupOptions"
+      :disabled="disabled"
+    />
   </div>
 </template>
 <script>
@@ -129,7 +140,8 @@ export default {
         return this.modelValue
       },
       set(val) {
-        if (this.modGroupStore.received) { // Only update once all groups received
+        if (this.modGroupStore.received) {
+          // Only update once all groups received
           this.$emit('update:modelValue', val)
 
           if (this.remember) {
@@ -186,8 +198,8 @@ export default {
           text: this.active
             ? '-- My active communities --'
             : this.allMy
-              ? '-- All my communities --'
-              : '-- All communities --',
+            ? '-- All my communities --'
+            : '-- All communities --',
           selected: this.selectedGroup === 0,
         })
       } else {
@@ -224,10 +236,7 @@ export default {
           if (this.work) {
             this.work.forEach((type) => {
               if (group.work && group.work[type]) {
-                text +=
-                  ' (' +
-                  group.work[type] +
-                  ')'
+                text += ' (' + group.work[type] + ')'
               }
             })
           }
@@ -263,9 +272,10 @@ export default {
         if (val && this.restrict) this.selectedGroup = 0
       },
     },
-    groupsloaded(newval) { // In some cases, need to set selected group now
-      let val = this.miscStore.get('groupselect-' + this.remember)
-      if (val && (val !== this.modelValue)) {
+    groupsloaded(newval) {
+      // In some cases, need to set selected group now
+      const val = this.miscStore.get('groupselect-' + this.remember)
+      if (val && val !== this.modelValue) {
         this.$emit('update:modelValue', val)
       }
     },
@@ -290,26 +300,26 @@ export default {
   },
   mounted() {
     // MT CHANGED
-    /*if (this.listall) {
+    /* if (this.listall) {
       console.error('MGS listMT mounted listall')
       console.trace()
       await this.modGroupStore.listMT({
         grouptype: 'Freegle'
       })
-    }*/
+    } */
     if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)
-        //let found = false
+        // let found = false
         this.groups.forEach((g) => {
           if (g.id === val) {
-            //found = true
+            // found = true
             this.selectedGroup = g.id
           }
         })
-        //if (!found) this.remembered = val
+        // if (!found) this.remembered = val
       }
     }
   },
