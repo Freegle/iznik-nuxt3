@@ -7,7 +7,7 @@
       <v-icon icon="trash-alt" /> Ban
     </b-button>
     <b-button v-if="!spam" variant="white" @click="spamReport">
-      <v-icon icon="ban" /> Spammer
+      <v-icon icon="ban" /> Report Spammer
     </b-button>
     <b-button v-if="supportOrAdmin" variant="white" @click="spamSafelist">
       <v-icon icon="check" /> Safelist

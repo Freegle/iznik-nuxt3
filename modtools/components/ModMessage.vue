@@ -294,6 +294,11 @@
         <NoticeMessage v-else-if="!editing && !message.lat && !message.lng" variant="danger" class="mb-2">
           This message needs editing so that we know where it is.
         </NoticeMessage>
+        <div v-if="pending" v-for="group in message?.groups" class="text-end mb-1">
+          <b-button variant="danger" @click="spamReport">
+            <v-icon icon="ban" /> Report Spammer
+          </b-button>
+        </div>
         <ModMessageButtons v-if="(!message.heldby || message.heldby && message.heldby.id === myid) && !editing" :message="message"
           :modconfig="modconfig" :editreview="editreview" :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'" />
         <b-button v-if="editing" variant="secondary" class="mr-auto" @click="photoAdd">
@@ -312,6 +317,7 @@
     </b-card>
     <ModMessageEmailModal v-if="showEmailSourceModal && (message.source === 'Email')" :id="message.id" ref="original"
       @hidden="showEmailSourceModal = false" />
+    <ModSpammerReport v-if="showSpamModal" ref="spamConfirm" :user="message.fromuser" :safelist="false" />
     <div ref="bottom" />
   </div>
 </template>
@@ -401,6 +407,7 @@ export default {
       saving: false,
       saved: false,
       showEmailSourceModal: false,
+      showSpamModal: false,
       showMailSettings: false,
       showActions: false,
       showEmails: false,
@@ -916,6 +923,10 @@ export default {
     async backToPending(callback) {
       await this.messageStore.backToPending(this.message.id)
       callback()
+    },
+    async spamReport() {
+      this.showSpamModal = true
+      this.$refs.spamConfirm?.show()
     },
   }
 }
