@@ -197,200 +197,191 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { useAddressStore } from '../stores/address'
 import { useGiftAidStore } from '../stores/giftaid'
 import { useAuthStore } from '../stores/auth'
+import { useMe } from '~/composables/useMe'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
 import { buildHead } from '~/composables/useBuildHead'
 import OurToggle from '~/components/OurToggle'
-import { ref } from '#imports'
+import {
+  ref,
+  computed,
+  watch,
+  definePageMeta,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
 
-export default {
-  components: { SpinButton, NoticeMessage, OurToggle },
-  setup() {
-    definePageMeta({
-      layout: 'login',
-    })
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+definePageMeta({
+  layout: 'login',
+})
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Gift Aid',
-        'Add gift aid to your donation to Freegle'
-      )
-    )
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    const addressStore = useAddressStore()
-    const giftAidStore = useGiftAidStore()
-    const authStore = useAuthStore()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Gift Aid',
+    'Add gift aid to your donation to Freegle'
+  )
+)
 
-    const addresses = computed(() => addressStore.addresses)
+const addressStore = useAddressStore()
+const giftAidStore = useGiftAidStore()
+const authStore = useAuthStore()
+const { me } = useMe()
 
-    const giftaid = computed(() => giftAidStore.giftaid)
-    const period = computed({
-      get: () =>
-        giftAidStore.giftaid.period
-          ? giftAidStore.giftaid.period
-          : 'Past4YearsAndFuture',
-      set: (value) => {
-        giftAidStore.giftaid.period = value
-      },
-    })
+const triedToSubmit = ref(false)
+const saved = ref(false)
+const marketingconsent = ref(false)
 
-    const fullname = computed({
-      get: () => giftAidStore.giftaid?.fullname,
-      set: (value) => (giftAidStore.giftaid.fullname = value),
-    })
+const addresses = computed(() => addressStore.addresses)
+const giftaid = computed(() => giftAidStore.giftaid)
 
-    const homeaddress = computed({
-      get: () => giftAidStore.giftaid?.homeaddress,
-      set: (value) => (giftAidStore.giftaid.homeaddress = value),
-    })
+const period = computed({
+  get: () =>
+    giftAidStore.giftaid.period
+      ? giftAidStore.giftaid.period
+      : 'Past4YearsAndFuture',
+  set: (value) => {
+    giftAidStore.giftaid.period = value
+  },
+})
 
-    const emailByMistake = computed(() => {
-      return homeaddress.value?.includes('@')
-    })
+const fullname = computed({
+  get: () => giftAidStore.giftaid?.fullname,
+  set: (value) => (giftAidStore.giftaid.fullname = value),
+})
 
-    const giftAidAllowed = computed({
-      get() {
-        return period.value !== 'Declined'
-      },
-      set(newValue) {
-        if (!newValue) {
-          period.value = 'Declined'
-        } else {
-          period.value = 'Past4YearsAndFuture'
-        }
-      },
-    })
+const homeaddress = computed({
+  get: () => giftAidStore.giftaid?.homeaddress,
+  set: (value) => (giftAidStore.giftaid.homeaddress = value),
+})
 
-    const oldoptions = computed(() => {
-      let oldoptions = false
+const emailByMistake = computed(() => {
+  return homeaddress.value?.includes('@')
+})
 
-      if (
-        period.value === 'Since' ||
-        period.value === 'This' ||
-        period.value === 'Future'
-      ) {
-        // Older gift aid options from a previous declaration.
-        oldoptions = true
-      }
-
-      return oldoptions
-    })
-
-    return {
-      addressStore,
-      giftAidStore,
-      authStore,
-      addresses,
-      giftaid,
-      period,
-      fullname,
-      homeaddress,
-      giftAidAllowed: ref(giftAidAllowed),
-      oldoptions,
-      emailByMistake,
+const giftAidAllowed = computed({
+  get() {
+    return period.value !== 'Declined'
+  },
+  set(newValue) {
+    if (!newValue) {
+      period.value = 'Declined'
+    } else {
+      period.value = 'Past4YearsAndFuture'
     }
   },
-  data() {
-    return {
-      triedToSubmit: false,
-      saved: false,
-      marketingconsent: false,
+})
+
+const oldoptions = computed(() => {
+  let oldoptions = false
+
+  if (
+    period.value === 'Since' ||
+    period.value === 'This' ||
+    period.value === 'Future'
+  ) {
+    // Older gift aid options from a previous declaration.
+    oldoptions = true
+  }
+
+  return oldoptions
+})
+
+const valid = computed(() => {
+  return (
+    !giftAidAllowed.value ||
+    (period.value &&
+      fullname.value &&
+      homeaddress.value &&
+      !emailByMistake.value)
+  )
+})
+
+const nameInvalid = computed(() => {
+  return !fullname.value || !fullname.value.includes(' ')
+})
+
+const addressInvalid = computed(() => {
+  return !homeaddress.value || !homeaddress.value.includes(' ')
+})
+
+watch(
+  me,
+  async (newVal, oldVal) => {
+    if (newVal && !oldVal) {
+      await addressStore.fetch()
+      await giftAidStore.fetch()
+
+      if (!period.value) {
+        // We fetched no gift aid info so set it to the default.
+        giftaid.value.period = giftAidAllowed.value
+          ? 'Past4YearsAndFuture'
+          : 'Declined'
+      }
+
+      marketingconsent.value = newVal.marketingconsent
     }
   },
-  computed: {
-    valid() {
-      return (
-        !this.giftAidAllowed ||
-        (this.period &&
-          this.fullname &&
-          this.homeaddress &&
-          !this.emailByMistake)
-      )
-    },
-    nameInvalid() {
-      return !this.fullname || !this.fullname.includes(' ')
-    },
-    addressInvalid() {
-      return !this.homeaddress || !this.homeaddress.includes(' ')
-    },
-  },
-  watch: {
-    me: {
-      immediate: true,
-      async handler(newVal, oldVal) {
-        if (newVal && !oldVal) {
-          await this.addressStore.fetch()
-          await this.giftAidStore.fetch()
+  { immediate: true }
+)
 
-          if (!this.period) {
-            // We fetched no gift aid info so set it to the default.
-            this.giftaid.period = this.giftAidAllowed
-              ? 'Past4YearsAndFuture'
-              : 'Declined'
-          }
+watch(marketingconsent, async (newVal) => {
+  await authStore.saveAndGet({
+    marketingconsent: newVal,
+  })
+})
 
-          this.marketingconsent = newVal.marketingconsent
-        }
-      },
-    },
-    async marketingconsent(newVal) {
-      await this.authStore.saveAndGet({
-        marketingconsent: newVal,
-      })
-    },
-  },
-  methods: {
-    async save(callback) {
-      this.triedToSubmit = true
+async function save(callback) {
+  triedToSubmit.value = true
 
-      if (!this.valid) {
-        callback()
-        return
-      }
+  if (!valid.value) {
+    callback()
+    return
+  }
 
-      if (!this.giftAidStore.giftaid.period) {
-        this.giftAidStore.giftaid.period = 'Past4YearsAndFuture'
-      }
+  if (!giftAidStore.giftaid.period) {
+    giftAidStore.giftaid.period = 'Past4YearsAndFuture'
+  }
 
-      if (!this.giftAidAllowed) {
-        // We might need to fake up some values that the server expects.
-        if (!this.fullname) {
-          this.giftAidStore.giftaid.fullname = this.me.displayname
-        }
+  if (!giftAidAllowed.value) {
+    // We might need to fake up some values that the server expects.
+    if (!fullname.value) {
+      giftAidStore.giftaid.fullname = me.value.displayname
+    }
 
-        if (!this.homeaddress) {
-          this.giftAidStore.giftaid.homeaddress = 'N/A'
-        }
-      }
+    if (!homeaddress.value) {
+      giftAidStore.giftaid.homeaddress = 'N/A'
+    }
+  }
 
-      await this.giftAidStore.save()
-      this.saved = true
-      callback()
-    },
-    async remove(callback) {
-      await this.giftAidStore.remove()
-      this.period = 'Past4YearsAndFuture'
-      this.fullname = null
-      this.homeaddress = null
-      callback()
-    },
-    changeGiftAidToggle(val) {
-      if (val.value) {
-        this.period = 'Since'
-      } else {
-        this.period = 'Declined'
-      }
-    },
-  },
+  await giftAidStore.save()
+  saved.value = true
+  callback()
+}
+
+async function remove(callback) {
+  await giftAidStore.remove()
+  period.value = 'Past4YearsAndFuture'
+  fullname.value = null
+  homeaddress.value = null
+  callback()
+}
+
+function changeGiftAidToggle(val) {
+  if (val.value) {
+    period.value = 'Since'
+  } else {
+    period.value = 'Declined'
+  }
 }
 </script>
 <style scoped lang="scss">

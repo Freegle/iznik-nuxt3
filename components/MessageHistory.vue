@@ -37,122 +37,108 @@
     </div>
   </div>
 </template>
-<script>
-import { mapState } from 'pinia'
-import dayjs from 'dayjs'
+<script setup>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
 import { useMiscStore } from '~/stores/misc'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  name: 'MessageHistory',
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    summary: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup(props) {
-    const groupStore = useGroupStore()
-    const messageStore = useMessageStore()
-    const authStore = useAuthStore()
-    const userStore = useUserStore()
+  summary: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    const me = authStore.user
+const groupStore = useGroupStore()
+const messageStore = useMessageStore()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const miscStore = useMiscStore()
+const { mod } = useMe()
 
-    if (
-      me &&
-      (me.systemrole === 'Moderator' ||
-        me.systemrole === 'Support' ||
-        me.systemrole === 'Admin')
-    ) {
-      // Fetch any approving mod.  No need to wait.
-      const message = messageStore.byId(props.id)
+// Get access to miscStore breakpoint
+const { breakpoint } = storeToRefs(miscStore)
 
-      if (message?.groups) {
-        // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
-        for (const group of message.groups) {
-          if (group?.approvedby) {
-            userStore.fetch(group.approvedby)
-          }
-        }
+// Fetch any approving mod when component is created
+const me = authStore.user
+
+if (
+  me &&
+  (me.systemrole === 'Moderator' ||
+    me.systemrole === 'Support' ||
+    me.systemrole === 'Admin')
+) {
+  // Fetch any approving mod. No need to wait.
+  const currentMessage = messageStore.byId(props.id)
+
+  if (currentMessage?.groups) {
+    // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
+    for (const group of currentMessage.groups) {
+      if (group?.approvedby) {
+        userStore.fetch(group.approvedby)
       }
     }
-
-    return { groupStore, messageStore, authStore, userStore, timeago }
-  },
-  computed: {
-    ...mapState(useMiscStore, ['breakpoint']),
-    showSummaryDetails() {
-      return (
-        !this.summary || (this.breakpoint !== 'xs' && this.breakpoint !== 'sm')
-      )
-    },
-    approvedby() {
-      let approvedby = ''
-
-      if (this.mod) {
-        for (const group of this.message?.groups) {
-          if (group?.approvedby) {
-            const mod = this.userStore?.byId(group.approvedby)
-            approvedby = mod?.displayname
-          }
-        }
-      }
-
-      return approvedby
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    groups() {
-      const ret = {}
-
-      this.message?.groups.forEach((g) => {
-        const thegroup = this.groupStore?.get(g.groupid)
-
-        if (thegroup) {
-          ret[g.groupid] = thegroup
-
-          // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-          // id variants.
-          ret[g.groupid].exploreLink = thegroup ? thegroup.nameshort : g.groupid
-        }
-      })
-
-      return ret
-    },
-    today() {
-      return dayjs(this.message.date).isSame(dayjs(), 'day')
-    },
-    source() {
-      if (
-        this.message.source === 'Email' &&
-        this.message.fromaddr &&
-        this.message.fromaddr.includes('trashnothing.com')
-      ) {
-        return 'TrashNothing'
-      } else if (this.message.sourceheader === 'Freegle App') {
-        return 'Freegle Mobile App'
-      } else if (this.message.source === 'Platform') {
-        return 'Freegle website'
-      } else {
-        return this.message.source
-      }
-    },
-    grouparrivalago() {
-      return timeago(this.message?.groups[0]?.arrival, true)
-    },
-  },
+  }
 }
+
+// Computed properties
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const showSummaryDetails = computed(() => {
+  return (
+    !props.summary || (breakpoint.value !== 'xs' && breakpoint.value !== 'sm')
+  )
+})
+
+const approvedby = computed(() => {
+  let result = ''
+
+  if (mod.value) {
+    for (const group of message.value?.groups || []) {
+      if (group?.approvedby) {
+        const moderator = userStore?.byId(group.approvedby)
+        result = moderator?.displayname
+      }
+    }
+  }
+
+  return result
+})
+
+const groups = computed(() => {
+  const ret = {}
+
+  message.value?.groups.forEach((g) => {
+    const thegroup = groupStore?.get(g.groupid)
+
+    if (thegroup) {
+      ret[g.groupid] = thegroup
+
+      // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+      // id variants.
+      ret[g.groupid].exploreLink = thegroup ? thegroup.nameshort : g.groupid
+    }
+  })
+
+  return ret
+})
+
+const grouparrivalago = computed(() => {
+  return timeago(message.value?.groups[0]?.arrival, true)
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';

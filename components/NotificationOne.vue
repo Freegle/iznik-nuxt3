@@ -34,8 +34,11 @@
     <span v-else> Unknown notification {{ notification.type }} </span>
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent } from 'vue'
+import { useRouter } from 'vue-router'
 import { setupNotification } from '../composables/useNotification'
+
 const NotificationGiftAid = defineAsyncComponent(() =>
   import('~/components/NotificationGiftAid')
 )
@@ -61,47 +64,39 @@ const NotificationOpenPosts = defineAsyncComponent(() =>
   import('~/components/NotificationOpenPosts')
 )
 
-export default {
-  components: {
-    NotificationGiftAid,
-    NotificationLovedPost,
-    NotificationLovedComment,
-    NotificationCommentOnPost,
-    NotificationCommentOnComment,
-    NotificationExhort,
-    NotificationAboutMe,
-    NotificationOpenPosts,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  inheritAttrs: false,
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const ret = await setupNotification(props.id)
-    return ret
-  },
-  methods: {
-    markSeen() {
-      if (!this.notification?.seen) {
-        this.notificationStore.seen(this.id)
-      }
-    },
-    click() {
-      this.markSeen()
+})
 
-      if (this.notification.url) {
-        window.open(this.notification.url)
-      } else if (this.newsfeed) {
-        this.$router.push('/chitchat/' + this.newsfeed.id)
-      }
-    },
-    showModal() {
-      this.$emit('showModal')
-    },
-  },
+const emit = defineEmits(['showModal'])
+const router = useRouter()
+
+// Setup notification
+const { notification, notificationStore, newsfeed } = await setupNotification(
+  props.id
+)
+
+function markSeen() {
+  if (!notification.value?.seen) {
+    notificationStore.seen(props.id)
+  }
+}
+
+function click() {
+  markSeen()
+
+  if (notification.value?.url) {
+    window.open(notification.value.url)
+  } else if (newsfeed?.value) {
+    router.push('/chitchat/' + newsfeed.value.id)
+  }
+}
+
+function showModal() {
+  emit('showModal')
 }
 </script>
 <style scoped>

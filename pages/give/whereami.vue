@@ -86,59 +86,33 @@
     </div>
   </client-only>
 </template>
-<script>
-import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
-import NoticeMessage from '~/components/NoticeMessage'
-import ExternalLink from '~/components/ExternalLink'
-import GlobalMessage from '~/components/GlobalMessage'
-import PostCode from '~/components/PostCode'
+<script setup>
+import { useRoute, useHead, useRuntimeConfig } from '#imports'
+import NoticeMessage from '~/components/NoticeMessage.vue'
+import ExternalLink from '~/components/ExternalLink.vue'
+import GlobalMessage from '~/components/GlobalMessage.vue'
+import PostCode from '~/components/PostCode.vue'
 import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
+import WizardProgress from '~/components/WizardProgress.vue'
+import ComposeGroup from '~/components/ComposeGroup.vue'
+import { buildHead } from '~/composables/useBuildHead'
 
-import WizardProgress from '~/components/WizardProgress'
-import ComposeGroup from '~/components/ComposeGroup'
+const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
 
-export default {
-  options: () => {},
-  components: {
-    ExternalLink,
-    GlobalMessage,
-    NoticeMessage,
-    PostCode,
-    ComposeGroup,
-    WizardProgress,
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'OFFER',
+    'OFFER something to people nearby and see who wants it'
+  )
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'OFFER',
-        'OFFER something to people nearby and see who wants it'
-      )
-    )
-
-    return await setup('Offer')
-  },
-  data() {
-    return {
-      id: null,
-    }
-  },
-  computed: {
-    source() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.APIv1 + '/locations?typeahead='
-    },
-  },
-  methods: {
-    postcodeSelect,
-    postcodeClear,
-  },
-}
+// Get setup data from composable
+const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
+  'Offer'
+)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

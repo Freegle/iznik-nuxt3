@@ -23,6 +23,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { ref, onMounted, definePageMeta } from '#imports'
 import { useJobStore } from '~/stores/job'
 import NoticeMessage from '~/components/NoticeMessage'
 

@@ -13,33 +13,28 @@
     }}</span>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import Highlighter from 'vue-highlight-words'
 import { twem } from '~/composables/useTwem'
 import { useMessageStore } from '~/stores/message'
 
-export default {
-  components: { Highlighter },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
+})
 
-    return { messageStore }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    safeBody() {
-      return twem(this.message.textbody)
-    },
-  },
-}
+const messageStore = useMessageStore()
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const safeBody = computed(() => {
+  return twem(message.value.textbody)
+})
 </script>
 <style scoped lang="scss">
 .highlight {

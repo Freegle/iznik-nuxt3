@@ -76,85 +76,77 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import SpinButton from './SpinButton'
+import MessagePhotosModal from './MessagePhotosModal'
+import NoticeMessage from './NoticeMessage'
+
 const MessageExpanded = defineAsyncComponent(() =>
   import('~/components/MessageExpanded')
 )
 
-export default {
-  components: { MessageExpanded, SpinButton },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const microVolunteeringStore = useMicroVolunteeringStore()
-    const messageStore = useMessageStore()
+})
 
-    let found = false
+const emit = defineEmits(['next'])
 
-    await messageStore.fetch(props.id, true)
-    found = messageStore.byId(props.id)
+const microVolunteeringStore = useMicroVolunteeringStore()
+const messageStore = useMessageStore()
 
-    const showMessagePhotosModal = ref(false)
-    const showPhotosModal = () => {
-      showMessagePhotosModal.value = true
-    }
+// State
+const showComments = ref(false)
+const comments = ref(null)
+const msgcategory = ref(null)
+const showMessagePhotosModal = ref(false)
+const found = ref(false)
 
-    return {
-      messageStore,
-      microVolunteeringStore,
-      showMessagePhotosModal,
-      showPhotosModal,
-      found,
-    }
-  },
-  data() {
-    return {
-      showComments: false,
-      comments: null,
-      msgcategory: null,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-  methods: {
-    notRight(callback) {
-      // Don't record the result yet - people who don't give comments seem to have less good judgement.
-      this.showComments = true
-      callback()
-    },
-    async sendComments(callback) {
-      // Record the result with comments.
-      await this.microVolunteeringStore.respond({
-        msgid: this.id,
-        response: 'Reject',
-        comments: this.comments,
-        msgcategory: this.msgcategory,
-      })
-      callback()
+// Initialize
+await messageStore.fetch(props.id, true)
+found.value = !!messageStore.byId(props.id)
 
-      this.$emit('next')
-    },
-    async approve(callback) {
-      // Approved -  that's it.
-      await this.microVolunteeringStore.respond({
-        msgid: this.id,
-        response: 'Approve',
-      })
-      callback()
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
 
-      this.$emit('next')
-    },
-  },
+function showPhotosModal() {
+  showMessagePhotosModal.value = true
+}
+
+function notRight(callback) {
+  // Don't record the result yet - people who don't give comments seem to have less good judgement.
+  showComments.value = true
+  callback()
+}
+
+async function sendComments(callback) {
+  // Record the result with comments.
+  await microVolunteeringStore.respond({
+    msgid: props.id,
+    response: 'Reject',
+    comments: comments.value,
+    msgcategory: msgcategory.value,
+  })
+  callback()
+
+  emit('next')
+}
+
+async function approve(callback) {
+  // Approved - that's it.
+  await microVolunteeringStore.respond({
+    msgid: props.id,
+    response: 'Approve',
+  })
+  callback()
+
+  emit('next')
 }
 </script>
 <style scoped lang="scss">

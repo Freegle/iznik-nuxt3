@@ -32,7 +32,10 @@
                     :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
-                    <l-tile-layer :url="osmtile" :attribution="attribution" />
+                    <l-tile-layer
+                      :url="osmtile()"
+                      :attribution="attribution()"
+                    />
                     <l-marker
                       :lat-lng="[address.lat, address.lng]"
                       :interactive="false"
@@ -96,7 +99,10 @@
                     :center="[address.lat, address.lng]"
                     :style="'width: 100%; height: 200px'"
                   >
-                    <l-tile-layer :url="osmtile" :attribution="attribution" />
+                    <l-tile-layer
+                      :url="osmtile()"
+                      :attribution="attribution()"
+                    />
                     <l-marker
                       :lat-lng="[address.lat, address.lng]"
                       :interactive="false"
@@ -130,71 +136,82 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { storeToRefs } from 'pinia'
 import { useAddressStore } from '../stores/address'
 import { useChatStore } from '../stores/chat'
+import { useUserStore } from '../stores/user'
+import { useChatBase } from '../composables/useChat'
 import ExternalLink from './ExternalLink'
-import ChatBase from '~/components/ChatBase'
+import AddressModal from './AddressModal'
 import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
-import { ref } from '#imports'
 import { MAX_MAP_ZOOM } from '~/constants'
+import { ref, computed, onMounted } from '#imports'
 
-export default {
-  components: { ExternalLink },
-  extends: ChatBase,
-  async setup(props) {
-    let L = null
-
-    if (process.client) {
-      L = await import('leaflet/dist/leaflet-src.esm')
-    }
-
-    // Make sure we have the addresses.
-    const addressStore = useAddressStore()
-    const chatStore = useChatStore()
-
-    // The addressid is (wrongly) stored in the message.
-    const chatmsg = chatStore.messageById(props.id)
-    const addressid = ref(parseInt(chatmsg?.message))
-
-    const address = await addressStore.fetch(addressid.value)
-    const showAddress = ref(false)
-
-    return {
-      addressStore,
-      chatStore,
-      L,
-      osmtile: osmtile(),
-      attribution: attribution(),
-      addressid,
-      address: ref(address),
-      showAddress,
-      chatmsg,
-    }
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
-    multiline() {
-      return constructMultiLine(this.address)
-    },
+  id: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    async editAddress() {
-      await this.addressStore.fetch()
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
 
-      this.showAddress = true
-    },
-    async addressClosed() {
-      await this.chatStore.fetchMessages(this.chatmsg.chatid)
-      this.showAddress = false
-    },
-    async sendAddress(id) {
-      await this.chatStore.send(this.chatmsg.chatid, null, id)
-      this.showAddress = false
-    },
-  },
+// Store access
+const addressStore = useAddressStore()
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const { myid } = storeToRefs(userStore)
+
+// Chat base properties
+const { otheruser, chatmessage } = useChatBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
+
+// Component state
+const showAddress = ref(false)
+const address = ref(null)
+
+// Computed properties
+const maxZoom = computed(() => MAX_MAP_ZOOM)
+const multiline = computed(() => constructMultiLine(address.value))
+
+// Methods
+const editAddress = async () => {
+  await addressStore.fetch()
+  showAddress.value = true
 }
+
+const addressClosed = async () => {
+  await chatStore.fetchMessages(props.chatid)
+  showAddress.value = false
+}
+
+const sendAddress = async (id) => {
+  await chatStore.send(props.chatid, null, id)
+  showAddress.value = false
+}
+
+// Setup
+onMounted(async () => {
+  if (process.client) {
+    await import('leaflet/dist/leaflet-src.esm')
+  }
+
+  // The addressid is (wrongly) stored in the message.
+  const addressid = parseInt(chatmessage.value?.message)
+  if (addressid) {
+    address.value = await addressStore.fetch(addressid)
+  }
+})
 </script>

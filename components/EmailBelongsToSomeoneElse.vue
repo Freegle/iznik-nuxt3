@@ -26,38 +26,28 @@
     </div>
   </NoticeMessage>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import NoticeMessage from './NoticeMessage'
 
-export default {
-  components: { NoticeMessage },
-  props: {
-    theirs: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  theirs: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const authStore = useAuthStore()
+})
 
-    return { authStore }
-  },
-  data: function () {
-    return {
-      showConfirm: false,
-    }
-  },
-  methods: {
-    async requestMerge() {
-      const data = await this.authStore.saveEmail({
-        email: this.theirs,
-      })
+const authStore = useAuthStore()
+const showConfirm = ref(false)
 
-      console.log('Merge data', data)
+async function requestMerge() {
+  const data = await authStore.saveEmail({
+    email: props.theirs,
+  })
 
-      this.showConfirm = true
-    },
-  },
+  console.log('Merge data', data)
+
+  showConfirm.value = true
 }
 </script>

@@ -16,51 +16,43 @@
     </div>
   </component>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useChatStore } from '../stores/chat'
-import { useMobileStore } from '@/stores/mobile'
+import { useRouter } from '#app'
+import { useMobileStore } from '@/stores/mobile' // APP
 
-export default {
-  name: 'ChatMenu',
-  props: {
-    isListItem: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+const props = defineProps({
+  isListItem: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  setup() {
-    const chatStore = useChatStore()
+})
 
-    return {
-      chatStore,
-    }
-  },
-  computed: {
-    chatType() {
-      // A different component needs to be created depending on the context in which it's used
-      return this.isListItem ? 'b-nav-item' : 'a'
-    },
-    chatCount() {
-      const mobileStore = useMobileStore()
-      // Don't show so many that the layout breaks.
-      const chatcount = Math.min(99, this.chatStore?.unreadCount)
-      mobileStore.setBadgeCount(chatcount)
-      console.log('chatcount:',chatcount)
-      return chatcount
-    },
-  },
-  methods: {
-    toChats(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
+const router = useRouter()
+const chatStore = useChatStore()
 
-      this.$router.push('/chats')
-    },
-  },
+const chatType = computed(() => {
+  // A different component needs to be created depending on the context in which it's used
+  return props.isListItem ? 'b-nav-item' : 'a'
+})
+
+const chatCount = computed(() => {
+  // Don't show so many that the layout breaks.
+  const chatcount = Math.min(99, this.chatStore?.unreadCount)
+  mobileStore.setBadgeCount(chatcount) // APP
+  return chatcount
+})
+
+function toChats(e) {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+
+  router.push('/chats')
 }
 </script>
 <style scoped lang="scss">

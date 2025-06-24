@@ -12,7 +12,7 @@
           Mobile app version: {{ mobileVersion }}, built {{ version }}
           <span style="display:none;">{{ mobileInfo }}</span>
         </p>
-        <RateAppModal v-if="isApp" ref="rateappmodal" />
+        <RateAppModal v-if="showRateAppModal" ref="rateappmodal" @hidden="showRateAppModal = false"/>
         <h1>How can we help?</h1>
         <p>
           Type a question in here, and we'll see if we can find an answer for
@@ -154,8 +154,8 @@
                 The app is only available in the UK app stores. We support
                 Android 5.1/iOS 13 or later.
               </p>
+              </div>
             </div>
-          </div>
           </HelpQuestion>
           <HelpQuestion id="selling" :matches="matches">
             <template #title>Can I sell something given on Freegle?</template>
@@ -411,15 +411,26 @@
     </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { Searcher } from 'fast-fuzzy'
 import dayjs from 'dayjs'
+import { defineAsyncComponent } from 'vue'
 import ExternalLink from '../components/ExternalLink'
 import HelpQuestion from '~/components/HelpQuestion'
 import { buildHead } from '~/composables/useBuildHead'
-import { useMobileStore } from '@/stores/mobile'
 import VisibleWhen from '~/components/VisibleWhen'
+import TermsOfUse from '~/components/TermsOfUse'
+import DonationButton from '~/components/DonationButton'
+import GroupRememberSelect from '~/components/GroupRememberSelect'
+import ChatButton from '~/components/ChatButton'
+import NoticeMessage from '~/components/NoticeMessage'
+import SupportLink from '~/components/SupportLink'
+import { ref, computed, onMounted, nextTick } from '#imports'
+import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '@/stores/mobile'
+
+// Async components
 const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )
@@ -427,133 +438,115 @@ const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
 )
 
-export default {
-  components: {
-    ExternalLink,
-    HelpQuestion,
-    SupporterInfoModal,
-    VisibleWhen,
-    SidebarLeft,
-  },
-  setup() {
-    const route = useRoute()
-    const runtimeConfig = useRuntimeConfig()
+// Setup
+const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const authStore = useAuthStore()
+const mobileStore = useMobileStore()
 
-    useHead(
-      buildHead(route, runtimeConfig, 'Help', 'Help with Freegle', null, {
-        class: 'overflow-y-scroll',
-      })
-    )
-  },
-  data() {
-    return {
-      question: null,
-      searcher: null,
-      forIndex: [],
-      contactGroupId: null,
-      showInfoModal: false,
-      deviceuserinfocopied: 'Copy app and device info'
-    }
-  },
-  computed: {
-    deviceuserinfo(){
-      const mobileStore = useMobileStore()
-      if( !mobileStore.deviceuserinfo) return false
-      return 'Device info: '+ mobileStore.deviceuserinfo
-    },
-    matches() {
-      if (!this.searcher || !this.question) {
-        return this.forIndex.map((o) => o.id)
-      }
+// State
+const question = ref(null)
+const searcher = ref(null)
+const forIndex = ref([])
+const contactGroupId = ref(null)
+const showInfoModal = ref(false)
+const faq = ref(null)
+const supporterInfoModal = ref(null)
+const showRateAppModal = ref(false)
 
-      let result = this.searcher.search(this.question, {
-        returnMatchData: true,
-      })
+// Computed properties
+const isApp = ref(mobileStore.isApp) // APP
+const appType = ref(mobileStore.isiOS ? 'iOS' : 'Android')
+const mobileVersion = ref(runtimeConfig.public.MOBILE_VERSION)
+const mobileInfo = ref(mobileStore.devicePersistentId)
 
-      result = result.slice(0, 10)
+const matches = computed(() => {
+  if (!searcher.value || !question.value) {
+    return forIndex.value.map((o) => o.id)
+  }
 
-      // Get id prop from each
-      return result.map((r) => r.item.id)
-    },
-    version() {
-      const runtimeConfig = useRuntimeConfig()
-      const date = dayjs(runtimeConfig.public.BUILD_DATE)
+  let result = searcher.value.search(question.value, {
+    returnMatchData: true,
+  })
 
-      return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
-    },
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    appType() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isiOS ? 'iOS' : 'Android'
-    },
-    mobileVersion() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.MOBILE_VERSION
-    },
-    mobileInfo() {
-      const mobileStore = useMobileStore()
-      return mobileStore.devicePersistentId;
-    },
-  },
-  async mounted() {
-    // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
-    await this.$nextTick()
-    const faqs = this.$refs.faq.children
+  result = result.slice(0, 10)
 
-    this.forIndex = []
+  // Get id prop from each
+  return result.map((r) => r.item.id)
+})
 
-    for (const question of faqs) {
-      if (question.tagName === 'DIV') {
-        try {
-          const questionText = question.children[0].innerText.trim()
-          const answerText = question.children[1].innerText.trim()
+const version = computed(() => {
+  const date = dayjs(runtimeConfig.public.BUILD_DATE)
+  return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
+})
 
-          this.forIndex.push({
-            id: question.id,
-            question: questionText,
-            answer: answerText,
-          })
-        } catch (e) {
-          console.error('Malformed FAQ', question)
-        }
-      }
-    }
+const loggedIn = computed(() => authStore.user !== null)
 
-    this.searcher = new Searcher(this.forIndex, {
-      threshold: 0.7,
-      keySelector: (obj) => obj.question + ' ' + obj.answer,
-    })
-  },
-  methods: {
-    supporterInfo() {
-      this.showInfoModal = true
-    },
-    showRateMe() {
-      window.localStorage.removeItem('rateappnotagain')
-      this.$refs.rateappmodal.show()
-    },
-    async copydeviceuserinfo(e){
-      console.log('copydeviceuserinfo',e)
-      let infotocopy = 'Mobile version: '+this.mobileVersion+'. '
-      if( this.deviceuserinfo) infotocopy += this.deviceuserinfo
-      await navigator.clipboard.writeText(infotocopy)
-      this.deviceuserinfocopied = 'Device info copied'
-      setTimeout(() => {
-        this.deviceuserinfocopied = 'Copy app and device info'
-      }, 3000)
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-      return false
-    }
-
-  },
+// Methods
+function supporterInfo() {
+  showInfoModal.value = true
 }
+
+function showRateMe() {
+  window.localStorage.removeItem('rateappnotagain')
+  showRateAppModal.value = true
+},
+
+async function copydeviceuserinfo(e){
+  console.log('copydeviceuserinfo',e)
+  let infotocopy = 'Mobile version: '+mobileVersion.value+'. '
+  if( deviceuserinfo.value) infotocopy += deviceuserinfo.value
+  await navigator.clipboard.writeText(infotocopy)
+  deviceuserinfocopied.value = 'Device info copied'
+  setTimeout(() => {
+    deviceuserinfocopied.value = 'Copy app and device info'
+  }, 3000)
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+  return false
+}
+
+
+// Lifecycle hooks
+onMounted(async () => {
+  // Scan the FAQs above and extract the plain text for each one, and then construct a search index.
+  await nextTick()
+  const faqs = faq.value.children
+
+  forIndex.value = []
+
+  for (const question of faqs) {
+    if (question.tagName === 'DIV') {
+      try {
+        const questionText = question.children[0].innerText.trim()
+        const answerText = question.children[1].innerText.trim()
+
+        forIndex.value.push({
+          id: question.id,
+          question: questionText,
+          answer: answerText,
+        })
+      } catch (e) {
+        console.error('Malformed FAQ', question)
+      }
+    }
+  }
+
+  searcher.value = new Searcher(forIndex.value, {
+    threshold: 0.7,
+    keySelector: (obj) => obj.question + ' ' + obj.answer,
+  })
+})
+
+// Page head
+useHead(
+  buildHead(route, runtimeConfig, 'Help', 'Help with Freegle', null, {
+    class: 'overflow-y-scroll',
+  })
+)
 </script>
 <style scoped lang="scss">
 :deep(h3) {

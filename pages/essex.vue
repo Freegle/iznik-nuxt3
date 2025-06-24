@@ -78,15 +78,21 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Wkt from 'wicket'
-import { buildHead } from '../composables/useBuildHead'
+import { buildHead } from '~/composables/useBuildHead'
 import { useAuthorityStore } from '~/stores/authority'
 import { loadLeaflet } from '~/composables/useMap'
+import { ref, onMounted, useHead, useRuntimeConfig } from '#imports'
+import GiveAsk from '~/components/GiveAsk.vue'
+import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
+import PostMapAndList from '~/components/PostMapAndList.vue'
+import ExternalLink from '~/components/ExternalLink.vue'
 
 console.log('Starting Essex page')
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
+const router = useRouter()
 
 useHead(
   buildHead(
@@ -140,8 +146,8 @@ function idle(map) {
     addedPolygon.value = true
   }
 }
+
 function explorePlace(place) {
-  const router = useRouter()
   place.minZoom = 12
   router.push('/explore/place/' + JSON.stringify(place))
 }

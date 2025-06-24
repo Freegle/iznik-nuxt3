@@ -31,6 +31,9 @@
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import PostMapAndList from '../../components/PostMapAndList'
+import { computed, useHead, useRuntimeConfig } from '#imports'
+import NoticeMessage from '~/components/NoticeMessage'
+import ExploreGroup from '~/components/ExploreGroup'
 import { useGroupStore } from '~/stores/group'
 
 const runtimeConfig = useRuntimeConfig()

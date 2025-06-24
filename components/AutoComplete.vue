@@ -133,7 +133,7 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 /*
  * Originally based on:
  *
@@ -147,543 +147,542 @@
  */
 
 /* eslint-disable */
-
+import { ref, computed, watch, onMounted } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import Highlighter from 'vue-highlight-words'
 
-export default {
-  components: {
-    Highlighter
+// Props
+const props = defineProps({
+  id: String,
+  name: String,
+  className: String,
+  classes: {
+    type: Object,
+    default: () => ({
+      wrapper: false,
+      input: false,
+      list: false,
+      item: false,
+      listentry: false,
+      listentrylist: false
+    })
   },
-  props: {
-    id: String,
-    name: String,
-    className: String,
-    classes: {
-      type: Object,
-      default: () => ({
-        wrapper: false,
-        input: false,
-        list: false,
-        item: false,
-        listentry: false,
-        listentrylist: false
-      })
-    },
-    placeholder: String,
-    required: Boolean,
+  placeholder: String,
+  required: Boolean,
 
-    // Initial Value
-    initValue: {
-      type: String,
-      default: ''
-    },
+  // Initial Value
+  initValue: {
+    type: String,
+    default: ''
+  },
 
-    // Manual List
-    options: Array,
+  // Manual List
+  options: Array,
 
-    // Filter After Get the data
-    filterByAnchor: {
-      type: Boolean,
-      default: true
-    },
+  // Filter After Get the data
+  filterByAnchor: {
+    type: Boolean,
+    default: true
+  },
 
-    restrict: {
-      type: Boolean,
-      default: false
-    },
+  restrict: {
+    type: Boolean,
+    default: false
+  },
 
-    // Anchor of list
-    anchor: {
-      type: String,
-      required: true
-    },
+  // Anchor of list
+  anchor: {
+    type: String,
+    required: true
+  },
 
-    // Label of list
-    label: String,
+  // Label of list
+  label: String,
 
-    // Debounce time
-    debounce: Number,
+  // Debounce time
+  debounce: Number,
 
-    // ajax URL will be fetched
-    url: {
-      type: String,
-      required: true
-    },
+  // ajax URL will be fetched
+  url: {
+    type: String,
+    required: true
+  },
 
-    // query param
-    param: {
-      type: String,
-      default: 'q'
-    },
+  // query param
+  param: {
+    type: String,
+    default: 'q'
+  },
 
-    encodeParams: {
-      type: Boolean,
-      default: true
-    },
+  encodeParams: {
+    type: Boolean,
+    default: true
+  },
 
-    // Custom Params
-    customParams: Object,
+  // Custom Params
+  customParams: Object,
 
-    // Custom Headers
-    customHeaders: Object,
+  // Custom Headers
+  customHeaders: Object,
 
-    // minimum length
-    min: {
-      type: Number,
-      default: 0
-    },
+  // minimum length
+  min: {
+    type: Number,
+    default: 0
+  },
 
-    // Create a custom template from data.
-    onShouldRenderChild: Function,
+  // Create a custom template from data.
+  onShouldRenderChild: Function,
 
-    // Process the result before retrieveng the result array.
-    process: Function,
+  // Process the result before retrieveng the result array.
+  process: Function,
 
-    // Callback
-    onInput: Function,
-    onShow: Function,
-    onBlur: Function,
-    onHide: Function,
-    onFocus: Function,
-    onSelect: Function,
-    onBeforeAjax: Function,
-    onAjaxProgress: Function,
-    onAjaxLoaded: Function,
-    onShouldGetData: Function,
+  // Callback
+  onInput: Function,
+  onShow: Function,
+  onBlur: Function,
+  onHide: Function,
+  onFocus: Function,
+  onSelect: Function,
+  onBeforeAjax: Function,
+  onAjaxProgress: Function,
+  onAjaxLoaded: Function,
+  onShouldGetData: Function,
 
-    searchbutton: {
-      type: String,
-      required: false,
-      default: ""
-    },
+  searchbutton: {
+    type: String,
+    required: false,
+    default: ""
+  },
 
-    timeout: {
-      type: Number,
-      required: false,
-      default: null
-    },
+  timeout: {
+    type: Number,
+    required: false,
+    default: null
+  },
 
-    closeButton: {
-      type: Boolean,
-      required: false,
-      default: false
-    },
+  closeButton: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
 
-    size: {
-      type: Number,
-      required: false,
-      default: null
-    },
+  size: {
+    type: Number,
+    required: false,
+    default: null
+  },
 
-    variant: {
-      type: String,
-      required: false,
-      default: null
-    },
+  variant: {
+    type: String,
+    required: false,
+    default: null
+  },
 
-    notFoundMessage: {
-      type: String,
-      required: false,
-      default: 'Sorry, we can\'t find that.'
+  notFoundMessage: {
+    type: String,
+    required: false,
+    default: 'Sorry, we can\'t find that.'
+  }
+})
+
+// Emits
+const emit = defineEmits(['update:modelValue', 'search', 'invalid'])
+
+// Refs
+const input = ref(null)
+const showList = ref(false)
+const showTimer = ref(null)
+const type = ref('')
+const json = ref([])
+const focusList = ref('')
+const debounceTask = ref(undefined)
+const ajaxInProgress = ref(null)
+const ajaxDeferred = ref(null)
+const invalid = ref(false)
+const focused = ref(false)
+
+// Computed
+const wrapClass = computed(() => {
+  let border
+
+  switch (props.variant) {
+    case 'primary': {
+      border = ' border border-primary'
+      break;
     }
-  },
-
-  data() {
-    return {
-      showList: false,
-      showTimer: null,
-      type: '',
-      json: [],
-      focusList: '',
-      debounceTask: undefined,
-      ajaxInProgress: null,
-      ajaxDeferred: null,
-      invalid: false,
-      focused: false
+    case 'success': {
+      border = ' border border-success'
+      break;
     }
-  },
-
-  computed: {
-    wrapClass() {
-      let border
-
-      switch (this.variant) {
-        case 'primary': {
-          border = ' border border-primary'
-          break;
-        }
-        case 'success': {
-          border = ' border border-success'
-          break;
-        }
-        default: {
-          border = ''
-          break;
-        }
-      }
-
-      return 'autocomplete-wrap ' + (this.focused ? ' autocomplete-wrap-focus' : '') + ' ' + border + ' ' +
-        (this.invalid ? 'autocomplete-wrap-invalid' : '')
-    },
-    parentClass() {
-      return 'd-flex ' + (this.searchbutton ? 'autocomplete-parent-focus' : '') + (this.invalid ? ' invalid' : '')
-    }
-  },
-
-  watch: {
-    options(newVal, oldVal) {
-      if (this.filterByAnchor) {
-        const { type, anchor } = this
-        const regex = new RegExp(`${type}`, 'i')
-        const filtered = newVal.filter(item => {
-          const found = item[anchor].search(regex) !== -1
-          return found
-        })
-        this.json = filtered
-      } else {
-        this.json = newVal
-      }
-    },
-    type(newVal) {
-      // We want to alert users of this component to changed data.
-      this.$emit('update:modelValue', newVal)
-    }
-  },
-
-  created() {
-    // Sync parent model with initValue Props
-    this.type = this.initValue ? this.initValue : null
-  },
-
-  mounted() {
-    if (this.required) this.$refs.input.setAttribute('required', this.required)
-  },
-
-  methods: {
-    getClassName(part) {
-      const { classes, className } = this
-      if (classes[part]) return `${classes[part]}`
-      return className ? `${className}-${part}` : ''
-    },
-
-    clearTimer() {
-      if (this.showTimer) {
-        clearTimeout(this.showTimer)
-      }
-    },
-
-    startTimer() {
-      this.clearTimer()
-      this.showTimer = setTimeout(() => {
-        this.showList = false
-        this.showTimer = null
-      }, 30000)
-    },
-
-    // Netralize Autocomplete
-    clearInput() {
-      this.showList = false
-      this.clearTimer()
-      this.type = ''
-      this.json = []
-      this.focusList = ''
-    },
-
-    // Get the original data
-    cleanUp(data) {
-      return data ? cloneDeep(data) : null
-    },
-
-    /* ==============================
-      INPUT EVENTS
-    ============================= */
-    handleInput(e) {
-      const { value } = e.target
-      this.showList = true
-      this.startTimer()
-      // Callback Event
-      if (this.onInput) this.onInput(value)
-      // If Debounce
-      if (this.debounce) {
-        if (this.debounceTask !== undefined) clearTimeout(this.debounceTask)
-        this.debounceTask = setTimeout(() => {
-          return this.getData(value)
-        }, this.debounce)
-      } else {
-        return this.getData(value)
-      }
-    },
-
-    handleKeyDown(e) {
-      const key = e.keyCode
-
-      // Disable when list isn't showing up
-      if (!this.showList) return
-
-      // Key List
-      const DOWN = 40
-      const UP = 38
-      const ENTER = 13
-      const ESC = 27
-
-      // Prevent Default for Prevent Cursor Move & Form Submit
-      switch (key) {
-        case DOWN:
-          e.preventDefault()
-          this.focusList++
-          break
-        case UP:
-          e.preventDefault()
-          this.focusList--
-          break
-        case ENTER:
-          e.preventDefault()
-
-          if (this.ajaxInProgress) {
-            // Wait until the ajax call has completed. Not in the most elegant way.
-            let self = this
-            setTimeout(() => {
-              self.handleKeyDown.apply(self, [e])
-            }, 100)
-          } else {
-            this.selectList(this.json[this.focusList])
-            this.showList = false
-            this.clearTimer()
-          }
-          break
-        case ESC:
-          this.showList = false
-          this.clearTimer()
-          break
-      }
-
-      const listLength = this.json.length - 1
-      const outOfRangeBottom = this.focusList > listLength
-      const outOfRangeTop = this.focusList < 0
-      const topItemIndex = 0
-      const bottomItemIndex = listLength
-
-      let nextFocusList = this.focusList
-      if (outOfRangeBottom) nextFocusList = topItemIndex
-      if (outOfRangeTop) nextFocusList = bottomItemIndex
-      this.focusList = nextFocusList
-    },
-
-    setValue(val) {
-      this.type = val
-    },
-
-    /* ==============================
-      LIST EVENTS
-    ============================= */
-
-    handleDoubleClick() {
-      this.json = []
-      this.getData('')
-      // Callback Event
-      if (this.onShow) {
-        this.onShow()
-      }
-      this.showList = true
-      this.startTimer()
-    },
-
-    handleBlur(e) {
-      this.focused = false
-
-      // Callback Event
-      if (this.onBlur) {
-        this.onBlur(e)
-      }
-      setTimeout(() => {
-        // Callback Event
-        if (this.onHide) {
-          this.onHide()
-        }
-        this.showList = false
-        this.clearTimer()
-      }, 250)
-    },
-
-    handleFocus(e) {
-      this.focused = true
-      this.focusList = 0
-
-      // Force the list to show.
-      this.showList = true
-      this.startTimer()
-      let value = this.$refs.input?.value
-      if (value) {
-        this.getData(value)
-      }
-
-      // Callback Event
-      if (this.onFocus) {
-        this.onFocus(e)
-      }
-    },
-
-    mousemove(i) {
-      this.focusList = i
-    },
-
-    activeClass(i) {
-      const focusClass = i === this.focusList ? 'focus-list' : ''
-      return `${focusClass}`
-    },
-
-    selectList(data) {
-      // Deep clone of the original object
-      let clean = null
-      if (!data) {
-        // No data - revert
-        this.type = this.initValue ? this.initValue : null
-      } else {
-        clean = this.cleanUp(data)
-        // Put the selected data to type (model)
-        this.type = clean[this.anchor]
-      }
-      // Hide List
-      this.showList = false
-      this.clearTimer()
-      // Callback Event
-      if (this.onSelect) {
-        this.onSelect(clean)
-      }
-    },
-
-    deepValue(obj, path) {
-      const arrayPath = path.split('.')
-      for (let i = 0; i < arrayPath.length; i++) {
-        obj = obj[arrayPath[i]]
-      }
-      return obj
-    },
-
-    /* ==============================
-      AJAX EVENTS
-    ============================= */
-
-    composeParams(val) {
-      const encode = val => (this.encodeParams ? encodeURIComponent(val) : val)
-      let params = `${this.param}=${encode(val)}`
-      if (this.customParams) {
-        Object.keys(this.customParams).forEach(key => {
-          params += `&${key}=${encode(this.customParams[key])}`
-        })
-      }
-      return params
-    },
-
-    composeHeader(ajax) {
-      if (this.customHeaders) {
-        Object.keys(this.customHeaders).forEach(key => {
-          ajax.setRequestHeader(key, this.customHeaders[key])
-        })
-      }
-    },
-
-    async doAjax(val) {
-      this.invalid = false
-      let beforeAjaxResult = []
-
-      if (this.ajaxInProgress) {
-        // We're already doing a request.  Don't send another one, partly out of politeness to the server, and
-        // partly because if they complete out of sequence then we will end up with the wrong values.
-        if (this.ajaxDeferred) {
-          clearTimeout(this.ajaxDeferred)
-        }
-
-        this.ajaxDeferred = setTimeout(() => {
-          this.doAjax(val)
-        }, 100)
-      } else {
-        // Callback Event
-        if (this.onBeforeAjax) {
-          // This might return some results - if so they should be shown first.
-          beforeAjaxResult = await this.onBeforeAjax(val)
-        }
-
-        // Compose Params
-        const params = this.composeParams(val.trim())
-        // Init Ajax
-        const ajax = new XMLHttpRequest()
-
-        // Save this request so that we know it's happening.
-        this.ajaxInProgress = ajax
-
-        ajax.open('GET', `${this.url}?${params}`, true)
-        this.composeHeader(ajax)
-
-        // Callback Event
-        ajax.addEventListener('progress', data => {
-          if (data.lengthComputable && this.onAjaxProgress)
-            this.onAjaxProgress(data)
-        })
-
-        // On Done
-        ajax.addEventListener('loadend', e => {
-          const { status, responseText } = e.target
-
-          if (status === 200) {
-            const json = JSON.parse(responseText)
-
-            // Callback Event
-            if (this.onAjaxLoaded) {
-              this.onAjaxLoaded(json)
-            }
-
-            this.json = beforeAjaxResult.concat(this.process ? this.process(json) : json)
-
-            if (this.restrict && (!this.json || this.json.length === 0)) {
-              // What we have doesn't match.  Indicate that we have selected an invalid value.
-              if (this.onSelect) {
-                this.$emit('invalid')
-                this.invalid = true
-              }
-            }
-            else if (this.json && this.json.length === 1 && this.json[0].name.toLowerCase().replace(' ', '').trim() === val.toLowerCase().replace(' ', '').trim()) {
-              // There is only one value, and it matches the value we were searching for.  Autoselect it.
-              this.selectList(this.json[0])
-            }
-          } else {
-            console.log("Autocomplete failed with", status)
-          }
-
-          // We no longer have a request in progress.
-          this.ajaxInProgress = null
-        })
-
-        ajax.send()
-      }
-    },
-
-    getData(value) {
-      if (value.length < this.min || !this.url) return
-      if (this.onShouldGetData) this.manualGetData(value)
-      else this.doAjax(value)
-    },
-
-    // Do Ajax Manually, so user can do whatever he want
-    manualGetData(val) {
-      const task = this.onShouldGetData(val)
-      if (task && task.then) {
-        return task.then(options => {
-          this.json = options
-        })
-      }
-    },
-
-    search() {
-      this.$emit('search')
-    },
-
-    close() {
-      this.showList = false
-      this.clearTimer()
+    default: {
+      border = ''
+      break;
     }
   }
+
+  return 'autocomplete-wrap ' + (focused.value ? ' autocomplete-wrap-focus' : '') + ' ' + border + ' ' +
+    (invalid.value ? 'autocomplete-wrap-invalid' : '')
+})
+
+const parentClass = computed(() => {
+  return 'd-flex ' + (props.searchbutton ? 'autocomplete-parent-focus' : '') + (invalid.value ? ' invalid' : '')
+})
+
+// Init
+// Sync parent model with initValue Props
+type.value = props.initValue ? props.initValue : null
+
+// Watch
+watch(() => props.options, (newVal, oldVal) => {
+  if (props.filterByAnchor) {
+    const regex = new RegExp(`${type.value}`, 'i')
+    const filtered = newVal.filter(item => {
+      const found = item[props.anchor].search(regex) !== -1
+      return found
+    })
+    json.value = filtered
+  } else {
+    json.value = newVal
+  }
+})
+
+watch(type, (newVal) => {
+  // We want to alert users of this component to changed data.
+  emit('update:modelValue', newVal)
+})
+
+// Lifecycle
+onMounted(() => {
+  if (props.required && input.value) input.value.setAttribute('required', props.required)
+})
+
+// Methods
+
+function setValue(val) {
+  type.value = val
+}
+
+defineExpose({
+  setValue
+})
+
+function getClassName(part) {
+  const { classes, className } = props
+  if (classes[part]) return `${classes[part]}`
+  return className ? `${className}-${part}` : ''
+}
+
+function clearTimer() {
+  if (showTimer.value) {
+    clearTimeout(showTimer.value)
+  }
+}
+
+function startTimer() {
+  clearTimer()
+  showTimer.value = setTimeout(() => {
+    showList.value = false
+    showTimer.value = null
+  }, 30000)
+}
+
+// Netralize Autocomplete
+function clearInput() {
+  showList.value = false
+  clearTimer()
+  type.value = ''
+  json.value = []
+  focusList.value = ''
+}
+
+// Get the original data
+function cleanUp(data) {
+  return data ? cloneDeep(data) : null
+}
+
+/* ==============================
+  INPUT EVENTS
+============================= */
+function handleInput(e) {
+  const { value } = e.target
+  showList.value = true
+  startTimer()
+  // Callback Event
+  if (props.onInput) props.onInput(value)
+  // If Debounce
+  if (props.debounce) {
+    if (debounceTask.value !== undefined) clearTimeout(debounceTask.value)
+    debounceTask.value = setTimeout(() => {
+      return getData(value)
+    }, props.debounce)
+  } else {
+    return getData(value)
+  }
+}
+
+function handleKeyDown(e) {
+  const key = e.keyCode
+
+  // Disable when list isn't showing up
+  if (!showList.value) return
+
+  // Key List
+  const DOWN = 40
+  const UP = 38
+  const ENTER = 13
+  const ESC = 27
+
+  // Prevent Default for Prevent Cursor Move & Form Submit
+  switch (key) {
+    case DOWN:
+      e.preventDefault()
+      focusList.value++
+      break
+    case UP:
+      e.preventDefault()
+      focusList.value--
+      break
+    case ENTER:
+      e.preventDefault()
+
+      if (ajaxInProgress.value) {
+        // Wait until the ajax call has completed. Not in the most elegant way.
+        setTimeout(() => {
+          handleKeyDown(e)
+        }, 100)
+      } else {
+        selectList(json.value[focusList.value])
+        showList.value = false
+        clearTimer()
+      }
+      break
+    case ESC:
+      showList.value = false
+      clearTimer()
+      break
+  }
+
+  const listLength = json.value.length - 1
+  const outOfRangeBottom = focusList.value > listLength
+  const outOfRangeTop = focusList.value < 0
+  const topItemIndex = 0
+  const bottomItemIndex = listLength
+
+  let nextFocusList = focusList.value
+  if (outOfRangeBottom) nextFocusList = topItemIndex
+  if (outOfRangeTop) nextFocusList = bottomItemIndex
+  focusList.value = nextFocusList
+}
+
+/* ==============================
+  LIST EVENTS
+============================= */
+
+function handleDoubleClick() {
+  json.value = []
+  getData('')
+  // Callback Event
+  if (props.onShow) {
+    props.onShow()
+  }
+  showList.value = true
+  startTimer()
+}
+
+function handleBlur(e) {
+  focused.value = false
+
+  // Callback Event
+  if (props.onBlur) {
+    props.onBlur(e)
+  }
+  setTimeout(() => {
+    // Callback Event
+    if (props.onHide) {
+      props.onHide()
+    }
+    showList.value = false
+    clearTimer()
+  }, 250)
+}
+
+function handleFocus(e) {
+  focused.value = true
+  focusList.value = 0
+
+  // Force the list to show.
+  showList.value = true
+  startTimer()
+  let value = input.value?.value
+  if (value) {
+    getData(value)
+  }
+
+  // Callback Event
+  if (props.onFocus) {
+    props.onFocus(e)
+  }
+}
+
+function mousemove(i) {
+  focusList.value = i
+}
+
+function activeClass(i) {
+  const focusClass = i === focusList.value ? 'focus-list' : ''
+  return `${focusClass}`
+}
+
+function selectList(data) {
+  // Deep clone of the original object
+  let clean = null
+  if (!data) {
+    // No data - revert
+    type.value = props.initValue ? props.initValue : null
+  } else {
+    clean = cleanUp(data)
+    // Put the selected data to type (model)
+    type.value = clean[props.anchor]
+  }
+  // Hide List
+  showList.value = false
+  clearTimer()
+  // Callback Event
+  if (props.onSelect) {
+    props.onSelect(clean)
+  }
+}
+
+function deepValue(obj, path) {
+  const arrayPath = path.split('.')
+  for (let i = 0; i < arrayPath.length; i++) {
+    obj = obj[arrayPath[i]]
+  }
+  return obj
+}
+
+/* ==============================
+  AJAX EVENTS
+============================= */
+
+function composeParams(val) {
+  const encode = val => (props.encodeParams ? encodeURIComponent(val) : val)
+  let params = `${props.param}=${encode(val)}`
+  if (props.customParams) {
+    Object.keys(props.customParams).forEach(key => {
+      params += `&${key}=${encode(props.customParams[key])}`
+    })
+  }
+  return params
+}
+
+function composeHeader(ajax) {
+  if (props.customHeaders) {
+    Object.keys(props.customHeaders).forEach(key => {
+      ajax.setRequestHeader(key, props.customHeaders[key])
+    })
+  }
+}
+
+async function doAjax(val) {
+  invalid.value = false
+  let beforeAjaxResult = []
+
+  if (ajaxInProgress.value) {
+    // We're already doing a request.  Don't send another one, partly out of politeness to the server, and
+    // partly because if they complete out of sequence then we will end up with the wrong values.
+    if (ajaxDeferred.value) {
+      clearTimeout(ajaxDeferred.value)
+    }
+
+    ajaxDeferred.value = setTimeout(() => {
+      doAjax(val)
+    }, 100)
+  } else {
+    // Callback Event
+    if (props.onBeforeAjax) {
+      // This might return some results - if so they should be shown first.
+      beforeAjaxResult = await props.onBeforeAjax(val)
+    }
+
+    // Compose Params
+    const params = composeParams(val.trim())
+    // Init Ajax
+    const ajax = new XMLHttpRequest()
+
+    // Save this request so that we know it's happening.
+    ajaxInProgress.value = ajax
+
+    ajax.open('GET', `${props.url}?${params}`, true)
+    composeHeader(ajax)
+
+    // Callback Event
+    ajax.addEventListener('progress', data => {
+      if (data.lengthComputable && props.onAjaxProgress)
+        props.onAjaxProgress(data)
+    })
+
+    // On Done
+    ajax.addEventListener('loadend', e => {
+      const { status, responseText } = e.target
+
+      if (status === 200) {
+        const jsonResponse = JSON.parse(responseText)
+
+        // Callback Event
+        if (props.onAjaxLoaded) {
+          props.onAjaxLoaded(jsonResponse)
+        }
+
+        json.value = beforeAjaxResult.concat(props.process ? props.process(jsonResponse) : jsonResponse)
+
+        if (props.restrict && (!json.value || json.value.length === 0)) {
+          // What we have doesn't match.  Indicate that we have selected an invalid value.
+          if (props.onSelect) {
+            emit('invalid')
+            invalid.value = true
+          }
+        }
+        else if (json.value && json.value.length === 1 && json.value[0].name.toLowerCase().replace(' ', '').trim() === val.toLowerCase().replace(' ', '').trim()) {
+          // There is only one value, and it matches the value we were searching for.  Autoselect it.
+          selectList(json.value[0])
+        }
+      } else {
+        console.log("Autocomplete failed with", status)
+      }
+
+      // We no longer have a request in progress.
+      ajaxInProgress.value = null
+    })
+
+    ajax.send()
+  }
+}
+
+function getData(value) {
+  if (value.length < props.min || !props.url) return
+  if (props.onShouldGetData) manualGetData(value)
+  else doAjax(value)
+}
+
+// Do Ajax Manually, so user can do whatever he want
+function manualGetData(val) {
+  const task = props.onShouldGetData(val)
+  if (task && task.then) {
+    return task.then(options => {
+      json.value = options
+    })
+  }
+}
+
+function search() {
+  emit('search')
+}
+
+function close() {
+  showList.value = false
+  clearTimer()
 }
 
 /* eslint-enable */

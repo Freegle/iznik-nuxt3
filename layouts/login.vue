@@ -17,16 +17,17 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
 import { useAuthStore } from '../stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 import LayoutCommon from '~/components/LayoutCommon'
-import { ref } from '#imports'
+import { ref, computed, watch, useMiscStore } from '#imports'
 const GoogleOneTap = defineAsyncComponent(() =>
   import('~/components/GoogleOneTap')
 )
 const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
+<<<<<<< HEAD
 export default {
   components: {
     GoogleOneTap,
@@ -40,28 +41,39 @@ export default {
     const authStore = useAuthStore()
     const jwt = authStore.auth.jwt
     const persistent = authStore.auth.persistent
+=======
+const ready = ref(false)
+const oneTap = ref(false)
+const bump = ref(0)
+const bumpLogin = ref(0)
+const loginModal = ref(null)
+const authStore = useAuthStore()
+const miscStore = useMiscStore()
+>>>>>>> master
 
-    const runtimeConfig = useRuntimeConfig()
-    const userSite = runtimeConfig.public.USER_SITE
-    const proxy = runtimeConfig.public.IMAGE_DELIVERY
+const runtimeConfig = useRuntimeConfig()
+const userSite = runtimeConfig.public.USER_SITE
+const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
-    if (jwt || persistent) {
-      // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
-      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
-      // whether or not we can log in that way.
-      let user = null
+const loggedIn = computed(() => authStore.user !== null)
+const me = computed(() => authStore.user)
 
-      try {
-        user = await authStore.fetchUser()
-      } catch (e) {
-        console.log('Error fetching user', e)
-      }
+if (process.client) {
+  // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
+  miscStore.apiCount = 0
+}
 
-      if (user) {
-        ready.value = true
-      }
-    }
+if (proxy) {
+  // Add the wallpaper background, proxying it from our image CDN.
+  const bg =
+    'background-image: url("' +
+    proxy +
+    '?url=' +
+    userSite +
+    '/wallpaper.png' +
+    '&output=webp")'
 
+<<<<<<< HEAD
     if (!ready.value && !mobileStore.isApp) {
       // We don't have a valid JWT.  See if OneTap can sign us in.
       oneTap.value = true
@@ -130,7 +142,70 @@ export default {
         // We need to force the login modal to rerender, otherwise the login button doesn't always show.
         this.bumpLogin++
       }
+=======
+  useHead({
+    bodyAttrs: {
+      style: bg,
+>>>>>>> master
     },
+  })
+}
+
+watch(
+  me,
+  (newVal) => {
+    if (newVal) {
+      // We've logged in.
+      ready.value = true
+    } else {
+      authStore.forceLogin = true
+    }
   },
+  { immediate: true }
+)
+
+function googleLoggedIn() {
+  // OneTap has logged us in. Re-render the page as logged in.
+  bump.value++
+}
+
+function googleLoaded() {
+  if (
+    loginModal.value &&
+    loginModal.value.showModal &&
+    loginModal.value.email
+  ) {
+    // The user is entering an email / password so isn't interested in Google sign-in.
+    console.log(
+      'Showing login modal - leave well alone',
+      loginModal.value.email
+    )
+  } else {
+    // We need to force the login modal to rerender
+    bumpLogin.value++
+  }
+}
+
+const jwt = authStore.auth.jwt
+const persistent = authStore.auth.persistent
+
+if (jwt || persistent) {
+  // We have some credentials, which may or may not be valid on the server.
+  let user = null
+
+  try {
+    user = await authStore.fetchUser()
+  } catch (e) {
+    console.log('Error fetching user', e)
+  }
+
+  if (user) {
+    ready.value = true
+  }
+}
+
+if (!ready.value) {
+  // We don't have a valid JWT. See if OneTap can sign us in.
+  oneTap.value = true
 }
 </script>

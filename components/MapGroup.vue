@@ -48,35 +48,29 @@
     <hr class="text-muted mt-0" />
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useGroupStore } from '../stores/group'
 import ExternalLink from './ExternalLink'
 import GroupProfileImage from './GroupProfileImage'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: { GroupProfileImage, ExternalLink },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup(props) {
-    const groupStore = useGroupStore()
+})
 
-    // Fetch the full group so that we get the tagline.
-    groupStore.fetch(props.id, true)
+const groupStore = useGroupStore()
+const { oneOfMyGroups } = useMe()
 
-    return {
-      groupStore,
-    }
-  },
-  computed: {
-    group() {
-      return this.groupStore?.get(this.id)
-    },
-  },
-}
+// Fetch the full group so that we get the tagline.
+groupStore.fetch(props.id, true)
+
+const group = computed(() => {
+  return groupStore?.get(props.id)
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

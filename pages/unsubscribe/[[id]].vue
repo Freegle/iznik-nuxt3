@@ -128,14 +128,26 @@
     </div>
   </client-only>
 </template>
-<script>
-import { buildHead } from '../../composables/useBuildHead'
-import { useAuthStore } from '../../stores/auth'
-import SpinButton from '~/components/SpinButton'
-import EmailValidator from '~/components/EmailValidator'
-import { useRoute, useRouter } from '#imports'
+<script setup>
+import {
+  ref,
+  computed,
+  onMounted,
+  defineAsyncComponent,
+  useRoute,
+  useRouter,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
+import { buildHead } from '~/composables/useBuildHead'
+import { useAuthStore } from '~/stores/auth'
+import SpinButton from '~/components/SpinButton.vue'
+import EmailValidator from '~/components/EmailValidator.vue'
+import SupportLink from '~/components/SupportLink.vue'
+import { useMe } from '~/composables/useMe'
+
 const ForgetFailModal = defineAsyncComponent(() =>
-  import('~/components/ForgetFailModal')
+  import('~/components/ForgetFailModal.vue')
 )
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect.vue')
@@ -144,125 +156,110 @@ const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
 const NoticeMessage = defineAsyncComponent(() =>
-  import('~/components/NoticeMessage')
+  import('~/components/NoticeMessage.vue')
 )
 const ExternalLink = defineAsyncComponent(() =>
-  import('~/components/ExternalLink')
+  import('~/components/ExternalLink.vue')
 )
 const DeletedRestore = defineAsyncComponent(() =>
-  import('~/components/DeletedRestore')
+  import('~/components/DeletedRestore.vue')
 )
 
-export default {
-  components: {
-    SpinButton,
-    EmailValidator,
-    ForgetFailModal,
-    GroupSelect,
-    ConfirmModal,
-    NoticeMessage,
-    ExternalLink,
-    DeletedRestore,
-  },
-  mixins: [buildHead],
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const route = useRoute()
+const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
+const authStore = useAuthStore()
+const { me, myid, myGroups, myGroup, loggedIn } = useMe()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Unsubscribe',
-        'Want to leave Freegle?  You can do that from here.'
-      )
-    )
+// Setup head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Unsubscribe',
+    'Want to leave Freegle?  You can do that from here.'
+  )
+)
 
-    const userid = parseInt(route.params.id)
-    const confirmed = route.query.confirm
+// Data properties
+const groupid = ref(null)
+const email = ref(null)
+const emailValid = ref(false)
+const emailSent = ref(false)
+const emailProblem = ref(false)
+const wrongUser = ref(false)
+const left = ref(null)
+const unknown = ref(false)
+const showForgetFailModal = ref(false)
+const showConfirmModal = ref(false)
 
-    const authStore = useAuthStore()
+// Route parameters
+const userid = parseInt(route.params.id)
+const confirmed = route.query.confirm
 
-    return {
-      authStore,
-      userid,
-      confirmed,
-    }
-  },
-  data() {
-    return {
-      groupid: null,
-      email: null,
-      emailValid: false,
-      emailSent: false,
-      emailProblem: false,
-      wrongUser: false,
-      left: null,
-      unknown: false,
-      showForgetFailModal: false,
-      showConfirmModal: false,
-    }
-  },
-  computed: {
-    groupCount() {
-      return this.myGroups.length
-    },
-  },
-  mounted() {
-    if (this.confirmed) {
-      if (this.userid === this.myid) {
-        this.forget()
-      } else if (this.myid) {
-        this.wrongUser = true
-      } else {
-        // Almost always this means they've clicked on the same link twice.  Tell them we've removed the account
-        // otherwise they'll get confused.
-        useRouter().push('/unsubscribe/unsubscribed')
-      }
-    }
-  },
-  methods: {
-    unsubscribe() {
-      if (!this.me) {
-        // If we're trying to do this, we must have logged in at some point in the past, even if not on this device
-        // and therefore not according to our store.  Set that, which will force us to show the log in rather than
-        // sign up variant of the login modal.
-        this.authStore.loggedInEver = true
-        this.authStore.forceLogin = true
-      } else {
-        this.showConfirmModal = true
-      }
-    },
-    async leave(callback) {
-      if (this.groupid) {
-        const groupName = this.myGroup(this.groupid).namedisplay
-        await this.authStore.leaveGroup(this.myid, this.groupid)
-        this.left = groupName
-      }
+// Computed properties
+const groupCount = computed(() => {
+  return myGroups.value.length
+})
 
-      this.groupid = 0
-      callback()
-    },
-    async forget() {
-      const ret = await this.authStore.forget()
-
-      if (ret) {
-        this.unknown = ret?.ret === 2
-        this.showForgetFailModal = true
-      } else {
-        useRouter().push('/unsubscribe/unsubscribed')
-      }
-    },
-    async emailConfirm(callback) {
-      if (this.emailValid) {
-        const ret = await this.authStore.unsubscribe(this.email.trim())
-        this.emailProblem = !ret.worked
-        this.unknown = ret.unknown
-        this.emailSent = ret.worked
-      }
-
-      callback()
-    },
-  },
+// Methods
+function unsubscribe() {
+  if (!me.value) {
+    // If we're trying to do this, we must have logged in at some point in the past, even if not on this device
+    // and therefore not according to our store. Set that, which will force us to show the log in rather than
+    // sign up variant of the login modal.
+    authStore.loggedInEver = true
+    authStore.forceLogin = true
+  } else {
+    showConfirmModal.value = true
+  }
 }
+
+async function leave(callback) {
+  if (groupid.value) {
+    const groupName = myGroup(groupid.value).namedisplay
+    await authStore.leaveGroup(myid.value, groupid.value)
+    left.value = groupName
+  }
+
+  groupid.value = 0
+  callback()
+}
+
+async function forget() {
+  const ret = await authStore.forget()
+
+  if (ret) {
+    unknown.value = ret?.ret === 2
+    showForgetFailModal.value = true
+  } else {
+    router.push('/unsubscribe/unsubscribed')
+  }
+}
+
+async function emailConfirm(callback) {
+  if (emailValid.value) {
+    const ret = await authStore.unsubscribe(email.value.trim())
+    emailProblem.value = !ret.worked
+    unknown.value = ret.unknown
+    emailSent.value = ret.worked
+  }
+
+  callback()
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  if (confirmed) {
+    if (userid === myid.value) {
+      forget()
+    } else if (myid.value) {
+      wrongUser.value = true
+    } else {
+      // Almost always this means they've clicked on the same link twice. Tell them we've removed the account
+      // otherwise they'll get confused.
+      router.push('/unsubscribe/unsubscribed')
+    }
+  }
+})
 </script>

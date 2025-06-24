@@ -107,199 +107,204 @@
   </div>
 </template>
 
-<script>
+<script setup>
 // From https://github.com/larsmars/vuejs-thermometer, tweaked to work with Vue3.
+import { ref, computed, watch, onMounted } from 'vue'
+
 const _textOffset = 0.75
 
-export default {
-  props: {
-    value: {
-      type: Number,
-      default: 0,
-      required: false,
-    },
-    min: {
-      type: Number,
-      default: -20,
-      required: false,
-    },
-    max: {
-      type: Number,
-      default: 25,
-      required: false,
-    },
-    scale: {
-      type: String,
-      default: '°C',
-      required: false,
-    },
-    options: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    customClass: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  value: {
+    type: Number,
+    default: 0,
+    required: false,
   },
-  data() {
-    return {
-      defaultOptions: Object,
-    }
+  min: {
+    type: Number,
+    default: -20,
+    required: false,
   },
-  computed: {
-    baseXOffset() {
-      return this.defaultOptions.layout.width / 5
-    },
-    width() {
-      return this.defaultOptions.layout.width
-    },
-    height() {
-      return this.defaultOptions.layout.height
-    },
-    textSpacing() {
-      return this.width * _textOffset
-    },
-    tickStep() {
-      return (
-        Math.abs(this.max - this.min) / (this.defaultOptions.thermo.ticks - 1)
-      )
-    },
-    ticks() {
-      const ticks = []
-      let maxValue = this.max
-      for (let i = 0; i < this.defaultOptions.thermo.ticks - 1; i++) {
-        ticks.push(Math.round(maxValue))
-        maxValue -= this.tickStep
-      }
-      ticks.push(this.min)
-      return ticks
-    },
-    thermoWidth() {
-      return this.defaultOptions.layout.width / 6
-    },
-    glassWidth() {
-      return this.defaultOptions.layout.width / 6 + 6
-    },
-    tickWidth() {
-      return Math.ceil(this.defaultOptions.layout.width / 12)
-    },
-    glassOffset() {
-      return this.defaultOptions.layout.height * 0.02
-    },
-    glassHeight() {
-      let height = this.defaultOptions.layout.height * 0.95
-      while (this.defaultOptions.layout.height - height < 30) {
-        height -= 1
-      }
-      return height
-    },
-    tickStepSize() {
-      return this.glassHeight / this.defaultOptions.thermo.ticks
-    },
-    thermoOffset() {
-      const offset = Math.ceil(this.glassHeight - this.thermoHeight)
-      return this.glassOffset + offset
-    },
-    level() {
-      return Math.ceil(((this.value - this.min) * 100) / (this.max - this.min))
-    },
-    thermoHeight() {
-      return (
-        this.level * (this.glassHeight / 100) +
-        ((100 - this.level) / 100) * this.glassHeight * 0.075
-      )
-    },
-    roundDotPositionX() {
-      return this.baseXOffset + this.glassWidth * 0.5
-    },
-    roundDot() {
-      return (
-        'm74.829132,' +
-        this.glassHeight +
-        'a33.41457,32 0 1 1 -66.829132,0a33.41457,32 0 1 1 66.829132,0z'
-      )
-    },
+  max: {
+    type: Number,
+    default: 25,
+    required: false,
   },
-  watch: {
-    options(val) {
-      if (val !== null && val !== undefined) {
-        this.mergeDefaultOptionsWithProp(val)
-      }
-    },
+  scale: {
+    type: String,
+    default: '°C',
+    required: false,
   },
-  created() {
-    this.defaultOptions = {
-      text: {
-        color: 'black',
-        fontSize: 10,
-        textAdjustmentY: 2,
-        fontFamily: 'Arial',
-        textEnabled: true,
-      },
-      thermo: {
-        color: '#FF0000',
-        backgroundColor: '#fcf9f9',
-        frameColor: 'black',
-        ticks: 10,
-        ticksEnabled: true,
-        tickColor: 'black',
-        tickWidth: '1',
-      },
-      layout: {
-        height: 300,
-        width: 90,
-      },
-    }
+  options: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  mounted() {
-    if (this.options !== null && this.options !== undefined) {
-      this.mergeDefaultOptionsWithProp(this.options)
-    }
+  customClass: {
+    type: String,
+    required: false,
+    default: null,
   },
-  methods: {
-    mergeDefaultOptionsWithProp(options) {
-      const result = this.defaultOptions
-      for (const option in options) {
-        if (options[option] !== null && typeof options[option] === 'object') {
-          for (const subOption in options[option]) {
-            if (
-              options[option][subOption] !== undefined &&
-              options[option][subOption] !== null
-            ) {
-              result[option][subOption] = options[option][subOption]
-            }
-          }
-        } else {
-          result[option] = options[option]
+})
+
+const defaultOptions = ref({
+  text: {
+    color: 'black',
+    fontSize: 10,
+    textAdjustmentY: 2,
+    fontFamily: 'Arial',
+    textEnabled: true,
+  },
+  thermo: {
+    color: '#FF0000',
+    backgroundColor: '#fcf9f9',
+    frameColor: 'black',
+    ticks: 10,
+    ticksEnabled: true,
+    tickColor: 'black',
+    tickWidth: '1',
+  },
+  layout: {
+    height: 300,
+    width: 90,
+  },
+})
+
+const baseXOffset = computed(() => {
+  return defaultOptions.value.layout.width / 5
+})
+
+const width = computed(() => {
+  return defaultOptions.value.layout.width
+})
+
+const height = computed(() => {
+  return defaultOptions.value.layout.height
+})
+
+const textSpacing = computed(() => {
+  return width.value * _textOffset
+})
+
+const tickStep = computed(() => {
+  return (
+    Math.abs(props.max - props.min) / (defaultOptions.value.thermo.ticks - 1)
+  )
+})
+
+const ticks = computed(() => {
+  const ticksArray = []
+  let maxValue = props.max
+  for (let i = 0; i < defaultOptions.value.thermo.ticks - 1; i++) {
+    ticksArray.push(Math.round(maxValue))
+    maxValue -= tickStep.value
+  }
+  ticksArray.push(props.min)
+  return ticksArray
+})
+
+const thermoWidth = computed(() => {
+  return defaultOptions.value.layout.width / 6
+})
+
+const glassWidth = computed(() => {
+  return defaultOptions.value.layout.width / 6 + 6
+})
+
+const tickWidth = computed(() => {
+  return Math.ceil(defaultOptions.value.layout.width / 12)
+})
+
+const glassOffset = computed(() => {
+  return defaultOptions.value.layout.height * 0.02
+})
+
+const glassHeight = computed(() => {
+  let heightValue = defaultOptions.value.layout.height * 0.95
+  while (defaultOptions.value.layout.height - heightValue < 30) {
+    heightValue -= 1
+  }
+  return heightValue
+})
+
+const tickStepSize = computed(() => {
+  return glassHeight.value / defaultOptions.value.thermo.ticks
+})
+
+const level = computed(() => {
+  return Math.ceil(((props.value - props.min) * 100) / (props.max - props.min))
+})
+
+const thermoHeight = computed(() => {
+  return (
+    level.value * (glassHeight.value / 100) +
+    ((100 - level.value) / 100) * glassHeight.value * 0.075
+  )
+})
+
+const thermoOffset = computed(() => {
+  const offset = Math.ceil(glassHeight.value - thermoHeight.value)
+  return glassOffset.value + offset
+})
+
+const roundDotPositionX = computed(() => {
+  return baseXOffset.value + glassWidth.value * 0.5
+})
+
+function mergeDefaultOptionsWithProp(options) {
+  const result = defaultOptions.value
+  for (const option in options) {
+    if (options[option] !== null && typeof options[option] === 'object') {
+      for (const subOption in options[option]) {
+        if (
+          options[option][subOption] !== undefined &&
+          options[option][subOption] !== null
+        ) {
+          result[option][subOption] = options[option][subOption]
         }
       }
-    },
-    offsetText(index) {
-      const base =
-        this.tickStepSize / this.defaultOptions.thermo.ticks +
-        this.glassOffset +
-        this.defaultOptions.text.textAdjustmentY
-      const offset = index * this.tickStepSize
-      return Number(offset) + Number(base)
-    },
-    offsetLine(index) {
-      const base =
-        this.tickStepSize / this.defaultOptions.thermo.ticks + this.glassOffset
-      let offsetY = index * this.tickStepSize
-      const length =
-        index % 2 === 0
-          ? 'l' + Math.ceil(this.tickWidth * 1.4)
-          : 'l' + Math.ceil(this.tickWidth + this.tickWidth)
-      offsetY = Number(offsetY) + Number(base) + length
-      const offsetX =
-        'm' + Number(this.defaultOptions.layout.width * 0.4) + '.121861,'
-      return offsetX + offsetY + '.121853,0'
-    },
-  },
+    } else {
+      result[option] = options[option]
+    }
+  }
 }
+
+function offsetText(index) {
+  const base =
+    tickStepSize.value / defaultOptions.value.thermo.ticks +
+    glassOffset.value +
+    defaultOptions.value.text.textAdjustmentY
+  const offset = index * tickStepSize.value
+  return Number(offset) + Number(base)
+}
+
+function offsetLine(index) {
+  const base =
+    tickStepSize.value / defaultOptions.value.thermo.ticks + glassOffset.value
+  let offsetY = index * tickStepSize.value
+  const length =
+    index % 2 === 0
+      ? 'l' + Math.ceil(tickWidth.value * 1.4)
+      : 'l' + Math.ceil(tickWidth.value + tickWidth.value)
+  offsetY = Number(offsetY) + Number(base) + length
+  const offsetX =
+    'm' + Number(defaultOptions.value.layout.width * 0.4) + '.121861,'
+  return offsetX + offsetY + '.121853,0'
+}
+
+watch(
+  () => props.options,
+  (val) => {
+    if (val !== null && val !== undefined) {
+      mergeDefaultOptionsWithProp(val)
+    }
+  }
+)
+
+onMounted(() => {
+  if (props.options !== null && props.options !== undefined) {
+    mergeDefaultOptionsWithProp(props.options)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

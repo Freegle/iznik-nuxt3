@@ -19,10 +19,10 @@
         </ExternalLink>
         <ExternalLink
           href="https://twitter.com/thisisfreegle"
-          title="Twitter"
+          title="X"
           class="pl-1"
         >
-          <b-img lazy alt="Twitter" src="/botleft/twitter.png" width="40" />
+          <b-img lazy alt="X" src="/botleft/twitter.png" width="40" />
         </ExternalLink>
       </div>
       <ExternalLink
@@ -52,14 +52,8 @@
     </div>
   </nav>
 </template>
-<script>
+<script setup>
 import ExternalLink from './ExternalLink'
-
-export default {
-  components: {
-    ExternalLink,
-  },
-}
 </script>
 <style scoped lang="scss">
 a {

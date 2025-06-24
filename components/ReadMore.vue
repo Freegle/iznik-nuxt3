@@ -21,58 +21,49 @@
     </p>
   </div>
 </template>
-<script>
+<script setup>
 // Based on https://github.com/avxkim/read-more but removing use of v-html which allows escape attacks.
+import { ref, computed } from 'vue'
 
-export default {
-  props: {
-    moreStr: {
-      type: String,
-      default: 'read more',
-    },
-    lessStr: {
-      type: String,
-      default: '',
-    },
-    text: {
-      type: String,
-      required: true,
-    },
-    link: {
-      type: String,
-      default: '#',
-    },
-    maxChars: {
-      type: Number,
-      default: 100,
-    },
+const props = defineProps({
+  moreStr: {
+    type: String,
+    default: 'read more',
   },
-
-  data() {
-    return {
-      isReadMore: false,
-    }
+  lessStr: {
+    type: String,
+    default: '',
   },
-
-  computed: {
-    formattedString() {
-      let valContainer = this.text
-
-      if (!this.isReadMore && this.text.length > this.maxChars) {
-        valContainer = valContainer.substring(0, this.maxChars) + '...'
-      }
-
-      return valContainer
-    },
+  text: {
+    type: String,
+    required: true,
   },
-
-  methods: {
-    triggerReadMore(e, b) {
-      if (this.link === '#') {
-        e.preventDefault()
-      }
-      if (this.lessStr !== null || this.lessStr !== '') this.isReadMore = b
-    },
+  link: {
+    type: String,
+    default: '#',
   },
+  maxChars: {
+    type: Number,
+    default: 100,
+  },
+})
+
+const isReadMore = ref(false)
+
+const formattedString = computed(() => {
+  let valContainer = props.text
+
+  if (!isReadMore.value && props.text.length > props.maxChars) {
+    valContainer = valContainer.substring(0, props.maxChars) + '...'
+  }
+
+  return valContainer
+})
+
+function triggerReadMore(e, b) {
+  if (props.link === '#') {
+    e.preventDefault()
+  }
+  if (props.lessStr !== null || props.lessStr !== '') isReadMore.value = b
 }
 </script>

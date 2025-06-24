@@ -55,18 +55,15 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    simpleEmailSetting: {
-      type: String,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  simpleEmailSetting: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      showMore: false,
-    }
-  },
-}
+})
+
+const showMore = ref(false)
 </script>

@@ -20,18 +20,17 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { setupNotification } from '../composables/useNotification'
+import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
-}
+})
+
+// Setup notification
+const { notification, notificationago } = await setupNotification(props.id)
 </script>

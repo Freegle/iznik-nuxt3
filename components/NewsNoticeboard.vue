@@ -58,13 +58,13 @@
       :center="[info.lat, info.lng]"
       :style="'width: 100%; height: 200px'"
     >
-      <l-tile-layer :url="osmtile" :attribution="attribution" />
+      <l-tile-layer :url="mapTile" :attribution="mapAttribution" />
       <l-marker :lat-lng="[info.lat, info.lng]" :interactive="false" />
     </l-map>
     <div class="mt-2 d-flex flex-wrap justify-content-between">
       <NewsLoveComment
         :newsfeed="newsfeed"
-        @focus-comment="$emit('focus-comment')"
+        @focus-comment="emit('focus-comment')"
       />
       <nuxt-link no-prefetch to="/promote">
         <b-button variant="secondary" size="sm" class="d-inline-block">
@@ -79,13 +79,15 @@
     />
   </div>
 </template>
-<script>
-import { defineAsyncComponent } from 'vue'
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
+import { useRuntimeConfig } from 'nuxt/app'
+import { useNewsfeedStore } from '../stores/newsfeed'
 import { twem } from '~/composables/useTwem'
-import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import NoticeMessage from '~/components/NoticeMessage'
+import OurUploadedImage from '~/components/OurUploadedImage'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 
@@ -93,64 +95,78 @@ const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
 
-export default {
-  components: {
-    NewsUserIntro,
-    NewsLoveComment,
-    NoticeMessage,
-    NewsShareModal,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
-  async setup() {
-    let L = null
+})
 
-    if (process.client) {
-      L = await import('leaflet/dist/leaflet-src.esm')
+const emit = defineEmits(['focus-comment'])
+
+const newsfeedStore = useNewsfeedStore()
+const runtimeConfig = useRuntimeConfig()
+
+// Data properties
+const showNewsShareModal = ref(false)
+const map = ref(null)
+
+// Leaflet instance
+if (process.client) {
+  await import('leaflet/dist/leaflet-src.esm')
+}
+
+// Map properties
+const maxZoom = computed(() => MAX_MAP_ZOOM)
+const mapTile = osmtile()
+const mapAttribution = attribution()
+
+// Computed properties
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
+
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
+
+const info = computed(() => {
+  let infoData = {}
+  try {
+    infoData = JSON.parse(newsfeed.value?.message)
+
+    if (infoData?.description) {
+      const desc = twem(infoData.description)
+      infoData.description = desc
     }
 
-    const runtimeConfig = useRuntimeConfig()
-
-    return {
-      L,
-      osmtile: osmtile(),
-      attribution: attribution(),
-      runtimeConfig,
+    if (infoData?.photofull?.externaluid) {
+      const p = infoData.photofull.externaluid.indexOf('freegletusd-')
+      if (p !== -1) {
+        infoData.photofull.ouruid = infoData.photofull.externaluid
+      }
     }
-  },
-  computed: {
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
-    info() {
-      let info = {}
-      try {
-        info = JSON.parse(this.newsfeed?.message)
+  } catch (e) {
+    console.log('Invalid noticeboard', newsfeed.value)
+  }
 
-        if (info?.description) {
-          const desc = twem(info.description)
-          info.description = desc
-        }
+  return infoData
+})
 
-        const p = info?.photofull?.externaluid.indexOf('freegletusd-')
-        if (p !== -1) {
-          info.photofull.ouruid = info.photofull.externaluid
-        }
-      } catch (e) {
-        console.log('Invalid noticeboard', this.newsfeed)
-      }
+const photo = computed(() => {
+  let ret = null
 
-      return info
-    },
-    photo() {
-      let ret = null
+  if (info.value?.photo) {
+    const id = info.value.photo
+    ret = runtimeConfig?.public?.IMAGE_SITE + '/bimg_' + id + '.jpg'
+  }
 
-      if (this.info) {
-        const id = this.info.photo
-        ret = this.runtimeConfig?.public?.IMAGE_SITE + '/bimg_' + id + '.jpg'
-      }
+  return ret
+})
 
-      return ret
-    },
-  },
+// Methods
+function moreInfo() {
+  // This function is used for the click handler on photos
+  console.log('Photo clicked')
 }
 </script>

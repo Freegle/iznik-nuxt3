@@ -11,6 +11,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+// Static component with no reactive state
+</script>
 <style scoped lang="scss">
 .stacked {
   display: grid;

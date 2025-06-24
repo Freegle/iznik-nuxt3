@@ -82,8 +82,18 @@
 import { useAuthStore } from '../stores/auth'
 import { useMessageStore } from '../stores/message'
 import { useSearchStore } from '../stores/search'
+import { useMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'
 import { useFavoritePage } from '~/composables/useFavoritePage'
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  defineAsyncComponent,
+  useHead,
+  useRouter,
+} from '#imports'
 
 import VisibleWhen from '~/components/VisibleWhen'
 import SidebarLeft from '~/components/SidebarLeft'
@@ -91,10 +101,18 @@ import SidebarRight from '~/components/SidebarRight'
 import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
+import NoticeMessage from '~/components/NoticeMessage.vue'
+import DonationButton from '~/components/DonationButton.vue'
+import StripeDonate from '~/components/StripeDonate.vue'
+import NewUserInfo from '~/components/NewUserInfo.vue'
+import DeadlineAskModal from '~/components/DeadlineAskModal.vue'
+import DeliveryAskModal from '~/components/DeliveryAskModal.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
 import { useRuntimeConfig } from '#app'
 import Api from '~/api'
+
+console.log('My Posts page setup')
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')
 )
@@ -103,6 +121,9 @@ const authStore = useAuthStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
 const trystStore = useTrystStore()
+const router = useRouter()
+// Use me and myid computed properties from useMe composable for consistency
+const { me, myid } = useMe()
 
 const runtimeConfig = useRuntimeConfig()
 const api = Api(runtimeConfig)
@@ -117,7 +138,7 @@ definePageMeta({
 
 useHead(
   buildHead(
-    useRouter().currentRoute.value,
+    router.currentRoute.value,
     runtimeConfig,
     'My Posts',
     "See OFFERs/WANTEDs that you've posted, and replies to them.",
@@ -131,8 +152,6 @@ useHead(
 useFavoritePage('myposts')
 
 const { showDonationAskModal } = await useDonationAskModal()
-
-const myid = computed(() => authStore.user?.id)
 
 // `posts` holds both OFFERs and WANTEDs (both old and active)
 const posts = computed(() => messageStore.byUserList[myid.value] || [])

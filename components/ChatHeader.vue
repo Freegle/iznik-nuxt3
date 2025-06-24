@@ -330,15 +330,14 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
-import { useRouter } from '#imports'
-import { twem } from '~/composables/useTwem'
+import { twem, useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
-import { timeago, datetimeshort } from '~/composables/useTimeFormat'
+import { timeago } from '~/composables/useTimeFormat'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -352,140 +351,128 @@ const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 
-export default {
-  components: {
-    ProfileModal,
-    SupporterInfo,
-    UserRatings,
-    ChatBlockModal,
-    ChatHideModal,
-    ChatReportModal,
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const chatStore = useChatStore()
-    const miscStore = useMiscStore()
+})
 
-    const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
-      props.id
-    )
+const showProfileModal = ref(false)
+const showChatHide = ref(false)
+const showChatBlock = ref(false)
+const showChatReport = ref(false)
 
+const chatStore = useChatStore()
+const miscStore = useMiscStore()
+const router = useRouter()
+
+const collapsed = computed({
+  get: () => miscStore?.get('chatinfoheader'),
+  set: (newVal) => {
     miscStore.set({
       key: 'chatinfoheader',
-      value: false,
+      value: newVal,
     })
+  },
+})
 
-    return {
-      chatStore,
-      miscStore,
-      chat,
-      otheruser,
-      unseen,
-      milesaway,
-      milesstring,
+function collapse(val) {
+  collapsed.value = val
+}
+
+defineExpose({
+  collapse,
+})
+
+// Set up chat data
+const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
+  props.id
+)
+
+// Set initial collapsed state
+miscStore.set({
+  key: 'chatinfoheader',
+  value: false,
+})
+
+// Computed properties
+const replytime = computed(() => {
+  let ret = null
+  let secs = null
+
+  if (otheruser?.value?.info) {
+    secs = otheruser.value.info.replytime
+  }
+
+  if (secs) {
+    if (secs < 60) {
+      ret = Math.round(secs) + ' second'
+    } else if (secs < 60 * 60) {
+      ret = Math.round(secs / 60) + ' minute'
+    } else if (secs < 24 * 60 * 60) {
+      ret = Math.round(secs / 60 / 60) + ' hour'
+    } else {
+      ret = Math.round(secs / 60 / 60 / 24) + ' day'
     }
-  },
-  data() {
-    return {
-      showProfileModal: false,
-      showChatHide: false,
-      showChatBlock: false,
-      showChatReport: false,
+
+    if (ret.indexOf('1 ') !== 0) {
+      ret += 's'
     }
-  },
-  computed: {
-    collapsed: {
-      get() {
-        return this.miscStore?.get('chatinfoheader')
-      },
-      set(newVal) {
-        this.miscStore.set({
-          key: 'chatinfoheader',
-          value: newVal,
-        })
-      },
-    },
-    replytime() {
-      let ret = null
-      let secs = null
+  }
 
-      if (this.otheruser?.info) {
-        secs = this.otheruser.info.replytime
-      }
+  return ret
+})
 
-      if (secs) {
-        if (secs < 60) {
-          ret = Math.round(secs) + ' second'
-        } else if (secs < 60 * 60) {
-          ret = Math.round(secs / 60) + ' minute'
-        } else if (secs < 24 * 60 * 60) {
-          ret = Math.round(secs / 60 / 60) + ' hour'
-        } else {
-          ret = Math.round(secs / 60 / 60 / 24) + ' day'
-        }
+const aboutthem = computed(() => {
+  return otheruser.value?.aboutme ? twem(otheruser.value.aboutme.text) : null
+})
 
-        if (ret.indexOf('1 ') !== 0) {
-          ret += 's'
-        }
-      }
+const otheraccess = computed(() => {
+  return timeago(otheruser.value.lastaccess)
+})
 
-      return ret
-    },
-    aboutthem() {
-      return this.otheruser?.aboutme ? twem(this.otheruser.aboutme.text) : null
-    },
-    otheraccess() {
-      return timeago(this.otheruser.lastaccess)
-    },
-  },
-  watch: {
-    unseen() {
-      // Make sure the chat is up to date.  This helps in the case where pollForChatUpdates picks up a new
-      // message and so we show that the chat has unread messages, but we haven't yet
-      this.chatStore.fetchMessages(this.id)
-    },
-  },
-  methods: {
-    datetimeshort,
-    collapse(val) {
-      this.collapsed = val
-    },
-    async hide() {
-      await this.chatStore.hide(this.id)
-      const router = useRouter()
-      router.push('/chats')
-    },
-    async block() {
-      await this.chatStore.block(this.id)
-      const router = useRouter()
-      router.push('/chats')
-    },
-    async unhide() {
-      await this.chatStore.unhide(this.id)
-    },
-    showhide() {
-      this.showChatHide = true
-    },
-    showblock() {
-      this.showChatBlock = true
-    },
-    showInfo() {
-      this.showProfileModal = true
-    },
-    report() {
-      this.showChatReport = true
-    },
-    async markRead() {
-      await this.chatStore.markRead(this.id)
-      await this.chatStore.fetchChat(this.id)
-    },
-  },
+// Watch for changes in unseen messages
+watch(unseen, () => {
+  // Make sure the chat is up to date.  This helps in the case where pollForChatUpdates picks up a new
+  // message and so we show that the chat has unread messages, but we haven't yet
+  chatStore.fetchMessages(props.id)
+})
+
+// Methods
+const hide = async () => {
+  await chatStore.hide(props.id)
+  router.push('/chats')
+}
+
+const block = async () => {
+  await chatStore.block(props.id)
+  router.push('/chats')
+}
+
+const unhide = async () => {
+  await chatStore.unhide(props.id)
+}
+
+const showhide = () => {
+  showChatHide.value = true
+}
+
+const showblock = () => {
+  showChatBlock.value = true
+}
+
+const showInfo = () => {
+  showProfileModal.value = true
+}
+
+const report = () => {
+  showChatReport.value = true
+}
+
+const markRead = async () => {
+  await chatStore.markRead(props.id)
+  await chatStore.fetchChat(props.id)
 }
 </script>
 <style scoped lang="scss">

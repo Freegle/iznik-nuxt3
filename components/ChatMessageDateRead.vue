@@ -71,16 +71,6 @@
       <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
         timeadapt(chatmessage?.date)
       }}</span>
-      <span
-        v-if="mod && chatmessage?.bymailid"
-        class="btn btn-sm btn-white mb-2 clickme"
-        :title="
-          'Received by email #' + chatmessage?.bymailid + ' click to view'
-        "
-        @click="viewOriginal"
-      >
-        <v-icon icon="info-circle" /> View original email
-      </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
@@ -91,62 +81,60 @@
     </div>
   </div>
 </template>
-
-<script>
-import { setupChat } from '../composables/useChat'
+<script setup>
 import { useUserStore } from '../stores/user'
-import ChatBase from './ChatBase'
-import { datetimeshort, timeadapt } from '~/composables/useTimeFormat'
+import { useChatBase } from '../composables/useChat'
+import { datetimeshort, timeadapt } from '../composables/useTimeFormat'
+import { ref, computed, onMounted } from '#imports'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  extends: ChatBase,
-  props: {
-    chatid: {
-      type: Number,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const userStore = useUserStore()
-
-    const { chat, otheruser, chatmessage } = await setupChat(
-      props.chatid,
-      props.id
-    )
-
-    let chatMessageUser = null
-
-    if (chatmessage?.userid) {
-      userStore.fetch(this.chatmessage.userid)
-      chatMessageUser = userStore.get(chatmessage.userid)
-    }
-
-    return {
-      chatmessage,
-      chat,
-      otheruser,
-      chatMessageUser,
-    }
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      dePlural: /^1 (.*)s/,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    othermodname() {
-      return this.chatMessageUser?.displayname
-    },
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    datetimeshort,
-    timeadapt
+})
+
+const userStore = useUserStore()
+const { me, mod } = useMe()
+
+// Use ChatBase functionality via composable
+const { chat, otheruser, chatmessage, messageIsFromCurrentUser } = useChatBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
+
+// Data properties
+const chatMessageUser = ref(null)
+
+// Computed properties
+const othermodname = computed(() => {
+  return chatMessageUser.value?.displayname
+})
+
+// Methods
+// Load chatMessageUser data
+onMounted(async () => {
+  if (chatmessage.value?.userid) {
+    await userStore.fetch(chatmessage.value.userid)
+    chatMessageUser.value = userStore.byId(chatmessage.value.userid)
   }
-}
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

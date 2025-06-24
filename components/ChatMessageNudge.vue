@@ -24,10 +24,31 @@
     </b-row>
   </div>
 </template>
-<script>
-import ChatBase from '~/components/ChatBase'
+<script setup>
+import { useChatBase } from '../composables/useChat'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  extends: ChatBase,
-}
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
+  },
+  id: {
+    type: Number,
+    required: true,
+  },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
+
+const { me } = useMe()
+
+const { otheruser, chatmessage } = useChatBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
 </script>

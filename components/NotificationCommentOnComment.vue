@@ -20,25 +20,29 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { setupNotification } from '../composables/useNotification'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import ProfileImage from '~/components/ProfileImage'
 
-export default {
-  components: {
-    ProfileImage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    // Make sure we have the up to date iem in the store fairly soon.
-    useNewsfeedStore().fetch(this.newsfeed.id, true)
-    return await setupNotification(props.id)
-  },
+})
+
+// Setup notification
+const { fromuser, newsfeed, notificationago } = await setupNotification(
+  props.id
+)
+
+// Make sure we have the up-to-date item in the store
+if (newsfeed?.value?.id) {
+  useNewsfeedStore().fetch(newsfeed.value.id, true)
+}
+
+function click() {
+  // Empty click handler for template - the clickme class indicates this is clickable
 }
 </script>

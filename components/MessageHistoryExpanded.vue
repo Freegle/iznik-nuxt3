@@ -75,110 +75,99 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import pluralize from 'pluralize'
-import dayjs from 'dayjs'
 import { milesAway } from '../composables/useDistance'
 import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
+import { useMe } from '~/composables/useMe'
+
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 
-export default {
-  name: 'MessageHistory',
-  components: { ProfileImage, ProfileModal },
-
-  props: {
-    id: {
-      type: Number,
-      default: 0,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    default: 0,
   },
-  async setup(props) {
-    const messageStore = useMessageStore()
-    const groupStore = useGroupStore()
-    const userStore = useUserStore()
+})
 
-    const message = messageStore.byId(props.id)
+const messageStore = useMessageStore()
+const groupStore = useGroupStore()
+const userStore = useUserStore()
+const { me } = useMe()
 
-    if (message) {
-      await userStore.fetch(message.fromuser)
-    }
+const showProfile = ref(false)
 
-    return { messageStore, timeago, groupStore, userStore }
-  },
-  data() {
-    return {
-      showProfile: false,
-    }
-  },
-  computed: {
-    fromuser() {
-      return this.message?.fromuser
-        ? this.userStore?.byId(this.message?.fromuser)
-        : null
-    },
-    milesaway() {
-      return milesAway(
-        this.me?.lat,
-        this.me?.lng,
-        this.message?.lat,
-        this.message?.lng
-      )
-    },
-    milesPlural() {
-      return pluralize('mile', this.milesaway, true)
-    },
-    openOfferPlural() {
-      return this.message && this.fromuser && this.fromuser.info
-        ? pluralize('open OFFER', this.fromuser.info.openoffers, true)
-        : null
-    },
-    openWantedPlural() {
-      return this.message && this.fromuser && this.fromuser.info
-        ? pluralize('open WANTED', this.fromuser.info.openwanteds, true)
-        : null
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    today() {
-      return dayjs(this.message?.date).isSame(dayjs(), 'day')
-    },
-    groups() {
-      const ret = {}
+// Fetch user data
+const currentMessage = messageStore.byId(props.id)
+if (currentMessage) {
+  userStore.fetch(currentMessage.fromuser)
+}
 
-      if (this.message) {
-        this.message.groups.forEach((g) => {
-          const thegroup = this.groupStore.get(g.groupid)
+// Computed properties
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
 
-          if (thegroup) {
-            ret[g.groupid] = thegroup
+const fromuser = computed(() => {
+  return message.value?.fromuser
+    ? userStore?.byId(message.value?.fromuser)
+    : null
+})
 
-            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-            // id variants.
-            ret[g.groupid].exploreLink = thegroup
-              ? thegroup.nameshort
-              : g.groupid
-          }
-        })
+const milesaway = computed(() => {
+  return milesAway(me?.lat, me?.lng, message.value?.lat, message.value?.lng)
+})
+
+const milesPlural = computed(() => {
+  return pluralize('mile', milesaway.value, true)
+})
+
+const openOfferPlural = computed(() => {
+  return message.value && fromuser.value && fromuser.value.info
+    ? pluralize('open OFFER', fromuser.value.info.openoffers, true)
+    : null
+})
+
+const openWantedPlural = computed(() => {
+  return message.value && fromuser.value && fromuser.value.info
+    ? pluralize('open WANTED', fromuser.value.info.openwanteds, true)
+    : null
+})
+
+const groups = computed(() => {
+  const ret = {}
+
+  if (message.value) {
+    message.value.groups.forEach((g) => {
+      const thegroup = groupStore.get(g.groupid)
+
+      if (thegroup) {
+        ret[g.groupid] = thegroup
+
+        // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
+        // id variants.
+        ret[g.groupid].exploreLink = thegroup ? thegroup.nameshort : g.groupid
       }
+    })
+  }
 
-      return ret
-    },
-  },
-  methods: {
-    showProfileModal() {
-      this.showProfile = true
-    },
-    grouparrivalago(val) {
-      return timeago(val)
-    },
-  },
+  return ret
+})
+
+// Methods
+function showProfileModal() {
+  showProfile.value = true
+}
+
+function grouparrivalago(val) {
+  return timeago(val)
 }
 </script>
 <style scoped lang="scss">

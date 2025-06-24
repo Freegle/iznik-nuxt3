@@ -2,8 +2,8 @@
   <b-modal
     ref="modal"
     scrollable
-    :title="choose ? 'Please choose an address' : 'Address Book'"
-    :alt="choose ? 'Please choose an address' : 'Address Book'"
+    :title="props.choose ? 'Please choose an address' : 'Address Book'"
+    :alt="props.choose ? 'Please choose an address' : 'Address Book'"
     size="lg"
     no-stacking
     @shown="onShow"
@@ -15,9 +15,9 @@
         people in future. We won't give it out to anyone or send you any junk
         mail.
       </p>
-      <h4 v-if="!choose">Your addresses</h4>
-      <div v-if="addressOptions && addressOptions.length">
-        <p v-if="!choose">These are your current addresses.</p>
+      <h4 v-if="!props.choose">Your addresses</h4>
+      <div v-if="addressOptions?.length">
+        <p v-if="!props.choose">These are your current addresses.</p>
         <b-row>
           <b-col cols="12" sm="8">
             <b-form-select
@@ -49,7 +49,7 @@
                     selectedAddressObject.lng,
                   ]"
                 >
-                  <l-tile-layer :url="osmtile" :attribution="attribution" />
+                  <l-tile-layer :url="osmtile()" :attribution="attribution()" />
                   <l-marker
                     :lat-lng="markerLatLng"
                     draggable
@@ -133,7 +133,7 @@
       </div>
     </template>
     <template #footer>
-      <b-button v-if="!choose" variant="white" class="mr-2" @click="hide">
+      <b-button v-if="!props.choose" variant="white" class="mr-2" @click="hide">
         Close
       </b-button>
       <div v-else>
@@ -150,250 +150,246 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
 import { useAddressStore } from '../stores/address'
 import { constructSingleLine } from '../composables/usePAF'
 import { useAuthStore } from '../stores/auth'
 import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
+import { ref, computed, watch } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 import PostCode from '~/components/PostCode'
 
-export default {
-  components: {
-    PostCode,
-    SpinButton,
+const props = defineProps({
+  choose: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    choose: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  emits: ['hidden', 'chosen'],
-  setup() {
-    const addressStore = useAddressStore()
-    const authStore = useAuthStore()
-    const { modal, hide } = useOurModal()
+})
 
-    return {
-      authStore,
-      addressStore,
-      modal,
-      hide,
-      osmtile: osmtile(),
-      attribution: attribution(),
-    }
-  },
-  data() {
-    return {
-      showAdd: false,
-      updatedInstructions: null,
-      postcode: null,
-      properties: {},
-      selectedProperty: 0,
-      showMap: false,
-    }
-  },
-  computed: {
-    addresses() {
-      return this.addressStore?.list
+const emit = defineEmits(['hidden', 'chosen'])
+
+const addressStore = useAddressStore()
+const authStore = useAuthStore()
+const { modal, hide } = useOurModal()
+
+const { me } = useMe()
+
+// Data properties
+const showAdd = ref(false)
+const updatedInstructions = ref(null)
+const postcode = ref(null)
+const selectedProperty = ref(0)
+const showMap = ref(false)
+const map = ref(null)
+
+// Computed properties
+const addresses = computed(() => {
+  return addressStore?.list
+})
+
+const addressOptions = computed(() => {
+  const ret = []
+  addresses.value?.forEach((address) => {
+    ret.push({
+      value: address.id,
+      text: constructSingleLine(address),
+    })
+  })
+
+  return ret
+})
+
+const propertyOptions = computed(() => {
+  const ret = [
+    {
+      value: 0,
+      text: 'Please choose your property...',
     },
-    addressOptions() {
-      const ret = []
-      this.addresses?.forEach((address) => {
+  ]
+
+  const singles = {}
+
+  if (addressStore?.properties) {
+    Object.values(addressStore.properties).forEach((address) => {
+      if (!singles[address.singleline]) {
         ret.push({
           value: address.id,
-          text: constructSingleLine(address),
-        })
-      })
-
-      return ret
-    },
-    propertyOptions() {
-      const ret = [
-        {
-          value: 0,
-          text: 'Please choose your property...',
-        },
-      ]
-
-      const singles = {}
-
-      if (this.addressStore?.properties) {
-        Object.values(this.addressStore.properties).forEach((address) => {
-          if (!singles[address.singleline]) {
-            ret.push({
-              value: address.id,
-              text: address.singleline,
-            })
-
-            singles[address.singleline] = true
-          }
-        })
-      }
-
-      return ret
-    },
-    selectedAddress: {
-      // We remember the preferred address.
-      get() {
-        const selected = this.me?.settings?.selectedAddress
-
-        if (this.addresses?.find((address) => address.id === selected)) {
-          return selected
-        } else {
-          return null
-        }
-      },
-      async set(newValue) {
-        const settings = this.me.settings
-        this.showMap = false
-        settings.selectedAddress = newValue
-
-        await this.authStore.saveAndGet({
-          settings,
+          text: address.singleline,
         })
 
-        this.showMap = true
-      },
-    },
-    selectedAddressObject() {
-      return this.selectedAddress
-        ? this.addresses?.find((a) => a.id === this.selectedAddress)
-        : null
-    },
-    markerLatLng: {
-      get() {
-        if (!this.selectedAddressObject) {
-          console.log('get markerLatLng NULL')
-          return null
-        }
-
-        if (this.selectedAddressObject.lat || this.selectedAddressObject.lng) {
-          console.log('get markerLatLng point', this.selectedAddressObject)
-          return [
-            this.selectedAddressObject.lat,
-            this.selectedAddressObject.lng,
-          ]
-        }
-
-        console.log('get markerLatLng postcode', this.selectedAddressObject.postcode)
-        return [
-          this.selectedAddressObject.postcode.lat,
-          this.selectedAddressObject.postcode.lng,
-        ]
-      },
-      set(newValue) {
-        this.selectedAddressObject.lat = newValue[0]
-        this.selectedAddressObject.lng = newValue[1]
-      },
-    },
-    instructions: {
-      get() {
-        return this.selectedAddressObject?.instructions
-      },
-      set(newValue) {
-        this.updatedInstructions = newValue
-      },
-    },
-  },
-  watch: {
-    selectedAddressObject(newVal) {
-      this.updatedInstructions = newVal?.instructions
-    },
-  },
-  methods: {
-    selectFirst() {
-      if (this.selectedAddress) {
-        const sel = this.addresses?.find(
-          (address) => address.id === this.selectedAddress
-        )
-        if (sel) {
-          // We have selected a valid address.
-          this.instructions = sel.instructions
-          this.updatedInstructions = this.instructions
-          return
-        }
+        singles[address.singleline] = true
       }
+    })
+  }
 
-      // Select first.
-      if (this.addresses?.length > 0) {
-        this.selectedAddress = this.addresses[0].id
-        this.instructions = this.addresses[0].instructions
-        this.updatedInstructions = this.instructions
-      } else {
-        this.selectedAddress = null
-        this.instructions = null
-        this.updatedInstructions = null
-      }
-    },
-    onShow() {
-      this.showMap = true
-      // Fetch the current addresses before opening the modal.
+  return ret
+})
 
-      this.selectFirst()
+const selectedAddress = computed({
+  // We remember the preferred address.
+  get() {
+    const selected = me.value?.settings?.selectedAddress
 
-      if (this.addresses?.length === 0) {
-        this.showAdd = true
-      }
-    },
-    onHide() {
-      this.showAdd = false
-      this.showMap = false
-      this.$emit('hidden')
-    },
-    async add(callback) {
-      const id = await this.addressStore.add({
-        pafid: this.selectedProperty,
-        instructions: this.updatedInstructions,
-      })
-
-      this.selectedAddress = id
-
-      this.showAdd = false
-      callback()
-    },
-    async deleteIt(callback) {
-      await this.addressStore.delete(this.selectedAddress)
-      this.selectFirst()
-      callback()
-    },
-    postcodeCleared() {
-      this.postcode = null
-    },
-    async postcodeSelect(pc) {
-      this.postcode = pc
-
-      // Fetch the postal addresses within that postcode
-      await this.addressStore.fetchProperties(pc.id)
-
-      this.selectedProperty = 0
-    },
-    async saveInstructions(callback) {
-      await this.addressStore.update({
-        id: this.selectedAddress,
-        instructions: this.updatedInstructions,
-      })
-      callback()
-    },
-    addnew() {
-      this.showAdd = true
-      this.updatedInstructions = null
-    },
-    chooseIt() {
-      this.$emit('chosen', this.selectedAddress)
-      this.hide()
-    },
-    async updateMarker(val) {
-      console.log('updateMarker',val)
-      await this.addressStore.update({
-        id: this.selectedAddress,
-        lat: val.lat,
-        lng: val.lng,
-      })
-    },
+    if (addresses.value?.find((address) => address.id === selected)) {
+      return selected
+    } else {
+      return null
+    }
   },
+  async set(newValue) {
+    const settings = me.value.settings
+    showMap.value = false
+    settings.selectedAddress = newValue
+
+    await authStore.saveAndGet({
+      settings,
+    })
+
+    showMap.value = true
+  },
+})
+
+const selectedAddressObject = computed(() => {
+  return selectedAddress.value
+    ? addresses.value?.find((a) => a.id === selectedAddress.value)
+    : null
+})
+
+const markerLatLng = computed({
+  get() {
+    if (!selectedAddressObject.value) {
+      return null
+    }
+
+    if (selectedAddressObject.value.lat || selectedAddressObject.value.lng) {
+      return [selectedAddressObject.value.lat, selectedAddressObject.value.lng]
+    }
+
+    return [
+      selectedAddressObject.value.postcode.lat,
+      selectedAddressObject.value.postcode.lng,
+    ]
+  },
+  set(newValue) {
+    selectedAddressObject.value.lat = newValue[0]
+    selectedAddressObject.value.lng = newValue[1]
+  },
+})
+
+const instructions = computed({
+  get() {
+    return selectedAddressObject.value?.instructions
+  },
+  set(newValue) {
+    updatedInstructions.value = newValue
+  },
+})
+
+// Watch for changes
+watch(selectedAddressObject, (newVal) => {
+  updatedInstructions.value = newVal?.instructions
+})
+
+// Methods
+function selectFirst() {
+  if (selectedAddress.value) {
+    const sel = addresses.value?.find(
+      (address) => address.id === selectedAddress.value
+    )
+    if (sel) {
+      // We have selected a valid address.
+      instructions.value = sel.instructions
+      updatedInstructions.value = instructions.value
+      return
+    }
+  }
+
+  // Select first.
+  if (addresses.value?.length > 0) {
+    selectedAddress.value = addresses.value[0].id
+    instructions.value = addresses.value[0].instructions
+    updatedInstructions.value = instructions.value
+  } else {
+    selectedAddress.value = null
+    instructions.value = null
+    updatedInstructions.value = null
+  }
+}
+
+function onShow() {
+  showMap.value = true
+  // Fetch the current addresses before opening the modal.
+
+  selectFirst()
+
+  if (addresses.value?.length === 0) {
+    showAdd.value = true
+  }
+}
+
+function onHide() {
+  showAdd.value = false
+  showMap.value = false
+  emit('hidden')
+}
+
+async function add(callback) {
+  const id = await addressStore.add({
+    pafid: selectedProperty.value,
+    instructions: updatedInstructions.value,
+  })
+
+  selectedAddress.value = id
+
+  showAdd.value = false
+  callback()
+}
+
+async function deleteIt(callback) {
+  await addressStore.delete(selectedAddress.value)
+  selectFirst()
+  callback()
+}
+
+function postcodeCleared() {
+  postcode.value = null
+}
+
+async function postcodeSelect(pc) {
+  postcode.value = pc
+
+  // Fetch the postal addresses within that postcode
+  await addressStore.fetchProperties(pc.id)
+
+  selectedProperty.value = 0
+}
+
+async function saveInstructions(callback) {
+  await addressStore.update({
+    id: selectedAddress.value,
+    instructions: updatedInstructions.value,
+  })
+  callback()
+}
+
+function addnew() {
+  showAdd.value = true
+  updatedInstructions.value = null
+}
+
+function chooseIt() {
+  emit('chosen', selectedAddress.value)
+  hide()
+}
+
+async function updateMarker(val) {
+  await addressStore.update({
+    id: selectedAddress.value,
+    lat: val.lat,
+    lng: val.lng,
+  })
 }
 </script>

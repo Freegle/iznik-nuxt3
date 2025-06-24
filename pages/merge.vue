@@ -96,122 +96,105 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import { ref, computed, useRuntimeConfig, defineAsyncComponent } from '#imports'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
-import api from '~/api'
+import Api from '~/api'
+import SupportLink from '~/components/SupportLink'
+
 const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
 
-export default {
-  components: {
-    SpinButton,
-    NoticeMessage,
-    ExternalLink,
-  },
-  async setup() {
-    const route = useRoute()
-    const id = route.query.id
-    const uid = route.query.uid
-    const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const id = route.query.id
+const uid = route.query.uid
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
 
-    let merge = null
+const merge = ref(null)
+const invalid = ref(false)
+const merging = ref(false)
+const rejected = ref(false)
+const preferred = ref(null)
+const mergeComplete = ref(false)
 
-    try {
-      merge = await api(runtimeConfig).merge.fetch({
-        id,
-        uid,
-      })
-    } catch (e) {}
+// Initial fetch of merge data
+try {
+  merge.value = await api.merge.fetch({
+    id,
+    uid,
+  })
+} catch (e) {}
 
-    let invalid = false
+if (!merge.value?.id || !merge.value.user1?.id || !merge.value.user2?.id) {
+  invalid.value = true
+}
 
-    if (!merge?.id || !merge.user1?.id || !merge.user2?.id) {
-      invalid = true
+function logins(user) {
+  const ret = []
+
+  user.logins.forEach((login) => {
+    switch (login.type) {
+      case 'Native': {
+        ret.push('Email/Password')
+        break
+      }
+      case 'Facebook': {
+        ret.push('Facebook')
+        break
+      }
+      case 'Yahoo': {
+        ret.push('Yahoo')
+        break
+      }
+      case 'Google': {
+        ret.push('Google')
+        break
+      }
     }
+  })
 
-    return {
-      id,
-      uid,
-      merge,
-      invalid,
-    }
-  },
-  data() {
-    return {
-      merging: false,
-      rejected: false,
-      preferred: null,
-      mergeComplete: false,
-    }
-  },
-  computed: {
-    u1logins() {
-      return this.logins(this.merge.user1)
-    },
-    u2logins() {
-      return this.logins(this.merge.user2)
-    },
-  },
-  async mounted() {
-    // Get the merge request.
-  },
-  methods: {
-    logins(user) {
-      const ret = []
+  return [...new Set(ret)].join(', ')
+}
 
-      user.logins.forEach((login) => {
-        switch (login.type) {
-          case 'Native': {
-            ret.push('Email/Password')
-            break
-          }
-          case 'Facebook': {
-            ret.push('Facebook')
-            break
-          }
-          case 'Yahoo': {
-            ret.push('Yahoo')
-            break
-          }
-          case 'Google': {
-            ret.push('Google')
-            break
-          }
-        }
-      })
+const u1logins = computed(() => {
+  return merge.value ? logins(merge.value.user1) : ''
+})
 
-      return [...new Set(ret)].join(', ')
-    },
-    mergeit() {
-      this.merging = true
-    },
-    reject() {
-      this.rejected = true
+const u2logins = computed(() => {
+  return merge.value ? logins(merge.value.user2) : ''
+})
 
-      this.$api.merge.reject({
-        id: this.id,
-        uid: this.uid,
-        user1: this.merge.user1.id,
-        user2: this.merge.user2.id,
-      })
-    },
-    async combine(callback) {
-      await this.$api.merge.accept({
-        id: this.id,
-        uid: this.uid,
-        user1: this.preferred,
-        user2:
-          this.preferred === this.merge.user1.id
-            ? this.merge.user2.id
-            : this.merge.user1.id,
-      })
+function mergeit() {
+  merging.value = true
+}
 
-      this.mergeComplete = true
-      callback()
-    },
-  },
+function reject() {
+  rejected.value = true
+
+  api.merge.reject({
+    id,
+    uid,
+    user1: merge.value.user1.id,
+    user2: merge.value.user2.id,
+  })
+}
+
+async function combine(callback) {
+  await api.merge.accept({
+    id,
+    uid,
+    user1: preferred.value,
+    user2:
+      preferred.value === merge.value.user1.id
+        ? merge.value.user2.id
+        : merge.value.user1.id,
+  })
+
+  mergeComplete.value = true
+  callback()
 }
 </script>

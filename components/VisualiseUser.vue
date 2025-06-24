@@ -12,55 +12,41 @@
     </l-icon>
   </l-marker>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import ProfileImage from './ProfileImage'
 
-export default {
-  components: { ProfileImage },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    icon: {
-      type: String,
-      required: true,
-    },
-    lat: {
-      type: Number,
-      required: true,
-    },
-    lng: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup() {
-    let L = null
+  icon: {
+    type: String,
+    required: true,
+  },
+  lat: {
+    type: Number,
+    required: true,
+  },
+  lng: {
+    type: Number,
+    required: true,
+  },
+})
 
-    if (process.client) {
-      L = await import('leaflet/dist/leaflet-src.esm')
-    }
+const marker = ref(null)
+const currlat = ref(null)
+const currlng = ref(null)
 
-    return { L }
-  },
-  data() {
-    return {
-      currlat: null,
-      currlng: null,
-    }
-  },
-  mounted() {
-    this.currlat = this.lat
-    this.currlng = this.lng
-  },
-  methods: {
-    setLatLng(lat, lng) {
-      this.currlat = lat
-      this.currlng = lng
-    },
-  },
+if (process.client) {
+  await import('leaflet/dist/leaflet-src.esm')
 }
+
+onMounted(() => {
+  currlat.value = props.lat
+  currlng.value = props.lng
+})
 </script>
 <style scoped lang="scss">
 :deep(img) {

@@ -31,7 +31,7 @@
             size="sm"
             variant="secondary"
             class="mb-1 order-1 order-lg-0 align-self-lg-center d-inline-block d-sm-none'"
-            @click="$emit('close')"
+            @click="emit('close')"
           >
             <v-icon icon="comments" />
             Message
@@ -55,59 +55,36 @@
     </div>
   </div>
 </template>
-<script>
-import { dateonly } from '~/composables/useTimeFormat'
+<script setup>
+import { computed } from 'vue'
 import { useUserStore } from '../stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import ChatButton from '~/components/ChatButton'
 import UserRatings from '~/components/UserRatings'
+import { dateonly } from '~/composables/useTimeFormat'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: {
-    ProfileImage,
-    ChatButton,
-    UserRatings,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    closeOnMessage: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  closeOnMessage: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  setup(props) {
-    const userStore = useUserStore()
+})
 
-    return {
-      userStore,
-    }
-  },
-  computed: {
-    email() {
-      let ret = null
+const emit = defineEmits(['close'])
 
-      if (this.user) {
-        this.user.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
-      }
+const userStore = useUserStore()
+// Use myid computed property from useMe composable for consistency
+const { myid } = useMe()
 
-      return ret
-    },
-    user() {
-      return this.id ? this.userStore?.byId(this.id) : null
-    },
-  },
-  methods: {
-    dateonly
-  }
-}
+const user = computed(() => {
+  return props.id ? userStore?.byId(props.id) : null
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';

@@ -56,104 +56,96 @@
     </b-badge>
   </span>
 </template>
-<script>
+<script setup>
 // This component should be imported, rather than using async require.  This is because async requires result in more
 // Vue DOM patching overall, and this component is used in places like chat where it appears many times.  Testing shows
 // this has a significant performance benefit.
-export default {
-  name: 'ProfileImage',
-  props: {
-    image: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    externaluid: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    ouruid: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    externalmods: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    altText: {
-      type: String,
-      required: false,
-      default: 'Profile picture',
-    },
-    isThumbnail: {
-      type: Boolean,
-      required: false,
-    },
-    isModerator: {
-      type: Boolean,
-      required: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    border: {
-      type: Boolean,
-      required: false,
-    },
-    lazy: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    badge: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  image: {
+    type: String,
+    required: false,
+    default: '',
   },
-  data: function () {
-    return {
-      brokenImage: false,
-    }
+  externaluid: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {
-    validImage() {
-      return !this.brokenImage && this.image
-        ? this.image
-        : '/defaultprofile.png'
-    },
-    className() {
-      let ret = 'p-0 profile profile--' + this.size
+  ouruid: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  externalmods: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  altText: {
+    type: String,
+    required: false,
+    default: 'Profile picture',
+  },
+  isThumbnail: {
+    type: Boolean,
+    required: false,
+  },
+  isModerator: {
+    type: Boolean,
+    required: false,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
+  },
+  border: {
+    type: Boolean,
+    required: false,
+  },
+  lazy: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  badge: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
 
-      if (this.border) {
-        ret += ' ourBorder'
-      }
+const brokenImage = ref(false)
 
-      return ret
-    },
-    width() {
-      // Return a resolution high enough for the CSS rules below.
-      if (this.className.includes('--sm')) {
-        return 25
-      } else if (this.className.includes('--md')) {
-        return 35
-      } else if (this.className.includes('--lg')) {
-        return 50
-      } else {
-        return 100
-      }
-    },
-  },
-  methods: {
-    brokenProfileImage(e) {
-      this.brokenImage = true
-    },
-  },
+const validImage = computed(() => {
+  return !brokenImage.value && props.image ? props.image : '/defaultprofile.png'
+})
+
+const className = computed(() => {
+  let ret = 'p-0 profile profile--' + props.size
+
+  if (props.border) {
+    ret += ' ourBorder'
+  }
+
+  return ret
+})
+
+const width = computed(() => {
+  // Return a resolution high enough for the CSS rules below.
+  if (className.value.includes('--sm')) {
+    return 25
+  } else if (className.value.includes('--md')) {
+    return 35
+  } else if (className.value.includes('--lg')) {
+    return 50
+  } else {
+    return 100
+  }
+})
+
+const brokenProfileImage = (e) => {
+  brokenImage.value = true
 }
 </script>
 <style scoped lang="scss">

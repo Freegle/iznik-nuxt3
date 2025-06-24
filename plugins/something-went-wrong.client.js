@@ -29,7 +29,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
       // Trigger popup.
       const miscStore = useMiscStore()
-      miscStore.somethingWentWrong = true
+      miscStore.setErrorDetails(err)
 
       Sentry.captureMessage('API error')
 
@@ -53,7 +53,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     } else if (reason) {
       // No point alerting the user if we have no info.
       const miscStore = useMiscStore()
-      miscStore.somethingWentWrong = true
+      const error = new Error(reason)
+      miscStore.setErrorDetails(error)
       Sentry.captureMessage('Unhandled promise', reason)
     }
   })

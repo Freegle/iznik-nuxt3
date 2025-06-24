@@ -42,76 +42,63 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useMiscStore } from '~/stores/misc'
-import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
 import { useAuthStore } from '~/stores/auth'
+import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
 
-export default {
-  components: { PrivacyUpdate },
-  setup() {
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
 
-    return { miscStore, authStore }
-  },
-  data: function () {
-    return {
-      thanks: false,
-      warningid: 'hideglobalwarning20250530',
-    }
-  },
-  computed: {
-    relevantGroup() {
-      const now = new Date()
-      const active = new Date('2025-06-22')
+const warningid = ref('hideglobalwarning20250530')
 
-      if (now >= active) {
-        return false
+const relevantGroup = computed(() => {
+  const now = new Date()
+  const active = new Date('2025-06-22')
+
+  if (now >= active) {
+    return false
+  }
+
+  let ret = false
+
+  const groupids = [126719]
+
+  const myGroups = authStore.groups
+
+  myGroups.forEach((g) => {
+    if (groupids.includes(g.groupid)) {
+      // If joined since 2024-09-01
+      if (new Date(g.added).getTime() >= new Date('2024-09-01').getTime()) {
+        ret = true
       }
+    }
+  })
 
-      let ret = false
+  return ret
+})
 
-      const groupids = [126719]
+const show = computed(() => {
+  return !miscStore?.get(warningid.value)
+})
 
-      const myGroups = this.authStore.groups
+const hideIt = (e) => {
+  e.preventDefault()
+  miscStore.set({
+    key: warningid.value,
+    value: true,
+  })
+}
 
-      myGroups.forEach((g) => {
-        if (groupids.includes(g.groupid)) {
-          // If joined since 2024-09-01
-          if (new Date(g.added).getTime() >= new Date('2024-09-01').getTime()) {
-            ret = true
-          }
-        }
-      })
-
-      return ret
-    },
-    show() {
-      return !this.miscStore?.get(this.warningid)
-    },
-    breakpoint() {
-      const store = useMiscStore()
-      return store.breakpoint
-    },
-  },
-  methods: {
-    hideIt(e) {
-      e.preventDefault()
-      this.miscStore.set({
-        key: this.warningid,
-        value: true,
-      })
-    },
-    showit() {
-      this.miscStore.set({
-        key: this.warningid,
-        value: false,
-      })
-    },
-  },
+const showit = () => {
+  miscStore.set({
+    key: warningid.value,
+    value: false,
+  })
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions.scss';
 @import 'bootstrap/scss/_variables.scss';

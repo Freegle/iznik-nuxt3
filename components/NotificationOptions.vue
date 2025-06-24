@@ -62,7 +62,7 @@
   </b-dropdown>
 </template>
 <script setup>
-import { ref, watch, defineAsyncComponent } from 'vue'
+import { ref, watch, computed, defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useNotificationStore } from '../stores/notification'
 

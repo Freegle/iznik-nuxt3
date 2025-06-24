@@ -55,54 +55,52 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import NoticeMessage from './NoticeMessage'
+import { useRuntimeConfig } from '#imports'
+
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
 
-export default {
-  components: { NoticeMessage, ConfirmModal },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-    threadhead: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
+  type: {
+    type: String,
+    required: true,
+  },
+  threadhead: {
+    type: Number,
+    required: true,
+  },
+})
 
-    return {
-      newsfeedStore,
-    }
-  },
-  data() {
-    return {
-      showDeleteModal: false,
-    }
-  },
-  computed: {
-    reply() {
-      return this.newsfeedStore?.byId(this.id)
-    },
-  },
-  methods: {
-    deleteWarning() {
-      this.showDeleteModal = true
-    },
-    async deleteConfirm() {
-      await this.newsfeedStore.delete(this.id, this.threadhead)
-    },
-  },
+const newsfeedStore = useNewsfeedStore()
+const showDeleteModal = ref(false)
+
+const reply = computed(() => {
+  return newsfeedStore?.byId(props.id)
+})
+
+const config = useRuntimeConfig()
+const supportOrAdmin = computed(() => {
+  return (
+    config.public.user?.systemrole === 'Support' ||
+    config.public.user?.systemrole === 'Admin'
+  )
+})
+
+function deleteWarning() {
+  showDeleteModal.value = true
+}
+
+async function deleteConfirm() {
+  await newsfeedStore.delete(props.id, props.threadhead)
 }
 </script>
 <style scoped lang="scss">

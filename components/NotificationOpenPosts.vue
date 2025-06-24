@@ -23,35 +23,35 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import pluralize from 'pluralize'
 import { setupNotification } from '../composables/useNotification'
 
-export default {
-  components: {},
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    return await setupNotification(props.id)
-  },
-  computed: {
-    count() {
-      return pluralize('recent open post', this.notification?.text, true)
-    },
-  },
-  methods: {
-    goto() {
-      if (!this.notification?.seen) {
-        this.notificationStore.seen(this.id)
-      }
+})
 
-      this.$router.push('/myposts')
-    },
-  },
+const router = useRouter()
+
+// Setup notification
+const { notification, notificationStore, notificationago } =
+  await setupNotification(props.id)
+
+const count = computed(() => {
+  return pluralize('recent open post', notification.value?.text, true)
+})
+
+function goto() {
+  if (!notification.value?.seen) {
+    notificationStore.seen(props.id)
+  }
+
+  router.push('/myposts')
 }
 </script>
 

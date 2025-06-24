@@ -102,7 +102,7 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
 import { useRoute, useRouter } from 'vue-router'
 import { defineAsyncComponent } from 'vue'
@@ -115,363 +115,361 @@ import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
+import { useMe } from '~/composables/useMe'
 import { useIsochroneStore } from '~/stores/isochrone'
 import PostFilters from '~/components/PostFilters'
+import SidebarLeft from '~/components/SidebarLeft'
+import PostCode from '~/components/PostCode'
+import ExternalDa from '~/components/ExternalDa'
+import { ref, computed, watch, onMounted, onUnmounted } from '#imports'
 
+// Async components
 const MicroVolunteering = defineAsyncComponent(() =>
   import('~/components/MicroVolunteering.vue')
 )
+const PostMapAndList = defineAsyncComponent(() =>
+  import('~/components/PostMapAndList')
+)
+const GlobalMessage = defineAsyncComponent(() =>
+  import('~/components/GlobalMessage')
+)
+const AboutMeModal = defineAsyncComponent(() =>
+  import('~/components/AboutMeModal')
+)
+const ExpectedRepliesWarning = defineAsyncComponent(() =>
+  import('~/components/ExpectedRepliesWarning')
+)
 
-export default {
-  components: {
-    NoticeMessage,
-    PostFilters,
-    PostMapAndList: defineAsyncComponent(() =>
-      import('~/components/PostMapAndList')
-    ),
-    GlobalMessage: defineAsyncComponent(() =>
-      import('~/components/GlobalMessage')
-    ),
-    AboutMeModal: defineAsyncComponent(() =>
-      import('~/components/AboutMeModal')
-    ),
-    ExpectedRepliesWarning: defineAsyncComponent(() =>
-      import('~/components/ExpectedRepliesWarning')
-    ),
-    VisibleWhen,
-    MicroVolunteering,
-  },
-  async setup() {
-    definePageMeta({
-      layout: 'login',
-      alias: ['/communities'],
-    })
-    const route = useRoute()
-    const runtimeConfig = useRuntimeConfig()
+// Page meta
+definePageMeta({
+  layout: 'login',
+  alias: ['/communities'],
+})
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Browse',
-        'See OFFERs and WANTEDs',
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+// Setup
+const route = useRoute()
+const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+const groupStore = useGroupStore()
+const isochroneStore = useIsochroneStore()
+const messageStore = useMessageStore()
 
-    const router = useRouter()
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
-    const groupStore = useGroupStore()
-    const isochroneStore = useIsochroneStore()
-    const messageStore = useMessageStore()
+// State
+const initialBounds = ref(null)
+const bump = ref(1)
+const showAboutMeModal = ref(false)
+const reviewAboutMe = ref(false)
+const messagesOnMapCount = ref(null)
+const selectedGroup = ref(0)
+const selectedType = ref('All')
+const selectedSort = ref('Unseen')
+const forceShowFilters = ref(false)
+const lastCountUpdate = ref(0)
+const updatingCount = ref(false)
+const searchTerm = ref(route.params.term)
 
-    const searchTerm = ref(route.params.term)
+// Use me and myGroups computed properties from useMe composable for consistency
+const { me, myGroups } = useMe()
 
-    // We want this to be our next home page.
-    const existingHomepage = miscStore.get('lasthomepage')
+const browseView = computed(() => {
+  return me.value?.settings?.browseView
+    ? me.value.settings.browseView
+    : 'nearby'
+})
 
-    if (existingHomepage !== 'mygroups') {
-      miscStore.set({
-        key: 'lasthomepage',
-        value: 'mygroups',
-      })
-    }
+const noMessagesNoLocation = computed(() => {
+  return messagesOnMapCount.value === 0 && !me.value?.settings?.mylocation
+})
 
-    // Also get all the groups.  This allows us to suggest other groups to join from within the map.
-    // Doing this now slows down the load, but reduces flicker.
-    await groupStore.fetch()
+const isochrones = computed(() => {
+  return isochroneStore?.list || []
+})
 
-    const martop1 = ref('285px')
+// Methods
+function myGroup(id) {
+  return groupStore.get(id)
+}
 
-    return {
-      route,
-      router,
-      miscStore,
-      authStore,
-      groupStore,
-      isochroneStore,
-      messageStore,
-      searchTerm,
-      martop1,
-    }
-  },
-  data() {
-    return {
-      initialBounds: null,
-      bump: 1,
-      showAboutMeModal: false,
-      reviewAboutMe: false,
-      messagesOnMapCount: null,
-      selectedGroup: 0,
-      selectedType: 'All',
-      selectedSort: 'Unseen',
-      forceShowFilters: false,
-      lastCountUpdate: 0,
-      updatingCount: false,
-    }
-  },
-  computed: {
-    browseView() {
-      return this?.me?.settings?.browseView
-        ? this.me.settings.browseView
-        : 'nearby'
-    },
-    noMessagesNoLocation() {
-      return this.messagesOnMapCount === 0 && !this.me?.settings?.mylocation
-    },
-    isochrones() {
-      return this.isochroneStore?.list
-    },
-  },
-  watch: {
-    me: {
-      immediate: true,
-      async handler(newVal, oldVal) {
-        if (newVal && !oldVal && process.client) {
-          await loadLeaflet()
-          this.calculateInitialMapBounds()
-          this.bump++
-        }
-      },
-    },
-    noMessagesNoLocation(newVal) {
-      if (newVal) {
-        // Make sure the filters are showing.
-        this.forceShowFilters = true
-      }
-    },
-    // When the isochrones or filters change, just re-render the whole map and list.  This is a bit heavy handed, but
-    // the code to handle the various changes is complex and not worth writting - most people will just take the
-    // default and scroll down.
-    searchTerm(newVal) {
-      this.incBump()
-    },
-    async selectedGroup(newVal) {
-      if (newVal > 0) {
-        // We want to show the group's map.
-        const g = this.myGroup(newVal)
+async function calculateInitialMapBounds() {
+  if (process.client) {
+    if (browseView.value === 'nearby') {
+      if (me.value) {
+        // The initial bounds for the map are determined from the isochrones if possible.
+        const promises = []
+        promises.push(isochroneStore.fetch())
 
-        if (g?.bbox) {
-          await loadLeaflet()
-          const wkt = new Wkt.Wkt()
-          wkt.read(g.bbox)
-          const obj = wkt.toObject()
+        // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.
+        // That way we can display the list rapidly. Fetching this and the isochrones in parallel reduces latency.
+        promises.push(isochroneStore.fetchMessages(true))
 
-          if (obj?.getBounds) {
-            const bounds = obj.getBounds()
-            const swlat = bounds.getSouthWest().lat
-            const swlng = bounds.getSouthWest().lng
-            const nelat = bounds.getNorthEast().lat
-            const nelng = bounds.getNorthEast().lng
-
-            this.initialBounds = [
-              [swlat, swlng],
-              [nelat, nelng],
-            ]
-          }
+        try {
+          await Promise.all(promises)
+          initialBounds.value = isochroneStore.bounds
+        } catch (e) {
+          // If this fails revert to a default view.
         }
       }
-
-      this.incBump()
-    },
-    selectedType(newVal) {
-      this.incBump()
-    },
-    browseView(newVal) {
-      this.calculateInitialMapBounds()
-      this.incBump()
-    },
-    async isochrones(newVal) {
-      this.initialBounds = this.isochroneStore.bounds
-      await this.isochroneStore.fetchMessages(true)
-      this.incBump()
-    },
-  },
-  async mounted() {
-    if (this.me) {
-      window.addEventListener('scroll', this.handleScroll)
-      const lastask = this.miscStore?.get('lastaboutmeask')
-      const now = new Date().getTime()
-
-      if (!lastask || now - lastask > 90 * 24 * 60 * 60 * 1000) {
-        // Not asked too recently.
-        await this.fetchMe(true)
-
-        if (this.me) {
-          if (!this.me.aboutme || !this.me.aboutme.text) {
-            // We have not yet provided one.
-            const daysago = dayjs().diff(dayjs(this.me.added), 'days')
-
-            if (daysago > 7) {
-              // Nudge to ask people to to introduce themselves.
-              this.showAboutMeModal = true
-            }
-          } else {
-            const monthsago = dayjs().diff(
-              dayjs(this.me.aboutme.timestamp),
-              'months'
-            )
-
-            if (monthsago >= 6) {
-              // Old.  Ask them to review it.
-              this.showAboutMeModal = true
-              this.reviewAboutMe = true
-            }
-          }
-        }
-      }
-
-      if (this.showAboutMeModal) {
-        useMiscStore().set({
-          key: 'lastaboutmeask',
-          value: now,
-        })
-      }
+    } else {
+      initialBounds.value = isochroneStore.bounds
     }
-  },
-  unmounted() {
-    window.removeEventListener('scroll', this.handleScroll)
-  },
-  methods: {
-    async calculateInitialMapBounds() {
-      if (process.client) {
-        if (this.browseView === 'nearby') {
-          if (this.me) {
-            // The initial bounds for the map are determined from the isochrones if possible.
-            const promises = []
-            promises.push(this.isochroneStore.fetch())
 
-            // By default we'll be showing the isochrone view in PostMap, so start the fetch of the messages now.  That
-            // way we can display the list rapidly.  Fetching this and the isochrones in parallel reduces latency.
-            promises.push(this.isochroneStore.fetchMessages(true))
+    if (!initialBounds.value) {
+      // Either we have no isochrones, or we're showing our groups. Use the bounding box of the group that
+      // our own location is within.
+      let mylat = null
+      let mylng = null
 
+      let swlat = null
+      let swlng = null
+      let nelat = null
+      let nelng = null
+
+      if (me.value && (me.value.lat || me.value.lng)) {
+        mylat = me.value.lat
+        mylng = me.value.lng
+
+        for (const g of myGroups.value) {
+          if (g.bbox) {
             try {
-              await Promise.all(promises)
-              this.initialBounds = this.isochroneStore.bounds
-            } catch (e) {
-              // If this fails revert to a default view.
-            }
-          }
-        } else {
-          this.initialBounds = this.isochroneStore.bounds
-        }
+              await loadLeaflet()
+              const wkt = new Wkt.Wkt()
+              wkt.read(g.bbox)
+              const obj = wkt.toObject()
 
-        if (!this.initialBounds) {
-          // Either we have no isochrones, or we're showing our groups.  Use the bounding box of the group that
-          // our own location is within.
-          let mylat = null
-          let mylng = null
+              if (obj?.getBounds) {
+                const thisbounds = obj.getBounds()
+                const thissw = thisbounds.getSouthWest()
+                const thisne = thisbounds.getNorthEast()
 
-          let swlat = null
-          let swlng = null
-          let nelat = null
-          let nelng = null
-
-          if (this.me && (this.me.lat || this.me.lng)) {
-            mylat = this.me.lat
-            mylng = this.me.lng
-
-            this.myGroups.forEach(async (g) => {
-              if (g.bbox) {
-                try {
-                  await loadLeaflet()
-                  const wkt = new Wkt.Wkt()
-                  wkt.read(g.bbox)
-                  const obj = wkt.toObject()
-
-                  if (obj?.getBounds) {
-                    const thisbounds = obj.getBounds()
-                    const thissw = thisbounds.getSouthWest()
-                    const thisne = thisbounds.getNorthEast()
-
-                    if (
-                      mylat >= thissw.lat &&
-                      mylat <= thisne.lat &&
-                      mylng >= thissw.lng &&
-                      mylng <= thisne.lng
-                    ) {
-                      swlat = (thissw.lat + thisne.lat) / 2
-                      swlng = thissw.lng
-                      nelat = (thissw.lat + thisne.lat) / 2
-                      nelng = thisne.lng
-                    }
-                  }
-                } catch (e) {
-                  console.error(
-                    'Failed to parse group bounding box',
-                    e?.message,
-                    g.bbox
-                  )
+                if (
+                  mylat >= thissw.lat &&
+                  mylat <= thisne.lat &&
+                  mylng >= thissw.lng &&
+                  mylng <= thisne.lng
+                ) {
+                  swlat = (thissw.lat + thisne.lat) / 2
+                  swlng = thissw.lng
+                  nelat = (thissw.lat + thisne.lat) / 2
+                  nelng = thisne.lng
                 }
               }
-            })
-          }
-
-          let bounds = null
-
-          if (
-            swlat !== null &&
-            swlng !== null &&
-            nelat !== null &&
-            nelng !== null
-          ) {
-            bounds = [
-              [swlat, swlng],
-              [nelat, nelng],
-            ]
-          } else if (this.me && mylat !== null && mylng !== null) {
-            // We're not a member of any groups, but at least we know where we are.  Centre there, and then let
-            // the map zoom to somewhere sensible.
-            bounds = [
-              [mylat - 0.01, mylng - 0.01],
-              [mylat + 0.01, mylng + 0.01],
-            ]
-          } else {
-            // We aren't a member of any groups and we don't know where we are.  This can happen, but it's rare.
-            // Send them to the explore page to pick somewhere.
-            this.router.push('/explore')
-          }
-
-          if (bounds) {
-            this.initialBounds = bounds
+            } catch (e) {
+              console.error(
+                'Failed to parse group bounding box',
+                e?.message,
+                g.bbox
+              )
+            }
           }
         }
       }
-    },
-    async savePostcode(pc) {
-      const settings = this.me.settings
 
-      if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
-        settings.mylocation = pc
-        await this.authStore.saveAndGet({
-          settings,
-        })
+      let bounds = null
 
-        // Now get an isochrone at this location.
-        await this.isochroneStore.fetch()
-      }
-    },
-    incBump() {
-      this.bump++
-    },
-    async handleScroll(event) {
-      // If we are scrolling down the browse window then we want to update our count, but only every few seconds.
       if (
-        !this.updatingCount &&
-        this.me &&
-        this.lastCountUpdate < new Date().getTime() - 5000
+        swlat !== null &&
+        swlng !== null &&
+        nelat !== null &&
+        nelng !== null
       ) {
-        this.lastCountUpdate = new Date().getTime()
-        this.updatingCount = true
-        await this.messageStore.fetchCount(this.me.settings?.browseView, false)
-        this.updatingCount = false
+        bounds = [
+          [swlat, swlng],
+          [nelat, nelng],
+        ]
+      } else if (me.value && mylat !== null && mylng !== null) {
+        // We're not a member of any groups, but at least we know where we are. Centre there, and then let
+        // the map zoom to somewhere sensible.
+        bounds = [
+          [mylat - 0.01, mylng - 0.01],
+          [mylat + 0.01, mylng + 0.01],
+        ]
+      } else {
+        // We aren't a member of any groups and we don't know where we are. This can happen, but it's rare.
+        // Send them to the explore page to pick somewhere.
+        router.push('/explore')
       }
-    },
+
+      if (bounds) {
+        initialBounds.value = bounds
+      }
+    }
+  }
+}
+
+async function savePostcode(pc) {
+  const settings = me.value.settings
+
+  if (!settings?.mylocation || settings?.mylocation.id !== pc.id) {
+    settings.mylocation = pc
+    await authStore.saveAndGet({
+      settings,
+    })
+
+    // Now get an isochrone at this location.
+    await isochroneStore.fetch()
+  }
+}
+
+function incBump() {
+  bump.value++
+}
+
+async function handleScroll() {
+  // If we are scrolling down the browse window then we want to update our count, but only every few seconds.
+  if (
+    !updatingCount.value &&
+    me.value &&
+    lastCountUpdate.value < new Date().getTime() - 5000
+  ) {
+    lastCountUpdate.value = new Date().getTime()
+    updatingCount.value = true
+    await messageStore.fetchCount(me.value.settings?.browseView, false)
+    updatingCount.value = false
+  }
+}
+
+async function fetchMe(force = false) {
+  return await authStore.fetchUser(force)
+}
+
+// Watchers
+watch(
+  me,
+  async (newVal, oldVal) => {
+    if (newVal && !oldVal && process.client) {
+      await loadLeaflet()
+      calculateInitialMapBounds()
+      bump.value++
+    }
   },
+  { immediate: true }
+)
+
+watch(noMessagesNoLocation, (newVal) => {
+  if (newVal) {
+    // Make sure the filters are showing.
+    forceShowFilters.value = true
+  }
+})
+
+// When the isochrones or filters change, just re-render the whole map and list.
+watch(searchTerm, () => {
+  incBump()
+})
+
+watch(selectedGroup, async (newVal) => {
+  if (newVal > 0) {
+    // We want to show the group's map.
+    const g = myGroup(newVal)
+
+    if (g?.bbox) {
+      await loadLeaflet()
+      const wkt = new Wkt.Wkt()
+      wkt.read(g.bbox)
+      const obj = wkt.toObject()
+
+      if (obj?.getBounds) {
+        const bounds = obj.getBounds()
+        const swlat = bounds.getSouthWest().lat
+        const swlng = bounds.getSouthWest().lng
+        const nelat = bounds.getNorthEast().lat
+        const nelng = bounds.getNorthEast().lng
+
+        initialBounds.value = [
+          [swlat, swlng],
+          [nelat, nelng],
+        ]
+      }
+    }
+  }
+
+  incBump()
+})
+
+watch(selectedType, () => {
+  incBump()
+})
+
+watch(browseView, () => {
+  calculateInitialMapBounds()
+  incBump()
+})
+
+watch(isochrones, async () => {
+  initialBounds.value = isochroneStore.bounds
+  await isochroneStore.fetchMessages(true)
+  incBump()
+})
+
+// Lifecycle hooks
+onMounted(async () => {
+  if (me.value) {
+    window.addEventListener('scroll', handleScroll)
+    const lastask = miscStore?.get('lastaboutmeask')
+    const now = new Date().getTime()
+
+    if (!lastask || now - lastask > 90 * 24 * 60 * 60 * 1000) {
+      // Not asked too recently.
+      await fetchMe(true)
+
+      if (me.value) {
+        if (!me.value.aboutme || !me.value.aboutme.text) {
+          // We have not yet provided one.
+          const daysago = dayjs().diff(dayjs(me.value.added), 'days')
+
+          if (daysago > 7) {
+            // Nudge to ask people to to introduce themselves.
+            showAboutMeModal.value = true
+          }
+        } else {
+          const monthsago = dayjs().diff(
+            dayjs(me.value.aboutme.timestamp),
+            'months'
+          )
+
+          if (monthsago >= 6) {
+            // Old. Ask them to review it.
+            showAboutMeModal.value = true
+            reviewAboutMe.value = true
+          }
+        }
+      }
+    }
+
+    if (showAboutMeModal.value) {
+      useMiscStore().set({
+        key: 'lastaboutmeask',
+        value: now,
+      })
+    }
+  }
+
+  // Also get all the groups. This allows us to suggest other groups to join from within the map.
+  // Doing this now slows down the load, but reduces flicker.
+  await groupStore.fetch()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+// Page head
+useHead(
+  buildHead(route, runtimeConfig, 'Browse', 'See OFFERs and WANTEDs', null, {
+    class: 'overflow-y-scroll',
+  })
+)
+
+// We want this to be our next home page.
+const existingHomepage = miscStore.get('lasthomepage')
+
+if (existingHomepage !== 'mygroups') {
+  miscStore.set({
+    key: 'lasthomepage',
+    value: 'mygroups',
+  })
 }
 </script>
 <style scoped lang="scss">

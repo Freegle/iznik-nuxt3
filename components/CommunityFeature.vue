@@ -55,6 +55,8 @@
   </div>
 </template>
 <script setup>
+import { ref, defineAsyncComponent } from 'vue'
+
 const CommunityEvent = defineAsyncComponent(() => import('./CommunityEvent'))
 const VolunteerOpportunity = defineAsyncComponent(() =>
   import('./VolunteerOpportunity')

@@ -16,7 +16,7 @@
         <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
           Share now
         </b-button>
-        <b-list-group v-if="!isApp" :key="'newsshare-' + bump" horizontal class="flex-wrap">
+        <b-list-group v-else :key="'newsshare-' + bump" horizontal class="flex-wrap">
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -41,7 +41,7 @@
               @open="opened"
             >
               <b-button variant="secondary" class="mt-1 twitter">
-                <v-icon :icon="['fab', 'twitter']" /> Twitter
+                <v-icon :icon="['fab', 'twitter']" /> X
               </b-button>
             </ShareNetwork>
           </b-list-group-item>
@@ -95,75 +95,65 @@
   </b-modal>
 </template>
 
-<script>
-import { useMobileStore } from '@/stores/mobile'
-import { Share } from '@capacitor/share';
+<script setup>
+import { ref, computed } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useOurModal } from '~/composables/useOurModal'
-import { useNuxtApp } from '#app'
+import { useNuxtApp, useRuntimeConfig } from '#app'
+import { useMobileStore } from '@/stores/mobile'
+import { Share } from '@capacitor/share'
 
-export default {
-  props: {
-    newsfeed: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  newsfeed: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { modal, hide } = useOurModal()
+})
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+const { modal, hide } = useOurModal()
 
-    return { modal, hide }
-  },
-  data() {
-    return {
-      copied: false,
-      bump: 0,
-    }
-  },
-  computed: {
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    url() {
-      if (this.newsfeed) {
-        const runtimeConfig = useRuntimeConfig()
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
+// case.
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-        return runtimeConfig.public.USER_SITE + '/chitchat/' + this.newsfeed.id
-      }
+const copied = ref(false)
+const bump = ref(0)
 
-      return null
-    },
-  },
-  methods: {
-    async shareApp(){
-      const href = this.url
-      const subject = 'Sharing Freegle chitchat'
-      try {
-        await Share.share({
-          title: subject,
-          text: this.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
-          url: href,
-          dialogTitle: 'Share now...',
-        })
-      } catch( e){
-        console.log('Share exception', e.message)
-      }
-    },
-    async doCopy() {
-      await navigator.clipboard.writeText(this.url)
-      this.copied = true
-    },
-    opened() {
-      this.bump++
-    },
-  },
+const url = computed(() => {
+  if (props.newsfeed) {
+    const runtimeConfig = useRuntimeConfig()
+    return runtimeConfig.public.USER_SITE + '/chitchat/' + props.newsfeed.id
+  }
+  return null
+})
+
+const isApp = ref(mobileStore.isApp) // APP
+
+async function doCopy() {
+  await navigator.clipboard.writeText(url.value)
+  copied.value = true
 }
+
+function opened() {
+  bump.value++
+}
+
+async function shareApp(){
+  const href = url.value
+  const subject = 'Sharing Freegle chitchat'
+  try {
+    await Share.share({
+      title: subject,
+      text: props.newsfeed.message + "\n\n",  // not supported on some apps (Facebook, Instagram)
+      url: href,
+      dialogTitle: 'Share now...',
+    })
+  } catch( e){
+    console.log('Share exception', e.message)
+  }
+}
+
 </script>
 <style scoped lang="scss">
 :deep(.facebook) {

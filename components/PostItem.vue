@@ -46,271 +46,267 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { uid } from '../composables/useId'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
+import { computed } from '#imports'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: {
-    NoticeMessage,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-    edit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    edititem: {
-      type: String,
-      required: false,
-      default: null,
-    },
-  },
-  setup() {
-    const composeStore = useComposeStore()
-    const messageStore = useMessageStore()
+const emit = defineEmits(['update:edititem'])
 
-    return {
-      composeStore,
-      messageStore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  edit: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  edititem: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const composeStore = useComposeStore()
+const messageStore = useMessageStore()
+const { myid } = useMe()
+
+// Data properties
+const vagueness = [
+  '^eney fink$',
+  '^eney think$',
+  '^furniture$',
+  '^household$',
+  '^anything$',
+  '^stuff$',
+  '^things$',
+  '^tools$',
+  '^garden$',
+  '^goods$',
+  "^don't know$",
+  '^items$',
+  '^browsing$',
+  '^browse$',
+  '^any$',
+]
+
+const warnings = [
+  {
+    type: 'Upholstered household items and furniture',
+    message:
+      "There is no requirement for freegled items to have fire labels, but please be honest in your description or make sure you don't ask for things that aren't suitable for your use.",
+    keywords: [
+      'sofa',
+      'sofabed',
+      'couch',
+      'settee',
+      'armchair',
+      'headboard',
+      'stool',
+      'futon',
+      'mattress',
+      'mattress',
+      'pillow',
+      'cushion',
+      'seat pad',
+    ],
+  },
+  {
+    type: 'Cot Mattress',
+    message:
+      'To be safe mattresses should be clean, dry and free from fabric tears, fit the cot snugly, with no gaps, firm and with no sagging.',
+    keywords: ['cot mattress'],
+  },
+  {
+    type: 'Motorcycle and cycle helmets',
+    message:
+      'Using helmets that have been involved in a crash is not recommended.',
+    keywords: ['helmet'],
+  },
+  {
+    type: 'Car seats',
+    message:
+      "These should be undamaged and suitable for the child's weight and height, and fit securely in the vehicle.",
+    keywords: ['car seat', 'carseat', 'child car'],
+  },
+  {
+    type: 'Knives',
+    message:
+      "Knives should only be given to those over 18 years of age, and must be collected and handed over in person (not left for collection in an agreed safe place). Knives shouldn't be carried openly on the street, so should be wrapped or in a container.",
+    keywords: ['knife', 'knives', 'sword', 'swords'],
+  },
+  {
+    type: 'Free',
+    message:
+      "Everything on Freegle is given away freely.  You don't need to say that - and it keeps things simpler if you remove it.",
+    keywords: ['free', 'giving away'],
+  },
+  {
+    type: 'Banned Plants',
+    message:
+      "This looks like a plant that is categorised as an invasive species, which can't be given away on Freegle.",
+    keywords: [
+      'alligator weed',
+      'American skunk cabbage',
+      'Asiatic tearthumb',
+      'balloon vine',
+      'broadleaf water milfoil',
+      'broadleaf watermilfoil',
+      'broomsedge',
+      'Chilean rhubarb',
+      'Chinese bush clover',
+      'Chinese bushclover',
+      'Chinese shrub clover',
+      'Chinese tallow',
+      'climbing fern',
+      'crimson fountain grass',
+      'curly water weed',
+      'curly waterweed',
+      'Eastern baccharis',
+      'fanwort',
+      'floating pennywort',
+      'floating water primrose',
+      'giant hogweed',
+      'giant rhubarb',
+      'giant salvinia',
+      'golden wreath wattle',
+      'Himalayan balsam',
+      'Japanese hop',
+      'Japanese stiltgrass',
+      'kudzu',
+      'mesquite',
+      'mile-a-minute',
+      'milkweed',
+      "Nuttall's water weed",
+      "Nuttall's waterweed",
+      'Nuttalls waterweed',
+      "parrot's feather",
+      'parrots feather',
+      'parthenium weed',
+      'perennial veldt grass',
+      'perennial veldtgrass',
+      'Persian hogweed',
+      'purple pampas grass',
+      'purple veldt grass',
+      'purple veldtgrass',
+      'Salvinia moss',
+      'Senegal tea',
+      "Sosnowsky's hogweed",
+      'tree groundsel',
+      'tree of heaven',
+      'Tromso palm',
+      'Tromsø palm',
+      'vine-like fern',
+      'water hyacinth',
+      'water primrose',
+      'water shield',
+      'whitetop weed',
+      'yellow skunk cabbage',
+    ],
+  },
+]
+
+// Computed properties
+const item = computed({
+  get() {
+    if (!props.edit) {
+      const msg = composeStore?.message(props.id)
+      return msg?.item
+    } else {
+      return props.edititem
     }
   },
-  data() {
-    return {
-      vagueness: [
-        '^eney fink$',
-        '^eney think$',
-        '^furniture$',
-        '^household$',
-        '^anything$',
-        '^stuff$',
-        '^things$',
-        '^tools$',
-        '^garden$',
-        '^goods$',
-        "^don't know$",
-        '^items$',
-        '^browsing$',
-        '^browse$',
-        '^any$',
-      ],
-      warnings: [
-        {
-          type: 'Upholstered household items and furniture',
-          message:
-            'There is no requirement for freegled items to have fire labels, but please be honest in your description or make sure you don’t ask for things that aren’t suitable for your use.',
-          keywords: [
-            'sofa',
-            'sofabed',
-            'couch',
-            'settee',
-            'armchair',
-            'headboard',
-            'stool',
-            'futon',
-            'mattress',
-            'mattress',
-            'pillow',
-            'cushion',
-            'seat pad',
-          ],
-        },
-        {
-          type: 'Cot Mattress',
-          message:
-            'To be safe mattresses should be clean, dry and free from fabric tears, fit the cot snugly, with no gaps, firm and with no sagging.',
-          keywords: ['cot mattress'],
-        },
-        {
-          type: 'Motorcycle and cycle helmets',
-          message:
-            'Using helmets that have been involved in a crash is not recommended.',
-          keywords: ['helmet'],
-        },
-        {
-          type: 'Car seats',
-          message:
-            'These should be undamaged and suitable for the child’s weight and height, and fit securely in the vehicle.',
-          keywords: ['car seat', 'carseat', 'child car'],
-        },
-        {
-          type: 'Knives',
-          message:
-            'Knives should only be given to those over 18 years of age, and must be collected and handed over in person (not left for collection in an agreed safe place). Knives shouldn’t be carried openly on the street, so should be wrapped or in a container.',
-          keywords: ['knife', 'knives', 'sword', 'swords'],
-        },
-        {
-          type: 'Free',
-          message:
-            "Everything on Freegle is given away freely.  You don't need to say that - and it keeps things simpler if you remove it.",
-          keywords: ['free', 'giving away'],
-        },
-        {
-          type: 'Banned Plants',
-          message:
-            "This looks like a plant that is categorised as an invasive species, which can't be given away on Freegle.",
-          keywords: [
-            'alligator weed',
-            'American skunk cabbage',
-            'Asiatic tearthumb',
-            'balloon vine',
-            'broadleaf water milfoil',
-            'broadleaf watermilfoil',
-            'broomsedge',
-            'Chilean rhubarb',
-            'Chinese bush clover',
-            'Chinese bushclover',
-            'Chinese shrub clover',
-            'Chinese tallow',
-            'climbing fern',
-            'crimson fountain grass',
-            'curly water weed',
-            'curly waterweed',
-            'Eastern baccharis',
-            'fanwort',
-            'floating pennywort',
-            'floating water primrose',
-            'giant hogweed',
-            'giant rhubarb',
-            'giant salvinia',
-            'golden wreath wattle',
-            'Himalayan balsam',
-            'Japanese hop',
-            'Japanese stiltgrass',
-            'kudzu',
-            'mesquite',
-            'mile-a-minute',
-            'milkweed',
-            "Nuttall's water weed",
-            "Nuttall's waterweed",
-            'Nuttalls waterweed',
-            "parrot's feather",
-            'parrots feather',
-            'parthenium weed',
-            'perennial veldt grass',
-            'perennial veldtgrass',
-            'Persian hogweed',
-            'purple pampas grass',
-            'purple veldt grass',
-            'purple veldtgrass',
-            'Salvinia moss',
-            'Senegal tea',
-            "Sosnowsky's hogweed",
-            'tree groundsel',
-            'tree of heaven',
-            'Tromso palm',
-            'Tromsø palm',
-            'vine-like fern',
-            'water hyacinth',
-            'water primrose',
-            'water shield',
-            'whitetop weed',
-            'yellow skunk cabbage',
-          ],
-        },
-      ],
+  set(newValue) {
+    if (!props.edit) {
+      composeStore.setItem({
+        id: props.id,
+        item: newValue,
+      })
+    } else {
+      console.log('Set new item', newValue)
+      emit('update:edititem', newValue)
     }
   },
-  computed: {
-    item: {
-      get() {
-        if (!this.edit) {
-          const msg = this.composeStore?.message(this.id)
-          return msg?.item
-        } else {
-          return this.edititem
-        }
-      },
-      set(newValue) {
-        if (!this.edit) {
-          this.composeStore.setItem({
-            id: this.id,
-            item: newValue,
-          })
-        } else {
-          console.log('Set new item', newValue)
-          this.$emit('update:edititem', newValue)
-        }
-      },
-    },
-    vague() {
-      let ret = false
-      let item = this.item
+})
 
-      if (item) {
-        item = item.toLowerCase()
+const vague = computed(() => {
+  let ret = false
+  let currentItem = item.value
 
-        this.vagueness.forEach((v) => {
-          if (item.match(v)) {
-            ret = true
-          }
-        })
+  if (currentItem) {
+    currentItem = currentItem.toLowerCase()
+
+    vagueness.forEach((v) => {
+      if (currentItem.match(v)) {
+        ret = true
       }
+    })
+  }
 
-      return ret
-    },
-    warn() {
-      let ret = null
-      let item = this.item
+  return ret
+})
 
-      if (item) {
-        item = item.toLowerCase()
+const warn = computed(() => {
+  let ret = null
+  let currentItem = item.value
 
-        this.warnings.forEach((k) => {
-          k.keywords.forEach((v) => {
-            if (item.includes(v)) {
-              ret = k
-            }
-          })
-        })
-      }
+  if (currentItem) {
+    currentItem = currentItem.toLowerCase()
 
-      return ret
-    },
-    duplicate() {
-      let ret = null
-
-      const messages = this.messageStore?.all
-
-      // This may be a repost, in which case we don't want to flag the original.
-      const composing = this.composeStore?.message(this.id)
-
-      const repostof = composing?.repostof
-
-      messages.forEach((m) => {
-        if (
-          m.fromuser &&
-          m.fromuser === this.myid &&
-          m.type === this.type &&
-          m.item?.name &&
-          this.item &&
-          m.item.name.toLowerCase() === this.item.toLowerCase() &&
-          m.id !== this.id &&
-          (!repostof || repostof !== m.id) &&
-          (!m.outcomes || !m.outcomes.length)
-        ) {
-          // Exactly duplicate of open post.
-          ret = m
+    warnings.forEach((k) => {
+      k.keywords.forEach((v) => {
+        if (currentItem.includes(v)) {
+          ret = k
         }
       })
+    })
+  }
 
-      return ret
-    },
-  },
-  methods: {
-    $id(type) {
-      return uid(type)
-    },
-  },
+  return ret
+})
+
+const duplicate = computed(() => {
+  let ret = null
+
+  const messages = messageStore?.all
+
+  // This may be a repost, in which case we don't want to flag the original.
+  const composing = composeStore?.message(props.id)
+
+  const repostof = composing?.repostof
+
+  messages.forEach((m) => {
+    if (
+      m.fromuser &&
+      m.fromuser === myid.value &&
+      m.type === props.type &&
+      m.item?.name &&
+      item.value &&
+      m.item.name.toLowerCase() === item.value.toLowerCase() &&
+      m.id !== props.id &&
+      (!repostof || repostof !== m.id) &&
+      (!m.outcomes || !m.outcomes.length)
+    ) {
+      // Exactly duplicate of open post.
+      ret = m
+    }
+  })
+
+  return ret
+})
+
+// Methods
+const $id = (type) => {
+  return uid(type)
 }
 </script>

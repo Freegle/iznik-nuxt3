@@ -9,6 +9,6 @@
     details.
   </p>
 </template>
-<script>
-export default {}
+<script setup>
+// This component is a simple static component with no dynamic behavior
 </script>

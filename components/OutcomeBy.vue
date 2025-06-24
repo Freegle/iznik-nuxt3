@@ -78,266 +78,232 @@
     </p>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, nextTick } from 'vue'
 import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
-import { ref } from '#imports'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  components: { NumberIncrementDecrement, UserRatings },
-  props: {
-    type: {
-      type: String,
-      required: true,
-    },
-    availablenow: {
-      type: Number,
-      required: true,
-    },
-    msgid: {
-      type: Number,
-      required: true,
-    },
-    left: {
-      type: Number,
-      required: true,
-    },
-    takenBy: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    chooseError: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    invalid: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  type: {
+    type: String,
+    required: true,
   },
-  async setup(props) {
-    const messageStore = useMessageStore()
-    const userStore = useUserStore()
-
-    if (props.msgid) {
-      await messageStore.fetch(props.msgid)
-    }
-
-    const message = computed(() =>
-      props.msgid ? messageStore.byId(props.msgid) : null
-    )
-
-    const selectUser = ref(-1)
-
-    const initiallySelectedUsers = computed(() => {
-      let ret = []
-
-      if (props.msgid) {
-        if (message?.value?.by) {
-          ret = [message.value.by]
-        }
-
-        if (props.takenBy) {
-          ret.push(props.takenBy)
-        }
-      }
-
-      return ret
-    })
-
-    const currentlySelectedUsers = ref(initiallySelectedUsers.value)
-
-    return {
-      messageStore,
-      userStore,
-      initiallySelectedUsers,
-      currentlySelectedUsers,
-      selectUser,
-      message,
-    }
+  availablenow: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      emptyUser: {
-        id: -1,
-        count: 0,
-      },
-    }
+  msgid: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    repliers() {
-      let ret = []
-
-      if (this.message?.replies) {
-        this.message.replies.forEach((u) => {
-          if (u.userid >= 0) {
-            ret.push({
-              userid: u.userid,
-              displayname: u.displayname,
-            })
-          }
-        })
-      }
-
-      // Might be promised to someone who didn't reply - for example if they replied about something else and
-      // then this was added in.
-      if (this.message?.promises) {
-        this.message.promises.forEach((u) => {
-          if (u.userid > 0) {
-            const user = this.userStore.byId(u.userid)
-
-            ret.push({
-              userid: u.userid,
-              displayname: user?.displayname,
-            })
-          }
-        })
-      }
-
-      // Make ret unique by userid
-      ret = ret.filter(
-        (v, i, a) => a.findIndex((t) => t.userid === v.userid) === i
-      )
-
-      return ret
-    },
-    availableUsers() {
-      // The users available to select are the ones which are not currently selected (unless that's the user for this
-      // one.
-      const ret = this.repliers?.filter(
-        (u) => !this.currentlySelectedUsers.find((u2) => u2.userid === u.userid)
-      )
-
-      return ret
-    },
-    moreUsersToSelect() {
-      // We show the choose if there are some left and we have not got all users plus someone else.
-      return (
-        this.currentlySelectedUsers?.length <= this.repliers?.length ||
-        !this.currentlySelectedUsers.find((u) => !u.userid)
-      )
-    },
-    sortedSelectors() {
-      // Want Someone Else at the end, and alphabetic otherwise.
-      const ret = JSON.parse(JSON.stringify(this.currentlySelectedUsers))
-      return ret.sort((a, b) => {
-        if (a.userid && !b.userid) {
-          return -1
-        } else if (!a.userid && b.userid) {
-          return 1
-        } else {
-          return a.displayname
-            .toLowerCase()
-            .localeCompare(b.displayname.toLowerCase())
-        }
-      })
-    },
+  left: {
+    type: Number,
+    required: true,
   },
-  watch: {
-    repliers: {
-      handler(newVal) {
-        newVal.forEach((u) => {
-          if (!u.displayname) {
-            this.userStore.fetch(u.userid)
-          }
-        })
-      },
-      immediate: true,
-    },
-    currentlySelectedUsers: {
-      handler(newVal) {
-        this.$emit('tookUsers', newVal)
-      },
-      immediate: true,
-    },
-    selectUser(userid) {
-      let user = null
-
-      if (userid === 0) {
-        user = {
-          userid: null,
-          count: this.left,
-        }
-      } else if (userid > 0) {
-        user = this.availableUsers.find((u) => u.userid === userid)
-
-        // Default to assuming they took all the remaining ones.  This particularly helps when there were
-        // multiple items which all went to a single person.
-        user.count = this.left
-      }
-
-      if (user) {
-        if (user.count === 0) {
-          // None left.  But they wouldn't have added them unless they wanted to give them at least one.  So
-          // steal one from the last person who had a count > 1.
-          console.log('Steal one', JSON.stringify(this.currentlySelectedUsers))
-          const last = this.currentlySelectedUsers
-            .slice()
-            .reverse()
-            .findIndex((u) => u.count > 1)
-          console.log('Last', last)
-
-          if (last >= 0) {
-            console.log(
-              'Last user has',
-              this.currentlySelectedUsers[last].count
-            )
-            this.currentlySelectedUsers[last].count--
-            user.count++
-          }
-        }
-
-        this.currentlySelectedUsers.push(user)
-      }
-
-      this.$nextTick(() => {
-        this.selectUser = -1
-      })
-    },
+  takenBy: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  methods: {
-    userOptions(small) {
-      const options = []
-
-      options.push({
-        value: -1,
-        html:
-          this.currentlySelectedUsers.length >= 1
-            ? '<em>-- Add someone else --</em>'
-            : this.userOptionsChoose(small),
-      })
-
-      for (const user of this.availableUsers) {
-        options.push({
-          value: user.userid,
-          text: user.displayname,
-        })
-      }
-
-      if (!this.currentlySelectedUsers.find((u) => u.userid === null)) {
-        options.push({
-          value: 0,
-          html:
-            this.availablenow === 1
-              ? '<em>Someone else</em>'
-              : '<em>Other people</em>',
-        })
-      }
-
-      return options
-    },
-    userOptionsChoose(small) {
-      return small
-        ? '<em>-- Please choose --</em>'
-        : "<em>-- Please choose (this isn't public) --</em>"
-    },
+  chooseError: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+  invalid: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['tookUsers'])
+
+const messageStore = useMessageStore()
+const userStore = useUserStore()
+
+if (props.msgid) {
+  await messageStore.fetch(props.msgid)
 }
+
+const message = computed(() =>
+  props.msgid ? messageStore.byId(props.msgid) : null
+)
+
+const selectUser = ref(-1)
+
+const initiallySelectedUsers = computed(() => {
+  let ret = []
+
+  if (props.msgid) {
+    if (message?.value?.by) {
+      ret = [message.value.by]
+    }
+
+    if (props.takenBy) {
+      ret.push(props.takenBy)
+    }
+  }
+
+  return ret
+})
+
+const currentlySelectedUsers = ref(initiallySelectedUsers.value)
+
+const repliers = computed(() => {
+  let ret = []
+
+  if (message.value?.replies) {
+    message.value.replies.forEach((u) => {
+      if (u.userid >= 0) {
+        ret.push({
+          userid: u.userid,
+          displayname: u.displayname,
+        })
+      }
+    })
+  }
+
+  // Might be promised to someone who didn't reply - for example if they replied about something else and
+  // then this was added in.
+  if (message.value?.promises) {
+    message.value.promises.forEach((u) => {
+      if (u.userid > 0) {
+        const user = userStore.byId(u.userid)
+
+        ret.push({
+          userid: u.userid,
+          displayname: user?.displayname,
+        })
+      }
+    })
+  }
+
+  // Make ret unique by userid
+  ret = ret.filter((v, i, a) => a.findIndex((t) => t.userid === v.userid) === i)
+
+  return ret
+})
+
+const availableUsers = computed(() => {
+  // The users available to select are the ones which are not currently selected (unless that's the user for this
+  // one.
+  const ret = repliers.value?.filter(
+    (u) => !currentlySelectedUsers.value.find((u2) => u2.userid === u.userid)
+  )
+
+  return ret
+})
+
+const moreUsersToSelect = computed(() => {
+  // We show the choose if there are some left and we have not got all users plus someone else.
+  return (
+    currentlySelectedUsers.value?.length <= repliers.value?.length ||
+    !currentlySelectedUsers.value.find((u) => !u.userid)
+  )
+})
+
+function userOptionsChoose(small) {
+  return small
+    ? '<em>-- Please choose --</em>'
+    : "<em>-- Please choose (this isn't public) --</em>"
+}
+
+function userOptions(small) {
+  const options = []
+
+  options.push({
+    value: -1,
+    html:
+      currentlySelectedUsers.value.length >= 1
+        ? '<em>-- Add someone else --</em>'
+        : userOptionsChoose(small),
+  })
+
+  for (const user of availableUsers.value) {
+    options.push({
+      value: user.userid,
+      text: user.displayname,
+    })
+  }
+
+  if (!currentlySelectedUsers.value.find((u) => u.userid === null)) {
+    options.push({
+      value: 0,
+      html:
+        props.availablenow === 1
+          ? '<em>Someone else</em>'
+          : '<em>Other people</em>',
+    })
+  }
+
+  return options
+}
+
+// Watchers
+watch(
+  repliers,
+  (newVal) => {
+    newVal.forEach((u) => {
+      if (!u.displayname) {
+        userStore.fetch(u.userid)
+      }
+    })
+  },
+  { immediate: true }
+)
+
+watch(
+  currentlySelectedUsers,
+  (newVal) => {
+    emit('tookUsers', newVal)
+  },
+  { immediate: true }
+)
+
+watch(selectUser, (userid) => {
+  let user = null
+
+  if (userid === 0) {
+    user = {
+      userid: null,
+      count: props.left,
+    }
+  } else if (userid > 0) {
+    user = availableUsers.value.find((u) => u.userid === userid)
+
+    // Default to assuming they took all the remaining ones. This particularly helps when there were
+    // multiple items which all went to a single person.
+    user.count = props.left
+  }
+
+  if (user) {
+    if (user.count === 0) {
+      // None left. But they wouldn't have added them unless they wanted to give them at least one. So
+      // steal one from the last person who had a count > 1.
+      console.log('Steal one', JSON.stringify(currentlySelectedUsers.value))
+      const last = currentlySelectedUsers.value
+        .slice()
+        .reverse()
+        .findIndex((u) => u.count > 1)
+      console.log('Last', last)
+
+      if (last >= 0) {
+        console.log('Last user has', currentlySelectedUsers.value[last].count)
+        currentlySelectedUsers.value[last].count--
+        user.count++
+      }
+    }
+
+    currentlySelectedUsers.value.push(user)
+  }
+
+  nextTick(() => {
+    selectUser.value = -1
+  })
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

@@ -121,269 +121,270 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
+import { ref, computed, watch, nextTick, defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import SpinButton from './SpinButton'
 import { useOurModal } from '~/composables/useOurModal'
+import { useAuthStore } from '~/stores/auth'
+import Api from '~/api'
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
 )
 
-export default {
-  components: {
-    NoticeMessage,
-    SpinButton,
+const props = defineProps({
+  messages: {
+    validator: (prop) => typeof prop === 'object' || prop === null,
+    required: true,
   },
-  props: {
-    messages: {
-      validator: (prop) => typeof prop === 'object' || prop === null,
-      required: true,
-    },
-    selectedMessage: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    users: {
-      validator: (prop) => typeof prop === 'object' || prop === null,
-      required: true,
-    },
-    selectedUser: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    maybe: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  selectedMessage: {
+    type: Number,
+    required: false,
+    default: 0,
   },
-  setup() {
-    const trystStore = useTrystStore()
-    const messageStore = useMessageStore()
-    const { modal, hide } = useOurModal()
+  users: {
+    validator: (prop) => typeof prop === 'object' || prop === null,
+    required: true,
+  },
+  selectedUser: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  maybe: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return {
-      trystStore,
-      messageStore,
-      modal,
-      hide,
+const trystStore = useTrystStore()
+const messageStore = useMessageStore()
+const { modal, hide } = useOurModal()
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
+const authStore = useAuthStore()
+const myid = authStore.user?.id
+
+const message = ref(null)
+const date = ref(null)
+const time = ref(null)
+const formattedDate = ref(null)
+const showOddTime = ref(false)
+const currentlySelected = ref(null)
+const dateInput = ref(null)
+
+const minDate = computed(() => {
+  return dayjs().format('YYYY-MM-DD')
+})
+
+const maxDate = computed(() => {
+  return dayjs().add(14, 'day').format('YYYY-MM-DD')
+})
+
+const buttonDisabled = computed(() => {
+  return (
+    currentlySelected.value <= 0 ||
+    !props.messages ||
+    props.messages.length === 0 ||
+    !message.value ||
+    // This is fun.  Because && returns one of the values, it doesn't return true or false.  Try hard.
+    // eslint-disable-next-line
+    (formattedDate.value && !time.value ? true : false)
+  )
+})
+
+const messageOptions = computed(() => {
+  const options = []
+
+  if (props.messages) {
+    if (props.messages.length > 1) {
+      options.push({
+        value: 0,
+        text: '-- Please choose --',
+      })
     }
-  },
-  data() {
-    return {
-      message: null,
-      date: null,
-      time: null,
-      formattedDate: null,
-      showOddTime: false,
-      currentlySelected: null,
-    }
-  },
-  computed: {
-    minDate() {
-      return dayjs().format('YYYY-MM-DD')
-    },
-    maxDate() {
-      return dayjs().add(14, 'day').format('YYYY-MM-DD')
-    },
-    buttonDisabled() {
-      return (
-        this.currentlySelected <= 0 ||
-        !this.messages ||
-        this.messages.length === 0 ||
-        !this.message ||
-        // This is fun.  Because && returns one of the values, it doesn't return true or false.  Try hard.
-        // eslint-disable-next-line
-        (this.formattedDate && !this.time ? true : false)
-      )
-    },
-    messageOptions() {
-      const options = []
 
-      if (this.messages) {
-        if (this.messages.length > 1) {
-          options.push({
-            value: 0,
-            text: '-- Please choose --',
-          })
-        }
-
-        for (const message of this.messages) {
-          if (
-            message.type === 'Offer' &&
-            (!message.outcomes || message.outcomes.length === 0)
-          ) {
-            options.push({
-              value: message.id,
-              text: message.subject,
-            })
-          }
-        }
-      } else {
+    for (const messageItem of props.messages) {
+      if (
+        messageItem.type === 'Offer' &&
+        (!messageItem.outcomes || messageItem.outcomes.length === 0)
+      ) {
         options.push({
-          value: 0,
-          text: '...Loading...',
-          selected: true,
+          value: messageItem.id,
+          text: messageItem.subject,
         })
       }
+    }
+  } else {
+    options.push({
+      value: 0,
+      text: '...Loading...',
+      selected: true,
+    })
+  }
 
-      return options
-    },
-    userOptions() {
-      const options = []
+  return options
+})
 
-      if (this.users) {
-        if (this.users.length > 1) {
-          options.push({
-            value: 0,
-            text: '-- Please choose a user --',
-            selected: this.currentlySelected === 0,
-          })
+const userOptions = computed(() => {
+  const options = []
+
+  if (props.users) {
+    if (props.users.length > 1) {
+      options.push({
+        value: 0,
+        text: '-- Please choose a user --',
+        selected: currentlySelected.value === 0,
+      })
+    }
+
+    for (const user of props.users) {
+      options.push({
+        value: user.id,
+        text: user.displayname,
+        selected: parseInt(message.value) === parseInt(user.id),
+      })
+    }
+  }
+
+  return options
+})
+
+const tryst = computed(() => {
+  return currentlySelected.value
+    ? trystStore?.getByUser(currentlySelected.value)
+    : null
+})
+
+watch(
+  () => props.messages,
+  (newVal) => {
+    let selected = false
+
+    if (newVal) {
+      // Maybe the selected message we picked up from a chat no longer exists.
+      newVal.forEach((m) => {
+        if (
+          (!m.outcomes || m.outcomes.length === 0) &&
+          parseInt(m.id) === parseInt(message.value)
+        ) {
+          selected = true
+          message.value = m.id
         }
+      })
 
-        for (const user of this.users) {
-          options.push({
-            value: user.id,
-            text: user.displayname,
-            selected: parseInt(this.message) === parseInt(user.id),
-          })
-        }
+      if (!selected) {
+        message.value = 0
       }
+    }
+  },
+  { immediate: true }
+)
 
-      return options
-    },
-    tryst() {
-      return this.currentlySelected
-        ? this.trystStore?.getByUser(this.currentlySelected)
+watch(
+  tryst,
+  (newVal) => {
+    if (newVal) {
+      const d = dayjs(newVal.arrangedfor)
+      date.value = d.format('YYYY-MM-DD')
+      time.value = d.format('HH:mm:ss')
+    } else {
+      date.value = null
+      time.value = null
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.selectedMessage,
+  (newVal) => {
+    message.value = newVal
+  }
+)
+
+async function promise(callback) {
+  if (currentlySelected.value > 0) {
+    await messageStore.promise(message.value, currentlySelected.value)
+
+    console.log('Date arranged for', time.value, date.value)
+
+    if (time.value && !time.value.includes(':')) {
+      // We've seen in Sentry that this can happen - looks like if someone types into the hours but not the minutes.
+      time.value = time.value + ':00'
+    }
+
+    const arrangedfor =
+      time.value && date.value
+        ? dayjs(date.value + ' ' + time.value).toISOString()
         : null
-    },
-  },
-  watch: {
-    messages: {
-      immediate: true,
-      handler(newVal) {
-        let selected = false
 
-        if (newVal) {
-          // Maybe the selected message we picked up from a chat no longer exists.
-          newVal.forEach((m) => {
-            if (
-              (!m.outcomes || m.outcomes.length === 0) &&
-              parseInt(m.id) === parseInt(this.message)
-            ) {
-              selected = true
-              this.message = m.id
-            }
-          })
-
-          if (!selected) {
-            this.message = 0
-          }
-        }
-      },
-    },
-    tryst: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          const d = dayjs(newVal.arrangedfor)
-          this.date = d.format('YYYY-MM-DD')
-          this.time = d.format('HH:mm:ss')
-        } else {
-          this.date = null
-          this.time = null
-        }
-      },
-    },
-    selectedMessage(newVal) {
-      this.message = newVal
-    },
-  },
-  methods: {
-    async promise(callback) {
-      if (this.currentlySelected > 0) {
-        await this.messageStore.promise(this.message, this.currentlySelected)
-
-        console.log('Date arranged for', this.time, this.date)
-
-        if (this.time && !this.time.includes(':')) {
-          // We've seen in Sentry that this can happen - looks like if someone types into the hours but not the minutes.
-          this.time = this.time + ':00'
-        }
-
-        const arrangedfor =
-          this.time && this.date
-            ? dayjs(this.date + ' ' + this.time).toISOString()
-            : null
-
-        if (arrangedfor) {
-          if (!this.tryst) {
-            // No arrangement yet.
-            await this.trystStore.add(
-              this.myid,
-              this.currentlySelected,
-              arrangedfor
-            )
-          } else {
-            // Update
-            await this.trystStore.edit(this.tryst.id, arrangedfor)
-          }
-        }
-
-        if (this.maybe) {
-          await this.$api.bandit.chosen({
-            uid: 'promise',
-            variant: 'AfterAddress',
-          })
-        }
-
-        this.hide()
+    if (arrangedfor) {
+      if (!tryst.value) {
+        // No arrangement yet.
+        await trystStore.add(myid, currentlySelected.value, arrangedfor)
+      } else {
+        // Update
+        await trystStore.edit(tryst.value.id, arrangedfor)
       }
+    }
 
-      callback()
-    },
-    async onShow(date) {
-      this.message = this.selectedMessage
+    if (props.maybe) {
+      await api.bandit.chosen({
+        uid: 'promise',
+        variant: 'AfterAddress',
+      })
+    }
 
-      this.currentlySelected = 0
+    hide()
+  }
 
-      if (this.selectedUser) {
-        this.currentlySelected = this.selectedUser
-      } else if (this.users && this.users.length === 1) {
-        this.currentlySelected = this.users[0].id
-      }
+  callback()
+}
 
-      // Fetch any existing trysts.
-      await this.trystStore.fetch()
+async function onShow(showDate) {
+  message.value = props.selectedMessage
 
-      // We can get called with a pointer event.
-      if (date && typeof date.format === 'function') {
-        // Explicit date -set it (overriding any in the tryst).
-        this.$nextTick(() => {
-          this.date = date.format('YYYY-MM-DD')
-        })
-      }
+  currentlySelected.value = 0
 
-      if (this.maybe) {
-        this.$api.bandit.shown({
-          uid: 'promise',
-          variant: 'AfterAddress',
-        })
-      }
-    },
-    deleteTryst() {
-      this.trystStore.delete(this.tryst.id)
-    },
-    clearTryst() {
-      this.date = null
-      this.time = null
-    },
-  },
+  if (props.selectedUser) {
+    currentlySelected.value = props.selectedUser
+  } else if (props.users && props.users.length === 1) {
+    currentlySelected.value = props.users[0].id
+  }
+
+  // Fetch any existing trysts.
+  await trystStore.fetch()
+
+  // We can get called with a pointer event.
+  if (showDate && typeof showDate.format === 'function') {
+    // Explicit date -set it (overriding any in the tryst).
+    nextTick(() => {
+      date.value = showDate.format('YYYY-MM-DD')
+    })
+  }
+
+  if (props.maybe) {
+    api.bandit.shown({
+      uid: 'promise',
+      variant: 'AfterAddress',
+    })
+  }
+}
+
+function deleteTryst() {
+  trystStore.delete(tryst.value.id)
+}
+
+function clearTryst() {
+  date.value = null
+  time.value = null
 }
 </script>
 <style scoped>

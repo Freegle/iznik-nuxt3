@@ -11,32 +11,32 @@
     </span>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import pluralize from 'pluralize'
 
-export default {
-  props: {
-    count: {
-      type: Number,
-      required: true,
-    },
-    tag: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    className: {
-      type: String,
-      required: false,
-      default: '',
-    },
+const props = defineProps({
+  count: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    countPlural() {
-      return pluralize(this.tag, this.count, false)
-    },
+  tag: {
+    type: String,
+    required: false,
+    default: null,
   },
-}
+  className: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+defineEmits(['click'])
+
+const countPlural = computed(() => {
+  return pluralize(props.tag, props.count, false)
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

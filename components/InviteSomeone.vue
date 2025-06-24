@@ -42,7 +42,7 @@
           @open="chosen"
         >
           <b-button variant="secondary" class="mt-1 twitter">
-            <v-icon :icon="['fab', 'twitter']" /> Twitter
+            <v-icon :icon="['fab', 'twitter']" /> X
           </b-button>
         </ShareNetwork>
       </b-list-group-item>
@@ -78,81 +78,74 @@
   </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useNuxtApp } from '#imports'
+import { useRuntimeConfig } from '#app'
 import { useMobileStore } from '@/stores/mobile'
 import { Share } from '@capacitor/share'
 
-export default {
-  props: {
-    headingLevel: {
-      type: String,
-      required: false,
-      default: 'h3',
-    },
-    trustPilot: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
+defineProps({
+  headingLevel: {
+    type: String,
+    required: false,
+    default: 'h3',
   },
-  setup() {
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+  trustPilot: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+})
 
-    const runtimeConfig = useRuntimeConfig()
+const emit = defineEmits(['invited'])
 
-    return {
-      url: runtimeConfig.public.USER_SITE,
-    }
-  },
-  data() {
-    return {
-      invitation:
-        "Hi - I'm using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org",
-      title: 'Have you heard about Freegle?',
-    }
-  },
-  computed: {
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    }
-  },
-  mounted() {
-    if( !this.isApp){
-    this.$api.bandit.shown({
-      uid: 'Invite',
-      variant: 'microvolunteering',
-    })
-    }
-  },
-  methods: {
-    async inviteApp(){
-      try {
-        await Share.share({
-          title: 'Try out Freegle for free stuff',
-          text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out!',
-          url: 'https://www.ilovefreegle.org',
-          dialogTitle: 'Share now...',
-        })
-      } catch( e){
-        console.log('Share exception', e.message)
-      }
-    },
-    chosen() {
-      this.$emit('invited')
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline case.
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-      this.$api.bandit.chosen({
-        uid: 'Invite',
-        variant: 'microvolunteering',
-      })
-    },
-  },
+const runtimeConfig = useRuntimeConfig()
+const url = runtimeConfig.public.USER_SITE
+const { $api } = useNuxtApp()
+
+const invitation = ref(
+  "Hi - I'm using Freegle to give and get things for free.  Check it out at https://www.ilovefreegle.org"
+)
+const title = ref('Have you heard about Freegle?')
+
+const mobileStore = useMobileStore()
+const isApp = ref(mobileStore.isApp) // APP
+
+function chosen() {
+  emit('invited')
+
+  $api.bandit.chosen({
+    uid: 'Invite',
+    variant: 'microvolunteering',
+  })
 }
+
+onMounted(() => {
+  $api.bandit.shown({
+    uid: 'Invite',
+    variant: 'microvolunteering',
+  })
+})
+
+async inviteApp(){
+  try {
+    await Share.share({
+      title: 'Try out Freegle for free stuff',
+      text: 'Hi - I\'m using Freegle to give and get things for free.  Check it out!',
+      url: 'https://www.ilovefreegle.org',
+      dialogTitle: 'Share now...',
+    })
+  } catch( e){
+    console.log('Share exception', e.message)
+  }
+}
+
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

@@ -21,7 +21,7 @@
     <div v-if="signUp" class="d-flex justify-content-around mb-2">
       <b-button
         variant="link"
-        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none"
+        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none test-already-a-freegler"
         @click="clickShowSignIn"
       >
         Already a freegler? Log in
@@ -60,13 +60,6 @@
             >Continue with Facebook</span
           >
         </b-button>
-        <b-button v-if="isiOS" 
-          class="social-button social-button--apple" :disabled="appleDisabled" 
-          @click="loginAppleApp"
-        >
-          <b-img src="signinbuttons/Apple_logo_white.svg" class="social-button__image" />
-          <span class="p-2 social-button__text font-weight-bold">Sign in with Apple</span>
-        </b-button>
         <b-button v-if="isApp"
           class="social-button social-button--google-app"
           @click="loginGoogleApp"
@@ -79,7 +72,7 @@
             >Continue with Google</span
           >
         </b-button>
-        <div v-if="!isApp"
+        <div v-else
           id="googleLoginButton"
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
@@ -101,7 +94,7 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
-        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true">
+        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true"> <!-- APP -->
           {{ loginWaitMessage }}
         </b-alert>
         <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
@@ -118,6 +111,15 @@
           <span v-if="signUp"> Create an account on Freegle </span>
           <span v-else>Continue with your Freegle account</span>
         </h3>
+        <div v-if="signUp" class="d-flex justify-content-around">
+          <b-button
+            variant="link"
+            class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block test-already-a-freegler"
+            @click="clickShowSignIn"
+          >
+            Already a freegler? Log in
+          </b-button>
+        </div>
         <b-form
           id="loginform"
           ref="form"
@@ -131,7 +133,6 @@
             <b-form-group id="nameGroup" label="Your name" label-for="fullname">
               <b-form-input
                 id="fullname"
-                ref="fullname"
                 v-model="fullname"
                 name="fullname"
                 :class="{
@@ -144,7 +145,6 @@
             </b-form-group>
           </div>
           <EmailValidator
-            ref="email"
             v-model:email="email"
             v-model:valid="emailValid"
             size="md"
@@ -186,34 +186,37 @@
             <p class="mb-0 text-center">
               <b-button
                 variant="link"
-                class="ps-1 pe-0 py-0 border-0 align-top"
+                class="ps-1 pe-0 py-0 border-0 align-top test-new-freegler"
                 @click="clickShowSignUp"
               >
                 New freegler? Register
               </b-button>
             </p>
           </div>
-          <div v-if="signUp" class="d-flex justify-content-around">
-            <b-button
-              variant="link"
-              class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block"
-              @click="clickShowSignIn"
-            >
-              Already a freegler? Log in
-            </b-button>
-          </div>
         </b-form>
       </div>
     </div>
   </b-modal>
 </template>
-<script>
-import { mapState, mapWritableState } from 'pinia'
+<script setup>
+import {
+  ref,
+  computed,
+  watch,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  nextTick,
+  getCurrentInstance,
+} from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
+import { useRuntimeConfig } from '#app'
 import { useAuthStore } from '~/stores/auth'
-import { useMobileStore } from '@/stores/mobile'
-import me from '~/mixins/me.js'
+import { useMe } from '~/composables/useMe'
+import Api from '~/api'
+import { useMobileStore } from '@/stores/mobile'  // APP...
 import { SocialLogin } from '@capgo/capacitor-social-login' // Required changes in ios\App\App\AppDelegate.swift ETC
 import { SignInWithApple } from '@capacitor-community/apple-sign-in'
 import { appYahooLogin } from '../composables/app-yahoo'
@@ -225,793 +228,682 @@ const PasswordEntry = defineAsyncComponent(() =>
   import('~/components/PasswordEntry')
 )
 
-export default {
-  name: 'LoginModal',
-  components: {
-    EmailValidator,
-    NoticeMessage,
-    PasswordEntry,
-  },
-  mixins: [me],
-  setup() {
-    const authStore = useAuthStore()
-    const runtimeConfig = useRuntimeConfig()
+// Setup
+const authStore = useAuthStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const router = useRouter()
+const { gtm } = getCurrentInstance().appContext.config.globalProperties
+const { me, loggedIn } = useMe()
 
-    return {
-      authStore,
-      runtimeConfig,
-    }
-  },
-  data() {
-    return {
-      bump: Date.now(),
-      fullname: null,
-      email: null,
-      emailValid: false,
-      password: null,
-      showModal: false,
-      pleaseShowModal: false,
-      showSignUp: false,
-      forceSignIn: false,
-      nativeLoginError: null,
-      socialLoginError: null,
-      loginWaitMessage: null,
-      showPassword: false,
-      initialisedSocialLogin: false,
-      showSocialLoginBlocked: false,
-      nativeBump: 1,
-      timerElapsed: false,
-      buttonClicked: false,
-    }
-  },
-  computed: {
-    clientId() {
-      return this.runtimeConfig.public.GOOGLE_CLIENT_ID
-    },
-    facebookDisabled() {
-      if( this.isApp) return false
-      return (
-        this.bump &&
-        (this.showSocialLoginBlocked || typeof window.FB === 'undefined')
-      )
-    },
-    appleDisabled() {
-      if( !this.isiOS) return true
-      const mobileStore = useMobileStore()
-      return parseFloat(mobileStore.osVersion) < 13
-    },
-    googleDisabled() {
-      return (
-        this.bump &&
-        this.showSocialLoginBlocked &&
-        (!window || !window.google || !window.google.accounts)
-      )
-    },
-    yahooDisabled() {
-      // Yahoo currently can't be disabled, because it's redirect auth flow rather than load of a JS toolkit.
-      return false
-    },
-    socialblocked() {
-      const googleActuallyDisabled = this.isApp ? false : this.googleDisabled
-      const ret =
-        this.bump &&
-        this.initialisedSocialLogin &&
-        (this.facebookDisabled || googleActuallyDisabled || this.yahooDisabled) &&
-        this.timerElapsed
-      return ret
-    },
-    ...mapState(useAuthStore, ['loggedInEver']),
-    ...mapWritableState(useAuthStore, ['loginType', 'forceLogin']),
-    signUp() {
-      if (this.forceSignIn) {
-        return false
-      } else {
-        return !this.loggedInEver || this.showSignUp
-      }
-    },
-    referToGoogleButton() {
-      return (
-        this.email &&
-        (this.email.toLowerCase().includes('gmail') ||
-          this.email.toLowerCase().includes('googlemail'))
-      )
-    },
-    referToYahooButton() {
-      return this.email && this.email.toLowerCase().includes('yahoo')
-    },
-    fullNameError() {
-      return this.nativeBump && this.buttonClicked && !this.fullname
-    },
-    formFields() {
-      return [this.fullname, this.email, this.password]
-    },
-    emailError() {
-      return (
-        this.nativeBump &&
-        this.buttonClicked &&
-        (!this.email || !this.emailValid)
-      )
-    },
-    passwordError() {
-      return this.nativeBump && this.buttonClicked && !this.password
-    },
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    isiOS() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isiOS
-    }
-  },
-  watch: {
-    showModal: {
-      immediate: true,
-      handler(newVal) {
-        this.loginWaitMessage = null
-        this.pleaseShowModal = newVal
+const api = Api(runtimeConfig)
 
-        if (newVal) {
-          if( this.isApp){
-            this.initializeAppSocialLogins()
-            return
-          }
-          if (!this.initialisedSocialLogin) {
-            // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
-            // don't load the scripts for every page.
-            this.installFacebookSDK()
-            this.initialisedSocialLogin = true
-          }
+// Refs
+const bump = ref(Date.now())
+const fullname = ref(null)
+const email = ref(null)
+const emailValid = ref(false)
+const password = ref(null)
+const showModal = ref(false)
+const pleaseShowModal = ref(false)
+const showSignUp = ref(false)
+const forceSignIn = ref(false)
+const nativeLoginError = ref(null)
+const socialLoginError = ref(null)
+const initialisedSocialLogin = ref(false)
+const showSocialLoginBlocked = ref(false)
+const nativeBump = ref(1)
+const timerElapsed = ref(false)
+const buttonClicked = ref(false)
+let bumpTimer = null
+const form = ref(null)
+const loginModal = ref(null)
+const googleLoginButton = ref(null)
+const loginWaitMessage = ref(null) // APP
 
-          // Need to install Google every time to get the button rendered.
-          this.installGoogleSDK()
-        }
-      },
-    },
-    pleaseShowModal: {
-      immediate: true,
-      handler(newVal) {
-        this.showModal = newVal || this.forceLogin
-      },
-    },
-    forceLogin: {
-      immediate: true,
-      handler(newVal) {
-        this.loginWaitMessage = null
-        console.log('Force login changed to ' + newVal)
-        this.showModal = this.pleaseShowModal || newVal
-      },
-    },
-    me(newVal) {
-      // Need to do this when we log out to get the signin button rendered on the login modal.
-      if (!newVal) {
-        this.$nextTick(() => {
-          this.installGoogleSDK()
+// Store refs
+const { loggedInEver } = storeToRefs(authStore)
+const { loginType, forceLogin } = storeToRefs(authStore)
+
+// Computed
+const clientId = computed(() => {
+  return runtimeConfig.public.GOOGLE_CLIENT_ID
+})
+
+const isApp = ref(mobileStore.isApp) // APP
+
+const isiOS = ref(mobileStore.isiOS) // APP
+
+const facebookDisabled = computed(() => {
+  if( isApp.value) return false
+  return (
+    bump.value &&
+    (showSocialLoginBlocked.value || typeof window.FB === 'undefined')
+  )
+})
+
+const googleDisabled = computed(() => {
+  return (
+    bump.value &&
+    showSocialLoginBlocked.value &&
+    (!window || !window.google || !window.google.accounts)
+  )
+})
+
+const yahooDisabled = computed(() => {
+  // Yahoo currently can't be disabled, because it's redirect auth flow rather than load of a JS toolkit.
+  return false
+})
+
+const appleDisabled = computed(() => {  // APP
+  if( !isiOS.value) return true
+  const mobileStore = useMobileStore()
+  return parseFloat(mobileStore.osVersion) < 13
+})
+
+const socialblocked = computed(() => {
+  const googleActuallyDisabled = isApp.value ? false : googleDisabled.value // APP
+  const ret =
+    bump.value &&
+    initialisedSocialLogin.value &&
+    (facebookDisabled.value || googleActuallyDisabled || yahooDisabled.value) &&
+    timerElapsed.value
+  return ret
+})
+
+const signUp = computed(() => {
+  if (forceSignIn.value) {
+    return false
+  } else {
+    return !loggedInEver.value || showSignUp.value
+  }
+})
+
+const referToGoogleButton = computed(() => {
+  return (
+    email.value?.toLowerCase().includes('gmail') ||
+    email.value?.toLowerCase().includes('googlemail')
+  )
+})
+
+const referToYahooButton = computed(() => {
+  return email.value?.toLowerCase().includes('yahoo')
+})
+
+const fullNameError = computed(() => {
+  return nativeBump.value && buttonClicked.value && !fullname.value
+})
+
+const formFields = computed(() => {
+  return [fullname.value, email.value, password.value]
+})
+
+const emailError = computed(() => {
+  return (
+    nativeBump.value &&
+    buttonClicked.value &&
+    (!email.value || !emailValid.value)
+  )
+})
+
+const passwordError = computed(() => {
+  return nativeBump.value && buttonClicked.value && !password.value
+})
+
+// Methods
+function tryLater(native) {
+  if (native) {
+    nativeLoginError.value = 'Something went wrong; please try later.'
+  } else {
+    socialLoginError.value = 'Something went wrong; please try later.'
+  }
+  loginWaitMessage.value = null
+}
+
+function bumpIt() {
+  // Force reconsideration of social signin disabled.  Need to do that regularly in case the SDKs haven't loaded
+  // by the time we open the modal.
+  bump.value = Date.now()
+
+  // And similarly naive signin.  This helps with some password managers which don't trigger events properly.
+  nativeBump.value++
+
+  if (showModal.value) {
+    bumpTimer = setTimeout(bumpIt, 500)
+  }
+}
+
+function show() {
+  pleaseShowModal.value = true
+  nativeLoginError.value = null
+  socialLoginError.value = null
+  loginWaitMessage.value = null
+  buttonClicked.value = false
+
+  setTimeout(() => {
+    timerElapsed.value = true
+  }, 3000)
+
+  bumpIt()
+}
+
+function hide() {
+  pleaseShowModal.value = false
+}
+
+function gtmRegister() {
+  if (gtm?.enabled()) {
+    gtm.trackEvent({
+      event: 'Register with Website',
+      label: 'EcEMCPvav7kZELy618UD',
+    })
+  }
+}
+
+function loginNative(e) {
+  loginType.value = 'Freegle'
+
+  if (signUp.value) {
+    api.bandit.chosen({
+      uid: 'signUpModal',
+      variant: 'native',
+    })
+  }
+
+  nativeLoginError.value = null
+  socialLoginError.value = null
+  loginWaitMessage.value = null
+  buttonClicked.value = true
+  e.preventDefault()
+  e.stopPropagation()
+
+  // Probably this is someone who is already a user and is trying to log in, but has cleared their cache
+  // (so we've forgotten that they've previously signed in) and hasn't noticed that they need to switch.
+  const confused = !fullname.value && email.value && password.value
+
+  if (!confused && signUp.value) {
+    if (!fullname.value || emailError.value || !password.value) {
+      nativeLoginError.value = 'Please fill out the form.'
+    } else {
+      gtmRegister()
+
+      authStore
+        .signUp({
+          fullname: fullname.value,
+          email: email.value,
+          password: password.value,
         })
-      }
-    },
-    formFields() {
-      // reset form validation once any of the fields changes its value
-      this.nativeLoginError = null
-      this.buttonClicked = false
-    },
-    signUp: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          this.$api.bandit.shown({
-            uid: 'signUpModal',
-            variant: 'facebook',
-          })
-          if( !this.appleDisabled){
-            this.$api.bandit.shown({
-              uid: 'signUpModal',
-              variant: 'apple',
-            })
-          }
-          this.$api.bandit.shown({
-            uid: 'signUpModal',
-            variant: 'google',
-          })
-          this.$api.bandit.shown({
-            uid: 'signUpModal',
-            variant: 'yahoo',
-          })
-          this.$api.bandit.shown({
-            uid: 'signUpModal',
-            variant: 'native',
-          })
-          this.$api.bandit.shown({
-            uid: 'signUpModal',
-            variant: 'signin',
-          })
-        }
-      },
-    },
-  },
-  beforeUnmount() {
-    if (this.bumpTimer) {
-      clearTimeout(this.bumpTimer)
-      this.bumpTimer = null
-    }
-  },
-  methods: {
-    tryLater(native) {
-      if (native) {
-        this.nativeLoginError = 'Something went wrong; please try later.'
-      } else {
-        this.socialLoginError = 'Something went wrong; please try later.'
-      }
-      this.loginWaitMessage = null
-    },
-    bumpIt() {
-      // Force reconsideration of social signin disabled.  Need to do that regularly in case the SDKs haven't loaded
-      // by the time we open the modal.
-      this.bump = Date.now()
-
-      // And similarly naive signin.  This helps with some password managers which don't trigger events properly.
-      this.nativeBump++
-
-      if (this.showModal) {
-        this.bumpTimer = setTimeout(this.bumpIt, 500)
-      }
-    },
-    show() {
-      this.pleaseShowModal = true
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      this.loginWaitMessage = null
-      this.buttonClicked = false
-
-      setTimeout(() => {
-        this.timerElapsed = true
-      }, 3000)
-
-      this.bumpIt()
-    },
-    hide() {
-      this.pleaseShowModal = false
-    },
-    gtmRegister() {
-      if (this.$gtm?.enabled()) {
-        this.$gtm.trackEvent({
-          event: 'Register with Website',
-          label: 'EcEMCPvav7kZELy618UD',
-        })
-      }
-    },
-    loginNative(e) {
-      this.loginType = 'Freegle'
-
-      if (this.signUp) {
-        this.$api.bandit.chosen({
-          uid: 'signUpModal',
-          variant: 'native',
-        })
-      }
-
-      const self = this
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      this.loginWaitMessage = null
-      this.buttonClicked = true
-      e.preventDefault()
-      e.stopPropagation()
-
-      // Probably this is someone who is already a user and is trying to log in, but has cleared their cache
-      // (so we've forgotten that they've previously signed in) and hasn't noticed that they need to switch.
-      const confused = !this.fullname && this.email && this.password
-
-      if (!confused && this.signUp) {
-        if (!this.fullname || this.emailError || !this.password) {
-          this.nativeLoginError = 'Please fill out the form.'
-        } else {
-          this.gtmRegister()
-
-          this.authStore
-            .signUp({
-              fullname: this.fullname,
-              email: this.email,
-              password: this.password,
-            })
-            .then(async () => {
-              // We are now logged in. Prompt the browser to remember the credentials.
-              if (window.PasswordCredential) {
-                try {
-                  const c = new window.PasswordCredential(e.target)
-                  navigator.credentials
-                    .store(c)
-                    .then(function () {
-                      self.pleaseShowModal = false
-                    })
-                    .catch((err) => {
-                      console.error('Failed to save credentials', err)
-                    })
-                } catch (e) {
-                  self.pleaseShowModal = false
-                }
-              } else {
-                self.pleaseShowModal = false
-              }
-
-              // Pick up the new user
-              await this.authStore.fetchUser()
-
-              if (this.$route.path === '/' || !this.$route.path) {
-                // We've signed up from the home page.  Send them to the explore page to find a group.
-                this.$router.push('/explore')
-              }
-            })
-            .catch((e) => {
-              console.log('Signup failed', e)
-              if (e instanceof SignUpError) {
-                console.log('Login error')
-                this.nativeLoginError = e.status
-              } else {
-                throw e // let others bubble up
-              }
-            })
-        }
-      } else if (this.emailError || this.passwordError) {
-        this.nativeLoginError = 'Please fill out the form.'
-      } else {
-        // Login
-        this.loginWaitMessage = "Please wait..."
-        this.authStore
-          .login({
-            email: this.email,
-            password: this.password,
-          })
-          .then(() => {
-            // We are now logged in. Prompt the browser to remember the credentials.
-            if (window.PasswordCredential) {
-              try {
-                // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
-                const c = new window.PasswordCredential({
-                  id: this.email,
-                  password: this.password,
+        .then(async () => {
+          // We are now logged in. Prompt the browser to remember the credentials.
+          if (window.PasswordCredential) {
+            try {
+              const c = new window.PasswordCredential(e.target)
+              navigator.credentials
+                .store(c)
+                .then(function () {
+                  pleaseShowModal.value = false
                 })
-                navigator.credentials
-                  .store(c)
-                  .then(function () {
-                    self.pleaseShowModal = false
-                  })
-                  .catch((err) => {
-                    console.error('Failed to save credentials', err)
-                  })
-              } catch (e) {
-                console.log('Failed to save credentials2', e)
-                self.pleaseShowModal = false
-              }
-            } else {
-              self.pleaseShowModal = false
+                .catch((err) => {
+                  console.error('Failed to save credentials', err)
+                })
+            } catch (e) {
+              pleaseShowModal.value = false
             }
-          })
-          .catch((e) => {
-            console.log('Login failed', e)
-            if (e instanceof LoginError) {
-              console.log('Login error')
-              this.nativeLoginError = e.status
-            } else {
-              throw e // let others bubble up
-            }
-            this.loginWaitMessage = null
-          })
-      }
-    },
-    async loginFacebook() {
-      this.loginType = 'Facebook'
+          } else {
+            pleaseShowModal.value = false
+          }
 
-      if (this.signUp) {
-        await this.$api.bandit.chosen({
-          uid: 'signUpModal',
-          variant: 'facebook',
+          // Pick up the new user
+          await authStore.fetchUser()
+
+          if (route.path === '/' || !route.path) {
+            // We've signed up from the home page.  Send them to the explore page to find a group.
+            router.push('/explore')
+          }
         })
-      }
+        .catch((e) => {
+          console.log('Signup failed', e)
+          if (e instanceof SignUpError) {
+            console.log('Login error')
+            nativeLoginError.value = e.status
+          } else {
+            throw e // let others bubble up
+          }
+        })
+    }
+  } else if (emailError.value || passwordError.value) {
+    nativeLoginError.value = 'Please fill out the form.'
+  } else {
+    // Login
+    loginWaitMessage.value = "Please wait..."
+    authStore
+      .login({
+        email: email.value,
+        password: password.value,
+      })
+      .then(() => {
+        // We are now logged in. Prompt the browser to remember the credentials.
+        if (window.PasswordCredential) {
+          try {
+            // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
+            const c = new window.PasswordCredential({
+              id: email.value,
+              password: password.value,
+            })
+            navigator.credentials
+              .store(c)
+              .then(function () {
+                pleaseShowModal.value = false
+              })
+              .catch((err) => {
+                console.error('Failed to save credentials', err)
+              })
+          } catch (e) {
+            console.log('Failed to save credentials2', e)
+            pleaseShowModal.value = false
+          }
+        } else {
+          pleaseShowModal.value = false
+        }
+      })
+      .catch((e) => {
+        console.log('Login failed', e)
+        if (e instanceof LoginError) {
+          console.log('Login error')
+          nativeLoginError.value = e.status
+        } else {
+          throw e // let others bubble up
+        }
+        loginWaitMessage.value = null
+      })
+  }
+}
 
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      this.loginWaitMessage = null
+async function loginFacebook() {
+  loginType.value = 'Facebook'
+
+  if (signUp.value) {
+    await api.bandit.chosen({
+      uid: 'signUpModal',
+      variant: 'facebook',
+    })
+  }
+
+  nativeLoginError.value = null
+  socialLoginError.value = null
+  loginWaitMessage.value = null
 
       // App: https://github.com/capacitor-community/facebook-login
 
-      if( this.isApp) {
-        console.log("Facebook app start")
+  if( isApp.value) {
+    console.log("Facebook app start")
 
-        try{
-          const loginOptions = {
-            provider: 'facebook',
-            options: {
-              permissions: [
-                'email',
-                //'public_profile'
-                //'user_birthday',
-                //'user_photos',
-                //'user_gender',
-              ]
-            },
-          }
-          if( this.isiOS) loginOptions.options.limitedLogin = true
-          const response = await SocialLogin.login(loginOptions)
-          //console.log("Facebook response", response)
-          let accessToken = false
-          if( response && response.result) {
-            accessToken = response.result.accessToken.token
-            if( this.isiOS) accessToken = response.result.idToken
-          }
-          if (accessToken) {
-            //console.log("accessToken", accessToken)
-            // Login successful.
-            this.loginWaitMessage = "Please wait..."
-            await this.authStore.login({
-              fblogin: 1,
-              fbaccesstoken: accessToken,
-              fblimited: this.isiOS
-            })
-            // We are now logged in.
-            self.pleaseShowModal = false
-          } else {
-            this.socialLoginError = 'Facebook app login failed'
-          }
-        } catch (e) {
-          this.socialLoginError = 'Facebook app login error: ' + e.message
-        }
-        this.loginWaitMessage = null
-        return 
+    try{
+      const loginOptions = {
+        provider: 'facebook',
+        options: {
+          permissions: [
+            'email',
+            //'public_profile'
+            //'user_birthday',
+            //'user_photos',
+            //'user_gender',
+          ]
+        },
       }
-
-      try {
-        let response = null
-        const promise = new Promise(function (resolve) {
-          window.FB.login(
-            function (ret) {
-              response = ret
-              resolve()
-            },
-            { scope: 'email' }
-          )
+      if( isiOS.value) loginOptions.options.limitedLogin = true
+      const response = await SocialLogin.login(loginOptions)
+      //console.log("Facebook response", response)
+      let accessToken = false
+      if( response && response.result) {
+        accessToken = response.result.accessToken.token
+        if( isiOS.value) accessToken = response.result.idToken
+      }
+      if (accessToken) {
+        //console.log("accessToken", accessToken)
+        // Login successful.
+        loginWaitMessage.value = "Please wait..."
+        await authStore.login({
+          fblogin: 1,
+          fbaccesstoken: accessToken,
+          fblimited: isiOS.value
         })
-
-        await promise
-        if (response.authResponse) {
-          const accessToken = response.authResponse.accessToken
-
-          await this.authStore.login({
-            fblogin: 1,
-            fbaccesstoken: accessToken,
-          })
-
-          // We are now logged in.
-          self.pleaseShowModal = false
-        } else {
-          this.socialLoginError =
-            'Facebook response is unexpected.  Please try later.'
-        }
-      } catch (e) {
-        this.socialLoginError = 'Facebook login error: ' + e.message
+        // We are now logged in.
+        self.pleaseShowModal = false
+      } else {
+        socialLoginError.value = 'Facebook app login failed'
       }
-    },
-    loginAppleApp() {
-      if (this.signUp) {
-        this.$api.bandit.chosen({
-          uid: 'signUpModal',
-          variant: 'apple',
-        })
-      }
-      // https://github.com/capacitor-community/apple-sign-in
-      this.socialLoginError = null
-      this.loginWaitMessage = null
-      try{
-        console.log('loginAppleApp')
-        const options = { scopes: 'email name' }
+    } catch (e) {
+      socialLoginError.value = 'Facebook app login error: ' + e.message
+    }
+    loginWaitMessage.value = null
+    return 
+  }
 
-        SignInWithApple.authorize(options)
-          .then( async result => {
-            // Sign in using token at server
-            if (result.response.identityToken) { // identityToken, user, etc
-              this.loginWaitMessage = "Please wait..."
-              await this.authStore.login({
-                applecredentials: result.response,
-                applelogin: true
-              })
-              // We are now logged in.
-              self.pleaseShowModal = false
-            } else{
-              this.socialLoginError = "No identityToken given"
-              this.loginWaitMessage = null
-            }
-          })
-          .catch(e => {
-            if( e.message.indexOf('1001') !== -1 ) {
-              this.socialLoginError = 'Apple login cancelled'
-            } else {
-              this.socialLoginError = e.message
-            }
-            this.loginWaitMessage = null
-          });
-        
-      } catch( e){
-        console.log('Apple login error: ', e)
-        this.socialLoginError = 'Apple login error: ' + e.message
-      }
-    },
-    async loginGoogleApp() {
-      // https://github.com/Cap-go/capacitor-social-login
-      try{
-        console.log('loginGoogleApp')
-        const response = await SocialLogin.login({
-          provider: 'google',
-          options: {
-            scopes: ['email'],
-            forceRefreshToken: true, // Android: if you need refresh token
-            forcePrompt: true // iOS: Force account selection prompt
-          }
-        })
-        //console.log(response)
-        if( response.result && response.result.idToken) {
-          this.loginWaitMessage = "Please wait..."
-          await this.authStore.login({
-              googlejwt: response.result.idToken,
-              googlelogin: true
-            })
-          // We are now logged in.
-          console.log('Logged in')
-          self.pleaseShowModal = false
-        } else{
-          this.socialLoginError = 'Google: no result.idToken found'
-        }
-        this.loginWaitMessage = null
-      } catch( e){
-        console.log('Google login error: ', e)
-        this.socialLoginError = 'Google login error: ' + e.message
-      }
-      this.loginWaitMessage = null
-    },
-    async handleGoogleCredentialsResponse(response) {
-      console.log('Google login', response)
-      this.loginType = 'Google'
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      if (response?.credential) {
-        console.log('Signed in')
+  try {
+    let response = null
+    const promise = new Promise(function (resolve) {
+      window.FB.login(
+        function (ret) {
+          response = ret
+          resolve()
+        },
+        { scope: 'email' }
+      )
+    })
 
-        if (this.signUp) {
-          await this.$api.bandit.chosen({
-            uid: 'signUpModal',
-            variant: 'google',
-          })
-        }
+    await promise
+    if (response.authResponse) {
+      const accessToken = response.authResponse.accessToken
 
+      await authStore.login({
+        fblogin: 1,
+        fbaccesstoken: accessToken,
+      })
+
+      // We are now logged in.
+      pleaseShowModal.value = false
+    } else {
+      socialLoginError.value =
+        'Facebook response is unexpected.  Please try later.'
+    }
+  } catch (e) {
+    socialLoginError.value = 'Facebook login error: ' + e.message
+  }
+}
+
+async function handleGoogleCredentialsResponse(response) {
+  console.log('Google login', response)
+  loginType.value = 'Google'
+  nativeLoginError.value = null
+  socialLoginError.value = null
+  if (response?.credential) {
+    console.log('Signed in')
+
+    if (signUp.value) {
+      await api.bandit.chosen({
+        uid: 'signUpModal',
+        variant: 'google',
+      })
+    }
+
+    try {
+      await authStore.login({
+        googlejwt: response.credential,
+        googlelogin: true,
+      })
+
+      // We are now logged in.
+      console.log('Logged in')
+      pleaseShowModal.value = false
+    } catch (e) {
+      socialLoginError.value = 'Google login failed: ' + e.message
+    }
+  } else if (response?.error && response.error !== 'immediate_failed') {
+    socialLoginError.value = 'Google login failed: ' + response.error
+  }
+}
+
+async function loginYahoo() {
+  loginType.value = 'Yahoo'
+
+  if (signUp.value) {
+    await api.bandit.chosen({
+      uid: 'signUpModal',
+      variant: 'yahoo',
+    })
+  }
+
+  // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
+  // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
+  // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
+  nativeLoginError.value = null
+  socialLoginError.value = null
+
+  const url =
+    'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
+    runtimeConfig.public.YAHOO_CLIENTID +
+    '&redirect_uri=' +
+    encodeURIComponent(
+      window.location.protocol +
+        '//' +
+        window.location.hostname +
+        (window.location.port ? ':' + window.location.port : '') +
+        '/yahoologin?returnto=' +
+        route.fullPath
+    ) +
+    '&response_type=code&language=en-us&scope=sdpp-w'
+
+  window.location = url
+}
+
+function clickShowSignUp(e) {
+  showSignUp.value = true
+  forceSignIn.value = false
+  e.preventDefault()
+  e.stopPropagation()
+}
+
+function clickShowSignIn(e) {
+  showSignUp.value = false
+  forceSignIn.value = true
+  e.preventDefault()
+  e.stopPropagation()
+
+  api.bandit.chosen({
+    uid: 'signUpModal',
+    variant: 'signin',
+  })
+}
+
+function forgot() {
+  hide()
+  forceLogin.value = false
+  router.push('/forgot')
+}
+
+function installGoogleSDK() {
+  if (
+    window &&
+    window.google &&
+    window.google.accounts &&
+    window.google.accounts.id
+  ) {
+    console.log('Install google SDK')
+    // Google client library should be loaded by default.vue.
+    window.google.accounts.id.initialize({
+      client_id: clientId.value,
+      callback: handleGoogleCredentialsResponse,
+    })
+    console.log(
+      'Render google button',
+      document.getElementById('googleLoginButton')
+    )
+
+    console.log('Found google button ref')
+    window.google.accounts.id.renderButton(
+      document.getElementById('googleLoginButton'),
+      { theme: 'outline', size: 'large', width: '300px' }
+    )
+  } else {
+    console.log('Google not yet fully loaded')
+  }
+}
+
+function installFacebookSDK() {
+  if (typeof window.FB === 'undefined') {
+    console.log('Need to install Facebook SDK')
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId: runtimeConfig.public.FACEBOOK_APPID,
+        autoLogAppEvents: true,
+        xfbml: true,
+        version: 'v4.0',
+      })
+      window.FB.AppEvents.logPageView()
+
+      // We need to have some special code for IE11 - see https://stackoverflow.com/questions/27176983/dispatchevent-not-working-in-ie11.
+      let event
+
+      if (typeof Event === 'function') {
+        event = new Event('fb-sdk-ready')
+      } else {
+        event = document.createEvent('Event')
+        event.initEvent('fb-sdk-ready', true, true)
+      }
+    }
+    ;(function (d, s, id) {
+      setTimeout(() => {
         try {
-          await this.authStore.login({
-            googlejwt: response.credential,
-            googlelogin: true,
-          })
+          const fjs = d.getElementsByTagName(s)[0]
+          if (d.getElementById(id)) {
+            return
+          }
 
-          // We are now logged in.
-          console.log('Logged in')
-          this.pleaseShowModal = false
+          const js = d.createElement(s)
+          js.id = id
+          js.src = '//connect.facebook.net/en_US/sdk.js'
+          fjs.parentNode.insertBefore(js, fjs)
         } catch (e) {
-          this.socialLoginError = 'Google login failed: ' + e.message
+          console.error('Failed to load Facebook SDK', e)
         }
-      } else if (response?.error && response.error !== 'immediate_failed') {
-        this.socialLoginError = 'Google login failed: ' + response.error
-      }
+      }, 1000)
+    })(document, 'script', 'facebook-jssdk')
+
+    console.log('Installed FB SDK, bump')
+    bumpIt()
+  } else {
+    console.log('FB SDK already loaded')
+  }
+}
+
+async function initializeAppSocialLogins() {
+  console.log('APP: Set up SocialLogin for google and facebook')
+  const initGoogleParams = {
+    webClientId: clientId.value, // Use Web Client ID for all platforms
+    iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+    iOSServerClientId: clientId.value // the iOS server client id (required in mode offline)
+    // mode: 'offline' // replaces grantOfflineAccess
+  }
+  /*if( isiOS.value) {
+    initGoogleParams.iOSClientId = runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
+    initGoogleParams.webClientId = clientId.value // Use Web Client ID for all platforms
+    initGoogleParams.iOSServerClientId = clientId.value
+  }
+  else {
+    initGoogleParams.webClientId = clientId.value // Use Web Client ID for all platforms
+  }*/
+  await SocialLogin.initialize({
+    google: initGoogleParams,
+    facebook: {
+      appId: runtimeConfig.public.FACEBOOK_APPID,
+      clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
     },
-    async loginYahoo() {
-      this.loginType = 'Yahoo'
+  })
+}
 
-      if (this.signUp) {
-        await this.$api.bandit.chosen({
-          uid: 'signUpModal',
-          variant: 'yahoo',
-        })
-      }
+// Watchers
+watch(
+  showModal,
+  (newVal) => {
+    loginWaitMessage.value = null
+    pleaseShowModal.value = newVal
 
-      this.nativeLoginError = null
-      this.socialLoginError = null
-      this.loginWaitMessage = null
-
-      if( this.isApp) {
-        appYahooLogin(this.$route.fullPath,
-        ret => { // arrow so .this. is correct
-            this.loginWaitMessage = "Please wait..."
-            //console.log('appYahooLogin completed', ret)
-            const returnto = ret.returnto
-            const code = ret.code
-            if (this.me) {
-              // We are logged in.  Go back to where we want to be.
-              console.log('Already logged in')
-              if (returnto) {
-                // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
-                console.log('Return to', returnto)
-                this.$router.push(returnto)
-              } else {
-                console.log('Just go home')
-                this.$router.push('/')
-              }
-            } else if (!code) {
-              this.socialLoginError = 'Yahoo login failed: '+ret.error
-              this.loginWaitMessage = null
-            } else {
-              this.authStore.login({
-                yahoocodelogin: code
-              })
-              .then(async result => {
-                const ret = result.data
-                console.log('Yahoologin session login returned', ret)
-                if (ret.ret === 0) {
-                  console.log('Logged in')
-                  this.pleaseShowModal = false
-
-                  if (returnto) {
-                    // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
-                    console.log('Return to', returnto)
-                    this.$router.go(returnto)
-                  } else {
-                    console.log('Just go home')
-                    this.$router.push('/')
-                  }
-                } else {
-                  console.error('Server login failed', ret)
-                  this.socialLoginError = 'Yahoo login failed'
-                  this.loginWaitMessage = null
-                }
-              })
-            }
-          })
+    if (newVal) {
+      if( isApp.value){ // APP
+        initializeAppSocialLogins()
         return
       }
+      if (!initialisedSocialLogin.value) {
+        // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
+        // don't load the scripts for every page.
+        installFacebookSDK()
+        initialisedSocialLogin.value = true
+      }
 
-      // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
-      // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
-      // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
-      const url =
-        'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
-        this.runtimeConfig.public.YAHOO_CLIENTID +
-        '&redirect_uri=' +
-        encodeURIComponent(
-          window.location.protocol +
-            '//' +
-            window.location.hostname +
-            (window.location.port ? ':' + window.location.port : '') +
-            '/yahoologin?returnto=' +
-            this.$route.fullPath
-        ) +
-        '&response_type=code&language=en-us&scope=sdpp-w'
+      // Need to install Google every time to get the button rendered.
+      installGoogleSDK()
+    }
+  },
+  { immediate: true }
+)
 
-      window.location = url
-    },
-    clickShowSignUp(e) {
-      this.showSignUp = true
-      this.forceSignIn = false
-      e.preventDefault()
-      e.stopPropagation()
-    },
-    clickShowSignIn(e) {
-      this.showSignUp = false
-      this.forceSignIn = true
-      e.preventDefault()
-      e.stopPropagation()
+watch(
+  pleaseShowModal,
+  (newVal) => {
+    showModal.value = newVal || forceLogin.value
+  },
+  { immediate: true }
+)
 
-      this.$api.bandit.chosen({
+watch(
+  forceLogin,
+  (newVal) => {
+    loginWaitMessage.value = null
+    console.log('Force login changed to ' + newVal)
+    showModal.value = pleaseShowModal.value || newVal
+  },
+  { immediate: true }
+)
+
+watch(me, (newVal) => {
+  // Need to do this when we log out to get the signin button rendered on the login modal.
+  if (!newVal) {
+    nextTick(() => {
+      installGoogleSDK()
+    })
+  }
+})
+
+watch(formFields, () => {
+  // reset form validation once any of the fields changes its value
+  nativeLoginError.value = null
+  buttonClicked.value = false
+})
+
+watch(
+  signUp,
+  (newVal) => {
+    if (newVal) {
+      api.bandit.shown({
+        uid: 'signUpModal',
+        variant: 'facebook',
+      })
+      api.bandit.shown({
+        uid: 'signUpModal',
+        variant: 'google',
+      })
+      api.bandit.shown({
+        uid: 'signUpModal',
+        variant: 'yahoo',
+      })
+      api.bandit.shown({
+        uid: 'signUpModal',
+        variant: 'native',
+      })
+      api.bandit.shown({
         uid: 'signUpModal',
         variant: 'signin',
       })
-    },
-    togglePassword() {
-      this.showPassword = !this.showPassword
-    },
-    forgot() {
-      this.hide()
-      this.forceLogin = false
-      this.$router.push('/forgot')
-    },
-    async initializeAppSocialLogins() {
-      console.log('APP: Set up SocialLogin for google and facebook')
-      const initGoogleParams = {
-        webClientId: this.clientId, // Use Web Client ID for all platforms
-        iOSClientId: this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
-        iOSServerClientId: this.clientId // the iOS server client id (required in mode offline)
-        // mode: 'offline' // replaces grantOfflineAccess
-      }
-      /*if( this.isiOS) {
-        initGoogleParams.iOSClientId = this.runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
-        initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
-        initGoogleParams.iOSServerClientId = this.clientId
-      }
-      else {
-        initGoogleParams.webClientId = this.clientId // Use Web Client ID for all platforms
-      }*/
-      await SocialLogin.initialize({
-        google: initGoogleParams,
-        facebook: {
-          appId: this.runtimeConfig.public.FACEBOOK_APPID,
-          clientToken: this.runtimeConfig.public.FACEBOOK_CLIENTID,
-        },
-      })
-    },
-    async installGoogleSDK() {
-      if( this.isApp){
-        initializeAppSocialLogins()
-      } else {
-      if (
-        window &&
-        window.google &&
-        window.google.accounts &&
-        window.google.accounts.id
-      ) {
-        console.log('Install google SDK')
-        // Google client library should be loaded by default.vue.
-        window.google.accounts.id.initialize({
-          client_id: this.clientId,
-          callback: this.handleGoogleCredentialsResponse,
-        })
-        console.log(
-          'Render google button',
-          document.getElementById('googleLoginButton')
-        )
-
-        console.log('Found google button ref')
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleLoginButton'),
-          { theme: 'outline', size: 'large', width: '300px' }
-        )
-      } else {
-        console.log('Google not yet fully loaded')
-      }
-      }
-    },
-    installFacebookSDK() {
-      const self = this
-
-      if (typeof window.FB === 'undefined') {
-        console.log('Need to install Facebook SDK')
-        window.fbAsyncInit = function () {
-          window.FB.init({
-            appId: self.runtimeConfig.public.FACEBOOK_APPID,
-            autoLogAppEvents: true,
-            xfbml: true,
-            version: 'v4.0',
-          })
-          window.FB.AppEvents.logPageView()
-
-          // We need to have some special code for IE11 - see https://stackoverflow.com/questions/27176983/dispatchevent-not-working-in-ie11.
-          let event
-
-          if (typeof Event === 'function') {
-            event = new Event('fb-sdk-ready')
-          } else {
-            event = document.createEvent('Event')
-            event.initEvent('fb-sdk-ready', true, true)
-          }
-        }
-        ;(function (d, s, id) {
-          setTimeout(() => {
-            try {
-              const fjs = d.getElementsByTagName(s)[0]
-              if (d.getElementById(id)) {
-                return
-              }
-
-              const js = d.createElement(s)
-              js.id = id
-              js.src = '//connect.facebook.net/en_US/sdk.js'
-              fjs.parentNode.insertBefore(js, fjs)
-            } catch (e) {
-              console.error('Failed to load Facebook SDK', e)
-            }
-          }, 1000)
-        })(document, 'script', 'facebook-jssdk')
-
-        console.log('Installed FB SDK, bump')
-        this.bumpIt()
-      } else {
-        console.log('FB SDK already loaded')
-      }
-    },
+    }
   },
-}
+  { immediate: true }
+)
+
+// Lifecycle hooks
+onBeforeUnmount(() => {
+  if (bumpTimer) {
+    clearTimeout(bumpTimer)
+    bumpTimer = null
+  }
+})
+
+// Expose methods to parent components
+defineExpose({
+  show,
+  hide,
+  tryLater,
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -1021,7 +913,6 @@ export default {
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-yahoo: #6b0094;
-$color-apple: #000000;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -1069,15 +960,116 @@ $color-apple: #000000;
   width: 100%;
 }
 
-.social-button--apple {
-  border: 2px solid $color-apple;
-  background-color: $color-apple;
+.social-button--google {
+  border: 2px solid $color-google;
+  background-color: $color-white;
+  width: 100%;
+  min-height: 47px;
+}
+
+:deep(.social-button--google > div) {
   width: 100%;
 }
-.social-button--apple .social-button__image {
-  width: 56px;
-  height: 56px;
-  background-color: $color-black;
+
+.social-button--yahoo {
+  border: 2px solid $color-yahoo;
+  background-color: $color-yahoo;
+  width: 100%;
+}
+
+.divider__wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  @include media-breakpoint-up(lg) {
+    flex-direction: column;
+    margin-bottom: 0;
+    flex-grow: 1;
+  }
+}
+
+.divider {
+  border-right: none;
+  border-bottom: 1px solid $color-gray--light;
+  width: 100%;
+
+  @include media-breakpoint-up(lg) {
+    border-right: 1px solid $color-gray--light;
+    border-bottom: none;
+    height: 100%;
+    width: auto;
+  }
+}
+
+.divider__text {
+  margin: 0 7px 0 7px;
+  color: $color-gray--base;
+  font-size: 0.8rem;
+
+  @include media-breakpoint-up(lg) {
+    margin: 7px 0 7px 0;
+  }
+}
+
+:deep(.link a) {
+  text-decoration: none !important;
+}
+
+:deep(.is-invalid label) {
+  color: unset;
+}
+
+$color-facebook: #4267b2;
+$color-google: #4285f4;
+$color-yahoo: #6b0094;
+
+.signin__section--social {
+  flex: 0 1 auto;
+
+  @include media-breakpoint-up(lg) {
+    flex: 0 1 37%;
+  }
+}
+
+.signin__section--freegle {
+  flex: 0 1 auto;
+
+  @include media-breakpoint-up(lg) {
+    flex: 0 1 44%;
+  }
+}
+
+.social-button {
+  display: flex;
+  align-items: center;
+  min-width: 315px;
+  border-radius: 3px;
+  padding: 0;
+  margin: 0 auto 20px;
+  color: $color-white;
+
+  @include media-breakpoint-up(lg) {
+    margin: 0 0 20px;
+  }
+}
+
+.social-button:disabled {
+  opacity: 0.2;
+}
+
+.social-button__image {
+  width: 46px;
+  height: 46px;
+  background-color: $color-white;
+}
+
+.social-button--facebook {
+  border: 2px solid $color-facebook;
+  background-color: $color-facebook;
+  width: 100%;
 }
 
 .social-button--google {
@@ -1085,12 +1077,6 @@ $color-apple: #000000;
   background-color: $color-white;
   width: 100%;
   min-height: 47px;
-}
-.social-button--google-app {
-  border: 2px solid $color-google;
-  background-color: #fff;
-  color: #3c4043;
-  width: 100%;
 }
 
 :deep(.social-button--google > div) {

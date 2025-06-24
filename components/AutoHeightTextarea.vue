@@ -11,105 +11,108 @@
     @focus="focused"
   />
 </template>
-<script>
+<script setup>
 // b-form-area doesn't yet support max-rows, so we roll our own component that monitors the textarea's scrollHeight.
 // If we're showing a scrollbar, then increase the number of rows.
 //
 // We don't shrink.  If you're reading this, why not code it?
-import { mapWritableState } from 'pinia'
-import { ref } from '#imports'
+import { storeToRefs } from 'pinia'
+import { ref, watch, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
-export default {
-  props: {
-    modelValue: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    size: {
-      type: [Number, String],
-      default: null,
-    },
-    rows: {
-      type: [Number, String],
-      default: 2,
-    },
-    maxRows: {
-      type: [Number, String],
-      default: 6,
-    },
-    maxlength: {
-      type: [Number, String],
-      default: null,
-    },
-    spellcheck: {
-      type: [Boolean, String],
-      default: false,
-    },
-    placeholder: {
-      type: String,
-      default: null,
-    },
-    autocapitalize: {
-      type: String,
-      default: null,
-    },
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: false,
+    default: null,
   },
-  setup(props) {
-    return {
-      currentValue: ref(props.modelValue),
-      currentRows: ref(props.rows),
-    }
+  size: {
+    type: [Number, String],
+    default: null,
   },
-  data() {
-    return {
-      timer: null,
-    }
+  rows: {
+    type: [Number, String],
+    default: 2,
   },
-  computed: {
-    ...mapWritableState(useMiscStore, ['lastTyping']),
+  maxRows: {
+    type: [Number, String],
+    default: 6,
   },
-  watch: {
-    modelValue(newVal) {
-      this.currentValue = newVal
-    },
-    currentValue(newVal) {
-      this.lastTyping = Date.now()
+  maxlength: {
+    type: [Number, String],
+    default: null,
+  },
+  spellcheck: {
+    type: [Boolean, String],
+    default: false,
+  },
+  placeholder: {
+    type: String,
+    default: null,
+  },
+  autocapitalize: {
+    type: String,
+    default: null,
+  },
+})
 
-      if (newVal && !this.timer) {
-        // Starting the timer here avoids having the timer run for empty textareas, which happen a lot in ChitChat.
-        this.checkRows()
-      } else if (!newVal && this.timer) {
-        // No longer need to check.
-        clearTimeout(this.timer)
-        this.timer = null
-      }
+const emit = defineEmits(['update:modelValue', 'focus'])
+const ta = ref(null)
+const currentValue = ref(props.modelValue)
+const currentRows = ref(props.rows)
+const timer = ref(null)
 
-      this.$emit('update:modelValue', newVal)
-    },
-  },
-  beforeUnmount() {
-    if (this.rowTimer) {
-      clearTimeout(this.rowTimer)
-    }
-  },
-  methods: {
-    focused() {
-      this.$emit('focus')
-    },
-    checkRows() {
-      const ta = this.$refs.ta
+const miscStore = useMiscStore()
+const { lastTyping } = storeToRefs(miscStore)
 
-      if (ta) {
-        const hasScroll = ta.$el.scrollHeight > ta.$el.clientHeight
-        if (hasScroll && this.currentRows < this.maxRows) {
-          this.currentRows++
-        }
-      }
-
-      this.timer = setTimeout(this.checkRows, 100)
-    },
-  },
+const focused = () => {
+  emit('focus')
 }
+
+function focus() {
+  ta.value.$el.focus()
+}
+
+defineExpose({
+  focus,
+})
+const checkRows = () => {
+  if (ta.value) {
+    const hasScroll = ta.value.$el.scrollHeight > ta.value.$el.clientHeight
+    if (hasScroll && currentRows.value < props.maxRows) {
+      currentRows.value++
+    }
+  }
+
+  timer.value = setTimeout(checkRows, 100)
+}
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    currentValue.value = newVal
+  }
+)
+
+watch(currentValue, (newVal) => {
+  lastTyping.value = Date.now()
+
+  if (newVal && !timer.value) {
+    // Starting the timer here avoids having the timer run for empty textareas, which happen a lot in ChitChat.
+    checkRows()
+  } else if (!newVal && timer.value) {
+    // No longer need to check.
+    clearTimeout(timer.value)
+    timer.value = null
+  }
+
+  emit('update:modelValue', newVal)
+})
+
+onBeforeUnmount(() => {
+  if (timer.value) {
+    clearTimeout(timer.value)
+    timer.value = null
+  }
+})
 </script>

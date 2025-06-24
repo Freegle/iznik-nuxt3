@@ -20,9 +20,11 @@
   </div>
 </template>
 <script setup>
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 import { TYPING_TIME_INVERVAL } from '../constants'
 import { useMiscStore } from '../stores/misc'
 import { useChatStore } from '../stores/chat'
+import ProfileImage from '~/components/ProfileImage'
 
 const chatStore = useChatStore()
 const miscStore = useMiscStore()
@@ -73,7 +75,7 @@ async function checkTyping() {
   // visible so as not to be cruel to the server just because we've implemented a poll-based mechanism rather than
   // web sockets.
   if (miscStore.visible) {
-    await chatStore.fetchChat(props.id)
+    await chatStore.fetchChat(props.chatid)
   }
 
   checkTypingTimer = setTimeout(checkTyping, TYPING_TIME_INVERVAL)

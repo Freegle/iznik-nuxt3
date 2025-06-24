@@ -5,6 +5,27 @@ import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 
+// Module-level globals
+const postType = ref(null)
+let email = ref(null)
+let group = ref(null)
+let postcode = ref(null)
+const loggedIn = ref(false)
+const submitting = ref(false)
+const invalid = ref(false)
+const notAllowed = ref(false)
+const unvalidatedEmail = ref(false)
+const wentWrong = ref(false)
+const initialPostcode = ref(null)
+let closed = ref(false)
+let ids = ref([])
+let notblank = ref(false)
+let messageValid = ref(false)
+let uploadingPhoto = ref(false)
+let noGroups = ref(false)
+let postcodeValid = ref(false)
+let emailIsntOurs = ref(false)
+
 export function setup(type) {
   // We can use this to set up a bunch of data and computed properties in a caller.
   const composeStore = useComposeStore()
@@ -12,9 +33,11 @@ export function setup(type) {
   const authStore = useAuthStore()
   const messageStore = useMessageStore()
 
-  const postType = ref(type)
+  // Set the post type
+  postType.value = type
 
-  const group = computed({
+  // Set up computed properties
+  group = computed({
     set(groupid) {
       composeStore.group = groupid
     },
@@ -24,7 +47,7 @@ export function setup(type) {
     },
   })
 
-  const postcode = computed({
+  postcode = computed({
     get() {
       return composeStore.postcode
     },
@@ -35,17 +58,17 @@ export function setup(type) {
 
   const me = computed(() => authStore.user)
 
-  const email = computed({
+  email = computed({
     get() {
       // See if we have a local email stored from last time we were logged in.
-      let email = composeStore.email
+      let emailValue = composeStore.email
 
-      if (!email && me.value?.email) {
+      if (!emailValue && me.value?.email) {
         // If we're logged in, then we have an email from that which takes precedence.
-        email = me.value.email
+        emailValue = me.value.email
       }
 
-      return email
+      return emailValue
     },
     set(newValue) {
       composeStore.setEmail(newValue)
@@ -53,7 +76,7 @@ export function setup(type) {
   })
 
   const route = useRoute()
-  const initialPostcode = route.query.postcode
+  initialPostcode.value = route.query.postcode
     ? route.query.postcode
     : composeStore.postcode?.name
 
@@ -64,11 +87,11 @@ export function setup(type) {
     groupStore.fetch(groupid)
   }
 
-  const ids = computed(() => {
+  ids = computed(() => {
     // ids of messages we are composing.
     const myid = authStore.user?.id
 
-    const ids = []
+    const messageIds = []
     composeStore.all.forEach((message) => {
       // We don't want to return messages where we are logged in as one user but the message came from another.
       // This can happen if you repost, don't complete, log in as another user.  The server submit call will
@@ -78,11 +101,11 @@ export function setup(type) {
         message.type === type &&
         (!message.savedBy || message.savedBy === myid)
       ) {
-        ids.push(message.id)
+        messageIds.push(message.id)
       }
     })
 
-    return ids
+    return messageIds
   })
 
   // Make sure we're not wrongly set as being in the middle of an upload
@@ -98,66 +121,91 @@ export function setup(type) {
     messageStore.fetchByUser(myid, false)
   }
 
+  // Update all the refs with initial values
+  loggedIn.value = !!myid
+  submitting.value = false
+  invalid.value = false
+  notAllowed.value = false
+  unvalidatedEmail.value = false
+  wentWrong.value = false
+
+  // Set up remaining computed properties
+  closed = computed(() => group.value?.settings?.closed)
+
+  notblank = computed(() => {
+    let ret = false
+    const messages = composeStore.all
+    if (messages?.length > 0) {
+      messages.forEach((message) => {
+        const atts = Object.values(composeStore.attachments(message.id))
+
+        ret ||=
+          message.type === postType.value &&
+          ((message.item && message.item.trim()) ||
+            (message.description && message.description.trim()) ||
+            atts?.length)
+      })
+    }
+
+    return ret
+  })
+
+  messageValid = computed(() => {
+    return composeStore.messageValid(postType)
+  })
+
+  uploadingPhoto = computed(() => {
+    return composeStore.uploading
+  })
+
+  noGroups = computed(() => {
+    return composeStore.noGroups
+  })
+
+  postcodeValid = computed(() => {
+    return composeStore.postcodeValid
+  })
+
+  emailIsntOurs = computed(() => {
+    let ret = false
+    const user = authStore.user
+    const em = email.value + ''
+
+    if (email.value && user) {
+      ret = !user.emails?.find((e) => {
+        return (
+          em
+            .toLowerCase()
+            .trim()
+            .localeCompare(e.email.toLowerCase().trim()) === 0
+        )
+      })
+    }
+
+    return ret
+  })
+
+  // Return all the refs
   return {
     email,
     postType,
-    submitting: ref(false),
-    invalid: ref(false),
-    notAllowed: ref(false),
-    unvalidatedEmail: ref(false),
-    wentWrong: ref(false),
-    initialPostcode: ref(initialPostcode),
+    loggedIn,
+    submitting,
+    invalid,
+    notAllowed,
+    unvalidatedEmail,
+    wentWrong,
+    initialPostcode,
     group,
     postcode,
-    closed: computed(() => group?.value?.settings?.closed),
+    closed,
     ids,
-    notblank: computed(() => {
-      let ret = false
-      const messages = composeStore.all
-      if (messages?.length > 0) {
-        messages.forEach((message) => {
-          const atts = Object.values(composeStore.attachments(message.id))
-
-          ret ||=
-            message.type === postType.value &&
-            ((message.item && message.item.trim()) ||
-              (message.description && message.description.trim()) ||
-              atts?.length)
-        })
-      }
-
-      return ret
-    }),
-    messageValid: computed(() => {
-      return composeStore.messageValid(postType)
-    }),
-    uploadingPhoto: computed(() => {
-      return composeStore.uploading
-    }),
-    noGroups: computed(() => {
-      return composeStore.noGroups
-    }),
-    postcodeValid: computed(() => {
-      return composeStore.postcodeValid
-    }),
-    emailIsntOurs: computed(() => {
-      let ret = false
-      const me = authStore.user
-      const em = email.value + ''
-
-      if (email.value && me) {
-        ret = !me.emails?.find((e) => {
-          return (
-            em
-              .toLowerCase()
-              .trim()
-              .localeCompare(e.email.toLowerCase().trim()) === 0
-          )
-        })
-      }
-
-      return ret
-    }),
+    notblank,
+    messageValid,
+    uploadingPhoto,
+    noGroups,
+    postcodeValid,
+    emailIsntOurs,
   }
 }
 
@@ -168,8 +216,8 @@ export async function deleteItem(id) {
 }
 
 export function postcodeClear() {
-  this.postcode = null
-  this.group = null
+  postcode.value = null
+  group.value = null
 }
 
 export function postcodeSelect(pc) {
@@ -229,7 +277,7 @@ export function addItem() {
       id,
       item: null,
       description: null,
-      type: this.postType,
+      type: postType.value,
       availablenow: 1,
     },
     me
@@ -241,10 +289,10 @@ export async function freegleIt(type, router) {
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
 
-  this.submitting = true
-  this.unvalidatedEmail = false
-  this.wentWrong = false
-  this.notAllowed = false
+  submitting.value = true
+  unvalidatedEmail.value = false
+  wentWrong.value = false
+  notAllowed.value = false
 
   try {
     const results = await composeStore.submit({
@@ -292,28 +340,28 @@ export async function freegleIt(type, router) {
 
     // We pass the data in the history state to avoid it showing up in the URL.
     console.log('Navigate to myposts', params)
-    router.push({
+    await router.push({
       name: 'myposts',
       state: params,
     })
     console.log('Navigated')
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
-    this.submitting = false
+    submitting.value = false
 
     if (e?.message) {
       if (e.message.includes('Unvalidated email')) {
         console.log('unvalidated')
-        this.unvalidatedEmail = true
+        unvalidatedEmail.value = true
       } else if (e.message.includes('Not allowed to post on this group')) {
-        this.notAllowed = true
+        notAllowed.value = true
       } else {
-        this.wentWrong = true
+        wentWrong.value = true
       }
     } else {
-      this.wentWrong = true
+      wentWrong.value = true
     }
   }
 
-  this.submitting = false
+  submitting.value = false
 }

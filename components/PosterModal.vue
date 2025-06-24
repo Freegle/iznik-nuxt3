@@ -109,7 +109,8 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, watch, defineAsyncComponent } from 'vue'
 import { useImageStore } from '../stores/image'
 import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
@@ -125,116 +126,108 @@ const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 
-export default {
-  components: {
-    DraggableMap,
-    NoticeMessage,
-    SpinButton,
-    OurUploader,
-  },
-  emits: ['hidden'],
-  setup() {
-    const noticeboardStore = useNoticeboardStore()
-    const imageStore = useImageStore()
+const emit = defineEmits(['hidden'])
 
-    const { modal, hide } = useOurModal()
+// Store instances
+const noticeboardStore = useNoticeboardStore()
+const imageStore = useImageStore()
 
-    return {
-      noticeboardStore,
-      imageStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      name: null,
-      description: null,
-      loaded: false,
-      active: true,
-      uploading: false,
-      image: null,
-      currentAtts: [],
-    }
-  },
-  watch: {
-    currentAtts: {
-      handler(newVal) {
-        this.uploading = false
+// Modal control
+const { modal, hide } = useOurModal()
 
-        this.image = {
-          id: newVal[0].id,
-          imageuid: newVal[0].ouruid,
-          imagemods: newVal[0].externalmods,
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    async submit(callback) {
-      if (this.name) {
-        const cent = this.$refs.map.getCenter()
+// Component refs
+const map = ref(null)
 
-        if (cent?.lat || cent?.lng) {
-          // There's a server oddity which means we need to add this and then edit in the name/description.
-          const id = await this.noticeboardStore.add(
-            cent.lat,
-            cent.lng,
-            this.active
-          )
+// Reactive state
+const name = ref(null)
+const description = ref(null)
+const loaded = ref(false)
+const active = ref(true)
+const uploading = ref(false)
+const image = ref(null)
+const currentAtts = ref([])
 
-          if (id) {
-            await this.noticeboardStore.edit(
-              id,
-              this.name,
-              this.description,
-              this.active,
-              this.image?.id
-            )
+// Watchers
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal?.length) {
+      uploading.value = false
 
-            this.name = null
-            this.description = null
-          }
-
-          this.hide()
-        }
+      image.value = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
       }
-      callback()
-    },
-    shown() {
-      this.loaded = true
-    },
-    hidden() {
-      this.loaded = false
-      this.$emit('hidden')
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    async rotate(deg) {
-      const curr = this.image?.imagemods?.rotate || 0
-      this.image.imagemods.rotate = curr + deg
-
-      // Ensure between 0 and 360
-      this.image.imagemods.rotate = (this.image.imagemods.rotate + 360) % 360
-
-      await this.imageStore.post({
-        id: this.image.id,
-        rotate: this.image.imagemods.rotate,
-        bust: Date.now(),
-        noticeboard: true,
-      })
-    },
-    rotateLeft() {
-      this.rotate(-90)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
+    }
   },
+  { deep: true }
+)
+
+// Methods
+async function submit(callback) {
+  if (name.value) {
+    const cent = map.value.getCenter()
+
+    if (cent?.lat || cent?.lng) {
+      // There's a server oddity which means we need to add this and then edit in the name/description.
+      const id = await noticeboardStore.add(cent.lat, cent.lng, active.value)
+
+      if (id) {
+        await noticeboardStore.edit(
+          id,
+          name.value,
+          description.value,
+          active.value,
+          image.value?.id
+        )
+
+        name.value = null
+        description.value = null
+      }
+
+      hide()
+    }
+  }
+  callback()
+}
+
+function shown() {
+  loaded.value = true
+}
+
+function hidden() {
+  loaded.value = false
+  emit('hidden')
+}
+
+function photoAdd() {
+  // Flag that we're uploading. This will trigger the render of the filepond instance and subsequently the
+  // processed callback below.
+  uploading.value = true
+}
+
+async function rotate(deg) {
+  const curr = image.value?.imagemods?.rotate || 0
+  image.value.imagemods.rotate = curr + deg
+
+  // Ensure between 0 and 360
+  image.value.imagemods.rotate = (image.value.imagemods.rotate + 360) % 360
+
+  await imageStore.post({
+    id: image.value.id,
+    rotate: image.value.imagemods.rotate,
+    bust: Date.now(),
+    noticeboard: true,
+  })
+}
+
+function rotateLeft() {
+  rotate(-90)
+}
+
+function rotateRight() {
+  rotate(90)
 }
 </script>
 <style scoped lang="scss">

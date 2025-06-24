@@ -97,10 +97,11 @@
     <StoryShareModal v-if="showShare" :id="id" @hidden="showShare = false" />
   </div>
 </template>
-<script>
-import { defineAsyncComponent } from 'vue'
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
+import { useAuthStore } from '~/stores/auth'
 import ReadMore from '~/components/ReadMore'
 import { timeago } from '~/composables/useTimeFormat'
 
@@ -108,55 +109,42 @@ const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )
 
-export default {
-  components: {
-    StoryShareModal,
-    ReadMore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  async setup(props) {
-    const storyStore = useStoryStore()
-    const userStore = useUserStore()
+})
 
-    const story = await storyStore.fetch(props.id)
-    const user = await userStore.fetch(story.userid)
-    const userLocation = await userStore.fetchPublicLocation(story.userid)
+const storyStore = useStoryStore()
+const userStore = useUserStore()
+const authStore = useAuthStore()
+const loggedIn = computed(() => authStore.user !== null)
 
-    return {
-      storyStore,
-      userStore,
-      story,
-      user,
-      userLocation,
-    }
-  },
-  data() {
-    return {
-      showShare: false,
-      showPhotoModal: false,
-    }
-  },
-  computed: {
-    storydateago() {
-      return timeago(this.story.date)
-    },
-  },
-  methods: {
-    share() {
-      this.showShare = true
-    },
-    async love() {
-      await this.storyStore.love(this.id)
-    },
-    async unlove() {
-      await this.storyStore.unlove(this.id)
-    },
-  },
+const showShare = ref(false)
+const showPhotoModal = ref(false)
+
+// Fetch data
+const story = await storyStore.fetch(props.id)
+const user = await userStore.fetch(story.userid)
+const userLocation = await userStore.fetchPublicLocation(story.userid)
+
+// Computed properties
+const storydateago = computed(() => {
+  return timeago(story.date)
+})
+
+// Methods
+function share() {
+  showShare.value = true
+}
+
+async function love() {
+  await storyStore.love(props.id)
+}
+
+async function unlove() {
+  await storyStore.unlove(props.id)
 }
 </script>
 <style scoped>

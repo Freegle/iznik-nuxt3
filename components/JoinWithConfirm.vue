@@ -17,50 +17,44 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, defineAsyncComponent } from 'vue'
 import { useRouter } from '#imports'
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
 
-export default {
-  components: { ConfirmModal },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
+  },
+  variant: {
+    type: String,
+    required: true,
+  },
+  className: {
+    type: String,
+    required: false,
+    default: 'm-1',
+  },
+})
 
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    variant: {
-      type: String,
-      required: true,
-    },
-    className: {
-      type: String,
-      required: false,
-      default: 'm-1',
-    },
-  },
-  data() {
-    return {
-      showConfirm: false,
-    }
-  },
-  methods: {
-    confirm() {
-      this.showConfirm = true
-    },
-    confirmed() {
-      const router = useRouter()
-      router.push('/explore/join/' + this.id)
-    },
-  },
+const router = useRouter()
+const showConfirm = ref(false)
+
+function confirm() {
+  showConfirm.value = true
+}
+
+function confirmed() {
+  router.push('/explore/join/' + props.id)
 }
 </script>

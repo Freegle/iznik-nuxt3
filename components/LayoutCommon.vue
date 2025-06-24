@@ -108,21 +108,33 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  defineAsyncComponent,
+} from 'vue'
 import { useRoute } from 'vue-router'
-import { mapState } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
+import { useNuxtApp, useRuntimeConfig } from '#app'
 import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
-import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
-import replyToPost from '@/mixins/replyToPost'
 import ChatButton from '~/components/ChatButton'
 import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
 import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
+import DeletedRestore from '~/components/DeletedRestore.vue'
+import DaDisableCTA from '~/components/DaDisableCTA.vue'
+import { useReplyToPost } from '~/composables/useReplyToPost'
+import { useMe } from '~/composables/useMe'
+import { useMobileStore } from '@/stores/mobile' // APP
+
+const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
 const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
@@ -133,262 +145,218 @@ const BouncingEmail = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
 )
-
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
-export default {
-  components: {
-    InterestedInOthersModal,
-    BouncingEmail,
-    SupportLink,
-    BreakpointFettler,
-    SomethingWentWrong,
-    ChatButton,
-    ExternalDa,
-    VisibleWhen,
-  },
-  mixins: [replyToPost],
-  data() {
-    return {
-      showLoader: true,
-      timeTimer: null,
-      adRendering: true,
-      firstRender: true,
-      interestedInOthersMsgid: null,
-      interestedInOthersUserId: null,
-      showInterestedModal: false,
-      windowHeight: 0, // Track window height for reactivity
-      videoAd: false,
-    }
-  },
-  computed: {
-    ...mapState(useMiscStore, ['breakpoint', 'adsDisabled']),
-    stickyAdRendered() {
-      return useMiscStore().stickyAdRendered
-    },
-    routePath() {
-      const route = useRoute()
-      return route?.path
-    },
-    allowAd() {
-      // We don't want to show the ad on the landing page when logged out - looks tacky.
-      return this.routePath !== '/' || this.loggedIn
-    },
-    marginTop() {
-      return navBarHidden.value ? '0px' : '60px'
-    },
-    desktopMaxHeight() {
-      // Use windowHeight to trigger reactivity on resize
-      // eslint-disable-next-line no-unused-expressions
-      this.windowHeight
+// Local state
+const showLoader = ref(true)
+let timeTimer = null
+const adRendering = ref(true)
+const firstRender = ref(true)
+const interestedInOthersMsgid = ref(null)
+const interestedInOthersUserId = ref(null)
+const showInterestedModal = ref(false)
+const videoAd = ref(true)
 
-      // Check if desktop tall detector is visible (using CSS media queries)
-      if (process.client && this.$refs.desktopTallDetector) {
-        const computed = window.getComputedStyle(this.$refs.desktopTallDetector)
-        return computed.display === 'block' ? '250px' : '90px'
-      }
-      return '90px'
-    },
-    mobileMaxHeight() {
-      // Use windowHeight to trigger reactivity on resize
-      // eslint-disable-next-line no-unused-expressions
-      this.windowHeight
+// Store access
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
+const { me, myid, loggedIn } = useMe()
+const route = useRoute()
 
-      // Check if mobile tall detector is visible (using CSS media queries)
-      if (process.client && this.$refs.mobileTallDetector) {
-        const computed = window.getComputedStyle(this.$refs.mobileTallDetector)
-        return computed.display === 'block' ? '100px' : '50px'
-      }
-      return '50px'
-    },
-  },
-  async mounted() {
-    if (process.client) {
-      // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-      // cause displayed fromNow() values to change, rather than starting a timer for each of them.
-      this.updateTime()
+// Computed properties
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
+const routePath = computed(() => route?.path)
+const allowAd = computed(() => {
+  // We don't want to show the ad on the landing page when logged out - looks tacky.
+  return routePath.value !== '/' || loggedIn.value
+})
+const marginTop = computed(() => (navBarHidden.value ? '0px' : '60px'))
 
-      // We added a basic loader into the HTML.  This helps if we are loaded on an old browser where our JS bombs
-      // out - at least we display something, with a link to support.  But now we're up and running, remove that.
-      //
-      // We have an animation on the loader so that it only becomes visible after ~10s.  That prevents page flicker
-      // if we manage to get up and running rapidly.
-      this.showLoader = false
-
-      // Start online checker
-      const miscStore = useMiscStore()
-      miscStore.startOnlineCheck()
-    }
-
-    if (this.me) {
-      // Get chats and poll regularly for new ones
-      const chatStore = useChatStore()
-      chatStore.pollForChatUpdates()
-    }
-    
-    /*if (process.client) {
-      const mobileStore = useMobileStore()
-      //if (!mobileStore.isApp) {
-
-      // We only add the cookie banner for logged out users.  This reduces costs.  For logged-in users, we assume
-      // they have already seen the banner and specified a preference if they care.
-      const runtimeConfig = useRuntimeConfig()
-
-      console.log(
-        'Consider adding cookie banner',
-        runtimeConfig.public.COOKIEYES
-      )
-
-      if (runtimeConfig.public.COOKIEYES) {
-        console.log('Add it')
-        const cookieScript = document.getElementById('cookieyes')
-
-        if (!cookieScript) {
-          const script = document.createElement('script')
-          script.id = 'cookieyes'
-          //script.setAttribute('src', runtimeConfig.public.COOKIEYES)
-          script.setAttribute('src', '/js/cookieyesapp.js')
-
-          document.head.appendChild(script)
-        }
-      } else {
-        console.log('No cookie banner')
-      }
-      //}
-    } */
-
-    try {
-      // Set the build date.  This may get superceded by Sentry releases, but it does little harm to add it in.
-      const runtimeConfig = useRuntimeConfig()
-      const { $sentrySetContext, $sentrySetUser } = useNuxtApp()
-
-      const sentryParams = {
-        buildDate: runtimeConfig.public.BUILD_DATE,
-        deployId: runtimeConfig.public.DEPLOY_ID,
-      }
-      if(  runtimeConfig.public.ISAPP){
-        console.log('LAYOUT mobileVersion',runtimeConfig.public.MOBILE_VERSION)
-        sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
-        const mobileStore = useMobileStore()
-        sentryParams.deviceuserinfo = mobileStore.deviceuserinfo
-      }
-
-      $sentrySetContext('builddate', sentryParams)
-
-      if (this.me) {
-        // Set the context for sentry so that we know which users are having errors.
-        $sentrySetUser({ id: this.myid })
-
-        if (typeof __insp !== 'undefined') {
-          // eslint-disable-next-line no-undef
-          __insp.push([
-            'tagSession',
-            {
-              userid: this.myid,
-              builddate: runtimeConfig.public.BUILD_DATE,
-            },
-          ])
-        }
-      } else {
-        // eslint-disable-next-line no-lonely-if
-        if (typeof __insp !== 'undefined') {
-          // eslint-disable-next-line no-undef
-          __insp.push([
-            'tagSession',
-            {
-              userid: 'Logged out',
-              builddate: runtimeConfig.public.BUILD_DATE,
-            },
-          ])
-        }
-      }
-    } catch (e) {
-      console.log('Failed to set sentry context', e)
-    }
-
-    if (process.client) {
-      if (this.replyToSend?.replyMsgId) {
-        // We have loaded the site with a reply that needs sending.  This happens if we force login in a way that
-        // causes us to navigate away and back again.  Fetch the relevant message.
-        this.interestedInOthersUserId = this.replyToUser
-        this.interestedInOthersMsgid = this.replyToSend.replyMsgId
-        const messageStore = useMessageStore()
-        await messageStore.fetch(this.replyToSend.replyMsgId, true)
-        this.replyToPost()
-      }
-
-      this.monitorTabVisibility()
-
-      this.haveMounted = true
-
-      // Track window resize for height detection
-      this.updateWindowHeight()
-      window.addEventListener('resize', this.updateWindowHeight)
-    }
-  },
-  beforeUnmount() {
-    if (process.client) {
-      clearTimeout(this.timeTimer)
-      window.removeEventListener('resize', this.updateWindowHeight)
-    }
-  },
-  methods: {
-    updateTime() {
-      const miscStore = useMiscStore()
-      miscStore.setTime()
-      this.timeTimer = setTimeout(this.updateTime, 1000)
-    },
-    monitorTabVisibility() {
-      if (process.client) {
-        document.addEventListener('visibilitychange', async () => {
-          const miscStore = useMiscStore()
-          miscStore.visible = !document.hidden
-
-          if (this.me && !document.hidden) {
-            try {
-              // We have become visible.  Refetch our notification count and chat count, which are the two key things which
-              // produce red badges people should click on.
-              const notificationStore = useNotificationStore()
-              notificationStore.fetchCount()
-
-              const chatStore = useChatStore()
-
-              // Don't log as we might have been logged out since we were last active.
-              await chatStore.fetchChats(null, false)
-            } catch (e) {
-              // If we failed to fetch the chats, double-check we're logged in by fetching the user. If that
-              // fails it'll log us out, which reduces our ability to start doing stuff in the mean time.
-              const authStore = useAuthStore()
-              authStore.fetchUser()
-            }
-          }
-        })
-      }
-    },
-    adRendered(adShown) {
-      console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
-      this.adRendering = false
-      this.firstRender = false
-      const store = useMiscStore()
-      store.stickyAdRendered = adShown ? 1 : 0
-    },
-    adFailed() {
-      console.log('Layout ad failed, not rendered')
-      this.adRendering = false
-      this.firstRender = false
-      const store = useMiscStore()
-      store.stickyAdRendered = 0
-    },
-    replySent() {
-      this.showInterestedModal = true
-    },
-    updateWindowHeight() {
-      if (process.client) {
-        this.windowHeight = window.innerHeight
-      }
-    },
-  },
+// Methods
+function updateTime() {
+  miscStore.setTime()
+  timeTimer = setTimeout(updateTime, 1000)
 }
+
+function monitorTabVisibility() {
+  if (process.client) {
+    document.addEventListener('visibilitychange', async () => {
+      miscStore.visible = !document.hidden
+
+      if (me && !document.hidden) {
+        try {
+          // We have become visible. Refetch our notification count and chat count, which are the two key things which
+          // produce red badges people should click on.
+          const notificationStore = useNotificationStore()
+          notificationStore.fetchCount()
+
+          const chatStore = useChatStore()
+
+          // Don't log as we might have been logged out since we were last active.
+          await chatStore.fetchChats(null, false)
+        } catch (e) {
+          // If we failed to fetch the chats, double-check we're logged in by fetching the user. If that
+          // fails it'll log us out, which reduces our ability to start doing stuff in the mean time.
+          authStore.fetchUser()
+        }
+      }
+    })
+  }
+}
+
+function adRendered(adShown) {
+  console.log('Layout ad rendered', adShown, adShown ? 1 : 0)
+  adRendering.value = false
+  firstRender.value = false
+  miscStore.stickyAdRendered = adShown ? 1 : 0
+}
+
+function adFailed() {
+  console.log('Layout ad failed, not rendered')
+  adRendering.value = false
+  firstRender.value = false
+  miscStore.stickyAdRendered = 0
+}
+
+function replySent() {
+  showInterestedModal.value = true
+}
+
+const replyToPostChatButton = ref(null)
+
+const windowHeight = ref(0)
+
+function updateWindowHeight() {
+  if (process.client) {
+    windowHeight.value = window.innerHeight
+  }
+}
+
+onMounted(async () => {
+  if (process.client) {
+    // Start our timer. Holding the time in the store allows us to update the time regularly and have reactivity
+    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
+    updateTime()
+
+    // We added a basic loader into the HTML. This helps if we are loaded on an old browser where our JS bombs
+    // out - at least we display something, with a link to support. But now we're up and running, remove that.
+    //
+    // We have an animation on the loader so that it only becomes visible after ~10s. That prevents page flicker
+    // if we manage to get up and running rapidly.
+    showLoader.value = false
+
+    // Start online checker
+    miscStore.startOnlineCheck()
+  }
+
+  if (me.value) {
+    // Get chats and poll regularly for new ones
+    const chatStore = useChatStore()
+    chatStore.pollForChatUpdates()
+  }
+
+  try {
+    // Set the build date. This may get superceded by Sentry releases, but it does little harm to add it in.
+    const runtimeConfig = useRuntimeConfig()
+    const nuxtApp = useNuxtApp()
+    const { $sentrySetContext, $sentrySetUser } = nuxtApp
+
+    const sentryParams = { // APP
+      buildDate: runtimeConfig.public.BUILD_DATE,
+      deployId: runtimeConfig.public.DEPLOY_ID,
+    }
+    if(  runtimeConfig.public.ISAPP){
+      console.log('LAYOUT mobileVersion',runtimeConfig.public.MOBILE_VERSION)
+      sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
+      const mobileStore = useMobileStore()
+      sentryParams.deviceuserinfo = mobileStore.deviceuserinfo
+    }
+
+    $sentrySetContext('builddate', sentryParams)
+
+    if (me.value) {
+      // Set the context for sentry so that we know which users are having errors.
+      $sentrySetUser({ id: myid.value })
+
+      if (typeof __insp !== 'undefined') {
+        // eslint-disable-next-line no-undef
+        __insp.push([
+          'tagSession',
+          {
+            userid: myid.value,
+            builddate: runtimeConfig.public.BUILD_DATE,
+          },
+        ])
+      }
+    } else {
+      // eslint-disable-next-line no-lonely-if
+      if (typeof __insp !== 'undefined') {
+        // eslint-disable-next-line no-undef
+        __insp.push([
+          'tagSession',
+          {
+            userid: 'Logged out',
+            builddate: runtimeConfig.public.BUILD_DATE,
+          },
+        ])
+      }
+    }
+  } catch (e) {
+    console.log('Failed to set context', e)
+  }
+
+  if (process.client) {
+    if (replyToSend.value?.replyMsgId) {
+      // We have loaded the site with a reply that needs sending. This happens if we force login in a way that
+      // causes us to navigate away and back again. Fetch the relevant message.
+      interestedInOthersUserId.value = replyToUser.value
+      interestedInOthersMsgid.value = replyToSend.value.replyMsgId
+      const messageStore = useMessageStore()
+      await messageStore.fetch(replyToSend.value.replyMsgId, true)
+      console.log('Reply to post chat button', replyToPostChatButton.value)
+      const replyResult = await replyToPost(replyToPostChatButton.value)
+      if (replyResult) {
+        replySent()
+      }
+    }
+
+    monitorTabVisibility()
+
+    // Track window resize for height detection
+    updateWindowHeight()
+    window.addEventListener('resize', updateWindowHeight)
+  }
+})
+
+const mobileTallDetector = ref(null)
+const desktopTallDetector = ref(null)
+
+const desktopMaxHeight = computed(() => {
+  // Use windowHeight to trigger reactivity on resize
+  // Check if desktop tall detector is visible (using CSS media queries)
+  if (windowHeight.value && process.client && desktopTallDetector.value) {
+    const computed = window.getComputedStyle(desktopTallDetector.value)
+    return computed.display === 'block' ? '250px' : '90px'
+  }
+  return '90px'
+})
+
+const mobileMaxHeight = computed(() => {
+  // Use windowHeight to trigger reactivity on resize
+  // Check if mobile tall detector is visible (using CSS media queries)
+  if (windowHeight.value && process.client && mobileTallDetector.value) {
+    const computed = window.getComputedStyle(mobileTallDetector.value)
+    return computed.display === 'block' ? '100px' : '50px'
+  }
+  return '50px'
+})
+
+onBeforeUnmount(() => {
+  if (process.client) {
+    clearTimeout(timeTimer)
+    window.removeEventListener('resize', updateWindowHeight)
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

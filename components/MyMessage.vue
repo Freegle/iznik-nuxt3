@@ -250,19 +250,19 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
 import { useComposeStore } from '../stores/compose'
 import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
-import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useTrystStore } from '../stores/tryst'
 import { useLocationStore } from '../stores/location'
 import { milesAway } from '../composables/useDistance'
-import { useRouter } from '#imports'
+import { datetimeshort, timeago } from '../composables/useTimeFormat'
+import { onMounted, ref, computed, watch, useRouter } from '#imports'
 import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
-import { timeago, datetimeshort } from '~/composables/useTimeFormat'
+import { useMe } from '~/composables/useMe'
 
 const MyMessageReply = defineAsyncComponent(() =>
   import('./MyMessageReply.vue')
@@ -284,560 +284,519 @@ const MessageEditModal = defineAsyncComponent(() =>
   import('./MessageEditModal')
 )
 
-export default {
-  components: {
-    MyMessagePromisedTo,
-    MessagePhotosModal,
-    PromiseModal,
-    OutcomeModal,
-    MessageShareModal,
-    MyMessageReply,
-    MessageEditModal,
-    NoticeMessage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    showOld: {
-      type: Boolean,
-      required: true,
-    },
-    expand: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    action: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  showOld: {
+    type: Boolean,
+    required: true,
   },
-  setup(props) {
-    const messageStore = useMessageStore()
-    const chatStore = useChatStore()
-    const groupStore = useGroupStore()
-    const userStore = useUserStore()
-    const trystStore = useTrystStore()
-    const composeStore = useComposeStore()
-    const locationStore = useLocationStore()
-
-    return {
-      messageStore,
-      chatStore,
-      groupStore,
-      userStore,
-      trystStore,
-      composeStore,
-      locationStore,
-    }
+  expand: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      visible: false,
-      maxChars: 60,
-      expanded: false,
-      showOutcomeModal: false,
-      outcomeType: null,
-      showEditModal: false,
-      showShareModal: false,
-      showPromiseModal: false,
-      showMessagePhotosModal: false,
-      broken: false,
-      triedToRepost: false,
-      bump: 0,
-      askDeadline: false,
-    }
+  action: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    groups() {
-      const ret = {}
+})
 
-      if (this.message) {
-        this.message.groups.forEach((g) => {
-          const thegroup = this.groupStore?.get(g.groupid)
+const messageStore = useMessageStore()
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const trystStore = useTrystStore()
+const composeStore = useComposeStore()
+const locationStore = useLocationStore()
+const router = useRouter()
 
-          if (thegroup) {
-            ret[g.groupid] = thegroup
+// Store refs - access me from the user store
+const { me } = useMe()
 
-            // Better to link to the group by name if possible to avoid nuxt generate creating explore pages for the
-            // id variants.
-            ret[g.groupid].exploreLink = thegroup
-              ? thegroup.nameshort
-              : g.groupid
-          }
-        })
-      }
+// Data properties as refs
+const visible = ref(false)
+const expanded = ref(false)
+const showOutcomeModal = ref(false)
+const outcomeType = ref(null)
+const showEditModal = ref(false)
+const showShareModal = ref(false)
+const showPromiseModal = ref(false)
+const showMessagePhotosModal = ref(false)
+const triedToRepost = ref(false)
+const bump = ref(0)
+const askDeadline = ref(false)
 
-      return ret
-    },
-    taken() {
-      return this.hasOutcome('Taken')
-    },
-    received() {
-      return this.hasOutcome('Received')
-    },
-    withdrawn() {
-      return this.hasOutcome('Withdrawn')
-    },
-    rejected() {
-      let rejected = false
+// Computed properties
+const message = computed(() => messageStore?.byId(props.id))
 
-      if (this.message?.groups) {
-        for (const group of this.message.groups) {
-          if (group.collection === 'Rejected') {
-            rejected = true
-          }
-        }
-      }
+const hasOutcome = (val) => {
+  let ret = false
 
-      return rejected
-    },
-    promisedUserids() {
-      const ret = []
-
-      if (this.message?.promisecount && this.message.promises?.length) {
-        for (const promise of this.message.promises) {
-          ret.push(promise.userid)
-        }
-      }
-
-      return ret
-    },
-    replies() {
-      // Show the replies with unseen messages first, then most recent
-      // console.log('Sort replies', this.message.replies, this)
-      const self = this
-
-      if (this.message?.replies) {
-        return [...this.message?.replies].sort((a, b) => {
-          const aunseen = self.countUnseen(a)
-          const bunseen = self.countUnseen(b)
-          const adate = new Date(a.date).getTime()
-          const bdate = new Date(b.date).getTime()
-          const promisea = this.promisedUserids.includes(a.userid)
-          const promiseb = this.promisedUserids.includes(b.userid)
-
-          if (promisea && !promiseb) {
-            return -1
-          } else if (promiseb && !promisea) {
-            return 1
-          } else if (aunseen !== bunseen) {
-            return bunseen - aunseen
-          } else {
-            return bdate - adate
-          }
-        })
-      }
-
-      return []
-    },
-    closestUser() {
-      let ret = null
-      let dist = null
-
-      if (this.replyusers?.length > 1 && this.me) {
-        this.replyusers.forEach((uid) => {
-          const u = this.userStore?.byId(uid)
-
-          if (u) {
-            const milesaway = milesAway(u.lat, u.lng, this.me.lat, this.me.lng)
-
-            if (dist === null || milesaway < dist) {
-              dist = milesaway
-              ret = u.id
-            }
-          }
-        })
-      }
-
-      return ret
-    },
-    bestRatedUser() {
-      let ret = null
-      let rating = null
-
-      if (this.replyusers?.length > 1) {
-        this.replyusers.forEach((uid) => {
-          const u = this.userStore?.byId(uid)
-
-          if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
-            const thisrating =
-              u.info.ratings.Up / (u.info.ratings.Up + u.info.ratings.Down)
-
-            if (
-              u.info.ratings.Up > u.info.ratings.Down &&
-              u.info.ratings.Up > 2 &&
-              (rating === null || thisrating > rating)
-            ) {
-              rating = thisrating
-              ret = u.id
-            }
-          }
-        })
-      }
-
-      return ret
-    },
-    quickestUser() {
-      let ret = null
-      let replytime = null
-
-      if (this.replyusers?.length > 1) {
-        this.replyusers.forEach((uid) => {
-          const u = this.userStore?.byId(uid)
-
-          if (
-            u &&
-            u.info?.replytime &&
-            (replytime === null ||
-              (u.info.replytime && u.info.replytime < replytime))
-          ) {
-            replytime = u.info.replytime
-            ret = u.id
-          }
-        })
-      }
-
-      return ret
-    },
-    replyusers() {
-      // Get the users in replyuserids from store
-      const ret = []
-
-      this.replyuserids.forEach((uid) => {
-        const u = this.userStore?.byId(uid)
-
-        if (u) {
-          ret.push(u)
-        }
-      })
-
-      return ret
-    },
-    replyuserids() {
-      const ret = []
-      const retids = {}
-
-      if (this.message?.replies) {
-        for (const reply of this.message.replies) {
-          if (!retids[reply.userid]) {
-            ret.push(reply.userid)
-            retids[reply.userid] = true
-          }
-        }
-      }
-
-      // Also add anyone who the message has been promised to.  It is possible to manually promise to someone who
-      // hasn't replied, during the course of a chat.
-      if (this.message?.promises) {
-        for (const promise of this.message.promises) {
-          if (!retids[promise.userid]) {
-            ret.push(promise.userid)
-            retids[promise.userid] = true
-          }
-        }
-      }
-
-      // We want to add all the recent chat users.  This allows us to promise to
-      // people who reply in a chat asking informally for multiple items.
-      const chats = this.chatStore?.list ? this.chatStore.list : []
-      const visibleChats = this.scanChats(chats)
-
-      visibleChats.forEach((chat) => {
-        if (
-          chat.chattype === 'User2User' &&
-          chat.otheruid &&
-          !retids[chat.otheruid]
-        ) {
-          ret.push(chat.otheruid)
-          retids[chat.otheruid] = true
-        }
-      })
-
-      return ret
-    },
-    chats() {
-      // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
-      // get them from the store
-      const chats = this.chatStore?.list ? this.chatStore.list : []
-      const ret = chats.filter((c) => {
-        return this.message?.refchatids?.includes(c.id)
-      })
-
-      return ret
-    },
-    promisedTo() {
-      const ret = []
-
-      if (this.message.promises?.length) {
-        this.message.promises.forEach((p) => {
-          const user = this.userStore?.byId(p.userid)
-
-          if (user) {
-            const tryst = this.trystStore?.getByUser(p.userid)
-            const date = tryst
-              ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
-              : null
-
-            ret.push({
-              id: p.userid,
-              name: user.displayname,
-              tryst,
-              trystdate: date,
-            })
-          }
-        })
-      }
-
-      return ret
-    },
-    willAutoRepost() {
-      if (this.taken || this.received || !this.message.canrepostat) {
-        return false
-      }
-
-      const d = dayjs(this.message.canrepostat)
-      const now = dayjs()
-
-      return d.isAfter(now)
-    },
-    repostatago() {
-      if (this.message.repostat) {
-        return timeago(this.message.repostat)
-      }
-
-      return null
-    },
-    canrepostatago() {
-      if (this.message.canrepostat) {
-        return timeago(this.message.canrepostat)
-      }
-
-      return null
-    },
-  },
-  watch: {
-    message: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          // We may need to fetch user info for promises.
-          if (newVal.promises) {
-            newVal.promises.forEach((p) => {
-              this.userStore.fetch(p.userid)
-            })
-          }
-
-          if (newVal.replycount === 1) {
-            this.expanded = true
-          }
-        }
-      },
-    },
-    replies: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal?.length === 1) {
-          this.expanded = true
-        }
-      },
-    },
-    replyuserids(newVal) {
-      // Make sure we have them in store.
-      newVal.forEach((uid) => {
-        this.userStore.fetch(uid)
-      })
-    },
-  },
-  mounted() {
-    this.expanded = this.expand
-
-    if (this.me) {
-      switch (this.action) {
-        case 'repost':
-          if (this.message.canrepost) {
-            this.repost()
-          }
-          break
-        case 'withdraw':
-          this.outcome('Withdrawn')
-          break
-        case 'taken':
-          this.outcome('Taken')
-          break
-        case 'received':
-          this.outcome('Received')
-          break
-        case 'promise':
-          this.showPromiseModal = true
-          break
-        case 'extend':
-          this.askDeadline = true
+  if (message.value?.outcomes?.length) {
+    for (const outcome of message.value.outcomes) {
+      if (outcome.outcome === val) {
+        ret = true
       }
     }
-  },
-  methods: {
-    datetimeshort,
-    async visibilityChanged(isVisible) {
-      if (isVisible) {
-        await this.messageStore.fetch(this.id)
-        this.visible = isVisible
-      }
-    },
-    showPhotos() {
-      console.log('Show photos')
-      this.showMessagePhotosModal = true
-    },
-    countUnseen(reply) {
-      let unseen = 0
+  }
 
-      for (const chat of this.chats) {
-        if (chat.id === reply.chatid) {
-          unseen = chat.unseen
-        }
-      }
-
-      return unseen
-    },
-    outcome(type) {
-      this.showOutcomeModal = true
-      this.outcomeType = type
-    },
-    share(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
-      this.showShareModal = true
-    },
-    async edit(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
-      await this.messageStore.fetch(this.id, true)
-      this.showEditModal = true
-    },
-    async repost(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-      }
-
-      // Remove any partially composed messages we currently have, because they'll be confusing.
-      await this.composeStore.clearMessages()
-
-      // Add this message to the compose store so that it will show up on the compose page.
-      console.log('repost', this.id)
-      await this.composeStore.setMessage(
-        0,
-        {
-          id: this.message.id,
-          savedBy: this.message.fromuser,
-          item: this.message.item?.name.trim(),
-          description: this.message.textbody
-            ? this.message.textbody.trim()
-            : null,
-          availablenow: this.message.availablenow,
-          type: this.message.type,
-          repostof: this.id,
-          deadline: null,
-        },
-        this.me
-      )
-
-      // Set the current location and nearby groups, too, since we're about to use them
-      if (this.message.location) {
-        console.log('Fetch location for', this.message.location.name)
-        const locs = await useLocationStore().typeahead(
-          this.message.location.name
-        )
-
-        console.log('Returned', locs)
-        this.composeStore.postcode = locs[0]
-      }
-
-      await this.composeStore.setAttachmentsForMessage(
-        0,
-        this.message.attachments
-      )
-
-      const router = useRouter()
-      router.push(this.message.type === 'Offer' ? '/give' : '/find')
-    },
-    async repostWhenUnavailable() {
-      this.triedToRepost = true
-
-      await this.messageStore.fetch(this.id, true)
-
-      if (this.message.canrepost) {
-        // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
-        // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
-        // on the page without refreshing it
-        this.triedToRepost = false
-        await this.repost()
-      }
-    },
-    hasOutcome(val) {
-      let ret = false
-
-      if (this.message.outcomes?.length) {
-        for (const outcome of this.message.outcomes) {
-          if (outcome.outcome === val) {
-            ret = true
-          }
-        }
-      }
-
-      return ret
-    },
-    brokenImage() {
-      this.broken = true
-    },
-    hidden() {
-      this.showEditModal = false
-      this.messageStore.fetch(this.id)
-    },
-    extendDeadline() {
-      this.askDeadline = true
-    },
-    scanChats(chats) {
-      chats = chats.filter((chat) => {
-        if (chat.status === 'Blocked' || chat.status === 'Closed') {
-          return false
-        }
-
-        return true
-      })
-
-      // Sort by last date.
-      chats.sort((a, b) => {
-        if (a.lastdate && b.lastdate) {
-          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-        } else if (a.lastdate) {
-          return -1
-        } else if (b.lastdate) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-
-      return chats
-    },
-  },
+  return ret
 }
+
+const taken = computed(() => hasOutcome('Taken'))
+const received = computed(() => hasOutcome('Received'))
+const withdrawn = computed(() => hasOutcome('Withdrawn'))
+
+const rejected = computed(() => {
+  let rejected = false
+
+  if (message.value?.groups) {
+    for (const group of message.value.groups) {
+      if (group.collection === 'Rejected') {
+        rejected = true
+      }
+    }
+  }
+
+  return rejected
+})
+
+const promisedUserids = computed(() => {
+  const ret = []
+
+  if (message.value?.promisecount && message.value.promises?.length) {
+    for (const promise of message.value.promises) {
+      ret.push(promise.userid)
+    }
+  }
+
+  return ret
+})
+
+const countUnseen = (reply) => {
+  let unseen = 0
+
+  for (const chat of chats.value) {
+    if (chat.id === reply.chatid) {
+      unseen = chat.unseen
+    }
+  }
+
+  return unseen
+}
+
+const replies = computed(() => {
+  // Show the replies with unseen messages first, then most recent
+  if (message.value?.replies) {
+    return [...message.value?.replies].sort((a, b) => {
+      const aunseen = countUnseen(a)
+      const bunseen = countUnseen(b)
+      const adate = new Date(a.date).getTime()
+      const bdate = new Date(b.date).getTime()
+      const promisea = promisedUserids.value.includes(a.userid)
+      const promiseb = promisedUserids.value.includes(b.userid)
+
+      if (promisea && !promiseb) {
+        return -1
+      } else if (promiseb && !promisea) {
+        return 1
+      } else if (aunseen !== bunseen) {
+        return bunseen - aunseen
+      } else {
+        return bdate - adate
+      }
+    })
+  }
+
+  return []
+})
+
+const replyuserids = computed(() => {
+  const ret = []
+  const retids = {}
+
+  if (message.value?.replies) {
+    for (const reply of message.value.replies) {
+      if (!retids[reply.userid]) {
+        ret.push(reply.userid)
+        retids[reply.userid] = true
+      }
+    }
+  }
+
+  // Also add anyone who the message has been promised to.  It is possible to manually promise to someone who
+  // hasn't replied, during the course of a chat.
+  if (message.value?.promises) {
+    for (const promise of message.value.promises) {
+      if (!retids[promise.userid]) {
+        ret.push(promise.userid)
+        retids[promise.userid] = true
+      }
+    }
+  }
+
+  // We want to add all the recent chat users.  This allows us to promise to
+  // people who reply in a chat asking informally for multiple items.
+  const chats = chatStore?.list ? chatStore.list : []
+  const visibleChats = scanChats(chats)
+
+  visibleChats.forEach((chat) => {
+    if (
+      chat.chattype === 'User2User' &&
+      chat.otheruid &&
+      !retids[chat.otheruid]
+    ) {
+      ret.push(chat.otheruid)
+      retids[chat.otheruid] = true
+    }
+  })
+
+  return ret
+})
+
+const replyusers = computed(() => {
+  // Get the users in replyuserids from store
+  const ret = []
+
+  replyuserids.value.forEach((uid) => {
+    const u = userStore?.byId(uid)
+
+    if (u) {
+      ret.push(u)
+    }
+  })
+
+  return ret
+})
+
+const closestUser = computed(() => {
+  let ret = null
+  let dist = null
+
+  if (replyusers.value?.length > 1 && me) {
+    replyusers.value.forEach((u) => {
+      if (u) {
+        const milesaway = milesAway(u.lat, u.lng, me.lat, me.lng)
+
+        if (dist === null || milesaway < dist) {
+          dist = milesaway
+          ret = u.id
+        }
+      }
+    })
+  }
+
+  return ret
+})
+
+const bestRatedUser = computed(() => {
+  let ret = null
+  let rating = null
+
+  if (replyusers.value?.length > 1) {
+    replyusers.value.forEach((u) => {
+      if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
+        const thisrating =
+          u.info.ratings.Up / (u.info.ratings.Up + u.info.ratings.Down)
+
+        if (
+          u.info.ratings.Up > u.info.ratings.Down &&
+          u.info.ratings.Up > 2 &&
+          (rating === null || thisrating > rating)
+        ) {
+          rating = thisrating
+          ret = u.id
+        }
+      }
+    })
+  }
+
+  return ret
+})
+
+const quickestUser = computed(() => {
+  let ret = null
+  let replytime = null
+
+  if (replyusers.value?.length > 1) {
+    replyusers.value.forEach((u) => {
+      if (
+        u &&
+        u.info?.replytime &&
+        (replytime === null ||
+          (u.info.replytime && u.info.replytime < replytime))
+      ) {
+        replytime = u.info.replytime
+        ret = u.id
+      }
+    })
+  }
+
+  return ret
+})
+
+const chats = computed(() => {
+  // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
+  // get them from the store
+  const chatsList = chatStore?.list ? chatStore.list : []
+  const ret = chatsList.filter((c) => {
+    return message.value?.refchatids?.includes(c.id)
+  })
+
+  return ret
+})
+
+const promisedTo = computed(() => {
+  const ret = []
+
+  if (message.value?.promises?.length) {
+    message.value.promises.forEach((p) => {
+      const user = userStore?.byId(p.userid)
+
+      if (user) {
+        const tryst = trystStore?.getByUser(p.userid)
+        const date = tryst
+          ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
+          : null
+
+        ret.push({
+          id: p.userid,
+          name: user.displayname,
+          tryst,
+          trystdate: date,
+        })
+      }
+    })
+  }
+
+  return ret
+})
+
+const willAutoRepost = computed(() => {
+  if (taken.value || received.value || !message.value?.canrepostat) {
+    return false
+  }
+
+  const d = dayjs(message.value.canrepostat)
+  const now = dayjs()
+
+  return d.isAfter(now)
+})
+
+const repostatago = computed(() => {
+  if (message.value?.repostat) {
+    return timeago(message.value.repostat)
+  }
+
+  return null
+})
+
+const canrepostatago = computed(() => {
+  if (message.value?.canrepostat) {
+    return timeago(message.value.canrepostat)
+  }
+
+  return null
+})
+
+// Methods
+const visibilityChanged = async (isVisible) => {
+  if (isVisible) {
+    await messageStore.fetch(props.id)
+    visible.value = isVisible
+  }
+}
+
+const showPhotos = () => {
+  console.log('Show photos')
+  showMessagePhotosModal.value = true
+}
+
+const outcome = (type) => {
+  showOutcomeModal.value = true
+  outcomeType.value = type
+}
+
+const share = (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+
+  showShareModal.value = true
+}
+
+const edit = async (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+
+  await messageStore.fetch(props.id, true)
+  showEditModal.value = true
+}
+
+const repost = async (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+
+  // Remove any partially composed messages we currently have, because they'll be confusing.
+  await composeStore.clearMessages()
+
+  // Add this message to the compose store so that it will show up on the compose page.
+  console.log('repost', props.id)
+  await composeStore.setMessage(
+    0,
+    {
+      id: message.value.id,
+      savedBy: message.value.fromuser,
+      item: message.value.item?.name.trim(),
+      description: message.value.textbody
+        ? message.value.textbody.trim()
+        : null,
+      availablenow: message.value.availablenow,
+      type: message.value.type,
+      repostof: props.id,
+      deadline: null,
+    },
+    me
+  )
+
+  // Set the current location and nearby groups, too, since we're about to use them
+  if (message.value.location) {
+    console.log('Fetch location for', message.value.location.name)
+    const locs = await locationStore.typeahead(message.value.location.name)
+
+    console.log('Returned', locs)
+    composeStore.postcode = locs[0]
+  }
+
+  await composeStore.setAttachmentsForMessage(0, message.value.attachments)
+
+  router.push(message.value.type === 'Offer' ? '/give' : '/find')
+}
+
+const repostWhenUnavailable = async () => {
+  triedToRepost.value = true
+
+  await messageStore.fetch(props.id, true)
+
+  if (message.value.canrepost) {
+    // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
+    // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
+    // on the page without refreshing it
+    triedToRepost.value = false
+    await repost()
+  }
+}
+
+const hidden = () => {
+  showEditModal.value = false
+  messageStore.fetch(props.id)
+}
+
+const extendDeadline = () => {
+  askDeadline.value = true
+}
+
+const scanChats = (chats) => {
+  chats = chats.filter((chat) => {
+    if (chat.status === 'Blocked' || chat.status === 'Closed') {
+      return false
+    }
+
+    return true
+  })
+
+  // Sort by last date.
+  chats.sort((a, b) => {
+    if (a.lastdate && b.lastdate) {
+      return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+    } else if (a.lastdate) {
+      return -1
+    } else if (b.lastdate) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  return chats
+}
+
+// Watchers
+watch(
+  message,
+  (newVal) => {
+    if (newVal) {
+      // We may need to fetch user info for promises.
+      if (newVal.promises) {
+        newVal.promises.forEach((p) => {
+          userStore.fetch(p.userid)
+        })
+      }
+
+      if (newVal.replycount === 1) {
+        expanded.value = true
+      }
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  replies,
+  (newVal) => {
+    if (newVal?.length === 1) {
+      expanded.value = true
+    }
+  },
+  { immediate: true }
+)
+
+watch(replyuserids, (newVal) => {
+  // Make sure we have them in store.
+  newVal.forEach((uid) => {
+    userStore.fetch(uid)
+  })
+})
+
+// Lifecycle hooks
+onMounted(() => {
+  expanded.value = props.expand
+
+  if (me.value) {
+    switch (props.action) {
+      case 'repost':
+        if (message.value?.canrepost) {
+          repost()
+        }
+        break
+      case 'withdraw':
+        outcome('Withdrawn')
+        break
+      case 'taken':
+        outcome('Taken')
+        break
+      case 'received':
+        outcome('Received')
+        break
+      case 'promise':
+        showPromiseModal.value = true
+        break
+      case 'extend':
+        askDeadline.value = true
+    }
+  }
+})
 </script>
 <style scoped lang="scss">
 .square {

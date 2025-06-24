@@ -19,7 +19,11 @@
         <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
           Share now
         </b-button>
-        <b-list-group v-if="!isApp" horizontal class="flex-wrap">
+        <b-list-group v-else
+          :key="'messageshare-' + bump"
+          horizontal
+          class="flex-wrap"
+        >
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -44,7 +48,7 @@
               @open="opened"
             >
               <b-button variant="secondary" class="mt-1 twitter">
-                <v-icon :icon="['fab', 'twitter']" /> Twitter
+                <v-icon :icon="['fab', 'twitter']" /> X
               </b-button>
             </ShareNetwork>
           </b-list-group-item>
@@ -99,100 +103,76 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
-import { useMobileStore } from '@/stores/mobile'
-import { Share } from '@capacitor/share';
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
+import { useMobileStore } from '@/stores/mobile' // APP
+import { Share } from '@capacitor/share';
 
-export default {
-  components: { NoticeMessage },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    maybe: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup() {
-    const messageStore = useMessageStore()
+  maybe: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    const { modal, hide } = useOurModal()
+const messageStore = useMessageStore()
+const { modal, hide } = useOurModal()
+const copied = ref(false)
+const bump = ref(0)
 
-    try {
-      await messageStore.fetch(this.id, true)
-    } catch (e) {
-      // Must no longer exist on server.
-      hide()
-    }
+// We install this plugin here rather than from the plugins folder to reduce page load side in the mainline case
+const nuxtApp = useNuxtApp()
+nuxtApp.vueApp.use(VueSocialSharing)
 
-    // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
-    // case.
-    const nuxtApp = useNuxtApp()
-    nuxtApp.vueApp.use(VueSocialSharing)
+onMounted(async () => {
+  try {
+    await messageStore.fetch(props.id, true)
+  } catch (e) {
+    // Must no longer exist on server.
+    hide()
+  }
+})
 
-    return {
-      messageStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      copied: false,
-      bump: 0,
-    }
-  },
-  computed: {
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-  methods: {
-    async shareApp(){
-      const href = this.message.url
-      const subject = 'Sharing ' + this.message.subject
-      try{
-        await Share.share({
-          title: subject,
-          text: this.message.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
-          url: href,
-          dialogTitle: 'Share now...',
-        })
-      } catch( e){
-        console.log('Share exception', e.message)
-      }
-    },
-    async show() {
-      try {
-        await this.messageStore.fetch(this.id, true)
-        if( this.isApp) this.shareApp(); else
-        this.showModal = true
-      } catch (e) {
-        // Must no longer exist on server.
-        this.close()
-      }
-    },
-    async doCopy() {
-      await navigator.clipboard.writeText(this.message.url)
-      this.copied = true
-    },
-    opened() {
-      this.bump++
-    },
-  },
+const isApp = ref(mobileStore.isApp) // APP
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+async function doCopy() {
+  await navigator.clipboard.writeText(message.value.url)
+  copied.value = true
 }
+
+function opened() {
+  bump.value++
+}
+
+async function shareApp(){
+  const href = message.value.url
+  const subject = 'Sharing ' + message.value.subject
+  try{
+    await Share.share({
+      title: subject,
+      text: message.value.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
+      url: href,
+      dialogTitle: 'Share now...',
+    })
+  } catch( e){
+    console.log('Share exception', e.message)
+  }
+},
+
 </script>
 <style scoped lang="scss">
 :deep(.facebook) {

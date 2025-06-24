@@ -39,10 +39,10 @@ public/js/prebid-base-*
 *.txt
 resources
 save
+/playwright-report/
 /test-results/.last-run.json
+/test-results/
 /.npmrc
-/playwright-report/index.html
-/test-results/junit.xml
 /test-emails.json
 
 /CLAUDE.local.md

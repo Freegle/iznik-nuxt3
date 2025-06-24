@@ -24,6 +24,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   // CookieYes banner.
   function checkCMPComplete() {
     const runTimeConfig = useRuntimeConfig()
+
+    // Skip Sentry initialization if DSN is empty (disabled)
+    if (!config.public.SENTRY_DSN) {
+      console.log('Sentry disabled - skipping initialization')
+      return
+    }
+
     if (runTimeConfig.public.COOKIEYES && !window.weHaveLoadedGPT) {
       setTimeout(checkCMPComplete, 100)
     } else {
@@ -118,6 +125,9 @@ export default defineNuxtPlugin((nuxtApp) => {
             if (!originalException) {
               // There's basically no info to report, so there's nothing we can do.  Suppress it.
               console.log('No info - suppress exception')
+              return null
+            } else if (originalExceptionStack?.includes('frame_ant')) {
+              // Chrome extension giving errors.
               return null
             } else if (originalExceptionStack?.includes('/gpt/')) {
               // Google ads are not our problem.

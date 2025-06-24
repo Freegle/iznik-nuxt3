@@ -1,56 +1,38 @@
 <template>
   <!-- eslint-disable-next-line -->
-  <a :href="carefulHref" target="target" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
+  <a :href="carefulHref" :target="target" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { AppLauncher } from '@capacitor/app-launcher'
 import { useMobileStore } from '@/stores/mobile'
 import { useShortlinkStore } from '../stores/shortlinks'
 
-export default {
-  props: {
-    href: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  href: {
+    type: String,
+    required: true,
   },
-  async setup() {
-    const mobileStore = useMobileStore()
-    const shortlinkStore = useShortlinkStore()
-    return {
-      mobileStore,
-      shortlinkStore,
-    }
-  },
-  methods: {
-    async openInBrowser() {
-      if (this.mobileStore.isApp) {
-        let url = this.carefulHref
-        /*const freeglein = 'https://freegle.in/'
-        if( url.startsWith(freeglein)){
-          const sname = url.substring(freeglein.length)
-          console.log('MATCH FREEGLE.IN', sname)
-          const sl = await this.shortlinkStore.fetch(26499)
-          console.log('sl', sl)
-          url = 'https://freegle.org.uk/businesscards/FreegleBusinessCardSmall.jpg' // https://ilovefreegle.org/businesscards/FreegleBusinessCardSmall.jpg
-          //const url = this.href.replace('ilovefreegle.org','freegle.org.uk')
-        }
-        console.log('openInBrowser',url)*/
-        AppLauncher.openUrl({ url })
-        return false
-      }
-      return true
-    },
-  },
-  computed: {
-    carefulHref() {
-      return this.href.startsWith('http') || this.href.startsWith('mailto')
-        ? this.href
-        : 'https://' + this.href
-    },
-    target() {
-      return this.href.startsWith('mailto') ? '_self' : '_blank'
-    },
-  },
+})
+
+const carefulHref = computed(() => {
+  return props.href.startsWith('http') || props.href.startsWith('mailto')
+    ? props.href
+    : 'https://' + props.href
+})
+
+const target = computed(() => {
+  return props.href.startsWith('mailto') ? '_self' : '_blank'
+})
+
+async openInBrowser() {
+  const mobileStore = useMobileStore()
+  if (mobileStore.isApp) {
+    let url = carefulHref.value
+    AppLauncher.openUrl({ url })
+    return false
+  }
+  return true
 }
+
 </script>

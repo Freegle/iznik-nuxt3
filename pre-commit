@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+#
+# Cross-platform pre-commit hook for Iznik Nuxt3
+# Works on both Linux and Windows (Git Bash/WSL/MINGW)
+
+# Print colorful messages
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Echo with color and emoji
+info() {
+  echo -e "${BLUE}ℹ️ $1${NC}"
+}
+
+success() {
+  echo -e "${GREEN}✅ $1${NC}"
+}
+
+warn() {
+  echo -e "${YELLOW}⚠️ $1${NC}"
+}
+
+error() {
+  echo -e "${RED}❌ $1${NC}"
+}
+
+# Detect operating system
+case "$(uname -s)" in
+  CYGWIN*|MINGW*|MSYS*)
+    IS_WINDOWS=1
+    info "Windows environment detected"
+    ;;
+  *)
+    IS_WINDOWS=0
+    info "Unix-like environment detected"
+    ;;
+esac
+
+# Get the path to the project root
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+info "Project root: $PROJECT_ROOT"
+
+# Change to the project root directory
+cd "$PROJECT_ROOT" || {
+  error "Failed to cd to $PROJECT_ROOT"
+  exit 1
+}
+
+# Check if our lint-staged script exists
+if [ ! -f "./run-lint-on-changed.sh" ]; then
+  error "Could not find run-lint-on-changed.sh script"
+  exit 1
+fi
+
+# Make sure the script is executable
+chmod +x "./run-lint-on-changed.sh"
+
+# Function to set up path for finding Node/npm binaries
+setup_path() {
+  # Add common path where Node can be found
+  if [ "$IS_WINDOWS" -eq 1 ]; then
+    # Windows paths
+    export PATH="$PATH:/c/Program Files/nodejs:/c/Program Files (x86)/nodejs"
+    # Add npm global path
+    if [ -d "$APPDATA/npm" ]; then
+      export PATH="$PATH:$APPDATA/npm"
+    fi
+  else
+    # Unix paths
+    export PATH="$PATH:/usr/local/bin:/usr/local"
+    # Load NVM if available (Unix only)
+    if [ -f "$HOME/.nvm/nvm.sh" ]; then
+      export NVM_DIR="$HOME/.nvm"
+      # This loads nvm
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+      # Use the project's Node version if .nvmrc exists
+      [ -f ".nvmrc" ] && nvm use
+    fi
+  fi
+}
+
+setup_path
+
+# Check if npm is available
+if ! command -v npm &> /dev/null; then
+  error "npm could not be found. Please ensure Node.js is installed."
+  exit 1
+fi
+
+# Verify package.json exists
+if [ ! -f "package.json" ]; then
+  error "package.json not found"
+  exit 1
+fi
+
+info "Running pre-commit hooks..."
+
+# Run the lint-staged script
+./run-lint-on-changed.sh
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  error "pre-commit hook failed (add --no-verify to bypass)"
+  exit 1
+fi
+
+success "pre-commit hook completed successfully"
+exit 0

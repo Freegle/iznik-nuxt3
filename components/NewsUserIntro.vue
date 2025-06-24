@@ -33,63 +33,56 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { timeago } from '~/composables/useTimeFormat'
+import { useAuthStore } from '~/stores/auth'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
+
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 
-export default {
-  components: {
-    NewsUserInfo,
-    ProfileModal,
-    ProfileImage,
+const props = defineProps({
+  userid: {
+    type: Number,
+    required: true,
   },
-  props: {
-    userid: {
-      type: Number,
-      required: true,
-    },
-    newsfeed: {
-      type: Object,
-      required: true,
-    },
-    append: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    appendBold: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  newsfeed: {
+    type: Object,
+    required: true,
   },
-  data() {
-    return {
-      showProfileModal: false,
-    }
+  append: {
+    type: String,
+    required: false,
+    default: '',
   },
-  computed: {
-    addedago() {
-      return timeago(this.newsfeed.added)
-    },
-    mod() {
-      const me = this.me
-      return (
-        me &&
-        (me.systemrole === 'Moderator' ||
-          me.systemrole === 'Admin' ||
-          me.systemrole === 'Support')
-      )
-    },
+  appendBold: {
+    type: String,
+    required: false,
+    default: '',
   },
-  methods: {
-    showInfo() {
-      this.showProfileModal = true
-    },
-  },
+})
+
+const authStore = useAuthStore()
+const me = computed(() => authStore.user)
+const showProfileModal = ref(false)
+
+const addedago = computed(() => {
+  return timeago(props.newsfeed.added)
+})
+
+const mod = computed(() => {
+  return (
+    me.value &&
+    (me.value.systemrole === 'Moderator' ||
+      me.value.systemrole === 'Admin' ||
+      me.value.systemrole === 'Support')
+  )
+})
+
+function showInfo() {
+  showProfileModal.value = true
 }
 </script>

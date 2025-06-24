@@ -46,7 +46,8 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { useMessageStore } from '../stores/message'
 import { useOurModal } from '~/composables/useOurModal'
@@ -57,136 +58,109 @@ const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
 )
 
-export default {
-  components: {
-    NoticeMessage,
-    UserRatings,
-    DateFormatted,
+const props = defineProps({
+  messages: {
+    validator: (prop) => typeof prop === 'object' || prop === null,
+    required: true,
   },
-  props: {
-    messages: {
-      validator: (prop) => typeof prop === 'object' || prop === null,
-      required: true,
-    },
-    selectedMessage: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    users: {
-      validator: (prop) => typeof prop === 'object' || prop === null,
-      required: true,
-    },
-    selectedUser: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
+  selectedMessage: {
+    type: Number,
+    required: false,
+    default: 0,
   },
-  async setup() {
-    const trystStore = useTrystStore()
-    const messageStore = useMessageStore()
+  users: {
+    validator: (prop) => typeof prop === 'object' || prop === null,
+    required: true,
+  },
+  selectedUser: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+})
 
-    const { modal, hide } = useOurModal()
+const trystStore = useTrystStore()
+const messageStore = useMessageStore()
+const { modal, hide } = useOurModal()
 
-    await trystStore.fetch()
+// Fetch data
+await trystStore.fetch()
 
-    return {
-      trystStore,
-      messageStore,
-      modal,
-      hide,
+// Reactive state
+const removeTryst = ref(true)
+const message = ref(null)
+const user = ref(null)
+
+// Computed properties
+const messageOptions = computed(() => {
+  const options = []
+
+  if (props.messages) {
+    if (props.messages.length > 1) {
+      options.push({
+        value: 0,
+        text: '-- Please choose a message --',
+        selected: props.selectedMessage === 0,
+      })
     }
-  },
-  data() {
-    return {
-      removeTryst: true,
-      message: null,
-      user: null,
+
+    for (const id of props.messages) {
+      const messageObj = messageStore?.byId(id)
+
+      if (messageObj) {
+        options.push({
+          value: messageObj.id,
+          text: messageObj.subject,
+          selected: props.selectedMessage === messageObj.id,
+        })
+      }
     }
-  },
-  computed: {
-    messageOptions() {
-      const options = []
+  }
 
-      if (this.messages) {
-        if (this.messages.length > 1) {
-          options.push({
-            value: 0,
-            text: '-- Please choose a message --',
-            selected: this.selectedMessage === 0,
-          })
-        }
+  return options
+})
 
-        for (const id of this.messages) {
-          const message = this.messageStore?.byId(id)
+const userOptions = computed(() => {
+  const options = []
 
-          if (message) {
-            options.push({
-              value: message.id,
-              text: message.subject,
-              selected: this.selectedMessage === message.id,
-            })
-          }
-        }
-      }
+  if (props.users) {
+    if (props.users.length > 1) {
+      options.push({
+        value: 0,
+        text: '-- Please choose a user --',
+        selected: props.selectedUser === 0,
+      })
+    }
 
-      return options
-    },
-    userOptions() {
-      const options = []
+    for (const user of props.users) {
+      options.push({
+        value: user.id,
+        text: user.displayname,
+        selected: props.selectedUser === user.id,
+      })
+    }
+  }
 
-      if (this.users) {
-        if (this.users.length > 1) {
-          options.push({
-            value: 0,
-            text: '-- Please choose a user --',
-            selected: this.selectedUser === 0,
-          })
-        }
+  return options
+})
 
-        for (const user of this.users) {
-          options.push({
-            value: user.id,
-            text: user.displayname,
-            selected: this.selectedUser === user.id,
-          })
-        }
-      }
+const tryst = computed(() => {
+  return props.selectedUser ? trystStore?.getByUser(props.selectedUser) : null
+})
 
-      return options
-    },
-    userobj() {
-      let ret = null
+// Methods
+function onShow() {
+  message.value = props.selectedMessage
+  user.value = props.selectedUser
+}
 
-      for (const user of this.users) {
-        if (user.id === this.selectedUser) {
-          ret = user
-        }
-      }
+async function renege() {
+  await messageStore.renege(message.value, user.value)
 
-      return ret
-    },
-    tryst() {
-      return this.selectedUser
-        ? this.trystStore?.getByUser(this.selectedUser)
-        : null
-    },
-  },
-  methods: {
-    onShow() {
-      this.message = this.selectedMessage
-      this.user = this.selectedUser
-    },
-    async renege() {
-      await this.messageStore.renege(this.message, this.user)
+  if (tryst.value && removeTryst.value) {
+    await trystStore.delete(tryst.value.id)
+  }
 
-      if (this.tryst && this.removeTryst) {
-        await this.trystStore.delete(this.tryst.id)
-      }
-
-      this.hide()
-    },
-  },
+  hide()
 }
 </script>

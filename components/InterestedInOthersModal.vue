@@ -32,6 +32,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import ProfileImage from './ProfileImage.vue'
+import MessageList from './MessageList.vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
@@ -58,14 +61,23 @@ await Promise.all([
   userStore.fetch(props.userid),
 ])
 
-const otherMessages = messageStore.byUser(props.userid)
+const otherMessages = computed(() => {
+  const userMessages = messageStore.byUser(props.userid)
+  return userMessages.filter((msg) => msg.id !== props.msgid)
+})
 
 const otherUser = computed(() => {
   return userStore.byId(props.userid)
 })
+
 const otherTitle = computed(() => {
   return 'Others from ' + otherUser.value.displayname
 })
+
+// Auto-hide modal if no other messages to show
+if (otherMessages.value.length === 0) {
+  hide()
+}
 </script>
 <style scoped lang="scss">
 .msglist {

@@ -91,17 +91,21 @@
       <div
         class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
       >
-        <PlaceAutocomplete
-          class="mb-2"
-          labeltext="See what's being freegled near you:"
-          labeltext-sr="Enter your location and"
-          @selected="explorePlace($event)"
-        />
+        <client-only>
+          <PlaceAutocomplete
+            class="mb-2"
+            labeltext="See what's being freegled near you:"
+            labeltext-sr="Enter your location and"
+            @selected="explorePlace($event)"
+          />
+        </client-only>
       </div>
-      <VisualiseList
-        v-if="!breakpoint || breakpoint === 'xs'"
-        class="mt-2 mb-2 d-block d-sm-none"
-      />
+      <client-only>
+        <VisualiseList
+          v-if="!breakpoint || breakpoint === 'xs'"
+          class="mt-2 mb-2 d-block d-sm-none"
+        />
+      </client-only>
     </div>
     <div v-if="!isApp" class="app-download mt-2">
       <a
@@ -137,165 +141,155 @@
     <MainFooter class="thefooter" />
   </div>
 </template>
-<script>
-import { useRoute } from 'vue-router'
+<script setup>
+import { useRoute, useRouter } from 'vue-router'
 import { buildHead } from '../composables/useBuildHead'
 import { useMiscStore } from '../stores/misc'
-import { useMobileStore } from '../stores/mobile'
+import { useAuthStore } from '../stores/auth'
 import MainFooter from '~/components/MainFooter'
-import { useRouter } from '#imports'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
+import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
+import FreeglerPhotos from '~/components/FreeglerPhotos.vue'
+import ProxyImage from '~/components/ProxyImage.vue'
+import {
+  computed,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  defineAsyncComponent,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
+import Api from '~/api'
+
 const VisualiseList = defineAsyncComponent(() =>
   import('~/components/VisualiseList')
 )
 
-export default {
-  components: {
-    MainFooter,
-    VisualiseList,
-    BreakpointFettler,
+// Setup
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+const route = useRoute()
+const router = useRouter()
+const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
+const userWatch = ref(null)
+const type = ref('landing')
+
+// Head configuration
+const head = buildHead(
+  route,
+  runtimeConfig,
+  "Don't throw it away, give it away!",
+  "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
+  null,
+  {
+    class: 'landing',
+  }
+)
+
+// Preload some images to speed page load
+const userSite = runtimeConfig.public.USER_SITE
+const proxy = runtimeConfig.public.IMAGE_DELIVERY
+
+const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
+const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
+
+head.link = [
+  {
+    rel: 'preload',
+    as: 'image',
+    href: logo,
   },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+  {
+    rel: 'preload',
+    as: 'image',
+    href: bg,
+  },
+]
 
-    const head = buildHead(
-      route,
-      runtimeConfig,
-      "Don't throw it away, give it away!",
-      "Freegle - like online dating for stuff. Got stuff you don't need? Looking for something? We'll match you with someone local. All completely free.",
-      null,
-      {
-        class: 'landing',
-      }
-    )
+useHead(head)
 
-    // Preload some images to speed page load.
-    const userSite = runtimeConfig.public.USER_SITE
-    const proxy = runtimeConfig.public.IMAGE_DELIVERY
+// Computed properties
+const breakpoint = computed(() => {
+  // We show different stuff on xs screens. In SSR we can't tell what the screen size will be.
+  // But removing the irrelevant option from the DOM once the client loads will save some network/CPU.
+  return process.server ? null : miscStore.breakpoint
+})
 
-    const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
-    const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
+const me = computed(() => {
+  // Access the user store to get the current user
+  const authStore = useAuthStore()
+  return authStore?.user
+})
 
-    head.link = [
-      {
-        rel: 'preload',
-        as: 'image',
-        href: logo,
-      },
-      {
-        rel: 'preload',
-        as: 'image',
-        href: bg,
-      },
-    ]
+const isApp = ref(mobileStore.isApp) // APP
 
-    useHead(head)
+// Methods
+function goHome() {
+  let nextroute = '/browse'
 
-    const miscStore = useMiscStore()
+  // Logged in homepage - on client side we want to load the last page, for logged in users.
+  try {
+    const lastRoute = miscStore.get('lasthomepage')
 
-    return {
-      miscStore,
+    if (lastRoute === 'news') {
+      nextroute = '/chitchat'
+    } else if (lastRoute === 'myposts') {
+      nextroute = '/myposts'
     }
-  },
-  data() {
-    return {
-      userWatch: null,
-      ourBackground: false,
-      timeToPlay: false,
+
+    if (route.path !== nextroute) {
+      nextTick(() => {
+        router.push(nextroute)
+      })
     }
-  },
-  computed: {
-    isApp() {
-      const mobileStore = useMobileStore()
-      return mobileStore.isApp
-    },
-    breakpoint() {
-      // We show different stuff on xs screens.  In SSR we can't tell what the screen size will be.  But removing
-      // the irrelevant option from the DOM once the client loads will save some network/CPU.
-      const store = useMiscStore()
-
-      return process.server ? null : store.breakpoint
-    },
-  },
-  mounted() {
-    if (process.client) {
-      if (this.me) {
-        this.goHome()
-      }
-    }
-  },
-  beforeUnmount() {
-    if (this.userWatch) {
-      this.userWatch()
-    }
-  },
-  methods: {
-    goHome() {
-      let nextroute = '/browse'
-
-      // Logged in homepage - on client side we want to load the last page, for logged in users.
-      try {
-        const lastRoute = this.miscStore.get('lasthomepage')
-
-        if (lastRoute === 'news') {
-          nextroute = '/chitchat'
-        } else if (lastRoute === 'myposts') {
-          nextroute = '/myposts'
-        }
-
-        const router = useRouter()
-        const route = useRoute()
-
-        if (route.path !== nextroute) {
-          this.$nextTick(() => {
-            router.push(nextroute)
-          })
-        }
-      } catch (e) {
-        console.log('Exception', e)
-      }
-    },
-    async clicked(button) {
-      await this.$api.bandit.chosen({
-        uid: 'landing',
-        variant: this.type,
-      })
-
-      await this.$api.bandit.chosen({
-        uid: 'landing-button',
-        variant: this.type + '-' + button,
-      })
-    },
-    async explorePlace(place) {
-      await this.$api.bandit.chosen({
-        uid: 'landing',
-        variant: this.type,
-      })
-
-      await this.$api.bandit.chosen({
-        uid: 'landing-button',
-        variant: this.type + '-place',
-      })
-
-      this.$router.push('/explore/place/' + JSON.stringify(place))
-    },
-    async play() {
-      if (process.client) {
-        try {
-          const videoEl = document.querySelector('video')
-
-          if (videoEl) {
-            videoEl.muted = true
-            await videoEl.play()
-          }
-        } catch (e) {
-          console.log('Video play failed', e)
-        }
-      }
-    },
-  },
+  } catch (e) {
+    console.log('Exception', e)
+  }
 }
+
+async function clicked(button) {
+  await api.bandit.chosen({
+    uid: 'landing',
+    variant: type.value,
+  })
+
+  await api.bandit.chosen({
+    uid: 'landing-button',
+    variant: type.value + '-' + button,
+  })
+}
+
+async function explorePlace(place) {
+  await api.bandit.chosen({
+    uid: 'landing',
+    variant: type.value,
+  })
+
+  await api.bandit.chosen({
+    uid: 'landing-button',
+    variant: type.value + '-place',
+  })
+
+  router.push('/explore/place/' + JSON.stringify(place))
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  if (process.client) {
+    if (me.value) {
+      goHome()
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  if (userWatch.value) {
+    userWatch.value()
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

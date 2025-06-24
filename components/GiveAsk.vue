@@ -16,15 +16,13 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    mobile: {
-      type: Boolean,
-      default: false,
-    },
+<script setup>
+defineProps({
+  mobile: {
+    type: Boolean,
+    default: false,
   },
-}
+})
 </script>
 <style scoped lang="scss">
 .topbutton {

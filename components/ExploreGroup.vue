@@ -10,76 +10,65 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 import MessageList from './MessageList'
 import OurMessage from './OurMessage'
 import { useGroupStore } from '~/stores/group'
 
-export default {
-  components: { MessageList, OurMessage },
-  props: {
-    id: {
-      validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
-      required: true,
-    },
-    msgid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    showGiveFind: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  id: {
+    validator: (prop) => typeof prop === 'number' || typeof prop === 'string',
+    required: true,
   },
-  async setup(props) {
-    const groupStore = useGroupStore()
-    await groupStore.fetchMessagesForGroup(props.id)
-    return { groupStore }
+  msgid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  data() {
-    return {
-      bump: 0,
-    }
+  showGiveFind: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    messages() {
-      return this.groupStore?.getMessages(this.id)
-    },
-    messagesToShow() {
-      const ids = this.messages ? this.messages.slice(0, this.toShow) : []
-      return ids.map((id) => {
-        return { id, groupid: this.id }
-      })
-    },
-    group() {
-      return this.groupStore?.get(this.id)
-    },
-    closed() {
-      let ret = false
+})
 
-      if (this.group?.settings?.closed) {
-        ret = true
-      }
+const groupStore = useGroupStore()
 
-      return ret
-    },
-  },
-  watch: {
-    messagesToShow() {
-      this.bump++
-    },
-  },
-  methods: {
-    loadMore($state) {
-      if (this.toShow < this.messages.length) {
-        this.toShow++
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-  },
+// Methods
+function loadMore($state) {
+  if (toShow.value < messages.value.length) {
+    toShow.value++
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
 }
+
+// Expose methods to parent components
+defineExpose({
+  loadMore,
+})
+
+const bump = ref(0)
+const toShow = ref(20) // Assuming a default value for toShow
+
+await groupStore.fetchMessagesForGroup(props.id)
+
+// Computed properties
+const messages = computed(() => {
+  return groupStore?.getMessages(props.id)
+})
+
+const messagesToShow = computed(() => {
+  const ids = messages.value ? messages.value.slice(0, toShow.value) : []
+  return ids.map((id) => {
+    return { id, groupid: props.id }
+  })
+})
+
+// Watch for changes
+watch(messagesToShow, () => {
+  bump.value++
+})
 </script>

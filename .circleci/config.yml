@@ -1,296 +1,207 @@
-# Android: runs in /home/circleci/project
-# Apple: runs in /Users/distiller/project as user distiller
-
 version: 2.1
 
 orbs:
-  node: circleci/node@4.1.0
-  android: circleci/android@1.0.3
+  node: circleci/node@5.1.0
+  browser-tools: circleci/browser-tools@1.4.1
 
-################
+# Define reusable commands
+commands:
+  save-test-results:
+    description: "Save test results and artifacts (always runs)"
+    steps:
+      - run:
+          name: Ensure test directories exist
+          command: |
+            mkdir -p test-results
+            mkdir -p playwright-report
+            mkdir -p screenshots
+            mkdir -p playwright-screenshots
+          when: always
+      - store_test_results:
+          path: test-results
+          when: always
+      - store_artifacts:
+          path: test-results
+          destination: test-results
+          when: always
+      - store_artifacts:
+          path: playwright-report
+          destination: playwright-report
+          when: always
+      # Store our dedicated screenshots directory
+      - store_artifacts:
+          path: playwright-screenshots
+          destination: playwright-screenshots
+          when: always
+      # Also look for any other screenshots that might have been created
+      - run:
+          name: Find and store additional screenshots
+          command: |
+            mkdir -p screenshots
+            # Copy root level screenshots
+            find . -maxdepth 1 -name "*.png" -exec cp {} screenshots/ \; || true
+            # Also try to find screenshots in test-results
+            find test-results -name "*.png" -exec cp {} screenshots/ \; || true
+          when: always
+      - store_artifacts:
+          path: screenshots
+          destination: screenshots
+          when: always
+      # Store server output logs
+      - store_artifacts:
+          path: server.out
+          destination: server.out
+          when: always
+
+# Define the jobs we want to run
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/node:18.20.8-browsers
+        environment:
+          NODE_ENV: test
+    # Use a larger resource class with more CPU/RAM - otherwise build fails.
+    resource_class: large
+
+    steps:
+      - checkout
+
+      # Install dependencies
+      - run:
+          name: Optimize Node.js environment
+          command: |
+            # Set Node.js memory options
+            echo "export NODE_OPTIONS=\"--max-old-space-size=8192\"" >> $BASH_ENV
+            source $BASH_ENV
+            
+      # Install dependencies with optimized settings
+      - node/install-packages:
+          pkg-manager: npm
+          cache-path: ~/project/node_modules
+          override-ci-command: npm ci --prefer-offline --no-audit
+
+      # Install Playwright browsers and system dependencies
+      - run:
+          name: Install Playwright browsers
+          command: npx playwright install --with-deps chromium
+
+      # Build the project with environment variables
+      - run:
+          name: Build for testing
+          command: |
+            export IZNIK_API_V1=${API_V1_URL:-https://fdapilive.ilovefreegle.org/api}
+            export IZNIK_API_V2=${API_V2_URL:-https://api.ilovefreegle.org/apiv2}
+            export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
+            # Increase Node.js memory limit to 8GB
+            export NODE_OPTIONS="--max-old-space-size=8192"
+            npm run build
+
+      # Serve the built application in the background
+      - run:
+          name: Serve built application
+          command: |
+            export NODE_OPTIONS="--max-old-space-size=8192"
+            npm run start > server.out 2>&1
+          background: true
+
+      # Wait for the server to be responsive
+      - run:
+          name: Wait for server to be ready
+          command: |
+            # Extract the host and port from TEST_BASE_URL or use default
+            SERVER_URL=${TEST_BASE_URL:-http://localhost:3000}
+            
+            # Wait for server to be up - using longer timeout (120 seconds)
+            timeout=${SERVER_TIMEOUT:-120}
+            counter=0
+            until curl --output /dev/null --silent --head --fail $SERVER_URL; do
+              if [ $counter -ge $timeout ]; then
+                echo "Timed out waiting for server to start at $SERVER_URL"
+                exit 1
+              fi
+              counter=$((counter+1))
+              echo "Waiting for server to be ready at $SERVER_URL... ($counter/$timeout)"
+              sleep 1
+            done
+            echo "Server is up!"
+
+      # Monitor memory usage during build
+      - run:
+          name: Start memory monitor
+          background: true
+          command: |
+            while true; do
+              echo "Memory usage at $(date):"
+              free -h
+              echo "Node process memory:"
+              ps -o pid,vsz,rss,pmem,pcpu,cmd -e | grep node | grep -v grep
+              sleep 30
+            done
+            
+      # Run Playwright tests
+      - run:
+          name: Run Playwright tests
+          command: |
+            mkdir -p test-results
+            export NODE_OPTIONS="--max-old-space-size=8192"
+            
+            # Set environment variables with defaults
+            export TEST_BASE_URL=${TEST_BASE_URL:-http://localhost:3000}
+            export TEST_POSTCODE=${TEST_POSTCODE:-EH3 6SS}
+            export TEST_PLACE=${TEST_PLACE:-Edinburgh}
+            export TEST_EMAIL_DOMAIN=${TEST_EMAIL_DOMAIN:-yahoogroups.com}
+            export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
+            
+            # Run tests and capture exit code
+            npm run test:ci
+            TEST_EXIT_CODE=$?
+            
+            echo "Playwright test exit code: $TEST_EXIT_CODE"
+            
+            # Check for test results
+            if [ ! -f "test-results/junit.xml" ]; then
+              echo "Test results not found at expected location: test-results/junit.xml"
+              echo "This likely indicates a failure in the test framework itself."
+              exit 1
+            fi
+            
+            # Print summary of test failures from junit report if tests failed
+            if [ $TEST_EXIT_CODE -ne 0 ]; then
+              echo "==== TEST FAILURES SUMMARY ===="
+              if command -v xmllint > /dev/null; then
+                # Get count of failing tests
+                FAILURE_COUNT=$(xmllint --xpath "count(//testcase[failure])" test-results/junit.xml || echo "unknown")
+                echo "Found $FAILURE_COUNT failing tests"
+                
+                # Extract specific failures
+                xmllint --xpath "//testcase[failure]/@name" test-results/junit.xml 2>/dev/null || echo "Could not extract failure details"
+              else
+                # Fallback if xmllint is not available
+                grep -A 2 "<failure" test-results/junit.xml || echo "No failure details found"
+              fi
+              echo "==== END OF FAILURES SUMMARY ===="
+              
+              echo "See CircleCI artifacts for full test reports and screenshots"
+              # Exit with the original test exit code to properly fail the build
+              exit $TEST_EXIT_CODE
+            fi
+                
+      # Save test results (always run this, even if tests fail)
+      - run:
+          name: Collect test artifacts
+          command: |
+            mkdir -p playwright-screenshots
+            # Ensure we have full screenshot info for debugging
+            find . -name "*.png" -type f -not -path "./node_modules/*" -exec cp {} playwright-screenshots/ \; || true
+          when: always  # Make sure this runs even if tests fail
+      
+      # Save all test results and artifacts
+      - save-test-results  # This custom command includes 'when: always' for all its steps
+
+# Orchestrate the workflow
 workflows:
   version: 2
-  build-and-publish:
+  build-test:
     jobs:
-      - hold: # Job needs approval to run
-          filters:
-            branches:
-              only:
-                - app-publish
-          type: approval      
-      - HoldApple: # Apple Job needs approval to run
-          filters:
-            branches:
-              only:
-                - app-publish
-          type: approval      
-      - HoldAndroid: # Android Job needs approval to run
-          filters:
-            branches:
-              only:
-                - app-publish
-          type: approval      
-      - build-and-publish-apple:
-          filters:
-            branches:
-              only:
-                - app-publish
-          requires:
-            - HoldApple
-      - build-and-publish-android:
-          filters:
-            branches:
-              only:
-                - app-publish
-          #requires:
-          #  - HoldAndroid
-
-################
-################ APPLE
-jobs:
-  build-and-publish-apple:
-    macos:
-      # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
-      xcode: "14.2.0" # 11.3.1 12.4.0 13.2.1 13.0.0
-    #resource_class: large
-    resource_class: macos.x86.medium.gen2
-    steps:
-      - checkout
-      - run: nvm list
-      - node/install:
-          lts: true # node 14.17.6 npm 6.14.15 for xcode:13.0.0 
-      - run: nvm list
-      - run: npm -v; node -v # 9.6.2 18.15.0
-      - run: sudo chown -R 502:20 "/Users/distiller/.npm"
-
-      ################
-      - run:
-          name: == Decrypt secrets and set up signing
-          command: echo "Decrypt secrets"
-      - run: openssl version; tar --version; java -version
-      - run: cd mobile; openssl enc -aes-256-cbc -md sha512 -salt -d -in circleci-secrets.tar.enc -out circleci-secrets.tar -k $CIRCLE_TAR_PWD
-      - run: cd mobile; tar -xvf circleci-secrets.tar --no-same-owner; ls -l secrets
-
-      - run: chmod +x mobile/add-key.sh
-      - run: ./mobile/add-key.sh
-
-      ################
-      - run:
-          name: == Extract app version string
-          command: echo "Extract app version string"
-      - run: grep -o "MOBILE_VERSION:\ '[^']*'" config.js | sed -e "s/.*MOBILE_VERSION:\ '//; s/'.*//" >MOBILE_VERSION.txt
-      - run: echo "export MOBILE_VERSION=$(<MOBILE_VERSION.txt)" >> $BASH_ENV
-      - run: echo $MOBILE_VERSION
-
-      - run: mkdir releases
-
-################
-      - run:
-          name: == Install globals
-          command: echo "Install globals"
-      - run: sudo npm install -g rimraf
-      - run: sudo npm install
-
-      ### Fix cache of @freegle/capacitor-push-notifications
-      ##- run: ls -l node_modules/@freegle/capacitor-push-notifications
-      ##- run: sudo npm remove @freegle/capacitor-push-notifications
-      ##- run: sudo npm add https://github.com/Freegle/capacitor-push-notifications.git
-      ##- run: ls -l node_modules/@freegle/capacitor-push-notifications
-
-      # Show current branch
-      - run: git rev-parse --abbrev-ref HEAD
-
-################
-# FREEGLE app
-      - run:
-          name: == Make Freegle app release build and upload to iTunes
-          command: echo "Make Freegle app"
-
-      - run: cd ios/App; sed -i '' "s/FREEGLE_TEAM_ID/$iosDeveloper/" Podfile
-      - run: cat ios/App/Podfile
-      - run: cp mobile/secrets/GoogleService-Info.plist .
-      - run: npm run generate
-      - run: npx cap sync ios
-      - run: ls -l ios/App
-      - run: npx cap build ios --scheme Freegle
-      #- run: xcodebuild -workspace ios/App/App.xcworkspace -list
-      #- run: xcodebuild -list -project ios/App/App.xcodeproj
-      #- run: cd ios/App; xcodebuild CODE_SIGN_STYLE="Manual" PROVISIONING_PROFILE_SPECIFIER="Freegle 0323" DEVELOPMENT_TEAM="$iosDeveloper" -configuration Release -workspace App.xcworkspace -scheme Freegle -destination generic/platform=iOS -archivePath App.xcarchive archive
-      #-allowProvisioningUpdates
-      
-################
-# UPLOAD TO GITHUB AS NEW TAGGED RELEASE
-      - run:
-          name: == Upload created ipas as a tagged github release
-          command: echo "Upload to github"
-      - run: git config --local user.name "$gitusername"
-      - run: git config --local user.email "$gitemail"
-      - run: echo "export CIRCLECI_TAG=circleci-ios-builds-fd$MOBILE_VERSION-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)" >> $BASH_ENV
-      - run: echo $CIRCLECI_TAG
-      - run: git tag $CIRCLECI_TAG
-
-      - run: brew install ghr
-
-      - run: ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
-
-################
-# STORE RELEASE IN CIRCLE-CI ARTIFACTS
-      - run:
-          name: == Store built ipas as circle-ci artifacts
-          command: echo "Store as circle-ci artifacts"
-      - store_artifacts:
-          path: ./releases
-
-################
-################ ANDROID
-
-  build-and-publish-android:
-    machine:
-      image: android:2022.01.1
-    #executor:
-    #  #name: android/android
-    #  name: android/android-machine # https://circleci.com/docs/2.0/android-machine-image/ 5/8/21:  android 23-30, gradle 6.8.3 npm 7.6.1 node v14.16.0
-    ##resource_class: large
-    environment:
-      # JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
-      # ANDROID_HOME: /usr/local/android-sdk-linux
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3g
-      _JAVA_OPTIONS: "-Xmx3g"
-      TERM: dumb
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
-    steps:
-      - run:
-          name: == Install
-          command: echo "Install"
-      - checkout
-      - android/accept-licenses
-      - run:
-          name: 'Install Node 18.15.0'
-          command: |
-            set +x
-            source ~/.bashrc
-
-            nvm install 18.15.0
-            NODE_DIR=$(dirname $(which node))
-            echo "export PATH=$NODE_DIR:\$PATH" >> $BASH_ENV
-
-      - run: npm -v; node -v # OK: 
-
-      - run: echo $ANDROID_SDK_ROOT # /opt/android/sdk
-      - run: find $ANDROID_SDK_ROOT -name "zipalign"
-      - run: find $ANDROID_SDK_ROOT -name "apksigner*"
-
-      - run: npm install
-      - run: npm install -g rimraf
-
-      ##- run: cat node_modules/@freegle/capacitor-push-notifications/android/src/main/java/com/capacitorjs/plugins/pushnotifications/PushNotificationsPlugin.java
-
-################
-      - run:
-          name: == Decrypt secrets 
-          command: echo "Decrypt secrets"
-      - run: sudo apt update
-      - run: openssl version; tar --version; java -version
-      - run: cd mobile; openssl enc -aes-256-cbc -md sha512 -salt -d -in circleci-secrets.tar.enc -out circleci-secrets.tar -k $CIRCLE_TAR_PWD
-      - run: cd mobile; tar -xvf circleci-secrets.tar --no-same-owner; ls -l secrets
-
-      - run: cp mobile/secrets/google-services.json android/app
-      - run: cp mobile/secrets/android-freegle.keystore mobile
-      - run: cp mobile/secrets/android-chrisphdcccom.new.keystore mobile
-
-################
-      - run: gradle -v # 6.8.3 - 7.3.3
-      - run: chmod +x android/gradlew
-      
-################
-      - run:
-          name: == Extract app version strings
-          command: echo "Extract app version strings"
-      - run: grep -o "MOBILE_VERSION:\ '[^']*'" config.js | sed -e "s/.*MOBILE_VERSION:\ '//; s/'.*//" >MOBILE_VERSION.txt
-      - run: echo "export MOBILE_VERSION=$(<MOBILE_VERSION.txt)" >> $BASH_ENV
-      - run: echo $MOBILE_VERSION
-
-      - run: mkdir releases
-
-################
-# FREEGLE APP
-      - run:
-          name: == Make Freegle app release build and upload to Google Play beta
-          command: echo "Make Freegle app"
-      - run: npm run generate
-      - run: npx cap sync android
-      - run: npx cap build android
-
-      # Build release build
-
-      - run: ls -l android/app/build/outputs/apk/release/
-      - run: $ANDROID_SDK_ROOT/build-tools/32.0.0/zipalign 4 android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/app-release-freegle.apk
-      - run: $ANDROID_SDK_ROOT/build-tools/32.0.0/apksigner sign --ks $FREEGLE_KEYSTORE --ks-pass env:FREEGLE_KEYSTORE_PASSWORD --key-pass env:FREEGLE_KEYSTORE_PASSWORD --ks-key-alias 'Freegle Ltd Chris' android/app/build/outputs/apk/release/app-release-freegle.apk
-      - run: keytool -printcert -jarfile android/app/build/outputs/apk/release/app-release-freegle.apk
-      - run: cp android/app/build/outputs/apk/release/app-release-freegle.apk releases
-
-      # Publish to Google Play beta track.
-      # https://haseebmajid.dev/blog/auto-publish-react-native-to-android-store-with-gitlab-ci
-      # https://plugins.gradle.org/plugin/com.github.triplet.play Version 3 doesn't seem to work
-      # https://github.com/Triple-T/gradle-play-publisher
-      # https://plugins.gradle.org/m2/com/github/triplet/gradle/play-publisher/2.8.1/
-      # gradle-play-publisher 3.7.0 needs Gradle plugin 7.x
-      #                       3.5.0                     4.2.x
-      #                       3.0-3.4                   4.1.x
-      #                       2.8.0                     6.5
-      #                       ...
-      # previous build:       2.0.0-rc1                 used 5.4.1
-      # "AGP_VERSION": "4.2.2", iznik-nuxt-app/platforms/android/cdv-gradle-config.json
-      # https://developer.android.com/reference/tools/gradle-api
-      # http://android-doc.github.io/tools/building/plugin-for-gradle.html
-#NO      - run: cat android/cdv-gradle-config.json
-
-      - run: cat android/build.gradle
-      - run: sed -i "/mavenCentral/amaven { url 'https://plugins.gradle.org/m2/' }" android/build.gradle
-      #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/build.gradle
-      - run: cat android/build.gradle
-
-      #- run: cat android/app/build.gradle
-      #- run: sed -i "/dependencies/aclasspath 'com.github.triplet.gradle:play-publisher:3.7.0'" android/app/build.gradle
-      #  repositories { maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-      #- run: echo "buildscript { repositories { maven { url 'https://plugins.gradle.org/m2/' } } dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
-      #- run: echo "buildscript { dependencies { classpath 'com.github.triplet.gradle:play-publisher:3.7.0' } }" >>android/app/build.gradle
-      #- run: cat android/app/build.gradle
-
-      # https://docs.gradle.org/current/userguide/command_line_interface.html
-      # https://github.com/Triple-T/gradle-play-publisher/issues/81
-      - run: cp mobile/build-extras.gradle android/app
-      - run: cat android/app/build-extras.gradle
-      - run: cp mobile/secrets/api-freegle-google-play-deployment-2023.json android/app/api-freegle-google-play-deployment.json
-      - run: cd android; gradle tasks --all
-      - run: cd android; gradle publishReleaseApk --info || true # Ignore errors ie if versionCode already submitted
-
-
-################
-# UPLOAD TO GITHUB AS NEW TAGGED RELEASE
-      - run:
-          name: == Upload created apks as a tagged github release
-          command: echo "Upload to github"
-      - run: git config --local user.name "$gitusername"
-      - run: git config --local user.email "$gitemail"
-      - run: echo "export CIRCLECI_TAG=circleci-android-builds-fd$MOBILE_VERSION--$(git log --format=%h -1)" >> $BASH_ENV
-      - run: echo $CIRCLECI_TAG
-      - run: git tag $CIRCLECI_TAG
-
-      # https://circleci.com/blog/publishing-to-github-releases-via-circleci/
-      # https://github.com/tcnksm/ghr
-      - run: wget https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_386.tar.gz
-      - run: tar -xvzf ghr_v0.13.0_linux_386.tar.gz
-      - run: ls -l ghr_v0.13.0_linux_386
-      - run: chmod +x ghr_v0.13.0_linux_386/ghr
-
-      - run: ghr_v0.13.0_linux_386/ghr -t ${GITHUB_TOKEN_NUXT3} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLECI_TAG} ./releases/
-
-################
-# STORE RELEASE IN CIRCLE-CI ARTIFACTS
-      - run:
-          name: == Store built apks as circle-ci artifacts
-          command: echo "Store as circle-ci artifacts"
-      - store_artifacts:
-          path: ./releases
+      # Run tests on all branches
+      - build-and-test

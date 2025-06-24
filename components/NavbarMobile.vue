@@ -45,7 +45,12 @@
         <div class="d-flex align-items-center">
           <b-nav>
             <b-nav-item>
-              <nuxt-link v-if="!loggedIn" no-prefetch>
+              <nuxt-link
+                v-if="!loggedIn"
+                no-prefetch
+                class="test-signinbutton"
+                :disabled="signInDisabled"
+              >
                 <div class="btn btn-white mr-2" @click="requestLogin">
                   Log in or Join
                 </div>
@@ -66,7 +71,7 @@
         >
           <template #button-content>
             <ProfileImage
-              v-if="me.profile.path"
+              v-if="me?.profile?.path"
               :image="me.profile.path"
               class="m-0 inline"
               is-thumbnail
@@ -230,7 +235,8 @@ import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
-import { useMobileStore } from '~/stores/mobile'
+import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile' // APP
 
 const {
   online,
@@ -270,14 +276,7 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
-const isApp = computed(() => {
-  const mobileStore = useMobileStore()
-  return mobileStore.isApp
-})
-
-const refresh = () => { // IS_APP
-  window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
-}
+const isApp = ref(mobileStore.isApp) // APP
 
 const stickyAdRendered = computed(() => {
   return useMiscStore().stickyAdRendered
@@ -292,8 +291,13 @@ watch(notificationsShown, (newVal) => {
   }
 })
 
+const signInDisabled = ref(true)
+
 // We want to hide the navbars when you scroll down.
 onMounted(() => {
+  // Keeping the button disabled until hygration has finished helps with Playwright tests.
+  signInDisabled.value = false
+
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -301,6 +305,10 @@ onBeforeUnmount(() => {
   clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
+
+function refresh() { // APP
+  window.location.reload(true)  // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
+}
 
 function handleScroll() {
   const scrollY = window.scrollY
@@ -330,6 +338,8 @@ const navBarBottomHidden = computed(() => {
     navBarHidden.value
   )
 })
+
+const loggedIn = computed(() => useAuthStore().user !== null)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';

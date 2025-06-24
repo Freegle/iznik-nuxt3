@@ -85,89 +85,85 @@
     <DonationThermometer ref="thermo" :groupid="groupid" class="ml-md-4" />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch } from 'vue'
 import DonationButton from './DonationButton'
 import SupporterInfo from './SupporterInfo'
 
-export default {
-  components: {
-    SupporterInfo,
-    DonationButton,
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupname: {
-      type: String,
-      required: true,
-    },
-    target: {
-      type: Number,
-      default: 2000,
-    },
-    raised: {
-      type: Number,
-      default: 0,
-    },
-    targetMet: {
-      type: Boolean,
-      default: false,
-    },
-    donated: {
-      type: String,
-      default: null,
-    },
-    amounts: {
-      type: Array,
-      required: false,
-      default: () => [1, 5, 10],
-    },
-    default: {
-      type: Number,
-      required: false,
-      default: 1,
-    },
+  groupname: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      monthly: false,
-      price: 1,
-      payPalFallback: false,
-      otherAmount: null,
-    }
+  target: {
+    type: Number,
+    default: 2000,
   },
-  watch: {
-    otherAmount(newVal) {
-      if (newVal) {
-        this.price = parseFloat(newVal)
-      } else {
-        this.price = this.default
-      }
-    },
+  raised: {
+    type: Number,
+    default: 0,
   },
-  created() {
-    this.price = this.default
+  targetMet: {
+    type: Boolean,
+    default: false,
   },
-  methods: {
-    score(amount) {
-      this.$emit('score', amount)
-    },
-    setPrice(price) {
-      this.price = price
-      this.$refs.belowStripe.scrollIntoView()
-    },
-    succeeded() {
-      this.score(this.price)
-      this.$emit('success')
-    },
-    noMethods() {
-      console.log('No payment methods')
-      this.payPalFallback = true
-    },
+  donated: {
+    type: String,
+    default: null,
   },
+  amounts: {
+    type: Array,
+    required: false,
+    default: () => [1, 5, 10],
+  },
+  default: {
+    type: Number,
+    required: false,
+    default: 1,
+  },
+})
+
+const emit = defineEmits(['score', 'success'])
+
+const monthly = ref(false)
+const price = ref(props.default)
+const payPalFallback = ref(false)
+const otherAmount = ref(null)
+const belowStripe = ref(null)
+const thermo = ref(null)
+
+watch(otherAmount, (newVal) => {
+  if (newVal) {
+    price.value = parseFloat(newVal)
+  } else {
+    price.value = props.default
+  }
+})
+
+function score(amount) {
+  emit('score', amount)
+}
+
+function setPrice(newPrice) {
+  price.value = newPrice
+  if (belowStripe.value) {
+    belowStripe.value.scrollIntoView()
+  }
+}
+
+function succeeded() {
+  score(price.value)
+  emit('success')
+}
+
+function noMethods() {
+  console.log('No payment methods')
+  payPalFallback.value = true
 }
 </script>
 <style scoped lang="scss">

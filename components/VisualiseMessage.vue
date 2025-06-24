@@ -14,43 +14,35 @@
     />
   </l-marker>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    icon: {
-      type: String,
-      required: true,
-    },
-    lat: {
-      type: Number,
-      required: true,
-    },
-    lng: {
-      type: Number,
-      required: true,
-    },
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      currlat: null,
-      currlng: null,
-    }
+  icon: {
+    type: String,
+    required: true,
   },
-  mounted() {
-    this.currlat = this.lat
-    this.currlng = this.lng
+  lat: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    setLatLng(lat, lng) {
-      this.currlat = lat
-      this.currlng = lng
-    },
+  lng: {
+    type: Number,
+    required: true,
   },
-}
+})
+
+const currlat = ref(null)
+const currlng = ref(null)
+
+onMounted(() => {
+  currlat.value = props.lat
+  currlng.value = props.lng
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
