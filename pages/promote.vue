@@ -241,6 +241,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { useMobileStore } from '@/stores/mobile' // APP
 import {
   ref,
   defineAsyncComponent,

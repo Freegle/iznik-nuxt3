@@ -37,9 +37,7 @@
           />
         </div>
         <div v-else-if="variant === 'rateapp'">
-          <RateAppAsk
-            @hide="hide"
-          />
+          <RateAppAsk @hide="hide" />
         </div>
         <div v-else-if="variant === 'stripe'">
           <DonationAskStripe

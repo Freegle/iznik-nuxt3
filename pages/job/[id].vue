@@ -3,11 +3,11 @@
     <b-row class="m-0 mt-4">
       <b-col cols="12" lg="6" class="p-0 mt-5" offset-lg="3">
         <NoticeMessage v-if="appshown">
-            <p>The job ad should have opened in your browser</p>
-            <b-button to="/jobs" variant="primary" size="lg">
-              View more jobs
-            </b-button>
-          </NoticeMessage>
+          <p>The job ad should have opened in your browser</p>
+          <b-button to="/jobs" variant="primary" size="lg">
+            View more jobs
+          </b-button>
+        </NoticeMessage>
         <NoticeMessage v-else-if="invalid" class="mt-5">
           <p>Sorry, that job is no longer available.</p>
           <b-button to="/jobs" variant="primary" size="lg">

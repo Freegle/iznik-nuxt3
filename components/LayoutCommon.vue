@@ -261,12 +261,13 @@ onMounted(async () => {
     const nuxtApp = useNuxtApp()
     const { $sentrySetContext, $sentrySetUser } = nuxtApp
 
-    const sentryParams = { // APP
+    const sentryParams = {
+      // APP
       buildDate: runtimeConfig.public.BUILD_DATE,
       deployId: runtimeConfig.public.DEPLOY_ID,
     }
-    if(  runtimeConfig.public.ISAPP){
-      console.log('LAYOUT mobileVersion',runtimeConfig.public.MOBILE_VERSION)
+    if (runtimeConfig.public.ISAPP) {
+      console.log('LAYOUT mobileVersion', runtimeConfig.public.MOBILE_VERSION)
       sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
       const mobileStore = useMobileStore()
       sentryParams.deviceuserinfo = mobileStore.deviceuserinfo

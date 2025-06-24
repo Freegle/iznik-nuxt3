@@ -48,7 +48,7 @@
       <VisibleWhen v-if="showAd && adId && !noAd" :at="['xs', 'sm']">
         <div class="d-flex justify-content-around mt-2">
           <ExternalDa
-            :adUnitPath="adUnitPath"
+            :ad-unit-path="adUnitPath"
             :ad-id="adId"
             max-height="250px"
             :div-id="adId"

@@ -7,22 +7,44 @@
       Loading donation methods...
     </div>
     <div v-if="isApp" class="d-flex justify-content-between flex-wrap">
-      <b-button v-if="isGooglePayAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with Google Pay" @click="useGooglePay">
+      <b-button
+        v-if="isGooglePayAvailable"
+        variant="primary"
+        size="lg"
+        aria-label="Donate to Freegle with Google Pay"
+        @click="useGooglePay"
+      >
         <div class="d-flex align-items-center">
           <img src="/GooglePayButton.png" class="w-100" />
         </div>
       </b-button>
-      <b-button v-if="isApplePayAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with Apple Pay" @click="useApplePay">
+      <b-button
+        v-if="isApplePayAvailable"
+        variant="primary"
+        size="lg"
+        aria-label="Donate to Freegle with Apple Pay"
+        @click="useApplePay"
+      >
         <div class="d-flex align-items-center">
           <img src="/ApplePayButton.jpg" class="w-100" />
         </div>
       </b-button>
-      <b-button v-if="isPayPalAvailable" variant="primary" size="lg" aria-label="Donate to Freegle with PayPay or a card" @click="usePayPalCard">
+      <b-button
+        v-if="isPayPalAvailable"
+        variant="primary"
+        size="lg"
+        aria-label="Donate to Freegle with PayPay or a card"
+        @click="usePayPalCard"
+      >
         <div class="d-flex align-items-center">
           <img src="/PayPalButton.png" class="w-100" />
         </div>
       </b-button>
-      <p v-if="!isGooglePayAvailable && !isApplePayAvailable && !isPayPalAvailable">
+      <p
+        v-if="
+          !isGooglePayAvailable && !isApplePayAvailable && !isPayPalAvailable
+        "
+      >
         Sorry, there are no payments methods available on your phone.
       </p>
     </div>
@@ -35,14 +57,20 @@
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
 import * as Sentry from '@sentry/browser'
+import {
+  Stripe,
+  PaymentSheetEventsEnum,
+  GooglePayEventsEnum,
+  ApplePayEventsEnum,
+} from '@capacitor-community/stripe'
 import { uid } from '../composables/useId'
 import { useDonationStore } from '~/stores/donations'
-import { Stripe, PaymentSheetEventsEnum, GooglePayEventsEnum, ApplePayEventsEnum } from '@capacitor-community/stripe'
+import { useMobileStore } from '@/stores/mobile'
 
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const donationStore = useDonationStore()
-import { useMobileStore } from '@/stores/mobile'
+const mobileStore = useMobileStore()
 
 definePageMeta({
   layout: 'login',
@@ -125,11 +153,12 @@ if (stripe) {
 
 const error = ref(null)
 
-onMounted(() => {
-  if( isApp.value){
+onMounted(async () => {
+  if (isApp.value) {
     try {
       console.log('Stripe props.price', props.price)
-      if (mobileStore.isApp && !mobileStore.isiOS) { // Disable on iOS for now
+      if (mobileStore.isApp && !mobileStore.isiOS) {
+        // Disable on iOS for now
 
         Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
           console.log('Stripe PaymentSheetEventsEnum.Failed', e)
@@ -162,7 +191,8 @@ onMounted(() => {
           Stripe.addListener(GooglePayEventsEnum.Completed, () => {
             console.log('Stripe GooglePayEventsEnum.Completed')
           })
-        } else { //iOS
+        } else {
+          // iOS
           Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
             console.log('Stripe ApplePayEventsEnum.Failed', e)
           })
@@ -178,33 +208,46 @@ onMounted(() => {
           Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
             console.log('Stripe ApplePayEventsEnum.applePayCanceled')
           })
-          Stripe.addListener(ApplePayEventsEnum.applePayDidSelectShippingContact, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayDidSelectShippingContact')
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayDidCreatePaymentMethod, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod')
-          })
+          Stripe.addListener(
+            ApplePayEventsEnum.applePayDidSelectShippingContact,
+            () => {
+              console.log(
+                'Stripe ApplePayEventsEnum.applePayDidSelectShippingContact'
+              )
+            }
+          )
+          Stripe.addListener(
+            ApplePayEventsEnum.applePayDidCreatePaymentMethod,
+            () => {
+              console.log(
+                'Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod'
+              )
+            }
+          )
         }
 
-        if (props.monthly) { // monthly never set in app as not supported
+        if (props.monthly) {
+          // monthly never set in app as not supported
           intent.value = await donationStore.stripeSubscription(props.price)
           console.log('Stripe subscription Intent', intent.value)
         } else {
           intent.value = await donationStore.stripeIntent({
             amount: props.price,
-            //test: true,
+            // test: true,
           })
           console.log('Stripe single payment Intent', intent.value)
         }
 
-        if (!mobileStore.isiOS) { // Android
+        if (!mobileStore.isiOS) {
+          // Android
           try {
             await Stripe.isGooglePayAvailable()
             isGooglePayAvailable.value = true
           } catch (e) {
             // eg Not implemented on Device.
           }
-        } else { // iOS
+        } else {
+          // iOS
           try {
             await Stripe.isApplePayAvailable()
             isApplePayAvailable.value = true
@@ -219,12 +262,15 @@ onMounted(() => {
     } catch (e) {
       console.log('Stripe Exception', e.message)
     }
-    if (isGooglePayAvailable.value || isApplePayAvailable.value || isPayPalAvailable.value) {
+    if (
+      isGooglePayAvailable.value ||
+      isApplePayAvailable.value ||
+      isPayPalAvailable.value
+    ) {
       emit('loaded')
     } else {
       emit('noPaymentMethods')
     }
-
   }
   if (stripe) {
     console.log(
@@ -362,22 +408,21 @@ async function useGooglePay() {
   console.log('Stripe DONE')
 }
 
-
 async function usePayPalCard() {
   console.log('usePayPalCard')
   await Stripe.createPaymentSheet({
     paymentIntentClientSecret: intent.value.client_secret,
-    //customerId: customer,
-    //customerEphemeralKeySecret: ephemeralKey,
-    //enableGooglePay: true,
-    //enableApplePay: false,
+    // customerId: customer,
+    // customerEphemeralKeySecret: ephemeralKey,
+    // enableGooglePay: true,
+    // enableApplePay: false,
     merchantDisplayName: 'Freegle',
     /**
      * iOS Only
      * @url https://stripe.com/docs/payments/accept-a-payment?platform=ios&ui=payment-sheet#userinterfacestyle
      * @default undefined
      */
-    //returnURL:
+    // returnURL:
   })
   console.log('Stripe createPaymentSheet')
 
@@ -390,20 +435,21 @@ async function usePayPalCard() {
   console.log('Stripe DONE')
 }
 
-
 async function useApplePay() {
   console.log('useApplePay')
   await Stripe.createApplePay({
     paymentIntentClientSecret: intent.value.client_secret,
-    paymentSummaryItems: [{
-      label: 'Freegle Donation',
-      amount: props.price
-    }],
+    paymentSummaryItems: [
+      {
+        label: 'Freegle Donation',
+        amount: props.price,
+      },
+    ],
     merchantIdentifier: 'Freegle',
-    //merchantDisplayName: 'Freegle',
+    // merchantDisplayName: 'Freegle',
     countryCode: 'GB',
     currency: 'GBP',
-  });
+  })
   // Present Apple Pay
   const result = await Stripe.presentApplePay()
   console.log('Stripe presentApplePay', result.paymentResult, result)
@@ -413,7 +459,6 @@ async function useApplePay() {
   }
   console.log('Stripe DONE')
 }
-
 </script>
 <style scoped lang="scss">
 .height {

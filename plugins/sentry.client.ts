@@ -1,5 +1,5 @@
-//import * as Sentry from '@sentry/capacitor';
-import * as Sentry from '@sentry/vue';
+// import * as Sentry from '@sentry/capacitor';
+import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 import {
   HttpClient as HttpClientIntegration,

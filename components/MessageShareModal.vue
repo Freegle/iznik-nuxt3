@@ -16,10 +16,17 @@
           </p>
         </NoticeMessage>
         <p class="mt-1">You can share using these buttons:</p>
-        <b-button v-if="isApp" variant="primary" size="lg" class="m-3" @click="shareApp">
+        <b-button
+          v-if="isApp"
+          variant="primary"
+          size="lg"
+          class="m-3"
+          @click="shareApp"
+        >
           Share now
         </b-button>
-        <b-list-group v-else
+        <b-list-group
+          v-else
           :key="'messageshare-' + bump"
           horizontal
           class="flex-wrap"
@@ -106,12 +113,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
+import { Share } from '@capacitor/share'
 import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 import { useMobileStore } from '@/stores/mobile' // APP
-import { Share } from '@capacitor/share';
 
 const props = defineProps({
   id: {
@@ -126,6 +133,7 @@ const props = defineProps({
 })
 
 const messageStore = useMessageStore()
+const mobileStore = useMobileStore()
 const { modal, hide } = useOurModal()
 const copied = ref(false)
 const bump = ref(0)
@@ -158,21 +166,20 @@ function opened() {
   bump.value++
 }
 
-async function shareApp(){
+async function shareApp() {
   const href = message.value.url
   const subject = 'Sharing ' + message.value.subject
-  try{
+  try {
     await Share.share({
       title: subject,
-      text: message.value.textbody + "\n\n",  // not supported on some apps (Facebook, Instagram)
+      text: message.value.textbody + '\n\n', // not supported on some apps (Facebook, Instagram)
       url: href,
       dialogTitle: 'Share now...',
     })
-  } catch( e){
+  } catch (e) {
     console.log('Share exception', e.message)
   }
-},
-
+}
 </script>
 <style scoped lang="scss">
 :deep(.facebook) {

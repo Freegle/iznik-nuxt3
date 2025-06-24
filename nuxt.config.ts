@@ -1,10 +1,10 @@
+// import fs from 'fs'
+// import https from 'https'
 import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
-import fs from 'fs'
-import https from 'https'
 
 // Mobile version change:
 // - config.js: MOBILE_VERSION eg 3.1.9
@@ -22,20 +22,20 @@ import https from 'https'
 // node_modules/tus-js-client/lib.esm/upload.js
 //         console.log('tus: failed to upload chunk at offset',_this8._offset, err)
 
-//console.log("CHECK PREBID SCRIPT CHANGES")
-//const prebidCurrent = fs.readFileSync('public/js/prebid.js')
-//const prebidBase = fs.readFileSync('public/js/prebid-base.js')
-//if (prebidCurrent.compare(prebidBase) !== 0) {
+// console.log("CHECK PREBID SCRIPT CHANGES")
+// const prebidCurrent = fs.readFileSync('public/js/prebid.js')
+// const prebidBase = fs.readFileSync('public/js/prebid-base.js')
+// if (prebidCurrent.compare(prebidBase) !== 0) {
 //  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
 //  process.exit(1)
-//}
-console.log('config.STRIPE_PUBLISHABLE_KEY',config.STRIPE_PUBLISHABLE_KEY)
-console.log('config.NODE_ENV',config.NODE_ENV)
-console.log('config.APP_ENV',config.APP_ENV)
-console.log('config.USE_COOKIES',config.USE_COOKIES)
-const production = config.APP_ENV ? config.APP_ENV=='production' : true
+// }
+console.log('config.STRIPE_PUBLISHABLE_KEY', config.STRIPE_PUBLISHABLE_KEY)
+console.log('config.NODE_ENV', config.NODE_ENV)
+console.log('config.APP_ENV', config.APP_ENV)
+console.log('config.USE_COOKIES', config.USE_COOKIES)
+const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
-/*if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
+/* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
 
@@ -100,7 +100,7 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: config.ISAPP ? 'static' : 'server',
-  
+
   ssr: !config.ISAPP,
   spaLoadingTemplate: false,
 
@@ -330,27 +330,30 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: config.ISAPP && production ? [
-      sentryVitePlugin({
-        org: 'freegle',
-        project: 'capacitor',
-        authToken: config.SENTRY_AUTH_TOKEN,
-      }),
-    ] :
-    config.ISAPP ? [] :
-      [
-        splitVendorChunkPlugin(),
-        VitePWA({ registerType: 'autoUpdate' }),
-        // Make Lint errors cause build failures.
-        eslintPlugin(),
-        legacy({
-          targets: ['since 2015'],
-        }),
-        sentryVitePlugin({
-          org: 'freegle',
-          project: 'nuxt3',
-        }),
-      ],
+    plugins:
+      config.ISAPP && production
+        ? [
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'capacitor',
+              authToken: config.SENTRY_AUTH_TOKEN,
+            }),
+          ]
+        : config.ISAPP
+        ? []
+        : [
+            splitVendorChunkPlugin(),
+            VitePWA({ registerType: 'autoUpdate' }),
+            // Make Lint errors cause build failures.
+            eslintPlugin(),
+            legacy({
+              targets: ['since 2015'],
+            }),
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'nuxt3',
+            }),
+          ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
@@ -673,7 +676,8 @@ export default defineNuxtConfig({
             // render.
             // loadScript('https://accounts.google.com/gsi/client')
             ` +
-            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) + `
+            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) +
+            `
             //}
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);

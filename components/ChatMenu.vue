@@ -32,6 +32,7 @@ const props = defineProps({
 
 const router = useRouter()
 const chatStore = useChatStore()
+const mobileStore = useMobileStore()
 
 const chatType = computed(() => {
   // A different component needs to be created depending on the context in which it's used
@@ -40,7 +41,7 @@ const chatType = computed(() => {
 
 const chatCount = computed(() => {
   // Don't show so many that the layout breaks.
-  const chatcount = Math.min(99, this.chatStore?.unreadCount)
+  const chatcount = Math.min(99, chatStore?.unreadCount)
   mobileStore.setBadgeCount(chatcount) // APP
   return chatcount
 })

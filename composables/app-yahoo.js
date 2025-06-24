@@ -8,25 +8,26 @@ function extractQueryStringParams(url) {
   if (qm >= 0) {
     const qs = url.substring(qm + 1)
     // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-    const pl = /\+/g  // Regex for replacing addition symbol with a space
+    const pl = /\+/g // Regex for replacing addition symbol with a space
     const search = /([^&=]+)=?([^&]*)/g
-    const decode = s => { return decodeURIComponent(s.replace(pl, ' ')) }
+    const decode = (s) => {
+      return decodeURIComponent(s.replace(pl, ' '))
+    }
     urlParams = {}
     let match
     while ((match = search.exec(qs))) {
-      urlParams[decode(match[1]).replace(/\./g, "_")] = decode(match[2]) // Convert period to underscore to get through to openid.php
+      urlParams[decode(match[1]).replace(/\./g, '_')] = decode(match[2]) // Convert period to underscore to get through to openid.php
     }
   }
   return urlParams
 }
 
 export async function appYahooLogin(returnPath, callback) {
-
   const runtimeConfig = useRuntimeConfig()
   const YahooClientId = runtimeConfig.public.YAHOO_CLIENTID
 
   const completeLoginCallback = callback
-  //console.log('appYahooLogin start', returnPath)
+  // console.log('appYahooLogin start', returnPath)
 
   const status = await Network.getStatus()
   if (!status.connected) {
@@ -45,10 +46,15 @@ export async function appYahooLogin(returnPath, callback) {
     encodeURIComponent(here + '/yahoologin?returnto=' + returnPath) +
     '&response_type=code&language=en-us&scope=sdpp-w'
 
-  const authWindow = cordova.InAppBrowser.open(yauthurl, '_blank', 'location=yes,menubar=yes')
+  // eslint-disable-next-line no-undef
+  const authWindow = cordova.InAppBrowser.open(
+    yauthurl,
+    '_blank',
+    'location=yes,menubar=yes'
+  )
 
-  authWindow.addEventListener('loadstart', e => {
-    //console.log('yloadstart: ', e)
+  authWindow.addEventListener('loadstart', (e) => {
+    // console.log('yloadstart: ', e)
     if (e && e.url) {
       // Catch redirect after auth back to ilovefreegle
       if (
@@ -70,8 +76,8 @@ export async function appYahooLogin(returnPath, callback) {
     }
   })
 
-  authWindow.addEventListener('exit', e => {
-    //console.log('Yahoo authWindow exit')
+  authWindow.addEventListener('exit', (e) => {
+    // console.log('Yahoo authWindow exit')
     if (!authGiven) {
       console.log('Yahoo permission not given or failed')
       completeLoginCallback({ error: 'Yahoo permission not given or failed' })

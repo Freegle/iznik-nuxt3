@@ -12,70 +12,77 @@
         'bg-white': adShown,
       }"
     >
-      <div v-if="fallbackAdVisible" class="d-flex w-100 justify-content-md-around">
-        <nuxt-link to="/adsoff"><img src="/donate/SupportFreegle_970x250px_20May20215.png" alt="Please donate to help keep Freegle running"
-          style="max-width: 100%; display: block; margin: auto;" /></nuxt-link>
+      <div
+        v-if="fallbackAdVisible"
+        class="d-flex w-100 justify-content-md-around"
+      >
+        <nuxt-link to="/adsoff"
+          ><img
+            src="/donate/SupportFreegle_970x250px_20May20215.png"
+            alt="Please donate to help keep Freegle running"
+            style="max-width: 100%; display: block; margin: auto"
+        /></nuxt-link>
       </div>
       <div v-else>
-      <div
-        v-if="isVisible || video"
-        :class="{
-          boredWithJobs,
-          jobs,
-        }"
-      >
-        <div class="d-flex w-100 justify-content-md-around">
-          <JobsDaSlot
-            v-if="renderAd && !boredWithJobs"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :class="{
-              'text-center': maxWidth === '100vw',
-            }"
-            @rendered="rippleRendered"
-            @borednow="setBored"
-          />
-          <OurPlaywireDa
-            v-else-if="playWire"
-            ref="playwiread"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            :video="video"
-            @rendered="rippleRendered"
-          />
-          <OurGoogleDa
-            v-else-if="adSense"
-            ref="googlead"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            @rendered="rippleRendered"
-          />
-          <OurPrebidDa
-            v-else
-            ref="prebidad"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            @rendered="rippleRendered"
-          />
+        <div
+          v-if="isVisible || video"
+          :class="{
+            boredWithJobs,
+            jobs,
+          }"
+        >
+          <div class="d-flex w-100 justify-content-md-around">
+            <JobsDaSlot
+              v-if="renderAd && !boredWithJobs"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :class="{
+                'text-center': maxWidth === '100vw',
+              }"
+              @rendered="rippleRendered"
+              @borednow="setBored"
+            />
+            <OurPlaywireDa
+              v-else-if="playWire"
+              ref="playwiread"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              :video="video"
+              @rendered="rippleRendered"
+            />
+            <OurGoogleDa
+              v-else-if="adSense"
+              ref="googlead"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              @rendered="rippleRendered"
+            />
+            <OurPrebidDa
+              v-else
+              ref="prebidad"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              @rendered="rippleRendered"
+            />
+          </div>
         </div>
-      </div>
       </div>
     </div>
   </client-only>
@@ -169,7 +176,8 @@ function visibilityChanged(visible) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
 
-    if( runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) { // Give up in iOS app
+    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) {
+      // Give up in iOS app
       console.error('Running in iOS with no cookies or served ads')
       const me = useAuthStore().user
       const recentDonor =

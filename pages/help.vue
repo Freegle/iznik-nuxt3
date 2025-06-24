@@ -8,11 +8,18 @@
       </b-col>
       <b-col cols="12" md="6" class="bg-white pt-4">
         <p v-if="isApp">
-          If you like this app - or not - <a href='#' class="d-inline" @click.stop.prevent="showRateMe">please leave a review</a>.<br />
+          If you like this app - or not -
+          <a href="#" class="d-inline" @click.stop.prevent="showRateMe"
+            >please leave a review</a
+          >.<br />
           Mobile app version: {{ mobileVersion }}, built {{ version }}
-          <span style="display:none;">{{ mobileInfo }}</span>
+          <span style="display: none">{{ mobileInfo }}</span>
         </p>
-        <RateAppModal v-if="showRateAppModal" ref="rateappmodal" @hidden="showRateAppModal = false"/>
+        <RateAppModal
+          v-if="showRateAppModal"
+          ref="rateappmodal"
+          @hidden="showRateAppModal = false"
+        />
         <h1>How can we help?</h1>
         <p>
           Type a question in here, and we'll see if we can find an answer for
@@ -113,47 +120,48 @@
             <template #title>Do you have a mobile app?</template>
             <div>
               <div v-if="isApp">
-                Yes! You are using the {{ appType }} app, version {{ mobileVersion }}.
+                Yes! You are using the {{ appType }} app, version
+                {{ mobileVersion }}.
               </div>
               <div v-else>
-              <p>
-                We do! Freegling is easy on mobiles and tablets, and you get
-                notifications of replies so you don't have to rely on email.
-                Download using these links or search for Freegle in your app
-                store - it's free!
-              </p>
-              <div class="d-flex justify-content-between">
-                <a
-                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle Android app on Google Play"
-                    title="Freegle Android app on Google Play"
-                    class="img-responsive"
-                    src="/en-play-badge.png"
-                  />
-                </a>
-                <a
-                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle app for iPhone, iPad, and iPod touch"
-                    title="Freegle app for iPhone, iPad, and iPod touch"
-                    class="img-responsive"
-                    src="/app-store-black-sm.png"
-                  />
-                </a>
-              </div>
-              <p class="mt-2">
-                The app is only available in the UK app stores. We support
-                Android 5.1/iOS 13 or later.
-              </p>
+                <p>
+                  We do! Freegling is easy on mobiles and tablets, and you get
+                  notifications of replies so you don't have to rely on email.
+                  Download using these links or search for Freegle in your app
+                  store - it's free!
+                </p>
+                <div class="d-flex justify-content-between">
+                  <a
+                    href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+                    class="mt-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      alt="Freegle Android app on Google Play"
+                      title="Freegle Android app on Google Play"
+                      class="img-responsive"
+                      src="/en-play-badge.png"
+                    />
+                  </a>
+                  <a
+                    href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+                    class="mt-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      alt="Freegle app for iPhone, iPad, and iPod touch"
+                      title="Freegle app for iPhone, iPad, and iPod touch"
+                      class="img-responsive"
+                      src="/app-store-black-sm.png"
+                    />
+                  </a>
+                </div>
+                <p class="mt-2">
+                  The app is only available in the UK app stores. We support
+                  Android 5.1/iOS 13 or later.
+                </p>
               </div>
             </div>
           </HelpQuestion>
@@ -357,10 +365,12 @@
               class="mb-2"
             />
             <p>
-              Mobile version: {{ mobileVersion }}<br/>
-              {{ deviceuserinfo}}
+              Mobile version: {{ mobileVersion }}<br />
+              {{ deviceuserinfo }}
             </p>
-            <b-button variant="white" @click="copydeviceuserinfo">{{ deviceuserinfocopied }}</b-button>
+            <b-button variant="white" @click="copydeviceuserinfo">{{
+              deviceuserinfocopied
+            }}</b-button>
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -453,12 +463,18 @@ const showInfoModal = ref(false)
 const faq = ref(null)
 const supporterInfoModal = ref(null)
 const showRateAppModal = ref(false)
+const deviceuserinfocopied = ref('Copy app and device info')
 
 // Computed properties
 const isApp = ref(mobileStore.isApp) // APP
 const appType = ref(mobileStore.isiOS ? 'iOS' : 'Android')
 const mobileVersion = ref(runtimeConfig.public.MOBILE_VERSION)
 const mobileInfo = ref(mobileStore.devicePersistentId)
+
+const deviceuserinfo = computed(() => {
+  if (!mobileStore.deviceuserinfo) return false
+  return 'Device info: ' + mobileStore.deviceuserinfo
+})
 
 const matches = computed(() => {
   if (!searcher.value || !question.value) {
@@ -490,12 +506,12 @@ function supporterInfo() {
 function showRateMe() {
   window.localStorage.removeItem('rateappnotagain')
   showRateAppModal.value = true
-},
+}
 
-async function copydeviceuserinfo(e){
-  console.log('copydeviceuserinfo',e)
-  let infotocopy = 'Mobile version: '+mobileVersion.value+'. '
-  if( deviceuserinfo.value) infotocopy += deviceuserinfo.value
+async function copydeviceuserinfo(e) {
+  console.log('copydeviceuserinfo', e)
+  let infotocopy = 'Mobile version: ' + mobileVersion.value + '. '
+  if (deviceuserinfo.value) infotocopy += deviceuserinfo.value
   await navigator.clipboard.writeText(infotocopy)
   deviceuserinfocopied.value = 'Device info copied'
   setTimeout(() => {
@@ -508,7 +524,6 @@ async function copydeviceuserinfo(e){
   }
   return false
 }
-
 
 // Lifecycle hooks
 onMounted(async () => {

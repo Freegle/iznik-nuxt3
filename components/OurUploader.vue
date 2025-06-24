@@ -27,7 +27,8 @@
           </b-button>
         </div>
       </div>
-      <DashboardModal v-if="!isApp"
+      <DashboardModal
+        v-if="!isApp"
         ref="dashboard"
         :uppy="uppy"
         :open="modalOpen"
@@ -56,11 +57,14 @@ import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
 import * as Sentry from '@sentry/browser'
 import { uid } from '../composables/useId'
+import { useMobileStore } from '@/stores/mobile' // APP...
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
 import { useMiscStore } from '~/stores/misc'
 
 const runtimeConfig = useRuntimeConfig()
+
+const mobileStore = useMobileStore()
 
 try {
   console.log('Consider polyfill ResizeObserver')
@@ -153,8 +157,8 @@ function resetUpload() {
   }
 }
 
-function openModal() {
-  if( isApp.value){
+async function openModal() {
+  if (isApp.value) {
     // console.log('openModal A')
     resetUpload()
     try {
@@ -163,7 +167,7 @@ function openModal() {
         height: 1024,
         allowEditing: false,
         resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
+        source: CameraSource.Camera,
       })
       loading.value = 'Uploading'
 
@@ -181,8 +185,7 @@ function openModal() {
       const response = await fetch(image.webPath)
       const file = await response.blob()
       await uploadOneFile(file)
-    }
-    catch (e) {
+    } catch (e) {
       loading.value = ''
       console.log('openModal', e.message)
     }
@@ -203,6 +206,7 @@ function closeModal() {
 
 const uploaderUid = ref(uid('uploader'))
 
+const loading = ref('')
 const emit = defineEmits(['update:modelValue', 'closed', 'photoProcessed'])
 const uploadedPhotos = ref([])
 const busy = ref(false)
@@ -250,27 +254,27 @@ function uploadOneFile(file) {
     upload = new tus.Upload(file, {
       endpoint: runtimeConfig.public.TUS_UPLOADER,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      //metadata: {
+      // metadata: {
       //  filename: uid,
       //  filetype: image.format,
-      //},
+      // },
       onError: function (error) {
         console.log('Failed because: ' + error)
         loading.value = 'Upload failed because: ' + error
-        reject()
+        reject(new Error('Upload failed because: ' + error))
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
         // console.log(bytesUploaded, bytesTotal, percentage + '%')
-        loading.value = 'Uploading '+percentage + '%'
+        loading.value = 'Uploading ' + percentage + '%'
       },
       onSuccess: async function (result) {
         // console.log('upload.url', result, upload.url)
         // console.log('result',result)
-        //if( result){
+        // if( result){
         //  const { lastResponse } = result
         //  console.log('lastResponse',lastResponse)
-        //}
+        // }
         loading.value = 'Uploading nearly done'
         const promises = []
         let recognised = false
@@ -341,19 +345,18 @@ async function choosePhoto() {
     const images = await Camera.pickImages({
       quality: 75,
       height: 1024,
-      allowEditing: false
+      allowEditing: false,
     })
     loading.value = 'Uploading'
 
     console.log(images)
-    for( const image of images.photos){
+    for (const image of images.photos) {
       console.log(image.webPath)
       const response = await fetch(image.webPath)
       const file = await response.blob()
       await uploadOneFile(file)
     }
-  }
-  catch (e) {
+  } catch (e) {
     loading.value = ''
     console.log('choosePhoto', e.message)
   }

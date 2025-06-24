@@ -58,19 +58,24 @@ export function useDonationAskModal(requestedVariant = null) {
           }
 
           let gotnow = false
-          if( mobileStore.isApp){
-            const rateappnotagain = window.localStorage.getItem('rateappnotagain')
-            if( !rateappnotagain){
+          if (mobileStore.isApp) {
+            const rateappnotagain =
+              window.localStorage.getItem('rateappnotagain')
+            if (!rateappnotagain) {
               const acertainratio = Math.random()
               console.log('stripe acertainratio', acertainratio)
-              if( acertainratio > 0.7) {
+              if (acertainratio > 0.7) {
                 requestedVariant = { variant: 'rateapp' }
                 gotnow = true
-                console.log('stripe uDAM rateapp', variant.value, requestedVariant)
+                console.log(
+                  'stripe uDAM rateapp',
+                  variant.value,
+                  requestedVariant
+                )
               }
             }
           }
-    
+
           if (!gotnow) {
             requestedVariant = await api.bandit.choose({
               uid: 'donation',
@@ -86,7 +91,7 @@ export function useDonationAskModal(requestedVariant = null) {
         console.error('Get variant failed')
       }
     }
-    if( mobileStore.isApp && mobileStore.isiOS && (variant.value == 'stripe')){
+    if (mobileStore.isApp && mobileStore.isiOS && variant.value === 'stripe') {
       variant.value = 'buttons2510'
       console.log('stripe uDAM iOS', variant.value)
     }

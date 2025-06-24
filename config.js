@@ -5,11 +5,11 @@ const ADS_SQUARISH_SIZES = [[300, 250]]
 const CONFIG = {
   APP_ENV: process.env.APP_ENV,
   NODE_ENV: process.env.NODE_ENV,
-  USE_COOKIES: process.env.USE_COOKIES==='True', // 'True' or 'False'
+  USE_COOKIES: process.env.USE_COOKIES === 'True', // 'True' or 'False'
 
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',
-  //APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
+  // APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
   // New style API, for fast read ops.
   APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org/apiv2',
@@ -40,7 +40,8 @@ const CONFIG = {
   GOOGLE_API_KEY: 'AIzaSyArVxoX781qdcbmQZi1PKHX-qa0bPbboH4',
   GOOGLE_CLIENT_ID:
     '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',
-  GOOGLE_IOS_CLIENT_ID: '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com',
+  GOOGLE_IOS_CLIENT_ID:
+    '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com',
 
   FACEBOOK_APPID: '134980666550322',
   FACEBOOK_CLIENTID: 'eb343dff9d3f338007745bdd0c9a6cd5',
