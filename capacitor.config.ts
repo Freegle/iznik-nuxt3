@@ -26,6 +26,7 @@ if (typeof AndroidKeyStoreAlias !== "string") throw "process.env.FREEGLE_NUXT3_K
 const AndroidKeyAliasPassword = process.env['FREEGLE_NUXT3_KEYALIAS_PASSWORD']
 if (typeof AndroidKeyAliasPassword !== "string") throw "process.env.FREEGLE_NUXT3_KEYALIAS_PASSWORD not set"
 
+// eslint cannot parse this colon ie type definition
 const config: CapacitorConfig = {
   appId: 'org.ilovefreegle.direct',  // Fix back to .direct
   appName: 'Freegle',

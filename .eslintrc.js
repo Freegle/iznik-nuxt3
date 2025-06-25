@@ -28,7 +28,7 @@ module.exports = {
     ],
     'vue/script-setup-uses-vars': 'error',
   },
-  ignorePatterns: ['android/*', 'ios/*'],
+  ignorePatterns: ['android/*', 'ios/*', 'capacitor.config.ts'],
   overrides: [
     {
       files: ['layouts/*.vue', 'pages/**/*.vue'],

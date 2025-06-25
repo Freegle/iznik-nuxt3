@@ -346,6 +346,7 @@ export default defineNuxtConfig({
             VitePWA({ registerType: 'autoUpdate' }),
             // Make Lint errors cause build failures.
             eslintPlugin(),
+            // eslint-disable-next-line no-undef
             legacy({
               targets: ['since 2015'],
             }),
