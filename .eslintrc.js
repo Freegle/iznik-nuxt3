@@ -28,6 +28,7 @@ module.exports = {
     ],
     'vue/script-setup-uses-vars': 'error',
   },
+  ignorePatterns: ['android/*', 'ios/*'],
   overrides: [
     {
       files: ['layouts/*.vue', 'pages/**/*.vue'],

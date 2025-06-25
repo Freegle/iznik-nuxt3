@@ -98,18 +98,24 @@ const intent = ref(false)
 
 const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
-const uniqueId = uid('stripe-donate-')
-
+let uniqueId = null
 let stripe = null
-
-try {
-  stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
-} catch (e) {
-  console.error('Stripe load error', e)
-  Sentry.captureMessage('Stripe load error', {
-    extra: e,
+if (isApp.value) {
+  console.log('Stripe.initialize', runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
+  Stripe.initialize({
+    publishableKey: runtimeConfig.public.STRIPE_PUBLISHABLE_KEY,
   })
-  emit('error')
+} else {
+  uniqueId = uid('stripe-donate-')
+  try {
+    stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
+  } catch (e) {
+    console.error('Stripe load error', e)
+    Sentry.captureMessage('Stripe load error', {
+      extra: e,
+    })
+    emit('error')
+  }
 }
 
 const appearance = {
@@ -382,6 +388,7 @@ onMounted(async () => {
       }
     })
   }
+  loading.value = false
 })
 
 async function useGooglePay() {

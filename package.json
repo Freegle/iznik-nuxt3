@@ -32,7 +32,9 @@
     "comment3": "@whiteguru/capacitor-plugin-facebook-login not updated to capacitor 7+",
     "comment4": "@freegle/capacitor-push-notifications-cap7 is a fork of sorts from https://github.com/ionic-team/capacitor-plugins",
     "comment5": "JAVA_HOME must be C:\\Program Files\\Android\\Android Studio\\jbr",
-    "comment7": "May need to use nuxt@3.14.159 vue@3.5.13 @pinia/nuxt@0.9.0 pinia@2.3.1 pinia-plugin-persistedstate@4.2.0"
+    "comment6": "Comment out node_modules/@capacitor/cli/dist/android/run.js L40",
+    "comment7": "May need to use nuxt@3.14.159 vue@3.5.13 @pinia/nuxt@0.9.0 pinia@2.3.1 pinia-plugin-persistedstate@4.2.0",
+    "comment8": "Need to copy in android/app/google-services.json and ios/App/App/GoogleService-Info.plist"
   },
   "overrides": {
     "vue-mention": {
@@ -91,7 +93,7 @@
     "@google-pay/button-element": "^3.1.0",
     "@nuxtjs/google-adsense": "^3.0.0",
     "@nuxtjs/sentry": "^5.1.7",
-    "@pinia/nuxt": "^0.9.0",
+    "@pinia/nuxt": "0.9.0",
     "@popperjs/core": "^2.11.4",
     "@sentry/integrations": "^7.99.0",
     "@sentry/tracing": "^7.99.0",
@@ -138,8 +140,8 @@
     "object.hasown": "github:es-shims/Object.hasOwn",
     "patch-package": "^6.4.7",
     "path-browserify": "^1.0.1",
-    "pinia": "^2.3.1",
-    "pinia-plugin-persistedstate": "^4.2.0",
+    "pinia": "2.3.1",
+    "pinia-plugin-persistedstate": "4.2.0",
     "pluralize": "^8.0.0",
     "postman-paf": "^1.0.1",
     "resize-observer-polyfill": "^1.5.1",
@@ -155,7 +157,7 @@
     "upgrade": "^1.1.0",
     "vee-validate": "^4.7.1",
     "vite": "^5.0.10",
-    "vue": "^3.5.13",
+    "vue": "3.5.13",
     "vue-clipboard2": "^0.3.3",
     "vue-datepicker-next": "^1.0.3",
     "vue-google-charts": "^1.1.0",
