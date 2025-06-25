@@ -378,6 +378,10 @@ export default {
               'Same image sent many times recently, which sometimes indicates spam.'
             break
           }
+          case 'DodgyImage': {
+            ret = 'Suspect text or email found in image, so needs checking.'
+            break
+          }
           default: {
             ret = this.message.reviewreason
           }
