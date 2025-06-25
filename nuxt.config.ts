@@ -514,10 +514,9 @@ export default defineNuxtConfig({
                 //
                 // prebid isn't compatible with older browsers which don't support Object.entries.
                 if (Object.fromEntries) {
-                  // Currently using Playwire so don't need to load prebid.  Loading GPT as
-                  // some ad providers seem to require it.
-                  // console.log('Load GPT');
-                  loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
+                  // Currently using AdSense so don't need to load GPT and prebid.
+                  // console.log('Load GPT and prebid');
+                  // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
                   // loadScript('/js/prebid.js', true)
                 }
               } else {
