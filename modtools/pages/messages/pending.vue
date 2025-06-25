@@ -31,6 +31,16 @@
         There are no messages at the moment. This will refresh automatically.
       </NoticeMessage>
       <ModMessages />
+      <infinite-loading
+        direction="top"
+        force-use-infinite-wrapper="true"
+        :identifier="bump"
+        @infinite="loadMore"
+      >
+        <template #spinner>
+          <b-img lazy src="/loader.gif" alt="Loading" />
+        </template>
+      </infinite-loading>
 
       <ModAffiliationConfirmModal
         v-if="affiliationGroup"
@@ -48,6 +58,7 @@
 import dayjs from 'dayjs'
 import { setupModMessages } from '../../composables/useModMessages'
 import { useAuthStore } from '@/stores/auth'
+import { useMessageStore } from '@/stores/message'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import me from '~/mixins/me.js'
@@ -56,6 +67,7 @@ export default {
   mixins: [me],
   setup() {
     const authStore = useAuthStore()
+    const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     const modGroupStore = useModGroupStore()
     const modMessages = setupModMessages(true)
@@ -66,6 +78,7 @@ export default {
     // modMessages.workType.value = 'pending'
     return {
       authStore,
+      messageStore,
       miscStore,
       modGroupStore,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
@@ -77,6 +90,7 @@ export default {
       showAimsModal: false,
       affiliationGroup: null,
       shownRulePopup: false,
+      bump: 0,
     }
   },
   computed: {
@@ -131,9 +145,8 @@ export default {
         const modGroupStore = useModGroupStore()
         await modGroupStore.fetchIfNeedBeMT(newVal)
         this.group = modGroupStore.get(newVal)
-        await this.getMessages()
-
-        this.show = this.messages.length
+        this.show = 0
+        this.bump++
       },
     },
   },
@@ -195,6 +208,45 @@ export default {
     },
     destroy(oldid, nextid) {
       this.nextAfterRemoved = nextid
+    },
+    async loadMore($state) {
+      this.busy = true
+      // console.log( 'Pending loadMore:', this.show, this.visibleMessages?.length, this.messages?.length)
+      if (!this.me) {
+        console.log('Ignore load more on MT page with no session.')
+        $state.complete()
+      } else if (this.show < this.messages.length) {
+        // console.log('Pending loadMore inc')
+        // This means that we will gradually add the messages that we have fetched from the server into the DOM.
+        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+        // console.log('this.show++', this.show)
+        this.show++
+        $state.loaded()
+      } else {
+        // const currentCount = this.messages.length
+        const currentCount = Object.keys(this.messageStore.list).length // Use total messages found, not just this,messages as this stops too soon
+        // console.log('Actually loadMore', currentCount)
+
+        const params = {
+          groupid: this.groupid,
+          collection: this.collection,
+          modtools: true,
+          summary: false,
+          context: this.context,
+          limit: this.messages.length + this.distance
+        }
+
+        await this.messageStore.fetchMessagesMT(params)
+        this.context = this.messageStore.context
+
+        if (currentCount === Object.keys(this.messageStore.list).length) {
+          $state.complete()
+        } else {
+          $state.loaded()
+          this.show++
+        }
+      }
+      this.busy = false
     },
   },
 }

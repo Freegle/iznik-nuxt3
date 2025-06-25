@@ -61,28 +61,10 @@ onMounted(async () => {
 
   await messageStore.clearContext()
   context.value = null
-
-  const count = work.value
-  if (count > 0) {
-    // console.log('###ModMessages onMounted fetchMessagesMT', groupid.value, collection.value, work.value, limit.value)
-    const params = {
-      // debug: 'MM onMounted',
-      groupid: groupid.value,
-      collection: collection.value,
-      modtools: true,
-      summary: false,
-      limit: Math.max(limit.value, count),
-    }
-    // subaction: 'searchall',
-    // search: this.messageTerm,
-
-    await messageStore.fetchMessagesMT(params)
-    show.value = messages.value.length
-  }
 })
 
 const destroy = (oldid, nextid) => {
-  console.log('destroy', oldid, nextid)
+  // console.log('destroy', oldid, nextid)
   nextAfterRemoved.value = nextid
 }
 </script>
