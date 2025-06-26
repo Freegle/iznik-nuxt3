@@ -316,7 +316,6 @@ const yahooDisabled = computed(() => {
 const appleDisabled = computed(() => {
   // APP
   if (!isiOS.value) return true
-  const mobileStore = useMobileStore()
   return parseFloat(mobileStore.osVersion) < 13
 })
 
@@ -555,6 +554,7 @@ async function loginFacebook() {
   // App: https://github.com/capacitor-community/facebook-login
 
   if (isApp.value) {
+    // APP
     console.log('Facebook app start')
 
     try {
@@ -752,6 +752,7 @@ async function loginYahoo() {
   }
 
   if (isApp.value) {
+    // APP
     appYahooLogin(route.fullPath, (ret) => {
       // arrow so .this. is correct
       loginWaitMessage.value = 'Please wait...'

@@ -9,15 +9,20 @@
       <b-col cols="12" md="6" class="bg-white pt-4">
         <p v-if="isApp">
           If you like this app - or not -
-          <a href="#" class="d-inline" @click.stop.prevent="showRateMe"
-            >please leave a review</a
+          <a href="#" class="d-inline" @click.stop.prevent="showRateMe">
+            please leave a review</a
           >.<br />
           Mobile app version: {{ mobileVersion }}, built {{ version }}
           <span style="display: none">{{ mobileInfo }}</span>
         </p>
+        <p>
+          <a href="#" class="d-inline" @click.stop.prevent="showDonationAsk"
+            >donation ask</a
+          >.<br />
+        </p>
         <RateAppModal
           v-if="showRateAppModal"
-          ref="rateappmodal"
+          ref="rateAppModal"
           @hidden="showRateAppModal = false"
         />
         <h1>How can we help?</h1>
@@ -462,6 +467,7 @@ const contactGroupId = ref(null)
 const showInfoModal = ref(false)
 const faq = ref(null)
 const supporterInfoModal = ref(null)
+const rateAppModal = ref(null)
 const showRateAppModal = ref(false)
 const deviceuserinfocopied = ref('Copy app and device info')
 

@@ -42,7 +42,10 @@ const chatType = computed(() => {
 const chatCount = computed(() => {
   // Don't show so many that the layout breaks.
   const chatcount = Math.min(99, chatStore?.unreadCount)
-  mobileStore.setBadgeCount(chatcount) // APP
+  if (mobileStore.isApp) {
+    // APP
+    mobileStore.setBadgeCount(chatcount)
+  }
   return chatcount
 })
 

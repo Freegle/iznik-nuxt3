@@ -13,39 +13,30 @@
     >
   </NoticeMessage>
 </template>
-<script>
+<script setup>
 import { useMobileStore } from '@/stores/mobile'
 
-export default {
-  setup() {
-    const mobileStore = useMobileStore()
-    const runtimeConfig = useRuntimeConfig()
+const mobileStore = useMobileStore()
+const runtimeConfig = useRuntimeConfig()
 
-    return {
-      mobileStore,
-      runtimeConfig,
-    }
-  },
-  computed: {
-    appcurrentversion() {
-      return this.runtimeConfig.public.MOBILE_VERSION
-    },
-    appupdaterequired() {
-      return this.mobileStore.appupdaterequired
-    },
-    applatestversion() {
-      return this.mobileStore.applatestversion
-    },
-    show() {
-      if (!this.mobileStore.isApp) return false
-      return (
-        this.mobileStore.appupdaterequired ||
-        this.mobileStore.appupdateavailable
-      )
-    },
-    isios() {
-      return this.mobileStore.isiOS
-    },
-  },
-}
+const appcurrentversion = computed(() => {
+  return runtimeConfig.public.MOBILE_VERSION
+})
+
+const appupdaterequired = computed(() => {
+  return mobileStore.appupdaterequired
+})
+
+const applatestversion = computed(() => {
+  return mobileStore.applatestversion
+})
+
+const isios = computed(() => {
+  return mobileStore.isiOS
+})
+
+const show = computed(() => {
+  if (!mobileStore.isApp) return false
+  return mobileStore.appupdaterequired || mobileStore.appupdateavailable
+})
 </script>

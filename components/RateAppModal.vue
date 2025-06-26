@@ -1,10 +1,5 @@
 <template>
-  <b-modal
-    id="rateappmodal"
-    v-model="showModal"
-    title="Please help - Rate this App!"
-    no-stacking
-  >
+  <b-modal ref="modal" title="Please help - Rate this App!">
     <template #default>
       <b-row>
         <b-col>
@@ -30,31 +25,23 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
 import { AppLauncher } from '@capacitor/app-launcher'
 import { useMobileStore } from '@/stores/mobile'
-import modal from '@/mixins/modal'
+import { useOurModal } from '~/composables/useOurModal'
+const { modal, hide } = useOurModal()
 
-export default {
-  mixins: [modal],
-  data: function () {
-    return {}
-  },
-  methods: {
-    notagain() {
-      window.localStorage.setItem('rateappnotagain', true)
-      this.hide()
-    },
+function notagain() {
+  window.localStorage.setItem('rateappnotagain', true)
+  hide()
+}
 
-    confirm() {
-      const mobileStore = useMobileStore()
-      let reviewLink = 'market://details?id=org.ilovefreegle.direct'
-      if (mobileStore.isiOS)
-        reviewLink =
-          'https://apps.apple.com/gb/app/id970045029?action=write-review'
-      AppLauncher.openUrl({ url: reviewLink })
-      this.hide()
-    },
-  },
+function confirm() {
+  const mobileStore = useMobileStore()
+  let reviewLink = 'market://details?id=org.ilovefreegle.direct'
+  if (mobileStore.isiOS)
+    reviewLink = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
+  AppLauncher.openUrl({ url: reviewLink })
+  hide()
 }
 </script>

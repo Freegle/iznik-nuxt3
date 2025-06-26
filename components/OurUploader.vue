@@ -25,6 +25,7 @@
           <b-button v-if="isApp" variant="primary" @click="choosePhoto">
             {{ chooselabel }}
           </b-button>
+          <p v-if="isApp">{{ loading }}</p>
         </div>
       </div>
       <DashboardModal
@@ -581,12 +582,12 @@ async function uploadSuccess(result) {
 
 .wrapper {
   border: 1px lightgray dashed;
-  width: 125px;
+  width: 100%; /* 125px */
   height: 125px;
   align-content: center;
 
   @include media-breakpoint-up(sm) {
-    width: 200px;
+    width: 100%; /* 200px */
     height: 200px;
   }
 }

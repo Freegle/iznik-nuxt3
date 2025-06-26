@@ -22,32 +22,24 @@
     <b-button variant="success" @click="confirm"> Rate now </b-button>
   </div>
 </template>
-<script>
+<script setup>
 import { AppLauncher } from '@capacitor/app-launcher'
 import { useMobileStore } from '@/stores/mobile'
 
-export default {
-  components: {},
-  props: {},
-  data() {
-    return {}
-  },
-  methods: {
-    notagain() {
-      window.localStorage.setItem('rateappnotagain', true)
-      this.$emit('hide')
-    },
+const emit = defineEmits(['hide'])
 
-    confirm() {
-      window.localStorage.setItem('rateappnotagain', true) // Do not ask again
-      const mobileStore = useMobileStore()
-      let reviewLink = 'market://details?id=org.ilovefreegle.direct'
-      if (mobileStore.isiOS)
-        reviewLink =
-          'https://apps.apple.com/gb/app/id970045029?action=write-review'
-      AppLauncher.openUrl({ url: reviewLink })
-      this.$emit('hide')
-    },
-  },
+function notagain() {
+  window.localStorage.setItem('rateappnotagain', true)
+  emit('hide')
+}
+
+function confirm() {
+  window.localStorage.setItem('rateappnotagain', true) // Do not ask again
+  const mobileStore = useMobileStore()
+  let reviewLink = 'market://details?id=org.ilovefreegle.direct'
+  if (mobileStore.isiOS)
+    reviewLink = 'https://apps.apple.com/gb/app/id970045029?action=write-review'
+  AppLauncher.openUrl({ url: reviewLink })
+  emit('hide')
 }
 </script>
