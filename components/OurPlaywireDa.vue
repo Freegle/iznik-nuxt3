@@ -164,38 +164,56 @@ watch(
           }
         }
 
-        if (!window.ramp) {
-          // We haven't loaded the Playwire code yet.
-          console.log('Load playwire code')
-          window.ramp = window.ramp || {}
-          window.ramp.que = window.ramp.que || []
-          window.ramp.passiveMode = true
+        function loadPlaywireCode() {
+          if (!window.ramp) {
+            // We haven't loaded the Playwire code yet.
+            console.log('Load playwire code')
+            window.ramp = window.ramp || {}
+            window.ramp.que = window.ramp.que || []
+            window.ramp.passiveMode = true
 
-          // Load the Ramp configuration script
-          const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
-          const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
+            // Load the Ramp configuration script
+            const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
+            const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
 
-          const configScript = document.createElement('script')
-          configScript.src =
-            'https://cdn.intergient.com/' + pubId + '/' + websiteId + '/ramp.js'
+            const configScript = document.createElement('script')
+            configScript.src =
+              'https://cdn.intergient.com/' +
+              pubId +
+              '/' +
+              websiteId +
+              '/ramp.js'
 
-          configScript.onload = () => {
-            // Playwire code loaded. Now we can add our ad.
-            console.log('Playwire script loaded, queue spaAddAds')
+            configScript.onload = () => {
+              // Playwire code loaded. Now we can add our ad.
+              console.log('Playwire script loaded, queue spaAddAds')
+              window.ramp.que.push(addAd)
+            }
+
+            configScript.onerror = (e) => {
+              console.log('Error loading Playwire script', e)
+            }
+
+            document.body.appendChild(configScript)
+            console.log('Appended Playwire script to DOM')
+          } else {
+            // The code is already loaded - we can add the add.
+            console.log('Already loaded code, queue ad')
             window.ramp.que.push(addAd)
           }
-
-          configScript.onerror = (e) => {
-            console.log('Error loading Playwire script', e)
-          }
-
-          document.body.appendChild(configScript)
-          console.log('Appended Playwire script to DOM')
-        } else {
-          // The code is already loaded - we can add the add.
-          console.log('Already loaded code, queue ad')
-          window.ramp.que.push(addAd)
         }
+
+        // Check if CookieYes consent is complete before loading Playwire, otherwise it won't work properly.
+        const checkCookieYes = () => {
+          if (window.cookieYesComplete) {
+            console.log('CookieYes now complete, loading Playwire')
+            loadPlaywireCode()
+          } else {
+            setTimeout(checkCookieYes, 100)
+          }
+        }
+
+        checkCookieYes()
       })
     }
   },
