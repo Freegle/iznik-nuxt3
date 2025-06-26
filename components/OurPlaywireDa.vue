@@ -183,6 +183,7 @@ watch(
             // Playwire code loaded. Now we can add our ad.
             console.log('Playwire script loaded, queue spaAddAds')
             window.ramp.que.push(addAd)
+            console.log('Queued ad count', window.ramp.que.length)
           }
 
           configScript.onerror = (e) => {
@@ -195,6 +196,7 @@ watch(
           // The code is already loaded - we can add the add.
           console.log('Already loaded code, queue ad')
           window.ramp.que.push(addAd)
+          console.log('Queued ad count', window.ramp.que.length)
         }
       })
     }
