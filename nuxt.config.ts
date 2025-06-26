@@ -528,6 +528,9 @@ export default defineNuxtConfig({
                 console.log('Error loading Playwire script', e)
               }
 
+              document.body.appendChild(configScript)
+              console.log('Appended Playwire script to DOM')
+              
               // Currently using Playwire so don't need to load GPT and prebid.
                             
               // if (!window.weHaveLoadedGPT) {
