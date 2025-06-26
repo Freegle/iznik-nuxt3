@@ -57,6 +57,7 @@ const props = defineProps({
 
 const daDiv = ref(null)
 let addAdTimer = null
+let queueAdTimer = null
 
 const showAd = ref(false)
 
@@ -143,6 +144,7 @@ watch(
             }
 
             console.log('Execute queued spaAddAds', theType.value, props.divId)
+
             if (props.video) {
               // No div for corner video.
               window.ramp.spaAddAds({
@@ -164,40 +166,19 @@ watch(
           }
         }
 
-        if (!window.ramp) {
-          // We haven't loaded the Playwire code yet.
-          console.log('Load playwire code')
-          window.ramp = window.ramp || {}
-          window.ramp.que = window.ramp.que || []
-          window.ramp.passiveMode = true
+        function doQueueAd() {
+          queueAdTimer = null
 
-          // Load the Ramp configuration script
-          const pubId = runtimeConfig.public.PLAYWIRE_PUB_ID
-          const websiteId = runtimeConfig.public.PLAYWIRE_WEBSITE_ID
-
-          const configScript = document.createElement('script')
-          configScript.src =
-            'https://cdn.intergient.com/' + pubId + '/' + websiteId + '/ramp.js'
-
-          configScript.onload = () => {
-            // Playwire code loaded. Now we can add our ad.
-            console.log('Playwire script loaded, queue spaAddAds')
+          if (window.playwireScriptLoaded) {
             window.ramp.que.push(addAd)
             console.log('Queued ad count', window.ramp.que.length)
+          } else {
+            console.log('Playwire script not loaded yet, retrying in 50ms')
+            queueAdTimer = setTimeout(doQueueAd, 50)
           }
-
-          configScript.onerror = (e) => {
-            console.log('Error loading Playwire script', e)
-          }
-
-          document.body.appendChild(configScript)
-          console.log('Appended Playwire script to DOM')
-        } else {
-          // The code is already loaded - we can add the add.
-          console.log('Already loaded code, queue ad')
-          window.ramp.que.push(addAd)
-          console.log('Queued ad count', window.ramp.que.length)
         }
+
+        doQueueAd()
       })
     }
   },
@@ -238,6 +219,11 @@ async function leaving() {
     if (addAdTimer) {
       clearTimeout(addAdTimer)
       addAdTimer = null
+    }
+
+    if (queueAdTimer) {
+      clearTimeout(queueAdTimer)
+      queueAdTimer = null
     }
 
     if (window.ramp?.destroyUnits) {
