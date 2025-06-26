@@ -27,14 +27,13 @@
     "node": ">=17.9.1"
   },
   "comments": {
-    "comment1": "switch to @codetrix-studio/capacitor-google-auth: ^4.0.0 when released",
-    "comment2": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch",
-    "comment3": "@whiteguru/capacitor-plugin-facebook-login not updated to capacitor 7+",
+    "comment1": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch",
     "comment4": "@freegle/capacitor-push-notifications-cap7 is a fork of sorts from https://github.com/ionic-team/capacitor-plugins",
     "comment5": "JAVA_HOME must be C:\\Program Files\\Android\\Android Studio\\jbr",
     "comment6": "Comment out node_modules/@capacitor/cli/dist/android/run.js L40",
-    "comment7": "May need to use nuxt@3.14.159 vue@3.5.13 @pinia/nuxt@0.9.0 pinia@2.3.1 pinia-plugin-persistedstate@4.2.0",
-    "comment8": "Need to copy in android/app/google-services.json and ios/App/App/GoogleService-Info.plist"
+    "comment7": "May need to use fixed vue@3.5.13 @pinia/nuxt@0.9.0 pinia@2.3.1 pinia-plugin-persistedstate@4.2.0",
+    "comment8": "One patch is for nuxt@3.14.159 but code needs higher than this",
+    "comment9": "Need to copy in android/app/google-services.json and ios/App/App/GoogleService-Info.plist"
   },
   "overrides": {
     "vue-mention": {
