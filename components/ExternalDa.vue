@@ -13,7 +13,7 @@
       }"
     >
       <div
-        v-if="isVisible || video"
+        v-if="isVisible"
         :class="{
           boredWithJobs,
           jobs,
@@ -189,7 +189,8 @@ function visibilityChanged(visible) {
         (tcData, success) => {
           if (success && tcData && tcData.tcString) {
             // The user has responded to the cookie banner.
-            console.log('TC data loaded and TC String set')
+            console.log('TC data loaded and TC String set', tcData.tcString)
+
             if (!playWire.value && !adSense.value && !window.pbjs?.version) {
               // Prebid required but not loaded yet.
               prebidRetry++
@@ -206,11 +207,12 @@ function visibilityChanged(visible) {
                 }, 100)
               }
             } else {
-              // Prebid has loaded.  We might want to show the ad now, if we stay visible for a little while.
+              // Prebid has loaded if required.  We might want to show the ad now, if we stay visible for a little while.
+              // Video ads are always visible because they float.
               console.log('Prebid loaded or not required')
-              isVisible.value = visible
+              isVisible.value = visible || props.video
 
-              if (visible && !firstBecomeVisible) {
+              if (isVisible.value && !firstBecomeVisible) {
                 if (!checkStillVisibleTimer) {
                   checkStillVisibleTimer = setTimeout(checkStillVisible, 100)
                 }
