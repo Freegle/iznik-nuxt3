@@ -519,7 +519,6 @@ export default defineNuxtConfig({
                 'https://cdn.intergient.com/' + pubId + '/' + websiteId + '/ramp.js'
 
               configScript.onload = () => {
-                // Playwire code loaded. Now we can add our ad.
                 console.log('Playwire script loaded')
                 window.playwireScriptLoaded = true;
               }
@@ -528,7 +527,7 @@ export default defineNuxtConfig({
                 console.log('Error loading Playwire script', e)
               }
 
-              document.body.appendChild(configScript)
+              document.head.appendChild(configScript)
               console.log('Appended Playwire script to DOM')
               
               // Currently using Playwire so don't need to load GPT and prebid.
