@@ -1065,6 +1065,7 @@ defineExpose({
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-yahoo: #6b0094;
+$color-apple: #000000;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -1110,6 +1111,17 @@ $color-yahoo: #6b0094;
   border: 2px solid $color-facebook;
   background-color: $color-facebook;
   width: 100%;
+}
+
+.social-button--apple {
+  border: 2px solid $color-apple;
+  background-color: $color-apple;
+  width: 100%;
+}
+.social-button--apple .social-button__image {
+  width: 56px;
+  height: 56px;
+  background-color: $color-black;
 }
 
 .social-button--google {
@@ -1229,6 +1241,13 @@ $color-yahoo: #6b0094;
   background-color: $color-white;
   width: 100%;
   min-height: 47px;
+}
+
+.social-button--google-app {
+  border: 2px solid $color-google;
+  background-color: #fff;
+  color: #3c4043;
+  width: 100%;
 }
 
 :deep(.social-button--google > div) {
