@@ -365,6 +365,7 @@ async function choosePhoto() {
 let uppyTimer = null
 
 onMounted(() => {
+  if (isApp.value) return
   console.log(
     'Uploader mounted',
     '#' + uploaderUid.value,
