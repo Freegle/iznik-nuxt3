@@ -504,9 +504,34 @@ export default defineNuxtConfig({
             window.postCookieYes = function() {
               window.cookieYesComplete = true;
               console.log('Consider load of GPT and prebid');
-              
-              if (!window.weHaveLoadedGPT) {
-                window.weHaveLoadedGPT = true;
+
+              console.log('Load playwire code')
+              window.ramp = window.ramp || {}
+              window.ramp.que = window.ramp.que || []
+              window.ramp.passiveMode = true
+    
+              // Load the Ramp configuration script
+              const pubId = config.PLAYWIRE_PUB_ID
+              const websiteId = config.PLAYWIRE_WEBSITE_ID
+    
+              const configScript = document.createElement('script')
+              configScript.src =
+                'https://cdn.intergient.com/' + pubId + '/' + websiteId + '/ramp.js'
+
+              configScript.onload = () => {
+                // Playwire code loaded. Now we can add our ad.
+                console.log('Playwire script loaded')
+                window.playwireScriptLoaded = true;
+              }
+    
+              configScript.onerror = (e) => {
+                console.log('Error loading Playwire script', e)
+              }
+
+              // Currently using Playwire so don't need to load GPT and prebid.
+                            
+              // if (!window.weHaveLoadedGPT) {
+              //   window.weHaveLoadedGPT = true;
                 
                 // We need to load:
                 // - GPT, which needs to be loaded before prebid.
@@ -514,15 +539,14 @@ export default defineNuxtConfig({
                 // The ordering is ensured by using defer and appending the script.
                 //
                 // prebid isn't compatible with older browsers which don't support Object.entries.
-                if (Object.fromEntries) {
-                  // Currently using AdSense so don't need to load GPT and prebid.
+                // if (Object.fromEntries) {
                   // console.log('Load GPT and prebid');
                   // loadScript('https://securepubads.g.doubleclick.net/tag/js/gpt.js', true)
                   // loadScript('/js/prebid.js', true)
-                }
-              } else {
-                console.log('GPT and prebid already loaded');
-              }
+              //   }
+              // } else {
+              //   console.log('GPT and prebid already loaded');
+              // }
             };
 
             function postGSI() {
