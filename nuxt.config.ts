@@ -512,8 +512,12 @@ export default defineNuxtConfig({
                 window.ramp.passiveMode = true
       
                 // Load the Ramp configuration script
-                const pubId = config.PLAYWIRE_PUB_ID
-                const websiteId = config.PLAYWIRE_WEBSITE_ID
+                const pubId = '` +
+            config.PLAYWIRE_PUB_ID +
+            `' 
+                const websiteId = '` +
+            config.PLAYWIRE_WEBSITE_ID +
+            `'
       
                 const configScript = document.createElement('script')
                 configScript.src =
