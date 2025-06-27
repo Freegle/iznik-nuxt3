@@ -209,7 +209,7 @@ export default {
     }
 
     const rememberedGroupId = this.miscStore.get('groupselect-pending')
-    console.log('rememberedGroupId', rememberedGroupId)
+    // console.log('rememberedGroupId', rememberedGroupId)
     if (typeof rememberedGroupId === 'number') {
       this.groupid = rememberedGroupId
     }
