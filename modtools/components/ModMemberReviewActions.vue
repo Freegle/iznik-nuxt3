@@ -67,8 +67,8 @@
           icon="pause"
           reviewhold
           :reviewgroupid="groupid"
-          label="Hold"
-          class="mr-2 mb-1"
+          label="Hold!"
+          class="mr-2"
           @pressed="forcerefresh"
         />
         <ModMemberButton
@@ -79,7 +79,7 @@
           reviewrelease
           :reviewgroupid="groupid"
           label="Release"
-          class="mr-2 mb-1"
+          class="mr-2"
           @pressed="forcerefresh"
         />
         <b-button
