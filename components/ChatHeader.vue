@@ -32,6 +32,9 @@
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
+        <div v-if="isMT" class="name font-weight-bold black d-block d-md-none ">
+          {{ chat.name }}
+        </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">
           {{ chat.name }}
         </div>
@@ -399,6 +402,9 @@ export default {
     }
   },
   computed: {
+    isMT() {
+      return this.miscStore.modtools
+    },
     collapsed: {
       get() {
         return this.miscStore?.get('chatinfoheader')
