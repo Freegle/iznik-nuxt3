@@ -505,7 +505,9 @@ export default defineNuxtConfig({
               try {
                 window.cookieYesComplete = true;
                 console.log('Consider load of GPT and prebid');
-  
+  ` +
+            (config.PLAYWIRE_PUB_ID
+              ? `
                 console.log('Load playwire code')
                 window.ramp = window.ramp || {}
                 window.ramp.que = window.ramp.que || []
@@ -513,11 +515,11 @@ export default defineNuxtConfig({
       
                 // Load the Ramp configuration script
                 const pubId = '` +
-            config.PLAYWIRE_PUB_ID +
-            `' 
+                config.PLAYWIRE_PUB_ID +
+                `' 
                 const websiteId = '` +
-            config.PLAYWIRE_WEBSITE_ID +
-            `'
+                config.PLAYWIRE_WEBSITE_ID +
+                `'
       
                 const configScript = document.createElement('script')
                 configScript.src =
@@ -535,7 +537,11 @@ export default defineNuxtConfig({
                 document.head.appendChild(configScript)
                 console.log('Appended Playwire script to DOM')
                 
-                // Currently using Playwire so don't need to load GPT and prebid.
+                // Currently using Playwire so don't need to load GPT and prebid.`
+              : `
+                console.log('Playwire not configured, skipping script load')
+                // Using AdSense or other ad solution instead of Playwire`) +
+            `
                               
                 // if (!window.weHaveLoadedGPT) {
                 //   window.weHaveLoadedGPT = true;
