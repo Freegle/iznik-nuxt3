@@ -103,8 +103,8 @@ export function setupModMessages(reset) {
     distance.value = 10
   }
 
-  const getMessages = async (workCount) => {
-    // console.log('<><><> getMessages', collection.value, groupid.value, workCount)
+  const getMessages = async (workdetail) => {
+    // console.log('<><><> getMessages', collection.value, groupid.value, workdetail)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -117,7 +117,9 @@ export function setupModMessages(reset) {
       summary: false,
       // limit: Math.max(limit.value, newVal)
     }
-    if (workCount) params.limit = Math.max(limit.value, workCount)
+    if (workdetail && workdetail.total) {
+      params.limit = Math.max(limit.value, workdetail.total)
+    }
     // console.log('uMM getMessages',params.limit)
     // params.debug = 'uMM getMessages',
     messageStore.clear()
@@ -164,12 +166,15 @@ export function setupModMessages(reset) {
       const work = authStore.work
       if (!work) return ret
       if (!workType.value) return ret
+      ret.total = 0
       if (Array.isArray(workType.value)) {
         for (const worktype of workType.value) {
           ret[worktype] = work[worktype]
+          ret.total += work[worktype]
         }
       } else {
         ret[workType.value] = work[workType.value]
+        ret.total += work[workType.value]
       }
       // console.log('uMM workdetail',ret)
       return ret
@@ -210,7 +215,7 @@ export function setupModMessages(reset) {
       }
 
       if (doFetch) {
-        // console.log('uMM watch work getmessages', newVal)
+        // console.log('uMM watch workdetail getmessages', newVal)
         getMessages(newVal)
       }
     }

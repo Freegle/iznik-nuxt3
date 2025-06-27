@@ -27,20 +27,26 @@
         <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
         <b-button variant="link" @click="loadAll"> Load all </b-button>
       </div>
-      <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
+      <NoticeMessage
+        v-if="!messages.length && !busy && groupsreceived"
+        class="mt-2"
+      >
         There are no messages at the moment. This will refresh automatically.
       </NoticeMessage>
-      <ModMessages />
-      <infinite-loading
-        direction="top"
-        force-use-infinite-wrapper="true"
-        :identifier="bump"
-        @infinite="loadMore"
-      >
-        <template #spinner>
-          <b-img lazy src="/loader.gif" alt="Loading" />
-        </template>
-      </infinite-loading>
+      <div v-if="groupsreceived">
+        <ModMessages />
+        <infinite-loading
+          direction="top"
+          force-use-infinite-wrapper="true"
+          :identifier="bump"
+          @infinite="loadMore"
+        >
+          <template #spinner>
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+        </infinite-loading>
+      </div>
+      <NoticeMessage v-else class="mt-2"> Please wait... </NoticeMessage>
 
       <ModAffiliationConfirmModal
         v-if="affiliationGroup"
@@ -98,6 +104,9 @@ export default {
       const ret = Object.values(this.modGroupStore.list)
       return ret
     },
+    groupsreceived() {
+      return this.modGroupStore.received
+    },
     rulesGroup() {
       if (!this.modGroupStore.received) return null
       let ret = null
@@ -140,6 +149,7 @@ export default {
   watch: {
     groupid: {
       async handler(newVal, oldVal) {
+        console.log('PENDING groupid changed', oldVal, newVal)
         this.context = null
 
         const modGroupStore = useModGroupStore()
@@ -197,6 +207,12 @@ export default {
       this.showCakeModal = true
       this.miscStore.set({ key: 'cakeasked', value: true })
     }
+
+    const rememberedGroupId = this.miscStore.get('groupselect-pending')
+    console.log('rememberedGroupId', rememberedGroupId)
+    if (typeof rememberedGroupId === 'number') {
+      this.groupid = rememberedGroupId
+    }
   },
   methods: {
     async loadAll() {
@@ -211,7 +227,7 @@ export default {
     },
     async loadMore($state) {
       this.busy = true
-      // console.log( 'Pending loadMore:', this.show, this.visibleMessages?.length, this.messages?.length)
+      // console.log( 'Pending loadMore:', this.show, this.visibleMessages?.length, this.messages?.length, this.modGroupStore.received)
       if (!this.me) {
         console.log('Ignore load more on MT page with no session.')
         $state.complete()
