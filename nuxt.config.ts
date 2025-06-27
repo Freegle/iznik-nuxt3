@@ -273,7 +273,7 @@ export default defineNuxtConfig({
       splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      //eslintPlugin(),
+      // eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',

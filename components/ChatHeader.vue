@@ -32,7 +32,7 @@
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
-        <div v-if="isMT" class="name font-weight-bold black d-block d-md-none ">
+        <div v-if="isMT" class="name font-weight-bold black d-block d-md-none">
           {{ chat.name }}
         </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">

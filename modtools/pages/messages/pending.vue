@@ -233,7 +233,7 @@ export default {
           modtools: true,
           summary: false,
           context: this.context,
-          limit: this.messages.length + this.distance
+          limit: this.messages.length + this.distance,
         }
 
         await this.messageStore.fetchMessagesMT(params)

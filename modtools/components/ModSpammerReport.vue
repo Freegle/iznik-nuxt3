@@ -50,7 +50,10 @@
           Spammer reports will be reviewed before they're added to the list.
           They'll only be added if they meet those criteria.
         </p>
-        <p>Please do not delete a post until the Spam team has had a chance to check things out.</p>
+        <p>
+          Please do not delete a post until the Spam team has had a chance to
+          check things out.
+        </p>
       </div>
       <p>
         This reason will be visible to other moderators, so please make sure
