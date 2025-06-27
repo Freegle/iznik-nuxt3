@@ -36,7 +36,7 @@
             :key="'story-' + story"
             class="mt-2"
           >
-            <StoryOne :id="story" />
+            <StoryOne :id="story" :group-id="groupid" />
           </div>
           <infinite-loading
             :key="'infinite-' + groupid"
