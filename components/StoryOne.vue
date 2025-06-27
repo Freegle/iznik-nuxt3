@@ -60,11 +60,12 @@
               <span>
                 {{ storydateago }}
                 <span v-if="user?.displayname"> by {{ user.displayname }}</span>
-                <span v-if="userLocation?.display">
+                <span v-if="displayGroupName"> in {{ displayGroupName }} </span>
+                <span v-else-if="userLocation?.display">
                   in {{ userLocation.display }}
                 </span>
-                <span v-else-if="userLocation.groupname">
-                  {{ publicLocation.groupname }}
+                <span v-else-if="userLocation?.groupname">
+                  in {{ userLocation.groupname }}
                 </span>
               </span>
               <nuxt-link
@@ -102,6 +103,7 @@ import { ref, computed, defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
 import { useAuthStore } from '~/stores/auth'
+import { useGroupStore } from '~/stores/group'
 import ReadMore from '~/components/ReadMore'
 import { timeago } from '~/composables/useTimeFormat'
 
@@ -114,11 +116,17 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  groupId: {
+    type: Number,
+    required: false,
+    default: null,
+  },
 })
 
 const storyStore = useStoryStore()
 const userStore = useUserStore()
 const authStore = useAuthStore()
+const groupStore = useGroupStore()
 const loggedIn = computed(() => authStore.user !== null)
 
 const showShare = ref(false)
@@ -129,9 +137,23 @@ const story = await storyStore.fetch(props.id)
 const user = await userStore.fetch(story.userid)
 const userLocation = await userStore.fetchPublicLocation(story.userid)
 
+// Fetch group data if groupId is provided
+let group = null
+if (props.groupId) {
+  group = await groupStore.fetch(props.groupId)
+}
+
 // Computed properties
 const storydateago = computed(() => {
   return timeago(story.date)
+})
+
+const displayGroupName = computed(() => {
+  if (props.groupId && group) {
+    return group.namedisplay || group.nameshort
+  }
+
+  return null
 })
 
 // Methods
