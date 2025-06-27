@@ -149,7 +149,7 @@ export default {
   watch: {
     groupid: {
       async handler(newVal, oldVal) {
-        console.log('PENDING groupid changed', oldVal, newVal)
+        // console.log('PENDING groupid changed', oldVal, newVal)
         this.context = null
 
         const modGroupStore = useModGroupStore()
