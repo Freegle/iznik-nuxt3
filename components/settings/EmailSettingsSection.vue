@@ -257,6 +257,19 @@ const simpleEmailSetting = computed(() => {
   return me.value?.settings?.simplemail ? me.value.settings.simplemail : 'Full'
 })
 
+watch(
+  simpleEmailSettingLocal,
+  async (newValue) => {
+    simpleEmailSettingLocal.value = newValue
+    const settings = me.value.settings
+    settings.simplemail = newValue
+    await authStore.saveAndGet({
+      settings,
+    })
+  },
+  { immediate: true }
+)
+
 const checkSimplicity = computed(() => {
   let ret = true
   let first = true
@@ -366,7 +379,7 @@ const toggleAdvanced = (e) => {
 }
 
 const changeAllGroups = async (param, value) => {
-  for (const group of authStore.myGroups) {
+  for (const group of myGroups.value) {
     const params = {
       userid: me.value.id,
       groupid: group.id,
