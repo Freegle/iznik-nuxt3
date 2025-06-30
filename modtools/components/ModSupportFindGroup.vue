@@ -9,6 +9,7 @@
       @handle="loadallgroups"
     />
     <AutocompleteLocal
+      v-if="groupitems.length > 0"
       v-model="searchgroup"
       :items="groupitems"
       class="max"

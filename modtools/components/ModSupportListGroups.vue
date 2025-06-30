@@ -1,6 +1,7 @@
 <template>
   <div>
     <SpinButton
+      v-if="!fetched"
       variant="primary"
       icon-name="users"
       label="Fetch communities"

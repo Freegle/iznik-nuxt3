@@ -8,6 +8,7 @@
       spinclass="text-white"
       @handle="loadallgroups"
     />
+    <div v-if="gotallgroups">
     <label>From:</label>
     <b-form-select v-model="from">
       <option value="null">-- Please choose --</option>
@@ -106,6 +107,7 @@
     >
       Show history
     </b-button>
+    </div>
   </div>
 </template>
 <script>
@@ -166,7 +168,7 @@ export default {
   },
   computed: {
     gotallgroups() {
-      return Object.values(this.modGroupStore.allGroups) > 0
+      return Object.values(this.modGroupStore.allGroups).length > 0
     },
     valid() {
       return this.from && this.subject && this.text && this.groupid
