@@ -357,10 +357,10 @@ export default {
 
 :deep(.chatMessageWrapper) {
   display: flex;
-  padding-right: 50px;
+  padding-right: 20%;
 
   &.myChatMessage {
-    padding-left: 50px;
+    padding-left: 20%;
     padding-right: 0;
   }
 }
