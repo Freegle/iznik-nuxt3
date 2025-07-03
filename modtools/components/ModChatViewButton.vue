@@ -3,8 +3,11 @@
     <b-button variant="white" class="mr-2 mb-1" @click="view">
       <v-icon icon="comments" /> View Chat
     </b-button>
+    <NoticeMessage v-if="showModal && !id" variant="warning" class="mt-2">
+      This chat is no longer available.
+    </NoticeMessage>
     <ModChatModal
-      v-if="showModal"
+      v-if="showModal && id"
       :id="id"
       ref="modChatModal"
       :pov="pov"
