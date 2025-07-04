@@ -30,7 +30,9 @@
         size="sm"
         :to="'/message/' + message.id"
       >
-        <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
+        <client-only>
+          <v-icon icon="hashtag" class="fa-0-8x" />{{ message.id }}
+        </client-only>
       </b-button>
     </div>
     <MessageShareModal
@@ -45,9 +47,12 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useRouter } from '#imports'
 import { useMessageStore } from '~/stores/message'
+import { useMe } from '~/composables/useMe'
+
 const MessageShareModal = defineAsyncComponent(() =>
   import('./MessageShareModal')
 )
@@ -55,45 +60,35 @@ const MessageReportModal = defineAsyncComponent(() =>
   import('./MessageReportModal')
 )
 
-export default {
-  components: {
-    MessageShareModal,
-    MessageReportModal,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
-  },
-  data() {
-    return {
-      showShareModal: false,
-      showMessageReportModal: false,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-  },
-  methods: {
-    share() {
-      this.showShareModal = true
-    },
-    report() {
-      this.showMessageReportModal = true
-    },
-    goto() {
-      console.log('Goto', this.id)
-      const router = useRouter()
-      router.push('/message/' + this.id)
-    },
-  },
+})
+
+const messageStore = useMessageStore()
+const router = useRouter()
+const { loggedIn } = useMe()
+
+const showShareModal = ref(false)
+const showMessageReportModal = ref(false)
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+function share() {
+  showShareModal.value = true
+}
+
+function report() {
+  showMessageReportModal.value = true
+}
+
+function goto() {
+  console.log('Goto', props.id)
+  router.push('/message/' + props.id)
 }
 </script>
 <style scoped lang="scss">

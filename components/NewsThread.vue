@@ -136,7 +136,7 @@
                   </span>
                 </slot>
                 <AutoHeightTextarea
-                  ref="threadcomment"
+                  ref="threadcommentautoheight"
                   v-model="threadcomment"
                   size="sm"
                   rows="1"
@@ -175,7 +175,7 @@
                   </span>
                 </slot>
                 <AutoHeightTextarea
-                  ref="threadcomment"
+                  ref="threadcommentautoheight"
                   v-model="threadcomment"
                   size="sm"
                   rows="1"
@@ -258,12 +258,21 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import {
+  ref,
+  computed,
+  defineAsyncComponent,
+  watch,
+  onMounted,
+  nextTick,
+} from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import NewsReplies from '~/components/NewsReplies'
 import { untwem } from '~/composables/useTwem'
+import { useAuthStore } from '~/stores/auth'
 
 // Use standard import to avoid screen-flicker
 import NewsRefer from '~/components/NewsRefer'
@@ -278,305 +287,320 @@ import NoticeMessage from '~/components/NoticeMessage'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
 import { useTeamStore } from '~/stores/team'
-import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+  scrollTo: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+const emit = defineEmits(['rendered'])
+
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
-const ConfirmModal = () =>
-  defineAsyncComponent(() => import('~/components/ConfirmModal.vue'))
+const ConfirmModal = defineAsyncComponent(() =>
+  import('~/components/ConfirmModal.vue')
+)
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 const OurAtTa = defineAsyncComponent(() => import('~/components/OurAtTa'))
 
-export default {
-  name: 'NewsThread',
-  components: {
-    NewsReplies,
-    SpinButton,
-    OurUploader,
-    NewsReportModal,
-    NewsRefer,
-    NewsMessage,
-    NewsAboutMe,
-    NewsCommunityEvent,
-    NewsVolunteerOpportunity,
-    NewsStory,
-    NewsAlert,
-    NewsNoticeboard,
-    NoticeMessage,
-    NewsPreviews,
-    ProfileImage,
-    ConfirmModal,
-    AutoHeightTextarea,
-    OurAtTa,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    scrollTo: {
-      type: String,
-      required: false,
-      default: '',
-    },
-  },
-  emits: ['rendered'],
-  async setup(props) {
-    const newsfeedStore = useNewsfeedStore()
-    const teamStore = useTeamStore()
-    const authStore = useAuthStore()
-    const userStore = useUserStore()
+// Setup stores
+const newsfeedStore = useNewsfeedStore()
+const teamStore = useTeamStore()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const me = computed(() => authStore.user)
+const myid = computed(() => me.value?.id)
 
-    const me = authStore.user
+// References
+const at = ref(null)
+const threadcomment = ref(null)
+const threadcommentref = ref(null)
+const threadcommentautoheight = ref(null)
 
-    // Get ChitChat moderation team so that we can show extra options for them.
-    if (
-      me &&
-      (me.systemrole === 'Moderator' ||
-        me.systemrole === 'Support' ||
-        me.systemrole === 'Admin')
-    ) {
-      teamStore.fetch('ChitChat Moderation')
+// Reactive state
+const scrollDownTo = ref(null)
+const replyingTo = ref(null)
+const uploading = ref(false)
+const imageid = ref(null)
+const ouruid = ref(null)
+const imageuid = ref(null)
+const imagemods = ref(null)
+const showDeleteModal = ref(false)
+const showEditModal = ref(false)
+const showReportModal = ref(false)
+const showThis = ref(true)
+const currentAtts = ref([])
+
+// Constants
+const newsComponents = {
+  AboutMe: NewsAboutMe,
+  Message: NewsMessage,
+  CommunityEvent: NewsCommunityEvent,
+  VolunteerOpportunity: NewsVolunteerOpportunity,
+  Story: NewsStory,
+  Alert: NewsAlert,
+  Noticeboard: NewsNoticeboard,
+  NewsRefer,
+}
+
+const elementBackgroundColor = {
+  CommunityEvent: 'card__community-event',
+  VolunteerOpportunity: 'card__volunteer-opportunity',
+}
+
+// Computed properties
+const canRefer = computed(() => {
+  return (
+    (mod.value && newsfeed.value?.type !== 'AboutMe') || supportOrAdmin.value
+  )
+})
+
+const canStory = computed(() => {
+  return mod.value && newsfeed.value?.type !== 'Story'
+})
+
+const enterNewLine = computed({
+  get() {
+    return me.value?.settings?.enterNewLine
+  },
+  async set(newVal) {
+    const settings = me.value.settings
+    settings.enterNewLine = newVal
+
+    await authStore.saveAndGet({
+      settings,
+    })
+  },
+})
+
+const newsfeed = computed(() => {
+  return newsfeedStore?.byId(props.id)
+})
+
+const tagusers = computed(() => {
+  return newsfeedStore?.tagusers?.map((u) => u.displayname)
+})
+
+const mod = computed(() => {
+  return (
+    me.value &&
+    (me.value.systemrole === 'Moderator' ||
+      me.value.systemrole === 'Admin' ||
+      me.value.systemrole === 'Support')
+  )
+})
+
+const chitChatMod = computed(() => {
+  return mod.value
+})
+
+const supportOrAdmin = computed(() => {
+  return (
+    me.value &&
+    (me.value.systemrole === 'Support' || me.value.systemrole === 'Admin')
+  )
+})
+
+const backgroundColor = computed(() => {
+  return elementBackgroundColor[newsfeed.value?.type] || 'card__default'
+})
+
+const isNewsComponent = computed(() => {
+  return newsfeed.value?.type in newsComponents
+})
+
+const newsComponentName = computed(() => {
+  return isNewsComponent.value ? newsComponents[newsfeed.value?.type] : ''
+})
+
+const starter = computed(() => {
+  if (newsfeed.value?.userid === myid.value) {
+    return 'you'
+  } else if (newsfeed.value?.displayname) {
+    return newsfeed.value.displayname
+  } else {
+    return 'someone'
+  }
+})
+
+// Watchers
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal.length > 0) {
+      uploading.value = false
+      imageid.value = newVal[0].id
+      imageuid.value = newVal[0].ouruid
+      ouruid.value = newVal[0].ouruid
+      imagemods.value = newVal[0].externalmods
     }
+  },
+  { deep: true }
+)
 
-    await newsfeedStore.fetch(props.id)
+// Setup
+// Get ChitChat moderation team so that we can show extra options for them.
+if (
+  me.value &&
+  (me.value.systemrole === 'Moderator' ||
+    me.value.systemrole === 'Support' ||
+    me.value.systemrole === 'Admin')
+) {
+  teamStore.fetch('ChitChat Moderation')
+}
 
-    return {
-      newsfeedStore,
-      teamStore,
-      userStore,
+// Fetch the newsfeed
+await newsfeedStore.fetch(props.id)
+
+// Lifecycle hooks
+onMounted(() => {
+  // Scroll down now that the child components are rendered.
+  emit('rendered')
+})
+
+// Methods
+function rendered(id) {
+  if (parseInt(id) === parseInt(props.scrollTo)) {
+    scrollDownTo.value = props.scrollTo
+  }
+}
+
+function focusComment() {
+  console.log('Focus comment', threadcommentref.value)
+  if (threadcommentref.value?.$el) {
+    threadcommentref.value.$el.focus()
+  }
+
+  if (threadcommentautoheight.value) {
+    threadcommentautoheight.value.focus()
+  }
+}
+
+function focusedComment() {
+  replyingTo.value = newsfeed.value.id
+}
+
+async function sendComment(callback) {
+  if (threadcomment.value && threadcomment.value.trim()) {
+    // Encode up any emojis.
+    const msg = untwem(threadcomment.value)
+    await newsfeedStore.send(msg, replyingTo.value, props.id, imageid.value)
+
+    // New message will be shown because it's in the store and we have a computed property.
+
+    // Clear the textarea now it's sent.
+    threadcomment.value = null
+
+    // And any image id
+    imageid.value = null
+    imageuid.value = null
+    ouruid.value = null
+    imagemods.value = null
+  }
+
+  if (typeof callback === 'function') {
+    callback()
+  }
+}
+
+function newlineComment() {
+  if (threadcomment.value?.$el) {
+    const p = threadcomment.value.$el.selectionStart
+    if (p) {
+      threadcomment.value.$el.value =
+        threadcomment.value.$el.value.substring(0, p) +
+        '\n' +
+        threadcomment.value.$el.value.substring(p)
+      nextTick(() => {
+        threadcomment.value.$el.selectionStart = p + 1
+        threadcomment.value.$el.selectionEnd = p + 1
+      })
+    } else {
+      threadcomment.value.$el.value += '\n'
     }
-  },
-  data() {
-    return {
-      scrollDownTo: null,
-      replyingTo: null,
-      threadcomment: null,
-      newsComponents: {
-        AboutMe: 'NewsAboutMe',
-        Message: 'NewsMessage',
-        CommunityEvent: 'NewsCommunityEvent',
-        VolunteerOpportunity: 'NewsVolunteerOpportunity',
-        Story: 'NewsStory',
-        Alert: 'NewsAlert',
-        Noticeboard: 'NewsNoticeboard',
-      },
-      elementBackgroundColor: {
-        CommunityEvent: 'card__community-event',
-        VolunteerOpportunity: 'card__volunteer-opportunity',
-      },
-      uploading: false,
-      imageid: null,
-      ouruid: null,
-      imageuid: null,
-      imagemods: null,
-      showDeleteModal: false,
-      showEditModal: false,
-      showReportModal: false,
-      showThis: true,
-      currentAtts: [],
-    }
-  },
-  computed: {
-    canRefer() {
-      return (
-        (this.mod && this.newsfeed?.type !== 'AboutMe') || this.supportOrAdmin
-      )
-    },
-    canStory() {
-      return this.mod && this.newsfeed?.type !== 'Story'
-    },
-    enterNewLine: {
-      get() {
-        return this.me?.settings?.enterNewLine
-      },
-      async set(newVal) {
-        const settings = this.me.settings
-        settings.enterNewLine = newVal
+  }
+}
 
-        await this.authStore.saveAndGet({
-          settings,
-        })
-      },
-    },
-    newsfeed() {
-      return this.newsfeedStore?.byId(this.id)
-    },
-    tagusers() {
-      return this.newsfeedStore?.tagusers?.map((u) => u.displayname)
-    },
-    mod() {
-      const me = this.me
-      return (
-        me &&
-        (me.systemrole === 'Moderator' ||
-          me.systemrole === 'Admin' ||
-          me.systemrole === 'Support')
-      )
-    },
-    backgroundColor() {
-      return this.elementBackgroundColor[this.newsfeed?.type] || 'card__default'
-    },
-    isNewsComponent() {
-      return this.newsfeed?.type in this.newsComponents
-    },
-    newsComponentName() {
-      return this.isNewsComponent
-        ? this.newsComponents[this.newsfeed?.type]
-        : ''
-    },
-    user() {
-      return this.userStore.byId(this.newsfeed?.userid)
-    },
-    starter() {
-      if (this.newsfeed.userid === this.myid) {
-        return 'you'
-      } else if (this.newsfeed.displayname) {
-        return this.newsfeed.displayname
-      } else {
-        return 'someone'
-      }
-    },
-  },
-  watch: {
-    currentAtts: {
-      handler(newVal) {
-        this.uploading = false
+function show() {
+  showEditModal.value = true
+}
 
-        this.imageid = newVal[0].id
-        this.imageuid = newVal[0].ouruid
-        this.ouruid = newVal[0].ouruid
-        this.imagemods = newVal[0].externalmods
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    // Scroll down now that the child components are rendered.
-    this.$emit('rendered')
-  },
-  methods: {
-    rendered(id) {
-      if (parseInt(id) === parseInt(this.scrollTo)) {
-        this.scrollDownTo = this.scrollTo
-      }
-    },
-    focusComment() {
-      this.$refs.threadcomment.$el.focus()
-    },
-    focusedComment() {
-      this.replyingTo = this.newsfeed.id
-    },
-    async sendComment(callback) {
-      if (this.threadcomment && this.threadcomment.trim()) {
-        // Encode up any emojis.
-        const msg = untwem(this.threadcomment)
-        await this.newsfeedStore.send(
-          msg,
-          this.replyingTo,
-          this.id,
-          this.imageid
-        )
+function deleteIt() {
+  showDeleteModal.value = true
+}
 
-        // New message will be shown because it's in the store and we have a computed property.
+function deleteConfirmed() {
+  newsfeedStore.delete(props.id, props.id)
+}
 
-        // Clear the textarea now it's sent.
-        this.threadcomment = null
+async function unfollow() {
+  await newsfeedStore.unfollow(props.id)
+}
 
-        // And any image id
-        this.imageid = null
-        this.imageuid = null
-        this.ouruid = null
-        this.imagemods = null
-      }
+function report() {
+  showReportModal.value = true
+}
 
-      if (typeof callback === 'function') {
-        callback()
-      }
-    },
-    newlineComment() {
-      const p = this.$refs.threadcomment.selectionStart
-      if (p) {
-        this.threadcomment =
-          this.threadcomment.substring(0, p) +
-          '\n' +
-          this.threadcomment.substring(p)
-        this.$nextTick(() => {
-          this.$refs.threadcomment.selectionStart = p + 1
-          this.$refs.threadcomment.selectionEnd = p + 1
-        })
-      } else {
-        this.threadcomment += '\n'
-      }
-    },
-    show() {
-      this.showEditModal = true
-    },
-    async save() {
-      await this.newsfeedStore.edit(
-        this.id,
-        this.newsfeed.message,
-        this.newsfeed.id
-      )
+function referToOffer() {
+  referTo('Offer')
+}
 
-      this.$refs.editModal.hide()
-    },
-    deleteIt() {
-      this.showDeleteModal = true
-    },
-    deleteConfirmed() {
-      this.newsfeedStore.delete(this.id, this.id)
-    },
-    async unfollow() {
-      await this.newsfeedStore.unfollow(this.id)
-    },
-    report() {
-      this.showReportModal = true
-    },
-    referToOffer() {
-      this.referTo('Offer')
-    },
-    referToWanted() {
-      this.referTo('Wanted')
-    },
-    referToTaken() {
-      this.referTo('Taken')
-    },
-    referToReceived() {
-      this.referTo('Recived')
-    },
-    async createStory() {
-      await this.newsfeedStore.convertToStory(this.id)
-    },
-    async unhide() {
-      await this.newsfeedStore.unhide(this.id)
-    },
-    async hide() {
-      await this.newsfeedStore.hide(this.id)
-    },
-    async referTo(type) {
-      await this.newsfeedStore.referTo(this.id, type)
-    },
-    filterMatch(name, chunk) {
-      // Only match at start of string.
-      return name.toLowerCase().indexOf(chunk.toLowerCase()) === 0
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    async mute() {
-      await this.userStore.muteOnChitChat(this.newsfeed.userid)
-      await this.newsfeedStore.fetch(this.id)
-    },
-    async unmute() {
-      await this.userStore.unMuteOnChitChat(this.newsfeed.userid)
-      await this.newsfeedStore.fetch(this.id)
-    },
-  },
+function referToWanted() {
+  referTo('Wanted')
+}
+
+function referToTaken() {
+  referTo('Taken')
+}
+
+function referToReceived() {
+  referTo('Recived')
+}
+
+async function createStory() {
+  await newsfeedStore.convertToStory(props.id)
+}
+
+async function unhide() {
+  await newsfeedStore.unhide(props.id)
+}
+
+async function hide() {
+  await newsfeedStore.hide(props.id)
+}
+
+async function referTo(type) {
+  await newsfeedStore.referTo(props.id, type)
+}
+
+function filterMatch(name, chunk) {
+  // Only match at start of string.
+  return name.toLowerCase().indexOf(chunk.toLowerCase()) === 0
+}
+
+function photoAdd() {
+  // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
+  // init callback below.
+  uploading.value = true
+}
+
+async function mute() {
+  await userStore.muteOnChitChat(newsfeed.value.userid)
+  await newsfeedStore.fetch(props.id)
+}
+
+async function unmute() {
+  await userStore.unMuteOnChitChat(newsfeed.value.userid)
+  await newsfeedStore.fetch(props.id)
 }
 </script>
 <style scoped lang="scss">

@@ -40,71 +40,74 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import Supercluster from 'supercluster/dist/supercluster'
-import { LMarker, LIcon } from '@vue-leaflet/vue-leaflet'
 import ClusterIcon from './ClusterIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
 
-export default {
-  components: { ClusterIcon, LMarker, LIcon },
-  props: {
-    // Array of { id, lat, lng }
-    markers: {
-      type: Array,
-      required: true,
-    },
-    map: {
-      type: Object,
-      required: true,
-    },
-    radius: {
-      type: Number,
-      required: false,
-      default: 60,
-    },
-    extent: {
-      type: Number,
-      required: false,
-      default: 256,
-    },
-    minZoom: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    maxZoom: {
-      type: Number,
-      required: false,
-      default: MAX_MAP_ZOOM,
-    },
-    minCluster: {
-      type: Number,
-      required: false,
-      default: 10,
-    },
-    tag: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    cssClass: {
-      type: String,
-      required: false,
-      default: '',
-    },
+const props = defineProps({
+  // Array of { id, lat, lng }
+  markers: {
+    type: Array,
+    required: true,
   },
-  computed: {
-    points() {
-      // Ensure that markers don't exactly overlap.  Simplistic.
-      const ret = []
-      const latlngs = []
-      const bounds = this.map.getBounds()
+  map: {
+    type: Object,
+    required: true,
+  },
+  radius: {
+    type: Number,
+    required: false,
+    default: 60,
+  },
+  extent: {
+    type: Number,
+    required: false,
+    default: 256,
+  },
+  minZoom: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  maxZoom: {
+    type: Number,
+    required: false,
+    default: MAX_MAP_ZOOM,
+  },
+  minCluster: {
+    type: Number,
+    required: false,
+    default: 10,
+  },
+  tag: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  cssClass: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+const emit = defineEmits(['click'])
+
+const points = computed(() => {
+  // Ensure that markers don't exactly overlap.  Simplistic.
+  const ret = []
+  const latlngs = []
+
+  if (props.map) {
+    const bounds = props.map.getBounds()
+    if (bounds) {
       const nelng = bounds.getNorthWest().lng
       const nelat = bounds.getNorthWest().lat
 
-      if (this.markers) {
-        this.markers.forEach((marker) => {
+      if (props.markers) {
+        props.markers.forEach((marker) => {
           if (marker.lat || marker.lng) {
             const key = marker.lat + '|' + marker.lng
             const already = latlngs[key] ? latlngs[key] : 0
@@ -127,87 +130,87 @@ export default {
           }
         })
       }
+    }
+  }
 
-      return ret
-    },
-    index() {
-      // Generate the index.  It's immutable, so we need to generate a new index each time the points change.
-      const index = new Supercluster({
-        radius: this.radius,
-        extent: this.extent,
-        maxZoom: this.maxZoom,
-        minZoom: this.minZoom,
-      })
+  return ret
+})
 
-      index.load(this.points)
+const index = computed(() => {
+  // Generate the index.  It's immutable, so we need to generate a new index each time the points change.
+  const idx = new Supercluster({
+    radius: props.radius,
+    extent: props.extent,
+    maxZoom: props.maxZoom,
+    minZoom: props.minZoom,
+  })
 
-      return index
-    },
-    clusters(index) {
-      let clusters = []
+  idx.load(points.value)
 
-      try {
-        if (this.map) {
-          if (this.markers.length < this.minCluster) {
-            // We've seen some cases where Supercluster excludes some markers from the cluster, so that the sum of
-            // what we get back is less than the number we passed in.  That isn't obvious except for low numbers of
-            // markers, i.e. high zoom levels.  It may be a bug, but we don't much care - for our purposes the
-            // actual numbers don't have to be spot on.  Using a minimum means that we can avoid that becoming
-            // obvious.
-            clusters = this.points
-          } else {
-            const bounds = this.map.getBounds()
-            const zoom = Math.round(this.map.getZoom())
-            let bbox = null
+  return idx
+})
 
-            try {
-              if (bounds) {
-                bbox = [
-                  bounds.getNorthWest().lng,
-                  bounds.getSouthEast().lat,
-                  bounds.getSouthEast().lng,
-                  bounds.getNorthWest().lat,
-                ]
+const clusters = computed(() => {
+  let clustersList = []
 
-                clusters = this.index.getClusters(bbox, zoom)
-              }
-            } catch (e) {
-              console.log('Exception 1', e, bounds, zoom, this.index)
-            }
+  try {
+    if (props.map) {
+      if (props.markers.length < props.minCluster) {
+        // We've seen some cases where Supercluster excludes some markers from the cluster, so that the sum of
+        // what we get back is less than the number we passed in.  That isn't obvious except for low numbers of
+        // markers, i.e. high zoom levels.  It may be a bug, but we don't much care - for our purposes the
+        // actual numbers don't have to be spot on.  Using a minimum means that we can avoid that becoming
+        // obvious.
+        clustersList = points.value
+      } else {
+        const bounds = props.map.getBounds()
+        const zoom = Math.round(props.map.getZoom())
+        let bbox = null
+
+        try {
+          if (bounds) {
+            bbox = [
+              bounds.getNorthWest().lng,
+              bounds.getSouthEast().lat,
+              bounds.getSouthEast().lng,
+              bounds.getNorthWest().lat,
+            ]
+
+            clustersList = index.value.getClusters(bbox, zoom)
           }
+        } catch (e) {
+          console.log('Exception 1', e, bounds, zoom, index.value)
         }
-      } catch (e) {
-        console.log('Exception 2', e)
       }
+    }
+  } catch (e) {
+    console.log('Exception 2', e)
+  }
 
-      return clusters
-    },
-  },
-  methods: {
-    clusterClick(cluster) {
-      let zoom = this.index.getClusterExpansionZoom(
-        cluster.properties.cluster_id
-      )
+  return clustersList
+})
 
-      // Don't allow us to zoom in too far.
-      zoom = Math.min(zoom, this.maxZoom)
+function clusterClick(cluster) {
+  let zoom = index.value.getClusterExpansionZoom(cluster.properties.cluster_id)
 
-      this.map.flyTo(
-        [cluster.geometry.coordinates[1], cluster.geometry.coordinates[0]],
-        zoom
-      )
+  // Don't allow us to zoom in too far.
+  zoom = Math.min(zoom, props.maxZoom)
 
-      this.$emit('click')
-    },
-    pointClick(cluster) {
-      // It's a point. Centre on it, and zoom right in.
-      this.map.flyTo(
-        [cluster.geometry.coordinates[1], cluster.geometry.coordinates[0]],
-        this.maxZoom
-      )
+  props.map.flyTo(
+    [cluster.geometry.coordinates[1], cluster.geometry.coordinates[0]],
+    zoom
+  )
 
-      this.$emit('click')
-    },
-  },
+  emit('click')
+}
+
+function pointClick(cluster) {
+  // It's a point. Centre on it, and zoom right in.
+  props.map.flyTo(
+    [cluster.geometry.coordinates[1], cluster.geometry.coordinates[0]],
+    props.maxZoom
+  )
+
+  emit('click')
 }
 </script>

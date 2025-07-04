@@ -239,44 +239,43 @@
     <PosterModal v-if="showPosterModal" @hidden="showPosterModal = false" />
   </b-row>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import {
+  ref,
+  defineAsyncComponent,
+  definePageMeta,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
 import InviteSomeone from '~/components/InviteSomeone'
 import { buildHead } from '~/composables/useBuildHead'
+
 const PosterModal = defineAsyncComponent(() =>
   import('~/components/PosterModal')
 )
-export default {
-  components: { InviteSomeone, PosterModal },
-  setup() {
-    definePageMeta({
-      layout: 'login',
-    })
 
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+definePageMeta({
+  layout: 'login',
+})
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Promote Freegle',
-        'Can you pass it on? Help us get more people freegling more often...'
-      )
-    )
-  },
-  data() {
-    return {
-      emailValid: false,
-      language: 'English',
-      showPosterModal: false,
-    }
-  },
-  methods: {
-    added() {
-      this.showPosterModal = true
-    },
-  },
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Promote Freegle',
+    'Can you pass it on? Help us get more people freegling more often...'
+  )
+)
+
+const language = ref('English')
+const showPosterModal = ref(false)
+
+function added() {
+  showPosterModal.value = true
 }
 </script>
 <style scoped>

@@ -11,38 +11,35 @@
     </b-button>
   </div>
 </template>
-<script>
+<script setup>
 import saveAs from 'save-file'
 
-export default {
-  props: {
-    variant: {
-      type: String,
-      required: false,
-      default: 'secondary',
-    },
-    ics: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    btnClass: {
-      type: String,
-      required: false,
-      default: '',
-    },
+const props = defineProps({
+  variant: {
+    type: String,
+    required: false,
+    default: 'secondary',
   },
-  methods: {
-    async download(e) {
-      e.preventDefault()
-      e.stopPropagation()
-      const blob = new Blob([this.ics], { type: 'text/calendar;charset=utf-8' })
-      await saveAs(blob, 'freegle-handover.ics')
-    },
+  ics: {
+    type: String,
+    required: true,
   },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
+  },
+  btnClass: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+async function download(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const blob = new Blob([props.ics], { type: 'text/calendar;charset=utf-8' })
+  await saveAs(blob, 'freegle-handover.ics')
 }
 </script>

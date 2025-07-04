@@ -8,16 +8,13 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 import ShortLink from './ShortLink'
 
-export default {
-  components: { ShortLink },
-  props: {
-    shortlinks: {
-      type: Array,
-      required: true,
-    },
+defineProps({
+  shortlinks: {
+    type: Array,
+    required: true,
   },
-}
+})
 </script>

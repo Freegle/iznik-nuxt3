@@ -151,13 +151,14 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import { useMiscStore } from '../../stores/misc'
 import { useNewsfeedStore } from '../../stores/newsfeed'
 import { useAuthStore } from '../../stores/auth'
 import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
+import { useMe } from '~/composables/useMe'
 import VisibleWhen from '~/components/VisibleWhen'
 import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -165,7 +166,14 @@ import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
 import { untwem } from '~/composables/useTwem'
-import { ref } from '#imports'
+import {
+  ref,
+  computed,
+  watch,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+} from '#imports'
 
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
@@ -182,338 +190,331 @@ const NewsLocation = defineAsyncComponent(() =>
 const ExpectedRepliesWarning = defineAsyncComponent(() =>
   import('~/components/ExpectedRepliesWarning')
 )
+const OurUploadedImage = defineAsyncComponent(() =>
+  import('~/components/OurUploadedImage')
+)
 
-export default {
-  components: {
-    NewsCommunityEventVolunteerSummary,
-    VisibleWhen,
-    GlobalMessage,
-    ExpectedRepliesWarning,
-    NoticeMessage,
-    NewsThread,
-    OurUploader,
-    SidebarLeft,
-    SidebarRight,
-    NewsLocation,
-    InfiniteLoading,
-    AutoHeightTextarea,
-  },
-  validate({ params }) {
+// Route validation
+definePageMeta({
+  layout: 'login',
+  validate: ({ params }) => {
     // Must be a number if present
     return !params.id || /^\d+$/.test(params.id)
   },
-  async setup(props) {
-    definePageMeta({
-      layout: 'login',
+})
+
+// Setup page head
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const id = route.params.id
+
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'ChitChat',
+    'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.',
+    null,
+    {
+      class: 'overflow-y-scroll',
+    }
+  )
+)
+
+// Store setup
+const miscStore = useMiscStore()
+const newsfeedStore = useNewsfeedStore()
+const authStore = useAuthStore()
+
+// We want this to be our next home page.
+const existingHomepage = miscStore.get('lasthomepage')
+
+if (existingHomepage !== 'news') {
+  miscStore.set({
+    key: 'lasthomepage',
+    value: 'news',
+  })
+}
+
+// Use me computed property from useMe composable for consistency
+const { me } = useMe()
+const mod = computed(
+  () =>
+    me.value &&
+    (me.value.systemrole === 'Moderator' ||
+      me.value.systemrole === 'Support' ||
+      me.value.systemrole === 'Admin')
+)
+
+// Refs and state
+const show = ref(0)
+const startThread = ref(null)
+const uploading = ref(false)
+const imageid = ref(null)
+const ouruid = ref(null)
+const imageuid = ref(null)
+const imagemods = ref(null)
+const distance = ref(1000)
+const runChecks = ref(true)
+const infiniteState = ref(null)
+const currentAtts = ref([])
+const showGiveFind = ref(false)
+const shownGiveFind = ref(false)
+const error = ref(false)
+const threadhead = ref(null)
+const infiniteId = ref(new Date().getTime())
+const giveFind = ref(null)
+
+// Computed properties
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
+
+const selectedArea = computed({
+  get() {
+    const settings = me.value?.settings
+    return settings?.newsfeedarea || 0
+  },
+  async set(newval) {
+    const settings = me.value.settings
+    settings.newsfeedarea = newval
+
+    await authStore.saveAndGet({
+      settings,
     })
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const id = route.params.id
+  },
+})
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'ChitChat',
-        'Chat to nearby freeglers...ask for advice, recommendations or just have a good old natter.',
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+const newsfeed = computed(() => {
+  let ret = Object.values(newsfeedStore?.feed || {})
 
-    const miscStore = useMiscStore()
-    const newsfeedStore = useNewsfeedStore()
-    const authStore = useAuthStore()
-
-    // We want this to be our next home page.
-    const existingHomepage = miscStore.get('lasthomepage')
-
-    if (existingHomepage !== 'news') {
-      miscStore.set({
-        key: 'lasthomepage',
-        value: 'news',
-      })
+  // Suppress duplicate posts.
+  ret = ret.filter((item, index) => {
+    if (index === 0) {
+      return true
     }
 
-    const me = authStore.user
-    const mod =
-      me &&
-      (me.systemrole === 'Moderator' ||
-        me.systemrole === 'Support' ||
-        me.systemrole === 'Admin')
+    return (
+      item.userid === 0 ||
+      item.userid !== ret[index - 1].userid ||
+      item.message !== ret[index - 1].message
+    )
+  })
 
-    const settings = me?.settings
-    const distance = settings?.newsfeedarea || 0
-    const error = ref(false)
-    const threadhead = ref(null)
+  return ret
+})
 
-    if (me) {
-      if (id) {
-        // Force as there may be changes since we loaded what was in the store.
-        const newsfeed = await newsfeedStore.fetch(id, true)
+const newsfeedToShow = computed(() => {
+  if (newsfeedStore) {
+    if (id) {
+      const thread = newsfeedStore.byId(threadhead.value)
 
-        // Mods can see deleted posts.
-        if (!mod && (!newsfeed?.id || newsfeed?.deleted)) {
-          error.value = true
-        } else if (newsfeed?.id !== newsfeed?.threadhead) {
-          threadhead.value = newsfeed.threadhead
+      if (thread) {
+        return [thread]
+      } else {
+        return []
+      }
+    } else {
+      return newsfeed.value
+        .slice(0, show.value)
+        .filter((entry) => !entry.unfollowed)
+    }
+  }
 
-          const fetched = await newsfeedStore.fetch(newsfeed.threadhead)
+  return []
+})
 
-          if (!mod && (!fetched?.id || fetched?.deleted)) {
+// Watchers
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal?.length) {
+      uploading.value = false
+
+      imageid.value = newVal[0].id
+      imageuid.value = newVal[0].ouruid
+      ouruid.value = newVal[0].ouruid
+      imagemods.value = newVal[0].externalmods
+    }
+  },
+  { deep: true }
+)
+
+// Methods
+function rendered() {
+  // We do this so that we wait until one item has rendered before inserting another.
+  // Otherwise we get them appearing out of order, which is worse than there being a delay before they appear in series.
+  console.log('Rendered')
+  if (infiniteState.value) {
+    infiniteState.value.loaded()
+  }
+}
+
+function loadMore($state) {
+  console.log('Load more', show.value, newsfeed.value.length)
+  infiniteState.value = $state
+
+  if (show.value < newsfeed.value.length) {
+    console.log('Show another')
+    show.value += 1
+  } else {
+    console.log('News complete')
+    $state.complete()
+  }
+}
+
+async function areaChange() {
+  const newDistance = me.value?.settings?.newsfeedarea || 0
+  await newsfeedStore.reset()
+  await newsfeedStore.fetchFeed(newDistance)
+  infiniteId.value++
+  show.value = 0
+}
+
+async function postIt() {
+  let msg = startThread.value
+
+  if (msg && msg.trim().length) {
+    // Encode up any emojis.
+    msg = untwem(msg)
+
+    await newsfeedStore.send(msg, null, null, imageid.value)
+
+    // Clear the textarea now it's sent.
+    startThread.value = null
+
+    // And any image id
+    imageid.value = null
+    imageuid.value = null
+    ouruid.value = null
+    imagemods.value = null
+
+    // Show from top.
+    infiniteId.value++
+    show.value = 0
+  }
+}
+
+function photoAdd() {
+  // Flag that we're uploading.  This will trigger the render of the filepond instance
+  uploading.value = true
+}
+
+function scrollToGiveFind(give) {
+  nextTick(() => {
+    if (giveFind.value) {
+      giveFind.value.$el.scrollIntoView()
+
+      setTimeout(() => {
+        if (give && giveFind.value?.$refs.givebutton?.$el) {
+          giveFind.value.$refs.givebutton.$el.scrollIntoView()
+        } else if (!give && giveFind.value?.$refs.findbutton?.$el) {
+          giveFind.value.$refs.findbutton.$el.scrollIntoView()
+        }
+      }, 500)
+    }
+
+    window.scrollBy(0, 100)
+    setTimeout(() => {
+      showGiveFind.value = false
+    }, 30000)
+  })
+}
+
+function runCheck() {
+  // People sometimes try to use chitchat to offer/request items, despite obvious buttons
+  if (runChecks.value) {
+    let msg = startThread.value
+
+    if (msg) {
+      msg = msg.toLowerCase()
+
+      if (!shownGiveFind.value) {
+        for (const word of [
+          'offer',
+          'giving away',
+          'does anyone want',
+          'collection from',
+          'collection only',
+        ]) {
+          if (msg.length && msg.includes(word)) {
+            showGiveFind.value = true
+            shownGiveFind.value = true
+            scrollToGiveFind(true)
+          }
+        }
+      }
+
+      if (!shownGiveFind.value) {
+        for (const word of [
+          'wanted',
+          'wanting',
+          'requesting',
+          'looking for',
+          'has anybody got',
+          'has anyone got',
+          'does anyone have',
+          'i really need',
+          'if anyone has',
+        ]) {
+          if (msg.length && msg.includes(word)) {
+            showGiveFind.value = true
+            shownGiveFind.value = true
+            scrollToGiveFind(false)
+          }
+        }
+      }
+    }
+
+    setTimeout(runCheck, 1000)
+  }
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  runCheck()
+})
+
+onBeforeUnmount(() => {
+  // Stop timers which would otherwise kill garbage collection.
+  runChecks.value = false
+})
+
+// Initial data loading
+const settings = me.value?.settings
+distance.value = settings?.newsfeedarea || 0
+
+// Fetch data if user is logged in
+if (me.value) {
+  if (id) {
+    // Force as there may be changes since we loaded what was in the store.
+    newsfeedStore.fetch(id, true).then((newsfeed) => {
+      // Mods can see deleted posts.
+      if (!mod.value && (!newsfeed?.id || newsfeed?.deleted)) {
+        error.value = true
+      } else if (newsfeed?.id !== newsfeed?.threadhead) {
+        threadhead.value = newsfeed.threadhead
+
+        newsfeedStore.fetch(newsfeed.threadhead).then((fetched) => {
+          if (!mod.value && (!fetched?.id || fetched?.deleted)) {
             error.value = true
           }
-        } else {
-          threadhead.value = id
-        }
-      } else {
-        await newsfeedStore.fetchFeed(distance)
-
-        // Fetch the first few threads in parallel so that they are in the store.  This speeds up rendering the
-        // first page.
-        const feed = newsfeedStore.feed
-
-        if (feed?.length) {
-          const firstThreads = feed.slice(0, 5)
-          firstThreads.forEach((thread) => {
-            newsfeedStore.fetch(thread.id)
-          })
-        }
-      }
-    }
-
-    return {
-      authStore,
-      newsfeedStore,
-      miscStore,
-      id,
-      error,
-      infiniteId: new Date().getTime(),
-      threadhead,
-    }
-  },
-  data() {
-    return {
-      show: 0,
-      startThread: null,
-      uploading: false,
-      imageid: null,
-      ouruid: null,
-      imageuid: null,
-      imagemods: null,
-      distance: 1000,
-      runChecks: true,
-      infiniteState: null,
-      currentAtts: [],
-      showGiveFind: false,
-      shownGiveFind: false,
-    }
-  },
-  computed: {
-    stickyAdRendered() {
-      return this.miscStore.stickyAdRendered
-    },
-    selectedArea: {
-      get() {
-        const settings = this.me.settings
-        return settings.newsfeedarea || 0
-      },
-      async set(newval) {
-        const settings = this.me.settings
-        settings.newsfeedarea = newval
-
-        await this.authStore.saveAndGet({
-          settings,
         })
-      },
-    },
-    newsfeed() {
-      let ret = Object.values(this.newsfeedStore?.feed)
-
-      // Suppress duplicate posts.
-      ret = ret.filter((item, index) => {
-        if (index === 0) {
-          return true
-        }
-
-        return (
-          item.userid === 0 ||
-          item.userid !== ret[index - 1].userid ||
-          item.message !== ret[index - 1].message
-        )
-      })
-
-      return ret
-    },
-    newsfeedToShow() {
-      if (this.newsfeedStore) {
-        if (this.id) {
-          const thread = this.newsfeedStore.byId(this.threadhead)
-
-          if (thread) {
-            return [thread]
-          } else {
-            return []
-          }
-        } else {
-          return this.newsfeed
-            .slice(0, this.show)
-            .filter((entry) => !entry.unfollowed)
-        }
-      }
-
-      return []
-    },
-  },
-  watch: {
-    currentAtts: {
-      handler(newVal) {
-        if (newVal?.length) {
-          this.uploading = false
-
-          this.imageid = newVal[0].id
-          this.imageuid = newVal[0].ouruid
-          this.ouruid = newVal[0].ouruid
-          this.imagemods = newVal[0].externalmods
-        }
-      },
-      deep: true,
-    },
-  },
-  beforeCreate() {
-    this.id = this.$route.params.id
-  },
-  beforeUnmount() {
-    // Stop timers which would otherwise kill garbage collection.
-    this.runChecks = false
-  },
-  mounted() {
-    this.runCheck()
-  },
-  methods: {
-    runCheck() {
-      // People sometimes try to use chitchat to offer/request items, despite what are technically known as
-      // Fuck Off Obvious Big Buttons.  Catch the most obvious attempts and redirect them.
-      if (this.runChecks) {
-        let msg = this.startThread
-
-        if (msg) {
-          msg = msg.toLowerCase()
-
-          if (!this.shownGiveFind) {
-            for (const word of [
-              'offer',
-              'giving away',
-              'does anyone want',
-              'collection from',
-              'collection only',
-            ]) {
-              if (msg.length && msg.includes(word)) {
-                this.showGiveFind = true
-                this.shownGiveFind = true
-                this.scrollToGiveFind(true)
-              }
-            }
-          }
-
-          if (!this.shownGiveFind) {
-            for (const word of [
-              'wanted',
-              'wanting',
-              'requesting',
-              'looking for',
-              'has anybody got',
-              'has anyone got',
-              'does anyone have',
-              'i really need',
-              'if anyone has',
-            ]) {
-              if (msg.length && msg.includes(word)) {
-                this.showGiveFind = true
-                this.shownGiveFind = true
-                this.scrollToGiveFind(false)
-              }
-            }
-          }
-        }
-
-        setTimeout(this.runCheck, 1000)
-      }
-    },
-    rendered() {
-      // We do this so that we wait until one item has rendered before inserting another.  Otherwise we get them
-      // appearing out of order, which is worse than there being a delay before they appear in series.
-      if (this.infiniteState) {
-        this.infiniteState.loaded()
-      }
-    },
-    loadMore($state) {
-      this.infiniteState = $state
-
-      if (this.show < this.newsfeed.length) {
-        this.show += 1
       } else {
-        $state.complete()
+        threadhead.value = id
       }
-    },
-    async areaChange() {
-      const distance = this.me?.settings?.newsfeedarea || 0
-      await this.newsfeedStore.reset()
-      await this.newsfeedStore.fetchFeed(distance)
-      this.infiniteId++
-      this.show = 0
-    },
-    async postIt() {
-      let msg = this.startThread
+    })
+  } else {
+    newsfeedStore.fetchFeed(distance.value).then(() => {
+      // Fetch the first few threads in parallel so that they are in the store.
+      const feed = newsfeedStore.feed
 
-      if (msg && msg.trim().length) {
-        // Encode up any emojis.
-        msg = untwem(msg)
-
-        await this.newsfeedStore.send(msg, null, null, this.imageid)
-
-        // Clear the textarea now it's sent.
-        this.startThread = null
-
-        // And any image id
-        this.imageid = null
-        this.imageuid = null
-        this.ouruid = null
-        this.imagemods = null
-
-        // Show from top.
-        this.infiniteId++
-        this.show = 0
+      if (feed?.length) {
+        const firstThreads = feed.slice(0, 5)
+        firstThreads.forEach((thread) => {
+          newsfeedStore.fetch(thread.id)
+        })
       }
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    scrollToGiveFind(give) {
-      this.$nextTick(() => {
-        if (this.$refs.giveFind) {
-          this.$refs.giveFind.$el.scrollIntoView()
-
-          setTimeout(() => {
-            if (give && this.$refs.givebutton?.$el) {
-              this.$refs.givebutton.$el.scrollIntoView()
-            } else if (!give && this.$refs.findbutton?.$el) {
-              this.$refs.findbutton.$el.scrollIntoView()
-            }
-          }, 500)
-        }
-
-        window.scrollBy(0, 100)
-        setTimeout(() => {
-          this.showGiveFind = false
-        }, 30000)
-      })
-    },
-  },
+    })
+  }
 }
 </script>
 <style scoped lang="scss">
@@ -547,6 +548,10 @@ export default {
 
 .adpad.stickyAdRendered {
   margin-bottom: $sticky-banner-height-mobile;
+
+  @media (min-height: $mobile-tall) {
+    margin-bottom: $sticky-banner-height-mobile-tall;
+  }
 
   @include media-breakpoint-up(md) {
     padding-bottom: $sticky-banner-height-desktop;

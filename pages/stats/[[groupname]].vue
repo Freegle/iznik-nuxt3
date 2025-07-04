@@ -119,12 +119,21 @@
     <b-col cols="0" md="3" class="d-none d-md-block" />
   </b-row>
 </template>
-<script>
+<script setup>
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import { useRoute } from 'vue-router'
-import StatsImpact from '~/components/StatsImpact'
-import ActivityGraph from '~/components/ActivityGraph'
+import {
+  ref,
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  nextTick,
+  useRoute,
+  useHead,
+  useRuntimeConfig,
+} from '#imports'
+import StatsImpact from '~/components/StatsImpact.vue'
+import ActivityGraph from '~/components/ActivityGraph.vue'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import { useStatsStore } from '~/stores/stats'
@@ -133,297 +142,294 @@ const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
 )
 
-export default {
-  components: {
-    ActivityGraph,
-    StatsImpact,
-    GChart,
-    GroupHeader,
+// Setup stores and route
+const groupStore = useGroupStore()
+const statsStore = useStatsStore()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+
+// Reactive state
+const loading = ref(false)
+const start = ref(null)
+const end = ref(null)
+const dataready = ref(false)
+
+// Route parameters
+const groupname = route.params.groupname
+const group = computed(() => {
+  return groupStore.get(groupname)
+})
+const groupid = computed(() => {
+  return groupStore.get(groupname)?.id || null
+})
+
+// Chart options
+const balanceOptions = {
+  title: 'Post Balance',
+  chartArea: { width: '80%', height: '80%' },
+  colors: ['green', 'blue'],
+  tooltip: {
+    text: 'percentage',
   },
-  async setup() {
-    const groupStore = useGroupStore()
-    const statsStore = useStatsStore()
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-
-    const groupname = route.params.groupname
-    const group = computed(() => {
-      return groupStore.get(groupname)
-    })
-    const groupid = computed(() => {
-      return groupStore.get(groupname)?.id || null
-    })
-
-    if (groupname) {
-      await groupStore.fetch(groupname, true)
-
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          'Statistics for ' + groupname,
-          'See stats and graphs for ' + groupname,
-          group.value?.profile ? group.value?.profile : null
-        )
-      )
-    } else {
-      useHead(
-        buildHead(
-          route,
-          runtimeConfig,
-          'Statistics',
-          'See stats and graphs for Freegle'
-        )
-      )
-    }
-
-    return {
-      groupStore,
-      statsStore,
-      groupname,
-      groupid,
-      group,
-    }
+  slices2: {
+    1: { offset: 0.2 },
+    2: { offset: 0.2 },
   },
-  data() {
-    return {
-      loading: false,
-      start: null,
-      end: null,
-      dataready: false,
-      balanceOptions: {
-        title: 'Post Balance',
-        chartArea: { width: '80%', height: '80%' },
-        colors: ['green', 'blue'],
-        tooltip: {
-          text: 'percentage',
-        },
-        slices2: {
-          1: { offset: 0.2 },
-          2: { offset: 0.2 },
-        },
-      },
-      offerOutcomeOptions: {
-        title: 'Offer Outcome',
-        chartArea: { width: '80%', height: '80%' },
-        colors: ['green', 'blue'],
-        tooltip: {
-          text: 'percentage',
-        },
-        slices2: {
-          1: { offset: 0.2 },
-          2: { offset: 0.2 },
-        },
-        legend: { position: 'bottom', alignment: 'center' },
-      },
-      wantedOutcomeOptions: {
-        title: 'Wanted Balance',
-        chartArea: { width: '80%', height: '80%' },
-        colors: ['green', 'blue'],
-        tooltip: {
-          text: 'percentage',
-        },
-        slices2: {
-          1: { offset: 0.2 },
-          2: { offset: 0.2 },
-        },
-        legend: { position: 'bottom', alignment: 'center' },
-      },
-      weightOptions: {
-        title: 'Weights (kg)',
-        interpolateNulls: false,
-        animation: {
-          duration: 5000,
-          easing: 'out',
-          startup: true,
-        },
-        legend: { position: 'none' },
-        chartArea: { width: '80%', height: '80%' },
-        bar: { groupWidth: '100%' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'green' },
-        },
-      },
-      memberOptions: {
-        title: 'Members',
-        interpolateNulls: false,
-        animation: {
-          duration: 5000,
-          easing: 'out',
-          startup: true,
-        },
-        legend: { position: 'none' },
-        chartArea: { width: '80%', height: '80%' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'blue' },
-        },
-      },
-    }
-  },
-  computed: {
-    totalWeight() {
-      const weights = this.statsStore?.Weight
-      let total = 0
-      const now = dayjs()
-
-      if (weights) {
-        for (const w of weights) {
-          if (now.diff(dayjs(w.date), 'days') <= 365) {
-            total += w.count
-          }
-        }
-      }
-
-      return total / 1000
-    },
-    // Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
-    // https://wrap.org.uk/resources/tool/benefits-reuse-tool
-    totalBenefit() {
-      return this.totalWeight * 711
-    },
-    totalCO2() {
-      return this.totalWeight * 0.51
-    },
-    balanceData() {
-      const breakdown = this.statsStore.MessageBreakdown
-      return [
-        ['Type', 'Count'],
-        ['Offer', parseInt(breakdown?.Offer)],
-        ['Wanted', parseInt(breakdown?.Wanted)],
-      ]
-    },
-    offerOutcomeData() {
-      const breakdown = this.statsStore.Outcomes
-      let totalOffer = 0
-      let takenOffer = 0
-      let withdrawnOffer = 0
-
-      if (breakdown?.Offer) {
-        for (const d of breakdown?.Offer) {
-          totalOffer += d.count
-
-          if (d.outcome === 'Taken') {
-            takenOffer = d.count
-          } else if (d.outcome === 'Withdrawn') {
-            withdrawnOffer = d.count
-          }
-        }
-      }
-
-      const ret = [
-        ['Type', 'Count'],
-        ['Taken', Math.round((100 * takenOffer) / totalOffer)],
-        ['Withdrawn', Math.round((100 * withdrawnOffer) / totalOffer)],
-      ]
-
-      return ret
-    },
-    wantedOutcomeData() {
-      const breakdown = this.statsStore.Outcomes
-      let totalWanted = 0
-      let receivedWanted = 0
-      let withdrawnWanted = 0
-
-      if (breakdown?.Wanted) {
-        for (const d of breakdown?.Wanted) {
-          totalWanted += d.count
-
-          if (d.outcome === 'Received') {
-            receivedWanted = d.count
-          } else if (d.outcome === 'Withdrawn') {
-            withdrawnWanted = d.count
-          }
-        }
-      }
-
-      const ret = [
-        ['Type', 'Count'],
-        ['Received', Math.round((100 * receivedWanted) / totalWanted)],
-        ['Withdrawn', Math.round((100 * withdrawnWanted) / totalWanted)],
-      ]
-
-      return ret
-    },
-    memberData() {
-      const ret = [['Date', 'Count']]
-      const members = this.statsStore.ApprovedMemberCount
-
-      if (members) {
-        for (const a of members) {
-          ret.push([new Date(a.date), parseInt(a.count)])
-        }
-      }
-
-      return ret
-    },
-    weightData() {
-      const ret = [['Date', 'Count']]
-      const activity = this.statsStore.Weight
-      let lastmon = null
-      let count = 0
-
-      if (activity) {
-        for (const a of activity) {
-          const mon = a.date.substring(0, 7)
-
-          if (mon !== lastmon) {
-            if (lastmon !== null) {
-              ret.push([new Date(lastmon + '-01'), count])
-              count = 0
-            }
-
-            lastmon = mon
-          }
-
-          count += a.count
-        }
-      }
-
-      if (lastmon !== null) {
-        ret.push([new Date(lastmon + '-01'), count])
-      }
-
-      return ret
-    },
-  },
-  async mounted() {
-    this.loading = true
-
-    this.start = dayjs()
-      .subtract(1, 'year')
-      .subtract(1, 'month')
-      .startOf('month')
-
-    this.end = dayjs().subtract(1, 'month').endOf('month')
-
-    await this.statsStore.clear()
-    console.log('Mounted', this.groupid)
-    await this.statsStore.fetch({
-      group: this.groupid,
-      grouptype: 'Freegle',
-      systemwide: this.groupid === null,
-      start: this.start.format('YYYY-MM-DD'),
-      end: this.end.format('YYYY-MM-DD'),
-    })
-
-    this.loading = false
-    this.$nextTick(() => {
-      // This is a bit of a hack to make sure everything is in the DOM and the data is ready, otherwise the charts
-      // break.
-      this.dataready = true
-    })
-  },
-
-  methods: {},
 }
+
+const offerOutcomeOptions = {
+  title: 'Offer Outcome',
+  chartArea: { width: '80%', height: '80%' },
+  colors: ['green', 'blue'],
+  tooltip: {
+    text: 'percentage',
+  },
+  slices2: {
+    1: { offset: 0.2 },
+    2: { offset: 0.2 },
+  },
+  legend: { position: 'bottom', alignment: 'center' },
+}
+
+const wantedOutcomeOptions = {
+  title: 'Wanted Balance',
+  chartArea: { width: '80%', height: '80%' },
+  colors: ['green', 'blue'],
+  tooltip: {
+    text: 'percentage',
+  },
+  slices2: {
+    1: { offset: 0.2 },
+    2: { offset: 0.2 },
+  },
+  legend: { position: 'bottom', alignment: 'center' },
+}
+
+const weightOptions = {
+  title: 'Weights (kg)',
+  interpolateNulls: false,
+  animation: {
+    duration: 5000,
+    easing: 'out',
+    startup: true,
+  },
+  legend: { position: 'none' },
+  chartArea: { width: '80%', height: '80%' },
+  bar: { groupWidth: '100%' },
+  vAxis: { viewWindow: { min: 0 } },
+  hAxis: {
+    format: 'MMM yyyy',
+  },
+  series: {
+    0: { color: 'green' },
+  },
+}
+
+const memberOptions = {
+  title: 'Members',
+  interpolateNulls: false,
+  animation: {
+    duration: 5000,
+    easing: 'out',
+    startup: true,
+  },
+  legend: { position: 'none' },
+  chartArea: { width: '80%', height: '80%' },
+  vAxis: { viewWindow: { min: 0 } },
+  hAxis: {
+    format: 'MMM yyyy',
+  },
+  series: {
+    0: { color: 'blue' },
+  },
+}
+
+// Computed properties
+const totalWeight = computed(() => {
+  const weights = statsStore?.Weight
+  let total = 0
+  const now = dayjs()
+
+  if (weights) {
+    for (const w of weights) {
+      if (now.diff(dayjs(w.date), 'days') <= 365) {
+        total += w.count
+      }
+    }
+  }
+
+  return total / 1000
+})
+
+// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
+// https://wrap.org.uk/resources/tool/benefits-reuse-tool
+const totalBenefit = computed(() => {
+  return totalWeight.value * 711
+})
+
+const totalCO2 = computed(() => {
+  return totalWeight.value * 0.51
+})
+
+const balanceData = computed(() => {
+  const breakdown = statsStore.MessageBreakdown
+  return [
+    ['Type', 'Count'],
+    ['Offer', parseInt(breakdown?.Offer)],
+    ['Wanted', parseInt(breakdown?.Wanted)],
+  ]
+})
+
+const offerOutcomeData = computed(() => {
+  const breakdown = statsStore.Outcomes
+  let totalOffer = 0
+  let takenOffer = 0
+  let withdrawnOffer = 0
+
+  if (breakdown?.Offer) {
+    for (const d of breakdown?.Offer) {
+      totalOffer += d.count
+
+      if (d.outcome === 'Taken') {
+        takenOffer = d.count
+      } else if (d.outcome === 'Withdrawn') {
+        withdrawnOffer = d.count
+      }
+    }
+  }
+
+  const ret = [
+    ['Type', 'Count'],
+    ['Taken', Math.round((100 * takenOffer) / totalOffer)],
+    ['Withdrawn', Math.round((100 * withdrawnOffer) / totalOffer)],
+  ]
+
+  return ret
+})
+
+const wantedOutcomeData = computed(() => {
+  const breakdown = statsStore.Outcomes
+  let totalWanted = 0
+  let receivedWanted = 0
+  let withdrawnWanted = 0
+
+  if (breakdown?.Wanted) {
+    for (const d of breakdown?.Wanted) {
+      totalWanted += d.count
+
+      if (d.outcome === 'Received') {
+        receivedWanted = d.count
+      } else if (d.outcome === 'Withdrawn') {
+        withdrawnWanted = d.count
+      }
+    }
+  }
+
+  const ret = [
+    ['Type', 'Count'],
+    ['Received', Math.round((100 * receivedWanted) / totalWanted)],
+    ['Withdrawn', Math.round((100 * withdrawnWanted) / totalWanted)],
+  ]
+
+  return ret
+})
+
+const memberData = computed(() => {
+  const ret = [['Date', 'Count']]
+  const members = statsStore.ApprovedMemberCount
+
+  if (members) {
+    for (const a of members) {
+      ret.push([new Date(a.date), parseInt(a.count)])
+    }
+  }
+
+  return ret
+})
+
+const weightData = computed(() => {
+  const ret = [['Date', 'Count']]
+  const activity = statsStore.Weight
+  let lastmon = null
+  let count = 0
+
+  if (activity) {
+    for (const a of activity) {
+      const mon = a.date.substring(0, 7)
+
+      if (mon !== lastmon) {
+        if (lastmon !== null) {
+          ret.push([new Date(lastmon + '-01'), count])
+          count = 0
+        }
+
+        lastmon = mon
+      }
+
+      count += a.count
+    }
+  }
+
+  if (lastmon !== null) {
+    ret.push([new Date(lastmon + '-01'), count])
+  }
+
+  return ret
+})
+
+// Set page head
+if (groupname) {
+  await groupStore.fetch(groupname, true)
+
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Statistics for ' + groupname,
+      'See stats and graphs for ' + groupname,
+      group.value?.profile ? group.value?.profile : null
+    )
+  )
+} else {
+  useHead(
+    buildHead(
+      route,
+      runtimeConfig,
+      'Statistics',
+      'See stats and graphs for Freegle'
+    )
+  )
+}
+
+// Lifecycle hooks
+onMounted(async () => {
+  loading.value = true
+
+  start.value = dayjs()
+    .subtract(1, 'year')
+    .subtract(1, 'month')
+    .startOf('month')
+
+  end.value = dayjs().subtract(1, 'month').endOf('month')
+
+  await statsStore.clear()
+  console.log('Mounted', groupid.value)
+  await statsStore.fetch({
+    group: groupid.value,
+    grouptype: 'Freegle',
+    systemwide: groupid.value === null,
+    start: start.value.format('YYYY-MM-DD'),
+    end: end.value.format('YYYY-MM-DD'),
+  })
+
+  loading.value = false
+
+  nextTick(() => {
+    // This is a bit of a hack to make sure everything is in the DOM and the data is ready, otherwise the charts
+    // break.
+    dataready.value = true
+  })
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

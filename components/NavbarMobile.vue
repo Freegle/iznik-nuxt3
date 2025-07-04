@@ -45,7 +45,12 @@
         <div class="d-flex align-items-center">
           <b-nav>
             <b-nav-item>
-              <nuxt-link v-if="!loggedIn" no-prefetch>
+              <nuxt-link
+                v-if="!loggedIn"
+                no-prefetch
+                class="test-signinbutton"
+                :disabled="signInDisabled"
+              >
                 <div class="btn btn-white mr-2" @click="requestLogin">
                   Log in or Join
                 </div>
@@ -61,7 +66,7 @@
         >
           <template #button-content>
             <ProfileImage
-              v-if="me.profile.path"
+              v-if="me?.profile?.path"
               :image="me.profile.path"
               class="m-0 inline"
               is-thumbnail
@@ -225,6 +230,7 @@ import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
 import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 
 const {
   online,
@@ -277,8 +283,13 @@ watch(notificationsShown, (newVal) => {
   }
 })
 
+const signInDisabled = ref(true)
+
 // We want to hide the navbars when you scroll down.
 onMounted(() => {
+  // Keeping the button disabled until hygration has finished helps with Playwright tests.
+  signInDisabled.value = false
+
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -315,6 +326,8 @@ const navBarBottomHidden = computed(() => {
     navBarHidden.value
   )
 })
+
+const loggedIn = computed(() => useAuthStore().user !== null)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -334,8 +347,16 @@ const navBarBottomHidden = computed(() => {
 .navbot.stickyAdRendered {
   margin-bottom: $sticky-banner-height-mobile;
 
+  @media (min-height: $mobile-tall) {
+    margin-bottom: $sticky-banner-height-mobile-tall;
+  }
+
   @include media-breakpoint-up(md) {
     margin-bottom: $sticky-banner-height-desktop;
+
+    @media (min-height: $desktop-tall) {
+      margin-bottom: $sticky-banner-height-desktop-tall;
+    }
   }
 }
 

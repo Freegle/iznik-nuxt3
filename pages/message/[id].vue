@@ -1,9 +1,11 @@
 <template>
-  <client-only>
-    <b-col>
+  <b-col>
+    <client-only>
       <MicroVolunteering />
-      <b-row class="m-0">
-        <b-col cols="0" xl="3" class="d-none d-xl-block">
+    </client-only>
+    <b-row class="m-0">
+      <b-col cols="0" xl="3" class="d-none d-xl-block">
+        <client-only>
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -17,92 +19,106 @@
               show-logged-out
             />
           </VisibleWhen>
-        </b-col>
-        <b-col cols="12" xl="6" class="p-0">
-          <div
+        </client-only>
+      </b-col>
+      <b-col cols="12" xl="6" class="p-0">
+        <div
+          v-if="
+            !showtaken &&
+            (failed ||
+              !message ||
+              (message &&
+                (message.outcomes?.length > 0 ||
+                  message.deleted ||
+                  (message.groups &&
+                    message.groups.length &&
+                    message.groups[0].collection === 'Rejected'))))
+          "
+          class="bg-white p-2"
+        >
+          <h1>Sorry, that post isn't around any more.</h1>
+          <p
             v-if="
-              !showtaken &&
-              (failed ||
-                !message ||
-                (message &&
-                  (message.outcomes?.length > 0 ||
-                    message.deleted ||
-                    (message.groups &&
-                      message.groups.length &&
-                      message.groups[0].collection === 'Rejected'))))
+              message?.outcomes?.length &&
+              message?.outcomes[0].outcome === 'Taken'
             "
-            class="bg-white p-2"
           >
-            <h1>Sorry, that post isn't around any more.</h1>
-            <p
-              v-if="
-                message?.outcomes?.length &&
-                message?.outcomes[0].outcome === 'Taken'
-              "
-            >
-              It was successfully taken.
-            </p>
-            <p
-              v-else-if="
-                message?.outcomes?.length &&
-                message?.outcomes[0].outcome === 'Received'
-              "
-            >
-              It was successfully received.
-            </p>
-            <p
-              v-else-if="
-                message?.outcomes?.length &&
-                message?.outcomes[0].outcome === 'Withdrawn'
-              "
-            >
-              It was withdrawn.
-            </p>
-            <p v-else-if="message?.deadline">
-              There was a deadline of
-              {{ dateonlyNoYear(message.deadline) }}.
-            </p>
-            <div v-else>
-              <p>
-                If it was an OFFER, it's probably been TAKEN. If it was a
-                WANTED, it's probably been RECEIVED.
-              </p>
-            </div>
-            <b-row>
-              <b-col cols="5" class="mt-1">
-                <b-button
-                  to="/give"
-                  class="mt-1"
-                  size="lg"
-                  block
-                  variant="primary"
-                >
-                  <v-icon icon="gift" />&nbsp;Give stuff
-                </b-button>
-              </b-col>
-              <b-col cols="2" />
-              <b-col cols="5">
-                <b-button
-                  to="/find"
-                  class="mt-1"
-                  size="lg"
-                  block
-                  variant="secondary"
-                >
-                  <v-icon icon="shopping-cart" />
-                  &nbsp;Ask for stuff
-                </b-button>
-              </b-col>
-            </b-row>
-          </div>
-          <div
+            It was successfully taken.
+          </p>
+          <p
             v-else-if="
-              mountComplete && myid && message && message.fromuser === myid
+              message?.outcomes?.length &&
+              message?.outcomes[0].outcome === 'Received'
             "
           >
-            <MyMessage :id="id" :show-old="true" expand />
+            It was successfully received.
+          </p>
+          <p
+            v-else-if="
+              message?.outcomes?.length &&
+              message?.outcomes[0].outcome === 'Withdrawn'
+            "
+          >
+            It was withdrawn.
+          </p>
+          <p v-else-if="message?.deadline">
+            There was a deadline of
+            {{ dateonlyNoYear(message.deadline) }}.
+          </p>
+          <div v-else>
+            <p>
+              If it was an OFFER, it's probably been TAKEN. If it was a WANTED,
+              it's probably been RECEIVED.
+            </p>
           </div>
-          <div v-else class="botpad">
+          <b-row>
+            <b-col cols="5" class="mt-1">
+              <b-button
+                to="/give"
+                class="mt-1"
+                size="lg"
+                block
+                variant="primary"
+              >
+                <v-icon icon="gift" />&nbsp;Give stuff
+              </b-button>
+            </b-col>
+            <b-col cols="2" />
+            <b-col cols="5">
+              <b-button
+                to="/find"
+                class="mt-1"
+                size="lg"
+                block
+                variant="secondary"
+              >
+                <v-icon icon="shopping-cart" />
+                &nbsp;Ask for stuff
+              </b-button>
+            </b-col>
+          </b-row>
+        </div>
+        <div
+          v-else-if="
+            mountComplete && myid && message && message.fromuser === myid
+          "
+        >
+          <client-only>
+            <MyMessage :id="id" :show-old="true" expand />
+          </client-only>
+        </div>
+        <div v-else class="botpad">
+          <client-only>
+            <template #fallback>
+              <OurMessage
+                :id="id"
+                class="mt-3"
+                :start-expanded="true"
+                hide-close
+                :record-view="false"
+                @not-found="error = true"
+              />
+            </template>
             <GlobalMessage />
             <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
               <OurMessage
@@ -126,9 +142,11 @@
                 @not-found="error = true"
               />
             </VisibleWhen>
-          </div>
-        </b-col>
-        <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
+          </client-only>
+        </div>
+      </b-col>
+      <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
+        <client-only>
           <VisibleWhen
             :not="['xs', 'sm', 'md', 'lg']"
             class="position-fixed"
@@ -143,22 +161,30 @@
               :jobs="false"
             />
           </VisibleWhen>
-        </b-col>
-      </b-row>
-    </b-col>
-  </client-only>
+        </client-only>
+      </b-col>
+    </b-row>
+  </b-col>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
+import { ref, computed, onMounted, useHead, useRuntimeConfig } from '#imports'
 import { useMessageStore } from '~/stores/message'
+import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
+import { dateonlyNoYear } from '~/composables/useTimeFormat'
 import MyMessage from '~/components/MyMessage'
-import { ref, onMounted } from '#imports'
+import OurMessage from '~/components/OurMessage'
+import GlobalMessage from '~/components/GlobalMessage'
+import VisibleWhen from '~/components/VisibleWhen'
+import ExternalDa from '~/components/ExternalDa'
+import MicroVolunteering from '~/components/MicroVolunteering'
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const messageStore = useMessageStore()
+const authStore = useAuthStore()
 
 // We don't use lazy because we want the page to be rendered for SEO.
 const id = parseInt(route.params.id)
@@ -167,12 +193,22 @@ const id = parseInt(route.params.id)
 const showtaken = route.query.showtaken
 
 const failed = ref(false)
+const error = ref(false)
+const mountComplete = ref(false)
+
+const myid = computed(() => authStore.user?.id)
+
+let ret = null
 
 try {
-  await messageStore.fetch(id)
+  ret = await messageStore.fetch(id)
 } catch (e) {
   // Likely to be because the message doesn't exist.
   console.log('Message fetch failed', e)
+  failed.value = true
+}
+
+if (!ret) {
   failed.value = true
 }
 
@@ -204,7 +240,6 @@ if (message.value) {
 
 // We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
 // contain the reply information correctly.
-const mountComplete = ref(false)
 
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because

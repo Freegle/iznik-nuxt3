@@ -1,4 +1,4 @@
-// import eslintPlugin from 'vite-plugin-eslint'
+//import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -171,6 +171,7 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
@@ -230,6 +231,8 @@ export default defineNuxtConfig({
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
+
+      CIRCLECI: process.env.CIRCLECI,
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
       PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
@@ -258,6 +261,9 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    build: {
+      minify: false,
+    },
     css: {
       preprocessorOptions: {
         scss: {
@@ -273,7 +279,7 @@ export default defineNuxtConfig({
       splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      // eslintPlugin(),
+      //eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',

@@ -1,8 +1,11 @@
 <template>
   <div class="clearfix">
-    <div v-if="chatmessage.userid != myid" class="media">
+    <div v-if="chatmessage?.userid != myid" class="media">
       <div v-if="!refmsg">
-        This chat message refers to a post which has been deleted.
+        This chat message refers to a post (<v-icon
+          icon="hashtag"
+          class="text-muted fa-0-8x"
+        />{{ chatmessage.refmsgid }}) which has been deleted.
       </div>
       <b-card v-else border-variant="success" class="ml-2">
         <b-card-title>
@@ -81,7 +84,10 @@
     </div>
     <div v-else class="media float-end">
       <div v-if="!refmsg">
-        This chat message refers to a post which has been deleted.
+        This chat message refers to a post (<v-icon
+          icon="hashtag"
+          class="text-muted fa-0-8x"
+        />{{ chatmessage.refmsgid }}) which has been deleted.
       </div>
       <b-card v-else border-variant="success">
         <b-card-title>
@@ -231,16 +237,17 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
-import { fetchReferencedMessage } from '../composables/useChat'
+import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import DateFormatted from './DateFormatted'
 import AddToCalendar from '~/components/AddToCalendar'
-import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
 )
@@ -250,73 +257,113 @@ const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
 
-export default {
-  components: {
-    OutcomeModal,
-    AddToCalendar,
-    ProfileImage,
-    RenegeModal,
-    PromiseModal,
-    DateFormatted,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  async setup(props) {
-    const trystStore = useTrystStore()
-    const chatStore = useChatStore()
-
-    await trystStore.fetch()
-
-    await fetchReferencedMessage(props.chatid, props.id)
-
-    return {
-      trystStore,
-      chatStore,
-    }
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      showRenege: false,
-      showOutcome: false,
-      outcomeType: null,
-      showPromise: false,
-    }
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    tryst() {
-      return this.otheruser
-        ? this.trystStore?.getByUser(this.otheruser.id)
-        : null
-    },
-    takenBy() {
-      let ret = null
-
-      if (this.otheruser) {
-        ret = this.otheruser
-        ret.userid = this.otheruser.id
-        ret.count = 1
-      }
-
-      return ret
-    },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  methods: {
-    unpromise() {
-      this.showRenege = true
-      fetchOurOffers()
-    },
-    changeTime() {
-      this.showPromise = true
-    },
-    fetchMessages() {
-      this.chatStore.fetchMessages(this.chatmessage.chatid)
-    },
-    async outcome(type) {
-      const messageStore = useMessageStore()
-      await messageStore.fetch(this.refmsgid)
-
-      this.showOutcome = true
-      this.outcomeType = type
-    },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+})
+
+// Data properties
+const showRenege = ref(false)
+const showOutcome = ref(false)
+const outcomeType = ref(null)
+const showPromise = ref(false)
+
+// Stores
+const trystStore = useTrystStore()
+const chatStore = useChatStore()
+const messageStore = useMessageStore()
+
+// Setup
+await trystStore.fetch()
+await fetchReferencedMessage(props.chatid, props.id)
+
+// Use the chat base composable
+const {
+  chat,
+  chatmessage,
+  emessage,
+  messageIsFromCurrentUser,
+  refmsgid,
+  refmsg,
+  me,
+  myid,
+  otheruser,
+  brokenImage,
+  fetchMessage,
+} = useChatBase(props.chatid, props.id, props.pov)
+
+if (refmsgid.value) {
+  useMessageStore().fetch(refmsgid.value)
+}
+
+// Component-specific computed properties
+const tryst = computed(() => {
+  return otheruser.value ? trystStore?.getByUser(otheruser.value.id) : null
+})
+
+const takenBy = computed(() => {
+  let ret = null
+
+  if (otheruser.value) {
+    ret = otheruser.value
+    ret.userid = otheruser.value.id
+    ret.count = 1
+  }
+
+  return ret
+})
+
+// Methods
+function unpromise() {
+  showRenege.value = true
+  fetchOurOffers()
+}
+
+function changeTime() {
+  showPromise.value = true
+}
+
+function fetchMessages() {
+  chatStore.fetchMessages(chatmessage.value.chatid)
+}
+
+async function outcome(type) {
+  await messageStore.fetch(refmsgid.value)
+
+  showOutcome.value = true
+  outcomeType.value = type
 }
 </script>
+<style scoped lang="scss">
+.chatMessage {
+  border: 1px solid $color-gray--light;
+  border-radius: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 2px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+</style>

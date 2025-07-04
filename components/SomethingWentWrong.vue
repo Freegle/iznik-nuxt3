@@ -27,6 +27,40 @@
             Please try again - if you continue to have problems then please take
             a screenshot and contact <SupportLink />
           </p>
+
+          <div v-if="errorDetails" class="mt-3">
+            <p class="mb-2">
+              <strong>Error:</strong> {{ errorDetails.message }}
+            </p>
+
+            <div v-if="errorDetails.stack">
+              <b-button
+                v-if="!showStackTrace"
+                variant="outline-secondary"
+                size="sm"
+                @click="showStackTrace = true"
+              >
+                Show technical details
+              </b-button>
+
+              <div v-if="showStackTrace" class="mt-2">
+                <p class="mb-1"><strong>Stack trace:</strong></p>
+                <pre class="error-stack">{{ errorDetails.stack }}</pre>
+                <b-button
+                  variant="outline-secondary"
+                  size="sm"
+                  class="mt-2"
+                  @click="showStackTrace = false"
+                >
+                  Hide technical details
+                </b-button>
+              </div>
+            </div>
+
+            <p v-if="errorDetails.timestamp" class="text-muted small mt-2">
+              Time: {{ formatTimestamp(errorDetails.timestamp) }}
+            </p>
+          </div>
         </div>
       </NoticeMessage>
       <NoticeMessage
@@ -47,66 +81,66 @@
     </div>
   </client-only>
 </template>
-<script>
-import { mapState } from 'pinia'
+<script setup>
+import { storeToRefs } from 'pinia'
 import NoticeMessage from './NoticeMessage'
+import { ref, watch, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupportLink from '~/components/SupportLink'
 
-export default {
-  components: {
-    NoticeMessage,
-    SupportLink,
-  },
-  data() {
-    return {
-      showError: false,
-      showReload: false,
-      snoozeReload: false,
-      snoozeTimer: null,
-    }
-  },
-  computed: {
-    ...mapState(useMiscStore, [
-      'somethingWentWrong',
-      'needToReload',
-      'offline',
-      'unloading',
-    ]),
-  },
-  watch: {
-    somethingWentWrong(newVal) {
-      if (newVal) {
-        this.showError = true
-        setTimeout(() => {
-          this.showError = false
-        }, 10000)
-      }
-    },
-    needToReload(newVal) {
-      if (newVal) {
-        this.showReload = true
-      }
-    },
-  },
-  beforeUnmount() {
-    if (this.snoozeTimer) {
-      clearTimeout(this.snoozeTimer)
-    }
-  },
-  methods: {
-    reload() {
-      window.location.reload()
-    },
-    snooze() {
-      this.snoozeReload = true
+const showError = ref(false)
+const showReload = ref(false)
+const snoozeReload = ref(false)
+const snoozeTimer = ref(null)
 
-      this.snoozeTimer = setTimeout(() => {
-        this.snoozeReload = false
-      }, 120000)
-    },
-  },
+const miscStore = useMiscStore()
+const { somethingWentWrong, needToReload, offline, unloading, errorDetails } =
+  storeToRefs(miscStore)
+
+const showStackTrace = ref(false)
+
+watch(somethingWentWrong, (newVal) => {
+  if (newVal) {
+    showError.value = true
+    showStackTrace.value = false // Reset stack trace visibility
+    setTimeout(() => {
+      showError.value = false
+      miscStore.clearError() // Clear error details when hiding
+    }, 10000)
+  }
+})
+
+watch(needToReload, (newVal) => {
+  if (newVal) {
+    showReload.value = true
+  }
+})
+
+function reload() {
+  window.location.reload()
 }
+
+function snooze() {
+  snoozeReload.value = true
+
+  snoozeTimer.value = setTimeout(() => {
+    snoozeReload.value = false
+  }, 120000)
+}
+
+function formatTimestamp(timestamp) {
+  try {
+    return new Date(timestamp).toLocaleString()
+  } catch (e) {
+    return timestamp
+  }
+}
+
+onBeforeUnmount(() => {
+  if (snoozeTimer.value) {
+    clearTimeout(snoozeTimer.value)
+  }
+})
 </script>
 <style scoped lang="scss">
 .posit {
@@ -114,5 +148,18 @@ export default {
   bottom: 0;
   width: 100%;
   z-index: 10000;
+}
+
+.error-stack {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  color: #dc3545;
 }
 </style>

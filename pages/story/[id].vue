@@ -39,8 +39,10 @@
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import { useStoryStore } from '../../stores/stories'
+import { ref, defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 import StoryOne from '~/components/StoryOne'
+
 const StoryAddModal = defineAsyncComponent(() =>
   import('~/components/StoryAddModal')
 )
@@ -51,33 +53,34 @@ const storyStore = useStoryStore()
 
 const id = parseInt(route.params.id)
 
-let invalid = false
-let story = null
+const invalid = ref(false)
+const story = ref(null)
 
 try {
-  story = await storyStore.fetch(id)
+  story.value = await storyStore.fetch(id)
 } catch (e) {
-  invalid = true
+  invalid.value = true
 }
 
-if (invalid) {
-  useHead(buildHead(route, useRuntimeConfig(), 'Story #' + id))
+if (invalid.value) {
+  useHead(buildHead(route, runtimeConfig, 'Story #' + id))
 } else {
   useHead(
     buildHead(
       route,
       runtimeConfig,
-
-      story ? 'Freegle Story: ' + story.headline : 'Freegle Stories',
-      story.story,
-      story.image
+      story.value
+        ? 'Freegle Story: ' + story.value.headline
+        : 'Freegle Stories',
+      story.value.story,
+      story.value.image
     )
   )
 }
 
 const showStoryAddModal = ref(false)
 
-const showAddModal = () => {
+function showAddModal() {
   showStoryAddModal.value = true
 }
 </script>

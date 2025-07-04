@@ -10,11 +10,6 @@
     </p>
   </b-alert>
 </template>
-<script>
+<script setup>
 import SupportLink from '~/components/SupportLink'
-export default {
-  components: {
-    SupportLink,
-  },
-}
 </script>

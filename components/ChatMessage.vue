@@ -1,11 +1,5 @@
 <template>
-  <div
-    :class="{
-      selected: selected,
-      strike: chatmessage.reviewrejected || chatmessage.deleted,
-    }"
-    @click="selectMe"
-  >
+  <div :class="selected ? 'selected' : ''" @click="selectMe">
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -23,7 +17,7 @@
     />
     <div v-else-if="chatmessage?.type === 'Interested'">
       <chat-message-interested
-        v-if="isMT || otheruser || chat.chattype === 'User2Mod'"
+        v-if="otheruser || chat.chattype === 'User2Mod'"
         :id="id"
         :chatid="chatid"
         :pov="pov"
@@ -129,7 +123,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { storeToRefs } from 'pinia'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
@@ -144,9 +139,12 @@ import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ChatMessageReminder from './ChatMessageReminder'
+import { useUserStore } from '~/stores/user'
+import { ref, computed } from '#imports'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
 )
@@ -154,144 +152,105 @@ const ResultModal = defineAsyncComponent(() =>
   import('~/components/ResultModal.vue')
 )
 
-// System chat message doesn't seem to be used;
-export default {
-  components: {
-    ResultModal,
-    ConfirmModal,
-    ChatMessageWarning,
-    ChatMessageDateRead,
-    ChatMessageText,
-    ChatMessageImage,
-    ChatMessageInterested,
-    ChatMessageCompleted,
-    ChatMessagePromised,
-    ChatMessageAddress,
-    ChatMessageReneged,
-    ChatMessageReport,
-    ChatMessageNudge,
-    ChatMessageModMail,
-    ChatMessageReminder,
-    SupportLink,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  props: {
-    chatid: {
-      type: Number,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
-    last: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    pov: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    highlightEmails: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    prevmessage: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    isMT: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const chatStore = useChatStore()
-
-    const { chat, otheruser, chatmessage } = await setupChat(
-      props.chatid,
-      props.id
-    )
-
-    return {
-      chatStore,
-      chat,
-      chatmessage,
-      otheruser,
-    }
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      selected: false,
-      options: [
-        {
-          name: 'Mark unread',
-        },
-      ],
-      showDeleteMessageResultModal: false,
-      deleteMessageSucceeded: null,
-      showConfirmModal: false,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    phoneNumber() {
-      let ret = false
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  prevmessage: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
 
-      if (this.chatmessage?.message) {
-        const re = /\+(\d\d)[^:]/gm
-        const matches = re.exec(this.chatmessage.message)
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const { myid } = storeToRefs(userStore)
 
-        if (matches && matches.length > 1) {
-          const country = matches[1]
+// Data properties as refs
+const selected = ref(false)
+const showDeleteMessageResultModal = ref(false)
+const deleteMessageSucceeded = ref(null)
+const showConfirmModal = ref(false)
 
-          if (parseInt(country) !== 44) {
-            ret = true
-          }
-        }
+// Setup chat - need this to be awaited
+const { chat, otheruser, chatmessage } = await setupChat(props.chatid, props.id)
+
+// Computed properties
+const phoneNumber = computed(() => {
+  let ret = false
+
+  if (chatmessage?.message) {
+    const re = /\+(\d\d)[^:]/gm
+    const matches = re.exec(chatmessage.message)
+
+    if (matches && matches.length > 1) {
+      const country = matches[1]
+
+      if (parseInt(country) !== 44) {
+        ret = true
       }
+    }
+  }
 
-      return ret
-    },
-    isMessageDeleted() {
-      // there should ideally be a flag on the message object indicating whether it's deleted or not, but for now we're
-      // instead checking the message contents. If it's "(Message deleted)", then we treat the message as deleted.
-      // Though that's obviously not ideal since a user can manually send a message with the same contents and it'd be
-      // still considered deleted
+  return ret
+})
 
-      return this.chatmessage.message === '(Message deleted)'
-    },
-  },
-  methods: {
-    selectMe() {
-      // don't allow to select deleted messages and messages consisting of a single image
-      if (!this.isMessageDeleted && !this.chatmessage.imageid)
-        this.selected = true
-    },
-    async markUnread() {
-      console.log('Mark unread', this.chatid, this.prevmessage)
-      await this.chatStore.markUnread(this.chatid, this.prevmessage)
-      this.selected = false
-    },
-    showDeleteMessageModal() {
-      this.showConfirmModal = true
-    },
-    async deleteMessage() {
-      try {
-        await this.chatStore.deleteMessage(this.chatid, this.chatmessage.id)
-        this.selected = false
+const isMessageDeleted = computed(() => {
+  // there should ideally be a flag on the message object indicating whether it's deleted or not, but for now we're
+  // instead checking the message contents. If it's "(Message deleted)", then we treat the message as deleted.
+  // Though that's obviously not ideal since a user can manually send a message with the same contents and it'd be
+  // still considered deleted
+  return chatmessage.message === '(Message deleted)'
+})
 
-        this.deleteMessageSucceeded = true
-      } catch (err) {
-        this.deleteMessageSucceeded = false
-      } finally {
-        this.showDeleteMessageResultModal = true
-      }
-    },
-  },
+// Methods
+const selectMe = () => {
+  // don't allow to select deleted messages and messages consisting of a single image
+  if (!isMessageDeleted.value && !chatmessage.imageid) selected.value = true
+}
+
+const markUnread = async () => {
+  console.log('Mark unread', props.chatid, props.prevmessage)
+  await chatStore.markUnread(props.chatid, props.prevmessage)
+  selected.value = false
+}
+
+const showDeleteMessageModal = () => {
+  showConfirmModal.value = true
+}
+
+const deleteMessage = async () => {
+  try {
+    await chatStore.deleteMessage(props.chatid, chatmessage.id)
+    selected.value = false
+
+    deleteMessageSucceeded.value = true
+  } catch (err) {
+    deleteMessageSucceeded.value = false
+  } finally {
+    showDeleteMessageResultModal.value = true
+  }
 }
 </script>
 <style scoped lang="scss">
@@ -357,10 +316,10 @@ export default {
 
 :deep(.chatMessageWrapper) {
   display: flex;
-  padding-right: 20%;
+  padding-right: 10px;
 
   &.myChatMessage {
-    padding-left: 20%;
+    padding-left: 10px;
     padding-right: 0;
   }
 }

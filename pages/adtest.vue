@@ -68,14 +68,8 @@
     </b-container>
   </client-only>
 </template>
-<script>
+<script setup>
 import VisibleWhen from '~/components/VisibleWhen'
 import ExternalDa from '~/components/ExternalDa.vue'
-
-export default {
-  components: {
-    ExternalDa,
-    VisibleWhen,
-  },
-}
+import SidebarLeft from '~/components/SidebarLeft.vue'
 </script>

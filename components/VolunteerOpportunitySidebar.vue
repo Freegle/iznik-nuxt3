@@ -15,54 +15,39 @@
     <infinite-loading :distance="200" @infinite="loadMore" />
   </aside>
 </template>
-<script>
-import { useRoute } from 'vue-router'
-import { useGroupStore } from '../stores/group'
+<script setup>
+import { ref, computed } from 'vue'
 import { useVolunteeringStore } from '../stores/volunteering'
 import CommunityFeature from './CommunityFeature'
 
-export default {
-  components: {
-    CommunityFeature,
-  },
-  async setup() {
-    const volunteeringStore = useVolunteeringStore()
-    const groupStore = useGroupStore()
+// Store instances
+const volunteeringStore = useVolunteeringStore()
 
-    const route = useRoute()
-    const groupid = parseInt(route.params.groupid)
+// Route parameters
 
-    await volunteeringStore.fetchList()
+// Reactive state
+const toShow = ref(1)
 
-    return {
-      volunteeringStore,
-      groupStore,
-      groupid,
-    }
-  },
-  data() {
-    return {
-      toShow: 1,
-    }
-  },
-  computed: {
-    forUser() {
-      return this.volunteeringStore?.forUser
-    },
-    opportunities() {
-      return this.forUser?.slice(0, this.toShow)
-    },
-  },
-  methods: {
-    loadMore($state) {
-      if (this.toShow < this.forUser?.length) {
-        this.toShow++
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-  },
+// Fetch data
+await volunteeringStore.fetchList()
+
+// Computed properties
+const forUser = computed(() => {
+  return volunteeringStore?.forUser
+})
+
+const opportunities = computed(() => {
+  return forUser.value?.slice(0, toShow.value)
+})
+
+// Methods
+function loadMore($state) {
+  if (toShow.value < forUser.value?.length) {
+    toShow.value++
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
 }
 </script>
 <style scoped lang="scss">

@@ -17,6 +17,7 @@
   </div>
 </template>
 <script setup>
+import { computed } from 'vue'
 import pluralize from 'pluralize'
 import NoticeMessage from './NoticeMessage'
 import ExpectedRepliesChat from '~/components/ExpectedRepliesChat.vue'

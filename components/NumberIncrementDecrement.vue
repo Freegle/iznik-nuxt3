@@ -24,66 +24,55 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import VueNumberInput from '@chenfengyuan/vue-number-input'
 import { uid } from '../composables/useId'
 
-export default {
-  components: {
-    VueNumberInput,
+defineProps({
+  modelValue: {
+    type: Number,
+    required: true,
   },
-  props: {
-    modelValue: {
-      type: Number,
-      required: true,
-    },
-    min: {
-      type: Number,
-      required: false,
-      default: 1,
-    },
-    max: {
-      type: Number,
-      required: false,
-      default: 999,
-    },
-    label: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    labelSROnly: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    appendText: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'lg',
-    },
+  min: {
+    type: Number,
+    required: false,
+    default: 1,
   },
-  data() {
-    return {
-      val2: 1,
-    }
+  max: {
+    type: Number,
+    required: false,
+    default: 999,
   },
-  methods: {
-    formatter(val) {
-      return val + this.appendText
-    },
-    $id(type) {
-      return uid(type)
-    },
-    update(newVal, oldVal) {
-      this.$emit('update:modelValue', newVal, oldVal)
-    },
+  label: {
+    type: String,
+    required: false,
+    default: '',
   },
+  labelSROnly: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  appendText: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'lg',
+  },
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const $id = (type) => {
+  return uid(type)
+}
+
+const update = (newVal, oldVal) => {
+  emit('update:modelValue', newVal, oldVal)
 }
 </script>
 <style scoped lang="scss">

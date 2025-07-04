@@ -10,13 +10,13 @@
     />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    modtoshow: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import ProfileImage from './ProfileImage.vue'
+
+defineProps({
+  modtoshow: {
+    type: Object,
+    required: true,
   },
-}
+})
 </script>

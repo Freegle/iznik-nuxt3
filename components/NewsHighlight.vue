@@ -29,72 +29,60 @@
     </span>
   </span>
 </template>
-<script>
+<script setup>
 // Originally based on https://github.com/orlyyani/read-more
+import { ref, computed } from 'vue'
 import Highlighter from 'vue-highlight-words'
 
-export default {
-  components: {
-    Highlighter,
+const props = defineProps({
+  moreStr: {
+    type: String,
+    default: 'read more',
   },
-  props: {
-    moreStr: {
-      type: String,
-      default: 'read more',
-    },
-    lessStr: {
-      type: String,
-      default: '',
-    },
-    text: {
-      validator: (prop) => typeof prop === 'string' || prop === null,
-      required: true,
-    },
-    link: {
-      type: String,
-      default: '#',
-    },
-    maxChars: {
-      type: Number,
-      default: 100,
-    },
-    searchWords: {
-      type: Array,
-      required: true,
-    },
-    highlightClassName: {
-      type: String,
-      required: false,
-      default: 'highlight',
-    },
+  lessStr: {
+    type: String,
+    default: '',
   },
-
-  data() {
-    return {
-      isReadMore: false,
-    }
+  text: {
+    validator: (prop) => typeof prop === 'string' || prop === null,
+    required: true,
   },
-
-  computed: {
-    formattedString() {
-      let valContainer = this.text
-
-      if (!this.isReadMore && this.text && this.text.length > this.maxChars) {
-        valContainer = valContainer.substring(0, this.maxChars) + '...'
-      }
-
-      return valContainer
-    },
+  link: {
+    type: String,
+    default: '#',
   },
-
-  methods: {
-    triggerReadMore(e, b) {
-      if (this.link === '#') {
-        e.preventDefault()
-      }
-      if (this.lessStr !== null || this.lessStr !== '') this.isReadMore = b
-    },
+  maxChars: {
+    type: Number,
+    default: 100,
   },
+  searchWords: {
+    type: Array,
+    required: true,
+  },
+  highlightClassName: {
+    type: String,
+    required: false,
+    default: 'highlight',
+  },
+})
+
+const isReadMore = ref(false)
+
+const formattedString = computed(() => {
+  let valContainer = props.text
+
+  if (!isReadMore.value && props.text && props.text.length > props.maxChars) {
+    valContainer = valContainer.substring(0, props.maxChars) + '...'
+  }
+
+  return valContainer
+})
+
+function triggerReadMore(e, b) {
+  if (props.link === '#') {
+    e.preventDefault()
+  }
+  if (props.lessStr !== null || props.lessStr !== '') isReadMore.value = b
 }
 </script>
 <style scoped lang="scss">

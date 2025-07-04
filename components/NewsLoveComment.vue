@@ -47,65 +47,53 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
 import pluralize from 'pluralize'
-import { defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
+import { useMe } from '~/composables/useMe'
+
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))
 
-export default {
-  components: {
-    SpinButton,
-    NewsLovesModal,
+const props = defineProps({
+  newsfeed: {
+    type: Object,
+    required: true,
   },
-  props: {
-    newsfeed: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup() {
-    const newsfeedStore = useNewsfeedStore()
+})
 
-    return {
-      newsfeedStore,
-    }
-  },
-  data() {
-    return {
-      loving: false,
-      showLoveModal: false,
-    }
-  },
-  computed: {
-    getShowLovesLabel() {
-      return (
-        'This comment has ' +
-        pluralize('love', this.newsfeed?.loves, true) +
-        '. Who loves this?'
-      )
-    },
-  },
-  methods: {
-    async love(callback) {
-      await this.newsfeedStore.love(this.newsfeed.id, this.newsfeed.threadhead)
-      callback()
-    },
-    async unlove(callback) {
-      await this.newsfeedStore.unlove(
-        this.newsfeed.id,
-        this.newsfeed.threadhead
-      )
-      callback()
-    },
-    focusComment() {
-      this.$emit('focus-comment')
-    },
-    showLove() {
-      this.showLoveModal = true
-    },
-  },
+const emit = defineEmits(['focus-comment'])
+
+const newsfeedStore = useNewsfeedStore()
+const { myid } = useMe()
+
+const showLoveModal = ref(false)
+
+const getShowLovesLabel = computed(() => {
+  return (
+    'This comment has ' +
+    pluralize('love', props.newsfeed?.loves, true) +
+    '. Who loves this?'
+  )
+})
+
+async function love(callback) {
+  await newsfeedStore.love(props.newsfeed.id, props.newsfeed.threadhead)
+  callback()
+}
+
+async function unlove(callback) {
+  await newsfeedStore.unlove(props.newsfeed.id, props.newsfeed.threadhead)
+  callback()
+}
+
+function focusComment() {
+  emit('focus-comment')
+}
+
+function showLove() {
+  showLoveModal.value = true
 }
 </script>
 <style scoped lang="scss">

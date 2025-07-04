@@ -13,28 +13,25 @@
     </l-tooltip>
   </l-marker>
 </template>
-<script>
+<script setup>
+import { useRouter } from 'vue-router'
 import GroupMarkerRich from './GroupMarkerRich'
 
-export default {
-  components: {
-    GroupMarkerRich,
+const props = defineProps({
+  group: {
+    type: Object,
+    required: true,
   },
-  props: {
-    group: {
-      type: Object,
-      required: true,
-    },
-    size: {
-      type: String,
-      required: true,
-    },
+  size: {
+    type: String,
+    required: true,
   },
-  methods: {
-    goto() {
-      this.$router.push('/explore/' + this.group.nameshort)
-    },
-  },
+})
+
+const router = useRouter()
+
+function goto() {
+  router.push('/explore/' + props.group.nameshort)
 }
 </script>
 <style scoped lang="scss">

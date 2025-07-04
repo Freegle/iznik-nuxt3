@@ -22,7 +22,7 @@
             @moveend="idle"
             @dragend="dragEnd"
           >
-            <l-tile-layer :url="osmtile" :attribution="attribution" />
+            <l-tile-layer :url="osmtile()" :attribution="attribution()" />
             <div v-if="showMessages">
               <ClusterMarker
                 v-if="messagesForMap.length"
@@ -75,839 +75,845 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { useRuntimeConfig } from 'nuxt/app'
 import 'vue3-draggable-resizable/dist/Vue3DraggableResizable.css'
 import cloneDeep from 'lodash.clonedeep'
-import { mapState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import Wkt from 'wicket'
+import { LGeoJson, LTooltip } from '@vue-leaflet/vue-leaflet'
 import { useGroupStore } from '../stores/group'
 import { useMessageStore } from '../stores/message'
-import { calculateMapHeight, loadLeaflet } from '../composables/useMap'
+import {
+  calculateMapHeight,
+  loadLeaflet,
+  attribution,
+  osmtile,
+} from '../composables/useMap'
 import GroupMarker from './GroupMarker'
 import BrowseHomeIcon from './BrowseHomeIcon'
 import ClusterMarker from './ClusterMarker'
 import { useMiscStore } from '~/stores/misc'
 import { useIsochroneStore } from '~/stores/isochrone'
-import { attribution, osmtile } from '~/composables/useMap'
+import { useAuthorityStore } from '~/stores/authority'
+import { useAuthStore } from '~/stores/auth'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
 import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
-import { useAuthorityStore } from '~/stores/authority'
+import { useMe } from '~/composables/useMe'
 
-export default {
-  components: {
-    BrowseHomeIcon,
-    ClusterMarker,
-    GroupMarker,
+const props = defineProps({
+  showIsochrones: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    showIsochrones: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    initialBounds: {
-      type: Array,
-      required: true,
-    },
-    heightFraction: {
-      type: Number,
-      required: false,
-      default: 3,
-    },
-    minZoom: {
-      type: Number,
-      required: false,
-      default: 5,
-    },
-    maxZoom: {
-      type: Number,
-      required: false,
-      default: 15,
-    },
-    postZoom: {
-      type: Number,
-      required: false,
-      default: 10,
-    },
-    forceMessages: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: 'All',
-    },
-    search: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    showMany: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    region: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    canHide: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isochroneOverride: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    authorityid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+  initialBounds: {
+    type: Array,
+    required: true,
   },
-  setup() {
-    const miscStore = useMiscStore()
-    const groupStore = useGroupStore()
-    const messageStore = useMessageStore()
-    const isochroneStore = useIsochroneStore()
-    const authorityStore = useAuthorityStore()
+  heightFraction: {
+    type: Number,
+    required: false,
+    default: 3,
+  },
+  minZoom: {
+    type: Number,
+    required: false,
+    default: 5,
+  },
+  maxZoom: {
+    type: Number,
+    required: false,
+    default: 15,
+  },
+  postZoom: {
+    type: Number,
+    required: false,
+    default: 10,
+  },
+  forceMessages: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  type: {
+    type: String,
+    required: false,
+    default: 'All',
+  },
+  search: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  showMany: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  region: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  canHide: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  isochroneOverride: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  authorityid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
 
-    return {
-      miscStore,
-      groupStore,
-      messageStore,
-      isochroneStore,
-      authorityStore,
-      Wkt,
-      osmtile: osmtile(),
-      attribution: attribution(),
-    }
-  },
-  data() {
-    return {
-      context: null,
-      messageList: [],
-      secondaryMessageList: [],
-      moved: false,
-      mapObject: null,
-      manyToShow: 20,
-      shownMany: false,
-      lastBounds: null,
-      lastBoundsFetch: null,
-      zoom: 5,
-      destroyed: false,
-      mapIdle: 0,
-      center: null,
-      bounds: null,
-      everFetched: false,
-    }
-  },
-  computed: {
-    ...mapState(useIsochroneStore, { isochroneBounds: 'bounds' }),
-    mapHeight() {
-      return calculateMapHeight(this.heightFraction)
-    },
-    mapOptions() {
-      return {
-        zoomControl: true,
-        dragging: process.client && window?.L?.Browser?.mobile,
-        touchZoom: true,
-        scrollWheelZoom: false,
-        bounceAtZoomLimits: true,
-        gestureHandling: true,
+const { myGroups, myGroupsBoundingBox, myGroupIds } = useMe()
+
+const emit = defineEmits([
+  'update:ready',
+  'update:showGroups',
+  'update:bounds',
+  'update:zoom',
+  'update:centre',
+  'update:loading',
+  'update:moved',
+  'groups',
+  'messages',
+  'idle',
+  'minzoom',
+  'searched',
+])
+
+const miscStore = useMiscStore()
+const groupStore = useGroupStore()
+const messageStore = useMessageStore()
+const isochroneStore = useIsochroneStore()
+const authorityStore = useAuthorityStore()
+const authStore = useAuthStore()
+const me = authStore.user
+
+// Data properties as refs
+const messageList = ref([])
+const secondaryMessageList = ref([])
+const moved = ref(false)
+const mapObject = ref(null)
+const manyToShow = ref(20)
+const shownMany = ref(false)
+const lastBounds = ref(null)
+const lastBoundsFetch = ref(null)
+const zoom = ref(5)
+const destroyed = ref(false)
+const mapIdle = ref(0)
+const center = ref(null)
+const bounds = ref(null)
+const map = ref(null)
+const mapcont = ref(null)
+
+// Get isochroneBounds from the store
+const { bounds: isochroneBounds } = storeToRefs(useIsochroneStore())
+
+// Computed properties
+const mapHeight = computed(() => {
+  return calculateMapHeight(props.heightFraction)
+})
+
+const mapOptions = computed(() => {
+  return {
+    zoomControl: true,
+    dragging: process.client && window?.L?.Browser?.mobile,
+    touchZoom: true,
+    scrollWheelZoom: false,
+    bounceAtZoomLimits: true,
+    gestureHandling: true,
+  }
+})
+
+const mapHidden = computed(() => {
+  return props.canHide && miscStore?.get('hidepostmap')
+})
+
+const showMessages = computed(() => {
+  // We're zoomed in far enough or we're forcing ourselves to show them (but not so that it's silly)
+  return (
+    mapIdle.value > 0 &&
+    (zoom.value >= props.postZoom || (props.forceMessages && zoom.value >= 7))
+  )
+})
+
+const showGroups = computed(() => {
+  // Don't show until the map has been idle - there is an issue with markers not destroying properly which this
+  // provokes.
+  return mapIdle.value > 0 && !showMessages.value
+})
+
+const groups = computed(() => {
+  const ret = []
+
+  if (messageList.value) {
+    messageList.value.forEach((m) => {
+      if (!ret.includes(m.groupid)) {
+        ret.push(m.groupid)
       }
-    },
-    mapHidden() {
-      return this.canHide && this.miscStore?.get('hidepostmap')
-    },
-    showMessages() {
-      // We're zoomed in far enough or we're forcing ourselves to show them (but not so that it's silly)
-      return (
-        this.mapIdle > 0 &&
-        (this.zoom >= this.postZoom || (this.forceMessages && this.zoom >= 7))
-      )
-    },
-    showGroups() {
-      // Don't show until the map has been idle - there is an issue with markers not destroying properly which this
-      // provokes.
-      return this.mapIdle > 0 && !this.showMessages
-    },
-    groups() {
-      const ret = []
+    })
+  }
 
-      if (this.messageList) {
-        this.messageList.forEach((m) => {
-          if (!ret.includes(m.groupid)) {
-            ret.push(m.groupid)
-          }
-        })
+  return ret
+})
+
+const largeGroupMarkers = computed(() => {
+  // Can't get this to look sane.
+  return false
+})
+
+const allGroups = computed(() => {
+  return groupStore?.list
+})
+
+const groupsInBounds = computed(() => {
+  const ret = []
+
+  try {
+    // Reference map idle so that we recalc.
+    const groups = mapIdle.value ? allGroups.value : []
+    const boundsObj = mapObject.value ? mapObject.value.getBounds() : null
+
+    if (!process.client && boundsObj) {
+      // SSR - return all for SEO.
+      for (const ix in groups) {
+        const group = groups[ix]
+
+        if (
+          group.onmap &&
+          (!props.region ||
+            group.region.trim().toLowerCase() ===
+              props.region.trim().toLowerCase())
+        ) {
+          ret.push(group)
+        }
       }
+    } else if (boundsObj) {
+      for (const ix in groups) {
+        const group = groups[ix]
 
-      return ret
-    },
-    largeGroupMarkers() {
-      // Can't get this to look sane.
-      return false
-    },
-    allGroups() {
-      return this.groupStore?.list
-    },
-    groupsInBounds() {
-      const ret = []
-
-      try {
-        // Reference map idle so that we recalc.
-        const groups = this.mapIdle ? this.allGroups : []
-        const bounds = this.mapObject ? this.mapObject.getBounds() : null
-
-        if (!process.client && bounds) {
-          // SSR - return all for SEO.
-          for (const ix in groups) {
-            const group = groups[ix]
-
+        if (group.lat || group.lng) {
+          try {
             if (
               group.onmap &&
-              (!this.region ||
-                group.region.trim().toLowerCase() ===
-                  this.region.trim().toLowerCase())
+              group.publish &&
+              boundsObj.contains([group.lat, group.lng]) &&
+              (!props.region ||
+                props.region.toLowerCase() === group.region.toLowerCase())
             ) {
               ret.push(group)
             }
-          }
-        } else if (bounds) {
-          for (const ix in groups) {
-            const group = groups[ix]
-
-            if (group.lat || group.lng) {
-              try {
-                if (
-                  group.onmap &&
-                  group.publish &&
-                  bounds.contains([group.lat, group.lng]) &&
-                  (!this.region ||
-                    this.region.toLowerCase() === group.region.toLowerCase())
-                ) {
-                  ret.push(group)
-                }
-              } catch (e) {
-                console.log('Problem group', e)
-              }
-            }
+          } catch (e) {
+            console.log('Problem group', e)
           }
         }
-      } catch (e) {
-        console.log('Groups in bounds exception', e)
       }
+    }
+  } catch (e) {
+    console.log('Groups in bounds exception', e)
+  }
 
-      const sorted = ret.sort((a, b) => {
-        return a.namedisplay
-          .toLowerCase()
-          .localeCompare(b.namedisplay.toLowerCase())
+  const sorted = ret.sort((a, b) => {
+    return a.namedisplay
+      .toLowerCase()
+      .localeCompare(b.namedisplay.toLowerCase())
+  })
+
+  return sorted
+})
+
+const messagesForMap = computed(() => {
+  return mapObject.value && messageList.value && messageList.value.length
+    ? messageList.value
+    : []
+})
+
+const isochrones = computed(() => {
+  return props.isochroneOverride
+    ? [props.isochroneOverride]
+    : isochroneStore?.list
+})
+
+const isochroneGEOJSONs = computed(() => {
+  const ret = []
+
+  isochrones.value.forEach((i) => {
+    const wkt = new Wkt.Wkt()
+    try {
+      wkt.read(i.polygon)
+      ret.push({
+        id: i.id,
+        json: wkt.toJson(),
       })
+    } catch (e) {
+      console.log('WKT error', location, e)
+    }
+  })
 
-      return sorted
-    },
-    messagesForMap() {
-      return this.mapObject && this.messageList && this.messageList.length
-        ? this.messageList
-        : []
-    },
-    isochrones() {
-      return this.isochroneOverride
-        ? [this.isochroneOverride]
-        : this.isochroneStore?.list
-    },
-    isochroneGEOJSONs() {
-      const ret = []
+  return ret
+})
 
-      this.isochrones.forEach((i) => {
+const isochroneOptions = computed(() => {
+  return {
+    fillColor: 'darkblue',
+    fill: true,
+    fillOpacity: 0.2,
+    color: 'darkblue',
+  }
+})
+
+const messageIds = computed(() => {
+  return messageList.value.map((m) => m.id)
+})
+
+const secondaryMessagesForMap = computed(() => {
+  if (secondaryMessageList.value?.length > 200) {
+    // So many posts that the precise numbers no longer matter that much.  So return all the ones we have fetched
+    // rather than spend CPU on filtering (which is a significant issue on slow browsers).
+    return secondaryMessageList.value
+  } else {
+    // Return anything relevant we have fetched which is not already in the primary one.
+    return secondaryMessageList.value.filter((m) => {
+      return (
+        !messageIds.value[m.id] &&
+        (!props.groupid || m.groupid === props.groupid) &&
+        (props.type === 'All' || m.type === props.type)
+      )
+    })
+  }
+})
+// Watchers
+watch(bounds, (newVal, oldVal) => {
+  if (!showGroups.value) {
+    getMessages()
+  }
+})
+
+watch(showGroups, (newVal) => {
+  if (!newVal && !props.authorityid) {
+    getMessages()
+  }
+})
+
+watch(zoom, (newVal) => {
+  if (newVal < props.postZoom && !props.forceMessages) {
+    emit('update:showGroups', true)
+  } else {
+    emit('update:showGroups', false)
+  }
+})
+
+watch(isochroneBounds, (newVal) => {
+  if (newVal && mapObject.value) {
+    // Make the map show the isochrone view.
+    try {
+      mapObject.value.fitBounds(newVal)
+    } catch (e) {
+      // This happens when leaflet is destroyed.
+      console.log('Ignore flyToBounds exception', e)
+    }
+  }
+  getMessages()
+})
+
+watch(
+  groups,
+  (newval) => {
+    emit('groups', newval)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.type,
+  () => {
+    lastBounds.value = null
+
+    if (zoom.value >= props.postZoom || props.search) {
+      getMessages()
+    }
+  }
+)
+
+watch(
+  () => props.search,
+  () => {
+    lastBounds.value = null
+    getMessages()
+  }
+)
+
+watch(
+  () => props.groupid,
+  (groupid) => {
+    lastBounds.value = null
+
+    if (groupid) {
+      // Use the bounding box for the group.
+      const group = myGroup(groupid)
+      console.log('Got group', group)
+
+      if (group.bbox) {
         const wkt = new Wkt.Wkt()
         try {
-          wkt.read(i.polygon)
-          ret.push({
-            id: i.id,
-            json: wkt.toJson(),
-          })
+          wkt.read(group.bbox)
+          const obj = wkt.toObject()
+          const thisbounds = obj.getBounds()
+          const sw = thisbounds.getSouthWest()
+          const ne = thisbounds.getNorthEast()
+
+          const latLngBounds = new window.L.LatLngBounds([
+            [sw.lat, sw.lng],
+            [ne.lat, ne.lng],
+          ]).pad(0.1)
+
+          // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+          const swlat = latLngBounds.getSouthWest().lat
+          const swlng = latLngBounds.getSouthWest().lng
+          const nelat = latLngBounds.getNorthEast().lat
+          const nelng = latLngBounds.getNorthEast().lng
+
+          mapObject.value.flyToBounds([
+            [swlat, swlng],
+            [nelat, nelng],
+          ])
+
+          moved.value = true
         } catch (e) {
           console.log('WKT error', location, e)
         }
-      })
-
-      return ret
-    },
-    isochroneOptions() {
-      return {
-        fillColor: 'darkblue',
-        fill: true,
-        fillOpacity: 0.2,
-        color: 'darkblue',
       }
-    },
-    messageIds() {
-      return this.messageList.map((m) => m.id)
-    },
-    secondaryMessagesForMap() {
-      if (this.secondaryMessageList?.length > 200) {
-        // So many posts that the precise numbers no longer matter that much.  So return all the ones we have fetched
-        // rather than spend CPU on filtering (which is a significant issue on slow browsers).
-        return this.secondaryMessageList
-      } else {
-        // Return anything relevant we have fetched which is not already in the primary one.
-        return this.secondaryMessageList.filter((m) => {
-          return (
-            !this.messageIds[m.id] &&
-            (!this.groupid || m.groupid === this.groupid) &&
-            (this.type === 'All' || m.type === this.type)
-          )
-        })
-      }
-    },
-  },
-  watch: {
-    bounds(newVal, oldVal) {
-      if (!this.showGroups) {
-        this.getMessages()
-      }
-    },
-    showGroups(newVal) {
-      if (!newVal && !this.authorityid) {
-        this.getMessages()
-      }
-    },
-    zoom(newVal) {
-      if (newVal < this.postZoom && !this.forceMessages) {
-        this.$emit('update:showGroups', true)
-      } else {
-        this.$emit('update:showGroups', false)
-      }
-    },
-    isochroneBounds(newVal) {
-      if (newVal && this.mapObject) {
-        // Make the map show the isochrone view.
-        try {
-          this.mapObject.fitBounds(newVal)
-        } catch (e) {
-          // This happens when leaflet is destroyed.
-          console.log('Ignore flyToBounds exception', e)
-        }
-      }
-      this.getMessages()
-    },
-    groups: {
-      immediate: true,
-      handler(newval) {
-        this.$emit('groups', newval)
-      },
-    },
-    type() {
-      this.lastBounds = null
+    }
+  }
+)
 
-      if (this.zoom >= this.postZoom || this.search) {
-        this.getMessages()
-      }
-    },
-    search() {
-      this.lastBounds = null
-      this.getMessages()
-    },
-    groupid(groupid) {
-      this.lastBounds = null
+watch(groupsInBounds, (newval) => {
+  emit(
+    'groups',
+    groupsInBounds.value.map((g) => g.id)
+  )
+})
+// Add missing myGroup function
+function myGroup(groupId) {
+  return groupStore.list?.find((g) => g.id === groupId) || {}
+}
 
-      if (groupid) {
-        // Use the bounding box for the group.
-        const group = this.myGroup(groupid)
-        console.log('Got group', group)
+// Lifecycle hooks
+onMounted(async () => {
+  if (mapHidden.value) {
+    // Say we're ready so the parent can crack on.
+    emit('update:ready', true)
 
-        if (group.bbox) {
-          const wkt = new Wkt.Wkt()
-          try {
-            wkt.read(group.bbox)
-            const obj = wkt.toObject()
-            const thisbounds = obj.getBounds()
-            const sw = thisbounds.getSouthWest()
-            const ne = thisbounds.getNorthEast()
+    // Fetch the messages.
+    getMessages()
+  }
 
-            const bounds = new window.L.LatLngBounds([
-              [sw.lat, sw.lng],
-              [ne.lat, ne.lng],
-            ]).pad(0.1)
+  await loadLeaflet()
+})
 
-            // For reasons I don't understand, leaflet throws errors if we don't make these local here.
-            const swlat = bounds.getSouthWest().lat
-            const swlng = bounds.getSouthWest().lng
-            const nelat = bounds.getNorthEast().lat
-            const nelng = bounds.getNorthEast().lng
+onBeforeUnmount(() => {
+  destroyed.value = true
+})
 
-            this.mapObject.flyToBounds([
-              [swlat, swlng],
-              [nelat, nelng],
-            ])
+// Methods
+async function ready() {
+  emit('update:ready', true)
+  mapObject.value = map.value.leafletObject
 
-            this.moved = true
-          } catch (e) {
-            console.log('WKT error', location, e)
-          }
-        }
-      }
-    },
-    groupsInBounds(newval) {
-      this.$emit(
-        'groups',
-        this.groupsInBounds.map((g) => g.id)
+  if (process.client && mapObject.value) {
+    try {
+      mapObject.value.fitBounds(props.initialBounds)
+      const runtimeConfig = useRuntimeConfig()
+
+      const { Geocoder } = await import('leaflet-control-geocoder/src/control')
+      const { Photon } = await import(
+        'leaflet-control-geocoder/src/geocoders/photon'
       )
-    },
-  },
-  async mounted() {
-    if (this.mapHidden) {
-      // Say we're ready so the parent can crack on.
-      this.$emit('update:ready', true)
 
-      // Fetch the messages.
-      this.getMessages()
+      new Geocoder({
+        placeholder: 'Search for a place...',
+        defaultMarkGeocode: false,
+        geocoder: new Photon({
+          geocodingQueryParams: {
+            bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+          },
+          nameProperties: [
+            'name',
+            'street',
+            'suburb',
+            'hamlet',
+            'town',
+            'city',
+          ],
+          serviceUrl: runtimeConfig.public.GEOCODE,
+        }),
+        collapsed: false,
+      })
+        .on('markgeocode', async function (e) {
+          if (e && e.geocode && e.geocode.bbox) {
+            // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
+            // which is why this isn't in a separate method.
+            console.log('Search for place', e)
+            this.moved = true
+            this.setQuery('')
+
+            // If we don't find anything at this location we will want to zoom out.
+            shownMany.value = false
+
+            // For some reason we need to take a copy of the latlng bounds in the event before passing it to
+            // flyToBounds.
+            const flyTo = e.geocode.bbox
+            const L = await import('leaflet/dist/leaflet-src.esm')
+            const newBounds = new L.LatLngBounds(
+              new L.LatLng(flyTo.getSouthWest().lat, flyTo.getSouthWest().lng),
+              new L.LatLng(flyTo.getNorthEast().lat, flyTo.getNorthEast().lng)
+            )
+            // Move the map to the location we've found.
+            map.value.leafletObject.flyToBounds(newBounds)
+            emit('searched')
+          }
+        })
+        .addTo(mapObject.value)
+    } catch (e) {
+      // This is usually caused by leaflet.
+      console.log('Ignore leaflet exception', e)
+    }
+  }
+}
+function clusterClick() {
+  moved.value = true
+  idle()
+}
+
+function idle() {
+  mapIdle.value++
+
+  try {
+    if (mapObject.value) {
+      // We need to update the parent about our zoom level and whether we are showing the posts or groups.
+      const newBounds = mapObject.value.getBounds().toBBoxString()
+
+      if (newBounds !== lastBounds.value) {
+        lastBounds.value = newBounds
+
+        if (showMessages.value) {
+          getMessages()
+        }
+      }
+
+      emit('update:bounds', mapObject.value.getBounds())
+      emit('update:zoom', mapObject.value.getZoom())
+      emit('update:centre', mapObject.value.getCenter())
+      emit('idle', mapObject.value)
+    }
+  } catch (e) {
+    console.error('Error in map idle', e)
+  }
+}
+
+async function getMessages() {
+  let messages = []
+  secondaryMessageList.value = []
+
+  emit('update:loading', true)
+
+  let bounds = new window.L.LatLngBounds(props.initialBounds)
+
+  if (mapObject.value) {
+    // Get the messages from the server which are in the bounds of the map.
+    bounds = mapObject.value.getBounds()
+
+    if (mapObject.value.getZoom() < props.minZoom) {
+      // The parent may replace us with something else at this point, e.g. with a group map.  But maybe not.
+      // Their call.
+      emit('minzoom', mapObject.value.getZoom())
+    }
+  }
+
+  const swlat = bounds.getSouthWest().lat
+  const swlng = bounds.getSouthWest().lng
+  const nelat = bounds.getNorthEast().lat
+  const nelng = bounds.getNorthEast().lng
+  let ret = null
+
+  if (moved.value) {
+    // The map has been moved.
+    if (props.search) {
+      // Search within the bounds of the map.
+      console.log('GetMessages - moved, search within map bounds')
+      ret = await messageStore.search({
+        messagetype: props.type,
+        search: props.search,
+        swlat,
+        swlng,
+        nelat,
+        nelng,
+      })
+    } else {
+      // Just fetch the bounds of the map.
+      console.log('GetMessages - moved, fetch within map bounds')
+      ret = await messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
+    }
+  } else if (props.groupid) {
+    // We have been asked to show a specific group.
+    if (props.search) {
+      // So search within that group.
+      console.log('GetMessages - search on specific group')
+      ret = await messageStore.search({
+        messagetype: props.type,
+        search: props.search,
+        groupids: [props.groupid],
+      })
+    } else {
+      // Just fetch that the messages on that group.
+      console.log('GetMessages - fetch on specific group')
+      ret = await messageStore.fetchMyGroups(props.groupid)
+
+      if (!mapHidden.value) {
+        // Fetch all the messages in the map bounds too, so that we can show others as secondary.
+        // No need to bother if the map isn't showing - they don't appear in the post list.
+        secondaryMessageList.value = await messageStore.fetchInBounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng
+        )
+      }
+    }
+  } else if (props.authorityid) {
+    // We are trying to show posts within a specific authority
+    console.log('Get messages within authority')
+    ret = await authorityStore.fetchMessages(props.authorityid)
+
+    // Don't fetch the other messages - this may return so many it's too much load on the client.
+  } else if (props.showIsochrones) {
+    // We are trying to show posts nearby.
+    if (isochrones.value?.length) {
+      // We have isochrones.
+      if (props.search) {
+        // We don't have a search-within-isochones call.  But we can fetch all the messages in the isochrones,
+        // and also search within the map, and take the intersection.
+        console.log('GetMessages - search in isochrones')
+        const isoret = await isochroneStore.fetchMessages()
+        const searchret = await messageStore.search({
+          messagetype: props.type,
+          search: props.search,
+          swlat,
+          swlng,
+          nelat,
+          nelng,
+        })
+
+        const ids = {}
+
+        ret = searchret.filter((i) => {
+          if (isoret.find((el) => el.id === i.id) && !ids[i.id]) {
+            ids[i.id] = true
+            return true
+          } else {
+            return false
+          }
+        })
+
+        secondaryMessageList.value = searchret
+      } else {
+        // Fetch the messages in our isochrones.
+        console.log('GetMessages - fetch in isochrones')
+        ret = await isochroneStore.fetchMessages()
+
+        // Fetch the messages in bounds too, so that we can show those as secondary.
+        secondaryMessageList.value = await messageStore.fetchInBounds(
+          swlat,
+          swlng,
+          nelat,
+          nelng
+        )
+      }
+    } else if (myGroups.value?.length) {
+      // We don't, which will be because we don't have a location.
+      // Use the bounding boxes of the groups we are in.
+      const groupbounds = myGroupsBoundingBox.value
+
+      if (props.search) {
+        console.log('GetMessages - search within group bounds')
+        ret = await messageStore.search({
+          messagetype: props.type,
+          search: props.search,
+          swlat: groupbounds[0][0],
+          swlng: groupbounds[0][1],
+          nelat: groupbounds[1][0],
+          nelng: groupbounds[1][1],
+        })
+      } else {
+        // Just fetch the messages within those bounds.    This will show a bit more than the strict
+        // "all my groups" option, but not as much as we might show using the map bounds.
+        console.log(
+          'GetMessages - fetch in group bounds',
+          JSON.stringify(groupbounds)
+        )
+
+        if (lastBoundsFetch.value !== JSON.stringify(groupbounds)) {
+          lastBoundsFetch.value = JSON.stringify(groupbounds)
+
+          ret = await messageStore.fetchInBounds(
+            groupbounds[0][0],
+            groupbounds[0][1],
+            groupbounds[1][0],
+            groupbounds[1][1],
+            props.groupid
+          )
+        } else {
+          console.log('Already fetched that.')
+        }
+      }
+    } else if (props.search) {
+      // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
+      // Search within the bounds of the map.
+      console.log(
+        'GetMessages - no isochrones, no groups, search within map bounds'
+      )
+      ret = await messageStore.search({
+        messagetype: props.type,
+        search: props.search,
+        swlat,
+        swlng,
+        nelat,
+        nelng,
+      })
+    } else {
+      // Just fetch the bounds of the map.
+      console.log(
+        'GetMessages - no isochrones, no groups, fetch within map bounds'
+      )
+      ret = await messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
+    }
+  } else if (myGroups.value?.length) {
+    if (props.search) {
+      const groupbounds = myGroupsBoundingBox.value
+
+      console.log(
+        'GetMessages - some groups, search within group bounds',
+        groupbounds,
+        myGroupIds
+      )
+      ret = await messageStore.search({
+        messagetype: props.type,
+        search: props.search,
+        swlat: groupbounds[0][0],
+        swlng: groupbounds[0][1],
+        nelat: groupbounds[1][0],
+        nelng: groupbounds[1][1],
+        groupids: myGroupIds,
+      })
+    } else {
+      // We have groups, so fetch the messages in those groups.
+      console.log('GetMessages - some groups, fetch groups')
+      ret = await messageStore.fetchMyGroups()
+
+      // Get the messages in the map bounds too, so that we can show others as secondary.
+      secondaryMessageList.value = await messageStore.fetchInBounds(
+        swlat,
+        swlng,
+        nelat,
+        nelng
+      )
+    }
+  } else {
+    // We have no groups, so fetch the messages in the map bounds.
+    console.log('GetMessages - no groups, fetch in map bounds')
+    ret = await messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
+  }
+
+  if (ret && !destroyed.value) {
+    messages = ret
+  }
+
+  if (messages?.length) {
+    if (props.groupid) {
+      messages = messages.filter((m) => {
+        return m.groupid === props.groupid
+      })
     }
 
-    await loadLeaflet()
-  },
-  beforeUnmount() {
-    this.destroyed = true
-  },
-  methods: {
-    async ready() {
-      const self = this
-
-      this.$emit('update:ready', true)
-      this.mapObject = this.$refs.map.leafletObject
-
-      if (process.client && this.mapObject) {
-        try {
-          this.mapObject.fitBounds(this.initialBounds)
-          const runtimeConfig = useRuntimeConfig()
-
-          const { Geocoder } = await import(
-            'leaflet-control-geocoder/src/control'
-          )
-          const { Photon } = await import(
-            'leaflet-control-geocoder/src/geocoders/photon'
-          )
-
-          new Geocoder({
-            placeholder: 'Search for a place...',
-            defaultMarkGeocode: false,
-            geocoder: new Photon({
-              geocodingQueryParams: {
-                bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-              },
-              nameProperties: [
-                'name',
-                'street',
-                'suburb',
-                'hamlet',
-                'town',
-                'city',
-              ],
-              serviceUrl: runtimeConfig.public.GEOCODE,
-            }),
-            collapsed: false,
-          })
-            .on('markgeocode', async function (e) {
-              if (e && e.geocode && e.geocode.bbox) {
-                // Empty out the query box so that the dropdown closes.  Note that "this" is the control object,
-                // which is why this isn't in a separate method.
-                console.log('Search for place', e)
-                this.moved = true
-                this.setQuery('')
-
-                // If we don't find anything at this location we will want to zoom out.
-                self.shownMany = false
-
-                // For some reason we need to take a copy of the latlng bounds in the event before passing it to
-                // flyToBounds.
-                const flyTo = e.geocode.bbox
-                const L = await import('leaflet/dist/leaflet-src.esm')
-                const newBounds = new L.LatLngBounds(
-                  new L.LatLng(
-                    flyTo.getSouthWest().lat,
-                    flyTo.getSouthWest().lng
-                  ),
-                  new L.LatLng(
-                    flyTo.getNorthEast().lat,
-                    flyTo.getNorthEast().lng
-                  )
-                )
-                // Move the map to the location we've found.
-                self.$refs.map.leafletObject.flyToBounds(newBounds)
-                self.$emit('searched')
-              }
-            })
-            .addTo(this.mapObject)
-        } catch (e) {
-          // This is usually caused by leaflet.
-          console.log('Ignore leaflet exception', e)
-        }
-      }
-    },
-    clusterClick() {
-      this.moved = true
-      this.idle()
-    },
-    idle() {
-      this.mapIdle++
-
-      try {
-        if (this.mapObject) {
-          // We need to update the parent about our zoom level and whether we are showing the posts or groups.
-          const bounds = this.mapObject.getBounds().toBBoxString()
-
-          if (bounds !== this.lastBounds) {
-            this.lastBounds = bounds
-
-            if (this.showMessages) {
-              this.getMessages()
-            }
-          }
-
-          this.$emit('update:bounds', this.mapObject.getBounds())
-          this.$emit('update:zoom', this.mapObject.getZoom())
-          this.$emit('update:centre', this.mapObject.getCenter())
-          this.$emit('idle', this.mapObject)
-        }
-      } catch (e) {
-        console.error('Error in map idle', e)
-      }
-    },
-    async getMessages() {
-      let messages = []
-      this.secondaryMessageList = []
-
-      this.$emit('update:loading', true)
-
-      let bounds = new window.L.LatLngBounds(this.initialBounds)
-
-      if (this.mapObject) {
-        // Get the messages from the server which are in the bounds of the map.
-        bounds = this.mapObject.getBounds()
-
-        if (this.mapObject.getZoom() < this.minZoom) {
-          // The parent may  replace us with something else at this point, e.g. with a group map.  But maybe not.
-          // Their call.
-          this.$emit('minzoom', this.mapObject.getZoom())
-        }
-      }
-
-      const swlat = bounds.getSouthWest().lat
-      const swlng = bounds.getSouthWest().lng
-      const nelat = bounds.getNorthEast().lat
-      const nelng = bounds.getNorthEast().lng
-      let ret = null
-
-      if (this.moved) {
-        // The map has been moved.
-        if (this.search) {
-          // Search within the bounds of the map.
-          console.log('GetMessages - moved, search within map bounds')
-          ret = await this.messageStore.search({
-            messagetype: this.type,
-            search: this.search,
-            swlat,
-            swlng,
-            nelat,
-            nelng,
-          })
-        } else {
-          // Just fetch the bounds of the map.
-          console.log('GetMessages - moved, fetch within map bounds')
-          ret = await this.messageStore.fetchInBounds(
-            swlat,
-            swlng,
-            nelat,
-            nelng
-          )
-        }
-      } else if (this.groupid) {
-        // We have been asked to show a specific group.
-        if (this.search) {
-          // So search within that group.
-          console.log('GetMessages - search on specific group')
-          ret = await this.messageStore.search({
-            messagetype: this.type,
-            search: this.search,
-            groupids: [this.groupid],
-          })
-        } else {
-          // Just fetch that the messages on that group.
-          console.log('GetMessages - fetch on specific group')
-          ret = await this.messageStore.fetchMyGroups(this.groupid)
-
-          if (!this.mapHidden) {
-            // Fetch all the messages in the map bounds too, so that we can show others as secondary.
-            // No need to bother if the map isn't showing - they don't appear in the post list.
-            this.secondaryMessageList = await this.messageStore.fetchInBounds(
-              swlat,
-              swlng,
-              nelat,
-              nelng
-            )
-          }
-        }
-      } else if (this.authorityid) {
-        // We are trying to show posts within a specific authority
-        console.log('Get messages within authority')
-        ret = await this.authorityStore.fetchMessages(this.authorityid)
-
-        // Don't fetch the other messages - this may return so many it's too much load on the client.
-      } else if (this.showIsochrones) {
-        // We are trying to show posts nearby.
-        if (this.isochrones?.length) {
-          // We have isochrones.
-          if (this.search) {
-            // We don't have a search-within-isochones call.  But we can fetch all the messages in the isochrones,
-            // and also search within the map, and take the intersection.
-            console.log('GetMessages - search in isochrones')
-            const isoret = await this.isochroneStore.fetchMessages()
-            const searchret = await this.messageStore.search({
-              messagetype: this.type,
-              search: this.search,
-              swlat,
-              swlng,
-              nelat,
-              nelng,
-            })
-
-            const ids = {}
-
-            ret = searchret.filter((i) => {
-              if (isoret.find((el) => el.id === i.id) && !ids[i.id]) {
-                ids[i.id] = true
-                return true
-              } else {
-                return false
-              }
-            })
-
-            this.secondaryMessageList = searchret
-          } else {
-            // Fetch the messages in our isochrones.
-            console.log('GetMessages - fetch in isochrones')
-            ret = await this.isochroneStore.fetchMessages()
-
-            // Fetch the messages in bounds too, so that we can show those as secondary.
-            this.secondaryMessageList = await this.messageStore.fetchInBounds(
-              swlat,
-              swlng,
-              nelat,
-              nelng
-            )
-          }
-        } else if (this.myGroups?.length) {
-          // We don't, which will be because we don't have a location.
-          // Use the bounding boxes of the groups we are in.
-          const groupbounds = this.myGroupsBoundingBox
-
-          if (this.search) {
-            console.log('GetMessages - search within group bounds')
-            ret = await this.messageStore.search({
-              messagetype: this.type,
-              search: this.search,
-              swlat: groupbounds[0][0],
-              swlng: groupbounds[0][1],
-              nelat: groupbounds[1][0],
-              nelng: groupbounds[1][1],
-            })
-          } else {
-            // Just fetch the messages within those bounds.    This will show a bit more than the strict
-            // "all my groups" option, but not as much as we might show using the map bounds.
-            console.log(
-              'GetMessages - fetch in group bounds',
-              JSON.stringify(groupbounds)
-            )
-
-            if (this.lastBoundsFetch !== JSON.stringify(groupbounds)) {
-              this.lastBoundsFetch = JSON.stringify(groupbounds)
-
-              ret = await this.messageStore.fetchInBounds(
-                groupbounds[0][0],
-                groupbounds[0][1],
-                groupbounds[1][0],
-                groupbounds[1][1],
-                this.groupid
-              )
-            } else {
-              console.log('Already fetched that.')
-            }
-          }
-        } else if (this.search) {
-          // We have no isochrones and no groups.  Do nothing - we expect code elsewhere to prompt for a location.
-          // Search within the bounds of the map.
-          console.log(
-            'GetMessages - no isochrones, no groups, search within map bounds'
-          )
-          ret = await this.messageStore.search({
-            messagetype: this.type,
-            search: this.search,
-            swlat,
-            swlng,
-            nelat,
-            nelng,
-          })
-        } else {
-          // Just fetch the bounds of the map.
-          console.log(
-            'GetMessages - no isochrones, no groups, fetch within map bounds'
-          )
-          ret = await this.messageStore.fetchInBounds(
-            swlat,
-            swlng,
-            nelat,
-            nelng
-          )
-        }
-      } else if (this.myGroups?.length) {
-        if (this.search) {
-          const groupbounds = this.myGroupsBoundingBox
-
-          console.log(
-            'GetMessages - some groups, search within group bounds',
-            groupbounds,
-            this.myGroupIds
-          )
-          ret = await this.messageStore.search({
-            messagetype: this.type,
-            search: this.search,
-            swlat: groupbounds[0][0],
-            swlng: groupbounds[0][1],
-            nelat: groupbounds[1][0],
-            nelng: groupbounds[1][1],
-            groupids: this.myGroupIds,
-          })
-        } else {
-          // We have groups, so fetch the messages in those groups.
-          console.log('GetMessages - some groups, fetch groups')
-          ret = await this.messageStore.fetchMyGroups()
-
-          // Get the messages in the map bounds too, so that we can show others as secondary.
-          this.secondaryMessageList = await this.messageStore.fetchInBounds(
-            swlat,
-            swlng,
-            nelat,
-            nelng
-          )
-        }
-      } else {
-        // We have no groups, so fetch the messages in the map bounds.
-        console.log('GetMessages - no groups, fetch in map bounds')
-        ret = await this.messageStore.fetchInBounds(swlat, swlng, nelat, nelng)
-      }
-
-      if (ret && !this.destroyed) {
-        messages = ret
-      }
-
-      if (messages?.length) {
-        if (this.groupid) {
-          messages = messages.filter((m) => {
-            return m.groupid === this.groupid
-          })
-        }
-
-        if (this.type !== 'All') {
-          messages = messages.filter((m) => {
-            return m.type === this.type
-          })
-        }
-      }
-
-      let countInBounds = 0
-
-      messages.forEach((m) => {
-        if (
-          swlat <= m.lat &&
-          m.lat <= nelat &&
-          swlng <= m.lng &&
-          m.lng <= nelng
-        ) {
-          countInBounds++
-        }
+    if (props.type !== 'All') {
+      messages = messages.filter((m) => {
+        return m.type === props.type
       })
+    }
+  }
 
-      if (this.isochroneOverride) {
-        // Don't want to autozoom out in this case - stay where we're put.
-        this.shownMany = true
-      } else if (countInBounds >= this.manyToShow) {
-        // We have seen lots, so we don't need to do the auto zoom out thing now.
-        this.shownMany = true
-      } else if (
-        !this.search &&
-        this.showMany &&
-        countInBounds < this.manyToShow &&
-        !this.shownMany
-      ) {
-        // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
-        // least something.  This is useful when we search for a specific place.
-        const currzoom = this.mapObject.getZoom()
-        if (currzoom > this.minZoom) {
-          console.log(
-            'Not enough showing, zoom out',
-            countInBounds,
-            this.manyToShow,
-            currzoom,
-            this.minZoom
-          )
-          this.mapObject.setZoom(currzoom - 1)
-          this.moved = true
-        } else {
-          this.shownMany = true
-        }
-      }
+  let countInBounds = 0
 
-      this.messageList = messages || []
-      this.$emit('messages', this.messageList)
-      this.$emit('update:loading', false)
+  messages.forEach((m) => {
+    if (swlat <= m.lat && m.lat <= nelat && swlng <= m.lng && m.lng <= nelng) {
+      countInBounds++
+    }
+  })
 
-      return cloneDeep(messages)
-    },
-    onResize(x, y, width, height) {
-      if (this.mapObject) {
-        this.resizedHeight = height
+  if (props.isochroneOverride) {
+    // Don't want to autozoom out in this case - stay where we're put.
+    shownMany.value = true
+  } else if (countInBounds >= manyToShow.value) {
+    // We have seen lots, so we don't need to do the auto zoom out thing now.
+    shownMany.value = true
+  } else if (
+    !props.search &&
+    props.showMany &&
+    countInBounds < manyToShow.value &&
+    !shownMany.value
+  ) {
+    // If we haven't got more than 1 message at this zoom level, zoom out.  That means we'll always show at
+    // least something.  This is useful when we search for a specific place.
+    const currzoom = mapObject.value.getZoom()
+    if (currzoom > props.minZoom) {
+      console.log(
+        'Not enough showing, zoom out',
+        countInBounds,
+        manyToShow.value,
+        currzoom,
+        props.minZoom
+      )
+      mapObject.value.setZoom(currzoom - 1)
+      moved.value = true
+    } else {
+      shownMany.value = true
+    }
+  }
 
-        this.$nextTick(() => {
-          this.mapObject.invalidateSize()
+  messageList.value = messages || []
+  emit('messages', messageList.value)
+  emit('update:loading', false)
 
-          // For some reason this doesn't always work immediately, so use a fallback too.
-          setTimeout(() => {
-            this.mapObject.invalidateSize()
-          }, 1000)
-        })
-      }
-    },
-    async goHome() {
-      await loadLeaflet()
+  return cloneDeep(messages)
+}
 
-      if (this.me.lat || this.me.lng) {
-        this.mapObject.flyTo(new this.L.LatLng(this.me.lat, this.me.lng))
-      }
-    },
-    toJSON(bounds) {
-      return [
-        [bounds.getSouthWest().lat, bounds.getSouthWest().lng],
-        [bounds.getNorthEast().lat, bounds.getNorthEast().lng],
-      ]
-    },
-    dragEnd(e) {
-      this.moved = true
-      this.$emit('update:moved', true)
-      this.idle()
-    },
-  },
+async function goHome() {
+  await loadLeaflet()
+
+  if (me.lat || me.lng) {
+    mapObject.value.flyTo(new window.L.LatLng(me.lat, me.lng))
+  }
+}
+
+function dragEnd(e) {
+  moved.value = true
+  emit('update:moved', true)
+  idle()
 }
 </script>
 <style scoped lang="scss">

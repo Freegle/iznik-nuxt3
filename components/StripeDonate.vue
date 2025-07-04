@@ -44,7 +44,17 @@ const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
 const uniqueId = uid('stripe-donate-')
 
-const stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
+let stripe = null
+
+try {
+  stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
+} catch (e) {
+  console.error('Stripe load error', e)
+  Sentry.captureMessage('Stripe load error', {
+    extra: e,
+  })
+  emit('error')
+}
 
 const appearance = {
   /* appearance */
@@ -64,136 +74,140 @@ const options = {
 
 let elements = null
 
-if (props.monthly) {
-  console.log('Create elements for subscription', event)
-  const res = await donationStore.stripeSubscription(props.price)
-  console.log('Subscription returned', res)
+if (stripe) {
+  if (props.monthly) {
+    console.log('Create elements for subscription', event)
+    const res = await donationStore.stripeSubscription(props.price)
+    console.log('Subscription returned', res)
 
-  elements = stripe.elements({
-    clientSecret: res.clientSecret,
-    appearance,
-  })
-} else {
-  console.log('Create elements for one-off payment')
-  elements = stripe.elements({
-    mode: 'payment',
-    amount: props.price * 100, // Price is in pence
-    currency: 'gbp',
-    appearance,
-  })
+    elements = stripe.elements({
+      clientSecret: res.clientSecret,
+      appearance,
+    })
+  } else {
+    console.log('Create elements for one-off payment')
+    elements = stripe.elements({
+      mode: 'payment',
+      amount: props.price * 100, // Price is in pence
+      currency: 'gbp',
+      appearance,
+    })
+  }
 }
 
 const error = ref(null)
 
 onMounted(() => {
-  console.log(
-    'Mounted for #',
-    uniqueId,
-    document.getElementById(uniqueId) !== null
-  )
-  const expressCheckoutElement = elements.create('expressCheckout', options)
-  expressCheckoutElement.mount('#' + uniqueId)
-  expressCheckoutElement.on('ready', (event) => {
-    console.log('Express checkout ready', event)
-    loading.value = false
+  if (stripe) {
+    console.log(
+      'Mounted for #',
+      uniqueId,
+      document.getElementById(uniqueId) !== null
+    )
+    const expressCheckoutElement = elements.create('expressCheckout', options)
+    expressCheckoutElement.mount('#' + uniqueId)
+    expressCheckoutElement.on('ready', (event) => {
+      console.log('Express checkout ready', event)
+      loading.value = false
 
-    if (
-      typeof event.availablePaymentMethods !== 'object' ||
-      !Object.keys(event.availablePaymentMethods).length
-    ) {
-      // We've seen this happen on Brave.
-      console.log('No Stripe payment methods available')
-      emit('noPaymentMethods')
-    } else {
-      emit('loaded')
-    }
-  })
-  expressCheckoutElement.on('loaderror', (event) => {
-    console.log('Express checkout loadError', event)
-    Sentry.captureMessage('Stripe Express Checkout load error', {
-      extra: event,
+      if (
+        typeof event.availablePaymentMethods !== 'object' ||
+        !Object.keys(event.availablePaymentMethods).length
+      ) {
+        // We've seen this happen on Brave.
+        console.log('No Stripe payment methods available')
+        emit('noPaymentMethods')
+      } else {
+        emit('loaded')
+      }
     })
-    emit('error')
-  })
-  expressCheckoutElement.on('change', (event) => {
-    console.log('Express checkout change', event)
-  })
-  expressCheckoutElement.on('loaderstart', (event) => {
-    console.log('Express checkout loadStart', event)
-  })
-  expressCheckoutElement.on('confirm', async (event) => {
-    const { submitError } = await elements.submit()
-
-    if (submitError) {
-      console.error('Payment submit error')
+    expressCheckoutElement.on('loaderror', (event) => {
+      console.log('Express checkout loadError', event)
       Sentry.captureMessage('Stripe Express Checkout load error', {
         extra: event,
       })
       emit('error')
-    } else if (!props.monthly) {
-      // Create the PaymentIntent and obtain clientSecret
-      console.log('One-off', event)
-      const res = await donationStore.stripeIntent(
-        props.price,
-        event.expressPaymentType
-      )
-      console.log('Intent', res)
+    })
+    expressCheckoutElement.on('change', (event) => {
+      console.log('Express checkout change', event)
+    })
+    expressCheckoutElement.on('loaderstart', (event) => {
+      console.log('Express checkout loadStart', event)
+    })
+    expressCheckoutElement.on('confirm', async (event) => {
+      const { submitError } = await elements.submit()
 
-      const clientSecret = res.client_secret
-
-      const { error } = await stripe.confirmPayment({
-        // `elements` instance used to create the Express Checkout Element
-        elements,
-        // `clientSecret` from the created PaymentIntent
-        clientSecret,
-        confirmParams: {
-          return_url: userSite + '/donated',
-        },
-        redirect: 'if_required',
-      })
-
-      console.log('Confirm payment returned', error)
-
-      if (error) {
-        console.error('Confirm payment error', error)
-        Sentry.captureMessage('Confirm payment error', {
+      if (submitError) {
+        console.error('Payment submit error')
+        Sentry.captureMessage('Stripe Express Checkout load error', {
           extra: event,
         })
         emit('error')
-      } else {
-        // The payment UI is support to automatically close. But we have
-        // seen a PayPal overlay persist, so remove that if it's present.
-        const overlap = document.querySelectorAll('[data-testid="overlay"]')
+      } else if (!props.monthly) {
+        // Create the PaymentIntent and obtain clientSecret
+        console.log('One-off', event)
+        const res = await donationStore.stripeIntent(
+          props.price,
+          event.expressPaymentType
+        )
+        console.log('Intent', res)
 
-        overlap.forEach((el) => {
-          el.remove()
+        const clientSecret = res.client_secret
+
+        const { error } = await stripe.confirmPayment({
+          // `elements` instance used to create the Express Checkout Element
+          elements,
+          // `clientSecret` from the created PaymentIntent
+          clientSecret,
+          confirmParams: {
+            return_url: userSite + '/donated',
+          },
+          redirect: 'if_required',
         })
 
-        emit('success')
-      }
-    } else {
-      const { error } = await stripe.confirmPayment({
-        // `Elements` instance that was used to create the Payment Element
-        elements,
-        confirmParams: {
-          return_url: userSite + '/donated',
-        },
-      })
+        console.log('Confirm payment returned', error)
 
-      if (error) {
-        console.error('Create subscription error', error)
-        Sentry.captureMessage('Create subscription  error', {
-          extra: event,
+        if (error) {
+          console.error('Confirm payment error', error)
+          Sentry.captureMessage('Confirm payment error', {
+            extra: event,
+          })
+          emit('error')
+        } else {
+          // The payment UI is support to automatically close. But we have
+          // seen a PayPal overlay persist, so remove that if it's present.
+          const overlap = document.querySelectorAll('[data-testid="overlay"]')
+
+          overlap.forEach((el) => {
+            el.remove()
+          })
+
+          emit('success')
+        }
+      } else {
+        const { error } = await stripe.confirmPayment({
+          // `Elements` instance that was used to create the Payment Element
+          elements,
+          confirmParams: {
+            return_url: userSite + '/donated',
+          },
         })
 
-        error.value = error.message
+        if (error) {
+          console.error('Create subscription error', error)
+          Sentry.captureMessage('Create subscription  error', {
+            extra: event,
+          })
 
-        emit('error')
-      } else {
-        emit('success')
+          error.value = error.message
+
+          emit('error')
+        } else {
+          emit('success')
+        }
       }
-    }
-  })
+    })
+  }
 })
 </script>
 <style scoped lang="scss">

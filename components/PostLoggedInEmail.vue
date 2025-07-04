@@ -1,8 +1,8 @@
 <template>
-  <div v-if="me.email">
+  <div v-if="user?.email">
     <p>Your email address is:</p>
     <p class="text--large">
-      <strong>{{ me.email }}</strong>
+      <strong>{{ user.email }}</strong>
     </p>
     <p>
       Replies will come back to this email address, as well as <em>Chats</em> on
@@ -28,3 +28,10 @@
     </b-button>
   </div>
 </template>
+
+<script setup>
+import { useAuthStore } from '~/stores/auth'
+
+const authStore = useAuthStore()
+const user = authStore.user
+</script>

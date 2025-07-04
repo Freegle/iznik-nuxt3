@@ -5,46 +5,49 @@
     }}</ExternalLink>
   </client-only>
 </template>
-<script>
-export default {
-  props: {
-    text: {
-      type: String,
-      default: 'support@ilovefreegle.org',
-    },
-    email: {
-      type: String,
-      default: 'support@ilovefreegle.org',
-    },
-    info: {
-      type: String,
-      required: false,
-      default: '',
-    },
+<script setup>
+import { computed } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+
+const props = defineProps({
+  text: {
+    type: String,
+    default: 'support@ilovefreegle.org',
   },
-  computed: {
-    href() {
-      const infostr = this.info ? '%0D%0A%0D%0A' + this.info : ''
-      if (this.myid) {
-        return (
-          'mailto:' +
-          this.email +
-          '?body=' +
-          infostr +
-          '%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
-          this.myid +
-          '.'
-        )
-      } else {
-        return (
-          'mailto:' +
-          this.email +
-          '?body=' +
-          infostr +
-          '%0D%0A%0D%0ANote to support: this freegler was not logged in when contacting Support to send this mail.'
-        )
-      }
-    },
+  email: {
+    type: String,
+    default: 'support@ilovefreegle.org',
   },
-}
+  info: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
+
+const authStore = useAuthStore()
+const myid = authStore.user?.id
+
+const href = computed(() => {
+  const infostr = props.info ? '%0D%0A%0D%0A' + props.info : ''
+  if (myid) {
+    return (
+      'mailto:' +
+      props.email +
+      '?body=' +
+      infostr +
+      '%0D%0A%0D%0ANote to support: this freegler was logged in as user id: #' +
+      myid +
+      '.'
+    )
+  } else {
+    return (
+      'mailto:' +
+      props.email +
+      '?body=' +
+      infostr +
+      '%0D%0A%0D%0ANote to support: this freegler was not logged in when contacting Support to send this mail.'
+    )
+  }
+})
 </script>

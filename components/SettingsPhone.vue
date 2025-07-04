@@ -45,95 +45,89 @@
     <p v-if="notMobile" class="text-danger">Please enter a mobile number.</p>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, watch, ref } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import SpinButton from './SpinButton'
 
-export default {
-  components: { SpinButton },
-  props: {
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    label: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    description: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    hideRemove: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    autoSave: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    inputClass: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  setup() {
-    const authStore = useAuthStore()
+  label: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  description: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  hideRemove: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  autoSave: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  inputClass: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
 
-    return {
-      authStore,
+const authStore = useAuthStore()
+const me = computed(() => authStore.user)
+const spinButton = ref(null)
+
+const notMobile = computed(() => {
+  if (!me.value?.phone) {
+    return false
+  }
+
+  return (
+    !(me.value.phone + '').startsWith('+447') &&
+    !(me.value.phone + '').startsWith('07')
+  )
+})
+
+const phone = computed(() => {
+  return me.value && me.value.phone ? me.value.phone : null
+})
+
+watch(phone, () => {
+  if (props.autoSave) {
+    savePhone()
+  }
+})
+
+async function savePhone(callback) {
+  if (!notMobile.value) {
+    await authStore.saveAndGet({
+      phone: me.value.phone,
+    })
+
+    if (callback) {
+      callback()
     }
-  },
-  computed: {
-    notMobile() {
-      if (!this.me?.phone) {
-        return false
-      }
+  }
+}
 
-      return (
-        !(this.me.phone + '').startsWith('+447') &&
-        !(this.me.phone + '').startsWith('07')
-      )
-    },
-    phone() {
-      return this.me && this.me.phone ? this.me.phone : null
-    },
-  },
-  watch: {
-    phone() {
-      if (this.autoSave) {
-        this.savePhone()
-      }
-    },
-  },
-  methods: {
-    async savePhone(callback) {
-      if (!this.notMobile) {
-        await this.authStore.saveAndGet({
-          phone: this.me.phone,
-        })
+async function removePhone() {
+  setTimeout(() => {
+    me.value.phone = null
+  }, 1000)
 
-        if (callback) {
-          callback()
-        }
-      }
-    },
-    async removePhone() {
-      setTimeout(() => {
-        this.me.phone = null
-      }, 1000)
-
-      await this.authStore.saveAndGet({
-        phone: '',
-      })
-    },
-  },
+  await authStore.saveAndGet({
+    phone: '',
+  })
 }
 </script>
 <style scoped lang="scss">

@@ -1,13 +1,11 @@
 <template>
   <l-map
     ref="map"
-    v-model:zoom="zoom"
-    v-model:center="center"
-    :style="'width: 100%; height: ' + height + 'px'"
+    :zoom="12"
     :max-zoom="maxZoom"
+    :style="'width: 100%; height: ' + height + 'px'"
     :options="mapOptions"
-    :use-global-leaflet="true"
-    @ready="ready"
+    @ready="idle"
   >
     <l-tile-layer :url="osmtile()" :attribution="attribution()" />
     <l-marker v-if="home" :lat-lng="home">
@@ -20,24 +18,12 @@
       :interactive="false"
       :icon="blurmarker"
     />
-    <l-geo-json v-if="boundary" :geojson="boundaryJSON" :options="cgaOptions" />
   </l-map>
 </template>
 <script setup>
-import 'leaflet'
-import Wkt from 'wicket'
-import { computed } from 'vue'
-import {
-  LMap,
-  LTileLayer,
-  LMarker,
-  LIcon,
-  LGeoJson,
-} from '@vue-leaflet/vue-leaflet'
+import { computed, ref } from 'vue'
 import HomeIcon from './HomeIcon'
-import { useMiscStore } from '~/stores/misc'
 import { MAX_MAP_ZOOM } from '~/constants'
-import { attribution, osmtile } from '~/composables/useMap'
 
 const props = defineProps({
   home: {
@@ -71,57 +57,41 @@ const props = defineProps({
   },
 })
 
-const miscStore = useMiscStore()
+const map = ref(null)
+let L = null
 
-const mapOptions = computed(() => ({
-  dragging: !props.locked && (!window.L || !window.L.Browser.mobile),
-  touchZoom: !props.locked,
-  scrollWheelZoom: false,
-  bounceAtZoomLimits: true,
-}))
+if (process.client) {
+  L = await import('leaflet/dist/leaflet-src.esm')
+}
 
-const AREA_FILL_COLOUR = 'darkblue'
-const CGA_BOUNDARY_COLOUR = 'darkblue'
-
-const cgaOptions = computed(() => ({
-  fillColor: AREA_FILL_COLOUR,
-  fillOpacity: 0,
-  color: CGA_BOUNDARY_COLOUR,
-}))
+const mapOptions = computed(() => {
+  return {
+    // On mobile require two-finger interaction.
+    dragging: !props.locked && (!L || !L.Browser.mobile),
+    touchZoom: !props.locked,
+    scrollWheelZoom: false,
+    bounceAtZoomLimits: true,
+  }
+})
 
 const blurmarker = computed(() => {
-  const modtools = miscStore.modtools
-  return window.L
-    ? new window.L.Icon({
-        iconUrl: modtools ? '/bluering.png' : '/blurmarker.png',
+  return L
+    ? new L.Icon({
+        iconUrl: '/blurmarker.png',
         iconSize: [100, 100],
       })
     : null
 })
 
-const boundaryJSON = computed(() => {
-  const wkt = new Wkt.Wkt()
-  try {
-    wkt.read(props.boundary)
-    return wkt.toJson()
-  } catch (e) {
-    console.log('WKT error', props.boundary, e)
-  }
-
-  return null
-})
-
-const map = ref(null)
-const center = ref(new window.L.LatLng(props.position.lat, props.position.lng))
-const zoom = ref(MAX_MAP_ZOOM)
-
-function ready() {
-  const themap = map.value.leafletObject
-
+function idle(themap) {
   if (props.home?.lat || props.home?.lng) {
-    const fg = new window.L.FeatureGroup([
-      new window.L.Marker([props.position.lat, props.position.lng]),
-      new window.L.Marker([props.home.lat, props.home.lng]),
+    // We want to show both the centre and the marker.
+    // eslint-disable-next-line new-cap
+    const fg = new L.featureGroup([
+      // eslint-disable-next-line new-cap
+      new L.marker([props.position.lat, props.position.lng]),
+      // eslint-disable-next-line new-cap
+      new L.marker([props.home.lat, props.home.lng]),
     ])
 
     const fitTo = fg.getBounds().pad(0.1)
@@ -129,12 +99,24 @@ function ready() {
       themap.fitBounds(fitTo)
     }
   } else {
-    center.value = new window.L.LatLng(props.position.lat, props.position.lng)
+    // eslint-disable-next-line new-cap
+    const fg = new L.featureGroup([
+      // eslint-disable-next-line new-cap
+      new L.marker([props.position.lat, props.position.lng]),
+    ])
+
+    themap.fitBounds(fg.getBounds().pad(0.1))
+    themap.setZoom(MAX_MAP_ZOOM)
   }
 
-  const zoomControl = themap._container.querySelector(
-    '.leaflet-top.leaflet-left'
-  )
-  zoomControl.className = 'leaflet-top leaflet-right'
+  try {
+    console.log('Add map Zoom Control', map.value)
+    const zoomControl = map.value.$el.querySelector('.leaflet-top.leaflet-left')
+    if (zoomControl) {
+      zoomControl.className = 'leaflet-top leaflet-right'
+    }
+  } catch (e) {
+    console.log('Failed to add MessageMap zoom control', e)
+  }
 }
 </script>

@@ -191,7 +191,7 @@
               </b-form-group>
             </b-col>
             <b-col v-if="enabled" cols="12" md="6">
-              <div v-if="volunteering.image" class="container">
+              <div v-if="image" class="container">
                 <div
                   class="clickme rotateleft stacked"
                   label="Rotate left"
@@ -212,22 +212,18 @@
                 </div>
                 <div class="image d-flex justify-content-around">
                   <OurUploadedImage
-                    v-if="volunteering.image?.imageuid"
-                    :width="200"
-                    :src="volunteering.image.imageuid"
+                    v-if="image?.imageuid"
+                    width="200"
+                    :src="image.imageuid"
                     :modifiers="mods"
                     alt="Volunteer Opportunity Photo"
                     class="mb-2"
                   />
                   <b-img
-                    v-else-if="volunteering.image"
+                    v-else-if="image"
                     fluid
                     :src="
-                      volunteering.image.paththumb +
-                      '?volunteering=' +
-                      id +
-                      '-' +
-                      cacheBust
+                      image.paththumb + '?volunteering=' + id + '-' + cacheBust
                     "
                   />
                   <b-img v-else width="250" thumbnail src="/placeholder.jpg" />
@@ -435,7 +431,8 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent, watch } from 'vue'
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useVolunteeringStore } from '../stores/volunteering'
@@ -443,12 +440,12 @@ import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
+import { useAuthStore } from '~/stores/auth'
 import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
-import { ref } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
-import { useMiscStore } from '~/stores/misc'
 import { useImageStore } from '~/stores/image'
+
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
@@ -492,341 +489,324 @@ function initialVolunteering() {
   }
 }
 
-export default {
-  components: {
-    EmailValidator,
-    SpinButton,
-    GroupSelect,
-    OurUploader,
-    StartEndCollection,
-    NoticeMessage,
-    DonationButton,
-    ExternalLink,
-    VeeForm,
-    Field,
-    ErrorMessage,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    startEdit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  startEdit: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  async setup(props) {
-    const volunteeringStore = useVolunteeringStore()
-    const composeStore = useComposeStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
-    const imageStore = useImageStore()
-    const groupid = ref(null)
+})
 
-    const { modal, hide } = useOurModal()
+const volunteeringStore = useVolunteeringStore()
+const composeStore = useComposeStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const imageStore = useImageStore()
+const authStore = useAuthStore()
+const myid = computed(() => authStore.user?.id)
+const form = ref(null)
 
-    if (props.id) {
-      const v = await volunteeringStore.fetch(props.id)
-      await userStore.fetch(v.userid)
+// Data properties
+const groupid = ref(null)
+const cacheBust = ref(Date.now())
+const showGroupError = ref(false)
+const description = ref(null)
+const currentAtts = ref([])
+const mods = ref({})
+const image = ref(null)
 
-      v.groups?.forEach(async (id) => {
-        groupid.value = id
-        await groupStore.fetch(id)
-      })
+const { modal, hide } = useOurModal()
+
+const editing = ref(props.startEdit)
+const added = ref(false)
+
+// Initialize data from props
+if (props.id) {
+  const v = await volunteeringStore.fetch(props.id)
+  await userStore.fetch(v.userid)
+
+  v.groups?.forEach(async (id) => {
+    groupid.value = id
+    await groupStore.fetch(id)
+  })
+}
+
+const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
+
+// Computed properties
+const volunteering = computed(() => {
+  let ret = null
+
+  if (props.id) {
+    ret = volunteeringStore?.byId(props.id)
+  }
+
+  if (!ret) {
+    ret = initialVolunteering()
+  }
+
+  return ret
+})
+
+const canmodify = computed(() => {
+  return volunteering.value?.userid === myid.value
+})
+
+const groups = computed(() => {
+  const ret = []
+  volunteering.value?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+
+    if (group) {
+      ret.push(group)
+    }
+  })
+
+  return ret
+})
+
+const user = computed(() => {
+  return userStore?.byId(volunteering.value?.userid)
+})
+
+const uploadingPhoto = computed(() => {
+  return composeStore?.uploading
+})
+
+const isExisting = computed(() => {
+  return Boolean(volunteering.value?.id)
+})
+
+const enabled = computed(() => {
+  const group = groupStore.get(groupid.value)
+
+  let ret = true
+
+  if (group?.settings) {
+    if ('volunteering' in group.settings) {
+      ret = group.settings.volunteering
+    }
+  }
+
+  return ret
+})
+
+// Watchers
+watch(
+  () => volunteering.value?.event,
+  (newVal) => {
+    let desc = newVal?.description
+    desc = desc ? twem(desc) : ''
+    desc = desc.trim()
+
+    description.value = desc
+  },
+  { immediate: true }
+)
+
+watch(description, (newVal) => {
+  if (volunteering.value) {
+    volunteering.value.description = newVal
+  }
+})
+
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal?.length) {
+      volunteering.value.image = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
+      }
+      image.value = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
+      }
+    }
+  },
+  { deep: true }
+)
+
+// Methods
+function validateTitle(value) {
+  if (!value) {
+    return 'Please enter a title.'
+  }
+
+  if (value.length < 10) {
+    return 'Title must be 10 or more characters.'
+  }
+
+  if (value.length > 80) {
+    return 'Title must be fewer than 80 characters.'
+  }
+
+  return true
+}
+
+function validateDescription(value) {
+  if (!value) {
+    return 'Please enter a description.'
+  }
+
+  return true
+}
+
+function validateTimeCommitment(value) {
+  if (!value) {
+    return 'Please enter the time commitment.'
+  }
+
+  return true
+}
+
+function validateLocation(value) {
+  if (!value) {
+    return 'Please enter a location.'
+  }
+
+  return true
+}
+
+function validateContactName(value) {
+  if (value?.length > 60) {
+    return 'Please enter 60 characters or fewer.'
+  }
+
+  return true
+}
+
+async function deleteIt() {
+  await volunteeringStore.delete(volunteering.value.id)
+  hide()
+}
+
+async function saveIt(callback) {
+  const validate = await form.value.validate()
+
+  if (!groupid.value) {
+    showGroupError.value = true
+    callback()
+    return
+  } else {
+    showGroupError.value = false
+  }
+
+  if (!validate.valid) {
+    callback()
+    return
+  }
+
+  if (isExisting.value) {
+    const { id } = volunteering.value
+
+    // Save the WIP volop before we start making changes, otherwise the saves will update the store and hence
+    // what we're looking at.
+    const wip = JSON.parse(JSON.stringify(volunteering.value))
+    let shouldUpdatePhoto = null
+
+    if (wip.image?.id !== oldPhoto.value?.id) {
+      shouldUpdatePhoto = wip.image.id
     }
 
-    const oldPhoto = ref(volunteeringStore.byId(props.id)?.image)
-
-    const editing = ref(props.startEdit)
-    const added = ref(false)
-
-    return {
-      volunteeringStore,
-      composeStore,
-      userStore,
-      groupStore,
-      imageStore,
-      groupid,
-      oldPhoto,
-      modal,
-      hide,
-      editing,
-      added,
+    if (shouldUpdatePhoto) {
+      await volunteeringStore.setPhoto(id, shouldUpdatePhoto)
     }
-  },
-  data() {
-    return {
-      cacheBust: Date.now(),
-      showGroupError: false,
-      description: null,
-      currentAtts: [],
-      mods: {},
-      image: null,
+
+    const oldgroupid = wip.groups && wip.groups.length ? wip.groups[0] : null
+
+    if (groupid.value !== oldgroupid) {
+      // Save the new group, then remove the old group, so it won't get stranded.
+      //
+      // Checking for groupid > 0 allows systemwide opportunities.
+      if (groupid.value > 0) {
+        await volunteeringStore.addGroup(id, groupid.value)
+      }
+
+      if (oldgroupid) {
+        await volunteeringStore.removeGroup(id, oldgroupid)
+      }
     }
-  },
-  computed: {
-    volunteering() {
-      let ret = null
 
-      if (this.id) {
-        ret = this.volunteeringStore?.byId(this.id)
+    await volunteeringStore.setDates({
+      id,
+      olddates: wip.dates,
+      newdates: wip.dates,
+    })
+
+    await volunteeringStore.save(wip)
+
+    added.value = true
+  } else {
+    // This is an add.  First create it to get the id.
+    const dates = volunteering.value.dates
+    const photoid = volunteering.value.image
+      ? volunteering.value.image.id
+      : null
+
+    const id = await volunteeringStore.add(volunteering.value)
+
+    if (id) {
+      if (photoid) {
+        await volunteeringStore.setPhoto(id, photoid)
       }
 
-      if (!ret) {
-        ret = initialVolunteering()
-      }
-      if (ret) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.description = ret.description
+      // Save the group.
+      if (groupid.value > 0) {
+        await volunteeringStore.addGroup(id, groupid.value)
       }
 
-      return ret
-    },
-    canmodify() {
-      return this.volunteering?.userid === this.myid
-    },
-    groups() {
-      const ret = []
-      this.volunteering?.groups?.forEach((id) => {
-        const group = this.groupStore?.get(id)
-
-        if (group) {
-          ret.push(group)
-        }
-      })
-
-      return ret
-    },
-    user() {
-      return this.userStore?.byId(this.volunteering?.userid)
-    },
-    uploadingPhoto() {
-      return this.composeStore?.uploading
-    },
-    isExisting() {
-      return Boolean(this.volunteering?.id)
-    },
-    enabled() {
-      const group = this.groupStore.get(this.groupid)
-
-      let ret = true
-
-      if (group?.settings) {
-        if ('volunteering' in group.settings) {
-          ret = group.settings.volunteering
-        }
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    event: {
-      handler(newVal) {
-        // console.log('VOM event handler',newVal)
-        let desc = newVal?.description
-        desc = desc ? twem(desc) : ''
-        desc = desc.trim()
-
-        this.description = desc
-      },
-      immediate: true,
-    },
-    description: {
-      handler(newVal) {
-        this.volunteering.description = newVal
-      },
-    },
-    currentAtts: {
-      handler(newVal) {
-        if (newVal?.length) {
-          this.volunteering.image = {
-            id: newVal[0].id,
-            imageuid: newVal[0].ouruid,
-            imagemods: newVal[0].externalmods,
-          }
-          this.image = {
-            id: newVal[0].id,
-            imageuid: newVal[0].ouruid,
-            imagemods: newVal[0].externalmods,
-          }
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    validateTitle(value) {
-      if (!value) {
-        return 'Please enter a title.'
-      }
-
-      if (value.length < 10) {
-        return 'Title must be 10 or more characters.'
-      }
-
-      if (value.length > 80) {
-        return 'Title must be fewer than 80 characters.'
-      }
-
-      return true
-    },
-    validateDescription(value) {
-      if (!value) {
-        return 'Please enter a description.'
-      }
-
-      return true
-    },
-    validateTimeCommitment(value) {
-      if (!value) {
-        return 'Please enter the time commitment.'
-      }
-
-      return true
-    },
-    validateLocation(value) {
-      if (!value) {
-        return 'Please enter a location.'
-      }
-
-      return true
-    },
-    validateContactName(value) {
-      if (value?.length > 60) {
-        return 'Please enter 60 characters or fewer.'
-      }
-
-      return true
-    },
-    async deleteIt() {
-      await this.volunteeringStore.delete(this.volunteering.id)
-      this.hide()
-    },
-    async saveIt(callback) {
-      const validate = await this.$refs.form.validate()
-
-      if (!this.groupid) {
-        this.showGroupError = true
-        callback()
-        return
-      } else {
-        this.showGroupError = false
-      }
-
-      if (!validate.valid) {
-        callback()
-        return
-      }
-
-      if (this.isExisting) {
-        const { id } = this.volunteering
-
-        // Save the WIP volop before we start making changes, otherwise the saves will update the store and hence
-        // what we're looking at.
-        const wip = JSON.parse(JSON.stringify(this.volunteering))
-        let shouldUpdatePhoto = null
-
-        if (wip.image?.id !== this.oldPhoto?.id) {
-          shouldUpdatePhoto = wip.image.id
-        }
-
-        if (shouldUpdatePhoto) {
-          await this.volunteeringStore.setPhoto(id, shouldUpdatePhoto)
-        }
-
-        const oldgroupid =
-          wip.groups && wip.groups.length ? wip.groups[0] : null
-
-        if (this.groupid !== oldgroupid) {
-          // Save the new group, then remove the old group, so it won't get stranded.
-          //
-          // Checking for groupid > 0 allows systemwide opportunities.
-          if (this.groupid > 0) {
-            await this.volunteeringStore.addGroup(id, this.groupid)
-          }
-
-          if (oldgroupid) {
-            await this.volunteeringStore.removeGroup(id, oldgroupid)
-          }
-        }
-
-        await this.volunteeringStore.setDates({
+      if (dates && dates.length) {
+        await volunteeringStore.setDates({
           id,
-          olddates: wip.dates,
-          newdates: wip.dates,
+          olddates: [],
+          newdates: dates,
         })
-
-        await this.volunteeringStore.save(wip)
-
-        const miscStore = useMiscStore()
-        if (miscStore.modtools) {
-          this.hide()
-        } else this.added = true
-      } else {
-        // This is an add.  First create it to get the id.
-        const dates = this.volunteering.dates
-        const photoid = this.volunteering.image
-          ? this.volunteering.image.id
-          : null
-
-        const id = await this.volunteeringStore.add(this.volunteering)
-
-        if (id) {
-          if (photoid) {
-            await this.volunteeringStore.setPhoto(id, photoid)
-          }
-
-          // Save the group.
-          if (this.groupid > 0) {
-            await this.volunteeringStore.addGroup(id, this.groupid)
-          }
-
-          if (dates && dates.length) {
-            await this.volunteeringStore.setDates({
-              id,
-              olddates: [],
-              newdates: dates,
-            })
-          }
-
-          this.added = true
-        }
-      }
-      callback()
-    },
-    async dontSave() {
-      if (this.id) {
-        // We may have updated the opportunity during the edit.  Fetch it again to reset those changes.
-        await this.volunteeringStore.fetch(this.volunteering.id)
       }
 
-      this.hide()
-    },
-    async rotate(deg) {
-      const curr = this.mods?.rotate || 0
-      this.mods.rotate = curr + deg
+      added.value = true
+    }
+  }
+  callback()
+}
 
-      // Ensure between 0 and 360
-      this.mods.rotate = (this.mods.rotate + 360) % 360
+async function dontSave() {
+  if (props.id) {
+    // We may have updated the opportunity during the edit.  Fetch it again to reset those changes.
+    await volunteeringStore.fetch(volunteering.value.id)
+  }
 
-      await this.imageStore.post({
-        id: this.volunteering.image.id,
-        rotate: this.mods.rotate,
-        bust: Date.now(),
-        volunteering: true,
-      })
-    },
-    rotateLeft() {
-      this.rotate(-0)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
-  },
+  hide()
+}
+
+async function rotate(deg) {
+  const curr = mods.value?.rotate || 0
+  mods.value.rotate = curr + deg
+
+  // Ensure between 0 and 360
+  mods.value.rotate = (mods.value.rotate + 360) % 360
+
+  await imageStore.post({
+    id: volunteering.value.image.id,
+    rotate: mods.value.rotate,
+    bust: Date.now(),
+    volunteering: true,
+  })
+}
+
+function rotateLeft() {
+  rotate(-90) // Fixed the bug where it was "-0"
+}
+
+function rotateRight() {
+  rotate(90)
 }
 </script>
 <style scoped lang="scss">

@@ -29,61 +29,44 @@
     </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useRoute } from 'vue-router'
 import { useShortlinkStore } from '../../stores/shortlinks'
 
-export default {
-  components: {
-    GChart,
+const shortlinkStore = useShortlinkStore()
+const route = useRoute()
+const id = parseInt(route.params.id)
+
+if (id) {
+  await shortlinkStore.fetch(id)
+}
+
+const chartOptions = {
+  interpolateNulls: false,
+  legend: { position: 'none' },
+  chartArea: { width: '80%', height: '80%' },
+  vAxis: { viewWindow: { min: 0 } },
+  hAxis: {
+    format: 'MMM yyyy',
   },
-  async setup() {
-    const shortlinkStore = useShortlinkStore()
-
-    const route = useRoute()
-    const id = parseInt(route.params.id)
-
-    if (id) {
-      await shortlinkStore.fetch(id)
-    }
-
-    return {
-      shortlinkStore,
-      id,
-    }
-  },
-  data: function () {
-    return {
-      chartOptions: {
-        interpolateNulls: false,
-        legend: { position: 'none' },
-        chartArea: { width: '80%', height: '80%' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'blue' },
-        },
-      },
-    }
-  },
-  computed: {
-    shortlink() {
-      return this.shortlinkStore?.byId(this.id)
-    },
-    chartData() {
-      const ret = [['Date', 'Count']]
-
-      if (this.shortlink?.clickhistory) {
-        for (const date of this.shortlink.clickhistory) {
-          ret.push([new Date(date.date), date.count])
-        }
-      }
-
-      return ret
-    },
+  series: {
+    0: { color: 'blue' },
   },
 }
+
+const shortlink = computed(() => shortlinkStore?.byId(id))
+
+const chartData = computed(() => {
+  const ret = [['Date', 'Count']]
+
+  if (shortlink.value?.clickhistory) {
+    for (const date of shortlink.value.clickhistory) {
+      ret.push([new Date(date.date), date.count])
+    }
+  }
+
+  return ret
+})
 </script>

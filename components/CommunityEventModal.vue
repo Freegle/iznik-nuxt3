@@ -397,20 +397,28 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useCommunityEventStore } from '../stores/communityevent'
 import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
+import { useAuthStore } from '../stores/auth'
 import { uid } from '../composables/useId'
 import { useGroupStore } from '../stores/group'
 import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
-import { ref } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useOurModal } from '~/composables/useOurModal'
 
+// Define validation rules
+defineRule('required', required)
+defineRule('email', email)
+defineRule('min', min)
+defineRule('max', max)
+
+// Load components asynchronously
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
 )
@@ -430,11 +438,48 @@ const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
 
-defineRule('required', required)
-defineRule('email', email)
-defineRule('min', min)
-defineRule('max', max)
+// Props
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  startEdit: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
+// Initialize stores
+const communityEventStore = useCommunityEventStore()
+const composeStore = useComposeStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+const imageStore = useImageStore()
+const authStore = useAuthStore()
+
+// Refs for the form
+const form = ref(null)
+
+// State variables
+const groupid = ref(null)
+const oldPhoto = ref(null)
+const editing = ref(props.startEdit)
+const added = ref(false)
+const cacheBust = ref(Date.now())
+const showGroupError = ref(false)
+const showDateError = ref(false)
+const description = ref(null)
+const currentAtts = ref([])
+const mods = ref({})
+const image = ref(null)
+
+// Modal handling
+const { modal, hide } = useOurModal()
+
+// Helper function to create initial event
 function initialEvent() {
   return {
     id: null,
@@ -461,338 +506,295 @@ function initialEvent() {
     contacturl: null,
   }
 }
-export default {
-  components: {
-    EmailValidator,
-    GroupSelect,
-    OurUploader,
-    StartEndCollection,
-    NoticeMessage,
-    DonationButton,
-    ExternalLink,
-    VeeForm,
-    Field,
-    ErrorMessage,
-  },
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    startEdit: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  async setup(props) {
-    const communityEventStore = useCommunityEventStore()
-    const composeStore = useComposeStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
-    const imageStore = useImageStore()
-    const groupid = ref(null)
 
-    const { modal, hide } = useOurModal()
+// Fetch data
+if (props.id) {
+  const v = await communityEventStore.fetch(props.id)
+  await userStore.fetch(v.userid)
 
-    if (props.id) {
-      const v = await communityEventStore.fetch(props.id)
-      await userStore.fetch(v.userid)
+  v.groups?.forEach(async (id) => {
+    groupid.value = id
+    await groupStore.fetch(id)
+  })
 
-      v.groups?.forEach(async (id) => {
-        groupid.value = id
-        await groupStore.fetch(id)
-      })
-    }
-
-    const oldPhoto = ref(communityEventStore.byId(props.id)?.image)
-
-    const editing = ref(props.startEdit)
-    const added = ref(false)
-
-    return {
-      communityEventStore,
-      composeStore,
-      userStore,
-      groupStore,
-      imageStore,
-      groupid,
-      oldPhoto,
-      modal,
-      hide,
-      editing,
-      added,
-    }
-  },
-  data() {
-    return {
-      cacheBust: Date.now(),
-      showGroupError: false,
-      showDateError: false,
-      description: null,
-      currentAtts: [],
-      mods: {},
-      image: null,
-    }
-  },
-  computed: {
-    event() {
-      let ret = null
-
-      if (this.id) {
-        ret = this.communityEventStore?.byId(this.id)
-      }
-
-      if (!ret) {
-        ret = initialEvent()
-      }
-
-      return ret
-    },
-    canmodify() {
-      return this.event?.userid === this.myid
-    },
-    groups() {
-      const ret = []
-      this.event?.groups?.forEach((id) => {
-        const group = this.groupStore?.get(id)
-
-        if (group) {
-          ret.push(group)
-        }
-      })
-
-      return ret
-    },
-    user() {
-      return this.userStore?.byId(this.event?.userid)
-    },
-    uploadingPhoto() {
-      return this.composeStore?.uploading
-    },
-    isExisting() {
-      return Boolean(this.event?.id)
-    },
-    enabled() {
-      const group = this.groupStore.get(this.groupid)
-
-      let ret = true
-
-      if (group?.settings) {
-        if ('communityevents' in group.settings) {
-          ret = group.settings.communityevents
-        }
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    event: {
-      handler(newVal) {
-        let desc = newVal?.description
-        desc = desc ? twem(desc) : ''
-        desc = desc.trim()
-
-        this.description = desc
-      },
-      immediate: true,
-    },
-    description: {
-      handler(newVal) {
-        this.event.description = newVal
-      },
-    },
-    currentAtts: {
-      handler(newVal) {
-        if (newVal?.length) {
-          this.event.image = {
-            id: newVal[0].id,
-            imageuid: newVal[0].ouruid,
-            imagemods: newVal[0].externalmods,
-          }
-          this.image = {
-            id: newVal[0].id,
-            imageuid: newVal[0].ouruid,
-            imagemods: newVal[0].externalmods,
-          }
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    validateTitle(value) {
-      if (!value) {
-        return 'Please enter a title.'
-      }
-
-      if (value.length < 10) {
-        return 'Title must be 10 or more characters.'
-      }
-
-      if (value.length > 80) {
-        return 'Title must be fewer than 80 characters.'
-      }
-
-      return true
-    },
-    validateDescription(value) {
-      if (!value) {
-        return 'Please enter a description.'
-      }
-
-      return true
-    },
-    validateLocation(value) {
-      if (!value) {
-        return 'Please enter a location.'
-      }
-
-      return true
-    },
-    validateContactName(value) {
-      if (value?.length > 60) {
-        return 'Please enter 60 characters or fewer.'
-      }
-
-      return true
-    },
-    async deleteIt() {
-      await this.communityEventStore.delete(this.event.id)
-      this.hide()
-    },
-    async saveIt(callback) {
-      const validate = await this.$refs.form.validate()
-
-      if (!this.groupid) {
-        this.showGroupError = true
-        callback()
-        return
-      } else {
-        this.showGroupError = false
-      }
-
-      if (this.event.dates?.length) {
-        for (const date of this.event.dates) {
-          if (!date.start || !date.end || !date.starttime || !date.endtime) {
-            this.showDateError = true
-            callback()
-            return
-          }
-        }
-
-        this.showDateError = false
-      } else {
-        this.showDateError = true
-      }
-
-      if (!validate.valid) {
-        callback()
-        return
-      }
-
-      if (this.isExisting) {
-        const { id } = this.event
-
-        // Save the WIP event before we start making changes, otherwise the saves will update the store and hence
-        // what we're looking at.
-        const wip = JSON.parse(JSON.stringify(this.event))
-        let shouldUpdatePhoto = null
-
-        if (wip.image?.id !== this.oldPhoto?.id) {
-          shouldUpdatePhoto = wip.image.id
-        }
-
-        if (shouldUpdatePhoto) {
-          await this.communityEventStore.setPhoto(id, shouldUpdatePhoto)
-        }
-
-        const oldgroupid = wip.groups?.length ? wip.groups[0] : null
-
-        if (this.groupid !== oldgroupid) {
-          // Save the new group, then remove the old group, so it won't get stranded.
-          //
-          // Checking for groupid > 0 allows systemwide opportunities.
-          if (this.groupid > 0) {
-            await this.communityEventStore.addGroup(id, this.groupid)
-          }
-
-          if (oldgroupid) {
-            await this.communityEventStore.removeGroup(id, oldgroupid)
-          }
-        }
-
-        await this.communityEventStore.setDates({
-          id,
-          olddates: wip.dates,
-          newdates: wip.dates,
-        })
-
-        await this.communityEventStore.save(wip)
-
-        this.added = true
-      } else {
-        // This is an add.  First create it to get the id.
-        const dates = this.event.dates
-        const photoid = this.event.image ? this.event.image.id : null
-
-        const id = await this.communityEventStore.add(this.event)
-
-        if (id) {
-          if (photoid) {
-            await this.communityEventStore.setPhoto(id, photoid)
-          }
-
-          // Save the group.
-          if (this.groupid > 0) {
-            await this.communityEventStore.addGroup(id, this.groupid)
-          }
-
-          if (dates && dates.length) {
-            await this.communityEventStore.setDates({
-              id,
-              olddates: [],
-              newdates: dates,
-            })
-          }
-
-          this.added = true
-        }
-      }
-      callback()
-    },
-    async dontSave() {
-      if (this.id) {
-        // We may have updated the event during the edit.  Fetch it again to reset those changes.
-        await this.communityEventStore.fetch(this.event.id)
-      }
-
-      this.hide()
-    },
-    async rotate(deg) {
-      const curr = this.mods?.rotate || 0
-      this.mods.rotate = curr + deg
-
-      // Ensure between 0 and 360
-      this.mods.rotate = (this.mods.rotate + 360) % 360
-
-      await this.imageStore.post({
-        id: this.event.image.id,
-        rotate: this.mods.rotate,
-        bust: Date.now(),
-        communityevent: true,
-      })
-    },
-    rotateLeft() {
-      this.rotate(-90)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
-  },
+  oldPhoto.value = communityEventStore.byId(props.id)?.image
 }
+
+// Computed properties
+const event = computed(() => {
+  let ret = null
+
+  if (props.id) {
+    ret = communityEventStore?.byId(props.id)
+  }
+
+  if (!ret) {
+    ret = initialEvent()
+  }
+
+  return ret
+})
+
+const canmodify = computed(() => {
+  return event.value?.userid === authStore.user?.id
+})
+
+const groups = computed(() => {
+  const ret = []
+  event.value?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+
+    if (group) {
+      ret.push(group)
+    }
+  })
+
+  return ret
+})
+
+const user = computed(() => {
+  return userStore?.byId(event.value?.userid)
+})
+
+const uploadingPhoto = computed(() => {
+  return composeStore?.uploading
+})
+
+const isExisting = computed(() => {
+  return Boolean(event.value?.id)
+})
+
+const enabled = computed(() => {
+  const group = groupStore.get(groupid.value)
+
+  let ret = true
+
+  if (group?.settings) {
+    if ('communityevents' in group.settings) {
+      ret = group.settings.communityevents
+    }
+  }
+
+  return ret
+})
+
+// Validation functions
+function validateTitle(value) {
+  if (!value) {
+    return 'Please enter a title.'
+  }
+
+  if (value.length < 10) {
+    return 'Title must be 10 or more characters.'
+  }
+
+  if (value.length > 80) {
+    return 'Title must be fewer than 80 characters.'
+  }
+
+  return true
+}
+
+function validateDescription(value) {
+  if (!value) {
+    return 'Please enter a description.'
+  }
+
+  return true
+}
+
+function validateLocation(value) {
+  if (!value) {
+    return 'Please enter a location.'
+  }
+
+  return true
+}
+
+function validateContactName(value) {
+  if (value?.length > 60) {
+    return 'Please enter 60 characters or fewer.'
+  }
+
+  return true
+}
+
+// Methods
+async function deleteIt() {
+  await communityEventStore.delete(event.value.id)
+  hide()
+}
+
+async function saveIt(callback) {
+  const validate = await form.value.validate()
+
+  if (!groupid.value) {
+    showGroupError.value = true
+    callback()
+    return
+  } else {
+    showGroupError.value = false
+  }
+
+  if (event.value.dates?.length) {
+    for (const date of event.value.dates) {
+      if (!date.start || !date.end || !date.starttime || !date.endtime) {
+        showDateError.value = true
+        callback()
+        return
+      }
+    }
+
+    showDateError.value = false
+  } else {
+    showDateError.value = true
+  }
+
+  if (!validate.valid) {
+    callback()
+    return
+  }
+
+  if (isExisting.value) {
+    const { id } = event.value
+
+    // Save the WIP event before we start making changes, otherwise the saves will update the store and hence
+    // what we're looking at.
+    const wip = JSON.parse(JSON.stringify(event.value))
+    let shouldUpdatePhoto = null
+
+    if (wip.image?.id !== oldPhoto.value?.id) {
+      shouldUpdatePhoto = wip.image.id
+    }
+
+    if (shouldUpdatePhoto) {
+      await communityEventStore.setPhoto(id, shouldUpdatePhoto)
+    }
+
+    const oldgroupid = wip.groups?.length ? wip.groups[0] : null
+
+    if (groupid.value !== oldgroupid) {
+      // Save the new group, then remove the old group, so it won't get stranded.
+      //
+      // Checking for groupid > 0 allows systemwide opportunities.
+      if (groupid.value > 0) {
+        await communityEventStore.addGroup(id, groupid.value)
+      }
+
+      if (oldgroupid) {
+        await communityEventStore.removeGroup(id, oldgroupid)
+      }
+    }
+
+    await communityEventStore.setDates({
+      id,
+      olddates: wip.dates,
+      newdates: wip.dates,
+    })
+
+    await communityEventStore.save(wip)
+
+    added.value = true
+  } else {
+    // This is an add.  First create it to get the id.
+    const dates = event.value.dates
+    const photoid = event.value.image ? event.value.image.id : null
+
+    const id = await communityEventStore.add(event.value)
+
+    if (id) {
+      if (photoid) {
+        await communityEventStore.setPhoto(id, photoid)
+      }
+
+      // Save the group.
+      if (groupid.value > 0) {
+        await communityEventStore.addGroup(id, groupid.value)
+      }
+
+      if (dates && dates.length) {
+        await communityEventStore.setDates({
+          id,
+          olddates: [],
+          newdates: dates,
+        })
+      }
+
+      added.value = true
+    }
+  }
+  callback()
+}
+
+async function dontSave() {
+  if (props.id) {
+    // We may have updated the event during the edit.  Fetch it again to reset those changes.
+    await communityEventStore.fetch(event.value.id)
+  }
+
+  hide()
+}
+
+async function rotate(deg) {
+  const curr = mods.value?.rotate || 0
+  mods.value.rotate = curr + deg
+
+  // Ensure between 0 and 360
+  mods.value.rotate = (mods.value.rotate + 360) % 360
+
+  await imageStore.post({
+    id: event.value.image.id,
+    rotate: mods.value.rotate,
+    bust: Date.now(),
+    communityevent: true,
+  })
+}
+
+function rotateLeft() {
+  rotate(-90)
+}
+
+function rotateRight() {
+  rotate(90)
+}
+
+// Watchers
+watch(
+  event,
+  (newVal) => {
+    let desc = newVal?.description
+    desc = desc ? twem(desc) : ''
+    desc = desc.trim()
+
+    description.value = desc
+  },
+  { immediate: true }
+)
+
+watch(description, (newVal) => {
+  if (event.value) {
+    event.value.description = newVal
+  }
+})
+
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal?.length) {
+      event.value.image = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
+      }
+      image.value = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
+      }
+    }
+  },
+  { deep: true }
+)
 </script>
 <style scoped lang="scss">
 .field {

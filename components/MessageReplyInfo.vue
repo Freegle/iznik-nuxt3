@@ -1,7 +1,8 @@
 <template>
   <span>
     <span v-if="message.replycount" class="small text-success mr-1">
-      <v-icon icon="user" class="d-inline" />&nbsp;<span class="d-inline"
+      <client-only> <v-icon icon="user" class="d-inline" /> </client-only
+      >&nbsp;<span class="d-inline"
         >{{ message.replycount }}&nbsp;freegler<span
           v-if="message.replycount != 1"
           >s</span
@@ -9,17 +10,16 @@
       >
     </span>
     <span v-else class="small text-muted mr-1">
-      <v-icon icon="user" class="d-inline" />&nbsp;No&nbsp;replies&nbsp;yet
+      <client-only> <v-icon icon="user" class="d-inline" /> </client-only
+      >&nbsp;No&nbsp;replies&nbsp;yet
     </span>
   </span>
 </template>
-<script>
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-}
+})
 </script>

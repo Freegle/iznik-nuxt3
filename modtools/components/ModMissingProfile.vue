@@ -22,11 +22,17 @@
 </template>
 
 <script>
+import { useMe } from '~/composables/useMe'
+
 export default {
   data: function () {
     return {
       summary: true,
     }
+  },
+  setup(){
+    const { myGroups } = useMe()
+    return { myGroups }
   },
   computed: {
     missing() {

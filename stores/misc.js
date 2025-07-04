@@ -4,23 +4,15 @@ import { defineStore } from 'pinia'
 export const useMiscStore = defineStore({
   id: 'misc',
   persist: {
-    enabled: true,
-    strategies:
-      typeof localStorage === 'undefined'
-        ? []
-        : [
-            // These are sticky preferences.
-            {
-              storage: localStorage,
-              paths: ['vals', 'source'],
-            },
-          ],
+    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    pick: ['vals', 'source'],
   },
   state: () => ({
     time: null,
     breakpoint: null,
     vals: {},
     somethingWentWrong: false,
+    errorDetails: null,
     needToReload: false,
     visible: true,
     apiCount: 0,
@@ -54,11 +46,26 @@ export const useMiscStore = defineStore({
       this.source = val
       // api(this.config).logs.src(val) // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
     },
+    setErrorDetails(error) {
+      this.somethingWentWrong = true
+      this.errorDetails = {
+        message: error?.message || 'Unknown error',
+        stack: error?.stack || null,
+        timestamp: new Date().toISOString(),
+        name: error?.name || 'Error',
+        cause: error?.cause || null,
+      }
+    },
+    clearError() {
+      this.somethingWentWrong = false
+      this.errorDetails = null
+    },
     api(diff) {
       this.apiCount += diff
 
       if (this.apiCount < 0) {
         console.error('API count went negative')
+        console.trace()
         this.apiCount = 0
       }
     },

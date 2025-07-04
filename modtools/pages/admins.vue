@@ -201,6 +201,7 @@ import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useAdminsStore } from '../stores/admins'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 defineRule('required', required)
 defineRule('email', email)
@@ -220,7 +221,8 @@ export default {
   setup() {
     const adminsStore = useAdminsStore()
     const modGroupStore = useModGroupStore()
-    return { adminsStore, modGroupStore }
+    const { myGroups } = useMe()
+    return { adminsStore, modGroupStore, myGroups }
   },
   data: function () {
     return {

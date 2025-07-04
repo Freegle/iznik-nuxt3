@@ -9,20 +9,21 @@
       class="mt-2"
     />
     <CommunityEventSidebar
-      v-if="showCommunityEvents"
+      v-if="me && showCommunityEvents"
       class="overflow-y-scroll border-bottom"
     />
     <VolunteerOpportunitySidebar
-      v-if="showVolunteerOpportunities"
+      v-if="me && showVolunteerOpportunities"
       class="overflow-y-scroll border-top border-bottom"
     />
-  </div>
-  <div class="sidebar__botleft align-content-end">
-    <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+    <div class="sidebar__botleft align-content-end col-lg-3 col-0">
+      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+    </div>
   </div>
 </template>
-<script>
+<script setup>
 import BotLeftBox from './BotLeftBox'
+import { useMe } from '~/composables/useMe'
 const CommunityEventSidebar = defineAsyncComponent(() =>
   import('~/components/CommunityEventSidebar')
 )
@@ -30,40 +31,35 @@ const VolunteerOpportunitySidebar = defineAsyncComponent(() =>
   import('~/components/VolunteerOpportunitySidebar')
 )
 
-export default {
-  components: {
-    BotLeftBox,
-    CommunityEventSidebar,
-    VolunteerOpportunitySidebar,
+const { me } = useMe()
+
+defineProps({
+  showCommunityEvents: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    showCommunityEvents: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showVolunteerOpportunities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    showBotLeft: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    adUnitPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    adDivId: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  showVolunteerOpportunities: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-}
+  showBotLeft: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  adUnitPath: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  adDivId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -77,10 +73,23 @@ export default {
     100vh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
   );
 
+  @media (min-height: $desktop-tall) {
+    height: calc(
+      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 75px - 10px
+    );
+  }
+
   @supports (height: 100dvh) {
     height: calc(
       100dvh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
     );
+
+    @media (min-height: $desktop-tall) {
+      height: calc(
+        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 75px -
+          10px
+      );
+    }
   }
 
   display: grid;
@@ -97,5 +106,9 @@ export default {
 .sidebar__botleft {
   position: fixed;
   bottom: $sticky-banner-height-desktop;
+
+  @media (min-height: $desktop-tall) {
+    bottom: $sticky-banner-height-desktop-tall;
+  }
 }
 </style>

@@ -5,7 +5,7 @@
       class="selected font-weight-bold"
       variant="white"
       size="lg"
-      @click="$emit('not')"
+      @click="emit('not')"
     >
       {{ term.term }}
     </b-button>
@@ -14,30 +14,31 @@
       class="unselected font-weight-bold"
       variant="white"
       size="lg"
-      @click="$emit('similar')"
+      @click="emit('similar')"
     >
       {{ term.term }}
     </b-button>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    term: {
-      type: Object,
-      required: true,
-    },
-    similarTerms: {
-      type: Array,
-      required: true,
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  term: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    similar() {
-      return this.similarTerms.find((t) => t.id === this.term.id)
-    },
+  similarTerms: {
+    type: Array,
+    required: true,
   },
-}
+})
+
+const emit = defineEmits(['similar', 'not'])
+
+const similar = computed(() => {
+  return props.similarTerms.find((t) => t.id === props.term.id)
+})
 </script>
 <style scoped lang="scss">
 .selected {

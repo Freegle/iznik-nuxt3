@@ -5,11 +5,7 @@
   >
     <div class="chatMessage forcebreak chatMessage__owner">
       <div>
-        <span v-if="isMT && emessageMThasTNlinks">
-          <!-- eslint-disable-next-line-->
-          <span v-html="emessageMTTN" class="preline forcebreak"></span>
-        </span>
-        <span v-else-if="!highlightEmails">
+        <span v-if="!highlightEmails">
           <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
             emessage
           }}</span>
@@ -26,7 +22,7 @@
           <span v-if="messageIsNew" class="font-weight-bold">
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmailMT]"
+              :search-words="[regexEmail]"
               highlight-class-name="highlight"
               class="prewrap"
             />
@@ -34,7 +30,7 @@
           <span v-else>
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmailMT]"
+              :search-words="[regexEmail]"
               highlight-class-name="highlight"
               class="preline forcebreak"
             />
@@ -48,9 +44,15 @@
           />
         </span>
       </div>
-      <div v-if="lat || lng" :style="'width: 100%; height: 200px'">
-        <l-map ref="map" :zoom="16" :max-zoom="maxZoom" :center="[lat, lng]">
-          <l-tile-layer :url="osmtile" :attribution="attribution" />
+      <div v-if="lat || lng">
+        <l-map
+          ref="map"
+          :zoom="16"
+          :max-zoom="maxZoom"
+          :center="[lat, lng]"
+          :style="'width: 100%; height: 200px'"
+        >
+          <l-tile-layer :url="osmtile()" :attribution="attribution()" />
           <l-marker :lat-lng="[lat, lng]" :interactive="false" />
         </l-map>
         <div class="small text-muted">
@@ -68,139 +70,88 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import Highlighter from 'vue-highlight-words'
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
-import { useMiscStore } from '../stores/misc'
-import ChatBase from '~/components/ChatBase'
+import { useChatBase } from '../composables/useChat'
+import { ref, computed, onMounted } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
 
-export default {
-  components: {
-    ProfileImage,
-    Highlighter,
-    LMap,
-    LTileLayer,
-    LMarker,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  data: function () {
-    return {
-      lat: null,
-      lng: null,
+  id: {
+    type: Number,
+    required: true,
+  },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+// Use properties from ChatBase component via composable
+const {
+  chat,
+  chatmessage,
+  emessage,
+  messageIsFromCurrentUser,
+  chatMessageProfileImage,
+  regexEmail,
+} = useChatBase(props.chatid, props.id, props.pov)
+
+// Data properties
+const lat = ref(null)
+const lng = ref(null)
+
+// Computed properties
+const maxZoom = computed(() => MAX_MAP_ZOOM)
+
+const messageIsNew = computed(() => {
+  return (
+    chatmessage.value?.secondsago < 60 ||
+    chatmessage.value?.id > chat.value?.lastmsgseen
+  )
+})
+
+const postcode = computed(() => {
+  let ret = null
+
+  const postcodeMatch = chatmessage.value?.message.match(POSTCODE_REGEX)
+
+  if (postcodeMatch?.length) {
+    if (!postcodeMatch[0].includes(' ')) {
+      // Make sure we have a space in the right place, because this helps with autocomplete
+      ret = postcodeMatch[0].replace(/^(.*)(\d)/, '$1 $2')
+    } else {
+      ret = postcodeMatch[0]
     }
-  },
-  computed: {
-    isMT() {
-      const miscStore = useMiscStore()
-      return miscStore.modtools
-    },
-    emessageMThasTNlinks() {
-      return this.emessage.includes('https://trashnothing.com/fd/')
-    },
-    emessageMTTN() {
-      let ret = this.emessage
-      ret = ret
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-      let tnpos = -1
-      while (true) {
-        tnpos = ret.indexOf('https://trashnothing.com/fd/', tnpos + 1)
-        if (tnpos === -1) break
-        const endtn = ret.indexOf('\n', tnpos)
-        if (endtn === -1) break
-        const tnurl = ret.substring(tnpos, endtn)
-        const tnlink = '<a href=' + tnurl + ' target="_blank">' + tnurl + '</a>'
-        ret = ret.substring(0, tnpos) + tnlink + ret.substring(endtn)
-        tnpos += tnlink.length
-      }
-      return ret
-    },
-    osmtile: () => osmtile(),
-    attribution: () => attribution(),
-    maxZoom() {
-      return MAX_MAP_ZOOM
-    },
-    messageIsNew() {
-      return (
-        this.chatmessage?.secondsago < 60 ||
-        this.chatmessage?.id > this.chat?.lastmsgseen
-      )
-    },
-    postcode() {
-      let ret = null
+  }
 
-      try {
-        const postcode = this.chatmessage?.message.match(POSTCODE_REGEX)
+  return ret
+})
 
-        if (postcode?.length) {
-          if (!postcode[0].includes(' ')) {
-            // Make sure we have a space in the right place, because this helps with autocomplete
-            ret = postcode[0].replace(/^(.*)(\d)/, '$1 $2')
-          } else {
-            ret = postcode[0]
-          }
-        }
-      } catch (e) {
-        // Gets here if message is a number, so OK to ignore
-      }
+// Lifecycle hooks
+onMounted(async () => {
+  if (postcode.value) {
+    // Use typeahead to find the postcode location.
+    const locationStore = useLocationStore()
+    const locs = await locationStore.typeahead(postcode.value)
 
-      return ret
-    },
-  },
-  async mounted() {
-    if (this.postcode) {
-      // Use typeahead to find the postcode location.
-      const locationStore = useLocationStore()
-      const locs = await locationStore.typeahead(this.postcode)
-      console.log('Typeahead returned', locs)
-
-      if (locs?.length) {
-        this.lat = locs[0].lat
-        this.lng = locs[0].lng
-      }
+    if (locs?.length) {
+      lat.value = locs[0].lat
+      lng.value = locs[0].lng
     }
-  },
-  methods: {
-    // MTTODO: Use if need be or remove if not
-    // Replace Highlighter with highlightedEmails as it does not support regex for emails
-    makesafeforhtml(input) {
-      input = input.replace(/&/g, '&amp;')
-      input = input.replace(/</g, '&lt;')
-      input = input.replace(/>/g, '&gt;')
-      return input
-    },
-    highlightedEmails(c) {
-      const regex = new RegExp(this.regexEmailMT)
-      // let count = 0
-      const giventext = this.makesafeforhtml(this.emessage)
-      let highlightedText = ''
-      let lastix = 0
-      let match
-      while ((match = regex.exec(giventext))) {
-        const start = match.index
-        const end = regex.lastIndex
-        // Do not highlight zero-length matches
-        if (end > start) {
-          highlightedText += giventext.substring(lastix, start)
-          highlightedText +=
-            `<span class="${c}">` + giventext.substring(start, end) + '</span>'
-          lastix = end
-        }
-        // if (++count === 10) break
-      }
-      if (lastix < giventext.length) {
-        highlightedText += giventext.substring(lastix)
-      }
-
-      return highlightedText
-    },
-  },
-}
+  }
+})
 </script>

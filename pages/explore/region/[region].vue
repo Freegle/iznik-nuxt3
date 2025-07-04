@@ -19,82 +19,71 @@
     </b-row>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
-import { defineAsyncComponent } from 'vue'
 import { buildHead } from '../../../composables/useBuildHead'
+import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import { useGroupStore } from '~/stores/group'
 
-export default {
-  components: {
-    PostMapAndList: defineAsyncComponent(() =>
-      import('~/components/PostMapAndList')
-    ),
-  },
-  async setup(props) {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const region = route.params.region
-      ? route.params.region.trim().toLowerCase()
-      : null
+const PostMapAndList = defineAsyncComponent(() =>
+  import('~/components/PostMapAndList')
+)
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Explore Freegle communities' +
-          (route.params.region ? ' in ' + route.params.region : ''),
-        null,
-        {
-          class: 'overflow-y-scroll',
-        }
-      )
-    )
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const region = route.params.region
+  ? route.params.region.trim().toLowerCase()
+  : null
 
-    // Get all the groups in store for the adaptive map.
-    const groupStore = useGroupStore()
-    await groupStore.fetch()
-
-    // Calculate the initial bounds for the region.
-    let bounds = null
-    const groupids = []
-    const allGroups = groupStore.list
-
-    let swlat = null
-    let swlng = null
-    let nelat = null
-    let nelng = null
-
-    for (const ix in allGroups) {
-      const group = allGroups[ix]
-      // console.log('compare', group.region, params.region)
-
-      if (
-        group.onmap &&
-        group.publish &&
-        group.region &&
-        group.region.trim().toLowerCase() === region
-      ) {
-        swlat = swlat === null ? group.lat : Math.min(swlat, group.lat)
-        swlng = swlng === null ? group.lng : Math.min(swlng, group.lng)
-        nelat = nelat === null ? group.lat : Math.max(nelat, group.lat)
-        nelng = nelng === null ? group.lng : Math.max(nelng, group.lng)
-        groupids.push(group.id)
-      }
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Explore Freegle communities' +
+      (route.params.region ? ' in ' + route.params.region : ''),
+    null,
+    {
+      class: 'overflow-y-scroll',
     }
+  )
+)
 
-    if (swlat !== null && swlng !== null && nelat !== null && nelng !== null) {
-      bounds = [
-        [swlat, swlng],
-        [nelat, nelng],
-      ]
-    }
+// Get all the groups in store for the adaptive map.
+const groupStore = useGroupStore()
+await groupStore.fetch()
 
-    return {
-      region,
-      initialBounds: bounds,
-      initialGroupIds: groupids,
-    }
-  },
+// Calculate the initial bounds for the region.
+let initialBounds = null
+const initialGroupIds = []
+const allGroups = groupStore.list
+
+let swlat = null
+let swlng = null
+let nelat = null
+let nelng = null
+
+for (const ix in allGroups) {
+  const group = allGroups[ix]
+  // console.log('compare', group.region, params.region)
+
+  if (
+    group.onmap &&
+    group.publish &&
+    group.region &&
+    group.region.trim().toLowerCase() === region
+  ) {
+    swlat = swlat === null ? group.lat : Math.min(swlat, group.lat)
+    swlng = swlng === null ? group.lng : Math.min(swlng, group.lng)
+    nelat = nelat === null ? group.lat : Math.max(nelat, group.lat)
+    nelng = nelng === null ? group.lng : Math.max(nelng, group.lng)
+    initialGroupIds.push(group.id)
+  }
+}
+
+if (swlat !== null && swlng !== null && nelat !== null && nelng !== null) {
+  initialBounds = [
+    [swlat, swlng],
+    [nelat, nelng],
+  ]
 }
 </script>

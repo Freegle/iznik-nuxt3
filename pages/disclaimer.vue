@@ -54,7 +54,7 @@
         <p>
           While some communities allow postage, you should never hand over money
           in advance. We don't recommend any specific courier (so if you see a
-          message saying we do, it’s a scam).
+          message saying we do, it's a scam).
         </p>
         <p>
           If you are unlucky enough to be scammed, please report it to the
@@ -66,25 +66,22 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
+import ExternalLink from '~/components/ExternalLink.vue'
 
-export default {
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Disclaimer',
-        'What you need to know when using Freegle.'
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Disclaimer',
+    'What you need to know when using Freegle.'
+  )
+)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

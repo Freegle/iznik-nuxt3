@@ -28,65 +28,51 @@
     </b-row>
   </div>
 </template>
-<script>
-import { useRoute } from 'vue-router'
-import { useStatsStore } from '~/stores/stats'
-import AutoComplete from '~/components/AutoComplete'
+<script setup>
+import { ref, useRoute, useRouter, useHead, useRuntimeConfig } from '#imports'
+import AutoComplete from '~/components/AutoComplete.vue'
 import { buildHead } from '~/composables/useBuildHead'
 
-export default {
-  components: {
-    AutoComplete,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    const statsStore = useStatsStore()
+// Setup stores and route
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
+const router = useRouter()
+const autocomplete = ref(null)
 
-    const api = runtimeConfig.public.APIv1
+// API base URL
+const api = runtimeConfig.public.APIv1
+const source = api + '/authority'
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Statistics by Authority',
-        "You can search for a council, local authority etc. Then we'll show you our impact in that area."
-      )
-    )
+// Set page head
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Statistics by Authority',
+    "You can search for a council, local authority etc. Then we'll show you our impact in that area."
+  )
+)
 
-    return {
-      statsStore,
-      api,
+// Methods
+function process(results) {
+  const authorities =
+    results.authorities.length > 5
+      ? results.authorities.slice(0, 5)
+      : results.authorities
+  const ret = []
+  for (const authority of authorities) {
+    if (authority && authority.name) {
+      ret.push(authority)
     }
-  },
-  data() {
-    return {
-      source: this.api + '/authority',
-      results: [],
-    }
-  },
-  computed: {},
-  methods: {
-    process(results) {
-      const authorities =
-        results.authorities.length > 5
-          ? results.authorities.slice(0, 5)
-          : results.authorities
-      const ret = []
-      for (const authority of authorities) {
-        if (authority && authority.name) {
-          ret.push(authority)
-        }
-      }
+  }
 
-      this.results = ret
-      return ret
-    },
-    select(auth) {
-      if (auth) {
-        this.$router.push('/stats/authority/' + auth.id)
-      }
-    },
-  },
+  results.value = ret
+  return ret
+}
+
+function select(auth) {
+  if (auth) {
+    router.push('/stats/authority/' + auth.id)
+  }
 }
 </script>

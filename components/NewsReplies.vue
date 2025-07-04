@@ -51,11 +51,11 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useNewsfeedStore } from '../stores/newsfeed'
 import { useAuthStore } from '../stores/auth'
-import { ref, computed } from '#imports'
 import NewsRefer from '~/components/NewsRefer'
 
 const NewsReply = defineAsyncComponent(() =>
@@ -64,160 +64,148 @@ const NewsReply = defineAsyncComponent(() =>
 
 const INITIAL_NUMBER_OF_REPLIES_TO_SHOW = 5
 
-export default {
-  name: 'NewsReplies',
-  components: { NewsRefer, NewsReply },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    threadhead: {
-      type: Number,
-      required: true,
-    },
-    replyTo: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    scrollTo: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    depth: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup(props) {
-    const newsfeedStore = useNewsfeedStore()
-    const authStore = useAuthStore()
-    const showAllReplies = ref(false)
+  threadhead: {
+    type: Number,
+    required: true,
+  },
+  replyTo: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  scrollTo: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  depth: {
+    type: Number,
+    required: true,
+  },
+})
 
-    // We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
-    //
-    // This is because it allows us to identify which replies we are going to show, and then fetch the users for them
-    // in advance.  That avoids the screen flicker that happens if we delay fetching the user until we render each reply.
-    const me = authStore.user
+const emit = defineEmits(['rendered'])
 
-    const mod = computed(() => {
-      return (
-        me &&
-        (me.systemrole === 'Moderator' ||
-          me.systemrole === 'Support' ||
-          me.systemrole === 'Admin')
-      )
-    })
+const newsfeedStore = useNewsfeedStore()
+const authStore = useAuthStore()
+const showAllReplies = ref(false)
 
-    const newsfeed = computed(() => {
-      return newsfeedStore.byId(props.id)
-    })
+// We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
+//
+// This is because it allows us to identify which replies we are going to show, and then fetch the users for them
+// in advance.  That avoids the screen flicker that happens if we delay fetching the user until we render each reply.
+const me = authStore.user
 
-    const replies = computed(() => {
-      return newsfeed.value?.replies || []
-    })
+const mod = computed(() => {
+  return (
+    me &&
+    (me.systemrole === 'Moderator' ||
+      me.systemrole === 'Support' ||
+      me.systemrole === 'Admin')
+  )
+})
 
-    const visiblereplies = computed(() => {
-      // These are the replies which are candidates to show, i.e. not deleted or hidden.
-      const ret = []
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
 
-      for (let i = 0; i < replies.value.length; i++) {
-        const reply = newsfeedStore.byId(replies.value[i])
+const replies = computed(() => {
+  return newsfeed.value?.replies || []
+})
 
-        if (!reply.deleted || mod) {
+const visiblereplies = computed(() => {
+  // These are the replies which are candidates to show, i.e. not deleted or hidden.
+  const ret = []
+
+  for (let i = 0; i < replies.value.length; i++) {
+    const reply = newsfeedStore.byId(replies.value[i])
+
+    if (!reply.deleted || mod.value) {
+      ret.push(reply)
+    }
+  }
+
+  return ret
+})
+
+const repliestoshow = computed(() => {
+  let ret = []
+
+  if (visiblereplies.value.length) {
+    if (
+      showAllReplies.value ||
+      props.scrollTo ||
+      visiblereplies.value.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
+    ) {
+      // Return all the replies
+      ret = visiblereplies.value
+    } else if (!props.replyTo) {
+      // Show the last 5
+      ret = visiblereplies.value.slice(-5)
+    } else {
+      // We are need to show what we are replying to and everything after that.
+      ret = []
+      let seen = false
+
+      for (let i = 0; i < visiblereplies.value.length; i++) {
+        const reply = newsfeedStore.byId(visiblereplies.value[i])
+
+        if (reply?.id === props.replyTo || seen) {
+          seen = true
           ret.push(reply)
         }
       }
 
-      return ret
-    })
-
-    const repliestoshow = computed(() => {
-      let ret = []
-
-      if (visiblereplies.value.length) {
-        if (
-          showAllReplies.value ||
-          scrollTo ||
-          visiblereplies.value.length <= INITIAL_NUMBER_OF_REPLIES_TO_SHOW
-        ) {
-          // Return all the replies
-          ret = visiblereplies.value
-        } else if (!props.replyTo) {
-          // Show the last 5
-          ret = visiblereplies.value.slice(-5)
-        } else {
-          // We are need to show what we are replying to and everything after that.
-          ret = []
-          let seen = false
-
-          for (let i = 0; i < visiblereplies.value.length; i++) {
-            const reply = newsfeedStore.byId(visiblereplies.value[i])
-
-            if (reply.id === props.replyTo || seen) {
-              seen = true
-              ret.push(reply)
-            }
-          }
-
-          if (!seen) {
-            // Probably won't happen.
-            ret = visiblereplies.value.slice(-5)
-          }
-        }
+      if (!seen) {
+        // Probably won't happen.
+        ret = visiblereplies.value.slice(-5)
       }
-
-      // Suppress replies where the message value is the same as the previous one.
-      let lastMessage = null
-
-      let i = ret.length
-
-      while (i--) {
-        if (!ret[i].message.localeCompare(lastMessage)) {
-          // Remove this from the array
-          ret.splice(i, 1)
-        } else {
-          lastMessage = ret[i].message
-        }
-      }
-
-      return ret
-    })
-
-    return {
-      newsfeedStore,
-      replies,
-      visiblereplies,
-      repliestoshow,
-      showAllReplies,
     }
-  },
-  computed: {
-    showEarlierRepliesOption() {
-      return this.visiblereplies.length > INITIAL_NUMBER_OF_REPLIES_TO_SHOW
-    },
-    numberOfRepliesNotShown() {
-      if (
-        !this.visiblereplies ||
-        this.visiblereplies.length < INITIAL_NUMBER_OF_REPLIES_TO_SHOW
-      ) {
-        return null
-      }
+  }
 
-      return pluralize(
-        'reply',
-        this.visiblereplies.length - INITIAL_NUMBER_OF_REPLIES_TO_SHOW,
-        true
-      )
-    },
-  },
-  methods: {
-    rendered(id) {
-      this.$emit('rendered', id)
-    },
-  },
+  // Suppress replies where the message value is the same as the previous one.
+  let lastMessage = null
+
+  let i = ret.length
+
+  while (i--) {
+    if (!ret[i].message.localeCompare(lastMessage)) {
+      // Remove this from the array
+      ret.splice(i, 1)
+    } else {
+      lastMessage = ret[i].message
+    }
+  }
+
+  return ret
+})
+
+const showEarlierRepliesOption = computed(() => {
+  return visiblereplies.value.length > INITIAL_NUMBER_OF_REPLIES_TO_SHOW
+})
+
+const numberOfRepliesNotShown = computed(() => {
+  if (
+    !visiblereplies.value ||
+    visiblereplies.value.length < INITIAL_NUMBER_OF_REPLIES_TO_SHOW
+  ) {
+    return null
+  }
+
+  return pluralize(
+    'reply',
+    visiblereplies.value.length - INITIAL_NUMBER_OF_REPLIES_TO_SHOW,
+    true
+  )
+})
+
+function rendered(id) {
+  emit('rendered', id)
 }
 </script>
 <style lang="scss">

@@ -77,7 +77,7 @@
       <b-row>
         <b-col>
           <b-form-textarea
-            ref="textbody"
+            ref="textbodyRef"
             v-model="edittextbody"
             :placeholder="placeholder"
             rows="8"
@@ -137,8 +137,8 @@
   </b-modal>
 </template>
 
-<script>
-import { ref, toRaw } from 'vue'
+<script setup>
+import { ref, computed, defineAsyncComponent, toRaw } from 'vue'
 import draggable from 'vuedraggable'
 import { useMessageStore } from '../stores/message'
 import { useComposeStore } from '../stores/compose'
@@ -148,174 +148,150 @@ import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostCode from '~/components/PostCode'
 import { useOurModal } from '~/composables/useOurModal'
 import { MESSAGE_EXPIRE_TIME } from '~/constants'
+
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 const PostItem = defineAsyncComponent(() => import('./PostItem'))
 const PostPhoto = defineAsyncComponent(() => import('./PostPhoto'))
 
-export default {
-  components: {
-    draggable,
-    NumberIncrementDecrement,
-    OurUploader,
-    PostCode,
-    PostItem,
-    PostPhoto,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
+})
+
+const emit = defineEmits(['hidden'])
+
+const messageStore = useMessageStore()
+const composeStore = useComposeStore()
+const groupStore = useGroupStore()
+
+const { modal, hide } = useOurModal()
+
+// Message was fetched by parent.
+const message = toRaw(messageStore.byId(props.id))
+const textbody = message.textbody
+const itemName = message.item?.name
+const attachments = ref(message.attachments || [])
+const triedToSave = ref(false)
+const textbodyRef = ref(null)
+const item = ref(null)
+
+const defaultDeadline = new Date(
+  Date.now() + MESSAGE_EXPIRE_TIME * 24 * 60 * 60 * 1000
+)
+  .toISOString()
+  .substring(0, 10)
+
+const today = computed(() => {
+  return new Date(Date.now()).toISOString().substring(0, 10)
+})
+
+const edittextbody = ref(textbody)
+const availablenow = ref(message.availablenow)
+const deadline = ref(
+  message.deadline
+    ? new Date(message.deadline).toISOString().substring(0, 10)
+    : null
+)
+const type = ref(message.type)
+const edititem = ref(itemName)
+const postcode = ref(message.location)
+
+const uniqueId = computed(() => {
+  return uid('posttype-')
+})
+
+const uploadingPhoto = computed(() => {
+  return composeStore?.uploading
+})
+
+const placeholder = computed(() => {
+  return message && type.value === 'Offer'
+    ? "e.g. colour, condition, size, whether it's working etc."
+    : "Explain what you're looking for, and why you'd like it."
+})
+
+const groupid = computed(() => {
+  return message?.groups?.[0]?.groupid
+})
+
+const group = computed(() => {
+  return groupStore?.get(groupid.value)
+})
+
+const typeOptions = computed(() => {
+  return [
+    {
+      value: 'Offer',
+      text: group.value?.settings?.keywords?.offer
+        ? group.value.settings.keywords.offer
+        : 'OFFER',
     },
-  },
-  setup(props) {
-    const messageStore = useMessageStore()
-    const composeStore = useComposeStore()
-    const groupStore = useGroupStore()
-
-    const { modal, hide } = useOurModal()
-
-    // Message was fetched by parent.
-    const message = toRaw(messageStore.byId(props.id))
-    const textbody = message.textbody
-    const item = message.item?.name
-    const attachments = ref(message.attachments)
-
-    if (!attachments.value) {
-      attachments.value = []
-    }
-
-    const defaultDeadline = new Date(
-      Date.now() + MESSAGE_EXPIRE_TIME * 24 * 60 * 60 * 1000
-    )
-      .toISOString()
-      .substring(0, 10)
-
-    const today = computed(() => {
-      return new Date(Date.now()).toISOString().substring(0, 10)
-    })
-
-    return {
-      messageStore,
-      composeStore,
-      groupStore,
-      modal,
-      hide,
-      message,
-      attachments,
-      edittextbody: ref(textbody),
-      availablenow: ref(message.availablenow),
-      deadline: ref(
-        message.deadline
-          ? new Date(message.deadline).toISOString().substring(0, 10)
-          : null
-      ),
-      availableinitially: ref(message.availableinitially),
-      type: ref(message.type),
-      edititem: ref(item),
-      postcode: ref(message.location),
-      defaultDeadline,
-      today,
-    }
-  },
-  data() {
-    return {
-      triedToSave: false,
-    }
-  },
-  computed: {
-    uniqueId() {
-      return uid('posttype-')
+    {
+      value: 'Wanted',
+      text: group.value?.settings?.keywords?.wanted
+        ? group.value.settings.keywords.wanted
+        : 'WANTED',
     },
-    uploadingPhoto() {
-      return this.composeStore?.uploading
-    },
-    placeholder() {
-      return this.message && this.type === 'Offer'
-        ? "e.g. colour, condition, size, whether it's working etc."
-        : "Explain what you're looking for, and why you'd like it."
-    },
-    count() {
-      return this.message ? this.message.availablenow : null
-    },
-    groupid() {
-      return this.message?.groups?.[0]?.groupid
-    },
-    group() {
-      return this.groupStore?.get(this.groupid)
-    },
-    typeOptions() {
-      return [
-        {
-          value: 'Offer',
-          text: this.group?.settings?.keywords?.offer
-            ? this.group.settings.keywords.offer
-            : 'OFFER',
-        },
-        {
-          value: 'Wanted',
-          text: this.group?.settings?.keywords?.wanted
-            ? this.group.settings.keywords.wanted
-            : 'WANTED',
-        },
-      ]
-    },
-    isSaveButtonDisabled() {
-      return !this.edittextbody && !this.attachments?.length
-    },
-  },
-  methods: {
-    async save() {
-      this.triedToSave = true
+  ]
+})
 
-      if (this.edititem && (this.edittextbody || this.attachments?.length)) {
-        const attids = []
+const isSaveButtonDisabled = computed(() => {
+  return !edittextbody.value && !attachments.value?.length
+})
 
-        if (this.attachments?.length) {
-          for (const att of this.attachments) {
-            attids.push(att.id)
-          }
-        }
+async function save() {
+  triedToSave.value = true
 
-        // We change both availablenow and available initially.  Probably the user is correcting a mistake in how
-        // they originally posted.
-        //
-        // Conceivably they are wrongly editing rather than using Mark as TAKEN - but if that's what's happening then
-        // they won't be able to get down as far as 0 available because we have a min value of 1.  That will keep
-        // the post open, and they will hopefully realise their error and use Mark as TAKEN eventually.
-        const params = {
-          id: this.id,
-          msgtype: this.type,
-          item: this.edititem,
-          location: this.postcode?.name,
-          textbody: this.edittextbody,
-          attachments: attids,
-          availablenow: this.availablenow,
-          availableinitially: this.availablenow,
-          deadline:
-            this.deadline && this.deadline > '1970-01-01'
-              ? this.deadline
-              : null,
-        }
+  if (edititem.value && (edittextbody.value || attachments.value?.length)) {
+    const attids = []
 
-        this.$emit('hidden')
-        this.hide()
-        await this.messageStore.patch(params)
+    if (attachments.value?.length) {
+      for (const att of attachments.value) {
+        attids.push(att.id)
       }
-    },
-    removePhoto(id) {
-      this.attachments = this.attachments.filter((item) => {
-        return item.id !== id
-      })
-    },
-    postcodeSelect(pc) {
-      this.postcode = pc
-    },
-    postcodeClear() {
-      this.postcode = null
-    },
-  },
+    }
+
+    // We change both availablenow and available initially.  Probably the user is correcting a mistake in how
+    // they originally posted.
+    //
+    // Conceivably they are wrongly editing rather than using Mark as TAKEN - but if that's what's happening then
+    // they won't be able to get down as far as 0 available because we have a min value of 1.  That will keep
+    // the post open, and they will hopefully realise their error and use Mark as TAKEN eventually.
+    const params = {
+      id: props.id,
+      msgtype: type.value,
+      item: edititem.value,
+      location: postcode.value?.name,
+      textbody: edittextbody.value,
+      attachments: attids,
+      availablenow: availablenow.value,
+      availableinitially: availablenow.value,
+      deadline:
+        deadline.value && deadline.value > '1970-01-01' ? deadline.value : null,
+    }
+
+    emit('hidden')
+    hide()
+    await messageStore.patch(params)
+  }
+}
+
+function removePhoto(id) {
+  attachments.value = attachments.value.filter((item) => {
+    return item.id !== id
+  })
+}
+
+function postcodeSelect(pc) {
+  postcode.value = pc
+}
+
+function postcodeClear() {
+  postcode.value = null
 }
 </script>
 <style scoped lang="scss">

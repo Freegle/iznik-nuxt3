@@ -22,37 +22,30 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )
 
-export default {
-  components: { SupporterInfoModal },
-  props: {
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    hidden: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+defineProps({
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  data() {
-    return {
-      showInfoModal: false,
-    }
+  hidden: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    showModal(e) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.showInfoModal = true
-    },
-  },
+})
+
+const showInfoModal = ref(false)
+
+const showModal = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  showInfoModal.value = true
 }
 </script>
 <style scoped lang="scss">

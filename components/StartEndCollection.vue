@@ -19,77 +19,72 @@
     </b-button>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch } from 'vue'
 import { uid } from '../composables/useId'
-import { ref } from '#imports'
 import StartEndDate from '~/components/StartEndDate'
 
-export default {
-  components: {
-    StartEndDate,
+const props = defineProps({
+  modelValue: {
+    type: Array,
+    required: true,
   },
-  props: {
-    modelValue: {
-      type: Array,
-      required: true,
-    },
-    required: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    maxDurationDays: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    time: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  required: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  setup(props) {
-    const current = ref(props.modelValue)
+  maxDurationDays: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  time: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    if (props.modelValue?.length === 0 && props.required) {
-      current.value = [
-        {
-          uniqueid: uid('date-'),
-          start: null,
-          end: null,
-          past: false,
-        },
-      ]
-    }
+const emit = defineEmits(['update:modelValue'])
 
-    return {
-      current,
-    }
-  },
-  watch: {
-    current(newVal) {
-      console.log('Current coll', newVal)
-      this.$emit('update:modelValue', newVal)
+const current = ref(props.modelValue)
+
+if (props.modelValue?.length === 0 && props.required) {
+  current.value = [
+    {
+      uniqueid: uid('date-'),
+      start: null,
+      end: null,
+      past: false,
     },
-  },
-  methods: {
-    remove(item) {
-      const idx = this.current.indexOf(item)
-      if (idx !== -1) this.current.splice(idx, 1)
-    },
-    add() {
-      this.current.push({
-        uniqueid: uid('date-'),
-        start: null,
-        end: null,
-        starttime: null,
-        endtime: null,
-        past: false,
-      })
-    },
-  },
+  ]
 }
+
+function remove(item) {
+  const idx = current.value.indexOf(item)
+  if (idx !== -1) current.value.splice(idx, 1)
+}
+
+function add() {
+  current.value.push({
+    uniqueid: uid('date-'),
+    start: null,
+    end: null,
+    starttime: null,
+    endtime: null,
+    past: false,
+  })
+}
+
+watch(
+  current,
+  (newVal) => {
+    console.log('Current coll', newVal)
+    emit('update:modelValue', newVal)
+  },
+  { deep: true }
+)
 </script>
 <style scoped lang="scss">
 .inpast {

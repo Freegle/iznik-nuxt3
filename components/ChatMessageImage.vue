@@ -42,7 +42,7 @@
       generator-unable-to-provide-required-alt=""
       :src="chatmessage.image.path"
       @click="zoom = true"
-      @error="brokenImage"
+      @error="imageError"
     />
     <ProfileImage
       v-if="messageIsFromCurrentUser"
@@ -76,7 +76,7 @@
             fluid
             generator-unable-to-provide-required-alt=""
             :src="chatmessage.image.path"
-            @error="brokenImage"
+            @error="imageError"
           />
         </div>
       </template>
@@ -89,26 +89,50 @@
     </b-modal>
   </div>
 </template>
-<script>
-import ChatBase from '~/components/ChatBase'
+<script setup>
+import { ref } from 'vue'
+import { useChatBase } from '../composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
+import OurUploadedImage from '~/components/OurUploadedImage'
 
-export default {
-  components: {
-    ProfileImage,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  emits: ['delete'],
-  data() {
-    return {
-      zoom: false,
-    }
+  id: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    brokenImage(event) {
-      event.target.src = '/placeholder.jpg'
-    },
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+defineEmits(['delete'])
+
+// State
+const zoom = ref(false)
+
+// Use the chat base composable
+const { chatmessage, messageIsFromCurrentUser, chatMessageProfileImage } =
+  useChatBase(props.chatid, props.id, props.pov)
+
+// Methods
+function imageError(event) {
+  event.target.src = '/placeholder.jpg'
 }
 </script>
 <style scoped>

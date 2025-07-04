@@ -4,7 +4,9 @@
     class="mr-2 mb-2 p-2"
     style="font-size: 0.9rem"
   >
-    <small v-if="spamKeyword.type === 'Regex'" class="mr-1 text-muted">REGEX:</small>
+    <small v-if="spamKeyword.type === 'Regex'" class="mr-1 text-muted"
+      >REGEX:</small
+    >
     {{ displayText }}
     <b-button
       size="sm"

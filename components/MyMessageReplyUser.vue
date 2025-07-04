@@ -37,6 +37,9 @@
   </div>
 </template>
 <script setup>
+import { ref, computed } from 'vue'
+import ProfileImage from './ProfileImage'
+import ProfileModal from './ProfileModal'
 import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()

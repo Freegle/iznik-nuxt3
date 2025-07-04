@@ -99,49 +99,42 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '../../composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
-
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
+import { onMounted } from '#imports'
 
-export default {
-  components: {
-    NoticeMessage,
-    PostMessage,
-    WizardProgress,
-  },
-  async setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+// Setup page head
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'WANTED',
-        "Ask people nearby if they have what you're looking for"
-      )
-    )
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'WANTED',
+    "Ask people nearby if they have what you're looking for"
+  )
+)
 
-    return await setup('Wanted')
-  },
-  mounted() {
-    if (this.$gtm?.enabled()) {
-      this.$gtm.trackEvent({
-        event: 'Give an Item',
-        label: 'QxhuCP7av7kZELy618UD',
-      })
-    }
-  },
-  methods: {
-    deleteItem,
-    addItem,
-  },
-}
+// Get composable data
+const { me, ids, messageValid, uploadingPhoto, notblank } = await setup(
+  'Wanted'
+)
+
+// Lifecycle hooks
+onMounted(() => {
+  if (globalThis.$gtm?.enabled()) {
+    globalThis.$gtm.trackEvent({
+      event: 'Give an Item',
+      label: 'QxhuCP7av7kZELy618UD',
+    })
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -164,8 +157,18 @@ export default {
     //mobile browsers.
     min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
 
+    @media (min-height: $mobile-tall) {
+      min-height: calc(100vh - 84px - $sticky-banner-height-mobile-tall - 84px);
+    }
+
     @supports (height: 100dvh) {
       min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
+
+      @media (min-height: $mobile-tall) {
+        min-height: calc(
+          100dvh - 84px - $sticky-banner-height-mobile-tall - 84px
+        );
+      }
     }
 
     display: flex;

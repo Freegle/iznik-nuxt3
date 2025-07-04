@@ -48,11 +48,11 @@
 import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '@/stores/message'
-import me from '~/mixins/me.js'
 import { setupModMessages } from '@/composables/useModMessages'
+import { useMe } from '~/composables/useMe'
 
 export default {
-  mixins: [me],
+  //mixins: [me],
   setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
@@ -60,9 +60,11 @@ export default {
     modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
     modMessages.collection.value = 'Approved'
     // modMessages.workType.value = 'approved'
+    const { me, myGroups } = useMe()
     return {
       messageStore,
       miscStore,
+      me, myGroups,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },

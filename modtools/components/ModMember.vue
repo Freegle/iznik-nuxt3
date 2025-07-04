@@ -284,6 +284,7 @@
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 import { useModConfigStore } from '../stores/modconfig'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -321,7 +322,8 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modConfigStore = useModConfigStore()
-    return { memberStore, modConfigStore, userStore }
+    const { myGroups } = useMe()
+    return { memberStore, modConfigStore, userStore, myGroups }
   },
   data: function () {
     return {

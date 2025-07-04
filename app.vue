@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="'loginCount-' + loginCount">
     <client-only>
       <header>
         <NavbarDesktop />
@@ -49,7 +49,8 @@
                 <div data-v-454188a5="" class="nav-item" no-prefetch="">
                   <button
                     data-v-454188a5=""
-                    class="btn btn-md btn-white mr-2"
+                    class="btn btn-md btn-white mr-2 test-signinbutton"
+                    disabled
                     type="button"
                   >
                     Sign&nbsp;in
@@ -120,7 +121,7 @@ import { useLogoStore } from './stores/logo'
 import { useLocationStore } from './stores/location'
 import { useShortlinkStore } from './stores/shortlinks'
 import { useMiscStore } from './stores/misc'
-import { computed, watch, reloadNuxtApp } from '#imports'
+import { computed } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 import { useConfigStore } from '~/stores/config'
@@ -218,14 +219,15 @@ const loginCount = computed(() => {
   return authStore.loginCount
 })
 
-watch(loginCount, async () => {
-  if (!route.query.k) {
-    await reloadNuxtApp({
-      force: true,
-      persistState: false,
-    })
-  }
-})
+// watch(loginCount, async () => {
+//   if (!route.query.k) {
+//     console.log('loginCount changed - reload')
+//     await reloadNuxtApp({
+//       force: true,
+//       persistState: false,
+//     })
+//   }
+// })
 
 try {
   if (route.query.u && route.query.k) {
@@ -260,6 +262,7 @@ if (process.client) {
 
     window.addEventListener('error', (ev) => {
       if (messages.includes(ev.message)) {
+        console.log('Error, reload')
         ev.preventDefault()
         window.location.reload()
       }

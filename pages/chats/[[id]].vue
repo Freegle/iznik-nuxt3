@@ -572,10 +572,21 @@ async function searchMore() {
   &.stickyAdRendered {
     height: calc(100vh - 58px - $sticky-banner-height-mobile);
 
+    @media (min-height: $mobile-tall) {
+      height: calc(100vh - 58px - $sticky-banner-height-mobile-tall);
+    }
+
     @include media-breakpoint-up(md) {
       height: calc(
         100vh - var(--header-navbar-height) - $sticky-banner-height-desktop
       );
+
+      @media (min-height: $desktop-tall) {
+        height: calc(
+          100vh - var(--header-navbar-height) -
+            $sticky-banner-height-desktop-tall
+        );
+      }
     }
   }
 
@@ -589,10 +600,21 @@ async function searchMore() {
     &.stickyAdRendered {
       height: calc(100dvh - 58px - $sticky-banner-height-mobile);
 
+      @media (min-height: $mobile-tall) {
+        height: calc(100dvh - 58px - $sticky-banner-height-mobile-tall);
+      }
+
       @include media-breakpoint-up(md) {
         height: calc(
           100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop
         );
+
+        @media (min-height: $desktop-tall) {
+          height: calc(
+            100dvh - var(--header-navbar-height) -
+              $sticky-banner-height-desktop-tall
+          );
+        }
       }
     }
   }

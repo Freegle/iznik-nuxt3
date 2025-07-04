@@ -77,6 +77,7 @@ import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
@@ -93,9 +94,11 @@ export default {
     let term = ''
     if ('term' in route.params && route.params.term) term = route.params.term
     modMembers.search.value = term
+    const { myGroups } = useMe()
     return {
       memberStore,
       miscStore,
+      myGroups,
       ...modMembers, // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
     }
   },

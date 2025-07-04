@@ -11,31 +11,26 @@
     />
   </div>
 </template>
-<script>
+<script setup>
 import ExternalDa from '~/components/ExternalDa.vue'
 
-export default {
-  components: {
-    ExternalDa,
+defineProps({
+  showJobOpportunities: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  props: {
-    showJobOpportunities: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    adUnitPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    adDivId: {
-      type: String,
-      required: false,
-      default: null,
-    },
+  adUnitPath: {
+    type: String,
+    required: false,
+    default: null,
   },
-}
+  adDivId: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
@@ -47,10 +42,22 @@ export default {
 .sidebar__wrapper {
   height: calc(100vh - $sticky-banner-height-desktop - $navbar-height - 10px);
 
+  @media (min-height: $desktop-tall) {
+    height: calc(
+      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+    );
+  }
+
   @supports (height: 100dvh) {
     height: calc(
       100dvh - $sticky-banner-height-desktop - $navbar-height - 10px
     );
+
+    @media (min-height: $desktop-tall) {
+      height: calc(
+        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+      );
+    }
   }
 
   display: grid;

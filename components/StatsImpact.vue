@@ -205,96 +205,99 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
 import pluralize from 'pluralize'
+import { computed } from 'vue'
 
-export default {
-  props: {
-    totalWeight: {
-      type: Number,
-      required: true,
-    },
-    totalBenefit: {
-      type: Number,
-      required: true,
-    },
-    totalCO2: {
-      type: Number,
-      required: true,
-    },
-    totalGifts: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    totalMembers: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupCount: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    range: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    start: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    end: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    border: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  totalWeight: {
+    type: Number,
+    required: true,
   },
-  computed: {
-    fullStats() {
-      // Have we been passed a full set of stats or just the first three?
-      return this.totalMembers
-    },
-    scale() {
-      return this.fullStats ? 3 : 4
-    },
-    heading() {
-      return this.fullStats ? 'H5' : 'H2'
-    },
-    totalGiftsPluralised() {
-      return pluralize('GIFT', this.totalGifts, false)
-    },
-    totalMembersPluralised() {
-      return pluralize('MEMBER', this.totalMembers, false)
-    },
-    groupCountPluralised() {
-      return pluralize('GROUP', this.groupCount, false)
-    },
-    groupServePluralised() {
-      return this.groupCount === 1 ? 'SERVES' : 'SERVE'
-    },
+  totalBenefit: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    roundIt(val) {
-      let ret = null
+  totalCO2: {
+    type: Number,
+    required: true,
+  },
+  totalGifts: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  totalMembers: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  groupCount: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  range: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  start: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  end: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  border: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      if (val < 100) {
-        ret = Math.round(val * 10) / 10
-      } else {
-        ret = Math.round(val)
-      }
+const fullStats = computed(() => {
+  // Have we been passed a full set of stats or just the first three?
+  return props.totalMembers
+})
 
-      return ret
-    },
-  },
+const scale = computed(() => {
+  return fullStats.value ? 3 : 4
+})
+
+const heading = computed(() => {
+  return fullStats.value ? 'H5' : 'H2'
+})
+
+const totalGiftsPluralised = computed(() => {
+  return pluralize('GIFT', props.totalGifts, false)
+})
+
+const totalMembersPluralised = computed(() => {
+  return pluralize('MEMBER', props.totalMembers, false)
+})
+
+const groupCountPluralised = computed(() => {
+  return pluralize('GROUP', props.groupCount, false)
+})
+
+const groupServePluralised = computed(() => {
+  return props.groupCount === 1 ? 'SERVES' : 'SERVE'
+})
+
+function roundIt(val) {
+  let ret = null
+
+  if (val < 100) {
+    ret = Math.round(val * 10) / 10
+  } else {
+    ret = Math.round(val)
+  }
+
+  return ret
 }
 </script>
 <style scoped lang="scss">

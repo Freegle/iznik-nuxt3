@@ -13,29 +13,23 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import TermsOfUse from '~/components/TermsOfUse'
 
-export default {
-  components: {
-    TermsOfUse,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+// Setup page head
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Terms of Use',
-        "Our Terms of Use.  They're pleasingly short."
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Terms of Use',
+    "Our Terms of Use.  They're pleasingly short."
+  )
+)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

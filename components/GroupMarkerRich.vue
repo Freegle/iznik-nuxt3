@@ -15,20 +15,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import GroupProfileImage from '~/components/GroupProfileImage'
 
-export default {
-  components: {
-    GroupProfileImage,
+defineProps({
+  group: {
+    type: Object,
+    required: true,
   },
-  props: {
-    group: {
-      type: Object,
-      required: true,
-    },
-  },
-}
+})
 </script>
 <style scoped lang="scss">
 .thick {

@@ -255,7 +255,12 @@
     </div>
     <div v-if="!loggedIn" class="navbar-nav ml-auto">
       <div class="nav-item" no-prefetch>
-        <b-button variant="white" class="mr-2" @click="requestLogin">
+        <b-button
+          variant="white"
+          class="mr-2 test-signinbutton"
+          :disabled="signInDisabled"
+          @click="requestLogin"
+        >
           Sign&nbsp;in
         </b-button>
       </div>
@@ -265,6 +270,7 @@
 </template>
 <script setup>
 import { useNavbar } from '~/composables/useNavbar'
+import { useAuthStore } from '~/stores/auth'
 
 const {
   online,
@@ -291,6 +297,15 @@ const {
   maybeReload,
 } = useNavbar()
 
+console.log('NavbarDesktop mounted, start with signInDisabled')
+const signInDisabled = ref(true)
+
+onMounted(() => {
+  // Keeping the button disabled until hygration has finished helps with Playwright tests.
+  console.log('NavbarDesktop mounted, setting signInDisabled to false')
+  signInDisabled.value = false
+})
+
 const AboutMeModal = defineAsyncComponent(() =>
   import('~/components/AboutMeModal')
 )
@@ -298,6 +313,8 @@ const AboutMeModal = defineAsyncComponent(() =>
 const NotificationOptions = defineAsyncComponent(() =>
   import('~/components/NotificationOptions')
 )
+
+const loggedIn = computed(() => useAuthStore().user !== null)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';

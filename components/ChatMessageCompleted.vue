@@ -2,9 +2,12 @@
   <div>
     <b-row>
       <b-col>
-        <div v-if="chatmessage.userid != myid" class="media">
+        <div v-if="chatmessage?.userid != myid" class="media">
           <div v-if="!refmsg">
-            This chat message refers to a post which has been deleted.
+            This chat message refers to a post (<v-icon
+              icon="hashtag"
+              class="text-muted fa-0-8x"
+            />{{ chatmessage.refmsgid }}) which has been deleted.
           </div>
           <b-card v-else border-variant="info" class="ml-2">
             <b-card-title>
@@ -53,7 +56,10 @@
         </div>
         <div v-else class="media float-end">
           <div v-if="!refmsg">
-            This chat message refers to a post which has been deleted.
+            This chat message refers to a post (<v-icon
+              icon="hashtag"
+              class="text-muted fa-0-8x"
+            />{{ chatmessage.refmsgid }}) which has been deleted.
           </div>
           <b-card v-else border-variant="info">
             <b-card-title>
@@ -104,12 +110,54 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { useChatBase } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
-import ChatBase from '~/components/ChatBase'
+import { useMessageStore } from '~/stores/message'
 
-export default {
-  components: { NoticeMessage },
-  extends: ChatBase,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
+  },
+  id: {
+    type: Number,
+    required: true,
+  },
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+// Use the chat base composable
+const { chatmessage, emessage, refmsg, refmsgid, myid, brokenImage } =
+  useChatBase(props.chatid, props.id, props.pov)
+
+if (refmsgid.value) {
+  useMessageStore().fetch(refmsgid.value)
 }
 </script>
+<style scoped lang="scss">
+.chatMessage {
+  border: 1px solid $color-gray--light;
+  border-radius: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 2px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+</style>

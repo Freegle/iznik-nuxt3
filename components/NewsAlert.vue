@@ -32,7 +32,7 @@
     <div class="mt-2 d-flex flex-wrap justify-content-between">
       <NewsLoveComment
         :newsfeed="newsfeed"
-        @focus-comment="$emit('focus-comment')"
+        @focus-comment="emit('focus-comment')"
       />
       <b-button variant="link" class="d-inline-block" size="sm" @click="share">
         <v-icon icon="share-alt" /> Share
@@ -55,10 +55,15 @@
   </div>
 </template>
 
-<script>
-import NewsBase from '~/components/NewsBase'
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
+import { useNewsfeedStore } from '../stores/newsfeed'
+import { twem } from '~/composables/useTwem'
+import { timeago } from '~/composables/useTimeFormat'
+import { URL_REGEX } from '~/constants'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'
+
 const NewsShareModal = defineAsyncComponent(() =>
   import('~/components/NewsShareModal')
 )
@@ -66,14 +71,59 @@ const NewsPhotoModal = defineAsyncComponent(() =>
   import('~/components/NewsPhotoModal.vue')
 )
 
-export default {
-  components: {
-    NewsShareModal,
-    NewsLoveComment,
-    ProfileImage,
-    NewsPhotoModal,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
+})
+
+const emit = defineEmits(['focus-comment'])
+
+const newsfeedStore = useNewsfeedStore()
+
+// Data properties
+const showNewsPhotoModal = ref(false)
+const showNewsShareModal = ref(false)
+
+// Computed properties
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
+
+const emessage = computed(() => {
+  let ret = newsfeed.value.message ? twem(newsfeed.value.message) : null
+
+  if (ret) {
+    // Remove leading spaces/tabs.
+    let regExp = /^[\t ]+/gm
+    ret = ret.replace(regExp, '')
+
+    // Remove duplicate blank lines.
+    const EOL = ret.match(/\r\n/gm) ? '\r\n' : '\n'
+    regExp = new RegExp('(' + EOL + '){3,}', 'gm')
+    ret = ret.replace(regExp, EOL + EOL)
+  }
+
+  if (newsfeed.value.type === 'Alert') {
+    // Make links clickable.
+    ret = ret.replace(URL_REGEX, '<a href="$1" target="_blank">$1</a>')
+  }
+
+  return ret
+})
+
+const addedago = computed(() => {
+  return timeago(newsfeed.value?.added)
+})
+
+// Methods
+function share() {
+  showNewsShareModal.value = true
+}
+
+function showPhotoModal() {
+  showNewsPhotoModal.value = true
 }
 </script>
 <style scoped lang="scss">

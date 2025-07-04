@@ -104,7 +104,7 @@ export const useSystemConfigStore = defineStore({
       try {
         await api(this.config).config.addSpamKeywordv2({
           word: trimmedWord,
-          type: type,
+          type,
           exclude: '',
           action: 'Review',
         })
@@ -144,7 +144,6 @@ export const useSystemConfigStore = defineStore({
 
     // Helper getters for displaying keywords
     getWorrywordKeywords: (state) => state.worrywords.map((w) => w.keyword),
-    getSpamKeywordWords: (state) =>
-      state.spam_keywords.map((w) => w.word),
+    getSpamKeywordWords: (state) => state.spam_keywords.map((w) => w.word),
   },
 })

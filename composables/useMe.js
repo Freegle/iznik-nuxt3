@@ -1,5 +1,9 @@
+import { computed } from 'vue'
+import cloneDeep from 'lodash.clonedeep'
+import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
 // import { useMiscStore } from './stores/misc'
+import { useTeamStore } from '~/stores/team'
 
 let fetchingPromise = null
 
@@ -66,5 +70,217 @@ export async function fetchMe(hitServer, components) {
         fetchingPromise = null
       })
     }
+  }
+}
+
+export function useMe() {
+  const authStore = useAuthStore()
+  const teamStore = useTeamStore()
+
+  const loginStateKnown = computed(() => {
+    return authStore.loginStateKnown
+  })
+
+  const jwt = computed(() => {
+    return authStore.auth.jwt
+  })
+
+  const realMe = computed(() => {
+    // We have this separate method so that components can override me() and still access the real user if they
+    // need to. This is used by impersonation.
+    try {
+      const me = authStore.user
+      return me?.id ? me : null
+    } catch (e) {
+      console.log('RealME error', e)
+      return null
+    }
+  })
+
+  const me = computed(() => realMe.value)
+
+  const myid = computed(() => me.value?.id)
+
+  const loggedIn = computed(() => me.value !== null)
+
+  const myGroupIds = computed(() => {
+    let ret = []
+
+    if (me.value) {
+      ret = authStore.groups.map((g) => {
+        // Memberships have an id of the membership whereas we want the groups to have the id of the group.
+        return g.groupid
+      })
+    }
+
+    return ret
+  })
+
+  const myGroups = computed(() => {
+    let ret = []
+
+    if (me.value) {
+      ret = authStore.groups.map((g) => {
+        // Memberships have an id of the membership whereas we want the groups to have the id of the group.
+        const g2 = cloneDeep(g)
+        g2.id = g.groupid
+        delete g2.groupid
+        return g2
+      })
+
+      // Sort by namedisplay case insensitive
+      ret.sort((a, b) => {
+        const aName = a.namedisplay.toLowerCase()
+        const bName = b.namedisplay.toLowerCase()
+        return aName < bName ? -1 : aName > bName ? 1 : 0
+      })
+    }
+
+    return ret
+  })
+
+  const anyGroups = computed(() => myGroups.value.length > 0)
+
+  const myLocation = computed(() => me.value?.settings?.mylocation?.name)
+
+  const mod = computed(() => {
+    return (
+      me.value &&
+      (me.value.systemrole === 'Moderator' ||
+        me.value.systemrole === 'Support' ||
+        me.value.systemrole === 'Admin')
+    )
+  })
+
+  const support = computed(() => me.value && me.value.systemrole === 'Support')
+
+  const admin = computed(() => me.value && me.value.systemrole === 'Admin')
+
+  const supportOrAdmin = computed(() => {
+    return (
+      me.value &&
+      (me.value.systemrole === 'Support' || me.value.systemrole === 'Admin')
+    )
+  })
+
+  const chitChatMod = computed(() => {
+    let ret = false
+
+    if (me.value) {
+      if (supportOrAdmin.value) {
+        ret = true
+      } else {
+        const mods = teamStore.getTeam('ChitChat Moderation')
+
+        if (mods) {
+          ret = !!mods.members.find((m) => myid.value === m.id)
+        }
+      }
+    }
+
+    return ret
+  })
+
+  const supporter = computed(() => me.value?.supporter)
+
+  const donor = computed(() => me.value?.donated)
+
+  const recentDonor = computed(() => {
+    const donated = me.value?.donated
+
+    // If donated and within last 31 days
+    return (
+      donated &&
+      new Date(donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+    )
+  })
+
+  const amMicroVolunteering = computed(() => {
+    return (
+      me.value &&
+      (me.value.trustlevel === 'Basic' ||
+        me.value.trustlevel === 'Moderate' ||
+        me.value.trustlevel === 'Advanced')
+    )
+  })
+
+  const myGroupsBoundingBox = computed(() => {
+    let swlat = null
+    let swlng = null
+    let nelat = null
+    let nelng = null
+
+    myGroups.value.forEach((g) => {
+      if (g.bbox) {
+        const wkt = new Wkt.Wkt()
+        try {
+          wkt.read(g.bbox)
+          const obj = wkt.toObject()
+          const thisbounds = obj.getBounds()
+          const sw = thisbounds.getSouthWest()
+          const ne = thisbounds.getNorthEast()
+
+          const bounds = new window.L.LatLngBounds([
+            [sw.lat, sw.lng],
+            [ne.lat, ne.lng],
+          ]).pad(0.1)
+
+          const gswlat = bounds.getSouthWest().lat
+          const gswlng = bounds.getSouthWest().lng
+          const gnelat = bounds.getNorthEast().lat
+          const gnelng = bounds.getNorthEast().lng
+
+          swlat = swlat === null ? gswlat : Math.min(swlat, gswlat)
+          swlng = swlng === null ? gswlng : Math.min(swlng, gswlng)
+          nelat = nelat === null ? gnelat : Math.max(nelat, gnelat)
+          nelng = nelng === null ? gnelng : Math.max(nelng, gnelng)
+        } catch (e) {
+          console.log('WKT error', g.id, g.bbox, g, e)
+        }
+      }
+    })
+
+    return [
+      [swlat, swlng],
+      [nelat, nelng],
+    ]
+  })
+
+  function oneOfMyGroups(groupid) {
+    return myGroups.value.find((g) => {
+      return g.id === groupid
+    })
+  }
+
+  function myGroup(groupid) {
+    return groupid
+      ? myGroups.value.find((g) => parseInt(g.id) === groupid)
+      : null
+  }
+
+  return {
+    fetchMe,
+    loginStateKnown,
+    jwt,
+    me,
+    realMe,
+    myid,
+    loggedIn,
+    myGroupIds,
+    myGroups,
+    anyGroups,
+    myLocation,
+    mod,
+    support,
+    admin,
+    supportOrAdmin,
+    chitChatMod,
+    supporter,
+    donor,
+    recentDonor,
+    amMicroVolunteering,
+    myGroupsBoundingBox,
+    oneOfMyGroups,
+    myGroup,
   }
 }

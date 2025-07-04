@@ -25,67 +25,60 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, onBeforeMount } from 'vue'
 import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import MicroVolunteeringPhotoRotate from './MicroVolunteeringPhotoRotate'
 import SpinButton from './SpinButton'
 
-export default {
-  components: { SpinButton, MicroVolunteeringPhotoRotate },
-  props: {
-    photos: {
-      type: Array,
-      required: true,
-    },
+const props = defineProps({
+  photos: {
+    type: Array,
+    required: true,
   },
-  setup() {
-    const microVolunteeringStore = useMicroVolunteeringStore()
+})
 
-    return {
-      microVolunteeringStore,
-    }
-  },
-  data() {
-    return {
-      currentPhotos: [],
-      bump: 1,
-    }
-  },
-  created() {
-    this.currentPhotos = this.photos
+const emit = defineEmits(['done'])
 
-    this.currentPhotos.forEach((p) => {
-      p.rotate = 0
-    })
-  },
-  methods: {
-    rotate(photo, rotate) {
-      this.currentPhotos.forEach((p, i) => {
-        if (p.id === photo.id) {
-          this.currentPhotos[i].rotate = rotate
-        }
+const microVolunteeringStore = useMicroVolunteeringStore()
+const currentPhotos = ref([])
+const bump = ref(1)
+
+onBeforeMount(() => {
+  // Create a deep copy of the photos array to avoid mutation issues
+  currentPhotos.value = JSON.parse(JSON.stringify(props.photos))
+
+  currentPhotos.value.forEach((p) => {
+    p.rotate = 0
+  })
+})
+
+function rotate(photo, rotate) {
+  currentPhotos.value.forEach((p, i) => {
+    if (p.id === photo.id) {
+      currentPhotos.value[i].rotate = rotate
+    }
+  })
+
+  bump.value++
+}
+
+async function done(callback) {
+  const promises = []
+  for (const p of currentPhotos.value) {
+    promises.push(
+      microVolunteeringStore.respond({
+        photoid: p.id,
+        response: p.rotate === 0 ? 'Approve' : 'Reject',
+        deg: p.rotate,
       })
+    )
+  }
 
-      this.bump++
-    },
-    async done(callback) {
-      const promises = []
-      for (const p of this.currentPhotos) {
-        promises.push(
-          this.microVolunteeringStore.respond({
-            photoid: p.id,
-            response: p.rotate === 0 ? 'Approve' : 'Reject',
-            deg: p.rotate,
-          })
-        )
-      }
+  await Promise.all(promises)
+  callback()
 
-      await Promise.all(promises)
-      callback()
-
-      this.$emit('done')
-    },
-  },
+  emit('done')
 }
 </script>
 <style scoped lang="scss">

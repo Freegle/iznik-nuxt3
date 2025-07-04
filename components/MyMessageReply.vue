@@ -114,15 +114,16 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '../stores/user'
-import { useMessageStore } from '../stores/message'
 import { useChatStore } from '../stores/chat'
+import MyMessageReplyUser from './MyMessageReplyUser'
 import { useRouter } from '#imports'
-import SupporterInfo from '~/components/SupporterInfo'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 import { useMiscStore } from '~/stores/misc'
+import SupporterInfo from '~/components/SupporterInfo'
 
 const UserRatings = defineAsyncComponent(() =>
   import('~/components/UserRatings')
@@ -130,221 +131,216 @@ const UserRatings = defineAsyncComponent(() =>
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 
-export default {
-  components: {
-    SupporterInfo,
-    UserRatings,
-    PromiseModal,
-    RenegeModal,
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-    taken: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    received: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    withdrawn: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    reply: {
-      type: Object,
-      required: true,
-    },
-    chats: {
-      type: Array,
-      required: true,
-    },
-    closest: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    best: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    quickest: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  taken: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  async setup(props) {
-    const userStore = useUserStore()
-    const messageStore = useMessageStore()
-    const chatStore = useChatStore()
-    const miscStore = useMiscStore()
-
-    const promises = []
-
-    promises.push(userStore.fetch(props.reply.userid))
-
-    if (chatStore.list?.length === 0) {
-      // Need to fetch chats
-      promises.push(chatStore.fetchChats)
-    }
-
-    const chat = chatStore.toUser(props.reply.userid)
-
-    if (!chat) {
-      // A chat that isn't fetched in the default chat list - maybe old, maybe closed.  We want to fetch it, but
-      // we don't want to update the roster - otherwise the act of viewing this reply will cause the chat to become
-      // active again.
-      promises.push(
-        chatStore.openChatToUser({
-          userid: props.reply.userid,
-          updateRoster: false,
-        })
-      )
-    }
-
-    await Promise.all(promises)
-
-    return {
-      userStore,
-      messageStore,
-      chatStore,
-      miscStore,
-    }
+  received: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data() {
-    return {
-      showPromiseModal: false,
-      showRenegeModal: false,
-    }
+  withdrawn: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    chat() {
-      return this.chatStore?.toUser(this.reply.userid)
-    },
-    replyuser() {
-      return this.userStore?.byId(this.reply.userid)
-    },
-    replyuserids() {
-      const ret = []
+  reply: {
+    type: Object,
+    required: true,
+  },
+  chats: {
+    type: Array,
+    required: true,
+  },
+  closest: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  best: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  quickest: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      if (this.replyuser) {
-        ret.push(this.replyuser.id)
-      }
+const userStore = useUserStore()
+const chatStore = useChatStore()
+const miscStore = useMiscStore()
+const router = useRouter()
 
-      let chats = this.chatStore?.list ? this.chatStore.list : []
+const showPromiseModal = ref(false)
+const showRenegeModal = ref(false)
 
-      chats = chats.filter((chat) => {
-        if (chat.status === 'Blocked' || chat.status === 'Closed') {
-          return false
-        }
+// Fetch necessary data
+const initialize = async () => {
+  const promises = []
 
-        if (chat.chattype !== 'User2User') {
-          return false
-        }
+  promises.push(userStore.fetch(props.reply.userid))
 
-        return true
+  if (chatStore.list?.length === 0) {
+    // Need to fetch chats
+    promises.push(chatStore.fetchChats)
+  }
+
+  const chat = chatStore.toUser(props.reply.userid)
+
+  if (!chat) {
+    // A chat that isn't fetched in the default chat list - maybe old, maybe closed.  We want to fetch it, but
+    // we don't want to update the roster - otherwise the act of viewing this reply will cause the chat to become
+    // active again.
+    promises.push(
+      chatStore.openChatToUser({
+        userid: props.reply.userid,
+        updateRoster: false,
       })
+    )
+  }
 
-      // Sort by last date.
-      chats.sort((a, b) => {
-        if (a.lastdate && b.lastdate) {
-          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-        } else if (a.lastdate) {
-          return -1
-        } else if (b.lastdate) {
-          return 1
-        } else {
-          return 0
-        }
-      })
+  await Promise.all(promises)
+}
 
-      chats.forEach((chat) => {
-        if (chat.otheruid && chat.otheruid !== this.replyuser?.id) {
-          ret.push(chat.otheruid)
-        }
-      })
+// Initialize on component creation
+initialize()
 
-      return ret
-    },
-    replyusers() {
-      // Get the users in replyuserids from store
-      const ret = []
+const chat = computed(() => {
+  return chatStore?.toUser(props.reply.userid)
+})
 
-      this.replyuserids.forEach((uid) => {
-        const u = this.userStore?.byId(uid)
+const replyuser = computed(() => {
+  return userStore?.byId(props.reply.userid)
+})
 
-        if (u) {
-          ret.push(u)
-        }
-      })
+const replyuserids = computed(() => {
+  const ret = []
 
-      console.log('Reply users', ret)
-      return ret
-    },
-    replyago() {
-      return timeago(this.chat?.lastdate)
-    },
-    replylocale() {
-      return datelocale(this.chat?.lastdate)
-    },
-    unseen() {
-      // See if this reply has unseen messages in the chats.
-      let unseen = 0
+  if (replyuser.value) {
+    ret.push(replyuser.value.id)
+  }
 
-      for (const chat of this.chats) {
-        if (chat.id === this.reply?.chatid) {
-          unseen += chat.unseen
-        }
-      }
+  let chats = chatStore?.list ? chatStore.list : []
 
-      return unseen
-    },
-    promised() {
-      if (this.message?.promisecount && this.message.promises?.length) {
-        for (const promise of this.message.promises) {
-          if (promise.userid === this.reply.userid) {
-            return true
-          }
-        }
-      }
-
+  chats = chats.filter((chat) => {
+    if (chat.status === 'Blocked' || chat.status === 'Closed') {
       return false
-    },
-    buttonSize() {
-      const breakpoint = this.miscStore?.breakpoint
-      return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
-    },
+    }
+
+    if (chat.chattype !== 'User2User') {
+      return false
+    }
+
+    return true
+  })
+
+  // Sort by last date.
+  chats.sort((a, b) => {
+    if (a.lastdate && b.lastdate) {
+      return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+    } else if (a.lastdate) {
+      return -1
+    } else if (b.lastdate) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  chats.forEach((chat) => {
+    if (chat.otheruid && chat.otheruid !== replyuser.value?.id) {
+      ret.push(chat.otheruid)
+    }
+  })
+
+  return ret
+})
+
+const replyusers = computed(() => {
+  // Get the users in replyuserids from store
+  const ret = []
+
+  replyuserids.value.forEach((uid) => {
+    const u = userStore?.byId(uid)
+
+    if (u) {
+      ret.push(u)
+    }
+  })
+
+  console.log('Reply users', ret)
+  return ret
+})
+
+const replyago = computed(() => {
+  return timeago(chat.value?.lastdate)
+})
+
+const replylocale = computed(() => {
+  return datelocale(chat.value?.lastdate)
+})
+
+const unseen = computed(() => {
+  // See if this reply has unseen messages in the chats.
+  let count = 0
+
+  for (const chatItem of props.chats) {
+    if (chatItem.id === props.reply?.chatid) {
+      count += chatItem.unseen
+    }
+  }
+
+  return count
+})
+
+const promised = computed(() => {
+  if (props.message?.promisecount && props.message.promises?.length) {
+    for (const promise of props.message.promises) {
+      if (promise.userid === props.reply.userid) {
+        return true
+      }
+    }
+  }
+
+  return false
+})
+
+const buttonSize = computed(() => {
+  const breakpoint = miscStore?.breakpoint
+  return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
+})
+
+// Ensure users are in store
+watch(
+  replyuserids,
+  (newVal) => {
+    newVal.forEach((uid) => {
+      userStore.fetch(uid)
+    })
   },
-  watch: {
-    replyuserids: {
-      immediate: true,
-      handler(newVal) {
-        newVal.forEach((uid) => {
-          this.userStore.fetch(uid)
-        })
-      },
-    },
-  },
-  methods: {
-    openChat() {
-      const router = useRouter()
-      router.push('/chats/' + this.chat?.id)
-    },
-    promise() {
-      this.showPromiseModal = true
-    },
-    unpromise() {
-      this.showRenegeModal = true
-    },
-  },
+  { immediate: true }
+)
+
+function openChat() {
+  router.push('/chats/' + chat.value?.id)
+}
+
+function promise() {
+  showPromiseModal.value = true
+}
+
+function unpromise() {
+  showRenegeModal.value = true
 }
 </script>
 <style scoped lang="scss">

@@ -51,9 +51,11 @@
     </b-col>
   </b-row>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
+import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
+
 const ExternalLink = defineAsyncComponent(() =>
   import('~/components/ExternalLink')
 )
@@ -61,20 +63,15 @@ const SupportLink = defineAsyncComponent(() =>
   import('~/components/SupportLink')
 )
 
-export default {
-  components: { ExternalLink, SupportLink },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'Our mobile app',
-        'Find out about our mobile app and how to install it.'
-      )
-    )
-  },
-}
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'Our mobile app',
+    'Find out about our mobile app and how to install it.'
+  )
+)
 </script>

@@ -60,11 +60,12 @@
               <span>
                 {{ storydateago }}
                 <span v-if="user?.displayname"> by {{ user.displayname }}</span>
-                <span v-if="userLocation?.display">
+                <span v-if="displayGroupName"> in {{ displayGroupName }} </span>
+                <span v-else-if="userLocation?.display">
                   in {{ userLocation.display }}
                 </span>
-                <span v-else-if="userLocation.groupname">
-                  {{ publicLocation.groupname }}
+                <span v-else-if="userLocation?.groupname">
+                  in {{ userLocation.groupname }}
                 </span>
               </span>
               <nuxt-link
@@ -97,10 +98,12 @@
     <StoryShareModal v-if="showShare" :id="id" @hidden="showShare = false" />
   </div>
 </template>
-<script>
-import { defineAsyncComponent } from 'vue'
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useUserStore } from '../stores/user'
+import { useAuthStore } from '~/stores/auth'
+import { useGroupStore } from '~/stores/group'
 import ReadMore from '~/components/ReadMore'
 import { timeago } from '~/composables/useTimeFormat'
 
@@ -108,55 +111,62 @@ const StoryShareModal = defineAsyncComponent(() =>
   import('~/components/StoryShareModal')
 )
 
-export default {
-  components: {
-    StoryShareModal,
-    ReadMore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+  groupId: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  async setup(props) {
-    const storyStore = useStoryStore()
-    const userStore = useUserStore()
+})
 
-    const story = await storyStore.fetch(props.id)
-    const user = await userStore.fetch(story.userid)
-    const userLocation = await userStore.fetchPublicLocation(story.userid)
+const storyStore = useStoryStore()
+const userStore = useUserStore()
+const authStore = useAuthStore()
+const groupStore = useGroupStore()
+const loggedIn = computed(() => authStore.user !== null)
 
-    return {
-      storyStore,
-      userStore,
-      story,
-      user,
-      userLocation,
-    }
-  },
-  data() {
-    return {
-      showShare: false,
-      showPhotoModal: false,
-    }
-  },
-  computed: {
-    storydateago() {
-      return timeago(this.story.date)
-    },
-  },
-  methods: {
-    share() {
-      this.showShare = true
-    },
-    async love() {
-      await this.storyStore.love(this.id)
-    },
-    async unlove() {
-      await this.storyStore.unlove(this.id)
-    },
-  },
+const showShare = ref(false)
+const showPhotoModal = ref(false)
+
+// Fetch data
+const story = await storyStore.fetch(props.id)
+const user = await userStore.fetch(story.userid)
+const userLocation = await userStore.fetchPublicLocation(story.userid)
+
+// Fetch group data if groupId is provided
+let group = null
+if (props.groupId) {
+  group = await groupStore.fetch(props.groupId)
+}
+
+// Computed properties
+const storydateago = computed(() => {
+  return timeago(story.date)
+})
+
+const displayGroupName = computed(() => {
+  if (props.groupId && group) {
+    return group.namedisplay || group.nameshort
+  }
+
+  return null
+})
+
+// Methods
+function share() {
+  showShare.value = true
+}
+
+async function love() {
+  await storyStore.love(props.id)
+}
+
+async function unlove() {
+  await storyStore.unlove(props.id)
 }
 </script>
 <style scoped>

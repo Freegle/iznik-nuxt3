@@ -176,7 +176,7 @@ export default {
 
       // For spam keywords, the type determines if it's Literal or Regex
       const keywordType = this.patternType === 'regex' ? 'Regex' : 'Literal'
-      
+
       await this.systemConfigStore.addSpamKeyword(trimmedWord, keywordType)
       this.newSpamKeyword = ''
     },

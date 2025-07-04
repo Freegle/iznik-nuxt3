@@ -26,19 +26,16 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  name: 'WizardProgress',
-  props: {
-    activeStage: {
-      type: Number,
-      required: true,
-      validator: (value) => {
-        return value > 0 && value <= 3
-      },
+<script setup>
+defineProps({
+  activeStage: {
+    type: Number,
+    required: true,
+    validator: (value) => {
+      return value > 0 && value <= 3
     },
   },
-}
+})
 </script>
 <style scoped lang="scss">
 .wizard {

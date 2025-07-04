@@ -64,81 +64,74 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
 import { useMessageStore } from '../stores/message'
 import { useUserStore } from '../stores/user'
-import AddToCalendar from '~/components/AddToCalendar'
 import { useMiscStore } from '~/stores/misc'
+import { useMe } from '~/composables/useMe'
+import AddToCalendar from '~/components/AddToCalendar'
+
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 
-export default {
-  components: { PromiseModal, RenegeModal, AddToCalendar },
-  props: {
-    promise: {
-      type: Object,
-      required: true,
-    },
-    id: {
-      type: Number,
-      required: true,
-    },
-    replyusers: {
-      type: Array,
-      required: true,
-    },
+const props = defineProps({
+  promise: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const miscStore = useMiscStore()
-    const messageStore = useMessageStore()
-    const userStore = useUserStore()
+  id: {
+    type: Number,
+    required: true,
+  },
+  replyusers: {
+    type: Array,
+    required: true,
+  },
+})
 
-    return {
-      miscStore,
-      messageStore,
-      userStore,
-    }
-  },
-  data() {
-    return {
-      showPromiseModal: false,
-      showRenegeModal: false,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore?.byId(this.id)
-    },
-    promisee() {
-      return this.promise?.id
-    },
-    promiseeUser() {
-      return this.userStore.byId(this.promisee)
-    },
-    btnSize() {
-      if (this.miscStore.breakpoint === 'xs') {
-        return 'xs'
-      } else {
-        return 'sm'
-      }
-    },
-  },
-  methods: {
-    changeTime(e) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.showPromiseModal = true
-    },
-    unpromise(e) {
-      e.preventDefault()
-      e.stopPropagation()
-      console.log('Renege', this.message, this.promise)
-      this.showRenegeModal = true
-      console.log('Shown')
-    },
-  },
+const miscStore = useMiscStore()
+const messageStore = useMessageStore()
+const userStore = useUserStore()
+const { myid } = useMe()
+
+const showPromiseModal = ref(false)
+const showRenegeModal = ref(false)
+
+const message = computed(() => {
+  return messageStore?.byId(props.id)
+})
+
+const promisee = computed(() => {
+  return props.promise?.id
+})
+
+const promiseeUser = computed(() => {
+  return userStore.byId(promisee.value)
+})
+
+const btnSize = computed(() => {
+  if (miscStore.breakpoint === 'xs') {
+    return 'xs'
+  } else {
+    return 'sm'
+  }
+})
+
+function changeTime(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  showPromiseModal.value = true
+}
+
+function unpromise(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  console.log('Renege', message.value, props.promise)
+  showRenegeModal.value = true
+  console.log('Shown')
 }
 </script>
 <style scoped lang="scss">

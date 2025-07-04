@@ -359,43 +359,31 @@
     </div>
   </client-only>
 </template>
-<script>
+<script setup>
 import { useRoute } from 'vue-router'
 import { useTeamStore } from '../stores/team'
 import { buildHead } from '~/composables/useBuildHead'
 import ProfileImage from '~/components/ProfileImage'
+import { computed } from '#imports'
 
-export default {
-  components: {
-    ProfileImage,
-  },
-  setup() {
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
+const route = useRoute()
 
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'About Us',
-        'What we do, how it works, who we are...all that stuff.'
-      )
-    )
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'About Us',
+    'What we do, how it works, who we are...all that stuff.'
+  )
+)
 
-    const teamStore = useTeamStore()
-    teamStore.fetch('Volunteers')
-    teamStore.fetch('Board')
+const teamStore = useTeamStore()
+teamStore.fetch('Volunteers')
+teamStore.fetch('Board')
 
-    const volunteers = computed(() => teamStore.getTeam('Volunteers')?.members)
-    const board = computed(() => teamStore.getTeam('Board')?.members)
-
-    return {
-      teamStore,
-      volunteers,
-      board,
-    }
-  },
-}
+const volunteers = computed(() => teamStore.getTeam('Volunteers')?.members)
+const board = computed(() => teamStore.getTeam('Board')?.members)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';

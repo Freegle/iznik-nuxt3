@@ -4,6 +4,7 @@
   </b-button>
 </template>
 <script setup>
+import { computed } from 'vue'
 import { useChatStore } from '~/stores/chat'
 
 const chatStore = useChatStore()

@@ -1,7 +1,7 @@
 <template>
   <div>
     <PrivacyUpdate />
-    <div v-if="oxfordshire">
+    <div v-if="relevantGroup">
       <b-card v-if="show">
         <div class="grid">
           <div class="hide">
@@ -16,23 +16,21 @@
             </b-button>
           </div>
           <div class="banner">
-            <b-img
-              lazy
-              alt="Brand The Bus"
-              src="https://images-oxfordbus.passenger-website.com/inline-images/1024x512%20Logos%20only_0.png"
-              style="width: 200px"
-              class="rounded mr-2"
-            />
             <div>
-              <p class="header--size2 mb-0">Please vote for us!</p>
-              <p>Help Freegle get free ads on the side of Oxfordshire buses!</p>
+              <p class="header--size2 mb-0">
+                Quick survey - win a £25 voucher!
+              </p>
+              <p>
+                We're asking freeglers on Wandsworth a few questions. Can you
+                help?
+              </p>
               <b-button
                 variant="primary"
                 size="lg"
-                href="https://forms.office.com/Pages/ResponsePage.aspx?id=G4CaewiZuk6gbSGK0YIk47DitQdE945DlWwLZDtsWnBUNDNNNURMNUxEWVY3WERZMENFN1NZRUxCUSQlQCN0PWcu"
+                href="https://ilovefreegle.org/shortlink/WandsworthSurvey"
                 target="_blank"
               >
-                Click to vote - we're Entry 61
+                Click to open survey
               </b-button>
             </div>
           </div>
@@ -44,89 +42,63 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useMiscStore } from '~/stores/misc'
-import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
 import { useAuthStore } from '~/stores/auth'
+import PrivacyUpdate from '~/components/PrivacyUpdate.vue'
 
-export default {
-  components: { PrivacyUpdate },
-  setup() {
-    const miscStore = useMiscStore()
-    const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const authStore = useAuthStore()
 
-    return { miscStore, authStore }
-  },
-  data: function () {
-    return {
-      thanks: false,
-      warningid: 'hideglobalwarning202503072',
+const warningid = ref('hideglobalwarning20250530')
+
+const relevantGroup = computed(() => {
+  const now = new Date()
+  const active = new Date('2025-06-22')
+
+  if (now >= active) {
+    return false
+  }
+
+  let ret = false
+
+  const groupids = [126719]
+
+  const myGroups = authStore.groups
+
+  myGroups.forEach((g) => {
+    if (groupids.includes(g.groupid)) {
+      // If joined since 2024-09-01
+      if (new Date(g.added).getTime() >= new Date('2024-09-01').getTime()) {
+        ret = true
+      }
     }
-  },
-  computed: {
-    oxfordshire() {
-      // Is the current date before 1st April 2025?
-      const now = new Date()
-      const apr2025 = new Date('2025-04-01')
+  })
 
-      if (now >= apr2025) {
-        return false
-      }
+  return ret
+})
 
-      let ret = false
+const show = computed(() => {
+  return !miscStore?.get(warningid.value)
+})
 
-      const groupids = [
-        21555, 21671, 21579, 21694, 21317, 21464, 21324, 21235, 21256,
-      ]
+const hideIt = (e) => {
+  e.preventDefault()
+  miscStore.set({
+    key: warningid.value,
+    value: true,
+  })
+}
 
-      const myGroups = this.authStore.groups
-
-      myGroups.forEach((g) => {
-        if (groupids.includes(g.groupid)) {
-          ret = true
-        }
-      })
-
-      return ret
-    },
-    show() {
-      return !this.miscStore?.get(this.warningid)
-    },
-    breakpoint() {
-      const store = useMiscStore()
-      return store.breakpoint
-    },
-  },
-  methods: {
-    hideIt(e) {
-      e.preventDefault()
-      this.miscStore.set({
-        key: this.warningid,
-        value: true,
-      })
-    },
-    showit() {
-      this.miscStore.set({
-        key: this.warningid,
-        value: false,
-      })
-    },
-    async pledge() {
-      const authStore = useAuthStore()
-
-      if (authStore.user) {
-        const settings = authStore.user.settings
-        settings.pledge2025 = true
-        await authStore.saveAndGet({
-          settings,
-        })
-
-        this.thanks = true
-      }
-    },
-  },
+const showit = () => {
+  miscStore.set({
+    key: warningid.value,
+    value: false,
+  })
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions.scss';
 @import 'bootstrap/scss/_variables.scss';

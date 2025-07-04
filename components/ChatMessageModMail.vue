@@ -20,14 +20,6 @@
                 </h4>
               </div>
               <h4 v-else>Message from Freegle Volunteers</h4>
-              <div v-if="realMod" class="text-muted small">
-                <div class="small">
-                  (Sent by
-                  <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
-                    chatmessage.userid
-                  }})
-                </div>
-              </div>
             </b-card-title>
             <b-card-text>
               <div :class="emessage ? 'media-body chatMessage' : 'media-body'">
@@ -61,7 +53,7 @@
                 </b-button>
               </div>
               <NoticeMessage
-                v-else-if="!modtools && chat.chattype === 'User2User'"
+                v-else-if="chat.chattype === 'User2User'"
                 variant="warning"
                 class="mt-2"
               >
@@ -90,82 +82,99 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useComposeStore } from '../stores/compose'
-import { fetchReferencedMessage } from '../composables/useChat'
+import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
-import { useMiscStore } from '~/stores/misc'
-import ChatBase from '~/components/ChatBase'
 import ProfileImage from '~/components/ProfileImage'
+import GroupSelect from '~/components/GroupSelect'
 import { useRouter } from '#imports'
 
-export default {
-  components: {
-    NoticeMessage,
-    ProfileImage,
-    ChatButton,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  async setup(props) {
-    const composeStore = useComposeStore()
-
-    await fetchReferencedMessage(props.chatid, props.id)
-
-    return { composeStore }
+  id: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      contactGroupId: null,
-    }
+  last: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    modtools() {
-      const miscStore = useMiscStore()
-      return miscStore.modtools
-    },
-    group() {
-      return this.chat && this.chat.group ? this.chat.group : null
-    },
-    amUser() {
-      return this.chat && this.chat.user && this.chat.user.id === this.myid // NOTTODO: ChatMessageModMail NEVER USED.Needs fixing for MT when viewing others' chat
-    },
-    realMod() {
-      return (
-        this.realMe &&
-        (this.realMe.systemrole === 'Moderator' ||
-          this.realMe.systemrole === 'Support' ||
-          this.realMe.systemrole === 'Admin')
-      )
-    },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  methods: {
-    async repost() {
-      const message = Object.assign({}, this.refmsg)
-
-      if (message) {
-        // Remove any partially composed messages we currently have, because they'll be confusing.
-        await this.composeStore.clearMessages()
-
-        // Add this message to the compose store so that it will show up on the compose page.
-        await this.composeStore.setMessage(
-          0,
-          {
-            type: message.type,
-            item: message.item?.name?.trim(),
-            description: message.textbody.trim(),
-            availablenow: message.availablenow,
-            repostof: this.chatmessage.refmsgid,
-          },
-          this.me
-        )
-
-        this.composeStore.setAttachmentsForMessage(0, message.attachments)
-
-        const router = useRouter()
-        router.push(message.type === 'Offer' ? '/give' : '/find')
-      }
-    },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
+})
+
+// Use the chat base composable
+const { chat, chatmessage, emessage, refmsg, me, myid } = useChatBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
+
+const composeStore = useComposeStore()
+const contactGroupId = ref(null)
+
+// Setup
+await fetchReferencedMessage(props.chatid, props.id)
+
+const group = computed(() => {
+  return chat.value && chat.value.group ? chat.value.group : null
+})
+
+const amUser = computed(() => {
+  return chat.value && chat.value.user && chat.value.user.id === myid
+})
+
+async function repost() {
+  const message = Object.assign({}, refmsg.value)
+
+  if (message) {
+    // Remove any partially composed messages we currently have, because they'll be confusing.
+    await composeStore.clearMessages()
+
+    // Add this message to the compose store so that it will show up on the compose page.
+    await composeStore.setMessage(
+      0,
+      {
+        type: message.type,
+        item: message.item?.name?.trim(),
+        description: message.textbody.trim(),
+        availablenow: message.availablenow,
+        repostof: chatmessage.value.refmsgid,
+      },
+      me.value
+    )
+
+    composeStore.setAttachmentsForMessage(0, message.attachments)
+
+    const router = useRouter()
+    router.push(message.type === 'Offer' ? '/give' : '/find')
+  }
 }
 </script>
+<style scoped lang="scss">
+.chatMessage {
+  border: 1px solid $color-gray--light;
+  border-radius: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 2px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+</style>

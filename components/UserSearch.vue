@@ -13,38 +13,32 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
 import { useSearchStore } from '../stores/search'
 import SpinButton from './SpinButton'
+import { useAuthStore } from '~/stores/auth'
 
-export default {
-  components: { SpinButton },
-  props: {
-    search: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  search: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const searchStore = useSearchStore()
+})
 
-    return {
-      searchStore,
-    }
-  },
-  computed: {
-    searchAgo() {
-      const daysago = dayjs().diff(dayjs(this.search.date), 'day')
-      return pluralize('day', daysago, true) + ' ago'
-    },
-  },
-  methods: {
-    async deleteSearch(callback) {
-      await this.searchStore.delete(this.search.id, this.myid)
-      callback()
-    },
-  },
+const searchStore = useSearchStore()
+const authStore = useAuthStore()
+const myid = computed(() => authStore.user?.id)
+
+const searchAgo = computed(() => {
+  const daysago = dayjs().diff(dayjs(props.search.date), 'day')
+  return pluralize('day', daysago, true) + ' ago'
+})
+
+async function deleteSearch(callback) {
+  await searchStore.delete(props.search.id, myid.value)
+  callback()
 }
 </script>

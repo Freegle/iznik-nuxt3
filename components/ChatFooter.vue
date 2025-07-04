@@ -1,7 +1,7 @@
 <template>
   <div class="cont bg-white">
     <div>
-      <notice-message v-if="!okToChat" variant="info" class="mb-2">
+      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
         This freegler has deleted their account, so you can't chat to them.
       </notice-message>
       <div v-else-if="showNotices && noticesToShow" class="d-flex">
@@ -38,9 +38,8 @@
             talk to them and under no circumstances send them any money. Do not
             arrange anything by courier.
           </notice-message>
-
           <notice-message
-            v-if="faraway && !isMT"
+            v-if="faraway"
             variant="warning"
             class="clickme"
             @click="showInfo"
@@ -59,12 +58,6 @@
               this freegler a thumbs down.
             </p>
           </notice-message>
-          <ModComments
-            v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
-            :user="otheruser"
-            class="mt-1"
-            @editing="editing"
-          />
         </div>
         <b-button
           variant="warning"
@@ -75,7 +68,7 @@
           <v-icon icon="times-circle" scale="1.5" />
         </b-button>
       </div>
-      <div v-if="okToChat">
+      <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
           <OurUploader
             v-model="currentAtts"
@@ -140,7 +133,10 @@
         </Dropdown>
       </div>
     </div>
-    <div v-if="!otheruser?.spammer && okToChat" class="bg-white pt-1 pb-1">
+    <div
+      v-if="!otheruser?.spammer && !otheruser?.deleted"
+      class="bg-white pt-1 pb-1"
+    >
       <div class="d-none d-lg-block">
         <span v-if="chat && chat.chattype === 'User2User' && otheruser">
           <b-button
@@ -179,36 +175,6 @@
               <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
             </b-button>
           </div>
-        </span>
-        <span v-if="chat && chat.chattype === 'User2Mod'">
-          <b-button v-if="mod" variant="secondary" @click="spamReport">
-            <v-icon icon="ban" /> Spammer
-          </b-button>
-          <external-link
-            v-if="chat && chat.chattype === 'User2Mod' && mod"
-            href="https://discourse.ilovefreegle.org/c/central"
-            class="nocolor btn btn-secondary"
-          >
-            <v-icon icon="question-circle" /> Central
-          </external-link>
-          <b-button
-            v-if="chat && chat.chattype === 'User2Mod' && mod"
-            v-b-tooltip.hover.top
-            title="Ask Support for help"
-            variant="secondary"
-            @click="confirmReferToSupport"
-          >
-            <v-icon icon="question-circle" /> Refer to Support
-          </b-button>
-          <b-button
-            v-if="chat && chat.chattype === 'User2Mod' && mod"
-            v-b-tooltip.hover.top
-            title="Add a note for this member, and optionally alert other groups"
-            variant="secondary"
-            @click="addAComment"
-          >
-            <v-icon icon="tag" /> Add note
-          </b-button>
         </span>
         <SpinButton
           size="md"
@@ -366,43 +332,40 @@
       @hidden="showNudgeWarningModal = false"
     />
     <MicroVolunteering v-if="showMicrovolunteering" />
-    <ConfirmModal
-      v-if="showConfirmModal"
-      title="Refer this chat to Support?"
-      message="The Support volunteers will have a look at the chat and get back to you by email."
-      @confirm="referToSupport"
-      @hidden="showConfirmModal = false"
-    />
-    <ModSpammerReport
-      v-if="showSpamModal && modchatuser"
-      ref="spamConfirm"
-      :user="modchatuser"
-      @hidden="showSpamModal = false"
-    />
-    <ModCommentAddModal
-      v-if="addComment && modchatuser"
-      ref="addComment"
-      :user="modchatuser"
-      :groupid="chat.group.id"
-    />
   </div>
 </template>
-<script>
+<script setup>
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  nextTick,
+  defineAsyncComponent,
+} from 'vue'
 import pluralize from 'pluralize'
 import getCaretCoordinates from 'textarea-caret'
 import { Dropdown } from 'floating-vue'
-import { mapWritableState } from 'pinia'
+import { storeToRefs } from 'pinia'
 import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import { setupChat } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
-import { useMessageStore } from '../stores/message'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useAuthStore } from '../stores/auth'
 import { useAddressStore } from '../stores/address'
 import SpinButton from './SpinButton'
-import { useUserStore } from '~/stores/user'
 import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
+import Api from '~/api'
+import { useMe } from '~/composables/useMe'
+
+// Define props
+const props = defineProps({
+  id: { type: Number, required: true },
+})
+
+// Define emits
+const emit = defineEmits(['typing', 'scrollbottom'])
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 const OurUploader = defineAsyncComponent(() =>
@@ -436,558 +399,449 @@ const MicroVolunteering = defineAsyncComponent(() =>
   import('~/components/MicroVolunteering')
 )
 
-export default {
-  components: {
-    SpinButton,
-    NudgeTooSoonWarningModal,
-    NudgeWarningModal,
-    UserRatings,
-    OurUploader,
-    NoticeMessage,
-    PromiseModal,
-    AddressModal,
-    ProfileModal,
-    ChatRSVPModal,
-    MicroVolunteering,
-    Dropdown,
+const { me, myid } = useMe()
+
+// Setup stores
+const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const addressStore = useAddressStore()
+
+// Setup chat data
+const {
+  chat,
+  otheruser,
+  tooSoonToNudge,
+  chatStore,
+  chatmessages,
+  milesaway,
+  milesstring,
+} = await setupChat(props.id)
+
+// Extract writable state from store
+const { lastTyping } = storeToRefs(miscStore)
+
+// Refs (former data properties)
+const sending = ref(false)
+const uploading = ref(false)
+const showMicrovolunteering = ref(false)
+const showNotices = ref(true)
+const showPromise = ref(false)
+const showPromiseMaybe = ref(false)
+const showProfileModal = ref(false)
+const showAddress = ref(false)
+const sendmessage = ref(null)
+const RSVP = ref(false)
+const likelymsg = ref(null)
+const ouroffers = ref([])
+const showNudgeTooSoonWarningModal = ref(false)
+const showNudgeWarningModal = ref(false)
+const hideSuggestedAddress = ref(false)
+const caretPosition = ref({ top: 0, left: 0 })
+const currentAtts = ref([])
+const chatarea = ref(null)
+const rsvp = ref(null)
+
+// Computed properties
+const shrink = computed(() => {
+  return sendmessage.value?.length > 120
+})
+
+const height = computed(() => {
+  // Bootstrap Vue Next doesn't yet have autoresizing.
+  const heightValue = Math.min(6, Math.round(sendmessage.value?.length / 60))
+  return heightValue + 6 + 'rem'
+})
+
+const noticesToShow = computed(() => {
+  return (
+    badratings.value ||
+    expectedreplies.value ||
+    otheruser.value?.spammer ||
+    otheruser.value?.deleted ||
+    thumbsdown.value ||
+    faraway.value
+  )
+})
+
+const faraway = computed(() => {
+  return milesaway.value && milesaway.value > FAR_AWAY
+})
+
+const thumbsdown = computed(() => {
+  return otheruser.value?.info?.ratings?.Mine === 'Down'
+})
+
+const badratings = computed(() => {
+  let ret = false
+
+  if (
+    otheruser.value?.info?.ratings &&
+    otheruser.value.info.ratings.Down > 2 &&
+    otheruser.value.info.ratings.Down * 2 > otheruser.value.info.ratings.Up
+  ) {
+    ret = true
+  }
+
+  return ret
+})
+
+const enterNewLine = computed({
+  get() {
+    return me.value?.settings?.enterNewLine
   },
-  props: {
-    id: { type: Number, required: true },
+  set: async (newVal) => {
+    const settings = me.value.settings
+    settings.enterNewLine = newVal
+
+    await authStore.saveAndGet({
+      settings,
+    })
   },
-  async setup(props) {
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-    const messageStore = useMessageStore()
-    const addressStore = useAddressStore()
-    const userStore = useUserStore()
+})
 
-    const {
-      chat,
-      otheruser,
-      tooSoonToNudge,
-      chatStore,
-      chatmessages,
-      milesaway,
-      milesstring,
-    } = await setupChat(props.id)
+const expectedreplies = computed(() => {
+  if (otheruser.value?.expectedreplies) {
+    pluralize.addIrregularRule('freegler is', 'freeglers are')
+    return pluralize('freegler is', otheruser.value?.expectedreplies, true)
+  }
 
-    // console.log('ChatFooter',chat.value)
+  return null
+})
 
-    const modchatuser = ref(null)
-    if (chat.value.user1id) {
-      await userStore.fetch(chat.value.user1id)
-      modchatuser.value = userStore.byId(chat.value.user1id)
+const possibleAddresses = computed(() => {
+  const seen = {}
+  const ret = []
+
+  Object.values(addressStore.properties).forEach((p) => {
+    if (!seen[p.singleline]) {
+      ret.push(p)
+      seen[p.singleline] = true
     }
+  })
 
-    return {
-      chat,
-      otheruser,
-      tooSoonToNudge,
-      miscStore,
-      chatStore,
-      messageStore,
-      addressStore,
-      chatmessages,
-      authStore,
-      milesaway,
-      milesstring,
-      modchatuser,
+  ret.sort((a, b) => {
+    return a.singleline.localeCompare(b.singleline)
+  })
+
+  return ret
+})
+
+const suggestedAddress = computed(() => {
+  let ret = null
+  let bestMatch = 0
+  let bestAddr = null
+
+  const sendMessageLength = sendmessage.value?.length
+  const possibleAddressesLength = possibleAddresses.value?.length
+  const sendLower = sendmessage.value?.toLowerCase()
+
+  if (sendMessageLength >= 3 && possibleAddressesLength) {
+    // Scan through the possible addresses, looking for the longest prefix of the address which appears as a
+    // suffix of the typed message. This finds when they're typing a possibly matching address.
+    for (let i = 0; i < possibleAddressesLength; i++) {
+      const addr = possibleAddresses.value[i].singleline.toLowerCase()
+
+      for (let j = 1; j <= addr.length; j++) {
+        const prefix = addr.substring(0, j)
+        const suffix = sendLower.substring(sendLower.length - j)
+
+        if (prefix === suffix && prefix.length > bestMatch) {
+          bestMatch = prefix.length
+          bestAddr = possibleAddresses.value[i]
+        }
+      }
     }
-  },
-  data() {
-    return {
-      sending: false,
-      uploading: false,
-      showMicrovolunteering: false,
-      showNotices: true,
-      dontHideNotices: false,
-      showPromise: false,
-      showPromiseMaybe: false,
-      showProfileModal: false,
-      showAddress: false,
-      sendmessage: null,
-      RSVP: false,
-      likelymsg: null,
-      ouroffers: [],
-      showNudgeTooSoonWarningModal: false,
-      showNudgeWarningModal: false,
-      hideSuggestedAddress: false,
-      caretPosition: { top: 0, left: 0 },
-      currentAtts: [],
-      showSpamModal: false,
-      showConfirmModal: false,
-      addComment: false,
+  }
+
+  if (bestMatch >= 3) {
+    ret = {
+      address: bestAddr,
+      matchedLength: bestMatch,
     }
-  },
-  computed: {
-    ...mapWritableState(useMiscStore, ['lastTyping']),
-    okToChat() {
-      if (this.otheruser?.deleted) {
-        return false
-        // if( this.miscStore.modtools){
-        //  if( this.otheruser.forgotten) {
-        //    return false
-        //  }
-        // } else {
-        //  return false
-        // }
-      }
-      return true
-    },
-    isMT() {
-      return this.miscStore.modtools
-    },
-    shrink() {
-      return this.sendmessage?.length > 120
-    },
-    height() {
-      // Bootstrap Vue Next doesn't yet have autoresizing.
-      const height = Math.min(6, Math.round(this.sendmessage?.length / 60))
+  }
 
-      return height + 6 + 'rem'
-    },
-    noticesToShow() {
-      return (
-        this.badratings ||
-        this.expectedreplies ||
-        this.otheruser?.spammer ||
-        this.otheruser?.deleted ||
-        this.thumbsdown ||
-        this.faraway ||
-        (this.miscStore.modtools &&
-          this.otheruser &&
-          this.otheruser.comments &&
-          this.otheruser.comments.length)
-      )
-    },
-    faraway() {
-      return this.milesaway && this.milesaway > FAR_AWAY
-    },
-    thumbsdown() {
-      return this.otheruser?.info?.ratings?.Mine === 'Down'
-    },
-    badratings() {
-      let ret = false
+  return ret
+})
 
-      if (
-        this.otheruser?.info?.ratings &&
-        this.otheruser.info.ratings.Down > 2 &&
-        this.otheruser.info.ratings.Down * 2 > this.otheruser.info.ratings.Up
-      ) {
-        ret = true
-      }
+const showSuggested = computed(() => {
+  return !hideSuggestedAddress.value && suggestedAddress.value !== null
+})
 
-      return ret
-    },
-    enterNewLine: {
-      get() {
-        if (this.miscStore.modtools) {
-          return !this.miscStore?.get('enternewlinemt')
-        }
-        return this.me?.settings?.enterNewLine
-      },
-      async set(newVal) {
-        const settings = this.me.settings
-        settings.enterNewLine = newVal
-
-        await this.authStore.saveAndGet({
-          settings,
-        })
-      },
-    },
-    expectedreplies() {
-      if (this.otheruser?.expectedreplies) {
-        pluralize.addIrregularRule('freegler is', 'freeglers are')
-        return pluralize('freegler is', this.otheruser?.expectedreplies, true)
-      }
-
-      return null
-    },
-    possibleAddresses() {
-      const seen = {}
-      const ret = []
-
-      Object.values(this.addressStore.properties).forEach((p) => {
-        if (!seen[p.singleline]) {
-          ret.push(p)
-          seen[p.singleline] = true
-        }
-      })
-
-      ret.sort((a, b) => {
-        return a.singleline.localeCompare(b.singleline)
-      })
-
-      return ret
-    },
-    suggestedAddress() {
-      let ret = null
-      let bestMatch = 0
-      let bestAddr = null
-
-      const sendMessageLength = this.sendmessage?.length
-      const possibleAddressesLength = this.possibleAddresses?.length
-      const sendLower = this.sendmessage?.toLowerCase()
-
-      if (sendMessageLength >= 3 && possibleAddressesLength) {
-        // Scan through the possible addresses, looking for the longest prefix of the address which appears as a
-        // suffix of the typed message.  This finds when they're typing a possibly matching address.
-        for (let i = 0; i < possibleAddressesLength; i++) {
-          const addr = this.possibleAddresses[i].singleline.toLowerCase()
-
-          for (let j = 1; j <= addr.length; j++) {
-            const prefix = addr.substring(0, j)
-            const suffix = sendLower.substring(sendLower.length - j)
-
-            if (prefix === suffix && prefix.length > bestMatch) {
-              bestMatch = prefix.length
-              bestAddr = this.possibleAddresses[i]
-            }
-          }
-        }
-      }
-
-      if (bestMatch >= 3) {
-        ret = {
-          address: bestAddr,
-          matchedLength: bestMatch,
-        }
-      }
-
-      return ret
-    },
-    showSuggested() {
-      return !this.hideSuggestedAddress && this.suggestedAddress !== null
-    },
-  },
-  watch: {
-    suggestedAddress: {
-      async handler(newVal) {
-        if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
-          this.hideSuggestedAddress = false
-          await this.$nextTick()
-          this.updateCaretPosition()
-        }
-      },
-      deep: true,
-    },
-    sendmessage(newVal, oldVal) {
-      // This will result in the chat header shrinking once you start typing, to give more room, and then
-      // expanding back again if you delete everything.  Only emit the event when the state changes.
-      if ((newVal && !oldVal) || (!newVal && oldVal)) {
-        this.$emit('typing', newVal?.length)
-      }
-    },
-    me: {
-      async handler(newVal, oldVal) {
-        if (newVal?.settings?.mylocation?.id) {
-          // We know our postcode.  This will usually be the case if we've posted.
-          //
-          // Fetch the addresses in that postcode - we can then spot them when people type and suggest
-          // them.
-          await this.addressStore.fetchProperties(
-            newVal?.settings?.mylocation?.id
-          )
-        }
-      },
-      immediate: true,
-    },
-    showSuggested(newVal) {
-      if (newVal) {
-        this.$api.bandit.shown({
-          uid: 'SuggestedAddress',
-          variant: 'chosen',
-        })
-        this.$api.bandit.shown({
-          uid: 'SuggestedAddress',
-          variant: 'cancel',
-        })
-      }
-    },
-    currentAtts: {
-      async handler(newVal) {
-        if (newVal?.length) {
-          this.sending = true
-
-          console.log('Upload photos', JSON.stringify(newVal))
-
-          const promises = []
-
-          newVal.forEach((att) => {
-            console.log('Send', att.id, this.id)
-            promises.push(this.chatStore.send(this.id, null, null, att.id))
-          })
-
-          await Promise.all(promises)
-
-          await this._updateAfterSend()
-          this.sending = false
-          this.uploading = false
-          this.currentAtts = []
-        }
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    setTimeout(() => {
-      if (!this.dontHideNotices) this.showNotices = false
-    }, 30000)
-  },
-  methods: {
-    editing() {
-      this.dontHideNotices = true
-    },
-    updateCaretPosition() {
-      const textarea = this.$refs.chatarea.$el
-      const caretPosition = getCaretCoordinates(textarea, textarea.selectionEnd)
-      const textareaPosition = textarea.getBoundingClientRect()
-      this.caretPosition = {
-        top: caretPosition.top + textareaPosition.top,
-        left: caretPosition.left + textareaPosition.left,
-      }
-    },
-    async applySuggestedAddress() {
-      const matchedLength = this.suggestedAddress.matchedLength
-      const suggestedAddress = this.suggestedAddress.address.singleline
-      // No need to apply suggestion if length of match and address are equal
-      if (matchedLength === suggestedAddress.length) {
-        return
-      }
-      this.sendmessage =
-        this.sendmessage.substring(0, this.sendmessage.length - matchedLength) +
-        this.suggestedAddress.address.singleline +
-        ' '
-      this.hideSuggestedAddress = true
-      await this.$nextTick()
-      const el = this.$refs.chatarea?.$el
-
-      if (el) {
-        setTimeout(() => {
-          // Focus at end of text.
-          el.focus()
-          el.selectionStart = this.sendmessage.length
-        }, 100)
-      }
-    },
-    async markRead() {
-      await this.chatStore.markRead(this.id)
-      this._updateAfterSend()
-    },
-    async _updateAfterSend() {
-      this.sending = false
-
-      // Fetch the messages again to pick up the new one.
-      await this.fetchMessages()
-      this.$emit('scrollbottom')
-
-      // We also want to trigger an update in the chat list.
-      if (this.miscStore.modtools) {
-        await this.chatStore.listChatsMT(false, this.id)
-      } else {
-        await this.chatStore.fetchChat(this.id)
-      }
-    },
-    async doNudge() {
-      await this.chatStore.nudge(this.id)
-      this._updateAfterSend()
-    },
-    nudge() {
-      this.showNudgeWarningModal = true
-    },
-    nudgeTooSoon() {
-      this.showNudgeTooSoonWarningModal = true
-    },
-    newline() {
-      const p = this.$refs.chatarea.selectionStart
-      if (p) {
-        this.sendmessage =
-          this.sendmessage.substring(0, p) +
-          '\n' +
-          this.sendmessage.substring(p)
-        this.$nextTick(() => {
-          this.$refs.chatarea.selectionStart = p + 1
-          this.$refs.chatarea.selectionEnd = p + 1
-        })
-      } else {
-        this.sendmessage += '\n'
-      }
-    },
-    async addressBook() {
-      await this.addressStore.fetch()
-
-      this.showAddress = true
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    promise(date, maybe) {
-      // Show the modal first, as eye candy.
-      this.showPromiseMaybe = !!maybe
-      this.showPromise = !maybe
-
-      this.$nextTick(async () => {
-        this.ouroffers = await fetchOurOffers()
-
-        // Find the last message referenced in this chat, if any.  That's the most likely one you'd want to promise,
-        // so it should be the default.
-        this.likelymsg = 0
-
-        for (const msg of this.chatmessages) {
-          if (msg.type === 'Interested' && msg.refmsgid) {
-            // Check that it's still in our list of messages
-            for (const ours of this.ouroffers) {
-              if (
-                ours.id === msg.refmsgid &&
-                !ours.promised &&
-                (!ours.outcomes || ours.outcomes.length === 0)
-              ) {
-                this.likelymsg = msg.refmsgid
-                this.showPromise = true
-              }
-            }
-          }
-        }
-      })
-    },
-    showInfo() {
-      this.showProfileModal = true
-    },
-    sendOnEnter() {
-      this.send()
-    },
-    async send(callback) {
-      if (!this.sending) {
-        let msg = this.sendmessage
-
-        if (msg) {
-          this.sending = true
-
-          // If the current last message in this chat is an "interested" from the other party, then we're going to ask
-          // if they expect a reply.
-          const RSVP =
-            this.chatmessages.length &&
-            this.chatmessages[this.chatmessages.length - 1].type ===
-              'Interested' &&
-            this.chatmessages[this.chatmessages.length - 1].userid !==
-              this.myid &&
-            this.chat.chattype === 'User2User'
-
-          // Encode up any emojis.
-          msg = untwem(msg)
-
-          // Send it
-          await this.chatStore.send(this.id, msg)
-
-          // Clear the message now it's sent.
-          this.sendmessage = ''
-
-          await this._updateAfterSend()
-
-          if (RSVP) {
-            this.RSVP = true
-          } else {
-            // We've sent a message.  This would be a good time to do some microvolunteering.
-            this.showMicrovolunteering = true
-          }
-        }
-      }
-
-      if (typeof callback === 'function') {
-        // For the send-on-enter case we are passed the native event, whereas for SpinButton we are passed a callback.
-        callback()
-      }
-    },
-    async fetchMessages() {
-      await this.chatStore.fetchMessages(this.id)
-    },
-    async sendAddress(id) {
-      await this.chatStore.send(this.id, null, id)
-      await this._updateAfterSend
-
-      // If we've sent an address to someone who has recently replied to an offer, then it's quite likely that we
-      // are promising the item to them.  Pop up a modified Promise modal to make it easy to do that.
-      this.promise(null, true)
-    },
-    async typing() {
-      const now = new Date().getTime()
-
-      if (!this.lastTyping || now - this.lastTyping > TYPING_TIME_INVERVAL) {
-        // Let the server know that we are typing, no more frequently than every 10 seconds.
-        await this.chatStore.typing(this.id)
-        this.lastTyping = now
-      }
-    },
-    async sendSuggestedAddress() {
-      // We want to send the address.  First we need to make sure it's in our address book.
-      this.$api.bandit.chosen({
-        uid: 'SuggestedAddress',
-        variant: 'chosen',
-      })
-
-      const toSend = JSON.parse(JSON.stringify(this.suggestedAddress.address))
-      const matchLen = this.suggestedAddress.matchedLength
-      await this.addressStore.fetch()
-
-      // Check if it's already in the address book.
-      let found = null
-      for (const addrid in this.addressStore.list) {
-        const addr = this.addressStore.list[addrid]
-
-        if (addr.singleline === toSend.singleline) {
-          found = addr.id
-          break
-        }
-      }
-
-      if (!found) {
-        // It's not in the address book.  Add it.
-        found = await this.addressStore.add({
-          pafid: toSend.id,
-        })
-      }
-
-      if (found) {
-        await this.sendAddress(found)
-      }
-
-      // Remove this.bestAddressMatch characters from the end of the message.
-      this.sendmessage = this.sendmessage.substring(
-        0,
-        this.sendmessage.length - matchLen
-      )
-
-      this.hideSuggestedAddress = true
-      this.$refs.chatarea.focus()
-    },
-    rejectSuggestedAddress() {
-      this.hideSuggestedAddress = true
-
-      this.$api.bandit.chosen({
-        uid: 'SuggestedAddress',
-        variant: 'cancel',
-        message: this.sendmessage,
-      })
-    },
-    spamReport() {
-      this.showSpamModal = true
-      this.$refs.spamConfirm?.show()
-    },
-    referToSupport() {
-      this.$api.chat.referToSupport(this.id)
-    },
-    confirmReferToSupport() {
-      this.showConfirmModal = true
-    },
-    addAComment() {
-      console.log('addAComment')
-      this.addComment = true
-      this.$refs.addComment?.show()
-    },
-  },
+// Methods
+const updateCaretPosition = () => {
+  const textarea = chatarea.value.$el
+  const caretCoords = getCaretCoordinates(textarea, textarea.selectionEnd)
+  const textareaPosition = textarea.getBoundingClientRect()
+  caretPosition.value = {
+    top: caretCoords.top + textareaPosition.top,
+    left: caretCoords.left + textareaPosition.left,
+  }
 }
+
+const applySuggestedAddress = async () => {
+  const matchedLength = suggestedAddress.value.matchedLength
+  const suggestedAddressText = suggestedAddress.value.address.singleline
+  // No need to apply suggestion if length of match and address are equal
+  if (matchedLength === suggestedAddressText.length) {
+    return
+  }
+  sendmessage.value =
+    sendmessage.value.substring(0, sendmessage.value.length - matchedLength) +
+    suggestedAddress.value.address.singleline +
+    ' '
+  hideSuggestedAddress.value = true
+  await nextTick()
+  const el = chatarea.value?.$el
+
+  if (el) {
+    setTimeout(() => {
+      // Focus at end of text.
+      el.focus()
+      el.selectionStart = sendmessage.value.length
+    }, 100)
+  }
+}
+
+const _updateAfterSend = async () => {
+  sending.value = false
+
+  // Fetch the messages again to pick up the new one.
+  await fetchMessages()
+  emit('scrollbottom')
+
+  // We also want to trigger an update in the chat list.
+  await chatStore.fetchChat(props.id)
+}
+
+const markRead = async () => {
+  await chatStore.markRead(props.id)
+  _updateAfterSend()
+}
+
+const doNudge = async () => {
+  await chatStore.nudge(props.id)
+  _updateAfterSend()
+}
+
+const nudge = () => {
+  showNudgeWarningModal.value = true
+}
+
+const nudgeTooSoon = () => {
+  showNudgeTooSoonWarningModal.value = true
+}
+
+const newline = () => {
+  const p = chatarea.value.selectionStart
+  if (p) {
+    sendmessage.value =
+      sendmessage.value.substring(0, p) + '\n' + sendmessage.value.substring(p)
+    nextTick(() => {
+      chatarea.value.selectionStart = p + 1
+      chatarea.value.selectionEnd = p + 1
+    })
+  } else {
+    sendmessage.value += '\n'
+  }
+}
+
+const addressBook = async () => {
+  await addressStore.fetch()
+  showAddress.value = true
+}
+
+const photoAdd = () => {
+  // Flag that we're uploading. This will trigger the render of the filepond instance and subsequently the
+  // processed callback below.
+  uploading.value = true
+}
+
+const promise = (date, maybe) => {
+  // Show the modal first, as eye candy.
+  showPromiseMaybe.value = !!maybe
+  showPromise.value = !maybe
+
+  nextTick(async () => {
+    ouroffers.value = await fetchOurOffers()
+
+    // Find the last message referenced in this chat, if any. That's the most likely one you'd want to promise,
+    // so it should be the default.
+    likelymsg.value = 0
+
+    for (const msg of chatmessages.value) {
+      if (msg.type === 'Interested' && msg.refmsgid) {
+        // Check that it's still in our list of messages
+        for (const ours of ouroffers.value) {
+          if (
+            ours.id === msg.refmsgid &&
+            !ours.promised &&
+            (!ours.outcomes || ours.outcomes.length === 0)
+          ) {
+            likelymsg.value = msg.refmsgid
+            showPromise.value = true
+          }
+        }
+      }
+    }
+  })
+}
+
+const showInfo = () => {
+  showProfileModal.value = true
+}
+
+const sendOnEnter = () => {
+  send()
+}
+
+const send = async (callback) => {
+  if (!sending.value) {
+    let msg = sendmessage.value
+
+    if (msg) {
+      sending.value = true
+
+      // If the current last message in this chat is an "interested" from the other party, then we're going to ask
+      // if they expect a reply.
+      const needRSVP =
+        chatmessages.value.length &&
+        chatmessages.value[chatmessages.value.length - 1].type ===
+          'Interested' &&
+        chatmessages.value[chatmessages.value.length - 1].userid !== myid &&
+        chat.value.chattype === 'User2User'
+
+      // Encode up any emojis.
+      msg = untwem(msg)
+
+      // Send it
+      await chatStore.send(props.id, msg)
+
+      // Clear the message now it's sent.
+      sendmessage.value = ''
+
+      await _updateAfterSend()
+
+      if (needRSVP) {
+        RSVP.value = true
+      } else {
+        // We've sent a message. This would be a good time to do some microvolunteering.
+        showMicrovolunteering.value = true
+      }
+    }
+  }
+
+  if (typeof callback === 'function') {
+    // For the send-on-enter case we are passed the native event, whereas for SpinButton we are passed a callback.
+    callback()
+  }
+}
+
+const fetchMessages = async () => {
+  await chatStore.fetchMessages(props.id)
+}
+
+const sendAddress = async (id) => {
+  await chatStore.send(props.id, null, id)
+  await _updateAfterSend()
+
+  // If we've sent an address to someone who has recently replied to an offer, then it's quite likely that we
+  // are promising the item to them. Pop up a modified Promise modal to make it easy to do that.
+  promise(null, true)
+}
+
+const typing = async () => {
+  const now = new Date().getTime()
+
+  if (!lastTyping.value || now - lastTyping.value > TYPING_TIME_INVERVAL) {
+    // Let the server know that we are typing, no more frequently than every 10 seconds.
+    await chatStore.typing(props.id)
+    lastTyping.value = now
+  }
+}
+
+// Watch for changes
+watch(
+  suggestedAddress,
+  async (newVal) => {
+    if (newVal?.address?.singleline?.length !== newVal?.matchedLength) {
+      hideSuggestedAddress.value = false
+      await nextTick()
+      updateCaretPosition()
+    }
+  },
+  { deep: true }
+)
+
+watch(sendmessage, (newVal, oldVal) => {
+  // This will result in the chat header shrinking once you start typing, to give more room, and then
+  // expanding back again if you delete everything. Only emit the event when the state changes.
+  if ((newVal && !oldVal) || (!newVal && oldVal)) {
+    emit('typing', newVal?.length)
+  }
+})
+
+watch(
+  () => me.value,
+  async (newVal) => {
+    if (newVal?.settings?.mylocation?.id) {
+      // We know our postcode. This will usually be the case if we've posted.
+      //
+      // Fetch the addresses in that postcode - we can then spot them when people type and suggest
+      // them.
+      await addressStore.fetchProperties(newVal?.settings?.mylocation?.id)
+    }
+  },
+  { immediate: true }
+)
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
+
+watch(showSuggested, (newVal) => {
+  if (newVal) {
+    api.bandit.shown({
+      uid: 'SuggestedAddress',
+      variant: 'chosen',
+    })
+    api.bandit.shown({
+      uid: 'SuggestedAddress',
+      variant: 'cancel',
+    })
+  }
+})
+
+watch(
+  currentAtts,
+  async (newVal) => {
+    if (newVal?.length) {
+      sending.value = true
+
+      console.log('Upload photos', JSON.stringify(newVal))
+
+      const promises = []
+
+      newVal.forEach((att) => {
+        console.log('Send', att.id, props.id)
+        promises.push(chatStore.send(props.id, null, null, att.id))
+      })
+
+      await Promise.all(promises)
+
+      await _updateAfterSend()
+      sending.value = false
+      uploading.value = false
+      currentAtts.value = []
+    }
+  },
+  { deep: true }
+)
+
+// Lifecycle hooks
+onMounted(() => {
+  setTimeout(() => {
+    showNotices.value = false
+  }, 30000)
+})
 </script>
 <style scoped lang="scss">
 .mobtext {

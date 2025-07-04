@@ -31,7 +31,7 @@
     >
       <NewsLoveComment
         :newsfeed="newsfeed"
-        @focus-comment="$emit('focus-comment')"
+        @focus-comment="emit('focus-comment')"
       />
       <div>
         <b-button variant="primary" size="sm" @click="showModal">
@@ -54,35 +54,74 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { defineAsyncComponent, ref, computed } from 'vue'
+import { useNewsfeedStore } from '../stores/newsfeed'
+import { twem } from '~/composables/useTwem'
+import { URL_REGEX } from '~/constants'
+import { useMe } from '~/composables/useMe'
 import ReadMore from '~/components/ReadMore'
-import NewsBase from '~/components/NewsBase'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'
+
 const AboutMeModal = defineAsyncComponent(() => import('./AboutMeModal'))
 const NewsPhotoModal = defineAsyncComponent(() =>
   import('./NewsPhotoModal.vue')
 )
 
-export default {
-  components: {
-    AboutMeModal,
-    NewsPhotoModal,
-    NewsUserIntro,
-    NewsLoveComment,
-    ReadMore,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  extends: NewsBase,
-  data() {
-    return {
-      showAboutMeModal: false,
-    }
-  },
-  methods: {
-    async showModal() {
-      await this.fetchMe(true)
-      this.showAboutMeModal = true
-    },
-  },
+})
+
+const emit = defineEmits(['focus-comment'])
+
+const newsfeedStore = useNewsfeedStore()
+const { fetchMe } = useMe()
+
+// Data properties
+const showAboutMeModal = ref(false)
+const showNewsPhotoModal = ref(false)
+
+// Computed properties
+const newsfeed = computed(() => {
+  return newsfeedStore.byId(props.id)
+})
+
+const userid = computed(() => {
+  return newsfeed.value?.userid
+})
+
+const emessage = computed(() => {
+  let ret = newsfeed.value.message ? twem(newsfeed.value.message) : null
+
+  if (ret) {
+    // Remove leading spaces/tabs.
+    let regExp = /^[\t ]+/gm
+    ret = ret.replace(regExp, '')
+
+    // Remove duplicate blank lines.
+    const EOL = ret.match(/\r\n/gm) ? '\r\n' : '\n'
+    regExp = new RegExp('(' + EOL + '){3,}', 'gm')
+    ret = ret.replace(regExp, EOL + EOL)
+  }
+
+  if (newsfeed.value.type === 'Alert') {
+    // Make links clickable.
+    ret = ret.replace(URL_REGEX, '<a href="$1" target="_blank">$1</a>')
+  }
+
+  return ret
+})
+
+function showPhotoModal() {
+  showNewsPhotoModal.value = true
+}
+
+async function showModal() {
+  await fetchMe(['me'], true)
+  showAboutMeModal.value = true
 }
 </script>

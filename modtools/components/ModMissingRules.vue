@@ -58,6 +58,7 @@
 </template>
 <script>
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -68,8 +69,10 @@ export default {
   },
   setup() {
     const modGroupStore = useModGroupStore()
+    const { myGroups } = useMe()
     return {
       modGroupStore,
+      myGroups,
     }
   },
   data: function () {

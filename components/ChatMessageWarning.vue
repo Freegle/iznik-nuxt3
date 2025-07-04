@@ -10,3 +10,7 @@
     </div>
   </div>
 </template>
+
+<script setup>
+// Simple component with no logic
+</script>

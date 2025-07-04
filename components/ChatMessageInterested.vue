@@ -11,9 +11,6 @@
           :chatid="chatid"
           class="mt-1 mb-2"
         />
-        <div v-if="modtools && modtoolsLink">
-          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
-        </div>
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -29,8 +26,8 @@
         </div>
         <div
           v-if="
-            !modtools &&
             refmsg &&
+            refmsg.fromuser === myid &&
             refmsg.type === 'Offer' &&
             (!refmsg.outcomes || !refmsg.outcomes.length)
           "
@@ -115,10 +112,9 @@
               "
               class="font-weight-bold"
             >
-              <!-- MTTODO FIX validator test in Highlighter -->
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmailMT]"
+                :search-words="[regexEmail]"
                 highlight-class-name="highlight"
                 class="prewrap"
               />
@@ -126,7 +122,7 @@
             <span v-else>
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmailMT]"
+                :search-words="[regexEmail]"
                 highlight-class-name="highlight"
                 class="preline forcebreak"
               />
@@ -152,107 +148,110 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { storeToRefs } from 'pinia'
 import Highlighter from 'vue-highlight-words'
+import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
-import { useMiscStore } from '../stores/misc'
-import { setupChat } from '../composables/useChat'
-import ChatBase from '~/components/ChatBase'
+import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-const OutcomeModal = () =>
-  defineAsyncComponent(() => import('~/components/OutcomeModal'))
+import { useUserStore } from '~/stores/user'
+
+const OutcomeModal = defineAsyncComponent(() =>
+  import('~/components/OutcomeModal')
+)
 const PromiseModal = defineAsyncComponent(() =>
   import('~/components/PromiseModal')
 )
 
-export default {
-  components: {
-    ProfileImage,
-    OutcomeModal,
-    PromiseModal,
-    ChatMessageSummary,
-    Highlighter,
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  extends: ChatBase,
-  async setup(props) {
-    const { chat, otheruser, chatmessage } = await setupChat(
-      props.chatid,
-      props.id
-    )
-    return {
-      chat,
-      chatmessage,
-      otheruser,
-    }
+  id: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      showOutcome: false,
-      outcomeType: null,
-      showPromise: false,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    modtools() {
-      return useMiscStore().modtools
-    },
-    modtoolsLink() {
-      if (
-        this.chatmessage.refmsg &&
-        this.chatmessage.refmsg.groups &&
-        this.chatmessage.refmsg.groups.length > 0
-      ) {
-        return (
-          '/messages/approved/' +
-          this.chatmessage.refmsg.groups[0].groupid +
-          '/' +
-          this.chatmessage.refmsg.id +
-          '?noguard=true'
-        )
-      }
-      // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-      if (this.chatmessage.group && this.chatmessage.refmsgid) {
-        return (
-          '/messages/approved/' +
-          this.chatmessage.group.id +
-          '/' +
-          this.chatmessage.refmsgid +
-          '?noguard=true'
-        )
-      }
-      return false
-    },
+  highlightEmails: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    promise(e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
+})
 
-      this.showPromise = true
-    },
-    promised() {
-      // Might have a new chat message to show from promising.
-      this.showPromise = false
-      const chatStore = useChatStore()
-      chatStore.fetchChat(this.chatid)
-    },
-    async outcome(type, e) {
-      if (e) {
-        e.preventDefault()
-        e.stopPropagation()
-      }
+const messageStore = useMessageStore()
+const chatStore = useChatStore()
+const userStore = useUserStore()
+const { myid } = storeToRefs(userStore)
 
-      // Make sure we're up to date.
-      const messageStore = useMessageStore()
-      await messageStore.fetch(this.refmsgid)
+// Data properties
+const showOutcome = ref(false)
+const outcomeType = ref(null)
+const showPromise = ref(false)
 
-      this.showOutcome = true
-      this.outcomeType = type
-    },
-  },
+// Get chat base functionality
+const {
+  chat,
+  chatmessage,
+  emessage,
+  messageIsFromCurrentUser,
+  chatMessageProfileImage,
+  regexEmail,
+  otheruser,
+} = useChatBase(props.chatid, props.id, props.pov)
+
+// Computed properties
+const refmsgid = computed(() => chatmessage.value?.refmsgid)
+const refmsg = computed(() =>
+  refmsgid.value ? messageStore.byId(refmsgid.value) : null
+)
+
+// Methods
+const fetchMessage = async () => {
+  if (refmsgid.value) {
+    await messageStore.fetch(refmsgid.value)
+  }
 }
+
+const promise = (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  showPromise.value = true
+}
+
+const promised = () => {
+  // Might have a new chat message to show from promising.
+  showPromise.value = false
+  chatStore.fetchChat(props.chatid)
+}
+
+const outcome = async (type, e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  // Make sure we're up to date.
+  await messageStore.fetch(refmsgid.value)
+
+  showOutcome.value = true
+  outcomeType.value = type
+}
+
+// On mount
+onMounted(async () => {
+  // Fetch the referenced message
+  await fetchReferencedMessage(props.chatid, props.id)
+})
 </script>

@@ -33,16 +33,15 @@
     </div>
   </b-modal>
 </template>
-
 <script setup>
-import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useOurModal } from '~/composables/useOurModal'
 import PostCode from '~/components/PostCode.vue'
 import SettingsPhone from '~/components/SettingsPhone.vue'
+import { useMe } from '~/composables/useMe'
 
 const authStore = useAuthStore()
-const me = storeToRefs(authStore).user
+const { me } = useMe()
 
 const { modal } = useOurModal()
 

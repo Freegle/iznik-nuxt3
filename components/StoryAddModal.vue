@@ -37,14 +37,14 @@
               }"
               placeholder="What have you given, what have you received, how does it feel, who have you met...?"
             />
-            <h3>Add a photo</h3>
+            <h3>Please add a photo</h3>
           </b-col>
         </b-row>
         <b-row>
           <b-col>
             <p>
-              If you like, you can add a photo. It's nice to see people and what
-              they've freegled. Take a selfie!
+              Photos are option but help make a story more engaging. It's nice
+              to see people and what they've freegled, or just take a selfie!
             </p>
             <b-button
               variant="secondary"
@@ -139,127 +139,121 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, defineAsyncComponent } from 'vue'
 import { useStoryStore } from '../stores/stories'
 import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
 import { useImageStore } from '~/stores/image'
+
 const OurUploader = defineAsyncComponent(() =>
   import('~/components/OurUploader')
 )
 
-export default {
-  components: {
-    NoticeMessage,
-    OurUploader,
-  },
-  props: {},
-  setup() {
-    const storyStore = useStoryStore()
-    const composeStore = useComposeStore()
-    const imageStore = useImageStore()
+// Store instances
+const storyStore = useStoryStore()
+const composeStore = useComposeStore()
+const imageStore = useImageStore()
 
-    const { modal, hide } = useOurModal()
+// Modal control
+const { modal, hide } = useOurModal()
 
-    return {
-      storyStore,
-      composeStore,
-      imageStore,
-      modal,
-      hide,
-    }
-  },
-  data() {
-    return {
-      uploading: false,
-      story: {
-        headline: null,
-        story: null,
-        photo: null,
-      },
-      thankyou: false,
-      currentAtts: [],
-      noHeadline: false,
-      noStory: false,
-    }
-  },
-  computed: {
-    uploadingPhoto() {
-      return this.composeStore?.uploading
-    },
-  },
-  watch: {
-    currentAtts: {
-      handler(newVal) {
-        this.uploading = false
+// Reactive state
+const uploading = ref(false)
+const story = ref({
+  headline: null,
+  story: null,
+  photo: null,
+  image: null,
+})
+const thankyou = ref(false)
+const currentAtts = ref([])
+const noHeadline = ref(false)
+const noStory = ref(false)
 
-        this.story.image = {
-          id: newVal[0].id,
-          imageuid: newVal[0].ouruid,
-          imagemods: newVal[0].externalmods,
-        }
-      },
-      deep: true,
-    },
-  },
-  methods: {
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // processed callback below.
-      this.uploading = true
-    },
-    async rotate(deg) {
-      const curr = this.story?.image?.imagemods?.rotate || 0
-      this.story.image.imagemods.rotate = curr + deg
+// Computed properties
+const uploadingPhoto = computed(() => {
+  return composeStore?.uploading
+})
 
-      // Ensure between 0 and 360
-      this.story.image.imagemods.rotate =
-        (this.story.image.imagemods.rotate + 360) % 360
+// Watchers
+watch(
+  currentAtts,
+  (newVal) => {
+    if (newVal?.length) {
+      uploading.value = false
 
-      await this.imageStore.post({
-        id: this.story.image.id,
-        rotate: this.story.image.imagemods.rotate,
-        bust: Date.now(),
-        story: true,
-      })
-    },
-    rotateLeft() {
-      this.rotate(-90)
-    },
-    rotateRight() {
-      this.rotate(90)
-    },
-    onShow() {
-      this.thankyou = false
-      this.story.headline = null
-      this.story.story = null
-      this.story.image = null
-    },
-    async submit() {
-      this.noHeadline = false
-      this.noStory = false
-
-      if (this.story.headline && this.story.story) {
-        await this.storyStore.add(
-          this.story.headline,
-          this.story.story,
-          this.story.image ? this.story.image.id : null,
-          true
-        )
-
-        this.thankyou = true
-      } else {
-        if (!this.story.headline) {
-          this.noHeadline = true
-        }
-
-        if (!this.story.story) {
-          this.noStory = true
-        }
+      story.value.image = {
+        id: newVal[0].id,
+        imageuid: newVal[0].ouruid,
+        imagemods: newVal[0].externalmods,
       }
-    },
+    }
   },
+  { deep: true }
+)
+
+// Methods
+function photoAdd() {
+  // Flag that we're uploading. This will trigger the render of the filepond instance and subsequently the
+  // processed callback below.
+  uploading.value = true
+}
+
+async function rotate(deg) {
+  const curr = story.value?.image?.imagemods?.rotate || 0
+  story.value.image.imagemods.rotate = curr + deg
+
+  // Ensure between 0 and 360
+  story.value.image.imagemods.rotate =
+    (story.value.image.imagemods.rotate + 360) % 360
+
+  await imageStore.post({
+    id: story.value.image.id,
+    rotate: story.value.image.imagemods.rotate,
+    bust: Date.now(),
+    story: true,
+  })
+}
+
+function rotateLeft() {
+  rotate(-90)
+}
+
+function rotateRight() {
+  rotate(90)
+}
+
+function onShow() {
+  thankyou.value = false
+  story.value.headline = null
+  story.value.story = null
+  story.value.image = null
+}
+
+async function submit() {
+  noHeadline.value = false
+  noStory.value = false
+
+  if (story.value.headline && story.value.story) {
+    await storyStore.add(
+      story.value.headline,
+      story.value.story,
+      story.value.image ? story.value.image.id : null,
+      true
+    )
+
+    thankyou.value = true
+  } else {
+    if (!story.value.headline) {
+      noHeadline.value = true
+    }
+
+    if (!story.value.story) {
+      noStory.value = true
+    }
+  }
 }
 </script>
 <style scoped lang="scss">
