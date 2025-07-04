@@ -65,6 +65,12 @@
             </template>
             <ModSupportCheckVolunteers />
           </b-tab>
+          <b-tab @click="onWorryWordsTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Worry Words</h2>
+            </template>
+            <ModSupportWorryWords ref="worryWordsComponent" />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -142,6 +148,13 @@ export default {
       this.error = false
 
       await this.messageStore.searchMT({ term: subj, groupid: this.groupid })
+    },
+
+    async onWorryWordsTab() {
+      // Fetch worry words when tab is selected
+      if (this.$refs.worryWordsComponent) {
+        await this.$refs.worryWordsComponent.fetchWorryWords()
+      }
     },
   },
 }

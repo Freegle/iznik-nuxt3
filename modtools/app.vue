@@ -51,6 +51,7 @@ import { useStdmsgStore } from './stores/stdmsg'
 import { useModGroupStore } from '@/stores/modgroup'
 import { usePublicityStore } from '@/stores/publicity'
 import { computed, watch, reloadNuxtApp } from '#imports'
+import { useSystemConfigStore } from '~/modtools/stores/systemconfig'
 
 const route = useRoute()
 // const loadingIndicatorThrottle = ref(5000)
@@ -113,6 +114,7 @@ const modGroupStore = useModGroupStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
 const publicityStore = usePublicityStore()
+const systemConfigStore = useSystemConfigStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -154,6 +156,7 @@ modGroupStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
 publicityStore.init(runtimeConfig)
+systemConfigStore.init(runtimeConfig)
 
 miscStore.modtools = true
 

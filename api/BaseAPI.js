@@ -81,7 +81,7 @@ export default class BaseAPI {
             Object.entries(config.params).filter(([_, v]) => v)
           )
         }
-        config.params.modtools = miscStore.modtools // MT ADDED
+        config.params.modtools = miscStore.modtools
 
         // MT ADDED cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
         Object.keys(config.params).forEach((c) => {
@@ -375,7 +375,18 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.params.modtools = miscStore.modtools // MT ADDED
+        if (!config.params) {
+          config.params = {}
+        }
+
+        console.log(
+          'Seet MT in config.params',
+          config,
+          config.params,
+          miscStore.modtools
+        )
+
+        config.params.modtools = miscStore.modtools
         body = JSON.stringify(config.data)
       }
 
