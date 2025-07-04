@@ -27,7 +27,7 @@ export default {
           await navigator.clipboard.writeText(this.value)
         }
       }
-      setTimeout(()=> this.saving = false, 1000)
+      setTimeout(() => (this.saving = false), 1000)
     },
   },
 }
