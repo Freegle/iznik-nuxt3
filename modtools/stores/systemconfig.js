@@ -92,20 +92,21 @@ export const useSystemConfigStore = defineStore({
       }
     },
 
-    async addSpamKeyword(word) {
+    async addSpamKeyword(word, type = 'Literal') {
       if (!word || !word.trim()) return
 
       const trimmedWord = word.trim()
-      // Check if keyword already exists
-      if (this.spam_keywords.some((w) => w.keyword === trimmedWord)) return
+      // Check if word already exists
+      if (this.spam_keywords.some((w) => w.word === trimmedWord)) return
 
       this.loading = true
       this.error = null
       try {
         await api(this.config).config.addSpamKeywordv2({
-          keyword: trimmedWord,
-          type: 'Review',
-          substance: '',
+          word: trimmedWord,
+          type: type,
+          exclude: '',
+          action: 'Review',
         })
 
         await this.fetchSpamKeywords()
@@ -143,7 +144,7 @@ export const useSystemConfigStore = defineStore({
 
     // Helper getters for displaying keywords
     getWorrywordKeywords: (state) => state.worrywords.map((w) => w.keyword),
-    getSpamKeywordKeywords: (state) =>
-      state.spam_keywords.map((w) => w.keyword),
+    getSpamKeywordWords: (state) =>
+      state.spam_keywords.map((w) => w.word),
   },
 })

@@ -71,6 +71,12 @@
             </template>
             <ModSupportWorryWords ref="worryWordsComponent" />
           </b-tab>
+          <b-tab @click="onSpamKeywordsTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Spam Keywords</h2>
+            </template>
+            <ModSupportSpamKeywords ref="spamKeywordsComponent" />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -154,6 +160,13 @@ export default {
       // Fetch worry words when tab is selected
       if (this.$refs.worryWordsComponent) {
         await this.$refs.worryWordsComponent.fetchWorryWords()
+      }
+    },
+
+    async onSpamKeywordsTab() {
+      // Fetch spam keywords when tab is selected
+      if (this.$refs.spamKeywordsComponent) {
+        await this.$refs.spamKeywordsComponent.fetchSpamKeywords()
       }
     },
   },
