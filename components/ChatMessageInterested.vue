@@ -112,9 +112,10 @@
               "
               class="font-weight-bold"
             >
+              <!-- MT TODO FIX validator test in Highlighter -->
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmail]"
+                :search-words="[regexEmailMT]"
                 highlight-class-name="highlight"
                 class="prewrap"
               />
@@ -122,7 +123,7 @@
             <span v-else>
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmail]"
+                :search-words="[regexEmailMT]"
                 highlight-class-name="highlight"
                 class="preline forcebreak"
               />
@@ -204,7 +205,7 @@ const {
   emessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
-  regexEmail,
+  regexEmailMT, // MT
   otheruser,
 } = useChatBase(props.chatid, props.id, props.pov)
 
