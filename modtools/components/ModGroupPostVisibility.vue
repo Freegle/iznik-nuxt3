@@ -90,9 +90,6 @@
 // So: display correct postvisibility polygon but scale is always reset to just group
 import turfbuffer from 'turf-buffer'
 import Wkt from 'wicket'
-import 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { LMap, LTileLayer, LGeoJson } from '@vue-leaflet/vue-leaflet'
 import { attribution, osmtile } from '../composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 

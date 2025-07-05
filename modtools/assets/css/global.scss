@@ -91,23 +91,12 @@ div[variant="success"] .card-header {
   display: block;
 }
 
-.truncate2 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-body.bodyMT{
-  background: #dff2d1;
 }
 
 // We have to go to some effort to style the resize grip.  We can't have it in a scoped style otherwise it won't
@@ -263,6 +252,14 @@ legend {
     height: calc(100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop - $ads-cta);
   }
 
+  @media (min-height: $desktop-tall) {
+    height: calc(100vh - var(--header-navbar-height) - $sticky-banner-height-desktop-tall - $ads-cta);
+
+    @supports (height: 100dvh) {
+      height: calc(100dvh - var(--header-navbar-height) - $sticky-banner-height-desktop-tall - $ads-cta);
+    }
+  }
+
   overflow-y: scroll;
 
   .card-body .card {
@@ -342,8 +339,16 @@ form {
 
   max-height: calc(100% - $sticky-banner-height-mobile) !important;
 
+  @media (min-height: $mobile-tall) {
+    max-height: calc(100% - $sticky-banner-height-mobile-tall) !important;
+  }
+
   @include media-breakpoint-up(md) {
     max-height: calc(100% - $sticky-banner-height-desktop) !important;
+
+    @media (min-height: $desktop-tall) {
+      max-height: calc(100% - $sticky-banner-height-desktop-tall) !important;
+    }
   }
 }
 
@@ -604,38 +609,16 @@ label {
   --header-navbar-height: 76px;
 }
 
-/* Small gap on left of #12345678 */
-svg[data-icon="hashtag"] {
-  margin-left: 0.25rem;
+/* // MT */
+body.bodyMT{
+  background: #dff2d1;
 }
 
-/* Used to make DIV scrollable */
-.scrollinplace {
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: 75vh;
-}
-
-.card-header-tabs {
-  padding: .75rem 0 0 1rem;
-  background-color: rgba(0, 0, 0, .03);
-}
-
-.card-header-tabs .nav-link.active {
-  color: #495057;
-  background-color: #fff;
-}
-
-.card-header-tabs li button {
-  border: 1px solid #d3d3d3 !important;
-}
-
-.card-body {
-  padding: 0 1rem;
-}
-
-.text-muted {
-  fill: #6c757d;
+.truncate2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 /* Missing from _utilities.scss for some reason */

@@ -7,6 +7,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
+import { MT_EMAIL_REGEX } from '~/constants' // MT
 
 export function chatCollate(msgs) {
   const ret = []
@@ -239,6 +240,11 @@ export function useChatBase(chatId, messageId, pov = null) {
     return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
   })
 
+  const regexEmailMT = computed(() => {
+    // MT
+    return MT_EMAIL_REGEX.toString()
+  })
+
   function brokenImage(event) {
     event.target.src = '/defaultprofile.png'
   }
@@ -279,6 +285,7 @@ export function useChatBase(chatId, messageId, pov = null) {
     messageIsFromCurrentUser,
     chatMessageProfileImage,
     regexEmail,
+    regexEmailMT, // MT
     refmsgid,
     refmsg,
     me,

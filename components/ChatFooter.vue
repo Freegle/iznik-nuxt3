@@ -39,7 +39,7 @@
             arrange anything by courier.
           </notice-message>
           <notice-message
-            v-if="faraway"
+            v-if="faraway && !isMT"
             variant="warning"
             class="clickme"
             @click="showInfo"
@@ -440,6 +440,7 @@ const caretPosition = ref({ top: 0, left: 0 })
 const currentAtts = ref([])
 const chatarea = ref(null)
 const rsvp = ref(null)
+const isMT = ref(miscStore.modtools)
 
 // Computed properties
 const shrink = computed(() => {
@@ -487,6 +488,10 @@ const badratings = computed(() => {
 
 const enterNewLine = computed({
   get() {
+    if (miscStore.modtools) {
+      // MT
+      return !miscStore?.get('enternewlinemt')
+    }
     return me.value?.settings?.enterNewLine
   },
   set: async (newVal) => {
