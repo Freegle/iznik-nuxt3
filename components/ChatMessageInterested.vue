@@ -149,7 +149,6 @@
   </div>
 </template>
 <script setup>
-import { storeToRefs } from 'pinia'
 import Highlighter from 'vue-highlight-words'
 import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
@@ -157,7 +156,7 @@ import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-import { useUserStore } from '~/stores/user'
+import { useMe } from '~/composables/useMe'
 
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
@@ -189,8 +188,7 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const chatStore = useChatStore()
-const userStore = useUserStore()
-const { myid } = storeToRefs(userStore)
+const { myid } = useMe()
 
 // Data properties
 const showOutcome = ref(false)
