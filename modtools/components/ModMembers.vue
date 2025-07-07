@@ -7,7 +7,6 @@
     >
       <ModMember
         :member="member"
-        :index="ix"
         :actions="false"
         :expand-comments="parseInt(filter) === 1"
       />

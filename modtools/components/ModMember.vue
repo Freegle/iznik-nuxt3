@@ -4,11 +4,9 @@
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
           <div v-if="isLJ">
-            {{ indexPlusOne }}
             LoveJunk user #{{ user.ljuserid }}
           </div>
-          <div v-else>
-            {{ indexPlusOne }}
+          <div v-else-if="email">
             <!-- eslint-disable-next-line -->
             <ModClipboard class="mr-1" :value="email" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
@@ -292,11 +290,6 @@ export default {
       type: Object,
       required: true,
     },
-    index: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
     spammerlist: {
       type: Boolean,
       required: false,
@@ -340,10 +333,6 @@ export default {
     }
   },
   computed: {
-    indexPlusOne() {
-      if (typeof this.index === 'undefined') return ''
-      return this.index + 1 + ': '
-    },
     email() {
       // Depending on which context we're used it, we might or might not have an email returned.
       let ret = this.member.email
