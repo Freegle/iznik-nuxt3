@@ -50,7 +50,10 @@
         </notice-message>
         <div v-if="simpleSettings && !showAdvanced">
           <b-form-group label="Choose your email level:">
-            <b-form-select v-model="simpleEmailSettingLocal">
+            <b-form-select
+              v-model="simpleEmailSettingLocal"
+              class="simpleEmailSelect"
+            >
               <b-form-select-option value="None"> Off </b-form-select-option>
               <b-form-select-option value="Basic">
                 Basic - limited emails
@@ -129,7 +132,7 @@
               </b-card>
             </div>
             <hr />
-            <p>
+            <p class="test-other-replies">
               Mail me replies from other freeglers about my OFFERs and WANTEDs.
             </p>
             <OurToggle

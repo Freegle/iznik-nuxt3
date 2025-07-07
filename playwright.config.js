@@ -8,13 +8,16 @@ module.exports = defineConfig({
   workers: 1,
   reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
   timeout: 240_000,
+  outputDir: 'test-results',
+  // Force video directory
+  videoDir: 'test-results/videos',
   use: {
     baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     viewport: { width: 1920, height: 1080 },
-    trace: 'on-first-retry',
+    trace: 'on',
     screenshot: 'only-on-failure',
-    video: 'retry-with-video',
+    video: 'on',
   },
 
   env: {
@@ -29,6 +32,7 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1920, height: 1080 },
+        video: 'on',
       },
     },
   ],
