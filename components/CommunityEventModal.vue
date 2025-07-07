@@ -411,6 +411,7 @@ import { useImageStore } from '../stores/image'
 import EmailValidator from './EmailValidator'
 import { twem } from '~/composables/useTwem'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 // Define validation rules
 defineRule('required', required)
@@ -479,6 +480,8 @@ const image = ref(null)
 // Modal handling
 const { modal, hide } = useOurModal()
 
+const { supportOrAdmin } = useMe()
+
 // Helper function to create initial event
 function initialEvent() {
   return {
@@ -536,7 +539,7 @@ const event = computed(() => {
 })
 
 const canmodify = computed(() => {
-  return event.value?.userid === authStore.user?.id
+  return event.value?.userid === authStore.user?.id || supportOrAdmin
 })
 
 const groups = computed(() => {
@@ -767,6 +770,24 @@ watch(
     desc = desc.trim()
 
     description.value = desc
+  },
+  { immediate: true }
+)
+
+// Populate currentAtts when editing an existing community event
+watch(
+  () => editing.value,
+  (newVal) => {
+    if (newVal && event.value?.image) {
+      // Populate currentAtts with existing image data for the uploader
+      currentAtts.value = [
+        {
+          id: event.value.image.id,
+          ouruid: event.value.image.ouruid || event.value.image.imageuid,
+          externalmods: event.value.image.imagemods || {},
+        },
+      ]
+    }
   },
   { immediate: true }
 )
