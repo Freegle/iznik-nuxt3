@@ -179,7 +179,7 @@ function visibilityChanged(visible) {
 
     if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) {
       // Give up in iOS app
-      console.error('Running in iOS with no cookies or served ads')
+      console.log('Running in iOS with no cookies or served ads')
       const me = useAuthStore().user
       const recentDonor =
         me &&
