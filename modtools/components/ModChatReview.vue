@@ -2,9 +2,6 @@
   <div>
     <b-card no-body>
       <b-card-header>
-        <div v-if="!message.group">
-          MESSAGE HAS NO GROUP - SO HAS BEEN REMOVED EG AS SPAMMER.
-        </div>
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
