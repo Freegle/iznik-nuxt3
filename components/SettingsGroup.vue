@@ -62,6 +62,12 @@ import OurToggle from '~/components/OurToggle'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
+  membershipMT: {
+    // MT and do not set groupid
+    type: Object,
+    required: false,
+    default: null,
+  },
   emailfrequency: {
     type: Number,
     required: false,
@@ -107,6 +113,7 @@ const myid = computed(() => authStore.user?.id)
 
 const membership = computed(() => {
   let ret = null
+  if (props.membershipMT) return props.membershipMT // MT
 
   if (myGroups.value) {
     myGroups.value.forEach((g) => {

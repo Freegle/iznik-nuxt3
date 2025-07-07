@@ -83,15 +83,14 @@
         <div class="d-flex justify-content-between flex-wrap">
           <SettingsGroup
             v-if="groupid && member.ourpostingstatus"
-            :groupid="groupid"
             :emailfrequency="member.emailfrequency"
-            :membership-m-t="member"
-            :volunteeringallowed="Boolean(member.volunteeringallowed)"
-            :eventsallowed="Boolean(member.eventsallowed)"
+            :membershipMT="member"
             :moderation="member.ourpostingstatus"
             :userid="member.userid"
             class="border border-info p-1 flex-grow-1 mr-1"
-            @change="settingsChange"
+            @update:emailfrequency="settingsChange('emailfrequency',groupid,$event)"
+            @update:eventsallowed="settingsChange('eventsallowed',groupid,$event)"
+            @update:volunteeringallowed="settingsChange('volunteeringallowed',groupid,$event)"
           />
           <div>
             <ModMemberSummary :member="member" />
@@ -460,12 +459,12 @@ export default {
       this.showLogsModal = true
       this.$refs.logs?.show()
     },
-    settingsChange(e) {
+    settingsChange(param,groupid,val) {
       const params = {
         userid: this.member.userid,
-        groupid: e.groupid,
+        groupid,
       }
-      params[e.param] = e.val
+      params[param] = val
       this.memberStore.update(params)
     },
     async changeNotification(e, type) {

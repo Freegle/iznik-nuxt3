@@ -26,7 +26,7 @@
           <span v-if="messageIsNew" class="font-weight-bold">
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmail]"
+              :search-words="[regexEmailMT]"
               highlight-class-name="highlight"
               class="prewrap"
             />
@@ -34,7 +34,7 @@
           <span v-else>
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmail]"
+              :search-words="[regexEmailMT]"
               highlight-class-name="highlight"
               class="preline forcebreak"
             />
@@ -112,7 +112,7 @@ const {
   emessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
-  regexEmail,
+  regexEmailMT, // MT
 } = useChatBase(props.chatid, props.id, props.pov)
 
 // Data properties
@@ -123,7 +123,7 @@ const isMT = ref(miscStore.modtools) // MT
 
 // Computed properties
 const emessageMThasTNlinks = computed(() => {
-  return emessage.includes('https://trashnothing.com/fd/')
+  return emessage.value.includes('https://trashnothing.com/fd/')
 })
 const emessageMTTN = computed(() => {
   let ret = emessage
