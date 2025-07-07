@@ -237,6 +237,7 @@
               class="bg-white"
               type="Volunteering"
             />
+            volunteering.description {{ volunteering.description }}
 
             <b-form-group
               ref="volunteering__description"
@@ -440,6 +441,7 @@ import { useComposeStore } from '../stores/compose'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '../stores/group'
 import EmailValidator from './EmailValidator'
+import { useMiscStore } from '~/stores/misc' // MT
 import { useAuthStore } from '~/stores/auth'
 import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
@@ -743,7 +745,12 @@ async function saveIt(callback) {
 
     await volunteeringStore.save(wip)
 
-    added.value = true
+    const miscStore = useMiscStore() // MT..
+    if (miscStore.modtools) {
+      this.hide()
+    } else {
+      added.value = true
+    }
   } else {
     // This is an add.  First create it to get the id.
     const dates = volunteering.value.dates

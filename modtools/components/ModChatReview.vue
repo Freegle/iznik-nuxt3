@@ -267,7 +267,7 @@ export default {
       if (this.message && this.message.reviewreason) {
         switch (this.message.reviewreason) {
           case 'Last': {
-            ret = 'Earlier message is held for review, so this one is too.'
+            ret = 'Earlier message was held for review, so this one is too.'
             break
           }
           case 'Force': {

@@ -67,7 +67,7 @@
           icon="pause"
           reviewhold
           :reviewgroupid="groupid"
-          label="Hold!"
+          label="Hold"
           class="mr-2"
           @pressed="forcerefresh"
         />
