@@ -31,13 +31,48 @@
           #{{ message.id }}
         </b-button>
       </client-only>
+      <span v-if="modinfo">
+        via {{ source }},
+        <span v-if="message.fromip">
+          from IP
+          <span v-if="message.fromip.length > 16">
+            hash {{ message.fromip }}
+          </span>
+          <span v-else> address {{ message.fromip }} </span>
+          <span v-if="message.fromcountry">
+            in
+            <span
+              :class="
+                message.fromcountry === 'United Kingdom' ? '' : 'text-danger'
+              "
+              >{{ message.fromcountry }}.</span
+            >
+          </span>
+        </span>
+        <span v-else> IP unavailable. </span>
+      </span>
       <div v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
       </div>
     </div>
+    <div
+      v-if="
+        modinfo &&
+        message.postings &&
+        message.postings.length &&
+        message.postings[0].date !== message.date
+      "
+      class="small"
+    >
+      <span v-if="!today">
+        First posted on {{ message.postings[0].namedisplay }} on
+        {{ datetime(message.postings[0].date) }}
+      </span>
+    </div>
   </div>
 </template>
 <script setup>
+import dayjs from 'dayjs' // MT
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
@@ -54,6 +89,17 @@ const props = defineProps({
     required: true,
   },
   summary: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  displayMessageLink: {
+    // MT
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  modinfo: {
     type: Boolean,
     required: false,
     default: false,
@@ -86,7 +132,10 @@ if (
     // Might fail, e.g. network, but we don't much mind if it does - we'd just not show the approving mod.
     for (const group of currentMessage.groups) {
       if (group?.approvedby) {
-        userStore.fetch(group.approvedby)
+        const approver = Number.isInteger(group.approvedby) // MT
+          ? group.approvedby
+          : group.approvedby.id
+        userStore.fetch(approver)
       }
     }
   }
@@ -138,6 +187,28 @@ const groups = computed(() => {
 
 const grouparrivalago = computed(() => {
   return timeago(message.value?.groups[0]?.arrival, true)
+})
+
+const today = computed(() => {
+  // MT
+  return dayjs(message.value.date).isSame(dayjs(), 'day')
+})
+
+const source = computed(() => {
+  // MT
+  if (
+    message.value.source === 'Email' &&
+    message.value.fromaddr &&
+    message.value.fromaddr.includes('trashnothing.com')
+  ) {
+    return 'TrashNothing'
+  } else if (message.value.sourceheader === 'Freegle App') {
+    return 'Freegle Mobile App'
+  } else if (message.value.source === 'Platform') {
+    return 'Freegle website'
+  } else {
+    return message.value.source
+  }
 })
 </script>
 <style scoped lang="scss">
