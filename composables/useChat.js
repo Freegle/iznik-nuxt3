@@ -192,17 +192,24 @@ export function useChatBase(chatId, messageId, pov = null) {
   const messageIsFromCurrentUser = computed(() => {
     if (chat.value?.chattype === 'User2Mod') {
       // For User2Mod chats we want it on the right hand side we sent it.
-      return chatmessage.value?.userid === myid
+      if (chat.value.user1id) {
+        // MT..
+        return chat.value.user1id !== chatmessage.value?.userid
+      } else {
+        return chatmessage.value?.userid === myid
+      }
     } else {
       return chatmessage.value?.userid === myid
     }
   })
 
   const refmsgid = computed(() => {
+    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg.id // MT
     return chatmessage.value?.refmsgid
   })
 
   const refmsg = computed(() => {
+    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg // MT
     return refmsgid.value ? messageStore?.byId(refmsgid.value) : null
   })
 
