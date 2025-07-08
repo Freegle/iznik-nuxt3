@@ -170,7 +170,7 @@
                   v-if="message.source === 'Email'"
                   variant="white"
                   class="mt-2"
-                  @click="viewSource"
+                  @click="showEmailSourceModal = true"
                 >
                   <v-icon icon="book-open" /><span class="d-none d-sm-inline">
                     View Email Source</span
@@ -592,7 +592,6 @@
     <ModMessageEmailModal
       v-if="showEmailSourceModal && message.source === 'Email'"
       :id="message.id"
-      ref="original"
       @hidden="showEmailSourceModal = false"
     />
     <ModSpammerReport
@@ -1096,10 +1095,6 @@ export default {
         // Get the user into the store for SettingsGroup.
         await this.userStore.fetch(this.message.fromuser.id)
       }
-    },
-    viewSource() {
-      this.showEmailSourceModal = true
-      this.$refs.original?.show()
     },
     canonSubj(message) {
       let subj = message.subject

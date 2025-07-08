@@ -28,7 +28,7 @@
         :title="
           'Received by email #' + chatmessage?.bymailid + ' click to view'
         "
-        @click="viewOriginal"
+        @click="showOriginal = true"
       >
         <v-icon icon="info-circle" /> View original email
       </span>
@@ -81,6 +81,16 @@
       <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
         timeadapt(chatmessage?.date)
       }}</span>
+      <span
+        v-if="mod && chatmessage?.bymailid"
+        class="btn btn-sm btn-white mb-2 clickme"
+        :title="
+          'Received by email #' + chatmessage?.bymailid + ' click to view'
+        "
+        @click="showOriginal = true"
+      >
+        <v-icon icon="info-circle" /> View original email
+      </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
@@ -89,6 +99,11 @@
         RSVP - reply requested
       </b-badge>
     </div>
+    <ModMessageEmailModal
+      v-if="showOriginal"
+      :id="chatmessage?.bymailid"
+      @hidden="showOriginal = false"
+    />
   </div>
 </template>
 <script setup>
@@ -131,6 +146,7 @@ const { chat, otheruser, chatmessage, messageIsFromCurrentUser } = useChatBase(
 
 // Data properties
 const chatMessageUser = ref(null)
+const showOriginal = ref(false)
 
 // Computed properties
 const othermodname = computed(() => {

@@ -28,7 +28,7 @@
             v-if="message.bymailid"
             size="lg"
             variant="white"
-            @click="viewOriginal"
+            @click="showOriginal = true"
           >
             <v-icon icon="info-circle" /> View original email
           </b-button>
@@ -215,11 +215,7 @@
       :chatid="message.chatid"
       @hidden="showModChatNoteModal = false"
     />
-    <ModMessageEmailModal
-      v-if="showOriginal"
-      :id="message.bymailid"
-      ref="original"
-    />
+    <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" @hidden="showOriginal = false"/>
   </div>
 </template>
 <script>
@@ -430,10 +426,6 @@ export default {
       await this.$api.chat.sendMT({ id: this.message.id, action: 'Redact' })
       this.$emit('reload')
       callback()
-    },
-    viewOriginal() {
-      this.showOriginal = true
-      this.$refs.original?.show()
     },
   },
 }
