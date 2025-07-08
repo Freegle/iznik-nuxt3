@@ -74,7 +74,7 @@
           <span :title="datetime(member.bandate)">{{
             timeago(member.bandate)
           }}</span>
-          <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check
+          <span v-if="member.bannedby"> by #{{ member.bannedby }}</span> - check
           logs for info.
           <b-button variant="link" size="sm" @click="confirmUnban(member)">
             Unban

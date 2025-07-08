@@ -50,7 +50,7 @@
           <span :title="datetime(member.bandate)">{{
             timeago(member.bandate)
           }}</span>
-          <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check
+          <span v-if="member.bannedby"> by #{{ member.bannedby }}</span> - check
           logs for info.
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
