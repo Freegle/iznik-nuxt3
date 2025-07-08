@@ -170,9 +170,10 @@ export function useChatBase(chatId, messageId, pov = null) {
   const chatmessage = computed(() => chatStore.messageById(messageId))
 
   const emessage = computed(() => {
-    const m = chatmessage.value?.message
+    let m = chatmessage.value?.message
 
     if (m) {
+      m = m.toString()
       const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
 
       try {
