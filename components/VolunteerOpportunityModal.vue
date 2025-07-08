@@ -237,7 +237,6 @@
               class="bg-white"
               type="Volunteering"
             />
-            volunteering.description {{ volunteering.description }}
 
             <b-form-group
               ref="volunteering__description"
@@ -770,7 +769,7 @@ async function saveIt(callback) {
 
     const miscStore = useMiscStore() // MT..
     if (miscStore.modtools) {
-      this.hide()
+      hide()
     } else {
       added.value = true
     }
