@@ -315,7 +315,6 @@ export default {
       await this.listChats()
     },
     gotoChat(id) {
-      console.log('gotoChat', id)
       const router = useRouter()
       router.push('/chats/' + id)
     },
