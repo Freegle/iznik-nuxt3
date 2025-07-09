@@ -132,6 +132,7 @@ export function setupChat(selectedChatId, chatMessageId) {
     milesaway,
     milesstring,
     chatmessage,
+    chatStore,
   }
 }
 
