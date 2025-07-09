@@ -111,7 +111,7 @@
   </div>
 </template>
 <script setup>
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
 import { useMessageStore } from '~/stores/message'
 
@@ -143,7 +143,7 @@ const props = defineProps({
 
 // Use the chat base composable
 const { chatmessage, emessage, refmsg, refmsgid, myid, brokenImage } =
-  useChatBase(props.chatid, props.id, props.pov)
+  useChatMessageBase(props.chatid, props.id, props.pov)
 
 if (refmsgid.value) {
   useMessageStore().fetch(refmsgid.value)
