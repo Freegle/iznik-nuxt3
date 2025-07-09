@@ -72,15 +72,13 @@
 import { computed } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
+import MessageItemLocation from '~/components/MessageItemLocation.vue'
 
 const MessageFreegled = defineAsyncComponent(() =>
   import('~/components/MessageFreegled')
 )
 const MessagePromised = defineAsyncComponent(() =>
   import('~/components/MessagePromised')
-)
-const MessageItemLocation = defineAsyncComponent(() =>
-  import('~/components/MessageItemLocation')
 )
 
 const emit = defineEmits(['expand', 'attachments'])
