@@ -83,7 +83,7 @@
 </template>
 <script setup>
 import { useUserStore } from '../stores/user'
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 import { datetimeshort, timeadapt } from '../composables/useTimeFormat'
 import { ref, computed, onMounted } from '#imports'
 import { useMe } from '~/composables/useMe'
@@ -113,11 +113,8 @@ const userStore = useUserStore()
 const { me, mod } = useMe()
 
 // Use ChatBase functionality via composable
-const { chat, otheruser, chatmessage, messageIsFromCurrentUser } = useChatBase(
-  props.chatid,
-  props.id,
-  props.pov
-)
+const { chat, otheruser, chatmessage, messageIsFromCurrentUser } =
+  useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Data properties
 const chatMessageUser = ref(null)

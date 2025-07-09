@@ -1,4 +1,4 @@
-@echo off
+echo @echo off
 setlocal enabledelayedexpansion
 REM Windows batch script for running ESLint on changed files
 
@@ -8,14 +8,7 @@ REM Create a temporary file to store the list of changed files
 set TEMP_FILE=%TEMP%\eslint-files-%RANDOM%.txt
 
 REM Get staged files, excluding .ts and .tsx files
-git diff --cached --name-only --diff-filter=ACMR | findstr /I /E ".js .jsx .vue" | findstr /V /I /E ".ts .tsx" > %TEMP_FILE%
-
-REM Check if there are any files to lint
-for %%I in (%TEMP_FILE%) do if %%~zI==0 (
-  echo No JavaScript/Vue files to lint (TypeScript .ts and .tsx files are excluded).
-  del %TEMP_FILE%
-  exit /b 0
-)
+git diff --name-only --diff-filter=ACMR | findstr /I "\.js \.jsx \.vue" | findstr /V /I "\.ts \.tsx" > %TEMP_FILE%
 
 echo Linting the following files:
 type %TEMP_FILE%
@@ -36,7 +29,7 @@ call npx eslint --fix %FILES_TO_LINT%
 set ESLINT_STATUS=%ERRORLEVEL%
 
 REM Clean up temp file
-del %TEMP_FILE%
+del "%TEMP_FILE%"
 
 REM Check if ESLint succeeded
 if %ESLINT_STATUS% == 0 (
@@ -52,11 +45,11 @@ if %ESLINT_STATUS% == 0 (
     )
   )
   
-  del %TEMP_FILE%
+  del "%TEMP_FILE%"
   echo All done! Your code is ready to commit.
   exit /b 0
 ) else (
   echo ESLint found issues. Please fix them before committing.
-  del %TEMP_FILE%
+  del "%TEMP_FILE%"
   exit /b 1
 )

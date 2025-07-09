@@ -31,7 +31,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 
 const props = defineProps({
   chatid: {
@@ -60,7 +60,7 @@ const props = defineProps({
 })
 
 // Use the chat base composable
-const { chat, chatmessage, emessage, myid } = useChatBase(
+const { chat, chatmessage, emessage, myid } = useChatMessageBase(
   props.chatid,
   props.id,
   props.pov

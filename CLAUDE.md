@@ -420,3 +420,6 @@ npm run lint
 
 ### Playwright Memory Notes
 - Use event driven Playwright tests not timers.
+
+### WSL Testing Considerations
+- Don't run npm run test - you can't in WSL

@@ -91,7 +91,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
 import OurUploadedImage from '~/components/OurUploadedImage'
 
@@ -128,7 +128,7 @@ const zoom = ref(false)
 
 // Use the chat base composable
 const { chatmessage, messageIsFromCurrentUser, chatMessageProfileImage } =
-  useChatBase(props.chatid, props.id, props.pov)
+  useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Methods
 function imageError(event) {

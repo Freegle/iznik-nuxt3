@@ -240,7 +240,10 @@ import { ref, defineAsyncComponent } from 'vue'
 import { useTrystStore } from '../stores/tryst'
 import { fetchOurOffers } from '../composables/useThrottle'
 import { useChatStore } from '../stores/chat'
-import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
+import {
+  fetchReferencedMessage,
+  useChatMessageBase,
+} from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import DateFormatted from './DateFormatted'
 import AddToCalendar from '~/components/AddToCalendar'
@@ -309,7 +312,7 @@ const {
   otheruser,
   brokenImage,
   fetchMessage,
-} = useChatBase(props.chatid, props.id, props.pov)
+} = useChatMessageBase(props.chatid, props.id, props.pov)
 
 if (refmsgid.value) {
   useMessageStore().fetch(refmsgid.value)
