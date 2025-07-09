@@ -353,6 +353,7 @@ const test = base.test.extend({
       /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
       /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
       /Refused to frame/, // Can happen in test.
+      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
     ]
 
     // Method to add additional allowed error patterns for specific tests
