@@ -39,9 +39,7 @@ test.describe('Explore Page Tests', () => {
     await joinButton.click()
 
     // Wait for the Leave button to appear, indicating successful join
-    const leaveButton = page
-      .locator('.btn:has-text("Leave this community")')
-      .first()
+    const leaveButton = page.locator('.btn:has-text("Leave")').first()
 
     // Wait for the Leave button to be visible as confirmation of successful join
     await leaveButton.waitFor({
