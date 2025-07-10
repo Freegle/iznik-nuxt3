@@ -5,7 +5,9 @@
       :items="groupitems"
       class="max"
       size="40"
-      :placeholder="loading ? 'Loading communities...' : 'Start typing a community name...'"
+      :placeholder="
+        loading ? 'Loading communities...' : 'Start typing a community name...'
+      "
       :disabled="loading"
     />
     <div v-if="group && group.url">

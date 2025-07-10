@@ -1,4 +1,4 @@
-//import eslintPlugin from 'vite-plugin-eslint'
+// import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -279,7 +279,7 @@ export default defineNuxtConfig({
       splitVendorChunkPlugin(),
       VitePWA({ registerType: 'autoUpdate' }),
       // Make Lint errors cause build failures.
-      //eslintPlugin(),
+      // eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
         project: 'modtools',

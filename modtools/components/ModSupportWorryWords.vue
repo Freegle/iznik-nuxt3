@@ -134,9 +134,11 @@ export default {
       }
 
       try {
+        // eslint-disable-next-line no-new
         new RegExp(this.newWorryWord.trim())
         return true
       } catch (e) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.regexError = `Invalid regex: ${e.message}`
         return false
       }
@@ -165,6 +167,7 @@ export default {
       // For regex patterns, validate first
       if (this.patternType === 'regex') {
         try {
+          // eslint-disable-next-line no-new
           new RegExp(trimmedWord)
         } catch (e) {
           this.regexError = `Invalid regex: ${e.message}`

@@ -3,9 +3,7 @@
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
-          <div v-if="isLJ">
-            LoveJunk user #{{ user.ljuserid }}
-          </div>
+          <div v-if="isLJ">LoveJunk user #{{ user.ljuserid }}</div>
           <div v-else-if="email">
             <!-- eslint-disable-next-line -->
             <ModClipboard class="mr-1" :value="email" />
@@ -84,13 +82,19 @@
           <SettingsGroup
             v-if="groupid && member.ourpostingstatus"
             :emailfrequency="member.emailfrequency"
-            :membershipMT="member"
+            :membership-m-t="member"
             :moderation="member.ourpostingstatus"
             :userid="member.userid"
             class="border border-info p-1 flex-grow-1 mr-1"
-            @update:emailfrequency="settingsChange('emailfrequency',groupid,$event)"
-            @update:eventsallowed="settingsChange('eventsallowed',groupid,$event)"
-            @update:volunteeringallowed="settingsChange('volunteeringallowed',groupid,$event)"
+            @update:emailfrequency="
+              settingsChange('emailfrequency', groupid, $event)
+            "
+            @update:eventsallowed="
+              settingsChange('eventsallowed', groupid, $event)
+            "
+            @update:volunteeringallowed="
+              settingsChange('volunteeringallowed', groupid, $event)
+            "
           />
           <div>
             <ModMemberSummary :member="member" />
@@ -459,7 +463,7 @@ export default {
       this.showLogsModal = true
       this.$refs.logs?.show()
     },
-    settingsChange(param,groupid,val) {
+    settingsChange(param, groupid, val) {
       const params = {
         userid: this.member.userid,
         groupid,

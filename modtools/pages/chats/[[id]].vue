@@ -244,7 +244,9 @@ export default {
         chats = chats.filter((chat) => {
           if (
             chat.name.toLowerCase().includes(l) ||
-            (chat.snippet && (typeof chat.snippet === 'string') && chat.snippet.toLowerCase().includes(l))
+            (chat.snippet &&
+              typeof chat.snippet === 'string' &&
+              chat.snippet.toLowerCase().includes(l))
           ) {
             // Found in the name of the chat (which may include a user
             return true

@@ -25,14 +25,14 @@
 import { useMe } from '~/composables/useMe'
 
 export default {
+  setup() {
+    const { myGroups } = useMe()
+    return { myGroups }
+  },
   data: function () {
     return {
       summary: true,
     }
-  },
-  setup(){
-    const { myGroups } = useMe()
-    return { myGroups }
   },
   computed: {
     missing() {

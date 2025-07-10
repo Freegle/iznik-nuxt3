@@ -95,3 +95,6 @@ this.checkWorkDeferGetMessages()
 npx eslint api/*.js --fix
 
 git reset --hard origin/production
+
+<!-- eslint-disable-next-line -->
+// eslint-disable-next-line no-unused-vars

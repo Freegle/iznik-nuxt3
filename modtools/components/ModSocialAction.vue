@@ -50,7 +50,7 @@ export default {
   setup() {
     const publicityStore = usePublicityStore()
     const { myGroups } = useMe()
-    return { publicityStore,myGroups }
+    return { publicityStore, myGroups }
   },
   data: function () {
     return {

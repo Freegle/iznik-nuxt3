@@ -59,13 +59,6 @@ export default {
       message: null,
     }
   },
-  async mounted(){
-    // Get message directly rather than via store, to get message mail source
-    this.message = await this.messageStore.fetchMT({
-      id: this.id,
-      messagehistory: true,
-    })
-  },
   computed: {
     parsed() {
       if (this.message) {
@@ -81,6 +74,13 @@ export default {
     html() {
       return this.parsed ? this.parsed.html : null
     },
+  },
+  async mounted() {
+    // Get message directly rather than via store, to get message mail source
+    this.message = await this.messageStore.fetchMT({
+      id: this.id,
+      messagehistory: true,
+    })
   },
   methods: {
     onHide() {

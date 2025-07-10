@@ -70,7 +70,7 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 
 export default {
-  //mixins: [me],
+  // mixins: [me],
   setup() {
     const authStore = useAuthStore()
     const messageStore = useMessageStore()
@@ -88,7 +88,8 @@ export default {
       messageStore,
       miscStore,
       modGroupStore,
-      me, myGroups,
+      me,
+      myGroups,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },

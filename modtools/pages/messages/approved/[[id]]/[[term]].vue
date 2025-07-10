@@ -52,7 +52,7 @@ import { setupModMessages } from '@/composables/useModMessages'
 import { useMe } from '~/composables/useMe'
 
 export default {
-  //mixins: [me],
+  // mixins: [me],
   setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
@@ -64,7 +64,8 @@ export default {
     return {
       messageStore,
       miscStore,
-      me, myGroups,
+      me,
+      myGroups,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },

@@ -155,13 +155,13 @@ import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 // import { buildHead } from '~/composables/useMTBuildHead'
-import { useMe, fetchMe } from '~/composables/useMe'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
 
 // Use me and myid computed properties from useMe composable for consistency
-const { me, myid } = useMe()
+const { me } = useMe()
 
 /* const version = computed(() => {
   return runtimeConfig.public.VERSION

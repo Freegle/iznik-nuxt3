@@ -215,7 +215,11 @@
       :chatid="message.chatid"
       @hidden="showModChatNoteModal = false"
     />
-    <ModMessageEmailModal v-if="showOriginal" :id="message.bymailid" @hidden="showOriginal = false"/>
+    <ModMessageEmailModal
+      v-if="showOriginal"
+      :id="message.bymailid"
+      @hidden="showOriginal = false"
+    />
   </div>
 </template>
 <script>

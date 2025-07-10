@@ -488,12 +488,14 @@
                 message.groups.length
               "
               :emailfrequency="membership.emailfrequency"
-              :membershipMT="membership"
+              :membership-m-t="membership"
               class="border border-info mt-2 p-1"
               :userid="message.fromuser.id"
-              @update:emailfrequency="settingsChange('emailfrequency',$event)"
-              @update:eventsallowed="settingsChange('eventsallowed',$event)"
-              @update:volunteeringallowed="settingsChange('volunteeringallowed',$event)"
+              @update:emailfrequency="settingsChange('emailfrequency', $event)"
+              @update:eventsallowed="settingsChange('eventsallowed', $event)"
+              @update:volunteeringallowed="
+                settingsChange('volunteeringallowed', $event)
+              "
             />
             <div v-if="showEmails">
               <div v-for="email in message.fromuser.emails" :key="email.id">
@@ -1077,7 +1079,7 @@ export default {
       this.saving = false
       this.editing = false
     },
-    settingsChange(param,val) {
+    settingsChange(param, val) {
       const params = {
         userid: this.message.fromuser.id,
         groupid: this.groupid,
