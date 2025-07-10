@@ -26,8 +26,7 @@ test.describe('Explore Page Tests', () => {
 
     // Look for the join button - it should be a .btn element
     const joinButton = page
-      .locator('.btn:has-text("Join")')
-      .filter({ hasText: /join/i })
+      .locator('.btn:has-text("Join this community)')
       .first()
 
     // Wait for the join button to be visible
@@ -41,8 +40,7 @@ test.describe('Explore Page Tests', () => {
 
     // Wait for the Leave button to appear, indicating successful join
     const leaveButton = page
-      .locator('.btn:has-text("Leave")')
-      .filter({ hasText: /leave/i })
+      .locator('.btn:has-text("Leave this community")')
       .first()
 
     // Wait for the Leave button to be visible as confirmation of successful join
@@ -56,8 +54,7 @@ test.describe('Explore Page Tests', () => {
 
     // Wait for the Join button to reappear, indicating successful leave
     const joinButtonAfterLeave = page
-      .locator('.btn:has-text("Join")')
-      .filter({ hasText: /join/i })
+      .locator('.btn:has-text("Join this community)')
       .first()
 
     // Wait for the Join button to be visible again as confirmation of successful leave

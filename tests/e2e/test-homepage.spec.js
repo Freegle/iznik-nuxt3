@@ -205,7 +205,9 @@ test.describe('Homepage tests', () => {
     })
 
     // Create a navigation promise before clicking
-    const giveStuffNavigation = page.waitForURL('/give')
+    const giveStuffNavigation = page.waitForURL('/give', {
+      timeout: timeouts.navigation.default,
+    })
     await giveStuffButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
@@ -223,7 +225,9 @@ test.describe('Homepage tests', () => {
     })
 
     // Create a navigation promise before clicking
-    const askStuffNavigation = page.waitForURL('/find')
+    const askStuffNavigation = page.waitForURL('/find', {
+      timeout: timeouts.navigation.default,
+    })
     await askStuffButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
