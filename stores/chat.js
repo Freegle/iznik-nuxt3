@@ -186,7 +186,6 @@ export const useChatStore = defineStore({
         if (miscStore.modtools) {
           // console.log('uCS fetchChat',id)
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
-          this.list.push(chatroom)
           this.listByChatId[id] = chatroom
         } else {
           const chat = await api(this.config).chat.fetchChat(id, false)
