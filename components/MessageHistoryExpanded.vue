@@ -51,6 +51,7 @@
       <div
         v-for="group in message.groups"
         :key="'message-' + message.id + '-' + group.id"
+        class="d-flex flex-wrap"
       >
         <nuxt-link
           v-if="group.groupid in groups"
@@ -59,11 +60,11 @@
             '/explore/' + groups[group.groupid].exploreLink + '?noguard=true'
           "
           :title="'Click to view ' + groups[group.groupid].namedisplay"
-          class="font-weight-bold text-success nodecor"
+          class="font-weight-bold text-success nodecor mr-1"
         >
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>
-        <span class="ml-1 small text-muted" :title="group.arrival">{{
+        <span class="small text-muted" :title="group.arrival">{{
           grouparrivalago(group.arrival)
         }}</span>
       </div>

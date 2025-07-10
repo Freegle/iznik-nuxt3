@@ -445,6 +445,7 @@ import SpinButton from '~/components/SpinButton.vue'
 import { twem } from '~/composables/useTwem'
 import { useOurModal } from '~/composables/useOurModal'
 import { useImageStore } from '~/stores/image'
+import { useMe } from '~/composables/useMe'
 
 const GroupSelect = defineAsyncComponent(() =>
   import('~/components/GroupSelect')
@@ -525,6 +526,8 @@ const { modal, hide } = useOurModal()
 const editing = ref(props.startEdit)
 const added = ref(false)
 
+const { supportOrAdmin } = useMe()
+
 // Initialize data from props
 if (props.id) {
   const v = await volunteeringStore.fetch(props.id)
@@ -554,7 +557,7 @@ const volunteering = computed(() => {
 })
 
 const canmodify = computed(() => {
-  return volunteering.value?.userid === myid.value
+  return volunteering.value?.userid === myid.value || supportOrAdmin
 })
 
 const groups = computed(() => {
@@ -598,13 +601,33 @@ const enabled = computed(() => {
 
 // Watchers
 watch(
-  () => volunteering.value?.event,
+  () => volunteering.value?.description,
   (newVal) => {
-    let desc = newVal?.description
+    let desc = newVal
     desc = desc ? twem(desc) : ''
     desc = desc.trim()
 
     description.value = desc
+  },
+  { immediate: true }
+)
+
+// Populate currentAtts when editing an existing volunteering opportunity
+watch(
+  () => editing.value,
+  (newVal) => {
+    if (newVal && volunteering.value?.image) {
+      // Populate currentAtts with existing image data for the uploader
+      currentAtts.value = [
+        {
+          id: volunteering.value.image.id,
+          ouruid:
+            volunteering.value.image.ouruid ||
+            volunteering.value.image.imageuid,
+          externalmods: volunteering.value.image.imagemods || {},
+        },
+      ]
+    }
   },
   { immediate: true }
 )

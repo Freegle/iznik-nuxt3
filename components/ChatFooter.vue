@@ -707,7 +707,8 @@ const send = async (callback) => {
         chatmessages.value.length &&
         chatmessages.value[chatmessages.value.length - 1].type ===
           'Interested' &&
-        chatmessages.value[chatmessages.value.length - 1].userid !== myid &&
+        chatmessages.value[chatmessages.value.length - 1].userid !==
+          myid.value &&
         chat.value.chattype === 'User2User'
 
       // Encode up any emojis.

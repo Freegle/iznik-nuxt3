@@ -43,7 +43,8 @@ export function chatCollate(msgs) {
   return ret
 }
 
-export function setupChat(selectedChatId, chatMessageId) {
+// Shared base functionality for both setupChat and useChatBase
+function useChatShared(chatId) {
   const chatStore = useChatStore()
   const userStore = useUserStore()
   const authStore = useAuthStore()
@@ -51,8 +52,26 @@ export function setupChat(selectedChatId, chatMessageId) {
   const myid = authStore.user?.id
 
   const chat = computed(() => {
-    return selectedChatId ? chatStore.byChatId(selectedChatId) : null
+    return chatId ? chatStore.byChatId(chatId) : null
   })
+
+  const otheruser = computed(() => {
+    return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null
+  })
+
+  return {
+    chatStore,
+    userStore,
+    authStore,
+    myid,
+    chat,
+    otheruser,
+  }
+}
+
+export function setupChat(selectedChatId, chatMessageId) {
+  const { chatStore, authStore, myid, chat, otheruser } =
+    useChatShared(selectedChatId)
 
   const chatmessages = computed(() => {
     return chatStore.messagesById(selectedChatId)
@@ -70,16 +89,6 @@ export function setupChat(selectedChatId, chatMessageId) {
     })
 
     return last
-  })
-
-  const otheruser = computed(() => {
-    let user = null
-
-    if (chat?.value?.otheruid) {
-      user = userStore.byId(chat.value.otheruid)
-    }
-
-    return user
   })
 
   const milesaway = computed(() =>
@@ -122,8 +131,8 @@ export function setupChat(selectedChatId, chatMessageId) {
     tooSoonToNudge,
     milesaway,
     milesstring,
-    chatStore,
     chatmessage,
+    chatStore,
   }
 }
 
@@ -142,17 +151,9 @@ export async function fetchReferencedMessage(chatid, id) {
   }
 }
 
-export function useChatBase(chatId, messageId, pov = null) {
-  const chatStore = useChatStore()
-  const userStore = useUserStore()
-  const authStore = useAuthStore()
+export function useChatMessageBase(chatId, messageId, pov = null) {
+  const { chatStore, authStore, myid, chat, otheruser } = useChatShared(chatId)
   const messageStore = useMessageStore()
-
-  const myid = authStore.user?.id
-
-  const chat = computed(() => {
-    return chatId ? chatStore.byChatId(chatId) : null
-  })
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
 
@@ -206,14 +207,6 @@ export function useChatBase(chatId, messageId, pov = null) {
       return chat.value.user2
     } else {
       return realMe.value
-    }
-  })
-
-  const otheruser = computed(() => {
-    if (chat.value?.otheruid) {
-      return userStore.byId(chat.value.otheruid)
-    } else {
-      return null
     }
   })
 

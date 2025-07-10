@@ -118,14 +118,14 @@ watch(
                 console.log('Failed to set path for ROS', e)
               }
             } else if (height === '100px') {
-              theType.value = 'mobile_large_footer'
+              theType.value = 'leaderboard_atf'
               try {
                 await window.ramp.setPath('mobile_large_footer')
               } catch (e) {
                 console.log('Failed to set path for ROS', e)
               }
             } else if (height === '250px') {
-              theType.value = 'desktop_large_footer'
+              theType.value = 'leaderboard_atf'
               try {
                 await window.ramp.setPath('desktop_large_footer')
               } catch (e) {
