@@ -621,6 +621,40 @@ body.bodyMT{
   display: block;
 }
 
+/* Small gap on left of #12345678 */
+svg[data-icon="hashtag"] {
+  margin-left: 0.25rem;
+}
+
+/* Used to make DIV scrollable */
+.scrollinplace {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 75vh;
+}
+
+.card-header-tabs {
+  padding: .75rem 0 0 1rem;
+  background-color: rgba(0, 0, 0, .03);
+}
+
+.card-header-tabs .nav-link.active {
+  color: #495057;
+  background-color: #fff;
+}
+
+.card-header-tabs li button {
+  border: 1px solid #d3d3d3 !important;
+}
+
+.card-body {
+  padding: 0 1rem;
+}
+
+.text-muted {
+  fill: #6c757d;
+}
+
 /* Missing from _utilities.scss for some reason */
 .order-6 {
   order: 6 !important;
