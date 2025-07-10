@@ -316,10 +316,10 @@ const deleteMessage = async () => {
 
 :deep(.chatMessageWrapper) {
   display: flex;
-  padding-right: 10px;
+  padding-right: 20%;
 
   &.myChatMessage {
-    padding-left: 10px;
+    padding-left: 20%;
     padding-right: 0;
   }
 }
