@@ -277,13 +277,13 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async fetchUser(components) {
-      // MT ADDED components
+      // MT components added
       // console.log('authstore.fetchUser A',components)
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      if (!components) components = [] // MT ADDED
-      components = ['me', ...components] // MT ADDED
+      if (!components) components = [] // MT
+      components = ['me', ...components] // MT
 
       const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
       if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
@@ -329,8 +329,8 @@ export const useAuthStore = defineStore({
                     if (!this.auth.jwt) {
                       this.setAuth(jwt, persistent)
                     }
-                    this.work = ret.work // MT added
-                    this.discourse = ret.discourse // MT added
+                    this.work = ret.work // MT
+                    this.discourse = ret.discourse // MT
                   } else {
                     // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
                     // which will then force a login when required and sort this out.
@@ -365,8 +365,8 @@ export const useAuthStore = defineStore({
           let permissions = null
           const v1groups = ret.groups
 
-          this.work = ret.work // MT added
-          this.discourse = ret.discourse // MT added
+          this.work = ret.work // MT
+          this.discourse = ret.discourse // MT
 
           if (me) {
             // console.log('authstore.fetchUser G fetchv1 got me')

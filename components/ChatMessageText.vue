@@ -76,7 +76,7 @@
 </template>
 <script setup>
 import Highlighter from 'vue-highlight-words'
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 import { ref, computed, onMounted } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
@@ -113,7 +113,7 @@ const {
   messageIsFromCurrentUser,
   chatMessageProfileImage,
   regexEmailMT, // MT
-} = useChatBase(props.chatid, props.id, props.pov)
+} = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Data properties
 const lat = ref(null)

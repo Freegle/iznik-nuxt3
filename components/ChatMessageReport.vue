@@ -37,7 +37,7 @@
   </div>
 </template>
 <script setup>
-import { useChatBase } from '../composables/useChat'
+import { useChatMessageBase } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc'
 
 const props = defineProps({
@@ -70,7 +70,7 @@ const miscStore = useMiscStore()
 const modtools = computed(() => miscStore.modtools)
 
 // Use the chat base composable (even though we don't use any of its properties in this component)
-useChatBase(props.chatid, props.id, props.pov)
+useChatMessageBase(props.chatid, props.id, props.pov)
 </script>
 <style scoped lang="scss">
 .chatMessage {

@@ -83,7 +83,7 @@ export default class BaseAPI {
         }
         config.params.modtools = miscStore.modtools
 
-        // MT ADDED cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
+        // MT cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
         Object.keys(config.params).forEach((c) => {
           const v = config.params[c]
           if (Array.isArray(v)) {
@@ -110,7 +110,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = miscStore.modtools // MT ADDED
+        config.params.modtools = miscStore.modtools // MT
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -120,7 +120,7 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = miscStore.modtools // MT ADDED
+        config.data.modtools = miscStore.modtools // MT
         body = JSON.stringify(config.data)
       }
 
@@ -365,7 +365,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = miscStore.modtools // MT ADDED
+        config.params.modtools = miscStore.modtools // MT
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)

@@ -93,7 +93,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useComposeStore } from '../stores/compose'
-import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
+import {
+  fetchReferencedMessage,
+  useChatMessageBase,
+} from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
 import ProfileImage from '~/components/ProfileImage'
@@ -127,12 +130,13 @@ const props = defineProps({
 })
 
 // Use the chat base composable
-const { chat, chatmessage, emessage, refmsg, me, myid, realMe } = useChatBase(
-  // MT
-  props.chatid,
-  props.id,
-  props.pov
-)
+const { chat, chatmessage, emessage, refmsg, me, myid, realMe } =
+  useChatMessageBase(
+    // MT
+    props.chatid,
+    props.id,
+    props.pov
+  )
 
 const composeStore = useComposeStore()
 const contactGroupId = ref(null)

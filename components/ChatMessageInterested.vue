@@ -151,7 +151,10 @@
 </template>
 <script setup>
 import Highlighter from 'vue-highlight-words'
-import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
+import {
+  fetchReferencedMessage,
+  useChatMessageBase,
+} from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
 import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
@@ -205,7 +208,7 @@ const {
   chatMessageProfileImage,
   regexEmailMT, // MT
   otheruser,
-} = useChatBase(props.chatid, props.id, props.pov)
+} = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Computed properties
 const refmsgid = computed(() => chatmessage.value?.refmsgid)

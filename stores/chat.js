@@ -86,7 +86,7 @@ export const useChatStore = defineStore({
       }
     },
     async fetchLatestChatsMT() {
-      // MT ADDED
+      // MT..
       // const now = new Date()
 
       const authStore = useAuthStore()
@@ -149,7 +149,7 @@ export const useChatStore = defineStore({
 
       // TODO Amend ChatAPI v2 to support chattypes
       let chats = []
-      const miscStore = useMiscStore() // MT ADDED
+      const miscStore = useMiscStore() // MT
       if (miscStore.modtools) {
         const { chatrooms } = await api(this.config).chat.listChatsMT({
           // v1: /chat/rooms
@@ -182,11 +182,10 @@ export const useChatStore = defineStore({
     },
     async fetchChat(id) {
       if (id > 0) {
-        const miscStore = useMiscStore() // MT ADDED
+        const miscStore = useMiscStore() // MT
         if (miscStore.modtools) {
           // console.log('uCS fetchChat',id)
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
-          this.list.push(chatroom)
           this.listByChatId[id] = chatroom
         } else {
           const chat = await api(this.config).chat.fetchChat(id, false)
@@ -196,7 +195,7 @@ export const useChatStore = defineStore({
     },
     async fetchMessages(id, force) {
       let messages = []
-      const miscStore = useMiscStore() // MT ADDED
+      const miscStore = useMiscStore() // MT
       if (miscStore.modtools) {
         const params = {
           // limit: 10, // NO: so new messages are picked up
@@ -279,7 +278,7 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      const miscStore = useMiscStore() // MT ADDED
+      const miscStore = useMiscStore() // MT
       if (miscStore.modtools) {
         await api(this.config).chat.sendMT(data)
       } else {
@@ -427,7 +426,7 @@ export const useChatStore = defineStore({
       return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
-      const miscStore = useMiscStore() // MT ADDED
+      const miscStore = useMiscStore() // MT
       if (miscStore.modtools) {
         return state.currentCountMT
       }

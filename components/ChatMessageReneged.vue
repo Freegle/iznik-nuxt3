@@ -124,7 +124,10 @@
   </div>
 </template>
 <script setup>
-import { fetchReferencedMessage, useChatBase } from '../composables/useChat'
+import {
+  fetchReferencedMessage,
+  useChatMessageBase,
+} from '../composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 
@@ -165,7 +168,7 @@ const {
   myid,
   otheruser,
   brokenImage,
-} = useChatBase(props.chatid, props.id, props.pov)
+} = useChatMessageBase(props.chatid, props.id, props.pov)
 
 if (refmsgid.value) {
   useMessageStore().fetch(refmsgid.value)
