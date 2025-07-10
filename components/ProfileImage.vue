@@ -34,7 +34,7 @@
     <ProxyImage
       v-else
       :src="validImage"
-      sizes="100px"
+      sizes="100px sm:25px"
       :class-name="className"
       :alt="altText"
       @error="brokenProfileImage"
@@ -152,6 +152,11 @@ const brokenProfileImage = (e) => {
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+
+.breakgrid,
+.breakgrid .ProfileImage__moderator {
+  display: inline !important;
+}
 
 .ProfileImage__container {
   display: grid;
