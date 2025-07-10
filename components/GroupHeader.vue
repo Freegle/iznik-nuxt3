@@ -199,7 +199,7 @@ const description = computed(() => {
 
 // Methods
 async function leave(callback) {
-  await authStore.leaveGroup(myid, props.group.id)
+  await authStore.leaveGroup(myid.value, props.group.id)
   callback()
 }
 
@@ -209,7 +209,7 @@ async function join(callback) {
     callback()
     router.push('/explore/join/' + props.group.id)
   } else {
-    await authStore.joinGroup(myid, props.group.id, true)
+    await authStore.joinGroup(myid.value, props.group.id, true)
     callback()
   }
 }

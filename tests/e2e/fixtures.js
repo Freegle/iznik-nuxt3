@@ -943,17 +943,21 @@ const testWithFixtures = test.extend({
       await noDeadlineButton.click()
       console.log('Clicked "No deadline" in deadline modal')
 
-      // Handle delivery modal if it appears
-      const deliveryModal = page.locator(
-        '.modal:has-text("Could you deliver?")'
-      )
-      await deliveryModal.waitFor({
-        state: 'visible',
-        timeout: timeouts.navigation.default,
-      })
-      const maybeButton = page.locator('.btn:has-text("Maybe")')
-      await maybeButton.click()
-      console.log('Clicked "Maybe" in delivery modal')
+      // Handle delivery modal if it appears (only for OFFER posts)
+      if (type.toUpperCase() === 'OFFER') {
+        const deliveryModal = page.locator(
+          '.modal:has-text("Could you deliver?")'
+        )
+        await deliveryModal.waitFor({
+          state: 'visible',
+          timeout: timeouts.navigation.default,
+        })
+        const maybeButton = page.locator('.btn:has-text("Maybe")')
+        await maybeButton.click()
+        console.log('Clicked "Maybe" in delivery modal')
+      } else {
+        console.log('Skipping delivery modal for WANTED post')
+      }
 
       // Set password to default test password in NewUserInfo component
       await setNewUserPassword()
