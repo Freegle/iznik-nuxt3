@@ -125,7 +125,6 @@ import { computed } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 import { useConfigStore } from '~/stores/config'
-import { useSystemConfigStore } from '~/modtools/stores/systemconfig'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
@@ -180,7 +179,6 @@ const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
-const systemConfigStore = useSystemConfigStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -213,7 +211,6 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
-systemConfigStore.init(runtimeConfig)
 
 const loginCount = computed(() => {
   return authStore.loginCount
