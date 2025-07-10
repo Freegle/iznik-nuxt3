@@ -8,7 +8,10 @@
           class="order-1 truncate2"
           :title="preferredemail"
         >
-          <div><v-icon icon="envelope" />&nbsp;{{ preferredemail }}</div>
+          <div v-if="preferredemail">
+            <ModClipboard class="mr-1" :value="preferredemail" />
+            {{ preferredemail }}
+          </div>
           <div v-if="user.tnuserid" class="text-muted small">
             TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
           </div>
