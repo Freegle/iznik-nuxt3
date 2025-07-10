@@ -9,11 +9,11 @@
             </template>
             <ModSupportFindUser :id="id" />
           </b-tab>
-          <b-tab>
+          <b-tab @click="onFindCommunityTab">
             <template #title>
               <h2 class="ml-2 mr-2">Find Community</h2>
             </template>
-            <ModSupportFindGroup />
+            <ModSupportFindGroup ref="findGroupComponent" />
           </b-tab>
           <b-tab>
             <template #title>
@@ -154,6 +154,13 @@ export default {
       this.error = false
 
       await this.messageStore.searchMT({ term: subj, groupid: this.groupid })
+    },
+
+    async onFindCommunityTab() {
+      // Load communities when tab is selected
+      if (this.$refs.findGroupComponent) {
+        await this.$refs.findGroupComponent.loadCommunities()
+      }
     },
 
     async onWorryWordsTab() {

@@ -1,20 +1,11 @@
 <template>
   <div>
-    <SpinButton
-      v-if="groupitems.length === 0"
-      variant="primary"
-      icon-name="refresh"
-      label="Fetch communities"
-      spinclass="text-white"
-      @handle="loadallgroups"
-    />
     <AutocompleteLocal
-      v-if="groupitems.length > 0"
       v-model="searchgroup"
       :items="groupitems"
       class="max"
       size="40"
-      placeholder="Start typing a community name..."
+      :placeholder="loading ? 'Loading communities...' : 'Start typing a community name...'"
       :disabled="loading"
     />
     <div v-if="group && group.url">
@@ -352,7 +343,14 @@ export default {
   methods: {
     async loadallgroups(callback) {
       await this.modGroupStore.listMT({ grouptype: 'Freegle' })
-      callback()
+      if (callback) callback()
+    },
+    async loadCommunities() {
+      if (this.groupitems.length === 0) {
+        this.loading = true
+        await this.loadallgroups()
+        this.loading = false
+      }
     },
     canonGroupName(name) {
       return name ? name.toLowerCase().replace(/-|_| /g, '') : null

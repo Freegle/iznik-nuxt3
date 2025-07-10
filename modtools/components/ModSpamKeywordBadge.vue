@@ -62,13 +62,16 @@ export default {
     },
 
     spamKeywordVariant() {
-      // Color-code based on type: Literal vs Regex
-      switch (this.spamKeyword.type) {
-        case 'Regex':
-          return 'info'
-        case 'Literal':
-        default:
+      // Color-code based on action: Review, Spam, Whitelist
+      switch (this.spamKeyword.action) {
+        case 'Review':
           return 'warning'
+        case 'Spam':
+          return 'danger'
+        case 'Whitelist':
+          return 'success'
+        default:
+          return 'secondary'
       }
     },
   },
