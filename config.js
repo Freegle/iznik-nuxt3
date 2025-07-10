@@ -46,7 +46,6 @@ const CONFIG = {
   SENTRY_DSN:
     'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
 
-  // MT
   SENTRY_DSN_MT:
     'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.sentry.io/4506712427855872',
 
