@@ -3,6 +3,8 @@ const ADS_MEDIUM_BANNER_SIZES = [[728, 90]]
 const ADS_SQUARISH_SIZES = [[300, 250]]
 
 const CONFIG = {
+  IS_MT: process.env.MT === 'true', // For MT set in modtools/nuxt.config.ts
+
   // Legacy API, especially mod ops.
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
@@ -42,7 +44,11 @@ const CONFIG = {
     'dj0yJmk9N245WTRqaDd2dnA4JmQ9WVdrOWIzTlZNMU01TjJjbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRh',
 
   SENTRY_DSN:
-    'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.sentry.io/4506712427855872', // modtools
+    'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
+
+  // MT
+  SENTRY_DSN_MT:
+    'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.sentry.io/4506712427855872',
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,

@@ -220,7 +220,7 @@ export default defineNuxtConfig({
       USER_SITE: config.USER_SITE,
       USER_DOMAIN: config.USER_DOMAIN,
       IMAGE_SITE: config.IMAGE_SITE,
-      SENTRY_DSN: config.SENTRY_DSN,
+      SENTRY_DSN: config.IS_MT ? config.SENTRY_DSN_MT: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
@@ -282,7 +282,7 @@ export default defineNuxtConfig({
       // eslintPlugin(),
       sentryVitePlugin({
         org: 'freegle',
-        project: 'modtools',
+        project: config.IS_MT ? 'modtools' : 'nuxt3',
       }),
     ],
   },

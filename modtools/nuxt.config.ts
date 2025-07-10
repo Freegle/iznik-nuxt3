@@ -5,6 +5,8 @@ const version = JSON.parse(packageJson).version || 0
 // import config from '../config'
 console.log('Building iznik-modtools', version)
 
+process.env.MT = 'true'
+
 export default defineNuxtConfig({
   // target: 'static',
   ssr: false,
