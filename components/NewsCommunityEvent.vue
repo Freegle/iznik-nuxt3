@@ -213,6 +213,10 @@ const initialize = async () => {
     for (const groupid of currentEvent.groups) {
       await groupStore.fetch(groupid)
     }
+
+    if (!currentEvent) {
+      throw new Error('Event not found')
+    }
   } catch (e) {
     // Most likely doesn't exist.
     emit('hide')

@@ -17,6 +17,7 @@
             :summary="false"
             class="mt-1"
             title-tag="h1"
+            @hide="invalid = true"
           />
           <NoticeMessage v-else>
             Sorry, we can't find that volunteer opportunity.
