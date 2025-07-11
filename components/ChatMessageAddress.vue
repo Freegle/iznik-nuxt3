@@ -136,10 +136,8 @@
   </div>
 </template>
 <script setup>
-import { storeToRefs } from 'pinia'
 import { useAddressStore } from '../stores/address'
 import { useChatStore } from '../stores/chat'
-import { useUserStore } from '../stores/user'
 import { useChatMessageBase } from '../composables/useChat'
 import ExternalLink from './ExternalLink'
 import AddressModal from './AddressModal'
@@ -147,6 +145,7 @@ import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { ref, computed, onMounted } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   chatid: {
@@ -167,8 +166,7 @@ const props = defineProps({
 // Store access
 const addressStore = useAddressStore()
 const chatStore = useChatStore()
-const userStore = useUserStore()
-const { myid } = storeToRefs(userStore)
+const { myid } = useMe()
 
 // Chat base properties
 const { otheruser, chatmessage } = useChatMessageBase(

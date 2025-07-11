@@ -120,14 +120,14 @@ test.describe('Post flow tests', () => {
     await page.waitForTimeout(timeouts.ui.transition)
 
     // Wait for the chat conversation to load
-    await page.waitForSelector('textarea[name="reply"]', {
+    await page.waitForSelector('#chatmessage', {
       timeout: timeouts.ui.appearance,
     })
 
     // Send a reply back to the person who messaged
     const replyMessage =
       'Thank you for your interest! When would be a good time to collect?'
-    const replyTextarea = page.locator('textarea[name="reply"]')
+    const replyTextarea = page.locator('#chatmessage')
     await replyTextarea.fill(replyMessage)
     console.log('Filled reply message from original user')
 

@@ -50,39 +50,45 @@ async function unsubscribeTestEmails() {
 
   // Process each email
   for (const email of testEmails) {
-    console.log(`Attempting to unsubscribe email: ${email}`)
-    // Create a new context for each email to ensure clean state
-    const context = await browser.newContext()
-    const page = await context.newPage()
-
-    // Add gotoAndVerify navigation helper method
-    page.gotoAndVerify = async function (url, options) {
-      await this.goto(url, options)
-      return this.url().includes(url)
-    }
-
-    // First try to log in with this account to see if it still exists
-    console.log(`Attempting to log in with email: ${email}`)
-    const loginSuccessful = await loginViaHomepage(
-      page,
-      email,
-      DEFAULT_TEST_PASSWORD
-    )
-
     let result = false
 
-    if (loginSuccessful) {
-      console.log(`Login successful for ${email}, proceeding with unsubscribe`)
-      // Use unsubscribeManually helper function
-      result = await unsubscribeManually(page, email)
-    } else {
-      console.log(`Login failed for ${email}, account may no longer exist`)
-      // Add to successful unsubscribes since the account is gone anyway
-      result = true
-    }
+    try {
+      console.log(`Attempting to unsubscribe email: ${email}`)
+      // Create a new context for each email to ensure clean state
+      const context = await browser.newContext()
+      const page = await context.newPage()
 
-    // Close the context when done
-    await context.close()
+      // Add gotoAndVerify navigation helper method
+      page.gotoAndVerify = async function (url, options) {
+        await this.goto(url, options)
+        return this.url().includes(url)
+      }
+
+      // First try to log in with this account to see if it still exists
+      console.log(`Attempting to log in with email: ${email}`)
+      const loginSuccessful = await loginViaHomepage(
+        page,
+        email,
+        DEFAULT_TEST_PASSWORD
+      )
+
+      if (loginSuccessful) {
+        console.log(
+          `Login successful for ${email}, proceeding with unsubscribe`
+        )
+        // Use unsubscribeManually helper function
+        result = await unsubscribeManually(page, email)
+      } else {
+        console.log(`Login failed for ${email}, account may no longer exist`)
+        // Add to successful unsubscribes since the account is gone anyway
+        result = true
+      }
+
+      // Close the context when done
+      await context.close()
+    } catch (e) {
+      console.log(`Error unsubscribing ${email}: ${e.message}`)
+    }
 
     if (result) {
       console.log(`✓ Successfully unsubscribed: ${email}`)
