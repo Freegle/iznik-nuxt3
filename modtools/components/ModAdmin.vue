@@ -76,6 +76,9 @@
         </NoticeMessage>
         <p class="text-muted">
           <span v-if="admin.parentid"> Suggested ADMIN </span>
+          <b-button v-if="admin.complete" variant="white" @click="copyIt" class="float-end">
+            <v-icon icon="copy" /> Copy
+          </b-button>
           <span v-else-if="admin.createdby">
             Created by
             {{ admin.createdby.displayname }}
@@ -227,6 +230,7 @@ export default {
       return this.admin.heldby ? this.userStore.byId(this.admin.heldby) : null
     },
   },
+  emits: ['copy'],
   mounted() {
     this.expanded = this.open
 
@@ -238,6 +242,9 @@ export default {
   methods: {
     deleteIt() {
       this.showConfirmModal = true
+    },
+    copyIt() {
+      this.$emit('copy',this.admin)
     },
     deleteConfirmed() {
       this.adminsStore.delete({ id: this.id })
