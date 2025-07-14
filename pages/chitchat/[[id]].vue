@@ -129,12 +129,6 @@
                 :distance="distance"
                 @infinite="loadMore"
               />
-              <div
-                class="adpad"
-                :class="{
-                  stickyAdRendered,
-                }"
-              />
             </div>
           </div>
         </b-col>
@@ -264,9 +258,6 @@ const error = ref(false)
 const threadhead = ref(null)
 const infiniteId = ref(new Date().getTime())
 const giveFind = ref(null)
-
-// Computed properties
-const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
 const selectedArea = computed({
   get() {
@@ -529,14 +520,6 @@ if (me.value) {
   }
 }
 
-.newsfeedHolder {
-  height: calc(100vh - 74px);
-
-  @supports (height: 100dvh) {
-    height: calc(100dvh - 74px);
-  }
-}
-
 .tab-content,
 .tab-pane {
   background-color: $color-white;
@@ -544,17 +527,5 @@ if (me.value) {
 
 .image__uploaded {
   width: 100px;
-}
-
-.adpad.stickyAdRendered {
-  margin-bottom: $sticky-banner-height-mobile;
-
-  @media (min-height: $mobile-tall) {
-    margin-bottom: $sticky-banner-height-mobile-tall;
-  }
-
-  @include media-breakpoint-up(md) {
-    padding-bottom: $sticky-banner-height-desktop;
-  }
 }
 </style>
