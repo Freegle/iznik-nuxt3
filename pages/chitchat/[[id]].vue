@@ -126,7 +126,7 @@
                 v-if="newsfeed.length"
                 :identifier="infiniteId"
                 force-use-infinite-wrapper="body"
-                :distance="distance"
+                :distance="infiniteDistance"
                 @infinite="loadMore"
               />
             </div>
@@ -248,7 +248,8 @@ const imageid = ref(null)
 const ouruid = ref(null)
 const imageuid = ref(null)
 const imagemods = ref(null)
-const distance = ref(1000)
+const distance = ref('nearby')
+const infiniteDistance = ref(1000)
 const runChecks = ref(true)
 const infiniteState = ref(null)
 const currentAtts = ref([])
