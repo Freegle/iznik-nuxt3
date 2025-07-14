@@ -101,6 +101,7 @@
               :configid="configid"
               name="name"
               label="Name"
+              :required="true"
               description="This is the name of this collection of standard messages.  It appears when you're choosing which collection to apply to your community."
               :disabled="locked"
             />
