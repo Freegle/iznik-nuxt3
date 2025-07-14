@@ -64,7 +64,8 @@ export default {
 
     return {
       authStore,
-      me, myid
+      me,
+      myid,
     }
   },
   data: function () {

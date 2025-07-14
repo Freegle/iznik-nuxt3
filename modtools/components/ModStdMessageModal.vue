@@ -189,7 +189,8 @@ export default {
       modal,
       hide,
       show,
-      me, myid
+      me,
+      myid,
     }
   },
   data: function () {

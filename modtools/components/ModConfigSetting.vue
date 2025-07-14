@@ -145,8 +145,8 @@ export default {
       return this.modConfigStore.current
     },
     setifrequired() {
-      if( this.required) {
-        return this.forSave && this.forSave.trim().length>0
+      if (this.required) {
+        return this.forSave && this.forSave.trim().length > 0
       }
       return true
     },
@@ -197,7 +197,7 @@ export default {
             : this.forSave
         }
       } else {
-        if( (this.forSave === null) && (this.type === 'input') && this.config) {
+        if (this.forSave === null && this.type === 'input' && this.config) {
           this.forSave = this.config[this.name]
         }
         data[this.name] = this.forSave
