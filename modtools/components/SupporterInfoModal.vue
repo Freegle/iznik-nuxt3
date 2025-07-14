@@ -47,13 +47,15 @@
 import { useMiscStore } from '../../stores/misc'
 import { useUserStore } from '../../stores/user'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const miscStore = useMiscStore()
     const userStore = useUserStore()
     const { modal, hide } = useOurModal()
-    return { miscStore, userStore, modal, hide }
+    const { myid } = useMe()
+    return { miscStore, userStore, modal, hide, myid }
   },
   methods: {
     donateTime() {

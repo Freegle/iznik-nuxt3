@@ -56,6 +56,7 @@
 <script>
 // import VisibleWhen from '~/components/VisibleWhen'
 import { useMemberStore } from '../stores/member'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -66,8 +67,10 @@ export default {
   },
   setup() {
     const memberStore = useMemberStore()
+    const { myGroup } = useMe()
     return {
       memberStore,
+      myGroup,
     }
   },
   computed: {

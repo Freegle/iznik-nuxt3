@@ -68,8 +68,8 @@ import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
-    const { myGroups } = useMe()
-    return { myGroups }
+    const { myGroups, myGroup } = useMe()
+    return { myGroups, myGroup }
   },
   data: function () {
     return {

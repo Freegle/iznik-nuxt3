@@ -9,6 +9,8 @@
   </span>
 </template>
 <script>
+import { useMe } from '~/composables/useMe'
+
 export default {
   props: {
     log: {
@@ -21,6 +23,10 @@ export default {
       required: false,
       default: null,
     },
+  },
+  setup() {
+    const { myGroup } = useMe()
+    return { myGroup }
   },
   computed: {
     loggroup() {

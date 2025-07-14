@@ -1,6 +1,10 @@
 // Global mixin so that every component can access the logged in state and user.  We use a mixin rather than the Vue
 // idiom of provide/inject because you still have to remember to inject in each component.  And you won't, will you?
 
+// TODO: convert into composable
+
+// Manages to access composables/useMe me fetchMe etc using plugins/me.js
+
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'

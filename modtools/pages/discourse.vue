@@ -4,13 +4,18 @@
       This should redirect you back to Discourse. If it doesn't, mail
       geeks@ilovefreegle.org.
     </p>
-    <b-img src="~/static/loader.gif" alt="Loading" />
+    <b-img src="/loader.gif" alt="Loading" />
   </div>
 </template>
 <script>
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 export default {
+  setup() {
+    const { myid } = useMe()
+    return { myid }
+  },
   watch: {
     myid(newVal, oldVal) {
       console.log('modtools discourse watch myid', newVal, oldVal)

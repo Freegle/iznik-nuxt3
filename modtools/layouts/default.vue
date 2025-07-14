@@ -259,6 +259,7 @@ import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '@/stores/modconfig'
+import { useMe } from '~/composables/useMe'
 
 import { buildHead } from '~/composables/useMTBuildHead'
 
@@ -274,6 +275,7 @@ export default {
     const modGroupStore = useModGroupStore()
     const modConfigStore = useModConfigStore()
     const persistent = authStore.auth.persistent
+    const { supportOrAdmin } = useMe()
 
     if (process.client) {
       // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
@@ -323,6 +325,7 @@ export default {
       modConfigStore,
       modGroupStore,
       oneTap,
+      supportOrAdmin,
     }
   },
   data: function () {

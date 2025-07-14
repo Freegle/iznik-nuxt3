@@ -221,8 +221,8 @@ export default {
   setup() {
     const adminsStore = useAdminsStore()
     const modGroupStore = useModGroupStore()
-    const { myGroups } = useMe()
-    return { adminsStore, modGroupStore, myGroups }
+    const { myGroups, supportOrAdmin } = useMe()
+    return { adminsStore, modGroupStore, myGroups, supportOrAdmin }
   },
   data: function () {
     return {

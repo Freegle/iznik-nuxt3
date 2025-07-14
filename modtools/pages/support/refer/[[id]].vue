@@ -18,12 +18,14 @@
 import { useRoute } from 'vue-router'
 import { useChatStore } from '../stores/chat'
 import { useMessageStore } from '~/stores/message'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const chatStore = useChatStore()
     const messageStore = useMessageStore()
-    return { chatStore, messageStore }
+    const { supportOrAdmin } = useMe()
+    return { chatStore, messageStore, supportOrAdmin }
   },
   data() {
     return {

@@ -300,13 +300,14 @@
 <script>
 import { useModConfigStore } from '../stores/modconfig'
 import { useMiscStore } from '@/stores/misc'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const miscStore = useMiscStore()
     const modConfigStore = useModConfigStore()
-
-    return { miscStore, modConfigStore }
+    const { myid } = useMe()
+    return { miscStore, modConfigStore, myid }
   },
   data: function () {
     return {

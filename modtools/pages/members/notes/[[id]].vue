@@ -37,12 +37,15 @@
 </template>
 <script>
 import { useCommentStore } from '../stores/comment'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const commentStore = useCommentStore()
+    const { myid } = useMe()
     return {
       commentStore,
+      myid,
     }
   },
   data: function () {

@@ -1040,6 +1040,7 @@ import { useAuthStore } from '../stores/auth'
 import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: {
@@ -1062,12 +1063,16 @@ export default {
       module: htmlEditButton,
       options: {}, // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
     }
+    const { fetchMe, myid, supportOrAdmin } = useMe()
     return {
       authStore,
       modGroupStore,
       modConfigStore,
       shortlinkStore,
       quillModules,
+      fetchMe,
+      myid,
+      supportOrAdmin,
     }
   },
   data: function () {
@@ -1464,7 +1469,6 @@ export default {
         userid: this.myid,
         settings,
       })
-
       this.fetchMe(true, ['groups'])
     },
     uploadProfile() {

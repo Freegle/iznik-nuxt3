@@ -71,11 +71,14 @@
 
 <script setup>
 import { useTeamStore } from '@/stores/team'
+import { useMe } from '~/composables/useMe'
+
 const teamStore = useTeamStore()
 
 const team = ref(null)
 const selected = ref(null)
 const memberToAdd = ref(null)
+const { supportOrAdmin } = useMe()
 
 const teams = computed(() => {
   return teamStore.all

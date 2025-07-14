@@ -103,6 +103,7 @@ import { GChart } from 'vue-google-charts'
 import { useUserStore } from '../stores/user'
 import { setupModMembers } from '../../composables/useModMembers'
 import { useMemberStore } from '@/stores/member'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: {
@@ -114,10 +115,12 @@ export default {
     const modMembers = setupModMembers(true)
     modMembers.collection.value = 'Happiness'
     modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
+    const { fetchMe } = useMe()
     return {
       memberStore,
       userStore,
       ...modMembers, // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
+      fetchMe,
     }
   },
   data: function () {

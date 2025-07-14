@@ -108,11 +108,13 @@
 <script>
 import { useAuthStore } from '../../stores/auth'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const { modal, hide } = useOurModal()
-    return { modal, hide }
+    const { supportOrAdmin } = useMe()
+    return { modal, hide, supportOrAdmin }
   },
   data: function () {
     return {

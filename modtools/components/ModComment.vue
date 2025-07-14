@@ -81,6 +81,7 @@ import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../composables/useModMembers'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: { ReadMore },
@@ -106,7 +107,16 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { bump, context } = setupModMembers()
-    return { bump, context, groupStore, memberStore, userStore }
+    const { supportOrAdmin, myGroup } = useMe()
+    return {
+      bump,
+      context,
+      groupStore,
+      memberStore,
+      userStore,
+      supportOrAdmin,
+      myGroup,
+    }
   },
   data: function () {
     return {
