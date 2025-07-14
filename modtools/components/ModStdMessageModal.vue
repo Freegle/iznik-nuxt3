@@ -147,6 +147,7 @@ import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: {},
@@ -178,6 +179,7 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
+    const { me, myid } = useMe()
     return {
       modGroupStore,
       memberStore,
@@ -187,6 +189,7 @@ export default {
       modal,
       hide,
       show,
+      me, myid
     }
   },
   data: function () {

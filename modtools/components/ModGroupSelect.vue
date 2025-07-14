@@ -20,6 +20,7 @@ import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
 import { useGroupStore } from '~/stores/group'
 import { useModGroupStore } from '~/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -126,8 +127,9 @@ export default {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const modGroupStore = useModGroupStore()
+    const { me, myid } = useMe()
 
-    return { miscStore, groupStore, modGroupStore }
+    return { miscStore, groupStore, modGroupStore, me, myid }
   },
   data: function () {
     return {

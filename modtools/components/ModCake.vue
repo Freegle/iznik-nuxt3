@@ -55,13 +55,16 @@
 </template>
 <script>
 import { useAuthStore } from '@/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const authStore = useAuthStore()
+    const { me, myid } = useMe()
 
     return {
       authStore,
+      me, myid
     }
   },
   data: function () {

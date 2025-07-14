@@ -53,6 +53,7 @@
 import { useGroupStore } from '../stores/group'
 import { useUserStore } from '../stores/user'
 import { useMemberStore } from '../stores/member'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -80,7 +81,8 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { groupStore, memberStore, userStore }
+    const { me, myid } = useMe()
+    return { groupStore, memberStore, userStore, me, myid }
   },
   data: function () {
     return {
