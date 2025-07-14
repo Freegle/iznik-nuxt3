@@ -353,6 +353,7 @@ const test = base.test.extend({
       /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
       /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
       /Refused to frame/, // Can happen in test.
+      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
     ]
 
     // Method to add additional allowed error patterns for specific tests
@@ -942,17 +943,21 @@ const testWithFixtures = test.extend({
       await noDeadlineButton.click()
       console.log('Clicked "No deadline" in deadline modal')
 
-      // Handle delivery modal if it appears
-      const deliveryModal = page.locator(
-        '.modal:has-text("Could you deliver?")'
-      )
-      await deliveryModal.waitFor({
-        state: 'visible',
-        timeout: timeouts.navigation.default,
-      })
-      const maybeButton = page.locator('.btn:has-text("Maybe")')
-      await maybeButton.click()
-      console.log('Clicked "Maybe" in delivery modal')
+      // Handle delivery modal if it appears (only for OFFER posts)
+      if (type.toUpperCase() === 'OFFER') {
+        const deliveryModal = page.locator(
+          '.modal:has-text("Could you deliver?")'
+        )
+        await deliveryModal.waitFor({
+          state: 'visible',
+          timeout: timeouts.navigation.default,
+        })
+        const maybeButton = page.locator('.btn:has-text("Maybe")')
+        await maybeButton.click()
+        console.log('Clicked "Maybe" in delivery modal')
+      } else {
+        console.log('Skipping delivery modal for WANTED post')
+      }
 
       // Set password to default test password in NewUserInfo component
       await setNewUserPassword()

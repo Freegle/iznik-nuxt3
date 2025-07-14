@@ -199,7 +199,10 @@ test.describe('Settings Page - Email Level Settings', () => {
       const advancedSection = page.locator(
         'text=Mail me replies from other freeglers'
       )
-      expect(await advancedSection.isVisible()).toBeFalsy()
+      await advancedSection.waitFor({
+        state: 'hidden',
+        timeout: timeouts.ui.appearance,
+      })
 
       // Take screenshot before showing advanced settings
       await page.screenshot({
@@ -212,7 +215,10 @@ test.describe('Settings Page - Email Level Settings', () => {
       await page.waitForTimeout(timeouts.ui.transition)
 
       // Advanced settings should now be visible
-      expect(await advancedSection.isVisible()).toBeTruthy()
+      await advancedSection.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
 
       // Take screenshot after showing advanced settings
       await page.screenshot({
@@ -234,7 +240,10 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       for (const settingText of expectedAdvancedSettings) {
         const setting = page.locator(`*:has-text("${settingText}")`).first()
-        expect(await setting.isVisible()).toBeTruthy()
+        await setting.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
         console.log(`✓ Found advanced setting: ${settingText}`)
       }
 
@@ -284,7 +293,9 @@ test.describe('Settings Page - Email Level Settings', () => {
     const warningMessage = page.locator(
       '*:has-text("If people message you, you won\'t get any emails")'
     )
-    expect(await warningMessage.first().isVisible()).toBeTruthy()
+    await warningMessage
+      .first()
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
     // Take screenshot showing the warning message
     await page.screenshot({
@@ -303,7 +314,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Warning should be gone
-    expect(await warningMessage.isVisible()).toBeFalsy()
+    await warningMessage.waitFor({
+      state: 'hidden',
+      timeout: timeouts.ui.appearance,
+    })
 
     // Take screenshot showing warning is gone with 'Full' setting
     await page.screenshot({

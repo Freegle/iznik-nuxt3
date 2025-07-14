@@ -52,6 +52,7 @@ const environment = {
   // These can be overridden with environment variables
   postcode: process.env.TEST_POSTCODE || 'EH3 6SS',
   place: process.env.TEST_PLACE || 'Edinburgh',
+  testgroup: process.env.TEST_GROUP || 'FreeglePlayground',
 
   // Test email configuration
   email: {

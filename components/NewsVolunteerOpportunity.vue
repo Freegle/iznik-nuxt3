@@ -182,6 +182,10 @@ try {
       await groupStore.fetch(groupid)
     }
   }
+
+  if (!volunteeringData) {
+    throw new Error('Volunteering opportunity not found')
+  }
 } catch (e) {
   // Most likely doesn't exist.
   emit('hide')
