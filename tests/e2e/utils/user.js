@@ -567,7 +567,7 @@ async function unsubscribeManually(page, email) {
     )
 
     // The leave button might not appear if the account has already unsubscribed but is in limbo.
-    if ((await leaveButton.count()) === 0) {
+    if ((await leaveButton.count()) > 0) {
       await leaveButton.click()
       // If no error message, look for the confirmation modal
       console.log('Waiting for confirmation modal in unsubscribe')
