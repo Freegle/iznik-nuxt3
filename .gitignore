@@ -24,6 +24,7 @@ static/sw.js
 /playwright-report/
 /test-results/.last-run.json
 /test-results/
+/coverage/
 /.npmrc
 /test-emails.json
 /CLAUDE.local.md

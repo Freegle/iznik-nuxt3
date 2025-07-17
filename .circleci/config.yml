@@ -28,6 +28,11 @@ commands:
           path: playwright-report
           destination: playwright-report
           when: always
+      # Store coverage reports
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+          when: always
       # Store our dedicated screenshots directory
       - store_artifacts:
           path: playwright-screenshots
@@ -138,11 +143,12 @@ jobs:
               sleep 30
             done
             
-      # Run Playwright tests
+      # Run Playwright tests with coverage
       - run:
-          name: Run Playwright tests
+          name: Run Playwright tests with coverage
           command: |
             mkdir -p test-results
+            mkdir -p coverage
             export NODE_OPTIONS="--max-old-space-size=8192"
             
             # Set environment variables with defaults
@@ -152,8 +158,8 @@ jobs:
             export TEST_EMAIL_DOMAIN=${TEST_EMAIL_DOMAIN:-yahoogroups.com}
             export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             
-            # Run tests and capture exit code
-            npm run test:ci
+            # Run tests with coverage and capture exit code
+            npm run test:coverage:ci
             TEST_EXIT_CODE=$?
             
             echo "Playwright test exit code: $TEST_EXIT_CODE"
@@ -185,6 +191,18 @@ jobs:
               # Exit with the original test exit code to properly fail the build
               exit $TEST_EXIT_CODE
             fi
+
+      # Upload coverage to Coveralls
+      - run:
+          name: Upload coverage to Coveralls
+          command: |
+            if [ -f "coverage/lcov.info" ]; then
+              echo "Uploading coverage to Coveralls..."
+              npm run coverage:upload
+            else
+              echo "No coverage file found, skipping upload"
+            fi
+          when: always  # Run even if tests fail to get partial coverage
                 
       # Save test results (always run this, even if tests fail)
       - run:
