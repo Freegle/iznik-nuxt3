@@ -5,7 +5,7 @@
         <a
           target="_blank"
           rel="noopener"
-          href="https://affiliate.k.io/go/Freegle-Krystal"
+          href="/shortlink/krystalaffiliate"
           class="d-flex justify-content-start flex-column mr-4 test-sponsor-krystal"
         >
           <ProxyImage
