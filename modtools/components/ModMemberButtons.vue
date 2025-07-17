@@ -155,6 +155,7 @@
 import ModMemberButton from './ModMemberButton'
 import ModMemberActions from './ModMemberActions'
 import ModCommentAddModal from '~/components/ModCommentAddModal'
+import { useModMe } from '~/composables/useModMe'
 
 const OurToggle = () => import('~/components/OurToggle')
 
@@ -165,7 +166,6 @@ export default {
     ModMemberButton,
     OurToggle,
   },
-
   props: {
     member: {
       type: Object,
@@ -186,6 +186,10 @@ export default {
       required: false,
       default: false,
     },
+  },
+  setup() {
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { hasPermissionSpamAdmin }
   },
   data: function () {
     return {

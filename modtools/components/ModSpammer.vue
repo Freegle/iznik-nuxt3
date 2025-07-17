@@ -57,6 +57,7 @@
   </div>
 </template>
 <script>
+import { useModMe } from '~/composables/useModMe'
 export default {
   props: {
     user: {
@@ -68,6 +69,10 @@ export default {
       required: false,
       default: null,
     },
+  },
+  setup() {
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { hasPermissionSpamAdmin }
   },
   computed: {
     variant() {

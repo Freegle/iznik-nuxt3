@@ -69,6 +69,7 @@
 </template>
 <script>
 import { useUserStore } from '../stores/user'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -79,8 +80,10 @@ export default {
   },
   setup() {
     const userStore = useUserStore()
+    const { amAModOn } = useModMe()
     return {
       userStore,
+      amAModOn,
     }
   },
   computed: {

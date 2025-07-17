@@ -62,6 +62,7 @@ export default {
     getCount(types) {
       let total = 0
 
+      //console.log('getCount', types, this.work)
       if (types) {
         for (const key in this.work) {
           if (types.includes(key)) {
@@ -69,6 +70,7 @@ export default {
           }
         }
       }
+      // console.log('getCount',types,total)
 
       return total
     },

@@ -203,6 +203,7 @@ import { required, email, min, max } from '@vee-validate/rules'
 import { useAdminsStore } from '../stores/admins'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 defineRule('required', required)
 defineRule('email', email)
@@ -223,7 +224,8 @@ export default {
     const adminsStore = useAdminsStore()
     const modGroupStore = useModGroupStore()
     const { myGroups, supportOrAdmin } = useMe()
-    return { adminsStore, modGroupStore, myGroups, supportOrAdmin }
+    const { checkWork } = useModMe()
+    return { adminsStore, modGroupStore, myGroups, supportOrAdmin, checkWork }
   },
   data: function () {
     return {
@@ -345,7 +347,7 @@ export default {
       }
       return true
     },
-    copyAdmin(admin){
+    copyAdmin(admin) {
       this.essential = admin.essential === 1
       this.groupidcreate = admin.groupid
       this.subject = admin.subject
@@ -353,7 +355,7 @@ export default {
       this.ctatext = admin.ctatext
       this.ctalink = admin.ctalink
       this.tabIndex = 1
-    }
+    },
   },
 }
 </script>

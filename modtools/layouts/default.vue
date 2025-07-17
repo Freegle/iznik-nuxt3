@@ -260,6 +260,7 @@ import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '@/stores/modconfig'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 import { buildHead } from '~/composables/useMTBuildHead'
 
@@ -276,6 +277,12 @@ export default {
     const modConfigStore = useModConfigStore()
     const persistent = authStore.auth.persistent
     const { supportOrAdmin } = useMe()
+    const {
+      hasPermissionNewsletter,
+      hasPermissionSpamAdmin,
+      hasPermissionGiftAid,
+      checkWork,
+    } = useModMe()
 
     if (process.client) {
       // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
@@ -326,6 +333,10 @@ export default {
       modGroupStore,
       oneTap,
       supportOrAdmin,
+      hasPermissionNewsletter,
+      hasPermissionSpamAdmin,
+      hasPermissionGiftAid,
+      checkWork
     }
   },
   data: function () {

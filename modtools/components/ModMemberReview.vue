@@ -153,6 +153,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useUserStore } from '../stores/user'
+import { useModMe } from '~/composables/useModMe'
 
 const MEMBERSHIPS_SHOW = 3
 
@@ -167,8 +168,10 @@ export default {
   emits: ['forcerefresh'],
   setup() {
     const userStore = useUserStore()
+    const { amAModOn } = useModMe()
     return {
       userStore,
+      amAModOn,
     }
   },
   data: function () {

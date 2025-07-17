@@ -71,12 +71,14 @@
 <script>
 import { useAuthStore } from '../../stores/auth'
 import { useSpammerStore } from '../stores/spammer'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   setup() {
     const authStore = useAuthStore()
     const spammerStore = useSpammerStore()
-    return { authStore, spammerStore }
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { authStore, spammerStore, hasPermissionSpamAdmin }
   },
   data: function () {
     return {

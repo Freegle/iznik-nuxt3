@@ -49,6 +49,7 @@
 
 import { useMessageStore } from '../../stores/message'
 import { useStdmsgStore } from '../stores/stdmsg'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -137,7 +138,8 @@ export default {
   setup() {
     const messageStore = useMessageStore()
     const stdmsgStore = useStdmsgStore()
-    return { messageStore, stdmsgStore }
+    const { checkWorkDeferGetMessages } = useModMe()
+    return { messageStore, stdmsgStore, checkWorkDeferGetMessages }
   },
   data: function () {
     return {

@@ -82,6 +82,7 @@ import { setupModMembers } from '../composables/useModMembers'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   components: { ReadMore },
@@ -108,6 +109,7 @@ export default {
     const userStore = useUserStore()
     const { bump, context } = setupModMembers()
     const { supportOrAdmin, myGroup } = useMe()
+    const { amAModOn } = useModMe()
     return {
       bump,
       context,
@@ -116,6 +118,7 @@ export default {
       userStore,
       supportOrAdmin,
       myGroup,
+      amAModOn,
     }
   },
   data: function () {

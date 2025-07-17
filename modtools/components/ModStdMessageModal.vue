@@ -148,6 +148,7 @@ import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   components: {},
@@ -180,6 +181,7 @@ export default {
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
     const { me, myid } = useMe()
+    const { checkWorkDeferGetMessages } = useModMe()
     return {
       modGroupStore,
       memberStore,
@@ -191,6 +193,7 @@ export default {
       show,
       me,
       myid,
+      checkWorkDeferGetMessages,
     }
   },
   data: function () {

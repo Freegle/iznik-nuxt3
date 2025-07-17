@@ -108,6 +108,7 @@
 // membership.id is groupid and membership.membershipid is membershipid
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -124,7 +125,8 @@ export default {
   setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { memberStore, userStore }
+    const { checkWork } = useModMe()
+    return { memberStore, userStore, checkWork }
   },
   methods: {
     async changeEvents(newval) {
