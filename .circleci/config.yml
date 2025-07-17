@@ -195,9 +195,18 @@ jobs:
             fi
 
       # Upload coverage to Coveralls using the orb
+      - run:
+          name: Upload coverage to Coveralls
+          command: |
+            if [ -f "coverage/lcov.info" ]; then
+              echo "Coverage file found, uploading to Coveralls..."
+            else
+              echo "No coverage file found at coverage/lcov.info"
+              exit 1
+            fi
+          when: always
       - coveralls/upload:
-          coverage_file: coverage/lcov.info
-          when: always  # Run even if tests fail to get partial coverage
+          path_to_lcov: coverage/lcov.info
                 
       # Save test results (always run this, even if tests fail)
       - run:
