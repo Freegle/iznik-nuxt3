@@ -3,12 +3,11 @@
 
 // TODO: convert into composable
 
-// Manages to access composables/useMe me fetchMe etc using plugins/me.js
-
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   data: function () {
@@ -37,7 +36,8 @@ export default {
   },
   methods: {
     hasPermission(perm) {
-      const perms = this.me ? this.me.permissions : null
+      const { me } = useMe()
+      const perms = me.value ? me.value.permissions : null
       return perms && perms.includes(perm)
     },
     myModGroup(groupid) {
@@ -91,12 +91,13 @@ export default {
         let currentTotal = 0
         if (authStore.work) currentTotal += authStore.work.total
         if (chatStore) currentTotal += Math.min(99, chatStore.unreadCount)
-        await this.fetchMe(true, ['work'])
+        const { fetchMe } = useMe()
+        await fetchMe(true, ['work'])
         await modGroupStore.getModGroups()
 
-        this.chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
+        const chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
         const work = authStore.work
-        const totalCount = work?.total + this.chatcount
+        const totalCount = work?.total + chatcount
         if (
           work &&
           totalCount > currentTotal &&
