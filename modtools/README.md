@@ -3,7 +3,8 @@
 This `modtools` branch provides an interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally, 
 running on separate website https://modtools.org/
 
-ModTools exists as a branch of the main/base `master` iznik-nuxt3 repository, with some modifications of the base code, with additions in a /modtools directory.
+ModTools exists as a branch of the main/base `master` iznik-nuxt3 repository, with some modifications of the base code, with the bulk of the volunteer
+interface in an added /modtools directory.
 
 The ModTools code in /modtools uses the parent directory as a Nuxt3 layer, ie modtools extends or inherits from `..` ie the base nuxt3 code. 
 These files/directories are present in /modtools:
@@ -48,7 +49,7 @@ These alterations to the base code should NOT be incorporated into the base code
 
 ## Usage:
 
-Best have in a separate directory to the main nuxt3 code so node_modules directories are not confused.
+Best have in a separate directory to the main nuxt3 code so the node_modules directories are not confused.
 
 Starting from root
 ```
@@ -81,7 +82,7 @@ If it succeeds it is available at https://modtools--golden-caramel-d2c3a7.netlif
 
 The Freegle ha proxy hides this URL so you can use it at https://modtools.org/
 
-The netlify instructions are in the modtools-branch-specific `netlify.toml`:
+The netlify instructions are in the modtools-branch-specific [netlify.toml](../netlify.toml):
 
 ```
 [build]
