@@ -31,7 +31,7 @@ These files/directories are present in /modtools:
 TO DO: Multiple modifications to the base code have been done in the modtools branch. 
 Most - but not all - of these can be incorporated into master.
 
-The base code usually uses `miscStore.modtools` to do any MT-specific actions.
+The base code usually uses `miscStore.modtools` to determine any MT-specific actions.
 However `process.env.MT` and `config.IS_MT` are also available if need be.
 
 ### ModTools crucial base alterations
@@ -81,6 +81,7 @@ When this branch is pushed to GitHub it is automatically built at netlify.
 If it succeeds it is available at https://modtools--golden-caramel-d2c3a7.netlify.app/
 
 The Freegle ha proxy hides this URL so you can use it at https://modtools.org/
+There is no automatic mechanism to detect changes and reload automatically, so volunteers must do this as required to pick up a new release.
 
 The netlify instructions are in the modtools-branch-specific [netlify.toml](../netlify.toml):
 
