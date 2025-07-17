@@ -336,7 +336,7 @@ export default {
       hasPermissionNewsletter,
       hasPermissionSpamAdmin,
       hasPermissionGiftAid,
-      checkWork
+      checkWork,
     }
   },
   data: function () {

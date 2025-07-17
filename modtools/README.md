@@ -17,9 +17,7 @@ These files/directories are present in /modtools:
 * composables/* - Extend and add to the base composables
 * layouts/* - ModTools layouts
 * middleware/* - `authuser.global.ts` provides user authentication for most routes
-* mixins/* - `modme.js` needs to be converted into a composable
 * pages/* - Generally replaces the base pages
-* plugins/* - `modme.js` needs to be converted into a composable
 * public/* - ModTools-specific icons and eg `alert.wav`
 * stores/* - Extend and add to the base stores
 
