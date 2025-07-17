@@ -1,100 +1,92 @@
 # iznik-nuxt3 modtools
 
-This branch provides an interface for Freegle volunteers to moderate their group, running on separate website https://modtools.org/
+This `modtools` branch provides an interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally, 
+running on separate website https://modtools.org/
 
-The app exists as a branch of the main nuxt3 app, with minimal modifications of the main codebase, with additions in a `modtools` directory.
+ModTools exists as a branch of the main/base `master` iznik-nuxt3 repository, with some modifications of the base code, with additions in a /modtools directory.
 
-The modtools app in `modtools` has the parent directory as a layer, ie modtools extends or inherits from `..` ie the base nuxt3 app. 
-These files/directories are extended:
+The ModTools code in /modtools uses the parent directory as a Nuxt3 layer, ie modtools extends or inherits from `..` ie the base nuxt3 code. 
+These files/directories are present in /modtools:
 
-* components/* - Extend the default components
-* composables/* - Extend the default composables
-* layouts/* - Extend the default layouts
-* pages/* - Extend the default pages
-* plugins/* - Extend the default plugins
-* server/* - Extend the default server endpoints & middleware
-* utils/* - Extend the default utils
-* nuxt.config.ts- Extend the default nuxt config
-* app.config.ts - Extend the default app config
+* `app.vue`
+* `nuxt.config.ts`- Extend the base nuxt config `['../']`
+* `package.json` - only extra packages needed for ModTools
+* `package-lock.json`
+* assets/* - does NOT extend the base assets
+* components/* - Extend and add to the base components
+* composables/* - Extend and add to the base composables
+* layouts/* - ModTools layouts
+* middleware/* - `authuser.global.ts` provides user authentication for most routes
+* mixins/* - `modme.js` needs to be converted into a composable
+* pages/* - Generally replaces the base pages
+* plugins/* - `modme.js` needs to be converted into a composable
+* public/* - ModTools-specific icons and eg `alert.wav`
+* stores/* - Extend and add to the base stores
 
-A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and so brings in the required packages.
+## Versioning:
 
-## Not extended:
+`/modtools/package.json` contains `version` which is shown to the volunteer. Bump this for each release.
 
-* api/*
-* assets/* - ADDED and amended `assets/css/_color-vars.scss`
+## Base alterations:
 
-## Changes
+TO DO: Multiple modifications to the base code have been done in the modtools branch. 
+Most - but not all - of these can be incorporated into master.
 
-* `app.vue` is a simplified copy of the root version
-* `modtools/layouts/default.vue` supersedes `./layouts/default.vue`
+The base code usually uses `miscStore.modtools` to do any MT-specific actions.
+However `process.env.MT` and `config.IS_MT` are also available if need be.
 
-## Amended:
+### ModTools crucial base alterations
 
-* `modtools/assets/css/bootstrap-custom.scss` now has `~/../` at start twice
-* `api/BaseAPI.js` add config.params.modtools
-* `stores/group.js` has confirmAffiliation() added
-* `stores/auth.js` has work&discourse added; session.fetchv2
-* `stores/misc.js` add modtools
-* `config.js` has modtools SENTRY_DSN
+These alterations to the base code should NOT be incorporated into the base code:
 
-## TODO
+* netlify.toml
+* nuxt.config.ts
+* components/ChatMessageInterested.vue
+* components/ChatMessageText.vue
 
-* Various TODOs to check inc some in base code
+???
+* `stores/group.js`
+* `stores/auth.js`
 
-* components/ProxyImage.vue Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
-  <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
+## Usage:
 
-## Upgrade notes
+Best have in a separate directory to the main nuxt3 code so node_modules directories are not confused.
 
-* b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input, b-textarea to b-form-textarea
-  b-input-group-append -> <slot name="append">
-* b-modal <template #default> <template #footer> useOurModal, etc. Do not use v-if on b-modal
-  add @hidden="onHide" emits: ['hidden'] onHide() { this.$emit('hidden') }
-  add v-if and @hidden <ModLogsModal v-if="showLogsModal" @hidden="showLogsModal = false" />
-  and if needed, in modal add show() { this.modal.show() }
-* Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
-* Add extra icons to root plugins/vue-awesome.js
-* Change `this.$store.getters['misc/time']` into `this.miscStore.time`
-* And... miscStore.get('dashboardShowInfo') and miscStore.set({ key: 'dashboardShowInfo', value: newValue })
-* SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
-  To have inline use :flex="false"
-* const path = computed(() => { return 0 } and access as path.value
-* Change pluralize to added pluralise with number and includeNumber as extra params
-  import { pluralise } from '../composables/usePluralise'
-* For waitForRef refs use this.$refs.modal?.show() etc. Within modal component:
-    const { modal, show, hide } = useOurModal()
-    defineExpose({ show })
+Starting from root
+```
+npm i
+cd modtools
+npm i
+npm run dev
+```
 
-* b-img-lazy to b-img lazy
-* float-right to float-end
+You can then debug on http://127.0.0.1:3000/
 
-* npm i leaflet-draw-toolbar --force
+To debug it often helps to comment out the main content of `/plugins/something-went-wrong.client.js`
 
-    delay(n) {
-      return new Promise(function (resolve) {
-        setTimeout(resolve, n * 1000);
-      })
-    },
+## Merging
 
-      await this.delay(5)
+To catch up with master:
+```
+git checkout master
+git pull
+git checkout modtools
+git merge master
+```
 
-CHECK ALL this.member.userid
+Any changes to `assets/css` must be copied through to `modtools/assets/css`.
 
-REMOVED to get it to build:
-    "@vitejs/plugin-legacy": "^5.2.0",
-    "nuxt-vite-legacy": "^1.2.0",
+## Release:
 
-this.checkWork(true)
-this.deferCheckWork()
-this.checkWorkDeferGetMessages()
-// SEE WORK EXPLANATION IN useModMessages.js
+When this branch is pushed to GitHub it is automatically built at netlify.
+If it succeeds it is available at https://modtools--golden-caramel-d2c3a7.netlify.app/
 
-<b-form-select v-model="whatever" @change="change"> needs v-model and newval is invalid but this.whatever has been updated
+The Freegle ha proxy hides this URL so you can use it at https://modtools.org/
 
-npx eslint api/*.js --fix
+The netlify instructions are in the modtools-branch-specific `netlify.toml`:
 
-git reset --hard origin/production
-
-<!-- eslint-disable-next-line -->
-// eslint-disable-next-line no-unused-vars
+```
+[build]
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && cd modtools && npm i && nuxt build"
+publish = "modtools/dist"
+```

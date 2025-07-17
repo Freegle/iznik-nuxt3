@@ -562,35 +562,36 @@ async function unsubscribeManually(page, email) {
     }
 
     console.log('Clicking "Leave Freegle completely" button')
-    await page.locator('.btn:has-text("Leave Freegle completely")').click()
-
-    // Take a screenshot after clicking
-    await page.screenshot({
-      path: `playwright-screenshots/after-click-leave-${Date.now()}.png`,
-      fullPage: true,
-    })
-
-    // If no error message, look for the confirmation modal
-    console.log('Waiting for confirmation modal in unsubscribe')
-
-    // Wait for the confirmation modal to appear and animations to complete
-    await waitForModal(page, 'Permanently delete your account?')
-
-    console.log('Found confirmation modal, clicking Confirm button')
-    // Click the Confirm button
-    const confirmButton = page.locator(
-      '.btn:has-text("Confirm"), button:has-text("Confirm")'
+    const leaveButton = page.locator(
+      '.btn:has-text("Leave Freegle completely")'
     )
-    await confirmButton.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-    await confirmButton.click()
 
-    console.log('Wait for confirmation')
-    await page.locator('div:has-text("removed your account")')
+    // The leave button might not appear if the account has already unsubscribed but is in limbo.
+    if ((await leaveButton.count()) === 0) {
+      await leaveButton.click()
+      // If no error message, look for the confirmation modal
+      console.log('Waiting for confirmation modal in unsubscribe')
 
-    console.log('Successfully unsubscribed email')
+      // Wait for the confirmation modal to appear and animations to complete
+      await waitForModal(page, 'Permanently delete your account?')
+
+      console.log('Found confirmation modal, clicking Confirm button')
+      // Click the Confirm button
+      const confirmButton = page.locator(
+        '.btn:has-text("Confirm"), button:has-text("Confirm")'
+      )
+      await confirmButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await confirmButton.click()
+
+      console.log('Wait for confirmation')
+      await page.locator('div:has-text("removed your account")')
+
+      console.log('Successfully unsubscribed email')
+    }
+
     return true
   } catch (error) {
     console.error(`Failed to unsubscribe: ${error.message}`)

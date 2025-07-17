@@ -124,7 +124,6 @@
   </div>
 </template>
 <script setup>
-import { storeToRefs } from 'pinia'
 import { useChatStore } from '../stores/chat'
 import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
@@ -139,11 +138,11 @@ import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ChatMessageReminder from './ChatMessageReminder'
-import { useUserStore } from '~/stores/user'
 import { ref, computed } from '#imports'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'
 import 'vue-simple-context-menu/dist/vue-simple-context-menu.css'
+import { useMe } from '~/composables/useMe'
 
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
@@ -184,8 +183,7 @@ const props = defineProps({
 })
 
 const chatStore = useChatStore()
-const userStore = useUserStore()
-const { myid } = storeToRefs(userStore)
+const { myid } = useMe()
 
 // Data properties as refs
 const selected = ref(false)
