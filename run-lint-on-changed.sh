@@ -40,7 +40,7 @@ esac
 
 info "Finding changed files..."
 
-# Get all changed files that are staged for commit, excluding .ts and .tsx files folder
+# Get all changed files that are staged for commit, excluding .ts and .tsx files
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|vue)$' | grep -v -E '\.(ts|tsx)$' || true)
 
 # Get all changed files that aren't staged (optional, uncomment if you want these too)
@@ -52,7 +52,7 @@ STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js
 ALL_CHANGED_FILES="$STAGED_FILES"
 
 if [ -z "$ALL_CHANGED_FILES" ]; then
-  success "No JavaScript/Vue files to lint (TypeScript .ts/.tsx files folder are excluded)."
+  success "No JavaScript/Vue files to lint (TypeScript .ts/.tsx files are excluded)."
   exit 0
 fi
 
