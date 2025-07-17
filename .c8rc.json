@@ -31,5 +31,6 @@
   "skip-full": false,
   "clean": true,
   "temp-directory": "coverage/tmp",
-  "resolve": "coverage/tmp"
+  "resolve": "coverage/tmp",
+  "src": "."
 }

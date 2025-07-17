@@ -207,6 +207,7 @@ jobs:
           when: always
       - coveralls/upload:
           path_to_lcov: coverage/lcov.info
+          debug: true
                 
       # Save test results (always run this, even if tests fail)
       - run:

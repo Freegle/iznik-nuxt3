@@ -6,6 +6,8 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: 1,
+  globalSetup: require.resolve('./tests/e2e/global-setup.js'),
+  globalTeardown: require.resolve('./tests/e2e/global-teardown.js'),
   reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
   timeout: 240_000,
   outputDir: 'test-results',
