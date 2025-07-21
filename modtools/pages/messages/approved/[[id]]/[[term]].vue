@@ -102,7 +102,7 @@ export default {
             router.push('/messages/approved/')
           } else {
             // console.log('chosengroupid GOTO', newVal, typeof newVal)
-            this.groupid = newVal // Sometimes royte change does not work so save as groupid just in case
+            this.groupid = newVal // Sometimes route change does not work so save as groupid just in case
             router.push('/messages/approved/' + newVal)
           }
         })

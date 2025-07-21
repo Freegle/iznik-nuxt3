@@ -284,6 +284,16 @@
 <script setup>
 import { nextTick } from 'vue'
 
+import 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import {
+  LMap,
+  LTileLayer,
+  LGeoJson,
+  LCircleMarker,
+  LFeatureGroup,
+} from '@vue-leaflet/vue-leaflet'
+
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
