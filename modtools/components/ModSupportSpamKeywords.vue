@@ -23,6 +23,12 @@
             class="mb-2"
           />
 
+          <b-form-select
+            v-model="actionType"
+            :options="actionTypeOptions"
+            class="mb-2"
+          />
+
           <NoticeMessage
             v-if="patternType === 'regex'"
             variant="warning"
@@ -120,6 +126,12 @@ export default {
         { text: 'Literal (exact word/phrase)', value: 'literal' },
         { text: 'Regular Expression (advanced)', value: 'regex' },
       ],
+      actionType: 'Review',
+      actionTypeOptions: [
+        { text: 'Review', value: 'Review' },
+        { text: 'Spam', value: 'Spam' },
+        { text: 'Whitelist', value: 'Whitelist' },
+      ],
       regexError: '',
       spamKeywordTypeFilter: 'all',
       spamKeywordTypeOptions: [
@@ -177,7 +189,7 @@ export default {
       // For spam keywords, the type determines if it's Literal or Regex
       const keywordType = this.patternType === 'regex' ? 'Regex' : 'Literal'
       
-      await this.systemConfigStore.addSpamKeyword(trimmedWord, keywordType)
+      await this.systemConfigStore.addSpamKeyword(trimmedWord, keywordType, this.actionType)
       this.newSpamKeyword = ''
     },
   },
