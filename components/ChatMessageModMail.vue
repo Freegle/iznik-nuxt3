@@ -61,7 +61,7 @@
                 </b-button>
               </div>
               <NoticeMessage
-                v-else-if="chat.chattype === 'User2User'"
+                v-else-if="!isMT && chat.chattype === 'User2User'"
                 variant="warning"
                 class="mt-2"
               >
@@ -97,11 +97,14 @@ import {
   fetchReferencedMessage,
   useChatMessageBase,
 } from '../composables/useChat'
+import { useMiscStore } from '../stores/misc' // MT..
 import NoticeMessage from './NoticeMessage'
 import ChatButton from './ChatButton'
 import ProfileImage from '~/components/ProfileImage'
 import GroupSelect from '~/components/GroupSelect'
 import { useRouter } from '#imports'
+const miscStore = useMiscStore()
+const isMT = ref(miscStore.modtools)
 
 const props = defineProps({
   chatid: {

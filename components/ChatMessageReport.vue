@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col>
-        <b-card v-if="!modtools" border-variant="warning">
+        <b-card v-if="!isMT" border-variant="warning">
           <b-card-title>
             <h4>
               <v-icon icon="exclamation-triangle" scale="2" />&nbsp;You reported
@@ -67,7 +67,7 @@ const props = defineProps({
 })
 
 const miscStore = useMiscStore()
-const modtools = computed(() => miscStore.modtools)
+const isMT = ref(miscStore.modtools)
 
 // Use the chat base composable (even though we don't use any of its properties in this component)
 useChatMessageBase(props.chatid, props.id, props.pov)

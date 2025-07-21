@@ -11,6 +11,9 @@
           :chatid="chatid"
           class="mt-1 mb-2"
         />
+        <div v-if="isMT && modtoolsLink">
+          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
+        </div>
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -26,6 +29,7 @@
         </div>
         <div
           v-if="
+            !modtools &&
             refmsg &&
             refmsg.fromuser === myid &&
             refmsg.type === 'Offer' &&
@@ -156,11 +160,14 @@ import {
   useChatMessageBase,
 } from '../composables/useChat'
 import { useMessageStore } from '../stores/message'
+import { useMiscStore } from '../stores/misc' // MT..
 import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
+const miscStore = useMiscStore()
+const isMT = ref(miscStore.modtools)
 
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
@@ -215,6 +222,33 @@ const refmsgid = computed(() => chatmessage.value?.refmsgid)
 const refmsg = computed(() =>
   refmsgid.value ? messageStore.byId(refmsgid.value) : null
 )
+
+const modtoolsLink = computed(() => {
+  if (
+    chatmessage.value.refmsg &&
+    chatmessage.value.refmsg.groups &&
+    chatmessage.value.refmsg.groups.length > 0
+  ) {
+    return (
+      '/messages/approved/' +
+      chatmessage.value.refmsg.groups[0].groupid +
+      '/' +
+      chatmessage.value.refmsg.id +
+      '?noguard=true'
+    )
+  }
+  // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
+  if (chatmessage.value.group && chatmessage.value.refmsgid) {
+    return (
+      '/messages/approved/' +
+      chatmessage.value.group.id +
+      '/' +
+      chatmessage.value.refmsgid +
+      '?noguard=true'
+    )
+  }
+  return false
+})
 
 // Methods
 const fetchMessage = async () => {

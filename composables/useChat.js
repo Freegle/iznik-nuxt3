@@ -1,5 +1,6 @@
 import pluralize from 'pluralize'
 import { milesAway } from '../composables/useDistance'
+import { useMiscStore } from '../stores/misc' // MT..
 import { computed } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
@@ -183,6 +184,7 @@ export async function fetchReferencedMessage(chatid, id) {
 export function useChatMessageBase(chatId, messageId, pov = null) {
   const { chatStore, authStore, myid, chat, otheruser } = useChatShared(chatId)
   const messageStore = useMessageStore()
+  const miscStore = useMiscStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
 
@@ -207,14 +209,13 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const messageIsFromCurrentUser = computed(() => {
+    if (miscStore.modtools) {
+      // MT..
+      return chat.value.user1id !== chatmessage.value?.userid
+    }
     if (chat.value?.chattype === 'User2Mod') {
       // For User2Mod chats we want it on the right hand side we sent it.
-      if (chat.value.user1id) {
-        // MT..
-        return chat.value.user1id !== chatmessage.value?.userid
-      } else {
-        return chatmessage.value?.userid === myid
-      }
+      return chatmessage.value?.userid === myid
     } else {
       return chatmessage.value?.userid === myid
     }
@@ -248,6 +249,12 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const chatMessageProfileImage = computed(() => {
+    if (miscStore.modtools) {
+      // MT..
+      return chat.value.user1id !== chatmessage.value?.userid
+        ? me.value?.profile?.paththumb
+        : chat.value?.icon
+    }
     return chatmessage.value?.userid === myid
       ? me.value?.profile?.paththumb
       : chat.value?.icon
