@@ -18,6 +18,12 @@
             :options="patternTypeOptions"
             class="mb-2"
           />
+          
+          <b-form-select
+            v-model="worryWordType"
+            :options="worryWordTypeOptions"
+            class="mb-2"
+          />
 
           <NoticeMessage
             v-if="patternType === 'regex'"
@@ -112,18 +118,27 @@ export default {
     return {
       newWorryWord: '',
       patternType: 'literal',
+      worryWordType: 'Review',
       patternTypeOptions: [
         { text: 'Literal (exact word/phrase)', value: 'literal' },
         { text: 'Regular Expression (advanced)', value: 'regex' },
       ],
       regexError: '',
       worrywordTypeFilter: 'all',
+      worryWordTypeOptions: [
+        { text: 'Review', value: 'Review' },
+        { text: 'Regulated', value: 'Regulated' },
+        { text: 'Reportable', value: 'Reportable' },
+        { text: 'Medicine', value: 'Medicine' },
+        { text: 'Allowed', value: 'Allowed' },
+      ],
       worrywordTypeOptions: [
         { text: 'All Types', value: 'all' },
         { text: 'Review', value: 'Review' },
         { text: 'Regulated', value: 'Regulated' },
         { text: 'Reportable', value: 'Reportable' },
         { text: 'Medicine', value: 'Medicine' },
+        { text: 'Allowed', value: 'Allowed' },
       ],
     }
   },
@@ -176,8 +191,8 @@ export default {
       const patternToAdd =
         this.patternType === 'regex' ? `REGEX:${trimmedWord}` : trimmedWord
 
-      // Determine type - for now always use 'Review' but could be extended
-      const type = 'Review'
+      // Use the selected type from the form
+      const type = this.worryWordType
 
       await this.systemConfigStore.addWorryword(patternToAdd, type)
       this.newWorryWord = ''
