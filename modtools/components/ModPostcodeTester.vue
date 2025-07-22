@@ -18,8 +18,8 @@
         </p>
         <p v-else>No community found</p>
         <p class="font-weight-bold">Area:</p>
-        <p v-if="postcode.area">
-          {{ postcode.area.name }}
+        <p v-if="postcode.areaname">
+          {{ postcode.areaname }}
         </p>
         <p v-else>No area found</p>
       </div>
