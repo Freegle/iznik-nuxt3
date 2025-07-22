@@ -6,13 +6,45 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: 1,
-  reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
+  reporter: [
+    ['html'],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+    [
+      'monocart-reporter',
+      {
+        name: 'Playwright Code Coverage Report',
+        reportDir: 'monocart-report',
+        coverage: {
+          reports: ['v8', 'lcov'],
+          lcov: true,
+          outputDir: 'coverage',
+          entryFilter: (entry) => {
+            return true
+          },
+          sourceFilter: (sourcePath) => {
+            // Include only source files from your project
+            return (
+              sourcePath.includes('/.nuxt/') ||
+              sourcePath.includes('/components/') ||
+              sourcePath.includes('/pages/') ||
+              sourcePath.includes('/layouts/') ||
+              sourcePath.includes('/plugins/') ||
+              sourcePath.includes('/middleware/') ||
+              sourcePath.includes('/composables/') ||
+              sourcePath.includes('/utils/') ||
+              sourcePath.includes('/stores/')
+            )
+          },
+        },
+      },
+    ],
+  ],
   timeout: 240_000,
   outputDir: 'test-results',
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
+    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3002',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     viewport: { width: 1920, height: 1080 },
     trace: 'on',
@@ -24,6 +56,12 @@ module.exports = defineConfig({
     SENTRY_DSN: '',
     SENTRY_ENABLE_DEBUG: 'false',
     SENTRY_TRACES_SAMPLE_RATE: '0',
+  },
+
+  webServer: {
+    command: 'npm run dev',
+    port: 3002,
+    reuseExistingServer: !process.env.CI,
   },
 
   projects: [

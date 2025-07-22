@@ -28,6 +28,15 @@ commands:
           path: playwright-report
           destination: playwright-report
           when: always
+      # Store coverage reports
+      - store_artifacts:
+          path: coverage
+          destination: coverage
+          when: always
+      - store_artifacts:
+          path: monocart-report
+          destination: monocart-report
+          when: always
       # Store our dedicated screenshots directory
       - store_artifacts:
           path: playwright-screenshots
@@ -152,8 +161,8 @@ jobs:
             export TEST_EMAIL_DOMAIN=${TEST_EMAIL_DOMAIN:-yahoogroups.com}
             export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             
-            # Run tests and capture exit code
-            npm run test:ci
+            # Run tests with coverage and capture exit code
+            npm run test:coverage
             TEST_EXIT_CODE=$?
             
             echo "Playwright test exit code: $TEST_EXIT_CODE"
@@ -185,6 +194,18 @@ jobs:
               # Exit with the original test exit code to properly fail the build
               exit $TEST_EXIT_CODE
             fi
+
+      # Upload coverage to Coveralls (runs even if tests fail, but only if coverage exists)
+      - run:
+          name: Upload coverage to Coveralls
+          command: |
+            if [ -f "coverage/lcov.info" ]; then
+              echo "Coverage file found, uploading to Coveralls..."
+              npm run coveralls
+            else
+              echo "No coverage file found, skipping Coveralls upload"
+            fi
+          when: always
                 
       # Save test results (always run this, even if tests fail)
       - run:

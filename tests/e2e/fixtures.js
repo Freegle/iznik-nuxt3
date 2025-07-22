@@ -190,6 +190,26 @@ const test = base.test.extend({
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
+
+    // Enable coverage collection only in Chromium
+    let coverageStarted = false
+    if (context.browser().browserType().name() === 'chromium') {
+      try {
+        await Promise.all([
+          page.coverage.startJSCoverage({
+            resetOnNavigation: false,
+          }),
+          page.coverage.startCSSCoverage({
+            resetOnNavigation: false,
+          }),
+        ])
+        coverageStarted = true
+        console.log('Coverage collection started')
+      } catch (error) {
+        console.warn('Failed to start coverage collection:', error.message)
+      }
+    }
+
     // Create a logging proxy for the page
     const loggingPage = logger.createLoggingPage(page)
 
@@ -700,6 +720,30 @@ const test = base.test.extend({
       // Re-throw the error to fail the test
       throw error
     } finally {
+      // Stop coverage collection and save results before teardown
+      if (coverageStarted) {
+        try {
+          const [jsCoverage, cssCoverage] = await Promise.all([
+            page.coverage.stopJSCoverage(),
+            page.coverage.stopCSSCoverage(),
+          ])
+
+          // Combine coverage data
+          const coverage = [...jsCoverage, ...cssCoverage]
+          if (coverage.length > 0) {
+            // Add coverage data to test info for monocart-reporter to pick up
+            // The reporter will automatically collect this data
+            test.info().annotations.push({
+              type: 'coverage-data',
+              description: JSON.stringify(coverage),
+            })
+            console.log(`Collected ${coverage.length} coverage entries`)
+          }
+        } catch (error) {
+          console.warn('Failed to collect coverage data:', error.message)
+        }
+      }
+
       // Always perform teardown operations, regardless of test success/failure
       await performTeardown()
     }
