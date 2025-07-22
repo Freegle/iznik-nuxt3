@@ -14,6 +14,7 @@ module.exports = defineConfig({
       {
         name: 'Playwright Code Coverage Report',
         reportDir: 'monocart-report',
+        json: true,
         coverage: {
           reports: ['v8', 'lcov'],
           lcov: true,
