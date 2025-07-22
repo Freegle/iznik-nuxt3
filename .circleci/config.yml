@@ -110,7 +110,6 @@ jobs:
           name: Serve built application
           command: |
             export NODE_OPTIONS="--max-old-space-size=8192"
-            export PORT=3002
             npm run start > server.out 2>&1
           background: true
 
@@ -119,7 +118,7 @@ jobs:
           name: Wait for server to be ready
           command: |
             # Extract the host and port from TEST_BASE_URL or use default
-            SERVER_URL=${TEST_BASE_URL:-http://localhost:3002}
+            SERVER_URL=${TEST_BASE_URL:-http://localhost:3000}
             
             # Wait for server to be up - using longer timeout (120 seconds)
             timeout=${SERVER_TIMEOUT:-120}
@@ -156,7 +155,7 @@ jobs:
             export NODE_OPTIONS="--max-old-space-size=8192"
             
             # Set environment variables with defaults
-            export TEST_BASE_URL=${TEST_BASE_URL:-http://localhost:3002}
+            export TEST_BASE_URL=${TEST_BASE_URL:-http://localhost:3000}
             export TEST_POSTCODE=${TEST_POSTCODE:-EH3 6SS}
             export TEST_PLACE=${TEST_PLACE:-Edinburgh}
             export TEST_EMAIL_DOMAIN=${TEST_EMAIL_DOMAIN:-yahoogroups.com}

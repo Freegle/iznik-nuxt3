@@ -44,7 +44,7 @@ module.exports = defineConfig({
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3002',
+    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     viewport: { width: 1920, height: 1080 },
     trace: 'on',
@@ -56,12 +56,6 @@ module.exports = defineConfig({
     SENTRY_DSN: '',
     SENTRY_ENABLE_DEBUG: 'false',
     SENTRY_TRACES_SAMPLE_RATE: '0',
-  },
-
-  webServer: {
-    command: 'npm run dev',
-    port: 3002,
-    reuseExistingServer: !process.env.CI,
   },
 
   projects: [
