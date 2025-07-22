@@ -94,15 +94,16 @@ jobs:
           name: Install Playwright browsers
           command: npx playwright install --with-deps chromium
 
-      # Build the project with environment variables
+      # Build the project with SSR disabled - otherwise coverage won't work.
       - run:
-          name: Build for testing
+          name: Build for testing (SSR disabled)
           command: |
             export IZNIK_API_V1=${API_V1_URL:-https://fdapilive.ilovefreegle.org/api}
             export IZNIK_API_V2=${API_V2_URL:-https://api.ilovefreegle.org/apiv2}
             export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             # Increase Node.js memory limit to 8GB
             export NODE_OPTIONS="--max-old-space-size=8192"
+            export NUXT_SSR=false
             npm run build
 
       # Serve the built application in the background
