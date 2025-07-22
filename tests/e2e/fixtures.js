@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
+const { addCoverageReport } = require('monocart-reporter')
 const {
   SCREENSHOTS_DIR,
   timeouts,
@@ -731,12 +732,8 @@ const test = base.test.extend({
           // Combine coverage data
           const coverage = [...jsCoverage, ...cssCoverage]
           if (coverage.length > 0) {
-            // Add coverage data to test info for monocart-reporter to pick up
-            // The reporter will automatically collect this data
-            test.info().annotations.push({
-              type: 'coverage-data',
-              description: JSON.stringify(coverage),
-            })
+            // Add coverage data to monocart-reporter using the proper API
+            await addCoverageReport(coverage, test.info())
             console.log(`Collected ${coverage.length} coverage entries`)
           }
         } catch (error) {
