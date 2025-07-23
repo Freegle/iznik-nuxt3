@@ -14,7 +14,7 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwright test",
-    "test:coverage": "npm run test:clean && playwright test && node scripts/generate-coverage.js",
+    "test:coverage": "npm run test:clean && playwright test",
     "test:coverage:upload": "npm run test:coverage && npm run coveralls",
     "coveralls": "node scripts/upload-coverage.js",
     "test:clean": "node -e \"const fs = require('fs'); const rimraf = path => { try { if (fs.existsSync(path)) fs.rmSync(path, { recursive: true, force: true }); } catch (e) { console.error('Error removing:', e); } }; rimraf('test-results'); rimraf('playwright-report'); rimraf('playwright-screenshots'); rimraf('coverage');\"",

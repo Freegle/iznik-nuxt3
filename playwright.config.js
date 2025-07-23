@@ -17,7 +17,7 @@ module.exports = defineConfig({
         reportDir: 'monocart-report',
         json: true,
         coverage: {
-          reports: ['v8', 'lcov'],
+          reports: ['v8', 'lcov', 'lcovonly'],
           lcov: true,
           outputDir: 'coverage',
           entryFilter: (entry) => {
