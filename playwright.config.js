@@ -23,17 +23,18 @@ module.exports = defineConfig({
             return true
           },
           sourceFilter: (sourcePath) => {
-            // Include only source files from your project
+            // Exclude node_modules and include only source files from your project
             return (
-              sourcePath.includes('/.nuxt/') ||
-              sourcePath.includes('/components/') ||
-              sourcePath.includes('/pages/') ||
-              sourcePath.includes('/layouts/') ||
-              sourcePath.includes('/plugins/') ||
-              sourcePath.includes('/middleware/') ||
-              sourcePath.includes('/composables/') ||
-              sourcePath.includes('/utils/') ||
-              sourcePath.includes('/stores/')
+              !sourcePath.includes('/node_modules/') &&
+              (sourcePath.includes('/.nuxt/') ||
+                sourcePath.includes('/components/') ||
+                sourcePath.includes('/pages/') ||
+                sourcePath.includes('/layouts/') ||
+                sourcePath.includes('/plugins/') ||
+                sourcePath.includes('/middleware/') ||
+                sourcePath.includes('/composables/') ||
+                sourcePath.includes('/utils/') ||
+                sourcePath.includes('/stores/'))
             )
           },
         },

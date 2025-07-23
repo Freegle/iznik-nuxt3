@@ -4,6 +4,8 @@ import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
+const isTest = process.env.NODE_ENV === 'test' || process.env.CI
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -50,7 +52,7 @@ export default defineNuxtConfig({
   // @ts-ignore
   target: 'server',
 
-  ssr: true,
+  ssr: isTest ? false : true,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
