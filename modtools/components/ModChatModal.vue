@@ -102,7 +102,6 @@ import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
 // import chatCollate from '@/mixins/chatCollate.js'
 // import chat from '@/mixins/chat.js'
-// const ChatMessage = () => import('~/components/ChatMessage')
 
 export default {
   // mixins: [chatCollate, chat, modal],
@@ -116,7 +115,6 @@ export default {
       required: true,
     },
   },
-  // components: { ChatMessage },
   async setup(props) {
     const { modal, hide } = useOurModal()
 

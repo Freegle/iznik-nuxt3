@@ -75,10 +75,10 @@ const { chat, otheruser, chatmessage } = useChatMessageBase(
 const mtNudgerPov = computed(() => {
   if (!isMT.value) return false
   const nudgerid = chatmessage.value.userid
-  return nudgerid !== props.pov
+  return nudgerid === chat.value.user1?.id
 })
 
 const mtClasses = computed(() => {
-  return mtNudgerPov.value ? 'media' : 'media float-end mb-1'
+  return mtNudgerPov.value ? 'media float-end mb-1' : 'media'
 })
 </script>

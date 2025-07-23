@@ -296,7 +296,7 @@ export default {
       console.log('markAllRead A')
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
-          console.log('markAllRead B')
+          console.log('markAllRead B', chat.unseen, chat.lastmsg)
           await this.chatStore.markRead(chat.id)
         }
       }
