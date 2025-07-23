@@ -52,7 +52,7 @@ export default defineNuxtConfig({
   // @ts-ignore
   target: 'server',
 
-  ssr: isTest ? false : true,
+  ssr: !isTest,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when

@@ -7,6 +7,7 @@ module.exports = defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: [
+    ['list'],
     ['html'],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     [
