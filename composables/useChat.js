@@ -209,7 +209,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const messageIsFromCurrentUser = computed(() => {
-    if (miscStore.modtools) {
+    if (miscStore.modtools && chat.value?.chattype === 'User2User') {
       // MT..
       if (pov === chat.value.user1id) {
         return chat.value.user1id === chatmessage.value?.userid

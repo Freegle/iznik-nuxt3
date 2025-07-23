@@ -58,6 +58,12 @@
               this freegler a thumbs down.
             </p>
           </notice-message>
+          <ModComments
+            v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
+            :user="otheruser"
+            class="mt-1"
+            @editing="editing"
+          />
         </div>
         <b-button
           variant="warning"
@@ -425,6 +431,7 @@ const sending = ref(false)
 const uploading = ref(false)
 const showMicrovolunteering = ref(false)
 const showNotices = ref(true)
+const dontHideNotices = ref(false) // MT
 const showPromise = ref(false)
 const showPromiseMaybe = ref(false)
 const showProfileModal = ref(false)
@@ -460,7 +467,11 @@ const noticesToShow = computed(() => {
     otheruser.value?.spammer ||
     otheruser.value?.deleted ||
     thumbsdown.value ||
-    faraway.value
+    faraway.value ||
+    (miscStore.modtools && // MT
+      otheruser.value &&
+      otheruser.value.comments &&
+      otheruser.value.comments.length)
   )
 })
 
@@ -573,6 +584,11 @@ const showSuggested = computed(() => {
 })
 
 // Methods
+const editing = () => {
+  // MT
+  dontHideNotices.value = true
+}
+
 const updateCaretPosition = () => {
   const textarea = chatarea.value.$el
   const caretCoords = getCaretCoordinates(textarea, textarea.selectionEnd)
@@ -845,7 +861,9 @@ watch(
 // Lifecycle hooks
 onMounted(() => {
   setTimeout(() => {
-    showNotices.value = false
+    if (!dontHideNotices.value) {
+      showNotices.value = false
+    }
   }, 30000)
 })
 </script>
