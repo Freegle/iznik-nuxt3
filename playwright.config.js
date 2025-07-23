@@ -24,8 +24,16 @@ module.exports = defineConfig({
             return true
           },
           sourceFilter: (sourcePath) => {
-            // Include everything except node_modules
-            return !sourcePath.includes('node_modules/')
+            // Exclude node_modules and external URLs that cause filename issues
+            return (
+              !sourcePath.includes('node_modules/') &&
+              !sourcePath.includes('http://') &&
+              !sourcePath.includes('https://') &&
+              !sourcePath.includes('accounts.google.com') &&
+              !sourcePath.includes('data:') &&
+              // Only include files with reasonable path lengths
+              sourcePath.length < 200
+            )
           },
         },
       },
