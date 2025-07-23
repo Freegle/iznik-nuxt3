@@ -97,10 +97,6 @@ export default {
     }
   },
   methods: {
-    show() {
-      this.modal.show()
-    },
-
     async send() {
       if (this.reason) {
         const userid = this.user.id ?? this.user.userid

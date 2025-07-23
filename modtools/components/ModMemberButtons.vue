@@ -147,7 +147,11 @@
           toggle temporarily disables that so you can edit first.
         </div>
       </div>
-      <ModCommentAddModal v-if="addComment" ref="addComment" :user="member" />
+      <ModCommentAddModal
+        v-if="showAddCommentModal"
+        :user="member"
+        @hidden="showAddCommentModal = false"
+      />
     </client-only>
   </div>
 </template>
@@ -195,7 +199,7 @@ export default {
     return {
       showRare: false,
       allowAutoSend: true,
-      addComment: false,
+      showAddCommentModal: false,
     }
   },
   computed: {
@@ -284,10 +288,7 @@ export default {
       return ret
     },
     addAComment() {
-      this.addComment = true
-      this.waitForRef('addComment', () => {
-        this.$refs.addComment.show()
-      })
+      this.showAddCommentModal = true
     },
   },
 }

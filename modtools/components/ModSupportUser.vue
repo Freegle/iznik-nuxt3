@@ -515,11 +515,10 @@
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
-      v-if="addComment"
-      ref="addComment"
+      v-if="showAddCommentModal"
       :user="user"
       @added="updateComments"
-      @hidden="addComment = false"
+      @hidden="showAddCommentModal = false"
     />
   </b-card>
 </template>
@@ -561,7 +560,7 @@ export default {
       newpassword: null,
       newemail: null,
       newEmailAs: 1,
-      addComment: false,
+      showAddCommentModal: false,
       emailAddError: null,
       showLogs: false,
       showProfile: false,
@@ -778,8 +777,7 @@ export default {
       }
     },
     addAComment() {
-      this.addComment = true
-      this.$refs.addComment?.show()
+      this.showAddCommentModal = true
     },
     async updateComments() {
       const userid = this.user.userid ? this.user.userid : this.user.id

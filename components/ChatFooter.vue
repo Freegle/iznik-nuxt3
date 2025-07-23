@@ -182,6 +182,36 @@
             </b-button>
           </div>
         </span>
+        <span v-if="chat && chat.chattype === 'User2Mod'">
+          <b-button v-if="mod" variant="secondary" @click="spamReport">
+            <v-icon icon="ban" /> Spammer
+          </b-button>
+          <external-link
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            href="https://discourse.ilovefreegle.org/c/central"
+            class="nocolor btn btn-secondary"
+          >
+            <v-icon icon="question-circle" /> Central
+          </external-link>
+          <b-button
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            v-b-tooltip.hover.top
+            title="Ask Support for help"
+            variant="secondary"
+            @click="confirmReferToSupport"
+          >
+            <v-icon icon="question-circle" /> Refer to Support
+          </b-button>
+          <b-button
+            v-if="chat && chat.chattype === 'User2Mod' && mod"
+            v-b-tooltip.hover.top
+            title="Add a note for this member, and optionally alert other groups"
+            variant="secondary"
+            @click="addAComment"
+          >
+            <v-icon icon="tag" /> Add note
+          </b-button>
+        </span>
         <SpinButton
           size="md"
           variant="primary"
@@ -338,6 +368,24 @@
       @hidden="showNudgeWarningModal = false"
     />
     <MicroVolunteering v-if="showMicrovolunteering" />
+    <ConfirmModal
+      v-if="showConfirmModal"
+      title="Refer this chat to Support?"
+      message="The Support volunteers will have a look at the chat and get back to you by email."
+      @confirm="referToSupport"
+      @hidden="showConfirmModal = false"
+    />
+    <ModSpammerReport
+      v-if="showSpamModal && modchatuser"
+      :user="modchatuser"
+      @hidden="showSpamModal = false"
+    />
+    <ModCommentAddModal
+      v-if="showAddCommentModal && modchatuser"
+      :user="modchatuser"
+      :groupid="chat.group.id"
+      @hidden="showAddCommentModal = false"
+    />
   </div>
 </template>
 <script setup>
@@ -364,6 +412,9 @@ import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
 import Api from '~/api'
 import { useMe } from '~/composables/useMe'
+import { useUserStore } from '~/stores/user' // MT...
+import { useNuxtApp } from '#app'
+const { $api } = useNuxtApp()
 
 // Define props
 const props = defineProps({
@@ -411,6 +462,7 @@ const { me, myid } = useMe()
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
 const addressStore = useAddressStore()
+const userStore = useUserStore() // MT
 
 // Setup chat data
 const {
@@ -447,7 +499,15 @@ const caretPosition = ref({ top: 0, left: 0 })
 const currentAtts = ref([])
 const chatarea = ref(null)
 const rsvp = ref(null)
+const showSpamModal = ref(false) // MT..
+const showConfirmModal = ref(false)
+const showAddCommentModal = ref(false)
 const isMT = ref(miscStore.modtools)
+const modchatuser = ref(null)
+if (miscStore.modtools && chat.value.user1id) {
+  await userStore.fetch(chat.value.user1id)
+  modchatuser.value = userStore.byId(chat.value.user1id)
+}
 
 // Computed properties
 const shrink = computed(() => {
@@ -779,6 +839,20 @@ const typing = async () => {
     await chatStore.typing(props.id)
     lastTyping.value = now
   }
+}
+
+const spamReport = () => {
+  // MT..
+  showSpamModal.value = true
+}
+const referToSupport = () => {
+  $api.chat.referToSupport(props.id)
+}
+const confirmReferToSupport = () => {
+  showConfirmModal.value = true
+}
+const addAComment = () => {
+  showAddCommentModal.value = true
 }
 
 // Watch for changes

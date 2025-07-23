@@ -34,12 +34,12 @@
       @confirm="banConfirmed"
     />
     <ModCommentAddModal
-      v-if="addComment"
-      ref="addComment"
+      v-if="showAddCommentModal"
       :user="user"
       :groupid="groupid"
       :groupname="groupname"
       @added="commentadded"
+      @hidden="showAddCommentModal = false"
     />
     <ModSpammerReport
       v-if="showSpamModal"
@@ -88,7 +88,7 @@ export default {
     return {
       removeConfirm: false,
       banConfirm: false,
-      addComment: false,
+      showAddCommentModal: false,
       user: null,
       showSpamModal: false,
       safelist: false,
@@ -162,8 +162,7 @@ export default {
         await this.fetchUser()
       }
 
-      this.addComment = true
-      this.$refs.addComment?.show()
+      this.showAddCommentModal = true
     },
     async commentadded() {
       await this.userStore.fetchMT({

@@ -31,11 +31,11 @@
       />
     </div>
     <ModCommentAddModal
-      v-if="addComment && groupid"
-      ref="addComment"
+      v-if="showAddCommentModal && groupid"
       :user="user"
       :groupid="groupid"
       @added="updateComments"
+      @hidden="showAddCommentModal = false"
     />
   </div>
 </template>
@@ -59,7 +59,7 @@ export default {
   emits: ['reload'],
   data: function () {
     return {
-      addComment: false,
+      showAddCommentModal: false,
     }
   },
   computed: {
@@ -79,8 +79,7 @@ export default {
   },
   methods: {
     addAComment() {
-      this.addComment = true
-      this.$refs.addComment?.show()
+      this.showAddCommentModal = true
     },
     updateComments() {
       this.$emit('reload')
