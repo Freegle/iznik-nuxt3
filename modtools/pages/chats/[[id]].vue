@@ -293,11 +293,14 @@ export default {
       }
     },
     async markAllRead() {
+      console.log('markAllRead A')
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
+          console.log('markAllRead B')
           await this.chatStore.markRead(chat.id)
         }
       }
+      console.log('markAllRead C')
 
       this.chatStore.clear()
       await this.listChats()

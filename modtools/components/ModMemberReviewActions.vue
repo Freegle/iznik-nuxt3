@@ -14,7 +14,8 @@
               ? 'text-danger font-weight-bold'
               : 'text-muted')
           "
-          >joined {{ timeago(membership.added) }}</span
+        >
+          joined {{ timeago(membership.added) }}</span
         >
         <span v-if="membership.reviewreason" class="text-danger ml-1 mr-1">
           <span v-if="membership.reviewrequestedat" class="text-dark small"

@@ -74,6 +74,7 @@
             <MessageMap
               v-if="member.info && member.info.privateposition"
               :position="member.info.privateposition"
+              :boundary="firstgrouppolygon"
               class="mt-2"
             />
             <ModMemberLogins :member="member" />
@@ -154,6 +155,7 @@
 import dayjs from 'dayjs'
 import { useUserStore } from '../stores/user'
 import { useModMe } from '~/composables/useModMe'
+import { useModGroupStore } from '@/stores/modgroup'
 
 const MEMBERSHIPS_SHOW = 3
 
@@ -168,10 +170,12 @@ export default {
   emits: ['forcerefresh'],
   setup() {
     const userStore = useUserStore()
+    const modGroupStore = useModGroupStore()
     const { amAModOn } = useModMe()
     return {
       userStore,
       amAModOn,
+      modGroupStore,
     }
   },
   data: function () {
@@ -235,6 +239,14 @@ export default {
           return b.added.localeCompare(a.added)
         }
       })
+    },
+    firstgrouppolygon() {
+      if (this.sortedMemberOf.length > 0) {
+        const group = this.sortedMemberOf[0]
+        const modgroup = this.modGroupStore.get(group.id)
+        if (modgroup) return modgroup.polygon
+      }
+      return null
     },
     email() {
       // Depending on which context we're used it, we might or might not have an email returned.
