@@ -58,7 +58,7 @@ function useChatShared(chatId) {
   })
 
   const otheruser = computed(() => {
-    // MT.. return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null
+    // return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null // MT commented out
     // MT.. Cope with MT chats
     let otheruid = chat?.value?.otheruid
     let user = null
@@ -67,7 +67,7 @@ function useChatShared(chatId) {
       otheruid = chat.value.user1id || chat.value.user1?.id
     }
     if (otheruid) {
-      user = userStore.byId(chat.value.otheruid)
+      user = userStore.byId(otheruid)
     }
     if (!user && chat?.value?.user1) {
       user = chat?.value?.user1

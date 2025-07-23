@@ -467,7 +467,12 @@ const showblock = () => {
 }
 
 const showInfo = () => {
-  showProfileModal.value = true
+  if (miscStore.modtools) {
+    // MT
+    navigateTo(
+      '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+    )
+  } else showProfileModal.value = true
 }
 
 const report = () => {

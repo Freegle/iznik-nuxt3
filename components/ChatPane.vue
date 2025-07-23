@@ -117,16 +117,18 @@ if (props.id) {
     if (miscStore.modtools) {
       if (chat.value.user1id) {
         // Need to get user.info using api v2 but user.comments using api v1
-        chat.value.otheruid = chat.value.user1id
-        await userStore.fetch(chat.value.otheruid)
-        if (chat.value.otheruid) {
+        const otheruid = chat.value.user1id
+        chat.value.otheruid = otheruid
+        await userStore.fetch(otheruid)
+        if (otheruid) {
           // otheruid can disappear from under us
-          const userv2 = userStore.byId(chat.value.otheruid)
-          await userStore.fetchMT({ id: chat.value.otheruid })
-          const user = userStore.byId(chat.value.otheruid)
+          const userv2 = userStore.byId(otheruid)
+          await userStore.fetchMT({ id: otheruid })
+          const user = userStore.byId(otheruid)
           if (user && !user.info && userv2) {
             user.info = userv2.info
           }
+          chat.value.otheruid = otheruid
         }
       }
     } else if (chat?.value?.otheruid) {
