@@ -25,7 +25,7 @@ module.exports = defineConfig({
           },
           sourceFilter: (sourcePath) => {
             // Include everything except node_modules
-            return !sourcePath.includes('/node_modules/')
+            return !sourcePath.includes('node_modules/')
           },
         },
       },
