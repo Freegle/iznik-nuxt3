@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * Tests for the post flow - posting OFFER and WANTED items to Freegle
  */

@@ -10,7 +10,6 @@ const {
   DEFAULT_TEST_PASSWORD,
 } = require('./config')
 const logger = require('./logger')
-const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
@@ -529,7 +528,7 @@ const test = base.test.extend({
         // Check if it's a connection refused error (dev server not running)
         if (error.message.includes('ERR_CONNECTION_REFUSED')) {
           throw new Error(
-            `Cannot connect to dev server at ${path}. Make sure the dev server is running on http://127.0.0.1:3002`
+            `Cannot connect to dev server at ${path}. Make sure the dev server is running`
           )
         }
 
@@ -757,13 +756,13 @@ test.afterAll(async () => {
     await cleanupScreenshots()
 
     // Attempt to unsubscribe all the test emails
-    console.log('Unsubscribing test emails...')
-    try {
-      await unsubscribeTestEmails()
-      console.log('Successfully processed test email unsubscriptions')
-    } catch (error) {
-      console.error(`Error during test email unsubscription: ${error.message}`)
-    }
+    console.log('Skipping test email unsubscription for now due to port issues')
+    // try {
+    //   await unsubscribeTestEmails()
+    //   console.log('Successfully processed test email unsubscriptions')
+    // } catch (error) {
+    //   console.error(`Error during test email unsubscription: ${error.message}`)
+    // }
   } else {
     console.log('Tests failed, keeping screenshots for debugging')
   }

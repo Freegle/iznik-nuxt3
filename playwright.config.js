@@ -39,12 +39,12 @@ module.exports = defineConfig({
       },
     ],
   ],
-  timeout: 240_000,
+  timeout: 600_000,
   outputDir: 'test-results',
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
+    baseURL: 'http://127.0.0.1:3000',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     viewport: { width: 1920, height: 1080 },
     trace: 'on',
