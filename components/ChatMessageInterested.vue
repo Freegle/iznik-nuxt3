@@ -29,7 +29,7 @@
         </div>
         <div
           v-if="
-            !modtools &&
+            !isMT &&
             refmsg &&
             refmsg.fromuser === myid &&
             refmsg.type === 'Offer' &&
@@ -165,7 +165,6 @@ import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-import { useMe } from '~/composables/useMe'
 const miscStore = useMiscStore()
 const isMT = ref(miscStore.modtools)
 
@@ -199,7 +198,6 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const chatStore = useChatStore()
-const { myid } = useMe()
 
 // Data properties
 const showOutcome = ref(false)
@@ -214,15 +212,13 @@ const {
   messageIsFromCurrentUser,
   chatMessageProfileImage,
   regexEmailMT, // MT
+  myid, // MT
+  refmsgid, // MT
+  refmsg, // MT
   otheruser,
 } = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Computed properties
-const refmsgid = computed(() => chatmessage.value?.refmsgid)
-const refmsg = computed(() =>
-  refmsgid.value ? messageStore.byId(refmsgid.value) : null
-)
-
 const modtoolsLink = computed(() => {
   if (
     chatmessage.value.refmsg &&

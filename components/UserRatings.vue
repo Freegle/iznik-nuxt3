@@ -78,7 +78,9 @@ const showDown = ref(false)
 const showRemove = ref(false)
 
 // Fetch user data
-userStore.fetch(props.id)
+if (props.id) {
+  userStore.fetch(props.id)
+}
 
 const user = computed(() => {
   let ret = null

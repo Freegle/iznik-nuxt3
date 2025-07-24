@@ -170,6 +170,7 @@ export async function fetchReferencedMessage(chatid, id) {
   const chatStore = useChatStore()
   const chatmessage = chatStore.messageById(id)
 
+  // MT chatmessage.refmsg may already be set and chatmessage.refmsgid not set
   if (chatmessage?.refmsgid) {
     const messageStore = useMessageStore()
 
@@ -182,7 +183,7 @@ export async function fetchReferencedMessage(chatid, id) {
 }
 
 export function useChatMessageBase(chatId, messageId, pov = null) {
-  const { chatStore, authStore, myid, chat, otheruser } = useChatShared(chatId)
+  const { chatStore, authStore, chat, otheruser } = useChatShared(chatId) // Do not inherit myid
   const messageStore = useMessageStore()
   const miscStore = useMiscStore()
 
@@ -219,9 +220,9 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     }
     if (chat.value?.chattype === 'User2Mod') {
       // For User2Mod chats we want it on the right hand side we sent it.
-      return chatmessage.value?.userid === myid
+      return chatmessage.value?.userid === myid.value
     } else {
-      return chatmessage.value?.userid === myid
+      return chatmessage.value?.userid === myid.value
     }
   })
 
@@ -252,6 +253,10 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     }
   })
 
+  const myid = computed(() => {
+    return me.value?.id
+  })
+
   const chatMessageProfileImage = computed(() => {
     if (miscStore.modtools) {
       // MT..
@@ -259,7 +264,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
         ? me.value?.profile?.paththumb
         : chat.value?.icon
     }
-    return chatmessage.value?.userid === myid
+    return chatmessage.value?.userid === myid.value
       ? me.value?.profile?.paththumb
       : chat.value?.icon
   })

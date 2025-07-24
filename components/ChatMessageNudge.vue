@@ -44,7 +44,6 @@
 <script setup>
 import { useChatMessageBase } from '../composables/useChat'
 import { useMiscStore } from '../stores/misc' // MT..
-import { useMe } from '~/composables/useMe'
 const miscStore = useMiscStore()
 const isMT = ref(miscStore.modtools)
 
@@ -64,9 +63,7 @@ const props = defineProps({
   },
 })
 
-const { me } = useMe()
-
-const { chat, otheruser, chatmessage } = useChatMessageBase(
+const { chat, me, otheruser, chatmessage } = useChatMessageBase(
   props.chatid,
   props.id,
   props.pov
