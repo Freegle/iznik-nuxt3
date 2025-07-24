@@ -4,8 +4,12 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts, environment } = require('./config')
-const { signUpViaHomepage } = require('./utils/user')
+const { timeouts, environment, DEFAULT_TEST_PASSWORD } = require('./config')
+const {
+  signUpViaHomepage,
+  logoutIfLoggedIn,
+  loginViaHomepage,
+} = require('./utils/user')
 
 test.describe('Browse Page Tests', () => {
   test('should create a message and browse it successfully', async ({
@@ -95,24 +99,8 @@ test.describe('Browse Page Tests', () => {
       if (offerResult) {
         console.log('Cleaning up test message')
         try {
-          // Clear session and log in as the message poster
-          await page.context().clearCookies()
-          await page.gotoAndVerify('/', {
-            timeout: timeouts.navigation.default,
-          })
-
-          // Login as the message poster
-          await page.locator('.test-signinbutton').first().click()
-          await page
-            .locator('#loginModal')
-            .waitFor({ state: 'visible', timeout: 5000 })
-          await page.locator('input[type="email"]').first().fill(offerEmail)
-          await page
-            .locator('input[type="password"]')
-            .first()
-            .fill('TestPassword123!')
-          await page.locator('button:has-text("Sign in")').click()
-          await page.waitForURL(/.*\/myposts/, { timeout: 60000 })
+          await logoutIfLoggedIn(page)
+          await loginViaHomepage(page, offerEmail, DEFAULT_TEST_PASSWORD)
 
           // Now withdraw the post
           await withdrawPost({ item: offerResult.item })
