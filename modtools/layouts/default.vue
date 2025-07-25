@@ -386,8 +386,7 @@ watch(
 
 watch(
   () => loginStateKnown,
-  (newVal, oldVal) => {
-    console.log('watch loginStateKnown', newVal.value, oldVal?.value)
+  (newVal) => {
     if (newVal.value) {
       // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
       bump.value++
