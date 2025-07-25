@@ -246,14 +246,20 @@
       </div>
     </div>
     <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
-    <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
+    <GoogleOneTap
+      v-if="oneTap"
+      @loggedin="googleLoggedIn"
+      @complete="googleLoaded"
+    />
     <LoginModal v-if="!loggedIn" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
     <SomethingWentWrong />
   </div>
 </template>
 
-<script lang="ts">
+<script setup>
+import { useRoute } from 'vue-router'
+import { useRouter } from '#imports'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
@@ -264,252 +270,232 @@ import { useModMe } from '~/composables/useModMe'
 
 import { buildHead } from '~/composables/useMTBuildHead'
 
-export default {
-  async setup() {
-    let ready = false
-    const oneTap = ref(false)
-    const googleReady = ref(false)
-    const authStore = useAuthStore()
-    const jwt = authStore.auth.jwt
-    const chatStore = useChatStore()
-    const miscStore = useMiscStore()
-    const modGroupStore = useModGroupStore()
-    const modConfigStore = useModConfigStore()
-    const persistent = authStore.auth.persistent
-    const { supportOrAdmin } = useMe()
-    const {
-      hasPermissionNewsletter,
-      hasPermissionSpamAdmin,
-      hasPermissionGiftAid,
-      checkWork,
-    } = useModMe()
+const router = useRouter()
+const route = useRoute()
 
-    if (process.client) {
-      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
-      miscStore.apiCount = 0
-    }
+const loginModal = ref(null)
+const sizer = ref(null)
+const logo = '/icon_modtools.png'
+const showMenu = ref(true)
+const timeTimer = ref(null)
+const bump = ref(0)
+const bumpLogin = ref(0)
 
-    if (jwt || persistent) {
-      // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
-      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
-      // whether or not we can log in that way.
-      let user = null
+const ready = ref(false)
+const oneTap = ref(false)
+const authStore = useAuthStore()
+const jwt = authStore.auth.jwt
+const chatStore = useChatStore()
+const miscStore = useMiscStore()
+const modGroupStore = useModGroupStore()
+const modConfigStore = useModConfigStore()
+const persistent = authStore.auth.persistent
+const { supportOrAdmin } = useMe()
+const {
+  hasPermissionNewsletter,
+  hasPermissionSpamAdmin,
+  hasPermissionGiftAid,
+  checkWork,
+} = useModMe()
 
-      try {
-        user = await authStore.fetchUser()
-      } catch (e) {
-        console.log('Error fetching user', e)
+if (process.client) {
+  // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
+  miscStore.apiCount = 0
+}
+
+if (jwt || persistent) {
+  // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
+  // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
+  // whether or not we can log in that way.
+  let user = null
+
+  try {
+    user = await authStore.fetchUser()
+  } catch (e) {
+    console.log('Error fetching user', e)
+  }
+
+  if (user) {
+    ready.value = true
+  }
+}
+if (!ready.value) {
+  // We don't have a valid JWT.  See if OneTap can sign us in.
+  oneTap.value = true
+}
+
+const runtimeConfig = useRuntimeConfig()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'ModTools',
+    'Moderation tool for Freegle volunteers'
+  )
+)
+useHead({
+  bodyAttrs: {
+    class: 'bodyMT',
+  },
+})
+
+const loginStateKnown = computed(() => authStore.loginStateKnown)
+const loggedIn = computed(() => authStore.user !== null)
+
+const discourseCount = computed(() => {
+  const discourse = authStore.discourse
+  return discourse
+    ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
+    : 0
+})
+
+const menuCount = computed(() => {
+  const work = authStore?.work
+  if (!work || !work.total) return 0
+  return work.total
+})
+
+const version = computed(() => {
+  const runtimeConfig = useRuntimeConfig()
+  return runtimeConfig.public.VERSION
+})
+
+const buildDate = computed(() => {
+  const runtimeConfig = useRuntimeConfig()
+  return runtimeConfig.public.BUILD_DATE
+})
+
+watch(
+  () => route.fullPath,
+  async (newVal, oldVal) => {
+    const routechanged = newVal !== oldVal
+    if (sizer.value && routechanged) {
+      const el = document.getElementById('sizer')
+      if (getComputedStyle(el).display !== 'block') {
+        // Not large screen, hide menu on move.
+        showMenu.value = false
       }
+    }
 
-      if (user) {
-        ready = true
-      }
+    if (routechanged) {
+      // Get per-group-work and ensure all current groups are in modGroupStore
+      await modGroupStore.getModGroups()
     }
-    if (!ready) {
-      // We don't have a valid JWT.  See if OneTap can sign us in.
-      oneTap.value = true
+  }
+)
+
+watch(
+  () => loginStateKnown,
+  (newVal, oldVal) => {
+    console.log('watch loginStateKnown', newVal.value, oldVal?.value)
+    if (newVal.value) {
+      // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+      bump.value++
     }
-    const runtimeConfig = useRuntimeConfig()
-    useHead(
-      buildHead(
-        null, // useRoute() not allowed here
-        runtimeConfig,
-        'ModTools',
-        'Moderation tool for Freegle volunteers'
-      )
+  },
+  { immediate: true }
+)
+
+// Lifecycle hooks and watches
+onMounted(async () => {
+  // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+  // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
+  if (!loginStateKnown.value) {
+    await authStore.fetchUser()
+  }
+
+  // If not logged in then show loginModal
+  const me = authStore.user
+  if (!me || !me.id) {
+    loginModal.value.show()
+    return
+  }
+
+  // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+  // cause displayed fromNow() values to change, rather than starting a timer for each of them.
+  updateTime()
+
+  // miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
+
+  // Check for work in global modtools/mixins/modme
+  const miscStore = useMiscStore()
+  miscStore.workTimer = setTimeout(checkWork, 0)
+
+  await modConfigStore.fetch({ all: true })
+
+  // Get chats and poll regularly for new ones
+  chatStore.fetchLatestChatsMT()
+})
+
+onBeforeUnmount(() => {
+  const miscStore = useMiscStore()
+  if (miscStore.workTimer) {
+    clearTimeout(miscStore.workTimer)
+    miscStore.workTimer = false
+  }
+})
+
+async function logOut() {
+  console.log('Logout')
+  await authStore.logout()
+  authStore.forceLogin = true
+
+  // Go to the landing page.
+  router.push('/')
+}
+function requestLogin() {
+  console.log('MODTOOLS.VUE requestLogin')
+  loginModal.value.show()
+}
+
+function discourse(e) {
+  window.open('https://discourse.ilovefreegle.org/')
+  e.stopPropagation()
+  e.preventDefault()
+}
+
+function clicklogo(e) {
+  console.log('clicklogo', route.fullPath)
+  if (route.fullPath === '/') {
+    // Click on current route.  Reload.
+    e.stopPropagation()
+    router.go()
+  } else {
+    router.push('/')
+  }
+}
+
+function toggleMenu() {
+  showMenu.value = !showMenu.value
+}
+
+function updateTime() {
+  miscStore.setTime()
+  timeTimer.value = setTimeout(updateTime, 30000)
+}
+
+function googleLoggedIn() {
+  // Re-render the page, now that we are logged in.
+  bump.value++
+}
+
+function googleLoaded() {
+  if (
+    loginModal.value &&
+    loginModal.value.showModal &&
+    loginModal.value.email
+  ) {
+    console.log(
+      'Showing login modal - leave well alone',
+      loginModal.value.email
     )
-    useHead({
-      bodyAttrs: {
-        class: 'bodyMT',
-      },
-    })
+  } else {
+    bumpLogin.value++
+  }
+}
 
-    return {
-      authStore,
-      chatStore,
-      googleReady,
-      miscStore,
-      modConfigStore,
-      modGroupStore,
-      oneTap,
-      supportOrAdmin,
-      hasPermissionNewsletter,
-      hasPermissionSpamAdmin,
-      hasPermissionGiftAid,
-      checkWork,
-    }
-  },
-  data: function () {
-    return {
-      logo: '/icon_modtools.png',
-      showMenu: true,
-      sliding: false,
-      timeTimer: null,
-      chatCount: 0,
-      // complete: true,  // CC
-      bump: 0,
-      bumpLogin: 0,
-    }
-  },
-  computed: {
-    discourseCount() {
-      const discourse = this.authStore.discourse
-      return discourse
-        ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
-        : 0
-    },
-    slideclass() {
-      return this.showMenu ? 'slide-in' : 'slide-out'
-    },
-    menuCount() {
-      const work = this.authStore?.work
-      if (!work || !work.total) return 0
-      return work.total
-    },
-    work() {
-      return this.authStore.work
-    },
-    version() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.VERSION
-    },
-    buildDate() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.BUILD_DATE
-    },
-  },
-  watch: {
-    $route: {
-      async handler(newVal, oldVal) {
-        const routechanged = newVal.fullPath !== oldVal.fullPath
-        if (this.$refs.sizer && routechanged) {
-          const el = document.getElementById('sizer')
-          if (getComputedStyle(el).display !== 'block') {
-            // Not large screen, hide menu on move.
-            this.showMenu = false
-          }
-        }
-
-        if (routechanged) {
-          // Get per-group-work and ensure all current groups are in modGroupStore
-          await this.modGroupStore.getModGroups()
-        }
-      },
-    },
-    loginStateKnown: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
-          this.bump++
-        }
-      },
-    },
-  },
-  async mounted() {
-    // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
-    // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
-    if (!this.loginStateKnown) {
-      await this.authStore.fetchUser()
-    }
-
-    // If not logged in then show loginModal
-    const me = this.authStore.user
-    if (!me || !me.id) {
-      this.$refs.loginModal.show()
-      return
-    }
-
-    // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
-    this.updateTime()
-
-    // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
-
-    // Check for work in global modtools/mixins/modme
-    const miscStore = useMiscStore()
-    miscStore.workTimer = setTimeout(this.checkWork, 0)
-
-    await this.modConfigStore.fetch({ all: true })
-
-    // Get chats and poll regularly for new ones
-    this.chatStore.fetchLatestChatsMT()
-  },
-  beforeUnmount() {
-    const miscStore = useMiscStore()
-    if (miscStore.workTimer) {
-      clearTimeout(miscStore.workTimer)
-      miscStore.workTimer = false
-    }
-  },
-  methods: {
-    async logOut() {
-      // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
-      // on the server, which would otherwise keep us logged in despite our efforts.
-      console.log('Logout')
-      try {
-        this.$cookies.removeAll()
-      } catch (e) {}
-
-      await this.authStore.logout()
-      this.authStore.forceLogin = true
-
-      // Go to the landing page.
-      this.$router.push('/')
-    },
-    requestLogin() {
-      console.log('MODTOOLS.VUE requestLogin')
-      this.$refs.loginModal.show()
-    },
-    discourse(e) {
-      window.open('https://discourse.ilovefreegle.org/')
-      e.stopPropagation()
-      e.preventDefault()
-    },
-    chats(e) {
-      this.$router.push('/chats')
-      e.stopPropagation()
-      e.preventDefault()
-    },
-    clicklogo(e) {
-      console.log('clicklogo', this.$route.fullPath)
-      if (this.$route.fullPath === '/') {
-        // Click on current route.  Reload.
-        e.stopPropagation()
-        this.$router.go()
-      } else {
-        this.$router.push('/')
-      }
-    },
-    toggleMenu() {
-      this.showMenu = !this.showMenu
-    },
-    updateTime() {
-      this.miscStore.setTime()
-      this.timeTimer = setTimeout(this.updateTime, 30000)
-    },
-    googleLoggedIn() {
-      // Re-render the page, now that we are logged in.
-      this.bump++
-    },
-    googleLoaded() {
-      if (
-        this.$refs.loginModal &&
-        this.$refs.loginModal.showModal &&
-        this.$refs.loginModal.email
-      ) {
-        console.log(
-          'Showing login modal - leave well alone',
-          this.$refs.loginModal.email
-        )
-      } else {
-        this.bumpLogin++
-      }
-    },
-    mobilehidemenu() {
-      this.showMenu = false
-    },
-  },
+function mobilehidemenu() {
+  showMenu.value = false
 }
 </script>
 

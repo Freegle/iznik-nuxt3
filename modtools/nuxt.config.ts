@@ -87,6 +87,7 @@ export default defineNuxtConfig({
         },
       ],
       meta: [
+        // These add to the ones in ../nuxt.config.ts
         { name: 'robots', content: 'noindex' },
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

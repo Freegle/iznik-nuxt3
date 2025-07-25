@@ -15,6 +15,8 @@ const CONFIG = {
   USER_SITE: 'https://www.ilovefreegle.org',
   USER_DOMAIN: 'ilovefreegle.org',
 
+  MODTOOLS_SITE: 'https://modtools.org',
+
   // This is where images are served from.
   //
   // Old:

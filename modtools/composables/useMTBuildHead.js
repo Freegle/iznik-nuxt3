@@ -1,4 +1,3 @@
-// DONE??
 import { useMiscStore } from '~/stores/misc'
 
 export function buildHead(
@@ -10,6 +9,8 @@ export function buildHead(
   bodyAttrs = {}
 ) {
   // Pain to have to pass in runtimeConfig but you can't use that in a composable.
+
+  // These meta params may or may not supersede or add to the ones in nuxt.config.ts and modtools/nuxt.config.ts
   const meta = [
     {
       hid: 'description',
@@ -22,20 +23,10 @@ export function buildHead(
       property: 'og:description',
       content: description,
     },
-
-    {
-      hid: 'twitter:title',
-      name: 'twitter:title',
-      content: title,
-    },
-    {
-      hid: 'twitter:description',
-      name: 'twitter:description',
-      content: description,
-    },
   ]
 
-  const retImage = image || runtimeConfig.public.USER_SITE + '/icon.png'
+  const retImage =
+    image || runtimeConfig.public.MODTOOLS_SITE + '/icon_modtools.png'
 
   meta.push({
     hid: 'og:image',
@@ -46,7 +37,7 @@ export function buildHead(
   meta.push({
     hid: 'og:url',
     property: 'og:url',
-    content: runtimeConfig.public.USER_SITE + (route ? route.fullPath : ''),
+    content: runtimeConfig.public.MODTOOLS_SITE,
   })
 
   meta.push({

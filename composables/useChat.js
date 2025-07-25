@@ -210,13 +210,18 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const messageIsFromCurrentUser = computed(() => {
-    if (miscStore.modtools && chat.value?.chattype === 'User2User') {
+    // console.log('messageIsFromCurrentUser',chat.value?.chattype, pov,chat.value.user1id,chatmessage.value?.userid,myid.value)
+    if (miscStore.modtools) {
       // MT..
-      if (pov === chat.value.user1id) {
-        return chat.value.user1id === chatmessage.value?.userid
-      } else {
-        return chat.value.user1id !== chatmessage.value?.userid
+      if (chat.value?.chattype === 'User2User') {
+        if (pov === chat.value.user1id) {
+          return chat.value.user1id === chatmessage.value?.userid
+        } else {
+          return chat.value.user1id !== chatmessage.value?.userid
+        }
       }
+      // else 'User2Mod'
+      return chat.value.user1id !== chatmessage.value?.userid
     }
     if (chat.value?.chattype === 'User2Mod') {
       // For User2Mod chats we want it on the right hand side we sent it.

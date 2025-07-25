@@ -219,6 +219,7 @@ export default defineNuxtConfig({
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       USER_DOMAIN: config.USER_DOMAIN,
+      MODTOOLS_SITE: config.MODTOOLS_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
       SENTRY_DSN: config.IS_MT ? config.SENTRY_DSN_MT : config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
