@@ -69,7 +69,7 @@ const props = defineProps({
 const miscStore = useMiscStore()
 const isMT = ref(miscStore.modtools)
 
-// Use the chat base composable (even though we don't use any of its properties in this component)
+// Chat base properties
 const { otheruser, chatmessage, emessage } = useChatMessageBase(
   props.chatid,
   props.id,
