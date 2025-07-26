@@ -91,6 +91,9 @@
       </div>
       <div v-else>
         <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
+        <div v-if="isMT && modtoolsLink">
+          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
+        </div>
         <div>
           <span v-if="!highlightEmails">
             <span
@@ -220,26 +223,22 @@ const {
 
 // Computed properties
 const modtoolsLink = computed(() => {
-  if (
-    chatmessage.value.refmsg &&
-    chatmessage.value.refmsg.groups &&
-    chatmessage.value.refmsg.groups.length > 0
-  ) {
+  if (refmsg.value && refmsg.value.groups && refmsg.value.groups.length > 0) {
     return (
       '/messages/approved/' +
-      chatmessage.value.refmsg.groups[0].groupid +
+      refmsg.value.groups[0].groupid +
       '/' +
-      chatmessage.value.refmsg.id +
+      refmsg.value.id +
       '?noguard=true'
     )
   }
   // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-  if (chatmessage.value.group && chatmessage.value.refmsgid) {
+  if (chatmessage.value.group && refmsgid.value) {
     return (
       '/messages/approved/' +
       chatmessage.value.group.id +
       '/' +
-      chatmessage.value.refmsgid +
+      refmsgid.value +
       '?noguard=true'
     )
   }
