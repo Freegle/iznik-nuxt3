@@ -20,13 +20,15 @@
               <v-icon icon="exclamation-triangle" scale="2" />&nbsp;{{
                 otheruser?.displayname
               }}
-              reported someone
+              reported
+              {{ reporteeName }}
             </h4>
           </b-card-title>
           <b-card-text>
             {{ emessage }}
             <ModChatViewButton
-              :id="chatmessage.refchatid ?? 0"
+              v-if="chatmessage?.refchatid"
+              :id="chatmessage.refchatid"
               class="mt-2"
               :pov="chatmessage.userid"
             />
@@ -38,6 +40,7 @@
 </template>
 <script setup>
 import { useChatMessageBase } from '../composables/useChat'
+import { useChatStore } from '../stores/chat'
 import { useMiscStore } from '../stores/misc'
 
 const props = defineProps({
@@ -66,6 +69,7 @@ const props = defineProps({
   },
 })
 
+const chatStore = useChatStore()
 const miscStore = useMiscStore()
 const isMT = ref(miscStore.modtools)
 
@@ -75,6 +79,20 @@ const { otheruser, chatmessage, emessage } = useChatMessageBase(
   props.id,
   props.pov
 )
+const reporteeName = ref('someone')
+
+onMounted(async () => {
+  const refchatid = chatmessage.value?.refchatid
+  if (isMT.value && refchatid) {
+    await chatStore.fetchChat(refchatid)
+    const refchat = chatStore.byChatId(refchatid)
+    if (refchat) {
+      if (refchat.user1.id === otheruser.value.id) {
+        if (refchat.user2) reporteeName.value = refchat.user2.displayname
+      } else if (refchat.user1) reporteeName.value = refchat.user1?.displayname
+    }
+  }
+})
 </script>
 <style scoped lang="scss">
 .chatMessage {
