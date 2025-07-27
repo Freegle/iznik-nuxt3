@@ -52,7 +52,6 @@ import { setupModMessages } from '@/composables/useModMessages'
 import { useMe } from '~/composables/useMe'
 
 export default {
-  // mixins: [me],
   setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
