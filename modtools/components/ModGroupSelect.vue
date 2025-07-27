@@ -127,9 +127,9 @@ export default {
     const miscStore = useMiscStore()
     const groupStore = useGroupStore()
     const modGroupStore = useModGroupStore()
-    const { me, myid } = useMe()
+    const { me } = useMe()
 
-    return { miscStore, groupStore, modGroupStore, me, myid }
+    return { miscStore, groupStore, modGroupStore, me }
   },
   data: function () {
     return {

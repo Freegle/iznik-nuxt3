@@ -155,13 +155,12 @@ export default {
   setup() {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
-    const { me, myid } = useMe()
+    const { me } = useMe()
 
     return {
       authStore,
       miscStore,
       me,
-      myid,
     }
   },
   data: function () {

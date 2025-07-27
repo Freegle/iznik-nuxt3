@@ -107,6 +107,7 @@
 import dayjs from 'dayjs'
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../stores/user'
+import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 export default {
@@ -128,10 +129,13 @@ export default {
   setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
+    const { me, myid } = useMe()
     const { amAModOn } = useModMe()
     return {
       memberStore,
       userStore,
+      me,
+      myid,
       amAModOn,
     }
   },

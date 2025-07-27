@@ -224,6 +224,7 @@
 </template>
 <script>
 import { useChatStore } from '~/stores/chat'
+import { useMe } from '~/composables/useMe'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
 // const REVIEWCHAT = null
@@ -231,7 +232,6 @@ import { useChatStore } from '~/stores/chat'
 export default {
   props: {
     id: {
-      // Was in mixins/chat.js
       type: Number,
       required: true,
     },
@@ -241,10 +241,11 @@ export default {
     },
   },
   emits: ['reload'],
-  // mixins: [chat],
   setup() {
     const chatStore = useChatStore()
+    const { me } = useMe()
     return {
+      me,
       chatStore,
     }
   },
@@ -256,7 +257,6 @@ export default {
   },
   computed: {
     chatusers() {
-      // Was in mixins/chat.js
       // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
       // get it in each message we render.
       return this.chatStore.getUsers(this.id)

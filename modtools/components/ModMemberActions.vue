@@ -81,8 +81,8 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    const { me, myid, supportOrAdmin } = useMe()
-    return { groupStore, memberStore, userStore, me, myid, supportOrAdmin }
+    const { me, supportOrAdmin } = useMe()
+    return { groupStore, memberStore, userStore, me, supportOrAdmin }
   },
   data: function () {
     return {

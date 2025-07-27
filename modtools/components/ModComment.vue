@@ -108,7 +108,7 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { bump, context } = setupModMembers()
-    const { supportOrAdmin, myGroup } = useMe()
+    const { myid, supportOrAdmin, myGroup } = useMe()
     const { amAModOn } = useModMe()
     return {
       bump,
@@ -116,6 +116,7 @@ export default {
       groupStore,
       memberStore,
       userStore,
+      myid,
       supportOrAdmin,
       myGroup,
       amAModOn,

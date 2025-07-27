@@ -318,8 +318,8 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modConfigStore = useModConfigStore()
-    const { myGroups, myGroup } = useMe()
-    return { memberStore, modConfigStore, userStore, myGroups, myGroup }
+    const { me, myGroups, myGroup } = useMe()
+    return { memberStore, modConfigStore, userStore, me, myGroups, myGroup }
   },
   data: function () {
     return {

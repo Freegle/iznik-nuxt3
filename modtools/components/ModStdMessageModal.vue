@@ -180,7 +180,7 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
-    const { me, myid } = useMe()
+    const { me } = useMe()
     const { checkWorkDeferGetMessages } = useModMe()
     return {
       modGroupStore,
@@ -192,7 +192,6 @@ export default {
       hide,
       show,
       me,
-      myid,
       checkWorkDeferGetMessages,
     }
   },

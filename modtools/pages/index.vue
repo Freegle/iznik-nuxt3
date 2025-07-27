@@ -163,14 +163,6 @@ const modGroupStore = useModGroupStore()
 // Use me and myid computed properties from useMe composable for consistency
 const { me } = useMe()
 
-/* const version = computed(() => {
-  return runtimeConfig.public.VERSION
-})
-
-const buildDate = computed(() => {
-  return runtimeConfig.public.BUILD_DATE
-}) */
-
 const showVolunteersWeek = ref(false)
 const starti = ref(null)
 const endi = ref(null)

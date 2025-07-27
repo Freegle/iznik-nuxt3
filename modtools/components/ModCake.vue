@@ -60,12 +60,11 @@ import { useMe } from '~/composables/useMe'
 export default {
   setup() {
     const authStore = useAuthStore()
-    const { me, myid } = useMe()
+    const { me } = useMe()
 
     return {
       authStore,
       me,
-      myid,
     }
   },
   data: function () {

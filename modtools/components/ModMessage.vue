@@ -389,7 +389,7 @@
             <div
               class="rounded border border-info p-2 d-flex justify-content-between flex-wrap"
             >
-              <MessageUserInfo
+              <ModMessageUserInfo
                 v-if="
                   message.fromuser && message.groups && message.groups.length
                 "
@@ -683,7 +683,7 @@ export default {
     const messageStore = useMessageStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
-    const { me } = useMe()
+    const { me, myid } = useMe()
     const { myModGroups, myModGroup } = useModMe()
 
     return {
@@ -695,6 +695,7 @@ export default {
       userStore,
       typeOptions,
       me,
+      myid,
       myModGroups,
       myModGroup,
     }

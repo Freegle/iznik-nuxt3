@@ -60,12 +60,11 @@ export default {
     modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
     modMessages.collection.value = 'Approved'
     // modMessages.workType.value = 'approved'
-    const { me, myGroups } = useMe()
+    const { me } = useMe()
     return {
       messageStore,
       miscStore,
       me,
-      myGroups,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },

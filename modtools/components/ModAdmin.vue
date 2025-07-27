@@ -191,6 +191,7 @@
 import { useAdminsStore } from '../stores/admins'
 import { useUserStore } from '../stores/user'
 import { useGroupStore } from '~/stores/group'
+import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 export default {
@@ -209,8 +210,9 @@ export default {
     const adminsStore = useAdminsStore()
     const groupStore = useGroupStore()
     const userStore = useUserStore()
+    const { myid } = useMe()
     const { checkWork } = useModMe()
-    return { adminsStore, groupStore, userStore, checkWork }
+    return { adminsStore, groupStore, userStore, myid, checkWork }
   },
   data: function () {
     return {

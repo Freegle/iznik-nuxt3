@@ -456,7 +456,7 @@ const MicroVolunteering = defineAsyncComponent(() =>
   import('~/components/MicroVolunteering')
 )
 
-const { me, myid } = useMe()
+const { me, myid, mod } = useMe()
 
 // Setup stores
 const authStore = useAuthStore()
