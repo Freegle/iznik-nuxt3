@@ -617,6 +617,7 @@ import { useUserStore } from '../../stores/user'
 
 import { setupKeywords } from '../composables/useKeywords'
 import { SUBJECT_REGEX } from '~/constants'
+import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
 import { useModGroupStore } from '@/stores/modgroup'
@@ -682,6 +683,7 @@ export default {
     const messageStore = useMessageStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
+    const { me } = useMe()
     const { myModGroups, myModGroup } = useModMe()
 
     return {
@@ -692,6 +694,7 @@ export default {
       modconfigStore,
       userStore,
       typeOptions,
+      me,
       myModGroups,
       myModGroup,
     }
