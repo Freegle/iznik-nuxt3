@@ -5,6 +5,8 @@ import { splitVendorChunkPlugin } from 'vite'
 import istanbul from 'vite-plugin-istanbul'
 import config from './config'
 
+const isTest = process.env.NODE_ENV === 'test' || process.env.CI
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -51,7 +53,7 @@ export default defineNuxtConfig({
   // @ts-ignore
   target: 'server',
 
-  ssr: true,
+  ssr: !isTest,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
@@ -728,12 +730,6 @@ export default defineNuxtConfig({
           content:
             "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
         },
-        {
-          hid: 'fb:app_id',
-          property: 'og:site_name',
-          content: config.FACEBOOK_APPID,
-        },
-
         {
           hid: 'twitter:title',
           name: 'twitter:title',

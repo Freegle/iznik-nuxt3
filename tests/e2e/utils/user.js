@@ -62,7 +62,7 @@ async function logoutIfLoggedIn(page) {
     await context.clearCookies()
 
     // Clear any cached data by reloading
-    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
     console.log(
       'Successfully cleared all session data - page is now in fresh state'

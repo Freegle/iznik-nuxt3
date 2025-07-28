@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
+const { addCoverageReport } = require('monocart-reporter')
 const {
   SCREENSHOTS_DIR,
   timeouts,
@@ -9,7 +10,6 @@ const {
   DEFAULT_TEST_PASSWORD,
 } = require('./config')
 const logger = require('./logger')
-const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
@@ -236,6 +236,26 @@ const test = base.test.extend({
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
+
+    // Enable coverage collection only in Chromium
+    let coverageStarted = false
+    if (context.browser().browserType().name() === 'chromium') {
+      try {
+        await Promise.all([
+          page.coverage.startJSCoverage({
+            resetOnNavigation: false,
+          }),
+          page.coverage.startCSSCoverage({
+            resetOnNavigation: false,
+          }),
+        ])
+        coverageStarted = true
+        console.log('Coverage collection started')
+      } catch (error) {
+        console.warn('Failed to start coverage collection:', error.message)
+      }
+    }
+
     // Create a logging proxy for the page
     const loggingPage = logger.createLoggingPage(page)
 
@@ -554,7 +574,7 @@ const test = base.test.extend({
         // Check if it's a connection refused error (dev server not running)
         if (error.message.includes('ERR_CONNECTION_REFUSED')) {
           throw new Error(
-            `Cannot connect to dev server at ${path}. Make sure the dev server is running on http://127.0.0.1:3002`
+            `Cannot connect to dev server at ${path}. Make sure the dev server is running`
           )
         }
 
@@ -746,6 +766,26 @@ const test = base.test.extend({
       // Re-throw the error to fail the test
       throw error
     } finally {
+      // Stop coverage collection and save results before teardown
+      if (coverageStarted) {
+        try {
+          const [jsCoverage, cssCoverage] = await Promise.all([
+            page.coverage.stopJSCoverage(),
+            page.coverage.stopCSSCoverage(),
+          ])
+
+          // Combine coverage data
+          const coverage = [...jsCoverage, ...cssCoverage]
+          if (coverage.length > 0) {
+            // Add coverage data to monocart-reporter using the proper API
+            await addCoverageReport(coverage, test.info())
+            console.log(`Collected ${coverage.length} coverage entries`)
+          }
+        } catch (error) {
+          console.warn('Failed to collect coverage data:', error.message)
+        }
+      }
+
       // Always perform teardown operations, regardless of test success/failure
       await performTeardown()
     }
@@ -762,13 +802,13 @@ test.afterAll(async () => {
     await cleanupScreenshots()
 
     // Attempt to unsubscribe all the test emails
-    console.log('Unsubscribing test emails...')
-    try {
-      await unsubscribeTestEmails()
-      console.log('Successfully processed test email unsubscriptions')
-    } catch (error) {
-      console.error(`Error during test email unsubscription: ${error.message}`)
-    }
+    console.log('Skipping test email unsubscription for now due to port issues')
+    // try {
+    //   await unsubscribeTestEmails()
+    //   console.log('Successfully processed test email unsubscriptions')
+    // } catch (error) {
+    //   console.error(`Error during test email unsubscription: ${error.message}`)
+    // }
   } else {
     console.log('Tests failed, keeping screenshots for debugging')
   }

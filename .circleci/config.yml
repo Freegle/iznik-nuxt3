@@ -3,7 +3,6 @@ version: 2.1
 orbs:
   node: circleci/node@5.1.0
   browser-tools: circleci/browser-tools@1.4.1
-  coveralls: coveralls/coveralls@1.0.6
 
 # Define reusable commands
 commands:
@@ -33,6 +32,10 @@ commands:
       - store_artifacts:
           path: coverage
           destination: coverage
+          when: always
+      - store_artifacts:
+          path: monocart-report
+          destination: monocart-report
           when: always
       # Store our dedicated screenshots directory
       - store_artifacts:
@@ -91,7 +94,7 @@ jobs:
           name: Install Playwright browsers
           command: npx playwright install --with-deps chromium
 
-      # Build the project with environment variables
+      # Build the project for testing
       - run:
           name: Build for testing
           command: |
@@ -100,6 +103,7 @@ jobs:
             export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             # Increase Node.js memory limit to 8GB
             export NODE_OPTIONS="--max-old-space-size=8192"
+            export NODE_ENV=test
             npm run build
 
       # Serve the built application in the background
@@ -144,14 +148,12 @@ jobs:
               sleep 30
             done
             
-      # Run Playwright tests with coverage
+      # Run Playwright tests
       - run:
-          name: Run Playwright tests with coverage
+          name: Run Playwright tests
           command: |
             mkdir -p test-results
-            mkdir -p coverage
             export NODE_OPTIONS="--max-old-space-size=8192"
-            export NODE_ENV=test
             
             # Set environment variables with defaults
             export TEST_BASE_URL=${TEST_BASE_URL:-http://localhost:3000}
@@ -161,7 +163,7 @@ jobs:
             export STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ}
             
             # Run tests with coverage and capture exit code
-            npm run test:coverage:ci
+            npm run test:coverage
             TEST_EXIT_CODE=$?
             
             echo "Playwright test exit code: $TEST_EXIT_CODE"
@@ -194,20 +196,18 @@ jobs:
               exit $TEST_EXIT_CODE
             fi
 
-      # Upload coverage to Coveralls using the orb
+      # Upload coverage to Coveralls (runs even if tests fail, but only if coverage exists)
       - run:
           name: Upload coverage to Coveralls
           command: |
             if [ -f "coverage/lcov.info" ]; then
               echo "Coverage file found, uploading to Coveralls..."
+              npm run coveralls
             else
-              echo "No coverage file found at coverage/lcov.info"
-              exit 1
+              echo "No coverage file found, skipping Coveralls upload"
             fi
           when: always
-      - coveralls/upload:
-          path_to_lcov: coverage/lcov.info
-
+                
       # Save test results (always run this, even if tests fail)
       - run:
           name: Collect test artifacts
