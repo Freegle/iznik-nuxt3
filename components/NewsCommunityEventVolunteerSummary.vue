@@ -1,5 +1,8 @@
 <template>
-  <b-card body-class="p-1 ps-0 pe-0">
+  <b-card
+    v-if="communityEvents.length || volunteerOpportunities.length"
+    body-class="p-1 ps-0 pe-0"
+  >
     <div class="small text-center">
       <span v-if="communityEvents?.length"
         >Community Events

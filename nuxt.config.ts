@@ -4,6 +4,9 @@ import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
+let isTest = process.env.NODE_ENV === 'test' || process.env.CI
+if( config.IS_MT) isTest = false
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -49,7 +52,7 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: 'server',
-  ssr: true,
+  ssr: !isTest,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
@@ -377,12 +380,6 @@ export default defineNuxtConfig({
           content:
             "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
         },
-        {
-          hid: 'fb:app_id',
-          property: 'og:site_name',
-          content: config.FACEBOOK_APPID,
-        },
-
         {
           hid: 'twitter:title',
           name: 'twitter:title',

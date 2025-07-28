@@ -62,7 +62,7 @@ async function logoutIfLoggedIn(page) {
     await context.clearCookies()
 
     // Clear any cached data by reloading
-    await page.goto('/', { waitUntil: 'networkidle' })
+    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
     console.log(
       'Successfully cleared all session data - page is now in fresh state'
@@ -567,7 +567,7 @@ async function unsubscribeManually(page, email) {
     )
 
     // The leave button might not appear if the account has already unsubscribed but is in limbo.
-    if ((await leaveButton.count()) === 0) {
+    if ((await leaveButton.count()) > 0) {
       await leaveButton.click()
       // If no error message, look for the confirmation modal
       console.log('Waiting for confirmation modal in unsubscribe')

@@ -55,7 +55,9 @@ async function unsubscribeTestEmails() {
     try {
       console.log(`Attempting to unsubscribe email: ${email}`)
       // Create a new context for each email to ensure clean state
-      const context = await browser.newContext()
+      const context = await browser.newContext({
+        baseURL: process.env.TEST_BASE_URL || 'http://127.0.0.1:3000',
+      })
       const page = await context.newPage()
 
       // Add gotoAndVerify navigation helper method
