@@ -5,7 +5,7 @@ import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
 let isTest = process.env.NODE_ENV === 'test' || process.env.CI
-if( config.IS_MT) isTest = false
+if (config.IS_MT) isTest = false
 
 // @ts-ignore
 export default defineNuxtConfig({
