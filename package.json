@@ -131,6 +131,7 @@
     "upgrade": "^1.1.0",
     "vee-validate": "^4.7.1",
     "vite": "^5.0.10",
+    "vite-plugin-istanbul": "^7.1.0",
     "vue": "^3.2.47",
     "vue-clipboard2": "^0.3.3",
     "vue-datepicker-next": "^1.0.3",
