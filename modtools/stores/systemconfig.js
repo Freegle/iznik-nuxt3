@@ -92,7 +92,7 @@ export const useSystemConfigStore = defineStore({
       }
     },
 
-    async addSpamKeyword(word, type = 'Literal') {
+    async addSpamKeyword(word, type = 'Literal', action = 'Review') {
       if (!word || !word.trim()) return
 
       const trimmedWord = word.trim()
@@ -106,7 +106,7 @@ export const useSystemConfigStore = defineStore({
           word: trimmedWord,
           type,
           exclude: '',
-          action: 'Review',
+          action,
         })
 
         await this.fetchSpamKeywords()

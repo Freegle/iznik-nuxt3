@@ -76,7 +76,9 @@ export default {
         case 'Reportable':
           return 'danger'
         case 'Medicine':
-          return isRegex ? 'info' : 'primary'
+          return 'info'
+        case 'Allowed':
+          return 'success'
         case 'Review':
         default:
           return isRegex ? 'info' : 'secondary'

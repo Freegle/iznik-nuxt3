@@ -35,6 +35,7 @@
         />
         <p v-if="!visibleChats || !visibleChats.length" class="ml-2">
           <span v-if="searching" class="pulsate"> Searching... </span>
+          <span v-else-if="loading" class="pulsate"> Loading... </span>
           <span v-else> No chats to show. </span>
         </p>
         <infinite-loading
@@ -125,6 +126,7 @@ export default {
       search: null,
       searching: false,
       searchlast: null,
+      loading: true,
       // complete: false,
       limit: 5,
       bump: 1,
@@ -205,6 +207,7 @@ export default {
   async mounted() {
     this.chatStore.clear()
     await this.listChats()
+    this.loading = false
   },
   methods: {
     async listChats(age, search) {
@@ -294,6 +297,7 @@ export default {
     },
     async markAllRead() {
       console.log('markAllRead A')
+      this.loading = true
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
           console.log('markAllRead B', chat.unseen, chat.lastmsg)
@@ -304,6 +308,7 @@ export default {
 
       this.chatStore.clear()
       await this.listChats()
+      this.loading = false
     },
     gotoChat(id) {
       const router = useRouter()

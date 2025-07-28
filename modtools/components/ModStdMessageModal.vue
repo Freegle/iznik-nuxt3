@@ -248,7 +248,7 @@ export default {
       let ret = null
       if (this.member) {
         ret = this.member.email
-      } else {
+      } else if (this.message.fromuser && this.message.fromuser.emails) {
         this.message.fromuser.emails.forEach((email) => {
           if (
             email.email &&
