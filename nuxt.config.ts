@@ -707,12 +707,6 @@ export default defineNuxtConfig({
             "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
         },
         {
-          hid: 'fb:app_id',
-          property: 'og:site_name',
-          content: config.FACEBOOK_APPID,
-        },
-
-        {
           hid: 'twitter:title',
           name: 'twitter:title',
           content: "Freegle - Don't throw it away, give it away!",
