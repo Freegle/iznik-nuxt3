@@ -42,10 +42,7 @@ These alterations to the base code should NOT be incorporated into the base code
 * nuxt.config.ts
 * components/ChatMessageInterested.vue
 * components/ChatMessageText.vue
-
-???
-* `stores/group.js`
-* `stores/auth.js`
+* stores/auth.js
 
 ## Usage:
 

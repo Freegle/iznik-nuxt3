@@ -1,3 +1,4 @@
+// DO NOT COPY INTO MASTER
 import { defineStore } from 'pinia'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import { useComposeStore } from '../stores/compose'

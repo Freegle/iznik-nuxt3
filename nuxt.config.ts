@@ -1,3 +1,4 @@
+// DO NOT COPY INTO MASTER
 // import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'

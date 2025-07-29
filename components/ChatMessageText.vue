@@ -1,4 +1,5 @@
 <template>
+  <!-- DO NOT COPY INTO MASTER -->
   <div
     class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
