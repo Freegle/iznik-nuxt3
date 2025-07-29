@@ -41,7 +41,6 @@ export const useChatStore = defineStore({
         search: params && params.search ? params.search : null,
       }
       params.summary = true
-      // console.log('uCS listChatsMT', params)
 
       this.lastSearchMT = params.search
 
@@ -54,10 +53,8 @@ export const useChatStore = defineStore({
         // current = chatid && this.list[chatid] ? this.list[chatid] : null
 
         const { chatrooms } = await api(this.config).chat.listChatsMT(params)
-        // console.log('uCS listChatsMT',chatrooms)
         this.list = chatrooms
         chatrooms.forEach((c) => {
-          // console.log('uCS listChatsMT',c.unseen)
           // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
           // component updates for no good reason.
           if (
@@ -65,16 +62,13 @@ export const useChatStore = defineStore({
             this.listByChatId[c.id].lastdate !== c.lastdate
           ) {
             this.listByChatId[c.id] = c
-            // console.log('uCS listChatsMT',c.id, c)
           }
         })
 
         if (selectedChatId) {
-          // console.log('uCS listChatsMT selectedChatId', selectedChatId)
           const { chatroom } = await api(this.config).chat.fetchChatMT(
             selectedChatId
           )
-          // console.log('uCS listChatsMT selectedChat', chatroom)
           this.listByChatId[chatroom.id] = chatroom
         }
       } catch (e) {
@@ -94,7 +88,6 @@ export const useChatStore = defineStore({
 
       if (me && me.id) {
         const newCount = await api(this.config).chat.unseenCountMT()
-        // console.log('fetchLatestChats BBB', this.currentCountMT, newCount)
 
         if (newCount !== this.currentCountMT) {
           if (!this.lastSearchMT) {
@@ -184,7 +177,6 @@ export const useChatStore = defineStore({
       if (id > 0) {
         const miscStore = useMiscStore() // MT
         if (miscStore.modtools) {
-          // console.log('uCS fetchChat',id)
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
           this.listByChatId[id] = chatroom
         } else {
@@ -440,7 +432,6 @@ export const useChatStore = defineStore({
         if (miscStore.modtools) {
           // TODO: Not now used, so remove
           const chat = state.listByChatId[key]
-          // console.log('unreadCount',chat.chattype,chat.unseen,chat.user1,chat.user2,myid)
           // We count chats between mods, and chats between other members and mods.
           if (chat.chattype === 'Mod2Mod') {
             ret += chat.unseen

@@ -127,7 +127,7 @@ export default {
       searching: false,
       searchlast: null,
       loading: true,
-      // complete: false,
+      complete: false,
       limit: 5,
       bump: 1,
       distance: 1000,
@@ -184,7 +184,6 @@ export default {
   },
   watch: {
     search(newVal, oldVal) {
-      console.log('search changed to', newVal)
       this.showChats = 0
       this.bump = Date.now()
 
@@ -205,13 +204,13 @@ export default {
     console.log('[[id]] created', route.params.id, this.id)
   },
   async mounted() {
-    this.chatStore.clear()
+    // Do not clear chat store - all chats are got but only updated if lastdate changed
+    // this.chatStore.clear()
     await this.listChats()
     this.loading = false
   },
   methods: {
     async listChats(age, search) {
-      // console.log('chats [[id]] listChats', this.id)
       const params = {
         chattypes: ['User2Mod', 'Mod2Mod'],
       }
@@ -226,7 +225,6 @@ export default {
       this.bump++
     },
     scanChats(closed, chats) {
-      // console.log('scanChats', closed, chats.length,this.id)
       // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
       if (chats && this.search && this.searching) {
         const l = this.search.toLowerCase()
@@ -277,14 +275,12 @@ export default {
         }
       })
 
-      // console.log('scanChats return', chats)
       return chats
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
       // we render onscreen the faster vue is to do so.
       const chats = this.filteredChats
-      // console.log('loadMore', this.showChats, chats.length)
       this.showChats++
 
       if (this.showChats > chats.length) {
