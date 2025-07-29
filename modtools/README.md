@@ -1,6 +1,6 @@
 # iznik-nuxt3 modtools
 
-This `modtools` branch provides an interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally, 
+This `modtools` branch provides the user interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally, 
 running on separate website https://modtools.org/
 
 ModTools exists as a branch of the main/base `master` iznik-nuxt3 repository, with some modifications of the base code, with the bulk of the volunteer
@@ -29,14 +29,15 @@ These files/directories are present in /modtools:
 ## Base alterations:
 
 TO DO: Multiple modifications to the base code have been done in the modtools branch. 
-Most - but not all - of these can be incorporated into master.
+Most - but not all - of these can be copied into master.
+Files which must stay diverged or have not been merged have text DO NOT COPY INTO MASTER.
 
 The base code usually uses `miscStore.modtools` to determine any MT-specific actions, often made available as ref `isMT`.
 However `process.env.MT` and `config.IS_MT` are also available if need be.
 
 ### ModTools crucial base alterations
 
-These alterations to the base code should NOT be incorporated into the base code:
+These alterations to the base code should NOT be incorporated into the base code and should be marked DO NOT COPY INTO MASTER:
 
 * netlify.toml
 * nuxt.config.ts
