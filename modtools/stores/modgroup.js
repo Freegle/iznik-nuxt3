@@ -33,23 +33,21 @@ export const useModGroupStore = defineStore({
     // Do not clear groups info but get any extra again
     async getModGroups() {
       try {
-        // console.log('--- uMGS getModGroups A')
-
         // Get all base groups once - but clear if not logged in
         const groupStore = useGroupStore()
         const authStore = useAuthStore()
-        // console.log('--- uMGS getModGroups AA', authStore.groups.length)
+
+        // If user has changed then clear groupStore
         if (authStore.groups.length === 0) {
           groupStore.clear()
           this.clear()
         }
+        // Get ALL groups into base groupStore once
         if (Object.keys(groupStore.list).length === 0) {
           await groupStore.fetch()
         }
-        // console.log('--- uMGS getModGroups AAAA', Object.keys(groupStore.list).length)
 
         // Get work for each group
-        // console.log('--- uMGS getModGroups B')
         const me = authStore.user
         this.sessionGroups = false
         if (me && me.id) {
@@ -57,9 +55,9 @@ export const useModGroupStore = defineStore({
             components: ['groups'],
           })
           if (ret && ret.groups) {
-            // console.log('uMGS getModGroups work', ret.groups)
             this.sessionGroups = ret.groups
 
+            // Update work for each of our groups
             for (const group of Object.values(this.list)) {
               const g = this.sessionGroups.find((g) => g.id === group.id)
               if (g && g.work) {
@@ -69,12 +67,10 @@ export const useModGroupStore = defineStore({
           }
         }
 
-        // console.log('--- uMGS getModGroups C')
-        // Go through all our groups, load the full MT group info if need be.
+        // Go through all my groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
         this.getting = []
         for (const g of Object.values(authStore.groups)) {
-          // console.log('--- uMGS getModGroups g', g.groupid)
           this.fetchIfNeedBeMT(g.groupid)
         }
       } catch (e) {
@@ -82,15 +78,13 @@ export const useModGroupStore = defineStore({
       }
     },
 
-    // Actually get full group infor for MT
+    // Actually get full group info for MT
     // Called by fetchIfNeedBeMT and when group needs reloading after changes
     async fetchGroupMT(id) {
-      // console.error('uMGS fetchGroupMT', id)
       if (!id) {
         console.error('fetchGroupMT with zero id')
         return
       }
-      // console.log('--- uMGS fetchGroupMT', id)
       const polygon = true
       const sponsors = true
       const showmods = true
@@ -104,6 +98,9 @@ export const useModGroupStore = defineStore({
         tnkey
       )
       if (group) {
+        // Set group work and role from sessionGroups ie session v1 call if not present.
+        // sessionGroups usually got every 30s in getModGroups()
+        // Note: group.myrole is overridden on server for support and admin so set group.role from sessionGroups
         if (!this.sessionGroups) {
           const ret = await this.$api.session.fetch({
             components: ['groups'],
@@ -112,7 +109,6 @@ export const useModGroupStore = defineStore({
             this.sessionGroups = ret.groups
           }
         }
-        // Get work and role from session info received when route first called in layout default.vue watch $route handler
         if (this.sessionGroups) {
           const g = this.sessionGroups.find((g) => g.id === group.id)
           if (g) {
@@ -133,7 +129,7 @@ export const useModGroupStore = defineStore({
       }
     },
     async listMT(params) {
-      console.error('uMGS listMT implemented: getting allGroups')
+      console.log('uMGS listMT implemented: getting allGroups')
       // console.trace()
       const groups = await api(this.config).group.listMT(params)
       // this.list = {}
@@ -145,11 +141,9 @@ export const useModGroupStore = defineStore({
       }
     },
     async fetchIfNeedBeMT(id) {
-      // console.log('uMGS fetchIfNeedBeMT A', id)
       if (!id) return
       if (this.list[id]) return
       if (this.getting.includes(id)) {
-        // console.log('uMGS fetchIfNeedBeMT B', id)
         const until = (predFn) => {
           const poll = (done) =>
             predFn() ? done() : setTimeout(() => poll(done), 100)
@@ -157,10 +151,8 @@ export const useModGroupStore = defineStore({
         }
         const self = this
         await until(() => self.list[id]) // Wait until group has arrived
-        // console.log('uMGS fetchIfNeedBeMT GOT', id)
         return
       }
-      // console.error('uMGS fetchIfNeedBeMT CCC', id)
       this.getting.push(id)
       await this.fetchGroupMT(id)
     },
@@ -179,7 +171,6 @@ export const useModGroupStore = defineStore({
         return null
       }
       const g = state.list[id] ? state.list[id] : null
-      // console.log('uMGS get', id, g)
       // OK if not found initially as it should appear soon enough
       // if (!g) console.error('uMGS group not found for id', id)
       return g
