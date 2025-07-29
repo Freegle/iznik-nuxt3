@@ -1,4 +1,3 @@
-// DO NOT COPY INTO MASTER
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import api from '~/api'
