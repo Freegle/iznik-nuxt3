@@ -43,6 +43,7 @@ These alterations to the base code should NOT be incorporated into the base code
 * components/ChatMessageInterested.vue
 * components/ChatMessageText.vue
 * stores/auth.js
+* and possibly others?
 
 ## Usage:
 
