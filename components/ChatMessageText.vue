@@ -127,7 +127,7 @@ const emessageMThasTNlinks = computed(() => {
   return emessage.value.includes('https://trashnothing.com/fd/')
 })
 const emessageMTTN = computed(() => {
-  let ret = emessage
+  let ret = emessage.value
   ret = ret
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
