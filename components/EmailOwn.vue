@@ -23,6 +23,7 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/stores/auth'
+const me = useAuthStore().user
 
 const props = defineProps({
   email: {
