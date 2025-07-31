@@ -124,7 +124,7 @@ const isMT = ref(miscStore.modtools) // MT
 
 // Computed properties
 const emessageMThasTNlinks = computed(() => {
-  return emessage.value.includes('https://trashnothing.com/fd/')
+  return emessage.value?.includes('https://trashnothing.com/fd/')
 })
 const emessageMTTN = computed(() => {
   let ret = emessage.value
