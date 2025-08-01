@@ -111,19 +111,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       const newEmailSettingsSection = newPage.locator(
         'h2:has-text("Email Settings")'
       )
-      try {
-        await newEmailSettingsSection.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-      } catch {
-        // If not visible, scroll into view
-        await newEmailSettingsSection.scrollIntoViewIfNeeded()
-        await newEmailSettingsSection.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-      }
+      await scrollIntoViewAndWait(newEmailSettingsSection)
 
       emailLevelSelect = newPage.locator('.simpleEmailSelect')
 
@@ -214,10 +202,9 @@ test.describe('Settings Page - Email Level Settings', () => {
     await signUpViaHomepage(page, testEmail, 'Test User')
     await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
-    // Wait for email settings section
-    await page.waitForSelector('text=Email Settings', {
-      timeout: timeouts.ui.appearance,
-    })
+    // Wait for email settings section and scroll into view
+    const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
+    await scrollIntoViewAndWait(emailSettingsSection)
 
     // Ensure we're not on 'None' setting (advanced settings not available for 'None')
     const emailLevelSelect = page
@@ -309,10 +296,9 @@ test.describe('Settings Page - Email Level Settings', () => {
     await signUpViaHomepage(page, testEmail, 'Test User')
     await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
-    // Wait for email settings section
-    await page.waitForSelector('text=Email Settings', {
-      timeout: timeouts.ui.appearance,
-    })
+    // Wait for email settings section and scroll into view
+    const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
+    await scrollIntoViewAndWait(emailSettingsSection)
 
     // Test that appropriate warnings appear for 'None' setting
     const emailLevelSelect = page
