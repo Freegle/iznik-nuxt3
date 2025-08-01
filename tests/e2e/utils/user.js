@@ -81,13 +81,15 @@ async function logoutIfLoggedIn(page) {
  * @param {string} email - Email address to use for sign up
  * @param {string} [displayName] - Optional display name (generates one if not provided)
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Optional password (uses default if not provided)
+ * @param {boolean} [marketingConsent=null] - Optional marketing consent value (null means don't change default)
  * @returns {Promise<boolean>} - Returns true if sign up was successful
  */
 async function signUpViaHomepage(
   page,
   email,
   displayName,
-  password = DEFAULT_TEST_PASSWORD
+  password = DEFAULT_TEST_PASSWORD,
+  marketingConsent = null
 ) {
   console.log(`Starting signup process for email: ${email}`)
 
@@ -122,13 +124,19 @@ async function signUpViaHomepage(
     // Use CSS selector to exclude disabled elements directly
     const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
     const button = page.locator(modifiedSelector).first()
-    if (
-      (await button.count()) > 0 &&
-      (await button.isVisible().catch(() => false))
-    ) {
+
+    try {
+      // Wait briefly for element to be present and visible (handles rendering delays)
+      await button.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await button.click()
       buttonFound = true
       break
+    } catch {
+      // Element not found or not visible, try next selector
+      continue
     }
   }
 
@@ -228,6 +236,32 @@ async function signUpViaHomepage(
   })
   await passwordInput.fill(password)
 
+  // Handle marketing consent if specified
+  if (marketingConsent !== null) {
+    console.log(`Setting marketing consent to: ${marketingConsent}`)
+    const marketingCheckbox = page.locator('#marketingConsent')
+
+    // Wait for the checkbox to be visible
+    await marketingCheckbox.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+
+    if (marketingConsent === true) {
+      // Ensure it's checked (should be by default)
+      const isChecked = await marketingCheckbox.isChecked()
+      if (!isChecked) {
+        await marketingCheckbox.check()
+      }
+    } else if (marketingConsent === false) {
+      // Uncheck it
+      const isChecked = await marketingCheckbox.isChecked()
+      if (isChecked) {
+        await marketingCheckbox.uncheck()
+      }
+    }
+  }
+
   // Take a screenshot before submitting
   await page.screenshot({
     path: `playwright-screenshots/before-signup-${Date.now()}.png`,
@@ -300,9 +334,15 @@ async function signUpViaHomepage(
  * @param {import('@playwright/test').Page} page - Playwright page object
  * @param {string} email - Email address to use for login
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Password to use for login
+ * @param {boolean} [expectedMarketingConsent=null] - Optional expected marketing consent value to verify (null means don't verify)
  * @returns {Promise<boolean>} - Returns true if login was successful
  */
-async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
+async function loginViaHomepage(
+  page,
+  email,
+  password = DEFAULT_TEST_PASSWORD,
+  expectedMarketingConsent = null
+) {
   console.log(`Starting login process for email: ${email}`)
 
   // Check if already logged in and logout if needed
@@ -344,13 +384,19 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
     // Use CSS selector to exclude disabled elements directly
     const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
     const button = page.locator(modifiedSelector).first()
-    if (
-      (await button.count()) > 0 &&
-      (await button.isVisible().catch(() => false))
-    ) {
+
+    try {
+      // Wait briefly for element to be present and visible (handles rendering delays)
+      await button.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await button.click()
       buttonFound = true
       break
+    } catch {
+      // Element not found or not visible, try next selector
+      continue
     }
   }
 
@@ -432,6 +478,27 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
     timeout: timeouts.ui.appearance,
   })
   await passwordInput.fill(password)
+
+  // Verify marketing consent if specified
+  if (expectedMarketingConsent !== null) {
+    console.log(`Verifying marketing consent is: ${expectedMarketingConsent}`)
+    const marketingCheckbox = page.locator('#marketingConsent')
+
+    // Wait for the checkbox to be visible
+    await marketingCheckbox.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+
+    const isChecked = await marketingCheckbox.isChecked()
+    if (expectedMarketingConsent !== isChecked) {
+      console.error(
+        `Marketing consent mismatch: expected ${expectedMarketingConsent}, got ${isChecked}`
+      )
+      return false
+    }
+    console.log(`Marketing consent verification passed: ${isChecked}`)
+  }
 
   // Take a screenshot before submitting
   await page.screenshot({
@@ -550,15 +617,15 @@ async function unsubscribeManually(page, email) {
       .first()
 
     // If so, fill it
-    if ((await emailInput.count()) > 0) {
+    try {
       console.log('Filling in email input')
       await emailInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
       await emailInput.fill(email)
-    } else {
-      console.log('Email input not found, logged in')
+    } catch {
+      console.log('Email input not found, likely already logged in')
     }
 
     console.log('Clicking "Leave Freegle completely" button')
@@ -567,7 +634,11 @@ async function unsubscribeManually(page, email) {
     )
 
     // The leave button might not appear if the account has already unsubscribed but is in limbo.
-    if ((await leaveButton.count()) > 0) {
+    try {
+      await leaveButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await leaveButton.click()
       // If no error message, look for the confirmation modal
       console.log('Waiting for confirmation modal in unsubscribe')
@@ -590,6 +661,10 @@ async function unsubscribeManually(page, email) {
       await page.locator('div:has-text("removed your account")')
 
       console.log('Successfully unsubscribed email')
+    } catch {
+      console.log(
+        'Leave button not found or not clickable - account may already be unsubscribed'
+      )
     }
 
     return true

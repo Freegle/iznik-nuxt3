@@ -386,6 +386,20 @@ export const useAuthStore = defineStore({
           // because persisted.
           composeStore.email = me.email
         }
+
+        // Sync marketing consent from local storage to user profile if needed
+        const miscStore = useMiscStore()
+        const localConsent = miscStore.marketingConsent ? 1 : 0
+        if (me.marketingconsent !== localConsent) {
+          try {
+            await this.$api.user.patch({
+              marketingconsent: localConsent,
+            })
+            console.log('Synced marketing consent to server')
+          } catch (e) {
+            console.log('Failed to sync marketing consent', e)
+          }
+        }
       } else {
         // Any auth info must be invalid.
         this.setAuth(null, null)
