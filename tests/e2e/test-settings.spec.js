@@ -51,7 +51,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       await page.gotoAndVerify('/settings')
 
       // Wait for the email settings section to load and scroll into view
-      const emailSettingsSection = page.locator('text=Email Settings')
+      const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
       try {
         await emailSettingsSection.waitFor({
           state: 'visible',
@@ -119,7 +119,9 @@ test.describe('Settings Page - Email Level Settings', () => {
       await newPage.gotoAndVerify('/settings')
 
       // Wait for settings to load again and scroll into view
-      const newEmailSettingsSection = newPage.locator('text=Email Settings')
+      const newEmailSettingsSection = newPage.locator(
+        'h2:has-text("Email Settings")'
+      )
       try {
         await newEmailSettingsSection.waitFor({
           state: 'visible',
