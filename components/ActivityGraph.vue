@@ -52,7 +52,7 @@
         These are the posts marked as TAKEN/RECEIVED.
       </p>
       <p v-if="graphType === 'Donations'">
-        These are donations received via PayPal.
+        These are donations received via PayPal or Stripe.
       </p>
       <p v-if="graphType === 'ActiveUsers'">
         This is the number of freeglers active in the 30 days before each date.
@@ -66,6 +66,9 @@
         class="height text-muted pulsate align-middle d-flex flex-column"
       >
         Loading...
+      </div>
+      <div v-else-if="noDataToShow">
+        <strong>No data for this period.</strong>
       </div>
       <GChart
         v-else
@@ -177,7 +180,7 @@ const graphTitles = {
   Wanteds: 'WANTEDs only',
   Weight: 'Weights',
   Outcomes: 'Successful',
-  Donations: 'PayPal Donations',
+  Donations: 'PayPal or Stripe Donations',
   ActiveUsers: 'Active freeglers',
 }
 
@@ -262,7 +265,7 @@ const graphTypes = computed(() => {
   ret.push({ value: 'Replies', text: 'Replies' })
 
   if (props.donations) {
-    ret.push({ value: 'Donations', text: 'PayPal Donations' })
+    ret.push({ value: 'Donations', text: 'PayPal or Stripe Donations' })
   }
 
   return ret
@@ -404,6 +407,12 @@ const graphData = computed(() => {
   return ret
 })
 
+const noDataToShow = computed(() => {
+  if (Array.isArray(graphData.value) && graphData.value.length > 1) {
+    return false
+  }
+  return true
+})
 // Methods
 const fetch = async (nodef) => {
   loading.value = true
