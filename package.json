@@ -13,7 +13,7 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwright test",
+    "test:prod": "TEST_BASE_URL=https://www.ilovefreegle.org playwrigrht test",
     "test:coverage": "npm run test:clean && playwright test",
     "test:coverage:upload": "npm run test:coverage && npm run coveralls",
     "coveralls": "node scripts/upload-coverage.js",
