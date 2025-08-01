@@ -8,6 +8,7 @@ const path = require('path')
 const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
 const { signUpViaHomepage, loginViaHomepage } = require('./utils/user')
+const { scrollIntoViewAndWait } = require('./utils/ui')
 
 // Ensure test-results directory exists
 const testResultsDir = path.join(__dirname, '../../test-results')
@@ -52,19 +53,7 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Wait for the email settings section to load and scroll into view
       const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
-      try {
-        await emailSettingsSection.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-      } catch {
-        // If not visible, scroll into view
-        await emailSettingsSection.scrollIntoViewIfNeeded()
-        await emailSettingsSection.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-      }
+      await scrollIntoViewAndWait(emailSettingsSection)
 
       // Get the email level select element - look for the select near the "Choose your email level" text
       let emailLevelSelect = page.locator('.simpleEmailSelect')

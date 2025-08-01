@@ -97,6 +97,54 @@ async function waitForElementWithText(
 }
 
 /**
+ * Scrolls an element into view if needed and waits for it to be visible
+ * Handles cases where the element might not be rendered yet by continuously re-evaluating the locator
+ * @param {import('@playwright/test').Locator} locator - Playwright locator object
+ * @param {number} [timeout] - Optional timeout (defaults to ui.appearance from config)
+ * @returns {Promise<void>}
+ */
+async function scrollIntoViewAndWait(
+  locator,
+  timeout = timeouts.ui.appearance
+) {
+  const startTime = Date.now()
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      // First try to wait for the element to be attached to the DOM
+      await locator.waitFor({
+        state: 'attached',
+        timeout: 1000, // Short timeout for each attempt
+      })
+
+      // Try to scroll into view
+      await locator.scrollIntoViewIfNeeded()
+
+      // Wait for it to be visible
+      await locator.waitFor({
+        state: 'visible',
+        timeout: 1000, // Short timeout for each attempt
+      })
+
+      // If we get here, the element is visible - success!
+      return
+    } catch (error) {
+      // Element might not be rendered yet, continue trying
+      // Wait a short time before retrying
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+  }
+
+  // If we get here, we've timed out - make one final attempt with the full timeout
+  // This will throw the appropriate error if it still fails
+  await locator.scrollIntoViewIfNeeded()
+  await locator.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+}
+
+/**
  * Clicks an OurToggle component correctly by targeting the toggle container
  * The actual checkbox in OurToggle is hidden, so we need to click the visible toggle container
  * @param {import('@playwright/test').Locator} toggleLocator - Locator for the toggle component
@@ -106,14 +154,8 @@ async function clickToggle(toggleLocator) {
   // Find the toggle container within the OurToggle component
   const toggleContainer = toggleLocator.locator('.toggle-container')
 
-  // Scroll the toggle into view if needed
-  await toggleContainer.scrollIntoViewIfNeeded()
-
-  // Wait for the toggle to be visible and ready for interaction
-  await toggleContainer.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
+  // Scroll the toggle into view if needed using our new utility
+  await scrollIntoViewAndWait(toggleContainer)
 
   // Click the toggle container to trigger the toggle
   await toggleContainer.click()
@@ -127,5 +169,6 @@ module.exports = {
   waitForAnimationEnd,
   waitForModal,
   waitForElementWithText,
+  scrollIntoViewAndWait,
   clickToggle,
 }
