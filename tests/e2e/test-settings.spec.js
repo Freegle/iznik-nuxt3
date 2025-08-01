@@ -7,8 +7,7 @@ const fs = require('fs')
 const path = require('path')
 const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
-const { signUpViaHomepage, loginViaHomepage } = require('./utils/user')
-const { scrollIntoViewAndWait } = require('./utils/ui')
+const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
 // Ensure test-results directory exists
 const testResultsDir = path.join(__dirname, '../../test-results')
@@ -18,7 +17,7 @@ if (!fs.existsSync(testResultsDir)) {
 
 test.describe('Settings Page - Email Level Settings', () => {
   test('Email level settings save correctly and persist after page reload', async ({
-    browser,
+    page,
     testEmail,
   }) => {
     // Define the email level options to test
@@ -31,29 +30,17 @@ test.describe('Settings Page - Email Level Settings', () => {
     for (const level of emailLevels) {
       console.log(`Testing email level: ${level.text}`)
 
-      // Create initial context and page
-      const context = await browser.newContext()
-      const page = await context.newPage()
-
-      // Add gotoAndVerify method to page (from fixtures)
-      page.gotoAndVerify = async (path, options = {}) => {
-        const timeout = options.timeout || timeouts.navigation.default
-        await page.goto(path, { timeout })
-        await page.waitForLoadState('networkidle', {
-          timeout: Math.min(timeout, timeouts.navigation.default),
-        })
-      }
-
       // Sign up to access settings page
-      await page.gotoAndVerify('/')
+      await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
       await signUpViaHomepage(page, testEmail, 'Test User')
 
       // Navigate to settings page
-      await page.gotoAndVerify('/settings')
+      await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
-      // Wait for the email settings section to load and scroll into view
-      const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
-      await scrollIntoViewAndWait(emailSettingsSection)
+      // Wait for the email settings section to load
+      await page.waitForSelector('text=Email Settings', {
+        timeout: timeouts.ui.appearance,
+      })
 
       // Get the email level select element - look for the select near the "Choose your email level" text
       let emailLevelSelect = page.locator('.simpleEmailSelect')
@@ -86,40 +73,21 @@ test.describe('Settings Page - Email Level Settings', () => {
         fullPage: true,
       })
 
-      // Create a new context and page to verify persistence (more reliable than page reload)
-      await context.close()
-      const newContext = await browser.newContext()
-      const newPage = await newContext.newPage()
+      // Reload the page to verify persistence
+      await page.reload({ waitUntil: 'networkidle' })
 
-      // Add gotoAndVerify method to new page (from fixtures)
-      newPage.gotoAndVerify = async (path, options = {}) => {
-        const timeout = options.timeout || timeouts.navigation.default
-        await newPage.goto(path, { timeout })
-        await newPage.waitForLoadState('networkidle', {
-          timeout: Math.min(timeout, timeouts.navigation.default),
-        })
-      }
+      // Wait for settings to load again
+      await page.waitForSelector('text=Email Settings', {
+        timeout: timeouts.ui.appearance,
+      })
 
-      // Login with the same user to verify settings persistence
-      await newPage.gotoAndVerify('/')
-      await loginViaHomepage(newPage, testEmail, 'Test User')
-
-      // Navigate to settings page in new context
-      await newPage.gotoAndVerify('/settings')
-
-      // Wait for settings to load again and scroll into view
-      const newEmailSettingsSection = newPage.locator(
-        'h2:has-text("Email Settings")'
-      )
-      await scrollIntoViewAndWait(newEmailSettingsSection)
-
-      emailLevelSelect = newPage.locator('.simpleEmailSelect')
+      emailLevelSelect = page.locator('.simpleEmailSelect')
 
       // Wait for the select element to be ready
       await emailLevelSelect.waitFor({ state: 'visible' })
 
-      // Take screenshot after login to verify persistence
-      await newPage.screenshot({
+      // Take screenshot after page reload to verify persistence
+      await page.screenshot({
         path: path.join(
           testResultsDir,
           `email-level-persisted-${level.value}.png`
@@ -128,7 +96,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       })
 
       // Verify the selected value persisted
-      await newPage.waitForTimeout(timeouts.ui.settleTime)
+      await page.waitForTimeout(timeouts.ui.settleTime)
       const selectedValue = await emailLevelSelect.inputValue()
       expect(selectedValue).toBe(level.value)
 
@@ -138,7 +106,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       if (level.value !== 'None') {
         // Look for the "Click to show advanced email settings" button
         console.log('Checking advanced settings...')
-        const advancedButton = newPage.locator(
+        const advancedButton = page.locator(
           'text=Click to show advanced email settings'
         )
 
@@ -146,16 +114,16 @@ test.describe('Settings Page - Email Level Settings', () => {
         await advancedButton.click()
 
         // Wait for advanced settings to appear
-        await newPage.waitForTimeout(timeouts.ui.transition)
+        await page.waitForTimeout(timeouts.ui.transition)
 
         // Look for email frequency settings in advanced view
-        const emailFrequencySection = newPage.locator(
+        const emailFrequencySection = page.locator(
           'text=Choose OFFER/WANTED frequency:'
         )
 
         if (await emailFrequencySection.isVisible()) {
           // Get the current email frequency setting
-          const frequencySelect = newPage
+          const frequencySelect = page
             .locator('select')
             .filter({
               hasText: /Immediate|1 hour|2 hours|4 hours|8 hours|Daily/,
@@ -186,8 +154,7 @@ test.describe('Settings Page - Email Level Settings', () => {
         }
       }
 
-      // Clean up the new context
-      await newContext.close()
+      await logoutIfLoggedIn(page)
     }
 
     console.log('✓ All email level settings tested successfully')
@@ -202,9 +169,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     await signUpViaHomepage(page, testEmail, 'Test User')
     await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
-    // Wait for email settings section and scroll into view
-    const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
-    await scrollIntoViewAndWait(emailSettingsSection)
+    // Wait for email settings section
+    await page.waitForSelector('text=Email Settings', {
+      timeout: timeouts.ui.appearance,
+    })
 
     // Ensure we're not on 'None' setting (advanced settings not available for 'None')
     const emailLevelSelect = page
@@ -296,9 +264,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     await signUpViaHomepage(page, testEmail, 'Test User')
     await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
-    // Wait for email settings section and scroll into view
-    const emailSettingsSection = page.locator('h2:has-text("Email Settings")')
-    await scrollIntoViewAndWait(emailSettingsSection)
+    // Wait for email settings section
+    await page.waitForSelector('text=Email Settings', {
+      timeout: timeouts.ui.appearance,
+    })
 
     // Test that appropriate warnings appear for 'None' setting
     const emailLevelSelect = page
