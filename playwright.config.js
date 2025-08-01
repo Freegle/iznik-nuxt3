@@ -21,6 +21,17 @@ module.exports = defineConfig({
           lcov: true,
           outputDir: 'coverage',
           entryFilter: (entry) => {
+            // Filter out entries from external domains and problematic URLs
+            if (entry.url) {
+              return (
+                !entry.url.includes('accounts.google.com') &&
+                !entry.url.includes('googleapis.com') &&
+                !entry.url.includes('gstatic.com') &&
+                !entry.url.startsWith('data:') &&
+                !entry.url.startsWith('blob:') &&
+                entry.url.length < 300
+              )
+            }
             return true
           },
           sourceFilter: (sourcePath) => {
@@ -30,7 +41,10 @@ module.exports = defineConfig({
               !sourcePath.includes('http://') &&
               !sourcePath.includes('https://') &&
               !sourcePath.includes('accounts.google.com') &&
+              !sourcePath.includes('googleapis.com') &&
+              !sourcePath.includes('gstatic.com') &&
               !sourcePath.includes('data:') &&
+              !sourcePath.includes('blob:') &&
               // Only include files with reasonable path lengths
               sourcePath.length < 200
             )
