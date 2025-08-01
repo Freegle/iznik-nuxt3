@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tests for the Settings page functionality
  * Focuses on email level settings and their persistence
@@ -33,14 +34,21 @@ test.describe('Settings Page - Email Level Settings', () => {
       const context = await browser.newContext()
       const page = await context.newPage()
 
+      // Add gotoAndVerify method to page (from fixtures)
+      page.gotoAndVerify = async (path, options = {}) => {
+        const timeout = options.timeout || timeouts.navigation?.default || 30000
+        await page.goto(path, { timeout })
+        await page.waitForLoadState('networkidle', {
+          timeout: Math.min(timeout, 30000),
+        })
+      }
+
       // Sign up to access settings page
-      await page.goto('/')
-      await page.waitForLoadState('networkidle')
+      await page.gotoAndVerify('/')
       await signUpViaHomepage(page, testEmail, 'Test User')
 
       // Navigate to settings page
-      await page.goto('/settings')
-      await page.waitForLoadState('networkidle')
+      await page.gotoAndVerify('/settings')
 
       // Wait for the email settings section to load
       await page.waitForSelector('text=Email Settings', {
@@ -83,14 +91,21 @@ test.describe('Settings Page - Email Level Settings', () => {
       const newContext = await browser.newContext()
       const newPage = await newContext.newPage()
 
+      // Add gotoAndVerify method to new page (from fixtures)
+      newPage.gotoAndVerify = async (path, options = {}) => {
+        const timeout = options.timeout || timeouts.navigation?.default || 30000
+        await newPage.goto(path, { timeout })
+        await newPage.waitForLoadState('networkidle', {
+          timeout: Math.min(timeout, 30000),
+        })
+      }
+
       // Login with the same user to verify settings persistence
-      await newPage.goto('/')
-      await newPage.waitForLoadState('networkidle')
+      await newPage.gotoAndVerify('/')
       await loginViaHomepage(newPage, testEmail, 'Test User')
 
       // Navigate to settings page in new context
-      await newPage.goto('/settings')
-      await newPage.waitForLoadState('networkidle')
+      await newPage.gotoAndVerify('/settings')
 
       // Wait for settings to load again
       await newPage.waitForSelector('text=Email Settings', {
