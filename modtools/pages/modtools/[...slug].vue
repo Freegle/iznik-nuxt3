@@ -13,8 +13,10 @@ import { useRoute } from 'vue-router'
 const path = computed(() => {
   const route = useRoute()
   let path = ''
-  for (const p of route.params.slug) {
-    path += '/' + p
+  if (route && route.params) {
+    for (const p of route.params.slug) {
+      path += '/' + p
+    }
   }
   if (path.length === 0) path = '/'
   return path
