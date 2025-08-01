@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- DONE -->
     <p>
       About once a month, we will randomly select one member of Freegle's
       national organisation (Freegle Ltd) to receive a surprise cake as a thank
@@ -75,9 +74,12 @@ export default {
   computed: {
     modcake: {
       get() {
-        return Object.keys(this.me.settings).includes('modcake')
-          ? this.me.settings.modcake
-          : false
+        if (this.me && this.me.settings) {
+          return Object.keys(this.me.settings).includes('modcake')
+            ? this.me.settings.modcake
+            : false
+        }
+        return false
       },
       set(newval) {
         this.saveSetting('modcake', newval)

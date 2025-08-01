@@ -26,7 +26,7 @@ export function useOurModal() {
     if (isShown.value) {
       console.log('GUARD NAV STOPPED')
     } else {
-      console.log('GUARD OK OK OK')
+      // console.log('GUARD OK OK OK')
     }
     // console.log('Guard', to?.query)
     if (to?.query?.noguard) {
