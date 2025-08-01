@@ -51,9 +51,9 @@
         </span>
         <span v-else> IP unavailable. </span>
       </span>
-      <div v-if="approvedby && showSummaryDetails" class="text-faded small">
+      <span v-if="approvedby && showSummaryDetails" class="text-faded small">
         Approved by {{ approvedby }}
-      </div>
+      </span>
     </div>
     <div
       v-if="
@@ -157,9 +157,8 @@ const approvedby = computed(() => {
 
   if (mod.value) {
     for (const group of message.value?.groups || []) {
-      if (group?.approvedby) {
-        const moderator = userStore?.byId(group.approvedby)
-        result = moderator?.displayname
+      if (group.approvedby) {
+        result = group.approvedby.displayname
       }
     }
   }
