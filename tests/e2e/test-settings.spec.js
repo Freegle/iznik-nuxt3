@@ -7,7 +7,11 @@ const fs = require('fs')
 const path = require('path')
 const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
-const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
+const {
+  signUpViaHomepage,
+  loginViaHomepage,
+  logoutIfLoggedIn,
+} = require('./utils/user')
 
 // Ensure test-results directory exists
 const testResultsDir = path.join(__dirname, '../../test-results')
@@ -73,8 +77,13 @@ test.describe('Settings Page - Email Level Settings', () => {
         fullPage: true,
       })
 
-      // Reload the page to verify persistence
-      await page.reload({ waitUntil: 'networkidle' })
+      // Log out and log back in to verify persistence
+      await logoutIfLoggedIn(page)
+      await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
+      await loginViaHomepage(page, testEmail, 'Test User')
+
+      // Navigate back to settings page
+      await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
 
       // Wait for settings to load again
       await page.waitForSelector('text=Email Settings', {
@@ -86,11 +95,11 @@ test.describe('Settings Page - Email Level Settings', () => {
       // Wait for the select element to be ready
       await emailLevelSelect.waitFor({ state: 'visible' })
 
-      // Take screenshot after page reload to verify persistence
+      // Take screenshot after login to verify persistence
       await page.screenshot({
         path: path.join(
           testResultsDir,
-          `email-level-persisted-${level.value}.png`
+          `email-level-login-persisted-${level.value}.png`
         ),
         fullPage: true,
       })
