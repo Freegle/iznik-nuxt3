@@ -201,6 +201,7 @@ import {
   watch,
   defineAsyncComponent,
   onBeforeUnmount,
+  onMounted,
   nextTick,
   getCurrentInstance,
 } from 'vue'
@@ -333,6 +334,17 @@ const emailError = computed(() => {
 
 const passwordError = computed(() => {
   return nativeBump.value && buttonClicked.value && !password.value
+})
+
+// Lifecycle hooks
+onMounted(() => {
+  // Set marketing consent to true if it doesn't have a value yet
+  if (
+    miscStore.marketingConsent === null ||
+    miscStore.marketingConsent === undefined
+  ) {
+    miscStore.setMarketingConsent(true)
+  }
 })
 
 // Methods
