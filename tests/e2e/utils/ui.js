@@ -88,9 +88,36 @@ async function waitForElementWithText(
   await page.waitForSelector(`${selector}:has-text("${text}")`, { timeout })
 }
 
+/**
+ * Clicks an OurToggle component correctly by targeting the toggle container
+ * The actual checkbox in OurToggle is hidden, so we need to click the visible toggle container
+ * @param {import('@playwright/test').Locator} toggleLocator - Locator for the toggle component
+ * @returns {Promise<void>}
+ */
+async function clickToggle(toggleLocator) {
+  // Find the toggle container within the OurToggle component
+  const toggleContainer = toggleLocator.locator('.toggle-container')
+
+  // Scroll the toggle into view if needed
+  await toggleContainer.scrollIntoViewIfNeeded()
+
+  // Wait for the toggle to be visible and ready for interaction
+  await toggleContainer.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+
+  // Click the toggle container to trigger the toggle
+  await toggleContainer.click()
+
+  // Wait for the toggle animation to complete
+  await waitForAnimationEnd(toggleContainer)
+}
+
 module.exports = {
   elementExists,
   waitForAnimationEnd,
   waitForModal,
   waitForElementWithText,
+  clickToggle,
 }

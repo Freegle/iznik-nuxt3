@@ -81,13 +81,15 @@ async function logoutIfLoggedIn(page) {
  * @param {string} email - Email address to use for sign up
  * @param {string} [displayName] - Optional display name (generates one if not provided)
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Optional password (uses default if not provided)
+ * @param {boolean} [marketingConsent=null] - Optional marketing consent value (null means don't change default)
  * @returns {Promise<boolean>} - Returns true if sign up was successful
  */
 async function signUpViaHomepage(
   page,
   email,
   displayName,
-  password = DEFAULT_TEST_PASSWORD
+  password = DEFAULT_TEST_PASSWORD,
+  marketingConsent = null
 ) {
   console.log(`Starting signup process for email: ${email}`)
 
@@ -228,6 +230,32 @@ async function signUpViaHomepage(
   })
   await passwordInput.fill(password)
 
+  // Handle marketing consent if specified
+  if (marketingConsent !== null) {
+    console.log(`Setting marketing consent to: ${marketingConsent}`)
+    const marketingCheckbox = page.locator('#marketingConsent')
+
+    // Wait for the checkbox to be visible
+    await marketingCheckbox.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+
+    if (marketingConsent === true) {
+      // Ensure it's checked (should be by default)
+      const isChecked = await marketingCheckbox.isChecked()
+      if (!isChecked) {
+        await marketingCheckbox.check()
+      }
+    } else if (marketingConsent === false) {
+      // Uncheck it
+      const isChecked = await marketingCheckbox.isChecked()
+      if (isChecked) {
+        await marketingCheckbox.uncheck()
+      }
+    }
+  }
+
   // Take a screenshot before submitting
   await page.screenshot({
     path: `playwright-screenshots/before-signup-${Date.now()}.png`,
@@ -300,9 +328,15 @@ async function signUpViaHomepage(
  * @param {import('@playwright/test').Page} page - Playwright page object
  * @param {string} email - Email address to use for login
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Password to use for login
+ * @param {boolean} [expectedMarketingConsent=null] - Optional expected marketing consent value to verify (null means don't verify)
  * @returns {Promise<boolean>} - Returns true if login was successful
  */
-async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
+async function loginViaHomepage(
+  page,
+  email,
+  password = DEFAULT_TEST_PASSWORD,
+  expectedMarketingConsent = null
+) {
   console.log(`Starting login process for email: ${email}`)
 
   // Check if already logged in and logout if needed
@@ -432,6 +466,27 @@ async function loginViaHomepage(page, email, password = DEFAULT_TEST_PASSWORD) {
     timeout: timeouts.ui.appearance,
   })
   await passwordInput.fill(password)
+
+  // Verify marketing consent if specified
+  if (expectedMarketingConsent !== null) {
+    console.log(`Verifying marketing consent is: ${expectedMarketingConsent}`)
+    const marketingCheckbox = page.locator('#marketingConsent')
+
+    // Wait for the checkbox to be visible
+    await marketingCheckbox.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+
+    const isChecked = await marketingCheckbox.isChecked()
+    if (expectedMarketingConsent !== isChecked) {
+      console.error(
+        `Marketing consent mismatch: expected ${expectedMarketingConsent}, got ${isChecked}`
+      )
+      return false
+    }
+    console.log(`Marketing consent verification passed: ${isChecked}`)
+  }
 
   // Take a screenshot before submitting
   await page.screenshot({

@@ -5,7 +5,7 @@ export const useMiscStore = defineStore({
   id: 'misc',
   persist: {
     storage: typeof localStorage === 'undefined' ? [] : localStorage,
-    pick: ['vals', 'source'],
+    pick: ['vals', 'source', 'marketingConsent'],
   },
   state: () => ({
     time: null,
@@ -25,6 +25,7 @@ export const useMiscStore = defineStore({
     boredWithJobs: false,
     lastTyping: null,
     source: null,
+    marketingConsent: true,
   }),
   actions: {
     init(config) {
@@ -155,6 +156,9 @@ export const useMiscStore = defineStore({
           }
         }, 1000)
       })
+    },
+    setMarketingConsent(value) {
+      this.marketingConsent = value
     },
   },
   getters: {

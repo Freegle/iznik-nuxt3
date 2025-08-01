@@ -57,24 +57,42 @@
           @change="changeAutorepost"
         />
       </b-form-group>
+      <b-form-group>
+        <h3 class="header--size5 header5__color mt-2">Keeping in touch</h3>
+        <p>
+          We'll also keep in touch by email about what's happening in Freegle
+          and other ways you can support Freegle in future.
+        </p>
+        <OurToggle
+          v-model="marketingConsentLocal"
+          :width="150"
+          :sync="true"
+          :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+          color="#61AE24"
+          @change="changeMarketingConsent"
+        />
+      </b-form-group>
     </b-card-body>
   </b-card>
 </template>
 <script setup>
 import { ref, defineEmits, watch } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import { useMiscStore } from '../../stores/misc'
 import OurToggle from '~/components/OurToggle'
 import { useMe } from '~/composables/useMe'
 
 const emit = defineEmits(['update'])
 
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
 
 const { me } = useMe()
 
 // State
 const autorepostsLocal = ref(true)
 const enterNewLineLocal = ref(false)
+const marketingConsentLocal = ref(true)
 
 // Methods
 const changeNewLine = async (e) => {
@@ -98,6 +116,10 @@ const changeAutorepost = async (e) => {
   emit('update')
 }
 
+const changeMarketingConsent = (e) => {
+  miscStore.setMarketingConsent(e)
+}
+
 // Update local refs when props change
 watch(
   () => me.value,
@@ -105,6 +127,7 @@ watch(
     if (newVal) {
       autorepostsLocal.value = !newVal.settings?.autorepostsdisable
       enterNewLineLocal.value = newVal.settings?.enterNewLine || false
+      marketingConsentLocal.value = miscStore.marketingConsent
     }
   },
   { immediate: true }

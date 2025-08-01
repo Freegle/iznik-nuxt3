@@ -32,8 +32,8 @@
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
       <nuxt-link no-prefetch target="_blank" to="/terms"
-        >Terms of Use</nuxt-link
-      >
+        >Terms of Use
+      </nuxt-link>
       and
       <nuxt-link no-prefetch target="_blank" to="/privacy">Privacy</nuxt-link>
       for details. Ok? Now come on in...
@@ -181,6 +181,17 @@
         </b-form>
       </div>
     </div>
+    <div class="marketing-consent-container pt-1 pb-3">
+      <b-form-checkbox
+        id="marketingConsent"
+        v-model="marketingConsent"
+        name="marketingConsent"
+        class="marketing-consent-checkbox pt-1"
+      >
+        We'll also keep in touch by email about what's happening and other ways
+        you can support Freegle.
+      </b-form-checkbox>
+    </div>
   </b-modal>
 </template>
 <script setup>
@@ -199,6 +210,7 @@ import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
 import { useRuntimeConfig } from '#app'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import Api from '~/api'
 
@@ -211,6 +223,7 @@ const PasswordEntry = defineAsyncComponent(() =>
 
 // Setup
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const router = useRouter()
@@ -225,6 +238,10 @@ const fullname = ref(null)
 const email = ref(null)
 const emailValid = ref(false)
 const password = ref(null)
+const marketingConsent = computed({
+  get: () => miscStore.marketingConsent,
+  set: (value) => miscStore.setMarketingConsent(value),
+})
 const showModal = ref(false)
 const pleaseShowModal = ref(false)
 const showSignUp = ref(false)
@@ -303,7 +320,7 @@ const fullNameError = computed(() => {
 })
 
 const formFields = computed(() => {
-  return [fullname.value, email.value, password.value]
+  return [fullname.value, email.value, password.value, marketingConsent.value]
 })
 
 const emailError = computed(() => {
@@ -1015,5 +1032,24 @@ $color-yahoo: #6b0094;
 
 :deep(.is-invalid label) {
   color: unset;
+}
+
+.marketing-consent-container {
+  border-top: 1px solid $color-gray--light;
+}
+
+.marketing-consent-checkbox :deep(label) {
+  font-size: 0.875rem;
+  font-weight: normal !important;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.marketing-consent-checkbox :deep(input[type='checkbox']) {
+  margin-top: 0.125rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
 }
 </style>
