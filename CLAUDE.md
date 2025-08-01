@@ -16,6 +16,9 @@ These commands can be run by Claude without asking for permission:
 
 IMPORTANT: After making code changes, always run `eslint --fix` on the specific files changed and remove any unused code detected by the linter.
 
+## File Creation Guidelines
+- When you create files, always add them to git
+
 ## Build Commands
 - `npm run dev` - Start development server on port 3002
 - `npm run build` - Build for production
