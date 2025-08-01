@@ -49,6 +49,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 ### Playwright Testing Best Practices
 - In Playwright tests, never use `expect().toBeVisible()`. Use `locator.waitFor({ state: 'visible', timeout: ... })`
 - Never use hard-coded timeouts in tests.  Reuse or add to the timeouts in config.js
+- Don't use a hardcoded timer value - use the constants.
 
 ### Playwright Test Development
 - When adding Playwright tests, look for existing utility functions (e.g. for logging in/signing up) to use before writing the code.

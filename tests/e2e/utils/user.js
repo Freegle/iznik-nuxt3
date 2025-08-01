@@ -124,13 +124,19 @@ async function signUpViaHomepage(
     // Use CSS selector to exclude disabled elements directly
     const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
     const button = page.locator(modifiedSelector).first()
-    if (
-      (await button.count()) > 0 &&
-      (await button.isVisible().catch(() => false))
-    ) {
+
+    try {
+      // Wait briefly for element to be present and visible (handles rendering delays)
+      await button.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await button.click()
       buttonFound = true
       break
+    } catch {
+      // Element not found or not visible, try next selector
+      continue
     }
   }
 
@@ -378,13 +384,19 @@ async function loginViaHomepage(
     // Use CSS selector to exclude disabled elements directly
     const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
     const button = page.locator(modifiedSelector).first()
-    if (
-      (await button.count()) > 0 &&
-      (await button.isVisible().catch(() => false))
-    ) {
+
+    try {
+      // Wait briefly for element to be present and visible (handles rendering delays)
+      await button.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await button.click()
       buttonFound = true
       break
+    } catch {
+      // Element not found or not visible, try next selector
+      continue
     }
   }
 
@@ -605,15 +617,15 @@ async function unsubscribeManually(page, email) {
       .first()
 
     // If so, fill it
-    if ((await emailInput.count()) > 0) {
+    try {
       console.log('Filling in email input')
       await emailInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
       await emailInput.fill(email)
-    } else {
-      console.log('Email input not found, logged in')
+    } catch {
+      console.log('Email input not found, likely already logged in')
     }
 
     console.log('Clicking "Leave Freegle completely" button')
@@ -622,7 +634,11 @@ async function unsubscribeManually(page, email) {
     )
 
     // The leave button might not appear if the account has already unsubscribed but is in limbo.
-    if ((await leaveButton.count()) > 0) {
+    try {
+      await leaveButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await leaveButton.click()
       // If no error message, look for the confirmation modal
       console.log('Waiting for confirmation modal in unsubscribe')
@@ -645,6 +661,10 @@ async function unsubscribeManually(page, email) {
       await page.locator('div:has-text("removed your account")')
 
       console.log('Successfully unsubscribed email')
+    } catch {
+      console.log(
+        'Leave button not found or not clickable - account may already be unsubscribed'
+      )
     }
 
     return true

@@ -12,7 +12,15 @@ const { SCREENSHOTS_DIR, timeouts } = require('../config')
  * @returns {Promise<boolean>} - Whether the element exists
  */
 async function elementExists(page, selector) {
-  return (await page.locator(selector).count()) > 0
+  try {
+    await page.locator(selector).first().waitFor({
+      state: 'attached',
+      timeout: timeouts.assertion.quick,
+    })
+    return true
+  } catch {
+    return false
+  }
 }
 
 /**

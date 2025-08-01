@@ -36,10 +36,10 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Add gotoAndVerify method to page (from fixtures)
       page.gotoAndVerify = async (path, options = {}) => {
-        const timeout = options.timeout || timeouts.navigation?.default || 30000
+        const timeout = options.timeout || timeouts.navigation.default
         await page.goto(path, { timeout })
         await page.waitForLoadState('networkidle', {
-          timeout: Math.min(timeout, 30000),
+          timeout: Math.min(timeout, timeouts.navigation.default),
         })
       }
 
@@ -50,10 +50,21 @@ test.describe('Settings Page - Email Level Settings', () => {
       // Navigate to settings page
       await page.gotoAndVerify('/settings')
 
-      // Wait for the email settings section to load
-      await page.waitForSelector('text=Email Settings', {
-        timeout: timeouts.ui.appearance,
-      })
+      // Wait for the email settings section to load and scroll into view
+      const emailSettingsSection = page.locator('text=Email Settings')
+      try {
+        await emailSettingsSection.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+      } catch {
+        // If not visible, scroll into view
+        await emailSettingsSection.scrollIntoViewIfNeeded()
+        await emailSettingsSection.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+      }
 
       // Get the email level select element - look for the select near the "Choose your email level" text
       let emailLevelSelect = page.locator('.simpleEmailSelect')
@@ -93,10 +104,10 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Add gotoAndVerify method to new page (from fixtures)
       newPage.gotoAndVerify = async (path, options = {}) => {
-        const timeout = options.timeout || timeouts.navigation?.default || 30000
+        const timeout = options.timeout || timeouts.navigation.default
         await newPage.goto(path, { timeout })
         await newPage.waitForLoadState('networkidle', {
-          timeout: Math.min(timeout, 30000),
+          timeout: Math.min(timeout, timeouts.navigation.default),
         })
       }
 
@@ -107,10 +118,21 @@ test.describe('Settings Page - Email Level Settings', () => {
       // Navigate to settings page in new context
       await newPage.gotoAndVerify('/settings')
 
-      // Wait for settings to load again
-      await newPage.waitForSelector('text=Email Settings', {
-        timeout: timeouts.ui.appearance,
-      })
+      // Wait for settings to load again and scroll into view
+      const newEmailSettingsSection = newPage.locator('text=Email Settings')
+      try {
+        await newEmailSettingsSection.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+      } catch {
+        // If not visible, scroll into view
+        await newEmailSettingsSection.scrollIntoViewIfNeeded()
+        await newEmailSettingsSection.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+      }
 
       emailLevelSelect = newPage.locator('.simpleEmailSelect')
 
