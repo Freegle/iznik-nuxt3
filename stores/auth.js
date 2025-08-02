@@ -421,12 +421,12 @@ export const useAuthStore = defineStore({
 
         if (miscStore.marketingConsent !== undefined) {
           const localConsent = !!miscStore.marketingConsent
-          console.log(
-            'Local marketing consent',
-            localConsent,
-            'User marketing consent',
-            me.marketingconsent
-          )
+          // console.log(
+          //  'Local marketing consent',
+          //  localConsent,
+          //  'User marketing consent',
+          //  me.marketingconsent
+          // )
 
           if (me.marketingconsent !== localConsent) {
             try {
@@ -435,15 +435,15 @@ export const useAuthStore = defineStore({
               })
 
               me.marketingconsent = localConsent
-              console.log("Sync'd marketing consent")
+              // console.log("Sync'd marketing consent")
             } catch (e) {
-              console.log('Failed to sync marketing consent', e)
+              // console.log('Failed to sync marketing consent', e)
             }
           } else {
-            console.log("Marketing consent already sync'd")
+            // console.log("Marketing consent already sync'd")
           }
         } else {
-          console.log('No local marketing consent to sync')
+          // console.log('No local marketing consent to sync')
         }
       } else {
         // Any auth info must be invalid.
