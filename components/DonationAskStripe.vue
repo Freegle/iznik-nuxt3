@@ -59,7 +59,7 @@
           class="monthly-checkbox"
         >
           <v-icon icon="arrow-left" class="monthly-arrow" />
-          Monthly donations are really helpful
+          Monthly donation (these are really helpful)
         </BFormCheckbox>
       </div>
 
