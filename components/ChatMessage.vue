@@ -240,7 +240,7 @@ const showDeleteMessageModal = () => {
 
 const deleteMessage = async () => {
   try {
-    await chatStore.deleteMessage(props.chatid, chatmessage.id)
+    await chatStore.deleteMessage(props.chatid, props.id)
     selected.value = false
 
     deleteMessageSucceeded.value = true
