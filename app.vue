@@ -1,7 +1,7 @@
 <template>
   <div :key="'loginCount-' + loginCount">
     <client-only>
-      <header>
+      <header v-if="shouldShowNavbar">
         <NavbarDesktop />
         <NavbarMobile />
       </header>
@@ -214,6 +214,12 @@ shortlinkStore.init(runtimeConfig)
 
 const loginCount = computed(() => {
   return authStore.loginCount
+})
+
+const shouldShowNavbar = computed(() => {
+  // Hide navbar for layouts that shouldn't show it
+  const layout = route.meta?.layout || 'default'
+  return layout !== 'no-navbar'
 })
 
 // watch(loginCount, async () => {
