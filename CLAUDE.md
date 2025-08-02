@@ -18,6 +18,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 
 ## File Creation Guidelines
 - When you create files, always add them to git
+- Always add newly created files to git.  
 
 ## Build Commands
 - `npm run dev` - Start development server on port 3002
