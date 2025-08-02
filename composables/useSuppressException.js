@@ -12,6 +12,14 @@ export function suppressException(err) {
     console.log('Leaflet in stack - ignore')
     return true
   }
+  if (
+    // MT
+    err.stack?.includes('chart element')
+  ) {
+    // GChart seems to show this error occasionally - ignore
+    console.log('suppressException chart element - ignore')
+    return true
+  }
 
   return false
 }
