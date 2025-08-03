@@ -115,6 +115,7 @@
   </client-only>
 </template>
 <script setup>
+import { storeToRefs } from 'pinia'
 import {
   ref,
   onMounted,
@@ -122,7 +123,6 @@ import {
   useHead,
   useRuntimeConfig,
   useRouter,
-  storeToRefs,
 } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import { useUserStore } from '~/stores/user'
