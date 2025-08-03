@@ -73,7 +73,8 @@ export function useModMe() {
 
     // Do not check for work and therefore refresh while any modal is open
     const bodyoverflow = document.body.style.overflow
-    if (force || bodyoverflow !== 'hidden') {
+    const oktocheck = bodyoverflow !== 'hidden' && !miscStore.modtoolsediting
+    if (force || oktocheck) {
       // console.log('========================================')
       console.log(
         'CHECKWORK modme',

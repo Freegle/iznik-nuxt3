@@ -25,6 +25,7 @@ export const useMiscStore = defineStore({
     boredWithJobs: false,
     lastTyping: null,
     modtools: false,
+    modtoolsediting: false, // Set when editing message in situ: do not check for work
     worktimer: false,
     deferGetMessages: false,
     source: null,

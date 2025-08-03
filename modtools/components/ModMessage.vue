@@ -616,6 +616,7 @@ import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 
 import { setupKeywords } from '../composables/useKeywords'
+import { useMiscStore } from '~/stores/misc'
 import { SUBJECT_REGEX } from '~/constants'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
@@ -676,22 +677,24 @@ export default {
       // eslint-disable-next-line vue/no-mutating-props
       props.message.fromuser = null
     }
-    const modGroupStore = useModGroupStore()
     const locationStore = useLocationStore()
-    const modconfigStore = useModConfigStore()
     const memberStore = useMemberStore()
     const messageStore = useMessageStore()
+    const miscStore = useMiscStore()
+    const modconfigStore = useModConfigStore()
+    const modGroupStore = useModGroupStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
     const { me, myid } = useMe()
     const { myModGroups, myModGroup } = useModMe()
 
     return {
-      modGroupStore,
       locationStore,
       memberStore,
       messageStore,
+      miscStore,
       modconfigStore,
+      modGroupStore,
       userStore,
       typeOptions,
       me,
@@ -1035,6 +1038,7 @@ export default {
     startEdit() {
       this.editmessage = this.message
       this.editing = true
+      this.miscStore.modtoolsediting = true
       this.editmessage.groups.forEach((group) => {
         this.editgroup = group.groupid
       })
@@ -1086,6 +1090,7 @@ export default {
 
       this.saving = false
       this.editing = false
+      this.miscStore.modtoolsediting = false
     },
     settingsChange(param, val) {
       const params = {
@@ -1209,6 +1214,7 @@ export default {
     },
     cancelEdit() {
       this.editing = false
+      this.miscStore.modtoolsediting = false
 
       // Fetch the message again to revert any changes.
       this.messageStore.fetch(this.message.id)
