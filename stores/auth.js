@@ -282,6 +282,7 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
       console.error('XXFETCHUSER A', typeof components)
+      if (typeof components === 'boolean') components = [] // MT as force boolean incorrectly used
       if (!components) components = [] // MT
       console.error('XXFETCHUSER B', typeof components)
       components = ['me', ...components] // MT
