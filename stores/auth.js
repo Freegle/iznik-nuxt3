@@ -277,11 +277,10 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async fetchUser(components) {
-      // MT components added
+      // MT components added (not force)
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      console.error('XXFETCHUSER A', typeof components)
       if (typeof components === 'boolean') components = [] // MT as force boolean incorrectly used
       if (!components) components = [] // MT
       components = ['me', ...components] // MT
