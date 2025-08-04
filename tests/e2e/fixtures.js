@@ -163,52 +163,6 @@ const test = base.test.extend({
     // Use the context in the test
     await use(context)
 
-    // Collect coverage from all pages in the context
-    if (process.env.NODE_ENV === 'test') {
-      const coverageDir = path.join(process.cwd(), 'coverage')
-      const tempDir = path.join(coverageDir, 'tmp')
-
-      try {
-        // Ensure coverage directories exist
-        if (!fs.existsSync(coverageDir)) {
-          fs.mkdirSync(coverageDir, { recursive: true })
-        }
-        if (!fs.existsSync(tempDir)) {
-          fs.mkdirSync(tempDir, { recursive: true })
-        }
-
-        // Collect coverage from all pages
-        for (const page of context.pages()) {
-          try {
-            const coverage = await page.evaluate(() => window.__coverage__)
-            if (coverage) {
-              console.log(
-                `Found coverage data for ${Object.keys(coverage).length} files`
-              )
-
-              const timestamp = Date.now()
-              const pid = process.pid
-              const coverageFile = path.join(
-                tempDir,
-                `coverage-${timestamp}-${pid}.json`
-              )
-              fs.writeFileSync(coverageFile, JSON.stringify(coverage, null, 2))
-              console.log(`Wrote coverage data to ${coverageFile}`)
-            } else {
-              console.log(`No coverage data found on page: ${page.url()}`)
-            }
-          } catch (error) {
-            console.log(
-              `Error collecting coverage from page ${page.url()}:`,
-              error.message
-            )
-          }
-        }
-      } catch (error) {
-        console.error('Error during coverage collection:', error.message)
-      }
-    }
-
     // Clean up the context after the test
     await context.close()
     console.log(`Closed browser context after test`)

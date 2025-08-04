@@ -2,7 +2,6 @@ import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
-import istanbul from 'vite-plugin-istanbul'
 import config from './config'
 
 const isTest = process.env.NODE_ENV === 'test' || process.env.CI
@@ -289,29 +288,6 @@ export default defineNuxtConfig({
         org: 'freegle',
         project: 'nuxt3',
       }),
-      // Istanbul code coverage instrumentation for testing
-      ...(process.env.NODE_ENV === 'test' ? [
-        istanbul({
-          include: ['**/*.vue', '**/*.js', '**/*.ts'],
-          exclude: [
-            'node_modules/**',
-            'test*/**',
-            'tests/**',
-            'coverage/**',
-            'dist/**',
-            'build/**',
-            '.nuxt/**',
-            '.output/**',
-            '**/*.config.*',
-            'playwright.config.js',
-            'nuxt.config.ts',
-          ],
-          extension: ['.js', '.ts', '.vue'],
-          requireEnv: false,
-          cypress: false,
-          forceBuildInstrument: true,
-        })
-      ] : []),
     ],
   },
 
