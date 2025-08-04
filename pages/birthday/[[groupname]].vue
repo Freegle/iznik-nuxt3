@@ -3,190 +3,15 @@
     <!-- Hero Section with Modern Design -->
     <section class="hero-section">
       <div class="hero-background">
-        <!-- Floating Balloons -->
-        <div class="floating-balloons">
-          <div
-            class="balloon balloon-1"
-            style="--delay: 0s; --duration: 6s; --color: #ff6b9d"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-2"
-            style="--delay: 1s; --duration: 5.5s; --color: #4ecdc4"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-3"
-            style="--delay: 2s; --duration: 6.5s; --color: #ffe066"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-4"
-            style="--delay: 1.5s; --duration: 5.8s; --color: #9c27b0"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-5"
-            style="--delay: 0.5s; --duration: 6.2s; --color: #ff9800"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-6"
-            style="--delay: 2.5s; --duration: 6.8s; --color: #e91e63"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-7"
-            style="--delay: 3s; --duration: 5.2s; --color: #2196f3"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-8"
-            style="--delay: 1.8s; --duration: 6.3s; --color: #8bc34a"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-9"
-            style="--delay: 0.8s; --duration: 5.9s; --color: #ffc107"
-          >
-            🎈
-          </div>
-          <div
-            class="balloon balloon-10"
-            style="--delay: 2.2s; --duration: 6.1s; --color: #673ab7"
-          >
-            🎈
-          </div>
-        </div>
-
-        <!-- Floating Birthday Cakes -->
-        <div class="floating-cakes">
-          <div class="cake cake-1" style="--delay: 0.5s; --duration: 7s">
-            🎂
-          </div>
-          <div class="cake cake-2" style="--delay: 1.8s; --duration: 6.5s">
-            🧁
-          </div>
-          <div class="cake cake-3" style="--delay: 3.2s; --duration: 7.5s">
-            🎂
-          </div>
-          <div class="cake cake-4" style="--delay: 2.1s; --duration: 6.8s">
-            🧁
-          </div>
-          <div class="cake cake-5" style="--delay: 0.9s; --duration: 7.2s">
-            🎂
-          </div>
-          <div class="cake cake-6" style="--delay: 2.7s; --duration: 6.3s">
-            🧁
-          </div>
-          <div class="cake cake-7" style="--delay: 1.3s; --duration: 6.9s">
-            🍰
-          </div>
-          <div class="cake cake-8" style="--delay: 3.6s; --duration: 7.1s">
-            🎂
-          </div>
-          <div class="cake cake-9" style="--delay: 0.2s; --duration: 6.7s">
-            🧁
-          </div>
-          <div class="cake cake-10" style="--delay: 2.4s; --duration: 7.3s">
-            🍰
-          </div>
-          <div class="cake cake-11" style="--delay: 1.7s; --duration: 6.4s">
-            🎂
-          </div>
-          <div class="cake cake-12" style="--delay: 3.9s; --duration: 7.6s">
-            🧁
-          </div>
-          <div class="cake cake-13" style="--delay: 0.6s; --duration: 6.2s">
-            🍰
-          </div>
-          <div class="cake cake-14" style="--delay: 2.8s; --duration: 7.4s">
-            🎂
-          </div>
-          <div class="cake cake-15" style="--delay: 1.1s; --duration: 6.6s">
-            🧁
-          </div>
-        </div>
-
-        <!-- Party Poppers -->
-        <div class="party-poppers">
-          <div class="popper popper-1" style="--delay: 1s; --duration: 4s">
-            🎉
-          </div>
-          <div class="popper popper-2" style="--delay: 2.5s; --duration: 3.8s">
-            🎉
-          </div>
-          <div class="popper popper-3" style="--delay: 4s; --duration: 4.2s">
-            🎉
-          </div>
-          <div class="popper popper-4" style="--delay: 0.8s; --duration: 3.5s">
-            🎉
-          </div>
-          <div class="popper popper-5" style="--delay: 3.3s; --duration: 4.5s">
-            🎉
-          </div>
-        </div>
-
         <!-- Floating Freegle Logos -->
         <div class="floating-logos">
-          <div class="logo logo-1" style="--delay: 1.5s; --duration: 8s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-2" style="--delay: 3.8s; --duration: 7.3s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-3" style="--delay: 0.7s; --duration: 8.5s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-4" style="--delay: 2.9s; --duration: 7.8s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-5" style="--delay: 4.2s; --duration: 7.1s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-6" style="--delay: 1.2s; --duration: 8.2s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-7" style="--delay: 3.5s; --duration: 7.6s">
-            <img
-              src="/logos/user_logo_vector.svg"
-              alt="Freegle Logo"
-              class="logo-img"
-            />
-          </div>
-          <div class="logo logo-8" style="--delay: 0.4s; --duration: 8.1s">
+          <div
+            v-for="n in 8"
+            :key="n"
+            class="logo"
+            :class="`logo-${n}`"
+            :style="`--delay: ${1.5 + n * 0.4}s; --duration: ${7 + n * 0.2}s;`"
+          >
             <img
               src="/logos/user_logo_vector.svg"
               alt="Freegle Logo"
@@ -199,44 +24,14 @@
       <b-container class="hero-content">
         <b-row class="align-items-center min-vh-100">
           <b-col cols="12" lg="10" offset-lg="1">
-            <div class="celebration-header text-center">
-              <!-- Birthday Message -->
-              <div class="birthday-message">
-                <div class="age-display">
-                  <div class="age-number">{{ groupAge }}</div>
-                  <div class="age-text">YEARS</div>
-                </div>
-                <h1 class="birthday-title">{{ pageTitle }}</h1>
-                <p class="birthday-subtitle">
-                  <strong>Together</strong>, we've been saving money, time and
-                  the planet for another year.
-                </p>
-              </div>
-
-              <!-- Call to Action -->
-              <div class="cta-section">
-                <h2 class="cta-heading">Free to use, but not free to run</h2>
-                <p class="cta-text">
-                  Help us keep
-                  {{ group?.namefull || 'the community' }} thriving for another
-                  year
-                </p>
-
-                <!-- Donation Section -->
-                <div class="donation-wrapper">
-                  <DonationAskStripe
-                    :groupid="groupId"
-                    :groupname="groupName"
-                    :default="5"
-                    :amounts="[3, 5, 10]"
-                    hide-intro
-                    hide-thermometer
-                    @success="onDonationSuccess"
-                    @score="onDonationClick"
-                  />
-                </div>
-              </div>
-            </div>
+            <BirthdayHero
+              :group-age="groupAge"
+              :title="pageTitle"
+              :group-id="groupId"
+              :is-today="isToday"
+              @donation-success="onDonationSuccess"
+              @donation-click="onDonationClick"
+            />
           </b-col>
         </b-row>
       </b-container>
@@ -352,78 +147,32 @@
   </div>
 </template>
 <script setup>
-import dayjs from 'dayjs'
 import StatsImpact from '~/components/StatsImpact'
-import DonationAskStripe from '~/components/DonationAskStripe'
-import { useGroupStore } from '~/stores/group'
-import { useStatsStore } from '~/stores/stats'
-import { buildHead } from '~/composables/useBuildHead'
-import { useRoute, definePageMeta } from '#imports'
+import BirthdayHero from '~/components/BirthdayHero'
+import { definePageMeta } from '#imports'
+import { useBirthday } from '~/composables/useBirthday'
 
 // Use empty layout
 definePageMeta({
   layout: 'no-navbar',
 })
 
-const route = useRoute()
-const runtimeConfig = useRuntimeConfig()
-
-// Initialize stores
-const groupStore = useGroupStore()
-const statsStore = useStatsStore()
-
-// Route parameters
-const groupname = route.params.groupname
-
-// Reactive data
-const loading = ref(true)
-const dataReady = ref(false)
-
-// Computed properties
-const group = computed(() => {
-  return groupStore.get(groupname)
-})
-
-const groupId = computed(() => {
-  return group.value?.id || null
-})
-
-const groupAge = computed(() => {
-  if (!group.value?.founded) return 0
-  const founded = new Date(group.value.founded)
-  const now = new Date()
-  return Math.floor((now - founded) / (365.25 * 24 * 60 * 60 * 1000))
-})
-
-// Stats computed properties
-const totalWeight = computed(() => {
-  const weights = statsStore?.Weight
-  let total = 0
-  const now = dayjs()
-  if (weights) {
-    for (const w of weights) {
-      if (now.diff(dayjs(w.date), 'days') <= 365) {
-        total += w.count
-      }
-    }
-  }
-  return total / 1000 // Convert to tonnes
-})
-
-// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
-// https://wrap.org.uk/resources/tool/benefits-reuse-tool
-const totalBenefit = computed(() => {
-  return totalWeight.value * 711
-})
-
-const totalCO2 = computed(() => {
-  return totalWeight.value * 0.51
-})
-
-const messagesThisYear = computed(() => {
-  const messages = statsStore.Activity || []
-  return messages.reduce((total, item) => total + (item.count || 0), 0)
-})
+// Use birthday composable
+const {
+  loading,
+  dataReady,
+  group,
+  groupId,
+  groupAge,
+  isToday,
+  totalWeight,
+  totalBenefit,
+  totalCO2,
+  messagesThisYear,
+  pageTitle,
+  setupPageHead,
+  loadBirthdayData,
+} = useBirthday()
 
 // Donation handlers
 function onDonationClick(amount) {
@@ -435,57 +184,12 @@ function onDonationSuccess() {
   // Could show a success message or redirect
 }
 
-// Meta tags
-const groupName = computed(() => group.value?.namefull || 'Community')
-const pageTitle = computed(
-  () => `${groupName.value} is ${groupAge.value} years old!`
-)
-
 // Set up page head
-if (groupname) {
-  await groupStore.fetch(groupname, true)
+await setupPageHead()
 
-  useHead(
-    buildHead(
-      route,
-      runtimeConfig,
-      pageTitle.value,
-      `Celebrate ${groupName.value}'s ${groupAge.value}th birthday! See the amazing impact our community has made and help us continue for another year.`,
-      group.value?.profile ? group.value?.profile : null
-    )
-  )
-}
-
-// Lifecycle hooks
+// Load birthday data
 onMounted(async () => {
-  try {
-    loading.value = true
-
-    if (!group.value) {
-      loading.value = false
-      return
-    }
-
-    // Set up date range for the last year
-    const start = dayjs().subtract(1, 'year').startOf('month')
-    const end = dayjs().endOf('month')
-
-    // Clear previous stats and fetch new ones
-    await statsStore.clear()
-    await statsStore.fetch({
-      group: groupId.value,
-      grouptype: 'Freegle',
-      systemwide: groupId.value === null,
-      start: start.format('YYYY-MM-DD'),
-      end: end.format('YYYY-MM-DD'),
-    })
-
-    dataReady.value = true
-    loading.value = false
-  } catch (err) {
-    console.error('Error loading birthday page:', err)
-    loading.value = false
-  }
+  await loadBirthdayData()
 })
 </script>
 
@@ -1178,7 +882,7 @@ onMounted(async () => {
 }
 
 .cta-section {
-  margin-top: 3rem;
+  margin-top: 1rem;
 }
 
 .cta-heading {
