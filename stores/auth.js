@@ -281,8 +281,11 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
+      console.log('XXFETCHUSER A', typeof components)
       if (!components) components = [] // MT
+      console.log('XXFETCHUSER B', typeof components)
       components = ['me', ...components] // MT
+      console.log('XXFETCHUSER C', typeof components)
 
       const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
       if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
-import { useMiscStore } from './stores/misc'
+import { useMiscStore } from '~/stores/misc'
 import api from '~/api'
 
 export const useUserStore = defineStore({
