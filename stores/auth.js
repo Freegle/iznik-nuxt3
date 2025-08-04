@@ -284,9 +284,7 @@ export const useAuthStore = defineStore({
       console.error('XXFETCHUSER A', typeof components)
       if (typeof components === 'boolean') components = [] // MT as force boolean incorrectly used
       if (!components) components = [] // MT
-      console.error('XXFETCHUSER B', typeof components)
       components = ['me', ...components] // MT
-      console.error('XXFETCHUSER C', typeof components)
 
       const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
       if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
