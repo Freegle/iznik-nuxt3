@@ -11,4 +11,5 @@ set PLAYWIRE_WEBSITE_ID=75051
 @REM set STRIPE_PUBLISHABLE_KEY=pk_test_51PrK1sP3oIVajsTk17Glxy8dnVLj3vRejiOFurMWO6lrV3VFzHS1Cg908Ker2mux5TD7Tym9WLYA7dHBNcEh0Y3C00SK9swPtJ
 set STRIPE_PUBLISHABLE_KEY=pk_live_51PrK1sP3oIVajsTkBJ3XrexNVYYdFeJnpIq9oGhcfWzoH15nDoeXT5icgpOP3xuf7RjLn0MTcpQfrKKbbjTJYNQz00wRqEDLUf
 set TEST_BASE_URL=HTTP://127.0.0.1:3002
+@REM set CLAUDE_CONFIG_DIR= Change this to your Claude config directory - you can use this to log in as different users in different projects.
 npx update-browserslist-db@latest

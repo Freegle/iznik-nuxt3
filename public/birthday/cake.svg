@@ -1,0 +1,88 @@
+<svg width="140" height="120" viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern gradient definitions -->
+  <defs>
+    <linearGradient id="cakeBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8D6E63;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5D4037;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cakeMiddle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E91E63;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cakeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFEB3B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC107;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="candle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF9C4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F9FBE7;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="flame" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFEB3B;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF9800;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F44336;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Cake plate with shadow -->
+  <ellipse cx="70" cy="105" rx="45" ry="6" fill="#E0E0E0" opacity="0.6"/>
+  <ellipse cx="70" cy="102" rx="42" ry="5" fill="#BDBDBD" stroke="#9E9E9E" stroke-width="1"/>
+  
+  <!-- Cake base layer -->
+  <rect x="25" y="75" width="90" height="30" rx="5" fill="url(#cakeBase)" stroke="#4A2C2A" stroke-width="1"/>
+  
+  <!-- Cake middle layer -->
+  <rect x="35" y="55" width="70" height="25" rx="4" fill="url(#cakeMiddle)" stroke="#C2185B" stroke-width="1"/>
+  
+  <!-- Cake top layer -->
+  <rect x="45" y="40" width="50" height="20" rx="3" fill="url(#cakeTop)" stroke="#F57F17" stroke-width="1"/>
+  
+  <!-- Decorative frosting on base -->
+  <path d="M25 75 Q35 70, 45 75 Q55 70, 65 75 Q75 70, 85 75 Q95 70, 105 75 Q115 70, 115 75" 
+        stroke="#FFCDD2" stroke-width="3" fill="none"/>
+  
+  <!-- Decorative frosting on middle -->
+  <path d="M35 55 Q45 50, 55 55 Q65 50, 75 55 Q85 50, 95 55 Q105 50, 105 55" 
+        stroke="#F8BBD9" stroke-width="3" fill="none"/>
+  
+  <!-- Decorative frosting on top -->
+  <path d="M45 40 Q55 35, 65 40 Q75 35, 85 40 Q95 35, 95 40" 
+        stroke="#FFF59D" stroke-width="3" fill="none"/>
+  
+  <!-- Candles -->
+  <rect x="58" y="25" width="3" height="18" rx="1.5" fill="url(#candle)" stroke="#E8F5E8" stroke-width="0.5"/>
+  <rect x="68" y="23" width="3" height="20" rx="1.5" fill="url(#candle)" stroke="#E8F5E8" stroke-width="0.5"/>
+  <rect x="78" y="26" width="3" height="17" rx="1.5" fill="url(#candle)" stroke="#E8F5E8" stroke-width="0.5"/>
+  
+  <!-- Candle flames with glow effect -->
+  <ellipse cx="59.5" cy="21" rx="2" ry="4" fill="url(#flame)" opacity="0.9"/>
+  <ellipse cx="69.5" cy="19" rx="2" ry="4" fill="url(#flame)" opacity="0.9"/>
+  <ellipse cx="79.5" cy="22" rx="2" ry="4" fill="url(#flame)" opacity="0.9"/>
+  
+  <!-- Flame highlights -->
+  <ellipse cx="59" cy="19" rx="0.8" ry="1.5" fill="#FFF9C4" opacity="0.8"/>
+  <ellipse cx="69" cy="17" rx="0.8" ry="1.5" fill="#FFF9C4" opacity="0.8"/>
+  <ellipse cx="79" cy="20" rx="0.8" ry="1.5" fill="#FFF9C4" opacity="0.8"/>
+  
+  <!-- Decorative elements - berries and cream -->
+  <circle cx="50" cy="65" r="3" fill="#E53935"/>
+  <circle cx="90" cy="62" r="3" fill="#43A047"/>
+  <circle cx="70" cy="67" r="2.5" fill="#FF7043"/>
+  <circle cx="60" cy="85" r="2.5" fill="#8BC34A"/>
+  <circle cx="80" cy="88" r="3" fill="#9C27B0"/>
+  <circle cx="100" cy="85" r="2.5" fill="#2196F3"/>
+  
+  <!-- Cream dollops -->
+  <ellipse cx="55" cy="50" rx="2" ry="3" fill="#FFFFFF" opacity="0.9"/>
+  <ellipse cx="85" cy="48" rx="2" ry="3" fill="#FFFFFF" opacity="0.9"/>
+  <ellipse cx="40" cy="68" rx="2.5" ry="3.5" fill="#FFFFFF" opacity="0.9"/>
+  <ellipse cx="95" cy="80" rx="2.5" ry="3.5" fill="#FFFFFF" opacity="0.9"/>
+  
+  <!-- Sparkles around the cake -->
+  <g opacity="0.8">
+    <polygon points="20,45 21,47 23,47 21.5,48.5 22,51 20,49.5 18,51 18.5,48.5 17,47 19,47" fill="#FFEB3B"/>
+    <polygon points="120,35 121,37 123,37 121.5,38.5 122,41 120,39.5 118,41 118.5,38.5 117,37 119,37" fill="#E91E63"/>
+    <polygon points="30,90 31,92 33,92 31.5,93.5 32,96 30,94.5 28,96 28.5,93.5 27,92 29,92" fill="#4ECDC4"/>
+    <polygon points="110,70 111,72 113,72 111.5,73.5 112,76 110,74.5 108,76 108.5,73.5 107,72 109,72" fill="#FF9800"/>
+  </g>
+</svg>

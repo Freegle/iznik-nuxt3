@@ -1,5 +1,11 @@
 <template>
-  <b-modal ref="modal" scrollable size="lg" title-class="w-100">
+  <b-modal
+    ref="modal"
+    scrollable
+    size="lg"
+    title-class="w-100"
+    @hidden="onModalHidden"
+  >
     <template #title>
       <div class="d-flex flex-wrap justify-content-between w-100">
         <em>{{ message.subject }}</em>
@@ -274,7 +280,6 @@ async function save() {
         deadline.value && deadline.value > '1970-01-01' ? deadline.value : null,
     }
 
-    emit('hidden')
     hide()
     await messageStore.patch(params)
   }
@@ -292,6 +297,10 @@ function postcodeSelect(pc) {
 
 function postcodeClear() {
   postcode.value = null
+}
+
+function onModalHidden() {
+  emit('hidden')
 }
 </script>
 <style scoped lang="scss">

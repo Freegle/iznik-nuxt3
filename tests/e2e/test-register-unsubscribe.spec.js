@@ -12,7 +12,7 @@ const { test, expect } = require('@playwright/test')
 const { environment } = require('./config')
 const { unsubscribeManually } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
-const { unsubscribeTestEmails } = require('~/tests/e2e/unsubscribe-test-emails')
+const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 
 // File path for storing test emails for later cleanup
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')

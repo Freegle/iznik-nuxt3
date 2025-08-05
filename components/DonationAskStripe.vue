@@ -1,28 +1,54 @@
 <template>
   <div class="d-flex justify-content-between">
     <div>
-      <p v-if="donated">
-        You've donated before, so you know that
-        <strong>{{ groupname }}</strong> is a charity that's free to use, but
-        not free to run. If you're able to <strong>donate again</strong>
-        that would be lovely.
-      </p>
-      <p v-else>
-        <strong>{{ groupname }}</strong> is a charity that's free to use, but
-        not free to run.
-      </p>
-      <p>
-        This month we're trying to raise
-        <strong>&pound;{{ target }}</strong
-        ><span v-if="groupid && !targetMet"> for this community</span
-        ><span v-else> across the UK</span>.
-      </p>
-      <p>
-        If you can,
-        <strong> please donate </strong>
-        to keep us running.
-      </p>
-      <b-button-group class="d-flex flex-wrap mt-1 mb-2 mr-2">
+      <div v-if="!hideIntro">
+        <p v-if="donated">
+          You've donated before, so you know that
+          <strong>{{ groupname }}</strong> is a charity that's free to use, but
+          not free to run. If you're able to <strong>donate again</strong>
+          that would be lovely.
+        </p>
+        <p v-else>
+          <strong>{{ groupname }}</strong> is a charity that's free to use, but
+          not free to run.
+        </p>
+        <p>
+          This month we're trying to raise
+          <strong>&pound;{{ target }}</strong
+          ><span v-if="groupid && !targetMet"> for this community</span
+          ><span v-else> across the UK</span>.
+        </p>
+        <p>
+          If you can,
+          <strong> please donate </strong>
+          to keep us running.
+        </p>
+      </div>
+      <!-- Birthday mode: show "You're kindly donating £X" with Other option -->
+      <div v-if="birthdayMode" class="birthday-donation-display mb-3">
+        <div class="donation-amount-display mb-2">
+          <h4 class="mb-0">
+            You're kindly donating £{{ price
+            }}<span v-if="monthly"> monthly</span>
+          </h4>
+        </div>
+        <div class="other-amount-section">
+          <b-input-group prepend="Other amount:">
+            <b-input
+              v-model="otherAmount"
+              type="number"
+              min="1"
+              step="0.50"
+              size="lg"
+              class="otherWidth"
+              placeholder="Enter amount"
+            />
+          </b-input-group>
+        </div>
+      </div>
+
+      <!-- Normal mode: show button group -->
+      <b-button-group v-else class="d-flex flex-wrap mt-1 mb-2 mr-2">
         <b-button
           v-for="amount in amounts"
           :key="'donate-' + amount"
@@ -49,9 +75,17 @@
           </b-input-group>
         </div>
       </b-button-group>
-      <!--BFormCheckbox id="monthly" v-model="monthly" name="monthly" class="mb-2">
-        <v-icon icon="arrow-left" /> Monthly donations are really helpful
-      </BFormCheckbox-->
+      <!--div class="monthly-checkbox-wrapper mb-2">
+        <BFormCheckbox
+          id="monthly"
+          v-model="monthly"
+          name="monthly"
+          class="monthly-checkbox"
+        >
+          <v-icon icon="arrow-left" class="monthly-arrow" />
+          Monthly donation (these are really helpful)
+        </BFormCheckbox>
+      </div-->
 
       <div v-if="parseFloat(price)" class="mt-2 mb-2 w-100">
         <StripeDonate
@@ -76,13 +110,25 @@
         <!-- eslint-disable-next-line -->
         Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link no-prefetch to="/donate?noguard=true">here</nuxt-link>.
       </p>
-      <p v-if="groupid && !targetMet" class="text-muted small mt-1">
+      <p
+        v-if="groupid && !targetMet && !hideThermometer"
+        class="text-muted small mt-1"
+      >
         This will contribute to the general fund for the ongoing support of
         Freegle. If we raise more than the target, we'll use it to support other
         communities.
       </p>
+      <p v-if="groupid && hideThermometer" class="text-muted small mt-1">
+        This will contribute to the general fund for the ongoing support of
+        {{ groupname }} and other communities.
+      </p>
     </div>
-    <DonationThermometer ref="thermo" :groupid="groupid" class="ml-md-4" />
+    <DonationThermometer
+      v-if="!hideThermometer"
+      ref="thermo"
+      :groupid="groupid"
+      class="ml-md-4"
+    />
   </div>
 </template>
 <script setup>
@@ -125,6 +171,21 @@ const props = defineProps({
     type: Number,
     required: false,
     default: 1,
+  },
+  hideIntro: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  hideThermometer: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  birthdayMode: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 
@@ -171,7 +232,46 @@ function noMethods() {
   width: 6rem;
 }
 
+.monthly-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.monthly-arrow {
+  flex-shrink: 0;
+}
+
+.monthly-checkbox {
+  margin: 0;
+}
+
 :deep(.form-check-input) {
   border: 1px solid red;
+}
+
+.birthday-donation-display {
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+
+.donation-amount-display h4 {
+  color: #2d3748;
+  font-weight: bold;
+}
+
+.other-amount-section {
+  margin-top: 1rem;
+}
+
+.other-amount-section .input-group-prepend .input-group-text {
+  background-color: #f7fafc;
+  border-color: #e2e8f0;
+  color: #4a5568;
+  font-weight: 500;
 }
 </style>

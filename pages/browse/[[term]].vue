@@ -79,6 +79,16 @@
             :review="reviewAboutMe"
             @hidden="showAboutMeModal = false"
           />
+          <BirthdayModal
+            v-if="showBirthdayModal && birthdayGroup"
+            v-model="showBirthdayModal"
+            :group-age="birthdayGroup.age"
+            :group-name="birthdayGroup.namefull"
+            :group-id="birthdayGroup.id"
+            @close="onBirthdayModalClose"
+            @donation-success="onBirthdayDonationSuccess"
+            @donation-click="onBirthdayDonationClick"
+          />
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
@@ -121,6 +131,7 @@ import PostFilters from '~/components/PostFilters'
 import SidebarLeft from '~/components/SidebarLeft'
 import PostCode from '~/components/PostCode'
 import ExternalDa from '~/components/ExternalDa'
+import Api from '~/api'
 import { ref, computed, watch, onMounted, onUnmounted } from '#imports'
 
 // Async components
@@ -139,6 +150,9 @@ const AboutMeModal = defineAsyncComponent(() =>
 const ExpectedRepliesWarning = defineAsyncComponent(() =>
   import('~/components/ExpectedRepliesWarning')
 )
+const BirthdayModal = defineAsyncComponent(() =>
+  import('~/components/BirthdayModal')
+)
 
 // Page meta
 definePageMeta({
@@ -155,6 +169,7 @@ const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const isochroneStore = useIsochroneStore()
 const messageStore = useMessageStore()
+const api = Api(runtimeConfig)
 
 // State
 const initialBounds = ref(null)
@@ -169,6 +184,13 @@ const forceShowFilters = ref(false)
 const lastCountUpdate = ref(0)
 const updatingCount = ref(false)
 const searchTerm = ref(route.params.term)
+const showBirthdayModal = ref(false)
+const birthdayGroup = ref(null)
+
+// Debug flag for testing birthday modal
+const debugBirthdayModal = computed(() => {
+  return route.query.debugbirthday === '1'
+})
 
 // Use me and myGroups computed properties from useMe composable for consistency
 const { me, myGroups } = useMe()
@@ -334,6 +356,118 @@ async function fetchMe(force = false) {
   return await authStore.fetchUser(force)
 }
 
+async function checkForBirthdays() {
+  if (!me.value) return
+
+  // Debug mode - show modal with mock data
+  if (debugBirthdayModal.value) {
+    await showDebugBirthdayModal()
+    return
+  }
+
+  if (!myGroups.value?.length) return
+
+  const today = dayjs()
+  const lastAppeal = me.value.settings?.lastbirthdayappeal
+
+  // Only check if we haven't shown an appeal in the last 31 days
+  if (lastAppeal && dayjs().diff(dayjs(lastAppeal), 'days') < 31) {
+    return
+  }
+
+  // Check if user has been a member for at least 31 days for any group
+  for (const group of myGroups.value) {
+    if (!group.founded) continue
+
+    const memberSince = dayjs(group.mysettings?.added || group.added)
+    const daysSinceMember = today.diff(memberSince, 'days')
+
+    // Skip if not a member for at least 31 days
+    if (daysSinceMember < 31) continue
+
+    // Check if today is the group's anniversary
+    const founded = dayjs(group.founded)
+    if (founded.format('MM-DD') === today.format('MM-DD')) {
+      const groupAge = Math.floor(today.diff(founded, 'years', true))
+      if (groupAge > 0) {
+        await showBirthdayModalForGroup(group, groupAge)
+        return // Show only one birthday modal at a time
+      }
+    }
+  }
+}
+
+async function showDebugBirthdayModal() {
+  console.log('Debug: Showing birthday modal with random user group')
+
+  if (!myGroups.value?.length) {
+    console.log('Debug: No groups available for user')
+    return
+  }
+
+  // Pick a random group from user's groups
+  const randomIndex = Math.floor(Math.random() * myGroups.value.length)
+  const randomGroup = myGroups.value[randomIndex]
+
+  // Use the actual group data but with a mock age for demonstration
+  const mockAge = Math.floor(Math.random() * 15) + 1 // Random age between 1-15 years
+
+  console.log(
+    `Debug: Using group "${randomGroup.namefull}" with mock age ${mockAge}`
+  )
+
+  await showBirthdayModalForGroup(randomGroup, mockAge)
+}
+
+async function showBirthdayModalForGroup(group, groupAge) {
+  birthdayGroup.value = {
+    ...group,
+    age: groupAge,
+  }
+
+  // Record when we show the appeal (on modal open) - skip in debug mode
+  if (!debugBirthdayModal.value && me.value?.settings) {
+    const settings = { ...me.value.settings }
+    settings.lastbirthdayappeal = dayjs().toISOString()
+
+    await authStore.saveAndGet({
+      settings,
+    })
+  }
+
+  // Record A/B test shown event - skip in debug mode
+  if (!debugBirthdayModal.value) {
+    await api.bandit.shown({
+      uid: 'birthdayappeal',
+      variant: 'modal',
+    })
+  }
+
+  showBirthdayModal.value = true
+}
+
+function onBirthdayModalClose() {
+  showBirthdayModal.value = false
+}
+
+async function onBirthdayDonationSuccess() {
+  console.log('Birthday donation successful!')
+  // Record A/B test chosen event for successful donation
+  await api.bandit.chosen({
+    uid: 'birthdayappeal',
+    variant: 'modal',
+  })
+}
+
+async function onBirthdayDonationClick(amount) {
+  console.log('Birthday donation clicked:', amount)
+  // Record A/B test chosen event for donation attempt
+  await api.bandit.chosen({
+    uid: 'birthdayappeal',
+    variant: 'modal',
+  })
+}
+
 // Watchers
 watch(
   me,
@@ -444,6 +578,11 @@ onMounted(async () => {
         value: now,
       })
     }
+
+    // Check for group birthdays after about me modal logic
+    setTimeout(() => {
+      checkForBirthdays()
+    }, 1000) // Small delay to ensure groups are loaded
   }
 
   // Also get all the groups. This allows us to suggest other groups to join from within the map.

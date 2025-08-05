@@ -55,6 +55,8 @@ const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 } else { console.error('config.COOKIEYES not set') }
  */
 
+const isTest = process.env.NODE_ENV === 'test' || process.env.CI
+
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -143,6 +145,7 @@ export default defineNuxtConfig({
     '/yahoologin': { prerender: true },
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
+    '/birthday/**': { ssr: false },
     '/browse/**': { ssr: false },
     '/chats/**': { ssr: false },
     '/chitchat/**': { ssr: false },
@@ -778,12 +781,6 @@ export default defineNuxtConfig({
           content:
             "Give and get stuff for free in your local community.  Don't just recycle - reuse, freecycle and freegle!",
         },
-        {
-          hid: 'fb:app_id',
-          property: 'og:site_name',
-          content: config.FACEBOOK_APPID,
-        },
-
         {
           hid: 'twitter:title',
           name: 'twitter:title',

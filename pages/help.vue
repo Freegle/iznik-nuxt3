@@ -36,9 +36,13 @@
           class="border-primary"
         />
         <hr />
+        <NoticeMessage v-if="hasNoResults" variant="info">
+          Sorry, we can't find an answer to that. Search for something else or
+          use the Contact community volunteers button below.
+        </NoticeMessage>
         <div ref="faq">
           <HelpQuestion id="unsubscribe" :matches="matches">
-            <template #title>How do I leave/unsubscribe?</template>
+            <template #title>How do I leave or unsubscribe?</template>
             <template #default>
               <p>
                 If you'd like to leave Freegle, then go
@@ -503,6 +507,10 @@ const version = computed(() => {
 })
 
 const loggedIn = computed(() => authStore.user !== null)
+
+const hasNoResults = computed(() => {
+  return question.value && question.value.trim() && matches.value.length === 0
+})
 
 // Methods
 function supporterInfo() {

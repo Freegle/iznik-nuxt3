@@ -1,5 +1,5 @@
-// Custom methods added to the Playwright Page object
-import { Page } from '@playwright/test'
+// Custom methods added to the Playwright Page object and test fixtures
+import { Page, PlaywrightTestArgs, PlaywrightTestOptions, PlaywrightWorkerArgs, PlaywrightWorkerOptions } from '@playwright/test'
 
 declare module '@playwright/test' {
   interface Page {
@@ -45,5 +45,33 @@ declare module '@playwright/test' {
      * Wait for network idle and other teardown operations
      */
     waitForTeardown(options?: { timeout?: number }): Promise<boolean>
+  }
+
+  interface PlaywrightTestArgs {
+    // Additional test fixtures
+    testEmail: string
+    getTestEmail: (prefix?: string) => string
+    registerTestEmail: (email: string) => boolean
+    getRegisteredEmails: () => string[]
+    postMessage: (options: {
+      type?: 'OFFER' | 'WANTED'
+      item?: string
+      description?: string
+      postcode?: string
+      email: string
+    }) => Promise<{ id: string | null; item: string; description: string }>
+    withdrawPost: (options: { item: string }) => Promise<boolean>
+    setupTestPage: (options?: { path?: string; viewport?: { width: number; height: number }; timeout?: number; waitForLoad?: boolean }) => Promise<void>
+    takeTimestampedScreenshot: (description: string, options?: any) => Promise<void>
+    waitForNuxtPageLoad: (options?: { timeout?: number }) => Promise<void>
+    findAndClickButton: (selectors: string[], options?: any) => Promise<boolean>
+    setNewUserPassword: (password?: string) => Promise<boolean>
+    replyToMessageWithSignup: (options: {
+      messageId: string
+      itemName: string
+      email: string
+      replyMessage?: string
+      collectDetails?: string
+    }) => Promise<boolean>
   }
 }

@@ -47,6 +47,10 @@ save
 
 /CLAUDE.local.md
 /.claude/settings.local.json
+/coverage/
+/monocart-report/
+/assets/monocart-coverage-app.js
+/playwright-screenshots/
 
 # app
 android
