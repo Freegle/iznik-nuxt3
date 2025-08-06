@@ -39,7 +39,7 @@
           v-model="groupid"
           all
           modonly
-          :systemwide="me.isAdmin"
+          :systemwide="me.systemrole === 'Admin'"
           active
         />
       </div>
