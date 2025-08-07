@@ -38,6 +38,7 @@
                 >
                   thinks this message shouldn't be on Freegle
                 </span>
+                <span v-else> thinks: {{ item.msgcategory }} </span>
               </span>
             </div>
             <div v-else-if="item.item1">marked as related</div>
