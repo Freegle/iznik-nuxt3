@@ -33,7 +33,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (runTimeConfig.public.COOKIEYES && !window.weHaveLoadedGPT) {
       setTimeout(checkCMPComplete, 100)
     } else {
-      console.log('Init Sentry', config.public.SENTRY_DSN.substring(0,5))
+      console.log('Init Sentry', config.public.SENTRY_DSN?.substring(0,12))
       Sentry.init({
         app: [vueApp],
         dsn: config.public.SENTRY_DSN,
