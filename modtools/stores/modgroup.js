@@ -44,7 +44,9 @@ export const useModGroupStore = defineStore({
         }
         // Get ALL groups into base groupStore once
         if (Object.keys(groupStore.list).length === 0) {
+          console.log('getModGroups fetch ALL base groups')
           await groupStore.fetch()
+          console.log('getModGroups fetched ALL base groups')
         }
 
         // Get work for each group
@@ -69,7 +71,7 @@ export const useModGroupStore = defineStore({
 
         // Go through all my groups, load the full MT group info if need be.
         // Do not clear our store first: this.clear()
-        this.getting = []
+        // this.getting = []
         for (const g of Object.values(authStore.groups)) {
           this.fetchIfNeedBeMT(g.groupid)
         }
@@ -154,6 +156,13 @@ export const useModGroupStore = defineStore({
         return
       }
       this.getting.push(id)
+      // Potential speed up could be using the base groups until modGroupStore populated
+      // const groupStore = useGroupStore()
+      // const basegroup = groupStore.get(id)
+      // console.log('fINB',id, basegroup, basegroup?.role)
+      // if( basegroup){
+      //  this.list[id] = basegroup
+      // }
       await this.fetchGroupMT(id)
     },
 
