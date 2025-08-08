@@ -33,7 +33,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (runTimeConfig.public.COOKIEYES && !window.weHaveLoadedGPT) {
       setTimeout(checkCMPComplete, 100)
     } else {
-      console.log('Init Sentry')
+      console.log('Init Sentry', config.public.SENTRY_DSN.substring(0,5))
       Sentry.init({
         app: [vueApp],
         dsn: config.public.SENTRY_DSN,
@@ -53,7 +53,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         integrations: [
           new Integrations.BrowserTracing({
             routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-            tracePropagationTargets: ['localhost', 'ilovefreegle.org', /^\//],
+            tracePropagationTargets: ['localhost', 'ilovefreegle.org', 'modtools.org', /^\//],
           }),
           new HttpClientIntegration(),
           new ExtraErrorDataIntegration(),
