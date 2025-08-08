@@ -92,9 +92,19 @@ function onDonationClick(amount) {
   console.log('Donation clicked:', amount)
 }
 
-function onDonationSuccess() {
+async function onDonationSuccess() {
   console.log('Donation successful!')
   showThankYou.value = true
+
+  // Record abtest conversion for successful donation from email
+  try {
+    await api.bandit.chosen({
+      uid: 'birthdayappeal',
+      variant: 'fromemail',
+    })
+  } catch (err) {
+    console.error('Error recording donation conversion:', err)
+  }
 }
 
 // Set up page head with custom description
