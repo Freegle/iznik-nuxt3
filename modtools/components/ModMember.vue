@@ -258,10 +258,17 @@
             :groupid="groupid"
             :role="member.role"
           />
-          <div v-if="chatid" class="d-inline btn border">
+          <!--div v-if="chatid" class="d-inline btn border">
             <v-icon class="me-1" style="color: blue" icon="comments" />
             <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
-          </div>
+          </div-->
+          <ChatButton
+            :userid="member.userid"
+            :groupid="member.groupid"
+            title="Chat"
+            variant="white"
+            class="ml-1"
+          />
         </div>
       </b-card-footer>
     </b-card>
@@ -349,7 +356,7 @@ export default {
       showUnbanModal: false,
       showUnbanModalTitle: '',
       banned: false,
-      chatid: 0,
+      // chatid: 0,
     }
   },
   computed: {
@@ -456,7 +463,7 @@ export default {
       setnewval() {},
     },
   },
-  async mounted() {
+  mounted() {
     if (this.member.banned) {
       this.banned = true
     }
@@ -468,10 +475,10 @@ export default {
         info: true,
       })
     }
-    this.chatid = await this.chatStore.openChatToMods(
-      this.member.groupid,
-      this.member.userid
-    )
+    // this.chatid = await this.chatStore.openChatToMods(
+    //  this.member.groupid,
+    //  this.member.userid
+    // )
   },
   methods: {
     showHistory(type = null) {
