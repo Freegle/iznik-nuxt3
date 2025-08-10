@@ -258,13 +258,10 @@
             :groupid="groupid"
             :role="member.role"
           />
-          <ChatButton
-            :userid="member.userid"
-            :groupid="member.groupid"
-            title="Chat"
-            variant="white"
-            class="ml-1"
-          />
+          <div v-if="chatid" class="d-inline btn border">
+            <v-icon class="me-1" style="color: blue" icon="comments" />
+            <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
+          </div>
         </div>
       </b-card-footer>
     </b-card>
@@ -291,6 +288,7 @@
   </div>
 </template>
 <script>
+import { useChatStore } from '../stores/chat'
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 import { useModConfigStore } from '../stores/modconfig'
@@ -324,11 +322,20 @@ export default {
     },
   },
   setup() {
+    const chatStore = useChatStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modConfigStore = useModConfigStore()
     const { me, myGroups, myGroup } = useMe()
-    return { memberStore, modConfigStore, userStore, me, myGroups, myGroup }
+    return {
+      chatStore,
+      memberStore,
+      modConfigStore,
+      userStore,
+      me,
+      myGroups,
+      myGroup,
+    }
   },
   data: function () {
     return {
@@ -342,6 +349,7 @@ export default {
       showUnbanModal: false,
       showUnbanModalTitle: '',
       banned: false,
+      chatid: 0,
     }
   },
   computed: {
@@ -448,7 +456,7 @@ export default {
       setnewval() {},
     },
   },
-  mounted() {
+  async mounted() {
     if (this.member.banned) {
       this.banned = true
     }
@@ -460,6 +468,10 @@ export default {
         info: true,
       })
     }
+    this.chatid = await this.chatStore.openChatToMods(
+      this.member.groupid,
+      this.member.userid
+    )
   },
   methods: {
     showHistory(type = null) {
