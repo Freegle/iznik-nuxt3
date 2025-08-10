@@ -32,6 +32,7 @@ export default {
     userid: {
       type: Number,
       required: false,
+      default: 0,
     },
     size: {
       type: String,

@@ -97,8 +97,8 @@
                 settingsChange('volunteeringallowed', groupid, $event)
               "
             />
+            <div class="fw-bold mt-1">Moderation status:</div>
             <ModModeration
-              v-if="member"
               :user="user"
               :userid="member.userid"
               :membership="member"
