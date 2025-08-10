@@ -79,23 +79,32 @@
           </b-button>
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <SettingsGroup
-            v-if="groupid && member.ourpostingstatus"
-            :emailfrequency="member.emailfrequency"
-            :membership-m-t="member"
-            :moderation="member.ourpostingstatus"
-            :userid="member.userid"
-            class="border border-info p-1 flex-grow-1 mr-1"
-            @update:emailfrequency="
-              settingsChange('emailfrequency', groupid, $event)
-            "
-            @update:eventsallowed="
-              settingsChange('eventsallowed', groupid, $event)
-            "
-            @update:volunteeringallowed="
-              settingsChange('volunteeringallowed', groupid, $event)
-            "
-          />
+          <div class="border border-info p-1 flex-grow-1 mr-1">
+            <SettingsGroup
+              v-if="groupid && member.ourpostingstatus"
+              :emailfrequency="member.emailfrequency"
+              :membership-m-t="member"
+              :moderation="member.ourpostingstatus"
+              :userid="member.userid"
+              xclass="border border-info p-1 flex-grow-1 mr-1"
+              @update:emailfrequency="
+                settingsChange('emailfrequency', groupid, $event)
+              "
+              @update:eventsallowed="
+                settingsChange('eventsallowed', groupid, $event)
+              "
+              @update:volunteeringallowed="
+                settingsChange('volunteeringallowed', groupid, $event)
+              "
+            />
+            <ModModeration
+              v-if="member"
+              :user="user"
+              :userid="member.userid"
+              :membership="member"
+              class="order-2 order-md-3 order-lg-4"
+            />
+          </div>
           <div>
             <ModMemberSummary :member="member" />
             <ModMemberEngagement :member="member" />
