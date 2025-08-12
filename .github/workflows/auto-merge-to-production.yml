@@ -207,7 +207,7 @@ jobs:
   merge-to-production:
     runs-on: ubuntu-latest
     needs: [check-tests, wait-for-tests]
-    if: always() && (needs.check-tests.outputs.tests-passed == 'true' || (needs.wait-for-tests.result == 'success'))
+    if: always() && (needs.check-tests.outputs.tests-passed == 'true' || needs.wait-for-tests.result == 'success') && !(needs.wait-for-tests.result == 'failure')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
