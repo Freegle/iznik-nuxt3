@@ -238,11 +238,11 @@ export default {
     },
     recordDonation(callback) {
       if (this.userid && this.amount >= 0 && this.date) {
-        this.donationStore.add({
-          userid: this.userid,
-          amount: this.amount,
-          date: this.date,
-        })
+        this.donationStore.add(
+          this.userid,
+          this.amount,
+          this.date.toISOString()
+        )
       }
       callback()
     },
