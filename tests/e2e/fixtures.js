@@ -10,6 +10,7 @@ const {
   DEFAULT_TEST_PASSWORD,
 } = require('./config')
 const logger = require('./logger')
+const { logoutIfLoggedIn } = require('./utils/user')
 
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
@@ -675,6 +676,10 @@ const test = base.test.extend({
       timestampFormat: 'simple',
       level: 'normal',
     })
+
+    // Ensure user is logged out at the start of each test (after all methods are set up)
+    await logoutIfLoggedIn(loggingPage)
+    console.log('Ensured user is logged out for fresh test state')
 
     // Wrap the use() call in a try-catch block to add automatic screenshot capturing
     try {

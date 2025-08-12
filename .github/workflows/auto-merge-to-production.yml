@@ -116,7 +116,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const maxWaitTime = 30 * 60 * 1000; // 30 minutes
+            const maxWaitTime = 45 * 60 * 1000; // 45 minutes
             const checkInterval = 30 * 1000; // 30 seconds
             const startTime = Date.now();
             
@@ -207,7 +207,7 @@ jobs:
   merge-to-production:
     runs-on: ubuntu-latest
     needs: [check-tests, wait-for-tests]
-    if: always() && (needs.check-tests.outputs.tests-passed == 'true' || (needs.wait-for-tests.result == 'success'))
+    if: always() && (needs.check-tests.outputs.tests-passed == 'true' || needs.wait-for-tests.result == 'success') && !(needs.wait-for-tests.result == 'failure')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

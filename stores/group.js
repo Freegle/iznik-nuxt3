@@ -25,6 +25,7 @@ export const useGroupStore = defineStore({
           if (!this.allGroups[id]) {
             // Fetch all the groups.
             const groups = await api(this.config).group.list()
+            console.log('Fetching all groups for name lookup:', id, groups)
 
             if (groups) {
               groups.forEach((g) => {
