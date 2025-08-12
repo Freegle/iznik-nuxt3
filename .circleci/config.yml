@@ -225,5 +225,10 @@ workflows:
   version: 2
   build-test:
     jobs:
-      # Run tests on all branches
-      - build-and-test
+      # Run tests on all branches except production
+      # Production branch tests are skipped because they've already been run on master 
+      # before the GitHub Actions auto-merge to production
+      - build-and-test:
+          filters:
+            branches:
+              ignore: production
