@@ -192,10 +192,6 @@ const test = base.test.extend({
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
 
-    // Ensure user is logged out at the start of each test
-    await logoutIfLoggedIn(page)
-    console.log('Ensured user is logged out for fresh test state')
-
     // Enable coverage collection only in Chromium
     let coverageStarted = false
     if (context.browser().browserType().name() === 'chromium') {
@@ -680,6 +676,10 @@ const test = base.test.extend({
       timestampFormat: 'simple',
       level: 'normal',
     })
+
+    // Ensure user is logged out at the start of each test (after all methods are set up)
+    await logoutIfLoggedIn(loggingPage)
+    console.log('Ensured user is logged out for fresh test state')
 
     // Wrap the use() call in a try-catch block to add automatic screenshot capturing
     try {
