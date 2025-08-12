@@ -10,6 +10,7 @@ const {
   DEFAULT_TEST_PASSWORD,
 } = require('./config')
 const logger = require('./logger')
+const { logoutIfLoggedIn } = require('./utils/user')
 
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
@@ -190,6 +191,10 @@ const test = base.test.extend({
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
+
+    // Ensure user is logged out at the start of each test
+    await logoutIfLoggedIn(page)
+    console.log('Ensured user is logged out for fresh test state')
 
     // Enable coverage collection only in Chromium
     let coverageStarted = false
