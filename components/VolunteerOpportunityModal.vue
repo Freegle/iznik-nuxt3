@@ -707,7 +707,7 @@ function validateContactName(value) {
 }
 
 async function deleteIt() {
-  await volunteeringStore.delete(volunteering.value.id)
+  await volunteeringStore.delete(props.id)
   hide()
 }
 

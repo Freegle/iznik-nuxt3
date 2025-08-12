@@ -624,7 +624,7 @@ function validateContactName(value) {
 
 // Methods
 async function deleteIt() {
-  await communityEventStore.delete(event.value.id)
+  await communityEventStore.delete(props.id)
   hide()
 }
 
