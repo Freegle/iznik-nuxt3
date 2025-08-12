@@ -37,11 +37,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeMount, nextTick } from 'vue'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
-import {
-  attribution as getAttribution,
-  osmtile as getOsmTile,
-  loadLeaflet,
-} from '../composables/useMap'
+import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 import SpinButton from './SpinButton'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useRuntimeConfig } from '#app'
@@ -82,8 +78,6 @@ const zoom = ref(14)
 // Setup
 const runtimeConfig = useRuntimeConfig()
 const serviceUrl = runtimeConfig.public.GEOCODE
-const osmtile = getOsmTile()
-const attribution = getAttribution()
 
 if (process.client) {
   await import('leaflet/dist/leaflet-src.esm')
