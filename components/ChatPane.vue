@@ -109,6 +109,11 @@ if (props.id) {
     await chatStore.fetchChats()
   }
 
+  if (miscStore.modtools && (!chat || !chat.value)) {
+    const params = { chattypes: ['User2Mod', 'Mod2Mod'] }
+    await chatStore.listChatsMT(params, props.id)
+  }
+
   if (chat?.value) {
     // Fetch the messages.  No need to wait, as we might already have the messages in store.
     chatStore.fetchMessages(props.id)
