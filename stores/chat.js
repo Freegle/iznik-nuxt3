@@ -69,7 +69,9 @@ export const useChatStore = defineStore({
           const { chatroom } = await api(this.config).chat.fetchChatMT(
             selectedChatId
           )
-          this.listByChatId[chatroom.id] = chatroom
+          if (chatroom) {
+            this.listByChatId[chatroom.id] = chatroom
+          }
         }
       } catch (e) {
         // This happens a lot on mobile when the network is flaky.  It's not necessarily an end-user visible error,
