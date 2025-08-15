@@ -387,34 +387,36 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
 
-        // Sync marketing consent from local storage to user profile if needed
-        const miscStore = useMiscStore()
+        if (process.client) {
+          // Sync marketing consent from local storage to user profile if needed
+          const miscStore = useMiscStore()
 
-        if (miscStore.marketingConsent !== undefined) {
-          const localConsent = !!miscStore.marketingConsent
-          console.log(
-            'Local marketing consent',
-            localConsent,
-            'User marketing consent',
-            me.marketingconsent
-          )
+          if (miscStore.marketingConsent !== undefined) {
+            const localConsent = !!miscStore.marketingConsent
+            console.log(
+              'Local marketing consent',
+              localConsent,
+              'User marketing consent',
+              me.marketingconsent
+            )
 
-          if (me.marketingconsent !== localConsent) {
-            try {
-              await this.$api.session.save({
-                marketingconsent: localConsent,
-              })
+            if (me.marketingconsent !== localConsent) {
+              try {
+                await this.$api.session.save({
+                  marketingconsent: localConsent,
+                })
 
-              me.marketingconsent = localConsent
-              console.log("Sync'd marketing consent")
-            } catch (e) {
-              console.log('Failed to sync marketing consent', e)
+                me.marketingconsent = localConsent
+                console.log("Sync'd marketing consent")
+              } catch (e) {
+                console.log('Failed to sync marketing consent', e)
+              }
+            } else {
+              console.log("Marketing consent already sync'd")
             }
           } else {
-            console.log("Marketing consent already sync'd")
+            console.log('No local marketing consent to sync')
           }
-        } else {
-          console.log('No local marketing consent to sync')
         }
       } else {
         // Any auth info must be invalid.
