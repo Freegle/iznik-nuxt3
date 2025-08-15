@@ -3,13 +3,21 @@
     <b-col cols="12" lg="6" class="p-0" offset-lg="3">
       <b-row>
         <b-col>
-          <GroupHeader
-            v-if="group"
-            :id="group.id"
-            :key="'group-' + (group ? group.id : null)"
-            :group="group"
-            :show-join="false"
-          />
+          <div v-if="group">
+            <GroupHeader
+              :id="group.id"
+              :key="'group-' + (group ? group.id : null)"
+              :group="group"
+              :show-join="false"
+            />
+            <div v-if="route.query.financialYear" class="mt-2 mb-3">
+              <div class="bg-light p-2 rounded">
+                <small class="text-muted">
+                  <strong>Showing data for: {{ dateRangeDescription }}</strong>
+                </small>
+              </div>
+            </div>
+          </div>
           <div v-else>
             <div class="d-flex pl-1 bg-white">
               <b-img thumbnail src="/icon.png" class="titlelogo" />
@@ -19,6 +27,11 @@
                   Give and get stuff for free in your local community. Don't
                   throw it away, give it away!
                 </h5>
+                <div v-if="route.query.financialYear" class="mt-1">
+                  <small class="text-muted">
+                    <strong>{{ dateRangeDescription }}</strong>
+                  </small>
+                </div>
               </div>
             </div>
           </div>
@@ -31,7 +44,7 @@
       </b-row>
       <div v-if="dataready">
         <StatsImpact
-          range="the last 12 months"
+          :range="dateRangeDescription"
           :total-benefit="totalBenefit"
           :total-c-o2="totalCO2"
           :total-weight="totalWeight"
@@ -245,6 +258,31 @@ const memberOptions = {
 }
 
 // Computed properties
+const dateRangeDescription = computed(() => {
+  const fyParam = route.query.financialYear
+  if (fyParam === 'true') {
+    return 'the last completed financial year (Apr 6 - Apr 5)'
+  } else if (fyParam && fyParam.toLowerCase().startsWith('fy')) {
+    const fyYear = fyParam.substring(2)
+    let startYear
+
+    if (fyYear.length === 2) {
+      // FY24 format
+      startYear = parseInt('20' + fyYear, 10)
+    } else if (fyYear.length === 4) {
+      // FY2024 format
+      startYear = parseInt(fyYear, 10)
+    }
+
+    if (!isNaN(startYear) && startYear >= 2000 && startYear <= 2099) {
+      return `financial year ${startYear}-${(startYear + 1)
+        .toString()
+        .substring(2)} (Apr 6 ${startYear} - Apr 5 ${startYear + 1})`
+    }
+  }
+  return 'the last 12 months'
+})
+
 const totalWeight = computed(() => {
   const weights = statsStore?.Weight
   let total = 0
@@ -377,6 +415,71 @@ const weightData = computed(() => {
   return ret
 })
 
+// Computed page title based on financial year parameter
+const pageTitle = computed(() => {
+  const fyParam = route.query.financialYear
+  let titleSuffix = ''
+
+  if (fyParam === 'true') {
+    titleSuffix = ' - Last Completed Financial Year'
+  } else if (fyParam && fyParam.toLowerCase().startsWith('fy')) {
+    const fyYear = fyParam.substring(2)
+    let startYear
+
+    if (fyYear.length === 2) {
+      // FY24 format
+      startYear = parseInt('20' + fyYear, 10)
+    } else if (fyYear.length === 4) {
+      // FY2024 format
+      startYear = parseInt(fyYear, 10)
+    }
+
+    if (!isNaN(startYear) && startYear >= 2000 && startYear <= 2099) {
+      titleSuffix = ` - Financial Year ${startYear}-${(startYear + 1)
+        .toString()
+        .substring(2)}`
+    }
+  }
+
+  if (groupname) {
+    return 'Statistics for ' + groupname + titleSuffix
+  } else {
+    return 'Statistics' + titleSuffix
+  }
+})
+
+const pageDescription = computed(() => {
+  const fyParam = route.query.financialYear
+  let descSuffix = ''
+
+  if (fyParam === 'true') {
+    descSuffix = ' for the last completed financial year'
+  } else if (fyParam && fyParam.toLowerCase().startsWith('fy')) {
+    const fyYear = fyParam.substring(2)
+    let startYear
+
+    if (fyYear.length === 2) {
+      // FY24 format
+      startYear = parseInt('20' + fyYear, 10)
+    } else if (fyYear.length === 4) {
+      // FY2024 format
+      startYear = parseInt(fyYear, 10)
+    }
+
+    if (!isNaN(startYear) && startYear >= 2000 && startYear <= 2099) {
+      descSuffix = ` for financial year ${startYear}-${(startYear + 1)
+        .toString()
+        .substring(2)}`
+    }
+  }
+
+  if (groupname) {
+    return 'See stats and graphs for ' + groupname + descSuffix
+  } else {
+    return 'See stats and graphs for Freegle' + descSuffix
+  }
+})
+
 // Set page head
 if (groupname) {
   await groupStore.fetch(groupname, true)
@@ -385,32 +488,110 @@ if (groupname) {
     buildHead(
       route,
       runtimeConfig,
-      'Statistics for ' + groupname,
-      'See stats and graphs for ' + groupname,
+      pageTitle.value,
+      pageDescription.value,
       group.value?.profile ? group.value?.profile : null
     )
   )
 } else {
   useHead(
-    buildHead(
-      route,
-      runtimeConfig,
-      'Statistics',
-      'See stats and graphs for Freegle'
-    )
+    buildHead(route, runtimeConfig, pageTitle.value, pageDescription.value)
   )
+}
+
+// Helper function to calculate financial year dates
+const getFinancialYearDates = (fyParam = null) => {
+  let fyStart, fyEnd
+
+  if (
+    fyParam &&
+    typeof fyParam === 'string' &&
+    fyParam.toLowerCase().startsWith('fy')
+  ) {
+    // Parse FY24 or FY2024 format - extract the year part
+    const fyYear = fyParam.substring(2)
+    let startYear
+
+    if (fyYear.length === 2) {
+      // FY24 format
+      startYear = parseInt('20' + fyYear, 10)
+    } else if (fyYear.length === 4) {
+      // FY2024 format
+      startYear = parseInt(fyYear, 10)
+    } else {
+      return null
+    }
+
+    if (!isNaN(startYear) && startYear >= 2000 && startYear <= 2099) {
+      // FY24 or FY2024 means April 6, 2024 to April 5, 2025
+      fyStart = dayjs()
+        .year(startYear)
+        .month(3) // April (0-indexed)
+        .date(6)
+        .startOf('day')
+      fyEnd = dayjs()
+        .year(startYear + 1)
+        .month(3) // April (0-indexed)
+        .date(5)
+        .endOf('day')
+
+      return { start: fyStart, end: fyEnd, year: fyYear }
+    }
+  }
+
+  // Default: calculate last completed financial year
+  const now = dayjs()
+  const currentYear = now.year()
+
+  // UK financial year runs from April 6 to April 5
+  if (now.month() > 3 || (now.month() === 3 && now.date() >= 6)) {
+    // We're in the current financial year (after April 6)
+    // So last completed financial year is previous year April 6 to current year April 5
+    fyStart = dayjs()
+      .year(currentYear - 1)
+      .month(3)
+      .date(6)
+      .startOf('day')
+    fyEnd = dayjs().year(currentYear).month(3).date(5).endOf('day')
+  } else {
+    // We're before April 6, so last completed financial year is two years ago
+    fyStart = dayjs()
+      .year(currentYear - 2)
+      .month(3)
+      .date(6)
+      .startOf('day')
+    fyEnd = dayjs()
+      .year(currentYear - 1)
+      .month(3)
+      .date(5)
+      .endOf('day')
+  }
+
+  return { start: fyStart, end: fyEnd, year: null }
 }
 
 // Lifecycle hooks
 onMounted(async () => {
   loading.value = true
 
-  start.value = dayjs()
-    .subtract(1, 'year')
-    .subtract(1, 'month')
-    .startOf('month')
+  // Check if financialYear parameter is set (supports FY24 format or 'true' for last completed FY)
+  const fyParam = route.query.financialYear
+  if (
+    fyParam &&
+    (fyParam === 'true' || fyParam.toLowerCase().startsWith('fy'))
+  ) {
+    const fyDates = getFinancialYearDates(fyParam === 'true' ? null : fyParam)
+    start.value = fyDates.start
+    end.value = fyDates.end
+  } else {
+    // Default behavior - last 12 months minus current month
+    start.value = dayjs()
+      .subtract(1, 'year')
+      .subtract(1, 'month')
+      .startOf('month')
 
-  end.value = dayjs().subtract(1, 'month').endOf('month')
+    end.value = dayjs().subtract(1, 'month').endOf('month')
+  }
 
   await statsStore.clear()
   console.log('Mounted', groupid.value)
