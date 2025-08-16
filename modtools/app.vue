@@ -37,7 +37,6 @@ import { useLogoStore } from '../stores/logo'
 import { useLocationStore } from '../stores/location'
 import { useShortlinkStore } from '../stores/shortlinks'
 import { useMiscStore } from '../stores/misc'
-import { computed, watch, reloadNuxtApp } from '#imports'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
@@ -49,16 +48,12 @@ import { useMemberStore } from './stores/member'
 import { useModConfigStore } from './stores/modconfig'
 import { useSpammerStore } from './stores/spammer'
 import { useStdmsgStore } from './stores/stdmsg'
+import { computed, watch, reloadNuxtApp } from '#imports'
 import { useModGroupStore } from '@/stores/modgroup'
 import { usePublicityStore } from '@/stores/publicity'
 
 const route = useRoute()
 const loadingIndicatorThrottle = ref(5000)
-const { isLoading } = useLoadingIndicator({
-  throttle: loadingIndicatorThrottle.value,
-})
-// Don't render the app until we've done everything in here.
-let ready = false
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -227,9 +222,6 @@ if (process.client) {
     return chatStore.unreadCount
   })
 
-  const notificationCount = computed(() => {
-    return notificationStore.count
-  })
 
   useHead({
     titleTemplate: (titleChunk) => {
@@ -247,7 +239,6 @@ if (process.client) {
     },
   })
 }
-ready = true
 </script>
 
 <style lang="scss">

@@ -58,5 +58,11 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 ### Playwright Test Development
 - When adding Playwright tests, look for existing utility functions (e.g. for logging in/signing up) to use before writing the code.
 
+## Branch Management
+- **Freegle**: Built from `master` branch using `./iznik-nuxt3` directory
+- **ModTools**: Built from `modtools` branch using `./iznik-nuxt3-modtools` directory
+- Two separate checkouts are required because different services need different branches
+- The `modtools` branch contains ModTools-specific configuration and components
+
 ## Debugging and Investigation
 - No need to run lint before investigating problems
