@@ -240,6 +240,9 @@
         <div id="mtinfo" :title="buildDate">
           MT-{{ version }} <br />{{ buildDate }}
         </div>
+        <div v-if="inMTapp" id="mtinfo" :title="inMTapp">
+          MT app {{ inMTapp }}
+        </div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
@@ -341,6 +344,7 @@ useHead({
 
 const loginStateKnown = computed(() => authStore.loginStateKnown)
 const loggedIn = computed(() => authStore.user !== null)
+const inMTapp = computed(() => window.sessionStorage?.getItem('inMTapp'))
 
 const discourseCount = computed(() => {
   const discourse = authStore.discourse
