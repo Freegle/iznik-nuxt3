@@ -207,11 +207,9 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-const noAdmin = (val) => {
-  return !!(val && !val.toLowerCase().includes('admin'))
-}
 
 export default {
+  name: 'AdminsManagement',
   components: {
     VeeForm,
     Field,
