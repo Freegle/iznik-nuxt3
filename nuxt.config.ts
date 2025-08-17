@@ -151,6 +151,12 @@ export default defineNuxtConfig({
       ignore: ['/message/'],
       crawlLinks: true,
     },
+    
+    // Disable HTTPS enforcement for development
+    httpsRedirect: false,
+    security: {
+      httpsRedirect: false,
+    },
   },
 
   render: {
@@ -313,8 +319,9 @@ export default defineNuxtConfig({
 
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {
-    host: '127.0.0.1',
+    host: '0.0.0.0', 
     port: 3000,
+    https: false,
   },
   app: {
     head: {
@@ -452,4 +459,16 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-11-29',
+
+  // Disable HTTPS redirects for development
+  security: {
+    headers: {
+      strictTransportSecurity: false,
+    },
+  },
+
+  // Disable security features that force HTTPS
+  routerOptions: {
+    strictSSL: false,
+  },
 })
