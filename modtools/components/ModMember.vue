@@ -262,6 +262,9 @@
             <v-icon class="me-1" style="color: blue" icon="comments" />
             <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
           </div-->
+          <b-button variant="white" class="mr-2 mb-1" @click="showChat">
+            <v-icon icon="comments" /> View Chat
+          </b-button>
           <ChatButton
             :userid="member.userid"
             :groupid="member.groupid"
@@ -291,6 +294,13 @@
       :title="showUnbanModalTitle"
       @confirm="unban"
       @hidden="showUnbanModal = false"
+    />
+    <ModChatModal
+      v-if="showModChatModal && chatid"
+      :id="chatid"
+      ref="modChatModal"
+      :pov="0"
+      @hidden="showModChatModal = false"
     />
   </div>
 </template>
@@ -355,8 +365,9 @@ export default {
       showLogsModal: false,
       showUnbanModal: false,
       showUnbanModalTitle: '',
+      showModChatModal: false,
       banned: false,
-      // chatid: 0,
+      chatid: 0,
     }
   },
   computed: {
@@ -475,10 +486,6 @@ export default {
         info: true,
       })
     }
-    // this.chatid = await this.chatStore.openChatToMods(
-    //  this.member.groupid,
-    //  this.member.userid
-    // )
   },
   methods: {
     showHistory(type = null) {
@@ -538,6 +545,14 @@ export default {
     async unban() {
       this.showUnbanModal = false
       await this.memberStore.unban(this.user.id, this.groupid)
+    },
+    async showChat() {
+      this.chatid = await this.chatStore.openChatToMods(
+        this.member.groupid,
+        this.member.userid
+      )
+      this.showModChatModal = true
+      this.$refs.modChatModal?.show()
     },
   },
 }

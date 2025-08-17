@@ -240,6 +240,9 @@
         <div id="mtinfo" :title="buildDate">
           MT-{{ version }} <br />{{ buildDate }}
         </div>
+        <div v-if="inMTapp" id="mtinfo" :title="inMTapp">
+          MT app {{ inMTapp }}
+        </div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
         <slot ref="pageContent" />
@@ -341,6 +344,7 @@ useHead({
 
 const loginStateKnown = computed(() => authStore.loginStateKnown)
 const loggedIn = computed(() => authStore.user !== null)
+const inMTapp = ref(false)
 
 const discourseCount = computed(() => {
   const discourse = authStore.discourse
@@ -378,6 +382,13 @@ watch(
     }
 
     if (routechanged) {
+      if (route.query?.inMTapp) {
+        const queryinMTapp =
+          route.query.inMTapp === 'true' ? '0.4.6' : route.query.inMTapp
+        console.error('queryinMTapp', queryinMTapp)
+        window.sessionStorage.setItem('inMTapp', queryinMTapp)
+        inMTapp.value = queryinMTapp
+      }
       // Get per-group-work and ensure all current groups are in modGroupStore
       await modGroupStore.getModGroups()
     }
@@ -397,6 +408,8 @@ watch(
 
 // Lifecycle hooks and watches
 onMounted(async () => {
+  inMTapp.value = window.sessionStorage?.getItem('inMTapp')
+
   // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
   // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
   if (!loginStateKnown.value) {
@@ -448,6 +461,7 @@ function requestLogin() {
 }
 
 function discourse(e) {
+  console.log('Open Discourse')
   window.open('https://discourse.ilovefreegle.org/')
   e.stopPropagation()
   e.preventDefault()

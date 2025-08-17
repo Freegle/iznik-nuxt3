@@ -47,6 +47,7 @@ export default {
     modMembers.collection.value = 'Spam'
     modMembers.groupid.value = 0
     modMembers.group.value = null
+    modMembers.limit.value = 100
     return {
       memberStore,
       miscStore,

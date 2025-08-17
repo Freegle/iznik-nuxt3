@@ -48,6 +48,7 @@
           Using one of these buttons is the easiest way to create an account:
         </p>
         <b-button
+          v-if="!inMTapp"
           class="social-button social-button--facebook"
           :disabled="facebookDisabled"
           @click="loginFacebook"
@@ -61,6 +62,7 @@
           >
         </b-button>
         <div
+          v-if="!inMTapp"
           id="googleLoginButton"
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
@@ -262,6 +264,8 @@ const googleLoginButton = ref(null)
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
 const { loginType, forceLogin } = storeToRefs(authStore)
+
+const inMTapp = computed(() => window.sessionStorage?.getItem('inMTapp'))
 
 // Computed
 const clientId = computed(() => {

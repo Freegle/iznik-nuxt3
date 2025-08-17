@@ -19,18 +19,21 @@ export default defineNuxtRouteMiddleware((to, from) => {
   }
   const me = authStore.user
   if (me === null || !me.id) {
-    // If me not set yet, then go to login page and bounce back if need be
+    // If me not set yet, then go to login page and bounce back if need be, saving passed params and inMTapp if set
+    if( to.query?.inMTapp){
+      const inMTapp = to.query.inMTapp==='true' ? '0.4.6' : to.query.inMTapp
+      window.sessionStorage.setItem('inMTapp',inMTapp)
+      delete to.query.inMTapp
+    }
+
     let newTo = '/login?return=' + to.path
     const newParams = []
 
-    console.log('To', to)
     for (const key in to.query) {
       if (Object.prototype.hasOwnProperty.call(to.query, key)) {
         newParams.push(key + '=' + encodeURIComponent(to.query[key]))
       }
     }
-
-    console.log('newParams', newParams)
 
     if (newParams.length) {
       newTo += '&' + newParams.join('&')
