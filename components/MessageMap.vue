@@ -139,7 +139,6 @@ function idle(themap) {
   }
 
   try {
-    console.log('Add map Zoom Control', map.value)
     const zoomControl = map.value.$el.querySelector('.leaflet-top.leaflet-left')
     if (zoomControl) {
       zoomControl.className = 'leaflet-top leaflet-right'
