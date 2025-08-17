@@ -60,8 +60,8 @@
             <v-icon icon="map-marker-alt" class="fa-fw" />&nbsp;
             <span v-if="publicLocation">
               <span v-if="publicLocation.location">
-                {{ publicLocation.location }}, {{ milesaway }}
-                away.
+                {{ publicLocation.location
+                }}<span v-if="milesaway">, {{ milesaway }} away.</span>
               </span>
               <span v-else-if="publicLocation.groupname">
                 {{ publicLocation.groupname }}
@@ -255,11 +255,11 @@ const expectedreplies = computed(() => {
 })
 
 const milesaway = computed(() => {
-  return pluralize(
-    'mile',
-    milesAway(me?.lat, me?.lng, user.value?.lat, user.value?.lng),
-    true
-  )
+  const milesfrome =
+    user.value?.info?.milesaway ??
+    milesAway(me?.lat, me?.lng, user.value?.lat, user.value?.lng)
+  if (milesfrome == null) return ''
+  return pluralize('mile', milesfrome, true)
 })
 
 const activeOFFERCount = computed(() => {
