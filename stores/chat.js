@@ -71,6 +71,8 @@ export const useChatStore = defineStore({
           )
           if (chatroom) {
             this.listByChatId[chatroom.id] = chatroom
+          } else {
+            console.error('listChatsMT selectedChatId NOTHING', selectedChatId)
           }
         }
       } catch (e) {
@@ -180,7 +182,11 @@ export const useChatStore = defineStore({
         const miscStore = useMiscStore() // MT
         if (miscStore.modtools) {
           const { chatroom } = await api(this.config).chat.fetchChatMT(id)
-          this.listByChatId[id] = chatroom
+          if (chatroom) {
+            this.listByChatId[id] = chatroom
+          } else {
+            console.error('useChatStore fetchChat NOTHING', id)
+          }
         } else {
           const chat = await api(this.config).chat.fetchChat(id, false)
           this.listByChatId[id] = chat
