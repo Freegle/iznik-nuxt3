@@ -51,7 +51,7 @@ export default {
       },
       async set(val) {
         const groupid = this.membership.groupid ?? this.membership.id
-        const userid = this.userid ?? this.user.id
+        const userid = this.userid ? this.userid : this.user.id
         await this.userStore.edit({
           id: userid,
           groupid,
@@ -65,7 +65,7 @@ export default {
       },
       async set(val) {
         const groupid = this.membership.groupid ?? this.membership.id
-        const userid = this.userid ?? this.user.id
+        const userid = this.userid ? this.userid : this.user.id
         await this.userStore.edit({
           id: userid,
           groupid,

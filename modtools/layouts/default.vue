@@ -461,6 +461,7 @@ function requestLogin() {
 }
 
 function discourse(e) {
+  console.log('Open Discourse')
   window.open('https://discourse.ilovefreegle.org/')
   e.stopPropagation()
   e.preventDefault()
