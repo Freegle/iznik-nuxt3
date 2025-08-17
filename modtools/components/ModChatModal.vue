@@ -41,7 +41,7 @@
               }}
             </span>
           </div>
-          <div v-if="user2">
+          <div v-if="user2 && user1.id != user2.id">
             {{ user2.displayname }}
             <span class="text-muted small">
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
@@ -71,6 +71,7 @@
               <b-img lazy src="/loader.gif" alt="Loading" />
             </template>
           </infinite-loading>
+          <div v-if="chatmessages.length === 0">No messages</div>
           <ul
             v-for="chatmessage in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
