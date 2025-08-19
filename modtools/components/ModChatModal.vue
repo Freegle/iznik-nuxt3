@@ -41,7 +41,7 @@
               }}
             </span>
           </div>
-          <div v-if="user2 && user1.id != user2.id">
+          <div v-if="user1 && user2 && user1.id != user2.id">
             {{ user2.displayname }}
             <span class="text-muted small">
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
