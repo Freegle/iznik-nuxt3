@@ -2,7 +2,6 @@
   <div class="d-inline">
     <div class="position-relative d-inline-block">
       <SpinButton
-        v-if="autosend"
         :variant="variant"
         :icon-name="icon"
         :label="label"
