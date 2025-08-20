@@ -273,6 +273,35 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    optimizeDeps: {
+      include: [
+        'resize-observer-polyfill',
+        'jwt-decode',
+        'bootstrap-vue-next/components/BAlert',
+        'bootstrap-vue-next/components/BCard',
+        'bootstrap-vue-next/components/BContainer',
+        'bootstrap-vue-next/components/BForm',
+        'bootstrap-vue-next/components/BFormCheckbox',
+        'bootstrap-vue-next/components/BFormGroup',
+        'bootstrap-vue-next/components/BFormInput',
+        'bootstrap-vue-next/components/BFormTextarea',
+        'bootstrap-vue-next/components/BInputGroup',
+        'bootstrap-vue-next/components/BModal',
+        'vee-validate',
+        '@formatjs/intl-locale/should-polyfill',
+        '@formatjs/intl-pluralrules/should-polyfill',
+        '@uppy/core',
+        '@uppy/vue',
+        '@uppy/tus',
+        '@uppy/compressor',
+        'object.hasown',
+        '@formatjs/intl-locale/polyfill',
+        '@formatjs/intl-pluralrules/polyfill-force',
+        '@formatjs/intl-pluralrules/locale-data/en',
+        'vuedraggable',
+        '@chenfengyuan/vue-number-input'
+      ],
+    },
     build: {
       minify: false,
     },
