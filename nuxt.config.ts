@@ -437,7 +437,7 @@ export default defineNuxtConfig({
 
     weserv: {
       provider: 'weserv',
-      baseURL: config.TUS_UPLOADER,
+      baseURL: process.env.IMAGE_BASE_URL || config.USER_SITE,
       weservURL: config.IMAGE_DELIVERY,
     },
 
