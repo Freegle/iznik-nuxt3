@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed } from 'vue'
 import simpleheat from 'simpleheat'
 
 // Originally from: https://github.com/Platoniq/vue2-leaflet-heatmap and https://github.com/Leaflet/Leaflet.heat
@@ -61,6 +61,7 @@ const ready = ref(false)
 let mapObject = null
 let parentContainer = null
 const instance = getCurrentInstance()
+const parentReady = ref(false)
 
 function addLatLng(value) {
   mapObject.addLatLng(value)
@@ -374,6 +375,20 @@ function extendLeafletWithHeatLayer() {
   }
 }
 
+const parentLeafletObject = computed(() => {
+  if (!instance?.parent) return null
+  const realParent = findRealParent(instance.parent)
+  return realParent?.leafletObject || null
+})
+
+watch(parentLeafletObject, (leafletObject) => {
+  if (leafletObject && mapObject && !parentContainer) {
+    parentContainer = leafletObject
+    parentContainer.addLayer(mapObject, !props.visible)
+    parentReady.value = true
+  }
+}, { immediate: true })
+
 onMounted(() => {
   if (!window.L.HeatLayer) {
     extendLeafletWithHeatLayer()
@@ -402,8 +417,6 @@ onMounted(() => {
   mapObject = new window.L.HeatLayer(props.latLngs, options)
   propsBinder(instance.proxy, mapObject, props)
   ready.value = true
-  parentContainer = findRealParent(instance.parent).leafletObject
-  parentContainer.addLayer(mapObject, !props.visible)
 })
 
 onBeforeUnmount(() => {
