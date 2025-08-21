@@ -282,6 +282,8 @@ export default defineNuxtConfig({
         'bootstrap-vue-next/components/BFormCheckbox',
         'bootstrap-vue-next/components/BFormGroup',
         'bootstrap-vue-next/components/BFormInput',
+        'bootstrap-vue-next/components/BFormSelect',
+        'bootstrap-vue-next/components/BPopover',
         'bootstrap-vue-next/components/BFormTextarea',
         'bootstrap-vue-next/components/BInputGroup',
         'bootstrap-vue-next/components/BModal',
@@ -297,6 +299,7 @@ export default defineNuxtConfig({
         '@formatjs/intl-pluralrules/polyfill-force',
         '@formatjs/intl-pluralrules/locale-data/en',
         'vuedraggable',
+        'vue-highlight-words',
         '@chenfengyuan/vue-number-input'
       ],
     },
@@ -335,6 +338,7 @@ export default defineNuxtConfig({
       'es.array.flat-map',
       'es.array.flat',
       'es.string.replace-all',
+      'es.promise.any',
     ],
   },
 
