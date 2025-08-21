@@ -41,6 +41,7 @@ test.describe('Browse Page Tests', () => {
 
       // Now sign up the main user to browse the messages
       console.log('Signing up main user for browse tests')
+      await logoutIfLoggedIn(page)
       const signupResult = await signUpViaHomepage(
         page,
         testEmail,
