@@ -382,7 +382,7 @@ export const useAuthStore = defineStore({
             if (me) {
               me.permissions = permissions
               groups = me.memberships
-              if (v1groups) {
+              if (v1groups && groups) {
                 // Set each group configid
                 for (const g of groups) {
                   const group = v1groups.find((v1g) => v1g.id === g.groupid)
