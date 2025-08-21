@@ -125,12 +125,19 @@ watch(
       if (domain.includes('.')) {
         suggestedDomains.value = []
 
-        const ret = await domainStore.fetch({
-          domain,
-        })
+        try {
+          const ret = await domainStore.fetch({
+            domain,
+          })
 
-        if (ret && ret.ret === 0) {
-          suggestedDomains.value = ret.suggestions
+          if (ret && ret.ret === 0) {
+            suggestedDomains.value = ret.suggestions
+          }
+        } catch (error) {
+          // Domain suggestion API can legitimately fail (network issues, server problems, etc.)
+          // In this case, we simply don't provide suggestions rather than showing an error
+          console.log('Domain suggestion API failed:', error.message)
+          suggestedDomains.value = []
         }
       }
     }
