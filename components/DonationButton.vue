@@ -1,5 +1,6 @@
 <template>
   <div>
+    buttonId: {{ buttonId }} value: {{ value }}
     <b-button
       variant="primary"
       size="lg"
@@ -7,7 +8,13 @@
       @click="clicked"
     >
       <div class="d-flex align-items-center">
-        <div :id="uniqueId" ref="paypalbutton" class="mr-2" @click="suppress" />
+        <div
+          :id="uniqueId"
+          :key="bump"
+          ref="paypalbutton"
+          class="mr-2"
+          @click="suppress"
+        />
         <div v-if="text">{{ text }}</div>
         <div v-else-if="!show">Donate</div>
         <div v-else>{{ show }}</div>
@@ -16,7 +23,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { loadScript } from 'vue-plugin-load-script'
 import { uid } from '../composables/useId'
 import { useNuxtApp } from '#app'
@@ -38,6 +45,18 @@ const props = defineProps({
     default: null,
   },
 })
+
+const bump = ref(1)
+
+watch(
+  () => props.value,
+  (newVal, oldVal) => {
+    bump.value++
+    nextTick(() => {
+      checkPayPalLoaded()
+    })
+  }
+)
 
 const emit = defineEmits(['clicked'])
 const paypalbutton = ref(null)
