@@ -232,7 +232,7 @@ onMounted(() => {
     newUserPassword.value = window.history.state.newpassword
   }
 
-  // showDonationAskModal.value = true // debug: shows <DonationAskModal/> on My Posts
+  showDonationAskModal.value = true // debug: shows <DonationAskModal/> on My Posts
 })
 
 function donationMade() {

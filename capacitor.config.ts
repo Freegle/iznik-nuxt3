@@ -16,6 +16,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 // - Set iOS window.open
 // - Get device info
 // - Add to calendar
+//
+// Test donations with pages/myposts.vue: showDonationAskModal.value = true
 
 const AndroidKeyStorePath = process.env['FREEGLE_NUXT3_KEYSTORE_PATH']
 if (typeof AndroidKeyStorePath !== "string") throw "process.env.FREEGLE_NUXT3_KEYSTORE_PATH not set"
