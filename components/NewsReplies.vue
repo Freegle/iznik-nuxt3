@@ -133,7 +133,50 @@ const visiblereplies = computed(() => {
   return ret
 })
 
-const repliestoshow = computed(() => {
+const combinedReplies = computed(() => {
+  const TEN_MINUTES = 10 * 60 * 1000 // 10 minutes in milliseconds
+  const combined = []
+
+  for (let i = 0; i < filteredReplies.value.length; i++) {
+    const currentReply = filteredReplies.value[i]
+    const currentTime = new Date(currentReply.added).getTime()
+
+    // Check if we can combine with the last reply in our combined array
+    const lastCombined = combined[combined.length - 1]
+
+    if (
+      lastCombined &&
+      lastCombined.userid === currentReply.userid &&
+      !currentReply.image && // Don't combine replies with images
+      !lastCombined.image &&
+      currentTime -
+        new Date(lastCombined.originalAdded || lastCombined.added).getTime() <=
+        TEN_MINUTES
+    ) {
+      // Combine the replies
+      const combinedReply = {
+        ...lastCombined,
+        message: lastCombined.message + '\n\n' + currentReply.message,
+        added: currentReply.added, // Use the latest timestamp
+        originalAdded: lastCombined.originalAdded || lastCombined.added, // Keep track of original timestamp
+        isCombined: true,
+        combinedMessages: lastCombined.combinedMessages
+          ? [...lastCombined.combinedMessages, currentReply.message]
+          : [lastCombined.message, currentReply.message],
+      }
+
+      // Replace the last combined reply with the new combined one
+      combined[combined.length - 1] = combinedReply
+    } else {
+      // Add as a separate reply
+      combined.push(currentReply)
+    }
+  }
+
+  return combined
+})
+
+const filteredReplies = computed(() => {
   let ret = []
 
   if (visiblereplies.value.length) {
@@ -183,6 +226,10 @@ const repliestoshow = computed(() => {
   }
 
   return ret
+})
+
+const repliestoshow = computed(() => {
+  return combinedReplies.value
 })
 
 const showEarlierRepliesOption = computed(() => {

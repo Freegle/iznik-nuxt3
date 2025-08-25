@@ -187,29 +187,21 @@
 
         <!-- Thank You Message -->
         <div v-if="showThankYou" class="thank-you-message">
-          <div class="thank-you-icon">
-            <v-icon icon="heart" class="heart-icon" />
+          <!-- Thank You Cake Slice Graphic -->
+          <div class="cake-slice-container">
+            <img
+              src="/birthday/thank-cake.png"
+              alt="Thank You Cake Slice"
+              class="cake-slice-graphic"
+            />
           </div>
           <h1 class="thank-you-title">Thank you!</h1>
           <p class="thank-you-subtitle">
             Your generous donation of
             <strong>£{{ donationAmount }}</strong> will help keep
-            {{ groupName || 'the community' }} thriving for another year.
+            {{ groupName || 'the community' }} thriving for another year. Have a
+            slice of virtual cake!
           </p>
-          <div class="thank-you-details">
-            <p>
-              <v-icon icon="check-circle" class="text-success mr-2" />
-              Your donation has been processed successfully
-            </p>
-            <p>
-              <v-icon icon="envelope" class="text-info mr-2" />
-              You'll receive a confirmation email shortly
-            </p>
-            <p>
-              <v-icon icon="star" class="text-warning mr-2" />
-              You'll get a cute supporter badge on your profile
-            </p>
-          </div>
         </div>
 
         <!-- Donation Section -->
@@ -850,6 +842,18 @@ const groupProfile = computed(() => {
 .thank-you-message {
   text-align: center;
   padding: 2rem 0;
+}
+
+/* Thank You Cake Slice Graphic */
+.cake-slice-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.cake-slice-graphic {
+  max-width: 200px;
+  height: auto;
 }
 
 .thank-you-icon {

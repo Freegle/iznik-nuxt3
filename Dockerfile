@@ -1,15 +1,26 @@
 FROM node:18-alpine
 
+# Install postfix for mail relay
+RUN apk add --no-cache postfix
+
 WORKDIR /app
 
-ENV IZNIK_API_V1=http://apiv1.localhost/api \
-    IZNIK_API_V2=http://apiv2.localhost:8192/api
+ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
+    IZNIK_API_V2=http://freegle-apiv2:8192/api
 
-RUN apk update && apk add git \
-    && git clone https://github.com/Freegle/iznik-nuxt3.git
+COPY package*.json setup-hooks.* ./
+RUN npm install --legacy-peer-deps
 
-CMD cd iznik-nuxt3 \
-    && git pull \
-    && yes | npm install -y --legacy-peer-deps \
-    && export NODE_OPTIONS=--max-old-space-size=8192;npm run build \
-    && export HOST=0; npm run start
+COPY . .
+
+EXPOSE 3002
+
+CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
+    rm -rf /tmp/nitro/worker-* && \
+    echo "relayhost = [mailhog]:1025" >> /etc/postfix/main.cf && \
+    postfix start && \
+    if [ "$NUXT_DEV_MODE" = "true" ]; then \
+        export HOST=0 && npm run dev; \
+    else \
+        npm run build && export HOST=0 && npm run start; \
+    fi
