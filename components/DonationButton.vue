@@ -1,6 +1,5 @@
 <template>
   <div>
-    buttonId: {{ buttonId }} value: {{ value }}
     <b-button
       variant="primary"
       size="lg"
