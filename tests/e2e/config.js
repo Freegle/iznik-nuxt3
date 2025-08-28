@@ -15,7 +15,7 @@ const timeouts = {
 
   // UI interaction timeouts
   ui: {
-    appearance: 5000, // Waiting for element to appear
+    appearance: 30000, // Waiting for element to appear (increased for Docker)
     interaction: 10000, // Interaction with elements like clicks
     animation: 1000, // Waiting for animations to complete
     autocomplete: 10000, // Waiting for autocomplete results
@@ -53,6 +53,9 @@ const environment = {
   postcode: process.env.TEST_POSTCODE || 'EH3 6SS',
   place: process.env.TEST_PLACE || 'Edinburgh',
   testgroup: process.env.TEST_GROUP || 'FreeglePlayground',
+
+  unmodded_email: process.env.TEST_EMAIL_UNMODDED || 'test@test.com',
+  unmodded_password: process.env.TEST_EMAIL_UNMODDED_PASSWORD || 'freegle',
 
   // Test email configuration
   email: {

@@ -4,8 +4,6 @@ import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
 
-const isTest = process.env.NODE_ENV === 'test' || process.env.CI
-
 // @ts-ignore
 export default defineNuxtConfig({
   devtools: { enabled: true },
@@ -52,7 +50,7 @@ export default defineNuxtConfig({
   // @ts-ignore
   target: 'server',
 
-  ssr: !isTest,
+  ssr: true,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
@@ -283,11 +281,20 @@ export default defineNuxtConfig({
         'bootstrap-vue-next/components/BFormGroup',
         'bootstrap-vue-next/components/BFormInput',
         'bootstrap-vue-next/components/BFormSelect',
+        'bootstrap-vue-next/components/BProgress',
         'bootstrap-vue-next/components/BPopover',
         'bootstrap-vue-next/components/BFormTextarea',
         'bootstrap-vue-next/components/BInputGroup',
         'bootstrap-vue-next/components/BModal',
+        'bootstrap-vue-next/components/BCarousel',
+        'bootstrap-vue-next/components/BCollapse',
         'vee-validate',
+        'vue-plugin-load-script',
+        '@stripe/stripe-js',
+        'turf-distance',
+        'turf-point',
+        '@vueform/toggle',
+        'save-file',
         '@formatjs/intl-locale/should-polyfill',
         '@formatjs/intl-pluralrules/should-polyfill',
         '@uppy/core',
@@ -300,7 +307,8 @@ export default defineNuxtConfig({
         '@formatjs/intl-pluralrules/locale-data/en',
         'vuedraggable',
         'vue-highlight-words',
-        '@chenfengyuan/vue-number-input'
+        '@chenfengyuan/vue-number-input',
+        'twemoji'
       ],
     },
     build: {

@@ -53,7 +53,7 @@
             </div>
 
             <MyPostsPostsList
-              :posts="posts"
+              :post-ids="posts.map((p) => p.id)"
               :loading="loading"
               :default-expanded="posts.length <= 5"
               :show="shownCount"

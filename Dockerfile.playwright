@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/playwright:v1.40.0-focal
+
+# Set working directory
+WORKDIR /app
+
+# Install required dependencies locally (not globally) first
+RUN npm init -y && \
+    npm install @playwright/test@1.40.0 monocart-reporter
+
+# Install Playwright browsers and dependencies after installing the package
+RUN npx playwright install chromium && \
+    npx playwright install-deps chromium
+
+# Copy initial test files and configuration (fallback)
+COPY playwright.config.js ./
+COPY tests/ ./tests/
+
+# Create directories for test output including videos
+RUN mkdir -p test-results test-results/videos playwright-report
+
+# Set environment variables
+ENV NODE_ENV=test
+ENV CI=false
+ENV PLAYWRIGHT_HTML_REPORT=./playwright-report
+
+# Keep container running with a long-running process
+CMD ["tail", "-f", "/dev/null"]
