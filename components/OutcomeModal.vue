@@ -369,6 +369,9 @@ async function submit(callback) {
         comment: comments.value,
         message: completionMessage.value,
       })
+
+      // Refetch the message to ensure the outcome is reflected in the store
+      await messageStore.fetch(props.id)
     }
 
     callback()

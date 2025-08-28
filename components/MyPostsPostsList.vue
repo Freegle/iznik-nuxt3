@@ -115,7 +115,7 @@ const userStore = useUserStore()
 const trystStore = useTrystStore()
 
 const props = defineProps({
-  posts: { type: Array, required: true },
+  postIds: { type: Array, required: true },
   loading: { type: Boolean, required: true },
   defaultExpanded: { type: Boolean, required: true },
   show: { type: Number, required: true },
@@ -130,9 +130,14 @@ function toggleShowOldPosts() {
   showOldPosts.value = !showOldPosts.value
 }
 
-// old posts are those without an outcome
+// Get posts from the store using the IDs
+const posts = computed(() => {
+  return props.postIds.map((id) => messageStore.byId(id)).filter(Boolean)
+})
+
+// old posts are those with an outcome
 const oldPosts = computed(() => {
-  return props.posts.filter((post) => post.hasoutcome)
+  return posts.value.filter((post) => post.hasoutcome)
 })
 
 const formattedOldPostsCount = computed(() => {
@@ -140,7 +145,7 @@ const formattedOldPostsCount = computed(() => {
 })
 
 const activePosts = computed(() => {
-  return props.posts.filter((post) => !post.hasoutcome)
+  return posts.value.filter((post) => !post.hasoutcome)
 })
 
 watch(activePosts, (newVal) => {
@@ -159,10 +164,10 @@ watch(activePosts, (newVal) => {
 })
 
 const visiblePosts = computed(() => {
-  let posts = showOldPosts.value ? props.posts : activePosts.value
-  posts = posts || []
+  let visiblePostList = showOldPosts.value ? posts.value : activePosts.value
+  visiblePostList = visiblePostList || []
 
-  return posts.toSorted((a, b) => {
+  return visiblePostList.toSorted((a, b) => {
     // promised items first, then by most recently posted
     if (!showOldPosts.value && a.promised && !b.promised) {
       return -1
