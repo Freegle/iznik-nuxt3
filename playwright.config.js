@@ -6,6 +6,7 @@ module.exports = defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: 1,
+  maxFailures: 1,
   reporter: [
     ['list'],
     ['html'],

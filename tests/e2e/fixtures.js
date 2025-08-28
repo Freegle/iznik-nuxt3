@@ -1129,17 +1129,23 @@ const testWithFixtures = test.extend({
       })
 
       // Look for the withdraw button within the post card
-      const withdrawButton = postCard.locator('.btn:has-text("Withdraw")')
+      const withdrawButton = postCard.locator('.btn:has-text("Withdraw"):not([disabled]):not([disable]):not(.disabled)')
       await withdrawButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
 
+      // Ensure button is enabled before clicking
+      const isEnabled = await withdrawButton.isEnabled()
+      if (!isEnabled) {
+        throw new Error('Withdraw button is disabled')
+      }
+
       // Click the withdraw button
       await withdrawButton.click()
 
       // Wait for confirmation modal to appear if needed
-      const confirmButtons = ['.modal .btn:has-text("Withdraw")']
+      const confirmButtons = ['.modal .btn:has-text("Withdraw"):not([disabled]):not([disable]):not(.disabled)']
 
       // Try to find and click any confirmation button that appears
       for (const selector of confirmButtons) {
@@ -1158,11 +1164,23 @@ const testWithFixtures = test.extend({
         }
       }
 
+      // Debug: Count posts before waiting for removal
+      const postsBeforeWait = await page.locator(postSelector).count()
+      console.log(`Posts with "${item}" before waiting: ${postsBeforeWait}`)
+      
+      // Debug: Check if our specific post card is still visible
+      const isSpecificPostVisible = await postCard.isVisible().catch(() => false)
+      console.log(`Specific post card still visible: ${isSpecificPostVisible}`)
+      
       // The post should disappear entirely
       await postCard.waitFor({
         state: 'detached',
         timeout: timeouts.api.default,
       })
+      
+      // Debug: Count posts after removal
+      const postsAfterWait = await page.locator(postSelector).count()
+      console.log(`Posts with "${item}" after waiting: ${postsAfterWait}`)
       console.log('Post successfully withdrawn and removed from page')
 
       return true
@@ -1194,7 +1212,7 @@ const testWithFixtures = test.extend({
           (await saveButton.count()) > 0
         ) {
           console.log('Found password input, setting password')
-          await passwordInput.fill(password)
+          await passwordInput.type(password)
           await saveButton.click()
           console.log('Set password successfully')
 

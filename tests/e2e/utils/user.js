@@ -214,7 +214,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await fullnameInput.fill(fullName)
+  await fullnameInput.type(fullName)
 
   // Fill in the email field
   const emailInput = page
@@ -224,7 +224,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await emailInput.fill(email)
+  await emailInput.type(email)
 
   // Fill in the password field
   const passwordInput = page
@@ -234,7 +234,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await passwordInput.fill(password)
+  await passwordInput.type(password)
 
   // Handle marketing consent if specified
   if (marketingConsent !== null) {
@@ -469,7 +469,7 @@ async function loginViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await emailInput.fill(email)
+  await emailInput.type(email)
 
   // Fill in the password field
   const passwordInput = passwordField
@@ -477,7 +477,7 @@ async function loginViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await passwordInput.fill(password)
+  await passwordInput.type(password)
 
   // Verify marketing consent if specified
   if (expectedMarketingConsent !== null) {
@@ -508,11 +508,19 @@ async function loginViaHomepage(
 
   // Find and click the Login button in the modal
   console.log('Clicking login button')
-  const loginButton = page.locator('button:has-text("Log in to Freegle")')
+  const loginButton = page.locator('button:has-text("Log in to Freegle"):not([disabled]):not([disable]):not(.disabled)')
   await loginButton.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
+  
+  // Double check that the button is enabled
+  const isEnabled = await loginButton.isEnabled()
+  if (!isEnabled) {
+    console.error('Login button is disabled')
+    return false
+  }
+  
   await loginButton.click()
 
   // Wait for successful login
@@ -623,7 +631,7 @@ async function unsubscribeManually(page, email) {
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
-      await emailInput.fill(email)
+      await emailInput.type(email)
     } catch {
       console.log('Email input not found, likely already logged in')
     }
