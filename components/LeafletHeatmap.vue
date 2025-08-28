@@ -4,7 +4,14 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount, getCurrentInstance, watch, computed } from 'vue'
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  getCurrentInstance,
+  watch,
+  computed,
+} from 'vue'
 import simpleheat from 'simpleheat'
 
 // Originally from: https://github.com/Platoniq/vue2-leaflet-heatmap and https://github.com/Leaflet/Leaflet.heat
@@ -381,13 +388,17 @@ const parentLeafletObject = computed(() => {
   return realParent?.leafletObject || null
 })
 
-watch(parentLeafletObject, (leafletObject) => {
-  if (leafletObject && mapObject && !parentContainer) {
-    parentContainer = leafletObject
-    parentContainer.addLayer(mapObject, !props.visible)
-    parentReady.value = true
-  }
-}, { immediate: true })
+watch(
+  parentLeafletObject,
+  (leafletObject) => {
+    if (leafletObject && mapObject && !parentContainer) {
+      parentContainer = leafletObject
+      parentContainer.addLayer(mapObject, !props.visible)
+      parentReady.value = true
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   if (!window.L.HeatLayer) {
