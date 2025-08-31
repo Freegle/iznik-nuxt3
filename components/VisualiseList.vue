@@ -100,7 +100,7 @@ function doNext() {
     clearTimeout(timer)
   }
 
-  if (running) {
+  if (running && list.value.length > 1) {
     index.value++
 
     if (index.value >= list.value.length) {
