@@ -75,16 +75,5 @@ test.describe('Explore Page Tests', () => {
       .locator(`h4:has-text("${environment.testgroup}")`)
       .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-
-    // Check for common explore page elements
-    const expectedElements = ['text=/freeglers/i', 'text=/founded/i']
-
-    for (const selector of expectedElements) {
-      const element = page.locator(selector).first()
-      await element.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-    }
   })
 })

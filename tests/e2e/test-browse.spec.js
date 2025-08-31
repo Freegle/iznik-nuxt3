@@ -17,11 +17,8 @@ test.describe('Browse Page Tests', () => {
     testEmail,
     getTestEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
   }) => {
-    // Register test emails for cleanup
-    registerTestEmail(testEmail)
 
     let offerResult = null
 
@@ -210,7 +207,6 @@ test.describe('Browse Page Tests', () => {
   test('should handle search functionality on browse page', async ({
     page,
     testEmail,
-    registerTestEmail,
   }) => {
     // Sign up user first
     const signupResult = await signUpViaHomepage(
@@ -219,7 +215,6 @@ test.describe('Browse Page Tests', () => {
       'Search Test User'
     )
     expect(signupResult).toBeTruthy()
-    registerTestEmail(testEmail)
 
     // Join the FreeglePlayground group
     await page.gotoAndVerify('/explore/FreeglePlayground', {
@@ -240,6 +235,7 @@ test.describe('Browse Page Tests', () => {
 
     // Test search with search term in URL
     console.log('Testing browse page with search term in URL')
+    await page.waitForLoadState('networkidle')
     await page.gotoAndVerify('/browse/furniture', {
       timeout: timeouts.navigation.default,
     })
@@ -255,7 +251,6 @@ test.describe('Browse Page Tests', () => {
   test('should display microvolunteering component', async ({
     page,
     testEmail,
-    registerTestEmail,
   }) => {
     // Sign up user first
     const signupResult = await signUpViaHomepage(
@@ -264,7 +259,6 @@ test.describe('Browse Page Tests', () => {
       'Micro Test User'
     )
     expect(signupResult).toBeTruthy()
-    registerTestEmail(testEmail)
 
     // Join the FreeglePlayground group
     await page.gotoAndVerify('/explore/FreeglePlayground', {
@@ -299,7 +293,6 @@ test.describe('Browse Page Tests', () => {
   test('should handle responsive behavior', async ({
     page,
     testEmail,
-    registerTestEmail,
   }) => {
     // Sign up user first
     const signupResult = await signUpViaHomepage(
@@ -308,7 +301,6 @@ test.describe('Browse Page Tests', () => {
       'Responsive Test User'
     )
     expect(signupResult).toBeTruthy()
-    registerTestEmail(testEmail)
 
     // Join the FreeglePlayground group
     await page.gotoAndVerify('/explore/FreeglePlayground', {
@@ -357,7 +349,6 @@ test.describe('Browse Page Tests', () => {
   test('should load browse page with existing messages', async ({
     page,
     testEmail,
-    registerTestEmail,
   }) => {
     // Sign up user first
     const signupResult = await signUpViaHomepage(
@@ -366,7 +357,6 @@ test.describe('Browse Page Tests', () => {
       'Browse Test User'
     )
     expect(signupResult).toBeTruthy()
-    registerTestEmail(testEmail)
 
     // Join the FreeglePlayground group
     await page.gotoAndVerify('/explore/FreeglePlayground', {

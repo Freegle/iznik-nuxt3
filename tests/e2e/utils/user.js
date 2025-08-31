@@ -110,54 +110,72 @@ async function signUpViaHomepage(
     }
   }
 
-  // Find and click a sign-up/sign-in button on the homepage to open the login modal
+  // Wait for page to be fully loaded with JavaScript
+  await page.waitForLoadState('networkidle', { timeout: timeouts.navigation.default });
+  
+  // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
-  const signInButtons = [
-    '.test-signinbutton',
-    '.btn:has-text("Sign up")',
-    '.btn:has-text("Sign in")',
-    'a:has-text("Sign up")',
-    'a:has-text("Register")',
-    'button:has-text("Sign up")',
-  ]
 
-  // Try each possible button until we find one
-  let buttonFound = false
-  for (const selector of signInButtons) {
-    // Use CSS selector to exclude disabled elements directly
-    const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
-    const button = page.locator(modifiedSelector).first()
-
-    try {
-      console.log(`Trying button selector: ${selector}`)
-      // Wait briefly for element to be present and visible (handles rendering delays)
-      await button.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-      
-      console.log(`Button visible, waiting to ensure it is enabled`)
-      // Wait for button to be truly enabled (not just visible)
-      await page.waitForFunction(() => {
-        const elements = document.querySelectorAll('.test-signinbutton:not([disabled]):not([disabled="true"]):not([aria-disabled="true"]):not(.disabled)');
-        return elements.length > 0 && !elements[0].disabled;
-      }, { timeout: 10000 });
-      
-      console.log(`Button is now enabled, clicking...`)
-      await button.click()
-      buttonFound = true
-      break
-    } catch (error) {
-      console.log(`Button selector failed: ${selector}, error: ${error.message}`)
-      // Element not found or not visible, try next selector
-      continue
-    }
-  }
-
-  if (!buttonFound) {
-    console.error('Could not find sign up/sign in button on homepage')
+  const buttons = page.locator('.test-signinbutton')
+  // Wait for at least one element to be visible
+  await page.locator('.test-signinbutton:visible').first().waitFor({ timeout: timeouts.ui.appearance })
+  const count = await buttons.count()
+  console.log(`Found ${count} .test-signinbutton elements`)
+  
+  if (count === 0) {
+    console.error('Could not find .test-signinbutton on homepage')
     return false
   }
+  
+  // Look for the first visible and enabled button
+  let signInButton = null
+  for (let i = 0; i < count; i++) {
+    const btn = buttons.nth(i)
+    
+    // Check if this button is visible
+    const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
+    
+    if (isVisible) {
+      // Check if it's enabled by checking various disabled states
+      const isDisabled = await btn.evaluate((el) => {
+        // For button elements, check the disabled property
+        if (el.disabled) return true
+        
+        // For any element, check disabled attribute values
+        const disabledAttr = el.getAttribute('disabled')
+        if (disabledAttr === 'true' || disabledAttr === '') return true
+        
+        // Check for disabled classes
+        if (el.classList.contains('disabled')) return true
+        
+        return false
+      }).catch(() => false)
+      
+      if (!isDisabled) {
+        console.log(`Found visible, enabled button at index ${i}`)
+        signInButton = btn
+        break
+      } else {
+        console.log(`Button at index ${i} is disabled`)
+      }
+    } else {
+      console.log(`Button at index ${i} is not visible`)
+    }
+  }
+  
+  if (!signInButton) {
+    console.error('Could not find visible, enabled .test-signinbutton on homepage')
+    return false
+  }
+  
+  // Wait for the button to be ready and click it
+  await signInButton.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  
+  console.log(`Found valid sign-in button, clicking...`)
+  await signInButton.click()
 
   // Wait for login modal to appear
   console.log('Waiting for login modal')
@@ -388,44 +406,69 @@ async function loginViaHomepage(
   console.log('Waiting for page to settle')
   await page.waitForTimeout(1000)
 
-  // Find and click a sign-in button on the homepage to open the login modal
+  // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
-  const signInButtons = [
-    '.test-signinbutton',
-    '.btn:has-text("Sign in")',
-    'a:has-text("Sign in")',
-    'button:has-text("Sign in")',
-    '.btn:has-text("Log in")',
-    'a:has-text("Log in")',
-    'button:has-text("Log in")',
-  ]
 
-  // Try each possible button until we find one
-  let buttonFound = false
-  for (const selector of signInButtons) {
-    // Use CSS selector to exclude disabled elements directly
-    const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
-    const button = page.locator(modifiedSelector).first()
+  const buttons = page.locator('.test-signinbutton')
+  // Wait for at least one element to be visible
+  await page.locator('.test-signinbutton:visible').first().waitFor({ timeout: timeouts.ui.appearance })
+  const count = await buttons.count()
+  console.log(`Found ${count} .test-signinbutton elements`)
 
-    try {
-      // Wait briefly for element to be present and visible (handles rendering delays)
-      await button.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-      await button.click()
-      buttonFound = true
-      break
-    } catch {
-      // Element not found or not visible, try next selector
-      continue
-    }
-  }
-
-  if (!buttonFound) {
-    console.error('Could not find sign in button on homepage')
+  if (count === 0) {
+    console.error('Could not find .test-signinbutton on homepage')
     return false
   }
+  
+  // Look for the first visible and enabled button
+  let signInButton = null
+  for (let i = 0; i < count; i++) {
+    const btn = buttons.nth(i)
+    
+    // Check if this button is visible
+    const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
+    
+    if (isVisible) {
+      // Check if it's enabled by checking various disabled states
+      const isDisabled = await btn.evaluate((el) => {
+        // For button elements, check the disabled property
+        if (el.disabled) return true
+        
+        // For any element, check disabled attribute values
+        const disabledAttr = el.getAttribute('disabled')
+        if (disabledAttr === 'true' || disabledAttr === '') return true
+        
+        // Check for disabled classes
+        if (el.classList.contains('disabled')) return true
+        
+        return false
+      }).catch(() => false)
+      
+      if (!isDisabled) {
+        console.log(`Found visible, enabled button at index ${i}`)
+        signInButton = btn
+        break
+      } else {
+        console.log(`Button at index ${i} is disabled`)
+      }
+    } else {
+      console.log(`Button at index ${i} is not visible`)
+    }
+  }
+  
+  if (!signInButton) {
+    console.error('Could not find visible, enabled .test-signinbutton on homepage')
+    return false
+  }
+  
+  // Wait for the button to be ready and click it
+  await signInButton.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  
+  console.log(`Found valid sign-in button, clicking...`)
+  await signInButton.click()
 
   // Wait for login modal to appear
   console.log('Waiting for login modal')

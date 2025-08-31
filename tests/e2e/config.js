@@ -110,7 +110,7 @@ const selectors = {
 // Viewport sizes for responsive testing
 const breakpoints = [
   { name: 'xs', width: 414, height: 896 }, // iPhone XR
-  { name: 'sm', width: 640, height: 960 },
+  { name: 'sm', width: 640, height: 960 }, // Small mobile
   { name: 'md', width: 820, height: 1180 }, // iPad Air
   { name: 'lg', width: 1024, height: 768 }, // iPad Pro
   { name: 'xl', width: 1280, height: 800 },

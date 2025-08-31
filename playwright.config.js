@@ -1,16 +1,38 @@
 const { defineConfig, devices } = require('@playwright/test')
 const { timeouts } = require('./tests/e2e/config')
+const fs = require('fs')
+const path = require('path')
+
+// Check if we have an ordered test list
+const orderedTestsFile = path.join(__dirname, 'tests/e2e/ordered-tests.txt')
+let testMatch = undefined
+
+if (fs.existsSync(orderedTestsFile)) {
+  try {
+    const orderedTests = fs.readFileSync(orderedTestsFile, 'utf8')
+      .split('\n')
+      .filter(line => line.trim())
+      .map(testPath => path.basename(testPath))
+    if (orderedTests.length > 0) {
+      testMatch = orderedTests
+      console.log(`Using ordered test execution: ${orderedTests.length} tests, prioritizing previously failed tests`)
+    }
+  } catch (error) {
+    console.warn('Could not load ordered test list:', error.message)
+  }
+}
 
 module.exports = defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: true,
+  testMatch: testMatch,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1,
+  retries: 1,
   workers: 1,
-  maxFailures: 1,
+  maxFailures: 0,
   reporter: [
     ['list'],
-    ['html', { port: 9327, host: '0.0.0.0' }],
+    ['html', { open: 'always', host: '0.0.0.0' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     // Only include monocart reporter when explicitly enabled via env var
     ...(process.env.ENABLE_MONOCART_REPORTER === 'true'
@@ -104,6 +126,7 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: null, // Remove viewport constraints to use full screen
+        deviceScaleFactor: undefined, // Remove device scale factor when viewport is null
         video: 'on',
         // Use Playwright's downloaded Chromium browser with security flags for Docker
         launchOptions: {

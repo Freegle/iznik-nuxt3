@@ -11,11 +11,8 @@ test.describe('Post flow tests', () => {
     page,
     testEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
   }) => {
-    // Register the automatically generated test email for cleanup
-    registerTestEmail(testEmail)
 
     // Use the fixture to post a message
     const result = await postMessage({
@@ -34,15 +31,14 @@ test.describe('Post flow tests', () => {
     console.log(`Post created with ID: ${result.id}`)
 
     // Navigate to /browse and verify a post is visible
-    // TODO This is flaky.
-    // console.log('Navigating to /browse to verify post visibility')
-    // await page.gotoAndVerify('/browse', {
-    //   timeout: timeouts.navigation.default,
-    // })
-    //
-    // await page.waitForSelector('.messagecard, .card-body', {
-    //   timeout: timeouts.ui.appearance,
-    // })
+    console.log('Navigating to /browse to verify post visibility')
+    await page.gotoAndVerify('/browse', {
+      timeout: timeouts.navigation.default,
+    })
+
+    await page.waitForSelector('.messagecard, .card-body', {
+      timeout: timeouts.ui.appearance,
+    })
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
@@ -53,14 +49,10 @@ test.describe('Post flow tests', () => {
     testEmail,
     getTestEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
     replyToMessageWithSignup,
   }) => {
-    // Register test emails for cleanup
-    registerTestEmail(testEmail)
     const replyEmail = getTestEmail('reply')
-    registerTestEmail(replyEmail)
 
     // Post a message using the logged-out user flow
     const result = await postMessage({
@@ -155,11 +147,8 @@ test.describe('Post flow tests', () => {
     page,
     testEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
   }) => {
-    // Register the automatically generated test email for cleanup
-    registerTestEmail(testEmail)
 
     // Use the fixture to post a WANTED message
     const result = await postMessage({
