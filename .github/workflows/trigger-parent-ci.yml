@@ -1,0 +1,46 @@
+name: Trigger Parent Repository CI
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  trigger-parent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger FreegleDocker CircleCI
+        run: |
+          echo "🔔 Triggering FreegleDocker CircleCI pipeline"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Commit Message: ${{ github.event.head_commit.message }}"
+          
+          response=$(curl -s -w "%{http_code}" -X POST \
+            -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "branch": "master",
+              "parameters": {
+                "webhook_repository": "${{ github.repository }}",
+                "webhook_branch": "${{ github.ref_name }}",
+                "webhook_commit": "${{ github.sha }}",
+                "webhook_message": "${{ github.event.head_commit.message }}",
+                "webhook_pusher": "${{ github.event.pusher.name }}"
+              }
+            }' \
+            https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline)
+          
+          http_code="${response: -3}"
+          response_body="${response%???}"
+          
+          if [ "$http_code" -eq "201" ] || [ "$http_code" -eq "200" ]; then
+            echo "✅ Successfully triggered FreegleDocker CircleCI pipeline"
+            echo "Response: $response_body"
+          else
+            echo "❌ Failed to trigger CircleCI pipeline"
+            echo "HTTP Status: $http_code"
+            echo "Response: $response_body"
+            exit 1
+          fi

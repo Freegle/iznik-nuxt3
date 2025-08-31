@@ -391,12 +391,8 @@ const test = base.test.extend({
     }
 
     // Helper to check if an error message matches any allowed pattern
-    // console.log each pattern and the errorText, and whether or not it matched
-    // This is useful for debugging
     const isAllowedError = (errorText) => {
-      return allowedErrorPatterns.some((pattern) => {
-        return pattern.test(errorText)
-      })
+      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
     }
 
     page.checkTestRanOK = async () => {

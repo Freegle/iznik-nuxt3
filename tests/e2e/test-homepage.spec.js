@@ -48,26 +48,41 @@ test.describe('Homepage tests', () => {
       waitForNuxtPageLoad,
       takeTimestampedScreenshot,
     }) => {
+      console.log(`[DEBUG MODTOOLS] Starting test for ${bp.name} breakpoint (${bp.width}x${bp.height})`)
+      
+      console.log(`[DEBUG MODTOOLS] Setting viewport size to ${bp.width}x${bp.height}`)
       await page.setViewportSize({
         width: bp.width,
         height: bp.height,
       })
 
-      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+      // Add console listener to capture page errors
+      page.on('console', msg => console.log(`[MODTOOLS PAGE CONSOLE] ${msg.type().toUpperCase()}: ${msg.text()}`))
+      page.on('pageerror', error => console.log(`[MODTOOLS PAGE ERROR] ${error.message}`))
 
+      console.log(`[DEBUG MODTOOLS] Navigating to homepage with timeout ${timeouts.navigation.initial}ms`)
+      const startTime = Date.now()
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+      console.log(`[DEBUG MODTOOLS] Navigation completed in ${Date.now() - startTime}ms`)
+
+      console.log(`[DEBUG MODTOOLS] Starting waitForNuxtPageLoad with 30s timeout`)
+      const loadStartTime = Date.now()
       try {
         await waitForNuxtPageLoad({ timeout: 30000 })
+        console.log(`[DEBUG MODTOOLS] Nuxt page load completed in ${Date.now() - loadStartTime}ms`)
       } catch (error) {
+        console.log(`[DEBUG MODTOOLS] Nuxt page load failed after ${Date.now() - loadStartTime}ms with error: ${error.message}`)
         const currentTitle = await page.title()
         const bodyText = await page
           .textContent('body')
           .catch(() => 'Could not get body text')
         const isStillLoading = bodyText?.includes('Loading... Stuck here')
+        const currentUrl = page.url()
 
-        console.log(
-          `Page failed to load properly at ${bp.name} breakpoint. Current title: "${currentTitle}"`
-        )
-        console.log(`Is still loading: ${isStillLoading}`)
+        console.log(`[DEBUG MODTOOLS] Current URL: ${currentUrl}`)
+        console.log(`[DEBUG MODTOOLS] Page failed to load properly at ${bp.name} breakpoint. Current title: "${currentTitle}"`)
+        console.log(`[DEBUG MODTOOLS] Is still loading: ${isStillLoading}`)
+        console.log(`[DEBUG MODTOOLS] Body text preview: ${bodyText ? bodyText.substring(0, 200) + '...' : 'No body text'}`)
 
         if (isStillLoading) {
           console.log(
@@ -79,7 +94,9 @@ test.describe('Homepage tests', () => {
       }
 
       // Verify page title
+      console.log(`[DEBUG MODTOOLS] Getting page title`)
       const title = await page.title()
+      console.log(`[DEBUG MODTOOLS] Page title: "${title}"`)
       expect(title).toBe("Don't throw it away, give it away!")
 
       // Check that essential elements that should always be visible are displayed
