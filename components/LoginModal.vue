@@ -326,9 +326,7 @@ const formFields = computed(() => {
 
 const emailError = computed(() => {
   return (
-    nativeBump.value &&
-    buttonClicked.value &&
-    (!email.value || !emailValid.value)
+    nativeBump.value && buttonClicked.value && !email.value // Only show error if email is truly empty
   )
 })
 
@@ -467,6 +465,54 @@ function loginNative(e) {
     }
   } else if (emailError.value || passwordError.value) {
     nativeLoginError.value = 'Please fill out the form.'
+  } else if (email.value && password.value && !emailValid.value) {
+    // Email validation may still be in progress - attempt login anyway
+    // If the email is invalid, the server will reject it
+    console.log('Attempting login with potentially unvalidated email')
+    authStore
+      .login({
+        email: email.value,
+        password: password.value,
+      })
+      .then(() => {
+        // We are now logged in. Prompt the browser to remember the credentials.
+        if (window.PasswordCredential) {
+          try {
+            // We used to pass in the DOM element, but in Chrome 92 that causes a crash.
+            const c = new window.PasswordCredential({
+              id: email.value,
+              password: password.value,
+            })
+            navigator.credentials
+              .store(c)
+              .then(function () {
+                pleaseShowModal.value = false
+              })
+              .catch(function (e) {
+                console.log('Failed to store credentials', e)
+                pleaseShowModal.value = false
+              })
+          } catch (e) {
+            console.log('Error setting up credential storage', e)
+            pleaseShowModal.value = false
+          }
+        } else {
+          pleaseShowModal.value = false
+        }
+      })
+      .catch((e) => {
+        console.log('Login error', e)
+        if (e instanceof LoginError) {
+          // Check if login failed due to email issues
+          if (e.status.includes('email') || e.status.includes('Email')) {
+            nativeLoginError.value = 'Please enter a valid email address.'
+          } else {
+            nativeLoginError.value = e.status
+          }
+        } else {
+          throw e // let others bubble up
+        }
+      })
   } else {
     // Login
     authStore
