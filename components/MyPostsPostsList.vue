@@ -116,6 +116,7 @@ const trystStore = useTrystStore()
 
 const props = defineProps({
   posts: { type: Array, required: true },
+  postIds: { type: Array, required: false },
   loading: { type: Boolean, required: true },
   defaultExpanded: { type: Boolean, required: true },
   show: { type: Number, required: true },
@@ -141,6 +142,22 @@ const formattedOldPostsCount = computed(() => {
 
 const activePosts = computed(() => {
   return props.posts.filter((post) => !post.hasoutcome)
+})
+
+const postIds = computed(() => {
+  return props.posts.map((post) => post.id)
+})
+
+watch(postIds, (newIds, oldIds) => {
+  // Fetch new messages when postIds change
+  if (oldIds && newIds.length !== oldIds.length) {
+    const newPostIds = newIds.filter(id => !oldIds.includes(id))
+    newPostIds.forEach((id) => {
+      if (!messageStore.byId(id)) {
+        messageStore.fetch(id)
+      }
+    })
+  }
 })
 
 watch(activePosts, (newVal) => {

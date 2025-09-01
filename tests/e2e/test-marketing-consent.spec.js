@@ -10,8 +10,11 @@ const { testUsers, timeouts } = require('./config')
 
 // Helper function to verify marketing consent in settings
 async function verifyMarketingConsentInSettings(page, expectedChecked) {
+  console.log(`[DEBUG] verifyMarketingConsentInSettings: Expected consent = ${expectedChecked}`)
+  
   await page.goto('/settings')
   await page.waitForLoadState('networkidle')
+  console.log('[DEBUG] Navigated to /settings and waited for networkidle')
 
   // First, try to find the "Keeping in touch" text - scroll if needed
   const keepingInTouchText = page.locator('h3:has-text("Keeping in touch")')
@@ -22,9 +25,10 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
       state: 'visible',
       timeout: 2000,
     })
+    console.log('[DEBUG] "Keeping in touch" header found immediately')
   } catch {
     // If not visible, scroll the element into view
-    console.log('Scrolling "Keeping in touch" setting into view')
+    console.log('[DEBUG] Scrolling "Keeping in touch" setting into view')
     await keepingInTouchText.scrollIntoViewIfNeeded()
 
     // Wait for it to become visible after scrolling
@@ -32,6 +36,7 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
+    console.log('[DEBUG] "Keeping in touch" header found after scrolling')
   }
 
   // Now find the toggle associated with "Keeping in touch"
@@ -46,12 +51,21 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
+  console.log('[DEBUG] Toggle container is visible')
 
   // Check the toggle state by looking for the 'toggle-on' or 'toggle-off' class
   const innerToggle = toggleContainer.locator('.toggle')
   const isToggleOn = await innerToggle.evaluate((el) => {
     return el.classList.contains('toggle-on')
   })
+  
+  console.log(`[DEBUG] Toggle state: isToggleOn = ${isToggleOn}, expected = ${expectedChecked}`)
+
+  // Get toggle classes for debugging
+  const toggleClasses = await innerToggle.evaluate((el) => {
+    return el.className
+  })
+  console.log(`[DEBUG] Toggle classes: "${toggleClasses}"`)
 
   if (expectedChecked) {
     expect(isToggleOn).toBe(true)
@@ -59,14 +73,56 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
     expect(isToggleOn).toBe(false)
   }
 
+  console.log(`[DEBUG] Marketing consent verification completed successfully`)
   return ourToggle
 }
 
-// Data provider for marketing consent test scenarios
-const marketingConsentScenarios = [
-  { name: 'enabled', value: true, description: 'enabled' },
-  { name: 'disabled', value: false, description: 'disabled' },
-]
+// Helper function for signup marketing consent tests
+async function testSignupWithMarketingConsent(page, marketingConsentValue, description) {
+  const testUser = testUsers.getRandomUser()
+
+  // Use enhanced signUpViaHomepage with marketing consent parameter
+  const success = await signUpViaHomepage(
+    page,
+    testUser.email,
+    testUser.fullName,
+    testUser.password,
+    marketingConsentValue
+  )
+  expect(success).toBe(true)
+
+  // Verify in settings
+  await verifyMarketingConsentInSettings(page, marketingConsentValue)
+}
+
+// Helper function for login marketing consent tests
+async function testLoginWithMarketingConsent(page, marketingConsentValue, description) {
+  const testUser = testUsers.getRandomUser()
+
+  // First create user account with specified marketing consent
+  const signupSuccess = await signUpViaHomepage(
+    page,
+    testUser.email,
+    testUser.fullName,
+    testUser.password,
+    marketingConsentValue
+  )
+  expect(signupSuccess).toBe(true)
+
+  await logoutIfLoggedIn(page)
+
+  // Now login again and verify consent state persists using enhanced loginViaHomepage
+  const loginSuccess = await loginViaHomepage(
+    page,
+    testUser.email,
+    testUser.password,
+    marketingConsentValue // expectedMarketingConsent
+  )
+  expect(loginSuccess).toBe(true)
+
+  // Verify in settings
+  await verifyMarketingConsentInSettings(page, marketingConsentValue)
+}
 
 test.describe('Marketing Consent', () => {
   test.beforeEach(async ({ page }) => {
@@ -79,57 +135,20 @@ test.describe('Marketing Consent', () => {
     await logoutIfLoggedIn(page)
   })
 
-  marketingConsentScenarios.forEach((scenario) => {
-    test(`signup with marketing consent ${scenario.description} should show ${scenario.description} in settings`, async ({
-      page,
-    }) => {
-      const testUser = testUsers.getRandomUser()
-
-      // Use enhanced signUpViaHomepage with marketing consent parameter
-      const success = await signUpViaHomepage(
-        page,
-        testUser.email,
-        testUser.fullName,
-        testUser.password,
-        scenario.value
-      )
-      expect(success).toBe(true)
-
-      // Verify in settings
-      await verifyMarketingConsentInSettings(page, scenario.value)
-    })
+  test('signup with marketing consent enabled should show enabled in settings', async ({ page }) => {
+    await testSignupWithMarketingConsent(page, true, 'enabled')
   })
 
-  marketingConsentScenarios.forEach((scenario) => {
-    test(`login with marketing consent ${scenario.description} should show ${scenario.description} in settings`, async ({
-      page,
-    }) => {
-      const testUser = testUsers.getRandomUser()
+  test('signup with marketing consent disabled should show disabled in settings', async ({ page }) => {
+    await testSignupWithMarketingConsent(page, false, 'disabled')
+  })
 
-      // First create user account with specified marketing consent
-      const signupSuccess = await signUpViaHomepage(
-        page,
-        testUser.email,
-        testUser.fullName,
-        testUser.password,
-        scenario.value
-      )
-      expect(signupSuccess).toBe(true)
+  test('login with marketing consent enabled should show enabled in settings', async ({ page }) => {
+    await testLoginWithMarketingConsent(page, true, 'enabled')
+  })
 
-      await logoutIfLoggedIn(page)
-
-      // Now login again and verify consent state persists using enhanced loginViaHomepage
-      const loginSuccess = await loginViaHomepage(
-        page,
-        testUser.email,
-        testUser.password,
-        scenario.value // expectedMarketingConsent
-      )
-      expect(loginSuccess).toBe(true)
-
-      // Verify in settings
-      await verifyMarketingConsentInSettings(page, scenario.value)
-    })
+  test('login with marketing consent disabled should show disabled in settings', async ({ page }) => {
+    await testLoginWithMarketingConsent(page, false, 'disabled')
   })
 
   test('toggling marketing consent in settings should persist after page refresh', async ({
