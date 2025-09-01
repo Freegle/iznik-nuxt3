@@ -14,10 +14,11 @@ test.describe('Post flow tests', () => {
     withdrawPost,
   }) => {
 
-    // Use the fixture to post a message
+    // Use the fixture to post a message with unique item name
+    const uniqueItem = `test-offer-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
     const result = await postMessage({
       type: 'OFFER',
-      item: 'test post - please delete',
+      item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
       postcode: environment.postcode,
       email: testEmail,
@@ -36,9 +37,18 @@ test.describe('Post flow tests', () => {
       timeout: timeouts.navigation.default,
     })
 
+    // Wait for message cards and verify our specific item is visible
     await page.waitForSelector('.messagecard, .card-body', {
       timeout: timeouts.ui.appearance,
     })
+    
+    // Look for our specific unique item in the message cards.
+    const itemLocator = page.locator('.messagecard, .card-body').filter({ hasText: uniqueItem })
+    await itemLocator.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    console.log(`Found our test item "${uniqueItem}" on browse page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
@@ -54,10 +64,11 @@ test.describe('Post flow tests', () => {
   }) => {
     const replyEmail = getTestEmail('reply')
 
-    // Post a message using the logged-out user flow
+    // Post a message using the logged-out user flow with unique item name
+    const uniqueItem = `test-reply-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
     const result = await postMessage({
       type: 'OFFER',
-      item: 'test item for reply - please delete',
+      item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
       postcode: environment.postcode,
       email: testEmail,
@@ -150,10 +161,11 @@ test.describe('Post flow tests', () => {
     withdrawPost,
   }) => {
 
-    // Use the fixture to post a WANTED message
+    // Use the fixture to post a WANTED message with unique item name
+    const uniqueItem = `test-wanted-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
     const result = await postMessage({
       type: 'WANTED',
-      item: 'test wanted item - please delete',
+      item: uniqueItem,
       description: `Created by automated test at ${new Date().toISOString()}`,
       postcode: environment.postcode,
       email: testEmail,
@@ -172,9 +184,18 @@ test.describe('Post flow tests', () => {
       timeout: timeouts.navigation.default,
     })
 
+    // Wait for message cards and verify our specific item is visible
     await page.waitForSelector('.messagecard, .card-body', {
       timeout: timeouts.ui.appearance,
     })
+    
+    // Look for our specific unique item in the message cards
+    const itemLocator = page.locator('.messagecard, .card-body').filter({ hasText: uniqueItem })
+    await itemLocator.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    console.log(`Found our test WANTED item "${uniqueItem}" on browse page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })

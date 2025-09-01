@@ -80,6 +80,9 @@
           <b-row>
             <b-col>
               <p>You have no active posts.</p>
+              {{ postIds }}, show old {{ showOldPosts }}, posts {{ posts }}, id
+              {{ id }},
+              {{ messageStore.byId(id) }}
             </b-col>
           </b-row>
           <b-row>
@@ -147,6 +150,21 @@ const formattedOldPostsCount = computed(() => {
 const activePosts = computed(() => {
   return posts.value.filter((post) => !post.hasoutcome)
 })
+
+watch(
+  () => props.postIds,
+  (newIds, oldIds) => {
+    // Fetch new messages when postIds change
+    if (oldIds && newIds.length !== oldIds.length) {
+      const newPostIds = newIds.filter((id) => !oldIds.includes(id))
+      newPostIds.forEach((id) => {
+        if (!messageStore.byId(id)) {
+          messageStore.fetch(id)
+        }
+      })
+    }
+  }
+)
 
 watch(activePosts, (newVal) => {
   // For messages which are promised and not successful, we need to trigger a fetch.  This is so

@@ -27,9 +27,9 @@ module.exports = defineConfig({
   testMatch: testMatch,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 1,
+  retries: 0,
   workers: 1,
-  maxFailures: 0,
+  maxFailures: 1,
   reporter: [
     ['list'],
     ['html', { open: 'always', host: '0.0.0.0' }],

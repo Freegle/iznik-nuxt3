@@ -295,14 +295,6 @@ async function signUpViaHomepage(
     }
   }
 
-  // Take a screenshot before submitting
-  try {
-    console.log('Skipping screenshot to avoid hang - will investigate later')
-    console.log('Screenshot taken successfully (skipped)')
-  } catch (screenshotError) {
-    console.log(`Screenshot failed: ${screenshotError.message}`)
-  }
-
   // Find and click the Register button in the modal
   console.log('Clicking register button')
   const registerButton = page.locator(

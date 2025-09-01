@@ -48,6 +48,7 @@ const getScreenshotPath = (filename) => {
   return path.join(SCREENSHOTS_DIR, filename)
 }
 
+
 // Function to remove screenshot files from the screenshots directory
 const cleanupScreenshots = async () => {
   ensureScreenshotsDir()
@@ -254,8 +255,60 @@ const test = base.test.extend({
     const consoleErrors = []
     const navigationEvents = []
 
-    // Track console errors
-    page.on('console', (message) => {
+    // List of allowed console error patterns (using regex)
+    const allowedErrorPatterns = [
+      /API count went negative/, // Not visible to client and can happen during navigation.
+      /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
+      /Not signed in with the identity provider/, // Not available in test.
+      /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
+      /The given origin is not allowed for the given client ID/, // Not available in test.
+      /FedCM get\(\) rejects with/, // Not available in test
+      /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
+      /ResizeObserver loop limit exceeded/, // Non-critical UI warning
+      /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
+      /tuimg_0/i, // Allow any error mentioning tuimg_0 (case-insensitive)
+      /delivery\.localhost.*tuimg_0/i, // Specific delivery service tuimg_0 errors
+      /stripe\.com/i, // Ignore any Stripe-related errors during testing (case-insensitive)
+      /Failed to load resource.*stripe/i, // Specific stripe resource loading errors
+      /The request has been aborted/, // Can happen during navigation.
+      /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
+      /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
+      /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
+      /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
+      /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
+      /Refused to frame/, // Can happen in test.
+      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
+      /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
+      /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
+      /Failed to load resource.*https:\/\/accounts\.google\.com\/gsi\/status.*400/, // Google authentication status errors in test
+      /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
+      // CSP (Content Security Policy) violations - common in development/testing
+      /Refused to apply inline style because it violates the following Content Security Policy directive/,
+      /Content Security Policy directive.*style-src/,
+      /Either the 'unsafe-inline' keyword.*is required to enable inline execution/,
+    ]
+
+    // Method to add additional allowed error patterns for specific tests
+    page.addAllowedErrorPattern = (pattern) => {
+      if (pattern instanceof RegExp) {
+        allowedErrorPatterns.push(pattern)
+      } else if (typeof pattern === 'string') {
+        // If a string is provided, convert it to a RegExp that matches the exact string
+        allowedErrorPatterns.push(
+          new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        )
+      } else {
+        throw new TypeError('Error pattern must be a RegExp or string')
+      }
+    }
+
+    // Helper to check if an error message matches any allowed pattern
+    const isAllowedError = (errorText) => {
+      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
+    }
+
+    // Track console errors and fail immediately on critical ones
+    page.on('console', async (message) => {
       if (message.type() === 'error') {
         // Combine text and location to match the format shown in test output
         let fullErrorText = message.text()
@@ -268,10 +321,49 @@ const test = base.test.extend({
           fullErrorText += ` (at ${locationStr})`
         }
 
+        // Try to extract stack trace from console arguments
+        let stackTrace = ''
+        try {
+          const args = message.args()
+          if (args.length > 0) {
+            // Look for Error objects in the arguments that might contain stack traces
+            for (const arg of args) {
+              const argValue = await arg.jsonValue().catch(() => null)
+              if (argValue && typeof argValue === 'object' && argValue.stack) {
+                stackTrace = `\nStack trace:\n${argValue.stack}`
+                break
+              }
+            }
+            
+            // If no stack found in args, try to get stack from the first argument
+            if (!stackTrace) {
+              const firstArg = await args[0].evaluate((obj) => {
+                if (obj instanceof Error) return obj.stack
+                if (typeof obj === 'string' && obj.includes('\n    at ')) return obj
+                return null
+              }).catch(() => null)
+              
+              if (firstArg) {
+                stackTrace = `\nStack trace:\n${firstArg}`
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore errors when trying to extract stack trace
+        }
+
+        const fullErrorWithStack = fullErrorText + stackTrace
+
         consoleErrors.push({
-          text: fullErrorText,
+          text: fullErrorWithStack,
           location,
         })
+
+        // Check if this is a critical (not allowed) error and fail immediately
+        if (!isAllowedError(fullErrorText)) {
+          console.error('CRITICAL CONSOLE ERROR DETECTED:', fullErrorWithStack)
+          throw new Error(`Critical console error detected: ${fullErrorWithStack}`)
+        }
       }
     })
 
@@ -404,86 +496,6 @@ const test = base.test.extend({
       }
     }
 
-    // List of allowed console error patterns (using regex)
-    const allowedErrorPatterns = [
-      /API count went negative/, // Not visible to client and can happen during navigation.
-      /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
-      /Not signed in with the identity provider/, // Not available in test.
-      /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
-      /The given origin is not allowed for the given client ID/, // Not available in test.
-      /FedCM get\(\) rejects with/, // Not available in test
-      /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
-      /ResizeObserver loop limit exceeded/, // Non-critical UI warning
-      /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
-      /tuimg_0/i, // Allow any error mentioning tuimg_0 (case-insensitive)
-      /delivery\.localhost.*tuimg_0/i, // Specific delivery service tuimg_0 errors
-      /stripe\.com/i, // Ignore any Stripe-related errors during testing (case-insensitive)
-      /Failed to load resource.*stripe/i, // Specific stripe resource loading errors
-      /The request has been aborted/, // Can happen during navigation.
-      /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
-      /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
-      /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
-      /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
-      /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
-      /Refused to frame/, // Can happen in test.
-      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
-      /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
-      /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
-      /Failed to load resource.*https:\/\/accounts\.google\.com\/gsi\/status.*400/, // Google authentication status errors in test
-      /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
-    ]
-
-    // Method to add additional allowed error patterns for specific tests
-    page.addAllowedErrorPattern = (pattern) => {
-      if (pattern instanceof RegExp) {
-        allowedErrorPatterns.push(pattern)
-      } else if (typeof pattern === 'string') {
-        // If a string is provided, convert it to a RegExp that matches the exact string
-        allowedErrorPatterns.push(
-          new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-        )
-      } else {
-        throw new TypeError('Error pattern must be a RegExp or string')
-      }
-    }
-
-    // Helper to check if an error message matches any allowed pattern
-    // console.log each pattern and the errorText, and whether or not it matched
-    // This is useful for debugging
-    const isAllowedError = (errorText) => {
-      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
-    }
-
-    page.checkTestRanOK = async () => {
-      // Get error summary
-      const { notAllowed, allowedCount, notAllowedCount, total } =
-        page.getErrorSummary()
-
-      // If there are relevant (non-allowed) errors, fail the test
-      if (notAllowedCount > 0) {
-        // Take a screenshot when console errors are found
-        await page.screenshot({
-          path: getScreenshotPath(`console-errors-${Date.now()}.png`),
-          fullPage: true,
-        })
-
-        const errorDetails = notAllowed
-          .map((err) => {
-            const location = err.location
-              ? `${err.location.url}:${err.location.lineNumber}`
-              : 'unknown location'
-            return `  • ${err.text} (at ${location})`
-          })
-          .join('\n')
-
-        throw new Error(
-          `Found ${notAllowedCount} console errors (${total} total, ${allowedCount} allowed):\n${errorDetails}`
-        )
-      }
-    }
-
-    // For backwards compatibility
-    page.expectNoConsoleErrors = page.checkTestRanOK
 
     page.gotoAndVerify = async (path, options = {}) => {
       const timeout = options.timeout || timeouts.navigation.default
@@ -718,8 +730,6 @@ const test = base.test.extend({
     })
 
     // Override methods that need both the original page and logging functionality
-    loggingPage.checkTestRanOK = page.checkTestRanOK
-    loggingPage.expectNoConsoleErrors = page.expectNoConsoleErrors
     loggingPage.gotoAndVerify = page.gotoAndVerify
     loggingPage.waitForTeardown = page.waitForTeardown
 
@@ -746,9 +756,6 @@ const test = base.test.extend({
         navigationInactivityTimer = null
         console.log('Navigation inactivity timer cleared after successful test')
       }
-
-      // Automatically check for console errors at the end of each test
-      await loggingPage.checkTestRanOK()
 
       // Log navigation summary at the end of successful tests
       const navSummary = loggingPage.getNavigationSummary()
@@ -1468,31 +1475,17 @@ const testWithFixtures = test.extend({
         timeout: timeouts.navigation.default,
         waitUntil: 'load',
       })
-
-      // Find the post we want to withdraw (use first match if multiple exist)
-      const postSelector = `.card-body:has-text("${item}")`
+      
+      // Find the post we want to withdraw.
+      const postSelector = `.card-body:has-text("${item}"):visible`
       console.log(`Looking for post with selector: ${postSelector}`)
       const postCard = page.locator(postSelector).first()
-      
-      // Check how many posts match first
-      const postCount = await page.locator(postSelector).count()
-      console.log(`Found ${postCount} posts matching "${item}"`)
-      
-      if (postCount === 0) {
-        // Try to find any posts at all to debug
-        const allPosts = await page.locator('.card-body').count()
-        console.log(`Total posts on page: ${allPosts}`)
-        if (allPosts > 0) {
-          const allPostTexts = await page.locator('.card-body').allTextContents()
-          console.log(`Available post texts: ${JSON.stringify(allPostTexts)}`)
-        }
-        throw new Error(`No posts found with text "${item}"`)
-      }
-      
+
       await postCard.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
+
       console.log(`Post card for "${item}" is visible, proceeding with withdrawal`)
 
       // Look for the withdraw button within the post card
