@@ -53,7 +53,7 @@
         ref="affiliation"
         :groupid="affiliationGroup"
       />
-      <ModRulesModal v-if="rulesGroup" ref="rules" />
+      <!--ModRulesModal v-if="rulesGroup" ref="rules" /-->
 
       <div ref="end" />
     </client-only>

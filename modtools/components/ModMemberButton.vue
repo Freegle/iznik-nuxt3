@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline">
-    <div class="position-relative d-inline">
+    <div class="position-relative d-inline-block">
       <SpinButton
         :variant="variant"
         :icon-name="icon"
@@ -294,11 +294,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';
-
 .autosend {
   right: 4px;
-  bottom: -20px;
+  bottom: 0px;
   position: absolute;
   color: $color-purple;
 }
