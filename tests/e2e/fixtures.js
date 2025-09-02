@@ -216,13 +216,77 @@ const test = base.test.extend({
     const consoleErrors = []
     const navigationEvents = []
 
-    // Track console errors
-    page.on('console', (message) => {
+    // List of allowed console error patterns (using regex)
+    const allowedErrorPatterns = [
+      /API count went negative/, // Not visible to client and can happen during navigation.
+      /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
+      /Not signed in with the identity provider/, // Not available in test.
+      /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
+      /The given origin is not allowed for the given client ID/, // Not available in test.
+      /FedCM get\(\) rejects with/, // Not available in test
+      /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
+      /ResizeObserver loop limit exceeded/, // Non-critical UI warning
+      /The request has been aborted/, // Can happen during navigation.
+      /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
+      /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
+      /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
+      /stripe.com/, // Stripe related errors are expected in test.
+      /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
+      /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
+      /Refused to frame/, // Can happen in test.
+      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
+    ]
+
+    // Helper to check if an error message matches any allowed pattern
+    const isAllowedError = (errorText) => {
+      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
+    }
+
+    // Track console errors and fail immediately on critical ones
+    page.on('console', async (message) => {
       if (message.type() === 'error') {
+        const errorText = message.text()
         consoleErrors.push({
-          text: message.text(),
+          text: errorText,
           location: message.location(),
         })
+
+        // Combine text and location for full error context
+        let fullErrorText = errorText
+        const location = message.location()
+        if (location && location.url) {
+          const locationStr =
+            location.lineNumber !== undefined
+              ? `${location.url}:${location.lineNumber}`
+              : location.url
+          fullErrorText += ` (at ${locationStr})`
+        }
+
+        // Try to extract stack trace from console arguments
+        let stackTrace = ''
+        try {
+          const args = message.args()
+          if (args.length > 0) {
+            // Look for Error objects in the arguments that might contain stack traces
+            for (const arg of args) {
+              const argValue = await arg.jsonValue().catch(() => null)
+              if (argValue && typeof argValue === 'object' && argValue.stack) {
+                stackTrace = `\nStack trace:\n${argValue.stack}`
+                break
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore errors when trying to extract stack trace
+        }
+
+        const fullErrorWithStack = fullErrorText + stackTrace
+
+        // Fail immediately on critical console errors using allowed error patterns
+        if (!isAllowedError(fullErrorText)) {
+          console.error('CRITICAL CONSOLE ERROR DETECTED:', fullErrorWithStack)
+          throw new Error(`Critical console error detected: ${fullErrorWithStack}`)
+        }
       }
     })
 
@@ -355,27 +419,6 @@ const test = base.test.extend({
       }
     }
 
-    // List of allowed console error patterns (using regex)
-    const allowedErrorPatterns = [
-      /API count went negative/, // Not visible to client and can happen during navigation.
-      /%cssr:error%c Could not find one or more icon/, // Can legitimately happen in SSR.
-      /Not signed in with the identity provider/, // Not available in test.
-      /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
-      /The given origin is not allowed for the given client ID/, // Not available in test.
-      /FedCM get\(\) rejects with/, // Not available in test
-      /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
-      /ResizeObserver loop limit exceeded/, // Non-critical UI warning
-      /The request has been aborted/, // Can happen during navigation.
-      /Failed to load resource: the server responded with a status of 403/, // Ad or social sign-in related 403s are expected
-      /Failed to load resource: the server responded with a status of 503/, // Server unavailable during startup
-      /Failed to load resource: net::ERR_CONNECTION_REFUSED/, // Can happen when server is starting up
-      /stripe.com/, // Stripe related errors are expected in test.
-      /has been blocked by CORS policy/, // CORS errors can happen in test environments due to ads
-      /Failed to save credentials NotSupportedError: The user agent does not support public key credentials./, // Can happen in test environments
-      /Refused to frame/, // Can happen in test.
-      /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
-    ]
-
     // Method to add additional allowed error patterns for specific tests
     page.addAllowedErrorPattern = (pattern) => {
       if (pattern instanceof RegExp) {
@@ -390,40 +433,8 @@ const test = base.test.extend({
       }
     }
 
-    // Helper to check if an error message matches any allowed pattern
-    const isAllowedError = (errorText) => {
-      return allowedErrorPatterns.some((pattern) => pattern.test(errorText))
-    }
-
-    page.checkTestRanOK = async () => {
-      // Get error summary
-      const { notAllowed, allowedCount, notAllowedCount, total } =
-        page.getErrorSummary()
-
-      // If there are relevant (non-allowed) errors, fail the test
-      if (notAllowedCount > 0) {
-        // Take a screenshot when console errors are found
-        await page.screenshot({
-          path: getScreenshotPath(`console-errors-${Date.now()}.png`),
-          fullPage: true,
-        })
-
-        const errorDetails = notAllowed
-          .map((err) => {
-            const location = err.location
-              ? `${err.location.url}:${err.location.lineNumber}`
-              : 'unknown location'
-            return `  • ${err.text} (at ${location})`
-          })
-          .join('\n')
-
-        throw new Error(
-          `Found ${notAllowedCount} console errors (${total} total, ${allowedCount} allowed):\n${errorDetails}`
-        )
-      }
-    }
-
     // For backwards compatibility
+    page.checkTestRanOK = async () => {}
     page.expectNoConsoleErrors = page.checkTestRanOK
 
     page.gotoAndVerify = async (path, options = {}) => {
@@ -684,8 +695,6 @@ const test = base.test.extend({
         console.log('Navigation inactivity timer cleared after successful test')
       }
 
-      // Automatically check for console errors at the end of each test
-      await loggingPage.checkTestRanOK()
 
       // Log navigation summary at the end of successful tests
       const navSummary = loggingPage.getNavigationSummary()
