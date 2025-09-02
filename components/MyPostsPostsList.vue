@@ -80,9 +80,6 @@
           <b-row>
             <b-col>
               <p>You have no active posts.</p>
-              {{ postIds }}, show old {{ showOldPosts }}, posts {{ posts }}, id
-              {{ id }},
-              {{ messageStore.byId(id) }}
             </b-col>
           </b-row>
           <b-row>
