@@ -10,7 +10,6 @@ import {
   watch,
   computed,
 } from 'vue'
-import { onMounted, onBeforeUnmount, watch, getCurrentInstance } from 'vue'
 import simpleheat from 'simpleheat'
 
 const props = defineProps({
@@ -52,9 +51,14 @@ const props = defineProps({
 let heatLayer = null
 let L = null
 let mapInstance = null
+let mapObject = null
+let parentContainer = null
+const options = null
+const propsBinder = null
 
 const instance = getCurrentInstance()
 const parentReady = ref(false)
+const ready = ref(false)
 
 defineExpose({
   addLatLng: (latlng) => {
