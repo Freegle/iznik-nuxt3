@@ -113,7 +113,7 @@
                   <v-icon icon="reply" flip="horizontal" class="pr-2" />
                 </div>
               </div>
-              <div v-if="supporter" class="mt-4">
+              <div v-if="eligibleSupporter" class="mt-4">
                 <SupporterInfo size="lg" :hidden="!showSupporter" />
                 <b-button variant="link" size="sm" @click="toggleSupporter">
                   <span v-if="showSupporter"> Click to hide from others </span>
@@ -202,6 +202,24 @@ const showSupporter = computed(() => {
 
 const supporter = computed(() => me.value?.supporter)
 
+// Check if user is eligible to be a supporter (regardless of hidesupporter setting)
+// This replicates the server-side logic for determining supporter eligibility
+const eligibleSupporter = computed(() => {
+  if (!me.value) return false
+  
+  // Check if they're a mod/admin (systemrole != 'User')
+  const isMod = me.value.systemrole && me.value.systemrole !== 'User'
+  
+  // Check if they've donated recently (within 360 days - SUPPORTER_PERIOD)
+  const hasRecentDonation = me.value.donated && 
+    new Date(me.value.donated) > new Date(Date.now() - 360 * 24 * 60 * 60 * 1000)
+  
+  // For microactions, we can't easily check from the frontend, so we'll rely on 
+  // the server having set supporter=true at some point, or the other conditions
+  
+  return isMod || hasRecentDonation || me.value.supporter
+})
+
 const useProfile = computed(() => {
   let ret = true
 
@@ -227,11 +245,15 @@ const aboutMe = computed(() => {
 // Methods
 const toggleSupporter = async () => {
   const settings = me.value.settings
+  // If showSupporter is true, we want to hide it (set hidesupporter to true)
+  // If showSupporter is false, we want to show it (set hidesupporter to false)
   settings.hidesupporter = showSupporter.value
 
   await authStore.saveAndGet({
     settings,
   })
+
+  emit('update')
 }
 
 const addAbout = () => {
