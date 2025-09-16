@@ -370,6 +370,13 @@ export default class BaseAPI {
         console.log('Not authorised - force logged out')
         authStore.setAuth(null, null)
         authStore.setUser(null)
+
+        // For specific paths, we want to silently allow 401 errors and swallow them.
+        // This can happen if a login token is invalid, and we don't want to show errors to the user.
+        if (path.startsWith('/chat?includeClosed=true')) {
+          console.log('Silently handling 401 for includeClosed chat request')
+          return new Promise(function (resolve) {})
+        }
       }
     } catch (e) {
       console.log('Fetch error', path, e?.message)
@@ -398,6 +405,13 @@ export default class BaseAPI {
     // - otherwise throw an exception.
     if (status !== 200) {
       const statusstr = status?.toString()
+
+      // For specific paths, we want to silently allow 401 errors and swallow them.
+      // This can happen if a login token is invalid, and we don't want to show errors to the user.
+      if (status === 401 && path.startsWith('/chat?includeClosed=true')) {
+        console.log('Silently handling 401 for includeClosed chat request')
+        return new Promise(function (resolve) {})
+      }
 
       // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
       // But some API calls are expected to fail, and throw an exception which is then handled in the code.  We don't
