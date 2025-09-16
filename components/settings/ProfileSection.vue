@@ -200,23 +200,23 @@ const showSupporter = computed(() => {
   return 'hidesupporter' in settings ? !settings.hidesupporter : true
 })
 
-const supporter = computed(() => me.value?.supporter)
-
 // Check if user is eligible to be a supporter (regardless of hidesupporter setting)
 // This replicates the server-side logic for determining supporter eligibility
 const eligibleSupporter = computed(() => {
   if (!me.value) return false
-  
+
   // Check if they're a mod/admin (systemrole != 'User')
   const isMod = me.value.systemrole && me.value.systemrole !== 'User'
-  
+
   // Check if they've donated recently (within 360 days - SUPPORTER_PERIOD)
-  const hasRecentDonation = me.value.donated && 
-    new Date(me.value.donated) > new Date(Date.now() - 360 * 24 * 60 * 60 * 1000)
-  
-  // For microactions, we can't easily check from the frontend, so we'll rely on 
+  const hasRecentDonation =
+    me.value.donated &&
+    new Date(me.value.donated) >
+      new Date(Date.now() - 360 * 24 * 60 * 60 * 1000)
+
+  // For microactions, we can't easily check from the frontend, so we'll rely on
   // the server having set supporter=true at some point, or the other conditions
-  
+
   return isMod || hasRecentDonation || me.value.supporter
 })
 
