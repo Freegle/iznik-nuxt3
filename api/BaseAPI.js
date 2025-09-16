@@ -441,7 +441,8 @@ export default class BaseAPI {
     if (status !== 200) {
       const statusstr = status?.toString()
 
-      // For specific paths, we want to silently allow 401 errors and swallow them
+      // For specific paths, we want to silently allow 401 errors and swallow them.
+      // This can happen if a login token is invalid, and we don't want to show errors to the user.
       if (status === 401 && path.startsWith('/chat?includeClosed=true')) {
         console.log('Silently handling 401 for includeClosed chat request')
         return new Promise(function (resolve) {})
