@@ -64,20 +64,25 @@ module.exports = defineConfig({
                   return true
                 },
                 sourceFilter: (sourcePath) => {
-                  // Exclude node_modules and external URLs that cause filename issues
+                  // Only include source files from our application, not polyfills or virtual files
                   return (
+                    // Include files that look like our source code
+                    (sourcePath.includes('.vue') ||
+                     sourcePath.includes('/pages/') ||
+                     sourcePath.includes('/components/') ||
+                     sourcePath.includes('/layouts/') ||
+                     sourcePath.includes('/composables/') ||
+                     sourcePath.includes('/stores/') ||
+                     sourcePath.startsWith('app.vue') ||
+                     sourcePath.startsWith('error.vue')) &&
+                    // Exclude problematic paths
                     !sourcePath.includes('node_modules/') &&
-                    !sourcePath.includes('http://') &&
-                    !sourcePath.includes('https://') &&
-                    !sourcePath.includes('accounts.google.com') &&
-                    !sourcePath.includes('googleapis.com') &&
-                    !sourcePath.includes('gstatic.com') &&
                     !sourcePath.includes('data:') &&
                     !sourcePath.includes('blob:') &&
-                    // Only include files with reasonable path lengths
-                    sourcePath.length < 200
+                    sourcePath.length < 300
                   )
                 },
+                // sourcePathMap not needed since paths are already relative to the correct directory
               },
             },
           ],
