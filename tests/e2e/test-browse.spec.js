@@ -18,6 +18,7 @@ test.describe('Browse Page Tests', () => {
     getTestEmail,
     postMessage,
     withdrawPost,
+    takeScreenshot,
   }) => {
 
     let offerResult = null
@@ -45,8 +46,7 @@ test.describe('Browse Page Tests', () => {
           console.warn('WARNING: No logged-in elements found before posting - this may cause issues')
           
           // Take screenshot for debugging
-          await page.screenshot({
-            path: `playwright-screenshots/no-login-elements-${Date.now()}.png`,
+          await takeScreenshot(`No Login Elements Debug ${Date.now()}`, {
             fullPage: true,
           })
         }
@@ -153,10 +153,7 @@ test.describe('Browse Page Tests', () => {
       }
       
       // Take screenshot to see current state
-      await page.screenshot({
-        path: `playwright-screenshots/postcode-debug-${Date.now()}.png`,
-        fullPage: true,
-      })
+      await takeScreenshot(`Postcode Debug ${Date.now()}`)
       
       // Wait for postcode section to disappear (indicates successful validation)
       await postcodeInput.waitFor({
@@ -211,6 +208,7 @@ test.describe('Browse Page Tests', () => {
 
   test('should handle search functionality on browse page', async ({
     page,
+    takeScreenshot,
     testEmail,
   }) => {
     // Sign up user first
@@ -255,6 +253,7 @@ test.describe('Browse Page Tests', () => {
 
   test('should display microvolunteering component', async ({
     page,
+    takeScreenshot,
     testEmail,
   }) => {
     // Sign up user first
@@ -297,6 +296,7 @@ test.describe('Browse Page Tests', () => {
 
   test('should handle responsive behavior', async ({
     page,
+    takeScreenshot,
     testEmail,
   }) => {
     // Sign up user first
@@ -353,6 +353,7 @@ test.describe('Browse Page Tests', () => {
 
   test('should load browse page with existing messages', async ({
     page,
+    takeScreenshot,
     testEmail,
   }) => {
     // Sign up user first

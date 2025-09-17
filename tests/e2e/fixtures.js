@@ -124,6 +124,33 @@ const test = base.test.extend({
     console.log(`Closed browser context after test`)
   },
 
+  // Add screenshot helper that automatically attaches to test report
+  takeScreenshot: async ({page}, use, testInfo) => {
+    const screenshotHelper = async (name, options = {}) => {
+      // Generate filename
+      const filename = `${name.replace(/[^a-zA-Z0-9-]/g, '_')}.png`
+      const screenshotPath = getScreenshotPath(filename)
+
+      // Take the screenshot
+      await page.screenshot({
+        path: screenshotPath,
+        fullPage: options.fullPage !== false, // Default to fullPage
+        ...options
+      })
+
+      // Attach to test report for inline viewing
+      await testInfo.attach(name, {
+        path: screenshotPath,
+        contentType: 'image/png'
+      })
+
+      console.log(`Screenshot taken and attached: ${name}`)
+      return screenshotPath
+    }
+
+    await use(screenshotHelper)
+  },
+
   // Add the testEmail fixture - basic version that just generates a random test email
   testEmail: async ({browser}, use) => {
     // Generate a unique test email for this test

@@ -60,6 +60,7 @@ test.describe('Post flow tests', () => {
     getTestEmail,
     postMessage,
     withdrawPost,
+    takeScreenshot,
     replyToMessageWithSignup,
   }) => {
     const replyEmail = getTestEmail('reply')

@@ -3,20 +3,12 @@
  * Tests for the Settings page functionality
  * Focuses on email level settings and their persistence
  */
-const fs = require('fs')
-const path = require('path')
 const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
 const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
-// Ensure test-results directory exists
-const testResultsDir = path.join(__dirname, '../../test-results')
-if (!fs.existsSync(testResultsDir)) {
-  fs.mkdirSync(testResultsDir, { recursive: true })
-}
-
 // Helper function to test email level settings
-async function testEmailLevelSetting(page, testEmail, level) {
+async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   console.log(`Testing email level: ${level.text}`)
 
   // Sign up to access settings page
@@ -39,13 +31,7 @@ async function testEmailLevelSetting(page, testEmail, level) {
   await page.waitForTimeout(1000)
 
   // Take screenshot before changing the setting
-  await page.screenshot({
-    path: path.join(
-      testResultsDir,
-      `email-level-before-${level.value}.png`
-    ),
-    fullPage: true,
-  })
+  await takeScreenshot(`Email Level Before ${level.value}`)
 
   // Select the email level
   await emailLevelSelect.selectOption(level.value)
@@ -57,10 +43,7 @@ async function testEmailLevelSetting(page, testEmail, level) {
   await page.waitForTimeout(timeouts.ui.settleTime)
 
   // Take screenshot after changing the setting
-  await page.screenshot({
-    path: path.join(testResultsDir, `email-level-after-${level.value}.png`),
-    fullPage: true,
-  })
+  await takeScreenshot(`Email Level After ${level.value}`)
 
   // Reload the page to verify persistence
   await page.reload({ waitUntil: 'networkidle' })
@@ -76,13 +59,7 @@ async function testEmailLevelSetting(page, testEmail, level) {
   await emailLevelSelect.waitFor({ state: 'visible' })
 
   // Take screenshot after page reload to verify persistence
-  await page.screenshot({
-    path: path.join(
-      testResultsDir,
-      `email-level-persisted-${level.value}.png`
-    ),
-    fullPage: true,
-  })
+  await takeScreenshot(`Email Level Persisted ${level.value}`)
 
   // Verify the selected value persisted
   await page.waitForTimeout(timeouts.ui.settleTime)
@@ -150,30 +127,34 @@ test.describe('Settings Page - Email Level Settings', () => {
   test('Email level "Off" saves correctly and persists after page reload', async ({
     page,
     testEmail,
+    takeScreenshot,
   }) => {
     const level = { value: 'None', text: 'Off' }
-    await testEmailLevelSetting(page, testEmail, level)
+    await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
   test('Email level "Basic" saves correctly and persists after page reload', async ({
     page,
     testEmail,
+    takeScreenshot,
   }) => {
     const level = { value: 'Basic', text: 'Basic - limited emails' }
-    await testEmailLevelSetting(page, testEmail, level)
+    await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
   test('Email level "Standard" saves correctly and persists after page reload', async ({
     page,
     testEmail,
+    takeScreenshot,
   }) => {
     const level = { value: 'Full', text: 'Standard - all types of emails' }
-    await testEmailLevelSetting(page, testEmail, level)
+    await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
   test('Advanced email settings toggle works correctly', async ({
     page,
     testEmail,
+    takeScreenshot,
   }) => {
     // Sign up and navigate to settings
     await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
@@ -216,10 +197,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       })
 
       // Take screenshot before showing advanced settings
-      await page.screenshot({
-        path: path.join(testResultsDir, 'advanced-settings-before-toggle.png'),
-        fullPage: true,
-      })
+      await takeScreenshot('Advanced Settings Before Toggle')
 
       // Click to show advanced settings
       await advancedButton.click()
@@ -232,10 +210,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       })
 
       // Take screenshot after showing advanced settings
-      await page.screenshot({
-        path: path.join(testResultsDir, 'advanced-settings-after-toggle.png'),
-        fullPage: true,
-      })
+      await takeScreenshot('Advanced Settings After Toggle')
 
       console.log('✓ Advanced settings shown successfully')
 
@@ -269,6 +244,7 @@ test.describe('Settings Page - Email Level Settings', () => {
   test('Email settings validation and error handling', async ({
     page,
     testEmail,
+    takeScreenshot,
   }) => {
     // Sign up and navigate to settings
     await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
@@ -288,10 +264,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       .first()
 
     // Take screenshot before setting to 'None'
-    await page.screenshot({
-      path: path.join(testResultsDir, 'validation-before-none-setting.png'),
-      fullPage: true,
-    })
+    await takeScreenshot('Validation Before None Setting')
 
     await emailLevelSelect.selectOption('None')
 
@@ -309,10 +282,7 @@ test.describe('Settings Page - Email Level Settings', () => {
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
     // Take screenshot showing the warning message
-    await page.screenshot({
-      path: path.join(testResultsDir, 'validation-none-setting-warning.png'),
-      fullPage: true,
-    })
+    await takeScreenshot('Validation None Setting Warning')
 
     console.log('✓ Warning message appears for "None" email setting')
 
@@ -331,10 +301,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     })
 
     // Take screenshot showing warning is gone with 'Full' setting
-    await page.screenshot({
-      path: path.join(testResultsDir, 'validation-full-setting-no-warning.png'),
-      fullPage: true,
-    })
+    await takeScreenshot('Validation Full Setting No Warning')
 
     console.log('✓ Warning message correctly hidden for "Full" setting')
   })
