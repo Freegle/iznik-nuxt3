@@ -135,6 +135,7 @@ module.exports = defineConfig({
         video: 'on',
         // Use Playwright's downloaded Chromium browser with security flags for Docker
         launchOptions: {
+          headless: true, // Run in headless mode for CI/Docker environments
           args: [
             '--start-maximized', // Maximize browser window
             '--no-sandbox',
