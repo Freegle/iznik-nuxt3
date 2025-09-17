@@ -491,7 +491,7 @@ export const useAuthStore = defineStore({
 
         return logIt
       })
-      console.log('Saved');
+      console.log('Saved')
       const user = await this.fetchUser()
       console.log('Fetched user', JSON.stringify(user))
       return user
