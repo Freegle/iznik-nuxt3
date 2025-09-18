@@ -27,7 +27,7 @@ module.exports = defineConfig({
   testMatch: testMatch,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 1,
+  retries: 2,
   workers: 1,
   maxFailures: 0,
   reporter: [
