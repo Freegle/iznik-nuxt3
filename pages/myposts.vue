@@ -31,26 +31,10 @@
           </div>
           <div v-else>
             <NewUserInfo v-if="newUserPassword" :password="newUserPassword" />
-            <div v-else-if="type === 'Offer' && !donated">
-              <NoticeMessage
-                type="info"
-                class="text-center font-weight-bold text-danger"
-              >
-                We're a charity - free to use, but not free to run. Help us keep
-                going by donating £1?
-                <DonationButton
-                  v-if="payPalFallback"
-                  :text="'Donate £1'"
-                  :value="1"
-                />
-                <StripeDonate
-                  v-else
-                  :price="1"
-                  @success="donationMade"
-                  @no-payment-methods="noMethods"
-                />
-              </NoticeMessage>
-            </div>
+            <MyPostsDonationAsk
+              v-else-if="type === 'Offer' && !donated"
+              @donation-made="donationMade"
+            />
 
             <MyPostsPostsList
               :post-ids="posts.map((p) => p.id)"
@@ -100,9 +84,7 @@ import SidebarRight from '~/components/SidebarRight'
 import ExpectedRepliesWarning from '~/components/ExpectedRepliesWarning'
 import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
-import NoticeMessage from '~/components/NoticeMessage.vue'
-import DonationButton from '~/components/DonationButton.vue'
-import StripeDonate from '~/components/StripeDonate.vue'
+import MyPostsDonationAsk from '~/components/MyPostsDonationAsk.vue'
 import NewUserInfo from '~/components/NewUserInfo.vue'
 import DeadlineAskModal from '~/components/DeadlineAskModal.vue'
 import DeliveryAskModal from '~/components/DeliveryAskModal.vue'
@@ -240,12 +222,6 @@ function donationMade() {
   })
 
   donated.value = true
-}
-
-const payPalFallback = ref(false)
-
-function noMethods() {
-  payPalFallback.value = true
 }
 </script>
 <style scoped lang="scss">
