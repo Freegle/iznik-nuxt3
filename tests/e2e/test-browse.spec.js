@@ -179,9 +179,24 @@ test.describe('Browse Page Tests', () => {
       expect(messageCount).toBeGreaterThan(0)
 
       console.log(`Found ${messageCount} messages on browse page`)
-      
+
+      // Debug: Wait for messages to load and then dump the DOM
+      await page.waitForLoadState('networkidle')
+
+      // Debug: Get the HTML of the first message card to see its structure
+      const firstCard = page.locator('.messagecard').first()
+      if (await firstCard.count() > 0) {
+        const cardHTML = await firstCard.innerHTML()
+        console.log('First message card HTML:', cardHTML)
+      }
+
+      // Debug: Check what text content is visible on the page
+      const allText = await page.locator('body').allTextContents()
+      const tableRelatedText = allText.join(' ').match(/[^]*Test Table[^]*/g)
+      console.log('Text containing "Test Table":', tableRelatedText)
+
       // Check that we can see the specific test item we created
-      const testTableMessage = page.locator('text=Test Table').first()
+      const testTableMessage = page.getByText('Test Table', { exact: false }).first()
       await testTableMessage.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
