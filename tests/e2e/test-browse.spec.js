@@ -22,6 +22,7 @@ test.describe('Browse Page Tests', () => {
   }) => {
 
     let offerResult = null
+    let uniqueItem = null  // Declare at outer scope for use in finally block
 
     try {
       // Create  test message.
@@ -54,13 +55,17 @@ test.describe('Browse Page Tests', () => {
         console.log(`Login check error: ${debugError.message}`)
       }
       
+      // Use unique timestamp to avoid conflicts with other test runs
+      const uniqueId = Date.now()
+      uniqueItem = `Test Table ${uniqueId}`  // Assign to outer scope variable
       offerResult = await postMessage({
         type: 'OFFER',
-        item: 'Test Table',
-        description: `Test table created by browse test`,
+        item: uniqueItem,
+        description: `Test table created by browse test ${uniqueId}`,
         postcode: environment.postcode,
         email: environment.unmodded_email,
       })
+      console.log(`Created post with unique item name: ${uniqueItem}`)
       expect(offerResult.id).toBeTruthy()
       console.log(`Created test message with ID: ${offerResult.id}`)
       await logoutIfLoggedIn(page)
@@ -192,16 +197,16 @@ test.describe('Browse Page Tests', () => {
 
       // Debug: Check what text content is visible on the page
       const allText = await page.locator('body').allTextContents()
-      const tableRelatedText = allText.join(' ').match(/[^]*Test Table[^]*/g)
-      console.log('Text containing "Test Table":', tableRelatedText)
+      const tableRelatedText = allText.join(' ').match(new RegExp(`[^]*${uniqueItem}[^]*`, 'g'))
+      console.log(`Text containing "${uniqueItem}":`, tableRelatedText)
 
       // Check that we can see the specific test item we created
-      const testTableMessage = page.getByText('Test Table', { exact: false }).first()
+      const testTableMessage = page.getByText(uniqueItem, { exact: false }).first()
       await testTableMessage.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
-      console.log('Successfully found the Test Table message on browse page')
+      console.log(`Successfully found the ${uniqueItem} message on browse page`)
     } finally {
       // Clean up the created message - log in as the poster and withdraw
       if (offerResult) {
@@ -210,8 +215,8 @@ test.describe('Browse Page Tests', () => {
           await logoutIfLoggedIn(page)
           await loginViaHomepage(page, environment.unmodded_email, environment.unmodded_password)
 
-          // Now withdraw the post
-          await withdrawPost({ item: offerResult.item })
+          // Now withdraw the post using the unique item name
+          await withdrawPost({ item: uniqueItem })
         } catch (cleanupError) {
           console.warn(
             `Failed to clean up test message: ${cleanupError.message}`

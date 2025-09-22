@@ -52,7 +52,19 @@ export const useMessageStore = defineStore({
             console.log('Failed to fetch message', e)
             if (e instanceof APIError && e.response.status === 404) {
               // This can validly happen if a message is deleted under our feet.
-              console.log('Ignore 404 error')
+              console.log('Message deleted, removing from store')
+
+              // Remove from the main list
+              delete this.list[id]
+
+              // Remove from user's list if present
+              const authStore = useAuthStore()
+              const userUid = authStore.user?.id
+              if (userUid && this.byUserList[userUid]) {
+                this.byUserList[userUid] = this.byUserList[userUid].filter(
+                  (message) => message.id !== id
+                )
+              }
             } else {
               throw e
             }
@@ -75,7 +87,19 @@ export const useMessageStore = defineStore({
 
             if (e instanceof APIError && e.response.status === 404) {
               // This can validly happen if a message is deleted under our feet.
-              console.log('Ignore 404 error')
+              console.log('Message deleted, removing from store')
+
+              // Remove from the main list
+              delete this.list[id]
+
+              // Remove from user's list if present
+              const authStore = useAuthStore()
+              const userUid = authStore.user?.id
+              if (userUid && this.byUserList[userUid]) {
+                this.byUserList[userUid] = this.byUserList[userUid].filter(
+                  (message) => message.id !== id
+                )
+              }
             } else {
               throw e
             }
