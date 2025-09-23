@@ -548,8 +548,9 @@ export default {
                 const daysago = dayjs().diff(postdate, 'day')
 
                 if (msg.type === keyword && daysago < self.recentDays) {
+                  console.log('Add for', msg, msg.postdate, dayjs(msg.postdate))
                   recentmsg +=
-                    dayjs(msg.postdate).format('lll') +
+                    dayjs(msg.postdate).format('dddd Do HH:mm a') +
                     ' - ' +
                     msg.subject +
                     '\n'
