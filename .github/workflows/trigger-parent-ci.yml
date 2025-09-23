@@ -1,0 +1,65 @@
+name: Trigger Parent Repository CI
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  trigger-parent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger FreegleDocker CircleCI
+        run: |
+          echo "🔔 Checking for recent FreegleDocker CircleCI pipelines before triggering"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Commit Message: ${{ github.event.head_commit.message }}"
+          
+          # Check for recent pipelines to avoid duplicate triggers
+          echo "Checking for recent pipelines..."
+          recent_pipelines=$(curl -s -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
+            "https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline?branch=master" | \
+            jq -r '.items[] | select(.state == "created" or .state == "running") | select(.created_at > (now - 300)) | .id' 2>/dev/null | head -3)
+          
+          if [ -n "$recent_pipelines" ]; then
+            echo "⚠️ Found recent pipelines within 5 minutes - skipping trigger to avoid duplicates:"
+            echo "$recent_pipelines"
+            echo "If this is a standalone submodule change, wait 5 minutes and manually trigger."
+            exit 0
+          fi
+          
+          # Add a small delay to coordinate with other potential triggers
+          echo "Waiting 30 seconds to coordinate with other potential triggers..."
+          sleep 30
+          
+          echo "No recent pipelines found - proceeding with trigger"
+          
+          response=$(curl -s -w "%{http_code}" -X POST \
+            -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "branch": "master",
+              "parameters": {
+                "webhook_repository": "${{ github.repository }}",
+                "webhook_branch": "${{ github.ref_name }}",
+                "webhook_commit": "${{ github.sha }}",
+                "webhook_message": "${{ github.event.head_commit.message }}",
+                "webhook_pusher": "${{ github.event.pusher.name }}"
+              }
+            }' \
+            https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline)
+          
+          http_code="${response: -3}"
+          response_body="${response%???}"
+          
+          if [ "$http_code" -eq "201" ] || [ "$http_code" -eq "200" ]; then
+            echo "✅ Successfully triggered FreegleDocker CircleCI pipeline"
+            echo "Response: $response_body"
+          else
+            echo "❌ Failed to trigger CircleCI pipeline"
+            echo "HTTP Status: $http_code"
+            echo "Response: $response_body"
+            exit 1
+          fi

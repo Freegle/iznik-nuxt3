@@ -478,6 +478,7 @@ export const useAuthStore = defineStore({
       this.user.bouncing = 0
     },
     async saveAndGet(params) {
+      console.log('Save and get', params)
       await this.$api.session.save(params, function (data) {
         let logIt
 
@@ -490,8 +491,10 @@ export const useAuthStore = defineStore({
 
         return logIt
       })
-      await this.fetchUser()
-      return this.user
+      console.log('Saved')
+      const user = await this.fetchUser()
+      console.log('Fetched user', JSON.stringify(user))
+      return user
     },
     async setGroup(params, nofetch) {
       await this.$api.memberships.update(params)

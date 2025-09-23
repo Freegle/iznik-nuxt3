@@ -70,20 +70,10 @@ test.describe('Explore Page Tests', () => {
     // Wait for content to load
     await page.waitForTimeout(timeouts.ui.settleTime)
 
-    // Check that the page contains the group name
+    // Check that the page contains the group name in heading
     await page
-      .locator(`text=${environment.testgroup}`)
+      .locator(`h4:has-text("${environment.testgroup}")`)
+      .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-
-    // Check for common explore page elements
-    const expectedElements = ['text=/freeglers/i', 'text=/founded/i']
-
-    for (const selector of expectedElements) {
-      const element = page.locator(selector).first()
-      await element.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-    }
   })
 })

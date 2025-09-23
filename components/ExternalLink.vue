@@ -13,12 +13,12 @@ const props = defineProps({
 })
 
 const carefulHref = computed(() => {
-  return props.href.startsWith('http') || props.href.startsWith('mailto')
+  return props.href?.startsWith('http') || props.href?.startsWith('mailto')
     ? props.href
     : 'https://' + props.href
 })
 
 const target = computed(() => {
-  return props.href.startsWith('mailto') ? '_self' : '_blank'
+  return props.href?.startsWith('mailto') ? '_self' : '_blank'
 })
 </script>

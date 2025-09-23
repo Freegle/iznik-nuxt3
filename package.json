@@ -19,7 +19,8 @@
     "coveralls": "node scripts/upload-coverage.js",
     "test:clean": "node -e \"const fs = require('fs'); const rimraf = path => { try { if (fs.existsSync(path)) fs.rmSync(path, { recursive: true, force: true }); } catch (e) { console.error('Error removing:', e); } }; rimraf('test-results'); rimraf('playwright-report'); rimraf('playwright-screenshots'); rimraf('coverage');\"",
     "test:ci": "npm run test:clean && playwright test",
-    "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js"
+    "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js",
+    "test:show-report": "npx playwright show-report --host 0.0.0.0 --port 9323"
   },
   "gitHooks": {
     "pre-commit": "npm run lint-staged"

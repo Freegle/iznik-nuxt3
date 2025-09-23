@@ -176,7 +176,7 @@ export const useComposeStore = defineStore({
             nameshort: group.nameshort,
             namedisplay: group.namedisplay,
             settings: {
-              closed: group.settings.closed,
+              closed: group.settings?.closed,
             },
           })
         }

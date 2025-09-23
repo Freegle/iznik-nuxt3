@@ -219,6 +219,7 @@
           </b-row>
           <span v-if="enabled">
             <OurUploader
+              v-if="!image"
               v-model="currentAtts"
               class="bg-white"
               type="CommunityEvent"

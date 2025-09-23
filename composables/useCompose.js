@@ -325,6 +325,19 @@ export async function freegleIt(type, router) {
           email: composeStore.email,
           password: params.newpassword,
         })
+
+        // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
+        if (composeStore.postcode?.id) {
+          console.log(
+            'Saving postcode to new user settings',
+            composeStore.postcode
+          )
+          const settings = authStore.user?.settings || {}
+          settings.mylocation = composeStore.postcode
+          await authStore.saveAndGet({
+            settings,
+          })
+        }
       }
     })
 

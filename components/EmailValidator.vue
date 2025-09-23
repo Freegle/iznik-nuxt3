@@ -98,6 +98,61 @@ const form = ref(null)
 // Create a domain validation cache outside of the component instance
 const domainValidationCache = new Map()
 
+// Email validation queue to prevent race conditions
+const validationQueue = {
+  currentRequest: null,
+  pendingValue: null,
+  pendingResolve: null,
+  pendingReject: null,
+
+  validate(email, validateFn) {
+    return new Promise((resolve, reject) => {
+      // Store the latest email to validate
+      this.pendingValue = email
+      this.pendingResolve = resolve
+      this.pendingReject = reject
+
+      // If a request is already in progress, just update the pending value
+      if (this.currentRequest) {
+        return
+      }
+
+      // Process the queue
+      this.processQueue(validateFn)
+    })
+  },
+
+  async processQueue(validateFn) {
+    while (this.pendingValue !== null) {
+      const emailToValidate = this.pendingValue
+      const resolveToCall = this.pendingResolve
+      const rejectToCall = this.pendingReject
+
+      // Clear pending before starting request
+      this.pendingValue = null
+      this.pendingResolve = null
+      this.pendingReject = null
+
+      try {
+        this.currentRequest = validateFn(emailToValidate)
+        const result = await this.currentRequest
+
+        // Only resolve if this is still the latest request (no newer pending)
+        if (this.pendingValue === null) {
+          resolveToCall(result)
+        }
+      } catch (error) {
+        // Only reject if this is still the latest request
+        if (this.pendingValue === null) {
+          rejectToCall(error)
+        }
+      } finally {
+        this.currentRequest = null
+      }
+    }
+  },
+}
+
 // Computed properties
 const uniqueId = computed(() => {
   return uid('login-')
@@ -117,22 +172,33 @@ watch(
   async (newVal) => {
     emit('update:email', newVal)
 
-    if (newVal && newVal?.includes('@')) {
+    // Only call domain suggestion API for properly formatted emails
+    if (newVal && new RegExp(EMAIL_REGEX).test(newVal)) {
       // Ask the server to spot typos in this domain.
       const domain = newVal.substring(newVal.indexOf('@') + 1)
 
-      // Wait for the first dot, as that will be long enough that we don't thrash the server.
+      // Only proceed if we have a complete domain (with dot)
       if (domain.includes('.')) {
         suggestedDomains.value = []
 
-        const ret = await domainStore.fetch({
-          domain,
-        })
+        try {
+          const ret = await domainStore.fetch({
+            domain,
+          })
 
-        if (ret && ret.ret === 0) {
-          suggestedDomains.value = ret.suggestions
+          if (ret && ret.ret === 0) {
+            suggestedDomains.value = ret.suggestions
+          }
+        } catch (error) {
+          // Domain suggestion API can legitimately fail (network issues, server problems, etc.)
+          // In this case, we simply don't provide suggestions rather than showing an error
+          console.log('Domain suggestion API failed:', error.message)
+          suggestedDomains.value = []
         }
       }
+    } else {
+      // Clear suggestions for invalid emails
+      suggestedDomains.value = []
     }
   },
   { immediate: true }
@@ -199,18 +265,28 @@ async function validateEmail(value) {
     return 'Please enter a valid email address.'
   }
 
-  const isValidDomain = await checkValidDomain(value)
-  if (isValidDomain) {
-    console.log('Valid domain')
-  } else {
-    console.log('Invalid domain')
-  }
+  // Use validation queue for domain checking to prevent race conditions
+  try {
+    const isValidDomain = await validationQueue.validate(
+      value,
+      checkValidDomain
+    )
+    if (isValidDomain) {
+      console.log('Valid domain')
+    } else {
+      console.log('Invalid domain')
+    }
 
-  emit('update:valid', isValidDomain)
-  return (
-    isValidDomain ||
-    "Please check your email domain - maybe you've made a typo?"
-  )
+    emit('update:valid', isValidDomain)
+    return (
+      isValidDomain ||
+      "Please check your email domain - maybe you've made a typo?"
+    )
+  } catch (error) {
+    console.warn('Domain validation failed:', error)
+    emit('update:valid', false)
+    return 'Unable to validate email domain - please check your connection.'
+  }
 }
 
 function focus() {

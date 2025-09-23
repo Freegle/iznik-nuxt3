@@ -34,12 +34,9 @@ RUN npx playwright install chromium && npx playwright install-deps
 
 COPY . .
 
-EXPOSE 3002
+EXPOSE 3003
 
+# Production build - always build and start, set PORT to 3003
 CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
     rm -rf /tmp/nitro/worker-* && \
-    if [ "$NUXT_DEV_MODE" = "true" ]; then \
-        export HOST=0 && npm run dev; \
-    else \
-        npm run build && export HOST=0 && npm run start; \
-    fi
+    npm run build && export HOST=0 PORT=3003 && npm run start

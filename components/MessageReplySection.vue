@@ -7,6 +7,7 @@
         v-model:valid="emailValid"
         size="lg"
         label="Your email address:"
+        class="test-email-reply-validator"
       />
       <NoticeMessage
         v-if="milesaway > faraway && message.type === 'Offer'"
