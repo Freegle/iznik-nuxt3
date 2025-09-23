@@ -804,7 +804,7 @@ export default defineNuxtConfig({
 
     weserv: {
       provider: 'weserv',
-      baseURL: process.env.IMAGE_BASE_URL || config.USER_SITE,
+      baseURL: config.TUS_UPLOADER.replace(':8080', ''),
       weservURL: config.IMAGE_DELIVERY,
     },
 
