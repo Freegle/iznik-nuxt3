@@ -148,7 +148,7 @@ export default defineNuxtConfig({
       ignore: ['/message/'],
       crawlLinks: true,
     },
-    
+
     // Disable HTTPS enforcement for development
     httpsRedirect: false,
     security: {
@@ -308,7 +308,7 @@ export default defineNuxtConfig({
         'vuedraggable',
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
-        'twemoji'
+        'twemoji',
       ],
     },
     build: {
