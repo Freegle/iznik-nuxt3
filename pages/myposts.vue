@@ -37,7 +37,7 @@
             />
 
             <MyPostsPostsList
-              :post-ids="posts.map((p) => p.id)"
+              :posts="posts"
               :loading="loading"
               :default-expanded="posts.length <= 5"
               :show="shownCount"
@@ -166,10 +166,14 @@ function loadMore(infiniteLoaderInstance) {
 
   if (shownCount.value > posts.value.length) {
     shownCount.value = posts.value.length
+    // No more posts to load - complete infinite loading
+    infiniteLoaderInstance.complete()
+  } else {
+    // More posts available - continue infinite loading
+    infiniteLoaderInstance.loaded()
   }
 
   loadedMore.value = true
-  infiniteLoaderInstance.loaded()
 }
 
 function forceLogin() {
