@@ -73,7 +73,12 @@
           />
           <InfiniteLoading
             :distance="scrollboxHeight"
-            @infinite="emit('load-more', $event)"
+            @infinite="
+              (event) => {
+                console.log('DEBUG: InfiniteLoading triggered', event)
+                emit('load-more', event)
+              }
+            "
           />
         </div>
         <div v-else>
@@ -115,7 +120,7 @@ const userStore = useUserStore()
 const trystStore = useTrystStore()
 
 const props = defineProps({
-  postIds: { type: Array, required: true },
+  posts: { type: Array, required: true },
   loading: { type: Boolean, required: true },
   defaultExpanded: { type: Boolean, required: true },
   show: { type: Number, required: true },
@@ -130,9 +135,9 @@ function toggleShowOldPosts() {
   showOldPosts.value = !showOldPosts.value
 }
 
-// Get posts from the store using the IDs
+// Posts are now passed directly as props
 const posts = computed(() => {
-  return props.postIds.map((id) => messageStore.byId(id)).filter(Boolean)
+  return props.posts || []
 })
 
 // old posts are those with an outcome
@@ -145,23 +150,14 @@ const formattedOldPostsCount = computed(() => {
 })
 
 const activePosts = computed(() => {
-  return posts.value.filter((post) => !post.hasoutcome)
+  const result = posts.value.filter((post) => !post.hasoutcome)
+  console.log('DEBUG: activePosts computed', {
+    allPostsLength: posts.value.length,
+    activePostsLength: result.length,
+    oldPostsLength: posts.value.filter((post) => post.hasoutcome).length,
+  })
+  return result
 })
-
-watch(
-  () => props.postIds,
-  (newIds, oldIds) => {
-    // Fetch new messages when postIds change
-    if (oldIds && newIds.length !== oldIds.length) {
-      const newPostIds = newIds.filter((id) => !oldIds.includes(id))
-      newPostIds.forEach((id) => {
-        if (!messageStore.byId(id)) {
-          messageStore.fetch(id)
-        }
-      })
-    }
-  }
-)
 
 watch(activePosts, (newVal) => {
   // For messages which are promised and not successful, we need to trigger a fetch.  This is so
@@ -182,16 +178,28 @@ const visiblePosts = computed(() => {
   let visiblePostList = showOldPosts.value ? posts.value : activePosts.value
   visiblePostList = visiblePostList || []
 
-  return visiblePostList.toSorted((a, b) => {
-    // promised items first, then by most recently posted
-    if (!showOldPosts.value && a.promised && !b.promised) {
-      return -1
-    } else if (!showOldPosts.value && b.promised && !a.promised) {
-      return 1
-    } else {
-      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-    }
+  const result = visiblePostList
+    .toSorted((a, b) => {
+      // promised items first, then by most recently
+      if (!showOldPosts.value && a.promised && !b.promised) {
+        return -1
+      } else if (!showOldPosts.value && b.promised && !a.promised) {
+        return 1
+      } else {
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      }
+    })
+    .slice(0, props.show)
+
+  console.log('DEBUG: visiblePosts computed', {
+    showOldPosts: showOldPosts.value,
+    visibleLength: result.length,
+    activePostsLength: activePosts.value.length,
+    totalPostsLength: posts.value.length,
+    showLimit: props.show,
   })
+
+  return result
 })
 
 const upcomingTrysts = computed(() => {

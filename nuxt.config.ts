@@ -148,7 +148,7 @@ export default defineNuxtConfig({
       ignore: ['/message/'],
       crawlLinks: true,
     },
-    
+
     // Disable HTTPS enforcement for development
     httpsRedirect: false,
     security: {
@@ -308,7 +308,7 @@ export default defineNuxtConfig({
         'vuedraggable',
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
-        'twemoji'
+        'twemoji',
       ],
     },
     build: {
@@ -804,7 +804,7 @@ export default defineNuxtConfig({
 
     weserv: {
       provider: 'weserv',
-      baseURL: process.env.IMAGE_BASE_URL || config.USER_SITE,
+      baseURL: config.TUS_UPLOADER.replace(':8080', ''),
       weservURL: config.IMAGE_DELIVERY,
     },
 
