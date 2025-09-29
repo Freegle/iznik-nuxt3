@@ -58,9 +58,15 @@
       icon-name="save"
       label="Add Group"
       spinclass="text-white"
-      :disabled="!valid"
+      :disabled="!valid || creating"
       @handle="add"
     />
+    <NoticeMessage v-if="groupAdded" variant="primary" class="mt-2">
+      Group "{{ namefull }}" has been successfully created! Group ID: {{ groupAdded }}
+    </NoticeMessage>
+    <NoticeMessage v-if="errorMessage" variant="danger" class="mt-2">
+      {{ errorMessage }}
+    </NoticeMessage>
   </div>
 </template>
 <script>
@@ -78,6 +84,9 @@ export default {
       lng: null,
       cga: null,
       dpa: null,
+      groupAdded: null,
+      errorMessage: null,
+      creating: false,
     }
   },
   computed: {
@@ -86,23 +95,82 @@ export default {
     },
   },
   methods: {
+    async checkGroupExists(nameshort) {
+      try {
+        // First ensure we have all groups loaded
+        await this.groupStore.fetch()
+
+        // Check using the store's getter
+        const existingGroup = this.groupStore.get(nameshort)
+        if (existingGroup) {
+          return true
+        }
+
+        // Also check the raw state to be sure
+        const allGroups = this.groupStore.$state.allGroups
+        const lowerName = nameshort.toLowerCase()
+        const foundInAllGroups = allGroups[lowerName]
+
+        return !!foundInAllGroups
+      } catch (error) {
+        // If fetch fails, we can't determine - let backend handle it
+        return false
+      }
+    },
+
     async add(callback) {
-      console.log('group/add', {
-        nameshort: this.nameshort,
-        namefull: this.namefull,
-        cga: this.cga,
-        dpa: this.dpa,
-        lat: this.lat,
-        lng: this.lng,
-      })
-      await this.groupStore.addgroup({
-        nameshort: this.nameshort,
-        namefull: this.namefull,
-        cga: this.cga,
-        dpa: this.dpa,
-        lat: this.lat,
-        lng: this.lng,
-      })
+      // Prevent double-clicking
+      if (this.creating) {
+        callback()
+        return
+      }
+
+      this.creating = true
+
+      // Clear previous messages
+      this.groupAdded = null
+      this.errorMessage = null
+
+      try {
+        // Check if group already exists
+        const groupExists = await this.checkGroupExists(this.nameshort)
+
+        if (groupExists) {
+          this.errorMessage = `A group with the name "${this.nameshort}" already exists. Please choose a different name.`
+          this.creating = false
+          callback()
+          return
+        }
+
+        const groupId = await this.groupStore.addgroup({
+          nameshort: this.nameshort,
+          namefull: this.namefull,
+          cga: this.cga,
+          dpa: this.dpa,
+          lat: this.lat,
+          lng: this.lng,
+        })
+
+        if (groupId) {
+          this.groupAdded = groupId
+          this.creating = false
+        } else {
+          this.errorMessage = `Failed to create group "${this.nameshort}". Group creation was unsuccessful.`
+        }
+      } catch (error) {
+
+        // Extract meaningful error message from API error
+        if (error.message && error.message.includes('Create failed')) {
+          this.errorMessage = `Failed to create group "${this.nameshort}". A group with this name already exists.`
+        } else if (error.response && error.response.data && error.response.data.status) {
+          this.errorMessage = `Error creating group: ${error.response.data.status}`
+        } else {
+          this.errorMessage = `Error creating group: ${error.message || 'Unknown error occurred'}`
+        }
+      } finally {
+        this.creating = false
+      }
+
       callback()
     },
   },
