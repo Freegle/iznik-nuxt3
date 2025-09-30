@@ -16,7 +16,7 @@
             <div class="ratio ratio-16x9">
               <iframe
                 class="embed-responsive-item w-100"
-                src="https://www.youtube.com/embed/1rjCVHPOIpA"
+                src="https://www.youtube.com/embed/jyrAq57nqPM?si=892mIXfXSGpFxvJG"
                 allowfullscreen
               />
             </div>
@@ -27,7 +27,7 @@
               title="A-Z Film"
               description="Watch and share our new film about the Freegle Free Shop."
               image="/NRD/A-Zfilm.png"
-              url="https://www.youtube.com/embed/1rjCVHPOIpA"
+              url="https://youtu.be/SMtiMAiEb20?si=7VI3TxOaHzguem65"
               colour="magenta"
             />
             <NationalReuseDayBox
@@ -52,10 +52,10 @@
               colour="gold"
             />
             <NationalReuseDayBox
-              title="Quiz"
-              image="/NRD/ReuseQuiz.png"
-              description="Test your knowledge and discover fun facts about reuse!"
-              url="https://f6o4c3o82sx.typeform.com/to/GK9Q7hJK"
+              title="#ReuseHeroes"
+              image="/NRD/ReuseHeroes.png"
+              description="Tell us about your local Reuse Heroes."
+              url="mailto:partnerships@ilovefreegle.org"
               colour="orange"
             />
             <NationalReuseDayBox
@@ -69,27 +69,28 @@
           <div class="d-flex justify-content-around">
             <b-card class="cardwidth">
               <p>
-                Join Freegle as we celebrate National Reuse Day On Friday 18th
-                October. #NationalReuseDay is an annual event which celebrates
-                the wonderful and powerful act of REUSE - in all its forms.
-                Let's work together to put #Reuse firmly into the spotlight!
+                Join Freegle as we celebrate National Reuse Day on Friday 17th
+                October.
               </p>
               <p>
-                This year we will be asking people to #ChooseToReuse everyday,
-                because it's simple, anyone can do it and it's a great way for
-                everyone to:
+                #NationalReuseDay is an annual event, held each year on the
+                third Friday of October. National Reuse Day celebrates the
+                wonderful and powerful act of REUSE - in all its forms. Let's
+                work together to put #Reuse firmly into the spotlight!
               </p>
-              <ul class="list-unstyled mb-0">
-                <li>✅ Save money.</li>
-                <li>✅ Cut waste.</li>
-                <li>✅ Help others.</li>
-                <li>✅ Protect the planet.</li>
-              </ul>
+              <p>
+                This year will focus on the UK's #ReuseHeroes. Up and down the
+                UK there are some incredible initiatives going on, helping
+                people to waste less and reuse more. We want to shine a light on
+                the amazing reuse that's already happening and the fabulous
+                'Reuse Heroes', who are helping to inspire communities to waste
+                less and reuse more.
+              </p>
               <p class="mt-2">
                 For more information about National Reuse Day contact us here:
                 <SupportLink
-                  email="info@ilovefreegle.org"
-                  text="info@ilovefreegle.org"
+                  email="partnerships@ilovefreegle.org"
+                  text="partnerships@ilovefreegle.org"
                 />.
               </p>
             </b-card>
@@ -117,7 +118,7 @@ definePageMeta({
 const head = buildHead(
   route,
   runtimeConfig,
-  'National Reuse Day 2024',
+  'National Reuse Day 2025',
   'Celebrate reuse and get involved',
   runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
   {
