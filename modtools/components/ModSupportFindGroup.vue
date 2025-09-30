@@ -128,6 +128,18 @@
         group.affiliationconfirmedby
       }}
       <br />
+      <h4 class="mt-2">Names</h4>
+      <p>Short name:</p>
+      <b-form-input v-model="group.nameshort" class="mb-2" />
+      <p>Full name:</p>
+      <b-form-input v-model="group.namefull" class="mb-2" />
+      <SpinButton
+        variant="white"
+        icon-name="save"
+        label="Save Names"
+        class="mt-2"
+        @handle="saveNames"
+      />
       <h4 class="mt-2">Centre</h4>
       <p>Lat/lng of group centre:</p>
       <div class="d-flex">
@@ -380,6 +392,14 @@ export default {
       } catch (e) {
         this.DPAerror = e.message
       }
+      callback()
+    },
+    saveNames(callback) {
+      this.modGroupStore.updateMT({
+        id: this.groupid,
+        namefull: this.group.namefull,
+        nameshort: this.group.nameshort,
+      })
       callback()
     },
     saveCentres(callback) {
