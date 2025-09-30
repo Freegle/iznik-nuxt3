@@ -6,6 +6,7 @@ export default class LogsAPI extends BaseAPI {
   }
 
   src(src) {
-    return this.$post('/src', { src })
+    // Use v2 endpoint for source tracking
+    return this.$postv2('/src', { src })
   }
 }
