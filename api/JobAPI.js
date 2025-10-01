@@ -19,6 +19,6 @@ export default class JobAPI extends BaseAPI {
   }
 
   async log(params) {
-    await this.$post('/jobs', params)
+    await this.$postv2('/job', params)
   }
 }
