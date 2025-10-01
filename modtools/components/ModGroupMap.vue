@@ -417,6 +417,9 @@ const allgroups = computed(() => {
     groups = groups.filter((g) => g.mentored)
   }
 
+  // Filter out groups with onmap = 0
+  groups = groups.filter((g) => g.onmap)
+
   return groups
 })
 
