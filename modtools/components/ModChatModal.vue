@@ -18,6 +18,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user2.id
               }}
+              <span v-if="user2.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.ljuserid
+                }}
+              </span>
+              <span v-else-if="user2.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="user1">
@@ -26,6 +38,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user1.id
               }}
+              <span v-if="user1.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.ljuserid
+                }}
+              </span>
+              <span v-else-if="user1.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
@@ -39,6 +63,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user1.id
               }}
+              <span v-if="user1.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.ljuserid
+                }}
+              </span>
+              <span v-else-if="user1.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="user1 && user2 && user1.id != user2.id">
@@ -47,6 +83,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user2.id
               }}
+              <span v-if="user2.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.ljuserid
+                }}
+              </span>
+              <span v-else-if="user2.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
