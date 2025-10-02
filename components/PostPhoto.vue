@@ -155,12 +155,16 @@ async function rotate(deg) {
   emit('updated') // MT
 }
 
-function rotateLeft() {
+function rotateLeft(e) {
   rotate(-90)
+  e.preventDefault()
+  e.stopPropagation()
 }
 
-function rotateRight() {
+function rotateRight(e) {
   rotate(90)
+  e.preventDefault()
+  e.stopPropagation()
 }
 </script>
 <style scoped lang="scss">
