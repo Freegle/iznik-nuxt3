@@ -5,9 +5,6 @@
 # .well-known folder needs to be exposed.
 /.well-known/*  /well-known/:splat 200!
 
-# Twilio status needs proxying to the API endpoint.
-/twilio/status.php https://fdapilive.ilovefreegle.org/twilio/status.php 200!
-
 # PayPal similarly.  This has been updated on PayPal so should fade away.
 /donateipn.php https://fdapilive.ilovefreegle.org/donateipn.php 200!
 

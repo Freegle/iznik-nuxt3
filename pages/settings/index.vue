@@ -16,7 +16,6 @@
           />
           <AddressBookSection @show-address-modal="showAddressModal = true" />
           <EmailSettingsSection @update="updateMe" />
-          <TextAlertsSection />
           <OtherSettingsSection @update="updateMe" />
         </b-col>
         <b-col cols="0" xl="3" />
@@ -55,7 +54,6 @@ import ProfileSection from '~/components/settings/ProfileSection.vue'
 import AccountSection from '~/components/settings/AccountSection.vue'
 import AddressBookSection from '~/components/settings/AddressBookSection.vue'
 import EmailSettingsSection from '~/components/settings/EmailSettingsSection.vue'
-import TextAlertsSection from '~/components/settings/TextAlertsSection.vue'
 import OtherSettingsSection from '~/components/settings/OtherSettingsSection.vue'
 
 definePageMeta({
