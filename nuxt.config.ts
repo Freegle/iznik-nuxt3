@@ -269,8 +269,16 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('add-'),
+        },
+      },
+    },
     optimizeDeps: {
       include: [
+        'add-to-calendar-button',
         'resize-observer-polyfill',
         'jwt-decode',
         'bootstrap-vue-next/components/BAlert',

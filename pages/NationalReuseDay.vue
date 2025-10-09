@@ -7,7 +7,7 @@
           <div class="d-flex justify-content-around">
             <ProxyImage
               preload
-              src="/NRD/Banner.png"
+              src="/NRD/Banner.png?a=1"
               alt="National Reuse Day banner"
               class-name="image mt-2 w-100"
             />
@@ -16,7 +16,7 @@
             <div class="ratio ratio-16x9">
               <iframe
                 class="embed-responsive-item w-100"
-                src="https://www.youtube.com/embed/1rjCVHPOIpA"
+                src="https://www.youtube.com/embed/1SxLokz9F88?si=fcTHW2u75l9qMr6d"
                 allowfullscreen
               />
             </div>
@@ -27,7 +27,7 @@
               title="A-Z Film"
               description="Watch and share our new film about the Freegle Free Shop."
               image="/NRD/A-Zfilm.png"
-              url="https://www.youtube.com/embed/1rjCVHPOIpA"
+              url="https://youtu.be/SMtiMAiEb20?si=7VI3TxOaHzguem65"
               colour="magenta"
             />
             <NationalReuseDayBox
@@ -52,10 +52,10 @@
               colour="gold"
             />
             <NationalReuseDayBox
-              title="Quiz"
-              image="/NRD/ReuseQuiz.png"
-              description="Test your knowledge and discover fun facts about reuse!"
-              url="https://f6o4c3o82sx.typeform.com/to/GK9Q7hJK"
+              title="#ReuseHeroes"
+              image="/NRD/ReuseHeroes.png"
+              description="Find out about Freegle's Reuse Heroes."
+              url="https://www.canva.com/design/DAG0jRT27LA/ZImvRlocTQiuEuaSICtL5w/view?utm_content=DAG0jRT27LA&utm_campaign=designshare&utm_medium=link&utm_source=viewer"
               colour="orange"
             />
             <NationalReuseDayBox
@@ -69,27 +69,26 @@
           <div class="d-flex justify-content-around">
             <b-card class="cardwidth">
               <p>
-                Join Freegle as we celebrate National Reuse Day On Friday 18th
-                October. #NationalReuseDay is an annual event which celebrates
-                the wonderful and powerful act of REUSE - in all its forms.
-                Let's work together to put #Reuse firmly into the spotlight!
+                National Reuse Day is an annual celebration of the simple yet
+                powerful act of ‘Reuse’ - in all its forms. There are so many
+                easy ways for all of us to reuse household items and pass things
+                on when we no longer need them. Whether you opt to re-home items
+                of furniture; take clothes you no longer wear to a charity shop
+                or simply remember to take your reusable bags with you when you
+                shop - it’s all reuse and it’s all good!
               </p>
               <p>
-                This year we will be asking people to #ChooseToReuse everyday,
-                because it's simple, anyone can do it and it's a great way for
-                everyone to:
+                National Reuse Day is celebrated each year on the third Friday
+                in October. This year, Reuse Day will focus on the UK’s
+                incredible network of ‘Reuse Heroes’. Reuse Heroes are
+                individuals, organisations and projects - in communities up and
+                down the UK - which help people to waste less and reuse more.
               </p>
-              <ul class="list-unstyled mb-0">
-                <li>✅ Save money.</li>
-                <li>✅ Cut waste.</li>
-                <li>✅ Help others.</li>
-                <li>✅ Protect the planet.</li>
-              </ul>
               <p class="mt-2">
                 For more information about National Reuse Day contact us here:
                 <SupportLink
-                  email="info@ilovefreegle.org"
-                  text="info@ilovefreegle.org"
+                  email="partnerships@ilovefreegle.org"
+                  text="partnerships@ilovefreegle.org"
                 />.
               </p>
             </b-card>
@@ -117,7 +116,7 @@ definePageMeta({
 const head = buildHead(
   route,
   runtimeConfig,
-  'National Reuse Day 2024',
+  'National Reuse Day 2025',
   'Celebrate reuse and get involved',
   runtimeConfig.public.USER_SITE + '/councils/NationalReuseDay.png',
   {
