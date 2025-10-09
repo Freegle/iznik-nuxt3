@@ -16,7 +16,7 @@
             <div class="ratio ratio-16x9">
               <iframe
                 class="embed-responsive-item w-100"
-                src="https://www.youtube.com/embed/jyrAq57nqPM?si=892mIXfXSGpFxvJG"
+                src="https://www.youtube.com/embed/1SxLokz9F88?si=fcTHW2u75l9qMr6d"
                 allowfullscreen
               />
             </div>
@@ -54,8 +54,8 @@
             <NationalReuseDayBox
               title="#ReuseHeroes"
               image="/NRD/ReuseHeroes.png"
-              description="Tell us about your local Reuse Heroes."
-              url="mailto:partnerships@ilovefreegle.org"
+              description="Find out about Freegle's Reuse Heroes."
+              url="https://www.canva.com/design/DAG0jRT27LA/ZImvRlocTQiuEuaSICtL5w/view?utm_content=DAG0jRT27LA&utm_campaign=designshare&utm_medium=link&utm_source=viewer"
               colour="orange"
             />
             <NationalReuseDayBox
@@ -69,22 +69,20 @@
           <div class="d-flex justify-content-around">
             <b-card class="cardwidth">
               <p>
-                Join Freegle as we celebrate National Reuse Day on Friday 17th
-                October.
+                National Reuse Day is an annual celebration of the simple yet
+                powerful act of ‘Reuse’ - in all its forms. There are so many
+                easy ways for all of us to reuse household items and pass things
+                on when we no longer need them. Whether you opt to re-home items
+                of furniture; take clothes you no longer wear to a charity shop
+                or simply remember to take your reusable bags with you when you
+                shop - it’s all reuse and it’s all good!
               </p>
               <p>
-                #NationalReuseDay is an annual event, held each year on the
-                third Friday of October. National Reuse Day celebrates the
-                wonderful and powerful act of REUSE - in all its forms. Let's
-                work together to put #Reuse firmly into the spotlight!
-              </p>
-              <p>
-                This year will focus on the UK's #ReuseHeroes. Up and down the
-                UK there are some incredible initiatives going on, helping
-                people to waste less and reuse more. We want to shine a light on
-                the amazing reuse that's already happening and the fabulous
-                'Reuse Heroes', who are helping to inspire communities to waste
-                less and reuse more.
+                National Reuse Day is celebrated each year on the third Friday
+                in October. This year, Reuse Day will focus on the UK’s
+                incredible network of ‘Reuse Heroes’. Reuse Heroes are
+                individuals, organisations and projects - in communities up and
+                down the UK - which help people to waste less and reuse more.
               </p>
               <p class="mt-2">
                 For more information about National Reuse Day contact us here:
