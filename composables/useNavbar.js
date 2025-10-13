@@ -183,7 +183,8 @@ export function useNavbar() {
       // Look for a custom logo.
       const ret = await logoStore.fetch()
 
-      if (ret.ret === 0 && ret.logo) {
+      // v2 API returns data directly without ret/status wrapper
+      if (ret?.logo) {
         logo.value = ret.logo.path.replace(/.*logos/, '/logos')
         logoFormat.value = 'gif'
       }
