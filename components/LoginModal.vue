@@ -27,7 +27,7 @@
         Already a freegler? Log in
       </b-button>
     </div>
-    <p v-if="signUp" class="text-center">
+    <p v-if="signUp" class="text-center signup-info-text">
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
@@ -41,10 +41,12 @@
     <p v-if="loginType" class="text-center font-weight-bold">
       You usually log in using {{ loginType }}.
     </p>
-    <div class="d-flex flex-column flex-lg-row justify-content-between p-3">
+    <div
+      class="d-flex flex-column flex-lg-row justify-content-between p-0 p-md-3"
+    >
       <div class="signin__section--social">
-        <h3 class="header--size5 pb-3">Log in with a social account</h3>
-        <p v-if="signUp" class="font-weight-bold">
+        <h3 class="header--size5 pb-1 pb-md-3">Log in with a social account</h3>
+        <p v-if="signUp" class="font-weight-bold d-none d-md-block">
           Using one of these buttons is the easiest way to create an account:
         </p>
         <b-button
@@ -92,9 +94,14 @@
         <div class="divider" />
       </div>
       <div class="signin__section--freegle">
-        <h3 class="header--size5 pb-0">
+        <h3 class="header--size5 pb-0 freegle-account-header">
           <span v-if="signUp"> Create an account on Freegle </span>
-          <span v-else>Continue with your Freegle account</span>
+          <template v-else>
+            <span class="d-none d-md-inline"
+              >Continue with your Freegle account</span
+            >
+            <span class="d-inline d-md-none">Use your Freegle account</span>
+          </template>
         </h3>
         <div v-if="signUp" class="d-flex justify-content-around">
           <b-button
@@ -891,11 +898,16 @@ $color-yahoo: #6b0094;
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 315px;
+  min-width: 280px;
+  max-width: 100%;
   border-radius: 3px;
   padding: 0;
   margin: 0 auto 20px;
   color: $color-white;
+
+  @include media-breakpoint-up(md) {
+    min-width: 315px;
+  }
 
   @include media-breakpoint-up(lg) {
     margin: 0 0 20px;
@@ -940,7 +952,7 @@ $color-yahoo: #6b0094;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   @include media-breakpoint-up(lg) {
     flex-direction: column;
@@ -1003,11 +1015,16 @@ $color-yahoo: #6b0094;
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 315px;
+  min-width: 280px;
+  max-width: 100%;
   border-radius: 3px;
   padding: 0;
   margin: 0 auto 20px;
   color: $color-white;
+
+  @include media-breakpoint-up(md) {
+    min-width: 315px;
+  }
 
   @include media-breakpoint-up(lg) {
     margin: 0 0 20px;
@@ -1052,7 +1069,7 @@ $color-yahoo: #6b0094;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   @include media-breakpoint-up(lg) {
     flex-direction: column;
@@ -1109,5 +1126,37 @@ $color-yahoo: #6b0094;
   margin-top: 0.125rem;
   margin-right: 0.5rem;
   flex-shrink: 0;
+}
+
+/* Hide modal header on mobile */
+:deep(.modal-header) {
+  display: none !important;
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+  }
+}
+
+.signup-info-text {
+  font-size: 0.813rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+}
+
+.freegle-account-header {
+  white-space: nowrap;
+}
+</style>
+
+<style lang="scss">
+// Unscoped styles for modal header visibility
+.verytop .modal-header {
+  display: none !important;
+
+  @media (min-width: 768px) {
+    display: flex !important;
+  }
 }
 </style>
