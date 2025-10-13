@@ -41,11 +41,11 @@
               message doesn't exist (or has been very deleted).
             </NoticeMessage>
           </b-tab>
-          <b-tab>
+          <b-tab @click="onListCommunitiesTab">
             <template #title>
               <h2 class="ml-2 mr-2">List Communities</h2>
             </template>
-            <ModSupportListGroups />
+            <ModSupportListGroups ref="listGroupsComponent" />
           </b-tab>
           <b-tab>
             <template #title>
@@ -176,6 +176,13 @@ export default {
       // Fetch spam keywords when tab is selected
       if (this.$refs.spamKeywordsComponent) {
         await this.$refs.spamKeywordsComponent.fetchSpamKeywords()
+      }
+    },
+
+    async onListCommunitiesTab() {
+      // Fetch communities when tab is selected
+      if (this.$refs.listGroupsComponent) {
+        await this.$refs.listGroupsComponent.fetchCommunities()
       }
     },
   },

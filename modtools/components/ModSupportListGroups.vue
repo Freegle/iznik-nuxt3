@@ -1,14 +1,9 @@
 <template>
   <div>
-    <SpinButton
-      v-if="!fetched"
-      variant="primary"
-      icon-name="users"
-      label="Fetch communities"
-      spinclass="text-white"
-      @handle="fetchCommunities"
-    />
-    <div v-if="fetched && groups && groups.length" class="mt-2">
+    <div v-if="busy" class="mt-2">
+      <p>Loading communities...</p>
+    </div>
+    <div v-else-if="fetched && groups && groups.length" class="mt-2">
       <p>
         Here you can see info about all Freegle groups. Click on the column
         headings to sort. Click on the dropdown arrow to filter.
@@ -99,6 +94,12 @@
           :renderer="centreRenderer"
         >
         </hot-column>
+        <hot-column
+          title="Caretaker?"
+          data="mentored"
+          :renderer="caretakerRenderer"
+        >
+        </hot-column>
       </hot-table>
     </div>
   </div>
@@ -151,7 +152,7 @@ export default {
   },
   methods: {
     idRenderer(_instance, td, _row, _col, _prop, value) {
-      const group = this.modGroupStore.get(value)
+      const group = this.groups[_row]
       if (group && group.mentored) {
         td.style.backgroundColor = 'lightblue'
       }
@@ -194,8 +195,18 @@ export default {
       td.style.textAlign = 'center'
       td.innerHTML = value === 1 ? 'Y' : 'N'
     },
+    caretakerRenderer(_instance, td, _row, _col, _prop, value) {
+      td.style.textAlign = 'center'
+      td.innerHTML = value ? 'Y' : 'N'
+    },
 
     async fetchCommunities(callback) {
+      if (this.fetched) {
+        if (callback) callback()
+        return
+      }
+
+      this.busy = true
       await this.modGroupStore.listMT({
         grouptype: 'Freegle',
         support: true,
@@ -203,7 +214,8 @@ export default {
 
       // This prevents us rendering partial data that happens to be in store.
       this.fetched = true
-      callback()
+      this.busy = false
+      if (callback) callback()
     },
     cells(row, col, prop) {
       return {
