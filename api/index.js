@@ -38,6 +38,7 @@ import NewsAPI from './NewsAPI.js'
 import NoticeboardAPI from './NoticeboardAPI.js'
 import NotificationAPI from './NotificationAPI.js'
 import SessionAPI from './SessionAPI.js'
+import SimulationAPI from './SimulationAPI.js'
 import ShortlinksAPI from './ShortlinksAPI.js'
 import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
@@ -83,6 +84,7 @@ export default (config) => {
     noticeboard: new NoticeboardAPI(options),
     notification: new NotificationAPI(options),
     session: new SessionAPI(options),
+    simulation: new SimulationAPI(options),
     shortlinks: new ShortlinksAPI(options),
     socialactions: new SocialActionsAPI(options),
     spammers: new SpammersAPI(options),
