@@ -14,13 +14,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   async fetchByEmail(email, logError = true) {
-    return await this.$get(
-      '/user',
-      {
-        email,
-      },
-      logError
-    )
+    return await this.$getv2('/user/byemail/' + email, {}, logError)
   }
 
   async fetchPublicLocation(id) {

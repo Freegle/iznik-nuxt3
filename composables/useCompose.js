@@ -171,15 +171,21 @@ export function setup(type) {
     const user = authStore.user
     const em = email.value + ''
 
-    if (email.value && user) {
-      ret = !user.emails?.find((e) => {
-        return (
-          em
-            .toLowerCase()
-            .trim()
-            .localeCompare(e.email.toLowerCase().trim()) === 0
-        )
-      })
+    if (email.value) {
+      if (user) {
+        // Logged in - check if email is one of ours
+        ret = !user.emails?.find((e) => {
+          return (
+            em
+              .toLowerCase()
+              .trim()
+              .localeCompare(e.email.toLowerCase().trim()) === 0
+          )
+        })
+      } else {
+        // Logged out - always need to check
+        ret = true
+      }
     }
 
     return ret
