@@ -330,6 +330,9 @@ ANDROID_KEY_PASSWORD=...             # Key password
 # Google Play API (CircleCI)
 GOOGLE_PLAY_JSON_KEY=...             # Base64-encoded service account JSON
 
+# Firebase Configuration (CircleCI)
+GOOGLE_SERVICES_JSON_BASE64=...      # Base64-encoded google-services.json
+
 # App Configuration
 ISAPP=true                           # Enable mobile app mode
 APP_ENV=production                   # Build environment
@@ -361,7 +364,12 @@ USE_COOKIES=false                    # Cookie behavior for mobile
 
    # Encode Google Play JSON key
    base64 -w 0 google-play-api-key.json > play_key_base64.txt
+
+   # Encode Firebase google-services.json
+   base64 -w 0 android/app/google-services.json > google_services_base64.txt
    ```
+
+**Note:** The `google-services.json` file is required for Firebase/Push Notifications to work. Download it from [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your Android app → Download google-services.json
 
 ---
 
@@ -374,12 +382,13 @@ USE_COOKIES=false                    # Cookie behavior for mobile
 **Build Steps**:
 1. Install Node.js dependencies
 2. Build Nuxt app with `npm run generate` (static site)
-3. Sync Capacitor to Android project
-4. Query Google Play Console for latest version code
-5. Build signed AAB (Android App Bundle) with auto-incremented version
-6. Build signed APK for direct installation
-7. Upload AAB to Google Play Internal Testing track
-8. Store AAB and APK as CircleCI artifacts
+3. Decode and place Firebase `google-services.json` from environment variable
+4. Sync Capacitor to Android project
+5. Query Google Play Console for latest version code and version name
+6. Build signed AAB (Android App Bundle) with auto-incremented version
+7. Build signed APK for direct installation
+8. Upload AAB to Google Play Internal Testing track
+9. Store AAB and APK as CircleCI artifacts
 
 **Artifacts**:
 - `android-bundle/app-release.aab` - For Play Store
