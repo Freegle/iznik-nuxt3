@@ -122,7 +122,7 @@ platform :android do
         "versionName" => version,
         "versionCode" => new_version_code.to_s
       },
-      flags: '--stacktrace --debug'  # Enable detailed debugging output
+      flags: '--stacktrace'  # Enable stack traces for debugging
     )
 
     # Also build APK for direct installation and testing
@@ -134,7 +134,7 @@ platform :android do
         "versionName" => version,
         "versionCode" => new_version_code.to_s
       },
-      flags: '--stacktrace --debug'  # Enable detailed debugging output
+      flags: '--stacktrace'  # Enable stack traces for debugging
     )
     UI.success("✅ APK built successfully for manual installation!")
     UI.message("📱 APK location: android/app/build/outputs/apk/release/app-release.apk")
