@@ -65,6 +65,19 @@ jobs:
             export APP_ENV=production
             npm run generate
 
+      # Decode and place google-services.json for Firebase
+      - run:
+          name: Setup Firebase Configuration
+          command: |
+            if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+              echo "Decoding google-services.json from environment variable"
+              echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
+              echo "✅ google-services.json created successfully"
+            else
+              echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
+              echo "   Add this environment variable in CircleCI project settings"
+            fi
+
       # Sync Capacitor
       - run:
           name: Sync Capacitor to Android
