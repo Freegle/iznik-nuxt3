@@ -98,6 +98,9 @@ jobs:
       - store_artifacts:
           path: android/app/build/outputs/bundle/release/
           destination: android-bundle
+      - store_artifacts:
+          path: android/app/build/outputs/apk/release/
+          destination: android-apk
 
 workflows:
   version: 2
