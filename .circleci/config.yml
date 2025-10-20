@@ -6,29 +6,10 @@ orbs:
 executors:
   android-executor:
     docker:
-      - image: cimg/android:2024.01.1-node
+      - image: cimg/android:2025.10-node
     resource_class: large
 
 commands:
-  setup-nodejs:
-    steps:
-      - run:
-          name: Install Node.js 20
-          command: |
-            # Install nvm
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            # Install and use Node.js 20
-            nvm install 20
-            nvm use 20
-            nvm alias default 20
-
-            # Verify versions
-            node --version
-            npm --version
-
   setup-android-fastlane:
     steps:
       - run:
@@ -53,8 +34,12 @@ jobs:
     steps:
       - checkout
 
-      # Setup Node.js 20
-      - setup-nodejs
+      # Verify Node.js version
+      - run:
+          name: Verify Node.js and npm versions
+          command: |
+            node --version
+            npm --version
 
       # Restore npm cache
       - restore_cache:
@@ -65,11 +50,7 @@ jobs:
       # Install Node.js dependencies
       - run:
           name: Install Node.js Dependencies
-          command: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 20
-            npm ci
+          command: npm ci
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
@@ -80,9 +61,6 @@ jobs:
       - run:
           name: Build Nuxt App
           command: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 20
             export ISAPP=true
             export APP_ENV=production
             npm run generate
@@ -90,11 +68,7 @@ jobs:
       # Sync Capacitor
       - run:
           name: Sync Capacitor to Android
-          command: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use 20
-            npx cap sync android
+          command: npx cap sync android
 
       # Restore Fastlane bundle cache
       - restore_cache:
