@@ -7,13 +7,21 @@ platform :android do
   lane :internal do
     version = File.read(VERSION_FILE).strip
 
-    # Get latest build number from Play Console and increment
-    latest_build = google_play_track_version_codes(
-      track: 'internal',
-      json_key: 'fastlane/google-play-api-key.json'
-    ).first || 0
-
-    new_version_code = latest_build + 1
+    # Get version code - try Google Play API first, fallback to timestamp
+    begin
+      latest_build = google_play_track_version_codes(
+        track: 'internal',
+        json_key: 'fastlane/google-play-api-key.json'
+      ).first || 0
+      new_version_code = latest_build + 1
+      UI.message("📊 Using Play Console version code: #{new_version_code}")
+    rescue => e
+      # Fallback: use timestamp-based version code (YYMMDDHHMM format)
+      # This ensures each build has a unique, incrementing version code
+      new_version_code = Time.now.strftime("%y%m%d%H%M").to_i
+      UI.important("⚠️  Google Play API unavailable: #{e.message}")
+      UI.important("📅 Using timestamp-based version code: #{new_version_code}")
+    end
 
     # Build the Android App Bundle (AAB)
     gradle(
@@ -26,15 +34,23 @@ platform :android do
       }
     )
 
-    # Upload to Google Play Internal Testing track
-    upload_to_play_store(
-      track: 'internal',
-      json_key: 'fastlane/google-play-api-key.json',
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
-    )
+    # Upload to Google Play Internal Testing track (if credentials are available)
+    begin
+      upload_to_play_store(
+        track: 'internal',
+        json_key: 'fastlane/google-play-api-key.json',
+        skip_upload_apk: true,
+        skip_upload_metadata: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true
+      )
+      UI.success("✅ Successfully uploaded to Google Play Internal Testing!")
+    rescue => e
+      UI.important("⚠️  Google Play upload failed: #{e.message}")
+      UI.important("📦 AAB file is available in android/app/build/outputs/bundle/release/")
+      UI.important("💡 To enable Play Store upload, configure GOOGLE_PLAY_JSON_KEY in CircleCI")
+      # Don't fail the build - the AAB is still created and stored as artifact
+    end
   end
 
   desc "Promote Internal to Beta"
