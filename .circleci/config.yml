@@ -72,7 +72,25 @@ jobs:
             if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
               echo "Decoding google-services.json from environment variable"
               echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
-              echo "✅ google-services.json created successfully"
+
+              # Validate the decoded file
+              if [ -f android/app/google-services.json ]; then
+                FILE_SIZE=$(wc -c < android/app/google-services.json)
+                echo "✅ File created: $FILE_SIZE bytes"
+
+                # Validate JSON syntax
+                if python3 -m json.tool android/app/google-services.json > /dev/null 2>&1; then
+                  echo "✅ Valid JSON structure"
+                  # Show project info (not sensitive)
+                  echo "📱 Project ID: $(python3 -c "import json; print(json.load(open('android/app/google-services.json'))['project_info']['project_id'])")"
+                else
+                  echo "❌ ERROR: Invalid JSON - Firebase will not work!"
+                  exit 1
+                fi
+              else
+                echo "❌ ERROR: File was not created!"
+                exit 1
+              fi
             else
               echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
               echo "   Add this environment variable in CircleCI project settings"
