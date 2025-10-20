@@ -54,7 +54,10 @@ save
 /playwright-screenshots/
 
 # app
-android
+android/*
+!android/app/
+android/app/*
+!android/app/build.gradle
 ios
 
 # Fastlane
