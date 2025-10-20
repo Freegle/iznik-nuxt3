@@ -283,50 +283,56 @@ Several components have mobile-specific behavior:
 
 ## Version Management
 
-Versions must be updated in **three locations** for each release:
+### Android (Automated via CircleCI)
 
-### 1. config.js
+**Version Code**: Auto-incremented by CircleCI
+- Queries Google Play Console production track for latest version
+- Automatically increments by 1 for each build
+- No manual intervention needed
 
-```javascript
-MOBILE_VERSION: '3.2.0'
-```
+**Version Name**: Manually updated in `VERSION.txt`
+- Location: `VERSION.txt` in repository root
+- Example: `3.2.0`
+- Update this file to change the user-facing version
 
-### 2. Android: `android/app/build.gradle`
+**Fallback**: If Google Play API is unavailable, defaults to version code `1297`
 
-```gradle
-android {
-    defaultConfig {
-        versionCode 1202           // Integer, must increment
-        versionName "3.2.0"        // User-facing version
-    }
-}
-```
+### iOS (Manual)
 
-### 3. iOS: `ios/App/App.xcodeproj/project.pbxproj`
-
-Search for and update (appears twice):
+Version must be updated in `ios/App/App.xcodeproj/project.pbxproj`:
 
 ```
 CURRENT_PROJECT_VERSION = 1200;      // Build number
 MARKETING_VERSION = 3.2.0;           // User-facing version
 ```
 
+### Config Version
+
+Also update in `config.js` for runtime version checks:
+
+```javascript
+MOBILE_VERSION: '3.2.0'
+```
+
 ---
 
 ## Environment Variables
 
-### Required for Mobile Builds
+### Required for CircleCI Android Builds
 
 ```bash
-# Android Signing
-FREEGLE_NUXT3_KEYSTORE_PATH=/path/to/keystore
-FREEGLE_NUXT3_KEYSTORE_PASSWORD=your_keystore_password
-FREEGLE_NUXT3_KEYSTORE_ALIAS=your_key_alias
-FREEGLE_NUXT3_KEYALIAS_PASSWORD=your_alias_password
+# Android Signing (CircleCI)
+ANDROID_KEYSTORE_BASE64=...          # Base64-encoded keystore file
+ANDROID_KEYSTORE_PASSWORD=...        # Keystore password
+ANDROID_KEY_ALIAS=...                # Key alias (e.g., "Freegle Ltd Chris")
+ANDROID_KEY_PASSWORD=...             # Key password
+
+# Google Play API (CircleCI)
+GOOGLE_PLAY_JSON_KEY=...             # Base64-encoded service account JSON
 
 # App Configuration
 ISAPP=true                           # Enable mobile app mode
-MOBILE_VERSION=3.2.0                 # App version
+APP_ENV=production                   # Build environment
 
 # Google
 GOOGLE_CLIENT_ID=...                 # Android client ID
@@ -343,9 +349,43 @@ STRIPE_PUBLISHABLE_KEY=...
 USE_COOKIES=false                    # Cookie behavior for mobile
 ```
 
+### Setting Up CircleCI Environment Variables
+
+1. Go to CircleCI Project Settings: https://app.circleci.com/settings/project/github/Freegle/iznik-nuxt3
+2. Click "Environment Variables"
+3. Add the required variables listed above
+4. For base64 encoding:
+   ```bash
+   # Encode keystore
+   base64 -w 0 your-keystore.jks > keystore_base64.txt
+
+   # Encode Google Play JSON key
+   base64 -w 0 google-play-api-key.json > play_key_base64.txt
+   ```
+
 ---
 
 ## Build Process
+
+### CircleCI Automated Builds (Android)
+
+**Triggered on**: Pushes to `app-ci-fd` branch
+
+**Build Steps**:
+1. Install Node.js dependencies
+2. Build Nuxt app with `npm run generate` (static site)
+3. Sync Capacitor to Android project
+4. Query Google Play Console for latest version code
+5. Build signed AAB (Android App Bundle) with auto-incremented version
+6. Build signed APK for direct installation
+7. Upload AAB to Google Play Internal Testing track
+8. Store AAB and APK as CircleCI artifacts
+
+**Artifacts**:
+- `android-bundle/app-release.aab` - For Play Store
+- `android-apk/app-release.apk` - For direct installation/testing
+
+**Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
 
 ### Local Development
 
@@ -363,7 +403,7 @@ npx cap open android
 npx cap open ios
 ```
 
-### Production Build
+### Manual Production Build
 
 ```bash
 # Build Nuxt app as static site
@@ -374,7 +414,7 @@ npx cap sync
 
 # Build Android (via Android Studio or Gradle)
 cd android
-./gradlew assembleRelease
+./gradlew bundleRelease
 
 # Build iOS (via Xcode or xcodebuild)
 cd ios/App
@@ -453,21 +493,43 @@ Some packages require specific versions for compatibility. Check `package.json` 
 
 ## Deployment
 
-### Android
+### Android (Automated via CircleCI)
 
-1. Build signed APK/AAB in Android Studio
-2. Upload to Google Play Console
-3. Deploy to Internal Testing → Beta → Production
+**Automatic Process**:
+1. Push to `app-ci-fd` branch triggers CircleCI build
+2. CircleCI builds and signs AAB with upload key
+3. AAB automatically uploaded to Google Play Internal Testing track
+4. APK available as artifact for manual testing
 
-### iOS
+**Google Play Console Access**:
+- Internal Testing: https://play.google.com/console → Your App → Testing → Internal testing
+- Promote to Beta/Production via Play Console UI
+
+**Play App Signing**:
+- App is enrolled in Google Play App Signing
+- Upload key (managed by CircleCI) signs AABs before upload
+- App signing key (managed by Google) signs final APKs for users
+
+**Manual Override**:
+If needed, download AAB artifact from CircleCI and manually upload to Play Console
+
+### iOS (Manual)
 
 1. Build archive in Xcode
 2. Upload to App Store Connect via Transporter
 3. Deploy to TestFlight → Production
 
-### Automated Deployment (Planned)
+### Fastlane Lanes
 
-See `/plans/app-releases.md` for automated deployment with Fastlane and CircleCI.
+Additional Fastlane lanes available:
+
+```bash
+# Promote from Internal to Beta
+bundle exec fastlane android promote_beta
+
+# Promote from Beta to Production
+bundle exec fastlane android promote_production
+```
 
 ---
 
@@ -518,6 +580,7 @@ For mobile app specific issues:
 
 ---
 
-**Last Updated**: 2025-01-20
-**Current Version**: 3.2.x (app branch)
+**Last Updated**: 2025-10-20
+**Current Version**: 3.2.x (app-ci-fd branch)
 **Capacitor Version**: 7.x
+**CI/CD**: CircleCI with Fastlane (Android automated)
