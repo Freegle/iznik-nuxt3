@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    fastlane (2.225.0)
+    fastlane-plugin-android_versioning (0.6.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  fastlane
+  fastlane-plugin-android_versioning
+
+BUNDLED WITH
+   2.3.26
