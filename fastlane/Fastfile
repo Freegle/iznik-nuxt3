@@ -5,7 +5,73 @@ VERSION_FILE = "../VERSION.txt"
 platform :android do
   desc "Build and deploy to Google Play Internal Testing"
   lane :internal do
-    version = File.read(VERSION_FILE).strip
+    # Get current version name from Google Play production track
+    current_version_name = nil
+    begin
+      # Get the latest release info from production track
+      production_version_codes = google_play_track_version_codes(
+        track: 'production',
+        json_key: 'fastlane/google-play-api-key.json'
+      )
+
+      if production_version_codes && production_version_codes.any?
+        # Get full release info to extract version name
+        require 'googleauth'
+        require 'google/apis/androidpublisher_v3'
+
+        json_key_data = JSON.parse(File.read('fastlane/google-play-api-key.json'))
+        credentials = Google::Auth::ServiceAccountCredentials.make_creds(
+          json_key_io: StringIO.new(json_key_data.to_json),
+          scope: 'https://www.googleapis.com/auth/androidpublisher'
+        )
+
+        service = Google::Apis::AndroidpublisherV3::AndroidPublisherService.new
+        service.authorization = credentials
+
+        # Get the edit
+        edit = service.insert_edit('org.ilovefreegle.direct')
+        edit_id = edit.id
+
+        # Get production track details
+        track_release = service.get_edit_track('org.ilovefreegle.direct', edit_id, 'production')
+
+        if track_release.releases && track_release.releases.any?
+          latest_release = track_release.releases.first
+          if latest_release.version_codes && latest_release.version_codes.any?
+            # Get version name from the APK listing
+            version_code = latest_release.version_codes.first
+            apk = service.list_edit_apks('org.ilovefreegle.direct', edit_id).apks.find { |a| a.version_code == version_code }
+            current_version_name = apk.version_name if apk
+          end
+        end
+
+        # Clean up the edit
+        service.delete_edit('org.ilovefreegle.direct', edit_id)
+      end
+    rescue => e
+      UI.important("⚠️  Could not fetch version name from Play Console: #{e.message}")
+    end
+
+    # Auto-increment version name
+    if current_version_name
+      # Parse version (e.g., "3.2.27" -> [3, 2, 27])
+      parts = current_version_name.split('.').map(&:to_i)
+
+      if parts.length == 3
+        # Increment patch version
+        parts[2] += 1
+        version = parts.join('.')
+        UI.success("📱 Auto-incremented version name: #{current_version_name} → #{version}")
+      else
+        # Fallback to VERSION.txt if version format is unexpected
+        version = File.read(VERSION_FILE).strip
+        UI.important("⚠️  Unexpected version format '#{current_version_name}', using VERSION.txt: #{version}")
+      end
+    else
+      # Fallback to VERSION.txt if API call failed
+      version = File.read(VERSION_FILE).strip
+      UI.important("📄 Using version from VERSION.txt: #{version}")
+    end
 
     # Get version code - try Google Play API first, fallback to incremental
     begin
