@@ -1,0 +1,4 @@
+for_platform :android do
+  json_key_file("fastlane/google-play-api-key.json")
+  package_name("org.ilovefreegle.direct")
+end

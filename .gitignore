@@ -37,6 +37,7 @@ public/js/prebid-base-*
 .vs
 *.sh
 *.txt
+!VERSION.txt
 resources
 save
 /playwright-report/
@@ -55,3 +56,11 @@ save
 # app
 android
 ios
+
+# Fastlane
+fastlane/*.json
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/README.md
