@@ -115,6 +115,29 @@ jobs:
           path: android/app/build/outputs/apk/release/
           destination: android-apk
 
+      # Store debug artifacts
+      - run:
+          name: Create build info file
+          command: |
+            echo "Build #${CIRCLE_BUILD_NUM}" > build-info.txt
+            echo "Branch: ${CIRCLE_BRANCH}" >> build-info.txt
+            echo "Commit: ${CIRCLE_SHA1}" >> build-info.txt
+            echo "" >> build-info.txt
+            echo "google-services.json status:" >> build-info.txt
+            ls -la android/app/google-services.json >> build-info.txt 2>&1 || echo "  File not found" >> build-info.txt
+            echo "" >> build-info.txt
+            echo "Build outputs:" >> build-info.txt
+            ls -lh android/app/build/outputs/bundle/release/ >> build-info.txt 2>&1 || echo "  Bundle not found" >> build-info.txt
+            ls -lh android/app/build/outputs/apk/release/ >> build-info.txt 2>&1 || echo "  APK not found" >> build-info.txt
+          when: always
+      - store_artifacts:
+          path: build-info.txt
+          destination: build-info.txt
+      - store_artifacts:
+          path: android/app/build/reports/
+          destination: gradle-reports
+          when: always
+
 workflows:
   version: 2
 
