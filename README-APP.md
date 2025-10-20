@@ -333,6 +333,9 @@ GOOGLE_PLAY_JSON_KEY=...             # Base64-encoded service account JSON
 # Firebase Configuration (CircleCI)
 GOOGLE_SERVICES_JSON_BASE64=...      # Base64-encoded google-services.json
 
+# Sentry Error Tracking (CircleCI)
+SENTRY_DSN_APP_FD=...                # Sentry DSN for app error tracking (optional)
+
 # App Configuration
 ISAPP=true                           # Enable mobile app mode
 APP_ENV=production                   # Build environment
@@ -370,6 +373,8 @@ USE_COOKIES=false                    # Cookie behavior for mobile
    ```
 
 **Note:** The `google-services.json` file is required for Firebase/Push Notifications to work. Download it from [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your Android app → Download google-services.json
+
+**Note:** `SENTRY_DSN_APP_FD` is optional but recommended for error tracking in the mobile app. If not set, the app will use the default Sentry DSN from `config.js`. Setting a separate DSN for the app prevents conflicts with other pipelines. Get your Sentry DSN from [Sentry](https://sentry.io/) → Project Settings → Client Keys (DSN).
 
 ---
 

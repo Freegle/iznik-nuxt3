@@ -50,6 +50,7 @@ const CONFIG = {
     'dj0yJmk9N245WTRqaDd2dnA4JmQ9WVdrOWIzTlZNMU01TjJjbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRh',
 
   SENTRY_DSN:
+    process.env.SENTRY_DSN ||
     // 'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
     'https://54fb66c60a53a6fc6de5c20e35295304@o118493.ingest.sentry.io/4506643536609280', // Capacitor
 

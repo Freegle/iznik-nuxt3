@@ -63,6 +63,13 @@ jobs:
           command: |
             export ISAPP=true
             export APP_ENV=production
+            # Set Sentry DSN from app-specific environment variable
+            if [ -n "$SENTRY_DSN_APP_FD" ]; then
+              export SENTRY_DSN="$SENTRY_DSN_APP_FD"
+              echo "✅ Using app-specific Sentry DSN for error tracking"
+            else
+              echo "⚠️  SENTRY_DSN_APP_FD not set - app will use default Sentry DSN"
+            fi
             npm run generate
 
       # Decode and place google-services.json for Firebase
