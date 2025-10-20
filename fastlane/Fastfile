@@ -75,28 +75,28 @@ platform :android do
 
     # Get version code - try Google Play API first, fallback to incremental
     begin
-      # Try to get version codes from production track first (most reliable)
+      # Try to get version codes from internal track first (where we upload to)
       version_codes = google_play_track_version_codes(
-        track: 'production',
+        track: 'internal',
         json_key: 'fastlane/google-play-api-key.json'
       )
 
       if version_codes && version_codes.any?
         latest_build = version_codes.first
         new_version_code = latest_build + 1
-        UI.message("📊 Using Play Console production version code: #{latest_build}")
+        UI.message("📊 Using Play Console internal version code: #{latest_build}")
         UI.message("📊 New version code: #{new_version_code}")
       else
-        # Try internal track if production is empty
+        # Fall back to production track if internal is empty
         version_codes = google_play_track_version_codes(
-          track: 'internal',
+          track: 'production',
           json_key: 'fastlane/google-play-api-key.json'
         )
 
         if version_codes && version_codes.any?
           latest_build = version_codes.first
           new_version_code = latest_build + 1
-          UI.message("📊 Using Play Console internal version code: #{latest_build}")
+          UI.message("📊 Using Play Console production version code: #{latest_build}")
           UI.message("📊 New version code: #{new_version_code}")
         else
           # No releases on any track - use default
@@ -106,7 +106,7 @@ platform :android do
         end
       end
     rescue => e
-      # Fallback: start from current production version
+      # Fallback: start from safe default
       new_version_code = 1297
       UI.important("⚠️  Google Play API error: #{e.message}")
       UI.important("📅 Using fallback version code: #{new_version_code}")
