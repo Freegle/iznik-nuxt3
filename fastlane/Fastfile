@@ -70,10 +70,28 @@ platform :android do
       )
       UI.success("✅ Successfully uploaded to Google Play Internal Testing!")
     rescue => e
-      UI.important("⚠️  Google Play upload failed: #{e.message}")
-      UI.important("📦 AAB file is available in android/app/build/outputs/bundle/release/")
-      UI.important("💡 To enable Play Store upload, configure GOOGLE_PLAY_JSON_KEY in CircleCI")
-      # Don't fail the build - the AAB is still created and stored as artifact
+      error_msg = e.message
+
+      # Check if this is a Play App Signing enrollment error
+      if error_msg.include?("Play Signing") || error_msg.include?("Play signing")
+        UI.error("❌ Google Play upload failed: #{error_msg}")
+        UI.error("📋 Action Required: Enroll in Google Play App Signing")
+        UI.error("🔗 Instructions: https://support.google.com/googleplay/android-developer/answer/9842756")
+        UI.error("")
+        UI.error("Steps:")
+        UI.error("1. Go to Play Console → your app → Release → Setup → App integrity")
+        UI.error("2. Under 'App signing', click 'Use Google-generated key'")
+        UI.error("3. Follow the prompts to complete enrollment")
+        UI.error("")
+        UI.error("📦 AAB file is available in CircleCI artifacts if needed for manual upload")
+        UI.user_error!("Build failed: Play App Signing enrollment required")
+      else
+        # For other errors, warn but don't fail (e.g., missing credentials)
+        UI.important("⚠️  Google Play upload failed: #{error_msg}")
+        UI.important("📦 AAB file is available in android/app/build/outputs/bundle/release/")
+        UI.important("💡 To enable Play Store upload, configure GOOGLE_PLAY_JSON_KEY in CircleCI")
+        # Don't fail the build - the AAB is still created and stored as artifact
+      end
     end
   end
 
