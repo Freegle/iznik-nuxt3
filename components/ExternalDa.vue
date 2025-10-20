@@ -13,62 +13,76 @@
       }"
     >
       <div
-        v-if="isVisible"
-        :class="{
-          boredWithJobs,
-          jobs,
-        }"
+        v-if="fallbackAdVisible"
+        class="d-flex w-100 justify-content-md-around"
       >
-        <div class="d-flex w-100 justify-content-md-around">
-          <JobsDaSlot
-            v-if="renderAd && !boredWithJobs"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :class="{
-              'text-center': maxWidth === '100vw',
-            }"
-            @rendered="rippleRendered"
-            @borednow="setBored"
+        <nuxt-link to="/adsoff">
+          <img
+            src="/donate/SupportFreegle_970x250px_20May20215.png"
+            alt="Please donate to help keep Freegle running"
+            style="max-width: 100%; display: block; margin: auto"
           />
-          <OurPlaywireDa
-            v-else-if="playWire"
-            ref="playwiread"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            :video="video"
-            @rendered="rippleRendered"
-          />
-          <OurGoogleDa
-            v-else-if="adSense"
-            ref="googlead"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            @rendered="rippleRendered"
-          />
-          <OurPrebidDa
-            v-else
-            ref="prebidad"
-            :ad-unit-path="adUnitPath"
-            :min-width="minWidth"
-            :max-width="maxWidth"
-            :min-height="minHeight"
-            :max-height="maxHeight"
-            :div-id="divId"
-            :render-ad="renderAd"
-            @rendered="rippleRendered"
-          />
+        </nuxt-link>
+      </div>
+      <div v-else>
+        <div
+          v-if="isVisible || video"
+          :class="{
+            boredWithJobs,
+            jobs,
+          }"
+        >
+          <div class="d-flex w-100 justify-content-md-around">
+            <JobsDaSlot
+              v-if="renderAd && !boredWithJobs"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :class="{
+                'text-center': maxWidth === '100vw',
+              }"
+              @rendered="rippleRendered"
+              @borednow="setBored"
+            />
+            <OurPlaywireDa
+              v-else-if="playWire"
+              ref="playwiread"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              :video="video"
+              @rendered="rippleRendered"
+            />
+            <OurGoogleDa
+              v-else-if="adSense"
+              ref="googlead"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              @rendered="rippleRendered"
+            />
+            <OurPrebidDa
+              v-else
+              ref="prebidad"
+              :ad-unit-path="adUnitPath"
+              :min-width="minWidth"
+              :max-width="maxWidth"
+              :min-height="minHeight"
+              :max-height="maxHeight"
+              :div-id="divId"
+              :render-ad="renderAd"
+              @rendered="rippleRendered"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -150,6 +164,7 @@ let prebidRetry = 0
 let tcDataRetry = 0
 let visibleAndScriptsLoadedTimer = null
 const isVisible = ref(false)
+const fallbackAdVisible = ref(false)
 let firstBecomeVisible = false
 
 function visibilityChanged(visible) {
@@ -161,6 +176,25 @@ function visibilityChanged(visible) {
 
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
+
+    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) {
+      // Give up in iOS app
+      console.log('Running in iOS with no cookies or served ads')
+      const me = useAuthStore().user
+      const recentDonor =
+        me &&
+        me.donated &&
+        new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
+      if (recentDonor) {
+        console.log('Ads disabled in iOS as recent donor')
+        emit('rendered', false)
+      } else {
+        fallbackAdVisible.value = true
+        adShown.value = true
+        emit('rendered', true)
+      }
+      return
+    }
 
     if (!runtimeConfig.public.COOKIEYES) {
       // Not using CookieYes, e.g. in dev.

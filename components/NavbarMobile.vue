@@ -58,6 +58,11 @@
             </b-nav-item>
           </b-nav>
         </div>
+        <div v-if="isApp && loggedIn" class="text-white mr-3">
+          <div class="notifwrapper">
+            <v-icon icon="redo" class="fa-2x" @click="refresh" />
+          </div>
+        </div>
         <b-dropdown
           v-if="loggedIn"
           no-caret
@@ -231,6 +236,8 @@ import NavbarMobilePost from './NavbarMobilePost'
 import { useNavbar, navBarHidden } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile' // APP
+const mobileStore = useMobileStore()
 
 const {
   online,
@@ -270,6 +277,8 @@ const title = computed(() => {
   return useMiscStore().pageTitle
 })
 
+const isApp = ref(mobileStore.isApp) // APP
+
 const stickyAdRendered = computed(() => {
   return useMiscStore().stickyAdRendered
 })
@@ -297,6 +306,11 @@ onBeforeUnmount(() => {
   clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
 })
+
+function refresh() {
+  // APP
+  window.location.reload(true) // Works, but causes a complete reload from scratch. this.$router.go() doesn't work in iOS app
+}
 
 function handleScroll() {
   const scrollY = window.scrollY

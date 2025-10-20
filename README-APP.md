@@ -1,0 +1,523 @@
+# Freegle Direct Mobile App
+
+This document describes the mobile app version of Freegle, which is built using Capacitor to create native Android and iOS apps from the same Nuxt3 codebase.
+
+## Overview
+
+The mobile app is managed in the `app-ci-fd` branch (based on the original `app` branch) and contains extensive modifications to support native mobile functionality. The app shares most of the Vue components and business logic with the web version but uses a different build configuration and includes native platform code.
+
+## App Branch vs Master Branch
+
+The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app version** that differs from `master` in several key ways:
+
+### Build Configuration Differences
+
+- **SSR Disabled**: Uses Static Site Generation instead of Server-Side Rendering
+- **Build Target**: `static` instead of `server`
+- **Environment Flag**: `ISAPP=true` to detect mobile app context
+- **No Docker**: Mobile apps don't use the Docker-based infrastructure
+
+### Statistics
+
+- **592 files changed** from master
+- **22,115 insertions**
+- **48,890 deletions**
+- **462+ commits** ahead of master (as of last analysis)
+
+---
+
+## Core Mobile Infrastructure
+
+### Capacitor Framework
+
+The app uses Capacitor 7 to bridge web code with native functionality:
+
+- **App ID**: `org.ilovefreegle.direct`
+- **App Name**: Freegle
+- **Config File**: `capacitor.config.ts`
+- **Web Directory**: `.output/public` (from Nuxt static build)
+
+### Android Native Files
+
+Located in `android/` directory:
+
+- Complete Android Studio project structure
+- Gradle build configuration (`android/app/build.gradle`)
+- App icons, splash screens, and resources
+- Android manifest with permissions (Camera, Storage, etc.)
+- **Version Management**:
+  - `versionCode`: Integer build number (e.g., 1202)
+  - `versionName`: User-facing version string (e.g., "3.2.0")
+
+### iOS Native Files
+
+Located in `ios/` directory:
+
+- Complete Xcode project structure
+- Podfile for CocoaPods dependencies
+- iOS-specific icons and assets
+- GoogleService-Info.plist for Firebase integration
+- **Version Management**:
+  - `CURRENT_PROJECT_VERSION`: Build number (e.g., 1200)
+  - `MARKETING_VERSION`: User-facing version (e.g., "3.1.9")
+
+---
+
+## Mobile-Specific Features
+
+### Authentication Methods
+
+The mobile app supports multiple authentication methods with native implementations:
+
+1. **Google Sign-In**
+   - Package: `@codetrix-studio/capacitor-google-auth`
+   - Platform-specific client IDs for Android and iOS
+   - Native Google Sign-In UI
+
+2. **Facebook Login**
+   - Package: Custom Capacitor Social Login plugin
+   - Support for "Limited Login" on iOS
+   - Native Facebook authentication
+
+3. **Apple Sign In**
+   - iOS only
+   - Native Sign in with Apple integration
+   - Identity token handling
+
+4. **Yahoo Login**
+   - Uses in-app browser (Cordova InAppBrowser)
+   - OAuth flow with native browser
+
+### Push Notifications
+
+Custom implementation using Freegle's fork:
+
+- **Package**: `@freegle/capacitor-push-notifications-cap7`
+- **Features**:
+  - Foreground and background push handling
+  - Badge count management on home screen icon
+  - Deep linking from notifications
+  - Multiple notification channels (Android)
+  - Sound and vibration control
+  - Notification permissions handling
+
+### Camera & Photo Management
+
+- **Native camera access** for taking photos
+- **Photo picker** for selecting from gallery (single/multiple)
+- **Photo size optimization**: Reduces to 800x800 to manage app size
+- **Permissions**: Automatic camera permission requests
+- Special handling for Android/iOS differences
+
+### Payment Integration (Stripe)
+
+Mobile-specific Stripe implementation:
+
+- **Google Pay** (Android - live)
+- **Apple Pay** (iOS)
+- Native payment sheets
+- Donation flows optimized for mobile
+- Test mode support for development
+
+### Device Features
+
+1. **Deep Linking**
+   - Custom URL scheme support
+   - Handle app links from external sources
+   - One-click unsubscribe links
+   - Push notification routing
+
+2. **Native Share**
+   - Share posts using native share sheet
+   - Platform-specific share UI
+
+3. **Calendar Integration**
+   - Add events to native calendar
+   - Permission handling (iOS requires multiple permission types)
+   - Uses Cordova Calendar plugin
+
+4. **Pinch Zoom**
+   - Enabled for Android
+   - Native zoom gestures
+
+5. **Device Information**
+   - Collect device details for debugging
+   - Persistent device ID
+   - OS version tracking
+   - Send to Sentry for error context
+
+6. **App Updates**
+   - Check for required updates
+   - Check for available updates
+   - Version comparison logic
+   - Update prompts
+
+7. **Rate App**
+   - Native rating prompts
+   - Timing logic to avoid annoying users
+   - Platform-specific app store links
+
+---
+
+## Mobile Store (`stores/mobile.js`)
+
+A dedicated Pinia store handles all mobile-specific state and functionality:
+
+### State
+
+- `isApp`: Boolean flag for mobile app context
+- `mobileVersion`: Current app version string
+- `deviceinfo`: Device information object
+- `devicePersistentId`: Unique device identifier
+- `isiOS`: Platform detection
+- `osVersion`: Operating system version
+- `lastBadgeCount`: Last set notification badge count
+- `appupdaterequired`: Flag for mandatory updates
+- `appupdateavailable`: Flag for optional updates
+
+### Actions
+
+- `init()`: Initialize mobile app features
+- `initApp()`: Set up device info, deep links, push notifications
+- `getDeviceInfo()`: Collect device information
+- `fixWindowOpen()`: Handle iOS window.open behavior
+- `initDeepLinks()`: Set up deep link handling
+- `initPushNotifications()`: Configure push notification system
+- `checkForAppUpdate()`: Check for app updates
+- `initWakeUpActions()`: Handle app resume/wake events
+
+---
+
+## UI/UX Adjustments
+
+### Modified Components
+
+Several components have mobile-specific behavior:
+
+1. **ExternalLink.vue**
+   - Opens links in in-app browser instead of external browser
+   - Uses Cordova InAppBrowser plugin
+
+2. **AddToCalendar.vue**
+   - Uses native calendar plugin
+   - Handles iOS calendar permissions
+
+3. **DraggableMap.vue**
+   - Adjusted for mobile touch interactions
+
+4. **EmailValidator.vue**
+   - Mobile-optimized validation flow
+
+5. **Chat Components**
+   - Optimized for mobile screens
+   - Native sharing integration
+
+### Ads & Analytics
+
+- **CookieYes**: App-specific version (`cookieyesapp.js`)
+- **Google AdSense**: Modified for HTTPS enforcement
+- **Matomo**: Mobile app tracking
+- **Sentry**: Error reporting with device context
+- **Ad Behavior**: Some ads disabled or modified for mobile
+
+### Status Bar
+
+- Android and iOS status bar handling
+- Light/dark theme support
+- Overlay configuration
+
+---
+
+## Dependencies
+
+### Capacitor Core Packages
+
+```json
+{
+  "@capacitor/core": "^7.x",
+  "@capacitor/cli": "^7.x",
+  "@capacitor/android": "^7.x",
+  "@capacitor/ios": "^7.x"
+}
+```
+
+### Capacitor Plugins
+
+```json
+{
+  "@capacitor/app": "Native app lifecycle",
+  "@capacitor/app-launcher": "Launch other apps",
+  "@capacitor/camera": "Camera and photo picker",
+  "@capacitor/device": "Device information",
+  "@capacitor/share": "Native share sheet",
+  "@capawesome/capacitor-badge": "App icon badge management"
+}
+```
+
+### Custom Freegle Plugins
+
+```json
+{
+  "@freegle/capacitor-push-notifications-cap7": "Push notifications"
+}
+```
+
+### Social Login
+
+```json
+{
+  "@codetrix-studio/capacitor-google-auth": "Google Sign-In"
+}
+```
+
+### Cordova Plugins
+
+```json
+{
+  "cordova-plugin-inappbrowser": "In-app browser for OAuth",
+  "cordova-plugin-calendar": "Calendar integration"
+}
+```
+
+---
+
+## Version Management
+
+Versions must be updated in **three locations** for each release:
+
+### 1. config.js
+
+```javascript
+MOBILE_VERSION: '3.2.0'
+```
+
+### 2. Android: `android/app/build.gradle`
+
+```gradle
+android {
+    defaultConfig {
+        versionCode 1202           // Integer, must increment
+        versionName "3.2.0"        // User-facing version
+    }
+}
+```
+
+### 3. iOS: `ios/App/App.xcodeproj/project.pbxproj`
+
+Search for and update (appears twice):
+
+```
+CURRENT_PROJECT_VERSION = 1200;      // Build number
+MARKETING_VERSION = 3.2.0;           // User-facing version
+```
+
+---
+
+## Environment Variables
+
+### Required for Mobile Builds
+
+```bash
+# Android Signing
+FREEGLE_NUXT3_KEYSTORE_PATH=/path/to/keystore
+FREEGLE_NUXT3_KEYSTORE_PASSWORD=your_keystore_password
+FREEGLE_NUXT3_KEYSTORE_ALIAS=your_key_alias
+FREEGLE_NUXT3_KEYALIAS_PASSWORD=your_alias_password
+
+# App Configuration
+ISAPP=true                           # Enable mobile app mode
+MOBILE_VERSION=3.2.0                 # App version
+
+# Google
+GOOGLE_CLIENT_ID=...                 # Android client ID
+GOOGLE_IOS_CLIENT_ID=...            # iOS client ID
+
+# Facebook
+FACEBOOK_APPID=...
+FACEBOOK_CLIENTID=...
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY=...
+
+# Other
+USE_COOKIES=false                    # Cookie behavior for mobile
+```
+
+---
+
+## Build Process
+
+### Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Sync web code to native projects
+npx cap sync
+
+# Open in Android Studio
+npx cap open android
+
+# Open in Xcode
+npx cap open ios
+```
+
+### Production Build
+
+```bash
+# Build Nuxt app as static site
+npm run build
+
+# Sync to native projects
+npx cap sync
+
+# Build Android (via Android Studio or Gradle)
+cd android
+./gradlew assembleRelease
+
+# Build iOS (via Xcode or xcodebuild)
+cd ios/App
+xcodebuild -workspace App.xcworkspace -scheme App -configuration Release
+```
+
+---
+
+## Testing
+
+### App-Specific Test Checklist
+
+From `capacitor.config.ts` comments:
+
+- [ ] Status bar shows correctly on Android pre-A15, A15+ and iOS
+- [ ] Camera: take photo and select one or more photos
+- [ ] Yahoo login works
+- [ ] Google login works (Android & iOS)
+- [ ] Facebook login works (Android & iOS)
+- [ ] Apple login works (iOS only)
+- [ ] Stripe payment flows work
+- [ ] Push notifications received
+- [ ] Home screen badge count updates
+- [ ] Share functionality works
+- [ ] Deep links open correctly
+- [ ] Android pinch zoom works
+- [ ] Add to calendar works
+- [ ] Device info collected properly
+
+### Testing Donations
+
+Enable donation modal for testing:
+
+```javascript
+// In pages/myposts.vue:
+showDonationAskModal.value = true
+```
+
+---
+
+## Removed/Disabled for Mobile
+
+To reduce app size and complexity:
+
+- **CircleCI config**: Different deployment process for mobile
+- **Playwright tests**: Not applicable for native apps
+- **Docker files**: Mobile apps don't use Docker
+- **ModTools folder**: Removed to reduce app file size
+- **Some councils data**: Reduced to minimize app size
+- **Prebid ads**: Simplified ad system for mobile
+
+---
+
+## Known Issues & Workarounds
+
+### npm Install Issues
+
+If npm reinstall needed, comment out this line:
+```
+node_modules/@capacitor/cli/dist/android/run.js:40
+// await common_1.runTask
+```
+
+### Android Manifest
+
+Ensure camera permission is present:
+```xml
+<uses-permission android:name="android.permission.CAMERA" />
+```
+
+### Package Overrides
+
+Some packages require specific versions for compatibility. Check `package.json` overrides section.
+
+---
+
+## Deployment
+
+### Android
+
+1. Build signed APK/AAB in Android Studio
+2. Upload to Google Play Console
+3. Deploy to Internal Testing → Beta → Production
+
+### iOS
+
+1. Build archive in Xcode
+2. Upload to App Store Connect via Transporter
+3. Deploy to TestFlight → Production
+
+### Automated Deployment (Planned)
+
+See `/plans/app-releases.md` for automated deployment with Fastlane and CircleCI.
+
+---
+
+## Maintenance
+
+### Keeping Up with Master
+
+The app-ci-fd branch should periodically merge from master to get new features:
+
+```bash
+git checkout app-ci-fd
+git merge master
+# Resolve conflicts, test thoroughly
+git push origin app-ci-fd
+```
+
+### Capacitor Updates
+
+When updating Capacitor major versions:
+
+1. Update all `@capacitor/*` packages
+2. Run `npx cap sync`
+3. Review breaking changes in Capacitor release notes
+4. Test all native features thoroughly
+5. Update this README with any changes
+
+---
+
+## Resources
+
+- **Capacitor Docs**: https://capacitorjs.com/docs
+- **App Release Plan**: `/plans/app-releases.md`
+- **Freegle Push Plugin**: https://github.com/Freegle/capacitor-push-notifications
+- **Google Play Console**: https://play.google.com/console
+- **App Store Connect**: https://appstoreconnect.apple.com
+
+---
+
+## Support
+
+For mobile app specific issues:
+
+1. Check device info in app (Help → Copy app info)
+2. Check Sentry for error reports with device context
+3. Test on physical devices (simulators may behave differently)
+4. Verify all environment variables are set correctly
+5. Check native logs in Android Studio / Xcode
+
+---
+
+**Last Updated**: 2025-01-20
+**Current Version**: 3.2.x (app branch)
+**Capacitor Version**: 7.x

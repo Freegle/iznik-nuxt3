@@ -13,6 +13,7 @@
                   <pre
                     v-if="address"
                     :class="address.instructions ? '' : 'mb-2'"
+                    style="text-wrap: wrap"
                     >{{ multiline }}</pre
                   >
                   <pre v-else>This address has been deleted.</pre>
@@ -66,9 +67,11 @@
               <b-row>
                 <b-col cols="12">
                   <div v-if="address" class="d-flex justify-content-between">
-                    <pre :class="address.instructions ? '' : 'mb-2'">{{
-                      multiline
-                    }}</pre>
+                    <pre
+                      :class="address.instructions ? '' : 'mb-2'"
+                      style="text-wrap: wrap"
+                      >{{ multiline }}</pre
+                    >
                     <div>
                       <b-button
                         variant="white"

@@ -75,7 +75,7 @@
           </b-input-group>
         </div>
       </b-button-group>
-      <div class="monthly-checkbox-wrapper mb-2">
+      <!--div class="monthly-checkbox-wrapper mb-2">
         <BFormCheckbox
           id="monthly"
           v-model="monthly"
@@ -85,7 +85,7 @@
           <v-icon icon="arrow-left" class="monthly-arrow" />
           Monthly donation (these are really helpful)
         </BFormCheckbox>
-      </div>
+      </div-->
 
       <div v-if="parseFloat(price)" class="mt-2 mb-2 w-100">
         <StripeDonate

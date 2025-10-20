@@ -62,7 +62,35 @@
             >Continue with Facebook</span
           >
         </b-button>
+        <b-button
+          v-if="isiOS"
+          class="social-button social-button--apple"
+          :disabled="appleDisabled"
+          @click="loginAppleApp"
+        >
+          <b-img
+            src="signinbuttons/Apple_logo_white.svg"
+            class="social-button__image"
+          />
+          <span class="p-2 social-button__text font-weight-bold"
+            >Sign in with Apple</span
+          >
+        </b-button>
+        <b-button
+          v-if="isApp"
+          class="social-button social-button--google-app"
+          @click="loginGoogleApp"
+        >
+          <b-img
+            src="/signinbuttons/google-logo.svg"
+            class="social-button__image"
+          />
+          <span class="p-2 text--medium font-weight-bold"
+            >Continue with Google</span
+          >
+        </b-button>
         <div
+          v-else
           id="googleLoginButton"
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
@@ -84,6 +112,10 @@
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
         </notice-message>
+        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true">
+          <!-- APP -->
+          {{ loginWaitMessage }}
+        </b-alert>
         <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
           Login Failed: {{ socialLoginError }}
         </b-alert>
@@ -214,6 +246,9 @@ import {
 } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { SocialLogin } from '@capgo/capacitor-social-login' // Required changes in ios\App\App\AppDelegate.swift ETC
+import { SignInWithApple } from '@capacitor-community/apple-sign-in'
+import { appYahooLogin } from '../composables/app-yahoo'
 import { LoginError, SignUpError } from '../api/BaseAPI'
 import EmailValidator from './EmailValidator'
 import { useRuntimeConfig } from '#app'
@@ -221,6 +256,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import Api from '~/api'
+import { useMobileStore } from '@/stores/mobile' // APP
 
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')
@@ -237,6 +273,7 @@ const route = useRoute()
 const router = useRouter()
 const { gtm } = getCurrentInstance().appContext.config.globalProperties
 const { me, loggedIn } = useMe()
+const mobileStore = useMobileStore()
 
 const api = Api(runtimeConfig)
 
@@ -265,6 +302,7 @@ let bumpTimer = null
 const form = ref(null)
 const loginModal = ref(null)
 const googleLoginButton = ref(null)
+const loginWaitMessage = ref(null) // APP
 
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
@@ -275,7 +313,12 @@ const clientId = computed(() => {
   return runtimeConfig.public.GOOGLE_CLIENT_ID
 })
 
+const isApp = ref(mobileStore.isApp) // APP
+
+const isiOS = ref(mobileStore.isiOS) // APP
+
 const facebookDisabled = computed(() => {
+  if (isApp.value) return false
   return (
     bump.value &&
     (showSocialLoginBlocked.value || typeof window.FB === 'undefined')
@@ -295,11 +338,18 @@ const yahooDisabled = computed(() => {
   return false
 })
 
+const appleDisabled = computed(() => {
+  // APP
+  if (!isiOS.value) return true
+  return parseFloat(mobileStore.osVersion) < 13
+})
+
 const socialblocked = computed(() => {
+  const googleActuallyDisabled = isApp.value ? false : googleDisabled.value // APP
   const ret =
     bump.value &&
     initialisedSocialLogin.value &&
-    (facebookDisabled.value || googleDisabled.value || yahooDisabled.value) &&
+    (facebookDisabled.value || googleActuallyDisabled || yahooDisabled.value) &&
     timerElapsed.value
   return ret
 })
@@ -359,6 +409,7 @@ function tryLater(native) {
   } else {
     socialLoginError.value = 'Something went wrong; please try later.'
   }
+  loginWaitMessage.value = null
 }
 
 function bumpIt() {
@@ -378,6 +429,7 @@ function show() {
   pleaseShowModal.value = true
   nativeLoginError.value = null
   socialLoginError.value = null
+  loginWaitMessage.value = null
   buttonClicked.value = false
 
   setTimeout(() => {
@@ -412,6 +464,7 @@ function loginNative(e) {
 
   nativeLoginError.value = null
   socialLoginError.value = null
+  loginWaitMessage.value = null
   buttonClicked.value = true
   e.preventDefault()
   e.stopPropagation()
@@ -522,6 +575,7 @@ function loginNative(e) {
       })
   } else {
     // Login
+    loginWaitMessage.value = 'Please wait...'
     authStore
       .login({
         email: email.value,
@@ -560,6 +614,7 @@ function loginNative(e) {
         } else {
           throw e // let others bubble up
         }
+        loginWaitMessage.value = null
       })
   }
 }
@@ -576,6 +631,56 @@ async function loginFacebook() {
 
   nativeLoginError.value = null
   socialLoginError.value = null
+  loginWaitMessage.value = null
+
+  // App: https://github.com/capacitor-community/facebook-login
+
+  if (isApp.value) {
+    // APP
+    console.log('Facebook app start')
+
+    try {
+      const loginOptions = {
+        provider: 'facebook',
+        options: {
+          permissions: [
+            'email',
+            // 'public_profile'
+            // 'user_birthday',
+            // 'user_photos',
+            // 'user_gender',
+          ],
+        },
+      }
+      if (isiOS.value) loginOptions.options.limitedLogin = true
+      const response = await SocialLogin.login(loginOptions)
+      // console.log("Facebook response", response)
+      let accessToken = false
+      if (response && response.result) {
+        accessToken = response.result.accessToken.token
+        if (isiOS.value) accessToken = response.result.idToken
+      }
+      if (accessToken) {
+        // console.log("accessToken", accessToken)
+        // Login successful.
+        loginWaitMessage.value = 'Please wait...'
+        await authStore.login({
+          fblogin: 1,
+          fbaccesstoken: accessToken,
+          fblimited: isiOS.value,
+        })
+        // We are now logged in.
+        self.pleaseShowModal = false
+      } else {
+        socialLoginError.value = 'Facebook app login failed'
+      }
+    } catch (e) {
+      socialLoginError.value = 'Facebook app login error: ' + e.message
+    }
+    loginWaitMessage.value = null
+    return
+  }
+
   try {
     let response = null
     const promise = new Promise(function (resolve) {
@@ -606,6 +711,84 @@ async function loginFacebook() {
   } catch (e) {
     socialLoginError.value = 'Facebook login error: ' + e.message
   }
+}
+
+function loginAppleApp() {
+  if (signUp.value) {
+    api.bandit.chosen({
+      uid: 'signUpModal',
+      variant: 'apple',
+    })
+  }
+  // https://github.com/capacitor-community/apple-sign-in
+  socialLoginError.value = null
+  loginWaitMessage.value = null
+  try {
+    console.log('loginAppleApp')
+    const options = { scopes: 'email name' }
+
+    SignInWithApple.authorize(options)
+      .then(async (result) => {
+        // Sign in using token at server
+        if (result.response.identityToken) {
+          // identityToken, user, etc
+          loginWaitMessage.value = 'Please wait...'
+          await authStore.login({
+            applecredentials: result.response,
+            applelogin: true,
+          })
+          // We are now logged in.
+          self.pleaseShowModal = false
+        } else {
+          socialLoginError.value = 'No identityToken given'
+          loginWaitMessage.value = null
+        }
+      })
+      .catch((e) => {
+        if (e.message.includes('1001')) {
+          socialLoginError.value = 'Apple login cancelled'
+        } else {
+          socialLoginError.value = e.message
+        }
+        loginWaitMessage.value = null
+      })
+  } catch (e) {
+    console.log('Apple login error: ', e)
+    socialLoginError.value = 'Apple login error: ' + e.message
+  }
+}
+
+async function loginGoogleApp() {
+  // https://github.com/Cap-go/capacitor-social-login
+  try {
+    console.log('loginGoogleApp')
+    const response = await SocialLogin.login({
+      provider: 'google',
+      options: {
+        scopes: ['email'],
+        forceRefreshToken: true, // Android: if you need refresh token
+        forcePrompt: true, // iOS: Force account selection prompt
+      },
+    })
+    // console.log(response)
+    if (response.result && response.result.idToken) {
+      loginWaitMessage.value = 'Please wait...'
+      await authStore.login({
+        googlejwt: response.result.idToken,
+        googlelogin: true,
+      })
+      // We are now logged in.
+      console.log('Logged in')
+      self.pleaseShowModal = false
+    } else {
+      socialLoginError.value = 'Google: no result.idToken found'
+    }
+    loginWaitMessage.value = null
+  } catch (e) {
+    console.log('Google login error: ', e)
+    socialLoginError.value = 'Google login error: ' + e.message
+  }
+  loginWaitMessage.value = null
 }
 
 async function handleGoogleCredentialsResponse(response) {
@@ -650,11 +833,65 @@ async function loginYahoo() {
     })
   }
 
+  if (isApp.value) {
+    // APP
+    appYahooLogin(route.fullPath, (ret) => {
+      // arrow so .this. is correct
+      loginWaitMessage.value = 'Please wait...'
+      // console.log('appYahooLogin completed', ret)
+      const returnto = ret.returnto
+      const code = ret.code
+      if (me.value) {
+        // We are logged in.  Go back to where we want to be.
+        console.log('Already logged in')
+        if (returnto) {
+          // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
+          console.log('Return to', returnto)
+          router.push(returnto)
+        } else {
+          console.log('Just go home')
+          router.push('/')
+        }
+      } else if (!code) {
+        socialLoginError.value = 'Yahoo login failed: ' + ret.error
+        loginWaitMessage.value = null
+      } else {
+        authStore
+          .login({
+            yahoocodelogin: code,
+          })
+          .then((result) => {
+            const ret = result.data
+            console.log('Yahoologin session login returned', ret)
+            if (ret.ret === 0) {
+              console.log('Logged in')
+              pleaseShowModal.value = false
+
+              if (returnto) {
+                // Go where we want to be.  Make sure we remove the code to avoid us trying to log in again.
+                console.log('Return to', returnto)
+                router.go(returnto)
+              } else {
+                console.log('Just go home')
+                router.push('/')
+              }
+            } else {
+              console.error('Server login failed', ret)
+              socialLoginError.value = 'Yahoo login failed'
+              loginWaitMessage.value = null
+            }
+          })
+      }
+    })
+    return
+  }
+
   // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
   // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
   // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
   nativeLoginError.value = null
   socialLoginError.value = null
+  loginWaitMessage.value = null
 
   const url =
     'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
@@ -773,13 +1010,44 @@ function installFacebookSDK() {
   }
 }
 
+async function initializeAppSocialLogins() {
+  console.log('APP: Set up SocialLogin for google and facebook')
+  const initGoogleParams = {
+    webClientId: clientId.value, // Use Web Client ID for all platforms
+    iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+    iOSServerClientId: clientId.value, // the iOS server client id (required in mode offline)
+    // mode: 'offline' // replaces grantOfflineAccess
+  }
+  /* if( isiOS.value) {
+    initGoogleParams.iOSClientId = runtimeConfig.public.GOOGLE_IOS_CLIENT_ID // for iOS
+    initGoogleParams.webClientId = clientId.value // Use Web Client ID for all platforms
+    initGoogleParams.iOSServerClientId = clientId.value
+  }
+  else {
+    initGoogleParams.webClientId = clientId.value // Use Web Client ID for all platforms
+  } */
+  await SocialLogin.initialize({
+    google: initGoogleParams,
+    facebook: {
+      appId: runtimeConfig.public.FACEBOOK_APPID,
+      clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
+    },
+  })
+}
+
 // Watchers
 watch(
   showModal,
   (newVal) => {
+    loginWaitMessage.value = null
     pleaseShowModal.value = newVal
 
     if (newVal) {
+      if (isApp.value) {
+        // APP
+        initializeAppSocialLogins()
+        return
+      }
       if (!initialisedSocialLogin.value) {
         // We only use the Google and Facebook SDKs in login, so we can install them here in the modal.  This means we
         // don't load the scripts for every page.
@@ -805,6 +1073,7 @@ watch(
 watch(
   forceLogin,
   (newVal) => {
+    loginWaitMessage.value = null
     console.log('Force login changed to ' + newVal)
     showModal.value = pleaseShowModal.value || newVal
   },
@@ -878,6 +1147,7 @@ defineExpose({
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-yahoo: #6b0094;
+$color-apple: #000000;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -928,6 +1198,17 @@ $color-yahoo: #6b0094;
   border: 2px solid $color-facebook;
   background-color: $color-facebook;
   width: 100%;
+}
+
+.social-button--apple {
+  border: 2px solid $color-apple;
+  background-color: $color-apple;
+  width: 100%;
+}
+.social-button--apple .social-button__image {
+  width: 56px;
+  height: 56px;
+  background-color: $color-black;
 }
 
 .social-button--google {
@@ -1052,6 +1333,13 @@ $color-yahoo: #6b0094;
   background-color: $color-white;
   width: 100%;
   min-height: 47px;
+}
+
+.social-button--google-app {
+  border: 2px solid $color-google;
+  background-color: #fff;
+  color: #3c4043;
+  width: 100%;
 }
 
 :deep(.social-button--google > div) {

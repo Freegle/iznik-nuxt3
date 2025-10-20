@@ -1,6 +1,7 @@
-import * as Sentry from '@sentry/browser'
+import * as Sentry from '@sentry/vue'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 
 let requestId = 0
@@ -52,6 +53,7 @@ export default class BaseAPI {
       const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
+      const mobileStore = useMobileStore()
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -92,6 +94,7 @@ export default class BaseAPI {
         }
 
         config.params.modtools = false
+        config.params.app = mobileStore.isApp
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -102,6 +105,7 @@ export default class BaseAPI {
         }
 
         config.data.modtools = false
+        config.data.app = mobileStore.isApp
         body = JSON.stringify(config.data)
       }
 

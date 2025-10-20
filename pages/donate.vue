@@ -30,16 +30,16 @@
                   class="amountwidth"
                 />
               </b-input-group>
-              <BFormCheckbox
+              <!--BFormCheckbox
                 v-if="!payPalFallback"
                 id="monthly"
                 v-model="monthly"
                 name="monthly"
                 class="mb-2"
               >
-                <v-icon icon="arrow-left" />
-                Monthly donations are really helpful
-              </BFormCheckbox>
+                <v-icon icon="arrow-left" /> Monthly donations are really
+                helpful
+              </BFormCheckbox-->
               <div v-if="parseFloat(amount)">
                 <DonationButton
                   v-if="payPalFallback"

@@ -14,6 +14,7 @@ import { useMiscStore } from '../stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '@/stores/mobile' // APP
 const GoogleOneTap = defineAsyncComponent(() =>
   import('~/components/GoogleOneTap')
 )
@@ -22,6 +23,7 @@ const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const proxy = runtimeConfig.public.IMAGE_DELIVERY
+const mobileStore = useMobileStore()
 
 let ready = false
 const oneTap = ref(false)
@@ -90,7 +92,8 @@ if (jwt || persistent) {
   }
 }
 
-if (!ready) {
+if (!ready && !mobileStore.isApp) {
+  // APP
   // We don't have a valid JWT.  See if OneTap can sign us in.
   oneTap.value = true
 }

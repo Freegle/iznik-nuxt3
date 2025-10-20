@@ -13,7 +13,7 @@
           friends, family or work colleagues who've never heard of us, and who
           could help themseves or others by freegling?
         </p>
-        <p>
+        <p v-if="!isApp">
           Personalise your message and send it to them using the buttons below.
         </p>
         <InviteSomeone />
@@ -241,6 +241,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
+import { useMobileStore } from '@/stores/mobile' // APP
 import {
   ref,
   defineAsyncComponent,
@@ -261,6 +262,9 @@ definePageMeta({
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
+const mobileStore = useMobileStore()
+
+const isApp = ref(mobileStore.isApp) // APP
 
 useHead(
   buildHead(

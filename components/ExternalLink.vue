@@ -1,9 +1,11 @@
 <template>
   <!-- eslint-disable-next-line -->
-  <a :href="carefulHref" :target="target" rel="noopener noreferrer"><slot /></a>
+  <a :href="carefulHref" :target="target" rel="noopener noreferrer" @click="openInBrowser"><slot /></a>
 </template>
 <script setup>
 import { computed } from 'vue'
+import { AppLauncher } from '@capacitor/app-launcher'
+import { useMobileStore } from '@/stores/mobile'
 
 const props = defineProps({
   href: {
@@ -21,4 +23,15 @@ const carefulHref = computed(() => {
 const target = computed(() => {
   return props.href?.startsWith('mailto') ? '_self' : '_blank'
 })
+
+function openInBrowser() {
+  // APP
+  const mobileStore = useMobileStore()
+  if (mobileStore.isApp) {
+    const url = carefulHref.value
+    AppLauncher.openUrl({ url })
+    return false
+  }
+  return true
+}
 </script>

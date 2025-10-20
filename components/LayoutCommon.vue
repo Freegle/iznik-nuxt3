@@ -132,6 +132,7 @@ import DeletedRestore from '~/components/DeletedRestore.vue'
 import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
+import { useMobileStore } from '@/stores/mobile' // APP
 
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
@@ -260,10 +261,19 @@ onMounted(async () => {
     const nuxtApp = useNuxtApp()
     const { $sentrySetContext, $sentrySetUser } = nuxtApp
 
-    $sentrySetContext('builddate', {
+    const sentryParams = {
+      // APP
       buildDate: runtimeConfig.public.BUILD_DATE,
       deployId: runtimeConfig.public.DEPLOY_ID,
-    })
+    }
+    if (runtimeConfig.public.ISAPP) {
+      console.log('LAYOUT mobileVersion', runtimeConfig.public.MOBILE_VERSION)
+      sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
+      const mobileStore = useMobileStore()
+      sentryParams.deviceuserinfo = mobileStore.deviceuserinfo
+    }
+
+    $sentrySetContext('builddate', sentryParams)
 
     if (me.value) {
       // Set the context for sentry so that we know which users are having errors.

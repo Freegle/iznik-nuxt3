@@ -146,60 +146,71 @@ function idle() {
 }
 
 async function ready() {
-  if (process.client) {
-    mapObject.value = map.value.leafletObject
+  mapObject.value = map.value.leafletObject
+  if (process.client && mapObject.value) {
+    try {
+      const { Geocoder } = await import('leaflet-control-geocoder/src/control')
+      const { Photon } = await import(
+        'leaflet-control-geocoder/src/geocoders/photon'
+      )
 
-    const { Geocoder } = await import('leaflet-control-geocoder/src/control')
-    const { Photon } = await import(
-      'leaflet-control-geocoder/src/geocoders/photon'
-    )
-
-    new Geocoder({
-      placeholder: 'Search for a place...',
-      defaultMarkGeocode: false,
-      geocoder: new Photon({
-        geocodingQueryParams: {
-          bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
-        },
-        nameProperties: ['name', 'street', 'suburb', 'hamlet', 'town', 'city'],
-        serviceUrl,
-      }),
-      collapsed: false,
-    })
-      .on('markgeocode', function (e) {
-        if (e && e.geocode && e.geocode.bbox) {
-          const bbox = e.geocode.bbox
-
-          const sw = bbox.getSouthWest()
-          const ne = bbox.getNorthEast()
-          console.log('BBOX', bbox, sw, ne)
-
-          const bounds = new window.L.LatLngBounds([
-            [sw.lat, sw.lng],
-            [ne.lat, ne.lng],
-          ]).pad(0.1)
-
-          // For reasons I don't understand, leaflet throws errors if we don't make these local here.
-          const swlat = bounds.getSouthWest().lat
-          const swlng = bounds.getSouthWest().lng
-          const nelat = bounds.getNorthEast().lat
-          const nelng = bounds.getNorthEast().lng
-
-          // Empty out the query box so that the dropdown closes.
-          this.setQuery('')
-          zoom.value = 14
-
-          nextTick(() => {
-            // Move the map to the location we've found.
-            console.log('Fly to', swlat, swlng, nelat, nelng)
-            mapObject.value.flyToBounds([
-              [swlat, swlng],
-              [nelat, nelng],
-            ])
-          })
-        }
+      new Geocoder({
+        placeholder: 'Search for a place...',
+        defaultMarkGeocode: false,
+        geocoder: new Photon({
+          geocodingQueryParams: {
+            bbox: '-7.57216793459, 49.959999905, 1.68153079591, 58.6350001085',
+          },
+          nameProperties: [
+            'name',
+            'street',
+            'suburb',
+            'hamlet',
+            'town',
+            'city',
+          ],
+          serviceUrl,
+        }),
+        collapsed: false,
       })
-      .addTo(mapObject.value)
+        .on('markgeocode', function (e) {
+          if (e && e.geocode && e.geocode.bbox) {
+            const bbox = e.geocode.bbox
+
+            const sw = bbox.getSouthWest()
+            const ne = bbox.getNorthEast()
+            console.log('BBOX', bbox, sw, ne)
+
+            const bounds = new window.L.LatLngBounds([
+              [sw.lat, sw.lng],
+              [ne.lat, ne.lng],
+            ]).pad(0.1)
+
+            // For reasons I don't understand, leaflet throws errors if we don't make these local here.
+            const swlat = bounds.getSouthWest().lat
+            const swlng = bounds.getSouthWest().lng
+            const nelat = bounds.getNorthEast().lat
+            const nelng = bounds.getNorthEast().lng
+
+            // Empty out the query box so that the dropdown closes.
+            this.setQuery('')
+            zoom.value = 14
+
+            nextTick(() => {
+              // Move the map to the location we've found.
+              console.log('Fly to', swlat, swlng, nelat, nelng)
+              mapObject.value.flyToBounds([
+                [swlat, swlng],
+                [nelat, nelng],
+              ])
+            })
+          }
+        })
+        .addTo(mapObject.value)
+    } catch (e) {
+      // This is usually caused by leaflet.
+      console.log('Ignore leaflet exception', e)
+    }
   }
 }
 </script>

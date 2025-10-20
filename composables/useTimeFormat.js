@@ -63,6 +63,7 @@ export function addStrings(item, times) {
 }
 
 export function timeago(val, past) {
+  // console.log('TIMEAGO',val)
   let f = null
 
   // dayjs pluralises wrongly in some cases - we've seen 1 hours ago.

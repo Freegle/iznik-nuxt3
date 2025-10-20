@@ -1,8 +1,61 @@
+// import fs from 'fs'
+// import https from 'https'
 import eslintPlugin from 'vite-plugin-eslint'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
+
+// Mobile version change:
+// - config.js: MOBILE_VERSION eg 3.1.9
+// - android\app\build.gradle
+//    - versionCode eg 1202
+//    - versionName eg "3.2.0"
+// - ios\App\App.xcodeproj\project.pbxproj
+//    - CURRENT_PROJECT_VERSION eg 1200 TWICE
+//    - MARKETING_VERSION eg 3.1.9 TWICE
+//
+// If npm reinstall, comment out line 40 of node_modules\@capacitor\cli\dist\android\run.js //await common_1.runTask
+// Ensure in here android\app\src\main\AndroidManifest.xml
+//  <uses-permission android:name="android.permission.CAMERA" />
+//
+// node_modules/tus-js-client/lib.esm/upload.js
+//         console.log('tus: failed to upload chunk at offset',_this8._offset, err)
+
+// console.log("CHECK PREBID SCRIPT CHANGES")
+// const prebidCurrent = fs.readFileSync('public/js/prebid.js')
+// const prebidBase = fs.readFileSync('public/js/prebid-base.js')
+// if (prebidCurrent.compare(prebidBase) !== 0) {
+//  console.error('public/js/prebid.js NOT THE SAME AS public/js/prebid-base.js', prebidCurrent.length, prebidBase.length)
+//  process.exit(1)
+// }
+console.log('config.STRIPE_PUBLISHABLE_KEY', config.STRIPE_PUBLISHABLE_KEY)
+console.log('config.NODE_ENV', config.NODE_ENV)
+console.log('config.APP_ENV', config.APP_ENV)
+console.log('config.USE_COOKIES', config.USE_COOKIES)
+const production = config.APP_ENV ? config.APP_ENV === 'production' : true
+
+/* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
+  console.log('CHECK COOKIEYES SCRIPT CHANGES')
+  const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
+
+  https.get(config.COOKIEYES, (res) => {
+    let cookieyesCurrent = '';
+    res.on('data', (chunk) => { cookieyesCurrent += chunk; });
+    res.on('end', () => {
+      try {
+        if (cookieyesCurrent !== cookieyesBase) {
+          console.error('config.COOKIEYES NOT THE SAME AS public/js/cookieyes-base.js', config.COOKIEYES)
+          process.exit(1)
+        }
+      } catch (error) { console.error(error.message) }
+    })
+
+  }).on("error", (error) => { console.error(error.message) })
+} else { console.error('config.COOKIEYES not set') }
+ */
+
+const isTest = process.env.NODE_ENV === 'test' || process.env.CI
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -48,9 +101,9 @@ export default defineNuxtConfig({
   //
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
-  target: 'server',
+  target: config.ISAPP ? 'static' : 'server',
 
-  ssr: true,
+  ssr: !config.ISAPP,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
@@ -60,9 +113,7 @@ export default defineNuxtConfig({
   // do that and then the _redirects file will proxy it to the correct location.
   $production: {
     app: {
-      cdnURL: process.env.DEPLOY_URL
-        ? '/netlify/' + process.env.DEPLOY_URL.replace('https://', '')
-        : '',
+      cdnURL: process.env.DEPLOY_URL,
     },
   },
 
@@ -221,20 +272,25 @@ export default defineNuxtConfig({
       OSM_TILE: config.OSM_TILE,
       GEOCODE: config.GEOCODE,
       FACEBOOK_APPID: config.FACEBOOK_APPID,
+      FACEBOOK_CLIENTID: config.FACEBOOK_CLIENTID,
       YAHOO_CLIENTID: config.YAHOO_CLIENTID,
       GOOGLE_MAPS_KEY: config.GOOGLE_MAPS_KEY,
       GOOGLE_API_KEY: config.GOOGLE_API_KEY,
       GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,
+      GOOGLE_IOS_CLIENT_ID: config.GOOGLE_IOS_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       USER_DOMAIN: config.USER_DOMAIN,
       IMAGE_SITE: config.IMAGE_SITE,
       SENTRY_DSN: config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
+      ISAPP: config.ISAPP,
+      MOBILE_VERSION: config.MOBILE_VERSION,
       NETLIFY_DEPLOY_ID: process.env.DEPLOY_ID,
       NETLIFY_SITE_NAME: process.env.SITE_NAME,
       NETLIFY_BRANCH: process.env.BRANCH,
       MATOMO_HOST: process.env.MATOMO_HOST,
       COOKIEYES: config.COOKIEYES,
+      USE_COOKIES: config.USE_COOKIES,
       TRUSTPILOT_LINK: config.TRUSTPILOT_LINK,
       TUS_UPLOADER: config.TUS_UPLOADER,
       IMAGE_DELIVERY: config.IMAGE_DELIVERY,
@@ -333,16 +389,31 @@ export default defineNuxtConfig({
         },
       },
     },
-    plugins: [
-      splitVendorChunkPlugin(),
-      VitePWA({ registerType: 'autoUpdate' }),
-      // Make Lint errors cause build failures.
-      eslintPlugin(),
-      sentryVitePlugin({
-        org: 'freegle',
-        project: 'nuxt3',
-      }),
-    ],
+    plugins:
+      config.ISAPP && production
+        ? [
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'capacitor',
+              authToken: config.SENTRY_AUTH_TOKEN,
+            }),
+          ]
+        : config.ISAPP
+        ? []
+        : [
+            splitVendorChunkPlugin(),
+            VitePWA({ registerType: 'autoUpdate' }),
+            // Make Lint errors cause build failures.
+            eslintPlugin(),
+            // eslint-disable-next-line no-undef
+            legacy({
+              targets: ['since 2015'],
+            }),
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'nuxt3',
+            }),
+          ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
@@ -701,11 +772,16 @@ export default defineNuxtConfig({
               }
             }
             
-            window.onGoogleLibraryLoad = postGSI
+            // config.ISAPP Do not load GSI client script as Google login uses Capacitor plugin: so just run postGSI
+            //window.onGoogleLibraryLoad = postGSI
             
             // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
             // render.
-            loadScript('https://accounts.google.com/gsi/client')
+            // loadScript('https://accounts.google.com/gsi/client')
+            ` +
+            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) +
+            `
+            //}
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,

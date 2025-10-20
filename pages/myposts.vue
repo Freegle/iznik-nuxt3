@@ -19,6 +19,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
+          <AppUpdateAvailable />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -216,7 +217,8 @@ onMounted(() => {
     ids.value = window.history.state.ids
     newUserPassword.value = window.history.state.newpassword
   }
-  // showDonationAskModal.value = true
+
+  // showDonationAskModal.value = true // debug: shows <DonationAskModal/> on My Posts
 })
 
 function donationMade() {

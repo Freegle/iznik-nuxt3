@@ -12,6 +12,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
+          <AppUpdateAvailable />
           <MicroVolunteering />
           <div>
             <GlobalMessage />

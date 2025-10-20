@@ -36,6 +36,9 @@
             @success="thankyou = true"
           />
         </div>
+        <div v-else-if="variant === 'rateapp'">
+          <RateAppAsk @hide="hide" />
+        </div>
         <div v-else-if="variant === 'stripe'">
           <DonationAskStripe
             :groupid="groupId"
@@ -67,6 +70,7 @@ import { useDonationStore } from '~/stores/donations'
 import Api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { dateshort } from '~/composables/useTimeFormat'
+import RateAppAsk from '~/components/RateAppAsk.vue'
 
 const props = defineProps({
   variant: {
