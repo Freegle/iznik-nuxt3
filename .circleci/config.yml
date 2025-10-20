@@ -70,6 +70,11 @@ jobs:
           name: Sync Capacitor to Android
           command: npx cap sync android
 
+      # Make gradlew executable
+      - run:
+          name: Make gradlew executable
+          command: chmod +x android/gradlew
+
       # Restore Fastlane bundle cache
       - restore_cache:
           keys:
