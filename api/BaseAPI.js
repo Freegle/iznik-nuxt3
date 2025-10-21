@@ -403,7 +403,9 @@ export default class BaseAPI {
     // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
     //   probably do the right thing.
     // - otherwise throw an exception.
-    if (status !== 200) {
+    //
+    // Accept all 2xx status codes as successful (200, 201, 204, etc.)
+    if (status < 200 || status >= 300) {
       const statusstr = status?.toString()
 
       // For specific paths, we want to silently allow 401 errors and swallow them.
