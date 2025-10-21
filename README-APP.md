@@ -285,17 +285,22 @@ Several components have mobile-specific behavior:
 
 ### Android (Automated via CircleCI)
 
-**Version Code**: Auto-incremented by CircleCI
-- Queries Google Play Console production track for latest version
+**Version Name** (e.g., "3.2.28"): Manually updated in `VERSION.txt`
+- Location: `VERSION.txt` in repository root
+- This is semantic versioning controlled by developers
+- Update this file when you want to change the user-facing version
+- Build will FAIL if VERSION.txt is missing or has invalid format (must be X.Y.Z)
+
+**Version Code** (e.g., 1300): Auto-incremented by CircleCI
+- Queries Google Play Console (internal track, then production track) for latest version code
 - Automatically increments by 1 for each build
 - No manual intervention needed
+- Build will FAIL if Google Play API is unavailable or no releases exist
 
-**Version Name**: Manually updated in `VERSION.txt`
-- Location: `VERSION.txt` in repository root
-- Example: `3.2.0`
-- Update this file to change the user-facing version
-
-**Fallback**: If Google Play API is unavailable, defaults to version code `1297`
+**Why this approach?**:
+- Version names are semantic (3.2.28) and should be controlled by developers
+- Version codes are sequential build numbers and must auto-increment from Play Console
+- Google Play API doesn't reliably expose version names for published releases
 
 ### iOS (Manual)
 
@@ -379,17 +384,19 @@ USE_COOKIES=false                    # Cookie behavior for mobile
 ### Verifying GOOGLE_PLAY_JSON_KEY
 
 The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
-- Auto-incrementing version names and codes from Google Play Console
+- Auto-incrementing version codes from Google Play Console
 - Uploading builds to Google Play Internal Testing
 
 **Status**: ✅ Properly configured and working (as of build #596)
 
 **Build Behavior**:
 - The build will **FAIL** if `GOOGLE_PLAY_JSON_KEY` is not set, empty, or invalid
-- The build will **FAIL** if it cannot fetch version information from Google Play API
-- No fallback to VERSION.txt - version must always be auto-incremented from Play Console
+- The build will **FAIL** if it cannot fetch version CODES from Google Play API
+- The build will **FAIL** if `VERSION.txt` is missing or has invalid format
+- Version NAME comes from VERSION.txt (developer controlled)
+- Version CODE comes from Google Play API (auto-incremented)
 
-**Debug Output**: The decode step now includes extensive validation:
+**Debug Output**: The decode step includes extensive validation:
 - ✅ Environment variable is set
 - ✅ File created successfully with valid size
 - ✅ Valid JSON structure
@@ -397,7 +404,8 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 **Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
 - Look for "✅ Google Play API key file validated" in decode step
-- Look for "📊 Using Play Console internal version code" in deploy step
+- Look for "📱 Using version name from VERSION.txt: X.Y.Z" in deploy step
+- Look for "📊 Using Play Console internal version code: XXXX" in deploy step
 - Look for "✅ Successfully uploaded to Google Play Internal Testing!" at end
 
 ---

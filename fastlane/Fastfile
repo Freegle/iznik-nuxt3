@@ -20,95 +20,20 @@ platform :android do
       UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
     end
 
-    # Get highest version name from ALL Google Play tracks
-    current_version_name = nil
-    begin
-      require 'googleauth'
-      require 'google/apis/androidpublisher_v3'
-
-      json_key_data = JSON.parse(File.read('google-play-api-key.json'))
-      credentials = Google::Auth::ServiceAccountCredentials.make_creds(
-        json_key_io: StringIO.new(json_key_data.to_json),
-        scope: 'https://www.googleapis.com/auth/androidpublisher'
-      )
-
-      service = Google::Apis::AndroidpublisherV3::AndroidPublisherService.new
-      service.authorization = credentials
-
-      # Get the edit
-      edit = service.insert_edit('org.ilovefreegle.direct')
-      edit_id = edit.id
-
-      # Check all tracks: production, beta (Open Testing), alpha, internal
-      tracks = ['production', 'beta', 'alpha', 'internal']
-      all_version_names = []
-
-      tracks.each do |track_name|
-        begin
-          UI.message("🔍 Checking #{track_name} track...")
-          track_release = service.get_edit_track('org.ilovefreegle.direct', edit_id, track_name)
-
-          if track_release.releases && track_release.releases.any?
-            UI.message("  Found #{track_release.releases.length} release(s) in #{track_name}")
-            latest_release = track_release.releases.first
-            if latest_release.version_codes && latest_release.version_codes.any?
-              version_code = latest_release.version_codes.first
-              UI.message("  Latest version code: #{version_code}")
-
-              # Try to get version name from bundles (AAB) first, then APKs
-              bundle = service.list_edit_bundles('org.ilovefreegle.direct', edit_id).bundles.find { |b| b.version_code == version_code }
-              if bundle && bundle.version_name
-                all_version_names << bundle.version_name
-                UI.message("📊 Found version #{bundle.version_name} (bundle) in #{track_name} track")
-              else
-                apk = service.list_edit_apks('org.ilovefreegle.direct', edit_id).apks.find { |a| a.version_code == version_code }
-                if apk && apk.version_name
-                  all_version_names << apk.version_name
-                  UI.message("📊 Found version #{apk.version_name} (apk) in #{track_name} track")
-                else
-                  UI.message("  ⚠️  No version name found for version code #{version_code}")
-                end
-              end
-            else
-              UI.message("  ⚠️  No version codes in latest release")
-            end
-          else
-            UI.message("  No releases in #{track_name} track")
-          end
-        rescue => track_error
-          UI.message("ℹ️  Error checking #{track_name} track: #{track_error.message}")
-        end
-      end
-
-      # Find the highest version across all tracks
-      if all_version_names.any?
-        current_version_name = all_version_names.max_by { |v| v.split('.').map(&:to_i) }
-        UI.success("🎯 Highest version across all tracks: #{current_version_name}")
-      end
-
-      # Clean up the edit
-      service.delete_edit('org.ilovefreegle.direct', edit_id)
-    rescue => e
-      UI.user_error!("❌ CRITICAL: Failed to fetch version names from Play Console: #{e.message}")
-      UI.user_error!("💡 Check that GOOGLE_PLAY_JSON_KEY is valid and service account has proper permissions")
+    # Get version NAME from VERSION.txt (semantic versioning controlled by developers)
+    # Version names in Play Console are not reliably accessible via API
+    unless File.exist?('../VERSION.txt')
+      UI.user_error!("❌ CRITICAL: VERSION.txt not found")
+      UI.user_error!("💡 Create VERSION.txt in repository root with version (e.g., 3.2.28)")
     end
 
-    # Auto-increment version name
-    unless current_version_name
-      UI.user_error!("❌ CRITICAL: No version found in Google Play Console")
-      UI.user_error!("💡 Ensure at least one release exists in Google Play (production, beta, alpha, or internal track)")
-    end
+    version = File.read('../VERSION.txt').strip
+    UI.success("📱 Using version name from VERSION.txt: #{version}")
 
-    # Parse version (e.g., "3.2.27" -> [3, 2, 27])
-    parts = current_version_name.split('.').map(&:to_i)
-
-    if parts.length == 3
-      # Increment patch version
-      parts[2] += 1
-      version = parts.join('.')
-      UI.success("📱 Auto-incremented version name: #{current_version_name} → #{version}")
-    else
-      UI.user_error!("❌ CRITICAL: Unexpected version format '#{current_version_name}'. Expected format: X.Y.Z")
+    # Validate version format
+    parts = version.split('.').map(&:to_i)
+    unless parts.length == 3
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}' in VERSION.txt. Expected format: X.Y.Z")
     end
 
     # Get version code from Google Play API
