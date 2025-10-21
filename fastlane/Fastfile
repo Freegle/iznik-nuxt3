@@ -20,20 +20,22 @@ platform :android do
       UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
     end
 
-    # Get and auto-increment version NAME from VERSION.txt
-    # Version names in Play Console are not reliably accessible via API
-    unless File.exist?('../VERSION.txt')
-      UI.user_error!("❌ CRITICAL: VERSION.txt not found")
-      UI.user_error!("💡 Create VERSION.txt in repository root with version (e.g., 3.2.28)")
+    # Get and auto-increment version NAME from CircleCI environment variable
+    # This avoids needing git push permissions
+    current_version = ENV['CURRENT_VERSION']
+
+    unless current_version
+      UI.user_error!("❌ CRITICAL: CURRENT_VERSION environment variable not set in CircleCI")
+      UI.user_error!("💡 Set it in CircleCI Project Settings → Environment Variables")
+      UI.user_error!("💡 Format: X.Y.Z (e.g., 3.2.28)")
     end
 
-    current_version = File.read('../VERSION.txt').strip
-    UI.message("📱 Current version from VERSION.txt: #{current_version}")
+    UI.message("📱 Current version from CircleCI: #{current_version}")
 
     # Validate and parse version format
     parts = current_version.split('.').map(&:to_i)
     unless parts.length == 3
-      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}' in VERSION.txt. Expected format: X.Y.Z")
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}'. Expected format: X.Y.Z")
     end
 
     # Auto-increment patch version
@@ -41,9 +43,9 @@ platform :android do
     version = parts.join('.')
     UI.success("📱 Auto-incremented version name: #{current_version} → #{version}")
 
-    # Update VERSION.txt with new version
-    File.write('../VERSION.txt', version)
-    UI.success("✅ Updated VERSION.txt to #{version}")
+    # Write new version to file for CircleCI to read
+    File.write('../.new_version', version)
+    UI.success("✅ Wrote new version to .new_version file")
 
     # Get version code from Google Play API
     version_codes = nil

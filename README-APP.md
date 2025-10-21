@@ -285,12 +285,13 @@ Several components have mobile-specific behavior:
 
 ### Android (Fully Automated via CircleCI)
 
-**Version Name** (e.g., "3.2.28"): Auto-incremented by CircleCI
-- Location: `VERSION.txt` in repository root
-- CircleCI reads current version, increments patch version (3.2.28 → 3.2.29)
-- Updated VERSION.txt is automatically committed and pushed back to repo
-- Build will FAIL if VERSION.txt is missing or has invalid format (must be X.Y.Z)
+**Version Name** (e.g., "3.2.29"): Auto-incremented by CircleCI
+- Stored in CircleCI environment variable `CURRENT_VERSION`
+- CircleCI reads current version, increments patch version (3.2.29 → 3.2.30)
+- Updates `CURRENT_VERSION` via CircleCI API after successful build
+- Build will FAIL if `CURRENT_VERSION` is not set or has invalid format (must be X.Y.Z)
 - **No manual intervention needed** - fully automated
+- **No git push permissions required**
 
 **Version Code** (e.g., 1300): Auto-incremented by CircleCI
 - Queries Google Play Console (internal track, then production track) for latest version code
@@ -299,16 +300,23 @@ Several components have mobile-specific behavior:
 - **No manual intervention needed** - fully automated
 
 **How it works**:
-1. CircleCI reads VERSION.txt (e.g., "3.2.28")
-2. Auto-increments patch version (3.2.28 → 3.2.29)
+1. CircleCI reads `CURRENT_VERSION` env var (e.g., "3.2.29")
+2. Auto-increments patch version (3.2.29 → 3.2.30)
 3. Queries Google Play for latest version code (e.g., 1300)
 4. Auto-increments version code (1300 → 1301)
-5. Builds AAB and APK with new version (3.2.29 / 1301)
+5. Builds AAB and APK with new version (3.2.30 / 1301)
 6. Uploads to Google Play Internal Testing
-7. Commits updated VERSION.txt (3.2.29) back to repo
+7. Updates `CURRENT_VERSION` env var to 3.2.30 via CircleCI API
+
+**Initial Setup** (one-time):
+1. Go to CircleCI Project Settings → Environment Variables
+2. Add `CURRENT_VERSION` = `3.2.29` (starting version)
+3. Add `CIRCLECI_API_TOKEN` = (your CircleCI personal access token)
+   - Get token from: https://app.circleci.com/settings/user/tokens
+   - Needs "All" scope to update environment variables
 
 **To manually bump major/minor version**:
-- Edit VERSION.txt directly: `3.2.28` → `4.0.0` or `3.3.0`
+- Update `CURRENT_VERSION` in CircleCI: `3.2.29` → `4.0.0` or `3.3.0`
 - Next build will auto-increment from there: `4.0.0` → `4.0.1`
 
 ### iOS (Manual)
@@ -401,10 +409,10 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 **Build Behavior**:
 - The build will **FAIL** if `GOOGLE_PLAY_JSON_KEY` is not set, empty, or invalid
 - The build will **FAIL** if it cannot fetch version CODES from Google Play API
-- The build will **FAIL** if `VERSION.txt` is missing or has invalid format
-- Version NAME is auto-incremented from VERSION.txt (3.2.28 → 3.2.29)
+- The build will **FAIL** if `CURRENT_VERSION` is not set or has invalid format
+- Version NAME is auto-incremented from `CURRENT_VERSION` env var (3.2.29 → 3.2.30)
 - Version CODE is auto-incremented from Google Play API (1300 → 1301)
-- Updated VERSION.txt is committed and pushed back to repo automatically
+- `CURRENT_VERSION` is updated via CircleCI API after successful build
 
 **Debug Output**: The decode step includes extensive validation:
 - ✅ Environment variable is set
@@ -414,12 +422,12 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 **Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
 - Look for "✅ Google Play API key file validated" in decode step
+- Look for "📱 Current version from CircleCI: X.Y.Z" in deploy step
 - Look for "📱 Auto-incremented version name: X.Y.Z → X.Y.(Z+1)" in deploy step
 - Look for "📊 Using Play Console internal version code: XXXX" in deploy step
 - Look for "📊 New version code: XXXX" in deploy step
 - Look for "✅ Successfully uploaded to Google Play Internal Testing!" at end
-- Look for "✅ Pushed VERSION.txt update: X.Y.(Z+1)" in commit step
-- Check repo for automatic commit: "Auto-increment version to X.Y.(Z+1)"
+- Look for "✅ Updated CURRENT_VERSION to X.Y.(Z+1)" in update version step
 
 ---
 

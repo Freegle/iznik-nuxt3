@@ -166,36 +166,48 @@ jobs:
       # Build and Deploy to Internal Track
       - run:
           name: Build and Deploy to Google Play Internal Track
-          command: bundle exec fastlane android internal
-
-      # Commit and push VERSION.txt update
-      - run:
-          name: Commit and Push Updated VERSION.txt
           command: |
-            echo "📝 Committing VERSION.txt update..."
+            # Run fastlane and capture the new version
+            bundle exec fastlane android internal
 
-            # Configure git
-            git config user.name "CircleCI Bot"
-            git config user.email "circleci@freegle.in"
+            # The NEW_VERSION is set by Fastlane in the environment
+            # We'll update CircleCI env var in the next step
 
-            # Check if VERSION.txt changed
-            if git diff --quiet VERSION.txt; then
-              echo "ℹ️  VERSION.txt unchanged - nothing to commit"
-            else
-              # Add and commit VERSION.txt
-              git add VERSION.txt
-              NEW_VERSION=$(cat VERSION.txt)
-              git commit -m "Auto-increment version to ${NEW_VERSION}
-
-Built and uploaded to Google Play Internal Testing.
-
-🤖 Automated by CircleCI build #${CIRCLE_BUILD_NUM}"
-
-              # Push to remote
-              git push origin ${CIRCLE_BRANCH}
-
-              echo "✅ Pushed VERSION.txt update: ${NEW_VERSION}"
+      # Update CircleCI CURRENT_VERSION environment variable
+      - run:
+          name: Update CircleCI Version Variable
+          command: |
+            # Check if CIRCLECI_API_TOKEN is set
+            if [ -z "$CIRCLECI_API_TOKEN" ]; then
+              echo "⚠️  CIRCLECI_API_TOKEN not set - cannot update version"
+              echo "💡 Add CIRCLECI_API_TOKEN to CircleCI environment variables"
+              echo "💡 Get a token from: https://app.circleci.com/settings/user/tokens"
+              exit 0
             fi
+
+            # Read the new version written by Fastlane
+            if [ ! -f .new_version ]; then
+              echo "⚠️  .new_version file not found"
+              exit 0
+            fi
+
+            NEW_VERSION=$(cat .new_version)
+            echo "📝 Updating CircleCI CURRENT_VERSION to: ${NEW_VERSION}"
+
+            # Update environment variable via CircleCI API
+            # First delete the old one
+            curl -X DELETE \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar/CURRENT_VERSION"
+
+            # Then create new one with updated value
+            curl -X POST \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"CURRENT_VERSION\",\"value\":\"${NEW_VERSION}\"}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar"
+
+            echo "✅ Updated CURRENT_VERSION to ${NEW_VERSION}"
 
       # Store build artifacts
       - store_artifacts:
