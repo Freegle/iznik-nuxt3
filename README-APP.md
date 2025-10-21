@@ -17,13 +17,6 @@ The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app ve
 - **Environment Flag**: `ISAPP=true` to detect mobile app context
 - **No Docker**: Mobile apps don't use the Docker-based infrastructure
 
-### Statistics
-
-- **592 files changed** from master
-- **22,115 insertions**
-- **48,890 deletions**
-- **462+ commits** ahead of master (as of last analysis)
-
 ---
 
 ## Core Mobile Infrastructure
