@@ -14,7 +14,8 @@ This document describes the mobile app version of Freegle, which is built using 
 
 The mobile app is managed in the `app-ci-fd` branch (based on the original `app` branch) and contains extensive modifications to support native mobile functionality. The app shares most of the Vue components and business logic with the web version but uses a different build configuration and includes native platform code.
 
-## App Branch vs Master Branch
+<details>
+<summary><h2>App Branch vs Master Branch</h2></summary>
 
 The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app version** that differs from `master` in several key ways:
 
@@ -25,9 +26,12 @@ The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app ve
 - **Environment Flag**: `ISAPP=true` to detect mobile app context
 - **No Docker**: Mobile apps don't use the Docker-based infrastructure
 
+</details>
+
 ---
 
-## Core Mobile Infrastructure
+<details>
+<summary><h2>Core Mobile Infrastructure</h2></summary>
 
 ### Capacitor Framework
 
@@ -62,9 +66,12 @@ Located in `ios/` directory:
   - `CURRENT_PROJECT_VERSION`: Build number (e.g., 1200)
   - `MARKETING_VERSION`: User-facing version (e.g., "3.1.9")
 
+</details>
+
 ---
 
-## Mobile-Specific Features
+<details>
+<summary><h2>Mobile-Specific Features</h2></summary>
 
 ### Authentication Methods
 
@@ -158,9 +165,12 @@ Mobile-specific Stripe implementation:
    - Timing logic to avoid annoying users
    - Platform-specific app store links
 
+</details>
+
 ---
 
-## Mobile Store (`stores/mobile.js`)
+<details>
+<summary><h2>Mobile Store (stores/mobile.js)</h2></summary>
 
 A dedicated Pinia store handles all mobile-specific state and functionality:
 
@@ -187,9 +197,12 @@ A dedicated Pinia store handles all mobile-specific state and functionality:
 - `checkForAppUpdate()`: Check for app updates
 - `initWakeUpActions()`: Handle app resume/wake events
 
+</details>
+
 ---
 
-## UI/UX Adjustments
+<details>
+<summary><h2>UI/UX Adjustments</h2></summary>
 
 ### Modified Components
 
@@ -227,9 +240,12 @@ Several components have mobile-specific behavior:
 - Light/dark theme support
 - Overlay configuration
 
+</details>
+
 ---
 
-## Dependencies
+<details>
+<summary><h2>Dependencies</h2></summary>
 
 ### Capacitor Core Packages
 
@@ -280,9 +296,12 @@ Several components have mobile-specific behavior:
 }
 ```
 
+</details>
+
 ---
 
-## Version Management
+<details>
+<summary><h2>Version Management</h2></summary>
 
 ### Android (Fully Automated via CircleCI)
 
@@ -337,9 +356,12 @@ Also update in `config.js` for runtime version checks:
 MOBILE_VERSION: '3.2.0'
 ```
 
+</details>
+
 ---
 
-## Environment Variables
+<details>
+<summary><h2>Environment Variables</h2></summary>
 
 ### Required for CircleCI Android Builds
 
@@ -430,9 +452,12 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - Look for "✅ Successfully uploaded to Google Play Internal Testing!" at end
 - Look for "✅ Updated CURRENT_VERSION to X.Y.(Z+1)" in update version step
 
+</details>
+
 ---
 
-## Build Process
+<details>
+<summary><h2>Build Process</h2></summary>
 
 ### CircleCI Automated Builds (Android)
 
@@ -489,9 +514,12 @@ cd ios/App
 xcodebuild -workspace App.xcworkspace -scheme App -configuration Release
 ```
 
+</details>
+
 ---
 
-## Testing
+<details>
+<summary><h2>Testing</h2></summary>
 
 ### App-Specific Test Checklist
 
@@ -521,9 +549,12 @@ Enable donation modal for testing:
 showDonationAskModal.value = true
 ```
 
+</details>
+
 ---
 
-## Removed/Disabled for Mobile
+<details>
+<summary><h2>Removed/Disabled for Mobile</h2></summary>
 
 To reduce app size and complexity:
 
@@ -534,9 +565,12 @@ To reduce app size and complexity:
 - **Some councils data**: Reduced to minimize app size
 - **Prebid ads**: Simplified ad system for mobile
 
+</details>
+
 ---
 
-## Known Issues & Workarounds
+<details>
+<summary><h2>Known Issues & Workarounds</h2></summary>
 
 ### npm Install Issues
 
@@ -557,9 +591,12 @@ Ensure camera permission is present:
 
 Some packages require specific versions for compatibility. Check `package.json` overrides section.
 
+</details>
+
 ---
 
-## Deployment
+<details>
+<summary><h2>Deployment</h2></summary>
 
 ### Android (Fully Automated Pipeline)
 
@@ -627,9 +664,12 @@ bundle exec fastlane android promote_beta
 bundle exec fastlane android promote_production
 ```
 
+</details>
+
 ---
 
-## Maintenance
+<details>
+<summary><h2>Maintenance</h2></summary>
 
 ### Keeping Up with Master
 
@@ -652,9 +692,12 @@ When updating Capacitor major versions:
 4. Test all native features thoroughly
 5. Update this README with any changes
 
+</details>
+
 ---
 
-## Resources
+<details>
+<summary><h2>Resources</h2></summary>
 
 - **Capacitor Docs**: https://capacitorjs.com/docs
 - **App Release Plan**: `/plans/app-releases.md`
@@ -662,9 +705,12 @@ When updating Capacitor major versions:
 - **Google Play Console**: https://play.google.com/console
 - **App Store Connect**: https://appstoreconnect.apple.com
 
+</details>
+
 ---
 
-## Support
+<details>
+<summary><h2>Support</h2></summary>
 
 For mobile app specific issues:
 
@@ -673,6 +719,8 @@ For mobile app specific issues:
 3. Test on physical devices (simulators may behave differently)
 4. Verify all environment variables are set correctly
 5. Check native logs in Android Studio / Xcode
+
+</details>
 
 ---
 
