@@ -376,6 +376,30 @@ USE_COOKIES=false                    # Cookie behavior for mobile
 
 **Note:** `SENTRY_DSN_APP_FD` is optional but recommended for error tracking in the mobile app. If not set, the app will use the default Sentry DSN from `config.js`. Setting a separate DSN for the app prevents conflicts with other pipelines. Get your Sentry DSN from [Sentry](https://sentry.io/) → Project Settings → Client Keys (DSN).
 
+### Verifying GOOGLE_PLAY_JSON_KEY
+
+The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
+- Auto-incrementing version names and codes from Google Play Console
+- Uploading builds to Google Play Internal Testing
+
+**Status**: ✅ Properly configured and working (as of build #596)
+
+**Build Behavior**:
+- The build will **FAIL** if `GOOGLE_PLAY_JSON_KEY` is not set, empty, or invalid
+- The build will **FAIL** if it cannot fetch version information from Google Play API
+- No fallback to VERSION.txt - version must always be auto-incremented from Play Console
+
+**Debug Output**: The decode step now includes extensive validation:
+- ✅ Environment variable is set
+- ✅ File created successfully with valid size
+- ✅ Valid JSON structure
+- 📧 Service account email (for debugging)
+
+**Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
+- Look for "✅ Google Play API key file validated" in decode step
+- Look for "📊 Using Play Console internal version code" in deploy step
+- Look for "✅ Successfully uploaded to Google Play Internal Testing!" at end
+
 ---
 
 ## Build Process

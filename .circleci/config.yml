@@ -26,7 +26,43 @@ commands:
       - run:
           name: Decode Google Play JSON Key
           command: |
+            echo "🔐 Decoding Google Play JSON Key..."
+
+            # Check if environment variable is set
+            if [ -z "$GOOGLE_PLAY_JSON_KEY" ]; then
+              echo "❌ CRITICAL: GOOGLE_PLAY_JSON_KEY environment variable is not set"
+              exit 1
+            fi
+
+            # Decode the key
             echo $GOOGLE_PLAY_JSON_KEY | base64 -d > fastlane/google-play-api-key.json
+
+            # Validate the file was created
+            if [ ! -f fastlane/google-play-api-key.json ]; then
+              echo "❌ CRITICAL: Failed to create google-play-api-key.json"
+              exit 1
+            fi
+
+            # Check file size
+            FILE_SIZE=$(wc -c < fastlane/google-play-api-key.json)
+            echo "✅ File created: $FILE_SIZE bytes"
+
+            if [ "$FILE_SIZE" -eq 0 ]; then
+              echo "❌ CRITICAL: google-play-api-key.json is empty"
+              exit 1
+            fi
+
+            # Validate JSON syntax
+            if python3 -m json.tool fastlane/google-play-api-key.json > /dev/null 2>&1; then
+              echo "✅ Valid JSON structure"
+              # Show project email (not sensitive, useful for debugging)
+              echo "📧 Service Account: $(python3 -c "import json; print(json.load(open('fastlane/google-play-api-key.json'))['client_email'])")"
+            else
+              echo "❌ CRITICAL: Invalid JSON - Google Play API will not work!"
+              exit 1
+            fi
+
+            echo "✅ Google Play JSON Key validated successfully"
 
 jobs:
   build-android:

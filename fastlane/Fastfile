@@ -1,10 +1,25 @@
 default_platform(:android)
 
-VERSION_FILE = "../VERSION.txt"
-
 platform :android do
   desc "Build and deploy to Google Play Internal Testing"
   lane :internal do
+    # Validate that Google Play API key file exists
+    unless File.exist?('fastlane/google-play-api-key.json')
+      UI.user_error!("❌ CRITICAL: Google Play API key file not found at fastlane/google-play-api-key.json")
+      UI.user_error!("💡 Ensure GOOGLE_PLAY_JSON_KEY environment variable is set in CircleCI")
+    end
+
+    # Validate that the file is valid JSON
+    begin
+      json_key_data = JSON.parse(File.read('fastlane/google-play-api-key.json'))
+      if json_key_data.empty?
+        UI.user_error!("❌ CRITICAL: Google Play API key file is empty")
+      end
+      UI.success("✅ Google Play API key file validated")
+    rescue JSON::ParserError => e
+      UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
+    end
+
     # Get highest version name from ALL Google Play tracks
     current_version_name = nil
     begin
@@ -57,33 +72,34 @@ platform :android do
       # Clean up the edit
       service.delete_edit('org.ilovefreegle.direct', edit_id)
     rescue => e
-      UI.important("⚠️  Could not fetch version names from Play Console: #{e.message}")
+      UI.user_error!("❌ CRITICAL: Failed to fetch version names from Play Console: #{e.message}")
+      UI.user_error!("💡 Check that GOOGLE_PLAY_JSON_KEY is valid and service account has proper permissions")
     end
 
     # Auto-increment version name
-    if current_version_name
-      # Parse version (e.g., "3.2.27" -> [3, 2, 27])
-      parts = current_version_name.split('.').map(&:to_i)
-
-      if parts.length == 3
-        # Increment patch version
-        parts[2] += 1
-        version = parts.join('.')
-        UI.success("📱 Auto-incremented version name: #{current_version_name} → #{version}")
-      else
-        # Fallback to VERSION.txt if version format is unexpected
-        version = File.read(VERSION_FILE).strip
-        UI.important("⚠️  Unexpected version format '#{current_version_name}', using VERSION.txt: #{version}")
-      end
-    else
-      # Fallback to VERSION.txt if API call failed
-      version = File.read(VERSION_FILE).strip
-      UI.important("📄 Using version from VERSION.txt: #{version}")
+    unless current_version_name
+      UI.user_error!("❌ CRITICAL: No version found in Google Play Console")
+      UI.user_error!("💡 Ensure at least one release exists in Google Play (production, beta, alpha, or internal track)")
     end
 
-    # Get version code - try Google Play API first, fallback to incremental
+    # Parse version (e.g., "3.2.27" -> [3, 2, 27])
+    parts = current_version_name.split('.').map(&:to_i)
+
+    if parts.length == 3
+      # Increment patch version
+      parts[2] += 1
+      version = parts.join('.')
+      UI.success("📱 Auto-incremented version name: #{current_version_name} → #{version}")
+    else
+      UI.user_error!("❌ CRITICAL: Unexpected version format '#{current_version_name}'. Expected format: X.Y.Z")
+    end
+
+    # Get version code from Google Play API
+    version_codes = nil
+    latest_build = nil
+
+    # Try internal track first (where we upload to)
     begin
-      # Try to get version codes from internal track first (where we upload to)
       version_codes = google_play_track_version_codes(
         track: 'internal',
         json_key: 'fastlane/google-play-api-key.json'
@@ -91,11 +107,15 @@ platform :android do
 
       if version_codes && version_codes.any?
         latest_build = version_codes.first
-        new_version_code = latest_build + 1
         UI.message("📊 Using Play Console internal version code: #{latest_build}")
-        UI.message("📊 New version code: #{new_version_code}")
-      else
-        # Fall back to production track if internal is empty
+      end
+    rescue => e
+      UI.message("ℹ️  Could not fetch internal track version codes: #{e.message}")
+    end
+
+    # Fall back to production track if internal is empty
+    unless latest_build
+      begin
         version_codes = google_play_track_version_codes(
           track: 'production',
           json_key: 'fastlane/google-play-api-key.json'
@@ -103,23 +123,22 @@ platform :android do
 
         if version_codes && version_codes.any?
           latest_build = version_codes.first
-          new_version_code = latest_build + 1
           UI.message("📊 Using Play Console production version code: #{latest_build}")
-          UI.message("📊 New version code: #{new_version_code}")
-        else
-          # No releases on any track - use default
-          new_version_code = 1297
-          UI.important("⚠️  No releases found on any track")
-          UI.important("📅 Using default version code: #{new_version_code}")
         end
+      rescue => e
+        UI.message("ℹ️  Could not fetch production track version codes: #{e.message}")
       end
-    rescue => e
-      # Fallback: start from safe default
-      new_version_code = 1297
-      UI.important("⚠️  Google Play API error: #{e.message}")
-      UI.important("📅 Using fallback version code: #{new_version_code}")
-      UI.important("💡 Check service account permissions in Play Console")
     end
+
+    # Fail if we couldn't get version code from any track
+    unless latest_build
+      UI.user_error!("❌ CRITICAL: Could not fetch version codes from Google Play Console")
+      UI.user_error!("💡 Ensure at least one release exists in Google Play (internal or production track)")
+      UI.user_error!("💡 Check that service account has 'View app information' permission")
+    end
+
+    new_version_code = latest_build + 1
+    UI.message("📊 New version code: #{new_version_code}")
 
     # Build the Android App Bundle (AAB) for Play Store
     gradle(
