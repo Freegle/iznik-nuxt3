@@ -177,17 +177,9 @@ jobs:
       - run:
           name: Update CircleCI Version Variable
           command: |
-            # Check if CIRCLECI_API_TOKEN is set
-            if [ -z "$CIRCLECI_API_TOKEN" ]; then
-              echo "⚠️  CIRCLECI_API_TOKEN not set - cannot update version"
-              echo "💡 Add CIRCLECI_API_TOKEN to CircleCI environment variables"
-              echo "💡 Get a token from: https://app.circleci.com/settings/user/tokens"
-              exit 0
-            fi
-
             # Read the new version written by Fastlane
             if [ ! -f .new_version ]; then
-              echo "⚠️  .new_version file not found"
+              echo "⚠️  .new_version file not found - skipping version update"
               exit 0
             fi
 
