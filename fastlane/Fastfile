@@ -45,21 +45,38 @@ platform :android do
 
       tracks.each do |track_name|
         begin
+          UI.message("🔍 Checking #{track_name} track...")
           track_release = service.get_edit_track('org.ilovefreegle.direct', edit_id, track_name)
 
           if track_release.releases && track_release.releases.any?
+            UI.message("  Found #{track_release.releases.length} release(s) in #{track_name}")
             latest_release = track_release.releases.first
             if latest_release.version_codes && latest_release.version_codes.any?
               version_code = latest_release.version_codes.first
-              apk = service.list_edit_apks('org.ilovefreegle.direct', edit_id).apks.find { |a| a.version_code == version_code }
-              if apk && apk.version_name
-                all_version_names << apk.version_name
-                UI.message("📊 Found version #{apk.version_name} in #{track_name} track")
+              UI.message("  Latest version code: #{version_code}")
+
+              # Try to get version name from bundles (AAB) first, then APKs
+              bundle = service.list_edit_bundles('org.ilovefreegle.direct', edit_id).bundles.find { |b| b.version_code == version_code }
+              if bundle && bundle.version_name
+                all_version_names << bundle.version_name
+                UI.message("📊 Found version #{bundle.version_name} (bundle) in #{track_name} track")
+              else
+                apk = service.list_edit_apks('org.ilovefreegle.direct', edit_id).apks.find { |a| a.version_code == version_code }
+                if apk && apk.version_name
+                  all_version_names << apk.version_name
+                  UI.message("📊 Found version #{apk.version_name} (apk) in #{track_name} track")
+                else
+                  UI.message("  ⚠️  No version name found for version code #{version_code}")
+                end
               end
+            else
+              UI.message("  ⚠️  No version codes in latest release")
             end
+          else
+            UI.message("  No releases in #{track_name} track")
           end
         rescue => track_error
-          UI.message("ℹ️  No releases in #{track_name} track")
+          UI.message("ℹ️  Error checking #{track_name} track: #{track_error.message}")
         end
       end
 
