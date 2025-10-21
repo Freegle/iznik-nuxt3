@@ -1,7 +1,7 @@
 default_platform(:android)
 
 platform :android do
-  desc "Build and deploy to Google Play Internal Testing"
+  desc "Build and deploy to Google Play Beta Testing"
   lane :internal do
     # Validate that Google Play API key file exists
     unless File.exist?('google-play-api-key.json')
@@ -51,22 +51,22 @@ platform :android do
     version_codes = nil
     latest_build = nil
 
-    # Try internal track first (where we upload to)
+    # Try beta track first (where we upload to)
     begin
       version_codes = google_play_track_version_codes(
-        track: 'internal',
+        track: 'beta',
         json_key: 'fastlane/google-play-api-key.json'
       )
 
       if version_codes && version_codes.any?
         latest_build = version_codes.first
-        UI.message("📊 Using Play Console internal version code: #{latest_build}")
+        UI.message("📊 Using Play Console beta version code: #{latest_build}")
       end
     rescue => e
-      UI.message("ℹ️  Could not fetch internal track version codes: #{e.message}")
+      UI.message("ℹ️  Could not fetch beta track version codes: #{e.message}")
     end
 
-    # Fall back to production track if internal is empty
+    # Fall back to production track if beta is empty
     unless latest_build
       begin
         version_codes = google_play_track_version_codes(
@@ -86,7 +86,7 @@ platform :android do
     # Fail if we couldn't get version code from any track
     unless latest_build
       UI.user_error!("❌ CRITICAL: Could not fetch version codes from Google Play Console")
-      UI.user_error!("💡 Ensure at least one release exists in Google Play (internal or production track)")
+      UI.user_error!("💡 Ensure at least one release exists in Google Play (beta or production track)")
       UI.user_error!("💡 Check that service account has 'View app information' permission")
     end
 
@@ -119,16 +119,16 @@ platform :android do
     UI.success("✅ APK built successfully for manual installation!")
     UI.message("📱 APK location: android/app/build/outputs/apk/release/app-release.apk")
 
-    # Upload to Google Play Internal Testing track
+    # Upload to Google Play Beta Testing track
     upload_to_play_store(
-      track: 'internal',
+      track: 'beta',
       json_key: 'fastlane/google-play-api-key.json',
       skip_upload_apk: true,
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
-    UI.success("✅ Successfully uploaded to Google Play Internal Testing!")
+    UI.success("✅ Successfully uploaded to Google Play Beta Testing!")
   end
 
   desc "Promote Internal to Beta"
