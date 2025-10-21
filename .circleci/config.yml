@@ -22,6 +22,8 @@ commands:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
+            # Update Fastlane to latest version
+            bundle update fastlane
             bundle install
       - run:
           name: Decode Google Play JSON Key

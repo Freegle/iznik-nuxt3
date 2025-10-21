@@ -48,50 +48,39 @@ platform :android do
     UI.success("✅ Wrote new version to .new_version file")
 
     # Get version code from Google Play API
-    version_codes = nil
-    latest_build = nil
+    # Check ALL tracks to find the maximum version code to avoid conflicts
+    all_version_codes = []
 
-    # Try beta track first (where we upload to)
-    begin
-      version_codes = google_play_track_version_codes(
-        track: 'beta',
-        json_key: 'fastlane/google-play-api-key.json'
-      )
-
-      if version_codes && version_codes.any?
-        latest_build = version_codes.first
-        UI.message("📊 Using Play Console beta version code: #{latest_build}")
-      end
-    rescue => e
-      UI.message("ℹ️  Could not fetch beta track version codes: #{e.message}")
-    end
-
-    # Fall back to production track if beta is empty
-    unless latest_build
+    ['internal', 'beta', 'production'].each do |track|
       begin
         version_codes = google_play_track_version_codes(
-          track: 'production',
+          track: track,
           json_key: 'fastlane/google-play-api-key.json'
         )
 
         if version_codes && version_codes.any?
-          latest_build = version_codes.first
-          UI.message("📊 Using Play Console production version code: #{latest_build}")
+          max_for_track = version_codes.max
+          all_version_codes << max_for_track
+          UI.message("📊 #{track.capitalize} track max version code: #{max_for_track}")
+        else
+          UI.message("ℹ️  No releases in #{track} track")
         end
       rescue => e
-        UI.message("ℹ️  Could not fetch production track version codes: #{e.message}")
+        UI.message("ℹ️  Could not fetch #{track} track version codes: #{e.message}")
       end
     end
 
     # Fail if we couldn't get version code from any track
-    unless latest_build
-      UI.user_error!("❌ CRITICAL: Could not fetch version codes from Google Play Console")
-      UI.user_error!("💡 Ensure at least one release exists in Google Play (beta or production track)")
+    if all_version_codes.empty?
+      UI.user_error!("❌ CRITICAL: Could not fetch version codes from any Google Play track")
+      UI.user_error!("💡 Ensure at least one release exists in Google Play (any track)")
       UI.user_error!("💡 Check that service account has 'View app information' permission")
     end
 
+    latest_build = all_version_codes.max
     new_version_code = latest_build + 1
-    UI.message("📊 New version code: #{new_version_code}")
+    UI.success("📊 Maximum version code across all tracks: #{latest_build}")
+    UI.success("📊 New version code: #{new_version_code}")
 
     # Build the Android App Bundle (AAB) for Play Store
     gradle(
