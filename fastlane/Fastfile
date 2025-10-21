@@ -4,14 +4,14 @@ platform :android do
   desc "Build and deploy to Google Play Internal Testing"
   lane :internal do
     # Validate that Google Play API key file exists
-    unless File.exist?('fastlane/google-play-api-key.json')
-      UI.user_error!("❌ CRITICAL: Google Play API key file not found at fastlane/google-play-api-key.json")
+    unless File.exist?('google-play-api-key.json')
+      UI.user_error!("❌ CRITICAL: Google Play API key file not found at google-play-api-key.json")
       UI.user_error!("💡 Ensure GOOGLE_PLAY_JSON_KEY environment variable is set in CircleCI")
     end
 
     # Validate that the file is valid JSON
     begin
-      json_key_data = JSON.parse(File.read('fastlane/google-play-api-key.json'))
+      json_key_data = JSON.parse(File.read('google-play-api-key.json'))
       if json_key_data.empty?
         UI.user_error!("❌ CRITICAL: Google Play API key file is empty")
       end
@@ -26,7 +26,7 @@ platform :android do
       require 'googleauth'
       require 'google/apis/androidpublisher_v3'
 
-      json_key_data = JSON.parse(File.read('fastlane/google-play-api-key.json'))
+      json_key_data = JSON.parse(File.read('google-play-api-key.json'))
       credentials = Google::Auth::ServiceAccountCredentials.make_creds(
         json_key_io: StringIO.new(json_key_data.to_json),
         scope: 'https://www.googleapis.com/auth/androidpublisher'
@@ -102,7 +102,7 @@ platform :android do
     begin
       version_codes = google_play_track_version_codes(
         track: 'internal',
-        json_key: 'fastlane/google-play-api-key.json'
+        json_key: 'google-play-api-key.json'
       )
 
       if version_codes && version_codes.any?
@@ -118,7 +118,7 @@ platform :android do
       begin
         version_codes = google_play_track_version_codes(
           track: 'production',
-          json_key: 'fastlane/google-play-api-key.json'
+          json_key: 'google-play-api-key.json'
         )
 
         if version_codes && version_codes.any?
@@ -169,7 +169,7 @@ platform :android do
     # Upload to Google Play Internal Testing track
     upload_to_play_store(
       track: 'internal',
-      json_key: 'fastlane/google-play-api-key.json',
+      json_key: 'google-play-api-key.json',
       skip_upload_apk: true,
       skip_upload_metadata: true,
       skip_upload_images: true,
@@ -183,7 +183,7 @@ platform :android do
     upload_to_play_store(
       track: 'internal',
       track_promote_to: 'beta',
-      json_key: 'fastlane/google-play-api-key.json',
+      json_key: 'google-play-api-key.json',
       skip_upload_apk: true,
       skip_upload_aab: true
     )
@@ -194,7 +194,7 @@ platform :android do
     upload_to_play_store(
       track: 'beta',
       track_promote_to: 'production',
-      json_key: 'fastlane/google-play-api-key.json',
+      json_key: 'google-play-api-key.json',
       skip_upload_apk: true,
       skip_upload_aab: true
     )
