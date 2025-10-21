@@ -283,24 +283,33 @@ Several components have mobile-specific behavior:
 
 ## Version Management
 
-### Android (Automated via CircleCI)
+### Android (Fully Automated via CircleCI)
 
-**Version Name** (e.g., "3.2.28"): Manually updated in `VERSION.txt`
+**Version Name** (e.g., "3.2.28"): Auto-incremented by CircleCI
 - Location: `VERSION.txt` in repository root
-- This is semantic versioning controlled by developers
-- Update this file when you want to change the user-facing version
+- CircleCI reads current version, increments patch version (3.2.28 → 3.2.29)
+- Updated VERSION.txt is automatically committed and pushed back to repo
 - Build will FAIL if VERSION.txt is missing or has invalid format (must be X.Y.Z)
+- **No manual intervention needed** - fully automated
 
 **Version Code** (e.g., 1300): Auto-incremented by CircleCI
 - Queries Google Play Console (internal track, then production track) for latest version code
 - Automatically increments by 1 for each build
-- No manual intervention needed
 - Build will FAIL if Google Play API is unavailable or no releases exist
+- **No manual intervention needed** - fully automated
 
-**Why this approach?**:
-- Version names are semantic (3.2.28) and should be controlled by developers
-- Version codes are sequential build numbers and must auto-increment from Play Console
-- Google Play API doesn't reliably expose version names for published releases
+**How it works**:
+1. CircleCI reads VERSION.txt (e.g., "3.2.28")
+2. Auto-increments patch version (3.2.28 → 3.2.29)
+3. Queries Google Play for latest version code (e.g., 1300)
+4. Auto-increments version code (1300 → 1301)
+5. Builds AAB and APK with new version (3.2.29 / 1301)
+6. Uploads to Google Play Internal Testing
+7. Commits updated VERSION.txt (3.2.29) back to repo
+
+**To manually bump major/minor version**:
+- Edit VERSION.txt directly: `3.2.28` → `4.0.0` or `3.3.0`
+- Next build will auto-increment from there: `4.0.0` → `4.0.1`
 
 ### iOS (Manual)
 
@@ -393,8 +402,9 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - The build will **FAIL** if `GOOGLE_PLAY_JSON_KEY` is not set, empty, or invalid
 - The build will **FAIL** if it cannot fetch version CODES from Google Play API
 - The build will **FAIL** if `VERSION.txt` is missing or has invalid format
-- Version NAME comes from VERSION.txt (developer controlled)
-- Version CODE comes from Google Play API (auto-incremented)
+- Version NAME is auto-incremented from VERSION.txt (3.2.28 → 3.2.29)
+- Version CODE is auto-incremented from Google Play API (1300 → 1301)
+- Updated VERSION.txt is committed and pushed back to repo automatically
 
 **Debug Output**: The decode step includes extensive validation:
 - ✅ Environment variable is set
@@ -404,9 +414,12 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 **Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
 - Look for "✅ Google Play API key file validated" in decode step
-- Look for "📱 Using version name from VERSION.txt: X.Y.Z" in deploy step
+- Look for "📱 Auto-incremented version name: X.Y.Z → X.Y.(Z+1)" in deploy step
 - Look for "📊 Using Play Console internal version code: XXXX" in deploy step
+- Look for "📊 New version code: XXXX" in deploy step
 - Look for "✅ Successfully uploaded to Google Play Internal Testing!" at end
+- Look for "✅ Pushed VERSION.txt update: X.Y.(Z+1)" in commit step
+- Check repo for automatic commit: "Auto-increment version to X.Y.(Z+1)"
 
 ---
 

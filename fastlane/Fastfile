@@ -20,21 +20,30 @@ platform :android do
       UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
     end
 
-    # Get version NAME from VERSION.txt (semantic versioning controlled by developers)
+    # Get and auto-increment version NAME from VERSION.txt
     # Version names in Play Console are not reliably accessible via API
     unless File.exist?('../VERSION.txt')
       UI.user_error!("❌ CRITICAL: VERSION.txt not found")
       UI.user_error!("💡 Create VERSION.txt in repository root with version (e.g., 3.2.28)")
     end
 
-    version = File.read('../VERSION.txt').strip
-    UI.success("📱 Using version name from VERSION.txt: #{version}")
+    current_version = File.read('../VERSION.txt').strip
+    UI.message("📱 Current version from VERSION.txt: #{current_version}")
 
-    # Validate version format
-    parts = version.split('.').map(&:to_i)
+    # Validate and parse version format
+    parts = current_version.split('.').map(&:to_i)
     unless parts.length == 3
-      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}' in VERSION.txt. Expected format: X.Y.Z")
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}' in VERSION.txt. Expected format: X.Y.Z")
     end
+
+    # Auto-increment patch version
+    parts[2] += 1
+    version = parts.join('.')
+    UI.success("📱 Auto-incremented version name: #{current_version} → #{version}")
+
+    # Update VERSION.txt with new version
+    File.write('../VERSION.txt', version)
+    UI.success("✅ Updated VERSION.txt to #{version}")
 
     # Get version code from Google Play API
     version_codes = nil

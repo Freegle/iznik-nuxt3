@@ -168,6 +168,35 @@ jobs:
           name: Build and Deploy to Google Play Internal Track
           command: bundle exec fastlane android internal
 
+      # Commit and push VERSION.txt update
+      - run:
+          name: Commit and Push Updated VERSION.txt
+          command: |
+            echo "📝 Committing VERSION.txt update..."
+
+            # Configure git
+            git config user.name "CircleCI Bot"
+            git config user.email "circleci@freegle.in"
+
+            # Check if VERSION.txt changed
+            if git diff --quiet VERSION.txt; then
+              echo "ℹ️  VERSION.txt unchanged - nothing to commit"
+            else
+              # Add and commit VERSION.txt
+              git add VERSION.txt
+              NEW_VERSION=$(cat VERSION.txt)
+              git commit -m "Auto-increment version to ${NEW_VERSION}
+
+Built and uploaded to Google Play Internal Testing.
+
+🤖 Automated by CircleCI build #${CIRCLE_BUILD_NUM}"
+
+              # Push to remote
+              git push origin ${CIRCLE_BRANCH}
+
+              echo "✅ Pushed VERSION.txt update: ${NEW_VERSION}"
+            fi
+
       # Store build artifacts
       - store_artifacts:
           path: android/app/build/outputs/bundle/release/
