@@ -560,25 +560,53 @@ Some packages require specific versions for compatibility. Check `package.json` 
 
 ## Deployment
 
-### Android (Automated via CircleCI)
+### Android (Fully Automated Pipeline)
 
-**Automatic Process**:
-1. Push to `app-ci-fd` branch triggers CircleCI build
-2. CircleCI builds and signs AAB with upload key
-3. AAB automatically uploaded to Google Play Internal Testing track
-4. APK available as artifact for manual testing
+**Automated Daily Workflow**:
+
+1. **11:00 PM UTC - Auto-merge master**:
+   - GitHub Actions merges `master` → `app-ci-fd`
+   - If merge succeeds with changes: triggers CircleCI build
+   - If merge fails: creates GitHub issue with conflict details
+
+2. **Build and Deploy to Beta (Open Testing)**:
+   - CircleCI builds version X.Y.Z (auto-incremented)
+   - Builds AAB and APK with auto-incremented version code
+   - Uploads to **Google Play Beta (Open Testing)** track
+   - Release notes: "Version X.Y.Z - Bug fixes and improvements"
+   - Updates `CURRENT_VERSION` environment variable
+
+3. **Midnight UTC - Auto-promote to Production**:
+   - CircleCI checks beta track for releases
+   - If beta release exists and not yet in production: promotes to production
+   - Assumes 24+ hours have passed (runs 1 hour after build)
+
+**Manual Triggers**:
+- Push to `app-ci-fd` branch: triggers build immediately
+- Rerun CircleCI workflow: rebuilds current commit
+- GitHub Actions "auto-merge-master": manually trigger merge
 
 **Google Play Console Access**:
-- Internal Testing: https://play.google.com/console → Your App → Testing → Internal testing
-- Promote to Beta/Production via Play Console UI
+- Beta Testing: https://play.google.com/console → Your App → Testing → Open testing
+- Production: https://play.google.com/console → Your App → Production
+- Internal Testing: (not used in automated pipeline)
 
 **Play App Signing**:
 - App is enrolled in Google Play App Signing
 - Upload key (managed by CircleCI) signs AABs before upload
 - App signing key (managed by Google) signs final APKs for users
 
+**Timeline**:
+```
+Day 1, 11:00 PM: Master merged → Build triggered
+Day 1, 11:15 PM: Build complete → Beta released
+Day 2, 12:00 AM: Auto-promote check → Promoted to Production
+```
+
 **Manual Override**:
-If needed, download AAB artifact from CircleCI and manually upload to Play Console
+- Download AAB artifact from CircleCI and manually upload to Play Console
+- Manually promote beta to production via Play Console UI
+- Skip auto-merge by not merging master manually
 
 ### iOS (Manual)
 

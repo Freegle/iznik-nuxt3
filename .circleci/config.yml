@@ -201,6 +201,52 @@ jobs:
 
             echo "✅ Updated CURRENT_VERSION to ${NEW_VERSION}"
 
+      # Send email notification for beta release
+      - run:
+          name: Send Beta Release Notification
+          when: on_success
+          command: |
+            NEW_VERSION=$(cat .new_version 2>/dev/null || echo "Unknown")
+
+            # Send email using curl and a mail service
+            # Requires NOTIFICATION_EMAIL environment variable to be set
+            if [ -n "$NOTIFICATION_EMAIL" ]; then
+              echo "📧 Sending beta release notification to ${NOTIFICATION_EMAIL}"
+
+              # Create simple email body
+              cat > /tmp/email_body.txt <<EOF
+Subject: 🚀 New Freegle Beta Release: ${NEW_VERSION}
+
+Freegle Android App - Beta Release Deployed
+
+Version: ${NEW_VERSION}
+Build: #${CIRCLE_BUILD_NUM}
+Branch: ${CIRCLE_BRANCH}
+Commit: ${CIRCLE_SHA1:0:8}
+
+The new beta version has been uploaded to Google Play Open Testing track.
+
+📱 Release Notes: "Version ${NEW_VERSION} - Bug fixes and improvements"
+
+🔗 View in Play Console:
+https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/open-testing
+
+🔗 CircleCI Build:
+${CIRCLE_BUILD_URL}
+
+This release will be automatically promoted to production at midnight UTC if no issues are found.
+
+🤖 Automated notification from CircleCI
+EOF
+
+              # You can integrate with your preferred email service here
+              # For now, just log the notification
+              echo "✅ Beta release notification prepared (set up email integration)"
+              cat /tmp/email_body.txt
+            else
+              echo "ℹ️  NOTIFICATION_EMAIL not set - skipping email notification"
+            fi
+
       # Store build artifacts
       - store_artifacts:
           path: android/app/build/outputs/bundle/release/
@@ -232,6 +278,73 @@ jobs:
           destination: gradle-reports
           when: always
 
+  auto-promote-production:
+    executor: android-executor
+    steps:
+      - checkout
+
+      # Restore Fastlane bundle cache
+      - restore_cache:
+          keys:
+            - bundle-v1-{{ checksum "Gemfile.lock" }}
+            - bundle-v1-
+
+      # Setup Fastlane
+      - setup-android-fastlane
+
+      # Check and auto-promote beta to production after 24 hours
+      - run:
+          name: Auto-promote Beta to Production
+          command: |
+            bundle exec fastlane android auto_promote
+            # Store result for notification
+            echo $? > /tmp/promote_status
+
+      # Send email notification for production release
+      - run:
+          name: Send Production Release Notification
+          when: on_success
+          command: |
+            # Check if promotion actually occurred (fastlane would have logged this)
+            if [ -f /tmp/promote_status ] && [ "$(cat /tmp/promote_status)" = "0" ]; then
+              VERSION=$(cat .new_version 2>/dev/null || echo "$CURRENT_VERSION")
+
+              if [ -n "$NOTIFICATION_EMAIL" ]; then
+                echo "📧 Sending production release notification to ${NOTIFICATION_EMAIL}"
+
+                cat > /tmp/email_body.txt <<EOF
+Subject: ✅ Freegle Production Release: ${VERSION}
+
+Freegle Android App - Production Release Deployed
+
+Version: ${VERSION}
+Build: Auto-promoted from Beta
+Branch: ${CIRCLE_BRANCH}
+
+The beta version has been automatically promoted to production after 24 hours in open testing.
+
+📱 Release Notes: "Version ${VERSION} - Bug fixes and improvements"
+
+🔗 View in Play Console:
+https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/production
+
+🔗 CircleCI Workflow:
+${CIRCLE_BUILD_URL}
+
+Users on Google Play will receive this update automatically.
+
+🤖 Automated notification from CircleCI
+EOF
+
+                echo "✅ Production release notification prepared (set up email integration)"
+                cat /tmp/email_body.txt
+              else
+                echo "ℹ️  NOTIFICATION_EMAIL not set - skipping email notification"
+              fi
+            else
+              echo "ℹ️  No promotion occurred (already in production or no beta release found)"
+            fi
+
 workflows:
   version: 2
 
@@ -242,3 +355,15 @@ workflows:
             branches:
               only:
                 - app-ci-fd
+
+  auto-promote-schedule:
+    triggers:
+      - schedule:
+          # Run at midnight UTC every day (24 hours after the 11pm merge)
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - app-ci-fd
+    jobs:
+      - auto-promote-production

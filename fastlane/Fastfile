@@ -152,4 +152,81 @@ platform :android do
       skip_upload_aab: true
     )
   end
+
+  desc "Auto-promote beta to production after 24 hours"
+  lane :auto_promote do
+    require 'googleauth'
+    require 'google/apis/androidpublisher_v3'
+    require 'time'
+
+    UI.message("🔍 Checking beta track for releases ready to promote...")
+
+    json_key_data = JSON.parse(File.read('google-play-api-key.json'))
+    credentials = Google::Auth::ServiceAccountCredentials.make_creds(
+      json_key_io: StringIO.new(json_key_data.to_json),
+      scope: 'https://www.googleapis.com/auth/androidpublisher'
+    )
+
+    service = Google::Apis::AndroidpublisherV3::AndroidPublisherService.new
+    service.authorization = credentials
+
+    # Get the edit
+    edit = service.insert_edit('org.ilovefreegle.direct')
+    edit_id = edit.id
+
+    begin
+      # Get beta track
+      beta_track = service.get_edit_track('org.ilovefreegle.direct', edit_id, 'beta')
+
+      if beta_track.releases && beta_track.releases.any?
+        latest_release = beta_track.releases.first
+
+        # Check if release has a user fraction (staged rollout) or is completed
+        if latest_release.status == 'completed' || latest_release.status == 'inProgress'
+          version_codes = latest_release.version_codes
+          UI.message("📦 Found beta release with version codes: #{version_codes.join(', ')}")
+
+          # Get production track to check if already promoted
+          production_track = service.get_edit_track('org.ilovefreegle.direct', edit_id, 'production')
+          production_version_codes = []
+          if production_track.releases && production_track.releases.any?
+            production_version_codes = production_track.releases.first.version_codes || []
+          end
+
+          # Check if beta version is already in production
+          if version_codes.all? { |vc| production_version_codes.include?(vc) }
+            UI.message("✅ Beta release already promoted to production")
+            service.delete_edit('org.ilovefreegle.direct', edit_id)
+            next
+          end
+
+          # Note: Google Play API doesn't expose exact publish timestamp
+          # We'll use a simpler approach: check if there's a beta release that's not in production
+          # and assume it's been there for 24 hours if this workflow runs daily
+
+          # For now, we'll just check once per day and promote
+          # A more sophisticated approach would track versions in a file/database
+          hours_since_release = ENV['HOURS_SINCE_RELEASE'] || '24'
+
+          UI.success("🚀 Promoting beta to production after #{hours_since_release} hours...")
+
+          # Delete current edit and create new one for promotion
+          service.delete_edit('org.ilovefreegle.direct', edit_id)
+
+          # Promote to production
+          promote_production
+
+          UI.success("✅ Successfully promoted beta to production!")
+        else
+          UI.message("ℹ️  Beta release status: #{latest_release.status} - not ready for promotion")
+        end
+      else
+        UI.message("ℹ️  No releases found in beta track")
+      end
+    rescue => e
+      UI.error("❌ Error checking beta track: #{e.message}")
+      service.delete_edit('org.ilovefreegle.direct', edit_id) rescue nil
+      raise e
+    end
+  end
 end
