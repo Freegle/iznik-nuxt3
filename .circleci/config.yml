@@ -213,31 +213,31 @@ jobs:
             if [ -n "$NOTIFICATION_EMAIL" ]; then
               echo "📧 Sending beta release notification to ${NOTIFICATION_EMAIL}"
 
-              # Create simple email body
-              cat > /tmp/email_body.txt <<EOF
-Subject: 🚀 New Freegle Beta Release: ${NEW_VERSION}
-
-Freegle Android App - Beta Release Deployed
-
-Version: ${NEW_VERSION}
-Build: #${CIRCLE_BUILD_NUM}
-Branch: ${CIRCLE_BRANCH}
-Commit: ${CIRCLE_SHA1:0:8}
-
-The new beta version has been uploaded to Google Play Open Testing track.
-
-📱 Release Notes: "Version ${NEW_VERSION} - Bug fixes and improvements"
-
-🔗 View in Play Console:
-https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/open-testing
-
-🔗 CircleCI Build:
-${CIRCLE_BUILD_URL}
-
-This release will be automatically promoted to production at midnight UTC if no issues are found.
-
-🤖 Automated notification from CircleCI
-EOF
+              # Create simple email body using echo to avoid YAML parsing issues
+              {
+                echo "Subject: 🚀 New Freegle Beta Release: ${NEW_VERSION}"
+                echo ""
+                echo "Freegle Android App - Beta Release Deployed"
+                echo ""
+                echo "Version: ${NEW_VERSION}"
+                echo "Build: #${CIRCLE_BUILD_NUM}"
+                echo "Branch: ${CIRCLE_BRANCH}"
+                echo "Commit: ${CIRCLE_SHA1:0:8}"
+                echo ""
+                echo "The new beta version has been uploaded to Google Play Open Testing track."
+                echo ""
+                echo "📱 Release Notes: \"Version ${NEW_VERSION} - Bug fixes and improvements\""
+                echo ""
+                echo "🔗 View in Play Console:"
+                echo "https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/open-testing"
+                echo ""
+                echo "🔗 CircleCI Build:"
+                echo "${CIRCLE_BUILD_URL}"
+                echo ""
+                echo "This release will be automatically promoted to production at midnight UTC if no issues are found."
+                echo ""
+                echo "🤖 Automated notification from CircleCI"
+              } > /tmp/email_body.txt
 
               # You can integrate with your preferred email service here
               # For now, just log the notification
@@ -312,29 +312,30 @@ EOF
               if [ -n "$NOTIFICATION_EMAIL" ]; then
                 echo "📧 Sending production release notification to ${NOTIFICATION_EMAIL}"
 
-                cat > /tmp/email_body.txt <<EOF
-Subject: ✅ Freegle Production Release: ${VERSION}
-
-Freegle Android App - Production Release Deployed
-
-Version: ${VERSION}
-Build: Auto-promoted from Beta
-Branch: ${CIRCLE_BRANCH}
-
-The beta version has been automatically promoted to production after 24 hours in open testing.
-
-📱 Release Notes: "Version ${VERSION} - Bug fixes and improvements"
-
-🔗 View in Play Console:
-https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/production
-
-🔗 CircleCI Workflow:
-${CIRCLE_BUILD_URL}
-
-Users on Google Play will receive this update automatically.
-
-🤖 Automated notification from CircleCI
-EOF
+                # Create email body using echo to avoid YAML parsing issues
+                {
+                  echo "Subject: ✅ Freegle Production Release: ${VERSION}"
+                  echo ""
+                  echo "Freegle Android App - Production Release Deployed"
+                  echo ""
+                  echo "Version: ${VERSION}"
+                  echo "Build: Auto-promoted from Beta"
+                  echo "Branch: ${CIRCLE_BRANCH}"
+                  echo ""
+                  echo "The beta version has been automatically promoted to production after 24 hours in open testing."
+                  echo ""
+                  echo "📱 Release Notes: \"Version ${VERSION} - Bug fixes and improvements\""
+                  echo ""
+                  echo "🔗 View in Play Console:"
+                  echo "https://play.google.com/console/u/0/developers/5213085306367696468/app/4972100654921386219/tracks/production"
+                  echo ""
+                  echo "🔗 CircleCI Workflow:"
+                  echo "${CIRCLE_BUILD_URL}"
+                  echo ""
+                  echo "Users on Google Play will receive this update automatically."
+                  echo ""
+                  echo "🤖 Automated notification from CircleCI"
+                } > /tmp/email_body.txt
 
                 echo "✅ Production release notification prepared (set up email integration)"
                 cat /tmp/email_body.txt
