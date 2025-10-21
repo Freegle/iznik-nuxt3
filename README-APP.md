@@ -2,6 +2,14 @@
 
 This document describes the mobile app version of Freegle, which is built using Capacitor to create native Android and iOS apps from the same Nuxt3 codebase.
 
+---
+
+## ⚠️ IMPORTANT: Android Only
+
+**Only Android releases are currently being produced.** The automated CI/CD pipeline, version management, and deployment process documented here are **Android-specific**. iOS builds are not currently automated and would require significant manual setup.
+
+---
+
 ## Overview
 
 The mobile app is managed in the `app-ci-fd` branch (based on the original `app` branch) and contains extensive modifications to support native mobile functionality. The app shares most of the Vue components and business logic with the web version but uses a different build configuration and includes native platform code.
