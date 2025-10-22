@@ -831,9 +831,11 @@ export default {
       let ret = 'text-success'
 
       if (this.modconfig && this.modconfig.coloursubj) {
-        ret = this.message.subject.match(this.modconfig.subjreg)
-          ? 'text-success'
-          : 'text-danger'
+        ret =
+          this.message.subject?.match &&
+          this.message.subject.match(this.modconfig.subjreg)
+            ? 'text-success'
+            : 'text-danger'
       }
 
       return ret
@@ -1126,20 +1128,23 @@ export default {
           subj = subj.replace(keyword, message.type.toUpperCase())
         }
       }
-      subj = subj.toLocaleLowerCase()
 
-      // Remove any group tag
-      subj = subj.replace(/^\[.*?\](.*)/, '$1')
+      if (subj.toLocaleLowerCase) {
+        subj = subj.toLocaleLowerCase()
 
-      // Remove duplicate spaces
-      subj = subj.replace(/\s+/g, ' ')
+        // Remove any group tag
+        subj = subj.replace(/^\[.*?\](.*)/, '$1')
 
-      subj = subj.trim()
+        // Remove duplicate spaces
+        subj = subj.replace(/\s+/g, ' ')
 
-      const matches = SUBJECT_REGEX.exec(subj)
-      if (matches?.length > 2) {
-        // Well-formed - remove the location.
-        subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
+        subj = subj.trim()
+
+        const matches = SUBJECT_REGEX.exec(subj)
+        if (matches?.length > 2) {
+          // Well-formed - remove the location.
+          subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
+        }
       }
 
       return subj
