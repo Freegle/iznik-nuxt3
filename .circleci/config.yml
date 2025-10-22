@@ -110,7 +110,7 @@ jobs:
             fi
 
             # Auto-increment patch version (same logic as Fastlane)
-            IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+            IFS='.' read -r major minor patch \<<< "$CURRENT_VERSION"
             NEW_VERSION="$major.$minor.$((patch + 1))"
             echo "📱 Auto-incrementing version: $CURRENT_VERSION → $NEW_VERSION"
 
