@@ -322,11 +322,13 @@ Several components have mobile-specific behavior:
 **How it works**:
 1. CircleCI reads `CURRENT_VERSION` env var (e.g., "3.2.29")
 2. Auto-increments patch version (3.2.29 → 3.2.30)
-3. Queries Google Play for latest version code (e.g., 1300)
-4. Auto-increments version code (1300 → 1301)
-5. Builds AAB and APK with new version (3.2.30 / 1301)
-6. Uploads to Google Play Internal Testing
-7. Updates `CURRENT_VERSION` env var to 3.2.30 via CircleCI API
+3. **Updates `config.js` MOBILE_VERSION** with new version (ensures Help page shows correct version)
+4. Builds Nuxt app with updated version
+5. Queries Google Play for latest version code (e.g., 1300)
+6. Auto-increments version code (1300 → 1301)
+7. Builds AAB and APK with new version (3.2.30 / 1301)
+8. Uploads to Google Play Internal Testing
+9. Updates `CURRENT_VERSION` env var to 3.2.30 via CircleCI API
 
 **Initial Setup** (one-time):
 1. Go to CircleCI Project Settings → Environment Variables
@@ -350,11 +352,13 @@ MARKETING_VERSION = 3.2.0;           // User-facing version
 
 ### Config Version
 
-Also update in `config.js` for runtime version checks:
+The `MOBILE_VERSION` in `config.js` is **automatically updated** by CircleCI before each build:
 
 ```javascript
-MOBILE_VERSION: '3.2.0'
+MOBILE_VERSION: '3.2.0'  // Auto-updated by CircleCI to match Android build version
 ```
+
+This ensures the version shown in the app's Help page matches the actual Android build version. **No manual updates needed** - the version is synchronized automatically during the build process.
 
 </details>
 

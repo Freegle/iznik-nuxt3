@@ -95,6 +95,37 @@ jobs:
           paths:
             - node_modules
 
+      # Update MOBILE_VERSION in config.js before build
+      - run:
+          name: Update Mobile Version in config.js
+          command: |
+            # Get current version from CircleCI environment variable
+            CURRENT_VERSION="${CURRENT_VERSION:-3.2.28}"
+            echo "📱 Current version from CircleCI: $CURRENT_VERSION"
+
+            # Validate version format (X.Y.Z)
+            if ! echo "$CURRENT_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "❌ ERROR: Invalid version format '$CURRENT_VERSION'. Expected format: X.Y.Z"
+              exit 1
+            fi
+
+            # Auto-increment patch version (same logic as Fastlane)
+            IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+            NEW_VERSION="$major.$minor.$((patch + 1))"
+            echo "📱 Auto-incrementing version: $CURRENT_VERSION → $NEW_VERSION"
+
+            # Update MOBILE_VERSION in config.js
+            sed -i "s/MOBILE_VERSION: '[0-9]*\.[0-9]*\.[0-9]*'/MOBILE_VERSION: '$NEW_VERSION'/" config.js
+
+            # Verify the update
+            if grep -q "MOBILE_VERSION: '$NEW_VERSION'" config.js; then
+              echo "✅ Successfully updated config.js with version $NEW_VERSION"
+              grep "MOBILE_VERSION:" config.js
+            else
+              echo "❌ ERROR: Failed to update config.js"
+              exit 1
+            fi
+
       # Build Nuxt app for production
       - run:
           name: Build Nuxt App
