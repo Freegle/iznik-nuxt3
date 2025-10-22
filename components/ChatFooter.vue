@@ -274,6 +274,45 @@
           />
           <div class="mobtext text--smallest">Spammer</div>
         </div>
+        <external-link
+          v-if="chat && chat.chattype === 'User2Mod' && mod"
+          href="https://discourse.ilovefreegle.org/c/central"
+          class="nocolor mr-2"
+        >
+          <v-icon
+            scale="2"
+            icon="question-circle"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
+          <div class="mobtext text--smallest">Central</div>
+        </external-link>
+        <div
+          v-if="chat && chat.chattype === 'User2Mod' && mod"
+          class="mr-2"
+          @click="confirmReferToSupport"
+        >
+          <v-icon
+            scale="2"
+            icon="question-circle"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
+          <div class="mobtext text--smallest">Support</div>
+        </div>
+        <div
+          v-if="chat && chat.chattype === 'User2Mod' && mod"
+          class="mr-2"
+          @click="addAComment"
+        >
+          <v-icon
+            scale="2"
+            icon="tag"
+            class="fa-mob"
+            :class="{ shrink: shrink }"
+          />
+          <div class="mobtext text--smallest">Add note</div>
+        </div>
         <div
           v-if="
             chat &&
