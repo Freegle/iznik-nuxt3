@@ -319,7 +319,8 @@ platform :ios do
       workspace: "ios/App/App.xcworkspace",
       export_method: "app-store",
       clean: true,
-      output_directory: "./build"
+      output_directory: "./build",
+      skip_package_dependencies_resolution: true
     )
 
     # Upload to TestFlight
