@@ -72,6 +72,14 @@ jobs:
     steps:
       - checkout
 
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            # Download and install Node.js 22
+            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+
       # Verify Node.js version
       - run:
           name: Verify Node.js and npm versions
