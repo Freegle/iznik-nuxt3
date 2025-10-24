@@ -14,13 +14,14 @@
     >
       <div
         v-if="fallbackAdVisible"
-        class="d-flex w-100 justify-content-md-around"
+        class="d-flex justify-content-md-around"
+        :style="maxWidth ? `max-width: ${maxWidth}` : ''"
       >
-        <nuxt-link to="/adsoff">
+        <nuxt-link to="/adsoff" style="display: block; max-width: 100%">
           <img
             src="/donate/SupportFreegle_970x250px_20May20215.png"
             alt="Please donate to help keep Freegle running"
-            style="max-width: 100%; display: block; margin: auto"
+            style="width: 100%; height: auto; display: block"
           />
         </nuxt-link>
       </div>
@@ -177,8 +178,8 @@ function visibilityChanged(visible) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
 
-    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) {
-      // App without cookies - show fallback donation ad unless recent donor
+    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES && !props.video) {
+      // App without cookies - show fallback donation ad unless recent donor (but not for video ads)
       console.log('Running in app with no cookies - using fallback ad')
       const me = useAuthStore().user
       const recentDonor =
