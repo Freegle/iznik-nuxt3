@@ -32,7 +32,7 @@
                   message.deleted ||
                   (message.groups &&
                     message.groups.length &&
-                    message.groups[0].collection === 'Rejected'))))
+                    message.groups[0]?.collection === 'Rejected'))))
           "
           class="bg-white p-2"
         >
@@ -219,14 +219,14 @@ const message = computed(() => {
 if (message.value) {
   let snip = null
 
-  if (message.value.snippet) {
-    snip = twem(message.value.snippet) + '...'
-  } else {
-    snip = 'Click for more details'
-  }
+  try {
+    if (message.value.snippet) {
+      snip = twem(message.value.snippet) + '...'
+    } else {
+      snip = 'Click for more details'
+    }
 
-  useHead(
-    buildHead(
+    const headData = buildHead(
       route,
       runtimeConfig,
       message.value.subject,
@@ -235,7 +235,12 @@ if (message.value) {
         ? message.value.attachments[0].path
         : null
     )
-  )
+    useHead(headData)
+  } catch (e) {
+    console.error('Error in head setup', e)
+    // Fallback to basic head
+    useHead({ title: message.value.subject || 'Message' })
+  }
 }
 
 // We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
