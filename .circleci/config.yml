@@ -444,6 +444,27 @@ jobs:
           name: Sync Capacitor to iOS
           command: npx cap sync ios
 
+      # Decode and place GoogleService-Info.plist for Firebase
+      - run:
+          name: Setup Firebase Configuration for iOS
+          command: |
+            if [ -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
+              echo "Decoding GoogleService-Info.plist from environment variable"
+              echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/App/App/GoogleService-Info.plist
+
+              # Validate the decoded file
+              if [ -f ios/App/App/GoogleService-Info.plist ]; then
+                echo "✅ GoogleService-Info.plist successfully created"
+                ls -lh ios/App/App/GoogleService-Info.plist
+              else
+                echo "❌ Failed to create GoogleService-Info.plist"
+                exit 1
+              fi
+            else
+              echo "❌ GOOGLE_SERVICE_INFO_PLIST_BASE64 environment variable not set"
+              exit 1
+            fi
+
       # Install Fastlane (no cache on macOS - it's problematic)
       - run:
           name: Install Fastlane
