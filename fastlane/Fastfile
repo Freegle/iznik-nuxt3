@@ -309,8 +309,26 @@ platform :ios do
     )
 
     # Install the provisioning profile
+    profile_path = ENV['IOS_PROVISIONING_PROFILE_PATH'] || 'ios_appstore.mobileprovision'
     install_provisioning_profile(
-      path: ENV['IOS_PROVISIONING_PROFILE_PATH'] || 'ios_appstore.mobileprovision'
+      path: profile_path
+    )
+
+    # Configure project to use manual signing with the provisioning profile
+    update_project_provisioning(
+      xcodeproj: "ios/App/App.xcodeproj",
+      target_filter: "Freegle",
+      profile: profile_path,
+      code_signing_identity: "iPhone Distribution"
+    )
+
+    # Disable automatic code signing
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "ios/App/App.xcodeproj",
+      targets: ["Freegle"],
+      code_sign_identity: "iPhone Distribution",
+      bundle_identifier: "org.ilovefreegle.iphone"
     )
 
     # Build the app
