@@ -178,15 +178,15 @@ function visibilityChanged(visible) {
     const runtimeConfig = useRuntimeConfig()
 
     if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES) {
-      // Give up in iOS app
-      console.log('Running in iOS with no cookies or served ads')
+      // App without cookies - show fallback donation ad unless recent donor
+      console.log('Running in app with no cookies - using fallback ad')
       const me = useAuthStore().user
       const recentDonor =
         me &&
         me.donated &&
         new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
       if (recentDonor) {
-        console.log('Ads disabled in iOS as recent donor')
+        console.log('Ads disabled in app as recent donor')
         emit('rendered', false)
       } else {
         fallbackAdVisible.value = true
