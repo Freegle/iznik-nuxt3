@@ -201,17 +201,16 @@
               <div v-if="user.privateposition.lat || user.privateposition.lng">
                 {{ Math.round(user.privateposition.lat * 100) / 100 }},
                 {{ Math.round(user.privateposition.lng * 100) / 100 }}
-                <a
+                <ExternalLink
                   :href="
                     'https://www.google.com/maps?q=' +
                     user.privateposition.lat +
                     ',' +
                     user.privateposition.lng
                   "
-                  target="_blank"
-                  rel="noopener"
-                  >Show on map</a
                 >
+                  Show on map
+                </ExternalLink>
               </div>
               <div v-else>Not known</div>
             </div>
@@ -526,10 +525,14 @@
 <script>
 import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
+import ExternalLink from '../../components/ExternalLink'
 
 const SHOW = 3
 
 export default {
+  components: {
+    ExternalLink,
+  },
   props: {
     id: {
       type: Number,
