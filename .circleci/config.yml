@@ -460,9 +460,30 @@ jobs:
             echo "$IOS_DISTRIBUTION_CERT" | base64 --decode > ~/certificates/ios_distribution.p12
             echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/certificates/ios_appstore.mobileprovision
 
-            # Set paths for Fastlane to use
+            # Create a temporary keychain for code signing
+            KEYCHAIN_PATH=~/Library/Keychains/temp.keychain-db
+            KEYCHAIN_PASSWORD=circleci
+
+            # Delete keychain if it exists
+            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+
+            # Create temporary keychain
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            # Set the keychain as default
+            security default-keychain -s "$KEYCHAIN_PATH"
+
+            # Unlock the keychain
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            # Set keychain timeout to 1 hour
+            security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
+
+            # Set paths and keychain info for Fastlane to use
             echo "export IOS_CERTIFICATE_PATH=~/certificates/ios_distribution.p12" >> $BASH_ENV
             echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
+            echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
+            echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
 
       # Build and Deploy to TestFlight
       - run:
