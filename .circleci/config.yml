@@ -451,12 +451,18 @@ jobs:
             bundle config set --local path 'vendor/bundle'
             bundle install
 
-      # Setup SSH for Match git access
+      # Setup iOS Certificates and Provisioning Profiles
       - run:
-          name: Setup SSH for Match
+          name: Setup iOS Certificates
           command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            # Decode certificates and profiles from CircleCI environment variables
+            mkdir -p ~/certificates
+            echo "$IOS_DISTRIBUTION_CERT" | base64 --decode > ~/certificates/ios_distribution.p12
+            echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/certificates/ios_appstore.mobileprovision
+
+            # Set paths for Fastlane to use
+            echo "export IOS_CERTIFICATE_PATH=~/certificates/ios_distribution.p12" >> $BASH_ENV
+            echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
 
       # Build and Deploy to TestFlight
       - run:

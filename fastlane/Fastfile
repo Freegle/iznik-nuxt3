@@ -299,12 +299,18 @@ platform :ios do
       xcodeproj: "ios/App/App.xcodeproj"
     )
 
-    # Get code signing certificates via Match
-    # This will create new certificates on first run
-    match(
-      type: "appstore",
-      readonly: false,
-      app_identifier: "org.ilovefreegle.iphone"
+    # Import certificates from CircleCI environment variables
+    # This avoids needing a separate git repo for certificate storage
+    import_certificate(
+      certificate_path: ENV['IOS_CERTIFICATE_PATH'] || 'ios_distribution.p12',
+      certificate_password: ENV['IOS_CERTIFICATE_PASSWORD'] || '',
+      keychain_name: ENV['KEYCHAIN_NAME'] || 'login.keychain',
+      keychain_password: ENV['KEYCHAIN_PASSWORD'] || ''
+    )
+
+    # Install the provisioning profile
+    install_provisioning_profile(
+      path: ENV['IOS_PROVISIONING_PROFILE_PATH'] || 'ios_appstore.mobileprovision'
     )
 
     # Build the app
