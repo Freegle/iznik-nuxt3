@@ -11,7 +11,7 @@ executors:
 
   macos-executor:
     macos:
-      xcode: 15.4.0
+      xcode: 16.1.0
     resource_class: macos.m1.medium.gen1
 
 commands:
@@ -450,6 +450,11 @@ jobs:
           command: |
             bundle config set --local path 'vendor/bundle'
             bundle install
+
+      # Update Fastlane to latest version
+      - run:
+          name: Update Fastlane to Latest Version
+          command: bundle update fastlane
 
       # Setup iOS Certificates and Provisioning Profiles
       - run:
