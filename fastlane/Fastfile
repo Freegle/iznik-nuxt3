@@ -315,14 +315,9 @@ platform :ios do
 
     # Build the app
     gym(
-      scheme: "App",
+      scheme: "Freegle",
       workspace: "ios/App/App.xcworkspace",
       export_method: "app-store",
-      export_options: {
-        provisioningProfiles: {
-          "org.ilovefreegle.iphone" => "match AppStore org.ilovefreegle.iphone"
-        }
-      },
       clean: true,
       output_directory: "./build"
     )
