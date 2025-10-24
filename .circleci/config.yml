@@ -444,23 +444,12 @@ jobs:
           name: Sync Capacitor to iOS
           command: npx cap sync ios
 
-      # Restore Fastlane bundle cache
-      - restore_cache:
-          keys:
-            - bundle-v1-{{ checksum "Gemfile.lock" }}
-            - bundle-v1-
-
-      # Install Fastlane
+      # Install Fastlane (no cache on macOS - it's problematic)
       - run:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
             bundle install
-
-      - save_cache:
-          key: bundle-v1-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
 
       # Setup SSH for Match git access
       - run:
