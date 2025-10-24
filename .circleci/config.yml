@@ -461,7 +461,9 @@ jobs:
       # Build and Deploy to TestFlight
       - run:
           name: Build and Deploy to TestFlight
-          command: bundle exec fastlane ios beta
+          command: |
+            export TERM=xterm-256color
+            bundle exec fastlane ios beta
           no_output_timeout: 30m
 
       # Update CircleCI CURRENT_VERSION environment variable
