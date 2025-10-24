@@ -9,6 +9,11 @@ executors:
       - image: cimg/android:2025.10-node
     resource_class: large
 
+  macos-executor:
+    macos:
+      xcode: 15.4.0
+    resource_class: macos.m1.medium.gen1
+
 commands:
   setup-android-fastlane:
     steps:
@@ -387,12 +392,147 @@ jobs:
               echo "ℹ️  No promotion occurred (already in production or no beta release found)"
             fi
 
+  build-ios:
+    executor: macos-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            # Install nvm
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            # Install Node 22
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
+
+            # Add to bash profile for subsequent steps
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+
+      # Verify versions
+      - run:
+          name: Verify Node.js and npm versions
+          command: |
+            node --version
+            npm --version
+
+      # Restore npm cache
+      - restore_cache:
+          keys:
+            - npm-deps-v1-{{ checksum "package-lock.json" }}
+            - npm-deps-v1-
+
+      # Install Node.js dependencies
+      - run:
+          name: Install Node.js Dependencies
+          command: npm ci
+
+      - save_cache:
+          key: npm-deps-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+      # Build Nuxt app for production
+      - run:
+          name: Build Nuxt App
+          command: |
+            export ISAPP=true
+            export APP_ENV=production
+            if [ -n "$SENTRY_DSN_APP_FD" ]; then
+              export SENTRY_DSN="$SENTRY_DSN_APP_FD"
+              echo "✅ Using app-specific Sentry DSN"
+            fi
+            npm run generate
+
+      # Sync Capacitor to iOS
+      - run:
+          name: Sync Capacitor to iOS
+          command: npx cap sync ios
+
+      # Restore Fastlane bundle cache
+      - restore_cache:
+          keys:
+            - bundle-v1-{{ checksum "Gemfile.lock" }}
+            - bundle-v1-
+
+      # Install Fastlane
+      - run:
+          name: Install Fastlane
+          command: |
+            bundle config set --local path 'vendor/bundle'
+            bundle install
+
+      - save_cache:
+          key: bundle-v1-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      # Setup SSH for Match git access
+      - run:
+          name: Setup SSH for Match
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      # Build and Deploy to TestFlight
+      - run:
+          name: Build and Deploy to TestFlight
+          command: bundle exec fastlane ios beta
+          no_output_timeout: 30m
+
+      # Update CircleCI CURRENT_VERSION environment variable
+      - run:
+          name: Update CircleCI Version Variable
+          command: |
+            # Read the new version written by Fastlane
+            if [ ! -f .new_version ]; then
+              echo "⚠️  .new_version file not found - skipping version update"
+              exit 0
+            fi
+
+            NEW_VERSION=$(cat .new_version)
+            echo "📝 Updating CircleCI CURRENT_VERSION to: ${NEW_VERSION}"
+
+            # Update environment variable via CircleCI API
+            # First delete the old one
+            curl -X DELETE \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar/CURRENT_VERSION"
+
+            # Then create new one with updated value
+            curl -X POST \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"CURRENT_VERSION\",\"value\":\"${NEW_VERSION}\"}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar"
+
+            echo "✅ Updated CURRENT_VERSION to ${NEW_VERSION}"
+
+      # Store build artifacts
+      - store_artifacts:
+          path: build/
+          destination: ios-build
+
 workflows:
   version: 2
 
   deploy-android-app:
     jobs:
       - build-android:
+          filters:
+            branches:
+              only:
+                - app-ci-fd
+
+  deploy-ios-app:
+    jobs:
+      - build-ios:
           filters:
             branches:
               only:
