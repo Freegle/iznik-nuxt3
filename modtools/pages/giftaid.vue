@@ -341,7 +341,7 @@ export default {
         // Check if email found in user's emails
         let emailFound = false
         const email = row[4]
-        for (let j = 0; j < user.emails?.length; j++) {
+        for (let j = 0; j < user?.emails?.length; j++) {
           if (user.emails[j].email === email) {
             emailFound = true
             break
