@@ -209,12 +209,12 @@ jobs:
           paths:
             - vendor/bundle
 
-      # Build and Deploy to Internal Track
+      # Build and Deploy to Beta Track
       - run:
-          name: Build and Deploy to Google Play Internal Track
+          name: Build and Deploy to Google Play Beta Track
           command: |
             # Run fastlane and capture the new version
-            bundle exec fastlane android internal
+            bundle exec fastlane android beta
 
             # The NEW_VERSION is set by Fastlane in the environment
             # We'll update CircleCI env var in the next step

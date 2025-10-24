@@ -2,7 +2,7 @@ default_platform(:android)
 
 platform :android do
   desc "Build and deploy to Google Play Beta Testing"
-  lane :internal do
+  lane :beta do
     # Validate that Google Play API key file exists
     unless File.exist?('google-play-api-key.json')
       UI.user_error!("❌ CRITICAL: Google Play API key file not found at google-play-api-key.json")
