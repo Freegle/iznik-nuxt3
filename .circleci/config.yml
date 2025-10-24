@@ -11,7 +11,7 @@ executors:
 
   macos-executor:
     macos:
-      xcode: 16.1.0
+      xcode: 16.2.0
     resource_class: macos.m1.medium.gen1
 
 commands:
