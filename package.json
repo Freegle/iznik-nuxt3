@@ -27,7 +27,7 @@
     "pre-commit": "npm run lint-staged"
   },
   "engines": {
-    "node": ">=17.9.1"
+    "node": ">=22.0.0"
   },
   "comments": {
     "comment1": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch",
