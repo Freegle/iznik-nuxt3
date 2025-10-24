@@ -145,7 +145,7 @@ const openWantedPlural = computed(() => {
 const groups = computed(() => {
   const ret = {}
 
-  if (message.value) {
+  if (message.value?.groups) {
     message.value.groups.forEach((g) => {
       const thegroup = groupStore.get(g.groupid)
 
