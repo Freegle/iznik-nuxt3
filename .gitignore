@@ -58,7 +58,14 @@ android/*
 !android/app/
 android/app/*
 !android/app/build.gradle
-ios
+ios/*
+!ios/App/
+ios/App/*
+!ios/App/App.xcodeproj/
+ios/App/App.xcodeproj/*
+!ios/App/App.xcodeproj/xcshareddata/
+ios/App/App.xcodeproj/xcshareddata/*
+!ios/App/App.xcodeproj/xcshareddata/xcschemes/
 
 # Fastlane
 fastlane/*.json
