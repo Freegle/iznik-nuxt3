@@ -226,3 +226,131 @@ platform :android do
     end
   end
 end
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Validate environment variables
+    unless ENV['APP_STORE_CONNECT_API_KEY_KEY_ID']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_KEY_ID not set")
+    end
+    unless ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_ISSUER_ID not set")
+    end
+    unless ENV['APP_STORE_CONNECT_API_KEY_KEY']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_KEY not set")
+    end
+
+    # Set up App Store Connect API Key
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Get version from CircleCI environment variable (same as Android)
+    current_version = ENV['CURRENT_VERSION']
+    unless current_version
+      UI.user_error!("❌ CRITICAL: CURRENT_VERSION environment variable not set")
+    end
+
+    UI.message("📱 Current version from CircleCI: #{current_version}")
+
+    # Auto-increment patch version (matching Android logic)
+    parts = current_version.split('.').map(&:to_i)
+    unless parts.length == 3
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}'")
+    end
+
+    parts[2] += 1
+    version = parts.join('.')
+    UI.success("📱 Auto-incremented version: #{current_version} → #{version}")
+
+    # Write new version to file for CircleCI to read (same as Android)
+    File.write('../.new_version', version)
+    UI.success("✅ Wrote new version to .new_version file")
+
+    # Set version number in Xcode
+    increment_version_number(
+      version_number: version,
+      xcodeproj: "ios/App/App.xcodeproj"
+    )
+
+    # Get latest TestFlight build number
+    begin
+      latest_build = latest_testflight_build_number(
+        version: version,
+        initial_build_number: 0,
+        app_identifier: "org.ilovefreegle.iphone"
+      )
+      UI.message("📊 Latest TestFlight build for v#{version}: #{latest_build}")
+    rescue => e
+      UI.message("ℹ️  No existing builds for v#{version}, starting at 0")
+      latest_build = 0
+    end
+
+    new_build = latest_build + 1
+    UI.success("📊 New build number: #{new_build}")
+
+    # Set build number in Xcode
+    increment_build_number(
+      build_number: new_build,
+      xcodeproj: "ios/App/App.xcodeproj"
+    )
+
+    # Get code signing certificates via Match
+    # This will create new certificates on first run
+    match(
+      type: "appstore",
+      readonly: false,
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    # Build the app
+    gym(
+      scheme: "App",
+      workspace: "ios/App/App.xcworkspace",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "org.ilovefreegle.iphone" => "match AppStore org.ilovefreegle.iphone"
+        }
+      },
+      clean: true,
+      output_directory: "./build"
+    )
+
+    # Upload to TestFlight
+    pilot(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      changelog: "Version #{version} - Bug fixes and improvements",
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    UI.success("✅ Successfully uploaded to TestFlight!")
+  end
+
+  desc "Promote TestFlight to Production"
+  lane :release do
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    deliver(
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      precheck_include_in_app_purchases: false,
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    UI.success("✅ Submitted for App Store review!")
+  end
+end
