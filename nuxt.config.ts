@@ -1,6 +1,6 @@
 // import fs from 'fs'
 // import https from 'https'
-import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint2'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -402,12 +402,14 @@ export default defineNuxtConfig({
         ? []
         : [
             splitVendorChunkPlugin(),
-            VitePWA({ registerType: 'autoUpdate' }),
-            // Make Lint errors cause build failures.
-            eslintPlugin(),
-            // eslint-disable-next-line no-undef
-            legacy({
-              targets: ['since 2015'],
+            VitePWA({
+              registerType: 'autoUpdate',
+              workbox: {
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+              },
+            }),
+            eslintPlugin({
+              exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
             }),
             sentryVitePlugin({
               org: 'freegle',
