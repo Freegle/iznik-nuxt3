@@ -1,5 +1,11 @@
 version: 2.1
 
+parameters:
+  run_manual_promote:
+    type: boolean
+    default: false
+    description: "Set to true to manually trigger promotion/submission workflow"
+
 orbs:
   android: circleci/android@2.3.0
 
@@ -734,16 +740,15 @@ workflows:
       - auto-submit-ios
 
   manual-promote-submit:
+    when: << pipeline.parameters.run_manual_promote >>
     jobs:
-      - hold-for-approval:
-          type: approval
+      - auto-promote-production:
           filters:
             branches:
               only:
                 - app-ci-fd
-      - auto-promote-production:
-          requires:
-            - hold-for-approval
       - auto-submit-ios:
-          requires:
-            - hold-for-approval
+          filters:
+            branches:
+              only:
+                - app-ci-fd
