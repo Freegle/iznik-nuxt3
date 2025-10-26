@@ -732,3 +732,18 @@ workflows:
     jobs:
       - auto-promote-production
       - auto-submit-ios
+
+  manual-promote-submit:
+    jobs:
+      - hold-for-approval:
+          type: approval
+          filters:
+            branches:
+              only:
+                - app-ci-fd
+      - auto-promote-production:
+          requires:
+            - hold-for-approval
+      - auto-submit-ios:
+          requires:
+            - hold-for-approval
