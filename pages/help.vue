@@ -15,11 +15,11 @@
           Mobile app version: {{ mobileVersion }}, built {{ version }}
           <span style="display: none">{{ mobileInfo }}</span>
         </p>
-        <p>
-          <a href="#" class="d-inline" @click.stop.prevent="showDonationAsk"
-            >donation ask</a
-          >.<br />
-        </p>
+        <!--        <p>-->
+        <!--          <a href="#" class="d-inline" @click.stop.prevent="showDonationAsk"-->
+        <!--            >donation ask</a-->
+        <!--          >.<br />-->
+        <!--        </p>-->
         <RateAppModal
           v-if="showRateAppModal"
           ref="rateAppModal"
@@ -59,7 +59,10 @@
             <template #title>How do I get fewer emails?</template>
             <p>
               <!-- eslint-disable-next-line-->
-            If you go to <nuxt-link no-prefetch to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
+              If you go to
+              <nuxt-link no-prefetch to="/settings">Settings</nuxt-link> then
+              you can change how many mails you get in your
+              <em>Mail Settings</em>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="taken" :matches="matches">
@@ -96,7 +99,11 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                If you've not had any replies, this happens automatically.  If you go to <nuxt-link  no-prefetch to="/myposts">My Posts</nuxt-link>, and click on the post, you can see the time until the auto-repost is due on there, like this:
+                If you've not had any replies, this happens automatically. If
+                you go to
+                <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link>, and
+                click on the post, you can see the time until the auto-repost is
+                due on there, like this:
               </p>
               <p>
                 <span class="success"> Auto-repost due in 2 days</span>
@@ -112,7 +119,9 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                You can do this from your <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
+                You can do this from your
+                <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>, in
+                the <em>Personal Information</em> section.
               </p>
             </div>
           </HelpQuestion>
@@ -316,7 +325,10 @@
               </ul>
               <p>
                 <!-- eslint-disable-next-line -->
-                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+                You can reach us at
+                <ExternalLink href="mailto:volunteers@ilovefreegle.org"
+                  >volunteers@ilovefreegle.org</ExternalLink
+                >.
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that

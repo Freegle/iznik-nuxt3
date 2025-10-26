@@ -1,8 +1,29 @@
 # CircleCI Continuous Integration
 
-This repository uses a **centralized testing approach** where Playwright tests run exclusively in the [FreegleDocker repository](https://github.com/Freegle/FreegleDocker), not locally.
+This repository uses CircleCI for **two distinct purposes**:
 
-## Why No Local CI?
+1. **Mobile App Builds** (`.circleci/config.yml` in `app-ci-fd` branch) - Automated iOS and Android app releases
+2. **Integration Testing** (via [FreegleDocker repository](https://github.com/Freegle/FreegleDocker)) - End-to-end testing
+
+## Mobile App CI/CD (`app-ci-fd` branch)
+
+The `app-ci-fd` branch contains a `.circleci/config.yml` that automates mobile app builds and deployments:
+
+### What It Does
+✅ **iOS & Android builds** - Parallel builds with shared version numbers
+✅ **Automated versioning** - Auto-increments version from shared workspace
+✅ **Store deployments** - TestFlight (iOS) and Google Play Beta (Android)
+✅ **Auto-promotion** - Daily job promotes/submits to production after 24 hours
+
+### Build Pipeline
+- **Version Management**: Single job increments version, shared by both platforms
+- **Parallel Builds**: iOS and Android build simultaneously with same version
+- **Auto-Deploy**: Uploads to TestFlight and Google Play Beta automatically
+- **Scheduled Promotion**: Daily job checks for releases to promote/submit
+
+See [README-APP.md](README-APP.md) for complete mobile app CI/CD documentation.
+
+## Web Application Testing
 
 **Playwright tests DO NOT run in this repository to prevent contamination of live systems.**
 
@@ -13,9 +34,10 @@ This repository uses a **centralized testing approach** where Playwright tests r
 - **Resource Efficiency**: One comprehensive test environment vs. multiple isolated ones
 
 ### What This Means
-❌ **No local CircleCI** - This repository has no `.circleci/config.yml`  
-❌ **No Playwright runs here** - All E2E testing happens in FreegleDocker  
-✅ **Development tools only** - ESLint, development server, build tools
+❌ **No web testing CI in master** - Master branch has no `.circleci/config.yml`
+❌ **No Playwright runs here** - All E2E testing happens in FreegleDocker
+✅ **Development tools only** - ESLint, development server, build tools (master branch)
+✅ **Mobile app builds** - iOS/Android automation in `app-ci-fd` branch
 ✅ **Integration testing** - Full system testing via FreegleDocker
 
 ## Integration Testing

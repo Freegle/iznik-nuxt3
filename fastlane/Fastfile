@@ -20,32 +20,23 @@ platform :android do
       UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
     end
 
-    # Get and auto-increment version NAME from CircleCI environment variable
-    # This avoids needing git push permissions
-    current_version = ENV['CURRENT_VERSION']
+    # Read pre-calculated version from workspace file
+    # Version was already incremented by the increment-version job
+    version_file = '../.new_version'
 
-    unless current_version
-      UI.user_error!("❌ CRITICAL: CURRENT_VERSION environment variable not set in CircleCI")
-      UI.user_error!("💡 Set it in CircleCI Project Settings → Environment Variables")
-      UI.user_error!("💡 Format: X.Y.Z (e.g., 3.2.28)")
+    unless File.exist?(version_file)
+      UI.user_error!("❌ CRITICAL: Version file not found at #{version_file}")
+      UI.user_error!("💡 The increment-version job should have created this file")
     end
 
-    UI.message("📱 Current version from CircleCI: #{current_version}")
+    version = File.read(version_file).strip
+    UI.success("📱 Using version from workspace: #{version}")
 
-    # Validate and parse version format
-    parts = current_version.split('.').map(&:to_i)
+    # Validate version format
+    parts = version.split('.').map(&:to_i)
     unless parts.length == 3
-      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}'. Expected format: X.Y.Z")
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}'. Expected format: X.Y.Z")
     end
-
-    # Auto-increment patch version
-    parts[2] += 1
-    version = parts.join('.')
-    UI.success("📱 Auto-incremented version name: #{current_version} → #{version}")
-
-    # Write new version to file for CircleCI to read
-    File.write('../.new_version', version)
-    UI.success("✅ Wrote new version to .new_version file")
 
     # Get version code from Google Play API
     # Check ALL tracks to find the maximum version code to avoid conflicts
@@ -79,6 +70,14 @@ platform :android do
 
     latest_build = all_version_codes.max
     new_version_code = latest_build + 1
+
+    # Ensure version code is at least 1272
+    min_version_code = 1272
+    if new_version_code < min_version_code
+      UI.message("📊 Jumping from version code #{new_version_code} to minimum #{min_version_code}")
+      new_version_code = min_version_code
+    end
+
     UI.success("📊 Maximum version code across all tracks: #{latest_build}")
     UI.success("📊 New version code: #{new_version_code}")
 
@@ -249,27 +248,23 @@ platform :ios do
       is_key_content_base64: false
     )
 
-    # Get version from CircleCI environment variable (same as Android)
-    current_version = ENV['CURRENT_VERSION']
-    unless current_version
-      UI.user_error!("❌ CRITICAL: CURRENT_VERSION environment variable not set")
+    # Read pre-calculated version from workspace file (same as Android)
+    # Version was already incremented by the increment-version job
+    version_file = '../.new_version'
+
+    unless File.exist?(version_file)
+      UI.user_error!("❌ CRITICAL: Version file not found at #{version_file}")
+      UI.user_error!("💡 The increment-version job should have created this file")
     end
 
-    UI.message("📱 Current version from CircleCI: #{current_version}")
+    version = File.read(version_file).strip
+    UI.success("📱 Using version from workspace: #{version}")
 
-    # Auto-increment patch version (matching Android logic)
-    parts = current_version.split('.').map(&:to_i)
+    # Validate version format
+    parts = version.split('.').map(&:to_i)
     unless parts.length == 3
-      UI.user_error!("❌ CRITICAL: Invalid version format '#{current_version}'")
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}'")
     end
-
-    parts[2] += 1
-    version = parts.join('.')
-    UI.success("📱 Auto-incremented version: #{current_version} → #{version}")
-
-    # Write new version to file for CircleCI to read (same as Android)
-    File.write('../.new_version', version)
-    UI.success("✅ Wrote new version to .new_version file")
 
     # Set version number in Xcode
     increment_version_number(
@@ -291,6 +286,14 @@ platform :ios do
     end
 
     new_build = latest_build + 1
+
+    # Ensure build number is at least 1272
+    min_build_number = 1272
+    if new_build < min_build_number
+      UI.message("📊 Jumping from build number #{new_build} to minimum #{min_build_number}")
+      new_build = min_build_number
+    end
+
     UI.success("📊 New build number: #{new_build}")
 
     # Set build number in Xcode
@@ -372,5 +375,100 @@ platform :ios do
     )
 
     UI.success("✅ Submitted for App Store review!")
+  end
+
+  desc "Auto-submit latest TestFlight build to App Store review (daily automation)"
+  lane :auto_submit do
+    require 'spaceship'
+    require 'time'
+
+    UI.message("🔍 Checking TestFlight for builds ready to submit...")
+
+    # Set up App Store Connect API
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Connect to App Store Connect
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY'])
+    )
+
+    app = Spaceship::ConnectAPI::App.find("org.ilovefreegle.iphone")
+    unless app
+      UI.user_error!("❌ Could not find app with identifier org.ilovefreegle.iphone")
+    end
+
+    # Get all TestFlight builds for the app
+    # Sort by upload date descending to get newest first
+    builds = app.get_builds(sort: "-uploadedDate", limit: 50)
+
+    if builds.nil? || builds.empty?
+      UI.message("ℹ️  No TestFlight builds found")
+      next
+    end
+
+    # Filter builds from the last 24 hours
+    cutoff_time = Time.now - (24 * 60 * 60)
+    recent_builds = builds.select do |build|
+      upload_time = Time.parse(build.uploaded_date)
+      upload_time >= cutoff_time
+    end
+
+    if recent_builds.empty?
+      UI.message("ℹ️  No TestFlight builds uploaded in the last 24 hours")
+      next
+    end
+
+    # Get the latest build (first in sorted list)
+    latest_build = recent_builds.first
+    version = latest_build.version
+    build_number = latest_build.version
+
+    UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
+    UI.message("📦 Latest build: version #{version} (#{build_number})")
+
+    # Check if this build is already in review or approved
+    # Get the app store version for this version number
+    app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
+
+    if app_store_version
+      case app_store_version.app_store_state
+      when "PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW"
+        UI.message("✅ Version #{version} is already submitted (status: #{app_store_version.app_store_state})")
+        next
+      when "READY_FOR_SALE"
+        UI.message("✅ Version #{version} is already released")
+        next
+      end
+    end
+
+    # Check processing status - don't submit if still processing
+    if latest_build.processing_state != "VALID"
+      UI.message("⏳ Build is still processing (status: #{latest_build.processing_state}), will try again later")
+      next
+    end
+
+    UI.success("🚀 Submitting build #{build_number} for App Store review...")
+
+    # Submit to App Store
+    deliver(
+      build_number: build_number.to_s,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      skip_binary_upload: true,
+      precheck_include_in_app_purchases: false,
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    UI.success("✅ Successfully submitted build #{build_number} for App Store review!")
   end
 end

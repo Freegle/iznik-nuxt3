@@ -4,9 +4,9 @@ This document describes the mobile app version of Freegle, which is built using 
 
 ---
 
-## ⚠️ IMPORTANT: Android Only
+## ✅ iOS and Android Automated
 
-**Only Android releases are currently being produced.** The automated CI/CD pipeline, version management, and deployment process documented here are **Android-specific**. iOS builds are not currently automated and would require significant manual setup.
+**Both iOS and Android releases are fully automated via CircleCI.** The CI/CD pipeline builds, version manages, and deploys both platforms in parallel using a shared version number to ensure consistency.
 
 ---
 
@@ -303,62 +303,88 @@ Several components have mobile-specific behavior:
 <details>
 <summary><h2>Version Management</h2></summary>
 
-### Android (Fully Automated via CircleCI)
+### Unified Version Management (Both Platforms)
 
-**Version Name** (e.g., "3.2.29"): Auto-incremented by CircleCI
+**Shared Version Strategy**: Both iOS and Android use the **same version number** to ensure consistency across platforms. A single `increment-version` job runs before both builds, calculates the new version, and shares it via CircleCI workspace.
+
+**Version Name** (e.g., "3.2.38"): Auto-incremented once, shared between platforms
 - Stored in CircleCI environment variable `CURRENT_VERSION`
-- CircleCI reads current version, increments patch version (3.2.29 → 3.2.30)
-- Updates `CURRENT_VERSION` via CircleCI API after successful build
+- CircleCI reads current version, increments patch version (3.2.37 → 3.2.38)
+- Creates `.new_version` file in workspace with new version
+- Both Android and iOS jobs read from this shared file
+- **No race conditions** - version calculated once before parallel builds
 - Build will FAIL if `CURRENT_VERSION` is not set or has invalid format (must be X.Y.Z)
 - **No manual intervention needed** - fully automated
-- **No git push permissions required**
 
-**Version Code** (e.g., 1300): Auto-incremented by CircleCI
-- Queries Google Play Console (internal track, then production track) for latest version code
+**Version Code/Build Number**: Platform-specific, auto-incremented from stores
+- **Android**: Queries Google Play Console (all tracks) for latest version code
+- **iOS**: Queries TestFlight for latest build number
 - Automatically increments by 1 for each build
+- **Minimum version code: 1272** (jumps from lower values if needed, then increments normally)
+- Build will FAIL if store APIs are unavailable
+
+### Android Version Management
+
+**Version Code** (e.g., 1272): Auto-incremented from Google Play
+- Queries Google Play Console across ALL tracks (internal, beta, production)
+- Finds maximum version code across all tracks
+- Automatically increments by 1 for each build (1272 → 1273)
+- Minimum enforced: if calculated code < 1272, jumps to 1272
 - Build will FAIL if Google Play API is unavailable or no releases exist
 - **No manual intervention needed** - fully automated
 
-**How it works**:
-1. CircleCI reads `CURRENT_VERSION` env var (e.g., "3.2.29")
-2. Auto-increments patch version (3.2.29 → 3.2.30)
-3. **Updates `config.js` MOBILE_VERSION** with new version (ensures Help page shows correct version)
+**How Android build works**:
+1. CircleCI `increment-version` job reads `CURRENT_VERSION` (e.g., "3.2.37")
+2. Auto-increments patch version (3.2.37 → 3.2.38)
+3. Saves to `.new_version` in workspace
+4. Android job attaches workspace and reads `.new_version`
+5. **Updates `config.js` MOBILE_VERSION** with new version (ensures Help page shows correct version)
+6. Builds Nuxt app with updated version
+7. Queries Google Play for latest version code (e.g., 1271)
+8. Auto-increments version code (1271 → 1272, or enforces minimum 1272)
+9. Builds AAB and APK with new version (3.2.38 / 1272)
+10. Uploads to Google Play Beta Testing (Open Testing)
+
+### iOS Version Management
+
+**Build Number** (e.g., 1272): Auto-incremented from TestFlight
+- Queries TestFlight for latest build number for this version
+- Automatically increments by 1 for each build (1272 → 1273)
+- Minimum enforced: if calculated build < 1272, jumps to 1272
+- If no builds exist for this version, starts at 1272
+- **No manual intervention needed** - fully automated
+
+**How iOS build works**:
+1. CircleCI `increment-version` job creates shared `.new_version` (e.g., "3.2.38")
+2. iOS job attaches workspace and reads `.new_version`
+3. **Updates `config.js` MOBILE_VERSION** with new version (same as Android)
 4. Builds Nuxt app with updated version
-5. Queries Google Play for latest version code (e.g., 1300)
-6. Auto-increments version code (1300 → 1301)
-7. Builds AAB and APK with new version (3.2.30 / 1301)
-8. Uploads to Google Play Internal Testing
-9. Updates `CURRENT_VERSION` env var to 3.2.30 via CircleCI API
-
-**Initial Setup** (one-time):
-1. Go to CircleCI Project Settings → Environment Variables
-2. Add `CURRENT_VERSION` = `3.2.29` (starting version)
-3. Add `CIRCLECI_API_TOKEN` = (your CircleCI personal access token)
-   - Get token from: https://app.circleci.com/settings/user/tokens
-   - Needs "All" scope to update environment variables
-
-**To manually bump major/minor version**:
-- Update `CURRENT_VERSION` in CircleCI: `3.2.29` → `4.0.0` or `3.3.0`
-- Next build will auto-increment from there: `4.0.0` → `4.0.1`
-
-### iOS (Manual)
-
-Version must be updated in `ios/App/App.xcodeproj/project.pbxproj`:
-
-```
-CURRENT_PROJECT_VERSION = 1200;      // Build number
-MARKETING_VERSION = 3.2.0;           // User-facing version
-```
+5. Queries TestFlight for latest build number for version 3.2.38
+6. Auto-increments build number (or enforces minimum 1272)
+7. Sets version in Xcode project: `MARKETING_VERSION = 3.2.38`, `CURRENT_PROJECT_VERSION = 1272`
+8. Builds IPA with new version (3.2.38 / 1272)
+9. Uploads to TestFlight
+10. **Auto-submit to App Store review after 24 hours** (scheduled job)
 
 ### Config Version
 
-The `MOBILE_VERSION` in `config.js` is **automatically updated** by CircleCI before each build:
+The `MOBILE_VERSION` in `config.js` is **automatically updated** by BOTH CircleCI jobs before each build:
 
 ```javascript
-MOBILE_VERSION: '3.2.0'  // Auto-updated by CircleCI to match Android build version
+MOBILE_VERSION: '3.2.38'  // Auto-updated by both jobs from shared workspace version
 ```
 
-This ensures the version shown in the app's Help page matches the actual Android build version. **No manual updates needed** - the version is synchronized automatically during the build process.
+This ensures the version shown in the app's Help page matches the actual build version on both platforms. **No manual updates needed** - the version is synchronized automatically during the build process.
+
+### Initial Setup (one-time)
+
+1. Go to CircleCI Project Settings → Environment Variables
+2. Add `CURRENT_VERSION` = `3.2.37` (starting version)
+
+**To manually bump major/minor version**:
+- Update `CURRENT_VERSION` in CircleCI: `3.2.37` → `4.0.0` or `3.3.0`
+- Next build will auto-increment from there: `4.0.0` → `4.0.1`
+- Both platforms will use the same version number
 
 </details>
 
@@ -367,22 +393,49 @@ This ensures the version shown in the app's Help page matches the actual Android
 <details>
 <summary><h2>Environment Variables</h2></summary>
 
-### Required for CircleCI Android Builds
+### Required for CircleCI Builds
+
+#### Android-Specific
 
 ```bash
-# Android Signing (CircleCI)
+# Android Signing
 ANDROID_KEYSTORE_BASE64=...          # Base64-encoded keystore file
 ANDROID_KEYSTORE_PASSWORD=...        # Keystore password
 ANDROID_KEY_ALIAS=...                # Key alias (e.g., "Freegle Ltd Chris")
 ANDROID_KEY_PASSWORD=...             # Key password
 
-# Google Play API (CircleCI)
+# Google Play API
 GOOGLE_PLAY_JSON_KEY=...             # Base64-encoded service account JSON
 
-# Firebase Configuration (CircleCI)
+# Firebase Configuration (Android)
 GOOGLE_SERVICES_JSON_BASE64=...      # Base64-encoded google-services.json
+```
 
-# Sentry Error Tracking (CircleCI)
+#### iOS-Specific
+
+```bash
+# App Store Connect API
+APP_STORE_CONNECT_API_KEY_KEY_ID=... # API Key ID from App Store Connect
+APP_STORE_CONNECT_API_KEY_ISSUER_ID=...  # Issuer ID from App Store Connect
+APP_STORE_CONNECT_API_KEY_KEY=...    # Base64-encoded .p8 private key file
+
+# iOS Code Signing
+IOS_DISTRIBUTION_CERT=...            # Base64-encoded iOS distribution certificate (.p12)
+IOS_CERTIFICATE_PASSWORD=...         # Password for the .p12 certificate
+IOS_PROVISIONING_PROFILE=...         # Base64-encoded provisioning profile (.mobileprovision)
+
+# Keychain Configuration
+KEYCHAIN_PASSWORD=...                # Password for temporary keychain (e.g., "circleci")
+KEYCHAIN_NAME=...                    # Name of temporary keychain (e.g., "temp.keychain-db")
+
+# Firebase Configuration (iOS)
+GOOGLE_SERVICE_INFO_PLIST_BASE64=... # Base64-encoded GoogleService-Info.plist
+```
+
+#### Shared Configuration
+
+```bash
+# Sentry Error Tracking
 SENTRY_DSN_APP_FD=...                # Sentry DSN for app error tracking (optional)
 
 # App Configuration
@@ -410,20 +463,39 @@ USE_COOKIES=false                    # Cookie behavior for mobile
 2. Click "Environment Variables"
 3. Add the required variables listed above
 4. For base64 encoding:
+
+   **Android:**
    ```bash
-   # Encode keystore
+   # Encode Android keystore
    base64 -w 0 your-keystore.jks > keystore_base64.txt
 
    # Encode Google Play JSON key
    base64 -w 0 google-play-api-key.json > play_key_base64.txt
 
-   # Encode Firebase google-services.json
+   # Encode Firebase google-services.json (Android)
    base64 -w 0 android/app/google-services.json > google_services_base64.txt
    ```
 
-**Note:** The `google-services.json` file is required for Firebase/Push Notifications to work. Download it from [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your Android app → Download google-services.json
+   **iOS:**
+   ```bash
+   # Encode iOS distribution certificate
+   base64 -w 0 ios_distribution.p12 > ios_cert_base64.txt
 
-**Note:** `SENTRY_DSN_APP_FD` is optional but recommended for error tracking in the mobile app. If not set, the app will use the default Sentry DSN from `config.js`. Setting a separate DSN for the app prevents conflicts with other pipelines. Get your Sentry DSN from [Sentry](https://sentry.io/) → Project Settings → Client Keys (DSN).
+   # Encode iOS provisioning profile
+   base64 -w 0 ios_appstore.mobileprovision > ios_profile_base64.txt
+
+   # Encode App Store Connect API key (.p8 file)
+   base64 -w 0 AuthKey_XXXXXXXXXX.p8 > appstore_key_base64.txt
+
+   # Encode Firebase GoogleService-Info.plist (iOS)
+   base64 -w 0 ios/App/App/GoogleService-Info.plist > google_service_info_base64.txt
+   ```
+
+**Notes:**
+- **Firebase files** (`google-services.json` for Android, `GoogleService-Info.plist` for iOS) are required for Firebase/Push Notifications. Download from [Firebase Console](https://console.firebase.google.com/) → Project Settings → Your app → Download config file
+- **App Store Connect API Key**: Create at [App Store Connect](https://appstoreconnect.apple.com/) → Users and Access → Keys → App Store Connect API
+- **iOS Certificates**: Export from Xcode or Apple Developer portal as .p12 with a password
+- **SENTRY_DSN_APP_FD** is optional but recommended for error tracking. Get from [Sentry](https://sentry.io/) → Project Settings → Client Keys (DSN)
 
 ### Verifying GOOGLE_PLAY_JSON_KEY
 
@@ -463,24 +535,51 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 <details>
 <summary><h2>Build Process</h2></summary>
 
-### CircleCI Automated Builds (Android)
+### CircleCI Automated Builds (Both Platforms)
 
 **Triggered on**: Pushes to `app-ci-fd` branch
 
-**Build Steps**:
-1. Install Node.js dependencies
-2. Build Nuxt app with `npm run generate` (static site)
-3. Decode and place Firebase `google-services.json` from environment variable
-4. Sync Capacitor to Android project
-5. Query Google Play Console for latest version code and version name
-6. Build signed AAB (Android App Bundle) with auto-incremented version
-7. Build signed APK for direct installation
-8. Upload AAB to Google Play Internal Testing track
-9. Store AAB and APK as CircleCI artifacts
+**Jobs Workflow**:
+
+1. **increment-version** (runs first):
+   - Reads `CURRENT_VERSION` from environment
+   - Increments patch version (3.2.37 → 3.2.38)
+   - Saves to `.new_version` in workspace
+
+2. **build-android** and **build-ios** (run in parallel):
+   - Both require `increment-version` to complete first
+   - Both attach workspace to read shared `.new_version`
+
+**Android Build Steps**:
+1. Install Node.js 22 dependencies
+2. Read version from workspace `.new_version` file
+3. Update `config.js` MOBILE_VERSION with new version
+4. Build Nuxt app with `npm run generate` (static site)
+5. Decode and place Firebase `google-services.json`
+6. Sync Capacitor to Android project
+7. Query Google Play Console for latest version code (across all tracks)
+8. Build signed AAB with auto-incremented version code (minimum 1272)
+9. Build signed APK for direct installation
+10. Upload AAB to Google Play Beta (Open Testing) track
+11. Store AAB and APK as CircleCI artifacts
+
+**iOS Build Steps**:
+1. Install Node.js 22 (via nvm on macOS)
+2. Read version from workspace `.new_version` file
+3. Update `config.js` MOBILE_VERSION with new version
+4. Build Nuxt app with `npm run generate` (static site)
+5. Sync Capacitor to iOS project
+6. Decode and place Firebase `GoogleService-Info.plist`
+7. Install Fastlane and dependencies (Ruby gems)
+8. Set up iOS certificates and provisioning profile
+9. Query TestFlight for latest build number
+10. Build IPA with auto-incremented build number (minimum 1272)
+11. Upload to TestFlight
+12. Store IPA as CircleCI artifact
 
 **Artifacts**:
-- `android-bundle/app-release.aab` - For Play Store
-- `android-apk/app-release.apk` - For direct installation/testing
+- **Android**: `android-bundle/app-release.aab`, `android-apk/app-release.apk`
+- **iOS**: IPA file in artifacts
 
 **Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
 
@@ -602,70 +701,136 @@ Some packages require specific versions for compatibility. Check `package.json` 
 <details>
 <summary><h2>Deployment</h2></summary>
 
-### Android (Fully Automated Pipeline)
+### Fully Automated Dual-Platform Deployment
+
+Both iOS and Android are built and deployed in parallel with shared version numbers. The workflow ensures consistency across platforms.
+
+**Build Workflow**:
+
+1. **Version Increment Job** (runs first):
+   - Reads `CURRENT_VERSION` environment variable (e.g., "3.2.37")
+   - Auto-increments patch version (3.2.37 → 3.2.38)
+   - Saves to workspace file `.new_version`
+   - Both platform jobs read from this shared file
+
+2. **Android and iOS Jobs** (run in parallel):
+   - Both attach workspace to read shared version
+   - Both update `config.js` MOBILE_VERSION with new version
+   - Both build Nuxt app with identical version
+   - Both query their respective stores for build numbers
+   - Both build and upload to beta/testing tracks
+   - **Artifacts stored** for both platforms
 
 **Automated Daily Workflow**:
 
-1. **11:00 PM UTC - Auto-merge master**:
-   - GitHub Actions merges `master` → `app-ci-fd`
-   - If merge succeeds with changes: triggers CircleCI build
-   - If merge fails: creates GitHub issue with conflict details
+1. **11:00 PM UTC - Trigger**:
+   - Push to `app-ci-fd` branch triggers build
+   - OR GitHub Actions can auto-merge `master` → `app-ci-fd` (optional)
 
-2. **Build and Deploy to Beta (Open Testing)**:
-   - CircleCI builds version X.Y.Z (auto-incremented)
-   - Builds AAB and APK with auto-incremented version code
-   - Uploads to **Google Play Beta (Open Testing)** track
+2. **Build and Deploy (11:00-11:30 PM UTC)**:
+   - **Android**: Uploads to Google Play Beta (Open Testing)
+   - **iOS**: Uploads to TestFlight
+   - Both use version X.Y.Z (shared) with platform-specific build numbers (minimum 1272)
    - Release notes: "Version X.Y.Z - Bug fixes and improvements"
-   - Updates `CURRENT_VERSION` environment variable
 
-3. **Midnight UTC - Auto-promote to Production**:
-   - CircleCI checks beta track for releases
-   - If beta release exists and not yet in production: promotes to production
-   - Assumes 24+ hours have passed (runs 1 hour after build)
+3. **Auto-Promote/Submit (24 hours later)**:
+   - **Android**: Auto-promotes Beta → Production (if not already promoted)
+   - **iOS**: Auto-submits latest TestFlight build to App Store review (if not already submitted)
+   - Only the LATEST build from last 24 hours is submitted/promoted
 
-**Manual Triggers**:
-- Push to `app-ci-fd` branch: triggers build immediately
-- Rerun CircleCI workflow: rebuilds current commit
-- GitHub Actions "auto-merge-master": manually trigger merge
+### Android-Specific
 
-**Google Play Console Access**:
+**Build Process**:
+- Queries Google Play for max version code across all tracks
+- Auto-increments version code (enforces minimum 1272)
+- Builds AAB (for Play Store) and APK (for direct install)
+- Uploads to Beta (Open Testing) track
+- Auto-promotes to Production after 24 hours
+
+**Google Play Console**:
 - Beta Testing: https://play.google.com/console → Your App → Testing → Open testing
 - Production: https://play.google.com/console → Your App → Production
-- Internal Testing: (not used in automated pipeline)
 
 **Play App Signing**:
-- App is enrolled in Google Play App Signing
-- Upload key (managed by CircleCI) signs AABs before upload
-- App signing key (managed by Google) signs final APKs for users
+- Enrolled in Google Play App Signing
+- Upload key (CircleCI) signs AABs
+- App signing key (Google) signs final APKs
 
-**Timeline**:
+**Artifacts**:
+- `android-bundle/app-release.aab`
+- `android-apk/app-release.apk`
+
+### iOS-Specific
+
+**Build Process**:
+- Queries TestFlight for latest build number
+- Auto-increments build number (enforces minimum 1272)
+- Sets Xcode version: `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION`
+- Builds IPA with manual code signing
+- Uploads to TestFlight
+- Auto-submits to App Store review after 24 hours (latest build only)
+
+**App Store Connect**:
+- TestFlight: https://appstoreconnect.apple.com → Your App → TestFlight
+- App Store: https://appstoreconnect.apple.com → Your App → App Store
+
+**Submission Notes**:
+- **One submission per day is safe** - well within Apple's limits
+- TestFlight has no daily submission issues
+- App Store review typically takes 24 hours (90% of submissions)
+- Auto-submit only submits if not already in review/approved
+
+**Artifacts**:
+- IPA file stored in CircleCI artifacts
+
+### Manual Triggers
+
+- Push to `app-ci-fd` branch: triggers full build workflow
+- Rerun CircleCI workflow: rebuilds current commit
+- Manual promotion/submission via store consoles if needed
+
+### Timeline
+
 ```
-Day 1, 11:00 PM: Master merged → Build triggered
-Day 1, 11:15 PM: Build complete → Beta released
-Day 2, 12:00 AM: Auto-promote check → Promoted to Production
+Day 1, 11:00 PM: Build triggered (master merge or manual push)
+Day 1, 11:30 PM: Builds complete
+                 → Android uploaded to Beta (Open Testing)
+                 → iOS uploaded to TestFlight
+
+Day 2, 11:30 PM: Auto-promotion check (24 hours later)
+                 → Android: Beta promoted to Production
+                 → iOS: Latest build submitted to App Store review
+
+Day 3-4:         iOS app review by Apple (typically 24 hours)
+                 → iOS approved and available on App Store
 ```
-
-**Manual Override**:
-- Download AAB artifact from CircleCI and manually upload to Play Console
-- Manually promote beta to production via Play Console UI
-- Skip auto-merge by not merging master manually
-
-### iOS (Manual)
-
-1. Build archive in Xcode
-2. Upload to App Store Connect via Transporter
-3. Deploy to TestFlight → Production
 
 ### Fastlane Lanes
 
-Additional Fastlane lanes available:
+Available Fastlane lanes for manual operations:
 
+**Android:**
 ```bash
-# Promote from Internal to Beta
-bundle exec fastlane android promote_beta
+# Build and deploy to Beta (automated in CI)
+bundle exec fastlane android beta
 
-# Promote from Beta to Production
+# Promote from Beta to Production (automated in CI)
 bundle exec fastlane android promote_production
+
+# Auto-promote check (automated in CI, runs daily)
+bundle exec fastlane android auto_promote
+```
+
+**iOS:**
+```bash
+# Build and deploy to TestFlight (automated in CI)
+bundle exec fastlane ios beta
+
+# Submit to App Store review (manual if needed)
+bundle exec fastlane ios release
+
+# Auto-submit latest build (automated in CI, runs daily)
+bundle exec fastlane ios auto_submit
 ```
 
 </details>
@@ -728,7 +893,7 @@ For mobile app specific issues:
 
 ---
 
-**Last Updated**: 2025-10-20
+**Last Updated**: 2025-10-26
 **Current Version**: 3.2.x (app-ci-fd branch)
 **Capacitor Version**: 7.x
-**CI/CD**: CircleCI with Fastlane (Android automated)
+**CI/CD**: CircleCI with Fastlane (iOS and Android fully automated)
