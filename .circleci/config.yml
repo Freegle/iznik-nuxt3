@@ -84,7 +84,9 @@ jobs:
             echo "Current version: $CURRENT_VERSION"
 
             # Parse and increment patch version
-            IFS='.' read -r major minor patch \<<< "$CURRENT_VERSION"
+            major=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+            minor=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+            patch=$(echo "$CURRENT_VERSION" | cut -d. -f3)
             NEW_PATCH=$((patch + 1))
             NEW_VERSION="$major.$minor.$NEW_PATCH"
 
