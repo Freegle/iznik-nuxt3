@@ -427,6 +427,71 @@ jobs:
               echo "ℹ️  No promotion occurred (already in production or no beta release found)"
             fi
 
+  auto-submit-ios:
+    executor: macos-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+
+      # Install Ruby and Fastlane dependencies
+      - run:
+          name: Install Fastlane
+          command: |
+            gem install bundler
+            bundle install
+
+      # Auto-submit latest TestFlight build to App Store review after 24 hours
+      - run:
+          name: Auto-submit Latest TestFlight Build to App Store Review
+          command: |
+            bundle exec fastlane ios auto_submit
+            echo $? > /tmp/submit_status
+
+      # Send notification if submission occurred
+      - run:
+          name: Send App Store Submission Notification
+          when: on_success
+          command: |
+            if [ -f /tmp/submit_status ] && [ "$(cat /tmp/submit_status)" = "0" ]; then
+              VERSION=$(cat .new_version 2>/dev/null || echo "$CURRENT_VERSION")
+
+              echo "📧 App Store submission notification"
+              echo ""
+              echo "Subject: ✅ Freegle iOS submitted for App Store review: ${VERSION}"
+              echo ""
+              echo "Freegle iOS App - Submitted for App Store Review"
+              echo ""
+              echo "Version: ${VERSION}"
+              echo "Status: Submitted for review"
+              echo "Branch: ${CIRCLE_BRANCH}"
+              echo ""
+              echo "The latest TestFlight build has been automatically submitted to App Store review."
+              echo ""
+              echo "⏱️  Review typically takes 24 hours (90% of submissions)"
+              echo ""
+              echo "🔗 View in App Store Connect:"
+              echo "https://appstoreconnect.apple.com/apps/1563499899/appstore/ios/version/deliverable"
+              echo ""
+              echo "🔗 CircleCI Workflow:"
+              echo "${CIRCLE_BUILD_URL}"
+              echo ""
+              echo "🤖 Automated notification from CircleCI"
+            else
+              echo "ℹ️  No submission occurred (already in review or no new build found)"
+            fi
+
   build-ios:
     executor: macos-executor
     steps:
@@ -666,3 +731,4 @@ workflows:
                 - app-ci-fd
     jobs:
       - auto-promote-production
+      - auto-submit-ios
