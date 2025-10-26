@@ -785,9 +785,28 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 
 ### Manual Triggers
 
+**Build Workflow:**
 - Push to `app-ci-fd` branch: triggers full build workflow
 - Rerun CircleCI workflow: rebuilds current commit
-- Manual promotion/submission via store consoles if needed
+
+**Manual Promotion/Submission (via CircleCI):**
+To manually trigger promotion/submission before the scheduled time:
+
+1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd)
+2. Click "Trigger Pipeline" (top right)
+3. Select branch: `app-ci-fd`
+4. Click "Trigger Pipeline"
+5. In the triggered workflow list, find `manual-promote-submit`
+6. Click on the workflow
+7. Click **"Approve"** on the `hold-for-approval` job
+8. Both `auto-promote-production` (Android) and `auto-submit-ios` will run in parallel
+
+This allows you to promote/submit releases early without waiting for the midnight scheduled run.
+
+**Alternative - Direct Fastlane:**
+- Android: `bundle exec fastlane android auto_promote`
+- iOS: `bundle exec fastlane ios auto_submit`
+- Manual promotion/submission via store consoles (Google Play Console / App Store Connect)
 
 ### Timeline
 
