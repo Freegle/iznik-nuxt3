@@ -438,13 +438,21 @@ platform :ios do
     app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
 
     if app_store_version
-      case app_store_version.app_store_state
-      when "PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW"
-        UI.message("✅ Version #{version} is already submitted (status: #{app_store_version.app_store_state})")
+      state = app_store_version.app_store_state
+      case state
+      when "PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED"
+        UI.message("✅ Version #{version} is already in the submission pipeline (status: #{state})")
+        UI.message("💡 This likely means the app was manually submitted or is already in review")
         next
       when "READY_FOR_SALE"
         UI.message("✅ Version #{version} is already released")
         next
+      when "READY_FOR_REVIEW"
+        UI.message("✅ Version #{version} is ready for review submission (status: #{state})")
+        UI.message("💡 Manual submission may already be in progress")
+        next
+      else
+        UI.message("ℹ️  Version #{version} has status: #{state}")
       end
     end
 
@@ -456,19 +464,34 @@ platform :ios do
 
     UI.success("🚀 Submitting build #{build_number} for App Store review...")
 
-    # Submit to App Store
-    deliver(
-      build_number: build_number.to_s,
-      submit_for_review: true,
-      automatic_release: false,
-      force: true,
-      skip_metadata: true,
-      skip_screenshots: true,
-      skip_binary_upload: true,
-      precheck_include_in_app_purchases: false,
-      app_identifier: "org.ilovefreegle.iphone"
-    )
+    # Submit to App Store with error handling for duplicate submissions
+    begin
+      deliver(
+        build_number: build_number.to_s,
+        submit_for_review: true,
+        automatic_release: false,
+        force: true,
+        skip_metadata: true,
+        skip_screenshots: true,
+        skip_binary_upload: true,
+        precheck_include_in_app_purchases: false,
+        app_identifier: "org.ilovefreegle.iphone"
+      )
 
-    UI.success("✅ Successfully submitted build #{build_number} for App Store review!")
+      UI.success("✅ Successfully submitted build #{build_number} for App Store review!")
+    rescue => e
+      # Check if the error is due to the app already being submitted
+      error_message = e.message.to_s.downcase
+      if error_message.include?("already") || error_message.include?("duplicate") || error_message.include?("in review") || error_message.include?("cannot submit")
+        UI.message("ℹ️  Build #{build_number} appears to already be submitted or in review")
+        UI.message("💡 This is likely because the app was manually submitted in App Store Connect")
+        UI.message("📝 Error details: #{e.message}")
+        UI.message("✅ No action needed - the app is already in the submission pipeline")
+      else
+        # Re-raise unexpected errors
+        UI.error("❌ Failed to submit build #{build_number}: #{e.message}")
+        raise e
+      end
+    end
   end
 end
