@@ -47,8 +47,8 @@
         </div>
       </div>
 
-      <!-- Normal mode: show button group -->
-      <b-button-group v-else class="d-flex flex-wrap mt-1 mb-2 mr-2">
+      <!-- Normal mode: show button group (only if not using PayPal fallback) -->
+      <b-button-group v-else-if="!payPalFallback" class="d-flex flex-wrap mt-1 mb-2 mr-2">
         <b-button
           v-for="amount in amounts"
           :key="'donate-' + amount"
@@ -87,18 +87,20 @@
         </BFormCheckbox>
       </div-->
 
-      <div v-if="parseFloat(price)" class="mt-2 mb-2 w-100">
+      <div v-if="parseFloat(price) || payPalFallback" class="mt-2 mb-2 w-100">
         <StripeDonate
+          v-if="!payPalFallback"
           :key="price + monthly"
           :price="price"
           :monthly="monthly"
           @success="succeeded"
           @no-payment-methods="noMethods"
+          @error="noMethods"
         />
         <DonationButton
           v-if="payPalFallback"
-          :text="`Donate £${price}`"
-          :value="price + ''"
+          text="Donate £5 with PayPal"
+          value="5"
           class="mb-4"
         />
         <div ref="belowStripe" />
