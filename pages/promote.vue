@@ -78,7 +78,12 @@
         </div>
         <div class="mr-1">
           <h3 class="header--size4">A5</h3>
-          <a href="/posters/A5.jpg" target="_blank" class="mr-2">
+          <a
+            href="https://freegle.in/A5Poster"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
             <b-img
               lazy
               src="/posters/A5.jpg"
@@ -92,7 +97,12 @@
         </div>
         <div class="mr-1">
           <h3 class="header--size4">A5 x 2</h3>
-          <a href="/posters/A5x2.jpg" target="_blank">
+          <a
+            href="https://freegle.in/A5x2Poster"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
             <b-img
               lazy
               src="/posters/A5x2.jpg"
@@ -108,7 +118,12 @@
       <div v-if="language === 'Welsh'" class="d-flex flex-wrap mt-2">
         <div class="mr-1">
           <h3 class="header--size4">A4</h3>
-          <a href="/posters/A4Welsh.jpg" target="_blank">
+          <a
+            href="https://freegle.in/A4WelshPoster"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
             <b-img
               lazy
               src="/posters/A4Welsh.jpg"
@@ -122,7 +137,12 @@
         </div>
         <div class="mr-1">
           <h3 class="header--size4">A5</h3>
-          <a href="/posters/A5Welsh.jpg" target="_blank">
+          <a
+            href="https://freegle.in/A5WelshPoster"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
             <b-img
               lazy
               src="/posters/A5Welsh.jpg"
@@ -136,7 +156,12 @@
         </div>
         <div class="mr-1">
           <h3 class="header--size4">A5 x 2</h3>
-          <a href="/posters/A5x2Welsh.jpg" target="_blank">
+          <a
+            href="https://freegle.in/A5x2WelshPoster"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
             <b-img
               lazy
               src="/posters/A5x2Welsh.jpg"
