@@ -28,7 +28,6 @@
             step="0.50"
             size="lg"
             placeholder="£"
-            @input="handleOtherAmount"
           />
         </b-input-group>
       </div>
@@ -37,6 +36,7 @@
       <div class="d-flex justify-content-center">
         <DonationButton
           v-if="payPalFallback"
+          :key="selectedAmount"
           :text="`Donate £${selectedAmount}`"
           :value="selectedAmount"
         />
@@ -46,6 +46,7 @@
           :price="selectedAmount"
           @success="emit('donation-made')"
           @no-payment-methods="payPalFallback = true"
+          @error="payPalFallback = true"
         />
       </div>
     </div>
@@ -75,15 +76,12 @@ const selectedAmount = ref(props.defaultAmount)
 const otherAmount = ref(null)
 const payPalFallback = ref(false)
 
-function handleOtherAmount(value) {
-  if (value && parseFloat(value) > 0) {
-    selectedAmount.value = parseFloat(value)
-  }
-}
-
-// Reset to default if other amount is cleared
+// Update selectedAmount whenever otherAmount changes
 watch(otherAmount, (newVal) => {
-  if (!newVal) {
+  if (newVal && parseFloat(newVal) > 0) {
+    selectedAmount.value = parseFloat(newVal)
+  } else if (!newVal) {
+    // Reset to default if cleared
     selectedAmount.value = props.defaultAmount
   }
 })
