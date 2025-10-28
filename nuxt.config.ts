@@ -1,5 +1,3 @@
-// import fs from 'fs'
-// import https from 'https'
 import eslintPlugin from 'vite-plugin-eslint2'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
@@ -335,10 +333,14 @@ export default defineNuxtConfig({
         },
       },
     },
-<<<<<<< HEAD
     plugins: [
       splitVendorChunkPlugin(),
-      VitePWA({ registerType: 'autoUpdate' }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        }
+      }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
       sentryVitePlugin({
@@ -346,35 +348,6 @@ export default defineNuxtConfig({
         project: 'nuxt3',
       }),
     ],
-=======
-    plugins:
-      config.ISAPP && production
-        ? [
-            sentryVitePlugin({
-              org: 'freegle',
-              project: 'capacitor',
-              authToken: config.SENTRY_AUTH_TOKEN,
-            }),
-          ]
-        : config.ISAPP
-        ? []
-        : [
-            splitVendorChunkPlugin(),
-            VitePWA({
-              registerType: 'autoUpdate',
-              workbox: {
-                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-              },
-            }),
-            eslintPlugin({
-              exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
-            }),
-            sentryVitePlugin({
-              org: 'freegle',
-              project: 'nuxt3',
-            }),
-          ],
->>>>>>> bf4af32f (Upgrade to node 22.)
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy

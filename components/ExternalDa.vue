@@ -13,77 +13,62 @@
       }"
     >
       <div
-        v-if="fallbackAdVisible"
-        class="d-flex justify-content-md-around"
-        :style="maxWidth ? `max-width: ${maxWidth}` : ''"
+        v-if="isVisible"
+        :class="{
+          boredWithJobs,
+          jobs,
+        }"
       >
-        <nuxt-link to="/adsoff" style="display: block; max-width: 100%">
-          <img
-            src="/donate/SupportFreegle_970x250px_20May20215.png"
-            alt="Please donate to help keep Freegle running"
-            style="width: 100%; height: auto; display: block"
+        <div class="d-flex w-100 justify-content-md-around">
+          <JobsDaSlot
+            v-if="renderAd && !boredWithJobs"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :class="{
+              'text-center': maxWidth === '100vw',
+            }"
+            @rendered="rippleRendered"
+            @borednow="setBored"
           />
-        </nuxt-link>
-      </div>
-      <div v-else>
-        <div
-          v-if="isVisible || video"
-          :class="{
-            boredWithJobs,
-            jobs,
-          }"
-        >
-          <div class="d-flex w-100 justify-content-md-around">
-            <JobsDaSlot
-              v-if="renderAd && !boredWithJobs"
-              :min-width="minWidth"
-              :max-width="maxWidth"
-              :min-height="minHeight"
-              :max-height="maxHeight"
-              :class="{
-                'text-center': maxWidth === '100vw',
-              }"
-              @rendered="rippleRendered"
-              @borednow="setBored"
-            />
-            <OurPlaywireDa
-              v-else-if="playWire"
-              ref="playwiread"
-              :ad-unit-path="adUnitPath"
-              :min-width="minWidth"
-              :max-width="maxWidth"
-              :min-height="minHeight"
-              :max-height="maxHeight"
-              :div-id="divId"
-              :render-ad="renderAd"
-              :video="video"
-              @rendered="rippleRendered"
-            />
-            <OurGoogleDa
-              v-else-if="adSense"
-              ref="googlead"
-              :ad-unit-path="adUnitPath"
-              :min-width="minWidth"
-              :max-width="maxWidth"
-              :min-height="minHeight"
-              :max-height="maxHeight"
-              :div-id="divId"
-              :render-ad="renderAd"
-              @rendered="rippleRendered"
-            />
-            <OurPrebidDa
-              v-else
-              ref="prebidad"
-              :ad-unit-path="adUnitPath"
-              :min-width="minWidth"
-              :max-width="maxWidth"
-              :min-height="minHeight"
-              :max-height="maxHeight"
-              :div-id="divId"
-              :render-ad="renderAd"
-              @rendered="rippleRendered"
-            />
-          </div>
+          <OurPlaywireDa
+            v-else-if="playWire"
+            ref="playwiread"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            :video="video"
+            @rendered="rippleRendered"
+          />
+          <OurGoogleDa
+            v-else-if="adSense"
+            ref="googlead"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
+          <OurPrebidDa
+            v-else
+            ref="prebidad"
+            :ad-unit-path="adUnitPath"
+            :min-width="minWidth"
+            :max-width="maxWidth"
+            :min-height="minHeight"
+            :max-height="maxHeight"
+            :div-id="divId"
+            :render-ad="renderAd"
+            @rendered="rippleRendered"
+          />
         </div>
       </div>
     </div>
@@ -177,28 +162,6 @@ function visibilityChanged(visible) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
 
-<<<<<<< HEAD
-=======
-    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES && !props.video) {
-      // App without cookies - show fallback donation ad unless recent donor (but not for video ads)
-      console.log('Running in app with no cookies - using fallback ad')
-      const me = useAuthStore().user
-      const recentDonor =
-        me &&
-        me.donated &&
-        new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-      if (recentDonor) {
-        console.log('Ads disabled in app as recent donor')
-        emit('rendered', false)
-      } else {
-        fallbackAdVisible.value = true
-        adShown.value = true
-        emit('rendered', true)
-      }
-      return
-    }
-
->>>>>>> 2e6d419c (Ad overflow issue on Android with fallback ad.)
     if (!runtimeConfig.public.COOKIEYES) {
       // Not using CookieYes, e.g. in dev.
       console.log('No CookieYes in ad')
