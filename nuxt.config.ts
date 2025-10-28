@@ -1,4 +1,4 @@
-import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint2'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -335,7 +335,12 @@ export default defineNuxtConfig({
     },
     plugins: [
       splitVendorChunkPlugin(),
-      VitePWA({ registerType: 'autoUpdate' }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        }
+      }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
       sentryVitePlugin({
