@@ -482,7 +482,12 @@ platform :ios do
     rescue => e
       # Check if the error is due to the app already being submitted
       error_message = e.message.to_s.downcase
-      if error_message.include?("already") || error_message.include?("duplicate") || error_message.include?("in review") || error_message.include?("cannot submit")
+      if error_message.include?("already") ||
+         error_message.include?("duplicate") ||
+         error_message.include?("in review") ||
+         error_message.include?("cannot submit") ||
+         error_message.include?("relationship value is not acceptable") ||
+         error_message.include?("pre-release build could not be added")
         UI.message("ℹ️  Build #{build_number} appears to already be submitted or in review")
         UI.message("💡 This is likely because the app was manually submitted in App Store Connect")
         UI.message("📝 Error details: #{e.message}")
