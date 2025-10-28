@@ -117,6 +117,7 @@
     "mitt": "^3.0.0",
     "object.hasown": "github:es-shims/Object.hasOwn",
     "on-change": "^5.0.1",
+    "oxc-transform": "^0.95.0",
     "oxc-walker": "^0.5.2",
     "patch-package": "^6.4.7",
     "path-browserify": "^1.0.1",
