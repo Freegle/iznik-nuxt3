@@ -1,12 +1,8 @@
 // DO NOT COPY INTO MASTER
-import eslintPlugin from 'vite-plugin-eslint2'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
-
-let isTest = process.env.NODE_ENV === 'test' || process.env.CI
-if (config.IS_MT) isTest = false
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -358,6 +354,13 @@ export default defineNuxtConfig({
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         },
+        manifest: false,
+        injectManifest: {
+          rollupFormat: 'iife',
+        },
+        buildBase: '/',
+        // Disable type checking to avoid tsconfig resolution issues during build
+        typescript: false,
       }),
       // Make Lint errors cause build failures.
       // eslintPlugin(),
