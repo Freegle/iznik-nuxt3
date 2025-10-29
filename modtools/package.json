@@ -5,7 +5,7 @@
   "private": true,
   "xtype": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxi prepare && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
