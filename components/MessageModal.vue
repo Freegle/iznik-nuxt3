@@ -96,7 +96,7 @@
 </template>
 <script setup>
 import { computed, ref } from 'vue'
-import { useMessageStore } from '../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
 import MessageExpanded from '~/components/MessageExpanded'

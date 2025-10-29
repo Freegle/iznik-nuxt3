@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '../../stores/group'
+import { useGroupStore } from '~/stores/group'
 export default {
   props: {
     message: {

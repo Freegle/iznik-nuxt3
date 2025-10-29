@@ -83,7 +83,7 @@
   </div>
 </template>
 <script>
-import { pluralise } from '../composables/usePluralise'
+import { pluralise } from '~/composables/usePluralise'
 
 import { useUserStore } from '~/stores/user'
 

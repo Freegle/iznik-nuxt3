@@ -111,7 +111,7 @@
 <script>
 // membership.id is groupid and membership.membershipid is membershipid
 import { useMemberStore } from '~/stores/member'
-import { useUserStore } from '../../stores/user'
+import { useUserStore } from '~/stores/user'
 
 export default {
   props: {

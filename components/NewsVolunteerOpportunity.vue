@@ -104,10 +104,10 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useVolunteeringStore } from '../stores/volunteering'
-import { useNewsfeedStore } from '../stores/newsfeed'
-import { useUserStore } from '../stores/user'
-import { useGroupStore } from '../stores/group'
+import { useVolunteeringStore } from '~/stores/volunteering'
+import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useUserStore } from '~/stores/user'
+import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
 import NewsLoveComment from '~/components/NewsLoveComment'
 import ProfileImage from '~/components/ProfileImage'

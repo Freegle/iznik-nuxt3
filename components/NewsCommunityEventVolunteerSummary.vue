@@ -43,8 +43,8 @@
   </b-card>
 </template>
 <script setup>
-import { useCommunityEventStore } from '../stores/communityevent'
-import { useVolunteeringStore } from '../stores/volunteering'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useVolunteeringStore } from '~/stores/volunteering'
 
 const communityEventStore = useCommunityEventStore()
 const volunteeringStore = useVolunteeringStore()

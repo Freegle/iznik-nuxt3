@@ -26,7 +26,7 @@
 </template>
 <script setup>
 import VueNumberInput from '@chenfengyuan/vue-number-input'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 
 defineProps({
   modelValue: {

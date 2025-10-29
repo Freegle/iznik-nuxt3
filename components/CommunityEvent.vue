@@ -151,9 +151,9 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useCommunityEventStore } from '../stores/communityevent'
-import { useUserStore } from '../stores/user'
-import { useGroupStore } from '../stores/group'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useUserStore } from '~/stores/user'
+import { useGroupStore } from '~/stores/group'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 

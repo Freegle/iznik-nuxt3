@@ -27,7 +27,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import pluralize from 'pluralize'
-import { setupNotification } from '../composables/useNotification'
+import { setupNotification } from '~/composables/useNotification'
 
 const props = defineProps({
   id: {

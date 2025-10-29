@@ -331,9 +331,9 @@
   </div>
 </template>
 <script setup>
-import { useChatStore } from '../stores/chat'
-import { setupChat } from '../composables/useChat'
 import ProfileImage from './ProfileImage'
+import { useChatStore } from '~/stores/chat'
+import { setupChat } from '~/composables/useChat'
 import { twem, useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'

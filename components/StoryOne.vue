@@ -100,8 +100,8 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useStoryStore } from '../stores/stories'
-import { useUserStore } from '../stores/user'
+import { useStoryStore } from '~/stores/stories'
+import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import ReadMore from '~/components/ReadMore'

@@ -46,8 +46,8 @@
 <script setup>
 import { useRoute } from 'vue-router'
 import { ref, onMounted, defineAsyncComponent } from 'vue'
-import { useMe, fetchMe } from '../../composables/useMe'
-import { buildHead } from '../../composables/useBuildHead'
+import { useMe, fetchMe } from '~/composables/useMe'
+import { buildHead } from '~/composables/useBuildHead'
 
 // Import the main components
 import ProfileSection from '~/components/settings/ProfileSection.vue'

@@ -79,8 +79,8 @@
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
 import pluralize from 'pluralize'
-import { milesAway } from '../composables/useDistance'
-import { useUserStore } from '../stores/user'
+import { milesAway } from '~/composables/useDistance'
+import { useUserStore } from '~/stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'

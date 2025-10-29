@@ -32,7 +32,7 @@
 <script setup>
 import pluralize from 'pluralize'
 import { computed } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 
 const props = defineProps({
   id: {

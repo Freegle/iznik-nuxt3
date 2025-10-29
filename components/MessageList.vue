@@ -109,10 +109,10 @@ import {
   onBeforeUnmount,
 } from 'vue'
 import dayjs from 'dayjs'
-import { useGroupStore } from '../stores/group'
-import { useMessageStore } from '../stores/message'
-import { throttleFetches } from '../composables/useThrottle'
 import MessageListUpToDate from './MessageListUpToDate'
+import { useGroupStore } from '~/stores/group'
+import { useMessageStore } from '~/stores/message'
+import { throttleFetches } from '~/composables/useThrottle'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import VisibleWhen from '~/components/VisibleWhen'
 import { useMe } from '~/composables/useMe'

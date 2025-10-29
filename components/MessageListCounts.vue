@@ -19,7 +19,7 @@
 <script setup>
 import pluralize from 'pluralize'
 import { computed } from 'vue'
-import { useMessageStore } from '../stores/message'
+import { useMessageStore } from '~/stores/message'
 
 const emit = defineEmits(['markSeen'])
 const messageStore = useMessageStore()

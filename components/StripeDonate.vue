@@ -15,7 +15,7 @@
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
 import * as Sentry from '@sentry/browser'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import { useDonationStore } from '~/stores/donations'
 
 const runtimeConfig = useRuntimeConfig()

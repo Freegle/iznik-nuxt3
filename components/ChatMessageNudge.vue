@@ -25,7 +25,7 @@
   </div>
 </template>
 <script setup>
-import { useChatMessageBase } from '../composables/useChat'
+import { useChatMessageBase } from '~/composables/useChat'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({

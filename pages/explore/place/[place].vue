@@ -26,7 +26,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../../composables/useBuildHead'
+import { buildHead } from '~/composables/useBuildHead'
 import { defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import SupportLink from '~/components/SupportLink'
 import { useGroupStore } from '~/stores/group'

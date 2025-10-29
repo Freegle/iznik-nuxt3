@@ -8,8 +8,8 @@
 </template>
 <script setup>
 import { computed, watch } from 'vue'
-import { useGroupStore } from '../stores/group'
 import GroupSelect from './GroupSelect'
+import { useGroupStore } from '~/stores/group'
 
 function intOrNull(val) {
   return typeof val === 'number' ? parseInt(val) : null

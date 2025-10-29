@@ -77,8 +77,8 @@
 </template>
 <script setup>
 import { ref, defineEmits, watch } from 'vue'
-import { useAuthStore } from '../../stores/auth'
-import { useMiscStore } from '../../stores/misc'
+import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import OurToggle from '~/components/OurToggle'
 import { useMe } from '~/composables/useMe'
 

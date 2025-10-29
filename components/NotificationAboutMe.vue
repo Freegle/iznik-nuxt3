@@ -33,7 +33,7 @@
   </div>
 </template>
 <script setup>
-import { setupNotification } from '../composables/useNotification'
+import { setupNotification } from '~/composables/useNotification'
 import ProfileImage from '~/components/ProfileImage'
 
 const props = defineProps({

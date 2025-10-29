@@ -168,7 +168,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
+import { buildHead } from '~/composables/useBuildHead'
 import { ref, computed, onMounted, useHead, useRuntimeConfig } from '#imports'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'

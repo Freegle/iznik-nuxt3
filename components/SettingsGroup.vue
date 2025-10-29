@@ -57,7 +57,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import OurToggle from '~/components/OurToggle'
 import { useMe } from '~/composables/useMe'
 

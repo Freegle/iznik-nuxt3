@@ -141,9 +141,9 @@
 </template>
 <script setup>
 import { ref, computed, watch, defineAsyncComponent } from 'vue'
-import { useStoryStore } from '../stores/stories'
-import { useComposeStore } from '../stores/compose'
 import NoticeMessage from './NoticeMessage'
+import { useStoryStore } from '~/stores/stories'
+import { useComposeStore } from '~/stores/compose'
 import { useOurModal } from '~/composables/useOurModal'
 import { useImageStore } from '~/stores/image'
 

@@ -16,8 +16,8 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { useGroupStore } from '../../../stores/group'
-import { useAuthStore } from '../../../stores/auth'
+import { useGroupStore } from '~/stores/group'
+import { useAuthStore } from '~/stores/auth'
 import {
   ref,
   onMounted,

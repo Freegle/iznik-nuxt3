@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { setupModMessages } from '../composables/useModMessages'
+import { setupModMessages } from '~/composables/useModMessages'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'

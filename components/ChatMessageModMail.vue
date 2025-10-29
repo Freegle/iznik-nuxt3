@@ -84,13 +84,13 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useComposeStore } from '../stores/compose'
+import NoticeMessage from './NoticeMessage'
+import ChatButton from './ChatButton'
+import { useComposeStore } from '~/stores/compose'
 import {
   fetchReferencedMessage,
   useChatMessageBase,
-} from '../composables/useChat'
-import NoticeMessage from './NoticeMessage'
-import ChatButton from './ChatButton'
+} from '~/composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
 import GroupSelect from '~/components/GroupSelect'
 import { useRouter } from '#imports'

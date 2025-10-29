@@ -37,8 +37,8 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
-import { useStoryStore } from '../../stores/stories'
+import { buildHead } from '~/composables/useBuildHead'
+import { useStoryStore } from '~/stores/stories'
 import { ref, defineAsyncComponent, useHead, useRuntimeConfig } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage'
 import StoryOne from '~/components/StoryOne'

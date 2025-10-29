@@ -167,9 +167,9 @@
 
 <script setup>
 import { ref, computed, defineEmits, watch } from 'vue'
-import { useAuthStore } from '../../stores/auth'
-import { useImageStore } from '../../stores/image'
-import { useMe, fetchMe } from '../../composables/useMe'
+import { useAuthStore } from '~/stores/auth'
+import { useImageStore } from '~/stores/image'
+import { useMe, fetchMe } from '~/composables/useMe'
 import ProfileImage from '~/components/ProfileImage'
 import NoticeMessage from '~/components/NoticeMessage'
 import OurUploader from '~/components/OurUploader'

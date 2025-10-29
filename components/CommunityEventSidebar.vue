@@ -17,8 +17,8 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useCommunityEventStore } from '../stores/communityevent'
 import CommunityFeature from './CommunityFeature'
+import { useCommunityEventStore } from '~/stores/communityevent'
 
 // Initialize stores
 const communityEventStore = useCommunityEventStore()

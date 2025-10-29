@@ -144,7 +144,7 @@
 <script>
 import dayjs from 'dayjs'
 import { useUserStore } from '~/stores/user'
-import { setupKeywords } from '../composables/useKeywords'
+import { setupKeywords } from '~/composables/useKeywords'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'

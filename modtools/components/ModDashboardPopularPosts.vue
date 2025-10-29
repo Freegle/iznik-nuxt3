@@ -51,7 +51,7 @@
   </div>
 </template>
 <script>
-import { pluralise } from '../composables/usePluralise'
+import { pluralise } from '~/composables/usePluralise'
 import ModDashboardBase from '~/components/ModDashboardBase'
 
 export default {

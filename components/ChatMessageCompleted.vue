@@ -111,8 +111,8 @@
   </div>
 </template>
 <script setup>
-import { useChatMessageBase } from '../composables/useChat'
 import NoticeMessage from './NoticeMessage'
+import { useChatMessageBase } from '~/composables/useChat'
 import { useMessageStore } from '~/stores/message'
 
 const props = defineProps({

@@ -136,11 +136,11 @@
   </div>
 </template>
 <script setup>
-import { useAddressStore } from '../stores/address'
-import { useChatStore } from '../stores/chat'
-import { useChatMessageBase } from '../composables/useChat'
 import ExternalLink from './ExternalLink'
 import AddressModal from './AddressModal'
+import { useAddressStore } from '~/stores/address'
+import { useChatStore } from '~/stores/chat'
+import { useChatMessageBase } from '~/composables/useChat'
 import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'

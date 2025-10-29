@@ -817,8 +817,8 @@
 </template>
 <script setup>
 import pluralize from 'pluralize'
-import ShowMore from '../components/ShowMore'
-import { useAuthStore } from '../stores/auth'
+import ShowMore from '~/components/ShowMore'
+import { useAuthStore } from '~/stores/auth'
 import {
   ref,
   computed,

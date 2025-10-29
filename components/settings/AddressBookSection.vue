@@ -30,7 +30,7 @@
 
 <script setup>
 import { defineEmits } from 'vue'
-import { useAddressStore } from '../../stores/address'
+import { useAddressStore } from '~/stores/address'
 
 const emit = defineEmits(['show-address-modal'])
 

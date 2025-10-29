@@ -17,7 +17,7 @@
   </div>
 </template>
 <script>
-import { setupModMessages } from '../../composables/useModMessages'
+import { setupModMessages } from '~/composables/useModMessages'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import ScrollToTop from '~/components/ScrollToTop'

@@ -1286,7 +1286,7 @@ import htmlEditButton from 'quill-html-edit-button'
 
 import { useAuthStore } from '~/stores/auth'
 import { useModConfigStore } from '~/stores/modconfig'
-import { useShortlinkStore } from '../../stores/shortlinks'
+import { useShortlinkStore } from '~/stores/shortlinks'
 import { useModGroupStore } from '@/stores/modgroup'
 import api from '~/api'
 

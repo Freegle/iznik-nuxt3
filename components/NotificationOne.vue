@@ -37,7 +37,7 @@
 <script setup>
 import { defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { setupNotification } from '../composables/useNotification'
+import { setupNotification } from '~/composables/useNotification'
 
 const NotificationGiftAid = defineAsyncComponent(() =>
   import('~/components/NotificationGiftAid')

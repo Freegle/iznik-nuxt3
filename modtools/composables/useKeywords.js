@@ -1,4 +1,4 @@
-import { setupModMessages } from '../composables/useModMessages'
+import { setupModMessages } from '~/composables/useModMessages'
 
 const typeOptions = computed(() => {
   const { group } = setupModMessages()

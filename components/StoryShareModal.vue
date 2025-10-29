@@ -96,7 +96,7 @@
 // increases the bundle size.  Putting them here allows better bundling.
 import VueSocialSharing from 'vue-social-sharing'
 import { ref, computed } from 'vue'
-import { useStoryStore } from '../stores/stories'
+import { useStoryStore } from '~/stores/stories'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 

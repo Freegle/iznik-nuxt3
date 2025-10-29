@@ -40,8 +40,8 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useAuthStore } from '../stores/auth'
-import { useLocationStore } from '../stores/location'
+import { useAuthStore } from '~/stores/auth'
+import { useLocationStore } from '~/stores/location'
 import { useMe } from '~/composables/useMe'
 
 const emit = defineEmits(['changed'])

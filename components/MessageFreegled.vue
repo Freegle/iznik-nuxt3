@@ -24,7 +24,7 @@
 </template>
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue'
-import { useMessageStore } from '../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
