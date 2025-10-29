@@ -1,5 +1,5 @@
 @REM Tell Chris if I add anything here.
-set path=%HOMEDRIVE%%HOMEPATH%\AppData\Roaming\nvm\v18.20.8\;c:\Program Files\Microsoft\Azure Functions Core Tools\;%path%
+set path=%HOMEDRIVE%%HOMEPATH%\AppData\Roaming\nvm\v22.21.0\;c:\Program Files\Microsoft\Azure Functions Core Tools\;%path%
 set IZNIK_API_V1=https://fdapidbg.ilovefreegle.org/api
 set IZNIK_API_V2=http://127.0.0.1:8192/api
 set TRUSTPILOT_LINK=https://uk.trustpilot.com/evaluate/ilovefreegle.org

@@ -41,5 +41,5 @@ CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
     if [ "$NUXT_DEV_MODE" = "true" ]; then \
         export HOST=0 && npm run dev; \
     else \
-        npm run build && export HOST=0 && npm run start; \
+        npx nuxi prepare && npm run build && export HOST=0 && npm run start; \
     fi
