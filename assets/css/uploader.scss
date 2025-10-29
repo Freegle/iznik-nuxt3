@@ -1,8 +1,8 @@
-@import 'assets/css/_color-vars.scss';
+@import './_color-vars.scss';
 @import 'bootstrap/scss/_functions';
 @import 'bootstrap/scss/_variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
-@import 'assets/css/sticky-banner.scss';
+@import './sticky-banner.scss';
 
 .uppy-Dashboard-poweredBy {
   display: none !important;
