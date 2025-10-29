@@ -224,7 +224,7 @@ import dayjs from 'dayjs'
 
 import { storeToRefs } from 'pinia'
 import { buildHead } from '../../composables/useBuildHead'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import { ref, useRoute, useRouter } from '#imports'
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
