@@ -15,7 +15,7 @@ const timeouts = {
 
   // UI interaction timeouts
   ui: {
-    appearance: 5000, // Waiting for element to appear
+    appearance: 30000, // Waiting for element to appear (increased for Docker)
     interaction: 10000, // Interaction with elements like clicks
     animation: 1000, // Waiting for animations to complete
     autocomplete: 10000, // Waiting for autocomplete results
@@ -53,6 +53,9 @@ const environment = {
   postcode: process.env.TEST_POSTCODE || 'EH3 6SS',
   place: process.env.TEST_PLACE || 'Edinburgh',
   testgroup: process.env.TEST_GROUP || 'FreeglePlayground',
+
+  unmodded_email: process.env.TEST_EMAIL_UNMODDED || 'test@test.com',
+  unmodded_password: process.env.TEST_EMAIL_UNMODDED_PASSWORD || 'freegle',
 
   // Test email configuration
   email: {
@@ -106,11 +109,8 @@ const selectors = {
 
 // Viewport sizes for responsive testing
 const breakpoints = [
-  // TODO: xs breakpoint disabled due to app download links not rendering properly on mobile viewport
-  // See: App download section has visibility issues on xs breakpoint - ProxyImage components may not render
-  // { name: 'xs', width: 414, height: 896 }, // iPhone XR - DISABLED: app download links visibility issues
-  // TODO: sm breakpoint disabled due to navigation inactivity timeouts causing test hangs
-  // { name: 'sm', width: 640, height: 960 }, // Small mobile - DISABLED: causes navigation timeouts
+  { name: 'xs', width: 414, height: 896 }, // iPhone XR
+  { name: 'sm', width: 640, height: 960 }, // Small mobile
   { name: 'md', width: 820, height: 1180 }, // iPad Air
   { name: 'lg', width: 1024, height: 768 }, // iPad Pro
   { name: 'xl', width: 1280, height: 800 },

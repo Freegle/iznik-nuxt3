@@ -105,8 +105,8 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../stores/user'
+import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 

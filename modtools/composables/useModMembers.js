@@ -1,6 +1,6 @@
 // Simplified from MT2 mixin/modMembersPage
 
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
 
 const bump = ref(0)

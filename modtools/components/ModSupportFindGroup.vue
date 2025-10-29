@@ -214,7 +214,7 @@
   </div>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {

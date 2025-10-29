@@ -523,9 +523,9 @@
 </template>
 
 <script>
-import { useMemberStore } from '../stores/member'
 import { useUserStore } from '../../stores/user'
 import ExternalLink from '../../components/ExternalLink'
+import { useMemberStore } from '~/stores/member'
 
 const SHOW = 3
 

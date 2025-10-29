@@ -41,9 +41,9 @@
 <script>
 import saveAs from 'save-file'
 import { createObjectCsvWriter } from 'csv-writer'
-import { useMemberStore } from '../stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
+import { useMemberStore } from '~/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
+import { useModGroupStore } from '~/stores/modgroup'
 
 export default {
   props: {

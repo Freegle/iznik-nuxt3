@@ -205,7 +205,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
       return ret
     } else {
-      return null
+      return ''
     }
   })
 

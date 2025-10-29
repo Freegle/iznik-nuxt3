@@ -69,8 +69,8 @@
   </div>
 </template>
 <script>
-import { useAuthStore } from '../../stores/auth'
-import { useSpammerStore } from '../stores/spammer'
+import { useAuthStore } from '~/stores/auth'
+import { useSpammerStore } from '~/stores/spammer'
 import { useModMe } from '~/composables/useModMe'
 
 export default {

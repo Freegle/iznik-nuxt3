@@ -171,15 +171,21 @@ export function setup(type) {
     const user = authStore.user
     const em = email.value + ''
 
-    if (email.value && user) {
-      ret = !user.emails?.find((e) => {
-        return (
-          em
-            .toLowerCase()
-            .trim()
-            .localeCompare(e.email.toLowerCase().trim()) === 0
-        )
-      })
+    if (email.value) {
+      if (user) {
+        // Logged in - check if email is one of ours
+        ret = !user.emails?.find((e) => {
+          return (
+            em
+              .toLowerCase()
+              .trim()
+              .localeCompare(e.email.toLowerCase().trim()) === 0
+          )
+        })
+      } else {
+        // Logged out - always need to check
+        ret = true
+      }
     }
 
     return ret
@@ -325,6 +331,19 @@ export async function freegleIt(type, router) {
           email: composeStore.email,
           password: params.newpassword,
         })
+
+        // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
+        if (composeStore.postcode?.id) {
+          console.log(
+            'Saving postcode to new user settings',
+            composeStore.postcode
+          )
+          const settings = authStore.user?.settings || {}
+          settings.mylocation = composeStore.postcode
+          await authStore.saveAndGet({
+            settings,
+          })
+        }
       }
     })
 

@@ -11,14 +11,12 @@ test.describe('Post flow tests', () => {
     page,
     testEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
   }) => {
-    // Register the automatically generated test email for cleanup
-    registerTestEmail(testEmail)
-
     // Use the fixture to post a message with unique item name
-    const uniqueItem = `test-offer-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+    const uniqueItem = `test-offer-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`
     const result = await postMessage({
       type: 'OFFER',
       item: uniqueItem,
@@ -44,9 +42,11 @@ test.describe('Post flow tests', () => {
     await page.waitForSelector('.messagecard, .card-body', {
       timeout: timeouts.ui.appearance,
     })
-    
-    // Look for our specific unique item in the message cards
-    const itemLocator = page.locator('.messagecard, .card-body').filter({ hasText: uniqueItem })
+
+    // Look for our specific unique item in the message cards.
+    const itemLocator = page
+      .locator('.messagecard, .card-body')
+      .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
@@ -62,17 +62,16 @@ test.describe('Post flow tests', () => {
     testEmail,
     getTestEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
+    takeScreenshot,
     replyToMessageWithSignup,
   }) => {
-    // Register test emails for cleanup
-    registerTestEmail(testEmail)
     const replyEmail = getTestEmail('reply')
-    registerTestEmail(replyEmail)
 
     // Post a message using the logged-out user flow with unique item name
-    const uniqueItem = `test-reply-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+    const uniqueItem = `test-reply-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`
     const result = await postMessage({
       type: 'OFFER',
       item: uniqueItem,
@@ -165,14 +164,12 @@ test.describe('Post flow tests', () => {
     page,
     testEmail,
     postMessage,
-    registerTestEmail,
     withdrawPost,
   }) => {
-    // Register the automatically generated test email for cleanup
-    registerTestEmail(testEmail)
-
     // Use the fixture to post a WANTED message with unique item name
-    const uniqueItem = `test-wanted-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+    const uniqueItem = `test-wanted-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`
     const result = await postMessage({
       type: 'WANTED',
       item: uniqueItem,
@@ -198,9 +195,11 @@ test.describe('Post flow tests', () => {
     await page.waitForSelector('.messagecard, .card-body', {
       timeout: timeouts.ui.appearance,
     })
-    
+
     // Look for our specific unique item in the message cards
-    const itemLocator = page.locator('.messagecard, .card-body').filter({ hasText: uniqueItem })
+    const itemLocator = page
+      .locator('.messagecard, .card-body')
+      .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
@@ -209,5 +208,194 @@ test.describe('Post flow tests', () => {
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
+  })
+
+  test("Email existence check - prevents posting with someone else's email", async ({
+    page,
+    testEmail,
+    postMessage,
+    withdrawPost,
+  }) => {
+    // First, create a user by posting with a specific email
+    const uniqueItem = `test-email-check-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`
+    const result = await postMessage({
+      type: 'OFFER',
+      item: uniqueItem,
+      description: `Created by automated test at ${new Date().toISOString()}`,
+      postcode: environment.postcode,
+      email: testEmail,
+    })
+
+    console.log(`Created post with email ${testEmail}, ID: ${result.id}`)
+    expect(result.id).toBeTruthy()
+
+    // Log out to simulate a different user trying to use this email
+    await logoutIfLoggedIn(page)
+    console.log(
+      'Logged out, now attempting to post with the same email as a different user'
+    )
+
+    // Navigate to the give page to start a new post
+    await page.gotoAndVerify('/give', {
+      timeout: timeouts.navigation.initial,
+    })
+
+    // Fill in the item name
+    await page
+      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+      .click()
+    await page
+      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+      .clear()
+    await page
+      .locator('[id^="what"], .type-input, input[placeholder*="give"]')
+      .type('test item for email check', { delay: 100 })
+
+    // Fill in the description
+    await page.waitForSelector(
+      '[id^="description"], textarea.description, textarea.form-control',
+      { timeout: timeouts.ui.appearance }
+    )
+    await page
+      .locator(
+        '[id^="description"], textarea.description, textarea.form-control'
+      )
+      .click()
+    await page
+      .locator(
+        '[id^="description"], textarea.description, textarea.form-control'
+      )
+      .clear()
+    await page
+      .locator(
+        '[id^="description"], textarea.description, textarea.form-control'
+      )
+      .type('Test description for email check', { delay: 50 })
+
+    // Wait for Next button to be enabled
+    await page.waitForFunction(
+      () => {
+        const allButtons = document.querySelectorAll('.btn, button')
+        let mobileBtn = null
+        let desktopBtn = null
+
+        for (const btn of allButtons) {
+          if (btn.textContent && btn.textContent.includes('Next')) {
+            if (
+              btn.closest('.d-block.d-md-none') ||
+              btn.classList.contains('d-md-none')
+            ) {
+              mobileBtn = btn
+            }
+            if (
+              btn.closest('.d-none.d-md-flex') ||
+              (btn.classList.contains('d-none') &&
+                btn.classList.contains('d-md-flex'))
+            ) {
+              desktopBtn = btn
+            }
+            if (!mobileBtn && !desktopBtn) {
+              mobileBtn = btn
+            }
+          }
+        }
+
+        return (
+          (mobileBtn && !mobileBtn.disabled) ||
+          (desktopBtn && desktopBtn.offsetParent !== null)
+        )
+      },
+      { timeout: timeouts.ui.appearance }
+    )
+
+    // Scroll and click Next to go to location page
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(500)
+    await page.locator('.d-none.d-md-flex .btn:has-text("Next")').click()
+
+    // Fill in postcode
+    await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
+      timeout: timeouts.ui.appearance,
+    })
+    await page
+      .locator('.pcinp, input[placeholder="Type postcode"]')
+      .fill(environment.postcode)
+
+    // Wait for location confirmation
+    const confirmationIcon = page.locator(
+      '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+    )
+    await confirmationIcon.waitFor({
+      state: 'visible',
+      timeout: timeouts.api.default,
+    })
+
+    // Scroll and click Next to go to email page
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForTimeout(500)
+    await page
+      .locator('.d-none.d-md-flex.maxbutt .btn:has-text("Next")')
+      .click()
+
+    // Fill in the email that already belongs to someone else
+    console.log(`Filling in email ${testEmail} that belongs to existing user`)
+    const emailInput = page
+      .locator('input[name="email"], input.email, input[type="email"]')
+      .first()
+    await emailInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await emailInput.click()
+    await emailInput.fill(testEmail)
+
+    // Wait for the "Freegle it!" button to appear (email passes basic validation)
+    console.log('Waiting for Freegle it button to appear')
+    const freegleButton = page.locator('.maxbutt .btn:has-text("Freegle it!")')
+    await freegleButton.first().waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+
+    // Click the button to trigger email existence check
+    console.log('Clicking Freegle it button to trigger email existence check')
+    await freegleButton.first().click()
+
+    // Wait for the error message to appear after the API check
+    console.log('Waiting for email validation error message to appear')
+    const errorMessage = page.locator('text=belongs to a different account')
+    await errorMessage.waitFor({
+      state: 'visible',
+      timeout: timeouts.api.default,
+    })
+
+    console.log(
+      'Email existence check working correctly - error message displayed'
+    )
+    expect(await errorMessage.isVisible()).toBe(true)
+
+    // Verify the "Freegle it!" button is no longer visible after error
+    const isButtonVisible = await freegleButton
+      .first()
+      .isVisible()
+      .catch(() => false)
+
+    // The button should no longer be visible after the error appears
+    expect(isButtonVisible).toBe(false)
+    console.log(
+      'Freegle it button is hidden as expected after email conflict detected'
+    )
+
+    // Clean up - log back in and withdraw the original post
+    console.log('Logging back in to clean up the test post')
+    const loginSuccess = await loginViaHomepage(page, testEmail)
+    if (!loginSuccess) {
+      throw new Error('Failed to login for cleanup')
+    }
+
+    await withdrawPost({ item: result.item })
+    console.log('Test completed - email existence check verified successfully')
   })
 })

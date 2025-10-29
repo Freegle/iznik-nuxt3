@@ -73,7 +73,7 @@
   </div>
 </template>
 <script>
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 export default {
   props: {
     id: {

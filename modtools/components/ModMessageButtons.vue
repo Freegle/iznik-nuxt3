@@ -157,8 +157,8 @@
 </template>
 <script>
 import { useMessageStore } from '../../stores/message'
-import { useStdmsgStore } from '../stores/stdmsg'
 import { copyStdMsgs } from '../composables/useStdMsgs'
+import { useStdmsgStore } from '~/stores/stdmsg'
 
 export default {
   props: {

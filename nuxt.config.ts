@@ -1,5 +1,5 @@
 // DO NOT COPY INTO MASTER
-// import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint2'
 import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
@@ -53,14 +53,18 @@ export default defineNuxtConfig({
   // Sometimes when debugging it's useful to set ssr: false, because the errors are clearer when generated on the client.
   // @ts-ignore
   target: 'server',
-  ssr: !isTest,
+
+  ssr: true,
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
-  // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.
+  // a new deploy happens. See https://github.com/nuxt/nuxt/issues/20950.
   //
-  // We still want to serve them below our domain, though, otherwise some security software gets tetchy.  So we
+  // We still want to serve them below our domain, though, otherwise some security software gets tetchy. So we
   // do that and then the _redirects file will proxy it to the correct location.
+  //
+  // Note: This works now that we've disabled experimental.appManifest (see below), which was causing
+  // 404 errors during prerendering when the crawler tried to access build metadata from the CDN.
   $production: {
     app: {
       cdnURL: process.env.DEPLOY_URL
@@ -94,7 +98,6 @@ export default defineNuxtConfig({
     '/mobile': { prerender: true },
     '/privacy': { prerender: true },
     '/unsubscribe': { prerender: true },
-    '/yahoologin': { prerender: true },
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
     '/birthday/**': { ssr: false },
@@ -148,10 +151,15 @@ export default defineNuxtConfig({
       routes: ['/404.html', '/sitemap.xml'],
 
       // Don't prerender the messages - too many.
-      ignore: ['/message/'],
+      // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
+      ignore: [
+        '/message/',
+        '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
+        '/netlify/**', // CDN URLs for Netlify permanent links
+      ],
       crawlLinks: true,
     },
-    
+
     // Disable HTTPS enforcement for development
     httpsRedirect: false,
     security: {
@@ -173,6 +181,12 @@ export default defineNuxtConfig({
     // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
     renderJsonPayloads: false,
     payloadExtraction: false,
+
+    // Disable app manifest to prevent 404 errors during prerendering
+    // The app manifest feature (introduced in Nuxt 3.8) creates /_nuxt/builds/meta/<buildId>.json files
+    // During prerendering with cdnURL configured, the crawler tries to access these from the CDN
+    // path before they exist, causing 404 errors. See: https://github.com/nuxt/nuxt/discussions/27624
+    appManifest: false,
   },
 
   webpack: {
@@ -273,8 +287,16 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    vue: {
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.startsWith('add-'),
+        },
+      },
+    },
     optimizeDeps: {
       include: [
+        'add-to-calendar-button',
         'resize-observer-polyfill',
         'jwt-decode',
         'bootstrap-vue-next/components/BAlert',
@@ -284,42 +306,21 @@ export default defineNuxtConfig({
         'bootstrap-vue-next/components/BFormCheckbox',
         'bootstrap-vue-next/components/BFormGroup',
         'bootstrap-vue-next/components/BFormInput',
+        'bootstrap-vue-next/components/BFormSelect',
+        'bootstrap-vue-next/components/BProgress',
+        'bootstrap-vue-next/components/BPopover',
         'bootstrap-vue-next/components/BFormTextarea',
         'bootstrap-vue-next/components/BInputGroup',
         'bootstrap-vue-next/components/BModal',
         'bootstrap-vue-next/components/BCarousel',
-        'bootstrap-vue-next/components/BImg',
-        'bootstrap-vue-next/components/BNavbar',
-        'bootstrap-vue-next/components/BBadge',
-        'bootstrap-vue-next/components/BNav',
-        'bootstrap-vue-next/components/BButton',
-        'bootstrap-vue-next/components/BFormSelect',
-        'bootstrap-vue-next/components/BProgress',
-        'bootstrap-vue-next/components/BPopover',
-        'bootstrap-vue-next/components/BTabs',
-        'bootstrap-vue-next/components/BTable',
         'bootstrap-vue-next/components/BCollapse',
-        'vue-datepicker-next',
-        'vue-google-charts',
-        'save-file',
-        'csv-writer',
-        '@vueform/toggle',
-        'vue-highlight-words',
-        'pluralize',
-        'diff',
-        '@vue-leaflet/vue-leaflet',
-        'leaflet/dist/leaflet-src.esm',
-        'vue-letter',
-        'letterparser',
-        'leaflet-gesture-handling',
-        'wicket/wicket-leaflet',
+        'vee-validate',
+        'vue-plugin-load-script',
+        '@stripe/stripe-js',
         'turf-distance',
         'turf-point',
-        'turf-buffer',
-        '@vee-validate/rules',
-        '@vueup/vue-quill',
-        'quill-html-edit-button',
-        'vee-validate',
+        '@vueform/toggle',
+        'save-file',
         '@formatjs/intl-locale/should-polyfill',
         '@formatjs/intl-pluralrules/should-polyfill',
         '@uppy/core',
@@ -331,8 +332,9 @@ export default defineNuxtConfig({
         '@formatjs/intl-pluralrules/polyfill-force',
         '@formatjs/intl-pluralrules/locale-data/en',
         'vuedraggable',
+        'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
-        'twemoji'
+        'twemoji',
       ],
     },
     build: {
@@ -351,7 +353,12 @@ export default defineNuxtConfig({
     },
     plugins: [
       splitVendorChunkPlugin(),
-      VitePWA({ registerType: 'autoUpdate' }),
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        },
+      }),
       // Make Lint errors cause build failures.
       // eslintPlugin(),
       sentryVitePlugin({
@@ -370,6 +377,7 @@ export default defineNuxtConfig({
       'es.array.flat-map',
       'es.array.flat',
       'es.string.replace-all',
+      'es.promise.any',
     ],
   }, */
 
@@ -381,7 +389,7 @@ export default defineNuxtConfig({
 
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {
-    host: '0.0.0.0', 
+    host: '0.0.0.0',
     port: 3000,
     https: false,
   },
@@ -499,7 +507,7 @@ export default defineNuxtConfig({
 
     weserv: {
       provider: 'weserv',
-      baseURL: process.env.IMAGE_BASE_URL || config.USER_SITE,
+      baseURL: config.TUS_UPLOADER.replace(':8080', ''),
       weservURL: config.IMAGE_DELIVERY,
     },
 

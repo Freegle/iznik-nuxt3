@@ -1036,9 +1036,9 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import htmlEditButton from 'quill-html-edit-button'
 
-import { useAuthStore } from '../stores/auth'
-import { useModConfigStore } from '../stores/modconfig'
 import { useShortlinkStore } from '../../stores/shortlinks'
+import { useAuthStore } from '~/stores/auth'
+import { useModConfigStore } from '~/stores/modconfig'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 

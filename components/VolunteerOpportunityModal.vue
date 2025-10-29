@@ -231,8 +231,9 @@
               </div>
             </b-col>
           </b-row>
-          <span v-if="enabled">
+          <div v-if="enabled" class="mt-2">
             <OurUploader
+              v-if="!image"
               v-model="currentAtts"
               class="bg-white"
               type="Volunteering"
@@ -367,7 +368,7 @@
                 placeholder="Is there more information on the web? (Optional)"
               />
             </b-form-group>
-          </span>
+          </div>
           <NoticeMessage v-else variant="warning" class="mt-2">
             <v-icon icon="info-circle" />&nbsp;This community has chosen not to
             allow Volunteer Opportunities.
@@ -708,7 +709,7 @@ function validateContactName(value) {
 }
 
 async function deleteIt() {
-  await volunteeringStore.delete(volunteering.value.id)
+  await volunteeringStore.delete(props.id)
   hide()
 }
 

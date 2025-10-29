@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import { useLogsStore } from './stores/logs'
+import { useLogsStore } from '~/stores/logs'
 
 export default {
   props: {

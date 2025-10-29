@@ -50,9 +50,9 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '../stores/group'
-import { useUserStore } from '../stores/user'
-import { useMemberStore } from '../stores/member'
+import { useGroupStore } from '~/stores/group'
+import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
 
 export default {

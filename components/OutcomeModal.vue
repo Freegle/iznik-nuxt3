@@ -369,6 +369,22 @@ async function submit(callback) {
         comment: comments.value,
         message: completionMessage.value,
       })
+
+      // Refetch the message to ensure the outcome is reflected in the store
+      // For withdrawn messages that were pending, the fetch may fail as they get deleted
+      try {
+        await messageStore.fetch(props.id)
+      } catch (error) {
+        if (props.type === 'Withdrawn') {
+          // Suppress fetch errors for withdrawn messages as they may have been deleted
+          console.log(
+            'Suppressed fetch error for withdrawn message:',
+            error.message
+          )
+        } else {
+          throw error
+        }
+      }
     }
 
     callback()

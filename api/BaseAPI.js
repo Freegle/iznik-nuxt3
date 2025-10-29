@@ -1,7 +1,16 @@
 import * as Sentry from '@sentry/browser'
+import {
+  APIError,
+  MaintenanceError,
+  LoginError,
+  SignUpError,
+} from './APIErrors'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
+
+// Re-export the error classes for backward compatibility
+export { APIError, MaintenanceError, LoginError, SignUpError }
 
 let requestId = 0
 
@@ -11,33 +20,6 @@ let requestId = 0
 //
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch)
-export class APIError extends Error {
-  constructor({ request, response }, message) {
-    super(message)
-    Object.assign(this, { request, response })
-  }
-}
-
-export class MaintenanceError extends Error {
-  constructor({ request, response }, message) {
-    super(message)
-    Object.assign(this, { request, response })
-  }
-}
-
-export class LoginError extends Error {
-  constructor(ret, status) {
-    super(status)
-    Object.assign(this, { ret, status })
-  }
-}
-
-export class SignUpError extends Error {
-  constructor(ret, status) {
-    super(status)
-    Object.assign(this, { ret, status })
-  }
-}
 
 export default class BaseAPI {
   constructor(config) {
@@ -438,7 +420,9 @@ export default class BaseAPI {
     // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
     //   probably do the right thing.
     // - otherwise throw an exception.
-    if (status !== 200) {
+    //
+    // Accept all 2xx status codes as successful (200, 201, 204, etc.)
+    if (status < 200 || status >= 300) {
       const statusstr = status?.toString()
 
       // For specific paths, we want to silently allow 401 errors and swallow them.

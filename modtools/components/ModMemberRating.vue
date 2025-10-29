@@ -68,7 +68,7 @@
   </div>
 </template>
 <script>
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
 export default {

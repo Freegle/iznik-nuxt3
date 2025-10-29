@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-row>
-      <b-col cols="12" sm="6" :offset-sm="chatmessage.userid != myid ? 0 : 6">
-        <div v-if="chatmessage.userid != myid" class="media">
+      <b-col cols="12" sm="6" :offset-sm="chatmessage.userid != me?.id ? 0 : 6">
+        <div v-if="chatmessage.userid != me?.id" class="media">
           <b-card border-variant="success">
             <b-card-title>
               <h4>{{ otheruser?.displayname }} sent an address:</h4>
@@ -145,7 +145,6 @@ import { constructMultiLine } from '~/composables/usePAF'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { ref, computed, onMounted } from '#imports'
-import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   chatid: {
@@ -166,10 +165,9 @@ const props = defineProps({
 // Store access
 const addressStore = useAddressStore()
 const chatStore = useChatStore()
-const { myid } = useMe()
 
 // Chat base properties
-const { otheruser, chatmessage } = useChatMessageBase(
+const { otheruser, chatmessage, me } = useChatMessageBase(
   props.chatid,
   props.id,
   props.pov

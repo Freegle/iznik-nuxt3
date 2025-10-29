@@ -4,6 +4,8 @@ Iznik is a platform for online reuse of unwanted items.  This is the front-end c
 
 The old version is [here](https://github.com/Freegle/iznik-nuxt).
 
+There is a Docker Compose development environment which can be used to run a complete standalone system; see [FreegleDocker](https://github.com/Freegle/FreegleDocker).
+
 The development has been funded by [Freegle](https://www.ilovefreegle.org) for use in the UK,
 but it is an open source platform which can be used or adapted by others.  Other contributors very welcome,
 especially those with design/UX expertise.
@@ -67,6 +69,35 @@ If you need to bypass the hooks for a specific commit:
 ```
 git commit --no-verify
 ```
+
+## Testing
+
+This project uses [Playwright](https://playwright.dev/) for end-to-end testing. The tests are deliberately configured to run in series with a single worker to ensure resource stability and prevent conflicts in the Docker environment.
+
+### Key Testing Configuration:
+- **Serial Execution**: Tests run one at a time (`fullyParallel: false`, `workers: 1`)
+- **Single Worker**: Prevents resource contention and hanging tests
+- **Breakpoint Tests**: Homepage tests run all viewport sizes in series within a single test function
+
+### Running Tests:
+```bash
+# Run all Playwright tests
+npm run test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests in headed mode
+npm run test:headed
+
+# Run tests in debug mode
+npm run test:debug
+
+# Clean test artifacts
+npm run test:clean
+```
+
+The serial configuration ensures reliable test execution in containerized environments while maintaining comprehensive test coverage across all responsive breakpoints.
 
 # Technologies
 

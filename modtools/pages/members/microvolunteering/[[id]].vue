@@ -82,8 +82,7 @@
 <script>
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
-
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 export default {
   components: {
     GChart,

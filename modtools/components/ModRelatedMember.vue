@@ -45,7 +45,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 
 const LONG_THRESHOLD = 4
 

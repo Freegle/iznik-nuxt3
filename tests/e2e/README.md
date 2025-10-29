@@ -103,24 +103,15 @@ This rule is critical because:
 
 ## Test Email Management
 
-The tests generate and track temporary email addresses that are used during test runs. These email addresses are recorded for later cleanup to prevent test user accounts from accumulating in the system.
+The tests generate unique, timestamped test email addresses for each test run. These emails follow the format: `prefix-YYYYMMDDHHMMSS-randomhash@domain`.
 
-### Automatic Email Registration
+### Email Generation
 
-Email addresses are automatically registered in two ways:
-
-1. Using the `testEmail` fixture which generates a random email address
-2. Using the `registerTestEmail` fixture which allows you to explicitly register any email address
-
-### Using Email Registration
-
-#### Standard Usage with Auto-Generated Email
+Tests can generate test emails using the `testEmail` fixture or `getTestEmail()` function:
 
 ```javascript
 test('My test with auto email', async ({ page, testEmail, postMessage }) => {
-  // testEmail is automatically registered for cleanup
-  
-  // Use the email in your test
+  // Use the generated test email
   await postMessage({
     type: 'OFFER',
     item: 'test item',
@@ -128,66 +119,22 @@ test('My test with auto email', async ({ page, testEmail, postMessage }) => {
     email: testEmail,
   });
 });
-```
 
-#### Custom Email Registration
-
-```javascript
-test('My test with custom email', async ({ page, registerTestEmail }) => {
-  // Create a custom email and register it manually
-  const customEmail = `custom-${Date.now()}@example.com`;
-  registerTestEmail(customEmail);
+test('My test with custom prefix', async ({ page, getTestEmail, postMessage }) => {
+  // Generate email with custom prefix
+  const customEmail = getTestEmail('signup');
   
-  // Now use the custom email in your test
-  // It will be tracked for later cleanup
+  await postMessage({
+    type: 'WANTED',
+    item: 'test item',
+    email: customEmail,
+  });
 });
 ```
 
-#### Getting All Registered Emails
+### Manual Cleanup
 
-```javascript
-test('Check registered emails', async ({ getRegisteredEmails }) => {
-  // Get array of all registered emails
-  const allEmails = getRegisteredEmails();
-  console.log('Registered emails:', allEmails);
-});
-```
-
-### Email Cleanup
-
-All registered test emails are saved to `test-emails.json` in the project root after each test run.
-
-#### Automatic Unsubscription
-
-The test framework automatically attempts to unsubscribe all registered test emails at the end of successful test runs. This is handled by the `unsubscribe-test-emails.js` script, which:
-
-1. Loads all emails from the `test-emails.json` file
-2. Navigates to the unsubscribe page for each email
-3. Submits the unsubscribe form
-4. Updates the test-emails.json file to remove successfully unsubscribed emails
-
-This happens automatically after test runs, but you can also trigger it manually:
-
-```bash
-# Manually unsubscribe all test emails
-npm run test:unsubscribe-emails
-```
-
-#### Database Cleanup
-
-For deeper cleanup that requires API access, use the cleanup utility:
-
-```bash
-# List all test emails
-node tests/e2e/cleanup-test-emails.js list
-
-# Delete all test users
-node tests/e2e/cleanup-test-emails.js delete
-```
-
-For the delete operation, you need to set environment variables:
-- `API_KEY`: Your API key for authorization
-- `API_URL`: The base URL of your API
+Test emails and user accounts should be cleaned up manually as needed. The `unsubscribe-test-emails.js` script is available for batch unsubscription operations.
 
 ## Available Fixtures
 
@@ -195,10 +142,10 @@ The test framework includes several custom fixtures to simplify tests:
 
 - `testEmail`: Generates a unique test email for each test
 - `getTestEmail(prefix)`: Function to generate custom test emails with specific prefixes
-- `registerTestEmail(email)`: Manually register an email for cleanup
-- `getRegisteredEmails()`: Get array of all registered emails
 - `postMessage(options)`: Helper to post a message (OFFER or WANTED)
-- `verifyPost(options)`: Helper to verify a post on My Posts page
+- `withdrawPost(options)`: Helper to withdraw a post from My Posts page
+- `setNewUserPassword(password)`: Sets password for new user during registration
+- `replyToMessageWithSignup(options)`: Reply to a message with signup as new user
 
 ## Command Logging
 

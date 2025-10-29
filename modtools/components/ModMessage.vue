@@ -610,12 +610,12 @@
 import Highlighter from 'vue-highlight-words'
 
 import { useLocationStore } from '../../stores/location'
-import { useModConfigStore } from '../stores/modconfig'
-import { useMemberStore } from '../stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 
 import { setupKeywords } from '../composables/useKeywords'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
 import { useMiscStore } from '~/stores/misc'
 import { SUBJECT_REGEX } from '~/constants'
 import { useMe } from '~/composables/useMe'

@@ -33,8 +33,8 @@
   </div>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
+import { useMemberStore } from '~/stores/member'
 import { useMiscStore } from '@/stores/misc'
 
 export default {

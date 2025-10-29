@@ -298,7 +298,7 @@
   </div>
 </template>
 <script>
-import { useModConfigStore } from '../stores/modconfig'
+import { useModConfigStore } from '~/stores/modconfig'
 import { useMiscStore } from '@/stores/misc'
 import { useMe } from '~/composables/useMe'
 

@@ -153,9 +153,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
+import { useModGroupStore } from '~/stores/modgroup'
 import { useModMe } from '~/composables/useModMe'
-import { useModGroupStore } from '@/stores/modgroup'
 
 const MEMBERSHIPS_SHOW = 3
 

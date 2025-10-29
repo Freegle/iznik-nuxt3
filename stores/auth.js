@@ -1,6 +1,6 @@
 // DO NOT COPY INTO MASTER
 import { defineStore } from 'pinia'
-import { LoginError, SignUpError } from '../api/BaseAPI'
+import { LoginError, SignUpError } from '../api/APIErrors'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useMiscStore } from '~/stores/misc'
@@ -417,34 +417,36 @@ export const useAuthStore = defineStore({
           composeStore.email = me.email
         }
 
-        // Sync marketing consent from local storage to user profile if needed
-        const miscStore = useMiscStore()
+        if (process.client) {
+          // Sync marketing consent from local storage to user profile if needed
+          const miscStore = useMiscStore()
 
-        if (miscStore.marketingConsent !== undefined) {
-          const localConsent = !!miscStore.marketingConsent
-          // console.log(
-          //  'Local marketing consent',
-          //  localConsent,
-          //  'User marketing consent',
-          //  me.marketingconsent
-          // )
+          if (miscStore.marketingConsent !== undefined) {
+            const localConsent = !!miscStore.marketingConsent
+            // console.log(
+            //  'Local marketing consent',
+            //  localConsent,
+            //  'User marketing consent',
+            //  me.marketingconsent
+            // )
 
-          if (me.marketingconsent !== localConsent) {
-            try {
-              await this.$api.session.save({
-                marketingconsent: localConsent,
-              })
+            if (me.marketingconsent !== localConsent) {
+              try {
+                await this.$api.session.save({
+                  marketingconsent: localConsent,
+                })
 
-              me.marketingconsent = localConsent
-              // console.log("Sync'd marketing consent")
-            } catch (e) {
-              // console.log('Failed to sync marketing consent', e)
+                me.marketingconsent = localConsent
+                // console.log("Sync'd marketing consent")
+              } catch (e) {
+                // console.log('Failed to sync marketing consent', e)
+              }
+            } else {
+              // console.log("Marketing consent already sync'd")
             }
           } else {
-            // console.log("Marketing consent already sync'd")
+            // console.log('No local marketing consent to sync')
           }
-        } else {
-          // console.log('No local marketing consent to sync')
         }
       } else {
         // Any auth info must be invalid.
@@ -509,6 +511,7 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
     },
     async saveAndGet(params) {
+      console.log('Save and get', params)
       await this.$api.session.save(params, function (data) {
         let logIt
 
@@ -521,8 +524,10 @@ export const useAuthStore = defineStore({
 
         return logIt
       })
-      await this.fetchUser()
-      return this.user
+      console.log('Saved')
+      const user = await this.fetchUser()
+      console.log('Fetched user', JSON.stringify(user))
+      return user
     },
     async setGroup(params, nofetch) {
       await this.$api.memberships.update(params)

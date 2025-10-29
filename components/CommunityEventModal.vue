@@ -219,6 +219,7 @@
           </b-row>
           <span v-if="enabled">
             <OurUploader
+              v-if="!image"
               v-model="currentAtts"
               class="bg-white"
               type="CommunityEvent"
@@ -624,7 +625,7 @@ function validateContactName(value) {
 
 // Methods
 async function deleteIt() {
-  await communityEventStore.delete(event.value.id)
+  await communityEventStore.delete(props.id)
   hide()
 }
 

@@ -48,7 +48,7 @@
   </div>
 </template>
 <script>
-import { useChatStore } from '../stores/chat'
+import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { untwem } from '~/composables/useTwem'
 import { useMe } from '~/composables/useMe'

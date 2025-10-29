@@ -306,6 +306,26 @@ async function calculateInitialMapBounds() {
           [mylat - 0.01, mylng - 0.01],
           [mylat + 0.01, mylng + 0.01],
         ]
+      } else if (myGroups.value?.length > 0 && myGroups.value[0].bbox) {
+        // We have groups but no location. Use the first group's bounds as a fallback.
+        try {
+          await loadLeaflet()
+          const wkt = new Wkt.Wkt()
+          wkt.read(myGroups.value[0].bbox)
+          const obj = wkt.toObject()
+
+          if (obj?.getBounds) {
+            const thisbounds = obj.getBounds()
+            const thissw = thisbounds.getSouthWest()
+            const thisne = thisbounds.getNorthEast()
+            bounds = [
+              [thissw.lat, thissw.lng],
+              [thisne.lat, thisne.lng],
+            ]
+          }
+        } catch (e) {
+          console.error('Failed to parse fallback group bounds', e?.message)
+        }
       } else {
         // We aren't a member of any groups and we don't know where we are. This can happen, but it's rare.
         // Send them to the explore page to pick somewhere.

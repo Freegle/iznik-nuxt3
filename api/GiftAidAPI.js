@@ -2,8 +2,9 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class GiftAidAPI extends BaseAPI {
   async get() {
-    const ret = await this.$get('/giftaid', {})
-    return ret.giftaid
+    // v2 API returns data directly without ret/status wrapper
+    const ret = await this.$getv2('/giftaid', {})
+    return ret
   }
 
   async list() {

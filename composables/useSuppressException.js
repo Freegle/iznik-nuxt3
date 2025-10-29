@@ -2,6 +2,7 @@ export function suppressException(err) {
   if (
     err.message?.includes('leaflet') ||
     err.message?.includes('LatLng') ||
+    err.message?.includes('Map container not found') ||
     err.stack?.includes('leaflet') ||
     err.stack?.includes('LMap') ||
     err.stack?.includes('LMarker') ||

@@ -59,7 +59,7 @@
   </b-form-group>
 </template>
 <script>
-import { useModConfigStore } from '../stores/modconfig'
+import { useModConfigStore } from '~/stores/modconfig'
 
 export default {
   props: {

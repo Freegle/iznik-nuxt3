@@ -240,6 +240,8 @@ const { me } = useMe()
 const triedToSubmit = ref(false)
 const saved = ref(false)
 const marketingconsent = ref(false)
+const fetchingGiftAid = ref(false)
+const giftAidFetched = ref(false)
 
 const addresses = computed(() => addressStore.addresses)
 const giftaid = computed(() => giftAidStore.giftaid)
@@ -314,24 +316,64 @@ const addressInvalid = computed(() => {
   return !homeaddress.value || !homeaddress.value.includes(' ')
 })
 
+const fetchGiftAidData = async () => {
+  // Only fetch if we have a user and valid auth tokens
+  if (!me.value) {
+    return
+  }
+
+  if (!authStore.auth.jwt && !authStore.auth.persistent) {
+    console.log('No auth tokens yet, waiting...')
+    return
+  }
+
+  // Prevent duplicate fetches
+  if (fetchingGiftAid.value || giftAidFetched.value) {
+    return
+  }
+
+  fetchingGiftAid.value = true
+
+  try {
+    await addressStore.fetch()
+    await giftAidStore.fetch()
+
+    if (!period.value) {
+      // We fetched no gift aid info so set it to the default.
+      giftaid.value.period = giftAidAllowed.value
+        ? 'Past4YearsAndFuture'
+        : 'Declined'
+    }
+
+    marketingconsent.value = me.value.marketingconsent
+    giftAidFetched.value = true
+  } catch (e) {
+    console.log('Error fetching gift aid data', e)
+  } finally {
+    fetchingGiftAid.value = false
+  }
+}
+
 watch(
   me,
   async (newVal, oldVal) => {
     if (newVal && !oldVal) {
-      await addressStore.fetch()
-      await giftAidStore.fetch()
-
-      if (!period.value) {
-        // We fetched no gift aid info so set it to the default.
-        giftaid.value.period = giftAidAllowed.value
-          ? 'Past4YearsAndFuture'
-          : 'Declined'
-      }
-
-      marketingconsent.value = newVal.marketingconsent
+      await fetchGiftAidData()
     }
   },
   { immediate: true }
+)
+
+// Also watch auth tokens in case they're set after the user
+watch(
+  () => authStore.auth,
+  async (newAuth) => {
+    if (me.value && (newAuth.jwt || newAuth.persistent)) {
+      // User exists and we now have valid tokens, try fetching again
+      await fetchGiftAidData()
+    }
+  },
+  { deep: true }
 )
 
 watch(marketingconsent, async (newVal) => {

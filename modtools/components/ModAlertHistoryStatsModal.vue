@@ -49,7 +49,7 @@
 </template>
 <script>
 import { GChart } from 'vue-google-charts'
-import { useAlertStore } from './stores/alert'
+import { useAlertStore } from '~/stores/alert'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

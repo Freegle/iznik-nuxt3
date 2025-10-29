@@ -6,8 +6,8 @@
         closer the better.
       </p>
       <p class="text-muted">
-        <strong>We won't show this</strong> to the other freegler,
-        but we will show an approximate distance.
+        <strong>We won't show this</strong> to the other freegler, but we will
+        show an approximate distance.
       </p>
 
       <b-form-group

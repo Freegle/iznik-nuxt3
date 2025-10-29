@@ -21,6 +21,23 @@ function setupNavigationHelpers(page) {
       waitUntil: options.waitUntil || 'domcontentloaded',
     })
 
+    // Wait for the page to be ready - try multiple strategies
+    // Skip additional waiting if specific waitUntil was provided
+    if (options.waitUntil && options.waitUntil !== 'domcontentloaded') {
+      return response?.ok() ?? false
+    }
+
+    try {
+      // First try waiting for load state if not already specified
+      await this.waitForLoadState('load', { timeout: timeouts.ui.appearance })
+    } catch (error) {
+      console.log(
+        'Load state wait failed, continuing without additional wait:',
+        error.message
+      )
+      // Don't use any timer fallback - just continue
+    }
+
     return response?.ok() ?? false
   }
 

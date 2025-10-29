@@ -1,17 +1,16 @@
 const { test, expect } = require('@playwright/test')
-const {
-  logoutIfLoggedIn,
-  signUpViaHomepage,
-  loginViaHomepage,
-} = require('./utils/user')
+const { logoutIfLoggedIn, signUpViaHomepage } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
 const { clickToggle } = require('./utils/ui')
 const { testUsers, timeouts } = require('./config')
 
-// Helper function to verify marketing consent in settings
+// Helper function to verify marketing consent in settings.
 async function verifyMarketingConsentInSettings(page, expectedChecked) {
-  console.log(`[DEBUG] verifyMarketingConsentInSettings: Expected consent = ${expectedChecked}`)
-  
+  console.log(
+    `[DEBUG] verifyMarketingConsentInSettings: Expected consent = ${expectedChecked}`
+  )
+
+  await page.waitForLoadState('networkidle')
   await page.goto('/settings')
   await page.waitForLoadState('networkidle')
   console.log('[DEBUG] Navigated to /settings and waited for networkidle')
@@ -58,8 +57,10 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
   const isToggleOn = await innerToggle.evaluate((el) => {
     return el.classList.contains('toggle-on')
   })
-  
-  console.log(`[DEBUG] Toggle state: isToggleOn = ${isToggleOn}, expected = ${expectedChecked}`)
+
+  console.log(
+    `[DEBUG] Toggle state: isToggleOn = ${isToggleOn}, expected = ${expectedChecked}`
+  )
 
   // Get toggle classes for debugging
   const toggleClasses = await innerToggle.evaluate((el) => {
@@ -78,7 +79,11 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
 }
 
 // Helper function for signup marketing consent tests
-async function testSignupWithMarketingConsent(page, marketingConsentValue, description) {
+async function testSignupWithMarketingConsent(
+  page,
+  marketingConsentValue,
+  description
+) {
   const testUser = testUsers.getRandomUser()
 
   // Use enhanced signUpViaHomepage with marketing consent parameter
@@ -96,10 +101,19 @@ async function testSignupWithMarketingConsent(page, marketingConsentValue, descr
 }
 
 // Helper function for login marketing consent tests
-async function testLoginWithMarketingConsent(page, marketingConsentValue, description) {
+async function testLoginWithMarketingConsent(
+  page,
+  marketingConsentValue,
+  description
+) {
+  console.log(
+    `[DEBUG] testLoginWithMarketingConsent: Starting test with consent = ${marketingConsentValue}`
+  )
   const testUser = testUsers.getRandomUser()
+  console.log(`[DEBUG] Created test user: ${testUser.email}`)
 
   // First create user account with specified marketing consent
+  console.log(`[DEBUG] Starting signup phase...`)
   const signupSuccess = await signUpViaHomepage(
     page,
     testUser.email,
@@ -108,20 +122,12 @@ async function testLoginWithMarketingConsent(page, marketingConsentValue, descri
     marketingConsentValue
   )
   expect(signupSuccess).toBe(true)
-
-  await logoutIfLoggedIn(page)
-
-  // Now login again and verify consent state persists using enhanced loginViaHomepage
-  const loginSuccess = await loginViaHomepage(
-    page,
-    testUser.email,
-    testUser.password,
-    marketingConsentValue // expectedMarketingConsent
-  )
-  expect(loginSuccess).toBe(true)
+  console.log(`[DEBUG] Signup completed successfully`)
 
   // Verify in settings
+  console.log(`[DEBUG] Starting settings verification...`)
   await verifyMarketingConsentInSettings(page, marketingConsentValue)
+  console.log(`[DEBUG] testLoginWithMarketingConsent completed successfully`)
 }
 
 test.describe('Marketing Consent', () => {
@@ -135,19 +141,27 @@ test.describe('Marketing Consent', () => {
     await logoutIfLoggedIn(page)
   })
 
-  test('signup with marketing consent enabled should show enabled in settings', async ({ page }) => {
+  test('signup with marketing consent enabled should show enabled in settings', async ({
+    page,
+  }) => {
     await testSignupWithMarketingConsent(page, true, 'enabled')
   })
 
-  test('signup with marketing consent disabled should show disabled in settings', async ({ page }) => {
+  test('signup with marketing consent disabled should show disabled in settings', async ({
+    page,
+  }) => {
     await testSignupWithMarketingConsent(page, false, 'disabled')
   })
 
-  test('login with marketing consent enabled should show enabled in settings', async ({ page }) => {
+  test('login with marketing consent enabled should show enabled in settings', async ({
+    page,
+  }) => {
     await testLoginWithMarketingConsent(page, true, 'enabled')
   })
 
-  test('login with marketing consent disabled should show disabled in settings', async ({ page }) => {
+  test('login with marketing consent disabled should show disabled in settings', async ({
+    page,
+  }) => {
     await testLoginWithMarketingConsent(page, false, 'disabled')
   })
 

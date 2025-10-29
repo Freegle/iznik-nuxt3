@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { nextTick } from 'vue'
 import { useGroupStore } from '~/stores/group'
 import { useStatsStore } from '~/stores/stats'
 import { buildHead } from '~/composables/useBuildHead'
@@ -82,7 +83,9 @@ export function useBirthday() {
   // Setup page head
   async function setupPageHead(customDescription = null) {
     if (groupname) {
+      console.log('Fetching group data for birthday page:', groupname)
       await groupStore.fetch(groupname, true)
+      await nextTick()
 
       const description =
         customDescription ||

@@ -5,14 +5,20 @@
       <div class="p-3">
         <div class="intro-text mb-3">
           <p>
-            This is a simulation of how we could use an "isochrone" (travel-time boundary) approach to
-            show posts to gradually increasing numbers of people to generate replies.  It uses historical
-            data about posts, replies and active members.
+            This is a simulation of how we could use an "isochrone" (travel-time
+            boundary) approach to show posts to gradually increasing numbers of
+            people to generate replies. It uses historical data about posts,
+            replies and active members.
           </p>
         </div>
         <div class="form-group">
           <label for="groupSelect"><strong>Choose a group:</strong></label>
-          <ModGroupSelect id="groupSelect" v-model="groupid" systemwide listall />
+          <ModGroupSelect
+            id="groupSelect"
+            v-model="groupid"
+            systemwide
+            listall
+          />
         </div>
         <div v-if="groupid" class="mt-3">
           <div v-if="loadingRuns" class="text-center p-4">
@@ -23,22 +29,24 @@
             {{ runsError }}
           </div>
           <div v-else-if="filteredRuns.length === 0" class="alert alert-info">
-            No completed simulation runs found for this group. Please run a simulation first using
-            the CLI script.
+            No completed simulation runs found for this group. Please run a
+            simulation first using the CLI script.
           </div>
           <div v-else>
             <div class="form-group">
-              <label for="runSelect"><strong>Choose a simulation run:</strong></label>
+              <label for="runSelect"
+                ><strong>Choose a simulation run:</strong></label
+              >
               <select
-                  id="runSelect"
-                  v-model="selectedRunId"
-                  class="form-control"
+                id="runSelect"
+                v-model="selectedRunId"
+                class="form-control"
               >
                 <option :value="null">-- Select a simulation run --</option>
                 <option
-                    v-for="run in filteredRuns"
-                    :key="run.id"
-                    :value="run.id"
+                  v-for="run in filteredRuns"
+                  :key="run.id"
+                  :value="run.id"
                 >
                   {{ run.name }} ({{ run.message_count }} messages) -
                   {{ formatDate(run.created) }}
@@ -49,23 +57,33 @@
             <!-- Show details of selected run -->
             <div v-if="selectedRun" class="run-details">
               <h4>Run Details</h4>
-              <p><strong>Description:</strong> {{ selectedRun.description || 'N/A' }}</p>
+              <p>
+                <strong>Description:</strong>
+                {{ selectedRun.description || 'N/A' }}
+              </p>
               <p>
                 <strong>Created:</strong> {{ formatDate(selectedRun.created) }}
               </p>
               <p>
-                <strong>Completed:</strong> {{ formatDate(selectedRun.completed) }}
+                <strong>Completed:</strong>
+                {{ formatDate(selectedRun.completed) }}
               </p>
               <p><strong>Messages:</strong> {{ selectedRun.message_count }}</p>
 
               <h5>Parameters</h5>
-              <pre class="params-display">{{ JSON.stringify(selectedRun.parameters, null, 2) }}</pre>
+              <pre class="params-display">{{
+                JSON.stringify(selectedRun.parameters, null, 2)
+              }}</pre>
 
               <h5>Filters</h5>
-              <pre class="params-display">{{ JSON.stringify(selectedRun.filters, null, 2) }}</pre>
+              <pre class="params-display">{{
+                JSON.stringify(selectedRun.filters, null, 2)
+              }}</pre>
 
               <h5>Metrics</h5>
-              <pre class="params-display">{{ JSON.stringify(selectedRun.metrics, null, 2) }}</pre>
+              <pre class="params-display">{{
+                JSON.stringify(selectedRun.metrics, null, 2)
+              }}</pre>
 
               <button class="btn btn-primary mt-3" @click="viewSimulation">
                 View Simulation
@@ -88,16 +106,20 @@
 
         <div class="intro-text mb-3">
           <p class="mb-2">
-            This simulation visualises how messages spread across a Freegle group over time.
-            Using historical data, it shows how an "isochrone" (travel-time boundary) expands
-            outward from the message location to reach more members.
+            This simulation visualises how messages spread across a Freegle
+            group over time. Using historical data, it shows how an "isochrone"
+            (travel-time boundary) expands outward from the message location to
+            reach more members.
           </p>
-          <div v-if="selectedRun && selectedRun.parameters" class="parameters-display">
+          <div
+            v-if="selectedRun && selectedRun.parameters"
+            class="parameters-display"
+          >
             <strong>Experiment Parameters:</strong>
             Initial isochrone: {{ selectedRun.parameters.initialMinutes }}min,
-            Max size: {{ selectedRun.parameters.maxMinutes }}min,
-            Expansion increment: {{ selectedRun.parameters.increment }}min,
-            Time between expansions: {{ selectedRun.parameters.timeSinceLastExpand }}min,
+            Max size: {{ selectedRun.parameters.maxMinutes }}min, Expansion
+            increment: {{ selectedRun.parameters.increment }}min, Time between
+            expansions: {{ selectedRun.parameters.timeSinceLastExpand }}min,
             Transport: {{ selectedRun.parameters.transport }}
           </div>
         </div>
@@ -113,79 +135,81 @@
         <div class="map-container">
           <client-only>
             <l-map
-                ref="map"
-                v-model:zoom="zoom"
-                v-model:center="center"
-                :options="{ zoomControl: true, scrollWheelZoom: true }"
-                :use-global-leaflet="true"
-                class="simulation-map"
-                :min-zoom="8"
-                :max-zoom="15"
-                @ready="onMapReady"
-                @moveend="onMapMoveEnd"
+              ref="map"
+              v-model:zoom="zoom"
+              v-model:center="center"
+              :options="{ zoomControl: true, scrollWheelZoom: true }"
+              :use-global-leaflet="true"
+              class="simulation-map"
+              :min-zoom="8"
+              :max-zoom="15"
+              @ready="onMapReady"
+              @moveend="onMapMoveEnd"
             >
               <l-tile-layer :url="mapTile" :attribution="mapAttribution" />
 
               <!-- Group CGA polygon (grey, semi-transparent) -->
               <l-geo-json
-                  v-if="groupCGA"
-                  :geojson="groupCGA"
-                  :options="groupCGAStyle"
+                v-if="groupCGA"
+                :geojson="groupCGA"
+                :options="groupCGAStyle"
               />
 
               <!-- Message location marker -->
               <l-marker
-                  v-if="messageLocation"
-                  :lat-lng="messageLocation"
-                  :icon="customIcon"
-                  :options="{ keyboard: false }"
+                v-if="messageLocation"
+                :lat-lng="messageLocation"
+                :icon="customIcon"
+                :options="{ keyboard: false }"
               />
 
               <!-- Active freeglers (tiny semi-transparent green dots) -->
               <l-circle-marker
-                  v-for="user in nonRepliers"
-                  :key="'user-' + user.properties.user_hash"
-                  :lat-lng="[
-              user.geometry.coordinates[1],
-              user.geometry.coordinates[0],
-            ]"
-                  :radius="1"
-                  :color="'#28a745'"
-                  :fill-color="'#28a745'"
-                  :fill-opacity="0.3"
+                v-for="user in nonRepliers"
+                :key="'user-' + user.properties.user_hash"
+                :lat-lng="[
+                  user.geometry.coordinates[1],
+                  user.geometry.coordinates[0],
+                ]"
+                :radius="1"
+                :color="'#28a745'"
+                :fill-color="'#28a745'"
+                :fill-opacity="0.3"
               />
 
               <!-- Repliers (bright red small dots) -->
               <l-circle-marker
-                  v-for="user in nonSuccessfulRepliers"
-                  :key="'replier-' + user.properties.user_hash"
-                  :lat-lng="[
-              user.geometry.coordinates[1],
-              user.geometry.coordinates[0],
-            ]"
-                  :radius="3"
-                  :color="'#ff0000'"
-                  :fill-color="'#ff0000'"
-                  :fill-opacity="1.0"
+                v-for="user in nonSuccessfulRepliers"
+                :key="'replier-' + user.properties.user_hash"
+                :lat-lng="[
+                  user.geometry.coordinates[1],
+                  user.geometry.coordinates[0],
+                ]"
+                :radius="3"
+                :color="'#ff0000'"
+                :fill-color="'#ff0000'"
+                :fill-opacity="1.0"
               />
 
               <!-- Successful replier (bright pink pin) -->
               <l-marker
-                  v-if="successfulReplier"
-                  :lat-lng="[
-              successfulReplier.geometry.coordinates[1],
-              successfulReplier.geometry.coordinates[0],
-            ]"
-                  :icon="pinkIcon"
+                v-if="successfulReplier"
+                :lat-lng="[
+                  successfulReplier.geometry.coordinates[1],
+                  successfulReplier.geometry.coordinates[0],
+                ]"
+                :icon="pinkIcon"
               />
 
               <!-- Isochrone expansion polygons (colored by sequence, excluding previous areas) -->
-              <template v-if="currentExpansionIndex >= 0 && expansions.length > 0">
+              <template
+                v-if="currentExpansionIndex >= 0 && expansions.length > 0"
+              >
                 <l-geo-json
-                    v-for="(exp, idx) in visibleExpansions"
-                    :key="'exp-' + idx"
-                    :geojson="exp.geometry"
-                    :options="getIsochroneStyle(idx)"
+                  v-for="(exp, idx) in visibleExpansions"
+                  :key="'exp-' + idx"
+                  :geojson="exp.geometry"
+                  :options="getIsochroneStyle(idx)"
                 />
               </template>
             </l-map>
@@ -200,23 +224,34 @@
           <div class="progress-section">
             <div class="progress-label">Overall Progress (2 days max)</div>
             <div class="progress-bar-container">
-              <div class="progress-bar-fill overall" :style="{ width: overallProgressPercent + '%' }"></div>
+              <div
+                class="progress-bar-fill overall"
+                :style="{ width: overallProgressPercent + '%' }"
+              ></div>
             </div>
           </div>
 
           <div class="stats-grid">
             <div class="stat-item">
-              <strong>Successful:</strong> <span :class="successfulReplier ? 'text-success' : 'text-danger'">{{ successfulReplier ? 'Yes' : 'No' }}</span>
+              <strong>Successful:</strong>
+              <span
+                :class="successfulReplier ? 'text-success' : 'text-danger'"
+                >{{ successfulReplier ? 'Yes' : 'No' }}</span
+              >
             </div>
 
             <!-- Isochrone expansion with its progress bar -->
             <div class="stat-item-group">
               <div class="stat-item">
-                <strong>Isochrone Expansion:</strong> {{ currentExpansionIndex + 1 }} /
+                <strong>Isochrone Expansion:</strong>
+                {{ currentExpansionIndex + 1 }} /
                 {{ expansions.length }}
               </div>
               <div class="progress-bar-container small">
-                <div class="progress-bar-fill expansion" :style="{ width: progressPercent + '%' }"></div>
+                <div
+                  class="progress-bar-fill expansion"
+                  :style="{ width: progressPercent + '%' }"
+                ></div>
               </div>
             </div>
 
@@ -227,7 +262,8 @@
               <strong>Active users covered:</strong> {{ usersReached }}
             </div>
             <div class="stat-item">
-              <strong>Actual repliers:</strong> {{ repliersCovered }} / {{ message.total_replies_actual }}
+              <strong>Actual repliers:</strong> {{ repliersCovered }} /
+              {{ message.total_replies_actual }}
             </div>
           </div>
         </div>
@@ -261,16 +297,18 @@
         <div class="controls-overlay">
           <div class="btn-group">
             <button
-                class="btn btn-secondary"
-                :disabled="!navigation.has_prev"
-                @click="previousMessage"
+              class="btn btn-secondary"
+              :disabled="!navigation.has_prev"
+              @click="previousMessage"
             >
-              ◀◀ Prev Message ({{ navigation.current_index }}/{{ navigation.total_messages }})
+              ◀◀ Prev Message ({{ navigation.current_index }}/{{
+                navigation.total_messages
+              }})
             </button>
             <button
-                class="btn btn-secondary"
-                :disabled="currentExpansionIndex === 0"
-                @click="previousExpansion"
+              class="btn btn-secondary"
+              :disabled="currentExpansionIndex === 0"
+              @click="previousExpansion"
             >
               ◀ Back
             </button>
@@ -278,18 +316,20 @@
               {{ isPlaying ? '⏸ Pause' : '▶ Play' }}
             </button>
             <button
-                class="btn btn-secondary"
-                :disabled="currentExpansionIndex >= expansions.length - 1"
-                @click="nextExpansion"
+              class="btn btn-secondary"
+              :disabled="currentExpansionIndex >= expansions.length - 1"
+              @click="nextExpansion"
             >
               Next ▶
             </button>
             <button
-                class="btn btn-secondary"
-                :disabled="!navigation.has_next"
-                @click="nextMessage"
+              class="btn btn-secondary"
+              :disabled="!navigation.has_next"
+              @click="nextMessage"
             >
-              Next Message ({{ navigation.current_index + 2 }}/{{ navigation.total_messages }}) ▶▶
+              Next Message ({{ navigation.current_index + 2 }}/{{
+                navigation.total_messages
+              }}) ▶▶
             </button>
           </div>
         </div>
@@ -299,11 +339,6 @@
 </template>
 
 <script setup>
-definePageMeta({
-  ssr: false
-})
-
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from '#imports'
 import 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import {
@@ -313,7 +348,20 @@ import {
   LGeoJson,
   LCircleMarker,
 } from '@vue-leaflet/vue-leaflet'
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+  useRoute,
+} from '#imports'
 import { attribution, osmtile } from '~/composables/useMap'
+
+definePageMeta({
+  ssr: false,
+})
 
 const mapTile = osmtile()
 const mapAttribution = attribution()
@@ -329,7 +377,7 @@ const customIcon = computed(() => {
     iconUrl: '/mapmarker.gif',
     iconSize: [25, 25],
     iconAnchor: [12.5, 25],
-    className: 'no-animation'
+    className: 'no-animation',
   })
 })
 
@@ -340,7 +388,7 @@ const pinkIcon = computed(() => {
     html: '<div style="background: #ff1493; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>',
     iconSize: [20, 20],
     iconAnchor: [10, 10],
-    className: 'pink-marker-icon'
+    className: 'pink-marker-icon',
   })
 })
 
@@ -426,33 +474,18 @@ const visibleExpansions = computed(() => {
   return expansions.value.slice(startIndex, currentExpansionIndex.value + 1)
 })
 
-const repliers = computed(() => {
-  return users.value.features.filter((u) => u.properties.replied)
-})
-
 const successfulReplier = computed(() => {
   return users.value.features.find((u) => u.properties.successful)
 })
 
 const nonSuccessfulRepliers = computed(() => {
-  return users.value.features.filter((u) => u.properties.replied && !u.properties.successful)
+  return users.value.features.filter(
+    (u) => u.properties.replied && !u.properties.successful
+  )
 })
 
 const nonRepliers = computed(() => {
   return users.value.features.filter((u) => !u.properties.replied)
-})
-
-const elapsedTime = computed(() => {
-  if (currentExpansionIndex.value >= 0 && expansions.value.length > 0) {
-    const minutes = expansions.value[currentExpansionIndex.value].minutes_after_arrival
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
-      return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
-    }
-    return `${minutes}m`
-  }
-  return '0m'
 })
 
 const animatedElapsedTime = computed(() => {
@@ -475,15 +508,6 @@ const usersReached = computed(() => {
 const repliersCovered = computed(() => {
   if (currentExpansionIndex.value >= 0 && expansions.value.length > 0) {
     return expansions.value[currentExpansionIndex.value].replies_in_isochrone
-  }
-  return 0
-})
-
-const captureRate = computed(() => {
-  if (message.value.total_replies_actual > 0) {
-    return Math.round(
-        (repliersCovered.value / message.value.total_replies_actual) * 100
-    )
   }
   return 0
 })
@@ -512,10 +536,16 @@ const filteredRuns = computed(() => {
     }
 
     // Check for specific group matches
-    if (run.filters.groupid && parseInt(run.filters.groupid) === groupid.value) {
+    if (
+      run.filters.groupid &&
+      parseInt(run.filters.groupid) === groupid.value
+    ) {
       return true
     }
-    if (run.filters.groupId && parseInt(run.filters.groupId) === groupid.value) {
+    if (
+      run.filters.groupId &&
+      parseInt(run.filters.groupId) === groupid.value
+    ) {
       return true
     }
     if (run.filters.groupids && Array.isArray(run.filters.groupids)) {
@@ -589,7 +619,7 @@ async function loadSimulation() {
     console.log('Loading simulation for runid:', selectedRunId.value)
 
     // Get run info to find total message count
-    const selectedRun = runs.value.find(r => r.id === selectedRunId.value)
+    const selectedRun = runs.value.find((r) => r.id === selectedRunId.value)
     const messageCount = selectedRun?.message_count || 1
 
     // Start at a random message
@@ -619,9 +649,17 @@ async function loadSimulation() {
 
 async function loadCurrentMessage() {
   try {
-    console.log('Loading message at index:', currentMessageIndex.value, 'for runid:', selectedRunId.value)
+    console.log(
+      'Loading message at index:',
+      currentMessageIndex.value,
+      'for runid:',
+      selectedRunId.value
+    )
 
-    const res = await $api.simulation.getMessage(selectedRunId.value, currentMessageIndex.value)
+    const res = await $api.simulation.getMessage(
+      selectedRunId.value,
+      currentMessageIndex.value
+    )
 
     console.log('Message response:', res)
 
@@ -636,11 +674,15 @@ async function loadCurrentMessage() {
 
     // Filter expansions to only show up to 2 days (2880 minutes)
     const maxMinutes = 2880 // 48 hours
-    expansions.value = res.expansions.filter(exp => exp.minutes_after_arrival <= maxMinutes)
+    expansions.value = res.expansions.filter(
+      (exp) => exp.minutes_after_arrival <= maxMinutes
+    )
 
     // Skip messages with no valid expansions
     if (expansions.value.length === 0) {
-      console.log('Message has no expansions within 2 days, loading next message')
+      console.log(
+        'Message has no expansions within 2 days, loading next message'
+      )
       await nextMessage()
       return
     }
@@ -657,7 +699,7 @@ async function loadCurrentMessage() {
       console.log('[loadCurrentMessage] Initialized animated time:', {
         animatedElapsedMinutes: animatedElapsedMinutes.value,
         firstExpansionMinutes: expansions.value[0].minutes_after_arrival,
-        totalExpansions: expansions.value.length
+        totalExpansions: expansions.value.length,
       })
     } else {
       console.warn('[loadCurrentMessage] No expansions to initialize time from')
@@ -670,12 +712,14 @@ async function loadCurrentMessage() {
     // Wait for map to be fully ready with Leaflet object
     let attempts = 0
     while (!map.value?.leafletObject && attempts < 50) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
       attempts++
     }
 
     if (!map.value?.leafletObject) {
-      console.warn('Map not ready after 5 seconds, checking if should start autoplay')
+      console.warn(
+        'Map not ready after 5 seconds, checking if should start autoplay'
+      )
       // Only start autoplay if currently playing
       if (isPlaying.value) {
         console.log('Map not ready but was playing - starting autoplay')
@@ -703,7 +747,10 @@ async function loadCurrentMessage() {
 async function nextMessage() {
   if (!navigation.value.has_next) return
 
-  console.log('[nextMessage] Moving to next message, isPlaying:', isPlaying.value)
+  console.log(
+    '[nextMessage] Moving to next message, isPlaying:',
+    isPlaying.value
+  )
 
   // Stop current autoplay intervals
   stopAutoPlay()
@@ -717,7 +764,10 @@ async function nextMessage() {
 async function previousMessage() {
   if (!navigation.value.has_prev) return
 
-  console.log('[previousMessage] Moving to previous message, isPlaying:', isPlaying.value)
+  console.log(
+    '[previousMessage] Moving to previous message, isPlaying:',
+    isPlaying.value
+  )
 
   // Stop current autoplay intervals
   stopAutoPlay()
@@ -732,7 +782,7 @@ function nextExpansion() {
   console.log('[nextExpansion] Called:', {
     currentIndex: currentExpansionIndex.value,
     maxIndex: expansions.value.length - 1,
-    isPlaying: isPlaying.value
+    isPlaying: isPlaying.value,
   })
 
   if (currentExpansionIndex.value < expansions.value.length - 1) {
@@ -741,8 +791,12 @@ function nextExpansion() {
 
     // Update animated time to match new expansion
     if (expansions.value[currentExpansionIndex.value]) {
-      animatedElapsedMinutes.value = expansions.value[currentExpansionIndex.value].minutes_after_arrival
-      console.log('[nextExpansion] Updated animated time to:', animatedElapsedMinutes.value)
+      animatedElapsedMinutes.value =
+        expansions.value[currentExpansionIndex.value].minutes_after_arrival
+      console.log(
+        '[nextExpansion] Updated animated time to:',
+        animatedElapsedMinutes.value
+      )
     }
   } else {
     console.log('[nextExpansion] At last expansion')
@@ -759,13 +813,19 @@ function previousExpansion() {
     currentExpansionIndex.value--
     // Update animated time to match new expansion
     if (expansions.value[currentExpansionIndex.value]) {
-      animatedElapsedMinutes.value = expansions.value[currentExpansionIndex.value].minutes_after_arrival
+      animatedElapsedMinutes.value =
+        expansions.value[currentExpansionIndex.value].minutes_after_arrival
     }
   }
 }
 
 function togglePlayPause() {
-  console.log('[togglePlayPause] Toggling play state from', isPlaying.value, 'to', !isPlaying.value)
+  console.log(
+    '[togglePlayPause] Toggling play state from',
+    isPlaying.value,
+    'to',
+    !isPlaying.value
+  )
   isPlaying.value = !isPlaying.value
 
   if (isPlaying.value) {
@@ -788,7 +848,7 @@ function startAutoPlay() {
   console.log('[startAutoPlay] Starting autoplay:', {
     totalExpansions,
     intervalMs,
-    currentExpansionIndex: currentExpansionIndex.value
+    currentExpansionIndex: currentExpansionIndex.value,
   })
 
   // Reset progress
@@ -796,10 +856,16 @@ function startAutoPlay() {
 
   // Set initial animated time
   if (currentExpansionIndex.value >= 0 && expansions.value.length > 0) {
-    animatedElapsedMinutes.value = expansions.value[currentExpansionIndex.value].minutes_after_arrival
-    console.log('[startAutoPlay] Set initial animated time:', animatedElapsedMinutes.value)
+    animatedElapsedMinutes.value =
+      expansions.value[currentExpansionIndex.value].minutes_after_arrival
+    console.log(
+      '[startAutoPlay] Set initial animated time:',
+      animatedElapsedMinutes.value
+    )
   } else {
-    console.warn('[startAutoPlay] Cannot set initial time - invalid index or no expansions')
+    console.warn(
+      '[startAutoPlay] Cannot set initial time - invalid index or no expansions'
+    )
   }
 
   // Update progress bar and time every 50ms
@@ -812,7 +878,8 @@ function startAutoPlay() {
 
     // Animate elapsed time
     if (currentExpansionIndex.value >= 0 && expansions.value.length > 0) {
-      const currentMinutes = expansions.value[currentExpansionIndex.value].minutes_after_arrival
+      const currentMinutes =
+        expansions.value[currentExpansionIndex.value].minutes_after_arrival
       const nextIndex = currentExpansionIndex.value + 1
 
       console.log('[progressInterval] Tick:', {
@@ -821,7 +888,7 @@ function startAutoPlay() {
         currentMinutes,
         nextIndex,
         animatedElapsedMinutesBefore: animatedElapsedMinutes.value,
-        progressPercent: progressPercent.value
+        progressPercent: progressPercent.value,
       })
 
       let increment
@@ -835,7 +902,7 @@ function startAutoPlay() {
           nextMinutes,
           minutesDiff,
           increment,
-          intervalMs
+          intervalMs,
         })
       } else {
         // On last expansion - keep ticking up at a steady rate
@@ -851,16 +918,19 @@ function startAutoPlay() {
         }
 
         console.log('[progressInterval] Last expansion - continuing to tick:', {
-          increment
+          increment,
         })
       }
 
       animatedElapsedMinutes.value += increment
-      console.log('[progressInterval] After increment:', animatedElapsedMinutes.value)
+      console.log(
+        '[progressInterval] After increment:',
+        animatedElapsedMinutes.value
+      )
     } else {
       console.warn('[progressInterval] Cannot animate - invalid state:', {
         currentExpansionIndex: currentExpansionIndex.value,
-        expansionsLength: expansions.value.length
+        expansionsLength: expansions.value.length,
       })
     }
   }, progressUpdateMs)
@@ -875,7 +945,7 @@ function startAutoPlay() {
 function stopAutoPlay() {
   console.log('[stopAutoPlay] Stopping autoplay, clearing intervals:', {
     hasPlayTimer: !!playTimer.value,
-    hasProgressInterval: !!progressInterval.value
+    hasProgressInterval: !!progressInterval.value,
   })
 
   if (playTimer.value) {
@@ -914,7 +984,12 @@ function fitMapToGroupCGA() {
 
     console.log('Bounds:', { sw, ne })
 
-    if (!isFinite(sw.lat) || !isFinite(sw.lng) || !isFinite(ne.lat) || !isFinite(ne.lng)) {
+    if (
+      !isFinite(sw.lat) ||
+      !isFinite(sw.lng) ||
+      !isFinite(ne.lat) ||
+      !isFinite(ne.lng)
+    ) {
       console.warn('Infinite bounds detected', { sw, ne })
       return
     }
@@ -952,7 +1027,10 @@ function onMapReady() {
 }
 
 function onMapMoveEnd() {
-  console.log('[onMapMoveEnd] Map move ended, pendingAutoplayStart:', pendingAutoplayStart.value)
+  console.log(
+    '[onMapMoveEnd] Map move ended, pendingAutoplayStart:',
+    pendingAutoplayStart.value
+  )
 
   if (pendingAutoplayStart.value) {
     console.log('[onMapMoveEnd] Starting autoplay after map move')
@@ -961,7 +1039,7 @@ function onMapMoveEnd() {
     console.log('[onMapMoveEnd] About to call startAutoPlay, current state:', {
       currentExpansionIndex: currentExpansionIndex.value,
       expansionsLength: expansions.value.length,
-      animatedElapsedMinutes: animatedElapsedMinutes.value
+      animatedElapsedMinutes: animatedElapsedMinutes.value,
     })
     startAutoPlay()
   }
@@ -1239,7 +1317,7 @@ onBeforeUnmount(() => {
     border-radius: 50%;
     width: 12px;
     height: 12px;
-    box-shadow: 0 0 3px rgba(0,0,0,0.3);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
   }
 }
 

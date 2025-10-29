@@ -7,59 +7,53 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { useNoticeboardStore } from '../stores/noticeboard'
-import { useAuthStore } from '../stores/auth'
-import { useGroupStore } from '../stores/group'
-import { useMessageStore } from '../stores/message'
-import { useUserStore } from '../stores/user'
-import { useIsochroneStore } from '../stores/isochrone'
-import { useComposeStore } from '../stores/compose'
-import { useChatStore } from '../stores/chat'
-import { useAddressStore } from '../stores/address'
-import { useTrystStore } from '../stores/tryst'
-import { useNotificationStore } from '../stores/notification'
-import { useNewsfeedStore } from '../stores/newsfeed'
-import { useReplyStore } from '../stores/reply'
-import { useSearchStore } from '../stores/search'
-import { useStoryStore } from '../stores/stories'
-import { useVolunteeringStore } from '../stores/volunteering'
-import { useCommunityEventStore } from '../stores/communityevent'
-import { useJobStore } from '../stores/job'
-import { useTeamStore } from '../stores/team'
-import { useDonationStore } from '../stores/donations'
-import { useGiftAidStore } from '../stores/giftaid'
-import { useAuthorityStore } from '../stores/authority'
-import { useStatsStore } from '../stores/stats'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
-import { useImageStore } from '../stores/image'
-import { useDomainStore } from '../stores/domain'
-import { useLogoStore } from '../stores/logo'
-import { useLocationStore } from '../stores/location'
-import { useShortlinkStore } from '../stores/shortlinks'
-import { useMiscStore } from '../stores/misc'
+import { useNoticeboardStore } from '~/stores/noticeboard'
+import { useAuthStore } from '~/stores/auth'
+import { useGroupStore } from '~/stores/group'
+import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '~/stores/user'
+import { useIsochroneStore } from '~/stores/isochrone'
+import { useComposeStore } from '~/stores/compose'
+import { useChatStore } from '~/stores/chat'
+import { useAddressStore } from '~/stores/address'
+import { useTrystStore } from '~/stores/tryst'
+import { useNotificationStore } from '~/stores/notification'
+import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useReplyStore } from '~/stores/reply'
+import { useSearchStore } from '~/stores/search'
+import { useStoryStore } from '~/stores/stories'
+import { useVolunteeringStore } from '~/stores/volunteering'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useJobStore } from '~/stores/job'
+import { useTeamStore } from '~/stores/team'
+import { useDonationStore } from '~/stores/donations'
+import { useGiftAidStore } from '~/stores/giftaid'
+import { useAuthorityStore } from '~/stores/authority'
+import { useStatsStore } from '~/stores/stats'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
+import { useImageStore } from '~/stores/image'
+import { useDomainStore } from '~/stores/domain'
+import { useLogoStore } from '~/stores/logo'
+import { useLocationStore } from '~/stores/location'
+import { useShortlinkStore } from '~/stores/shortlinks'
+import { useMiscStore } from '~/stores/misc'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
-import { useAdminsStore } from './stores/admins'
-import { useAlertStore } from './stores/alert'
-import { useCommentStore } from './stores/comment'
-import { useLogsStore } from './stores/logs'
-import { useMemberStore } from './stores/member'
-import { useModConfigStore } from './stores/modconfig'
-import { useSpammerStore } from './stores/spammer'
-import { useStdmsgStore } from './stores/stdmsg'
-import { useModGroupStore } from '@/stores/modgroup'
-import { usePublicityStore } from '@/stores/publicity'
+import { useAdminsStore } from '~/stores/admins'
+import { useAlertStore } from '~/stores/alert'
+import { useCommentStore } from '~/stores/comment'
+import { useLogsStore } from '~/stores/logs'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useSpammerStore } from '~/stores/spammer'
+import { useStdmsgStore } from '~/stores/stdmsg'
 import { computed, watch, reloadNuxtApp } from '#imports'
-import { useSystemConfigStore } from '~/modtools/stores/systemconfig'
+import { useModGroupStore } from '~/stores/modgroup'
+import { usePublicityStore } from '~/stores/publicity'
+import { useSystemConfigStore } from '~/stores/systemconfig'
 
 const route = useRoute()
-// const loadingIndicatorThrottle = ref(5000)
-// const { isLoading } = useLoadingIndicator({
-//  throttle: loadingIndicatorThrottle.value,
-// })
-// Don't render the app until we've done everything in here.
-// let ready = false
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -230,10 +224,6 @@ if (process.client) {
     return chatStore.unreadCount
   })
 
-  // const notificationCount = computed(() => {
-  //  return notificationStore.count
-  // })
-
   useHead({
     titleTemplate: (titleChunk) => {
       const totalCount = menuCount.value + chatCount.value
@@ -250,7 +240,6 @@ if (process.client) {
     },
   })
 }
-// ready = true
 </script>
 
 <style lang="scss">

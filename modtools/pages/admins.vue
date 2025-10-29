@@ -200,7 +200,7 @@
 <script>
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
-import { useAdminsStore } from '../stores/admins'
+import { useAdminsStore } from '~/stores/admins'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
@@ -210,11 +210,8 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-// const noAdmin = val => {
-//  return !!(val && val.toLowerCase().indexOf('admin') === -1)
-// }
-
 export default {
+  name: 'AdminsManagement',
   components: {
     VeeForm,
     Field,

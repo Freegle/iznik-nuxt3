@@ -128,9 +128,9 @@ export default {
           info: {
             'Status API': {
               warning: true,
-              warningtext: 'Cannot access status file - system status unknown'
-            }
-          }
+              warningtext: 'Cannot access status file - system status unknown',
+            },
+          },
         }
       }
 

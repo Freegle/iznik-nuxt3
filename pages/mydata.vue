@@ -310,10 +310,6 @@
                   }}
                 </div>
               </div>
-              <div v-if="status.data.phone">
-                <h2>Phone number</h2>
-                <p>{{ status.data.phone }}</p>
-              </div>
               <h2>Memberships</h2>
               <p>
                 Which communities you are a member of. You can change your

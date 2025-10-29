@@ -453,15 +453,15 @@ async function logOut() {
   authStore.forceLogin = true
 
   // Go to the landing page.
-  router.push('/')
+  this.$router.push('/')
 }
+
 function requestLogin() {
   console.log('MODTOOLS.VUE requestLogin')
   loginModal.value.show()
 }
 
 function discourse(e) {
-  console.log('Open Discourse')
   window.open('https://discourse.ilovefreegle.org/')
   e.stopPropagation()
   e.preventDefault()

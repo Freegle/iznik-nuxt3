@@ -27,7 +27,7 @@
         Already a freegler? Log in
       </b-button>
     </div>
-    <p v-if="signUp" class="text-center">
+    <p v-if="signUp" class="text-center signup-info-text">
       You'll get emails. Name, approximate location, and profile picture are
       public - you can hide your real name and picture from Settings. Logging in
       adds cookies and local storage. Read
@@ -41,10 +41,12 @@
     <p v-if="loginType" class="text-center font-weight-bold">
       You usually log in using {{ loginType }}.
     </p>
-    <div class="d-flex flex-column flex-lg-row justify-content-between p-3">
+    <div
+      class="d-flex flex-column flex-lg-row justify-content-between p-0 p-md-3"
+    >
       <div class="signin__section--social">
-        <h3 class="header--size5 pb-3">Log in with a social account</h3>
-        <p v-if="signUp" class="font-weight-bold">
+        <h3 class="header--size5 pb-1 pb-md-3">Log in with a social account</h3>
+        <p v-if="signUp" class="font-weight-bold d-none d-md-block">
           Using one of these buttons is the easiest way to create an account:
         </p>
         <b-button
@@ -67,19 +69,24 @@
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
         />
-        <b-button
-          class="social-button social-button--yahoo"
-          :disabled="yahooDisabled"
-          @click="loginYahoo"
-        >
-          <b-img
-            src="/signinbuttons/yahoo-logo.svg"
-            class="social-button__image"
-          />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Yahoo</span
-          >
-        </b-button>
+        <div class="yahoo-retirement-notice mb-3">
+          <p class="text-muted small mb-1">
+            Used to login with Yahoo? Use Lost Password
+            <v-icon
+              icon="question-circle"
+              class="ms-1"
+              style="cursor: pointer"
+              @click="toggleYahooDetails"
+              @mouseover="showYahooDetails = true"
+            />
+          </p>
+          <NoticeMessage v-if="showYahooDetails" variant="info">
+            We no longer support logging in with a Yahoo button, but you can log
+            in with your Yahoo email and a Freegle password. Please
+            <a href="#" @click.prevent="forgot">click here</a>
+            to get an email allowing you to log in and set a password.
+          </NoticeMessage>
+        </div>
         <notice-message v-if="socialblocked" variant="warning">
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
@@ -94,9 +101,14 @@
         <div class="divider" />
       </div>
       <div class="signin__section--freegle">
-        <h3 class="header--size5 pb-0">
+        <h3 class="header--size5 pb-0 freegle-account-header">
           <span v-if="signUp"> Create an account on Freegle </span>
-          <span v-else>Continue with your Freegle account</span>
+          <template v-else>
+            <span class="d-none d-md-inline"
+              >Continue with your Freegle account</span
+            >
+            <span class="d-inline d-md-none">Use your Freegle account</span>
+          </template>
         </h3>
         <div v-if="signUp" class="d-flex justify-content-around">
           <b-button
@@ -140,10 +152,6 @@
           />
           <NoticeMessage v-if="referToGoogleButton">
             Please use the <em>Continue with Google</em> button to log in. That
-            way you don't need to remember a password on this site.
-          </NoticeMessage>
-          <NoticeMessage v-if="referToYahooButton">
-            Please use the <em>Continue with Yahoo</em> button to log in. That
             way you don't need to remember a password on this site.
           </NoticeMessage>
           <PasswordEntry
@@ -260,6 +268,7 @@ let bumpTimer = null
 const form = ref(null)
 const loginModal = ref(null)
 const googleLoginButton = ref(null)
+const showYahooDetails = ref(false)
 
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
@@ -287,16 +296,11 @@ const googleDisabled = computed(() => {
   )
 })
 
-const yahooDisabled = computed(() => {
-  // Yahoo currently can't be disabled, because it's redirect auth flow rather than load of a JS toolkit.
-  return false
-})
-
 const socialblocked = computed(() => {
   const ret =
     bump.value &&
     initialisedSocialLogin.value &&
-    (facebookDisabled.value || googleDisabled.value || yahooDisabled.value) &&
+    (facebookDisabled.value || googleDisabled.value) &&
     timerElapsed.value
   return ret
 })
@@ -316,8 +320,11 @@ const referToGoogleButton = computed(() => {
   )
 })
 
-const referToYahooButton = computed(() => {
-  return email.value?.toLowerCase().includes('yahoo')
+const showYahooRetirementMessage = computed(() => {
+  // Show if user enters a Yahoo email address or if they usually log in with Yahoo
+  return (
+    email.value?.toLowerCase().includes('yahoo') || loginType.value === 'Yahoo'
+  )
 })
 
 const fullNameError = computed(() => {
@@ -330,9 +337,7 @@ const formFields = computed(() => {
 
 const emailError = computed(() => {
   return (
-    nativeBump.value &&
-    buttonClicked.value &&
-    !email.value  // Only show error if email is truly empty
+    nativeBump.value && buttonClicked.value && !email.value // Only show error if email is truly empty
   )
 })
 
@@ -494,11 +499,12 @@ function loginNative(e) {
               .then(function () {
                 pleaseShowModal.value = false
               })
-              .catch((err) => {
-                console.error('Failed to save credentials', err)
+              .catch(function (e) {
+                console.log('Failed to store credentials', e)
+                pleaseShowModal.value = false
               })
           } catch (e) {
-            console.log('Failed to save credentials2', e)
+            console.log('Error setting up credential storage', e)
             pleaseShowModal.value = false
           }
         } else {
@@ -506,7 +512,7 @@ function loginNative(e) {
         }
       })
       .catch((e) => {
-        console.log('Login failed', e)
+        console.log('Login error', e)
         if (e instanceof LoginError) {
           // Check if login failed due to email issues
           if (e.status.includes('email') || e.status.includes('Email')) {
@@ -638,37 +644,8 @@ async function handleGoogleCredentialsResponse(response) {
   }
 }
 
-async function loginYahoo() {
-  loginType.value = 'Yahoo'
-
-  if (signUp.value) {
-    await api.bandit.chosen({
-      uid: 'signUpModal',
-      variant: 'yahoo',
-    })
-  }
-
-  // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
-  // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
-  // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
-  nativeLoginError.value = null
-  socialLoginError.value = null
-
-  const url =
-    'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
-    runtimeConfig.public.YAHOO_CLIENTID +
-    '&redirect_uri=' +
-    encodeURIComponent(
-      window.location.protocol +
-        '//' +
-        window.location.hostname +
-        (window.location.port ? ':' + window.location.port : '') +
-        '/yahoologin?returnto=' +
-        route.fullPath
-    ) +
-    '&response_type=code&language=en-us&scope=sdpp-w'
-
-  window.location = url
+function toggleYahooDetails() {
+  showYahooDetails.value = !showYahooDetails.value
 }
 
 function clickShowSignUp(e) {
@@ -824,6 +801,13 @@ watch(formFields, () => {
   buttonClicked.value = false
 })
 
+watch(showYahooRetirementMessage, (newVal) => {
+  // Auto-expand details if Yahoo email or Yahoo login type detected
+  if (newVal) {
+    showYahooDetails.value = true
+  }
+})
+
 watch(
   signUp,
   (newVal) => {
@@ -835,10 +819,6 @@ watch(
       api.bandit.shown({
         uid: 'signUpModal',
         variant: 'google',
-      })
-      api.bandit.shown({
-        uid: 'signUpModal',
-        variant: 'yahoo',
       })
       api.bandit.shown({
         uid: 'signUpModal',
@@ -875,7 +855,6 @@ defineExpose({
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
-$color-yahoo: #6b0094;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -896,11 +875,16 @@ $color-yahoo: #6b0094;
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 315px;
+  min-width: 280px;
+  max-width: 100%;
   border-radius: 3px;
   padding: 0;
   margin: 0 auto 20px;
   color: $color-white;
+
+  @include media-breakpoint-up(md) {
+    min-width: 315px;
+  }
 
   @include media-breakpoint-up(lg) {
     margin: 0 0 20px;
@@ -934,18 +918,12 @@ $color-yahoo: #6b0094;
   width: 100%;
 }
 
-.social-button--yahoo {
-  border: 2px solid $color-yahoo;
-  background-color: $color-yahoo;
-  width: 100%;
-}
-
 .divider__wrapper {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   @include media-breakpoint-up(lg) {
     flex-direction: column;
@@ -987,7 +965,6 @@ $color-yahoo: #6b0094;
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
-$color-yahoo: #6b0094;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -1008,11 +985,16 @@ $color-yahoo: #6b0094;
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 315px;
+  min-width: 280px;
+  max-width: 100%;
   border-radius: 3px;
   padding: 0;
   margin: 0 auto 20px;
   color: $color-white;
+
+  @include media-breakpoint-up(md) {
+    min-width: 315px;
+  }
 
   @include media-breakpoint-up(lg) {
     margin: 0 0 20px;
@@ -1046,18 +1028,12 @@ $color-yahoo: #6b0094;
   width: 100%;
 }
 
-.social-button--yahoo {
-  border: 2px solid $color-yahoo;
-  background-color: $color-yahoo;
-  width: 100%;
-}
-
 .divider__wrapper {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   @include media-breakpoint-up(lg) {
     flex-direction: column;
@@ -1114,5 +1090,37 @@ $color-yahoo: #6b0094;
   margin-top: 0.125rem;
   margin-right: 0.5rem;
   flex-shrink: 0;
+}
+
+/* Hide modal header on mobile */
+:deep(.modal-header) {
+  display: none !important;
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+  }
+}
+
+.signup-info-text {
+  font-size: 0.813rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+}
+
+.freegle-account-header {
+  white-space: nowrap;
+}
+</style>
+
+<style lang="scss">
+// Unscoped styles for modal header visibility
+.verytop .modal-header {
+  display: none !important;
+
+  @media (min-width: 768px) {
+    display: flex !important;
+  }
 }
 </style>

@@ -14,8 +14,7 @@
   </div>
 </template>
 <script>
-import { useStoryStore } from '../stores/stories'
-
+import { useStoryStore } from '~/stores/stories'
 export default {
   setup() {
     const storyStore = useStoryStore()

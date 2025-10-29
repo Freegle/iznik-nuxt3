@@ -3,7 +3,7 @@ module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: 'espree',
-    ecmaVersion: 2022,
+    ecmaVersion: 'latest',
     sourceType: 'module',
   },
   env: {

@@ -36,7 +36,7 @@
   </div>
 </template>
 <script>
-import { useCommentStore } from '../stores/comment'
+import { useCommentStore } from '~/stores/comment'
 import { useMe } from '~/composables/useMe'
 
 export default {

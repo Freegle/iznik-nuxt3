@@ -37,9 +37,9 @@
 </template>
 
 <script>
-import { useLogsStore } from '../stores/logs'
 import { useUserStore } from '../../stores/user'
-import { useMemberStore } from '../stores/member'
+import { useLogsStore } from '~/stores/logs'
+import { useMemberStore } from '~/stores/member'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useOurModal } from '~/composables/useOurModal'
 

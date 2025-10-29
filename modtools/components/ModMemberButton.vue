@@ -34,10 +34,10 @@
   </div>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
-import { useModConfigStore } from '../stores/modconfig'
-import { useSpammerStore } from '../stores/spammer'
-import { useStdmsgStore } from './stores/stdmsg'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useSpammerStore } from '~/stores/spammer'
+import { useStdmsgStore } from '~/stores/stdmsg'
 import { useMe } from '~/composables/useMe'
 
 export default {

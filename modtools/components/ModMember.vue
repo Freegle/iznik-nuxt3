@@ -305,10 +305,10 @@
   </div>
 </template>
 <script>
-import { useChatStore } from '../stores/chat'
-import { useMemberStore } from '../stores/member'
-import { useUserStore } from '../../stores/user'
-import { useModConfigStore } from '../stores/modconfig'
+import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
 
 export default {
