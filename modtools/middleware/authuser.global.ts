@@ -7,12 +7,8 @@ import { useAuthStore } from '~/stores/auth'
 export default defineNuxtRouteMiddleware((to, from) => {
   // console.log('authuser.global.ts',to.path)
   const authStore = useAuthStore()
-  if (
-    to.path === '/login' ||
-    to.path === '/forgot' ||
-    to.path === '/yahoologin/'
-  ) {
-    // Accessing login, forgot and yahoologin pages always OK
+  if (to.path === '/login' || to.path === '/forgot') {
+    // Accessing login and forgot pages always OK
     return
   }
   const me = authStore.user

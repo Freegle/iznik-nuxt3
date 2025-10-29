@@ -91,7 +91,6 @@ export default defineNuxtConfig({
     '/mobile': { prerender: true },
     '/privacy': { prerender: true },
     '/unsubscribe': { prerender: true },
-    '/yahoologin': { prerender: true },
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
     '/birthday/**': { ssr: false },
@@ -145,7 +144,9 @@ export default defineNuxtConfig({
       routes: ['/404.html', '/sitemap.xml'],
 
       // Don't prerender the messages - too many.
-      ignore: ['/message/'],
+      // Also ignore _nuxt and netlify asset paths to avoid 404 errors during prerendering
+      // when the CDN assets don't exist yet.
+      ignore: ['/message/', '/_nuxt/**', '/netlify/**'],
       crawlLinks: true,
     },
 
@@ -339,7 +340,7 @@ export default defineNuxtConfig({
         registerType: 'autoUpdate',
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        }
+        },
       }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
