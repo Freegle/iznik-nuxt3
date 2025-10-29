@@ -91,7 +91,6 @@ export default defineNuxtConfig({
     '/mobile': { prerender: true },
     '/privacy': { prerender: true },
     '/unsubscribe': { prerender: true },
-    '/yahoologin': { prerender: true },
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
     '/birthday/**': { ssr: false },
@@ -339,7 +338,7 @@ export default defineNuxtConfig({
         registerType: 'autoUpdate',
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        }
+        },
       }),
       // Make Lint errors cause build failures.
       eslintPlugin(),
