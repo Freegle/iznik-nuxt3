@@ -67,19 +67,24 @@
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
         />
-        <b-button
-          class="social-button social-button--yahoo"
-          :disabled="yahooDisabled"
-          @click="loginYahoo"
-        >
-          <b-img
-            src="/signinbuttons/yahoo-logo.svg"
-            class="social-button__image"
-          />
-          <span class="p-2 text--medium font-weight-bold"
-            >Continue with Yahoo</span
-          >
-        </b-button>
+        <div class="yahoo-retirement-notice mb-3">
+          <p class="text-muted small mb-1">
+            Used to login with Yahoo? Use Lost Password
+            <v-icon
+              icon="question-circle"
+              class="ms-1"
+              style="cursor: pointer"
+              @click="toggleYahooDetails"
+              @mouseover="showYahooDetails = true"
+            />
+          </p>
+          <NoticeMessage v-if="showYahooDetails" variant="info">
+            We no longer support logging in with a Yahoo button, but you can log
+            in with your Yahoo email and a Freegle password. Please
+            <a href="#" @click.prevent="forgot">click here</a>
+            to get an email allowing you to log in and set a password.
+          </NoticeMessage>
+        </div>
         <notice-message v-if="socialblocked" variant="warning">
           Social log in blocked - check your privacy settings, including any ad
           blockers such as Adblock Plus.
@@ -145,10 +150,6 @@
           />
           <NoticeMessage v-if="referToGoogleButton">
             Please use the <em>Continue with Google</em> button to log in. That
-            way you don't need to remember a password on this site.
-          </NoticeMessage>
-          <NoticeMessage v-if="referToYahooButton">
-            Please use the <em>Continue with Yahoo</em> button to log in. That
             way you don't need to remember a password on this site.
           </NoticeMessage>
           <PasswordEntry
@@ -265,6 +266,7 @@ let bumpTimer = null
 const form = ref(null)
 const loginModal = ref(null)
 const googleLoginButton = ref(null)
+const showYahooDetails = ref(false)
 
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
@@ -290,16 +292,11 @@ const googleDisabled = computed(() => {
   )
 })
 
-const yahooDisabled = computed(() => {
-  // Yahoo currently can't be disabled, because it's redirect auth flow rather than load of a JS toolkit.
-  return false
-})
-
 const socialblocked = computed(() => {
   const ret =
     bump.value &&
     initialisedSocialLogin.value &&
-    (facebookDisabled.value || googleDisabled.value || yahooDisabled.value) &&
+    (facebookDisabled.value || googleDisabled.value) &&
     timerElapsed.value
   return ret
 })
@@ -319,8 +316,11 @@ const referToGoogleButton = computed(() => {
   )
 })
 
-const referToYahooButton = computed(() => {
-  return email.value?.toLowerCase().includes('yahoo')
+const showYahooRetirementMessage = computed(() => {
+  // Show if user enters a Yahoo email address or if they usually log in with Yahoo
+  return (
+    email.value?.toLowerCase().includes('yahoo') || loginType.value === 'Yahoo'
+  )
 })
 
 const fullNameError = computed(() => {
@@ -640,37 +640,8 @@ async function handleGoogleCredentialsResponse(response) {
   }
 }
 
-async function loginYahoo() {
-  loginType.value = 'Yahoo'
-
-  if (signUp.value) {
-    await api.bandit.chosen({
-      uid: 'signUpModal',
-      variant: 'yahoo',
-    })
-  }
-
-  // Sadly Yahoo doesn't support a Javascript-only OAuth flow, so far as I can tell.  So what we do is
-  // redirect to Yahoo, which returns back to us with a code parameter, which we then pass to the server
-  // to complete the signin.  This replaces the old flow which stopped working in Jan 2020.
-  nativeLoginError.value = null
-  socialLoginError.value = null
-
-  const url =
-    'https://api.login.yahoo.com/oauth2/request_auth?client_id=' +
-    runtimeConfig.public.YAHOO_CLIENTID +
-    '&redirect_uri=' +
-    encodeURIComponent(
-      window.location.protocol +
-        '//' +
-        window.location.hostname +
-        (window.location.port ? ':' + window.location.port : '') +
-        '/yahoologin?returnto=' +
-        route.fullPath
-    ) +
-    '&response_type=code&language=en-us&scope=sdpp-w'
-
-  window.location = url
+function toggleYahooDetails() {
+  showYahooDetails.value = !showYahooDetails.value
 }
 
 function clickShowSignUp(e) {
@@ -826,6 +797,13 @@ watch(formFields, () => {
   buttonClicked.value = false
 })
 
+watch(showYahooRetirementMessage, (newVal) => {
+  // Auto-expand details if Yahoo email or Yahoo login type detected
+  if (newVal) {
+    showYahooDetails.value = true
+  }
+})
+
 watch(
   signUp,
   (newVal) => {
@@ -837,10 +815,6 @@ watch(
       api.bandit.shown({
         uid: 'signUpModal',
         variant: 'google',
-      })
-      api.bandit.shown({
-        uid: 'signUpModal',
-        variant: 'yahoo',
       })
       api.bandit.shown({
         uid: 'signUpModal',
@@ -877,7 +851,6 @@ defineExpose({
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
-$color-yahoo: #6b0094;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -938,12 +911,6 @@ $color-yahoo: #6b0094;
 }
 
 :deep(.social-button--google > div) {
-  width: 100%;
-}
-
-.social-button--yahoo {
-  border: 2px solid $color-yahoo;
-  background-color: $color-yahoo;
   width: 100%;
 }
 
@@ -994,7 +961,6 @@ $color-yahoo: #6b0094;
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
-$color-yahoo: #6b0094;
 
 .signin__section--social {
   flex: 0 1 auto;
@@ -1055,12 +1021,6 @@ $color-yahoo: #6b0094;
 }
 
 :deep(.social-button--google > div) {
-  width: 100%;
-}
-
-.social-button--yahoo {
-  border: 2px solid $color-yahoo;
-  background-color: $color-yahoo;
   width: 100%;
 }
 
