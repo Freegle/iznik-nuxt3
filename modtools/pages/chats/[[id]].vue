@@ -86,7 +86,7 @@
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 // import { pluralise } from '../composables/usePluralise'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '~/stores/chat'
 // import { setupChat } from '../composables/useChat'
 import { useRouter } from '#imports'
