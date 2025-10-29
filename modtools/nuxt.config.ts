@@ -35,6 +35,11 @@ export default defineNuxtConfig({
         },
       },
     },
+    build: {
+      rollupOptions: {
+        external: ['add-to-calendar-button'],
+      },
+    },
   },
   postcss: {
     // https://answers.netlify.com/t/javascript-heap-out-of-memory-when-trying-to-build-a-nuxt-app/93138/13
