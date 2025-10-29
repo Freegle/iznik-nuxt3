@@ -1,6 +1,6 @@
 {
   // https://v3.nuxtjs.org/concepts/typescript
-  "extends": "./modtools/.nuxt/tsconfig.json",
+  "extends": "./.nuxt/tsconfig.json",
     "compilerOptions": {
       "noImplicitAny": false,
     }
