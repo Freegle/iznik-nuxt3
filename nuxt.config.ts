@@ -54,10 +54,13 @@ export default defineNuxtConfig({
   spaLoadingTemplate: false,
 
   // This makes Netlify serve assets from the perm link for the build, which avoids missing chunk problems when
-  // a new deploy happens.  See https://github.com/nuxt/nuxt/issues/20950.
+  // a new deploy happens. See https://github.com/nuxt/nuxt/issues/20950.
   //
-  // We still want to serve them below our domain, though, otherwise some security software gets tetchy.  So we
+  // We still want to serve them below our domain, though, otherwise some security software gets tetchy. So we
   // do that and then the _redirects file will proxy it to the correct location.
+  //
+  // Note: This works now that we've disabled experimental.appManifest (see below), which was causing
+  // 404 errors during prerendering when the crawler tried to access build metadata from the CDN.
   $production: {
     app: {
       cdnURL: process.env.DEPLOY_URL
@@ -144,9 +147,12 @@ export default defineNuxtConfig({
       routes: ['/404.html', '/sitemap.xml'],
 
       // Don't prerender the messages - too many.
-      // Also ignore _nuxt and netlify asset paths to avoid 404 errors during prerendering
-      // when the CDN assets don't exist yet.
-      ignore: ['/message/', '/_nuxt/**', '/netlify/**'],
+      // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
+      ignore: [
+        '/message/',
+        '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
+        '/netlify/**', // CDN URLs for Netlify permanent links
+      ],
       crawlLinks: true,
     },
 
@@ -171,6 +177,12 @@ export default defineNuxtConfig({
     // Payload extraction breaks SSR with routeRules - see https://github.com/nuxt/nuxt/issues/22068
     renderJsonPayloads: false,
     payloadExtraction: false,
+
+    // Disable app manifest to prevent 404 errors during prerendering
+    // The app manifest feature (introduced in Nuxt 3.8) creates /_nuxt/builds/meta/<buildId>.json files
+    // During prerendering with cdnURL configured, the crawler tries to access these from the CDN
+    // path before they exist, causing 404 errors. See: https://github.com/nuxt/nuxt/discussions/27624
+    appManifest: false,
   },
 
   webpack: {
