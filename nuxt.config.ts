@@ -1,5 +1,5 @@
 // DO NOT COPY INTO MASTER
-// import { VitePWA } from 'vite-plugin-pwa' // Disabled - causes modtools build issues
+import { VitePWA } from 'vite-plugin-pwa'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { splitVendorChunkPlugin } from 'vite'
 import config from './config'
@@ -349,19 +349,9 @@ export default defineNuxtConfig({
     },
     plugins: [
       splitVendorChunkPlugin(),
-      // VitePWA disabled - causes issues with modtools build processing root files
-      // VitePWA({
-      //   registerType: 'autoUpdate',
-      //   workbox: {
-      //     maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-      //   },
-      //   manifest: false,
-      //   injectManifest: {
-      //     rollupFormat: 'iife',
-      //   },
-      //   buildBase: '/',
-      //   typescript: false,
-      // }),
+      VitePWA({
+        disable: true, // Disable PWA to avoid build issues
+      }),
       // Make Lint errors cause build failures.
       // eslintPlugin(),
       sentryVitePlugin({
