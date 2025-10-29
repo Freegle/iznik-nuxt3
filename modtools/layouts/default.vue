@@ -333,7 +333,11 @@ export default {
     // If not logged in then show loginModal
     const me = this.authStore.user
     if (!me || !me.id) {
-      this.$refs.loginModal.show()
+      // Wait for next tick to ensure LoginModal is rendered before accessing ref
+      await this.$nextTick()
+      if (this.$refs.loginModal) {
+        this.$refs.loginModal.show()
+      }
       return
     }
 
@@ -374,9 +378,12 @@ export default {
       // Go to the landing page.
       this.$router.push('/')
     },
-    requestLogin() {
+    async requestLogin() {
       console.log('MODTOOLS.VUE requestLogin')
-      this.$refs.loginModal.show()
+      await this.$nextTick()
+      if (this.$refs.loginModal) {
+        this.$refs.loginModal.show()
+      }
     },
     discourse(e) {
       window.open('https://discourse.ilovefreegle.org/')

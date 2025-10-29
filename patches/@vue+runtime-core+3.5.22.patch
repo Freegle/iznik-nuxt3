@@ -1,8 +1,8 @@
 diff --git a/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js b/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
-index ec24dbd..77618e6 100644
+index 6325755..79f57b5 100644
 --- a/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
 +++ b/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
-@@ -5923,6 +5923,10 @@ function baseCreateRenderer(options, createHydrationFns) {
+@@ -6012,6 +6012,10 @@ function baseCreateRenderer(options, createHydrationFns) {
      hostRemove(end);
    };
    const unmountComponent = (instance, parentSuspense, doRemove) => {

@@ -6,7 +6,7 @@
   </b-form-select>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 
 export default {
   props: {

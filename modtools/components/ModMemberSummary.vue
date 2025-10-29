@@ -85,7 +85,7 @@
 <script>
 import { pluralise } from '../composables/usePluralise'
 
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 
 export default {
   props: {

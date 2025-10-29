@@ -79,8 +79,8 @@
   </div>
 </template>
 <script>
-import { useModConfigStore } from '../stores/modconfig'
-import { useStdmsgStore } from '../stores/stdmsg'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useStdmsgStore } from '~/stores/stdmsg'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

@@ -105,7 +105,7 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import htmlEditButton from 'quill-html-edit-button'
 
-import { useAlertStore } from './stores/alert'
+import { useAlertStore } from '~/stores/alert'
 import ModAlertHistory from './ModAlertHistory'
 
 /* let VueEditor, htmlEditButton

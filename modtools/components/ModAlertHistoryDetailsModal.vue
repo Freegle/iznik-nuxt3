@@ -20,7 +20,7 @@
   </div>
 </template>
 <script>
-import { useAlertStore } from './stores/alert'
+import { useAlertStore } from '~/stores/alert'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

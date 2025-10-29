@@ -47,8 +47,8 @@
   </div>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
-import { useUserStore } from '../stores/user'
+import { useMemberStore } from '~/stores/member'
+import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

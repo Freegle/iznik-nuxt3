@@ -72,7 +72,7 @@
 </template>
 <script>
 import { useAuthStore } from '../../stores/auth'
-import { useSpammerStore } from '../stores/spammer'
+import { useSpammerStore } from '~/stores/spammer'
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {

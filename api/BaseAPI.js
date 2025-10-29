@@ -2,6 +2,15 @@ import * as Sentry from '@sentry/browser'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
+import {
+  APIError,
+  MaintenanceError,
+  LoginError,
+  SignUpError,
+} from './APIErrors'
+
+// Re-export the error classes for backward compatibility
+export { APIError, MaintenanceError, LoginError, SignUpError }
 
 let requestId = 0
 
@@ -11,33 +20,6 @@ let requestId = 0
 //
 // Note that $fetch and useFetch cause problems on Node v18, so we don't use them.
 const ourFetch = fetchRetry(fetch)
-export class APIError extends Error {
-  constructor({ request, response }, message) {
-    super(message)
-    Object.assign(this, { request, response })
-  }
-}
-
-export class MaintenanceError extends Error {
-  constructor({ request, response }, message) {
-    super(message)
-    Object.assign(this, { request, response })
-  }
-}
-
-export class LoginError extends Error {
-  constructor(ret, status) {
-    super(status)
-    Object.assign(this, { ret, status })
-  }
-}
-
-export class SignUpError extends Error {
-  constructor(ret, status) {
-    super(status)
-    Object.assign(this, { ret, status })
-  }
-}
 
 export default class BaseAPI {
   constructor(config) {

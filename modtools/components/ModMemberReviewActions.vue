@@ -100,7 +100,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 
 export default {
   props: {

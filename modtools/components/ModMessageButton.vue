@@ -48,7 +48,7 @@
 // SEE WORK EXPLANATION IN useModMessages.js
 
 import { useMessageStore } from '../../stores/message'
-import { useStdmsgStore } from '../stores/stdmsg'
+import { useStdmsgStore } from '~/stores/stdmsg'
 
 export default {
   props: {

@@ -199,7 +199,7 @@
 <script>
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
-import { useAdminsStore } from '../stores/admins'
+import { useAdminsStore } from '~/stores/admins'
 import { useModGroupStore } from '@/stores/modgroup'
 
 defineRule('required', required)

@@ -180,8 +180,8 @@
   </div>
 </template>
 <script>
-import { useAdminsStore } from '../stores/admins'
-import { useUserStore } from '../stores/user'
+import { useAdminsStore } from '~/stores/admins'
+import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
 
 export default {

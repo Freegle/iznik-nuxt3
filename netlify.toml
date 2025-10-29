@@ -1,3 +1,7 @@
+[build.environment]
+NODE_VERSION = "22"
+NPM_FLAGS = "--legacy-peer-deps"
+
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 [[redirects]]
 from = "/api/*"
