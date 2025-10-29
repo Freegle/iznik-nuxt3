@@ -350,17 +350,7 @@ export default defineNuxtConfig({
     plugins: [
       splitVendorChunkPlugin(),
       VitePWA({
-        registerType: 'autoUpdate',
-        workbox: {
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-        },
-        manifest: false,
-        injectManifest: {
-          rollupFormat: 'iife',
-        },
-        buildBase: '/',
-        // Disable type checking to avoid tsconfig resolution issues during build
-        typescript: false,
+        disable: true, // Disable PWA to avoid build issues
       }),
       // Make Lint errors cause build failures.
       // eslintPlugin(),
