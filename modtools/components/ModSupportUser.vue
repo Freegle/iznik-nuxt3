@@ -523,8 +523,8 @@
 </template>
 
 <script>
-import { useUserStore } from '../../stores/user'
-import ExternalLink from '../../components/ExternalLink'
+import { useUserStore } from '~/stores/user'
+import ExternalLink from '~/components/ExternalLink'
 import { useMemberStore } from '~/stores/member'
 
 const SHOW = 3

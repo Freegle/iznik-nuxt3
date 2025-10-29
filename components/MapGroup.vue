@@ -50,9 +50,9 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useGroupStore } from '../stores/group'
 import ExternalLink from './ExternalLink'
 import GroupProfileImage from './GroupProfileImage'
+import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({

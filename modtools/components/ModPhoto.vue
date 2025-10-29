@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { useMessageStore } from '../../stores/message'
+import { useMessageStore } from '~/stores/message'
 const PostPhoto = defineAsyncComponent(() =>
   import('../../components/PostPhoto')
 )

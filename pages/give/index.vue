@@ -101,7 +101,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
+import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'

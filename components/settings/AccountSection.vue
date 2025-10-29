@@ -100,8 +100,8 @@
 
 <script setup>
 import { ref, computed, defineEmits, watch } from 'vue'
-import { useAuthStore } from '../../stores/auth'
-import { useMe } from '../../composables/useMe'
+import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 import EmailOwn from '~/components/EmailOwn'
 import EmailValidator from '~/components/EmailValidator'
 import PostCode from '~/components/PostCode'

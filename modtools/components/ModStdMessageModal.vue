@@ -140,7 +140,7 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { setupKeywords } from '../composables/useKeywords'
+import { setupKeywords } from '~/composables/useKeywords'
 import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'

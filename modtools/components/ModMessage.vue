@@ -609,11 +609,11 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 
-import { useLocationStore } from '../../stores/location'
-import { useMessageStore } from '../../stores/message'
-import { useUserStore } from '../../stores/user'
+import { useLocationStore } from '~/stores/location'
+import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '~/stores/user'
 
-import { setupKeywords } from '../composables/useKeywords'
+import { setupKeywords } from '~/composables/useKeywords'
 import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useMiscStore } from '~/stores/misc'

@@ -66,7 +66,7 @@
   </div>
 </template>
 <script>
-import { setupModMembers } from '../composables/useModMembers'
+import { setupModMembers } from '~/composables/useModMembers'
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 

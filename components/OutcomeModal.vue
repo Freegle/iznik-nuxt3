@@ -200,9 +200,9 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useMessageStore } from '../stores/message'
 import OutcomeBy from './OutcomeBy'
 import SpinButton from './SpinButton'
+import { useMessageStore } from '~/stores/message'
 import NoticeMessage from '~/components/NoticeMessage'
 import { useOurModal } from '~/composables/useOurModal'
 

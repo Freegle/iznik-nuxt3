@@ -169,9 +169,9 @@
 <script setup>
 import pluralize from 'pluralize'
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useUserStore } from '../stores/user'
-import { milesAway } from '../composables/useDistance'
-import { useMessageStore } from '../stores/message'
+import { useUserStore } from '~/stores/user'
+import { milesAway } from '~/composables/useDistance'
+import { useMessageStore } from '~/stores/message'
 import NoticeMessage from '~/components/NoticeMessage'
 import { twem } from '~/composables/useTwem'
 import { useAuthStore } from '~/stores/auth'

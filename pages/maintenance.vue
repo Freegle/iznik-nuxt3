@@ -32,7 +32,7 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import NoticeMessage from '../components/NoticeMessage'
+import NoticeMessage from '~/components/NoticeMessage'
 import { useHead, useRuntimeConfig } from '#imports'
 import { buildHead } from '~/composables/useBuildHead'
 import ExternalLink from '~/components/ExternalLink'

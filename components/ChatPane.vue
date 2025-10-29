@@ -65,10 +65,10 @@
   </client-only>
 </template>
 <script setup>
-import { navBarHidden } from '../composables/useNavbar'
 import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
 import ChatTypingIndicator from './ChatTypingIndicator'
+import { navBarHidden } from '~/composables/useNavbar'
 import { useUserStore } from '~/stores/user'
 import { useChatStore } from '~/stores/chat'
 import { useMiscStore } from '~/stores/misc'

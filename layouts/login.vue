@@ -18,8 +18,8 @@
   </div>
 </template>
 <script setup>
-import { useAuthStore } from '../stores/auth'
-import { useMiscStore } from '../stores/misc'
+import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref, computed, watch } from '#imports'
 const GoogleOneTap = defineAsyncComponent(() =>

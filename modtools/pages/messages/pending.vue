@@ -62,7 +62,7 @@
 
 <script>
 import dayjs from 'dayjs'
-import { setupModMessages } from '../../composables/useModMessages'
+import { setupModMessages } from '~/composables/useModMessages'
 import { useAuthStore } from '@/stores/auth'
 import { useMessageStore } from '@/stores/message'
 import { useMiscStore } from '@/stores/misc'

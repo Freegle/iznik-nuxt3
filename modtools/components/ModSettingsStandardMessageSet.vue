@@ -69,7 +69,7 @@
 </template>
 <script>
 import draggable from 'vuedraggable'
-import { copyStdMsgs } from '../composables/useStdMsgs'
+import { copyStdMsgs } from '~/composables/useStdMsgs'
 import { useModConfigStore } from '~/stores/modconfig'
 
 export default {

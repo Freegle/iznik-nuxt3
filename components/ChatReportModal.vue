@@ -28,8 +28,8 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useChatStore } from '../stores/chat'
 import GroupSelect from './GroupSelect'
+import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({

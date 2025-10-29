@@ -11,7 +11,7 @@ import {
   dateshort,
   weekdayshort,
   dateonlyNoYear,
-} from '../composables/useTimeFormat'
+} from '~/composables/useTimeFormat'
 
 const props = defineProps({
   value: {

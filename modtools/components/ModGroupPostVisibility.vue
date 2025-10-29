@@ -91,7 +91,7 @@
 import turfbuffer from 'turf-buffer'
 import Wkt from 'wicket'
 import { LGeoJson } from '@vue-leaflet/vue-leaflet'
-import { attribution, osmtile } from '../composables/useMap'
+import { attribution, osmtile } from '~/composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 
 const modGroupStore = useModGroupStore()

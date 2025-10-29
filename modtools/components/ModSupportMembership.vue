@@ -106,7 +106,7 @@
 </template>
 <script>
 // membership.id is groupid and membership.membershipid is membershipid
-import { useUserStore } from '../../stores/user'
+import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModMe } from '~/composables/useModMe'
 

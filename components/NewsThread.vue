@@ -267,9 +267,9 @@ import {
   onMounted,
   nextTick,
 } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import NewsReplies from '~/components/NewsReplies'
 import { untwem } from '~/composables/useTwem'
 import { useAuthStore } from '~/stores/auth'

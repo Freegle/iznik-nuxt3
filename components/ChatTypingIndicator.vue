@@ -22,8 +22,8 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount } from 'vue'
 import { TYPING_TIME_INVERVAL } from '../constants'
-import { useMiscStore } from '../stores/misc'
-import { useChatStore } from '../stores/chat'
+import { useMiscStore } from '~/stores/misc'
+import { useChatStore } from '~/stores/chat'
 import ProfileImage from '~/components/ProfileImage'
 
 const chatStore = useChatStore()

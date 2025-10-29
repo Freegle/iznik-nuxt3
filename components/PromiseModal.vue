@@ -124,8 +124,8 @@
 <script setup>
 import dayjs from 'dayjs'
 import { ref, computed, watch, nextTick, defineAsyncComponent } from 'vue'
-import { useTrystStore } from '../stores/tryst'
-import { useMessageStore } from '../stores/message'
+import { useTrystStore } from '~/stores/tryst'
+import { useMessageStore } from '~/stores/message'
 import SpinButton from './SpinButton'
 import { useOurModal } from '~/composables/useOurModal'
 import { useAuthStore } from '~/stores/auth'

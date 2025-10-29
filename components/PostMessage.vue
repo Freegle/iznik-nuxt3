@@ -92,8 +92,8 @@
   </div>
 </template>
 <script setup>
-import { uid } from '../composables/useId'
-import { useComposeStore } from '../stores/compose'
+import { uid } from '~/composables/useId'
+import { useComposeStore } from '~/stores/compose'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import { ref, watch } from '#imports'
 import { useMiscStore } from '~/stores/misc'

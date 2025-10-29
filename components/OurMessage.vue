@@ -58,7 +58,7 @@
 
 <script setup>
 import { ref, computed, defineAsyncComponent, nextTick, onMounted } from 'vue'
-import { useMessageStore } from '../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import MessageExpanded from '~/components/MessageExpanded'

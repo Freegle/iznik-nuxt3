@@ -167,9 +167,9 @@
 <script setup>
 import { defineAsyncComponent, ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
-import { useMiscStore } from '../stores/misc'
-import { useAuthStore } from '../stores/auth'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
+import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import { useMe } from '~/composables/useMe'
 
 const MicroVolunteeringFacebook = defineAsyncComponent(() =>

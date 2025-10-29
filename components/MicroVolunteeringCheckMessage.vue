@@ -78,11 +78,11 @@
 </template>
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
-import { useMessageStore } from '../stores/message'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import SpinButton from './SpinButton'
 import MessagePhotosModal from './MessagePhotosModal'
 import NoticeMessage from './NoticeMessage'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
+import { useMessageStore } from '~/stores/message'
 
 const MessageExpanded = defineAsyncComponent(() =>
   import('~/components/MessageExpanded')

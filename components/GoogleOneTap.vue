@@ -12,7 +12,7 @@
 // eslint-disable-next-line camelcase
 import jwt_decode from 'jwt-decode'
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import { useRuntimeConfig } from '#app'
 
 const emit = defineEmits(['complete', 'loggedin'])

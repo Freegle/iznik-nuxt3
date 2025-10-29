@@ -39,9 +39,9 @@
   </div>
 </template>
 <script setup>
-import { useChatMessageBase } from '../composables/useChat'
-import { useChatStore } from '../stores/chat'
-import { useMiscStore } from '../stores/misc'
+import { useChatMessageBase } from '~/composables/useChat'
+import { useChatStore } from '~/stores/chat'
+import { useMiscStore } from '~/stores/misc'
 
 const props = defineProps({
   chatid: {

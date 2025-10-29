@@ -47,7 +47,7 @@
 <script>
 // SEE WORK EXPLANATION IN useModMessages.js
 
-import { useMessageStore } from '../../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { useModMe } from '~/composables/useModMe'
 

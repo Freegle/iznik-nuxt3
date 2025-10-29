@@ -42,8 +42,8 @@
   </div>
 </template>
 <script setup>
-import { useChatMessageBase } from '../composables/useChat'
-import { useMiscStore } from '../stores/misc' // MT..
+import { useChatMessageBase } from '~/composables/useChat'
+import { useMiscStore } from '~/stores/misc' // MT..
 const miscStore = useMiscStore()
 const isMT = ref(miscStore.modtools)
 

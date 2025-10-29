@@ -47,9 +47,9 @@
   </div>
 </template>
 <script setup>
-import { uid } from '../composables/useId'
-import { useComposeStore } from '../stores/compose'
-import { useMessageStore } from '../stores/message'
+import { uid } from '~/composables/useId'
+import { useComposeStore } from '~/stores/compose'
+import { useMessageStore } from '~/stores/message'
 import NoticeMessage from './NoticeMessage'
 import { computed } from '#imports'
 import { useMe } from '~/composables/useMe'

@@ -40,7 +40,7 @@
   </div>
 </template>
 <script>
-import { setupModMembers } from '../../composables/useModMembers'
+import { setupModMembers } from '~/composables/useModMembers'
 import { useMemberStore } from '~/stores/member'
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'

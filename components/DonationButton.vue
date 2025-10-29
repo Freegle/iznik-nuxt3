@@ -24,7 +24,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { loadScript } from 'vue-plugin-load-script'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import { useNuxtApp } from '#app'
 
 const props = defineProps({

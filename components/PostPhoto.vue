@@ -64,7 +64,7 @@
 </template>
 <script setup>
 import { ref, computed, watch, defineAsyncComponent } from 'vue'
-import { useImageStore } from '../stores/image'
+import { useImageStore } from '~/stores/image'
 import OurUploadedImage from '~/components/OurUploadedImage.vue'
 import { useMiscStore } from '~/stores/misc'
 

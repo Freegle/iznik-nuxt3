@@ -21,7 +21,7 @@
 </template>
 <script setup>
 import { ref, watch } from 'vue'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import StartEndDate from '~/components/StartEndDate'
 
 const props = defineProps({

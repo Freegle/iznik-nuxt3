@@ -106,7 +106,7 @@
   </div>
 </template>
 <script>
-import { useSystemConfigStore } from '../stores/systemconfig'
+import { useSystemConfigStore } from '~/stores/systemconfig'
 
 export default {
   name: 'ModSupportWorryWords',

@@ -127,7 +127,7 @@
 import {
   fetchReferencedMessage,
   useChatMessageBase,
-} from '../composables/useChat'
+} from '~/composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
 import { useMessageStore } from '~/stores/message'
 

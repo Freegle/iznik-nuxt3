@@ -38,7 +38,7 @@
 <script setup>
 import { computed } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 import { useNuxtApp } from '#app'
 
 const props = defineProps({

@@ -341,9 +341,9 @@ import {
   onMounted,
   watch,
 } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
-import { useMiscStore } from '../stores/misc'
 import SpinButton from './SpinButton'
+import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useMiscStore } from '~/stores/misc'
 import { twem, untwem } from '~/composables/useTwem'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import NewsHighlight from '~/components/NewsHighlight'

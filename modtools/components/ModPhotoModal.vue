@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { useMessageStore } from '../../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

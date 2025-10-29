@@ -22,8 +22,8 @@
   </client-only>
 </template>
 <script setup>
-import { useStoryStore } from '../../stores/stories'
-import { buildHead } from '../../composables/useBuildHead'
+import { useStoryStore } from '~/stores/stories'
+import { buildHead } from '~/composables/useBuildHead'
 import { useRoute } from '#imports'
 
 const LIMIT = 10000

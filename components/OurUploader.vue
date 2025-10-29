@@ -3,31 +3,31 @@
     <div class="wrapper" @dragenter="openModal">
       <div class="d-flex flex-column justify-content-around">
         <v-icon
-            v-if="!busy"
-            :size="iconSize"
-            icon="camera"
-            class="camera text-faded"
+          v-if="!busy"
+          :size="iconSize"
+          icon="camera"
+          class="camera text-faded"
         />
-        <b-img v-if="busy" src="/loader.gif" class="fit-cover fadein loader"/>
+        <b-img v-if="busy" src="/loader.gif" class="fit-cover fadein loader" />
         <div
-            v-else-if="multiple || !modelValue.length"
-            class="d-flex justify-content-around"
+          v-else-if="multiple || !modelValue.length"
+          class="d-flex justify-content-around"
         >
           <b-button
-              :id="uploaderUid"
-              variant="primary"
-              :size="buttonSize"
-              @click="openModal"
+            :id="uploaderUid"
+            variant="primary"
+            :size="buttonSize"
+            @click="openModal"
           >
             {{ label }}
           </b-button>
         </div>
       </div>
       <DashboardModal
-          ref="dashboard"
-          :uppy="uppy"
-          :open="modalOpen"
-          :props="{
+        ref="dashboard"
+        :uppy="uppy"
+        :open="modalOpen"
+        :props="{
           onRequestCloseModal: closeModal,
           waitForThumbnailsBeforeUpload: true,
           closeAfterFinish: true,
@@ -49,7 +49,7 @@ import Compressor from '@uppy/compressor'
 import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
 import * as Sentry from '@sentry/browser'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
 import { useMiscStore } from '~/stores/misc'
@@ -82,8 +82,8 @@ try {
       console.log('Polyfill-force')
       await import('@formatjs/intl-pluralrules/polyfill-force')
       console.log(
-          'Polyfill-locale',
-          '@formatjs/intl-pluralrules/locale-data/en'
+        'Polyfill-locale',
+        '@formatjs/intl-pluralrules/locale-data/en'
       )
       await import('@formatjs/intl-pluralrules/locale-data/en')
     }
@@ -143,14 +143,14 @@ const modalOpen = ref(props.startOpen)
 const buttonSize = computed(() => (miscStore.breakpoint === 'xs' ? 'xs' : 'md'))
 const iconSize = computed(() => (miscStore.breakpoint === 'xs' ? '4x' : '6x'))
 
-function openModal () {
+function openModal() {
   const DashboardModal = uppy.getPlugin('DashboardModal')
   if (DashboardModal) {
     DashboardModal.openModal()
   }
 }
 
-function closeModal () {
+function closeModal() {
   const DashboardModal = uppy.getPlugin('DashboardModal')
   if (DashboardModal) {
     DashboardModal.closeModal()
@@ -189,11 +189,11 @@ let uppyTimer = null
 
 onMounted(() => {
   console.log(
-      'Uploader mounted',
-      '#' + uploaderUid.value,
-      dashboard.value,
-      props.multiple,
-      props.startOpen
+    'Uploader mounted',
+    '#' + uploaderUid.value,
+    dashboard.value,
+    props.multiple,
+    props.startOpen
   )
   uppy = new Uppy({
     autoProceed: true,
@@ -211,11 +211,11 @@ onMounted(() => {
       maxNumberOfFiles: props.multiple ? 10 : 1,
     },
   })
-      .use(Tus, {
-        endpoint: runtimeConfig.public.TUS_UPLOADER,
-        uploadDataDuringCreation: true,
-      })
-      .use(Compressor)
+    .use(Tus, {
+      endpoint: runtimeConfig.public.TUS_UPLOADER,
+      uploadDataDuringCreation: true,
+    })
+    .use(Compressor)
   uppy.on('file-added', (file) => {
     console.log('Added file', file)
   })
@@ -237,10 +237,10 @@ onMounted(() => {
     // file: { id, name, type, ... }
     // progress: { uploader, bytesUploaded, bytesTotal }
     console.log(
-        'Upload progress',
-        file.id,
-        progress.bytesUploaded,
-        progress.bytesTotal
+      'Upload progress',
+      file.id,
+      progress.bytesUploaded,
+      progress.bytesTotal
     )
   })
   uppy.on('upload-pause', (file, isPaused) => {
@@ -308,7 +308,7 @@ onBeforeUnmount(() => {
   }
 })
 
-async function uploadSuccess (result) {
+async function uploadSuccess(result) {
   console.log('Upload success', result)
   busy.value = true
 

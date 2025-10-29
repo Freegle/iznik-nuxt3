@@ -239,15 +239,15 @@
 </template>
 <script setup>
 import { ref, defineAsyncComponent } from 'vue'
-import { useTrystStore } from '../stores/tryst'
-import { fetchOurOffers } from '../composables/useThrottle'
-import { useChatStore } from '../stores/chat'
+import DateFormatted from './DateFormatted'
+import { useTrystStore } from '~/stores/tryst'
+import { fetchOurOffers } from '~/composables/useThrottle'
+import { useChatStore } from '~/stores/chat'
 import {
   fetchReferencedMessage,
   useChatMessageBase,
-} from '../composables/useChat'
-import { useMessageStore } from '../stores/message'
-import DateFormatted from './DateFormatted'
+} from '~/composables/useChat'
+import { useMessageStore } from '~/stores/message'
 import AddToCalendar from '~/components/AddToCalendar'
 import ProfileImage from '~/components/ProfileImage'
 

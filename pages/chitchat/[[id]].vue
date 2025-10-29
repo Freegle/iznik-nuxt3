@@ -147,11 +147,11 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
-import { useMiscStore } from '../../stores/misc'
-import { useNewsfeedStore } from '../../stores/newsfeed'
-import { useAuthStore } from '../../stores/auth'
-import NewsCommunityEventVolunteerSummary from '../../components/NewsCommunityEventVolunteerSummary'
+import { buildHead } from '~/composables/useBuildHead'
+import { useMiscStore } from '~/stores/misc'
+import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useAuthStore } from '~/stores/auth'
+import NewsCommunityEventVolunteerSummary from '~/components/NewsCommunityEventVolunteerSummary'
 import { useMe } from '~/composables/useMe'
 import VisibleWhen from '~/components/VisibleWhen'
 import GlobalMessage from '~/components/GlobalMessage'

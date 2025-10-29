@@ -156,8 +156,8 @@
   </div>
 </template>
 <script>
-import { useMessageStore } from '../../stores/message'
-import { copyStdMsgs } from '../composables/useStdMsgs'
+import { useMessageStore } from '~/stores/message'
+import { copyStdMsgs } from '~/composables/useStdMsgs'
 import { useStdmsgStore } from '~/stores/stdmsg'
 
 export default {

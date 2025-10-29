@@ -71,7 +71,7 @@
 <script>
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import { useMiscStore } from '../../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 import ModPostingHistory from './ModPostingHistory'
 import ModMemberships from './ModMemberships'
 import ModSupporter from '~/components/ModSupporter'
