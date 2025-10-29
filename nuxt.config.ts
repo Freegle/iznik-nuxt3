@@ -144,7 +144,9 @@ export default defineNuxtConfig({
       routes: ['/404.html', '/sitemap.xml'],
 
       // Don't prerender the messages - too many.
-      ignore: ['/message/'],
+      // Also ignore _nuxt and netlify asset paths to avoid 404 errors during prerendering
+      // when the CDN assets don't exist yet.
+      ignore: ['/message/', '/_nuxt/**', '/netlify/**'],
       crawlLinks: true,
     },
 
