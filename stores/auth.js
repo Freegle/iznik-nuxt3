@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { LoginError, SignUpError } from '../api/BaseAPI'
+import { LoginError, SignUpError } from '../api/APIErrors'
 import { useComposeStore } from '../stores/compose'
 import api from '~/api'
 import { useMiscStore } from '~/stores/misc'
