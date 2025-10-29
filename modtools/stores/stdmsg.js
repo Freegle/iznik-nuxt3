@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { useModConfigStore } from '../stores/modconfig'
+import { useModConfigStore } from '~/stores/modconfig'
 import api from '~/api'
 
 export const useStdmsgStore = defineStore({

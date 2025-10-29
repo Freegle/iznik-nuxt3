@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import { useStoryStore } from '../stores/stories'
+import { useStoryStore } from '~/stores/stories'
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {

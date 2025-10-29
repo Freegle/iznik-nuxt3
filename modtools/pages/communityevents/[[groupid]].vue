@@ -26,7 +26,7 @@
   </div>
 </template>
 <script>
-import { useCommunityEventStore } from '../stores/communityevent'
+import { useCommunityEventStore } from '~/stores/communityevent'
 import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'

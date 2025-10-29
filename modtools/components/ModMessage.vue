@@ -595,8 +595,8 @@ import Highlighter from 'vue-highlight-words'
 
 import { pluralise } from '../composables/usePluralise'
 import { useLocationStore } from '../../stores/location'
-import { useModConfigStore } from '../stores/modconfig'
-import { useMemberStore } from '../stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '../../stores/message'
 import { useUserStore } from '../../stores/user'
 

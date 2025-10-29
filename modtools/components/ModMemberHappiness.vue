@@ -55,7 +55,7 @@
 </template>
 <script>
 // import VisibleWhen from '~/components/VisibleWhen'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 
 export default {
   props: {

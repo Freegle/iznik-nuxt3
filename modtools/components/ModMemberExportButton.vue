@@ -40,8 +40,8 @@
 <script>
 import saveAs from 'save-file'
 import { createObjectCsvWriter } from 'csv-writer'
-import { useGroupStore } from '../stores/group'
-import { useMemberStore } from '../stores/member'
+import { useGroupStore } from '~/stores/group'
+import { useMemberStore } from '~/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

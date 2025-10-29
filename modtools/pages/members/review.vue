@@ -34,7 +34,7 @@
   </div>
 </template>
 <script>
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { setupModMembers } from '../../composables/useModMembers'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
