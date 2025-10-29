@@ -55,8 +55,8 @@
   </div>
 </template>
 <script>
-import { useLogsStore } from './stores/logs'
-import { useModGroupStore } from '@/stores/modgroup'
+import { useLogsStore } from '~/stores/logs'
+import { useModGroupStore } from '~/stores/modgroup'
 
 export default {
   setup() {

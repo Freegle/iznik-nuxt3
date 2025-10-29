@@ -15,7 +15,7 @@
   </div>
 </template>
 <script>
-import { useChatStore } from '../stores/chat'
+import { useChatStore } from '~/stores/chat'
 const ChatPopup = defineAsyncComponent(() => import('./ChatPopup'))
 
 export default {

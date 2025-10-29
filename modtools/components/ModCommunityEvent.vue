@@ -67,8 +67,8 @@
   </div>
 </template>
 <script>
-import { useCommunityEventStore } from '../stores/communityevent'
-import { useGroupStore } from '../stores/group'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useGroupStore } from '~/stores/group'
 
 export default {
   props: {

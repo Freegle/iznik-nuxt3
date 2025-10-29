@@ -283,9 +283,9 @@
 <script>
 import { pluralise } from '../composables/usePluralise'
 
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '../../stores/user'
-import { useModConfigStore } from '../stores/modconfig'
+import { useModConfigStore } from '~/stores/modconfig'
 
 export default {
   props: {

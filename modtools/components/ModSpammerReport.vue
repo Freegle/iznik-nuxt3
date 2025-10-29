@@ -67,7 +67,7 @@
   </b-modal>
 </template>
 <script>
-import { useSpammerStore } from '../stores/spammer'
+import { useSpammerStore } from '~/stores/spammer'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

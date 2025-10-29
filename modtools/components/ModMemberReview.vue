@@ -152,7 +152,7 @@
 <script>
 import dayjs from 'dayjs'
 import { pluralise } from '../composables/usePluralise'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 
 const MEMBERSHIPS_SHOW = 3
 

@@ -516,7 +516,7 @@
 </template>
 
 <script>
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '../../stores/user'
 
 const SHOW = 3

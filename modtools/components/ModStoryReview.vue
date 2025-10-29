@@ -81,8 +81,8 @@
   </div>
 </template>
 <script>
-import { useGroupStore } from '../stores/group'
-import { useStoryStore } from '../stores/stories'
+import { useGroupStore } from '~/stores/group'
+import { useStoryStore } from '~/stores/stories'
 
 export default {
   props: {

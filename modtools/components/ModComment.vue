@@ -77,7 +77,7 @@
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import cloneDeep from 'lodash.clonedeep'
-import { useMemberStore } from '../stores/member'
+import { useMemberStore } from '~/stores/member'
 import { setupModMembers } from '../composables/useModMembers'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'

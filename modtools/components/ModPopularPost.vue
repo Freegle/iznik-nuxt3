@@ -46,8 +46,8 @@
   </b-card>
 </template>
 <script>
-import { useGroupStore } from '../stores/group'
-import { useMessageStore } from '../stores/message'
+import { useGroupStore } from '~/stores/group'
+import { useMessageStore } from '~/stores/message'
 import { usePublicityStore } from '@/stores/publicity'
 
 export default {
