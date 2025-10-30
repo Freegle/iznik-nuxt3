@@ -17,7 +17,6 @@
 
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 /sw.js* / 404!
-/robots.txt / 404!
 /img* / 404!
 /timg* / 404!
 /gimg* / 404!
