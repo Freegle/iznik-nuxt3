@@ -593,14 +593,14 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 
-import { pluralise } from '../composables/usePluralise'
-import { useLocationStore } from '../../stores/location'
+import { pluralise } from '~/composables/usePluralise'
+import { useLocationStore } from '~/stores/location'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useMemberStore } from '~/stores/member'
-import { useMessageStore } from '../../stores/message'
-import { useUserStore } from '../../stores/user'
+import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '~/stores/user'
 
-import { setupKeywords } from '../composables/useKeywords'
+import { setupKeywords } from '~/composables/useKeywords'
 import { SUBJECT_REGEX } from '~/constants'
 
 import { useModGroupStore } from '@/stores/modgroup'

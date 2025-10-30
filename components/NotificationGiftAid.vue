@@ -20,7 +20,7 @@
 </template>
 <script setup>
 import { useRouter } from 'vue-router'
-import { setupNotification } from '../composables/useNotification'
+import { setupNotification } from '~/composables/useNotification'
 import ProfileImage from '~/components/ProfileImage'
 
 const props = defineProps({

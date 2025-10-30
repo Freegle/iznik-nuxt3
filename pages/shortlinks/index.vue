@@ -61,11 +61,11 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import ShortLinks from '../../components/ShortLinks'
-import NoticeMessage from '../../components/NoticeMessage'
-import { useShortlinkStore } from '../../stores/shortlinks'
-import { useGroupStore } from '../../stores/group'
-import ShortLink from '../../components/ShortLink'
+import ShortLinks from '~/components/ShortLinks'
+import NoticeMessage from '~/components/NoticeMessage'
+import { useShortlinkStore } from '~/stores/shortlinks'
+import { useGroupStore } from '~/stores/group'
+import ShortLink from '~/components/ShortLink'
 import SpinButton from '~/components/SpinButton'
 
 definePageMeta({

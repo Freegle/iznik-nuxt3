@@ -143,9 +143,9 @@
 </template>
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { buildHead } from '../composables/useBuildHead'
-import { useMiscStore } from '../stores/misc'
-import { useAuthStore } from '../stores/auth'
+import { buildHead } from '~/composables/useBuildHead'
+import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'

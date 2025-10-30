@@ -44,8 +44,8 @@
 </template>
 
 <script>
-import { useMiscStore } from '../../stores/misc'
-import { useUserStore } from '../../stores/user'
+import { useMiscStore } from '~/stores/misc'
+import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

@@ -83,17 +83,17 @@ import cloneDeep from 'lodash.clonedeep'
 import { storeToRefs } from 'pinia'
 import Wkt from 'wicket'
 import { LGeoJson, LTooltip } from '@vue-leaflet/vue-leaflet'
-import { useGroupStore } from '../stores/group'
-import { useMessageStore } from '../stores/message'
+import GroupMarker from './GroupMarker'
+import BrowseHomeIcon from './BrowseHomeIcon'
+import ClusterMarker from './ClusterMarker'
+import { useGroupStore } from '~/stores/group'
+import { useMessageStore } from '~/stores/message'
 import {
   calculateMapHeight,
   loadLeaflet,
   attribution,
   osmtile,
-} from '../composables/useMap'
-import GroupMarker from './GroupMarker'
-import BrowseHomeIcon from './BrowseHomeIcon'
-import ClusterMarker from './ClusterMarker'
+} from '~/composables/useMap'
 import { useMiscStore } from '~/stores/misc'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthorityStore } from '~/stores/authority'

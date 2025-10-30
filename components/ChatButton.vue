@@ -27,8 +27,8 @@
   </div>
 </template>
 <script setup>
-import { useChatStore } from '../stores/chat'
-import { useMessageStore } from '../stores/message'
+import { useChatStore } from '~/stores/chat'
+import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
 import { useMe } from '~/composables/useMe'

@@ -50,8 +50,8 @@
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
 import pluralize from 'pluralize'
-import { useNewsfeedStore } from '../stores/newsfeed'
 import SpinButton from './SpinButton'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { useMe } from '~/composables/useMe'
 
 const NewsLovesModal = defineAsyncComponent(() => import('./NewsLovesModal'))

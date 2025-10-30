@@ -153,8 +153,8 @@ import Highlighter from 'vue-highlight-words'
 import {
   fetchReferencedMessage,
   useChatMessageBase,
-} from '../composables/useChat'
-import { useMessageStore } from '../stores/message'
+} from '~/composables/useChat'
+import { useMessageStore } from '~/stores/message'
 import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'

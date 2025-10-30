@@ -36,7 +36,7 @@
   </span>
 </template>
 <script setup>
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
 const UserRatingsDownModal = defineAsyncComponent(() =>

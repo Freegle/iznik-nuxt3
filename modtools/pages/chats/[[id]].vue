@@ -83,11 +83,11 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { pluralise } from '../composables/usePluralise'
-import { useAuthStore } from '../../stores/auth'
+import { pluralise } from '~/composables/usePluralise'
+import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '~/stores/chat'
 import { useModGroupStore } from '@/stores/modgroup'
-// import { setupChat } from '../composables/useChat'
+// import { setupChat } from '~/composables/useChat'
 import { useRouter } from '#imports'
 
 export default {

@@ -44,8 +44,8 @@
 <script setup>
 import { Field, ErrorMessage, Form as VeeForm } from 'vee-validate'
 import { ref, computed, watch } from 'vue'
-import { useDomainStore } from '../stores/domain'
-import { uid } from '../composables/useId'
+import { useDomainStore } from '~/stores/domain'
+import { uid } from '~/composables/useId'
 import { useRuntimeConfig } from '#app'
 import { EMAIL_REGEX } from '~/constants'
 

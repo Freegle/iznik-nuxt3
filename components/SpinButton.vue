@@ -25,7 +25,7 @@
   />
 </template>
 <script setup>
-import { useMiscStore } from '../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 import { ref, defineAsyncComponent, onBeforeUnmount } from '#imports'
 const { $sentryCaptureException } = useNuxtApp()
 

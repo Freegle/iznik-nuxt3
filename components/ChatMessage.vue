@@ -124,8 +124,6 @@
   </div>
 </template>
 <script setup>
-import { useChatStore } from '../stores/chat'
-import { setupChat } from '../composables/useChat'
 import ChatMessageText from './ChatMessageText'
 import ChatMessageImage from './ChatMessageImage'
 import ChatMessageInterested from './ChatMessageInterested'
@@ -138,6 +136,8 @@ import ChatMessageNudge from './ChatMessageNudge'
 import ChatMessageDateRead from './ChatMessageDateRead'
 import ChatMessageModMail from './ChatMessageModMail'
 import ChatMessageReminder from './ChatMessageReminder'
+import { setupChat } from '~/composables/useChat'
+import { useChatStore } from '~/stores/chat'
 import { ref, computed } from '#imports'
 import SupportLink from '~/components/SupportLink.vue'
 import ChatMessageWarning from '~/components/ChatMessageWarning'

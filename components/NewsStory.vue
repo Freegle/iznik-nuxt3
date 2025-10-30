@@ -108,8 +108,8 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useStoryStore } from '../stores/stories'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useStoryStore } from '~/stores/stories'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'
 import NewsUserIntro from '~/components/NewsUserIntro'

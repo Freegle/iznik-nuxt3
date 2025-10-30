@@ -111,7 +111,7 @@
 </template>
 <script setup>
 import { ref, watch, defineAsyncComponent } from 'vue'
-import { useImageStore } from '../stores/image'
+import { useImageStore } from '~/stores/image'
 import SpinButton from '~/components/SpinButton'
 import { useNoticeboardStore } from '~/stores/noticeboard'
 import { useOurModal } from '~/composables/useOurModal'

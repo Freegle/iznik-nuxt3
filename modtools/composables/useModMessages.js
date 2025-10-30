@@ -8,7 +8,7 @@
 // - which in turn stops useModMessages watch(work) from updating the messages list
 // - until another timed update occurs
 
-import { useMessageStore } from '../../stores/message'
+import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '@/stores/auth'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMiscStore } from '@/stores/misc'

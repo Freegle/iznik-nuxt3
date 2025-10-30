@@ -51,7 +51,7 @@
   </b-row>
 </template>
 <script setup>
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import { timeago } from '~/composables/useTimeFormat'
 import { useMe } from '~/composables/useMe'
 const { me } = useMe()

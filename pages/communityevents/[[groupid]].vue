@@ -59,11 +59,11 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
-import { useCommunityEventStore } from '../../stores/communityevent'
-import { useGroupStore } from '../../stores/group'
-import { useAuthStore } from '../../stores/auth'
-import NoticeMessage from '../../components/NoticeMessage'
+import { buildHead } from '~/composables/useBuildHead'
+import { useCommunityEventStore } from '~/stores/communityevent'
+import { useGroupStore } from '~/stores/group'
+import { useAuthStore } from '~/stores/auth'
+import NoticeMessage from '~/components/NoticeMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import { ref, computed, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'

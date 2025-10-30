@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { setupModMembers } from '../composables/useModMembers'
+import { setupModMembers } from '~/composables/useModMembers'
 
 const { filter, visibleMembers } = setupModMembers()
 </script>

@@ -53,9 +53,9 @@
 </template>
 <script setup>
 import { ref, watch } from 'vue'
-import { useAuthStore } from '../stores/auth'
 import SpinButton from './SpinButton'
 import SettingsGroup from './SettingsGroup'
+import { useAuthStore } from '~/stores/auth'
 import { useMe } from '~/composables/useMe'
 
 defineProps({

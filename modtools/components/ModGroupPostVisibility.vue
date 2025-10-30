@@ -94,7 +94,7 @@ import Wkt from 'wicket'
 import 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { LMap, LTileLayer, LGeoJson } from '@vue-leaflet/vue-leaflet'
-import { attribution, osmtile } from '../composables/useMap'
+import { attribution, osmtile } from '~/composables/useMap'
 
 const modGroupStore = useModGroupStore()
 

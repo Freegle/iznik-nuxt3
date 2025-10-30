@@ -103,7 +103,7 @@
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useUserStore } from '~/stores/user'
-import { setupModMembers } from '../../composables/useModMembers'
+import { setupModMembers } from '~/composables/useModMembers'
 import { useMemberStore } from '@/stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
 

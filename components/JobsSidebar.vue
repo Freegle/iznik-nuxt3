@@ -45,9 +45,9 @@
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '../stores/job'
-import { useAuthStore } from '../stores/auth'
 import JobOne from './JobOne'
+import { useJobStore } from '~/stores/job'
+import { useAuthStore } from '~/stores/auth'
 import InfiniteLoading from '~/components/InfiniteLoading'
 const NoticeMessage = defineAsyncComponent(() =>
   import('~/components/NoticeMessage')

@@ -125,7 +125,7 @@
 </template>
 <script setup>
 import { ref, computed, watch, defineAsyncComponent } from 'vue'
-import { useGroupStore } from '../stores/group'
+import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { getDistance } from '~/composables/useMap'

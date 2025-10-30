@@ -226,7 +226,7 @@
 </template>
 <script setup>
 import { ref, computed, defineEmits, watch } from 'vue'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import SettingsGroup from '~/components/SettingsGroup'
 import SettingsEmailInfo from '~/components/SettingsEmailInfo'
 import NoticeMessage from '~/components/NoticeMessage'

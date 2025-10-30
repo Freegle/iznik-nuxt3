@@ -18,7 +18,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useChatStore } from '../stores/chat'
+import { useChatStore } from '~/stores/chat'
 import { useRouter } from '#app'
 
 const props = defineProps({

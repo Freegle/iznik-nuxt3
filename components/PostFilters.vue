@@ -121,8 +121,8 @@
   </div>
 </template>
 <script setup>
-import { useMiscStore } from '../stores/misc'
-import { useMessageStore } from '../stores/message'
+import { useMiscStore } from '~/stores/misc'
+import { useMessageStore } from '~/stores/message'
 import { ref, watch } from '#imports'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthStore } from '~/stores/auth'

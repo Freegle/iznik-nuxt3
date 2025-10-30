@@ -117,8 +117,8 @@ import {
   defineAsyncComponent,
 } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
 import SomethingWentWrong from './SomethingWentWrong'
+import { useAuthStore } from '~/stores/auth'
 import { useNuxtApp, useRuntimeConfig } from '#app'
 import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'

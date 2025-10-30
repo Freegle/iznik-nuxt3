@@ -82,7 +82,7 @@
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
 import { useRuntimeConfig } from 'nuxt/app'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { twem } from '~/composables/useTwem'
 import NewsUserIntro from '~/components/NewsUserIntro'
 import NewsLoveComment from '~/components/NewsLoveComment'

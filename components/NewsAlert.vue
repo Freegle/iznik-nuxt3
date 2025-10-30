@@ -57,7 +57,7 @@
 
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { twem } from '~/composables/useTwem'
 import { timeago } from '~/composables/useTimeFormat'
 import { URL_REGEX } from '~/constants'

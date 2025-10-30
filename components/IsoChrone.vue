@@ -149,8 +149,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useLocationStore } from '../stores/location'
-import { useMessageStore } from '../stores/message'
+import { useLocationStore } from '~/stores/location'
+import { useMessageStore } from '~/stores/message'
 import PostCode from '~/components/PostCode'
 import SpinButton from '~/components/SpinButton'
 import { useIsochroneStore } from '~/stores/isochrone'

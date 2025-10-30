@@ -28,8 +28,8 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useAuthStore } from '../stores/auth'
 import NoticeMessage from './NoticeMessage'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   theirs: {

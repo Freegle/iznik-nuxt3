@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { useGroupStore } from '../../stores/group'
+import { useGroupStore } from '~/stores/group'
 import { useOurModal } from '~/composables/useOurModal'
 
 export default {

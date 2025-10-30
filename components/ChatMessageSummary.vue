@@ -68,9 +68,9 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useMessageStore } from '../stores/message'
-import { useGroupStore } from '../stores/group'
-import { useChatStore } from '../stores/chat'
+import { useMessageStore } from '~/stores/message'
+import { useGroupStore } from '~/stores/group'
+import { useChatStore } from '~/stores/chat'
 import { useRouter } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import OurUploadedImage from '~/components/OurUploadedImage'

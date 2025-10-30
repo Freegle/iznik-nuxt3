@@ -17,8 +17,8 @@
 import { computed } from 'vue'
 import dayjs from 'dayjs'
 import pluralize from 'pluralize'
-import { useSearchStore } from '../stores/search'
 import SpinButton from './SpinButton'
+import { useSearchStore } from '~/stores/search'
 import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({

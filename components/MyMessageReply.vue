@@ -117,9 +117,9 @@
 <script setup>
 import { defineAsyncComponent, ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
-import { useUserStore } from '../stores/user'
-import { useChatStore } from '../stores/chat'
 import MyMessageReplyUser from './MyMessageReplyUser'
+import { useUserStore } from '~/stores/user'
+import { useChatStore } from '~/stores/chat'
 import { useRouter } from '#imports'
 import { timeago, datelocale } from '~/composables/useTimeFormat'
 import { useMiscStore } from '~/stores/misc'

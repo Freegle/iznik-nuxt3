@@ -54,8 +54,8 @@
 <script setup>
 import pluralize from 'pluralize'
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
-import { useAuthStore } from '../stores/auth'
+import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useAuthStore } from '~/stores/auth'
 import NewsRefer from '~/components/NewsRefer'
 
 const NewsReply = defineAsyncComponent(() =>

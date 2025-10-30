@@ -27,9 +27,9 @@
 </template>
 <script setup>
 import { ref, onBeforeMount } from 'vue'
-import { useMicroVolunteeringStore } from '../stores/microvolunteering'
 import MicroVolunteeringPhotoRotate from './MicroVolunteeringPhotoRotate'
 import SpinButton from './SpinButton'
+import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
 
 const props = defineProps({
   photos: {

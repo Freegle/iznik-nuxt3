@@ -48,8 +48,8 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useTrystStore } from '../stores/tryst'
-import { useMessageStore } from '../stores/message'
+import { useTrystStore } from '~/stores/tryst'
+import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import UserRatings from '~/components/UserRatings'
 import DateFormatted from '~/components/DateFormatted'

@@ -14,7 +14,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useDonationStore } from '../stores/donations'
+import { useDonationStore } from '~/stores/donations'
 import VueThermometer from '~/components/VueThermometer'
 
 const props = defineProps({

@@ -24,7 +24,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({

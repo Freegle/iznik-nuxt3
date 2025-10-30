@@ -57,7 +57,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 import ProfileImage from '~/components/ProfileImage'
 import ChatButton from '~/components/ChatButton'
 import UserRatings from '~/components/UserRatings'

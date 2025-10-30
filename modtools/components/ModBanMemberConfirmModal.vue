@@ -49,7 +49,7 @@
 <script>
 import Wkt from 'wicket'
 import cloneDeep from 'lodash.clonedeep'
-import { useUserStore } from '../../stores/user'
+import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useOurModal } from '~/composables/useOurModal'
 

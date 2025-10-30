@@ -9,7 +9,7 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import NewsUserIntro from '~/components/NewsUserIntro'
 
 const props = defineProps({
