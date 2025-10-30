@@ -44,8 +44,8 @@ test.describe('ModTools login tests', () => {
     expect(currentUrl).toContain('/login')
     expect(currentUrl).toContain('return=/')
 
-    // Wait for the "Please login" text to appear
-    const loginText = page.locator('text=Please login')
+    // Wait for the "Let's get freegling!" text to appear
+    const loginText = page.locator("text=Let's get freegling!")
     await loginText.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
@@ -88,8 +88,8 @@ test.describe('ModTools login tests', () => {
       }
     }
 
-    // Wait for the "Please login" text to appear
-    const loginText = page.locator('text=Please login')
+    // Wait for the "Let's get freegling!" text to appear
+    const loginText = page.locator("text=Let's get freegling!")
     await loginText.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
