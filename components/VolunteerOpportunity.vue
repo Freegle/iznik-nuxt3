@@ -197,10 +197,10 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
+import NoticeMessage from './NoticeMessage'
 import { useVolunteeringStore } from '~/stores/volunteering'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
-import NoticeMessage from './NoticeMessage'
 import { useAuthStore } from '~/stores/auth'
 import ReadMore from '~/components/ReadMore'
 import { twem } from '~/composables/useTwem'

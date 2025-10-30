@@ -29,8 +29,8 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { useShortlinkStore } from '~/stores/shortlinks'
 import ExternalLink from './ExternalLink'
+import { useShortlinkStore } from '~/stores/shortlinks'
 
 const props = defineProps({
   id: {

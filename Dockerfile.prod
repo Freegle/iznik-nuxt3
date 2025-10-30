@@ -30,8 +30,8 @@ COPY package*.json setup-hooks.* ./
 
 # Use npm ci for clean install, then explicitly reinstall optional dependencies
 # to work around npm bug with oxc-parser: https://github.com/npm/cli/issues/4828
-RUN npm ci --legacy-peer-deps && \
-    npm rebuild --legacy-peer-deps
+RUN npm ci && \
+    npm rebuild
 
 # Install Playwright browsers and system dependencies after npm ci
 RUN npx playwright install chromium && npx playwright install-deps

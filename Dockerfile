@@ -27,7 +27,7 @@ ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
 
 COPY package*.json setup-hooks.* ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 
 # Install Playwright browsers and system dependencies after npm install
 RUN npx playwright install chromium && npx playwright install-deps

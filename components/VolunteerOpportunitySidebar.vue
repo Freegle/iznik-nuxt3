@@ -17,8 +17,8 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
-import { useVolunteeringStore } from '~/stores/volunteering'
 import CommunityFeature from './CommunityFeature'
+import { useVolunteeringStore } from '~/stores/volunteering'
 
 // Store instances
 const volunteeringStore = useVolunteeringStore()

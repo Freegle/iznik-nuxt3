@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@master
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install
 
       - name: Build
         run: npm run build
