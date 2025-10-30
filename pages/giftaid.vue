@@ -211,6 +211,7 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
   definePageMeta,
   useHead,
   useRuntimeConfig,
@@ -354,27 +355,19 @@ const fetchGiftAidData = async () => {
   }
 }
 
-watch(
-  me,
-  async (newVal, oldVal) => {
-    if (newVal && !oldVal) {
-      await fetchGiftAidData()
-    }
-  },
-  { immediate: true }
-)
+// Fetch gift aid data on mount (after auth has been validated by layout)
+onMounted(async () => {
+  if (me.value) {
+    await fetchGiftAidData()
+  }
+})
 
-// Also watch auth tokens in case they're set after the user
-watch(
-  () => authStore.auth,
-  async (newAuth) => {
-    if (me.value && (newAuth.jwt || newAuth.persistent)) {
-      // User exists and we now have valid tokens, try fetching again
-      await fetchGiftAidData()
-    }
-  },
-  { deep: true }
-)
+// Watch for subsequent login events
+watch(me, async (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    await fetchGiftAidData()
+  }
+})
 
 watch(marketingconsent, async (newVal) => {
   await authStore.saveAndGet({
