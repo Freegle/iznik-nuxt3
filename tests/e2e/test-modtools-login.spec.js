@@ -4,15 +4,17 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts } = require('./config')
+const { timeouts, environment } = require('./config')
 
 test.describe('ModTools login tests', () => {
   test('root path should redirect to login page for unauthenticated users', async ({
     page,
     waitForNuxtPageLoad,
   }) => {
-    // Navigate to the root path
-    await page.goto('/', { timeout: timeouts.navigation.initial })
+    // Navigate to ModTools root path (use absolute URL since this test is for ModTools)
+    await page.goto(`${environment.modtoolsBaseUrl}/`, {
+      timeout: timeouts.navigation.initial,
+    })
 
     try {
       await waitForNuxtPageLoad({ timeout: 30000 })
@@ -58,8 +60,10 @@ test.describe('ModTools login tests', () => {
     page,
     waitForNuxtPageLoad,
   }) => {
-    // Navigate directly to the login page
-    await page.goto('/login', { timeout: timeouts.navigation.initial })
+    // Navigate directly to ModTools login page (use absolute URL since this test is for ModTools)
+    await page.goto(`${environment.modtoolsBaseUrl}/login`, {
+      timeout: timeouts.navigation.initial,
+    })
 
     try {
       await waitForNuxtPageLoad({ timeout: 30000 })
