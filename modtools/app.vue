@@ -37,6 +37,7 @@ import { useLogoStore } from '~/stores/logo'
 import { useLocationStore } from '~/stores/location'
 import { useShortlinkStore } from '~/stores/shortlinks'
 import { useMiscStore } from '~/stores/misc'
+import { useConfigStore } from '~/stores/config'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
@@ -98,6 +99,7 @@ const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
+const configStore = useConfigStore()
 const adminsStore = useAdminsStore()
 const alertStore = useAlertStore()
 const commentStore = useCommentStore()
@@ -140,6 +142,7 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 adminsStore.init(runtimeConfig)
 alertStore.init(runtimeConfig)
 commentStore.init(runtimeConfig)
