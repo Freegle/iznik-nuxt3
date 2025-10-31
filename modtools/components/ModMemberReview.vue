@@ -1,5 +1,5 @@
 <template>
-  <div v-if="member">
+  <div v-if="member && !reviewed">
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
@@ -188,6 +188,7 @@ export default {
       showSpamModal: false,
       showPostingHistoryModal: false,
       showLogsModal: false,
+      reviewed: false,
     }
   },
   computed: {
@@ -342,6 +343,7 @@ export default {
       this.$refs.logs?.show()
     },
     forcerefresh() {
+      this.reviewed = true
       this.$emit('forcerefresh')
     },
   },

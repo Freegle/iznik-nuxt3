@@ -184,6 +184,7 @@ export default {
 
       setTimeout(() => {
         this.reviewed = true
+        this.forcerefresh()
       }, 2000)
     },
     async ignore(callback) {
@@ -195,6 +196,7 @@ export default {
       setTimeout(() => {
         this.reviewed = true
         callback()
+        this.forcerefresh()
       }, 2000)
     },
     daysago(d) {
