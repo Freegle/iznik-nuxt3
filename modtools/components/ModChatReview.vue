@@ -28,6 +28,7 @@
             v-if="message.bymailid"
             size="lg"
             variant="white"
+            class="ml-2"
             @click="showOriginal = true"
           >
             <v-icon icon="info-circle" /> View original email
