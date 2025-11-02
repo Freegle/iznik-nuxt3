@@ -724,7 +724,8 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 **Automated Daily Workflow**:
 
 1. **11:00 PM UTC - Trigger**:
-   - **Automatic daily merge**: GitHub Actions auto-merges `master` → `app-ci-fd` at 11pm UTC
+   - **Automatic daily merge**: GitHub Actions auto-merges `production` → `app-ci-fd` at 11pm UTC
+   - Only tested code from production branch is deployed to mobile apps
    - Manual push to `app-ci-fd` branch also triggers build
    - Workflow: `.github/workflows/auto-merge-master.yml`
 
@@ -815,7 +816,7 @@ This allows you to promote/submit releases early without waiting for the midnigh
 ### Timeline
 
 ```
-Day 1, 11:00 PM: Build triggered (master merge or manual push)
+Day 1, 11:00 PM: Build triggered (production merge or manual push)
 Day 1, 11:30 PM: Builds complete
                  → Android uploaded to Beta (Open Testing)
                  → iOS uploaded to TestFlight
