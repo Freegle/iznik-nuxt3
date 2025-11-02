@@ -42,8 +42,8 @@
 <script setup>
 import { computed } from 'vue'
 import pluralize from 'pluralize'
-import { useUserStore } from '../stores/user'
 import ProfileImage from './ProfileImage'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
   id: {

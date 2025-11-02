@@ -57,8 +57,12 @@
   </div>
 </template>
 <script setup>
-import { clearNavBarTimeout, setNavBarHidden } from '../composables/useNavbar'
-import { useNavbar, navBarHidden } from '~/composables/useNavbar'
+import {
+  clearNavBarTimeout,
+  setNavBarHidden,
+  useNavbar,
+  navBarHidden,
+} from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
 

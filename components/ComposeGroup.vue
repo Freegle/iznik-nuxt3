@@ -7,7 +7,7 @@
 </template>
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useComposeStore } from '../stores/compose'
+import { useComposeStore } from '~/stores/compose'
 import { useAuthStore } from '~/stores/auth'
 import api from '~/api'
 import { useRuntimeConfig } from '#app'

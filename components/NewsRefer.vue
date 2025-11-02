@@ -57,8 +57,8 @@
 
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
 import NoticeMessage from './NoticeMessage'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { useRuntimeConfig } from '#imports'
 
 const ConfirmModal = defineAsyncComponent(() =>

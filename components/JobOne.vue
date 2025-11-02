@@ -51,7 +51,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useJobStore } from '../stores/job'
+import { useJobStore } from '~/stores/job'
 import ExternalLink from '~/components/ExternalLink'
 
 const props = defineProps({

@@ -63,9 +63,9 @@
   </client-only>
 </template>
 <script setup>
-import { useAuthStore } from '../stores/auth'
-import { useMessageStore } from '../stores/message'
-import { useSearchStore } from '../stores/search'
+import { useAuthStore } from '~/stores/auth'
+import { useMessageStore } from '~/stores/message'
+import { useSearchStore } from '~/stores/search'
 import { useMe } from '~/composables/useMe'
 import { buildHead } from '~/composables/useBuildHead'
 import { useFavoritePage } from '~/composables/useFavoritePage'

@@ -22,8 +22,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
 import NewsLovesUserInfo from './NewsLovesUserInfo'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { useOurModal } from '~/composables/useOurModal'
 
 const props = defineProps({

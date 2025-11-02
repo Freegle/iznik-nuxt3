@@ -18,7 +18,7 @@
   </div>
 </template>
 <script setup>
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '~/stores/auth'
 import LayoutCommon from '~/components/LayoutCommon'
 import { useMobileStore } from '@/stores/mobile' // APP
 import { ref, computed, watch, useMiscStore } from '#imports'

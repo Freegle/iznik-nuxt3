@@ -111,7 +111,7 @@
 import VueSocialSharing from 'vue-social-sharing'
 import { ref, computed } from 'vue'
 import { Share } from '@capacitor/share'
-import { useStoryStore } from '../stores/stories'
+import { useStoryStore } from '~/stores/stories'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 import { useMobileStore } from '@/stores/mobile' // APP

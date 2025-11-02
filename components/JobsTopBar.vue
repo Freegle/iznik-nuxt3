@@ -40,8 +40,8 @@
 <script setup>
 import { computed, defineAsyncComponent } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useJobStore } from '../stores/job'
-import { useAuthStore } from '../stores/auth'
+import { useJobStore } from '~/stores/job'
+import { useAuthStore } from '~/stores/auth'
 const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))

@@ -89,8 +89,8 @@
 </template>
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
-import { useNewsfeedStore } from '../stores/newsfeed'
 import ChatButton from './ChatButton'
+import { useNewsfeedStore } from '~/stores/newsfeed'
 import { twem } from '~/composables/useTwem'
 import { URL_REGEX } from '~/constants'
 import ReadMore from '~/components/ReadMore'

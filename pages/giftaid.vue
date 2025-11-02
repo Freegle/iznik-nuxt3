@@ -199,9 +199,9 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { useAddressStore } from '../stores/address'
-import { useGiftAidStore } from '../stores/giftaid'
-import { useAuthStore } from '../stores/auth'
+import { useAddressStore } from '~/stores/address'
+import { useGiftAidStore } from '~/stores/giftaid'
+import { useAuthStore } from '~/stores/auth'
 import { useMe } from '~/composables/useMe'
 import SpinButton from '~/components/SpinButton'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -211,6 +211,7 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
   definePageMeta,
   useHead,
   useRuntimeConfig,
@@ -354,15 +355,19 @@ const fetchGiftAidData = async () => {
   }
 }
 
-watch(
-  me,
-  async (newVal, oldVal) => {
-    if (newVal && !oldVal) {
-      await fetchGiftAidData()
-    }
-  },
-  { immediate: true }
-)
+// Fetch gift aid data on mount (after auth has been validated by layout)
+onMounted(async () => {
+  if (me.value) {
+    await fetchGiftAidData()
+  }
+})
+
+// Watch for subsequent login events
+watch(me, async (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    await fetchGiftAidData()
+  }
+})
 
 // Also watch auth tokens in case they're set after the user
 watch(

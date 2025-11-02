@@ -63,7 +63,7 @@ import {
   GooglePayEventsEnum,
   ApplePayEventsEnum,
 } from '@capacitor-community/stripe'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import { useDonationStore } from '~/stores/donations'
 import { useMobileStore } from '@/stores/mobile'
 

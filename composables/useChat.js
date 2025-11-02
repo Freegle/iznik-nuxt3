@@ -1,5 +1,5 @@
 import pluralize from 'pluralize'
-import { milesAway } from '../composables/useDistance'
+import { milesAway } from '~/composables/useDistance'
 import { computed } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'

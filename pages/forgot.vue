@@ -4,12 +4,12 @@
       <b-col cols="12" lg="6" offset-lg="3" class="bg-white">
         <h1>Forgotten your password?</h1>
         <p>
-          If you usually log in using Facebook, Google or Yahoo, then you don't
-          use a password - just click those buttons.
+          If you usually log in using Facebook or Google, then you don't use a
+          password - just click those buttons.
         </p>
         <p>
-          But if you usually log in with your email address and a password you
-          set up for Freegle, then enter your email address and we'll mail you a
+          If you usually log in with your email address and a password you set
+          up for Freegle, then enter your email address and we'll mail you a
           link so that you can log in.
         </p>
         <b-alert variant="warning" :model-value="worked">
@@ -34,6 +34,12 @@
           v-model:valid="emailValid"
           size="lg"
         />
+        <p class="mt-3">
+          <strong>Used to sign in with Yahoo?</strong> We no longer support
+          logging in with a Yahoo button, but you can log in with your Yahoo
+          email and a Freegle password. You can use this page to get a login
+          link and set a new password for your account.
+        </p>
         <SpinButton
           v-if="emailValid && !worked"
           icon-name="envelope"

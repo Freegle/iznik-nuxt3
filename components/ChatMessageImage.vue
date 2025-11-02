@@ -91,7 +91,7 @@
 </template>
 <script setup>
 import { ref } from 'vue'
-import { useChatMessageBase } from '../composables/useChat'
+import { useChatMessageBase } from '~/composables/useChat'
 import ProfileImage from '~/components/ProfileImage'
 import OurUploadedImage from '~/components/OurUploadedImage'
 

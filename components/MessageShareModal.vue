@@ -114,8 +114,8 @@
 import { ref, computed, onMounted } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
 import { Share } from '@capacitor/share'
-import { useMessageStore } from '../stores/message'
 import NoticeMessage from './NoticeMessage'
+import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
 import { useMobileStore } from '@/stores/mobile' // APP

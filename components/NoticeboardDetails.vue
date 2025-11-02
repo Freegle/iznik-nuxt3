@@ -108,10 +108,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
-import { useNoticeboardStore } from '../stores/noticeboard'
 import NoticeMessage from './NoticeMessage'
 import SpinButton from './SpinButton'
 import NoticeboardCheck from './NoticeboardCheck'
+import { useNoticeboardStore } from '~/stores/noticeboard'
 import { attribution, osmtile } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 

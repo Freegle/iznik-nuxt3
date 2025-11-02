@@ -6,7 +6,7 @@
   </div>
 </template>
 <script setup>
-import { useUserStore } from '../stores/user'
+import { useUserStore } from '~/stores/user'
 import { ref, onMounted, useRouter, useRoute } from '#imports'
 
 const userStore = useUserStore()

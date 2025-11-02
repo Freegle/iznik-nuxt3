@@ -1,5 +1,6 @@
 [build.environment]
 NODE_VERSION = "22"
+NPM_FLAGS = "--legacy-peer-deps"
 
 # Return 404 for requests from old code.  This avoids the function call, which costs.
 [[redirects]]
@@ -10,12 +11,6 @@ force = true
 
 [[redirects]]
 from = "/sw.js*"
-to = "/"
-status = 404
-force = true
-
-[[redirects]]
-from = "/robots.txt"
 to = "/"
 status = 404
 force = true

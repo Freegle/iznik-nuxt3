@@ -64,10 +64,10 @@
 </template>
 <script setup>
 import { defineAsyncComponent } from 'vue'
-import { buildHead } from '../../composables/useBuildHead'
-import { useVolunteeringStore } from '../../stores/volunteering'
-import { useGroupStore } from '../../stores/group'
-import { useAuthStore } from '../../stores/auth'
+import { buildHead } from '~/composables/useBuildHead'
+import { useVolunteeringStore } from '~/stores/volunteering'
+import { useGroupStore } from '~/stores/group'
+import { useAuthStore } from '~/stores/auth'
 import GlobalMessage from '~/components/GlobalMessage'
 import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'

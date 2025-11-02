@@ -82,9 +82,9 @@
   </div>
 </template>
 <script setup>
-import { useUserStore } from '../stores/user'
-import { useChatMessageBase } from '../composables/useChat'
-import { datetimeshort, timeadapt } from '../composables/useTimeFormat'
+import { useUserStore } from '~/stores/user'
+import { useChatMessageBase } from '~/composables/useChat'
+import { datetimeshort, timeadapt } from '~/composables/useTimeFormat'
 import { ref, computed, onMounted } from '#imports'
 import { useMe } from '~/composables/useMe'
 

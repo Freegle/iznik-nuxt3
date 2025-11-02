@@ -37,8 +37,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeMount, nextTick } from 'vue'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
-import { attribution, osmtile, loadLeaflet } from '../composables/useMap'
 import SpinButton from './SpinButton'
+import { attribution, osmtile, loadLeaflet } from '~/composables/useMap'
 import { MAX_MAP_ZOOM } from '~/constants'
 import { useRuntimeConfig } from '#app'
 

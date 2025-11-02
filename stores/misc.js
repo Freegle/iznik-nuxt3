@@ -4,7 +4,7 @@ import api from '~/api'
 export const useMiscStore = defineStore({
   id: 'misc',
   persist: {
-    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    storage: piniaPluginPersistedstate.localStorage(),
     pick: ['vals', 'source', 'marketingConsent'],
   },
   state: () => ({

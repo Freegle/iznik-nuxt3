@@ -30,8 +30,8 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
-import { buildHead } from '../../composables/useBuildHead'
-import { useVolunteeringStore } from '../../stores/volunteering'
+import { buildHead } from '~/composables/useBuildHead'
+import { useVolunteeringStore } from '~/stores/volunteering'
 import NoticeMessage from '~/components/NoticeMessage'
 import { useRouter } from '#imports'
 import VolunteerOpportunity from '~/components/VolunteerOpportunity'

@@ -55,9 +55,9 @@
   </client-only>
 </template>
 <script setup>
-import { useStoryStore } from '../../stores/stories'
-import { buildHead } from '../../composables/useBuildHead'
-import { useGroupStore } from '../../stores/group'
+import { useStoryStore } from '~/stores/stories'
+import { buildHead } from '~/composables/useBuildHead'
+import { useGroupStore } from '~/stores/group'
 import GroupSelect from '~/components/GroupSelect'
 import StoryOne from '~/components/StoryOne'
 import { useRoute } from '#imports'

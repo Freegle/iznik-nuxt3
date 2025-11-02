@@ -151,11 +151,11 @@
   </b-modal>
 </template>
 <script setup>
-import { useAddressStore } from '../stores/address'
-import { constructSingleLine } from '../composables/usePAF'
-import { useAuthStore } from '../stores/auth'
-import { attribution, osmtile } from '../composables/useMap'
 import SpinButton from './SpinButton'
+import { useAddressStore } from '~/stores/address'
+import { constructSingleLine } from '~/composables/usePAF'
+import { useAuthStore } from '~/stores/auth'
+import { attribution, osmtile } from '~/composables/useMap'
 import { ref, computed, watch } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMe } from '~/composables/useMe'

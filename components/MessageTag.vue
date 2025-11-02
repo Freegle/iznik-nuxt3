@@ -15,7 +15,7 @@
 </template>
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useGroupStore } from '../stores/group'
+import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
 
 const props = defineProps({

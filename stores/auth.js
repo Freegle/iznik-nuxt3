@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
-import { LoginError, SignUpError } from '../api/BaseAPI'
-import { useComposeStore } from '../stores/compose'
+import { LoginError, SignUpError } from '~/api/BaseAPI'
+import { useComposeStore } from '~/stores/compose'
 import api from '~/api'
 import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
@@ -9,7 +9,7 @@ import { useMiscStore } from '~/stores/misc'
 export const useAuthStore = defineStore({
   id: 'auth',
   persist: {
-    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    storage: piniaPluginPersistedstate.localStorage(),
     // We don't persist much about the user, to avoid data getting 'stuck'.  All we need is enough to log us
     // in, and information about which users have been used on this device.
     pick: ['auth', 'userlist', 'loginCount', 'loggedInEver'],

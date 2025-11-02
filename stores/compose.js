@@ -19,7 +19,7 @@ const defaultWanted = {
 export const useComposeStore = defineStore({
   id: 'compose',
   persist: {
-    storage: typeof localStorage === 'undefined' ? [] : localStorage,
+    storage: piniaPluginPersistedstate.localStorage(),
   },
   // We allow composing of multiple posts for the same location/email, so messages and attachments are indexed by
   // id.  The id is a client-only index; it becomes a real id once the items are posted.

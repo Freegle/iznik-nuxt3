@@ -57,7 +57,7 @@ import * as tus from 'tus-js-client'
 import ResizeObserver from 'resize-observer-polyfill'
 import hasOwn from 'object.hasown'
 import * as Sentry from '@sentry/browser'
-import { uid } from '../composables/useId'
+import { uid } from '~/composables/useId'
 import { useMobileStore } from '@/stores/mobile' // APP...
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'

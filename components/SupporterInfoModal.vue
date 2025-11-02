@@ -36,8 +36,8 @@
   </b-modal>
 </template>
 <script setup>
-import { useMiscStore } from '../stores/misc'
-import { useAuthStore } from '../stores/auth'
+import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import { computed } from '#imports'
 import { useOurModal } from '~/composables/useOurModal'
 import DonationButton from '~/components/DonationButton'

@@ -10,7 +10,7 @@
   </div>
 </template>
 <script setup>
-import { useMiscStore } from '../stores/misc'
+import { useMiscStore } from '~/stores/misc'
 import LayoutCommon from '~/components/LayoutCommon'
 import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'

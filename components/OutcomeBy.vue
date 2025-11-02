@@ -80,9 +80,9 @@
 </template>
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { useMessageStore } from '../stores/message'
 import UserRatings from './UserRatings'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
+import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({

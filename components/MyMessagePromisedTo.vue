@@ -66,8 +66,8 @@
 </template>
 <script setup>
 import { defineAsyncComponent, ref, computed } from 'vue'
-import { useMessageStore } from '../stores/message'
-import { useUserStore } from '../stores/user'
+import { useMessageStore } from '~/stores/message'
+import { useUserStore } from '~/stores/user'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import AddToCalendar from '~/components/AddToCalendar'

@@ -233,7 +233,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDonationStore } from '../stores/donations'
+import { useDonationStore } from '~/stores/donations'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthStore } from '~/stores/auth'
 import DonationThermometer from '~/components/DonationThermometer'
