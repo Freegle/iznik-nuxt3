@@ -24,7 +24,7 @@
       </b-badge>
       <span
         v-if="mod && chatmessage?.bymailid"
-        class="btn btn-sm btn-white mb-2 clickme"
+        class="btn btn-sm btn-white mb-2 ml-2 clickme"
         :title="
           'Received by email #' + chatmessage?.bymailid + ' click to view'
         "
@@ -83,7 +83,7 @@
       }}</span>
       <span
         v-if="mod && chatmessage?.bymailid"
-        class="btn btn-sm btn-white mb-2 clickme"
+        class="btn btn-sm btn-white mb-2 ml-2 clickme"
         :title="
           'Received by email #' + chatmessage?.bymailid + ' click to view'
         "
