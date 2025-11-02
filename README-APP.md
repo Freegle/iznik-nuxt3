@@ -866,11 +866,11 @@ bundle exec fastlane ios auto_submit
 
 ### Keeping Up with Master
 
-The app-ci-fd branch should periodically merge from master to get new features:
+The app-ci-fd branch receives tested code automatically from production via the auto-merge workflow. Manual merges are rarely needed, but if required:
 
 ```bash
 git checkout app-ci-fd
-git merge master
+git merge production  # Use production, not master, to ensure tested code only
 # Resolve conflicts, test thoroughly
 git push origin app-ci-fd
 ```
