@@ -183,8 +183,13 @@ function click() {
   }
 
   .rest {
-    grid-row: 1 / 3;
-    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    grid-column: 1 / 3;
+
+    @include media-breakpoint-up(md) {
+      grid-row: 1 / 3;
+      grid-column: 2 / 3;
+    }
   }
 }
 
