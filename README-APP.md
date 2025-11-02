@@ -724,8 +724,9 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 **Automated Daily Workflow**:
 
 1. **11:00 PM UTC - Trigger**:
-   - Push to `app-ci-fd` branch triggers build
-   - OR GitHub Actions can auto-merge `master` → `app-ci-fd` (optional)
+   - **Automatic daily merge**: GitHub Actions auto-merges `master` → `app-ci-fd` at 11pm UTC
+   - Manual push to `app-ci-fd` branch also triggers build
+   - Workflow: `.github/workflows/auto-merge-master.yml`
 
 2. **Build and Deploy (11:00-11:30 PM UTC)**:
    - **Android**: Uploads to Google Play Beta (Open Testing)
@@ -795,13 +796,16 @@ To manually trigger promotion/submission before the scheduled time:
 1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd)
 2. Click "Trigger Pipeline" (top right)
 3. Select branch: `app-ci-fd`
-4. Click "Trigger Pipeline"
-5. In the triggered workflow list, find `manual-promote-submit`
-6. Click on the workflow
-7. Click **"Approve"** on the `hold-for-approval` job
+4. Click "Add Parameters" (expand the parameters section)
+5. Add parameter:
+   - Name: `run_manual_promote`
+   - Type: `boolean`
+   - Value: `true`
+6. Click "Trigger Pipeline"
+7. The `manual-promote-submit` workflow will start immediately
 8. Both `auto-promote-production` (Android) and `auto-submit-ios` will run in parallel
 
-This allows you to promote/submit releases early without waiting for the midnight scheduled run.
+This allows you to promote/submit releases early without waiting for the midnight scheduled run, and without consuming CircleCI concurrency slots while waiting for approval.
 
 **Alternative - Direct Fastlane:**
 - Android: `bundle exec fastlane android auto_promote`
