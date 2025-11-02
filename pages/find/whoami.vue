@@ -117,6 +117,7 @@
 <script setup>
 import {
   ref,
+  watch,
   onMounted,
   useRoute,
   useHead,
@@ -204,6 +205,10 @@ onMounted(() => {
     email.value = me.value?.email
     emailValid.value = email.value?.length > 0
   }
+})
+
+watch(email, () => {
+  emailBelongsToSomeoneElse.value = false
 })
 </script>
 <style scoped lang="scss">
