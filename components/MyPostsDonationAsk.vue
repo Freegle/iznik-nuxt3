@@ -89,6 +89,7 @@ async function onDonationSuccess() {
     await api.bandit.chosen({
       uid: 'mypostsdonation',
       variant: `${variation.value}-${selectedAmount.value}`,
+      score: selectedAmount.value,
     })
   } catch (err) {
     console.error('Error recording donation conversion:', err)
