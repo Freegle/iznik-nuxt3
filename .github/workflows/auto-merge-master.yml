@@ -1,4 +1,4 @@
-name: Auto-merge master to app-ci-fd
+name: Auto-merge production to app-ci-fd
 
 on:
   schedule:
@@ -22,23 +22,23 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Fetch master branch
-        run: git fetch origin master
+      - name: Fetch production branch
+        run: git fetch origin production
 
       - name: Check if merge is needed
         id: check
         run: |
-          # Check if master has changes not in app-ci-fd
-          git merge-base --is-ancestor origin/master HEAD && echo "up-to-date=true" >> $GITHUB_OUTPUT || echo "up-to-date=false" >> $GITHUB_OUTPUT
+          # Check if production has changes not in app-ci-fd
+          git merge-base --is-ancestor origin/production HEAD && echo "up-to-date=true" >> $GITHUB_OUTPUT || echo "up-to-date=false" >> $GITHUB_OUTPUT
 
-      - name: Merge master into app-ci-fd
+      - name: Merge production into app-ci-fd
         if: steps.check.outputs.up-to-date == 'false'
         id: merge
         continue-on-error: true
         run: |
-          git merge origin/master -m "Auto-merge master to app-ci-fd (daily scheduled)
+          git merge origin/production -m "Auto-merge production to app-ci-fd (daily scheduled)
 
-          Automated merge from master branch.
+          Automated merge from production branch after successful tests.
 
           🤖 Automated by GitHub Actions"
 
@@ -46,7 +46,7 @@ jobs:
         if: steps.merge.outcome == 'success'
         run: |
           git push origin app-ci-fd
-          echo "✅ Successfully merged and pushed master to app-ci-fd"
+          echo "✅ Successfully merged and pushed production to app-ci-fd"
 
       - name: Trigger CircleCI build
         if: steps.merge.outcome == 'success'
@@ -68,16 +68,16 @@ jobs:
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '🚨 Auto-merge failed: master → app-ci-fd',
+              title: '🚨 Auto-merge failed: production → app-ci-fd',
               body: `## Merge Conflict Detected
 
-              The scheduled daily merge from \`master\` to \`app-ci-fd\` failed due to conflicts.
+              The scheduled daily merge from \`production\` to \`app-ci-fd\` failed due to conflicts.
 
               **Action Required:**
               1. Manually resolve conflicts:
                  \`\`\`bash
                  git checkout app-ci-fd
-                 git merge master
+                 git merge production
                  # Resolve conflicts
                  git commit
                  git push origin app-ci-fd
@@ -95,9 +95,9 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.check.outputs.up-to-date }}" == "true" ]; then
-            echo "ℹ️  app-ci-fd is already up-to-date with master"
+            echo "ℹ️  app-ci-fd is already up-to-date with production"
           elif [ "${{ steps.merge.outcome }}" == "success" ]; then
-            echo "✅ Successfully merged master to app-ci-fd and triggered build"
+            echo "✅ Successfully merged production to app-ci-fd and triggered build"
           elif [ "${{ steps.merge.outcome }}" == "failure" ]; then
             echo "❌ Merge failed - conflicts detected. Issue created."
           fi
