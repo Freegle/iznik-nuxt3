@@ -52,9 +52,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       router.push('/maintenance')
     } else if (reason) {
       // No point alerting the user if we have no info.
-      const miscStore = useMiscStore()
-      const error = new Error(reason)
-      miscStore.setErrorDetails(error)
       Sentry.captureMessage('Unhandled promise', reason)
     }
   })
