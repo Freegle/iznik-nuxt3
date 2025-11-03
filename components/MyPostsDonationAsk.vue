@@ -4,8 +4,8 @@
       <!-- Solution Framing Variation (#5) - Environmental focus -->
       <p v-if="variation === 'solution-framing'" class="donation-message">
         <strong>Help us continue the solution!</strong><br />
-        Our 4.6M volunteer-run communities kept 11,000 tonnes out of landfill
-        last year. Donate to keep Freegle growing?
+        Our 4.6M freeglers kept 11,000 tonnes out of landfill last year. Donate
+        to keep Freegle growing?
       </p>
 
       <!-- Minimal Friction Variation (#10) - Simple and direct -->
@@ -89,6 +89,7 @@ async function onDonationSuccess() {
     await api.bandit.chosen({
       uid: 'mypostsdonation',
       variant: `${variation.value}-${selectedAmount.value}`,
+      score: selectedAmount.value,
     })
   } catch (err) {
     console.error('Error recording donation conversion:', err)
