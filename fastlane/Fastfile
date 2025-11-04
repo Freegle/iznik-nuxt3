@@ -427,11 +427,11 @@ platform :ios do
 
     # Get the latest build (first in sorted list)
     latest_build = recent_builds.first
-    version = latest_build.version
+    version = latest_build.app_version
     build_number = latest_build.version
 
     UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
-    UI.message("📦 Latest build: version #{version} (#{build_number})")
+    UI.message("📦 Latest build: version #{version}, build #{build_number}")
 
     # Get all App Store versions to diagnose blocking issues
     UI.message("🔍 Checking App Store versions for blocking issues...")
@@ -504,16 +504,25 @@ platform :ios do
     unless app_store_version
       begin
         UI.message("📝 Creating new App Store version #{version}...")
-        app_store_version = app.create_app_store_version!(
+        app_store_version = Spaceship::ConnectAPI::AppStoreVersion.create(
+          app_id: app.id,
           version_string: version,
           platform: Spaceship::ConnectAPI::Platform::IOS
         )
         UI.success("✅ Created App Store version #{version} (ID: #{app_store_version.id})")
       rescue => e
         UI.error("❌ Failed to create App Store version: #{e.message}")
-        if e.message.downcase.include?("already exists")
+        if e.message.downcase.include?("already exists") || e.message.downcase.include?("version must be unique")
           UI.message("💡 Version already exists, will try to fetch it again")
-          app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
+          sleep 2  # Give API time to sync
+          all_versions = app.get_app_store_versions
+          app_store_version = all_versions.find { |v| v.version_string == version }
+          if app_store_version
+            UI.success("✅ Found existing App Store version #{version}")
+          else
+            UI.error("❌ Could not find or create version #{version}")
+            next
+          end
         else
           raise e
         end
@@ -521,13 +530,15 @@ platform :ios do
     end
 
     # Attach the build to the version
-    begin
-      UI.message("📎 Attaching build #{build_number} to App Store version #{version}...")
-      app_store_version.select_build(build_id: latest_build.id)
-      UI.success("✅ Build attached successfully")
-    rescue => e
-      UI.error("⚠️  Failed to attach build: #{e.message}")
-      # Continue anyway - deliver might handle this
+    if app_store_version
+      begin
+        UI.message("📎 Attaching build #{build_number} to App Store version #{version}...")
+        app_store_version.select_build(build_id: latest_build.id)
+        UI.success("✅ Build attached successfully")
+      rescue => e
+        UI.error("⚠️  Failed to attach build: #{e.message}")
+        # Continue anyway - deliver might handle this
+      end
     end
 
     # Submit to App Store with error handling for duplicate submissions
