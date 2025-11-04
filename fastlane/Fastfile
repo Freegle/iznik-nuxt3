@@ -498,7 +498,37 @@ platform :ios do
       next
     end
 
-    UI.success("🚀 Submitting build #{build_number} (version #{version}) for App Store review...")
+    UI.success("🚀 Preparing to submit build #{build_number} (version #{version}) for App Store review...")
+
+    # Ensure an App Store version exists - create one if needed
+    unless app_store_version
+      begin
+        UI.message("📝 Creating new App Store version #{version}...")
+        app_store_version = app.create_app_store_version!(
+          version_string: version,
+          platform: Spaceship::ConnectAPI::Platform::IOS
+        )
+        UI.success("✅ Created App Store version #{version} (ID: #{app_store_version.id})")
+      rescue => e
+        UI.error("❌ Failed to create App Store version: #{e.message}")
+        if e.message.downcase.include?("already exists")
+          UI.message("💡 Version already exists, will try to fetch it again")
+          app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
+        else
+          raise e
+        end
+      end
+    end
+
+    # Attach the build to the version
+    begin
+      UI.message("📎 Attaching build #{build_number} to App Store version #{version}...")
+      app_store_version.select_build(build_id: latest_build.id)
+      UI.success("✅ Build attached successfully")
+    rescue => e
+      UI.error("⚠️  Failed to attach build: #{e.message}")
+      # Continue anyway - deliver might handle this
+    end
 
     # Submit to App Store with error handling for duplicate submissions
     begin
