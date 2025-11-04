@@ -543,7 +543,10 @@ platform :ios do
           "en-US" => "Bug fixes and improvements"
         },
         submission_information: {
-          add_id_info_uses_idfa: false
+          add_id_info_uses_idfa: false,
+          export_compliance_uses_encryption: false,
+          export_compliance_is_exempt: true,
+          content_rights_contains_third_party_content: false
         }
       )
 
