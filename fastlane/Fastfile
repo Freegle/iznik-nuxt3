@@ -540,10 +540,7 @@ platform :ios do
         precheck_include_in_app_purchases: false,
         app_identifier: "org.ilovefreegle.iphone",
         release_notes: {
-          "en-US" => "Bug fixes and improvements",
-          "en-GB" => "Bug fixes and improvements",
-          "en-AU" => "Bug fixes and improvements",
-          "en-CA" => "Bug fixes and improvements"
+          "en-GB" => "Bug fixes and improvements"
         },
         submission_information: {
           add_id_info_uses_idfa: false,
