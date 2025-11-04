@@ -433,6 +433,14 @@ platform :ios do
     UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
     UI.message("📦 Latest build: version #{version} (#{build_number})")
 
+    # Get all App Store versions to diagnose blocking issues
+    UI.message("🔍 Checking App Store versions for blocking issues...")
+    all_versions = app.get_app_store_versions
+    UI.message("📋 Found #{all_versions.length} App Store version(s):")
+    all_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state} (ID: #{v.id})")
+    end
+
     # Check if this build is already in review or approved
     # Get the app store version for this version number
     app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
@@ -463,13 +471,24 @@ platform :ios do
     end
 
     # Check if there's any version blocking submission (in editable states)
-    blocking_version = app.get_app_store_versions.find do |v|
-      ["PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"].include?(v.app_store_state)
+    editable_states = ["PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"]
+    blocking_versions = all_versions.select do |v|
+      editable_states.include?(v.app_store_state)
     end
 
-    if blocking_version && blocking_version.version_string != version
-      UI.message("⚠️  Cannot submit: Version #{blocking_version.version_string} is blocking (status: #{blocking_version.app_store_state})")
-      UI.message("💡 Wait for #{blocking_version.version_string} to be approved or reject it in App Store Connect")
+    UI.message("🔍 Editable/blocking versions: #{blocking_versions.length}")
+    blocking_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state}")
+    end
+
+    # Check if there's a different version blocking
+    other_blocking = blocking_versions.find { |v| v.version_string != version }
+    if other_blocking
+      UI.error("⚠️  Cannot submit: Version #{other_blocking.version_string} is blocking (status: #{other_blocking.app_store_state})")
+      UI.message("💡 Action needed in App Store Connect:")
+      UI.message("   1. Go to https://appstoreconnect.apple.com/apps/1563499899/appstore/ios/version/deliverable")
+      UI.message("   2. Either approve/release version #{other_blocking.version_string}, or remove it to clear the way")
+      UI.message("   3. Only one version can be in the submission pipeline at a time")
       next
     end
 
