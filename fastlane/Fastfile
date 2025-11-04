@@ -406,7 +406,12 @@ platform :ios do
 
     # Get all TestFlight builds for the app
     # Sort by upload date descending to get newest first
-    builds = app.get_builds(sort: "-uploadedDate", limit: 50)
+    # Include pre_release_version to get the app_version
+    builds = app.get_builds(
+      sort: "-uploadedDate",
+      limit: 50,
+      includes: "preReleaseVersion"
+    )
 
     if builds.nil? || builds.empty?
       UI.message("ℹ️  No TestFlight builds found")
@@ -427,7 +432,21 @@ platform :ios do
 
     # Get the latest build (first in sorted list)
     latest_build = recent_builds.first
-    version = latest_build.app_version
+
+    # Get version string - try multiple methods
+    version = nil
+    if latest_build.respond_to?(:app_version) && latest_build.app_version
+      version = latest_build.app_version
+    elsif latest_build.respond_to?(:pre_release_version) && latest_build.pre_release_version
+      version = latest_build.pre_release_version.version
+    end
+
+    unless version
+      UI.error("❌ Could not determine version string from build")
+      UI.message("Build object: #{latest_build.inspect}")
+      next
+    end
+
     build_number = latest_build.version
 
     UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
