@@ -821,7 +821,7 @@ test.afterAll(async () => {
 })
 
 // Progress tracking functions
-const PROGRESS_FILE = '/app/test-progress.json'
+const PROGRESS_FILE = path.join(__dirname, 'test-progress.json')
 
 const initializeProgressFile = () => {
   try {
