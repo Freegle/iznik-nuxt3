@@ -635,7 +635,7 @@ platform :ios do
 
         # Create an app store version release request
         # This is the API endpoint that releases a version from PENDING_DEVELOPER_RELEASE
-        client = Spaceship::ConnectAPI::Base.client
+        client = Spaceship::ConnectAPI.client
 
         # POST to create a release request for this version
         response = client.post("appStoreVersionReleaseRequests", {
