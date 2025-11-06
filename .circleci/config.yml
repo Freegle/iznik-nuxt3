@@ -498,6 +498,71 @@ jobs:
               echo "ℹ️  No submission occurred (already in review or no new build found)"
             fi
 
+  auto-release-ios:
+    executor: macos-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+
+      # Install Ruby and Fastlane dependencies
+      - run:
+          name: Install Fastlane
+          command: |
+            gem install bundler
+            bundle install
+
+      # Auto-release approved apps from Pending Developer Release state
+      - run:
+          name: Auto-release Apps from Pending Developer Release
+          command: |
+            bundle exec fastlane ios auto_release
+            echo $? > /tmp/release_status
+
+      # Send notification if release occurred
+      - run:
+          name: Send App Store Release Notification
+          when: on_success
+          command: |
+            if [ -f /tmp/release_status ] && [ "$(cat /tmp/release_status)" = "0" ]; then
+              VERSION=$(cat .new_version 2>/dev/null || echo "$CURRENT_VERSION")
+
+              echo "📧 App Store release notification"
+              echo ""
+              echo "Subject: ✅ Freegle iOS released to App Store: ${VERSION}"
+              echo ""
+              echo "Freegle iOS App - Released to App Store"
+              echo ""
+              echo "Version: ${VERSION}"
+              echo "Status: Released to App Store"
+              echo "Branch: ${CIRCLE_BRANCH}"
+              echo ""
+              echo "The app has been automatically released from Pending Developer Release state."
+              echo ""
+              echo "🔗 View in App Store Connect:"
+              echo "https://appstoreconnect.apple.com/apps/1563499899/appstore/ios/version/deliverable"
+              echo ""
+              echo "🔗 CircleCI Workflow:"
+              echo "${CIRCLE_BUILD_URL}"
+              echo ""
+              echo "The app is now available to users on the App Store."
+              echo ""
+              echo "🤖 Automated notification from CircleCI"
+            else
+              echo "ℹ️  No release occurred (no apps in Pending Developer Release state)"
+            fi
+
   build-ios:
     executor: macos-executor
     steps:
@@ -748,6 +813,11 @@ workflows:
               only:
                 - app-ci-fd
       - auto-submit-ios:
+          filters:
+            branches:
+              only:
+                - app-ci-fd
+      - auto-release-ios:
           filters:
             branches:
               only:

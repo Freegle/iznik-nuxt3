@@ -579,4 +579,93 @@ platform :ios do
       end
     end
   end
+
+  desc "Auto-release approved apps from Pending Developer Release state"
+  lane :auto_release do
+    require 'spaceship'
+
+    UI.message("🔍 Checking for apps in Pending Developer Release state...")
+
+    # Set up App Store Connect API
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Connect to App Store Connect
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY'])
+    )
+
+    app = Spaceship::ConnectAPI::App.find("org.ilovefreegle.iphone")
+    unless app
+      UI.user_error!("❌ Could not find app with identifier org.ilovefreegle.iphone")
+    end
+
+    # Get all App Store versions
+    all_versions = app.get_app_store_versions
+    UI.message("📋 Found #{all_versions.length} App Store version(s):")
+    all_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state} (ID: #{v.id})")
+    end
+
+    # Find versions in PENDING_DEVELOPER_RELEASE state
+    pending_versions = all_versions.select do |v|
+      v.app_store_state == "PENDING_DEVELOPER_RELEASE"
+    end
+
+    if pending_versions.empty?
+      UI.message("ℹ️  No versions in PENDING_DEVELOPER_RELEASE state")
+      next
+    end
+
+    UI.message("📦 Found #{pending_versions.length} version(s) ready to release:")
+    pending_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state}")
+    end
+
+    # Release each pending version
+    pending_versions.each do |version|
+      begin
+        UI.success("🚀 Releasing version #{version.version_string} to App Store...")
+
+        # Use deliver to release the app
+        # This updates the version to be released immediately
+        deliver(
+          app_version: version.version_string,
+          automatic_release: true,
+          force: true,
+          skip_metadata: true,
+          skip_screenshots: true,
+          skip_binary_upload: true,
+          skip_app_version_update: true,
+          precheck_include_in_app_purchases: false,
+          app_identifier: "org.ilovefreegle.iphone",
+          submission_information: {
+            add_id_info_uses_idfa: false,
+            export_compliance_uses_encryption: false,
+            export_compliance_is_exempt: true,
+            content_rights_contains_third_party_content: false
+          }
+        )
+
+        UI.success("✅ Successfully released version #{version.version_string} to App Store!")
+      rescue => e
+        error_message = e.message.to_s.downcase
+        if error_message.include?("already") || error_message.include?("ready_for_sale")
+          UI.message("ℹ️  Version #{version.version_string} appears to already be released")
+          UI.message("✅ No action needed - the app is already available on the App Store")
+        else
+          UI.error("❌ Failed to release version #{version.version_string}: #{e.message}")
+          raise e
+        end
+      end
+    end
+
+    UI.success("✅ Auto-release process completed!")
+  end
 end
