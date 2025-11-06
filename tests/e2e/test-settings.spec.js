@@ -7,6 +7,44 @@ const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
 const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
+/**
+ * @returns a promise to monitor network traffic
+ * and resolve when all required responses have been received,
+ * indicating that the user's new email settings are saved server-side.
+ */
+function getSaveSettingsPromise(page, level) {
+  const responsePromise1 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv1.localhost/api/session') &&
+      response.status() === 200 &&
+      response.request().method() === 'POST' &&
+      (await response.request().postDataJSON()).settings?.simplemail ===
+        level.value
+  )
+  const responsePromise2 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv2.localhost/api/user') &&
+      response.status() === 200 &&
+      response.request().method() === 'GET' &&
+      (await response.json()).settings?.simplemail === level.value
+  )
+  const responsePromise3 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv1.localhost/api/session') &&
+      response.status() === 200 &&
+      response.request().method() === 'GET' &&
+      (await response.json()).me?.settings?.simplemail === level.value
+  )
+
+  const saveSettingsPromise = Promise.all([
+    responsePromise1,
+    responsePromise2,
+    responsePromise3,
+  ])
+
+  return saveSettingsPromise
+}
+
 // Helper function to test email level settings
 async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   console.log(`Testing email level: ${level.text}`)
@@ -33,17 +71,18 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   // Take screenshot before changing the setting
   await takeScreenshot(`Email Level Before ${level.value}`)
 
-  // TODO: this network response won't come in for Standard because that's the default setting.
-  // Find a workaround for this case.
+  // Handle edge case where select value default is equal to target value.
+  const selectedLevel = await emailLevelSelect.inputValue()
+  if (selectedLevel === level.value) {
+    // For now, this allows setting the select back to Standard (the default)
+    // and properly sending network events/actually testing that it changes and persists.
+    await emailLevelSelect.selectOption('None')
+  }
+
   // Start waiting for network response before changing setting - note no await yet
-  const responsePromise = page.waitForResponse(
-    (response) =>
-      response.url().startsWith('http://apiv1.localhost/api/session') &&
-      response.status() === 200 &&
-      response.request().method() === 'POST'
-  )
+  const saveSettingsPromise = getSaveSettingsPromise(page, level)
   await emailLevelSelect.selectOption(level.value) // Then select the email level
-  await responsePromise // Then await the network response indicating settings saved
+  await saveSettingsPromise // Then await the network responses indicating settings saved
 
   // Take screenshot after changing the setting
   await takeScreenshot(`Email Level After ${level.value}`)
