@@ -24,7 +24,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   })
 
   // Get the email level select element - look for the select near the "Choose your email level" text
-  let emailLevelSelect = page.locator('.simpleEmailSelect')
+  const emailLevelSelect = page.locator('.simpleEmailSelect')
 
   // Wait for page to be fully loaded before screenshot
   await page.waitForLoadState('domcontentloaded')
@@ -33,27 +33,30 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   // Take screenshot before changing the setting
   await takeScreenshot(`Email Level Before ${level.value}`)
 
-  // Select the email level
-  await emailLevelSelect.selectOption(level.value)
-
-  // Wait for network requests to complete (settings save)
-  await page.waitForLoadState('networkidle')
-
-  // Wait for the change to be processed
-  await page.waitForTimeout(timeouts.ui.settleTime)
+  // TODO: this network response won't come in for Standard because that's the default setting.
+  // Find a workaround for this case.
+  // Start waiting for network response before changing setting - note no await yet
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.url().startsWith('http://apiv1.localhost/api/session') &&
+      response.status() === 200 &&
+      response.request().method() === 'POST'
+  )
+  await emailLevelSelect.selectOption(level.value) // Then select the email level
+  await responsePromise // Then await the network response indicating settings saved
 
   // Take screenshot after changing the setting
   await takeScreenshot(`Email Level After ${level.value}`)
 
   // Reload the page to verify persistence
+  // TODO: persistence check is failing, is there another specific network response
+  // I need to wait for to ensure the value from the server has been pulled?
   await page.reload({ waitUntil: 'networkidle' })
 
   // Wait for settings to load again
   await page.waitForSelector('text=Email Settings', {
     timeout: timeouts.ui.appearance,
   })
-
-  emailLevelSelect = page.locator('.simpleEmailSelect')
 
   // Wait for the select element to be ready
   await emailLevelSelect.waitFor({ state: 'visible' })
@@ -108,9 +111,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
           expect(['8', '24']).toContain(currentFrequency)
         } else if (level.value === 'Full') {
           // Full can have any frequency including immediate
-          expect(['0', '1', '2', '4', '8', '24']).toContain(
-            currentFrequency
-          )
+          expect(['0', '1', '2', '4', '8', '24']).toContain(currentFrequency)
         }
 
         console.log(
@@ -124,7 +125,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 }
 
 test.describe('Settings Page - Email Level Settings', () => {
-  test.skip('Email level "Off" saves correctly and persists after page reload', async ({
+  test('Email level "Off" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -136,7 +137,7 @@ test.describe('Settings Page - Email Level Settings', () => {
   // TODO: Fix this test - it's failing with timeout issues after user registration
   // The test successfully registers a new user but then fails to properly save/verify email settings
   // Need to investigate why the settings page isn't working correctly after registration
-  test.skip('Email level "Basic" saves correctly and persists after page reload', async ({
+  test('Email level "Basic" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -145,7 +146,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
-  test.skip('Email level "Standard" saves correctly and persists after page reload', async ({
+  test('Email level "Standard" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
