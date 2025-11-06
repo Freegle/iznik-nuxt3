@@ -633,34 +633,40 @@ platform :ios do
       begin
         UI.success("🚀 Releasing version #{version.version_string} to App Store...")
 
-        # Use deliver to release the app
-        # This updates the version to be released immediately
-        deliver(
-          app_version: version.version_string,
-          automatic_release: true,
-          force: true,
-          skip_metadata: true,
-          skip_screenshots: true,
-          skip_binary_upload: true,
-          skip_app_version_update: true,
-          precheck_include_in_app_purchases: false,
-          app_identifier: "org.ilovefreegle.iphone",
-          submission_information: {
-            add_id_info_uses_idfa: false,
-            export_compliance_uses_encryption: false,
-            export_compliance_is_exempt: true,
-            content_rights_contains_third_party_content: false
+        # Create an app store version release request
+        # This is the API endpoint that releases a version from PENDING_DEVELOPER_RELEASE
+        client = Spaceship::ConnectAPI::Base.client
+
+        # POST to create a release request for this version
+        response = client.post("appStoreVersionReleaseRequests", {
+          data: {
+            type: "appStoreVersionReleaseRequests",
+            relationships: {
+              appStoreVersion: {
+                data: {
+                  type: "appStoreVersions",
+                  id: version.id
+                }
+              }
+            }
           }
-        )
+        })
 
         UI.success("✅ Successfully released version #{version.version_string} to App Store!")
+        UI.message("📱 The app should be available on the App Store shortly")
       rescue => e
         error_message = e.message.to_s.downcase
-        if error_message.include?("already") || error_message.include?("ready_for_sale")
-          UI.message("ℹ️  Version #{version.version_string} appears to already be released")
-          UI.message("✅ No action needed - the app is already available on the App Store")
+        if error_message.include?("already") ||
+           error_message.include?("ready_for_sale") ||
+           error_message.include?("cannot create") ||
+           error_message.include?("relationship") ||
+           error_message.include?("not in a releasable state")
+          UI.message("ℹ️  Version #{version.version_string} may already be released or in process")
+          UI.message("📝 Error details: #{e.message}")
+          UI.message("✅ Check App Store Connect to verify current state")
         else
           UI.error("❌ Failed to release version #{version.version_string}: #{e.message}")
+          UI.error("Full error: #{e.inspect}")
           raise e
         end
       end
