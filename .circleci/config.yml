@@ -456,6 +456,7 @@ jobs:
           name: Install Fastlane
           command: |
             gem install bundler
+            bundle update fastlane
             bundle install
 
       # Auto-submit latest TestFlight build to App Store review after 24 hours
@@ -521,6 +522,7 @@ jobs:
           name: Install Fastlane
           command: |
             gem install bundler
+            bundle update fastlane
             bundle install
 
       # Auto-release approved apps from Pending Developer Release state
@@ -680,12 +682,8 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
+            bundle update fastlane
             bundle install
-
-      # Update Fastlane to latest version
-      - run:
-          name: Update Fastlane to Latest Version
-          command: bundle update fastlane
 
       # Setup iOS Certificates and Provisioning Profiles
       - run:
