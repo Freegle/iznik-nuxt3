@@ -24,7 +24,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   })
 
   // Get the email level select element - look for the select near the "Choose your email level" text
-  const emailLevelSelect = page.locator('.simpleEmailSelect')
+  const emailLevelSelect = page.locator('select.simpleEmailSelect')
 
   // Wait for page to be fully loaded before screenshot
   await page.waitForLoadState('domcontentloaded')
@@ -53,21 +53,11 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   // I need to wait for to ensure the value from the server has been pulled?
   await page.reload({ waitUntil: 'networkidle' })
 
-  // Wait for settings to load again
-  await page.waitForSelector('text=Email Settings', {
-    timeout: timeouts.ui.appearance,
-  })
-
-  // Wait for the select element to be ready
-  await emailLevelSelect.waitFor({ state: 'visible' })
+  // Verify the selected value persisted
+  await expect(emailLevelSelect).toHaveValue(level.value)
 
   // Take screenshot after page reload to verify persistence
   await takeScreenshot(`Email Level Persisted ${level.value}`)
-
-  // Verify the selected value persisted
-  await page.waitForTimeout(timeouts.ui.settleTime)
-  const selectedValue = await emailLevelSelect.inputValue()
-  expect(selectedValue).toBe(level.value)
 
   console.log(`✓ Email level ${level.text} saved and persisted correctly`)
 
