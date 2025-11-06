@@ -634,23 +634,8 @@ platform :ios do
         UI.success("🚀 Releasing version #{version.version_string} to App Store...")
 
         # Create an app store version release request
-        # This is the API endpoint that releases a version from PENDING_DEVELOPER_RELEASE
-        client = Spaceship::ConnectAPI.client
-
-        # POST to create a release request for this version
-        response = client.post("appStoreVersionReleaseRequests", {
-          data: {
-            type: "appStoreVersionReleaseRequests",
-            relationships: {
-              appStoreVersion: {
-                data: {
-                  type: "appStoreVersions",
-                  id: version.id
-                }
-              }
-            }
-          }
-        })
+        # This releases the version from PENDING_DEVELOPER_RELEASE to the App Store
+        version.create_app_store_version_release_request
 
         UI.success("✅ Successfully released version #{version.version_string} to App Store!")
         UI.message("📱 The app should be available on the App Store shortly")
