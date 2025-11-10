@@ -72,10 +72,6 @@ const userSite = runtimeConfig.public.USER_SITE
 const donationStore = useDonationStore()
 const mobileStore = useMobileStore()
 
-definePageMeta({
-  layout: 'login',
-})
-
 const props = defineProps({
   price: {
     type: Number,

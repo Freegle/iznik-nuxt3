@@ -1,5 +1,17 @@
 <template>
-  <b-modal ref="modal" scrollable :title="title" size="lg" no-stacking>
+  <b-modal
+    ref="modal"
+    :title="variant === 'stripe' ? '' : title"
+    :hide-header="variant === 'stripe'"
+    hide-footer
+    size="lg"
+    no-stacking
+    :body-class="
+      variant === 'stripe' ? 'p-3 bg-transparent overflow-visible' : ''
+    "
+    :content-class="variant === 'stripe' ? 'bg-transparent border-0' : ''"
+    :modal-class="variant === 'stripe' ? 'donation-modal-stripe' : ''"
+  >
     <template #default>
       <div v-if="thankyou">
         <DonationThank />
@@ -51,12 +63,10 @@
             :default="1"
             @score="score"
             @success="thankyou = true"
+            @cancel="hide"
           />
         </div>
       </div>
-    </template>
-    <template #footer>
-      <b-button variant="secondary" @click="hide">Close</b-button>
     </template>
   </b-modal>
 </template>
@@ -129,3 +139,15 @@ const title = computed(() => {
 })
 show()
 </script>
+
+<style scoped lang="scss">
+:deep(.donation-modal-stripe) {
+  .modal-dialog {
+    overflow: visible;
+  }
+
+  .modal-content {
+    overflow: visible;
+  }
+}
+</style>
