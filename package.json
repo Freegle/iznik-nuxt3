@@ -30,7 +30,6 @@
     "node": ">=22.0.0"
   },
   "comments": {
-    "comment1": "When isapp: node_modules/@nuxtjs/google-adsense/dist/module.mjs needs to use https as per patch/@nuxtjs+google-adsense+3.0.0.patch",
     "comment4": "@freegle/capacitor-push-notifications-cap7 is a fork of sorts from https://github.com/ionic-team/capacitor-plugins",
     "comment5": "JAVA_HOME must be C:\\Program Files\\Android\\Android Studio\\jbr",
     "comment6": "Comment out node_modules/@capacitor/cli/dist/android/run.js L40",
@@ -95,7 +94,6 @@
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
     "@freegle/capacitor-push-notifications-cap7": "github:Freegle/capacitor-push-notifications-cap7",
     "@google-pay/button-element": "^3.1.0",
-    "@nuxtjs/google-adsense": "^3.0.0",
     "@nuxtjs/sentry": "^5.1.7",
     "@pinia/nuxt": "0.9.0",
     "@popperjs/core": "^2.11.4",
