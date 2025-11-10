@@ -784,13 +784,10 @@ export default defineNuxtConfig({
                 window.postCookieYes();
               }
             }
-            
-            // config.ISAPP Do not load GSI client script as Google login uses Capacitor plugin: so just run postGSI
-            //window.onGoogleLibraryLoad = postGSI
-            
+
             // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
             // render.
-            // loadScript('https://accounts.google.com/gsi/client')
+            loadScript('https://accounts.google.com/gsi/client')
             ` +
             (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) +
             `
