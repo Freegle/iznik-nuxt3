@@ -73,7 +73,7 @@
         <p>
           You can find more information
           <a
-            href="http://wiki.ilovefreegle.org/Worry_Words"
+            href="https://wiki.ilovefreegle.org/Worry_Words"
             data-realurl="true"
             target="_blank"
             rel="noopener noreferrer"
