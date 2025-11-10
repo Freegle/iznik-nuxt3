@@ -3,7 +3,6 @@ import { CapacitorConfig } from '@capacitor/cli';
 // App-specific tests
 // - Status bar shows correctly on A15, pre-A15 and iOS - AOK iOK 11/3/25
 // - Camera: take photo and select one or more photos - AOK iOK 11/3/25
-// - Yahoo: login - AOK iOK 11/3/25
 // - Google: login - capacitor-social-login - AOK iOK 12/3/25
 // - Facebook: login - capacitor-social-login - AOK iOK 11/3/25
 // - Apple: login - iOK 11/3/25
@@ -51,7 +50,6 @@ const config: CapacitorConfig = {
   android: {
     includePlugins: [
       "cordova-plugin-calendar", // C6 https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
-      "cordova-plugin-inappbrowser", // C7 OK Yahoo
       "@capacitor-community/stripe",
       "@capacitor/app-launcher", // C7 OK eg donate
       "@capacitor/browser",
@@ -79,7 +77,6 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     includePlugins: [
       "cordova-plugin-calendar", // iOS 17: https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
-      "cordova-plugin-inappbrowser",
       "@capacitor-community/stripe",
       "@capacitor/app-launcher",
       "@capacitor/browser",

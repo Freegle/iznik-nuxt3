@@ -1,0 +1,90 @@
+<template>
+  <div class="bg-white rounded border border-info p-2">
+    <div>
+      {{ tag }}<strong>{{ user.displayname }}</strong>
+      <span class="small">
+        <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ user.id }}
+      </span>
+      <div v-if="user.tnuserid" class="text-muted small">
+        TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
+      </div>
+      <div v-if="user.ljuserid" class="text-muted small">
+        LoveJunk user id <v-icon icon="hashtag" scale="0.6" />{{
+          user.ljuserid
+        }}
+      </div>
+      <span v-if="email">
+        (<ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
+        <Clipboard :value="email" />)
+      </span>
+    </div>
+    <b-button variant="white" size="xs" class="mt-1" @click="addAComment">
+      <v-icon icon="tag" /> Add note
+    </b-button>
+    <div v-if="user.comments" class="mt-1">
+      <ModComment
+        v-for="comment in user.comments"
+        :key="'comment-' + comment.id"
+        :comment="comment"
+        :user="user"
+        @updated="updateComments"
+      />
+    </div>
+    <ModCommentAddModal
+      v-if="addComment"
+      ref="addComment"
+      :user="user"
+      :groupid="groupid"
+      @added="updateComments"
+    />
+  </div>
+</template>
+<script>
+export default {
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+    tag: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    groupid: {
+      type: Number,
+      required: true,
+    },
+  },
+  emits: ['reload'],
+  data: function () {
+    return {
+      addComment: false,
+    }
+  },
+  computed: {
+    email() {
+      let ret = null
+
+      if (this.user && this.user.emails) {
+        this.user.emails.forEach((e) => {
+          if (!e.ourdomain && (!ret || e.preferred)) {
+            ret = e.email
+          }
+        })
+      }
+
+      return ret
+    },
+  },
+  methods: {
+    addAComment() {
+      this.addComment = true
+      this.$refs.addComment?.show()
+    },
+    updateComments() {
+      this.$emit('reload')
+    },
+  },
+}
+</script>

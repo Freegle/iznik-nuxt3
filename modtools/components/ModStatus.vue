@@ -1,0 +1,162 @@
+<template>
+  <span
+    title="Platform Status - click for more info"
+    class="clickme"
+    @click="clicked"
+  >
+    <span v-if="!tried" class="trying" />
+    <span v-else-if="error" class="error" />
+    <span v-else-if="warning && supportOrAdmin" class="warning" />
+    <span v-else class="fine" />
+    <b-modal
+      id="statusmmodal"
+      ref="modal"
+      no-stacking
+      size="lg"
+      :title="'Platform Status: ' + headline"
+    >
+      <template #default>
+        <NoticeMessage
+          v-if="(warning || error) && supportOrAdmin"
+          variant="warning"
+          class="mb-2"
+        >
+          There is a problem. If this just mentions
+          <strong>security patches or reboots</strong>, you can ignore it, but
+          if it's something else please alert geeks@ilovefreegle.org if this
+          persists for more than an hour.
+        </NoticeMessage>
+        <NoticeMessage v-else-if="error" variant="warning" class="mb-2">
+          There's a problem, and parts of the system may not be working. The
+          Geeks will be on the case.
+        </NoticeMessage>
+        <NoticeMessage v-else-if="warning" variant="warning" class="mb-2">
+          There's a problem, but the system should still be working. The Geeks
+          will be on the case.
+        </NoticeMessage>
+        <NoticeMessage v-else variant="primary">
+          Everything seems fine.
+        </NoticeMessage>
+        <div v-if="status && status.info">
+          <div v-for="(stat, server) in status.info" :key="server">
+            <div v-if="stat.warning" class="d-flex justify-content-between">
+              <strong>{{ server }}</strong>
+              <em>{{ stat.warningtext }}</em>
+            </div>
+            <div v-if="stat.error" class="d-flex justify-content-between">
+              <strong>{{ server }}</strong>
+              <em>{{ stat.errortext }}</em>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #footer>
+        <b-button variant="white" @click="hide"> Close </b-button>
+      </template>
+    </b-modal>
+  </span>
+</template>
+<script>
+import { useOurModal } from '~/composables/useOurModal'
+
+export default {
+  setup() {
+    const { modal, hide } = useOurModal()
+    return { modal, hide }
+  },
+  data: function () {
+    return {
+      overall: 'green',
+      status: null,
+      updated: null,
+      tried: false,
+    }
+  },
+  computed: {
+    outOfDate() {
+      // Check if we've managed to get it recently.
+      return !this.updated || Date.now() - this.updated >= 1000 * 600
+    },
+    error() {
+      return this.status ? this.status.error : false
+    },
+    warning() {
+      return this.outOfDate || (this.status && this.status.warning)
+    },
+    fine() {
+      return !this.error && !this.warning
+    },
+    headline() {
+      if (this.outOfDate) {
+        return 'Not sure'
+      } else if (this.warning) {
+        return 'Warning'
+      } else if (this.error) {
+        return 'Error'
+      } else {
+        return 'Fine'
+      }
+    },
+  },
+  mounted() {
+    this.checkStatus()
+    this.hide()
+  },
+  beforeUnmount() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
+  },
+  methods: {
+    async checkStatus() {
+      this.status = await this.$api.status.fetch()
+
+      this.tried = true
+
+      if (this.status.ret === 0) {
+        this.updated = Date.now()
+      }
+
+      this.timer = setTimeout(this.checkStatus, 30000)
+    },
+    clicked(e) {
+      this.modal.show()
+      e.preventDefault()
+      e.stopPropagation()
+    },
+  },
+}
+</script>
+<style scoped lang="scss">
+.trying {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: $color-gray--light;
+  display: block;
+}
+
+.error {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: $color-red;
+  display: block;
+}
+
+.warning {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: $color-orange--dark;
+  display: block;
+}
+
+.fine {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: $color-green--medium;
+  display: block;
+}
+</style>

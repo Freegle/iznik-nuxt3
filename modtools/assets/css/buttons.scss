@@ -1,0 +1,91 @@
+// There are six types of button used on the site - primary, secondary, white, danger, warning and link
+
+button {
+  white-space: nowrap !important;
+}
+
+.btn-group-xs > .btn, .btn-xs {
+  padding  : .25rem .4rem !important;
+  font-size  : .875rem !important;
+  line-height  : .5 !important;
+  border-radius : .2rem !important;
+}
+
+// Override some of the default bootstrap definitions
+.btn {
+  font-weight: 500 !important;
+}
+
+.btn-primary {
+  color: $color-white !important;
+
+  &:hover {
+    border-color: $colour-success !important;
+  }
+
+  &:disabled {
+    color: $color-white !important;
+  }
+}
+
+.btn-secondary {
+  &:hover {
+    border-color: $color-black !important;
+  }
+
+  &:disabled {
+    border: none !important;
+  }
+}
+
+// This is the tertiary CTA
+.btn-white {
+  background-color: $color-white !important;
+  border-color: $color-green--dark !important;
+  color: $color-black !important;
+  text-shadow: none !important;
+  -webkit-font-smoothing: antialiased !important;
+  border: 1px $color-black solid !important;
+}
+
+.btn-white:hover {
+  color: $color-white !important;
+  background-color: $color-blue--light !important;
+  border-color: $color-blue--2 !important;
+}
+
+.btn-default {
+  background-color: $color-white !important;
+  background-image: none !important;
+  border-color: $color-green--dark !important;
+  color: $color-black !important;
+  text-shadow: 0 -1px 0 $color-black-opacity-33 !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.btn-warning {
+  background-color: $colour-warning !important;
+  background-image: none !important;
+  border-color: $color-green--dark !important;
+  color: $color-white !important;
+  text-shadow: 0 -1px 0 $color-black-opacity-33 !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+.btn-light {
+  color: $color-gray--normal !important;
+  background-color: inherit !important;
+  font-size: 0.8rem !important;
+  padding: 0 2px 0 2px !important;
+  border: none !important;
+
+  &:hover {
+    color: $color-gray--normal !important;
+  }
+}
+
+.badge {
+  &.text-bg-info {
+    color: white !important;
+  }
+}

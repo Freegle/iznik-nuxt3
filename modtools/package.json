@@ -1,0 +1,33 @@
+{
+  "name": "iznik-modtools",
+  "version": "3.0.43",
+  "description": "Moderation tool for Freegle volunteers",
+  "author": "chriscant",
+  "private": true,
+  "xtype": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "clean": "nuxi cleanup"
+  },
+  "dependencies": {
+    "@geoman-io/leaflet-geoman-free": "^2.18.3",
+    "@handsontable/vue3": "^14.6.1",
+    "@vueup/vue-quill": "^1.2.0",
+    "csv-writer": "^1.6.0",
+    "diff": "^5.2.0",
+    "handsontable": "^14.6.1",
+    "leaflet-draw": "^1.0.4",
+    "letterparser": "^0.1.4",
+    "papaparse": "^5.4.1",
+    "quill-html-edit-button": "^2.2.13",
+    "turf-area": "^3.0.12",
+    "turf-buffer": "^3.0.12",
+    "turf-intersect": "^3.0.12",
+    "turf-polygon": "^1.0.3",
+    "vue-letter": "^0.2.0"
+  }
+}

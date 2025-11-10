@@ -31,7 +31,6 @@ export default class SessionAPI extends BaseAPI {
       appversion,
       applecredentials,
       applelogin,
-      yahoocodelogin,
     },
     log
   ) {
@@ -52,16 +51,9 @@ export default class SessionAPI extends BaseAPI {
         appversion,
         applecredentials,
         applelogin,
-        yahoocodelogin,
       },
       log
     )
-  }
-
-  yahooCodeLogin(yahoocodelogin) {
-    return this.$post('/session', {
-      yahoocodelogin,
-    })
   }
 
   logout() {

@@ -66,6 +66,7 @@ module.exports = {
     onMounted: 'readonly',
     onBeforeUnmount: 'readonly',
     usePinia: 'readonly',
+    piniaPluginPersistedstate: 'readonly',
     navigateTo: 'readonly',
     sendRedirect: 'readonly',
     setResponseStatus: 'readonly',

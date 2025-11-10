@@ -609,9 +609,6 @@ export const useAuthStore = defineStore({
       await api(this.config).user.addEmail(this.user?.id, email, true)
       return await this.fetchUser()
     },
-    async yahooCodeLogin(code) {
-      return await this.$api.session.yahooCodeLogin(code)
-    },
     async removeEmail(email) {
       if (this.user) {
         await api(this.config).user.removeEmail(this.user.id, email)
