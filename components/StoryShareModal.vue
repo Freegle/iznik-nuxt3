@@ -13,7 +13,21 @@
       </p>
       <div>
         <p>You can share using these buttons:</p>
-        <b-list-group :key="'storyshare-' + bump" horizontal class="flex-wrap">
+        <b-button
+          v-if="isApp"
+          variant="primary"
+          size="lg"
+          class="m-3"
+          @click="shareApp"
+        >
+          Share now
+        </b-button>
+        <b-list-group
+          v-else
+          :key="'storyshare-' + bump"
+          horizontal
+          class="flex-wrap"
+        >
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -96,9 +110,11 @@
 // increases the bundle size.  Putting them here allows better bundling.
 import VueSocialSharing from 'vue-social-sharing'
 import { ref, computed } from 'vue'
+import { Share } from '@capacitor/share'
 import { useStoryStore } from '~/stores/stories'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp } from '#app'
+import { useMobileStore } from '@/stores/mobile' // APP
 
 const props = defineProps({
   id: {
@@ -111,6 +127,9 @@ const storyStore = useStoryStore()
 const { modal, hide } = useOurModal()
 const copied = ref(false)
 const bump = ref(0)
+const mobileStore = useMobileStore()
+
+const isApp = ref(mobileStore.isApp) // APP
 
 // We install this plugin here rather than from the plugins folder to reduce page load side in the mainline
 // case.
@@ -135,6 +154,22 @@ async function doCopy() {
 
 function opened() {
   bump.value++
+}
+
+async function shareApp() {
+  // APP
+  const href = story.value.url
+  const subject = 'Sharing ' + story.value.headline
+  try {
+    await Share.share({
+      title: subject,
+      text: story.value.story + '\n\n', // not supported on some apps (Facebook, Instagram)
+      url: href,
+      dialogTitle: 'Share now...',
+    })
+  } catch (e) {
+    console.log('Share exception', e.message)
+  }
 }
 </script>
 <style scoped lang="scss">

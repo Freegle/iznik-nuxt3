@@ -780,7 +780,10 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 - **One submission per day is safe** - well within Apple's limits
 - TestFlight has no daily submission issues
 - App Store review typically takes 24 hours (90% of submissions)
-- Auto-submit only submits if not already in review/approved
+- Auto-submit checks for blocking versions before submission
+- Auto-submit will skip if another version is in review/approved
+- If submission fails, check App Store Connect for versions blocking submission
+- The auto_submit lane provides detailed error messages for troubleshooting
 
 **Artifacts**:
 - IPA file stored in CircleCI artifacts

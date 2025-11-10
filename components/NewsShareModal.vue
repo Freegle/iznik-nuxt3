@@ -13,7 +13,21 @@
       </p>
       <div>
         <p>You can share using these buttons:</p>
-        <b-list-group :key="'newsshare-' + bump" horizontal class="flex-wrap">
+        <b-button
+          v-if="isApp"
+          variant="primary"
+          size="lg"
+          class="m-3"
+          @click="shareApp"
+        >
+          Share now
+        </b-button>
+        <b-list-group
+          v-else
+          :key="'newsshare-' + bump"
+          horizontal
+          class="flex-wrap"
+        >
           <b-list-group-item>
             <ShareNetwork
               network="facebook"
@@ -95,8 +109,12 @@
 <script setup>
 import { ref, computed } from 'vue'
 import VueSocialSharing from 'vue-social-sharing'
+import { Share } from '@capacitor/share'
 import { useOurModal } from '~/composables/useOurModal'
 import { useNuxtApp, useRuntimeConfig } from '#app'
+import { useMobileStore } from '@/stores/mobile'
+
+const mobileStore = useMobileStore()
 
 const props = defineProps({
   newsfeed: {
@@ -123,6 +141,8 @@ const url = computed(() => {
   return null
 })
 
+const isApp = ref(mobileStore.isApp) // APP
+
 async function doCopy() {
   await navigator.clipboard.writeText(url.value)
   copied.value = true
@@ -130,6 +150,21 @@ async function doCopy() {
 
 function opened() {
   bump.value++
+}
+
+async function shareApp() {
+  const href = url.value
+  const subject = 'Sharing Freegle chitchat'
+  try {
+    await Share.share({
+      title: subject,
+      text: props.newsfeed.message + '\n\n', // not supported on some apps (Facebook, Instagram)
+      url: href,
+      dialogTitle: 'Share now...',
+    })
+  } catch (e) {
+    console.log('Share exception', e.message)
+  }
 }
 </script>
 <style scoped lang="scss">

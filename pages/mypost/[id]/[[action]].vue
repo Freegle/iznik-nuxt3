@@ -23,7 +23,7 @@
               <p>
                 Please change your email from
                 <!-- eslint-disable-next-line-->
-              <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>
+                <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>
                 if necessary - we'll merge your accounts.
               </p>
             </b-alert>
@@ -103,27 +103,22 @@ try {
 
   await Promise.all(promises)
 
-  if (myid) {
-    if (fetchedMessage?.fromuser !== myid) {
-      // Message was from a different user. Probably logged in as the wrong user. Let the server know.
-      authStore.addRelatedUser(fetchedMessage.fromuser)
-    } else if (action) {
-      // If they have an intended outcome, then we save that to the server now. This means that if they never
-      // get round to doing anything else on this page we'll assume that's what they wanted. We do this because
-      // we've seen people click the button in the email a lot and then bail out.
-      let outcome = null
+  if (myid === fetchedMessage?.fromuser && action) {
+    // If they have an intended outcome, then we save that to the server now. This means that if they never
+    // get round to doing anything else on this page we'll assume that's what they wanted. We do this because
+    // we've seen people click the button in the email a lot and then bail out.
+    let outcome = null
 
-      if (action === 'repost') {
-        outcome = 'Repost'
-      } else if (action === 'withdraw') {
-        outcome = 'Withdrawn'
-      } else if (action === 'completed') {
-        outcome = fetchedMessage.type === 'Offer' ? 'Taken' : 'Received'
-      }
+    if (action === 'repost') {
+      outcome = 'Repost'
+    } else if (action === 'withdraw') {
+      outcome = 'Withdrawn'
+    } else if (action === 'completed') {
+      outcome = fetchedMessage.type === 'Offer' ? 'Taken' : 'Received'
+    }
 
-      if (outcome) {
-        messageStore.intend(id, outcome)
-      }
+    if (outcome) {
+      messageStore.intend(id, outcome)
     }
   }
 } catch (e) {

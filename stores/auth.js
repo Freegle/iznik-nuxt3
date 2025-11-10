@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
-import { LoginError, SignUpError } from '~/api/APIErrors'
+import { SocialLogin } from '@capgo/capacitor-social-login'
+import { LoginError, SignUpError } from '~/api/BaseAPI'
 import { useComposeStore } from '~/stores/compose'
 import api from '~/api'
+import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 
 export const useAuthStore = defineStore({
@@ -40,6 +42,7 @@ export const useAuthStore = defineStore({
       // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
+      console.log('Saving jwt and persistent')
       this.auth.jwt = jwt
       this.auth.persistent = persistent
     },
@@ -129,10 +132,47 @@ export const useAuthStore = defineStore({
       }
     },
     async logout() {
+      const mobileStore = useMobileStore()
+
       await this.$api.session.logout()
 
-      this.disableGoogleAutoselect()
+      if (!mobileStore.isApp) {
+        this.disableGoogleAutoselect()
+      }
 
+      if (mobileStore.isApp) {
+        try {
+          console.log('Try Facebook logout')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            facebook: {
+              appId: runtimeConfig.public.FACEBOOK_APPID,
+              clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
+            },
+          })
+          await SocialLogin.logout({ provider: 'facebook' })
+          console.log('Facebook logout OK')
+        } catch (e) {
+          console.log('Ignore Facebook logout error', e)
+        }
+
+        try {
+          console.log('Try Google logout')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            google: {
+              webClientId: runtimeConfig.public.GOOGLE_CLIENT_ID, // the web client id for Android and Web
+              iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+            },
+          })
+          await SocialLogin.logout({ provider: 'google' })
+          console.log('Google logout OK')
+        } catch (e) {
+          console.log('Ignore Google logout error', e)
+        }
+
+        this.logoutPushId()
+      }
       // We are going to reset the store, but there are a few things we want to preserve.
       const loginCount = this.loginCount
       const config = this.config
@@ -378,6 +418,8 @@ export const useAuthStore = defineStore({
         // Set the user, which will trigger various re-rendering if we were required to be logged in.
         this.setUser(me)
 
+        await this.savePushId() // Tell server our mobile push notification id, if available
+
         const composeStore = useComposeStore()
         const email = composeStore.email
 
@@ -519,6 +561,49 @@ export const useAuthStore = defineStore({
       })
       await this.fetchUser()
       return this.user
+    },
+    async savePushId() {
+      const mobileStore = useMobileStore()
+      if (mobileStore.mobilePushId === null)
+        console.log('******************* mobileStore.mobilePushId===null')
+      // Tell server our push notification id if logged in
+      if (
+        this.user !== null &&
+        typeof mobileStore.mobilePushId === 'string' &&
+        mobileStore.mobilePushId.length > 0
+      ) {
+        if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
+          console.log('sending mobilePushId', mobileStore.mobilePushId)
+          const params = {
+            notifications: {
+              push: {
+                type: mobileStore.isiOS ? 'FCMIOS' : 'FCMAndroid',
+                subscription: mobileStore.mobilePushId,
+                deviceuserinfo: mobileStore.deviceuserinfo,
+              },
+            },
+          }
+          const data = await this.$api.session.save(params)
+          if (data.ret === 0) {
+            mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
+            console.log('savePushId: saved OK')
+          } else {
+            // 1 === Not logged in
+            console.log(
+              'savePushId: Not logged in: OK will try again when signed in'
+            )
+          }
+        }
+      }
+    },
+    // Remember that we've logged out
+    // It could tell the server to invalidate pushid
+    // However we simply zap acceptedMobilePushId so it is sent when logged in
+    logoutPushId() {
+      // TODO
+      const mobileStore = useMobileStore()
+      mobileStore.acceptedMobilePushId = false
+      console.log('logoutPushId')
     },
     async makeEmailPrimary(email) {
       await api(this.config).user.addEmail(this.user?.id, email, true)
