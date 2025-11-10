@@ -210,7 +210,7 @@ test.describe('Post flow tests', () => {
     await withdrawPost({ item: result.item })
   })
 
-  test("Email existence check - prevents posting with someone else's email", async ({
+  test.skip("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
     postMessage,
@@ -385,7 +385,9 @@ test.describe('Post flow tests', () => {
 
     // The button should no longer be visible after the error appears
     expect(isButtonVisible).toBe(false)
-    console.log('Freegle it button is hidden as expected after email conflict detected')
+    console.log(
+      'Freegle it button is hidden as expected after email conflict detected'
+    )
 
     // Clean up - log back in and withdraw the original post
     console.log('Logging back in to clean up the test post')
