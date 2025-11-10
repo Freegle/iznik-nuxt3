@@ -15,28 +15,10 @@
           Mobile app version: {{ mobileVersion }}, built {{ version }}
           <span style="display: none">{{ mobileInfo }}</span>
         </p>
-        <p>
-          <a href="#" class="d-inline" @click.stop.prevent="showDonationAsk"
-            >donation ask</a
-          >.<br />
-        </p>
-        <b-form-group label="Test variant:" label-for="variant-select">
-          <b-form-select
-            id="variant-select"
-            v-model="selectedVariant"
-            :options="variantOptions"
-          />
-        </b-form-group>
         <RateAppModal
           v-if="showRateAppModal"
           ref="rateAppModal"
           @hidden="showRateAppModal = false"
-        />
-        <DonationAskModal
-          v-if="showDonationModal"
-          ref="donationAskModal"
-          :variant="selectedVariant || 'stripe'"
-          @hidden="showDonationModal = false"
         />
         <h1>How can we help?</h1>
         <p>
@@ -478,9 +460,6 @@ import { useMobileStore } from '@/stores/mobile'
 const SupporterInfoModal = defineAsyncComponent(() =>
   import('~/components/SupporterInfoModal.vue')
 )
-const DonationAskModal = defineAsyncComponent(() =>
-  import('~/components/DonationAskModal.vue')
-)
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
 )
@@ -501,16 +480,7 @@ const faq = ref(null)
 const supporterInfoModal = ref(null)
 const rateAppModal = ref(null)
 const showRateAppModal = ref(false)
-const donationAskModal = ref(null)
-const showDonationModal = ref(false)
-const selectedVariant = ref('stripe')
 const deviceuserinfocopied = ref('Copy app and device info')
-
-const variantOptions = [
-  { value: 'stripe', text: 'Stripe (uses bandit)' },
-  { value: 'buttons2510', text: 'Buttons 2/5/10' },
-  { value: 'buttons51025', text: 'Buttons 5/10/25' },
-]
 
 // Computed properties
 const isApp = ref(mobileStore.isApp) // APP
@@ -557,10 +527,6 @@ function supporterInfo() {
 function showRateMe() {
   window.localStorage.removeItem('rateappnotagain')
   showRateAppModal.value = true
-}
-
-function showDonationAsk() {
-  showDonationModal.value = true
 }
 
 async function copydeviceuserinfo(e) {
