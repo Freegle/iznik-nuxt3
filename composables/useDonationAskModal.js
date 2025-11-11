@@ -54,7 +54,7 @@ export function useDonationAskModal(requestedVariant = null) {
       try {
         if (!requestedVariant) {
           requestedVariant = {
-            variant: 'buttons2510',
+            variant: 'stripe',
           }
 
           let gotnow = false

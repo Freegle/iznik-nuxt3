@@ -204,7 +204,6 @@ async function succeeded() {
   emit('success')
 
   try {
-    // If this was from the legacy 'stripe' variant, record it as such
     const variantToRecord =
       variation.value === 'traditional' && selectedAmount.value === 5
         ? 'stripe'
@@ -238,7 +237,7 @@ onMounted(async () => {
 
       if (chosen && chosen.variant) {
         // Handle legacy 'stripe' variant - map it to traditional-5
-        if (chosen.variant === 'stripe') {
+        if (!chosen.variant.includes('-')) {
           variation.value = 'traditional'
           testAmount.value = 5
           selectedAmount.value = 5

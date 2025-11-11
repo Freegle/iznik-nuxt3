@@ -1,16 +1,14 @@
 <template>
   <b-modal
     ref="modal"
-    :title="variant === 'stripe' ? '' : title"
-    :hide-header="variant === 'stripe'"
+    :title="''"
+    hide-header
     hide-footer
     size="lg"
     no-stacking
-    :body-class="
-      variant === 'stripe' ? 'p-3 bg-transparent overflow-visible' : ''
-    "
-    :content-class="variant === 'stripe' ? 'bg-transparent border-0' : ''"
-    :modal-class="variant === 'stripe' ? 'donation-modal-stripe' : ''"
+    body-class="p-3 bg-transparent overflow-visible"
+    content-class="bg-transparent border-0"
+    modal-class="donation-modal-stripe"
   >
     <template #default>
       <div v-if="thankyou">
@@ -20,52 +18,23 @@
         <p v-if="donated">
           You've already donated to Freegle (on {{ donated }}). Thank you.
         </p>
-        <div v-if="variant === 'buttons2510'">
-          <DonationAskStripe
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            :donated="donated"
-            :amounts="[2, 5, 10]"
-            :default="2"
-            @score="score"
-            @success="thankyou = true"
-          />
-        </div>
-        <div v-else-if="variant === 'buttons51025'">
-          <DonationAskStripe
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            :donated="donated"
-            :amounts="[5, 10, 25]"
-            :default="5"
-            @score="score"
-            @success="thankyou = true"
-          />
-        </div>
         <div v-else-if="variant === 'rateapp'">
           <RateAppAsk @hide="hide" />
         </div>
-        <div v-else-if="variant === 'stripe'">
-          <DonationAskStripe
-            :groupid="groupId"
-            :groupname="groupName"
-            :target="target"
-            :raised="raised"
-            :target-met="targetMet"
-            :donated="donated"
-            :amounts="[1, 5, 10]"
-            :default="1"
-            @score="score"
-            @success="thankyou = true"
-            @cancel="hide"
-          />
-        </div>
+        <DonationAskStripe
+          v-else
+          :groupid="groupId"
+          :groupname="groupName"
+          :target="target"
+          :raised="raised"
+          :target-met="targetMet"
+          :donated="donated"
+          :amounts="[1, 5, 10]"
+          :default="1"
+          @score="score"
+          @success="thankyou = true"
+          @cancel="hide"
+        />
       </div>
     </template>
   </b-modal>
@@ -82,14 +51,6 @@ import { useAuthStore } from '~/stores/auth'
 import { dateshort } from '~/composables/useTimeFormat'
 import RateAppAsk from '~/components/RateAppAsk.vue'
 
-const props = defineProps({
-  variant: {
-    type: String,
-    required: false,
-    default: null,
-  },
-})
-
 const groupStore = useGroupStore()
 const donationStore = useDonationStore()
 const authStore = useAuthStore()
@@ -97,7 +58,7 @@ const authStore = useAuthStore()
 const thankyou = ref(false)
 
 const { modal, hide } = useOurModal()
-const { variant, groupId, show } = await useDonationAskModal(props.variant)
+const { variant, groupId, show } = await useDonationAskModal()
 
 const groupName = computed(() => {
   if (groupId.value && !targetMet.value) {
@@ -128,14 +89,6 @@ const donated = computed(() => {
   const me = authStore.user
 
   return me?.donated ? dateshort(me.donated) : null
-})
-
-const title = computed(() => {
-  if (donated.value) {
-    return 'Thank you for helping keep ' + groupName.value + ' running'
-  } else {
-    return 'Please help keep ' + groupName.value + ' running'
-  }
 })
 show()
 </script>
