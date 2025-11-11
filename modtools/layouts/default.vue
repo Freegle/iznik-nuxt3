@@ -453,7 +453,7 @@ async function logOut() {
   authStore.forceLogin = true
 
   // Go to the landing page.
-  this.$router.push('/')
+  router.push('/')
 }
 
 function requestLogin() {
