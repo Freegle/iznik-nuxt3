@@ -235,24 +235,29 @@ jobs:
           name: Install xcpretty
           command: gem install xcpretty
 
-      # Build debug IPA (no TestFlight upload)
+      # Build ad-hoc IPA for testing (no TestFlight upload)
+      # Note: Using Release configuration with ad-hoc export for easier installation
+      # Safari Web Inspector works on all iOS builds for debugging
       - run:
-          name: Build Debug IPA
+          name: Build Ad-Hoc IPA for Testing
           command: |
+            # Install provisioning profile
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp ~/certificates/ios_appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
             cd ios/App
 
-            # Build with development configuration
+            # Build with Release configuration (ad-hoc distribution requires release)
             xcodebuild \
               -workspace App.xcworkspace \
               -scheme Freegle \
-              -configuration Debug \
+              -configuration Release \
               -archivePath $PWD/build/Freegle.xcarchive \
               archive \
               CODE_SIGN_IDENTITY="iPhone Distribution" \
-              PROVISIONING_PROFILE_SPECIFIER="" \
               | xcpretty
 
-            # Export IPA
+            # Export as ad-hoc IPA
             xcodebuild \
               -exportArchive \
               -archivePath $PWD/build/Freegle.xcarchive \
@@ -260,20 +265,21 @@ jobs:
               -exportOptionsPlist ../../fastlane/ExportOptionsDebug.plist \
               | xcpretty
 
-            echo "✅ Debug IPA built successfully"
+            echo "✅ Ad-hoc IPA built successfully"
             ls -lh build/*.ipa
 
-      # Store the debug IPA as artifact
+      # Store the ad-hoc IPA as artifact
       - store_artifacts:
           path: ios/App/build/Freegle.ipa
-          destination: freegle-debug.ipa
+          destination: freegle-adhoc.ipa
 
       - run:
           name: Build Complete
           command: |
-            echo "🎉 iOS Debug build complete!"
+            echo "🎉 iOS ad-hoc build complete!"
             echo "📱 Download IPA from CircleCI artifacts tab"
             echo "🔍 Install via Xcode or third-party tools for testing"
+            echo "📡 Safari Web Inspector available for debugging"
 
   build-android-debug:
     executor: android-executor
