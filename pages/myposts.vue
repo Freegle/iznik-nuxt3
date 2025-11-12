@@ -19,7 +19,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          <AppUpdateAvailable />
+          <AppUpdateAvailable v-if="mobileStore.isApp" />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -64,6 +64,7 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import { useMessageStore } from '~/stores/message'
 import { useSearchStore } from '~/stores/search'
 import { useMe } from '~/composables/useMe'
@@ -100,6 +101,7 @@ const DonationAskModal = defineAsyncComponent(() =>
 )
 
 const authStore = useAuthStore()
+const mobileStore = useMobileStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
 const trystStore = useTrystStore()

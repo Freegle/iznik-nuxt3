@@ -12,7 +12,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          <AppUpdateAvailable />
+          <AppUpdateAvailable v-if="mobileStore.isApp" />
           <MicroVolunteering />
           <div>
             <GlobalMessage />
@@ -123,6 +123,7 @@ import { loadLeaflet } from '~/composables/useMap'
 import { buildHead } from '~/composables/useBuildHead'
 import VisibleWhen from '~/components/VisibleWhen'
 import { useMiscStore } from '~/stores/misc'
+import { useMobileStore } from '~/stores/mobile'
 import { useAuthStore } from '~/stores/auth'
 import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
@@ -165,6 +166,7 @@ const route = useRoute()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
 const authStore = useAuthStore()
 const groupStore = useGroupStore()
 const isochroneStore = useIsochroneStore()
