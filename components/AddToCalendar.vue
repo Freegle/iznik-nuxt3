@@ -131,15 +131,21 @@ async function download(e) {
 
   // Check if calendar plugin is available
   console.log('Checking for calendar plugin...')
+  console.log('window:', typeof window)
   console.log('window.plugins:', window.plugins)
   console.log('window.plugins.calendar:', window.plugins?.calendar)
 
   if (!window.plugins || !window.plugins.calendar) {
-    console.error('Calendar plugin not available')
-    return
+    console.error('❌ Calendar plugin not available!')
+    console.error('This might mean:')
+    console.error('1. Plugin not synced to Android project')
+    console.error('2. Cordova plugins not loaded yet')
+    console.error('3. Plugin not installed correctly')
+    // Don't return - let it fail naturally so we see the error
+  } else {
+    console.log('✅ Calendar plugin is available!')
   }
 
-  console.log('Calendar plugin is available!')
   console.log('Creating calendar event:', {
     title,
     location: eventLocation,
