@@ -365,6 +365,27 @@ jobs:
           name: Make gradlew executable
           command: chmod +x android/gradlew
 
+      # Create debug keystore if it doesn't exist
+      - run:
+          name: Create Debug Keystore
+          command: |
+            mkdir -p ~/.android
+            if [ ! -f ~/.android/debug.keystore ]; then
+              echo "Creating debug keystore..."
+              keytool -genkey -v \
+                -keystore ~/.android/debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+              echo "✅ Debug keystore created"
+            else
+              echo "✅ Debug keystore already exists"
+            fi
+
       # Build debug APK (enables WebView debugging automatically)
       - run:
           name: Build Debug APK
