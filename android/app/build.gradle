@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "org.ilovefreegle.direct"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "org.ilovefreegle.direct"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1296
+        versionName project.hasProperty('versionName') ? project.property('versionName') : "3.2.28"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            // Load from environment variables for CI/CD
+            if (System.getenv("ANDROID_KEYSTORE_BASE64")) {
+                // Decode base64 keystore from environment variable
+                def keystoreFile = file("${buildDir}/keystore.jks")
+                keystoreFile.parentFile.mkdirs()
+                keystoreFile.bytes = System.getenv("ANDROID_KEYSTORE_BASE64").decodeBase64()
+                storeFile keystoreFile
+            } else if (project.hasProperty('ANDROID_KEYSTORE_FILE')) {
+                storeFile file(project.property('ANDROID_KEYSTORE_FILE'))
+            }
+
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: project.findProperty('ANDROID_KEYSTORE_PASSWORD') ?: ''
+            keyAlias System.getenv("ANDROID_KEY_ALIAS") ?: project.findProperty('ANDROID_KEY_ALIAS') ?: ''
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD") ?: project.findProperty('ANDROID_KEY_PASSWORD') ?: ''
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+    implementation "com.google.firebase:firebase-messaging:23.+"
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}
