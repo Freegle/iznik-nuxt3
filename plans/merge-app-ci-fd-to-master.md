@@ -1,20 +1,67 @@
-# Plan: Merge app-ci-fd Branch into master
+# Plan: Merge app-ci-fd Branch into master (and production)
 
 ## Executive Summary
 
-**Goal**: Consolidate the app-ci-fd branch into master to eliminate code divergence and enable building both web and mobile app from a single branch.
+**Goal**: Consolidate the app-ci-fd branch into master and production to eliminate code divergence and enable building web and mobile from the production branch.
 
 **Current Problem**:
-- app-ci-fd contains fixes (e.g., calendar functionality) not present in master
+- app-ci-fd contains fixes (e.g., calendar functionality) not present in master/production
 - This creates maintenance overhead and bugs when fixes are only applied to one branch
 - Separate branches make it harder to ensure feature parity
+- Apps build from app-ci-fd while web deploys from production, causing version drift
 
 **Proposed Solution**:
-- Merge app-ci-fd into master
+- Merge app-ci-fd into master (for development)
+- Merge master into production (after tests pass - existing workflow)
+- Update CircleCI to build apps from **production branch** (not app-ci-fd)
+- Both web (Netlify) and apps (CircleCI) deploy from production branch
 - Use runtime/build-time configuration switches (`ISAPP` environment variable) to handle platform differences
-- Build both web (Docker) and mobile (CircleCI) from master branch
 
-**Key Finding**: After analysis, there is **NO fundamental technical reason** to maintain separate branches. The codebase already has the infrastructure (ISAPP flag) to support both platforms from a single branch.
+**Key Finding**: After analysis, there is **NO fundamental technical reason** to maintain separate branches. The codebase already has the infrastructure (ISAPP flag) to support both platforms. Apps should deploy from production branch to match web deployment.
+
+---
+
+## Critical: Production Branch Architecture
+
+### Current Deployment Workflow
+
+**Web Deployment**:
+1. Code committed to `master` branch
+2. Tests run on master (PHPUnit, Playwright, Go tests)
+3. **When tests pass**, master is automatically merged into `production` branch
+4. `production` branch triggers Netlify deployment
+5. Live site updated at https://www.ilovefreegle.org
+
+**Mobile Deployment (Current - WRONG)**:
+1. Code committed to `app-ci-fd` branch
+2. CircleCI builds apps from `app-ci-fd`
+3. Apps deployed to Play Store / TestFlight
+4. **Problem**: Apps deploy from different branch than web!
+
+### Correct Architecture (After Merge)
+
+**Both Web and Mobile** should deploy from `production` branch:
+
+1. Code committed to `master` branch
+2. Tests run on master
+3. **When tests pass**, master auto-merged into `production`
+4. `production` branch triggers:
+   - **Netlify**: Deploys web app
+   - **CircleCI**: Builds and deploys mobile apps
+5. Web and mobile stay perfectly in sync
+
+**Why This Matters**:
+- Apps should only deploy AFTER tests pass (same as web)
+- Apps and web must use identical tested code from production
+- Prevents version drift between platforms
+- Single source of truth for deployed code
+
+### Required Changes
+
+1. **Merge app-ci-fd → master**: Consolidate code
+2. **Update CircleCI config**: Change branch filter from `app-ci-fd` to `production`
+3. **Merge master → production**: After tests pass (existing workflow)
+4. **Deprecate app-ci-fd**: No longer needed
 
 ---
 
@@ -150,17 +197,46 @@ git merge app-ci-fd --no-ff -m "Merge app-ci-fd into master: Consolidate web and
 - All web files intact: Docker configs, nuxt.config.ts ✅
 - No unexpected file changes ✅
 
-### Phase 3: Update Build Infrastructure
+### Phase 3: Update CircleCI Configuration
 
-**3.1 Update CircleCI Trigger**
+**3.1 Update Branch Filters in .circleci/config.yml**
+
+**CRITICAL**: Change all branch filters from `app-ci-fd` to `production`:
+
 ```yaml
-# In iznik-nuxt3 GitHub Actions (if exists)
-# Change branch trigger from 'app-ci-fd' to 'master'
+# BEFORE (current - wrong):
+workflows:
+  deploy-apps:
+    jobs:
+      - increment-version:
+          filters:
+            branches:
+              only:
+                - app-ci-fd  # ❌ WRONG
+
+# AFTER (correct):
+workflows:
+  deploy-apps:
+    jobs:
+      - increment-version:
+          filters:
+            branches:
+              only:
+                - production  # ✅ CORRECT
 ```
 
+**Locations to update** (in .circleci/config.yml):
+- Line ~773: `increment-version` job filter
+- Line ~782: `build-android` job filter
+- Line ~790: `build-ios` job filter
+- Line ~800: `auto-promote-schedule` workflow filter
+- Line ~812: `manual-promote-submit` workflow filter
+
+**Why**: Apps should build from production branch (after tests pass), not from app-ci-fd or master.
+
 **3.2 Update Documentation**
-- README.md: Update to mention both web and mobile build from master
-- README-APP.md: Update branch references from app-ci-fd to master
+- README.md: Update to mention both web and mobile deploy from production
+- README-APP.md: Update branch references from app-ci-fd to production
 - CLAUDE.md: Update branch strategy documentation
 
 **3.3 Update Build Commands**
@@ -169,13 +245,37 @@ git merge app-ci-fd --no-ff -m "Merge app-ci-fd into master: Consolidate web and
 npm run dev    # Development
 npm run build  # Production
 
-# Mobile (now from master):
+# Mobile Development (from master):
 ISAPP=true npm run generate  # Build static site
 npx cap sync                 # Sync to native projects
-# Then use CircleCI or local fastlane
+
+# Mobile Production (from production branch):
+# CircleCI automatically builds when production branch updates
 ```
 
-### Phase 4: Testing & Validation
+### Phase 4: Merge to Production
+
+**4.1 Run Tests on Master**
+```bash
+# Ensure all tests pass before merging to production
+git checkout master
+npm run test  # Playwright tests
+# Go tests, PHPUnit tests run in CI
+```
+
+**4.2 Merge Master to Production**
+```bash
+git checkout production
+git merge master --no-ff -m "Merge master to production: Add app build support"
+git push origin production
+```
+
+**4.3 Verify CircleCI Triggers**
+- Push should trigger CircleCI pipeline on production branch
+- Verify .circleci/config.yml is detected
+- Monitor Android and iOS builds
+
+### Phase 5: Testing & Validation
 
 **4.1 Web Build Testing**
 ```bash
@@ -408,16 +508,17 @@ npx cap open android  # Or 'ios' for iOS
 
 ### Key Differences
 
-| Aspect | Web (Docker) | Mobile (CircleCI) |
-|--------|-------------|-------------------|
-| Branch | master | master (after merge) |
+| Aspect | Web (Netlify) | Mobile (CircleCI) |
+|--------|---------------|-------------------|
+| Branch | production | production (after merge) |
 | ISAPP | false | true |
 | SSR | Enabled | Disabled |
 | Target | server | static |
 | Output | .nuxt/ | .output/public/ |
 | Runtime | Node.js server | Static files in native wrapper |
-| Build Tool | Docker | npm + Capacitor + fastlane |
-| Deploy | Docker Registry / Netlify | App Store / Play Store |
+| Build Tool | Nuxt build | npm + Capacitor + fastlane |
+| Deploy | Netlify | App Store / Play Store |
+| Trigger | production branch push | production branch push |
 
 ---
 
@@ -425,10 +526,13 @@ npx cap open android  # Or 'ios' for iOS
 
 ### Immediate Post-Merge
 
-- [ ] Git merge completes without conflicts
+- [ ] Git merge completes without conflicts (app-ci-fd → master)
 - [ ] All app files present in master: android/, ios/, fastlane/, .circleci/
 - [ ] All web files unchanged: Docker configs, nuxt.config.ts
 - [ ] No unexpected file deletions or modifications
+- [ ] CircleCI config updated: branch filters changed to `production`
+- [ ] Master merged to production after tests pass
+- [ ] CircleCI pipeline triggers on production branch
 
 ### Web Platform Validation
 
@@ -492,16 +596,22 @@ npx cap open android  # Or 'ios' for iOS
 
 **Day 2 (Merge & Initial Testing)**:
 - [ ] Execute merge: `git merge app-ci-fd into master`
+- [ ] Update CircleCI config: Change branch filters to `production`
 - [ ] Immediate smoke tests: Git status, file presence
 - [ ] Test web build locally: Docker containers
 - [ ] Test mobile build locally: `ISAPP=true npm run generate`
+- [ ] Commit CircleCI config changes
 - [ ] Push to master
 
-**Day 3 (CI/CD Validation)**:
-- [ ] Verify CircleCI pipeline triggers
+**Day 3 (Production Merge & CI/CD Validation)**:
+- [ ] Wait for tests to pass on master
+- [ ] Merge master → production: `git checkout production && git merge master`
+- [ ] Push production: `git push origin production`
+- [ ] Verify CircleCI pipeline triggers on production branch
 - [ ] Monitor iOS build completion
 - [ ] Monitor Android build completion
 - [ ] Verify Play Store / TestFlight uploads
+- [ ] Verify Netlify deployment
 - [ ] Test deployed mobile apps
 
 **Day 4 (Integration Testing)**:
@@ -579,16 +689,17 @@ ISAPP=true npm run generate
 ### For CI/CD
 
 **Before merge**:
-- Web: Docker builds from master
+- Web: Netlify deploys from production
 - Mobile: CircleCI builds from app-ci-fd
-- Separate branch protection rules
+- Different branches = version drift
 - Risk of divergence
 
 **After merge**:
-- Web: Docker builds from master (unchanged)
-- Mobile: CircleCI builds from master (changed)
-- Single branch protection rule
+- Web: Netlify deploys from production (unchanged)
+- Mobile: CircleCI builds from production (changed)
+- Same branch = perfect sync
 - No divergence possible
+- Apps only deploy after tests pass (same as web)
 
 ### For Testing
 
@@ -694,14 +805,17 @@ ISAPP=true npm run generate
 - [ ] Test mobile build: `ISAPP=true npm run generate && npx cap sync`
 
 ### Push & CI/CD
-- [ ] Push to master: `git push origin master`
-- [ ] Monitor GitHub Actions (if any)
-- [ ] Monitor CircleCI pipeline
+- [ ] Push master: `git push origin master`
+- [ ] Wait for tests to pass on master
+- [ ] Auto-merge master → production (existing workflow)
+- [ ] Push production: `git push origin production` (or wait for auto-merge)
+- [ ] Monitor CircleCI pipeline on production branch
 - [ ] Check CircleCI detects .circleci/config.yml
 - [ ] Wait for Android build completion
 - [ ] Wait for iOS build completion
 - [ ] Verify Play Store upload
 - [ ] Verify TestFlight upload
+- [ ] Verify Netlify deployment triggered
 
 ### Testing
 - [ ] Web smoke test: Login, create post, send chat message
