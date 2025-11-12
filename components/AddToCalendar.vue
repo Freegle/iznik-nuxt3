@@ -93,18 +93,50 @@ async function download(e) {
   }
 
   // APP version - use Cordova calendar plugin with structured data
-  // Parse the start date and time using dayjs with timezone support
-  const startDateTime = `${eventData.startDate} ${eventData.startTime}`
-  const endDateTime = `${eventData.startDate} ${eventData.endTime}`
+  let startDate, endDate
 
-  // Create dates in the specified timezone and convert to local device time
-  const startDate = dayjs.tz(startDateTime, eventData.timeZone).toDate()
-  const endDate = dayjs.tz(endDateTime, eventData.timeZone).toDate()
+  try {
+    // Try to use timezone-aware parsing
+    const startDateTime = `${eventData.startDate} ${eventData.startTime}`
+    const endDateTime = `${eventData.startDate} ${eventData.endTime}`
+
+    startDate = dayjs.tz(startDateTime, eventData.timeZone).toDate()
+    endDate = dayjs.tz(endDateTime, eventData.timeZone).toDate()
+
+    // Validate the dates
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new TypeError('Invalid dates from timezone parsing')
+    }
+    console.log('Using timezone-aware dates:', startDate, endDate)
+  } catch (err) {
+    // Fallback to simple local time parsing if timezone parsing fails
+    console.log('Timezone parsing failed, using fallback:', err)
+    const [year, month, day] = eventData.startDate.split('-').map(Number)
+    const [startHour, startMin] = eventData.startTime.split(':').map(Number)
+    const [endHour, endMin] = eventData.endTime.split(':').map(Number)
+
+    startDate = new Date(year, month - 1, day, startHour, startMin, 0)
+    endDate = new Date(year, month - 1, day, endHour, endMin, 0)
+    console.log('Using fallback dates:', startDate, endDate)
+  }
 
   const title = eventData.name
   const eventLocation = eventData.location || ''
   const notes = eventData.description
-  // console.log('window.plugins',window.plugins)
+
+  // Check if calendar plugin is available
+  if (!window.plugins || !window.plugins.calendar) {
+    console.error('Calendar plugin not available')
+    return
+  }
+
+  console.log('Creating calendar event:', {
+    title,
+    location: eventLocation,
+    notes,
+    startDate,
+    endDate,
+  })
 
   // Call hasWritePermission
   // Then requestWritePermission if necessary
@@ -113,13 +145,13 @@ async function download(e) {
     console.log('Add calendar success', JSON.stringify(message))
   }
   const error = function (message) {
-    console.log('Add calendar error: ' + message)
-  } // TODO
-  const error1 = function (message) {
-    console.log('hasWritePermission error: ' + message)
+    console.error('Add calendar error:', message)
   }
-  const errorw = function () {
-    console.log('requestWritePermission error')
+  const error1 = function (message) {
+    console.error('hasWritePermission error:', message)
+  }
+  const errorw = function (message) {
+    console.error('requestWritePermission error:', message)
   }
   const successw = function () {
     console.log('requestWritePermission success')
@@ -134,8 +166,9 @@ async function download(e) {
     )
   }
   const success1 = function (message) {
-    console.log('hasWritePermission success', JSON.stringify(message))
+    console.log('hasWritePermission success:', JSON.stringify(message))
     if (message || !mobileStore.isiOS) {
+      console.log('Calling createEventInteractively directly')
       window.plugins.calendar.createEventInteractively(
         title,
         eventLocation,
@@ -146,10 +179,11 @@ async function download(e) {
         error
       )
     } else {
-      window.plugins.calendar.requestWritePermission(successw, errorw) // Android: successw not called
+      console.log('Requesting write permission first')
+      window.plugins.calendar.requestWritePermission(successw, errorw)
     }
   }
 
-  window.plugins.calendar.hasWritePermission(success1, error1) // Always success: message: self.eventStore != nil
+  window.plugins.calendar.hasWritePermission(success1, error1)
 }
 </script>
