@@ -8,8 +8,8 @@ const CONFIG = {
   USE_COOKIES: process.env.USE_COOKIES === 'True', // 'True' or 'False'
 
   // Legacy API, especially mod ops.
-  APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',
-  // APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
+  // APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',
+  APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
   // New style API, for fast read ops.
   APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org/apiv2',
@@ -24,8 +24,10 @@ const CONFIG = {
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
-  TUS_UPLOADER: process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
-  IMAGE_DELIVERY: process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
+  TUS_UPLOADER:
+    process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
+  IMAGE_DELIVERY:
+    process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
 
   // OpenStreetMap Tile Server
   OSM_TILE:
