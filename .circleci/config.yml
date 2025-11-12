@@ -248,6 +248,8 @@ jobs:
             cd ios/App
 
             # Build with Release configuration (ad-hoc distribution requires release)
+            # Save full logs for debugging (don't use xcpretty which hides errors)
+            set -o pipefail
             xcodebuild \
               -workspace App.xcworkspace \
               -scheme Freegle \
@@ -255,7 +257,7 @@ jobs:
               -archivePath $PWD/build/Freegle.xcarchive \
               archive \
               CODE_SIGN_IDENTITY="iPhone Distribution" \
-              | xcpretty
+              2>&1 | tee build/xcodebuild-archive.log
 
             # Export as ad-hoc IPA
             xcodebuild \
@@ -263,10 +265,21 @@ jobs:
               -archivePath $PWD/build/Freegle.xcarchive \
               -exportPath $PWD/build \
               -exportOptionsPlist ../../fastlane/ExportOptionsDebug.plist \
-              | xcpretty
+              2>&1 | tee build/xcodebuild-export.log
 
             echo "✅ Ad-hoc IPA built successfully"
             ls -lh build/*.ipa
+
+      # Store build logs as artifacts
+      - store_artifacts:
+          path: ios/App/build/xcodebuild-archive.log
+          destination: xcodebuild-archive.log
+          when: always
+
+      - store_artifacts:
+          path: ios/App/build/xcodebuild-export.log
+          destination: xcodebuild-export.log
+          when: always
 
       # Store the ad-hoc IPA as artifact
       - store_artifacts:
