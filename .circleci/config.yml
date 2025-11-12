@@ -398,7 +398,7 @@ jobs:
             ls -lh app/build/outputs/apk/debug/
             echo ""
             echo "📦 APK Contents (first 20 files):"
-            unzip -l app/build/outputs/apk/debug/app-debug.apk | head -20
+            unzip -l app/build/outputs/apk/debug/app-debug.apk | head -20 || true
 
       # Store the debug APK as artifact
       - store_artifacts:
