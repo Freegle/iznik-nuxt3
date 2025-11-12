@@ -1,6 +1,5 @@
-// Stub mobile store for web builds
-// The real mobile store exists only in the app-ci-fd branch
 import { defineStore } from 'pinia'
+import { Capacitor } from '@capacitor/core'
 
 export const useMobileStore = defineStore({
   id: 'mobile',
@@ -18,8 +17,21 @@ export const useMobileStore = defineStore({
   actions: {
     init(config) {
       this.config = config
-      // For web builds, isApp is always false
-      this.isApp = false
+
+      // Detect if running in a native Capacitor app
+      // This works for both app and web builds
+      const platform = Capacitor.getPlatform()
+      this.isApp = platform === 'ios' || platform === 'android'
+      this.isiOS = platform === 'ios'
+
+      if (this.isApp) {
+        console.log(
+          'Mobile store initialized - running in Capacitor app:',
+          platform
+        )
+      } else {
+        console.log('Mobile store initialized - running in web browser')
+      }
     },
   },
 })
