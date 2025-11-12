@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test')
-const {
-  logoutIfLoggedIn,
-  signUpViaHomepage,
-} = require('./utils/user')
+const { logoutIfLoggedIn, signUpViaHomepage } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
-const { clickToggle } = require('./utils/ui')
 const { testUsers, timeouts } = require('./config')
 
-// Helper function to verify marketing consent in settings.
+/**
+ * Helper function to verify marketing consent in settings.
+ *
+ * @returns {Promise<import('@playwright/test').Locator>} - The locator for the toggle element that can be clicked
+ */
 async function verifyMarketingConsentInSettings(page, expectedChecked) {
   console.log(
     `[DEBUG] verifyMarketingConsentInSettings: Expected consent = ${expectedChecked}`
@@ -78,7 +78,7 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
   }
 
   console.log(`[DEBUG] Marketing consent verification completed successfully`)
-  return ourToggle
+  return ourToggle.locator('.toggle-container')
 }
 
 // Helper function for signup marketing consent tests
@@ -186,9 +186,10 @@ test.describe('Marketing Consent', () => {
     // Navigate to settings and get initial toggle
     let settingsToggle = await verifyMarketingConsentInSettings(page, true)
 
-    // Toggle it off using the clickToggle utility
-    await clickToggle(settingsToggle)
+    // Toggle it off
+    await settingsToggle.click()
 
+    // TODO: replace line below with wait for network response
     // Wait for the change to be saved
     await page.waitForTimeout(timeouts.ui.settleTime)
 
@@ -196,11 +197,13 @@ test.describe('Marketing Consent', () => {
     await page.reload()
     settingsToggle = await verifyMarketingConsentInSettings(page, false)
 
-    // Toggle it back on using the clickToggle utility
-    await clickToggle(settingsToggle)
+    // Toggle it back on
+    await settingsToggle.click()
 
+    // TODO: replace line below with wait for network response
     // Wait and refresh again
     await page.waitForTimeout(timeouts.ui.settleTime)
+
     await page.reload()
     await verifyMarketingConsentInSettings(page, true)
   })
