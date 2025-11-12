@@ -1,6 +1,7 @@
 package org.ilovefreegle.direct;
 
 import android.util.Log;
+import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
 import android.os.Bundle;
 import ee.forgr.capacitor.social.login.GoogleProvider;
@@ -9,13 +10,19 @@ import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
 import com.getcapacitor.PluginHandle;
 import com.getcapacitor.Plugin;
 import android.content.Intent;
-import android.util.Log;
 
 public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
 
   public void onCreate(Bundle savedInstanceState) {
     //Log.e("PHDCC","org.ilovefreegle.direct onCreate A");
     super.onCreate(savedInstanceState);
+
+    // Enable WebView debugging for chrome://inspect only in debuggable builds
+    if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+      WebView.setWebContentsDebuggingEnabled(true);
+      Log.d("MainActivity", "WebView debugging enabled for chrome://inspect");
+    }
+
     registerPlugin(com.getcapacitor.community.stripe.StripePlugin.class);
   }
 

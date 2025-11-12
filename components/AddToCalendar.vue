@@ -47,10 +47,12 @@ const props = defineProps({
 const message = ref(null) // TODO Seems unused
 
 async function download(e) {
+  console.log('AddToCalendar button clicked!')
   e.preventDefault()
   e.stopPropagation()
 
   // Extract and decode the calendar data from the link
+  console.log('calendarLink:', props.calendarLink)
   const url = new URL(props.calendarLink)
   const encodedData = url.searchParams.get('data')
   if (!encodedData) {
@@ -58,10 +60,13 @@ async function download(e) {
     return
   }
 
+  console.log('Decoding calendar data...')
   const decodedData = atob(encodedData)
   const eventData = JSON.parse(decodedData)
+  console.log('Event data:', eventData)
 
   const mobileStore = useMobileStore()
+  console.log('Is app?', mobileStore.isApp)
   if (!mobileStore.isApp) {
     // Web version - generate ICS file from the structured data
     const startDateTime = `${eventData.startDate.replace(
@@ -125,9 +130,20 @@ async function download(e) {
   const notes = eventData.description
 
   // Check if calendar plugin is available
+  console.log('Checking for calendar plugin...')
+  console.log('window:', typeof window)
+  console.log('window.plugins:', window.plugins)
+  console.log('window.plugins.calendar:', window.plugins?.calendar)
+
   if (!window.plugins || !window.plugins.calendar) {
-    console.error('Calendar plugin not available')
-    return
+    console.error('❌ Calendar plugin not available!')
+    console.error('This might mean:')
+    console.error('1. Plugin not synced to Android project')
+    console.error('2. Cordova plugins not loaded yet')
+    console.error('3. Plugin not installed correctly')
+    // Don't return - let it fail naturally so we see the error
+  } else {
+    console.log('✅ Calendar plugin is available!')
   }
 
   console.log('Creating calendar event:', {
