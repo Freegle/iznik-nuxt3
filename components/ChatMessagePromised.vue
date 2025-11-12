@@ -45,7 +45,11 @@
               {{ refmsg?.subject }}
             </h4>
           </nuxt-link>
-          <AddToCalendar v-if="tryst" :ics="tryst.ics" class="mr-2" />
+          <AddToCalendar
+            v-if="tryst?.calendarLink"
+            :calendar-link="tryst.calendarLink"
+            class="mr-2"
+          />
           <notice-message
             v-if="refmsg.outcomes?.length || refmsg.deleted"
             class="mt-2 mb-2"
@@ -142,7 +146,11 @@
             class="d-flex mt-1 flex-wrap justify-content-between"
           >
             <template v-if="tryst">
-              <AddToCalendar :ics="tryst.ics" class="mr-2 mb-1" />
+              <AddToCalendar
+                v-if="tryst?.calendarLink"
+                :calendar-link="tryst.calendarLink"
+                class="mr-2 mb-1"
+              />
               <b-button
                 v-if="refmsg.promisecount && refmsg.availablenow"
                 variant="secondary"
