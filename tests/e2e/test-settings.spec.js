@@ -54,22 +54,10 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   await signUpViaHomepage(page, testEmail, 'Test User')
 
   // Navigate to settings page
-  await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
-
-  // Wait for the email settings section to load
-  await page.waitForSelector('text=Email Settings', {
-    timeout: timeouts.ui.appearance,
-  })
+  await page.gotoAndVerify('/settings')
 
   // Get the email level select element - look for the select near the "Choose your email level" text
   const emailLevelSelect = page.locator('select.simpleEmailSelect')
-
-  // Wait for page to be fully loaded before screenshot
-  await page.waitForLoadState('domcontentloaded')
-  await page.waitForTimeout(1000)
-
-  // Take screenshot before changing the setting
-  await takeScreenshot(`Email Level Before ${level.value}`)
 
   // Handle edge case where select value default is equal to target value.
   const selectedLevel = await emailLevelSelect.inputValue()
@@ -84,19 +72,11 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   await emailLevelSelect.selectOption(level.value) // Then select the email level
   await saveSettingsPromise // Then await the network responses indicating settings saved
 
-  // Take screenshot after changing the setting
-  await takeScreenshot(`Email Level After ${level.value}`)
-
   // Reload the page to verify persistence
-  // TODO: persistence check is failing, is there another specific network response
-  // I need to wait for to ensure the value from the server has been pulled?
-  await page.reload({ waitUntil: 'networkidle' })
+  await page.reload()
 
   // Verify the selected value persisted
   await expect(emailLevelSelect).toHaveValue(level.value)
-
-  // Take screenshot after page reload to verify persistence
-  await takeScreenshot(`Email Level Persisted ${level.value}`)
 
   console.log(`✓ Email level ${level.text} saved and persisted correctly`)
 
@@ -110,9 +90,6 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 
     // Click to show advanced settings
     await advancedButton.click()
-
-    // Wait for advanced settings to appear
-    await page.waitForTimeout(timeouts.ui.transition)
 
     // Look for email frequency settings in advanced view
     const emailFrequencySection = page.locator(
