@@ -395,6 +395,37 @@ jobs:
             echo "✅ Debug APK built successfully"
             ls -lh app/build/outputs/apk/debug/
 
+      # Verify APK signature
+      - run:
+          name: Verify APK Signature
+          command: |
+            APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
+
+            echo "📋 APK Info:"
+            ls -lh "$APK_PATH"
+
+            echo ""
+            echo "🔐 Checking APK signature with apksigner:"
+            $ANDROID_HOME/build-tools/*/apksigner verify --verbose "$APK_PATH" || {
+              echo "❌ APK signature verification failed!"
+              echo "Attempting to sign APK manually..."
+
+              # Sign the APK manually
+              $ANDROID_HOME/build-tools/*/apksigner sign \
+                --ks ~/.android/debug.keystore \
+                --ks-key-alias androiddebugkey \
+                --ks-pass pass:android \
+                --key-pass pass:android \
+                "$APK_PATH"
+
+              echo "Verifying again after manual signing:"
+              $ANDROID_HOME/build-tools/*/apksigner verify --verbose "$APK_PATH"
+            }
+
+            echo ""
+            echo "📦 APK Contents:"
+            unzip -l "$APK_PATH" | head -20
+
       # Store the debug APK as artifact
       - store_artifacts:
           path: android/app/build/outputs/apk/debug/app-debug.apk
@@ -406,6 +437,13 @@ jobs:
             echo "🎉 Debug build complete!"
             echo "📱 Download APK from CircleCI artifacts tab"
             echo "🔍 This build has WebView debugging enabled for chrome://inspect"
+            echo ""
+            echo "⚠️  IMPORTANT: Before installing debug APK:"
+            echo "1. Uninstall any existing Freegle app (different signature)"
+            echo "2. Check APK size is reasonable (should be 50-80MB)"
+            echo "3. Try installing via 'adb install' if direct install fails"
+            echo ""
+            echo "Debug via: chrome://inspect/#devices"
 
   build-android:
     executor: android-executor
