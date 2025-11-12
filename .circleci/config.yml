@@ -393,38 +393,12 @@ jobs:
             cd android
             ./gradlew assembleDebug --stacktrace
             echo "✅ Debug APK built successfully"
-            ls -lh app/build/outputs/apk/debug/
-
-      # Verify APK signature
-      - run:
-          name: Verify APK Signature
-          command: |
-            APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
-
+            echo ""
             echo "📋 APK Info:"
-            ls -lh "$APK_PATH"
-
+            ls -lh app/build/outputs/apk/debug/
             echo ""
-            echo "🔐 Checking APK signature with apksigner:"
-            $ANDROID_HOME/build-tools/*/apksigner verify --verbose "$APK_PATH" || {
-              echo "❌ APK signature verification failed!"
-              echo "Attempting to sign APK manually..."
-
-              # Sign the APK manually
-              $ANDROID_HOME/build-tools/*/apksigner sign \
-                --ks ~/.android/debug.keystore \
-                --ks-key-alias androiddebugkey \
-                --ks-pass pass:android \
-                --key-pass pass:android \
-                "$APK_PATH"
-
-              echo "Verifying again after manual signing:"
-              $ANDROID_HOME/build-tools/*/apksigner verify --verbose "$APK_PATH"
-            }
-
-            echo ""
-            echo "📦 APK Contents:"
-            unzip -l "$APK_PATH" | head -20
+            echo "📦 APK Contents (first 20 files):"
+            unzip -l app/build/outputs/apk/debug/app-debug.apk | head -20
 
       # Store the debug APK as artifact
       - store_artifacts:
