@@ -39,8 +39,9 @@ android {
         debug {
             // Use default debug signing (automatic debug keystore)
             // This enables WebView debugging automatically
-            applicationIdSuffix ".debug"
             debuggable true
+            // Note: No applicationIdSuffix so package name matches google-services.json
+            // This means debug and release can't be installed side-by-side
         }
         release {
             signingConfig signingConfigs.release
