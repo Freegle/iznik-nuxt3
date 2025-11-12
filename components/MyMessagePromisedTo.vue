@@ -26,8 +26,8 @@
     </div>
     <div class="d-flex flex-wrap small">
       <AddToCalendar
-        v-if="promise.trystdate"
-        :ics="promise.tryst.ics"
+        v-if="promise.tryst?.calendarLink"
+        :calendar-link="promise.tryst.calendarLink"
         variant="link"
         btn-class="ps-0"
         :size="btnSize"
