@@ -12,19 +12,27 @@ This document describes the mobile app version of Freegle, which is built using 
 
 ## Overview
 
-The mobile app is managed in the `app-ci-fd` branch (based on the original `app` branch) and contains extensive modifications to support native mobile functionality. The app shares most of the Vue components and business logic with the web version but uses a different build configuration and includes native platform code.
+The mobile app is built from the `production` branch (same as the web app) and includes native Android and iOS platform code. The app shares all Vue components and business logic with the web version but uses a different build configuration controlled by the `ISAPP` environment variable.
 
 <details>
-<summary><h2>App Branch vs Master Branch</h2></summary>
+<summary><h2>Mobile App vs Web App</h2></summary>
 
-The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app version** that differs from `master` in several key ways:
+The mobile and web apps are built from the **same codebase** (`production` branch) with build-time differences:
 
 ### Build Configuration Differences
 
-- **SSR Disabled**: Uses Static Site Generation instead of Server-Side Rendering
-- **Build Target**: `static` instead of `server`
+- **SSR Disabled**: Mobile uses Static Site Generation instead of Server-Side Rendering
+- **Build Target**: `static` (mobile) instead of `server` (web)
 - **Environment Flag**: `ISAPP=true` to detect mobile app context
-- **No Docker**: Mobile apps don't use the Docker-based infrastructure
+- **Build Pipeline**: CircleCI (mobile) vs Netlify (web)
+- **Deploy Trigger**: Both deploy from `production` branch after tests pass on `master`
+
+### Unified Codebase Benefits
+
+- **Single Source of Truth**: All code in one place, no branch divergence
+- **Automatic Sync**: Fixes automatically apply to both platforms
+- **Consistent Testing**: Same tests validate both web and mobile code
+- **Simplified Maintenance**: No need to manually sync branches
 
 </details>
 
@@ -519,7 +527,7 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - ✅ Valid JSON structure
 - 📧 Service account email (for debugging)
 
-**Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
+**Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production
 - Look for "✅ Google Play API key file validated" in decode step
 - Look for "📱 Current version from CircleCI: X.Y.Z" in deploy step
 - Look for "📱 Auto-incremented version name: X.Y.Z → X.Y.(Z+1)" in deploy step
@@ -537,7 +545,7 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 ### CircleCI Automated Builds (Both Platforms)
 
-**Triggered on**: Pushes to `app-ci-fd` branch
+**Triggered on**: Pushes to `production` branch (after tests pass on `master`)
 
 **Jobs Workflow**:
 
@@ -581,7 +589,7 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - **Android**: `android-bundle/app-release.aab`, `android-apk/app-release.apk`
 - **iOS**: IPA file in artifacts
 
-**Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
+**Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production
 
 ### Local Development
 
@@ -721,13 +729,20 @@ Both iOS and Android are built and deployed in parallel with shared version numb
    - Both build and upload to beta/testing tracks
    - **Artifacts stored** for both platforms
 
-**Automated Daily Workflow**:
+**Deployment Workflow**:
 
-1. **11:00 PM UTC - Trigger**:
-   - **Automatic daily merge**: GitHub Actions auto-merges `production` → `app-ci-fd` at 11pm UTC
-   - Only tested code from production branch is deployed to mobile apps
-   - Manual push to `app-ci-fd` branch also triggers build
-   - Workflow: `.github/workflows/auto-merge-master.yml`
+1. **Development**:
+   - Code committed to `master` branch
+   - Tests run automatically (Playwright, PHPUnit, Go tests)
+
+2. **Production Merge**:
+   - When tests pass, `master` is auto-merged to `production` branch
+   - Only tested code reaches production
+
+3. **Deployment Triggers** (from `production` branch):
+   - **Web**: Netlify deploys web application
+   - **Mobile**: CircleCI builds and deploys iOS/Android apps
+   - Both platforms deploy from same tested code
 
 2. **Build and Deploy (11:00-11:30 PM UTC)**:
    - **Android**: Uploads to Google Play Beta (Open Testing)
@@ -791,15 +806,15 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 ### Manual Triggers
 
 **Build Workflow:**
-- Push to `app-ci-fd` branch: triggers full build workflow
+- Push to `production` branch: triggers full build workflow
 - Rerun CircleCI workflow: rebuilds current commit
 
 **Manual Promotion/Submission (via CircleCI):**
 To manually trigger promotion/submission before the scheduled time:
 
-1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd)
+1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production)
 2. Click "Trigger Pipeline" (top right)
-3. Select branch: `app-ci-fd`
+3. Select branch: `production`
 4. Click "Add Parameters" (expand the parameters section)
 5. Add parameter:
    - Name: `run_manual_promote`
@@ -867,16 +882,18 @@ bundle exec fastlane ios auto_submit
 <details>
 <summary><h2>Maintenance</h2></summary>
 
-### Keeping Up with Master
+### Development Workflow
 
-The app-ci-fd branch receives tested code automatically from production via the auto-merge workflow. Manual merges are rarely needed, but if required:
+The production branch receives tested code automatically from master after tests pass. Manual merges are rarely needed, but if required:
 
 ```bash
-git checkout app-ci-fd
-git merge production  # Use production, not master, to ensure tested code only
+git checkout production
+git merge master  # Only merge after tests pass on master
 # Resolve conflicts, test thoroughly
-git push origin app-ci-fd
+git push origin production
 ```
+
+**Note**: The mobile app now builds from the same `production` branch as the web app. There is no longer a separate `app-ci-fd` branch.
 
 ### Capacitor Updates
 
@@ -921,6 +938,6 @@ For mobile app specific issues:
 ---
 
 **Last Updated**: 2025-10-26
-**Current Version**: 3.2.x (app-ci-fd branch)
+**Current Version**: 3.2.x (production branch)
 **Capacitor Version**: 7.x
 **CI/CD**: CircleCI with Fastlane (iOS and Android fully automated)
