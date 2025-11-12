@@ -36,6 +36,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Use default debug signing (automatic debug keystore)
+            // This enables WebView debugging automatically
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
