@@ -14,7 +14,13 @@
 </template>
 <script setup>
 import saveAs from 'save-file'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { useMobileStore } from '@/stores/mobile' // APP
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const props = defineProps({
   variant: {
@@ -87,13 +93,13 @@ async function download(e) {
   }
 
   // APP version - use Cordova calendar plugin with structured data
-  // Parse the start date and time
-  const [year, month, day] = eventData.startDate.split('-').map(Number)
-  const [startHour, startMin] = eventData.startTime.split(':').map(Number)
-  const [endHour, endMin] = eventData.endTime.split(':').map(Number)
+  // Parse the start date and time using dayjs with timezone support
+  const startDateTime = `${eventData.startDate} ${eventData.startTime}`
+  const endDateTime = `${eventData.startDate} ${eventData.endTime}`
 
-  const startDate = new Date(year, month - 1, day, startHour, startMin, 0)
-  const endDate = new Date(year, month - 1, day, endHour, endMin, 0)
+  // Create dates in the specified timezone and convert to local device time
+  const startDate = dayjs.tz(startDateTime, eventData.timeZone).toDate()
+  const endDate = dayjs.tz(endDateTime, eventData.timeZone).toDate()
 
   const title = eventData.name
   const eventLocation = eventData.location || ''
