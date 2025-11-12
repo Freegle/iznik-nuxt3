@@ -14,7 +14,13 @@
 </template>
 <script setup>
 import saveAs from 'save-file'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { useMobileStore } from '@/stores/mobile' // APP
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const props = defineProps({
   variant: {
@@ -22,7 +28,7 @@ const props = defineProps({
     required: false,
     default: 'secondary',
   },
-  ics: {
+  calendarLink: {
     type: String,
     required: true,
   },
@@ -43,50 +49,61 @@ const message = ref(null) // TODO Seems unused
 async function download(e) {
   e.preventDefault()
   e.stopPropagation()
+
+  // Extract and decode the calendar data from the link
+  const url = new URL(props.calendarLink)
+  const encodedData = url.searchParams.get('data')
+  if (!encodedData) {
+    console.error('No calendar data found in link')
+    return
+  }
+
+  const decodedData = atob(encodedData)
+  const eventData = JSON.parse(decodedData)
+
   const mobileStore = useMobileStore()
   if (!mobileStore.isApp) {
-    // APP
-    const blob = new Blob([props.ics], { type: 'text/calendar;charset=utf-8' })
+    // Web version - generate ICS file from the structured data
+    const startDateTime = `${eventData.startDate.replace(
+      /-/g,
+      ''
+    )}T${eventData.startTime.replace(/:/g, '')}00`
+    const endDateTime = `${eventData.startDate.replace(
+      /-/g,
+      ''
+    )}T${eventData.endTime.replace(/:/g, '')}00`
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Freegle//NONSGML Event//EN',
+      'BEGIN:VEVENT',
+      `DTSTART;TZID=${eventData.timeZone}:${startDateTime}`,
+      `DTEND;TZID=${eventData.timeZone}:${endDateTime}`,
+      `SUMMARY:${eventData.name}`,
+      `DESCRIPTION:${eventData.description}`,
+      `LOCATION:${eventData.location}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n')
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
     await saveAs(blob, 'freegle-handover.ics')
     return
   }
-  // APP..
-  // webcal://localhost/myCalendar.ics
-  // https://www.npmjs.com/package/cordova-plugin-calendar
-  // https://github.com/uzurv/Calendar-PhoneGap-Plugin-ios-17-support
 
-  function getCalProp(lines, name) {
-    name += ':'
-    const namelen = name.length
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (line.length >= namelen) {
-        if (line.substring(0, namelen) === name) {
-          let rv = line.substring(namelen)
-          while (++i < lines.length) {
-            const nextline = lines[i]
-            if (nextline.substring(0, 1) !== ' ') break
-            rv += nextline.substring(1)
-          }
-          return rv
-        }
-      }
-    }
-    return ''
-  }
-  const lines = props.ics.split('\r\n')
-  const dtstart = getCalProp(lines, 'DTSTART;TZID=Europe/London') // 20210109T110000
-  const year = parseInt(dtstart.substring(0, 4))
-  const month = parseInt(dtstart.substring(4, 6)) - 1
-  const dom = parseInt(dtstart.substring(6, 8))
-  const hour = parseInt(dtstart.substring(9, 11))
-  const mins = parseInt(dtstart.substring(11, 13))
-  const secs = parseInt(dtstart.substring(13, 15))
-  const startDate = new Date(year, month, dom, hour, mins, secs)
-  const endDate = new Date(startDate.getTime() + 5 * 60 * 1000)
-  const title = getCalProp(lines, 'SUMMARY')
-  const eventLocation = ''
-  const notes = getCalProp(lines, 'DESCRIPTION')
+  // APP version - use Cordova calendar plugin with structured data
+  // Parse the start date and time using dayjs with timezone support
+  const startDateTime = `${eventData.startDate} ${eventData.startTime}`
+  const endDateTime = `${eventData.startDate} ${eventData.endTime}`
+
+  // Create dates in the specified timezone and convert to local device time
+  const startDate = dayjs.tz(startDateTime, eventData.timeZone).toDate()
+  const endDate = dayjs.tz(endDateTime, eventData.timeZone).toDate()
+
+  const title = eventData.name
+  const eventLocation = eventData.location || ''
+  const notes = eventData.description
   // console.log('window.plugins',window.plugins)
 
   // Call hasWritePermission

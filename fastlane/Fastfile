@@ -1,0 +1,662 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and deploy to Google Play Beta Testing"
+  lane :beta do
+    # Validate that Google Play API key file exists
+    unless File.exist?('google-play-api-key.json')
+      UI.user_error!("❌ CRITICAL: Google Play API key file not found at google-play-api-key.json")
+      UI.user_error!("💡 Ensure GOOGLE_PLAY_JSON_KEY environment variable is set in CircleCI")
+    end
+
+    # Validate that the file is valid JSON
+    begin
+      json_key_data = JSON.parse(File.read('google-play-api-key.json'))
+      if json_key_data.empty?
+        UI.user_error!("❌ CRITICAL: Google Play API key file is empty")
+      end
+      UI.success("✅ Google Play API key file validated")
+    rescue JSON::ParserError => e
+      UI.user_error!("❌ CRITICAL: Google Play API key file is not valid JSON: #{e.message}")
+    end
+
+    # Read pre-calculated version from workspace file
+    # Version was already incremented by the increment-version job
+    version_file = '../.new_version'
+
+    unless File.exist?(version_file)
+      UI.user_error!("❌ CRITICAL: Version file not found at #{version_file}")
+      UI.user_error!("💡 The increment-version job should have created this file")
+    end
+
+    version = File.read(version_file).strip
+    UI.success("📱 Using version from workspace: #{version}")
+
+    # Validate version format
+    parts = version.split('.').map(&:to_i)
+    unless parts.length == 3
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}'. Expected format: X.Y.Z")
+    end
+
+    # Get version code from Google Play API
+    # Check ALL tracks to find the maximum version code to avoid conflicts
+    all_version_codes = []
+
+    ['internal', 'beta', 'production'].each do |track|
+      begin
+        version_codes = google_play_track_version_codes(
+          track: track,
+          json_key: 'fastlane/google-play-api-key.json'
+        )
+
+        if version_codes && version_codes.any?
+          max_for_track = version_codes.max
+          all_version_codes << max_for_track
+          UI.message("📊 #{track.capitalize} track max version code: #{max_for_track}")
+        else
+          UI.message("ℹ️  No releases in #{track} track")
+        end
+      rescue => e
+        UI.message("ℹ️  Could not fetch #{track} track version codes: #{e.message}")
+      end
+    end
+
+    # Fail if we couldn't get version code from any track
+    if all_version_codes.empty?
+      UI.user_error!("❌ CRITICAL: Could not fetch version codes from any Google Play track")
+      UI.user_error!("💡 Ensure at least one release exists in Google Play (any track)")
+      UI.user_error!("💡 Check that service account has 'View app information' permission")
+    end
+
+    latest_build = all_version_codes.max
+    new_version_code = latest_build + 1
+
+    # Ensure version code is at least 1272
+    min_version_code = 1272
+    if new_version_code < min_version_code
+      UI.message("📊 Jumping from version code #{new_version_code} to minimum #{min_version_code}")
+      new_version_code = min_version_code
+    end
+
+    UI.success("📊 Maximum version code across all tracks: #{latest_build}")
+    UI.success("📊 New version code: #{new_version_code}")
+
+    # Build the Android App Bundle (AAB) for Play Store
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: 'android/',
+      properties: {
+        "versionName" => version,
+        "versionCode" => new_version_code.to_s
+      },
+      flags: '--stacktrace'  # Enable stack traces for debugging
+    )
+
+    # Also build APK for direct installation and testing
+    gradle(
+      task: 'assemble',
+      build_type: 'Release',
+      project_dir: 'android/',
+      properties: {
+        "versionName" => version,
+        "versionCode" => new_version_code.to_s
+      },
+      flags: '--stacktrace'  # Enable stack traces for debugging
+    )
+    UI.success("✅ APK built successfully for manual installation!")
+    UI.message("📱 APK location: android/app/build/outputs/apk/release/app-release.apk")
+
+    # Create changelog for this release
+    # Fastlane expects changelogs in metadata/android/{locale}/changelogs/{version_code}.txt
+    changelog_dir = '../fastlane/metadata/android/en-US/changelogs'
+    FileUtils.mkdir_p(changelog_dir)
+    changelog_file = "#{changelog_dir}/#{new_version_code}.txt"
+    File.write(changelog_file, "Version #{version} - Bug fixes and improvements")
+    UI.success("✅ Created changelog for version code #{new_version_code}")
+
+    # Upload to Google Play Beta Testing track
+    upload_to_play_store(
+      track: 'beta',
+      json_key: 'fastlane/google-play-api-key.json',
+      skip_upload_apk: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+    UI.success("✅ Successfully uploaded to Google Play Beta Testing!")
+  end
+
+  desc "Promote Internal to Beta"
+  lane :promote_beta do
+    upload_to_play_store(
+      track: 'internal',
+      track_promote_to: 'beta',
+      json_key: 'fastlane/google-play-api-key.json',
+      skip_upload_apk: true,
+      skip_upload_aab: true
+    )
+  end
+
+  desc "Promote Beta to Production"
+  lane :promote_production do
+    upload_to_play_store(
+      track: 'beta',
+      track_promote_to: 'production',
+      json_key: 'fastlane/google-play-api-key.json',
+      skip_upload_apk: true,
+      skip_upload_aab: true
+    )
+  end
+
+  desc "Auto-promote beta to production after 24 hours"
+  lane :auto_promote do
+    require 'googleauth'
+    require 'google/apis/androidpublisher_v3'
+    require 'time'
+
+    UI.message("🔍 Checking beta track for releases ready to promote...")
+
+    json_key_data = JSON.parse(File.read('google-play-api-key.json'))
+    credentials = Google::Auth::ServiceAccountCredentials.make_creds(
+      json_key_io: StringIO.new(json_key_data.to_json),
+      scope: 'https://www.googleapis.com/auth/androidpublisher'
+    )
+
+    service = Google::Apis::AndroidpublisherV3::AndroidPublisherService.new
+    service.authorization = credentials
+
+    # Get the edit
+    edit = service.insert_edit('org.ilovefreegle.direct')
+    edit_id = edit.id
+
+    begin
+      # Get beta track
+      beta_track = service.get_edit_track('org.ilovefreegle.direct', edit_id, 'beta')
+
+      if beta_track.releases && beta_track.releases.any?
+        latest_release = beta_track.releases.first
+
+        # Check if release has a user fraction (staged rollout) or is completed
+        if latest_release.status == 'completed' || latest_release.status == 'inProgress'
+          version_codes = latest_release.version_codes
+          UI.message("📦 Found beta release with version codes: #{version_codes.join(', ')}")
+
+          # Get production track to check if already promoted
+          production_track = service.get_edit_track('org.ilovefreegle.direct', edit_id, 'production')
+          production_version_codes = []
+          if production_track.releases && production_track.releases.any?
+            production_version_codes = production_track.releases.first.version_codes || []
+          end
+
+          # Check if beta version is already in production
+          if version_codes.all? { |vc| production_version_codes.include?(vc) }
+            UI.message("✅ Beta release already promoted to production")
+            service.delete_edit('org.ilovefreegle.direct', edit_id)
+            next
+          end
+
+          # Note: Google Play API doesn't expose exact publish timestamp
+          # We'll use a simpler approach: check if there's a beta release that's not in production
+          # and assume it's been there for 24 hours if this workflow runs daily
+
+          # For now, we'll just check once per day and promote
+          # A more sophisticated approach would track versions in a file/database
+          hours_since_release = ENV['HOURS_SINCE_RELEASE'] || '24'
+
+          UI.success("🚀 Promoting beta to production after #{hours_since_release} hours...")
+
+          # Delete current edit and create new one for promotion
+          service.delete_edit('org.ilovefreegle.direct', edit_id)
+
+          # Promote to production
+          promote_production
+
+          UI.success("✅ Successfully promoted beta to production!")
+        else
+          UI.message("ℹ️  Beta release status: #{latest_release.status} - not ready for promotion")
+        end
+      else
+        UI.message("ℹ️  No releases found in beta track")
+      end
+    rescue => e
+      UI.error("❌ Error checking beta track: #{e.message}")
+      service.delete_edit('org.ilovefreegle.direct', edit_id) rescue nil
+      raise e
+    end
+  end
+end
+
+platform :ios do
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    # Validate environment variables
+    unless ENV['APP_STORE_CONNECT_API_KEY_KEY_ID']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_KEY_ID not set")
+    end
+    unless ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_ISSUER_ID not set")
+    end
+    unless ENV['APP_STORE_CONNECT_API_KEY_KEY']
+      UI.user_error!("❌ CRITICAL: APP_STORE_CONNECT_API_KEY_KEY not set")
+    end
+
+    # Set up App Store Connect API Key
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Read pre-calculated version from workspace file (same as Android)
+    # Version was already incremented by the increment-version job
+    version_file = '../.new_version'
+
+    unless File.exist?(version_file)
+      UI.user_error!("❌ CRITICAL: Version file not found at #{version_file}")
+      UI.user_error!("💡 The increment-version job should have created this file")
+    end
+
+    version = File.read(version_file).strip
+    UI.success("📱 Using version from workspace: #{version}")
+
+    # Validate version format
+    parts = version.split('.').map(&:to_i)
+    unless parts.length == 3
+      UI.user_error!("❌ CRITICAL: Invalid version format '#{version}'")
+    end
+
+    # Set version number in Xcode
+    increment_version_number(
+      version_number: version,
+      xcodeproj: "ios/App/App.xcodeproj"
+    )
+
+    # Get latest TestFlight build number
+    begin
+      latest_build = latest_testflight_build_number(
+        version: version,
+        initial_build_number: 0,
+        app_identifier: "org.ilovefreegle.iphone"
+      )
+      UI.message("📊 Latest TestFlight build for v#{version}: #{latest_build}")
+    rescue => e
+      UI.message("ℹ️  No existing builds for v#{version}, starting at 0")
+      latest_build = 0
+    end
+
+    new_build = latest_build + 1
+
+    # Ensure build number is at least 1272
+    min_build_number = 1272
+    if new_build < min_build_number
+      UI.message("📊 Jumping from build number #{new_build} to minimum #{min_build_number}")
+      new_build = min_build_number
+    end
+
+    UI.success("📊 New build number: #{new_build}")
+
+    # Set build number in Xcode
+    increment_build_number(
+      build_number: new_build,
+      xcodeproj: "ios/App/App.xcodeproj"
+    )
+
+    # Import certificates from CircleCI environment variables
+    # This avoids needing a separate git repo for certificate storage
+    import_certificate(
+      certificate_path: ENV['IOS_CERTIFICATE_PATH'] || 'ios_distribution.p12',
+      certificate_password: ENV['IOS_CERTIFICATE_PASSWORD'] || '',
+      keychain_name: ENV['KEYCHAIN_NAME'] || 'login.keychain',
+      keychain_password: ENV['KEYCHAIN_PASSWORD'] || ''
+    )
+
+    # Install the provisioning profile
+    profile_path = ENV['IOS_PROVISIONING_PROFILE_PATH'] || 'ios_appstore.mobileprovision'
+    install_provisioning_profile(
+      path: profile_path
+    )
+
+    # Configure project to use manual signing with the provisioning profile
+    update_project_provisioning(
+      xcodeproj: "ios/App/App.xcodeproj",
+      target_filter: "Freegle",
+      profile: profile_path,
+      code_signing_identity: "iPhone Distribution"
+    )
+
+    # Disable automatic code signing
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "ios/App/App.xcodeproj",
+      targets: ["Freegle"],
+      code_sign_identity: "iPhone Distribution",
+      bundle_identifier: "org.ilovefreegle.iphone"
+    )
+
+    # Build the app
+    gym(
+      scheme: "Freegle",
+      workspace: "ios/App/App.xcworkspace",
+      export_method: "app-store",
+      clean: true,
+      output_directory: "./build",
+      skip_package_dependencies_resolution: true
+    )
+
+    # Upload to TestFlight
+    pilot(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      changelog: "Version #{version} - Bug fixes and improvements",
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    UI.success("✅ Successfully uploaded to TestFlight!")
+  end
+
+  desc "Promote TestFlight to Production"
+  lane :release do
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    deliver(
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      precheck_include_in_app_purchases: false,
+      app_identifier: "org.ilovefreegle.iphone"
+    )
+
+    UI.success("✅ Submitted for App Store review!")
+  end
+
+  desc "Auto-submit latest TestFlight build to App Store review (daily automation)"
+  lane :auto_submit do
+    require 'spaceship'
+    require 'time'
+
+    UI.message("🔍 Checking TestFlight for builds ready to submit...")
+
+    # Set up App Store Connect API
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Connect to App Store Connect
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY'])
+    )
+
+    app = Spaceship::ConnectAPI::App.find("org.ilovefreegle.iphone")
+    unless app
+      UI.user_error!("❌ Could not find app with identifier org.ilovefreegle.iphone")
+    end
+
+    # Get all TestFlight builds for the app
+    # Sort by upload date descending to get newest first
+    # Include pre_release_version to get the app_version
+    builds = app.get_builds(
+      sort: "-uploadedDate",
+      limit: 50,
+      includes: "preReleaseVersion"
+    )
+
+    if builds.nil? || builds.empty?
+      UI.message("ℹ️  No TestFlight builds found")
+      next
+    end
+
+    # Filter builds from the last 24 hours
+    cutoff_time = Time.now - (24 * 60 * 60)
+    recent_builds = builds.select do |build|
+      upload_time = Time.parse(build.uploaded_date)
+      upload_time >= cutoff_time
+    end
+
+    if recent_builds.empty?
+      UI.message("ℹ️  No TestFlight builds uploaded in the last 24 hours")
+      next
+    end
+
+    # Get the latest build (first in sorted list)
+    latest_build = recent_builds.first
+
+    # Get version string - try multiple methods
+    version = nil
+    if latest_build.respond_to?(:app_version) && latest_build.app_version
+      version = latest_build.app_version
+    elsif latest_build.respond_to?(:pre_release_version) && latest_build.pre_release_version
+      version = latest_build.pre_release_version.version
+    end
+
+    unless version
+      UI.error("❌ Could not determine version string from build")
+      UI.message("Build object: #{latest_build.inspect}")
+      next
+    end
+
+    build_number = latest_build.version
+
+    UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
+    UI.message("📦 Latest build: version #{version}, build #{build_number}")
+
+    # Get all App Store versions to diagnose blocking issues
+    UI.message("🔍 Checking App Store versions for blocking issues...")
+    all_versions = app.get_app_store_versions
+    UI.message("📋 Found #{all_versions.length} App Store version(s):")
+    all_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state} (ID: #{v.id})")
+    end
+
+    # Check if this build is already in review or approved
+    # Get the app store version for this version number
+    app_store_version = app.get_app_store_versions.find { |v| v.version_string == version }
+
+    if app_store_version
+      state = app_store_version.app_store_state
+      case state
+      when "PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW"
+        UI.message("✅ Version #{version} is already in the submission pipeline (status: #{state})")
+        UI.message("💡 This likely means the app was manually submitted or is already in review")
+        next
+      when "READY_FOR_SALE"
+        UI.message("✅ Version #{version} is already released")
+        next
+      when "DEVELOPER_REJECTED", "REJECTED"
+        UI.message("⚠️  Version #{version} was rejected (status: #{state})")
+        UI.message("💡 You may need to manually create a new version in App Store Connect")
+        next
+      when "PREPARE_FOR_SUBMISSION"
+        UI.message("📝 Version #{version} is in PREPARE_FOR_SUBMISSION state - will attempt to submit")
+      when "READY_FOR_REVIEW"
+        UI.message("📝 Version #{version} is READY_FOR_REVIEW - will attempt to submit")
+      else
+        UI.message("ℹ️  Version #{version} has status: #{state} - will attempt to submit")
+      end
+    else
+      UI.message("ℹ️  No App Store version found for #{version} - will create one during submission")
+    end
+
+    # Check if there's any version blocking submission (in editable states)
+    editable_states = ["PENDING_DEVELOPER_RELEASE", "PENDING_APPLE_RELEASE", "IN_REVIEW", "WAITING_FOR_REVIEW", "PREPARE_FOR_SUBMISSION", "READY_FOR_REVIEW"]
+    blocking_versions = all_versions.select do |v|
+      editable_states.include?(v.app_store_state)
+    end
+
+    UI.message("🔍 Editable/blocking versions: #{blocking_versions.length}")
+    blocking_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state}")
+    end
+
+    # Check if there's a different version blocking
+    other_blocking = blocking_versions.find { |v| v.version_string != version }
+    if other_blocking
+      UI.error("⚠️  Cannot submit: Version #{other_blocking.version_string} is blocking (status: #{other_blocking.app_store_state})")
+      UI.message("💡 Action needed in App Store Connect:")
+      UI.message("   1. Go to https://appstoreconnect.apple.com/apps/1563499899/appstore/ios/version/deliverable")
+      UI.message("   2. Either approve/release version #{other_blocking.version_string}, or remove it to clear the way")
+      UI.message("   3. Only one version can be in the submission pipeline at a time")
+      next
+    end
+
+    # Check processing status - don't submit if still processing
+    if latest_build.processing_state != "VALID"
+      UI.message("⏳ Build is still processing (status: #{latest_build.processing_state}), will try again later")
+      next
+    end
+
+    UI.success("🚀 Submitting build #{build_number} (version #{version}) for App Store review...")
+
+    if app_store_version
+      UI.message("📋 App Store version exists: #{app_store_version.app_store_state}")
+    else
+      UI.message("📋 No App Store version found - deliver will create one")
+    end
+
+    # Submit to App Store - deliver will create the version if needed
+    begin
+      deliver(
+        build_number: build_number.to_s,
+        app_version: version,
+        submit_for_review: true,
+        automatic_release: false,
+        force: true,
+        skip_metadata: false,  # Need to provide metadata for whatsNew
+        skip_screenshots: true,
+        skip_binary_upload: true,
+        skip_app_version_update: false,  # Allow deliver to create/update version
+        precheck_include_in_app_purchases: false,
+        app_identifier: "org.ilovefreegle.iphone",
+        release_notes: {
+          "en-GB" => "Bug fixes and improvements"
+        },
+        submission_information: {
+          add_id_info_uses_idfa: false,
+          export_compliance_uses_encryption: false,
+          export_compliance_is_exempt: true,
+          content_rights_contains_third_party_content: false
+        }
+      )
+
+      UI.success("✅ Successfully submitted build #{build_number} (version #{version}) for App Store review!")
+    rescue => e
+      # Check if the error is due to the app already being submitted
+      error_message = e.message.to_s.downcase
+      if error_message.include?("already") ||
+         error_message.include?("duplicate") ||
+         error_message.include?("in review")
+        UI.message("ℹ️  Build #{build_number} appears to already be submitted or in review")
+        UI.message("💡 This is likely because the app was manually submitted in App Store Connect")
+        UI.message("📝 Error details: #{e.message}")
+        UI.message("✅ No action needed - the app is already in the submission pipeline")
+      elsif error_message.include?("cannot submit") ||
+            error_message.include?("could not find an editable version") ||
+            error_message.include?("relationship value is not acceptable")
+        UI.error("❌ Cannot submit: Another version may be blocking submission")
+        UI.error("📝 Error details: #{e.message}")
+        UI.message("💡 Check App Store Connect for versions in review or pending release")
+        UI.message("💡 You may need to reject or approve the blocking version first")
+      elsif error_message.include?("pre-release build could not be added")
+        UI.error("❌ Build #{build_number} cannot be added to the version")
+        UI.error("📝 Error details: #{e.message}")
+        UI.message("💡 The build may not have completed processing in TestFlight")
+      else
+        # Re-raise unexpected errors
+        UI.error("❌ Failed to submit build #{build_number}: #{e.message}")
+        raise e
+      end
+    end
+  end
+
+  desc "Auto-release approved apps from Pending Developer Release state"
+  lane :auto_release do
+    require 'spaceship'
+
+    UI.message("🔍 Checking for apps in Pending Developer Release state...")
+
+    # Set up App Store Connect API
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Connect to App Store Connect
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY'])
+    )
+
+    app = Spaceship::ConnectAPI::App.find("org.ilovefreegle.iphone")
+    unless app
+      UI.user_error!("❌ Could not find app with identifier org.ilovefreegle.iphone")
+    end
+
+    # Get all App Store versions
+    all_versions = app.get_app_store_versions
+    UI.message("📋 Found #{all_versions.length} App Store version(s):")
+    all_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state} (ID: #{v.id})")
+    end
+
+    # Find versions in PENDING_DEVELOPER_RELEASE state
+    pending_versions = all_versions.select do |v|
+      v.app_store_state == "PENDING_DEVELOPER_RELEASE"
+    end
+
+    if pending_versions.empty?
+      UI.message("ℹ️  No versions in PENDING_DEVELOPER_RELEASE state")
+      next
+    end
+
+    UI.message("📦 Found #{pending_versions.length} version(s) ready to release:")
+    pending_versions.each do |v|
+      UI.message("   - Version #{v.version_string}: #{v.app_store_state}")
+    end
+
+    # Release each pending version
+    pending_versions.each do |version|
+      begin
+        UI.success("🚀 Releasing version #{version.version_string} to App Store...")
+
+        # Create an app store version release request
+        # This releases the version from PENDING_DEVELOPER_RELEASE to the App Store
+        version.create_app_store_version_release_request
+
+        UI.success("✅ Successfully released version #{version.version_string} to App Store!")
+        UI.message("📱 The app should be available on the App Store shortly")
+      rescue => e
+        error_message = e.message.to_s.downcase
+        if error_message.include?("already") ||
+           error_message.include?("ready_for_sale") ||
+           error_message.include?("cannot create") ||
+           error_message.include?("relationship") ||
+           error_message.include?("not in a releasable state")
+          UI.message("ℹ️  Version #{version.version_string} may already be released or in process")
+          UI.message("📝 Error details: #{e.message}")
+          UI.message("✅ Check App Store Connect to verify current state")
+        else
+          UI.error("❌ Failed to release version #{version.version_string}: #{e.message}")
+          UI.error("Full error: #{e.inspect}")
+          raise e
+        end
+      end
+    end
+
+    UI.success("✅ Auto-release process completed!")
+  end
+end
