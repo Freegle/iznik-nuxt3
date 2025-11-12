@@ -1,0 +1,11 @@
+for_platform :android do
+  json_key_file("fastlane/google-play-api-key.json")
+  package_name("org.ilovefreegle.direct")
+end
+
+for_platform :ios do
+  app_identifier("org.ilovefreegle.iphone")
+  apple_id(ENV["FASTLANE_APPLE_ID"])
+  itc_team_id(ENV["FASTLANE_TEAM_ID"])
+  team_id(ENV["FASTLANE_TEAM_ID"])
+end
