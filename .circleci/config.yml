@@ -247,8 +247,12 @@ jobs:
 
             cd ios/App
 
+            # Create build directory for logs
+            mkdir -p build
+
             # Build with Release configuration (ad-hoc distribution requires release)
             # Save full logs for debugging (don't use xcpretty which hides errors)
+            # Don't specify CODE_SIGN_IDENTITY - let Xcode handle signing automatically
             set -o pipefail
             xcodebuild \
               -workspace App.xcworkspace \
@@ -256,7 +260,6 @@ jobs:
               -configuration Release \
               -archivePath $PWD/build/Freegle.xcarchive \
               archive \
-              CODE_SIGN_IDENTITY="iPhone Distribution" \
               2>&1 | tee build/xcodebuild-archive.log
 
             # Export as ad-hoc IPA
