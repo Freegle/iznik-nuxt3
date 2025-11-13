@@ -260,7 +260,9 @@ platform :ios do
       output_directory: "./ios/App/build",
       output_name: "Freegle.ipa",
       skip_package_dependencies_resolution: true,
-      buildlog_path: "./ios/App/build"
+      buildlog_path: "./ios/App/build",
+      suppress_xcode_output: false,
+      xcodebuild_formatter: ""
     )
 
     UI.success("✅ Ad-hoc IPA built successfully!")
