@@ -252,17 +252,15 @@ jobs:
 
             # Build with Release configuration (ad-hoc distribution requires release)
             # Save full logs for debugging (don't use xcpretty which hides errors)
-            # Override automatic signing with manual signing using our provisioning profile
+            # Use -allowProvisioningUpdates to let Xcode use the installed provisioning profile
+            # This works with the automatic signing settings in the project
             set -o pipefail
             xcodebuild \
               -workspace App.xcworkspace \
               -scheme Freegle \
               -configuration Release \
               -archivePath $PWD/build/Freegle.xcarchive \
-              CODE_SIGN_STYLE=Manual \
-              CODE_SIGN_IDENTITY="iPhone Distribution" \
-              DEVELOPMENT_TEAM="${APPLE_TEAM_ID:-N7B7R43PU3}" \
-              PROVISIONING_PROFILE_SPECIFIER="" \
+              -allowProvisioningUpdates \
               archive \
               2>&1 | tee build/xcodebuild-archive.log
 
