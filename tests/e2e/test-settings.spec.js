@@ -211,13 +211,9 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Click to show advanced settings
       await advancedButton.click()
-      await page.waitForTimeout(timeouts.ui.transition)
 
       // Advanced settings should now be visible
-      await advancedSection.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
+      await expect(advancedSection).toBeVisible()
 
       // Take screenshot after showing advanced settings
       await takeScreenshot('Advanced Settings After Toggle')

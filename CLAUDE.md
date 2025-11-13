@@ -3,7 +3,9 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Safe Commands to Run
+
 These commands can be run by Claude without asking for permission:
+
 - `eslint --fix <file1> <file2>` - Fix code style issues in specific files
 - `npm run test` - Run Playwright tests
 - `git status` - Check repository status
@@ -17,15 +19,18 @@ These commands can be run by Claude without asking for permission:
 IMPORTANT: After making code changes, always run `eslint --fix` on the specific files changed and remove any unused code detected by the linter.
 
 ## File Creation Guidelines
+
 - When you create files, always add them to git
-- Always add newly created files to git.  
+- Always add newly created files to git.
 
 ## Build Commands
+
 - `npm run dev` - Start development server on port 3002
 - `npm run build` - Build for production
 - `eslint --fix <file>` - Fix code style issues for specific files
 
 ## Testing
+
 - `npm run test` - Run Playwright end-to-end tests (against dev server)
 - `npm run test:ui` - Run Playwright tests with UI
 - `npm run test:headed` - Run Playwright tests in headed mode
@@ -38,11 +43,13 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - For specific test: `npx playwright test -g "test name pattern"`
 
 ### WSL Testing Considerations
+
 - When in WSL, and running lint, use run-lint-on-changed.sh
 - Don't run npm run test - you can't in WSL
 - When running Playwright tests in WSL, use --headed option and only run using the Chrome browser
 
 ### Playwright Setup Notes
+
 - First time setup: `npm install @playwright/test`
 - Install browsers: `npx playwright install`
 - For WSL/Linux, may need system dependencies: `sudo npx playwright install-deps`
@@ -51,18 +58,24 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - IMPORTANT: Never mark tests with `.skip()` - all tests should be runnable
 
 ### Playwright Testing Best Practices
-- In Playwright tests, never use `expect().toBeVisible()`. Use `locator.waitFor({ state: 'visible', timeout: ... })`
-- Never use hard-coded timeouts in tests.  Reuse or add to the timeouts in config.js
+
+- In Playwright tests, always use Playwright assertions instead of locator.waitFor() or page.waitForTimeout().
+  - Allow assertions to handle waiting and timing as much as possible.
+  - Only use timeouts using the timeout constants as a last resort. Always prefer assertions.
+- Never use hard-coded timeouts in tests. Reuse or add to the timeouts in config.js
 - Don't use a hardcoded timer value - use the constants.
 
 ### Playwright Test Development
+
 - When adding Playwright tests, look for existing utility functions (e.g. for logging in/signing up) to use before writing the code.
 
 ## Branch Management
+
 - **Freegle**: Built from `master` branch using `./iznik-nuxt3` directory
 - **ModTools**: Built from `modtools` branch using `./iznik-nuxt3-modtools` directory
 - Two separate checkouts are required because different services need different branches
 - The `modtools` branch contains ModTools-specific configuration and components
 
 ## Debugging and Investigation
+
 - No need to run lint before investigating problems

@@ -1514,9 +1514,6 @@ const testWithFixtures = test.extend({
           await withdrawButton.click()
         }
 
-        // Wait for any network activity after the click
-        await page.waitForTimeout(timeouts.ui.transition)
-
         // Look for any modals that might appear
         const modalSelectors = [
           '.modal',

@@ -20,7 +20,6 @@ const timeouts = {
     animation: 1000, // Waiting for animations to complete
     autocomplete: 10000, // Waiting for autocomplete results
     settleTime: 1000, // Time to allow UI to settle
-    transition: 500, // Time for UI transitions
   },
 
   // API and data loading timeouts
