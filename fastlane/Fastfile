@@ -256,6 +256,7 @@ platform :ios do
         uploadSymbols: true,
         compileBitcode: false
       },
+      xcargs: "-allowProvisioningUpdates",
       clean: false,
       output_directory: "./ios/App/build",
       output_name: "Freegle.ipa",
