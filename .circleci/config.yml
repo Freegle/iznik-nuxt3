@@ -1146,6 +1146,7 @@ workflows:
     jobs:
       - auto-promote-production
       - auto-submit-ios
+      - auto-release-ios
 
   manual-promote-submit:
     when: << pipeline.parameters.run_manual_promote >>
