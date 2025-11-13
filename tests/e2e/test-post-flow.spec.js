@@ -210,7 +210,7 @@ test.describe('Post flow tests', () => {
     await withdrawPost({ item: result.item })
   })
 
-  test.skip("Email existence check - prevents posting with someone else's email", async ({
+  test("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
     postMessage,
@@ -365,16 +365,11 @@ test.describe('Post flow tests', () => {
 
     // Wait for the error message to appear after the API check
     console.log('Waiting for email validation error message to appear')
-    const errorMessage = page.locator('text=belongs to a different account')
-    await errorMessage.waitFor({
-      state: 'visible',
-      timeout: timeouts.api.default,
-    })
-
+    const errorMessage = page.locator('text=belongs to an existing account')
+    await expect(errorMessage).toBeVisible()
     console.log(
       'Email existence check working correctly - error message displayed'
     )
-    expect(await errorMessage.isVisible()).toBe(true)
 
     // Verify the "Freegle it!" button is no longer visible after error
     const buttonCount = await freegleButton.count()
