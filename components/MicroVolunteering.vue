@@ -115,9 +115,15 @@
                   @next="considerNext"
                 />
               </div>
-              <div v-else-if="task.type === 'SearchTerm'">
+              <div
+                v-else-if="
+                  task.type === 'SearchTerm' &&
+                  task.terms &&
+                  task.terms.length > 0
+                "
+              >
                 <MicroVolunteeringSimilarTerms
-                  :term="task.terms"
+                  :terms="task.terms"
                   @next="considerNext"
                 />
               </div>
@@ -305,7 +311,9 @@ async function getTask() {
 
     if (
       task.value.type === 'CheckMessage' ||
-      task.value.type === 'SearchTerm' ||
+      (task.value.type === 'SearchTerm' &&
+        task.value.terms &&
+        task.value.terms.length > 0) ||
       task.value.type === 'Facebook' ||
       task.value.type === 'PhotoRotate' ||
       task.value.type === 'Survey2' ||
@@ -313,7 +321,7 @@ async function getTask() {
     ) {
       showTask.value = true
     } else {
-      doneForNow()
+      considerNext()
     }
 
     console.log('Show?', showTask.value)

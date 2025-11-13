@@ -21,11 +21,16 @@ export default class SessionAPI extends BaseAPI {
       password,
       fblogin,
       fbaccesstoken,
+      fblimited,
       googlelogin,
       googleauthcode,
       googlejwt,
       u,
       k,
+      mobile,
+      appversion,
+      applecredentials,
+      applelogin,
     },
     log
   ) {
@@ -36,20 +41,19 @@ export default class SessionAPI extends BaseAPI {
         password,
         fblogin,
         fbaccesstoken,
+        fblimited,
         googlelogin,
         googleauthcode,
         googlejwt,
         u,
         k,
+        mobile,
+        appversion,
+        applecredentials,
+        applelogin,
       },
       log
     )
-  }
-
-  yahooCodeLogin(yahoocodelogin) {
-    return this.$post('/session', {
-      yahoocodelogin,
-    })
   }
 
   logout() {

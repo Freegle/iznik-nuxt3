@@ -1,142 +1,109 @@
 <template>
-  <div class="d-flex justify-content-between">
-    <div>
-      <div v-if="!hideIntro">
-        <p v-if="donated">
-          You've donated before, so you know that
-          <strong>{{ groupname }}</strong> is a charity that's free to use, but
-          not free to run. If you're able to <strong>donate again</strong>
-          that would be lovely.
-        </p>
-        <p v-else>
-          <strong>{{ groupname }}</strong> is a charity that's free to use, but
-          not free to run.
-        </p>
-        <p>
-          This month we're trying to raise
-          <strong>&pound;{{ target }}</strong
-          ><span v-if="groupid && !targetMet"> for this community</span
-          ><span v-else> across the UK</span>.
-        </p>
-        <p>
-          If you can,
-          <strong> please donate </strong>
-          to keep us running.
-        </p>
-      </div>
-      <!-- Birthday mode: show "You're kindly donating £X" with Other option -->
-      <div v-if="birthdayMode" class="birthday-donation-display mb-3">
-        <div class="donation-amount-display mb-2">
-          <h4 class="mb-0">
-            You're kindly donating £{{ price
-            }}<span v-if="monthly"> monthly</span>
-          </h4>
-        </div>
-        <div class="other-amount-section">
-          <b-input-group prepend="Other amount:">
-            <b-input
-              v-model="otherAmount"
-              type="number"
-              min="1"
-              step="0.50"
-              size="lg"
-              class="otherWidth"
-              placeholder="Enter amount"
-            />
-          </b-input-group>
-        </div>
-      </div>
+  <div>
+    <div class="donation-ask-container">
+      <div class="d-flex justify-content-between">
+        <div class="donation-ask-content">
+          <!-- Traditional variant: Show intro text -->
+          <DonationIntroText
+            v-if="!isMinimalVariant && !birthdayMode"
+            :groupid="groupid"
+            :groupname="groupname"
+            :target="target"
+            :target-met="targetMet"
+            :donated="donated"
+            :hide-intro="hideIntro"
+          />
 
-      <!-- Normal mode: show button group (only if not using PayPal fallback) -->
-      <b-button-group v-else-if="!payPalFallback" class="d-flex flex-wrap mt-1 mb-2 mr-2">
-        <b-button
-          v-for="amount in amounts"
-          :key="'donate-' + amount"
-          :pressed="price === amount"
-          :variant="price === amount ? 'primary' : 'white'"
-          size="lg"
-          class="shadow-none"
-          @click="setPrice(amount)"
-        >
-          <span class="d-none d-md-inline"
-            ><span v-if="!monthly">Donate </span></span
-          >£{{ amount }}<span v-if="monthly"> monthly</span>
-        </b-button>
-        <div class="text-muted text-small">
-          <b-input-group prepend="Other:">
-            <b-input
-              v-model="otherAmount"
-              type="number"
-              min="1"
-              step="0.50"
-              size="lg"
-              class="otherWidth"
-            />
-          </b-input-group>
-        </div>
-      </b-button-group>
-      <div class="monthly-checkbox-wrapper mb-2">
-        <BFormCheckbox
-          id="monthly"
-          v-model="monthly"
-          name="monthly"
-          class="monthly-checkbox"
-        >
-          <v-icon icon="arrow-left" class="monthly-arrow" />
-          Monthly donation (these are really helpful)
-        </BFormCheckbox>
-      </div>
+          <!-- Minimal variant: Show simple message -->
+          <p v-if="isMinimalVariant && !birthdayMode" class="donation-message">
+            Freegle is volunteer-run and free to use. Donate to help us
+            continue?
+          </p>
 
-      <div v-if="parseFloat(price) || payPalFallback" class="mt-2 mb-2 w-100">
-        <StripeDonate
-          v-if="!payPalFallback"
-          :key="price + monthly"
-          :price="price"
-          :monthly="monthly"
-          @success="succeeded"
-          @no-payment-methods="noMethods"
-          @error="noMethods"
+          <DonationBirthdayDisplay
+            v-if="birthdayMode"
+            v-model="otherAmount"
+            :price="price"
+            :monthly="monthly"
+          />
+
+          <div v-else>
+            <div class="donation-controls">
+              <div class="amount-display">
+                <div class="amount-label">Donation Amount</div>
+                <div class="amount-value">£{{ selectedAmount.toFixed(2) }}</div>
+              </div>
+              <input
+                v-model.number="selectedAmount"
+                type="range"
+                min="2"
+                max="25"
+                step="1"
+                class="amount-slider"
+              />
+              <div class="slider-labels">
+                <span>£2</span>
+                <span>£25</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="parseFloat(price) || payPalFallback"
+            class="mt-2 mb-2 w-100 stripe-container"
+          >
+            <div v-show="!payPalFallback">
+              <StripeDonate
+                :key="price + monthly"
+                :price="price"
+                :monthly="monthly"
+                @success="succeeded"
+                @no-payment-methods="noMethods"
+                @error="noMethods"
+              />
+            </div>
+            <DonationButton
+              v-if="payPalFallback"
+              :text="`Donate £${price} with PayPal`"
+              :value="String(price)"
+              class="mb-4"
+            />
+            <div ref="belowStripe" />
+          </div>
+
+          <!-- Cancel button below donation -->
+          <div class="text-center mt-3">
+            <b-button variant="secondary" @click="cancel"> Not now </b-button>
+          </div>
+
+          <!-- Traditional variant: Show supporter badge info and footnotes -->
+          <DonationTraditionalExtras
+            v-if="!isMinimalVariant"
+            :groupid="groupid"
+            :groupname="groupname"
+            :target-met="targetMet"
+            :hide-thermometer="hideThermometer"
+          />
+        </div>
+        <!-- Traditional variant: Show thermometer inside container -->
+        <DonationThermometer
+          v-if="!hideThermometer && !isMinimalVariant"
+          ref="thermo"
+          :groupid="groupid"
+          class="ml-md-4 flex-shrink-0"
         />
-        <DonationButton
-          v-if="payPalFallback"
-          text="Donate £5 with PayPal"
-          value="5"
-          class="mb-4"
-        />
-        <div ref="belowStripe" />
       </div>
-      <p class="mt-2 small">
-        You'll get a cute little
-        <SupporterInfo size="sm" class="d-inline" />
-        badge so that people can see you're a committed freegler.
-        <!-- eslint-disable-next-line -->
-        Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link no-prefetch to="/donate?noguard=true">here</nuxt-link>.
-      </p>
-      <p
-        v-if="groupid && !targetMet && !hideThermometer"
-        class="text-muted small mt-1"
-      >
-        This will contribute to the general fund for the ongoing support of
-        Freegle. If we raise more than the target, we'll use it to support other
-        communities.
-      </p>
-      <p v-if="groupid && hideThermometer" class="text-muted small mt-1">
-        This will contribute to the general fund for the ongoing support of
-        {{ groupname }} and other communities.
-      </p>
     </div>
-    <DonationThermometer
-      v-if="!hideThermometer"
-      ref="thermo"
-      :groupid="groupid"
-      class="ml-md-4"
-    />
   </div>
 </template>
+
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import DonationButton from './DonationButton'
-import SupporterInfo from './SupporterInfo'
+import DonationIntroText from './DonationIntroText'
+import DonationBirthdayDisplay from './DonationBirthdayDisplay'
+import DonationTraditionalExtras from './DonationTraditionalExtras'
+import Api from '~/api'
 
 const props = defineProps({
   groupid: {
@@ -167,12 +134,12 @@ const props = defineProps({
   amounts: {
     type: Array,
     required: false,
-    default: () => [1, 5, 10],
+    default: () => [2, 3, 5, 10, 15, 25],
   },
   default: {
     type: Number,
     required: false,
-    default: 1,
+    default: 5,
   },
   hideIntro: {
     type: Boolean,
@@ -191,7 +158,10 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['score', 'success'])
+const emit = defineEmits(['score', 'success', 'cancel'])
+
+const runtimeConfig = useRuntimeConfig()
+const api = Api(runtimeConfig)
 
 const monthly = ref(false)
 const price = ref(props.default)
@@ -199,6 +169,23 @@ const payPalFallback = ref(false)
 const otherAmount = ref(null)
 const belowStripe = ref(null)
 const thermo = ref(null)
+
+const variation = ref('minimal-friction')
+const testAmount = ref(props.default)
+const selectedAmount = ref(testAmount.value)
+
+const isMinimalVariant = computed(() => {
+  return variation.value && variation.value.includes('minimal')
+})
+
+watch(testAmount, (newVal) => {
+  selectedAmount.value = newVal
+  price.value = newVal
+})
+
+watch(selectedAmount, (newVal) => {
+  price.value = newVal
+})
 
 watch(otherAmount, (newVal) => {
   if (newVal) {
@@ -212,68 +199,310 @@ function score(amount) {
   emit('score', amount)
 }
 
-function setPrice(newPrice) {
-  price.value = newPrice
-  if (belowStripe.value) {
-    belowStripe.value.scrollIntoView()
-  }
-}
-
-function succeeded() {
+async function succeeded() {
   score(price.value)
   emit('success')
+
+  try {
+    const variantToRecord =
+      variation.value === 'traditional' && selectedAmount.value === 5
+        ? 'stripe'
+        : `${variation.value}-${selectedAmount.value}`
+
+    await api.bandit.chosen({
+      uid: 'donation',
+      variant: variantToRecord,
+      score: selectedAmount.value,
+    })
+  } catch (err) {
+    console.error('Error recording donation conversion:', err)
+  }
 }
 
 function noMethods() {
   console.log('No payment methods')
   payPalFallback.value = true
 }
+
+function cancel() {
+  emit('cancel')
+}
+
+onMounted(async () => {
+  if (!props.birthdayMode) {
+    try {
+      const chosen = await api.bandit.choose({
+        uid: 'donation',
+      })
+
+      if (chosen && chosen.variant) {
+        // Handle legacy 'stripe' variant - map it to traditional-5
+        if (!chosen.variant.includes('-')) {
+          variation.value = 'traditional'
+          testAmount.value = 5
+          selectedAmount.value = 5
+          price.value = 5
+        } else {
+          const parts = chosen.variant.split('-')
+          const amount = parseFloat(parts[parts.length - 1])
+          const varType = parts.slice(0, -1).join('-')
+
+          variation.value = varType
+          testAmount.value = amount
+          selectedAmount.value = amount
+          price.value = amount
+        }
+      }
+
+      await api.bandit.shown({
+        uid: 'donation',
+        variant: chosen?.variant || `${variation.value}-${testAmount.value}`,
+      })
+    } catch (err) {
+      console.error('Error with bandit API:', err)
+    }
+  }
+})
 </script>
+
 <style scoped lang="scss">
-.otherWidth {
-  width: 6rem;
-}
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
-.monthly-checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-}
-
-.monthly-arrow {
-  flex-shrink: 0;
-}
-
-.monthly-checkbox {
+.donation-ask-container {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff, #f8f9ff);
+  border-radius: 15px;
+  padding: 2rem;
   margin: 0;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 19px;
+    background: linear-gradient(
+      45deg,
+      rgb(255, 0, 0),
+      rgb(255, 127, 0),
+      rgb(255, 255, 0),
+      rgb(0, 255, 0),
+      rgb(0, 127, 255),
+      rgb(0, 0, 255),
+      rgb(75, 0, 130),
+      rgb(148, 0, 211),
+      rgb(255, 0, 0)
+    );
+    background-size: 300% 300%;
+    z-index: -1;
+    filter: blur(5px);
+    animation: rainbow-glow 8s ease-in-out infinite;
+  }
 }
 
-:deep(.form-check-input) {
-  border: 1px solid red;
-}
-
-.birthday-donation-display {
+.donation-ask-content {
+  max-width: 600px;
+  margin: 0 auto;
   text-align: center;
-  padding: 1rem;
-  background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
-  border-radius: 10px;
-  border: 2px solid #e2e8f0;
 }
 
-.donation-amount-display h4 {
-  color: #2d3748;
-  font-weight: bold;
+@keyframes rainbow-glow {
+  0% {
+    background-position: 0% 50%;
+    filter: blur(6px) brightness(1);
+  }
+  25% {
+    background-position: 50% 50%;
+    filter: blur(8px) brightness(1.2);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: blur(6px) brightness(1);
+  }
+  75% {
+    background-position: 50% 50%;
+    filter: blur(8px) brightness(1.2);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: blur(6px) brightness(1);
+  }
 }
 
-.other-amount-section {
-  margin-top: 1rem;
+.donation-controls {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 1.5rem;
 }
 
-.other-amount-section .input-group-prepend .input-group-text {
-  background-color: #f7fafc;
-  border-color: #e2e8f0;
+.amount-display {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.amount-label {
+  font-size: 0.9rem;
   color: #4a5568;
   font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.amount-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #007bff;
+  line-height: 1;
+}
+
+.amount-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  margin: 1rem 0 0.5rem;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.5);
+    transition: all 0.2s ease;
+    margin-top: -10px;
+
+    &:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.6);
+    }
+
+    &:active {
+      transform: scale(1.1);
+    }
+  }
+
+  &::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.5);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.6);
+    }
+
+    &:active {
+      transform: scale(1.1);
+    }
+  }
+
+  &::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #e2e8f0 0%, #007bff 100%);
+  }
+
+  &::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #e2e8f0 0%, #007bff 100%);
+  }
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #4a5568;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.stripe-container {
+  text-align: center;
+  width: 100%;
+
+  :deep(> div),
+  :deep(> *) {
+    display: inline-block;
+    margin: 0 auto;
+  }
+}
+
+.donation-message {
+  font-size: 1.25rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+
+  strong {
+    color: #1a202c;
+    font-weight: 600;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .donation-ask-container {
+    padding: 1.5rem;
+    margin: 1rem auto 1.5rem;
+    max-width: calc(100% - 2rem);
+  }
+
+  .amount-value {
+    font-size: 2rem;
+  }
+}
+
+@include media-breakpoint-down(sm) {
+  .donation-ask-container {
+    margin: 1.5rem auto;
+    max-width: calc(100% - 2rem);
+  }
+
+  .amount-value {
+    font-size: 1.8rem;
+  }
+
+  .amount-slider {
+    height: 10px;
+
+    &::-webkit-slider-thumb {
+      width: 32px;
+      height: 32px;
+      margin-top: -11px;
+    }
+
+    &::-moz-range-thumb {
+      width: 32px;
+      height: 32px;
+    }
+
+    &::-webkit-slider-runnable-track {
+      height: 10px;
+    }
+
+    &::-moz-range-track {
+      height: 10px;
+    }
+  }
 }
 </style>

@@ -13,6 +13,10 @@ export default defineNuxtPlugin((nuxtApp) => {
         host,
         siteId: 1,
         trackerFileName: 'piwik',
+        preInitActions: [
+          ['setCustomVariable', 1, 'app', 'true'],
+          ['setCustomVariable', 2, 'appversion', config.public.MOBILE_VERSION],
+        ],
       })
     } catch (e) {
       console.log('Matomo load failed', e)

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1140" android:versionName="2.0.100" >
+
+  <application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/AppTheme" android:largeHeap="true">
+
+    <activity android:exported="true" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation" android:name="org.ilovefreegle.direct.MainActivity" android:label="@string/title_activity_main" android:theme="@style/AppTheme.NoActionBarLaunch" android:launchMode="singleTask">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="freegle" />
+      </intent-filter>
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https" />
+        <data android:host="www.ilovefreegle.org" />
+      </intent-filter>
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme=" " />
+        <data android:host=" " />
+        <data android:pathPrefix="/" />
+      </intent-filter>
+    </activity>
+    <activity android:name="com.facebook.FacebookActivity"
+        android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+        android:label="@string/app_name" />
+    
+    <activity
+        android:name="com.facebook.CustomTabActivity"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="@string/fb_login_protocol_scheme" />
+        </intent-filter>
+    </activity>
+
+    <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true">
+      <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/>
+    </provider>
+
+    <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+    <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+    <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/fr_icon" />
+
+    <meta-data android:name="com.google.android.gms.wallet.api.enabled" android:value="true" />
+    <meta-data android:name="com.getcapacitor.community.stripe.enable_google_pay" android:value="@bool/enable_google_pay"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.publishable_key" android:value="@string/publishable_key"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.country_code" android:value="@string/country_code"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.merchant_display_name" android:value="@string/merchant_display_name"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.google_pay_is_testing" android:value="@bool/google_pay_is_testing"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.email_address_required" android:value="@bool/email_address_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.phone_number_required" android:value="@bool/phone_number_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.billing_address_required" android:value="@bool/billing_address_required"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.billing_address_format" android:value="@string/billing_address_format"/>
+    <meta-data android:name="com.getcapacitor.community.stripe.google_pay_existing_payment_method_required" android:value="@bool/google_pay_existing_payment_method_required"/>
+  </application>
+
+  <!-- Permissions -->
+
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.READ_CALENDAR"/>
+  <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS" />
+  <queries>
+    <intent>
+      <action android:name="android.media.action.IMAGE_CAPTURE"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.GET_CONTENT"/>
+    </intent>
+    <intent>
+      <action android:name="android.intent.action.PICK"/>
+    </intent>
+    <intent>
+      <action android:name="com.android.camera.action.CROP"/>
+      <data android:mimeType="image/*" android:scheme="content"/>
+    </intent>
+  </queries>
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.VIBRATE"/>
+  <uses-permission android:name="android.permission.CAMERA" />
+  <queries>
+    <package android:name="com.facebook.katana"/>
+  </queries>
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+</manifest>

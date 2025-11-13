@@ -21,14 +21,57 @@ static/sw.js
 
 # Sentry Auth Token
 .env.sentry-build-plugin
+
+# app secrets
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
+
+# copied with app secrets
+android/app/src/main/assets/capacitor.config.json
+
+# public/js
+public/js/cookieyes-*
+public/js/cookieyesapp-v*
+public/js/prebid-app-*
+public/js/prebid-base-*
+.vs
+*.sh
+*.txt
+!VERSION.txt
+resources
+save
 /playwright-report/
 /test-results/.last-run.json
 /test-results/
 /.npmrc
 /test-emails.json
+
 /CLAUDE.local.md
 /.claude/settings.local.json
 /coverage/
 /monocart-report/
 /assets/monocart-coverage-app.js
 /playwright-screenshots/
+
+# app
+android/*
+!android/app/
+android/app/*
+!android/app/build.gradle
+ios/*
+!ios/App/
+ios/App/*
+!ios/App/App.xcodeproj/
+ios/App/App.xcodeproj/*
+!ios/App/App.xcodeproj/xcshareddata/
+ios/App/App.xcodeproj/xcshareddata/*
+!ios/App/App.xcodeproj/xcshareddata/xcschemes/
+
+# Fastlane
+fastlane/*.json
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/README.md
+fastlane/metadata/android/en-US/changelogs/

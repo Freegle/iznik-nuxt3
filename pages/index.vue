@@ -107,7 +107,7 @@
         />
       </client-only>
     </div>
-    <div class="app-download mt-2">
+    <div v-if="!isApp" class="app-download mt-2">
       <a
         href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
         target="_blank"
@@ -146,6 +146,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '@/stores/mobile'
 import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
@@ -173,6 +174,7 @@ const api = Api(runtimeConfig)
 const route = useRoute()
 const router = useRouter()
 const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
 const userWatch = ref(null)
 const type = ref('landing')
 
@@ -222,6 +224,8 @@ const me = computed(() => {
   const authStore = useAuthStore()
   return authStore?.user
 })
+
+const isApp = ref(mobileStore.isApp) // APP
 
 // Methods
 function goHome() {

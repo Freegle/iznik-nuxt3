@@ -1,3 +1,4 @@
+// import * as Sentry from '@sentry/capacitor';
 import * as Sentry from '@sentry/vue'
 import { Integrations } from '@sentry/tracing'
 import {
@@ -14,10 +15,10 @@ export default defineNuxtPlugin((nuxtApp) => {
   const { vueApp } = nuxtApp
   const router = useRouter()
 
-  window.onbeforeunload = function () {
+  /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
     console.log('Window unloading...')
     useMiscStore().unloading = true
-  }
+  } */
 
   // If we initialise Sentry before CookieYes then it seems to attach a click handler which blocks clicking on the
   // CookieYes banner.

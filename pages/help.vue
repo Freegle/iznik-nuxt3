@@ -7,6 +7,19 @@
         </VisibleWhen>
       </b-col>
       <b-col cols="12" md="6" class="bg-white pt-4">
+        <p v-if="isApp">
+          If you like this app - or not -
+          <a href="#" class="d-inline" @click.stop.prevent="showRateMe">
+            please leave a review</a
+          >.<br />
+          Mobile app version: {{ mobileVersion }}, built {{ version }}
+          <span style="display: none">{{ mobileInfo }}</span>
+        </p>
+        <RateAppModal
+          v-if="showRateAppModal"
+          ref="rateAppModal"
+          @hidden="showRateAppModal = false"
+        />
         <h1>How can we help?</h1>
         <p>
           Type a question in here, and we'll see if we can find an answer for
@@ -41,7 +54,10 @@
             <template #title>How do I get fewer emails?</template>
             <p>
               <!-- eslint-disable-next-line-->
-            If you go to <nuxt-link no-prefetch to="/settings">Settings</nuxt-link> then you can change how many mails you get in your <em>Mail Settings</em>.
+              If you go to
+              <nuxt-link no-prefetch to="/settings">Settings</nuxt-link> then
+              you can change how many mails you get in your
+              <em>Mail Settings</em>.
             </p>
           </HelpQuestion>
           <HelpQuestion id="taken" :matches="matches">
@@ -78,7 +94,11 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                If you've not had any replies, this happens automatically.  If you go to <nuxt-link  no-prefetch to="/myposts">My Posts</nuxt-link>, and click on the post, you can see the time until the auto-repost is due on there, like this:
+                If you've not had any replies, this happens automatically. If
+                you go to
+                <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link>, and
+                click on the post, you can see the time until the auto-repost is
+                due on there, like this:
               </p>
               <p>
                 <span class="success"> Auto-repost due in 2 days</span>
@@ -94,7 +114,9 @@
             <div>
               <p>
                 <!-- eslint-disable-next-line-->
-                You can do this from your <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>, in the <em>Personal Information</em> section.
+                You can do this from your
+                <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>, in
+                the <em>Personal Information</em> section.
               </p>
             </div>
           </HelpQuestion>
@@ -110,44 +132,50 @@
           <HelpQuestion id="app" :matches="matches">
             <template #title>Do you have a mobile app?</template>
             <div>
-              <p>
-                We do! Freegling is easy on mobiles and tablets, and you get
-                notifications of replies so you don't have to rely on email.
-                Download using these links or search for Freegle in your app
-                store - it's free!
-              </p>
-              <div class="d-flex justify-content-between">
-                <a
-                  href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle Android app on Google Play"
-                    title="Freegle Android app on Google Play"
-                    class="img-responsive"
-                    src="/en-play-badge.png"
-                  />
-                </a>
-                <a
-                  href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-                  class="mt-2"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    alt="Freegle app for iPhone, iPad, and iPod touch"
-                    title="Freegle app for iPhone, iPad, and iPod touch"
-                    class="img-responsive"
-                    src="/app-store-black-sm.png"
-                  />
-                </a>
+              <div v-if="isApp">
+                Yes! You are using the {{ appType }} app, version
+                {{ mobileVersion }}.
               </div>
-              <p class="mt-2">
-                The app is only available in the UK app stores. We support
-                Android 5.1/iOS 13 or later.
-              </p>
+              <div v-else>
+                <p>
+                  We do! Freegling is easy on mobiles and tablets, and you get
+                  notifications of replies so you don't have to rely on email.
+                  Download using these links or search for Freegle in your app
+                  store - it's free!
+                </p>
+                <div class="d-flex justify-content-between">
+                  <a
+                    href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+                    class="mt-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      alt="Freegle Android app on Google Play"
+                      title="Freegle Android app on Google Play"
+                      class="img-responsive"
+                      src="/en-play-badge.png"
+                    />
+                  </a>
+                  <a
+                    href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+                    class="mt-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      alt="Freegle app for iPhone, iPad, and iPod touch"
+                      title="Freegle app for iPhone, iPad, and iPod touch"
+                      class="img-responsive"
+                      src="/app-store-black-sm.png"
+                    />
+                  </a>
+                </div>
+                <p class="mt-2">
+                  The app is only available in the UK app stores. We support
+                  Android 5.1/iOS 13 or later.
+                </p>
+              </div>
             </div>
           </HelpQuestion>
           <HelpQuestion id="selling" :matches="matches">
@@ -292,7 +320,10 @@
               </ul>
               <p>
                 <!-- eslint-disable-next-line -->
-                You can reach us at <ExternalLink href="mailto:volunteers@ilovefreegle.org">volunteers@ilovefreegle.org</ExternalLink>.
+                You can reach us at
+                <ExternalLink href="mailto:volunteers@ilovefreegle.org"
+                  >volunteers@ilovefreegle.org</ExternalLink
+                >.
               </p>
               <p>
                 Or if you'd like to donate to our charity, you can do that
@@ -349,6 +380,13 @@
               variant="primary"
               class="mb-2"
             />
+            <p>
+              Mobile version: {{ mobileVersion }}<br />
+              {{ deviceuserinfo }}
+            </p>
+            <b-button variant="white" @click="copydeviceuserinfo">{{
+              deviceuserinfocopied
+            }}</b-button>
           </b-card-body>
         </b-card>
         <div class="text-muted">
@@ -416,6 +454,7 @@ import NoticeMessage from '~/components/NoticeMessage'
 import SupportLink from '~/components/SupportLink'
 import { ref, computed, onMounted, nextTick } from '#imports'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '@/stores/mobile'
 
 // Async components
 const SupporterInfoModal = defineAsyncComponent(() =>
@@ -429,6 +468,7 @@ const SidebarLeft = defineAsyncComponent(() =>
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const authStore = useAuthStore()
+const mobileStore = useMobileStore()
 
 // State
 const question = ref(null)
@@ -438,8 +478,21 @@ const contactGroupId = ref(null)
 const showInfoModal = ref(false)
 const faq = ref(null)
 const supporterInfoModal = ref(null)
+const rateAppModal = ref(null)
+const showRateAppModal = ref(false)
+const deviceuserinfocopied = ref('Copy app and device info')
 
 // Computed properties
+const isApp = ref(mobileStore.isApp) // APP
+const appType = ref(mobileStore.isiOS ? 'iOS' : 'Android')
+const mobileVersion = ref(runtimeConfig.public.MOBILE_VERSION)
+const mobileInfo = ref(mobileStore.devicePersistentId)
+
+const deviceuserinfo = computed(() => {
+  if (!mobileStore.deviceuserinfo) return false
+  return 'Device info: ' + mobileStore.deviceuserinfo
+})
+
 const matches = computed(() => {
   if (!searcher.value || !question.value) {
     return forIndex.value.map((o) => o.id)
@@ -469,6 +522,28 @@ const hasNoResults = computed(() => {
 // Methods
 function supporterInfo() {
   showInfoModal.value = true
+}
+
+function showRateMe() {
+  window.localStorage.removeItem('rateappnotagain')
+  showRateAppModal.value = true
+}
+
+async function copydeviceuserinfo(e) {
+  console.log('copydeviceuserinfo', e)
+  let infotocopy = 'Mobile version: ' + mobileVersion.value + '. '
+  if (deviceuserinfo.value) infotocopy += deviceuserinfo.value
+  await navigator.clipboard.writeText(infotocopy)
+  deviceuserinfocopied.value = 'Device info copied'
+  setTimeout(() => {
+    deviceuserinfocopied.value = 'Copy app and device info'
+  }, 3000)
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+  }
+  return false
 }
 
 // Lifecycle hooks

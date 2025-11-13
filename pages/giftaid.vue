@@ -369,6 +369,18 @@ watch(me, async (newVal, oldVal) => {
   }
 })
 
+// Also watch auth tokens in case they're set after the user
+watch(
+  () => authStore.auth,
+  async (newAuth) => {
+    if (me.value && (newAuth.jwt || newAuth.persistent)) {
+      // User exists and we now have valid tokens, try fetching again
+      await fetchGiftAidData()
+    }
+  },
+  { deep: true }
+)
+
 watch(marketingconsent, async (newVal) => {
   await authStore.saveAndGet({
     marketingconsent: newVal,

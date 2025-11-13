@@ -1,8 +1,14 @@
 <template>
   <client-only>
     <b-row class="m-0 mt-4">
-      <b-col cols="12" lg="6" class="p-0 mt-4" offset-lg="3">
-        <NoticeMessage v-if="invalid" class="mt-4">
+      <b-col cols="12" lg="6" class="p-0 mt-5" offset-lg="3">
+        <NoticeMessage v-if="appshown">
+          <p>The job ad should have opened in your browser</p>
+          <b-button to="/jobs" variant="primary" size="lg">
+            View more jobs
+          </b-button>
+        </NoticeMessage>
+        <NoticeMessage v-else-if="invalid" class="mt-5">
           <p>Sorry, that job is no longer available.</p>
           <b-button to="/jobs" variant="primary" size="lg">
             View more jobs
@@ -29,6 +35,7 @@ const jobStore = useJobStore()
 const route = useRoute()
 const id = ref(parseInt(route.params.id))
 const invalid = ref(false)
+const appshown = ref(false)
 
 const job = ref(await jobStore.fetchOne(id.value))
 
@@ -40,6 +47,7 @@ onMounted(async () => {
     })
 
     window.location = job.value.url
+    appshown.value = true
   } else {
     invalid.value = true
   }

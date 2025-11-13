@@ -376,7 +376,7 @@ export default {
       this.authStore.forceLogin = false
 
       // Go to the landing page.
-      this.$router.push('/')
+      router.push('/')
     },
     async requestLogin() {
       console.log('MODTOOLS.VUE requestLogin')

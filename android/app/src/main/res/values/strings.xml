@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Freegle</string>
+    <string name="title_activity_main">Freegle</string>
+    <string name="package_name">org.ilovefreegle.direct</string>
+    <string name="custom_url_scheme">org.ilovefreegle.direct</string>
+    <string name="facebook_app_id">134980666550322</string>
+    <string name="facebook_client_token">eb343dff9d3f338007745bdd0c9a6cd5</string>
+    <string name="fb_login_protocol_scheme">fb134980666550322</string>
+    <string name="server_client_id">423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com</string>
+    <string name="publishable_key">pk_live_51PrK1sP3oIVajsTkBJ3XrexNVYYdFeJnpIq9oGhcfWzoH15nDoeXT5icgpOP3xuf7RjLn0MTcpQfrKKbbjTJYNQz00wRqEDLUf</string>
+    <bool name="enable_google_pay">true</bool>
+    <string name="country_code">GB</string>
+    <string name="merchant_display_name">Freegle</string>
+    <bool name="google_pay_is_testing">false</bool>
+    <bool name="email_address_required">true</bool>
+    <bool name="phone_number_required">true</bool>
+    <bool name="billing_address_required">true</bool>
+    <string name="billing_address_format">Full</string>
+    <bool name="google_pay_existing_payment_method_required">false</bool>
+</resources>

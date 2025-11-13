@@ -113,6 +113,7 @@ import { useTeamStore } from './stores/team'
 import { useDonationStore } from './stores/donations'
 import { useGiftAidStore } from './stores/giftaid'
 import { useAuthorityStore } from './stores/authority'
+import { useMobileStore } from './stores/mobile'
 import { useStatsStore } from './stores/stats'
 import { useMicroVolunteeringStore } from './stores/microvolunteering'
 import { useImageStore } from './stores/image'
@@ -172,6 +173,7 @@ const donationStore = useDonationStore()
 const giftAidStore = useGiftAidStore()
 const authorityStore = useAuthorityStore()
 const noticeboardStore = useNoticeboardStore()
+const mobileStore = useMobileStore()
 const statsStore = useStatsStore()
 const microVolunteeringStore = useMicroVolunteeringStore()
 const imageStore = useImageStore()
@@ -204,6 +206,7 @@ donationStore.init(runtimeConfig)
 giftAidStore.init(runtimeConfig)
 authorityStore.init(runtimeConfig)
 noticeboardStore.init(runtimeConfig)
+mobileStore.init(runtimeConfig)
 statsStore.init(runtimeConfig)
 microVolunteeringStore.init(runtimeConfig)
 imageStore.init(runtimeConfig)
