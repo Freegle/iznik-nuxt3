@@ -230,66 +230,20 @@ jobs:
 
             echo "✅ Certificate imported successfully"
 
-      # Install xcpretty for prettier output
-      - run:
-          name: Install xcpretty
-          command: gem install xcpretty
-
-      # Build ad-hoc IPA for testing (no TestFlight upload)
-      # Note: Using Release configuration with ad-hoc export for easier installation
+      # Build ad-hoc IPA using Fastlane (same approach as production but with ad-hoc export)
       # Safari Web Inspector works on all iOS builds for debugging
       - run:
           name: Build Ad-Hoc IPA for Testing
           command: |
-            # Install provisioning profile
-            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-            cp ~/certificates/ios_appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+            export TERM=xterm-256color
+            bundle exec fastlane ios debug
+          no_output_timeout: 30m
 
-            cd ios/App
-
-            # Create build directory for logs
-            mkdir -p build
-
-            # Build with Release configuration (ad-hoc distribution requires release)
-            # Save full logs for debugging (don't use xcpretty which hides errors)
-            # Use -allowProvisioningUpdates to let Xcode use the installed provisioning profile
-            # This works with the automatic signing settings in the project
-            set -o pipefail
-            xcodebuild \
-              -workspace App.xcworkspace \
-              -scheme Freegle \
-              -configuration Release \
-              -archivePath $PWD/build/Freegle.xcarchive \
-              -allowProvisioningUpdates \
-              archive \
-              2>&1 | tee build/xcodebuild-archive.log
-
-            # Export as ad-hoc IPA
-            xcodebuild \
-              -exportArchive \
-              -archivePath $PWD/build/Freegle.xcarchive \
-              -exportPath $PWD/build \
-              -exportOptionsPlist ../../fastlane/ExportOptionsDebug.plist \
-              2>&1 | tee build/xcodebuild-export.log
-
-            echo "✅ Ad-hoc IPA built successfully"
-            ls -lh build/*.ipa
-
-      # Store build logs as artifacts
+      # Store build logs and IPA as artifacts
       - store_artifacts:
-          path: ios/App/build/xcodebuild-archive.log
-          destination: xcodebuild-archive.log
+          path: ios/App/build/
+          destination: ios-debug-build
           when: always
-
-      - store_artifacts:
-          path: ios/App/build/xcodebuild-export.log
-          destination: xcodebuild-export.log
-          when: always
-
-      # Store the ad-hoc IPA as artifact
-      - store_artifacts:
-          path: ios/App/build/Freegle.ipa
-          destination: freegle-adhoc.ipa
 
       - run:
           name: Build Complete

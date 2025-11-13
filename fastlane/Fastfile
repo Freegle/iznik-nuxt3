@@ -227,6 +227,45 @@ platform :android do
 end
 
 platform :ios do
+  desc "Build ad-hoc IPA for testing (master branch debug builds)"
+  lane :debug do
+    # Import certificates from CircleCI environment variables
+    import_certificate(
+      certificate_path: ENV['IOS_CERTIFICATE_PATH'] || '~/certificates/ios_distribution.p12',
+      certificate_password: ENV['IOS_CERTIFICATE_PASSWORD'] || '',
+      keychain_name: ENV['KEYCHAIN_NAME'] || '~/Library/Keychains/temp.keychain-db',
+      keychain_password: ENV['KEYCHAIN_PASSWORD'] || 'circleci'
+    )
+
+    # Install provisioning profile
+    install_provisioning_profile(
+      path: ENV['IOS_PROVISIONING_PROFILE_PATH'] || '~/certificates/ios_appstore.mobileprovision'
+    )
+
+    # Build the app with ad-hoc export
+    gym(
+      scheme: "Freegle",
+      workspace: "ios/App/App.xcworkspace",
+      export_method: "ad-hoc",
+      export_options: {
+        method: "ad-hoc",
+        teamID: ENV['APPLE_TEAM_ID'] || "N7B7R43PU3",
+        signingStyle: "manual",
+        stripSwiftSymbols: true,
+        uploadBitcode: false,
+        uploadSymbols: true,
+        compileBitcode: false
+      },
+      clean: false,
+      output_directory: "./ios/App/build",
+      output_name: "Freegle.ipa",
+      skip_package_dependencies_resolution: true,
+      buildlog_path: "./ios/App/build"
+    )
+
+    UI.success("✅ Ad-hoc IPA built successfully!")
+  end
+
   desc "Build and upload to TestFlight"
   lane :beta do
     # Validate environment variables
