@@ -261,7 +261,7 @@ jobs:
               -archivePath $PWD/build/Freegle.xcarchive \
               CODE_SIGN_STYLE=Manual \
               CODE_SIGN_IDENTITY="iPhone Distribution" \
-              DEVELOPMENT_TEAM=N7B7R43PU3 \
+              DEVELOPMENT_TEAM="${APPLE_TEAM_ID:-N7B7R43PU3}" \
               PROVISIONING_PROFILE_SPECIFIER="" \
               archive \
               2>&1 | tee build/xcodebuild-archive.log
