@@ -164,6 +164,18 @@ export const useMiscStore = defineStore({
     setMarketingConsent(value) {
       this.marketingConsent = value
     },
+    async fetchLatestMessage() {
+      try {
+        const response = await fetch(
+          this.config.public.APIv2 + '/latestmessage'
+        )
+        const data = await response.json()
+        return data
+      } catch (e) {
+        console.log('Failed to fetch latest message time', e)
+        return { ret: 1, status: 'Error' }
+      }
+    },
   },
   getters: {
     get: (state) => (key) => {

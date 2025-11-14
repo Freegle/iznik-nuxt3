@@ -40,6 +40,15 @@
         </li>
       </ul>
     </div>
+    <div
+      v-if="
+        latestMessage &&
+        (me.systemrole === 'Admin' || me.systemrole === 'Support')
+      "
+    >
+      <strong>Latest message arrival (Yesterday backup):</strong>
+      {{ latestMessage }}
+    </div>
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
@@ -195,6 +204,7 @@ const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
 const appVersions = ref(null)
+const latestMessage = ref(null)
 // const dateFormat = ref(null)
 
 const groupid = computed({
@@ -315,6 +325,18 @@ onMounted(async () => {
     }
   } catch (e) {
     console.log('Failed to fetch app versions', e)
+  }
+
+  // Fetch latest message time for Admin/Support users
+  if (me.value?.systemrole === 'Admin' || me.value?.systemrole === 'Support') {
+    const data = await miscStore.fetchLatestMessage()
+    if (data.ret === 0 && data.latestmessage) {
+      latestMessage.value = dayjs(data.latestmessage).format(
+        'D MMM YYYY HH:mm:ss'
+      )
+    } else {
+      latestMessage.value = 'Restoring...'
+    }
   }
 
   update()
