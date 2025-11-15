@@ -784,14 +784,19 @@ export default defineNuxtConfig({
                 window.postCookieYes();
               }
             }
-
-            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-            // render.
-            loadScript('https://accounts.google.com/gsi/client')
             ` +
-            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) +
+            (config.ISAPP
+              ? `
+            // App builds: Don't load GSI client script (apps use Capacitor plugin for Google login)
+            // For Android apps with cookies, call postGSI directly to load CookieYes and ads
+            ` +
+                (config.USE_COOKIES ? `postGSI()` : ``)
+              : `
+            // Web builds: Load GSI client script and set callback to initialize ads
+            window.onGoogleLibraryLoad = postGSI
+            loadScript('https://accounts.google.com/gsi/client')
+            `) +
             `
-            //}
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
