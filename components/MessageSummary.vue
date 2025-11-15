@@ -168,7 +168,10 @@ const view = async () => {
 
 const expand = (e) => {
   if (message.value) {
-    emit('expand')
+    // If the handler function doesnt do anything, then continue opening popups.
+    if (!handleClickWithModifiers(e)) {
+      emit('expand')
+    }
 
     if (e) {
       e.preventDefault()
@@ -181,14 +184,44 @@ const expandAndAttachments = (e) => {
   // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
   // on My Posts).
   if (message.value) {
-    emit('expand')
-    emit('attachments')
+    // If the handler function does something, then we do not want to continue opening popups.
+    if (!handleClickWithModifiers(e)) {
+      emit('expand')
+      emit('attachments')
+    }
 
     if (e) {
       e.preventDefault()
       e.stopPropagation()
     }
   }
+}
+
+// Aims to handle any click events intended to open a popup when a modifier (ctrl or shift) are held.
+const handleClickWithModifiers = (e) => {
+  // Handle situations where `e` is not defined or null for some reason.
+  if (!e) {
+    return false
+  }
+
+  // Ensure we dont accidentally apply this to a proper a[href]
+  if (e.target.nodeName.toLowerCase() === 'a') {
+    return false
+  }
+
+  // CtrlKey will make a post open in a new tab
+  if (e.ctrlKey) {
+    window.open('/message/' + props.id, '_BLANK')
+    return true
+  }
+
+  // Shift key will make a URL open in a new window
+  if (e.shiftKey) {
+    window.open('/message/' + props.id, '_NEW')
+    return true
+  }
+
+  return false
 }
 </script>
 <style scoped lang="scss">
