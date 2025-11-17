@@ -164,16 +164,16 @@ const groups = computed(() => {
 
 // Methods
 function showProfileModal(e) {
-  // If either modifier key is help when clicking, open the profile accordingly
+  // If either modifier key is held when clicking, open the profile accordingly
   if (e.shiftKey || e.ctrlKey) {
     e.preventDefault()
     e.stopPropagation()
-    // Handle the ctrlKey (new tab)
+    // Handle the ctrl key (new tab)
     if (e.ctrlKey) {
       window.open('/profile/' + currentMessage.fromuser, '_BLANK')
       return
     }
-    // Handle the shiftKey (new window)
+    // Handle the shift key (new window)
     if (e.shiftKey) {
       window.open('/profile/' + currentMessage.fromuser, '_NEW')
       return
