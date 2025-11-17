@@ -342,8 +342,10 @@ export default {
       this.showLogsModal = true
       this.$refs.logs?.show()
     },
-    forcerefresh() {
-      this.reviewed = true
+    forcerefresh(hideMember = false) {
+      if (hideMember) {
+        this.reviewed = true
+      }
       this.$emit('forcerefresh')
     },
   },

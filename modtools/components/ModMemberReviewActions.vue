@@ -70,7 +70,6 @@
           :reviewgroupid="groupid"
           label="Hold"
           class="mr-2"
-          @pressed="forcerefresh"
         />
         <ModMemberButton
           v-else
@@ -81,7 +80,6 @@
           :reviewgroupid="groupid"
           label="Release"
           class="mr-2"
-          @pressed="forcerefresh"
         />
         <b-button
           :to="'/members/approved/' + membership.id + '/' + member.userid"
@@ -184,7 +182,7 @@ export default {
 
       setTimeout(() => {
         this.reviewed = true
-        this.forcerefresh()
+        this.forcerefresh(true)
       }, 2000)
     },
     async ignore(callback) {
@@ -196,7 +194,7 @@ export default {
       setTimeout(() => {
         this.reviewed = true
         callback()
-        this.forcerefresh()
+        this.forcerefresh(true)
       }, 2000)
     },
     daysago(d) {
