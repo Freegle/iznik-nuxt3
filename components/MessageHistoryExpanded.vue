@@ -163,7 +163,23 @@ const groups = computed(() => {
 })
 
 // Methods
-function showProfileModal() {
+function showProfileModal(e) {
+  // If either modifier key is help when clicking, open the profile accordingly
+  if (e.shiftKey || e.ctrlKey) {
+    e.preventDefault()
+    e.stopPropagation()
+    // Handle the ctrlKey (new tab)
+    if (e.ctrlKey) {
+      window.open('/profile/' + currentMessage.fromuser, '_BLANK')
+      return
+    }
+    // Handle the shiftKey (new window)
+    if (e.shiftKey) {
+      window.open('/profile/' + currentMessage.fromuser, '_NEW')
+      return
+    }
+  }
+
   showProfile.value = true
 }
 
