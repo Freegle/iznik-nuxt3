@@ -45,9 +45,19 @@
         latestMessage &&
         (me.systemrole === 'Admin' || me.systemrole === 'Support')
       "
+      :class="{
+        'alert alert-danger': backupStatus === 'error',
+        'alert alert-warning': backupStatus === 'warning',
+      }"
     >
       <strong>Latest message arrival (Yesterday backup):</strong>
       {{ latestMessage }}
+      <span v-if="backupStatus === 'error'">
+        ❌ Backup is over 2 days old!</span
+      >
+      <span v-if="backupStatus === 'warning'">
+        ⚠️ Backup is currently restoring</span
+      >
     </div>
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
@@ -205,6 +215,7 @@ const start = ref(null)
 const end = ref(null)
 const appVersions = ref(null)
 const latestMessage = ref(null)
+const backupStatus = ref(null)
 // const dateFormat = ref(null)
 
 const groupid = computed({
@@ -334,8 +345,17 @@ onMounted(async () => {
       latestMessage.value = dayjs(data.latestmessage).format(
         'D MMM YYYY HH:mm:ss'
       )
+
+      // Check backup age and set status
+      const backupAge = dayjs().diff(dayjs(data.latestmessage), 'day')
+      if (backupAge > 2) {
+        backupStatus.value = 'error'
+      } else {
+        backupStatus.value = null
+      }
     } else {
       latestMessage.value = 'Restoring...'
+      backupStatus.value = 'warning'
     }
   }
 
