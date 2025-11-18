@@ -544,7 +544,11 @@ export default {
     },
     async unban() {
       this.showUnbanModal = false
-      await this.memberStore.unban(this.user.id, this.groupid)
+      await this.memberStore.unban(this.member.userid, this.groupid)
+      // eslint-disable-next-line vue/no-mutating-props
+      delete this.member.bandate
+      // eslint-disable-next-line vue/no-mutating-props
+      delete this.member.bannedby
     },
     async showChat() {
       this.chatid = await this.chatStore.openChatToMods(
