@@ -353,7 +353,38 @@ onMounted(async () => {
       } else {
         backupStatus.value = null
       }
+    } else if (
+      window.location.hostname.includes('yesterday.ilovefreegle.org')
+    ) {
+      // Try to get restore status from Yesterday API if no messages found
+      try {
+        const restoreResponse = await fetch(
+          'https://yesterday.ilovefreegle.org:8444/api/restore-status'
+        )
+        if (restoreResponse.ok) {
+          const restoreData = await restoreResponse.json()
+          if (restoreData.inProgress && restoreData.backupDate) {
+            const formattedDate = dayjs(
+              restoreData.backupDate,
+              'YYYYMMDD'
+            ).format('D MMM YYYY')
+            latestMessage.value = `Restoring backup from ${formattedDate}...`
+            backupStatus.value = 'warning'
+          } else {
+            latestMessage.value = 'Restoring...'
+            backupStatus.value = 'warning'
+          }
+        } else {
+          latestMessage.value = 'Restoring...'
+          backupStatus.value = 'warning'
+        }
+      } catch (e) {
+        // If Yesterday API is not accessible, just show generic message
+        latestMessage.value = 'Restoring...'
+        backupStatus.value = 'warning'
+      }
     } else {
+      // Not on yesterday - just show generic message
       latestMessage.value = 'Restoring...'
       backupStatus.value = 'warning'
     }
