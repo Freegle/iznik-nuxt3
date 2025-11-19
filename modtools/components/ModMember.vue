@@ -540,7 +540,7 @@ export default {
     },
     async changeAutorepost(e) {
       const settings = this.user.settings || {}
-      settings.autorepostsdisable = e.value ? 0 : 1
+      settings.autorepostsdisable = !e.value
       await this.userStore.edit({
         id: this.user.id,
         settings,
