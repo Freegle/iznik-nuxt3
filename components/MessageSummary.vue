@@ -168,7 +168,7 @@ const view = async () => {
 
 const expand = (e) => {
   if (message.value) {
-    // If the handler function doesnt do anything, then continue opening popups.
+    // If the handler function doesn't do anything, then continue opening popups.
     if (!handleClickWithModifiers(e)) {
       emit('expand')
     }
@@ -197,7 +197,7 @@ const expandAndAttachments = (e) => {
   }
 }
 
-// Aims to handle any click events intended to open a popup when a modifier (ctrl or shift) are held.
+// Aims to handle any click events intended to open a popup when a modifier (ctrl or shift) is held.
 const handleClickWithModifiers = (e) => {
   // Handle situations where `e` is not defined or null for some reason.
   if (!e) {
@@ -209,13 +209,13 @@ const handleClickWithModifiers = (e) => {
     return false
   }
 
-  // CtrlKey will make a post open in a new tab
+  // Ctrl key will make a post open in a new tab
   if (e.ctrlKey) {
     window.open('/message/' + props.id, '_BLANK')
     return true
   }
 
-  // Shift key will make a URL open in a new window
+  // Shift key will make a post open in a new window
   if (e.shiftKey) {
     window.open('/message/' + props.id, '_NEW')
     return true
