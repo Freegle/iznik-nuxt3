@@ -7,7 +7,7 @@ parameters:
     description: "Set to true to manually trigger promotion/submission workflow"
 
 orbs:
-  freegle: freegle/tests@1.0.0
+  freegle: freegle/tests@1
 
 workflows:
   version: 2
