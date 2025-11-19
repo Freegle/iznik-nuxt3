@@ -542,7 +542,7 @@ export default {
       const settings = this.user.settings || {}
       settings.autorepostsdisable = !e.value
       await this.userStore.edit({
-        id: this.user.id,
+        id: this.member.userid,
         settings,
       })
     },
