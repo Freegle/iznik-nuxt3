@@ -239,6 +239,7 @@
               }"
               variant="modgreen"
               class="mb-2"
+              @change="changeAutorepost"
             />
           </div>
         </div>
@@ -535,6 +536,14 @@ export default {
       await this.userStore.edit({
         id: this.user.id,
         newslettersallowed: e.value,
+      })
+    },
+    async changeAutorepost(e) {
+      const settings = this.user.settings || {}
+      settings.autorepostsdisable = !e.value
+      await this.userStore.edit({
+        id: this.user.id,
+        settings,
       })
     },
     confirmUnban(member) {
