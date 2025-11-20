@@ -8,6 +8,7 @@ parameters:
 
 orbs:
   android: circleci/android@2.3.0
+  freegle-tests: freegle/freegle-tests@1
 
 executors:
   android-executor:
@@ -898,26 +899,6 @@ jobs:
           path: build/
           destination: ios-build
 
-  playwright-tests:
-    machine:
-      image: ubuntu-2404:current
-    resource_class: large
-    steps:
-      - checkout
-      - run:
-          name: Clone FreegleDocker
-          command: |
-            git clone https://github.com/Freegle/FreegleDocker.git ~/FreegleDocker
-            cd ~/FreegleDocker
-            git submodule update --init --recursive
-      - run:
-          name: Run Playwright tests
-          command: |
-            cd ~/FreegleDocker
-            chmod +x scripts/run-submodule-tests.sh
-            ./scripts/run-submodule-tests.sh playwright ~/project
-          no_output_timeout: 30m
-
 workflows:
   version: 2
 
@@ -931,7 +912,7 @@ workflows:
 
   pr-tests:
     jobs:
-      - playwright-tests:
+      - freegle-tests/playwright-tests:
           filters:
             branches:
               ignore:
