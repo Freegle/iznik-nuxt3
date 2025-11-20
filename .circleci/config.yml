@@ -8,7 +8,7 @@ parameters:
 
 orbs:
   android: circleci/android@2.3.0
-  freegle-tests: freegle/freegle-tests@1
+  freegle: freegle/tests@1
 
 executors:
   android-executor:
@@ -912,7 +912,7 @@ workflows:
 
   pr-tests:
     jobs:
-      - freegle-tests/playwright-tests:
+      - freegle/playwright-tests:
           filters:
             branches:
               ignore:
