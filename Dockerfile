@@ -1,7 +1,7 @@
 FROM node:22-slim
 
-# Install Playwright dependencies
-RUN apt-get update && apt-get install -y \
+# Install Playwright dependencies (with retry for flaky networks)
+RUN apt-get update -o Acquire::Retries=5 && apt-get install -o Acquire::Retries=5 -y \
     xvfb \
     dbus \
     libglib2.0-0 \
@@ -27,7 +27,12 @@ ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
 
 COPY package*.json setup-hooks.* ./
-RUN npm install --legacy-peer-deps
+
+# Configure npm retries for flaky networks
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm install --legacy-peer-deps
 
 # Install Playwright browsers and system dependencies after npm install
 RUN npx playwright install chromium && npx playwright install-deps

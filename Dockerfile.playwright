@@ -3,8 +3,11 @@ FROM mcr.microsoft.com/playwright:v1.40.0-focal
 # Set working directory
 WORKDIR /app
 
-# Install required dependencies locally (not globally) first
-RUN npm init -y && \
+# Configure npm retries for flaky networks, then install dependencies
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm init -y && \
     npm install @playwright/test@1.40.0 monocart-reporter coveralls
 
 # Install Playwright browsers and dependencies after installing the package
