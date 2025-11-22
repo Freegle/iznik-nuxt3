@@ -1,22 +1,11 @@
-FROM mcr.microsoft.com/playwright:v1.40.0-focal
+FROM ghcr.io/freegle/freegle-base:latest
 
 # Set working directory
 WORKDIR /app
 
-# Copy retry script for flaky network operations
-COPY --from=scripts retry.sh /usr/local/bin/retry
-RUN chmod +x /usr/local/bin/retry
-
-# Configure npm retries for flaky networks, then install dependencies
-RUN npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm init -y && \
+# Install test dependencies
+RUN npm init -y && \
     npm install @playwright/test@1.40.0 monocart-reporter coveralls
-
-# Install Playwright browsers and dependencies after installing the package
-RUN npx playwright install chromium && \
-    npx playwright install-deps chromium
 
 # Copy initial test files and configuration (fallback)
 COPY playwright.config.js ./
