@@ -1,25 +1,11 @@
 FROM node:22-slim
 
-# Install Playwright dependencies (with retry for flaky networks)
-RUN apt-get update -o Acquire::Retries=5 && apt-get install -o Acquire::Retries=5 -y \
-    xvfb \
-    dbus \
-    libglib2.0-0 \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libxkbcommon0 \
-    libatspi2.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libgbm1 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libasound2 \
-    && mkdir -p /var/run/dbus \
-    && rm -rf /var/lib/apt/lists/*
+# Copy retry script for flaky network operations
+COPY --from=scripts retry.sh /usr/local/bin/retry
+RUN chmod +x /usr/local/bin/retry
+
+# Install Playwright dependencies (with retry for flaky networks including DNS)
+RUN retry bash -c 'apt-get update && apt-get install -y xvfb dbus libglib2.0-0 libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 libxcomposite1 libxdamage1 libgbm1 libpango-1.0-0 libcairo2 libasound2 && mkdir -p /var/run/dbus && rm -rf /var/lib/apt/lists/*'
 
 WORKDIR /app
 

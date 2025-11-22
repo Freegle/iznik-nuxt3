@@ -3,6 +3,10 @@ FROM mcr.microsoft.com/playwright:v1.40.0-focal
 # Set working directory
 WORKDIR /app
 
+# Copy retry script for flaky network operations
+COPY --from=scripts retry.sh /usr/local/bin/retry
+RUN chmod +x /usr/local/bin/retry
+
 # Configure npm retries for flaky networks, then install dependencies
 RUN npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
