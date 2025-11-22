@@ -8,3 +8,7 @@ dist
 .env.*
 logs
 *.log
+coverage
+monocart-report
+playwright-report
+test-results
