@@ -1,9 +1,6 @@
-FROM node:22-slim
+FROM ghcr.io/freegle/freegle-base:latest
 
 WORKDIR /app
-
-# Install postfix for mail relay
-RUN apt-get update && apt-get install -y postfix && rm -rf /var/lib/apt/lists/*
 
 ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
