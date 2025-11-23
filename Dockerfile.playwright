@@ -3,9 +3,8 @@ FROM ghcr.io/freegle/freegle-base:latest
 # Set working directory
 WORKDIR /app
 
-# Install test dependencies
-RUN npm init -y && \
-    npm install @playwright/test@1.40.0 monocart-reporter coveralls
+# Initialize package.json for any local dependencies
+RUN npm init -y
 
 # Copy initial test files and configuration (fallback)
 COPY playwright.config.js ./
