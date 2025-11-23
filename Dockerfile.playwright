@@ -1,15 +1,10 @@
-FROM mcr.microsoft.com/playwright:v1.40.0-focal
+FROM ghcr.io/freegle/freegle-base:latest
 
 # Set working directory
 WORKDIR /app
 
-# Install required dependencies locally (not globally) first
-RUN npm init -y && \
-    npm install @playwright/test@1.40.0 monocart-reporter coveralls
-
-# Install Playwright browsers and dependencies after installing the package
-RUN npx playwright install chromium && \
-    npx playwright install-deps chromium
+# Initialize package.json for any local dependencies
+RUN npm init -y
 
 # Copy initial test files and configuration (fallback)
 COPY playwright.config.js ./
