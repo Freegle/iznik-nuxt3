@@ -3,8 +3,21 @@ FROM ghcr.io/freegle/freegle-base:latest
 # Set working directory
 WORKDIR /app
 
-# Initialize package.json for any local dependencies
-RUN npm init -y
+# Install Playwright system dependencies
+RUN apt-get update && apt-get install -y \
+    xvfb dbus libglib2.0-0 libnss3 libnspr4 libatk1.0-0 \
+    libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 \
+    libxcomposite1 libxdamage1 libgbm1 libpango-1.0-0 \
+    libcairo2 libasound2 \
+    && mkdir -p /var/run/dbus \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright and related packages
+# Version should match iznik-nuxt3/package.json
+RUN npm install -g @playwright/test@1.52.0 monocart-reporter coveralls
+
+# Install Playwright browsers and dependencies
+RUN npx playwright install chromium && npx playwright install-deps
 
 # Copy initial test files and configuration (fallback)
 COPY playwright.config.js ./
