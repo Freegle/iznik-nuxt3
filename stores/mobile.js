@@ -205,32 +205,9 @@ export const useMobileStore = defineStore({
 
     async initPushNotifications(PushNotifications, Badge) {
       if (!this.isiOS) {
+        // Clean up old channels - no longer needed as we use the default channel
         await PushNotifications.deleteChannel({ id: 'PushDefaultForeground' })
-        console.log('CHANNEL DELETED: PushDefaultForeground')
-
-        await PushNotifications.createChannel({
-          id: 'PushDefaultForeground',
-          name: 'Freegle chats',
-          description: 'Direct messages with other Freeglers',
-          importance: 3,
-          visibility: 1,
-          lights: true,
-          lightColor: '#5ECA24',
-          vibration: false,
-        })
-        console.log('CHANNEL CREATED: PushDefaultForeground')
-
-        await PushNotifications.createChannel({
-          id: 'NewPosts',
-          name: 'Freegle new posts',
-          description: 'New offer and wanted posts from other Freeglers',
-          importance: 3,
-          visibility: 1,
-          lights: true,
-          lightColor: '#5ECA24',
-          vibration: false,
-        })
-        console.log('CHANNEL CREATED: NewPosts')
+        await PushNotifications.deleteChannel({ id: 'NewPosts' })
       }
 
       let permStatus = await PushNotifications.checkPermissions()
@@ -314,6 +291,17 @@ export const useMobileStore = defineStore({
           console.error('--- notification.data NOT SET')
           return
         }
+
+        // Only process legacy notifications (no channel specified).
+        // New notifications with channel_id are for newer app versions.
+        if (data.channel_id) {
+          console.log(
+            '--- Ignoring notification with channel_id:',
+            data.channel_id
+          )
+          return
+        }
+
         let foreground = false
         if ('foreground' in data) {
           console.log('--- FOREGROUND', data.foreground)
