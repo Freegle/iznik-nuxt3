@@ -909,6 +909,7 @@ workflows:
             branches:
               only:
                 - master
+                - /^feature\/.*$/
 
   pr-tests:
     jobs:
