@@ -205,32 +205,74 @@ export const useMobileStore = defineStore({
 
     async initPushNotifications(PushNotifications, Badge) {
       if (!this.isiOS) {
+        // Delete old channels that have been renamed/replaced
         await PushNotifications.deleteChannel({ id: 'PushDefaultForeground' })
-        console.log('CHANNEL DELETED: PushDefaultForeground')
+        await PushNotifications.deleteChannel({ id: 'NewPosts' })
 
+        // Create notification channels matching server-side categories
+        // Channel IDs must match what the server sends in android.notification.channel_id
+
+        // Chat messages - HIGH importance for heads-up notifications
         await PushNotifications.createChannel({
-          id: 'PushDefaultForeground',
-          name: 'Freegle chats',
+          id: 'chat_messages',
+          name: 'Chat Messages',
           description: 'Direct messages with other Freeglers',
-          importance: 3,
+          importance: 4, // HIGH - shows as heads-up notification
           visibility: 1,
           lights: true,
           lightColor: '#5ECA24',
-          vibration: false,
+          vibration: true,
         })
-        console.log('CHANNEL CREATED: PushDefaultForeground')
 
+        // Social - DEFAULT importance for ChitChat comments, replies, loves
         await PushNotifications.createChannel({
-          id: 'NewPosts',
-          name: 'Freegle new posts',
-          description: 'New offer and wanted posts from other Freeglers',
-          importance: 3,
+          id: 'social',
+          name: 'ChitChat & Social',
+          description: 'Comments, replies, and likes on your posts',
+          importance: 3, // DEFAULT - sound and appears in tray
           visibility: 1,
           lights: true,
           lightColor: '#5ECA24',
           vibration: false,
         })
-        console.log('CHANNEL CREATED: NewPosts')
+
+        // Reminders - DEFAULT importance for post expiry, collection reminders
+        await PushNotifications.createChannel({
+          id: 'reminders',
+          name: 'Reminders',
+          description: 'Post expiry warnings and collection reminders',
+          importance: 3, // DEFAULT - sound and appears in tray
+          visibility: 1,
+          lights: true,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        // Tips - LOW importance for encouragement/engagement prompts
+        await PushNotifications.createChannel({
+          id: 'tips',
+          name: 'Tips & Suggestions',
+          description: 'Helpful tips and encouragement',
+          importance: 2, // LOW - no sound, appears in tray
+          visibility: 1,
+          lights: false,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        // New posts - LOW importance for digest/relevant/nearby posts
+        await PushNotifications.createChannel({
+          id: 'new_posts',
+          name: 'New Posts',
+          description: 'New offers and wanted posts nearby',
+          importance: 2, // LOW - no sound, appears in tray
+          visibility: 1,
+          lights: false,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        console.log('Notification channels created')
       }
 
       let permStatus = await PushNotifications.checkPermissions()
