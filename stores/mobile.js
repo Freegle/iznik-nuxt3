@@ -310,8 +310,21 @@ export const useMobileStore = defineStore({
 
       await PushNotifications.addListener(
         'pushNotificationActionPerformed',
-        (n) => {
+        async (n) => {
           console.log('Push action performed:', n)
+          const actionId = n.actionId
+          const inputValue = n.inputValue
+
+          // Handle specific actions
+          if (actionId === 'reply' && inputValue && inputValue.trim()) {
+            await this.handleReplyAction(n.notification, inputValue.trim())
+            return
+          } else if (actionId === 'mark_read') {
+            await this.handleMarkReadAction(n.notification)
+            return
+          }
+
+          // Default behavior - navigate to the notification target
           if (n.notification) n.notification.okToMove = true
           this.handleNotification(n.notification, PushNotifications, Badge)
         }
@@ -439,6 +452,65 @@ export const useMobileStore = defineStore({
         this.route = false
       } catch (e) {
         console.log('hangleNotification exception', e.message)
+      }
+    },
+
+    async handleReplyAction(notification, replyText) {
+      // Send a reply message directly from the notification
+      console.log('handleReplyAction', replyText, notification)
+      try {
+        const data = notification?.data
+        if (!data) {
+          console.error('handleReplyAction: no notification data')
+          return
+        }
+
+        // Get chat ID from notification data
+        const chatId = parseInt(data.chatids)
+        if (!chatId) {
+          console.error('handleReplyAction: no chat ID in notification')
+          return
+        }
+
+        // Send the reply via API
+        await api(this.config).chat.send({
+          roomid: chatId,
+          message: replyText,
+        })
+        console.log('handleReplyAction: message sent successfully')
+      } catch (e) {
+        console.error('handleReplyAction error:', e.message)
+      }
+    },
+
+    async handleMarkReadAction(notification) {
+      // Mark the chat as read without opening the app
+      console.log('handleMarkReadAction', notification)
+      try {
+        const data = notification?.data
+        if (!data) {
+          console.error('handleMarkReadAction: no notification data')
+          return
+        }
+
+        // Get chat ID from notification data
+        const chatId = parseInt(data.chatids)
+        if (!chatId) {
+          console.error('handleMarkReadAction: no chat ID in notification')
+          return
+        }
+
+        // Mark as read via API
+        // Use a high lastmsg value to mark all messages as read
+        await api(this.config).chat.markRead(chatId, 999999999, false)
+        console.log('handleMarkReadAction: chat marked as read')
+
+        // Update badge count
+        const { Badge } = await import('@capawesome/capacitor-badge')
+        const newCount = Math.max(0, (parseInt(data.badge) || 1) - 1)
+        this.setBadgeCount(newCount, Badge)
+      } catch (e) {
+        console.error('handleMarkReadAction error:', e.message)
       }
     },
 
