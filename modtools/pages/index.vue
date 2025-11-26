@@ -370,6 +370,18 @@ onMounted(async () => {
             ).format('D MMM YYYY')
             latestMessage.value = `Restoring backup from ${formattedDate}...`
             backupStatus.value = 'warning'
+          } else if (
+            restoreData.status === 'completed' &&
+            restoreData.completedAt
+          ) {
+            const formattedDate = dayjs(restoreData.completedAt).format(
+              'D MMM YYYY HH:mm:ss'
+            )
+            latestMessage.value = formattedDate
+            backupStatus.value = null
+          } else if (restoreData.status === 'failed') {
+            latestMessage.value = 'Restore failed - check logs'
+            backupStatus.value = 'error'
           } else {
             latestMessage.value = 'Restoring...'
             backupStatus.value = 'warning'
