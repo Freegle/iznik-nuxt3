@@ -50,7 +50,7 @@
         'alert alert-warning': backupStatus === 'warning',
       }"
     >
-      <strong>Latest message arrival (Yesterday backup):</strong>
+      <strong>System backed up on Yesterday up to:</strong>
       {{ latestMessage }}
       <span v-if="backupStatus === 'error'">
         ❌ Backup is over 2 days old!</span
