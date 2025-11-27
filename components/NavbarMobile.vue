@@ -90,6 +90,12 @@
               <span class="text--large">Settings</span>
             </div>
           </b-dropdown-item>
+          <b-dropdown-item v-if="isApp" @click="showDebugLogs = true">
+            <div class="d-flex align-items-center clickme">
+              <v-icon icon="bug" size="2x" class="mr-2" />
+              <span class="text--large">Debug Logs</span>
+            </div>
+          </b-dropdown-item>
           <b-dropdown-item @click="logout">
             <div class="d-flex align-items-center clickme">
               <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
@@ -225,6 +231,7 @@
           v-if="showAboutMeModal"
           @hidden="showAboutMeModal = false"
         />
+        <DebugLogsModal v-if="showDebugLogs" @hidden="showDebugLogs = false" />
       </b-navbar>
     </div>
   </div>
@@ -270,6 +277,12 @@ const AboutMeModal = defineAsyncComponent(() =>
 const NotificationOptions = defineAsyncComponent(() =>
   import('~/components/NotificationOptions')
 )
+
+const DebugLogsModal = defineAsyncComponent(() =>
+  import('~/components/DebugLogsModal')
+)
+
+const showDebugLogs = ref(false)
 
 const mobileNav = ref(null)
 

@@ -17,7 +17,17 @@ import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '~/stores/chat'
 import { useNotificationStore } from '~/stores/notification'
+import { useDebugStore } from '~/stores/debug'
 import api from '~/api'
+
+// Helper to get debug store safely (may not be initialized early)
+function dbg() {
+  try {
+    return useDebugStore()
+  } catch (e) {
+    return null
+  }
+}
 
 export const useMobileStore = defineStore({
   id: 'mobile',
@@ -204,6 +214,8 @@ export const useMobileStore = defineStore({
     },
 
     async initPushNotifications(PushNotifications, Badge) {
+      dbg()?.info('initPushNotifications started', { isiOS: this.isiOS })
+
       if (!this.isiOS) {
         // Delete old channels
         await PushNotifications.deleteChannel({ id: 'PushDefaultForeground' })
@@ -273,22 +285,30 @@ export const useMobileStore = defineStore({
         })
 
         console.log('Notification channels created')
+        dbg()?.info('Android notification channels created')
       } else {
         // iOS: Register notification action categories
         // This enables Reply, Mark Read, and View action buttons on chat notifications
         try {
           const result = await PushNotifications.registerActionCategories()
           console.log('iOS notification categories registered:', result)
+          dbg()?.info('iOS notification categories registered', result)
         } catch (e) {
           console.log('iOS registerActionCategories not available:', e.message)
+          dbg()?.warn('iOS registerActionCategories not available', e.message)
         }
       }
 
       let permStatus = await PushNotifications.checkPermissions()
       console.log('checkPermissions:', permStatus)
+      dbg()?.info('Push permission status', permStatus)
 
       await PushNotifications.addListener('registration', (token) => {
         console.log('Push registration success, token: ', token.value)
+        dbg()?.info('Push registration success', {
+          tokenLength: token.value?.length,
+          tokenStart: token.value?.substring(0, 20) + '...',
+        })
         this.mobilePushId = token.value
         const authStore = useAuthStore()
         authStore.savePushId()
@@ -297,6 +317,7 @@ export const useMobileStore = defineStore({
           PushNotifications.listChannels().then((result) => {
             for (const channel of result.channels) {
               console.log('CHANNEL', channel)
+              dbg()?.debug('Channel registered', channel)
             }
           })
         }
@@ -305,6 +326,7 @@ export const useMobileStore = defineStore({
 
       await PushNotifications.addListener('registrationError', (error) => {
         console.log('Error on registration: ', error)
+        dbg()?.error('Push registration ERROR', error)
       })
       console.log('addListener registrationError done')
 
@@ -312,6 +334,7 @@ export const useMobileStore = defineStore({
         'pushNotificationReceived',
         (notification) => {
           console.log('============ Push received:', notification)
+          dbg()?.info('PUSH RECEIVED', notification)
           this.handleNotification(notification, PushNotifications, Badge)
         }
       )
@@ -321,14 +344,21 @@ export const useMobileStore = defineStore({
         'pushNotificationActionPerformed',
         async (n) => {
           console.log('Push action performed:', n)
+          dbg()?.info('PUSH ACTION', {
+            actionId: n.actionId,
+            inputValue: n.inputValue,
+            notification: n.notification,
+          })
           const actionId = n.actionId
           const inputValue = n.inputValue
 
           // Handle specific actions
           if (actionId === 'reply' && inputValue && inputValue.trim()) {
+            dbg()?.info('Handling reply action')
             await this.handleReplyAction(n.notification, inputValue.trim())
             return
           } else if (actionId === 'mark_read') {
+            dbg()?.info('Handling mark_read action')
             await this.handleMarkReadAction(n.notification)
             return
           }
@@ -342,14 +372,18 @@ export const useMobileStore = defineStore({
 
       permStatus = await PushNotifications.requestPermissions()
       console.log('requestPermissions:', permStatus)
+      dbg()?.info('Push requestPermissions result', permStatus)
       if (permStatus.receive === 'granted') {
         await PushNotifications.register()
         console.log('PUSH REGISTER OK')
+        dbg()?.info('Push register() called successfully')
       } else {
         console.log('Error on request: ', permStatus)
+        dbg()?.error('Push permission NOT granted', permStatus)
       }
 
       this.setBadgeCount(0, Badge)
+      dbg()?.info('initPushNotifications completed')
     },
 
     async setBadgeCount(badgeCount, Badge) {
@@ -368,14 +402,17 @@ export const useMobileStore = defineStore({
     async handleNotification(notification, PushNotifications, Badge) {
       const router = useRouter()
       console.log('handleNotification A', notification)
+      dbg()?.info('handleNotification called', notification)
       if (!notification) {
         console.error('--- notification NOT SET')
+        dbg()?.error('handleNotification: notification NOT SET')
         return
       }
       try {
         const data = notification.data
         if (!data) {
           console.error('--- notification.data NOT SET')
+          dbg()?.error('handleNotification: notification.data NOT SET')
           return
         }
 
@@ -383,6 +420,7 @@ export const useMobileStore = defineStore({
         // Legacy notifications without channel_id are for older app versions.
         if (!data.channel_id) {
           console.log('--- Ignoring legacy notification without channel_id')
+          dbg()?.warn('Ignoring legacy notification without channel_id', data)
           return
         }
 
