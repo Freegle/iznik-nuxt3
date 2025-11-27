@@ -273,6 +273,15 @@ export const useMobileStore = defineStore({
         })
 
         console.log('Notification channels created')
+      } else {
+        // iOS: Register notification action categories
+        // This enables Reply, Mark Read, and View action buttons on chat notifications
+        try {
+          const result = await PushNotifications.registerActionCategories()
+          console.log('iOS notification categories registered:', result)
+        } catch (e) {
+          console.log('iOS registerActionCategories not available:', e.message)
+        }
       }
 
       let permStatus = await PushNotifications.checkPermissions()
