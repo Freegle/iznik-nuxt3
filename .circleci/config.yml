@@ -935,8 +935,9 @@ jobs:
       - run:
           name: Generate Test Version Number
           command: |
-            # Use format 0.0.BUILD_NUM for test builds
-            TEST_VERSION="0.0.${CIRCLE_BUILD_NUM}"
+            # Use format 99.0.BUILD_NUM for test builds
+            # Must be higher than production (currently 3.2.x) for App Store Connect
+            TEST_VERSION="99.0.${CIRCLE_BUILD_NUM}"
             echo "Test version: $TEST_VERSION"
             echo "$TEST_VERSION" > .new_version
 
