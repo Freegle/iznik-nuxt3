@@ -11,15 +11,10 @@
       <div class="d-flex justify-content-between mb-2">
         <span class="text-muted">{{ logCount }} log entries</span>
         <div>
-          <b-button
-            variant="outline-secondary"
-            size="sm"
-            class="mr-2"
-            @click="copyLogs"
-          >
+          <b-button variant="primary" size="sm" class="mr-2" @click="copyLogs">
             <v-icon icon="copy" /> Copy
           </b-button>
-          <b-button variant="outline-danger" size="sm" @click="clearLogs">
+          <b-button variant="danger" size="sm" @click="clearLogs">
             <v-icon icon="trash" /> Clear
           </b-button>
         </div>
