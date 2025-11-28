@@ -86,16 +86,13 @@ export const useMobileStore = defineStore({
 
       // Log app and plugin versions for debugging
       const runtimeConfig = useRuntimeConfig()
+      const appInfo = await App.getInfo()
       dbg()?.info('=== APP STARTUP ===')
       dbg()?.info('App version', runtimeConfig.public.MOBILE_VERSION)
+      dbg()?.info('App build', appInfo.build)
+      dbg()?.info('App bundle', appInfo.id)
       dbg()?.info('Platform', Capacitor.getPlatform())
       dbg()?.info('Capacitor native', Capacitor.isNativePlatform())
-
-      // Log available PushNotifications methods to verify plugin version
-      const pluginMethods = Object.keys(PushNotifications).filter(
-        (k) => typeof PushNotifications[k] === 'function'
-      )
-      dbg()?.info('PushNotifications methods', pluginMethods.join(', '))
 
       // On Android, check for background push log (from when app wasn't running)
       if (Capacitor.getPlatform() === 'android') {
