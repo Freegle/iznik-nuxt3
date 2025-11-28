@@ -102,8 +102,7 @@ const config: CapacitorConfig = {
       "backgroundColor": "#33880800" // Nominally green but completely transparent
     },
     PushNotifications: {
-      //presentationOptions: ["badge", "sound", "alert"],
-      presentationOptions: ["badge", "alert"],
+      presentationOptions: ["badge", "sound", "alert"],
     },
     Badge: {
       "persist": true,
