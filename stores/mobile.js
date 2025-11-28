@@ -554,16 +554,25 @@ export const useMobileStore = defineStore({
         }
 
         // Get chat ID from notification data
-        const chatId = parseInt(data.chatids)
+        const chatId = parseInt(data.chatid || data.chatids)
         if (!chatId) {
           console.error('handleMarkReadAction: no chat ID in notification')
           return
         }
 
-        // Mark as read via API
-        // Use a high lastmsg value to mark all messages as read
-        await api(this.config).chat.markRead(chatId, 999999999, false)
-        console.log('handleMarkReadAction: chat marked as read')
+        // Get the message ID from the notification - use the actual message ID, not a magic number
+        const messageId = parseInt(data.messageid)
+        if (!messageId) {
+          console.error('handleMarkReadAction: no message ID in notification')
+          return
+        }
+
+        // Mark as read up to this specific message ID
+        await api(this.config).chat.markRead(chatId, messageId, false)
+        console.log(
+          'handleMarkReadAction: chat marked as read up to message',
+          messageId
+        )
 
         // Update badge count
         const { Badge } = await import('@capawesome/capacitor-badge')
