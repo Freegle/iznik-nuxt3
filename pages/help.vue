@@ -470,6 +470,7 @@ import SupportLink from '~/components/SupportLink'
 import { ref, computed, onMounted, nextTick } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
+import { useDebugStore } from '~/stores/debug'
 
 // Async components
 const SupporterInfoModal = defineAsyncComponent(() =>
@@ -487,6 +488,7 @@ const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const authStore = useAuthStore()
 const mobileStore = useMobileStore()
+const debugStore = useDebugStore()
 
 // State
 const question = ref(null)
@@ -552,6 +554,15 @@ async function copydeviceuserinfo(e) {
   console.log('copydeviceuserinfo', e)
   let infotocopy = 'Mobile version: ' + mobileVersion.value + '. '
   if (deviceuserinfo.value) infotocopy += deviceuserinfo.value
+
+  // Include debug logs if in app
+  if (isApp.value) {
+    const debugLogs = debugStore.getLogsAsText
+    if (debugLogs) {
+      infotocopy += '\n\n=== Debug Logs ===\n' + debugLogs
+    }
+  }
+
   await navigator.clipboard.writeText(infotocopy)
   deviceuserinfocopied.value = 'Device info copied'
   setTimeout(() => {

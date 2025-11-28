@@ -125,17 +125,22 @@ export const useMobileStore = defineStore({
       const deviceinfo = await Device.getInfo()
       console.log('deviceinfo', deviceinfo)
       this.deviceinfo = deviceinfo
-      this.deviceuserinfo = ''
-      if (deviceinfo.manufacturer)
-        this.deviceuserinfo += deviceinfo.manufacturer + ' '
-      if (deviceinfo.model) this.deviceuserinfo += deviceinfo.model + ' '
-      if (deviceinfo.platform) this.deviceuserinfo += deviceinfo.platform + ' '
-      if (deviceinfo.operatingSystem)
-        this.deviceuserinfo += deviceinfo.operatingSystem + ' '
-      if (deviceinfo.osVersion)
-        this.deviceuserinfo += deviceinfo.osVersion + ' '
-      if (deviceinfo.webViewVersion)
-        this.deviceuserinfo += deviceinfo.webViewVersion
+
+      // Build device info string - avoid duplicates (platform/operatingSystem are often same)
+      const parts = []
+      if (deviceinfo.manufacturer) parts.push(deviceinfo.manufacturer)
+      if (deviceinfo.model) parts.push(deviceinfo.model)
+      if (deviceinfo.platform) parts.push(deviceinfo.platform)
+      if (deviceinfo.osVersion) parts.push(deviceinfo.osVersion)
+      // Only add webViewVersion if different from osVersion
+      if (
+        deviceinfo.webViewVersion &&
+        deviceinfo.webViewVersion !== deviceinfo.osVersion
+      ) {
+        parts.push('WebView ' + deviceinfo.webViewVersion)
+      }
+      this.deviceuserinfo = parts.join(' ')
+
       console.log('deviceuserinfo', this.deviceuserinfo)
       this.isiOS = deviceinfo.platform === 'ios'
       this.osVersion = deviceinfo.osVersion
