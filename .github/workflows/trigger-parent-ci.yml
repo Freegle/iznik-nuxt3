@@ -21,7 +21,7 @@ jobs:
           echo "Checking for recent pipelines..."
           recent_pipelines=$(curl -s -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
             "https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline?branch=master" | \
-            jq -r '.items[] | select(.state == "created" or .state == "running") | select(.created_at > (now - 300)) | .id' 2>/dev/null | head -3)
+            jq -r '.items[] | select(.state == "created" or .state == "running") | select((.created_at | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601) > (now - 300)) | .id' 2>/dev/null | head -3)
           
           if [ -n "$recent_pipelines" ]; then
             echo "⚠️ Found recent pipelines within 5 minutes - skipping trigger to avoid duplicates:"
