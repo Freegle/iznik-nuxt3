@@ -5,6 +5,10 @@ parameters:
     type: boolean
     default: false
     description: "Set to true to manually trigger promotion/submission workflow"
+  build_testflight:
+    type: boolean
+    default: false
+    description: "Set to true to build iOS and upload to TestFlight from current branch"
 
 orbs:
   android: circleci/android@2.3.0
@@ -899,6 +903,140 @@ jobs:
           path: build/
           destination: ios-build
 
+  # Build iOS for TestFlight from any branch (for testing)
+  # Uses a test version number based on branch name hash
+  build-ios-testflight:
+    executor: macos-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+
+      - run:
+          name: Verify Node.js and npm versions
+          command: |
+            node --version
+            npm --version
+
+      - run:
+          name: Install Node.js Dependencies
+          command: |
+            # First install all dependencies
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
+
+      # Generate a test version number that's higher than any production version
+      - run:
+          name: Generate Test Version Number
+          command: |
+            # Use format 99.0.BUILD_NUM for test builds
+            # Must be higher than production (currently 3.2.x) for App Store Connect
+            # Using 99.x ensures test builds are always accepted
+            TEST_VERSION="99.0.${CIRCLE_BUILD_NUM}"
+            echo "🧪 Test version: $TEST_VERSION"
+            echo "$TEST_VERSION" > .new_version
+
+            # Update MOBILE_VERSION in config.js
+            sed -i '' "s/MOBILE_VERSION: '[0-9]*\.[0-9]*\.[0-9]*'/MOBILE_VERSION: '$TEST_VERSION'/" config.js
+
+            if grep -q "MOBILE_VERSION: '$TEST_VERSION'" config.js; then
+              echo "✅ Updated config.js with test version $TEST_VERSION"
+              grep "MOBILE_VERSION:" config.js
+            else
+              echo "❌ ERROR: Failed to update config.js"
+              exit 1
+            fi
+
+      - run:
+          name: Build Nuxt App
+          command: |
+            export ISAPP=true
+            export APP_ENV=production
+            if [ -n "$SENTRY_DSN_APP_FD" ]; then
+              export SENTRY_DSN="$SENTRY_DSN_APP_FD"
+              echo "✅ Using app-specific Sentry DSN"
+            fi
+            npm run generate
+
+      - run:
+          name: Sync Capacitor to iOS
+          command: npx cap sync ios
+
+      - run:
+          name: Setup Firebase Configuration for iOS
+          command: |
+            if [ -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
+              echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/App/App/GoogleService-Info.plist
+              echo "✅ GoogleService-Info.plist created"
+            else
+              echo "❌ GOOGLE_SERVICE_INFO_PLIST_BASE64 not set"
+              exit 1
+            fi
+
+      - run:
+          name: Install Fastlane
+          command: |
+            bundle config set --local path 'vendor/bundle'
+            bundle update fastlane
+            bundle install
+
+      - run:
+          name: Setup iOS Certificates
+          command: |
+            mkdir -p ~/certificates
+            echo "$IOS_DISTRIBUTION_CERT" | base64 --decode > ~/certificates/ios_distribution.p12
+            echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/certificates/ios_appstore.mobileprovision
+
+            KEYCHAIN_PATH=~/Library/Keychains/temp.keychain-db
+            KEYCHAIN_PASSWORD=circleci
+            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security default-keychain -s "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
+
+            echo "export IOS_CERTIFICATE_PATH=~/certificates/ios_distribution.p12" >> $BASH_ENV
+            echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
+            echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
+            echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
+
+      - run:
+          name: Build and Deploy to TestFlight
+          command: |
+            export TERM=xterm-256color
+            echo "🧪 Building TestFlight test version from branch: ${CIRCLE_BRANCH}"
+            bundle exec fastlane ios beta
+          no_output_timeout: 30m
+
+      - run:
+          name: TestFlight Build Complete
+          command: |
+            TEST_VERSION=$(cat .new_version)
+            echo "🎉 TestFlight build complete!"
+            echo ""
+            echo "📱 Version: $TEST_VERSION"
+            echo "🌿 Branch: ${CIRCLE_BRANCH}"
+            echo "🔗 Commit: ${CIRCLE_SHA1:0:8}"
+            echo ""
+            echo "The build is now uploading to TestFlight."
+            echo "It will be available for testing in ~15-30 minutes."
+
+      - store_artifacts:
+          path: build/
+          destination: ios-build
+
 workflows:
   version: 2
 
@@ -980,3 +1118,10 @@ workflows:
             branches:
               only:
                 - production
+
+  # Build iOS for TestFlight from any branch
+  # Trigger with: build_testflight=true parameter
+  testflight-branch:
+    when: << pipeline.parameters.build_testflight >>
+    jobs:
+      - build-ios-testflight
