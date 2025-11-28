@@ -100,15 +100,15 @@ export const useMobileStore = defineStore({
       // On Android, check for background push log (from when app wasn't running)
       if (Capacitor.getPlatform() === 'android') {
         try {
-          if (typeof PushNotifications.getBackgroundPushLog === 'function') {
-            const { log } = await PushNotifications.getBackgroundPushLog()
-            if (log && log.trim()) {
-              dbg()?.info('=== BACKGROUND PUSH LOG ===')
-              dbg()?.info(log)
-              dbg()?.info('=== END BACKGROUND PUSH LOG ===')
-              // Clear the log after reading
-              await PushNotifications.clearBackgroundPushLog()
-            }
+          const result = await PushNotifications.getBackgroundPushLog()
+          if (result?.log && result.log.trim()) {
+            dbg()?.info('=== BACKGROUND PUSH LOG ===')
+            dbg()?.info(result.log)
+            dbg()?.info('=== END BACKGROUND PUSH LOG ===')
+            // Clear the log after reading
+            await PushNotifications.clearBackgroundPushLog()
+          } else {
+            dbg()?.debug('No background push log entries')
           }
         } catch (e) {
           dbg()?.warn('Failed to read background push log', e.message)
