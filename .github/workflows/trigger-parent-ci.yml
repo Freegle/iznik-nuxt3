@@ -41,16 +41,7 @@ jobs:
           response=$(curl -s -w "%{http_code}" -X POST \
             -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "branch": "master",
-              "parameters": {
-                "webhook_repository": "${{ github.repository }}",
-                "webhook_branch": "${{ github.ref_name }}",
-                "webhook_commit": "${{ github.sha }}",
-                "webhook_message": "${{ github.event.head_commit.message }}",
-                "webhook_pusher": "${{ github.event.pusher.name }}"
-              }
-            }' \
+            -d '{"branch": "master"}' \
             https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline)
           
           http_code="${response: -3}"
