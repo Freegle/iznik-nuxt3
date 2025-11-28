@@ -931,15 +931,20 @@ jobs:
 
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            # First install all dependencies
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
 
-      # Generate a test version number (0.0.BUILD_NUM for TestFlight testing)
+      # Generate a test version number that's higher than any production version
       - run:
           name: Generate Test Version Number
           command: |
-            # Use format 0.0.BUILD_NUM for test builds
-            # This ensures test builds are always lower than production versions
-            TEST_VERSION="0.0.${CIRCLE_BUILD_NUM}"
+            # Use format 99.0.BUILD_NUM for test builds
+            # Must be higher than production (currently 3.2.x) for App Store Connect
+            # Using 99.x ensures test builds are always accepted
+            TEST_VERSION="99.0.${CIRCLE_BUILD_NUM}"
             echo "🧪 Test version: $TEST_VERSION"
             echo "$TEST_VERSION" > .new_version
 
