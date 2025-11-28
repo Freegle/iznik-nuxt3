@@ -3,7 +3,8 @@
     ref="modal"
     scrollable
     title="Debug Logs"
-    size="lg"
+    size="xl"
+    fullscreen="md-down"
     @hidden="emit('hidden')"
   >
     <template #default>

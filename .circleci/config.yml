@@ -745,7 +745,11 @@ jobs:
       # Install Node.js dependencies (no cache on macOS - it's problematic)
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            # First install all dependencies
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
 
       # Update MOBILE_VERSION in config.js before build
       - run:
@@ -930,7 +934,11 @@ jobs:
 
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            # First install all dependencies
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
 
       - run:
           name: Generate Test Version Number
