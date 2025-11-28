@@ -431,6 +431,21 @@
             </li>
           </ul>
           <p>This version of the site was built on {{ version }}.</p>
+          <div v-if="isApp" class="mt-4">
+            <hr />
+            <b-button
+              variant="link"
+              class="text-muted p-0"
+              @click="showDebugLogs = true"
+            >
+              <v-icon icon="bug" class="mr-1" />
+              View Debug Logs
+            </b-button>
+            <DebugLogsModal
+              v-if="showDebugLogs"
+              @hidden="showDebugLogs = false"
+            />
+          </div>
         </div>
       </b-col>
       <b-col cols="0" md="3" />
@@ -463,6 +478,9 @@ const SupporterInfoModal = defineAsyncComponent(() =>
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
 )
+const DebugLogsModal = defineAsyncComponent(() =>
+  import('~/components/DebugLogsModal.vue')
+)
 
 // Setup
 const route = useRoute()
@@ -480,6 +498,7 @@ const faq = ref(null)
 const supporterInfoModal = ref(null)
 const rateAppModal = ref(null)
 const showRateAppModal = ref(false)
+const showDebugLogs = ref(false)
 const deviceuserinfocopied = ref('Copy app and device info')
 
 // Computed properties
