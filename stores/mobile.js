@@ -97,6 +97,24 @@ export const useMobileStore = defineStore({
       )
       dbg()?.info('PushNotifications methods', pluginMethods.join(', '))
 
+      // On Android, check for background push log (from when app wasn't running)
+      if (Capacitor.getPlatform() === 'android') {
+        try {
+          if (typeof PushNotifications.getBackgroundPushLog === 'function') {
+            const { log } = await PushNotifications.getBackgroundPushLog()
+            if (log && log.trim()) {
+              dbg()?.info('=== BACKGROUND PUSH LOG ===')
+              dbg()?.info(log)
+              dbg()?.info('=== END BACKGROUND PUSH LOG ===')
+              // Clear the log after reading
+              await PushNotifications.clearBackgroundPushLog()
+            }
+          }
+        } catch (e) {
+          dbg()?.warn('Failed to read background push log', e.message)
+        }
+      }
+
       await this.getDeviceInfo(Device)
       this.fixWindowOpen(AppLauncher)
       this.initDeepLinks(App)
