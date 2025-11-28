@@ -431,6 +431,21 @@
             </li>
           </ul>
           <p>This version of the site was built on {{ version }}.</p>
+          <div v-if="isApp" class="mt-4">
+            <hr />
+            <b-button
+              variant="link"
+              class="text-muted p-0"
+              @click="showDebugLogs = true"
+            >
+              <v-icon icon="bug" class="mr-1" />
+              View Debug Logs
+            </b-button>
+            <DebugLogsModal
+              v-if="showDebugLogs"
+              @hidden="showDebugLogs = false"
+            />
+          </div>
         </div>
       </b-col>
       <b-col cols="0" md="3" />
@@ -455,6 +470,7 @@ import SupportLink from '~/components/SupportLink'
 import { ref, computed, onMounted, nextTick } from '#imports'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
+import { useDebugStore } from '~/stores/debug'
 
 // Async components
 const SupporterInfoModal = defineAsyncComponent(() =>
@@ -463,12 +479,16 @@ const SupporterInfoModal = defineAsyncComponent(() =>
 const SidebarLeft = defineAsyncComponent(() =>
   import('~/components/SidebarLeft')
 )
+const DebugLogsModal = defineAsyncComponent(() =>
+  import('~/components/DebugLogsModal.vue')
+)
 
 // Setup
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const authStore = useAuthStore()
 const mobileStore = useMobileStore()
+const debugStore = useDebugStore()
 
 // State
 const question = ref(null)
@@ -480,6 +500,7 @@ const faq = ref(null)
 const supporterInfoModal = ref(null)
 const rateAppModal = ref(null)
 const showRateAppModal = ref(false)
+const showDebugLogs = ref(false)
 const deviceuserinfocopied = ref('Copy app and device info')
 
 // Computed properties
@@ -533,6 +554,15 @@ async function copydeviceuserinfo(e) {
   console.log('copydeviceuserinfo', e)
   let infotocopy = 'Mobile version: ' + mobileVersion.value + '. '
   if (deviceuserinfo.value) infotocopy += deviceuserinfo.value
+
+  // Include debug logs if in app
+  if (isApp.value) {
+    const debugLogs = debugStore.getLogsAsText
+    if (debugLogs) {
+      infotocopy += '\n\n=== Debug Logs ===\n' + debugLogs
+    }
+  }
+
   await navigator.clipboard.writeText(infotocopy)
   deviceuserinfocopied.value = 'Device info copied'
   setTimeout(() => {

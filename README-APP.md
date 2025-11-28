@@ -14,6 +14,79 @@ This document describes the mobile app version of Freegle, which is built using 
 
 The mobile app is built from the `production` branch (same as the web app) and includes native Android and iOS platform code. The app shares all Vue components and business logic with the web version but uses a different build configuration controlled by the `ISAPP` environment variable.
 
+---
+
+## Push Notifications
+
+Push notifications are implemented using Freegle's custom fork of the Capacitor push notifications plugin.
+
+- **Package**: `@freegle/capacitor-push-notifications-cap7`
+- **Source**: https://github.com/Freegle/capacitor-push-notifications-cap7
+- **Features**:
+  - Foreground and background push handling
+  - Badge count management on home screen icon
+  - Deep linking from notifications
+  - Multiple notification channels (Android)
+  - Sound and vibration control
+  - Notification permissions handling
+  - Action buttons (Reply, Mark Read, View) on chat notifications
+  - Boot receiver for Android (notifications work after device restart)
+
+### How Notifications Work by App State
+
+| App State | Android | iOS |
+|-----------|---------|-----|
+| **Foreground** | ✅ Notification displayed via NotificationHelper | ✅ Notification displayed (iOS 14+ banner/list) |
+| **Background** | ✅ MessagingService receives FCM, shows notification | ✅ System displays notification |
+| **Swiped away** | ✅ MessagingService still receives FCM (on most devices) | ✅ System displays notification |
+| **After device restart** | ✅ BootReceiver initializes FCM connection | ✅ Works automatically (APNs handles) |
+| **Force stopped** | ❌ Android blocks ALL app components | ⚠️ Visible notifications still appear, but app can't process silently |
+
+**Key Differences:**
+
+- **Android**: Uses data-only FCM messages. The `MessagingService` handles ALL message types and displays notifications via `NotificationHelper`. Force-stop is a hard block by Android - nothing can wake the app until user opens it manually.
+
+- **iOS**: Uses APNs. The system displays visible notifications regardless of app state. Only silent/background pushes are blocked after force-quit. After device restart, notifications work immediately without user opening the app.
+
+### Android Notification Channels
+
+The app creates these notification channels on startup:
+
+| Channel ID | Name | Importance | Vibration | Lights |
+|------------|------|------------|-----------|--------|
+| `chat_messages` | Chat Messages | High (4) | Yes | Yes (green) |
+| `reminders` | Reminders | Default (3) | No | Yes (green) |
+| `new_posts` | New Posts | Low (2) | No | No |
+| `tips` | Tips & Suggestions | Low (2) | No | No |
+| `social` | ChitChat & Social | Default (3) | No | Yes (green) |
+
+Users can customize these in Android Settings > Apps > Freegle > Notifications.
+
+### iOS Action Categories
+
+Chat message notifications support these actions (visible on long-press):
+
+- **Reply**: Inline text reply
+- **Mark Read**: Dismiss and mark conversation as read
+- **View**: Open the chat in the app
+
+### Debugging Notifications
+
+1. **Help page**: "Copy app and device info" button includes debug logs
+2. **Debug logs modal**: View logs directly in app (Help page, bottom)
+3. **Android SharedPreferences**: Background push events logged to `push_debug` preferences
+4. **Boot events**: BootReceiver logs to SharedPreferences for debugging post-restart issues
+
+### Known Limitations
+
+1. **Android force-stop**: This is an intentional Android security feature. When a user force-stops an app via Settings > Apps > Force Stop, Android prevents ALL app components from running until the user manually opens the app again. This is by design and cannot be worked around.
+
+2. **OEM battery optimization**: Some Android manufacturers (Xiaomi, Oppo, Vivo, Huawei) have aggressive battery optimization that may kill apps or prevent notifications. Users may need to whitelist Freegle in battery settings.
+
+3. **iOS silent push after force-quit**: If user force-quits the app on iOS, silent/background pushes won't be processed. However, visible notifications still appear normally.
+
+---
+
 <details>
 <summary><h2>Mobile App vs Web App</h2></summary>
 
@@ -40,6 +113,8 @@ The mobile and web apps are built from the **same codebase** (`production` branc
 
 <details>
 <summary><h2>Core Mobile Infrastructure</h2></summary>
+
+The mobile app is built on Capacitor, which wraps the Nuxt web app in native containers for Android and iOS.
 
 ### Capacitor Framework
 
@@ -81,6 +156,8 @@ Located in `ios/` directory:
 <details>
 <summary><h2>Mobile-Specific Features</h2></summary>
 
+The mobile app includes native implementations of features that require platform-specific code or provide a better user experience than web equivalents.
+
 ### Authentication Methods
 
 The mobile app supports multiple authentication methods with native implementations:
@@ -103,19 +180,6 @@ The mobile app supports multiple authentication methods with native implementati
 4. **Yahoo Login**
    - Uses in-app browser (Cordova InAppBrowser)
    - OAuth flow with native browser
-
-### Push Notifications
-
-Custom implementation using Freegle's fork:
-
-- **Package**: `@freegle/capacitor-push-notifications-cap7`
-- **Features**:
-  - Foreground and background push handling
-  - Badge count management on home screen icon
-  - Deep linking from notifications
-  - Multiple notification channels (Android)
-  - Sound and vibration control
-  - Notification permissions handling
 
 ### Camera & Photo Management
 
@@ -211,6 +275,8 @@ A dedicated Pinia store handles all mobile-specific state and functionality:
 
 <details>
 <summary><h2>UI/UX Adjustments</h2></summary>
+
+Some Vue components behave differently in the mobile app to provide a native-like experience.
 
 ### Modified Components
 

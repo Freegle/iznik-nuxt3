@@ -141,7 +141,10 @@ jobs:
       # Install Node.js dependencies
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}

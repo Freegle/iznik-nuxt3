@@ -19,36 +19,29 @@ jobs:
           
           # Check for recent pipelines to avoid duplicate triggers
           echo "Checking for recent pipelines..."
+          five_mins_ago=$(date -u -d '5 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
+          echo "Looking for pipelines created after: $five_mins_ago"
           recent_pipelines=$(curl -s -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
             "https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline?branch=master" | \
-            jq -r '.items[] | select(.state == "created" or .state == "running") | select(.created_at > (now - 300)) | .id' 2>/dev/null | head -3)
-          
+            jq -r --arg cutoff "$five_mins_ago" '.items[] | select(.state == "created" or .state == "running") | select(.created_at > $cutoff) | .id' 2>/dev/null | head -3)
+
           if [ -n "$recent_pipelines" ]; then
             echo "⚠️ Found recent pipelines within 5 minutes - skipping trigger to avoid duplicates:"
             echo "$recent_pipelines"
             echo "If this is a standalone submodule change, wait 5 minutes and manually trigger."
             exit 0
           fi
-          
+
           # Add a small delay to coordinate with other potential triggers
           echo "Waiting 30 seconds to coordinate with other potential triggers..."
           sleep 30
-          
+
           echo "No recent pipelines found - proceeding with trigger"
           
           response=$(curl -s -w "%{http_code}" -X POST \
             -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "branch": "master",
-              "parameters": {
-                "webhook_repository": "${{ github.repository }}",
-                "webhook_branch": "${{ github.ref_name }}",
-                "webhook_commit": "${{ github.sha }}",
-                "webhook_message": "${{ github.event.head_commit.message }}",
-                "webhook_pusher": "${{ github.event.pusher.name }}"
-              }
-            }' \
+            -d '{"branch": "master"}' \
             https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline)
           
           http_code="${response: -3}"
