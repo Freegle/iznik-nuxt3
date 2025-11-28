@@ -84,6 +84,19 @@ export const useMobileStore = defineStore({
       const { AppLauncher } = await import('@capacitor/app-launcher')
       const { App } = await import('@capacitor/app')
 
+      // Log app and plugin versions for debugging
+      const runtimeConfig = useRuntimeConfig()
+      dbg()?.info('=== APP STARTUP ===')
+      dbg()?.info('App version', runtimeConfig.public.MOBILE_VERSION)
+      dbg()?.info('Platform', Capacitor.getPlatform())
+      dbg()?.info('Capacitor native', Capacitor.isNativePlatform())
+
+      // Log available PushNotifications methods to verify plugin version
+      const pluginMethods = Object.keys(PushNotifications).filter(
+        (k) => typeof PushNotifications[k] === 'function'
+      )
+      dbg()?.info('PushNotifications methods', pluginMethods.join(', '))
+
       await this.getDeviceInfo(Device)
       this.fixWindowOpen(AppLauncher)
       this.initDeepLinks(App)
