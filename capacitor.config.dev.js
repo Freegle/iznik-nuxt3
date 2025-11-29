@@ -4,9 +4,9 @@
 //
 // SETUP REQUIRED: Connect phone via USB and run:
 //   adb reverse tcp:3004 tcp:3004
-//   adb reverse tcp:24678 tcp:24678
 //
 // Then start the freegle-dev-live container from the status page.
+// Tap the refresh icon after making code changes (HMR not supported in WebView).
 
 /** @type {import('@capacitor/cli').CapacitorConfig} */
 const config = {

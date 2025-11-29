@@ -104,12 +104,11 @@
       <ol>
         <li>Connect phone via USB</li>
         <li>Run: <code>adb reverse tcp:3004 tcp:3004</code></li>
-        <li>Run: <code>adb reverse tcp:24678 tcp:24678</code></li>
         <li>Start <code>freegle-dev-live</code> container from the status page</li>
       </ol>
       <p class="note">
-        The adb reverse commands forward localhost on the phone to your dev machine.
-        HMR port 24678 enables hot reload for instant code updates.
+        The adb reverse command forwards localhost on the phone to your dev machine.
+        Tap the refresh icon after making code changes.
       </p>
     </div>
   </div>

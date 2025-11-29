@@ -33,11 +33,6 @@ console.log('config.APP_ENV', config.APP_ENV)
 console.log('config.USE_COOKIES', config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
-// Mobile dev app HMR: Only enable when MOBILE_DEV_HMR=true (set in freegle-dev-live container)
-const mobileDevHmr = process.env.MOBILE_DEV_HMR === 'true'
-if (mobileDevHmr) {
-  console.log('📱 Mobile dev HMR enabled - patching Vite client for port 24678')
-}
 
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
@@ -271,42 +266,6 @@ export default defineNuxtConfig({
         item.preload = false
       }
     },
-    'vite:extendConfig': (viteConfig) => {
-      // Mobile dev app HMR: Patch Vite client to use explicit port 24678
-      // Only enabled when MOBILE_DEV_HMR=true (set in freegle-dev-live container)
-      // This allows mobile devices connecting via mDNS to get HMR updates
-      if (!mobileDevHmr) return
-
-      if (!viteConfig.plugins) viteConfig.plugins = []
-      viteConfig.plugins.push({
-        name: 'hmr-client-port-fix',
-        configureServer(server) {
-          server.middlewares.use((req, res, next) => {
-            if (req.url?.includes('@vite/client')) {
-              const originalEnd = res.end.bind(res)
-              let body = ''
-
-              res.write = (chunk) => {
-                body += chunk.toString()
-                return true
-              }
-
-              res.end = (chunk) => {
-                if (chunk) body += chunk.toString()
-                // Patch hmrPort from null to 24678 for mobile clients
-                const patched = body.replace(
-                  'const hmrPort = null;',
-                  'const hmrPort = 24678;'
-                )
-                res.setHeader('Content-Length', Buffer.byteLength(patched))
-                return originalEnd(patched)
-              }
-            }
-            next()
-          })
-        },
-      })
-    },
     close: (nuxt) => {
       // Required to stop build hanging - see https://github.com/nuxt/cli/issues/193
       if (!nuxt.options._prepare) {
@@ -376,20 +335,6 @@ export default defineNuxtConfig({
   ],
 
   vite: {
-    // Mobile dev app HMR: Configure Vite server for mobile device connections
-    // Only enabled when MOBILE_DEV_HMR=true (set in freegle-dev-live container)
-    ...(mobileDevHmr
-      ? {
-          server: {
-            hmr: {
-              protocol: 'ws',
-              host: '0.0.0.0',
-              port: 24678,
-              clientPort: 24678,
-            },
-          },
-        }
-      : {}),
     vue: {
       template: {
         compilerOptions: {
@@ -402,6 +347,7 @@ export default defineNuxtConfig({
         'add-to-calendar-button',
         'resize-observer-polyfill',
         'jwt-decode',
+        'leaflet',
         'bootstrap-vue-next/components/BAlert',
         'bootstrap-vue-next/components/BCard',
         'bootstrap-vue-next/components/BContainer',
