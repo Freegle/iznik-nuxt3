@@ -82,6 +82,9 @@
         <li>Dev server must be running (docker-compose up)</li>
         <li>Check firewall allows port 3002</li>
       </ul>
+      <p class="note">
+        <strong>Note:</strong> Push notifications do not work in the dev app.
+      </p>
     </div>
   </div>
 </template>
@@ -272,6 +275,12 @@ async function scanQR() {
 
     li {
       margin-bottom: 4px;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #dc3545;
     }
   }
 }
