@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div>
+    <div v-if="!isApp">
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
@@ -106,7 +106,7 @@ import NoticeMessage from '~/components/NoticeMessage'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
-import { onMounted } from '#imports'
+import { onMounted, computed } from '#imports'
 import { useMobileStore } from '~/stores/mobile'
 
 // Setup
@@ -114,6 +114,9 @@ const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const router = useRouter()
 const mobileStore = useMobileStore()
+
+// Check if app - used to prevent flash of desktop UI
+const isApp = computed(() => mobileStore.isApp)
 
 // Redirect to app-specific flow if in app
 if (mobileStore.isApp) {

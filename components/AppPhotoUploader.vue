@@ -8,6 +8,8 @@
         :item-key="(el) => `photo-${el.id || el.tempId}`"
         :animation="150"
         ghost-class="ghost"
+        filter=".no-drag"
+        :prevent-on-filter="false"
         @start="dragging = true"
         @end="dragging = false"
       >
@@ -48,25 +50,44 @@
               </div>
             </div>
 
-            <!-- Quality warning badge -->
+            <!-- Error overlay with retry/delete -->
+            <div v-if="element.error" class="photo-error-overlay no-drag">
+              <div class="error-message">Upload failed</div>
+              <div class="error-actions">
+                <button
+                  class="error-btn no-drag"
+                  @click.stop="retryUpload(element)"
+                >
+                  <v-icon icon="redo" /> Retry
+                </button>
+                <button
+                  class="error-btn no-drag"
+                  @click.stop="removePhoto(element)"
+                >
+                  <v-icon icon="times" /> Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Quality warning - shown inline with short label -->
             <div
-              v-if="element.qualityWarning && !element.uploading"
-              class="quality-badge"
+              v-if="
+                element.qualityWarning && !element.uploading && !element.error
+              "
+              class="quality-warning-inline no-drag"
               :class="`quality-${element.qualityWarning.severity}`"
               @click.stop="showQualityWarning(element)"
             >
               <v-icon icon="exclamation-triangle" />
-            </div>
-
-            <!-- Primary badge -->
-            <div v-if="index === 0 && !element.uploading" class="primary-badge">
-              <v-icon icon="star" /> Main
+              <span class="quality-text">{{
+                getShortLabel(element.qualityWarning)
+              }}</span>
             </div>
 
             <!-- Delete button -->
             <button
-              v-if="!element.uploading"
-              class="delete-button"
+              v-if="!element.uploading && !element.error"
+              class="delete-button no-drag"
               @click.stop="removePhoto(element)"
             >
               <v-icon icon="times" />
@@ -74,16 +95,21 @@
           </div>
         </template>
       </draggable>
+    </div>
 
-      <!-- Add more button -->
-      <div
-        v-if="photos.length > 0 && photos.length < maxPhotos"
-        class="photo-card photo-add"
+    <!-- Add more button (when photos exist) - secondary style -->
+    <div
+      v-if="photos.length > 0 && photos.length < maxPhotos"
+      class="add-more-section"
+    >
+      <b-button
+        variant="outline-primary"
+        size="lg"
+        class="add-photos-button"
         @click="openPhotoOptions"
       >
-        <v-icon icon="plus" class="add-icon" />
-        <span class="add-text">Add more</span>
-      </div>
+        <v-icon icon="plus" /> Add More Photos
+      </b-button>
     </div>
 
     <!-- Empty state -->
@@ -91,8 +117,8 @@
       <div class="empty-icon">
         <v-icon icon="camera" size="4x" />
       </div>
-      <h2 class="empty-title">Add photos of your item</h2>
-      <p class="empty-subtitle">Items with photos get 3x more responses!</p>
+      <h2 class="empty-title">{{ emptyTitle }}</h2>
+      <p class="empty-subtitle">{{ emptySubtitle }}</p>
       <b-button
         variant="primary"
         size="lg"
@@ -101,21 +127,9 @@
       >
         <v-icon icon="camera" /> Add Photos
       </b-button>
-    </div>
-
-    <!-- Add photos button (when photos exist) -->
-    <div
-      v-if="photos.length > 0 && photos.length < maxPhotos"
-      class="add-more-section"
-    >
-      <b-button
-        variant="outline-primary"
-        size="lg"
-        class="w-100"
-        @click="openPhotoOptions"
-      >
-        <v-icon icon="plus" /> Add More Photos
-      </b-button>
+      <p class="skip-link">
+        <a href="#" @click.prevent="emit('skip')">Skip</a>
+      </p>
     </div>
 
     <!-- Photo source selection modal -->
@@ -132,7 +146,7 @@
           <span>Take Photo</span>
         </button>
         <button class="source-option" @click="chooseFromGallery">
-          <v-icon icon="images" size="2x" />
+          <v-icon icon="image" size="2x" />
           <span>Choose from Gallery</span>
         </button>
       </div>
@@ -147,24 +161,20 @@
       @cancel="retakePhoto"
     >
       <p>{{ qualityModalMessage }}</p>
-      <p class="text-muted small">
-        Better photos help people see what you're offering and get more
-        responses.
-      </p>
-      <template #footer>
-        <b-button variant="outline-secondary" @click="retakePhoto">
-          Retake Photo
-        </b-button>
-        <b-button variant="primary" @click="continueWithPhoto">
-          Use This Photo
-        </b-button>
+      <template #footer="{}">
+        <div class="d-flex w-100 justify-content-between">
+          <b-button variant="secondary" @click="continueWithPhoto">
+            Use This
+          </b-button>
+          <b-button variant="primary" @click="retakePhoto"> Retake </b-button>
+        </div>
       </template>
     </b-modal>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, defineAsyncComponent } from 'vue'
+import { ref, watch, defineAsyncComponent, reactive } from 'vue'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
 import { useRuntimeConfig } from '#app'
@@ -197,9 +207,19 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  emptyTitle: {
+    type: String,
+    required: false,
+    default: 'Add photos of your item',
+  },
+  emptySubtitle: {
+    type: String,
+    required: false,
+    default: "You'll get a better response",
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'photoProcessed'])
+const emit = defineEmits(['update:modelValue', 'photoProcessed', 'skip'])
 
 const runtimeConfig = useRuntimeConfig()
 const imageStore = useImageStore()
@@ -230,7 +250,9 @@ watch(
 watch(
   photos,
   (newVal) => {
-    emit('update:modelValue', newVal)
+    // Convert reactive objects to plain objects for store persistence
+    const plainPhotos = newVal.map((p) => ({ ...p }))
+    emit('update:modelValue', plainPhotos)
   },
   { deep: true }
 )
@@ -279,15 +301,16 @@ async function chooseFromGallery() {
 
 // Process a photo (quality check + upload)
 async function processPhoto(webPath) {
-  // Create temp photo entry with preview
+  // Create temp photo entry with preview - use reactive() for proper reactivity
   const tempId = `temp-${++tempIdCounter}`
-  const photo = {
+  const photo = reactive({
     tempId,
     preview: webPath,
     uploading: true,
     progress: 0,
     qualityWarning: null,
-  }
+    error: false,
+  })
 
   photos.value.push(photo)
 
@@ -342,7 +365,8 @@ async function uploadPhoto(photo, webPath) {
           reject(error)
         },
         onProgress: (bytesUploaded, bytesTotal) => {
-          photo.progress = Math.round((bytesUploaded / bytesTotal) * 100)
+          const progress = Math.round((bytesUploaded / bytesTotal) * 100)
+          photo.progress = progress
         },
         onSuccess: async () => {
           let uid = uploadInstance.url
@@ -392,6 +416,16 @@ async function uploadPhoto(photo, webPath) {
   }
 }
 
+// Retry a failed upload
+function retryUpload(photo) {
+  if (photo.preview) {
+    photo.error = false
+    photo.uploading = true
+    photo.progress = 0
+    uploadPhoto(photo, photo.preview)
+  }
+}
+
 // Remove a photo
 function removePhoto(photo) {
   const index = photos.value.findIndex(
@@ -401,6 +435,17 @@ function removePhoto(photo) {
   if (index !== -1) {
     photos.value.splice(index, 1)
   }
+}
+
+// Get short label for inline quality warning
+function getShortLabel(warning) {
+  // Return a single word with ? to invite tapping for more info
+  const msg = warning.message?.toLowerCase() || ''
+  if (msg.includes('blur')) return 'Blurry?'
+  if (msg.includes('dark')) return 'Dark?'
+  if (msg.includes('bright') || msg.includes('overexposed')) return 'Bright?'
+  if (msg.includes('contrast')) return 'Contrast?'
+  return 'Check?'
 }
 
 // Show quality warning for a photo
@@ -450,6 +495,7 @@ function retakePhoto() {
 }
 
 .photo-grid {
+  margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -474,7 +520,7 @@ function retakePhoto() {
 }
 
 .photo-primary {
-  border-color: #ffc107;
+  border-color: #28a745;
   border-width: 3px;
 }
 
@@ -498,6 +544,45 @@ function retakePhoto() {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.photo-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(220, 53, 69, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.error-message {
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.error-btn {
+  padding: 0.25rem 0.5rem;
+  border: none;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: #212529;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .progress-circle {
@@ -538,42 +623,35 @@ function retakePhoto() {
   font-weight: 600;
 }
 
-.quality-badge {
+.quality-warning-inline {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 0.75rem;
-}
-
-.quality-critical {
-  background: #dc3545;
-}
-
-.quality-warning {
-  background: #ffc107;
-  color: #000;
-}
-
-.primary-badge {
-  position: absolute;
-  bottom: 0.5rem;
-  left: 0.5rem;
-  background: #ffc107;
-  color: #000;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.25rem 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  font-size: 0.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.quality-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quality-critical {
+  background: rgba(220, 53, 69, 0.9);
+  color: #fff;
+}
+
+.quality-warning {
+  background: rgba(255, 193, 7, 0.9);
+  color: #000;
 }
 
 .delete-button {
@@ -597,27 +675,9 @@ function retakePhoto() {
   background: #dc3545;
 }
 
-.photo-add {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-style: dashed;
-  cursor: pointer;
-  color: #6c757d;
-}
-
-.photo-add:active {
-  background: #e9ecef;
-}
-
-.add-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.add-text {
-  font-size: 0.75rem;
+.add-more-section {
+  text-align: center;
+  margin-top: 1rem;
 }
 
 .empty-state {
@@ -648,6 +708,16 @@ function retakePhoto() {
 
 .add-photos-button {
   min-width: 200px;
+}
+
+.skip-link {
+  margin-top: 1rem;
+  margin-bottom: 0;
+
+  a {
+    color: #6c757d;
+    text-decoration: none;
+  }
 }
 
 .add-more-section {
