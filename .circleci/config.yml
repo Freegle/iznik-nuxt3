@@ -1258,26 +1258,25 @@ jobs:
 workflows:
   version: 2
 
-  # Build dev app for local development (master only)
-  build-dev-app:
+  # Build Android apps for all branches (except production/modtools)
+  build-android-apps:
     jobs:
       - build-android-dev-app:
           filters:
             branches:
-              only:
-                - master
+              ignore:
+                - production
+                - modtools
+      - build-android-debug:
+          filters:
+            branches:
+              ignore:
+                - production
+                - modtools
 
   pr-tests:
     jobs:
       - freegle/playwright-tests:
-          filters:
-            branches:
-              ignore:
-                - master
-                - main
-                - production
-                - modtools
-      - build-android-debug:
           filters:
             branches:
               ignore:
