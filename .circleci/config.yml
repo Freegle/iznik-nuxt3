@@ -112,147 +112,6 @@ jobs:
           paths:
             - .new_version
 
-  build-android-debug:
-    executor: android-executor
-    steps:
-      - checkout
-
-      # Install Node.js 22
-      - run:
-          name: Install Node.js 22
-          command: |
-            # Download and install Node.js 22
-            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-            sudo apt-get install -y nodejs
-
-      # Verify Node.js version
-      - run:
-          name: Verify Node.js and npm versions
-          command: |
-            node --version
-            npm --version
-
-      # Restore npm cache
-      - restore_cache:
-          keys:
-            - npm-deps-v1-{{ checksum "package-lock.json" }}
-            - npm-deps-v1-
-
-      # Install Node.js dependencies
-      - run:
-          name: Install Node.js Dependencies
-          command: |
-            npm ci
-            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
-            npm update @freegle/capacitor-push-notifications-cap7
-
-      - save_cache:
-          key: npm-deps-v1-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
-
-      # Build Nuxt app for debug (no version increment needed)
-      - run:
-          name: Build Nuxt App (Debug)
-          command: |
-            export ISAPP=true
-            export APP_ENV=development
-            echo "🔧 Building debug version for master branch"
-            npm run generate
-
-      # Decode and place google-services.json for Firebase
-      - run:
-          name: Setup Firebase Configuration
-          command: |
-            if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
-              echo "Decoding google-services.json from environment variable"
-              echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
-
-              # Validate the decoded file
-              if [ -f android/app/google-services.json ]; then
-                FILE_SIZE=$(wc -c < android/app/google-services.json)
-                echo "✅ File created: $FILE_SIZE bytes"
-
-                # Validate JSON syntax
-                if python3 -m json.tool android/app/google-services.json > /dev/null 2>&1; then
-                  echo "✅ Valid JSON structure"
-                  echo "📱 Project ID: $(python3 -c "import json; print(json.load(open('android/app/google-services.json'))['project_info']['project_id'])")"
-                else
-                  echo "❌ ERROR: Invalid JSON - Firebase will not work!"
-                  exit 1
-                fi
-              else
-                echo "❌ ERROR: File was not created!"
-                exit 1
-              fi
-            else
-              echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
-            fi
-
-      # Sync Capacitor
-      - run:
-          name: Sync Capacitor to Android
-          command: npx cap sync android
-
-      # Make gradlew executable
-      - run:
-          name: Make gradlew executable
-          command: chmod +x android/gradlew
-
-      # Create debug keystore if it doesn't exist
-      - run:
-          name: Create Debug Keystore
-          command: |
-            mkdir -p ~/.android
-            if [ ! -f ~/.android/debug.keystore ]; then
-              echo "Creating debug keystore..."
-              keytool -genkey -v \
-                -keystore ~/.android/debug.keystore \
-                -storepass android \
-                -alias androiddebugkey \
-                -keypass android \
-                -keyalg RSA \
-                -keysize 2048 \
-                -validity 10000 \
-                -dname "CN=Android Debug,O=Android,C=US"
-              echo "✅ Debug keystore created"
-            else
-              echo "✅ Debug keystore already exists"
-            fi
-
-      # Build debug APK (enables WebView debugging automatically)
-      - run:
-          name: Build Debug APK
-          command: |
-            cd android
-            ./gradlew assembleDebug --stacktrace
-            echo "✅ Debug APK built successfully"
-            echo ""
-            echo "📋 APK Info:"
-            ls -lh app/build/outputs/apk/debug/
-            echo ""
-            echo "📦 APK Contents (first 20 files):"
-            unzip -l app/build/outputs/apk/debug/app-debug.apk | head -20 || true
-
-      # Store the debug APK as artifact
-      - store_artifacts:
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          destination: freegle-debug.apk
-
-      - run:
-          name: Build Complete
-          command: |
-            echo "🎉 Debug build complete!"
-            echo "📱 Download APK from CircleCI artifacts tab"
-            echo "🔍 This build has WebView debugging enabled for chrome://inspect"
-            echo ""
-            echo "⚠️  IMPORTANT: Before installing debug APK:"
-            echo "1. Uninstall any existing Freegle app (different signature)"
-            echo "2. Check APK size is reasonable (should be 50-80MB)"
-            echo "3. Try installing via 'adb install' if direct install fails"
-            echo ""
-            echo "Debug via: chrome://inspect/#devices"
-
   build-dev-app:
     executor: android-executor
     steps:
@@ -280,16 +139,19 @@ jobs:
       # Install Node.js dependencies
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
 
-      # Build minimal dev connect screen app
+      # Build Nuxt app for dev
       - run:
-          name: Build Dev Connect App
+          name: Build Nuxt App (Dev)
           command: |
             export ISAPP=true
             export APP_ENV=development
@@ -338,16 +200,14 @@ jobs:
 
             # Add network security config for cleartext
             mkdir -p android/app/src/main/res/xml
-            cat > android/app/src/main/res/xml/network_security_config.xml << 'EOF'
-            <?xml version="1.0" encoding="utf-8"?>
-            <network-security-config>
-                <base-config cleartextTrafficPermitted="true">
-                    <trust-anchors>
-                        <certificates src="system" />
-                    </trust-anchors>
-                </base-config>
-            </network-security-config>
-            EOF
+            echo '<?xml version="1.0" encoding="utf-8"?>' > android/app/src/main/res/xml/network_security_config.xml
+            echo '<network-security-config>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '    <base-config cleartextTrafficPermitted="true">' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '        <trust-anchors>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '            <certificates src="system" />' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '        </trust-anchors>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '    </base-config>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '</network-security-config>' >> android/app/src/main/res/xml/network_security_config.xml
 
             # Reference network config in AndroidManifest if not already present
             if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
@@ -408,18 +268,26 @@ jobs:
           command: |
             echo "🎉 Freegle Dev app build complete!"
             echo ""
-            echo "📱 This is a special development app that:"
+            echo "📱 This is a development app that:"
             echo "   - Has package ID: org.ilovefreegle.dev"
             echo "   - Can coexist with production Freegle app"
-            echo "   - Connects to your local dev server"
-            echo "   - Allows instant code changes via hot reload"
+            echo "   - Connects to your local dev server via QR code"
+            echo "   - Has WebView debugging enabled (chrome://inspect)"
+            echo "   - Allows HTTP connections to local dev servers"
+            echo "   - Instant hot reload for Vue/JS/CSS changes"
             echo ""
             echo "📖 Setup instructions:"
             echo "1. Download freegle-dev.apk from artifacts"
-            echo "2. Install on your Android device"
-            echo "3. Open http://status.localhost/dev-connect on your computer"
-            echo "4. Scan the QR code with the Freegle Dev app"
-            echo "5. Make code changes - they appear instantly!"
+            echo "2. Install on your Android device (enable 'Install from unknown sources')"
+            echo "3. Start your dev server: docker-compose up -d"
+            echo "4. Open http://status.localhost/dev-connect on your computer"
+            echo "5. Scan the QR code with the Freegle Dev app"
+            echo "6. Make code changes - they appear instantly!"
+            echo ""
+            echo "🔍 Debug via: chrome://inspect/#devices"
+            echo ""
+            echo "⚠️  Note: This APK uses a different package ID, so it won't"
+            echo "    conflict with the production Freegle app."
 
   build-android:
     executor: android-executor
@@ -1211,20 +1079,14 @@ jobs:
 workflows:
   version: 2
 
-  build-debug-apps:
+  build-dev-app:
     jobs:
-      - build-android-debug:
-          filters:
-            branches:
-              only:
-                - master
-                - /^feature\/.*$/
       - build-dev-app:
           filters:
             branches:
               only:
                 - master
-                - /^feature\/app-.*$/
+                - /^feature\/.*$/
 
   pr-tests:
     jobs:
