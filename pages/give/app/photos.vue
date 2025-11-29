@@ -11,17 +11,10 @@
       />
     </div>
 
-    <!-- Footer with Next button - always show for debugging -->
-    <div class="app-footer">
-      <b-button
-        variant="primary"
-        size="lg"
-        class="w-100"
-        :disabled="!hasPhotos"
-        @click="goNext"
-      >
-        <span v-if="hasPhotos">Next <v-icon icon="arrow-right" /></span>
-        <span v-else>Add a photo first</span>
+    <!-- Footer with Next button -->
+    <div v-if="hasPhotos" class="app-footer">
+      <b-button variant="primary" size="lg" class="w-100" @click="goNext">
+        Next <v-icon icon="arrow-right" />
       </b-button>
     </div>
   </div>
