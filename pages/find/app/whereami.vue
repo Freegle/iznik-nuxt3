@@ -100,6 +100,7 @@ import EmailValidator from '~/components/EmailValidator.vue'
 import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse.vue'
 import { useComposeStore } from '~/stores/compose'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 import {
   setup,
   postcodeSelect,
@@ -110,6 +111,7 @@ import {
 const router = useRouter()
 const composeStore = useComposeStore()
 const userStore = useUserStore()
+const authStore = useAuthStore()
 
 // Get store state
 const { email } = storeToRefs(composeStore)
@@ -153,7 +155,14 @@ async function submitWanted() {
     const inuse = await userStore.emailIsInUse(email.value)
 
     if (inuse) {
-      // Email belongs to someone else
+      if (!loggedIn.value) {
+        // User is not logged in and the email belongs to an existing account.
+        // Force them to log in rather than showing the merge dialog.
+        authStore.forceLogin = true
+        return
+      }
+      // User is logged in but trying to use an email from a different account.
+      // Show the merge dialog.
       emailBelongsToSomeoneElse.value = true
       return
     }
