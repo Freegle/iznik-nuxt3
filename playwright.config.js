@@ -1,21 +1,24 @@
-const { defineConfig, devices } = require('@playwright/test')
-const { timeouts } = require('./tests/e2e/config')
 const fs = require('fs')
 const path = require('path')
+const { defineConfig, devices } = require('@playwright/test')
+const { timeouts } = require('./tests/e2e/config')
 
 // Check if we have an ordered test list
 const orderedTestsFile = path.join(__dirname, 'tests/e2e/ordered-tests.txt')
-let testMatch = undefined
+let testMatch
 
 if (fs.existsSync(orderedTestsFile)) {
   try {
-    const orderedTests = fs.readFileSync(orderedTestsFile, 'utf8')
+    const orderedTests = fs
+      .readFileSync(orderedTestsFile, 'utf8')
       .split('\n')
-      .filter(line => line.trim())
-      .map(testPath => path.basename(testPath))
+      .filter((line) => line.trim())
+      .map((testPath) => path.basename(testPath))
     if (orderedTests.length > 0) {
       testMatch = orderedTests
-      console.log(`Using ordered test execution: ${orderedTests.length} tests, prioritizing previously failed tests`)
+      console.log(
+        `Using ordered test execution: ${orderedTests.length} tests, prioritizing previously failed tests`
+      )
     }
   } catch (error) {
     console.warn('Could not load ordered test list:', error.message)
@@ -24,7 +27,7 @@ if (fs.existsSync(orderedTestsFile)) {
 
 module.exports = defineConfig({
   testDir: './tests/e2e',
-  testMatch: testMatch,
+  testMatch,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 2,
@@ -68,13 +71,13 @@ module.exports = defineConfig({
                   return (
                     // Include files that look like our source code
                     (sourcePath.includes('.vue') ||
-                     sourcePath.includes('/pages/') ||
-                     sourcePath.includes('/components/') ||
-                     sourcePath.includes('/layouts/') ||
-                     sourcePath.includes('/composables/') ||
-                     sourcePath.includes('/stores/') ||
-                     sourcePath.startsWith('app.vue') ||
-                     sourcePath.startsWith('error.vue')) &&
+                      sourcePath.includes('/pages/') ||
+                      sourcePath.includes('/components/') ||
+                      sourcePath.includes('/layouts/') ||
+                      sourcePath.includes('/composables/') ||
+                      sourcePath.includes('/stores/') ||
+                      sourcePath.startsWith('app.vue') ||
+                      sourcePath.startsWith('error.vue')) &&
                     // Exclude problematic paths
                     !sourcePath.includes('node_modules/') &&
                     !sourcePath.includes('data:') &&
@@ -94,7 +97,7 @@ module.exports = defineConfig({
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://freegle.localhost',
+    baseURL: process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     // viewport set at test level for better control
     trace: 'on',
@@ -104,8 +107,8 @@ module.exports = defineConfig({
     contextOptions: {
       recordVideo: {
         dir: 'test-results',
-        size: { width: 1280, height: 720 }
-      }
+        size: { width: 1280, height: 720 },
+      },
     },
     // Docker-friendly navigation settings
     navigationTimeout: timeouts.navigation.default,
