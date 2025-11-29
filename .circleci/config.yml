@@ -182,8 +182,8 @@ jobs:
             # Update build.gradle applicationId
             sed -i 's/org\.ilovefreegle\.direct/org.ilovefreegle.dev/g' android/app/build.gradle
 
-            # Update app name in strings.xml
-            sed -i 's/<string name="app_name">Freegle<\/string>/<string name="app_name">Freegle Dev<\/string>/g' android/app/src/main/res/values/strings.xml
+            # Update app name in strings.xml (both app_name and title_activity_main)
+            sed -i 's/>Freegle</>Freegle Dev</g' android/app/src/main/res/values/strings.xml
 
             # Update capacitor.config.json if it exists
             if [ -f capacitor.config.json ]; then
@@ -194,6 +194,21 @@ jobs:
             echo "✅ Dev app identity configured"
             echo "   Package ID: org.ilovefreegle.dev"
             echo "   App Name: Freegle Dev"
+
+      # Convert app icons to greyscale for dev app
+      - run:
+          name: Create Greyscale Icons (Dev)
+          command: |
+            echo "🎨 Converting app icons to greyscale..."
+            sudo apt-get update && sudo apt-get install -y imagemagick
+
+            # Convert all launcher icons to greyscale
+            find android/app/src/main/res -name "ic_launcher*.png" -type f | while read icon; do
+              echo "  Converting: $icon"
+              convert "$icon" -colorspace Gray "$icon"
+            done
+
+            echo "✅ Icons converted to greyscale"
 
       # Allow cleartext HTTP for dev servers
       - run:
