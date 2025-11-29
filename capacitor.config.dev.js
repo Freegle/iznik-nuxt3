@@ -13,6 +13,8 @@ const config = {
   // Server URL is set dynamically at runtime from saved preference
   // The DevConnectScreen component handles QR scanning and URL saving
   server: {
+    // Use HTTP scheme to allow mixed content requests to dev servers
+    androidScheme: 'http',
     // Allow cleartext HTTP for local dev servers
     cleartext: true,
   },
