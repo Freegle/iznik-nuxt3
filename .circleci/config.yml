@@ -254,6 +254,64 @@ jobs:
 
             npx cap sync android
 
+      # Modify MainActivity to allow all WebView navigation (no external browser)
+      - run:
+          name: Configure WebView Navigation
+          command: |
+            echo "🔧 Configuring MainActivity to keep all navigation in WebView..."
+
+            MAIN_ACTIVITY="android/app/src/main/java/org/ilovefreegle/dev/MainActivity.java"
+
+            # Ensure the directory exists
+            mkdir -p "$(dirname "$MAIN_ACTIVITY")"
+
+            # Create the modified MainActivity
+            cat > "$MAIN_ACTIVITY" << 'JAVAEOF'
+package org.ilovefreegle.dev;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+  private static final String TAG = "FreegleDev";
+
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    // Enable WebView debugging for chrome://inspect
+    WebView.setWebContentsDebuggingEnabled(true);
+    Log.d(TAG, "WebView debugging enabled");
+
+    // Override WebViewClient to keep ALL navigation in the WebView
+    // This prevents window.location.href from opening external browser
+    getBridge().getWebView().setWebViewClient(new WebViewClient() {
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+        String url = request.getUrl().toString();
+        Log.d(TAG, "Navigation to: " + url);
+        // Return false = load in WebView, not external browser
+        return false;
+      }
+
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        Log.d(TAG, "Navigation to (legacy): " + url);
+        return false;
+      }
+    });
+
+    Log.d(TAG, "WebViewClient configured to keep navigation in WebView");
+  }
+}
+JAVAEOF
+
+            echo "✅ MainActivity configured for in-WebView navigation"
+
       - run:
           name: Make gradlew executable
           command: chmod +x android/gradlew
