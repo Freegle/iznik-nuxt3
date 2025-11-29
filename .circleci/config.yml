@@ -237,11 +237,16 @@ jobs:
       - run:
           name: Sync Capacitor to Android (Dev)
           command: |
-            # Use dev config by replacing the main config
-            if [ -f capacitor.config.dev.js ]; then
-              echo "Using capacitor.config.dev.js"
-              cp capacitor.config.dev.js capacitor.config.js
-            fi
+            # Remove the TypeScript config so our JS config is used
+            rm -f capacitor.config.ts
+
+            # Copy dev config as the main config
+            echo "Using capacitor.config.dev.js"
+            cp capacitor.config.dev.js capacitor.config.js
+
+            # Verify the dev-app directory exists
+            ls -la dev-app/
+
             npx cap sync android
 
       - run:
