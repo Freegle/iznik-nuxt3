@@ -14,81 +14,10 @@ This document describes the mobile app version of Freegle, which is built using 
 
 The mobile app is built from the `production` branch (same as the web app) and includes native Android and iOS platform code. The app shares all Vue components and business logic with the web version but uses a different build configuration controlled by the `ISAPP` environment variable.
 
----
-
-## Push Notifications
-
-Push notifications are implemented using Freegle's custom fork of the Capacitor push notifications plugin.
-
-- **Package**: `@freegle/capacitor-push-notifications-cap7`
-- **Source**: https://github.com/Freegle/capacitor-push-notifications-cap7
-- **Features**:
-  - Foreground and background push handling
-  - Badge count management on home screen icon
-  - Deep linking from notifications
-  - Multiple notification channels (Android)
-  - Sound and vibration control
-  - Notification permissions handling
-  - Action buttons (Reply, Mark Read, View) on chat notifications
-  - Boot receiver for Android (notifications work after device restart)
-
-### How Notifications Work by App State
-
-| App State | Android | iOS |
-|-----------|---------|-----|
-| **Foreground** | ✅ Notification displayed via NotificationHelper | ✅ Notification displayed (iOS 14+ banner/list) |
-| **Background** | ✅ MessagingService receives FCM, shows notification | ✅ System displays notification |
-| **Swiped away** | ✅ MessagingService still receives FCM (on most devices) | ✅ System displays notification |
-| **After device restart** | ✅ BootReceiver initializes FCM connection | ✅ Works automatically (APNs handles) |
-| **Force stopped** | ❌ Android blocks ALL app components | ⚠️ Visible notifications still appear, but app can't process silently |
-
-**Key Differences:**
-
-- **Android**: Uses data-only FCM messages. The `MessagingService` handles ALL message types and displays notifications via `NotificationHelper`. Force-stop is a hard block by Android - nothing can wake the app until user opens it manually.
-
-- **iOS**: Uses APNs. The system displays visible notifications regardless of app state. Only silent/background pushes are blocked after force-quit. After device restart, notifications work immediately without user opening the app.
-
-### Android Notification Channels
-
-The app creates these notification channels on startup:
-
-| Channel ID | Name | Importance | Vibration | Lights |
-|------------|------|------------|-----------|--------|
-| `chat_messages` | Chat Messages | High (4) | Yes | Yes (green) |
-| `reminders` | Reminders | Default (3) | No | Yes (green) |
-| `new_posts` | New Posts | Low (2) | No | No |
-| `tips` | Tips & Suggestions | Low (2) | No | No |
-| `social` | ChitChat & Social | Default (3) | No | Yes (green) |
-
-Users can customize these in Android Settings > Apps > Freegle > Notifications.
-
-### iOS Action Categories
-
-Chat message notifications support these actions (visible on long-press):
-
-- **Reply**: Inline text reply
-- **Mark Read**: Dismiss and mark conversation as read
-- **View**: Open the chat in the app
-
-### Debugging Notifications
-
-1. **Help page**: "Copy app and device info" button includes debug logs
-2. **Debug logs modal**: View logs directly in app (Help page, bottom)
-3. **Android SharedPreferences**: Background push events logged to `push_debug` preferences
-4. **Boot events**: BootReceiver logs to SharedPreferences for debugging post-restart issues
-
-### Known Limitations
-
-1. **Android force-stop**: This is an intentional Android security feature. When a user force-stops an app via Settings > Apps > Force Stop, Android prevents ALL app components from running until the user manually opens the app again. This is by design and cannot be worked around.
-
-2. **OEM battery optimization**: Some Android manufacturers (Xiaomi, Oppo, Vivo, Huawei) have aggressive battery optimization that may kill apps or prevent notifications. Users may need to whitelist Freegle in battery settings.
-
-3. **iOS silent push after force-quit**: If user force-quits the app on iOS, silent/background pushes won't be processed. However, visible notifications still appear normally.
-
----
-
 <details>
 <summary><h2>Mobile App vs Web App</h2></summary>
+
+Understanding the differences between mobile and web builds helps when debugging platform-specific issues.
 
 The mobile and web apps are built from the **same codebase** (`production` branch) with build-time differences:
 
@@ -114,7 +43,7 @@ The mobile and web apps are built from the **same codebase** (`production` branc
 <details>
 <summary><h2>Core Mobile Infrastructure</h2></summary>
 
-The mobile app is built on Capacitor, which wraps the Nuxt web app in native containers for Android and iOS.
+The app uses Capacitor to bridge web code with native device features. This section covers the core configuration and project structure.
 
 ### Capacitor Framework
 
@@ -156,7 +85,7 @@ Located in `ios/` directory:
 <details>
 <summary><h2>Mobile-Specific Features</h2></summary>
 
-The mobile app includes native implementations of features that require platform-specific code or provide a better user experience than web equivalents.
+These features use native device capabilities not available in web browsers.
 
 ### Authentication Methods
 
@@ -180,6 +109,19 @@ The mobile app supports multiple authentication methods with native implementati
 4. **Yahoo Login**
    - Uses in-app browser (Cordova InAppBrowser)
    - OAuth flow with native browser
+
+### Push Notifications
+
+Custom implementation using Freegle's fork:
+
+- **Package**: `@freegle/capacitor-push-notifications-cap7`
+- **Features**:
+  - Foreground and background push handling
+  - Badge count management on home screen icon
+  - Deep linking from notifications
+  - Multiple notification channels (Android)
+  - Sound and vibration control
+  - Notification permissions handling
 
 ### Camera & Photo Management
 
@@ -244,6 +186,8 @@ Mobile-specific Stripe implementation:
 <details>
 <summary><h2>Mobile Store (stores/mobile.js)</h2></summary>
 
+All mobile-specific state and functionality is managed through a dedicated Pinia store.
+
 A dedicated Pinia store handles all mobile-specific state and functionality:
 
 ### State
@@ -276,7 +220,7 @@ A dedicated Pinia store handles all mobile-specific state and functionality:
 <details>
 <summary><h2>UI/UX Adjustments</h2></summary>
 
-Some Vue components behave differently in the mobile app to provide a native-like experience.
+Several components have mobile-specific behavior to optimize for touch screens and native capabilities.
 
 ### Modified Components
 
@@ -320,6 +264,8 @@ Several components have mobile-specific behavior:
 
 <details>
 <summary><h2>Dependencies</h2></summary>
+
+The mobile app requires specific Capacitor plugins and dependencies for native functionality.
 
 ### Capacitor Core Packages
 
@@ -376,6 +322,8 @@ Several components have mobile-specific behavior:
 
 <details>
 <summary><h2>Version Management</h2></summary>
+
+Version numbers are managed automatically by CircleCI to ensure consistency across platforms.
 
 ### Unified Version Management (Both Platforms)
 
@@ -466,6 +414,8 @@ This ensures the version shown in the app's Help page matches the actual build v
 
 <details>
 <summary><h2>Environment Variables</h2></summary>
+
+CircleCI builds require various environment variables for signing, store APIs, and service integrations.
 
 ### Required for CircleCI Builds
 
@@ -609,6 +559,8 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 <details>
 <summary><h2>Build Process</h2></summary>
 
+Production builds are fully automated via CircleCI. Local builds are useful for testing.
+
 ### CircleCI Automated Builds (Both Platforms)
 
 **Triggered on**: Pushes to `production` branch (after tests pass on `master`)
@@ -696,7 +648,132 @@ xcodebuild -workspace App.xcworkspace -scheme App -configuration Release
 ---
 
 <details>
+<summary><h2>Freegle Dev App (Live Reload)</h2></summary>
+
+A separate development app allows rapid iteration by loading code from your local dev server instead of bundled assets.
+
+### Overview
+
+The "Freegle Dev" app is a separate Android app that:
+- Has a different package ID (`org.ilovefreegle.dev`) so it can coexist with the production app
+- Connects to `freegle-app-dev.local` via mDNS (no IP address needed)
+- Supports hot module reloading (HMR) for instant code updates
+- Only needs rebuilding when Capacitor plugins change
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Phone                                                      │
+│  ┌───────────────────┐  ┌───────────────────┐              │
+│  │ Freegle           │  │ Freegle Dev       │              │
+│  │ (Production)      │  │ (Development)     │              │
+│  │                   │  │                   │              │
+│  │ Bundled assets    │  │ Connects via      │              │
+│  │ Works offline     │  │ mDNS hostname     │              │
+│  └───────────────────┘  └─────────┬─────────┘              │
+└───────────────────────────────────┼─────────────────────────┘
+                                    │ HTTP (WiFi) + WebSocket (HMR)
+                                    │ freegle-app-dev.local:3004
+                                    │ freegle-app-dev.local:24678
+                                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Developer Machine                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ freegle-dev-live container                           │   │
+│  │ Port 3004: Nuxt app server                          │   │
+│  │ Port 24678: Vite HMR WebSocket                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  mDNS broadcast: freegle-app-dev.local                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Setup
+
+1. **Build the dev APK** (one-time or when Capacitor plugins change):
+   - Trigger the `build-dev-app` job in CircleCI
+   - Download `freegle-dev.apk` from artifacts
+   - Install on your Android device (enable "Install from unknown sources")
+
+2. **Start the dev-live container**:
+   - Go to `http://status.localhost`
+   - Click "Start" on the freegle-dev-live container (requires confirmation as it uses live APIs)
+
+3. **Set up mDNS hostname broadcast** (Windows with Bonjour):
+   ```cmd
+   dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local YOUR_IP
+   ```
+   Replace `YOUR_IP` with your LAN IP (e.g., `192.168.1.50`). Keep this window open.
+
+4. **Set up port forwarding** (WSL users - run in PowerShell as Admin):
+   ```powershell
+   # Port forwarding
+   netsh interface portproxy add v4tov4 listenport=3004 listenaddress=0.0.0.0 connectport=3004 connectaddress=127.0.0.1
+   netsh interface portproxy add v4tov4 listenport=24678 listenaddress=0.0.0.0 connectport=24678 connectaddress=127.0.0.1
+
+   # Firewall rules
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev App" -Direction Inbound -LocalPort 3004 -Protocol TCP -Action Allow
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev HMR" -Direction Inbound -LocalPort 24678 -Protocol TCP -Action Allow
+   ```
+
+5. **Connect the app**:
+   - Open Freegle Dev on your phone (must be on same WiFi network)
+   - App automatically connects to `freegle-app-dev.local:3004`
+   - If connection fails, check mDNS setup and port forwarding
+
+6. **Develop**:
+   - Make code changes → app hot reloads via HMR
+   - No rebuild needed for Vue/JS/CSS changes
+   - Only rebuild APK when Capacitor plugins change
+
+### App Comparison
+
+| Aspect | Freegle (Production) | Freegle Dev |
+|--------|---------------------|-------------|
+| **Package ID** | `org.ilovefreegle.direct` | `org.ilovefreegle.dev` |
+| **App Name** | Freegle | Freegle Dev |
+| **Icon** | Normal | Orange tint |
+| **Assets** | Bundled | From dev server |
+| **Connection** | N/A | mDNS auto-connect |
+| **APIs** | Production | Production (live data!) |
+| **Play Store** | Published | Never published |
+
+### Network Requirements
+
+- Phone and dev machine on same WiFi network
+- mDNS broadcast running (`dns-sd` command)
+- Port 3004 (app) and 24678 (HMR) accessible
+- For WSL: port forwarding configured
+
+### Troubleshooting
+
+**Cannot resolve freegle-app-dev.local:**
+- Ensure Bonjour is installed and `dns-sd` command is running
+- Check phone is on same WiFi as dev machine
+- Some corporate networks block mDNS - try a home network
+
+**App loads but HMR not working:**
+- Check port 24678 is forwarded and accessible
+- Check firewall allows port 24678
+- Check container logs for HMR errors
+
+**Cannot connect to dev server:**
+- Ensure freegle-dev-live container is running
+- Check mDNS is broadcasting (should show in dns-sd output)
+- Try pinging `freegle-app-dev.local` from another device
+
+**Changes not appearing:**
+- Nuxt dev server should auto-reload
+- Try refreshing the app or reconnecting
+
+</details>
+
+---
+
+<details>
 <summary><h2>Testing</h2></summary>
+
+Testing the mobile app requires checking native features that cannot be tested via browser automation.
 
 ### App-Specific Test Checklist
 
@@ -733,6 +810,8 @@ showDonationAskModal.value = true
 <details>
 <summary><h2>Removed/Disabled for Mobile</h2></summary>
 
+Some features are excluded from the mobile build to reduce app size and complexity.
+
 To reduce app size and complexity:
 
 - **CircleCI config**: Different deployment process for mobile
@@ -748,6 +827,8 @@ To reduce app size and complexity:
 
 <details>
 <summary><h2>Known Issues & Workarounds</h2></summary>
+
+Common issues encountered during development and their solutions.
 
 ### npm Install Issues
 
@@ -774,6 +855,8 @@ Some packages require specific versions for compatibility. Check `package.json` 
 
 <details>
 <summary><h2>Deployment</h2></summary>
+
+Production releases are fully automated with scheduled promotions to app stores.
 
 ### Fully Automated Dual-Platform Deployment
 
@@ -948,6 +1031,8 @@ bundle exec fastlane ios auto_submit
 <details>
 <summary><h2>Maintenance</h2></summary>
 
+Guidelines for keeping the mobile app codebase up to date.
+
 ### Development Workflow
 
 The production branch receives tested code automatically from master after tests pass. Manual merges are rarely needed, but if required:
@@ -978,6 +1063,8 @@ When updating Capacitor major versions:
 <details>
 <summary><h2>Resources</h2></summary>
 
+Useful links for mobile app development.
+
 - **Capacitor Docs**: https://capacitorjs.com/docs
 - **App Release Plan**: `/plans/app-releases.md`
 - **Freegle Push Plugin**: https://github.com/Freegle/capacitor-push-notifications
@@ -991,6 +1078,8 @@ When updating Capacitor major versions:
 <details>
 <summary><h2>Support</h2></summary>
 
+Steps for debugging mobile app issues.
+
 For mobile app specific issues:
 
 1. Check device info in app (Help → Copy app info)
@@ -1003,7 +1092,7 @@ For mobile app specific issues:
 
 ---
 
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-11-29
 **Current Version**: 3.2.x (production branch)
 **Capacitor Version**: 7.x
 **CI/CD**: CircleCI with Fastlane (iOS and Android fully automated)
