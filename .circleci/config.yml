@@ -160,19 +160,17 @@ jobs:
             ls -la dev-app/
             echo "✅ Dev app web content ready (using dev-app/ folder)"
 
-      # Skip Firebase for dev app (different package ID not registered in Firebase)
-      # Push notifications won't work in dev app, but that's fine for UI development
+      # Setup Firebase for dev app (now registered in Firebase)
       - run:
-          name: Disable Google Services Plugin (Dev)
+          name: Setup Firebase Configuration
           command: |
-            echo "📱 Disabling Google Services plugin for dev build..."
-            echo "   (Push notifications not needed for hot reload development)"
-
-            # Remove google-services plugin from build.gradle to avoid package ID mismatch
-            sed -i '/apply plugin.*google-services/d' android/app/build.gradle
-            sed -i '/com.google.gms.google-services/d' android/app/build.gradle
-
-            echo "✅ Google Services plugin disabled"
+            if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+              echo "Decoding google-services.json"
+              echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
+              echo "✅ Firebase configured for dev app"
+            else
+              echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
+            fi
 
       # Update Android app ID and name for dev app
       - run:

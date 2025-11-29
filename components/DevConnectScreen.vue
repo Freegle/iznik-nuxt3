@@ -83,7 +83,8 @@
         <li>Check firewall allows port 3002</li>
       </ul>
       <p class="note">
-        <strong>Note:</strong> Push notifications do not work in the dev app.
+        <strong>Note:</strong> Push notifications will appear in the production
+        Freegle app, not this dev app.
       </p>
     </div>
   </div>
