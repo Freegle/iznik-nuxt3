@@ -59,6 +59,7 @@ const isTest = process.env.NODE_ENV === 'test' || process.env.CI
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
+
   // Rendering modes are confusing.
   //
   // - target can be:
@@ -336,6 +337,19 @@ export default defineNuxtConfig({
   ],
 
   vite: {
+    server: {
+      // HMR configuration for mobile dev app via mDNS hostname
+      // The dev app connects to freegle-app-dev.local which must be
+      // broadcast via mDNS from the developer's machine
+      hmr: {
+        protocol: 'ws',
+        host: '0.0.0.0',
+        port: 24678,
+        clientPort: 24678,
+        // Tell HMR client to connect to the mDNS hostname
+        clientHost: 'freegle-app-dev.local',
+      },
+    },
     vue: {
       template: {
         compilerOptions: {

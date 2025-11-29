@@ -26,33 +26,6 @@
       border: 1px solid #e9ecef;
     }
     .card h3 { font-size: 16px; margin-bottom: 12px; color: #5cb85c; }
-    .form-group { margin-bottom: 16px; }
-    .form-row { display: flex; gap: 12px; }
-    .form-row .form-group { flex: 1; margin-bottom: 16px; }
-    .form-row .form-group.port { flex: 0 0 90px; }
-    label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-    }
-    input[type="text"]:focus { border-color: #5cb85c; outline: none; }
-    button {
-      width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 8px;
-    }
-    .btn-primary { background: #5cb85c; color: white; }
-    .btn-primary:hover { background: #4cae4c; }
-    .btn-primary:disabled { background: #ccc; }
-    .btn-secondary { background: #6c757d; color: white; }
     .status {
       padding: 12px;
       border-radius: 8px;
@@ -62,26 +35,6 @@
     .status.connecting { background: #fff3cd; color: #856404; }
     .status.success { background: #d4edda; color: #155724; }
     .status.error { background: #f8d7da; color: #721c24; }
-    .saved-url {
-      font-family: monospace;
-      background: #f5f5f5;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      word-break: break-all;
-      font-size: 14px;
-    }
-    .help {
-      font-size: 13px;
-      color: #666;
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 16px;
-      border: 1px solid #e9ecef;
-    }
-    .help strong { color: #5cb85c; }
-    .help ul { margin: 8px 0 0 20px; }
-    .help li { margin-bottom: 4px; }
     .warning {
       background: #f8d7da;
       border: 2px solid #dc3545;
@@ -92,106 +45,93 @@
       font-size: 13px;
     }
     .warning strong { display: block; margin-bottom: 4px; }
-    .hidden { display: none; }
+    .hostname {
+      font-family: monospace;
+      background: #e8f5e9;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+      border: 2px solid #5cb85c;
+    }
+    .help {
+      font-size: 13px;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #e9ecef;
+    }
+    .help strong { color: #5cb85c; }
+    .help ol { margin: 8px 0 0 20px; }
+    .help li { margin-bottom: 8px; }
+    .help code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #888;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Freegle Dev</h1>
-    <p class="subtitle">Connect to your development server</p>
+    <p class="subtitle">Connecting to development server...</p>
 
     <div class="warning">
       <strong>Production Data</strong>
       This app connects to live Freegle APIs. Any posts, messages, or actions will affect real users and data.
     </div>
 
-    <div id="status" class="status hidden"></div>
-
-    <div id="saved-section" class="card hidden">
-      <h3>Last Server</h3>
-      <div id="saved-url" class="saved-url"></div>
-      <button class="btn-primary" onclick="reconnect()">Reconnect</button>
-    </div>
+    <div id="status" class="status connecting">Resolving freegle-app-dev.local...</div>
 
     <div class="card">
-      <h3>Enter Server Details</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="server-ip">IP Address:</label>
-          <input type="text" id="server-ip" placeholder="192.168.1.100" inputmode="decimal">
-        </div>
-        <div class="form-group port">
-          <label for="server-port">Port:</label>
-          <input type="text" id="server-port" value="3004" inputmode="numeric">
-        </div>
-      </div>
-      <button class="btn-primary" onclick="connect()">Connect</button>
+      <h3>Server Address</h3>
+      <div class="hostname">freegle-app-dev.local:3004</div>
+      <p style="font-size: 13px; color: #666;">
+        This app automatically connects to the above hostname via mDNS.
+      </p>
     </div>
 
     <div class="help">
-      <strong>Setup:</strong>
-      <ul>
-        <li>Start the freegle-dev-live container from the status page</li>
-        <li>Find your IP at <code>status.localhost/dev-connect</code></li>
-        <li>Phone must be on same WiFi network</li>
-      </ul>
+      <strong>Developer Setup Required:</strong>
+      <ol>
+        <li>Start the <code>freegle-dev-live</code> container from the status page</li>
+        <li>Broadcast <code>freegle-app-dev.local</code> via mDNS from your dev machine</li>
+        <li>Ensure ports 3004 and 24678 are forwarded (for app and hot reload)</li>
+        <li>Phone must be on the same WiFi network</li>
+      </ol>
+      <p class="note">
+        See <code>status.localhost/dev-connect</code> for mDNS setup instructions.
+        Static images are served from production. Hot reload requires mDNS to work.
+      </p>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'dev_server_url';
+    const SERVER_URL = 'http://freegle-app-dev.local:3004';
     const statusEl = document.getElementById('status');
-    const savedSection = document.getElementById('saved-section');
-    const savedUrlEl = document.getElementById('saved-url');
-    const ipInput = document.getElementById('server-ip');
-    const portInput = document.getElementById('server-port');
-
-    // Load saved URL on startup
-    function init() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        savedUrlEl.textContent = saved;
-        // Parse saved URL to populate IP/port fields
-        try {
-          const url = new URL(saved);
-          ipInput.value = url.hostname;
-          portInput.value = url.port || '3004';
-        } catch (e) {
-          // If parsing fails, just show the saved value
-        }
-        savedSection.classList.remove('hidden');
-
-        // Auto-connect after a short delay
-        showStatus('connecting', 'Connecting to ' + saved + '...');
-        setTimeout(() => testAndConnect(saved), 500);
-      }
-    }
 
     function showStatus(type, message) {
       statusEl.className = 'status ' + type;
       statusEl.textContent = message;
-      statusEl.classList.remove('hidden');
     }
 
-    function hideStatus() {
-      statusEl.classList.add('hidden');
-    }
-
-    function saveUrl(url) {
-      localStorage.setItem(STORAGE_KEY, url);
-      savedUrlEl.textContent = url;
-      savedSection.classList.remove('hidden');
-    }
-
-    async function testAndConnect(url) {
-      showStatus('connecting', 'Connecting to ' + url + '...');
+    async function connect() {
+      showStatus('connecting', 'Connecting to ' + SERVER_URL + '...');
 
       try {
         // Try to fetch from the server with a timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        await fetch(url, {
+        await fetch(SERVER_URL, {
           method: 'HEAD',
           mode: 'no-cors',
           signal: controller.signal
@@ -199,59 +139,24 @@
         clearTimeout(timeoutId);
 
         // If we get here, the server responded
-        showStatus('success', 'Connected! Redirecting...');
-        saveUrl(url);
+        showStatus('success', 'Connected! Loading app...');
 
         // Redirect to the dev server
         setTimeout(() => {
-          window.location.href = url;
+          window.location.href = SERVER_URL;
         }, 500);
 
       } catch (error) {
         if (error.name === 'AbortError') {
-          showStatus('error', 'Connection timed out. Check IP, port, and network.');
+          showStatus('error', 'Connection timed out. Check mDNS setup and network.');
         } else {
-          showStatus('error', 'Connection failed: ' + (error.message || 'Unknown error'));
+          showStatus('error', 'Cannot resolve freegle-app-dev.local. Check mDNS is broadcasting.');
         }
       }
     }
 
-    function connect() {
-      const ip = ipInput.value.trim();
-      const port = portInput.value.trim() || '3004';
-
-      if (!ip) {
-        showStatus('error', 'Please enter an IP address');
-        return;
-      }
-
-      // Basic IP validation
-      if (!/^[\d.]+$/.test(ip)) {
-        showStatus('error', 'Please enter a valid IP address (e.g., 192.168.1.100)');
-        return;
-      }
-
-      const url = 'http://' + ip + ':' + port;
-      testAndConnect(url);
-    }
-
-    function reconnect() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        testAndConnect(saved);
-      }
-    }
-
-    // Handle Enter key on both inputs
-    ipInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') connect();
-    });
-    portInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') connect();
-    });
-
-    // Initialize on load
-    init();
+    // Auto-connect on load
+    setTimeout(connect, 500);
   </script>
 </body>
 </html>

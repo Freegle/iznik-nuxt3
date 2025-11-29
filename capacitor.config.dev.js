@@ -1,6 +1,10 @@
 // Development app configuration for Freegle Dev
 // This builds a separate "Freegle Dev" app that can coexist with the production app
-// and connects to a local development server via QR code or manual URL entry
+// and connects to a local development server via mDNS hostname
+//
+// SETUP REQUIRED: Developer must broadcast 'freegle-app-dev.local' via mDNS
+// On Windows with Bonjour: dns-sd -P "Freegle Dev" _http._tcp local 3004 freegle-app-dev.local <YOUR_IP>
+// Or install an mDNS responder that advertises this hostname
 
 /** @type {import('@capacitor/cli').CapacitorConfig} */
 const config = {
@@ -10,16 +14,16 @@ const config = {
   bundledWebRuntime: false,
   zoomEnabled: true,
 
-  // Server URL is set dynamically at runtime from saved preference
-  // The DevConnectScreen component handles QR scanning and URL saving
+  // Fixed server URL using mDNS hostname
+  // Android resolves .local hostnames via mDNS (Bonjour)
+  // Developer must broadcast this hostname from their machine
   server: {
+    url: 'http://freegle-app-dev.local:3004',
     // Use HTTP scheme to allow mixed content requests to dev servers
     androidScheme: 'http',
     // Allow cleartext HTTP for local dev servers
     cleartext: true,
     // Allow navigation to any local network address for live reload
-    // Patterns must match the hostname/IP exactly (wildcards for subdomains only)
-    // Since we can't wildcard IPs, we allow all HTTP navigation
     allowNavigation: ['*'],
   },
 
