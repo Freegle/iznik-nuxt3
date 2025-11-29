@@ -112,7 +112,7 @@ jobs:
           paths:
             - .new_version
 
-  build-android-dev-app:
+  build-android-dev:
     executor: android-executor
     steps:
       - checkout
@@ -1261,7 +1261,7 @@ workflows:
   # Build Android apps for all branches (except production/modtools)
   build-android-apps:
     jobs:
-      - build-android-dev-app:
+      - build-android-dev:
           filters:
             branches:
               ignore:
