@@ -89,33 +89,33 @@
       This app connects to live Freegle APIs. Any posts, messages, or actions will affect real users and data.
     </div>
 
-    <div id="status" class="status connecting">Resolving freegle-app-dev.local...</div>
+    <div id="status" class="status connecting">Connecting to localhost:3004...</div>
 
     <div class="card">
       <h3>Server Address</h3>
-      <div class="hostname">freegle-app-dev.local:3004</div>
+      <div class="hostname">localhost:3004</div>
       <p style="font-size: 13px; color: #666;">
-        This app automatically connects to the above hostname via mDNS.
+        Uses adb reverse to forward to your dev machine.
       </p>
     </div>
 
     <div class="help">
       <strong>Developer Setup Required:</strong>
       <ol>
-        <li>Start the <code>freegle-dev-live</code> container from the status page</li>
-        <li>Broadcast <code>freegle-app-dev.local</code> via mDNS from your dev machine</li>
-        <li>Ensure ports 3004 and 24678 are forwarded (for app and hot reload)</li>
-        <li>Phone must be on the same WiFi network</li>
+        <li>Connect phone via USB</li>
+        <li>Run: <code>adb reverse tcp:3004 tcp:3004</code></li>
+        <li>Run: <code>adb reverse tcp:24678 tcp:24678</code></li>
+        <li>Start <code>freegle-dev-live</code> container from the status page</li>
       </ol>
       <p class="note">
-        See <code>status.localhost/dev-connect</code> for mDNS setup instructions.
-        Static images are served from production. Hot reload requires mDNS to work.
+        The adb reverse commands forward localhost on the phone to your dev machine.
+        HMR port 24678 enables hot reload for instant code updates.
       </p>
     </div>
   </div>
 
   <script>
-    const SERVER_URL = 'http://freegle-app-dev.local:3004';
+    const SERVER_URL = 'http://localhost:3004';
     const statusEl = document.getElementById('status');
 
     function showStatus(type, message) {
@@ -148,9 +148,9 @@
 
       } catch (error) {
         if (error.name === 'AbortError') {
-          showStatus('error', 'Connection timed out. Check mDNS setup and network.');
+          showStatus('error', 'Connection timed out. Check adb reverse is running.');
         } else {
-          showStatus('error', 'Cannot resolve freegle-app-dev.local. Check mDNS is broadcasting.');
+          showStatus('error', 'Cannot connect. Run: adb reverse tcp:3004 tcp:3004');
         }
       }
     }

@@ -1,10 +1,12 @@
 // Development app configuration for Freegle Dev
 // This builds a separate "Freegle Dev" app that can coexist with the production app
-// and connects to a local development server via mDNS hostname
+// and connects to a local development server via adb reverse port forwarding
 //
-// SETUP REQUIRED: Developer must broadcast 'freegle-app-dev.local' via mDNS
-// On Windows with Bonjour: dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local <YOUR_IP>
-// Or install an mDNS responder that advertises this hostname
+// SETUP REQUIRED: Connect phone via USB and run:
+//   adb reverse tcp:3004 tcp:3004
+//   adb reverse tcp:24678 tcp:24678
+//
+// Then start the freegle-dev-live container from the status page.
 
 /** @type {import('@capacitor/cli').CapacitorConfig} */
 const config = {
@@ -14,11 +16,10 @@ const config = {
   bundledWebRuntime: false,
   zoomEnabled: true,
 
-  // Fixed server URL using mDNS hostname
-  // Android resolves .local hostnames via mDNS (Bonjour)
-  // Developer must broadcast this hostname from their machine
+  // Server URL uses localhost - adb reverse forwards to dev machine
+  // Run: adb reverse tcp:3004 tcp:3004
   server: {
-    url: 'http://freegle-app-dev.local:3004',
+    url: 'http://localhost:3004',
     // Use HTTP scheme to allow mixed content requests to dev servers
     androidScheme: 'http',
     // Allow cleartext HTTP for local dev servers
