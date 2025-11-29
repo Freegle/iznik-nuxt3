@@ -227,6 +227,16 @@ export const useComposeStore = defineStore({
       this.messages[id].availablenow = availablenow
       this.messages[id].savedAt = Date.now()
     },
+    setDeliveryPossible(id, deliveryPossible) {
+      this.ensureMessage(id)
+      this.messages[id].deliveryPossible = deliveryPossible
+      this.messages[id].savedAt = Date.now()
+    },
+    setDeadline(id, deadline) {
+      this.ensureMessage(id)
+      this.messages[id].deadline = deadline
+      this.messages[id].savedAt = Date.now()
+    },
     setDescription(params) {
       const id = params.id
       this.ensureMessage(id)
@@ -246,6 +256,7 @@ export const useComposeStore = defineStore({
     setAttachmentsForMessage(id, attachments) {
       this.ensureMessage(id)
       this.messages[id].attachments = attachments
+      this.attachmentBump++
     },
     removeAttachment(params) {
       console.log('Remove attachment', JSON.stringify(params))
