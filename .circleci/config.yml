@@ -159,16 +159,19 @@ jobs:
             echo "🔧 Building Freegle Dev app (live reload development)"
             npm run generate
 
-      # Setup Firebase (optional for dev)
+      # Skip Firebase for dev app (different package ID not registered in Firebase)
+      # Push notifications won't work in dev app, but that's fine for UI development
       - run:
-          name: Setup Firebase Configuration
+          name: Disable Google Services Plugin (Dev)
           command: |
-            if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
-              echo "Decoding google-services.json"
-              echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
-            else
-              echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
-            fi
+            echo "📱 Disabling Google Services plugin for dev build..."
+            echo "   (Push notifications not needed for hot reload development)"
+
+            # Remove google-services plugin from build.gradle to avoid package ID mismatch
+            sed -i '/apply plugin.*google-services/d' android/app/build.gradle
+            sed -i '/com.google.gms.google-services/d' android/app/build.gradle
+
+            echo "✅ Google Services plugin disabled"
 
       # Update Android app ID and name for dev app
       - run:
