@@ -127,6 +127,7 @@ import {
 } from '#imports'
 import { useComposeStore } from '~/stores/compose'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 import { buildHead } from '~/composables/useBuildHead'
 import EmailValidator from '~/components/EmailValidator.vue'
 import NoticeMessage from '~/components/NoticeMessage.vue'
@@ -142,6 +143,7 @@ const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const composeStore = useComposeStore()
 const userStore = useUserStore()
+const authStore = useAuthStore()
 const { me } = useMe()
 
 // Data properties
@@ -182,20 +184,21 @@ async function next() {
 
   if (emailIsntOurs.value) {
     // Need to check if it's ok to use.
-    console.log('Not ours')
     const inuse = await userStore.emailIsInUse(email.value)
 
     if (!inuse) {
       // Not in use - that's ok.
-      console.log('Not in use')
       await freegleIt('Offer', router)
+    } else if (!loggedIn.value) {
+      // User is not logged in and the email belongs to an existing account.
+      // Force them to log in rather than showing the merge dialog.
+      authStore.forceLogin = true
     } else {
-      // We can't proceed.
-      console.log('Belongs to someone else')
+      // User is logged in but trying to use an email from a different account.
+      // Show the merge dialog.
       emailBelongsToSomeoneElse.value = true
     }
   } else {
-    console.log('One of ours')
     await freegleIt('Offer', router)
   }
 }
