@@ -165,7 +165,23 @@ jobs:
             ls -la dev-app/
             echo "✅ Dev app web content ready (using dev-app/ folder)"
 
-      # Setup Firebase for dev app (now registered in Firebase)
+      # Sync Capacitor with dev config (must happen BEFORE any android/ modifications)
+      - run:
+          name: Sync Capacitor to Android (Dev)
+          command: |
+            # Remove the TypeScript config so our JS config is used
+            rm -f capacitor.config.ts
+
+            # Copy dev config as the main config
+            echo "Using capacitor.config.dev.js"
+            cp capacitor.config.dev.js capacitor.config.js
+
+            # Verify the dev-app directory exists
+            ls -la dev-app/
+
+            npx cap sync android
+
+      # Setup Firebase for dev app (after cap sync so it doesn't get overwritten)
       - run:
           name: Setup Firebase Configuration
           command: |
@@ -177,7 +193,7 @@ jobs:
               echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
             fi
 
-      # Update Android app ID and name for dev app
+      # Update Android app ID and name for dev app (after cap sync)
       - run:
           name: Configure Dev App Identity
           command: |
@@ -199,7 +215,7 @@ jobs:
             echo "   Package ID: org.ilovefreegle.dev"
             echo "   App Name: Freegle Dev"
 
-      # Convert app icons to greyscale for dev app
+      # Convert app icons to greyscale for dev app (after cap sync)
       - run:
           name: Create Greyscale Icons (Dev)
           command: |
@@ -214,7 +230,7 @@ jobs:
 
             echo "✅ Icons converted to greyscale"
 
-      # Allow cleartext HTTP for dev servers
+      # Allow cleartext HTTP for dev servers (after cap sync)
       - run:
           name: Enable HTTP for Dev Servers
           command: |
@@ -238,22 +254,6 @@ jobs:
 
             echo "✅ HTTP enabled for dev servers"
 
-      # Sync Capacitor with dev config
-      - run:
-          name: Sync Capacitor to Android (Dev)
-          command: |
-            # Remove the TypeScript config so our JS config is used
-            rm -f capacitor.config.ts
-
-            # Copy dev config as the main config
-            echo "Using capacitor.config.dev.js"
-            cp capacitor.config.dev.js capacitor.config.js
-
-            # Verify the dev-app directory exists
-            ls -la dev-app/
-
-            npx cap sync android
-
       # Modify MainActivity to allow all WebView navigation (no external browser)
       - run:
           name: Configure WebView Navigation
@@ -265,50 +265,49 @@ jobs:
             # Ensure the directory exists
             mkdir -p "$(dirname "$MAIN_ACTIVITY")"
 
-            # Create the modified MainActivity
-            cat > "$MAIN_ACTIVITY" << 'JAVAEOF'
-package org.ilovefreegle.dev;
-
-import android.os.Bundle;
-import android.util.Log;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebResourceRequest;
-import com.getcapacitor.BridgeActivity;
-
-public class MainActivity extends BridgeActivity {
-  private static final String TAG = "FreegleDev";
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    // Enable WebView debugging for chrome://inspect
-    WebView.setWebContentsDebuggingEnabled(true);
-    Log.d(TAG, "WebView debugging enabled");
-
-    // Override WebViewClient to keep ALL navigation in the WebView
-    // This prevents window.location.href from opening external browser
-    getBridge().getWebView().setWebViewClient(new WebViewClient() {
-      @Override
-      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        String url = request.getUrl().toString();
-        Log.d(TAG, "Navigation to: " + url);
-        // Return false = load in WebView, not external browser
-        return false;
-      }
-
-      @Override
-      public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        Log.d(TAG, "Navigation to (legacy): " + url);
-        return false;
-      }
-    });
-
-    Log.d(TAG, "WebViewClient configured to keep navigation in WebView");
-  }
-}
-JAVAEOF
+            # Create the modified MainActivity using printf to avoid heredoc issues
+            printf '%s\n' \
+              'package org.ilovefreegle.dev;' \
+              '' \
+              'import android.os.Bundle;' \
+              'import android.util.Log;' \
+              'import android.webkit.WebView;' \
+              'import android.webkit.WebViewClient;' \
+              'import android.webkit.WebResourceRequest;' \
+              'import com.getcapacitor.BridgeActivity;' \
+              '' \
+              'public class MainActivity extends BridgeActivity {' \
+              '  private static final String TAG = "FreegleDev";' \
+              '' \
+              '  @Override' \
+              '  public void onCreate(Bundle savedInstanceState) {' \
+              '    super.onCreate(savedInstanceState);' \
+              '' \
+              '    // Enable WebView debugging for chrome://inspect' \
+              '    WebView.setWebContentsDebuggingEnabled(true);' \
+              '    Log.d(TAG, "WebView debugging enabled");' \
+              '' \
+              '    // Override WebViewClient to keep ALL navigation in the WebView' \
+              '    // This prevents window.location.href from opening external browser' \
+              '    getBridge().getWebView().setWebViewClient(new WebViewClient() {' \
+              '      @Override' \
+              '      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {' \
+              '        String url = request.getUrl().toString();' \
+              '        Log.d(TAG, "Navigation to: " + url);' \
+              '        // Return false = load in WebView, not external browser' \
+              '        return false;' \
+              '      }' \
+              '' \
+              '      @Override' \
+              '      public boolean shouldOverrideUrlLoading(WebView view, String url) {' \
+              '        Log.d(TAG, "Navigation to (legacy): " + url);' \
+              '        return false;' \
+              '      }' \
+              '    });' \
+              '' \
+              '    Log.d(TAG, "WebViewClient configured to keep navigation in WebView");' \
+              '  }' \
+              '}' > "$MAIN_ACTIVITY"
 
             echo "✅ MainActivity configured for in-WebView navigation"
 

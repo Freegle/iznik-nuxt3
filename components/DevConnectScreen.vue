@@ -82,9 +82,9 @@
         <li>Dev server must be running (docker-compose up)</li>
         <li>Check firewall allows port 3002</li>
       </ul>
-      <p class="note">
-        <strong>Note:</strong> Push notifications will appear in the production
-        Freegle app, not this dev app.
+      <p style="margin-top: 10px; font-size: 12px; color: #999">
+        This dev app is built on CircleCI and can be installed alongside the
+        production Freegle app.
       </p>
     </div>
   </div>

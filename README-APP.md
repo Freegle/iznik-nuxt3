@@ -654,10 +654,11 @@ A separate development app allows rapid iteration by loading code from your loca
 
 ### Overview
 
-The "Freegle Dev" app is a separate Android/iOS app that:
+The "Freegle Dev" app is a separate Android app that:
 - Has a different package ID (`org.ilovefreegle.dev`) so it can coexist with the production app
-- Loads web content from your local development server instead of bundled assets
-- Allows instant code changes without rebuilding the APK (only needs rebuild when Capacitor plugins change)
+- Connects to `freegle-app-dev.local` via mDNS (no IP address needed)
+- Supports hot module reloading (HMR) for instant code updates
+- Only needs rebuilding when Capacitor plugins change
 
 ### Architecture
 
@@ -668,25 +669,24 @@ The "Freegle Dev" app is a separate Android/iOS app that:
 │  │ Freegle           │  │ Freegle Dev       │              │
 │  │ (Production)      │  │ (Development)     │              │
 │  │                   │  │                   │              │
-│  │ Bundled assets    │  │ Loads from        │              │
-│  │ Works offline     │  │ dev server        │              │
+│  │ Bundled assets    │  │ Connects via      │              │
+│  │ Works offline     │  │ mDNS hostname     │              │
 │  └───────────────────┘  └─────────┬─────────┘              │
 └───────────────────────────────────┼─────────────────────────┘
-                                    │ HTTP (WiFi)
+                                    │ HTTP (WiFi) + WebSocket (HMR)
+                                    │ freegle-app-dev.local:3004
+                                    │ freegle-app-dev.local:24678
                                     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  Developer Machine (Docker dev server on port 3002)         │
-│                                                             │
-│  Hot reload on file changes                                 │
+│  Developer Machine                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ freegle-dev-live container                           │   │
+│  │ Port 3004: Nuxt app server                          │   │
+│  │ Port 24678: Vite HMR WebSocket                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  mDNS broadcast: freegle-app-dev.local                     │
 └─────────────────────────────────────────────────────────────┘
 ```
-
-### Connection Flow
-
-1. **First Launch**: App shows a connect screen with QR scanner and manual URL input
-2. **Scan QR Code**: Status page displays a QR code with your dev server URL
-3. **Save & Connect**: URL is saved for future sessions
-4. **Returning User**: Tap "Reconnect" to use saved server
 
 ### Setup
 
@@ -695,21 +695,34 @@ The "Freegle Dev" app is a separate Android/iOS app that:
    - Download `freegle-dev.apk` from artifacts
    - Install on your Android device (enable "Install from unknown sources")
 
-2. **Start your dev environment**:
-   ```bash
-   docker-compose up -d
+2. **Start the dev-live container**:
+   - Go to `http://status.localhost`
+   - Click "Start" on the freegle-dev-live container (requires confirmation as it uses live APIs)
+
+3. **Set up mDNS hostname broadcast** (Windows with Bonjour):
+   ```cmd
+   dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local YOUR_IP
+   ```
+   Replace `YOUR_IP` with your LAN IP (e.g., `192.168.1.50`). Keep this window open.
+
+4. **Set up port forwarding** (WSL users - run in PowerShell as Admin):
+   ```powershell
+   # Port forwarding
+   netsh interface portproxy add v4tov4 listenport=3004 listenaddress=0.0.0.0 connectport=3004 connectaddress=127.0.0.1
+   netsh interface portproxy add v4tov4 listenport=24678 listenaddress=0.0.0.0 connectport=24678 connectaddress=127.0.0.1
+
+   # Firewall rules
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev App" -Direction Inbound -LocalPort 3004 -Protocol TCP -Action Allow
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev HMR" -Direction Inbound -LocalPort 24678 -Protocol TCP -Action Allow
    ```
 
-3. **Get the connection URL**:
-   - Open `http://status.localhost/dev-connect` in your browser
-   - The page shows a QR code with your LAN IP and port 3002
-
-4. **Connect the app**:
+5. **Connect the app**:
    - Open Freegle Dev on your phone (must be on same WiFi network)
-   - Scan the QR code or enter the URL manually (e.g., `http://192.168.1.50:3002`)
+   - App automatically connects to `freegle-app-dev.local:3004`
+   - If connection fails, check mDNS setup and port forwarding
 
-5. **Develop**:
-   - Make code changes → app hot reloads instantly
+6. **Develop**:
+   - Make code changes → app hot reloads via HMR
    - No rebuild needed for Vue/JS/CSS changes
    - Only rebuild APK when Capacitor plugins change
 
@@ -721,27 +734,33 @@ The "Freegle Dev" app is a separate Android/iOS app that:
 | **App Name** | Freegle | Freegle Dev |
 | **Icon** | Normal | Orange tint |
 | **Assets** | Bundled | From dev server |
-| **Startup** | Normal flow | QR/URL connect screen |
+| **Connection** | N/A | mDNS auto-connect |
+| **APIs** | Production | Production (live data!) |
 | **Play Store** | Published | Never published |
-| **Coexistence** | ✓ Both can be installed | ✓ |
 
 ### Network Requirements
 
-- Phone and dev machine must be on the same WiFi network
-- Port 3002 must be accessible (check Windows Firewall if using WSL)
-- The dev server URL uses your machine's LAN IP (not localhost)
+- Phone and dev machine on same WiFi network
+- mDNS broadcast running (`dns-sd` command)
+- Port 3004 (app) and 24678 (HMR) accessible
+- For WSL: port forwarding configured
 
 ### Troubleshooting
 
-**Cannot connect to dev server:**
-- Ensure dev server is running (`docker-compose up -d`)
-- Verify phone is on same WiFi network as dev machine
-- Check firewall allows port 3002 (Windows: allow through Windows Defender Firewall)
-- Try accessing the URL from phone's browser first
+**Cannot resolve freegle-app-dev.local:**
+- Ensure Bonjour is installed and `dns-sd` command is running
+- Check phone is on same WiFi as dev machine
+- Some corporate networks block mDNS - try a home network
 
-**QR code shows wrong IP:**
-- The status page auto-detects your LAN IP
-- If incorrect, enter the URL manually (find your IP with `ip addr` or `ipconfig`)
+**App loads but HMR not working:**
+- Check port 24678 is forwarded and accessible
+- Check firewall allows port 24678
+- Check container logs for HMR errors
+
+**Cannot connect to dev server:**
+- Ensure freegle-dev-live container is running
+- Check mDNS is broadcasting (should show in dns-sd output)
+- Try pinging `freegle-app-dev.local` from another device
 
 **Changes not appearing:**
 - Nuxt dev server should auto-reload

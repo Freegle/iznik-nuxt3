@@ -3,7 +3,7 @@
 // and connects to a local development server via mDNS hostname
 //
 // SETUP REQUIRED: Developer must broadcast 'freegle-app-dev.local' via mDNS
-// On Windows with Bonjour: dns-sd -P "Freegle Dev" _http._tcp local 3004 freegle-app-dev.local <YOUR_IP>
+// On Windows with Bonjour: dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local <YOUR_IP>
 // Or install an mDNS responder that advertises this hostname
 
 /** @type {import('@capacitor/cli').CapacitorConfig} */
