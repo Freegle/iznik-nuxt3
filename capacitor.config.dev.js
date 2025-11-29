@@ -6,7 +6,7 @@
 const config = {
   appId: 'org.ilovefreegle.dev', // Different ID so both apps can be installed
   appName: 'Freegle Dev',
-  webDir: '.output/public',
+  webDir: 'dev-app', // Minimal connection screen, not full Nuxt build
   bundledWebRuntime: false,
   zoomEnabled: true,
 

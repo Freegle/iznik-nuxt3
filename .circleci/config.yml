@@ -149,15 +149,16 @@ jobs:
           paths:
             - node_modules
 
-      # Build Nuxt app for dev
+      # Use minimal dev-app instead of full Nuxt build
+      # This avoids initialization issues and just shows a connection screen
       - run:
-          name: Build Nuxt App (Dev)
+          name: Setup Dev App Web Content
           command: |
-            export ISAPP=true
-            export APP_ENV=development
-            export IS_DEV_APP=true
-            echo "🔧 Building Freegle Dev app (live reload development)"
-            npm run generate
+            echo "🔧 Setting up minimal dev app (connection screen only)"
+            # The dev-app folder contains a simple HTML page for server connection
+            # No Nuxt build needed - the app redirects to dev server after connecting
+            ls -la dev-app/
+            echo "✅ Dev app web content ready (using dev-app/ folder)"
 
       # Skip Firebase for dev app (different package ID not registered in Firebase)
       # Push notifications won't work in dev app, but that's fine for UI development

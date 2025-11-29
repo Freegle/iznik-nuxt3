@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Freegle Dev</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #5cb85c 0%, #3d8b3d 100%);
+      color: white;
+      padding: 20px;
+      padding-top: env(safe-area-inset-top, 20px);
+    }
+    .container { max-width: 400px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
+    .subtitle { text-align: center; opacity: 0.9; margin-bottom: 24px; }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      color: #333;
+    }
+    .card h3 { font-size: 16px; margin-bottom: 12px; color: #333; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+    }
+    input[type="text"]:focus { border-color: #5cb85c; outline: none; }
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .btn-primary { background: #5cb85c; color: white; }
+    .btn-primary:hover { background: #4cae4c; }
+    .btn-primary:disabled { background: #ccc; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .status.connecting { background: #fff3cd; color: #856404; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .saved-url {
+      font-family: monospace;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      word-break: break-all;
+      font-size: 14px;
+    }
+    .help {
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      background: rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .help ul { margin: 8px 0 0 20px; }
+    .help li { margin-bottom: 4px; }
+    .note { color: #dc3545; margin-top: 12px; font-size: 13px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Freegle Dev</h1>
+    <p class="subtitle">Connect to your development server</p>
+
+    <div id="status" class="status hidden"></div>
+
+    <div id="saved-section" class="card hidden">
+      <h3>Last Server</h3>
+      <div id="saved-url" class="saved-url"></div>
+      <button class="btn-primary" onclick="reconnect()">Reconnect</button>
+    </div>
+
+    <div class="card">
+      <h3>Enter Server URL</h3>
+      <div class="form-group">
+        <label for="server-url">Dev Server URL:</label>
+        <input type="text" id="server-url" placeholder="http://192.168.1.100:3002">
+      </div>
+      <button class="btn-primary" onclick="connect()">Connect</button>
+    </div>
+
+    <div class="help">
+      <strong>Setup:</strong>
+      <ul>
+        <li>Start dev server: <code>docker-compose up -d</code></li>
+        <li>Find your IP at <code>status.localhost/dev-connect</code></li>
+        <li>Phone must be on same WiFi network</li>
+      </ul>
+      <p class="note">
+        <strong>Note:</strong> Push notifications do not work in the dev app.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'dev_server_url';
+    const statusEl = document.getElementById('status');
+    const savedSection = document.getElementById('saved-section');
+    const savedUrlEl = document.getElementById('saved-url');
+    const urlInput = document.getElementById('server-url');
+
+    // Load saved URL on startup
+    function init() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        savedUrlEl.textContent = saved;
+        urlInput.value = saved;
+        savedSection.classList.remove('hidden');
+
+        // Auto-connect after a short delay
+        showStatus('connecting', 'Connecting to ' + saved + '...');
+        setTimeout(() => testAndConnect(saved), 500);
+      }
+    }
+
+    function showStatus(type, message) {
+      statusEl.className = 'status ' + type;
+      statusEl.textContent = message;
+      statusEl.classList.remove('hidden');
+    }
+
+    function hideStatus() {
+      statusEl.classList.add('hidden');
+    }
+
+    function saveUrl(url) {
+      localStorage.setItem(STORAGE_KEY, url);
+      savedUrlEl.textContent = url;
+      savedSection.classList.remove('hidden');
+    }
+
+    async function testAndConnect(url) {
+      showStatus('connecting', 'Connecting to ' + url + '...');
+
+      try {
+        // Try to fetch from the server with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        await fetch(url, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        // If we get here, the server responded
+        showStatus('success', 'Connected! Redirecting...');
+        saveUrl(url);
+
+        // Redirect to the dev server
+        setTimeout(() => {
+          window.location.href = url;
+        }, 500);
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          showStatus('error', 'Connection timed out. Check URL and network.');
+        } else {
+          showStatus('error', 'Connection failed: ' + (error.message || 'Unknown error'));
+        }
+      }
+    }
+
+    function connect() {
+      let url = urlInput.value.trim();
+      if (!url) {
+        showStatus('error', 'Please enter a server URL');
+        return;
+      }
+
+      // Add http:// if missing
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'http://' + url;
+        urlInput.value = url;
+      }
+
+      testAndConnect(url);
+    }
+
+    function reconnect() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        testAndConnect(saved);
+      }
+    }
+
+    // Handle Enter key
+    urlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') connect();
+    });
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+</html>
