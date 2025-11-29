@@ -220,13 +220,12 @@ jobs:
       - run:
           name: Sync Capacitor to Android (Dev)
           command: |
-            # Use dev config if available
+            # Use dev config by replacing the main config
             if [ -f capacitor.config.dev.js ]; then
               echo "Using capacitor.config.dev.js"
-              npx cap sync android --config capacitor.config.dev.js
-            else
-              npx cap sync android
+              cp capacitor.config.dev.js capacitor.config.js
             fi
+            npx cap sync android
 
       - run:
           name: Make gradlew executable
