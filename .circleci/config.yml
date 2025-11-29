@@ -157,6 +157,11 @@ jobs:
             echo "🔧 Setting up minimal dev app (connection screen only)"
             # The dev-app folder contains a simple HTML page for server connection
             # No Nuxt build needed - the app redirects to dev server after connecting
+
+            # Add build timestamp to the HTML
+            BUILD_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            sed -i "s|</body>|<p style=\"text-align:center;font-size:11px;color:#999;margin-top:20px;\">Build: ${BUILD_TIME}</p></body>|" dev-app/index.html
+
             ls -la dev-app/
             echo "✅ Dev app web content ready (using dev-app/ folder)"
 
