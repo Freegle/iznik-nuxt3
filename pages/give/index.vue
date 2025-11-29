@@ -100,17 +100,25 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 import { onMounted } from '#imports'
+import { useMobileStore } from '~/stores/mobile'
 
 // Setup
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
+const router = useRouter()
+const mobileStore = useMobileStore()
+
+// Redirect to app-specific flow if in app
+if (mobileStore.isApp) {
+  router.replace('/give/app/photos')
+}
 
 // Page head
 useHead(
