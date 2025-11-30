@@ -1,5 +1,55 @@
 # Photo Upload and Quality Detection - Freegle App
 
+## Implementation Plan (Updated)
+
+### Key Decisions
+
+1. **Focus on App Only** - Web changes deferred; this plan targets the native app experience
+2. **Three-Stage Full-Screen Form** - Split Offer/Wanted post into clean, modern stages:
+   - Stage 1: **Photos** (full-screen, emphasize photo-first like competitors)
+   - Stage 2: **Details** (item name, description, quantity)
+   - Stage 3: **Confirm** (review and post)
+3. **Blur Detection** - Use Revolut's Laplacian variance approach (lightweight, no dependencies)
+4. **Lighting Detection** - Implement brightness histogram analysis
+5. **No Compression Changes** - Keep existing compression as-is
+6. **Branch** - All work in `feature/app-photos` branch
+
+### Competitor Research Summary
+
+| App | Flow | Photo Position | Key UX Features |
+|-----|------|----------------|-----------------|
+| **Facebook Marketplace** | Multi-step | First after category | Up to 10 photos, clear photo guidance |
+| **Vinted** | Linear | First step | 1-20 photos, photo order matters, quick upload |
+| **OfferUp** | 4-step wizard | Step 1 | 2-12 photos, cover photo first, mobile-only posting |
+| **Depop** | Streamlined | First step | 4-8 photos + video, AI-powered description from photo |
+
+**Key Insight**: All major competitors put photos FIRST in the flow, not buried in a form. This is the biggest change we should make.
+
+### iOS vs Android Design Differences
+
+| Pattern | iOS (HIG) | Android (Material) | Recommendation |
+|---------|-----------|-------------------|----------------|
+| **Photo Picker** | Native photo library | Native photo picker | Use Capacitor defaults |
+| **Action Selection** | Action Sheet (bottom) | Bottom Sheet or Dialog | Use Capacitor ActionSheet (adapts) |
+| **Navigation** | No persistent back button | System back button | Provide explicit "Back" on both |
+| **Progress** | Segmented control or dots | Linear progress indicator | Use progress dots (works on both) |
+| **FAB** | Rarely used | Common pattern | Avoid FAB, use inline buttons |
+| **Date/Time Picker** | Scroll wheels | Calendar/clock | N/A for this feature |
+
+**Recommendation**: Use platform-native patterns via Capacitor where possible. For shared UI, favor iOS patterns as they work on both platforms.
+
+### Clunkiness Issues to Fix
+
+1. **Two confusing buttons** ("Add photo" / "Choose photo") → Single button with action sheet
+2. **15-second loader fade-in** → Immediate progress indicator
+3. **Text-only progress** ("Uploading 45%") → Visual circular progress
+4. **No instant preview** → Show preview immediately from blob URL
+5. **Photo buried in form** → Photos first, full-screen stage
+6. **Small touch targets** → Larger, clearer tap areas
+7. **No quality feedback** → Blur/lighting warnings before upload
+
+---
+
 ## Current Implementation
 
 ### Photo Upload Flow
@@ -1711,3 +1761,199 @@ This is step 1 of a broader photo excellence strategy:
 - 😊 **Delightful** - No friction, pleasant experience
 
 This isn't just about uploading photos - it's about helping people successfully share items and build community. Better photo upload → better photos → more responses → more successful gives → happier users → stronger community.
+
+---
+
+## App Implementation Todo List
+
+### Phase 1: Three-Stage Form Flow (App Only)
+
+- [ ] Create `pages/give/app/index.vue` - Entry point that redirects to photos stage
+- [ ] Create `pages/give/app/photos.vue` - Stage 1: Full-screen photo upload
+- [ ] Create `pages/give/app/details.vue` - Stage 2: Item name, description, quantity
+- [ ] Create `pages/give/app/confirm.vue` - Stage 3: Review and post
+- [ ] Create `components/AppPhotoUploader.vue` - New app-specific photo component
+- [ ] Create `components/AppProgressDots.vue` - Progress indicator for stages
+- [ ] Update routing to use app-specific pages when `isApp` is true
+
+### Phase 2: Photo Upload UX Fixes
+
+- [ ] Replace two buttons with single "Add Photos" button + action sheet
+- [ ] Implement instant preview using blob URLs before upload completes
+- [ ] Add visual circular progress indicator (replace text percentage)
+- [ ] Remove 15-second loader fade-in delay
+- [ ] Add larger touch targets (minimum 48x48px)
+- [ ] Implement drag-to-reorder for multiple photos
+- [ ] Show "primary photo" badge on first photo
+
+### Phase 3: Quality Detection
+
+- [ ] Create `utils/blurDetector.js` - Laplacian variance blur detection
+- [ ] Create `utils/brightnessDetector.js` - Histogram brightness analysis
+- [ ] Add quality check after photo capture/selection (before upload)
+- [ ] Create warning modal for blur/lighting issues
+- [ ] Add "Retake" and "Use Anyway" options
+- [ ] Store quality preferences (don't show again)
+
+### Phase 4: Platform-Specific Polish
+
+- [ ] Use Capacitor ActionSheet for photo source selection
+- [ ] Ensure back button works correctly on Android
+- [ ] Test on both iOS and Android simulators
+- [ ] Handle permission requests gracefully
+
+### Files to Create/Modify
+
+```
+iznik-nuxt3/
+├── pages/
+│   └── give/
+│       └── app/           # NEW: App-specific pages
+│           ├── index.vue  # Redirects to photos
+│           ├── photos.vue # Stage 1
+│           ├── details.vue # Stage 2
+│           └── confirm.vue # Stage 3
+├── components/
+│   ├── AppPhotoUploader.vue  # NEW: App-specific uploader
+│   ├── AppProgressDots.vue   # NEW: Stage progress
+│   └── AppPhotoQualityWarning.vue # NEW: Quality modal
+└── utils/
+    ├── blurDetector.js      # NEW: Blur detection
+    └── brightnessDetector.js # NEW: Brightness detection
+```
+
+### Stage 1: Photos (Wireframe)
+
+```
+┌─────────────────────────────────────┐
+│  ← Back                        1/3  │
+│                                     │
+│        Add photos of your item      │
+│                                     │
+│   ┌─────────┐ ┌─────────┐ ┌─────────┐
+│   │  ★      │ │         │ │   +     │
+│   │ Photo 1 │ │ Photo 2 │ │  Add    │
+│   │         │ │         │ │  more   │
+│   └─────────┘ └─────────┘ └─────────┘
+│                                     │
+│   Items with photos get 3x more     │
+│   responses!                        │
+│                                     │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     [ Add Photos ]          │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     [ Next → ]              │   │
+│   └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+### Stage 2: Details (Wireframe)
+
+```
+┌─────────────────────────────────────┐
+│  ← Back                        2/3  │
+│                                     │
+│        Tell us about your item      │
+│                                     │
+│   ┌──────┐ ┌──────┐                 │
+│   │ 📷   │ │ 📷   │  (thumbnails)   │
+│   └──────┘ └──────┘                 │
+│                                     │
+│   What are you giving away?         │
+│   ┌─────────────────────────────┐   │
+│   │ e.g. Blue IKEA bookshelf    │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   Tell us more about it:            │
+│   ┌─────────────────────────────┐   │
+│   │ Condition, size, why you're │   │
+│   │ giving it away...           │   │
+│   │                             │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   Quantity: [ - ] 1 [ + ]           │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     [ Next → ]              │   │
+│   └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+### Stage 3: Confirm (Wireframe)
+
+```
+┌─────────────────────────────────────┐
+│  ← Back                        3/3  │
+│                                     │
+│        Ready to post?               │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │  📷 📷 📷                    │   │
+│   │                             │   │
+│   │  OFFER: Blue IKEA bookshelf │   │
+│   │                             │   │
+│   │  Good condition, 5 shelves, │   │
+│   │  moving house so need gone  │   │
+│   │  this week...               │   │
+│   │                             │   │
+│   │  Quantity: 1                │   │
+│   └─────────────────────────────┘   │
+│                                     │
+│   Posting to: [Your Location]       │
+│                                     │
+│   ┌─────────────────────────────┐   │
+│   │     [ Post Now! ]           │   │
+│   └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+### Development Workflow: Capacitor Live Reload
+
+For fast iteration without rebuilding the APK each time:
+
+**1. Get your host IP address:**
+```bash
+# On WSL
+hostname -I
+# Example output: 172.28.176.1
+```
+
+**2. Run Nuxt with network access:**
+```bash
+cd iznik-nuxt3
+npm run dev -- --host 0.0.0.0
+# This exposes the server on all interfaces at port 3002
+```
+
+**3. Configure Capacitor for live reload:**
+Edit `capacitor.config.ts`:
+```typescript
+const config: CapacitorConfig = {
+  // ... existing config
+  server: {
+    url: 'http://YOUR_HOST_IP:3002',  // Replace with your IP
+    cleartext: true,  // Allow HTTP
+  }
+}
+```
+
+**4. Build and install the APK once via CircleCI**
+
+**5. Iterate:**
+- Make code changes
+- App auto-reloads (Nuxt HMR works over network)
+- Capacitor plugins (camera) still work because native code is on device
+
+**Note:** Remember to remove the `server` config from `capacitor.config.ts` before production builds!
+
+### Sources
+
+- [Vinted UX Flow](https://pageflows.com/ios/products/vinted/)
+- [OfferUp Posting Guide](https://help.offerup.com/hc/en-us/articles/360031987592-Post-an-item-to-sell)
+- [iOS vs Android Design](https://www.uxpin.com/studio/blog/ios-vs-andoid-ui-design-for-mobile/)
+- [Multi-Step Form Best Practices](https://www.growform.co/16-best-multi-step-form-examples-and-why-they-work-2024/)
+- [Inspector Bokeh (Blur Detection)](https://github.com/timotgl/inspector-bokeh)
+- [Revolut Blur Detection Article](https://medium.com/revolut/canvas-based-javascript-blur-detection-b92ab1075acf)

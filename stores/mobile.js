@@ -349,7 +349,6 @@ export const useMobileStore = defineStore({
         if (!this.isiOS) {
           PushNotifications.listChannels().then((result) => {
             for (const channel of result.channels) {
-              console.log('CHANNEL', channel)
               dbg()?.debug('Channel registered', channel)
             }
           })

@@ -199,11 +199,16 @@ function maybeAskDelivery() {
 onMounted(() => {
   type.value = window.history.state?.type || null
 
-  if (type.value) {
+  if (type.value && !window.history.state?.skipDeadline) {
     askDeadline.value = true
+  }
 
+  if (type.value) {
     window.setTimeout(() => {
-      window.history.replaceState({ ids: null, type: null }, null)
+      window.history.replaceState(
+        { ids: null, type: null, skipDeadline: null },
+        null
+      )
     }, 5000)
 
     if (type.value === 'Offer' && myid) {

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Freegle Dev</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      background: #fff;
+      color: #333;
+      padding: 20px;
+      padding-top: env(safe-area-inset-top, 20px);
+    }
+    .container { max-width: 400px; margin: 0 auto; }
+    h1 { text-align: center; font-size: 28px; margin-bottom: 8px; color: #5cb85c; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 24px; }
+    .card {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      color: #333;
+      border: 1px solid #e9ecef;
+    }
+    .card h3 { font-size: 16px; margin-bottom: 12px; color: #5cb85c; }
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .status.connecting { background: #fff3cd; color: #856404; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .warning {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      color: #721c24;
+      font-size: 13px;
+    }
+    .warning strong { display: block; margin-bottom: 4px; }
+    .hostname {
+      font-family: monospace;
+      background: #e8f5e9;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+      border: 2px solid #5cb85c;
+    }
+    .help {
+      font-size: 13px;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #e9ecef;
+    }
+    .help strong { color: #5cb85c; }
+    .help ol { margin: 8px 0 0 20px; }
+    .help li { margin-bottom: 8px; }
+    .help code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Freegle Dev</h1>
+    <p class="subtitle">Connecting to development server...</p>
+
+    <div class="warning">
+      <strong>Production Data</strong>
+      This app connects to live Freegle APIs. Any posts, messages, or actions will affect real users and data.
+    </div>
+
+    <div id="status" class="status connecting">Connecting to localhost:3004...</div>
+
+    <div class="card">
+      <h3>Server Address</h3>
+      <div class="hostname">localhost:3004</div>
+      <p style="font-size: 13px; color: #666;">
+        Uses adb reverse to forward to your dev machine.
+      </p>
+    </div>
+
+    <div class="help">
+      <strong>Developer Setup Required:</strong>
+      <ol>
+        <li>Connect phone via USB</li>
+        <li>Run: <code>adb reverse tcp:3004 tcp:3004</code></li>
+        <li>Start <code>freegle-dev-live</code> container from the status page</li>
+      </ol>
+      <p class="note">
+        The adb reverse command forwards localhost on the phone to your dev machine.
+        Tap the refresh icon after making code changes.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const SERVER_URL = 'http://localhost:3004';
+    const statusEl = document.getElementById('status');
+
+    function showStatus(type, message) {
+      statusEl.className = 'status ' + type;
+      statusEl.textContent = message;
+    }
+
+    async function connect() {
+      showStatus('connecting', 'Connecting to ' + SERVER_URL + '...');
+
+      try {
+        // Try to fetch from the server with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        await fetch(SERVER_URL, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        // If we get here, the server responded
+        showStatus('success', 'Connected! Loading app...');
+
+        // Redirect to the dev server
+        setTimeout(() => {
+          window.location.href = SERVER_URL;
+        }, 500);
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          showStatus('error', 'Connection timed out. Check adb reverse is running.');
+        } else {
+          showStatus('error', 'Cannot connect. Run: adb reverse tcp:3004 tcp:3004');
+        }
+      }
+    }
+
+    // Auto-connect on load
+    setTimeout(connect, 500);
+  </script>
+</body>
+</html>

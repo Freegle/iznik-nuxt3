@@ -73,12 +73,7 @@
           />
           <InfiniteLoading
             :distance="scrollboxHeight"
-            @infinite="
-              (event) => {
-                console.log('DEBUG: InfiniteLoading triggered', event)
-                emit('load-more', event)
-              }
-            "
+            @infinite="(event) => emit('load-more', event)"
           />
         </div>
         <div v-else>
@@ -190,14 +185,6 @@ const visiblePosts = computed(() => {
       }
     })
     .slice(0, props.show)
-
-  console.log('DEBUG: visiblePosts computed', {
-    showOldPosts: showOldPosts.value,
-    visibleLength: result.length,
-    activePostsLength: activePosts.value.length,
-    totalPostsLength: posts.value.length,
-    showLimit: props.show,
-  })
 
   return result
 })

@@ -9,8 +9,8 @@
         <div class="flex-grow-1">
           <h3>Offer</h3>
           <p>
-            Got an item you want to give away for free? Offer it to someone in
-            your community.
+            Got an item to give away for free? Offer it to someone in your
+            community.
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">
@@ -42,7 +42,7 @@
         <div class="flex-grow-1">
           <h3>ChitChat</h3>
           <p>
-            Feeling chatty? Chat to other freeglers in your community forum.
+            Feeling chatty? Talk to other freeglers in your community forum.
           </p>
         </div>
         <div class="d-flex flex-column justify-content-around">

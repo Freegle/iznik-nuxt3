@@ -33,6 +33,7 @@ console.log('config.APP_ENV', config.APP_ENV)
 console.log('config.USE_COOKIES', config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
+
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
@@ -52,8 +53,6 @@ const production = config.APP_ENV ? config.APP_ENV === 'production' : true
   }).on("error", (error) => { console.error(error.message) })
 } else { console.error('config.COOKIEYES not set') }
  */
-
-const isTest = process.env.NODE_ENV === 'test' || process.env.CI
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -348,6 +347,7 @@ export default defineNuxtConfig({
         'add-to-calendar-button',
         'resize-observer-polyfill',
         'jwt-decode',
+        'leaflet',
         'bootstrap-vue-next/components/BAlert',
         'bootstrap-vue-next/components/BCard',
         'bootstrap-vue-next/components/BContainer',
@@ -789,8 +789,7 @@ export default defineNuxtConfig({
               ? `
             // App builds: Don't load GSI client script (apps use Capacitor plugin for Google login)
             // For Android apps with cookies, call postGSI directly to load CookieYes and ads
-            ` +
-                (config.USE_COOKIES ? `postGSI()` : ``)
+            ` + (config.USE_COOKIES ? `postGSI()` : ``)
               : `
             // Web builds: Load GSI client script and set callback to initialize ads
             window.onGoogleLibraryLoad = postGSI
