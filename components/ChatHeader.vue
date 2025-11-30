@@ -4,7 +4,8 @@
       v-if="chat && (chat.chattype !== 'User2User' || otheruser?.info)"
       class="outer position-relative"
     >
-      <div class="nameinfo pt-md-1 pb-md-1 pl-md-1">
+      <!-- Desktop header - original grid layout -->
+      <div class="nameinfo pt-md-1 pb-md-1 pl-md-1 d-none d-md-grid">
         <div
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >
@@ -52,26 +53,18 @@
           v-if="!collapsed && otheruser && otheruser.info"
           class="userinfo mr-2"
         >
-          <span
-            class="small d-flex d-md-block justify-content-between flex-wrap"
-          >
-            <span v-if="otheruser.lastaccess" class="d-inline d-md-block">
-              <span class="d-none d-md-inline">Last seen</span>
-              <span class="d-inline d-md-none">Seen</span>
+          <span class="small d-block">
+            <span v-if="otheruser.lastaccess" class="d-block">
+              Last seen
               <!-- eslint-disable-next-line-->
-              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1" >{{ otheraccess }}</strong>
-              <span class="d-none d-md-inline">.</span>
+              <strong :title="datetimeshort(otheruser.lastaccess)" class="ml-1">{{ otheraccess }}</strong>.
             </span>
-            <span v-if="replytime" class="d-inline d-md-block">
-              <span class="d-none d-md-inline">Typically replies in</span>
-              <span class="d-inline d-md-none">Replies in</span>
+            <span v-if="replytime" class="d-block">
+              Typically replies in
               <strong class="ml-1">{{ replytime }}</strong
-              ><span class="d-none d-md-inline">.</span>
+              >.
             </span>
-            <span
-              v-if="!otheruser?.deleted && milesaway"
-              class="d-none d-md-block"
-            >
+            <span v-if="!otheruser?.deleted && milesaway" class="d-block">
               About <strong>{{ milesstring }}</strong
               >.
             </span>
@@ -92,7 +85,7 @@
       <b-button
         v-if="unseen"
         variant="white"
-        class="ml-1 d-block d-md-none"
+        class="ml-1 d-none d-md-block"
         @click="markRead"
       >
         Mark read
@@ -102,7 +95,7 @@
       </b-button>
       <div
         v-if="!collapsed"
-        class="d-flex flex-wrap justify-content-between p-md-1 mt-md-1 actions"
+        class="d-none d-md-flex flex-wrap justify-content-between p-md-1 mt-md-1 actions"
       >
         <div class="d-flex">
           <b-button
@@ -480,37 +473,72 @@ const markRead = async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .outer {
-  background-color: $color-blue--x-light;
-  border: 1px solid $color-gray--light;
-  box-shadow: 0px 4px 2px -2px $color-black-opacity-60 !important;
+  display: none;
+
+  @include media-breakpoint-up(md) {
+    display: block;
+    background-color: $color-blue--x-light;
+    border: 1px solid $color-gray--light;
+    box-shadow: 0px 4px 2px -2px $color-black-opacity-60 !important;
+    padding: 0;
+  }
 }
 
 .nameinfo {
-  display: grid;
-  grid-template-columns: auto 10px 1fr 121px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+
+  @include media-breakpoint-up(md) {
+    display: grid;
+    grid-template-columns: auto 10px 1fr 121px;
+    gap: 0;
+    flex-wrap: wrap;
+  }
 
   .profile {
-    grid-column: 1;
-    grid-row: 1 / 3;
+    @include media-breakpoint-up(md) {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
   }
 
   .name {
-    grid-column: 3;
-    grid-row: 1 / 2;
+    @include media-breakpoint-up(md) {
+      grid-column: 3;
+      grid-row: 1 / 2;
+    }
   }
 
   .ratings {
-    grid-column: 4;
-    grid-row: 1 / 2;
+    @include media-breakpoint-up(md) {
+      grid-column: 4;
+      grid-row: 1 / 2;
+    }
   }
 
   .userinfo {
-    grid-column: 3 / 5;
-    grid-row: 2 / 3;
-    color: $colour-info-fg;
-    padding-top: 0.25rem;
+    flex: 0 0 auto;
+    color: $color-gray--dark;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    padding: 0;
+    border: none;
+    margin: 0;
+
+    @include media-breakpoint-up(md) {
+      flex: none;
+      grid-column: 3 / 5;
+      grid-row: 2 / 3;
+      color: $colour-info-fg;
+      padding-top: 0.25rem;
+      font-size: inherit;
+    }
 
     @include media-breakpoint-up(md) {
       grid-row: 1 / 2;
@@ -537,11 +565,8 @@ const markRead = async () => {
 }
 
 pre {
-  white-space: pre-wrap; /* css-3 */
-  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-  white-space: -pre-wrap; /* Opera 4-6 */
-  white-space: -o-pre-wrap; /* Opera 7 */
-  word-wrap: break-word; /* Internet Explorer 5.5+ */
+  white-space: pre-wrap;
+  word-wrap: break-word;
   width: 200px;
 
   @include media-breakpoint-up(md) {
@@ -554,8 +579,28 @@ pre {
 }
 
 .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid $color-gray--light;
+
   @include media-breakpoint-up(md) {
     border-top: 1px solid $color-gray--light;
+    padding: 8px;
+    margin-top: 0;
+  }
+
+  :deep(.btn-link) {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    color: $colour-success;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

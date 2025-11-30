@@ -116,6 +116,24 @@ export function timeadapt(val) {
   }
 }
 
+export function timeadaptChat(val) {
+  // Compact chat timestamp: time only for today, day+time for this week, date+time otherwise
+  const t = dayjs(val)
+  const now = dayjs()
+
+  if (t.isToday()) {
+    return t.format('HH:mm')
+  } else if (now.diff(t, 'day') < 7) {
+    // Within last week, show day and time
+    return t.format('ddd HH:mm')
+  } else if (t.year() === now.year()) {
+    // This year, no need to show year
+    return t.format('D MMM HH:mm')
+  } else {
+    return t.format('D MMM YYYY HH:mm')
+  }
+}
+
 export function datelocale(val) {
   return dayjs(val).toLocaleString()
 }

@@ -1,228 +1,164 @@
 <template>
-  <div class="clearfix">
-    <div v-if="chatmessage?.userid != myid" class="media">
-      <div v-if="!refmsg">
+  <div class="chat-message-promised">
+    <!-- Received promise (from other user) -->
+    <div v-if="chatmessage?.userid != myid" class="promised-message">
+      <div v-if="!refmsg" class="text-muted small">
         This chat message refers to a post (<v-icon
           icon="hashtag"
           class="text-muted fa-0-8x"
         />{{ chatmessage.refmsgid }}) which has been deleted.
       </div>
-      <b-card v-else border-variant="success" class="ml-2">
-        <b-card-title>
-          <nuxt-link
-            no-prefetch
-            :to="
-              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
-            "
-          >
-            <b-img
-              v-if="refmsg?.attachments?.length > 0"
-              class="float-end ml-1"
-              rounded
-              thumbnail
-              generator-unable-to-provide-required-alt=""
-              lazy
-              :src="refmsg.attachments[0].paththumb"
-              width="70px"
-              @error="brokenImage"
-            />
-          </nuxt-link>
+      <div v-else class="promised-wrapper">
+        <div class="promised-header">
           <ProfileImage
             :image="otheruser.profile.paththumb"
-            class="mr-1 mb-1 mt-1 inline"
+            :name="otheruser.displayname"
+            class="mr-2 inline"
             is-thumbnail
             size="sm"
           />
-          <span class="small black">Good news! You've been promised this:</span>
-          <br />
-          <nuxt-link
-            no-prefetch
-            :to="
-              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
+          <span class="promised-label"
+            >Good news! You've been promised this:</span
+          >
+        </div>
+        <ChatMessageCard :id="refmsgid" />
+        <AddToCalendar
+          v-if="tryst?.calendarLink"
+          :calendar-link="tryst.calendarLink"
+          class="mt-2"
+        />
+        <notice-message
+          v-if="refmsg.outcomes?.length || refmsg.deleted"
+          class="mt-2"
+        >
+          <v-icon icon="info-circle" />
+          <span v-if="refmsg.type === 'Offer'">
+            This is no longer available.
+          </span>
+          <span v-else> They are no longer looking for this. </span>
+        </notice-message>
+        <div v-if="emessage" class="promised-text mt-2">
+          <span
+            v-if="
+              chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
             "
+            class="prewrap font-weight-bold"
+            >{{ emessage }}</span
           >
-            <h4>
-              {{ refmsg?.subject }}
-            </h4>
-          </nuxt-link>
-          <AddToCalendar
-            v-if="tryst?.calendarLink"
-            :calendar-link="tryst.calendarLink"
-            class="mr-2"
-          />
-          <notice-message
-            v-if="refmsg.outcomes?.length || refmsg.deleted"
-            class="mt-2 mb-2"
-          >
-            <v-icon icon="info-circle" />
-            <span v-if="refmsg.type === 'Offer'">
-              This is no longer available.
-            </span>
-            <span v-else> They are no longer looking for this. </span>
-          </notice-message>
-        </b-card-title>
-        <b-card-text>
-          <div :class="emessage ? 'media-body chatMessage' : 'media-body'">
-            <span>
-              <span
-                v-if="
-                  chatmessage.secondsago < 60 ||
-                  chatmessage.id > chat.lastmsgseen
-                "
-                class="prewrap font-weight-bold"
-                >{{ emessage }}</span
-              >
-              <span v-else class="preline forcebreak">{{ emessage }}</span>
-              <b-img
-                v-if="chatmessage.image"
-                fluid
-                :src="chatmessage.image.path"
-                lazy
-                rounded
-              />
-            </span>
-          </div>
-        </b-card-text>
-      </b-card>
+          <span v-else class="preline forcebreak">{{ emessage }}</span>
+        </div>
+      </div>
     </div>
-    <div v-else class="media float-end">
-      <div v-if="!refmsg">
+
+    <!-- Sent promise (from current user) -->
+    <div v-else class="promised-message promised-message--mine">
+      <div v-if="!refmsg" class="text-muted small">
         This chat message refers to a post (<v-icon
           icon="hashtag"
           class="text-muted fa-0-8x"
         />{{ chatmessage.refmsgid }}) which has been deleted.
       </div>
-      <b-card v-else border-variant="success">
-        <b-card-title>
-          <nuxt-link
-            no-prefetch
-            :to="
-              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
-            "
-          >
-            <b-img
-              v-if="refmsg && refmsg.attachments?.length > 0"
-              class="float-end"
-              rounded
-              thumbnail
-              generator-unable-to-provide-required-alt=""
-              lazy
-              :src="refmsg.attachments[0].paththumb"
-              width="70px"
-              @error="brokenImage"
+      <div v-else class="promised-wrapper">
+        <div class="promised-header">
+          <ProfileImage
+            :image="me.profile.path"
+            :name="me.displayname"
+            class="mr-2 inline"
+            is-thumbnail
+            size="sm"
+          />
+          <span class="promised-label">
+            You promised <strong>{{ otheruser.displayname }}</strong
+            >:
+          </span>
+        </div>
+        <ChatMessageCard :id="refmsgid" :show-location="false" />
+        <p v-if="tryst?.arrangedfor" class="small text-info mt-2 mb-1">
+          Handover arranged for
+          <strong
+            ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
+          /></strong>
+        </p>
+        <div v-if="refmsg" class="promised-actions mt-2">
+          <template v-if="tryst">
+            <AddToCalendar
+              v-if="tryst?.calendarLink"
+              :calendar-link="tryst.calendarLink"
+              class="mr-2 mb-1"
             />
-          </nuxt-link>
-          <div class="d-flex justify-content-start align-items-center">
-            <ProfileImage
-              :image="me.profile.path"
-              class="mr-1 inline"
-              is-thumbnail
-              size="sm"
-            />
-            <div class="small black">
-              You promised <strong>{{ otheruser.displayname }}</strong
-              >:
-            </div>
-          </div>
-          <nuxt-link
-            no-prefetch
-            :to="
-              (messageIsFromCurrentUser ? '/mypost/' : '/message/') + refmsgid
-            "
-            class="nodecor"
-          >
-            <h4>
-              {{ refmsg?.subject }}
-            </h4>
-          </nuxt-link>
-          <p v-if="tryst?.arrangedfor" class="small text-info">
-            Handover arranged for
-            <strong
-              ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
-            /></strong>
-          </p>
-          <div
-            v-if="refmsg"
-            class="d-flex mt-1 flex-wrap justify-content-between"
-          >
-            <template v-if="tryst">
-              <AddToCalendar
-                v-if="tryst?.calendarLink"
-                :calendar-link="tryst.calendarLink"
-                class="mr-2 mb-1"
-              />
-              <b-button
-                v-if="refmsg.promisecount && refmsg.availablenow"
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="changeTime"
-              >
-                <v-icon icon="pen" />
-                Change time
-              </b-button>
-            </template>
-            <template v-else-if="refmsg.promisecount && refmsg.availablenow">
-              <b-button
-                variant="secondary"
-                class="mr-2 mb-1"
-                @click="changeTime"
-              >
-                <v-icon icon="pen" />
-                Set time
-              </b-button>
-            </template>
             <b-button
               v-if="refmsg.promisecount && refmsg.availablenow"
-              variant="warning"
-              class="align-middle mr-2 mb-1"
-              @click="unpromise"
+              variant="secondary"
+              size="sm"
+              class="mr-2 mb-1"
+              @click="changeTime"
             >
-              Unpromise
+              <v-icon icon="pen" />
+              Change time
             </b-button>
+          </template>
+          <template v-else-if="refmsg.promisecount && refmsg.availablenow">
             <b-button
-              v-if="refmsg.availablenow"
-              variant="primary"
-              class="mr-1 mb-1"
-              @click="outcome('Taken')"
+              variant="secondary"
+              size="sm"
+              class="mr-2 mb-1"
+              @click="changeTime"
             >
-              Mark as TAKEN
+              <v-icon icon="pen" />
+              Set time
             </b-button>
-          </div>
-          <PromiseModal
-            v-if="showPromise"
-            :messages="[refmsg]"
-            :selected-message="refmsgid"
-            :users="otheruser ? [otheruser] : []"
-            :selected-user="otheruser ? otheruser.id : null"
-            @hidden="showPromise = false"
-          />
-        </b-card-title>
-        <b-card-text>
-          <div :class="emessage ? 'media-body chatMessage' : 'media-body'">
-            <span>
-              <span
-                v-if="
-                  chatmessage.secondsago < 60 ||
-                  chatmessage.id > chat.lastmsgseen
-                "
-                class="prewrap font-weight-bold"
-                >{{ emessage }}</span
-              >
-              <span v-else class="preline forcebreak">{{ emessage }}</span>
-              <b-img
-                v-if="chatmessage.image"
-                fluid
-                :src="chatmessage.image.path"
-                lazy
-                rounded
-              />
-            </span>
-          </div>
-          <p v-if="!refmsg?.availablenow" class="text-muted">
-            This has now been taken.
-          </p>
-        </b-card-text>
-      </b-card>
+          </template>
+          <b-button
+            v-if="refmsg.promisecount && refmsg.availablenow"
+            variant="warning"
+            size="sm"
+            class="mr-2 mb-1"
+            @click="unpromise"
+          >
+            Unpromise
+          </b-button>
+          <b-button
+            v-if="refmsg.availablenow"
+            variant="primary"
+            size="sm"
+            class="mb-1"
+            @click="outcome('Taken')"
+          >
+            Mark as TAKEN
+          </b-button>
+        </div>
+        <notice-message
+          v-if="refmsg.outcomes?.length || refmsg.deleted"
+          class="mt-2"
+        >
+          <v-icon icon="info-circle" />
+          <span v-if="refmsg.type === 'Offer'">
+            This is no longer available.
+          </span>
+          <span v-else> They are no longer looking for this. </span>
+        </notice-message>
+        <p v-else-if="!refmsg?.availablenow" class="text-muted small mt-2">
+          This has now been taken.
+        </p>
+        <div v-if="emessage" class="promised-text mt-2">
+          <span
+            v-if="
+              chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
+            "
+            class="prewrap font-weight-bold"
+            >{{ emessage }}</span
+          >
+          <span v-else class="preline forcebreak">{{ emessage }}</span>
+        </div>
+        <PromiseModal
+          v-if="showPromise"
+          :messages="[refmsg]"
+          :selected-message="refmsgid"
+          :users="otheruser ? [otheruser] : []"
+          :selected-user="otheruser ? otheruser.id : null"
+          @hidden="showPromise = false"
+        />
+      </div>
     </div>
     <RenegeModal
       v-if="showRenege && refmsgid"
@@ -256,6 +192,7 @@ import {
 import { useMessageStore } from '~/stores/message'
 import AddToCalendar from '~/components/AddToCalendar'
 import ProfileImage from '~/components/ProfileImage'
+import ChatMessageCard from '~/components/ChatMessageCard'
 
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
@@ -312,13 +249,11 @@ const {
   chat,
   chatmessage,
   emessage,
-  messageIsFromCurrentUser,
   refmsgid,
   refmsg,
   me,
   myid,
   otheruser,
-  brokenImage,
   fetchMessage,
 } = useChatMessageBase(props.chatid, props.id, props.pov)
 
@@ -365,14 +300,51 @@ async function outcome(type) {
 }
 </script>
 <style scoped lang="scss">
-.chatMessage {
-  border: 1px solid $color-gray--light;
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
+
+.chat-message-promised {
+  max-width: 100%;
+}
+
+.promised-message {
+  width: 100%;
+}
+
+.promised-message--mine {
+  margin-left: auto;
+}
+
+.promised-wrapper {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 2px;
-  word-wrap: break-word;
-  line-height: 1.5;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.promised-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.promised-label {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.promised-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.promised-text {
+  font-size: 0.9rem;
+  padding: 8px;
+  background: $color-gray--lighter;
+  border-radius: 8px;
 }
 </style>

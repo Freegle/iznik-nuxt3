@@ -216,6 +216,12 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
       : chat.value?.icon
   })
 
+  const chatMessageProfileName = computed(() => {
+    return chatmessage.value?.userid === myid
+      ? me.value?.displayname
+      : otheruser.value?.displayname
+  })
+
   const regexEmail = computed(() => {
     return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
   })
@@ -259,6 +265,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     emessage,
     messageIsFromCurrentUser,
     chatMessageProfileImage,
+    chatMessageProfileName,
     regexEmail,
     refmsgid,
     refmsg,

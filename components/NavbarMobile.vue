@@ -1,6 +1,6 @@
 <template>
   <div id="navbar-mobile">
-    <div>
+    <div v-if="!isSpecificChatPage">
       <b-navbar
         type="dark"
         class="ourBack d-flex justify-content-between d-xl-none"
@@ -36,7 +36,10 @@
         />
         <div v-else />
         <div class="flex-grow-1 d-flex justify-content-around">
-          <h1 v-if="loggedIn" class="text-white truncate text-center maxwidth">
+          <h1
+            v-if="loggedIn"
+            class="text-white truncate text-center maxwidth m-0"
+          >
             {{ title }}
           </h1>
         </div>
@@ -71,6 +74,7 @@
             <ProfileImage
               v-if="me?.profile?.path"
               :image="me.profile.path"
+              :name="me?.displayname"
               class="m-0 inline"
               is-thumbnail
               size="lg"
@@ -159,6 +163,8 @@
         />
       </nav>
     </div>
+    <!-- Placeholder for chat pages - prevents flicker before ChatMobileNavbar teleports in -->
+    <div v-else class="chat-navbar-placeholder ourBack fixed-top d-xl-none" />
   </div>
 </template>
 <script setup>
@@ -286,6 +292,13 @@ const navBarBottomHidden = computed(() => {
   )
 })
 
+// Detect when on a specific chat page (e.g., /chats/123) - the ChatMobileNavbar
+// will be teleported in to replace this navbar, so hide our content to prevent flicker
+const isSpecificChatPage = computed(() => {
+  const match = route.path.match(/^\/chats\/(\d+)/)
+  return match !== null
+})
+
 const loggedIn = computed(() => useAuthStore().user !== null)
 const me = computed(() => useAuthStore().user)
 </script>
@@ -313,7 +326,7 @@ const me = computed(() => useAuthStore().user)
   ) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 0.5rem 0.75rem;
-  min-height: 56px;
+  min-height: $navbar-mobile-chat-height;
 
   h1 {
     font-size: 1.2rem;
@@ -484,5 +497,16 @@ const me = computed(() => useAuthStore().user)
 .showNavBarTop {
   transform: translateY(0px);
   transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
+}
+
+// Placeholder for chat pages to prevent flicker
+.chat-navbar-placeholder {
+  height: $navbar-mobile-chat-height;
+  background: linear-gradient(
+    135deg,
+    $color-green-background 0%,
+    darken($color-green-background, 5%) 100%
+  );
+  z-index: 1030;
 }
 </style>

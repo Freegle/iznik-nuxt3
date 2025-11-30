@@ -1,53 +1,160 @@
 <template>
-  <div type="dark" class="ourBack layout fixed-top pt-1 pb-1">
-    <OfflineIndicator v-if="!online" class="offline" />
-    <div v-else class="backbutton d-flex flex-column justify-content-around">
-      <b-button variant="white" class="nohover" @click="backButton">
-        <v-icon icon="arrow-left" />
-        <b-badge v-if="backButtonCount" variant="danger" class="ml-1">
+  <div>
+    <!-- Main navbar row -->
+    <div
+      type="dark"
+      class="ourBack layout fixed-top d-flex justify-content-between align-items-center"
+    >
+      <OfflineIndicator v-if="!online" class="offline" />
+      <div v-else class="nav-back-btn" @click="backButton">
+        <v-icon icon="arrow-left" class="back-icon" />
+        <b-badge v-if="backButtonCount" variant="danger" class="back-badge">
           {{ backButtonCount }}
         </b-badge>
-      </b-button>
-    </div>
-    <ProfileImage
-      :image="chat.icon"
-      :name="chat.name"
-      class="profilepic clickme"
-      is-thumbnail
-      size="lg-always"
-      border
-      :title="'Click to view profile for ' + chat.name"
-      @click="showInfo"
-    />
-    <div
-      class="name d-flex flex-column justify-content-around clickme text-center"
-      :title="'Click to view profile for ' + chat.name"
-      @click="showInfo"
-    >
-      <h1 class="text-white truncate text-center header--size5 m-0">
-        {{ chat.name }}
-      </h1>
+      </div>
       <div
-        v-if="!otheruser?.deleted && milesaway"
-        class="text-white small text-truncate"
+        class="flex-grow-1 d-flex justify-content-around clickme"
+        @click="toggleProfileCard"
       >
-        {{ milesstring }}
+        <h1 class="text-white truncate text-center header--size5 m-0">
+          {{ chat.name }}
+        </h1>
       </div>
-    </div>
-    <div
-      v-if="otheruser && otheruser.info && !otheruser?.deleted"
-      class="d-flex flex-column justify-content-around ratings"
-    >
-      <div class="d-flex flex-column align-content-between">
-        <UserRatings
-          :id="chat.otheruid"
-          :key="'otheruser-' + chat.otheruid"
-          class="d-flex justify-content-end"
-          size="sm"
+      <div
+        v-if="otheruser && otheruser.info && !otheruser?.deleted"
+        ref="expandBtnRef"
+        class="expand-btn clickme"
+        :class="{ pulsating: isPulsating }"
+        @click="toggleProfileCard"
+      >
+        <ProfileImage
+          :image="chat.icon"
+          :name="chat.name"
+          class="navbar-avatar"
+          is-thumbnail
+          size="md"
         />
-        <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
       </div>
     </div>
+
+    <!-- Expandable profile card -->
+    <div
+      v-if="cssReady"
+      class="profile-card"
+      :class="{ 'profile-card--expanded': profileCardExpanded }"
+    >
+      <div v-if="otheruser && otheruser.info" class="profile-card-content">
+        <ProfileImage
+          :image="chat.icon"
+          :name="chat.name"
+          class="profile-card-avatar clickme"
+          is-thumbnail
+          size="lg"
+          border
+          @click="showInfo"
+        />
+        <div class="profile-card-details">
+          <div class="profile-card-info-row">
+            <div class="profile-card-stats">
+              <span v-if="otheruser.lastaccess" class="stat-item">
+                <v-icon icon="clock" class="stat-icon" />
+                <span class="stat-text"
+                  >Last seen <strong>{{ otheraccessFull }}</strong></span
+                >
+              </span>
+              <span v-if="replytimeFull" class="stat-item">
+                <v-icon icon="reply" class="stat-icon" />
+                <span class="stat-text"
+                  >Replies in <strong>{{ replytimeFull }}</strong></span
+                >
+              </span>
+              <span v-if="!otheruser?.deleted && milesaway" class="stat-item">
+                <v-icon icon="map-marker-alt" class="stat-icon" />
+                <span class="stat-text"
+                  >Distance <strong>{{ milesaway }} miles</strong></span
+                >
+              </span>
+            </div>
+            <div class="profile-card-ratings">
+              <UserRatings
+                :id="chat.otheruid"
+                :key="'otheruser-' + chat.otheruid"
+                size="sm"
+              />
+              <SupporterInfo v-if="otheruser.supporter" class="ml-2" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Action buttons -->
+      <div class="profile-card-actions">
+        <button
+          v-if="otheruser && otheruser.info && !otheruser?.deleted"
+          class="action-btn"
+          @click="showInfo"
+        >
+          <v-icon icon="user" class="action-icon" />
+          <span>Profile</span>
+        </button>
+        <button
+          v-if="chat.chattype === 'User2User' || !unseen"
+          class="action-btn"
+          @click="chat.status === 'Closed' ? unhide() : showhide()"
+        >
+          <v-icon
+            :icon="chat.status === 'Closed' ? 'eye' : 'eye-slash'"
+            class="action-icon"
+          />
+          <span>{{ chat.status === 'Closed' ? 'Show' : 'Hide' }}</span>
+        </button>
+        <button
+          v-if="chat.chattype === 'User2User' && otheruser"
+          class="action-btn"
+          @click="chat.status === 'Blocked' ? unhide() : showblock()"
+        >
+          <v-icon icon="ban" class="action-icon" />
+          <span>{{ chat.status === 'Blocked' ? 'Unblock' : 'Block' }}</span>
+        </button>
+        <button
+          v-if="
+            chat.chattype === 'User2User' && otheruser && !otheruser?.deleted
+          "
+          class="action-btn action-btn--danger"
+          @click="report"
+        >
+          <v-icon icon="flag" class="action-icon" />
+          <span>Report</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <ChatBlockModal
+      v-if="showChatBlock && chat.chattype === 'User2User'"
+      :id="id"
+      :user="otheruser"
+      @confirm="block"
+      @hidden="showChatBlock = false"
+    />
+    <ChatHideModal
+      v-if="
+        showChatHide &&
+        (chat.chattype === 'User2User' || chat.chattype === 'User2Mod')
+      "
+      :id="id"
+      :user="otheruser"
+      @confirm="hide"
+      @hidden="showChatHide = false"
+    />
+    <ChatReportModal
+      v-if="showChatReport && chat.chattype === 'User2User'"
+      :id="'report-' + id"
+      :user="otheruser"
+      :chatid="chat.id"
+      @confirm="hide"
+      @hidden="showChatReport = false"
+    />
+
     <ProfileModal
       v-if="showProfileModal"
       :id="otheruser?.id"
@@ -65,6 +172,13 @@ import {
 } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
+import { timeago } from '~/composables/useTimeFormat'
+
+const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
+const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
+const ChatReportModal = defineAsyncComponent(() =>
+  import('~/components/ChatReportModal')
+)
 
 const props = defineProps({
   id: {
@@ -78,67 +192,383 @@ const chat = chatStore.byChatId(props.id)
 
 const { online, backButtonCount, backButton } = useNavbar()
 
-const { otheruser, milesaway, milesstring } = await setupChat(props.id)
+const { otheruser, milesaway, unseen } = await setupChat(props.id)
 
-// We want to hide the navbars when you scroll down.
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
+// Modal states
+const showChatBlock = ref(false)
+const showChatHide = ref(false)
+const showChatReport = ref(false)
+
+const otheraccessFull = computed(() => {
+  if (!otheruser.value?.lastaccess) return null
+  const full = timeago(otheruser.value.lastaccess)
+  // Remove "ago" suffix for cleaner display
+  return full.replace(/ ago$/, '')
 })
 
-onBeforeUnmount(() => {
-  clearNavBarTimeout()
-  window.removeEventListener('scroll', handleScroll)
+const replytimeFull = computed(() => {
+  let ret = null
+  let secs = null
+
+  if (otheruser?.value?.info) {
+    secs = otheruser.value.info.replytime
+  }
+
+  if (secs) {
+    if (secs < 60) {
+      const val = Math.round(secs)
+      ret = val + (val === 1 ? ' second' : ' seconds')
+    } else if (secs < 60 * 60) {
+      const val = Math.round(secs / 60)
+      ret = val + (val === 1 ? ' minute' : ' minutes')
+    } else if (secs < 24 * 60 * 60) {
+      const val = Math.round(secs / 60 / 60)
+      ret = val + (val === 1 ? ' hour' : ' hours')
+    } else {
+      const val = Math.round(secs / 60 / 60 / 24)
+      ret = val + (val === 1 ? ' day' : ' days')
+    }
+  }
+
+  return ret
 })
+
+const showProfileModal = ref(false)
+const profileCardExpanded = ref(false)
+const isPulsating = ref(false)
+const cssReady = ref(false)
+const chevronX = ref('calc(100% - 24px) -30px')
+const expandBtnRef = ref(null)
+let autoCollapseTimer = null
+let expandTimer = null
+let pulsateTimer = null
+
+function showInfo() {
+  showProfileModal.value = true
+}
+
+function triggerPulsate() {
+  isPulsating.value = true
+  if (pulsateTimer) {
+    clearTimeout(pulsateTimer)
+  }
+  pulsateTimer = setTimeout(() => {
+    isPulsating.value = false
+  }, 600)
+}
+
+function toggleProfileCard() {
+  triggerPulsate()
+  profileCardExpanded.value = !profileCardExpanded.value
+  if (autoCollapseTimer) {
+    clearTimeout(autoCollapseTimer)
+    autoCollapseTimer = null
+  }
+  if (expandTimer) {
+    clearTimeout(expandTimer)
+    expandTimer = null
+  }
+}
+
+// Action methods
+const hide = async () => {
+  await chatStore.hide(props.id)
+}
+
+const block = async () => {
+  await chatStore.block(props.id)
+}
+
+const unhide = async () => {
+  await chatStore.unhide(props.id)
+}
+
+const showhide = () => {
+  showChatHide.value = true
+}
+
+const showblock = () => {
+  showChatBlock.value = true
+}
+
+const report = () => {
+  showChatReport.value = true
+}
 
 function handleScroll() {
   const scrollY = window.scrollY
 
   if (scrollY > 200 && !navBarHidden.value) {
-    // Scrolling down.  Hide the navbars.
     setNavBarHidden(true)
   } else if (scrollY < 100 && navBarHidden.value) {
-    // At the top. Show the navbars.
     setNavBarHidden(false)
+  }
+
+  // Also collapse profile card on scroll
+  if (scrollY > 50 && profileCardExpanded.value) {
+    profileCardExpanded.value = false
   }
 }
 
-const showProfileModal = ref(false)
-function showInfo() {
-  showProfileModal.value = true
-}
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+
+  // Use double requestAnimationFrame to ensure CSS is fully applied before showing
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      // Calculate the actual chevron position relative to profile card
+      if (expandBtnRef.value) {
+        const rect = expandBtnRef.value.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        // Y position: chevron center is above the profile card (which starts at top: 60px)
+        // So we need a negative Y to point back up to the chevron
+        const centerY = rect.top + rect.height / 2 - 60 // 60px is the profile card's top
+        chevronX.value = `${centerX}px ${centerY}px`
+      }
+
+      cssReady.value = true
+
+      // Delay the profile card animation to let the page settle first
+      expandTimer = setTimeout(() => {
+        triggerPulsate()
+        profileCardExpanded.value = true
+
+        // Auto-collapse after 3 seconds of being expanded
+        autoCollapseTimer = setTimeout(() => {
+          triggerPulsate()
+          profileCardExpanded.value = false
+        }, 3000)
+      }, 800)
+    })
+  })
+})
+
+onBeforeUnmount(() => {
+  clearNavBarTimeout()
+  window.removeEventListener('scroll', handleScroll)
+  if (autoCollapseTimer) {
+    clearTimeout(autoCollapseTimer)
+  }
+  if (expandTimer) {
+    clearTimeout(expandTimer)
+  }
+  if (pulsateTimer) {
+    clearTimeout(pulsateTimer)
+  }
+})
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
+@import 'assets/css/_color-vars.scss';
 
 .layout {
-  display: grid;
-  grid-template-columns:
-    0.25em 40px 50px calc(
-      100vw - 0.5em - 40px - 0.25em - 50px - 0.25em - 110px - 0.5em
-    )
-    110px 0.25em;
-  grid-column-gap: 0.25em;
+  min-height: $navbar-mobile-chat-height;
+  padding: 0.5rem 0.75rem;
 
-  .offline,
-  .backbutton {
-    grid-row: 1 / 2;
-    grid-column: 2 / 3;
+  h1 {
+    line-height: 1.3;
+    overflow: visible;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
-  .profilepic {
-    grid-row: 1 / 2;
-    grid-column: 3 / 4;
+  .expand-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin-right: 0.5rem;
+  }
+}
+
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
   }
 
-  .name {
-    grid-row: 1 / 2;
-    grid-column: 4 / 5;
+  &:active {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.back-icon {
+  color: white;
+  font-size: 1.25rem;
+}
+
+.back-badge {
+  margin-left: 6px;
+  font-size: 0.65rem;
+}
+
+.navbar-avatar {
+  transition: transform 0.3s ease;
+}
+
+.expand-btn.pulsating .navbar-avatar {
+  animation: pulse-chevron 0.6s ease-in-out;
+}
+
+@keyframes pulse-chevron {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.4);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Expandable profile card
+.profile-card {
+  position: fixed;
+  top: 60px;
+  right: 0;
+  left: 0;
+  background: white;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: scale(0);
+  // Dynamic transform-origin set via v-bind (includes both X and Y)
+  transform-origin: v-bind(chevronX);
+  transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
+    transform 0.5s ease-out, padding 0.5s ease-out, visibility 0s linear 0.5s;
+  z-index: 1039;
+  padding: 0;
+  box-shadow: none;
+  border-bottom: none;
+  visibility: hidden;
+  will-change: transform, opacity;
+
+  &--expanded {
+    max-height: 220px;
+    opacity: 1;
+    transform: scale(1);
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid $color-gray--light;
+    visibility: visible;
+    transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
+      transform 0.5s ease-out, padding 0.5s ease-out, visibility 0s linear 0s;
+  }
+}
+
+.profile-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid $color-gray--lighter;
+  margin-bottom: 10px;
+}
+
+.profile-card-avatar {
+  flex-shrink: 0;
+}
+
+.profile-card-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-card-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-card-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: $color-gray--darker;
+}
+
+.stat-icon {
+  font-size: 0.7rem;
+  color: $color-green--dark;
+  width: 14px;
+  text-align: center;
+}
+
+.stat-text {
+  color: #333;
+
+  strong {
+    color: $color-black;
+    font-weight: 600;
+  }
+}
+
+.profile-card-ratings {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+// Action buttons row
+.profile-card-actions {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: $color-gray--dark;
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: $color-gray--lighter;
   }
 
-  .ratings {
-    grid-row: 1 / 2;
-    grid-column: 5 / 6;
+  &:active {
+    background-color: $color-gray--light;
   }
+
+  &--danger {
+    color: #c62828;
+  }
+}
+
+.action-icon {
+  font-size: 1rem;
+  margin-bottom: 2px;
 }
 
 :deep(.badge) {
