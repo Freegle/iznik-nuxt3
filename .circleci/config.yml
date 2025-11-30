@@ -1097,6 +1097,13 @@ jobs:
             echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
 
+      # Expire any test versions (99.x.x) that might block the upload
+      - run:
+          name: Expire Test Versions
+          command: |
+            export TERM=xterm-256color
+            bundle exec fastlane ios expire_test_versions
+
       # Build and Deploy to TestFlight
       - run:
           name: Build and Deploy to TestFlight
