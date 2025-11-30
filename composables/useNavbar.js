@@ -12,6 +12,7 @@ import { useRuntimeConfig } from '#app'
 import { TYPING_TIME_INVERVAL } from '~/constants'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useVolunteeringStore } from '~/stores/volunteering'
+import { useMobileStore } from '~/stores/mobile'
 
 export const navBarHidden = ref(false)
 
@@ -86,7 +87,14 @@ export function useNavbar() {
   const logo = ref('/icon.png')
   const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
-  const chatCount = computed(() => chatStore.unreadCount)
+  const mobileStore = useMobileStore()
+  const chatCount = computed(() => {
+    const count = Math.min(99, chatStore.unreadCount)
+    if (mobileStore.isApp) {
+      mobileStore.setBadgeCount(count)
+    }
+    return count
+  })
   const activePostsCount = computed(() => messageStore.activePostsCounter)
   const showAboutMeModal = ref(false)
   const countTimer = ref(null)

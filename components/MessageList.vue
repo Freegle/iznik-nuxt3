@@ -42,6 +42,7 @@
                 <OurMessage
                   :id="m.id"
                   :matchedon="m.matchedon"
+                  :preload="ix < 6"
                   record-view
                   @not-found="messageNotFound(m.id)"
                 />
@@ -55,6 +56,7 @@
                 <OurMessage
                   :id="deDuplicatedMessages[ix + 1].id"
                   :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                  :preload="ix + 1 < 6"
                   record-view
                   @not-found="messageNotFound(deDuplicatedMessages[ix + 1].id)"
                 />

@@ -1,53 +1,53 @@
 <template>
-  <div class="up-to-date-wrapper">
-    <NoticeMessage
-      variant="info"
-      class="text-center mt-1 ms-2 me-2 ms-md-0 me-md-0 up-to-date-notice"
-    >
-      <v-icon icon="check-circle" class="text-success icon-size" />
-      <p class="title-text font-weight-bold mb-0">You're up to date.</p>
-      <p class="subtitle-text mb-0">You've already seen posts below here.</p>
-    </NoticeMessage>
+  <div class="up-to-date-divider">
+    <div class="divider-line"></div>
+    <div class="divider-content">
+      <v-icon icon="check-circle" class="check-icon" />
+      <span class="divider-text">You're up to date</span>
+    </div>
+    <div class="divider-line"></div>
   </div>
 </template>
-<script setup>
-import NoticeMessage from './NoticeMessage'
-</script>
+<script setup></script>
 <style scoped lang="scss">
-@import 'bootstrap/scss/functions';
-@import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-.up-to-date-wrapper {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
+.up-to-date-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 4px 0;
 }
 
-.up-to-date-notice {
-  padding: 0.5rem !important;
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba($color-green-background, 0.3),
+    rgba($color-green-background, 0.3),
+    transparent
+  );
 }
 
-.icon-size {
-  font-size: 1.5rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 2rem;
-  }
+.divider-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $color-green-background;
+  white-space: nowrap;
 }
 
-.title-text {
-  font-size: 0.85rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 1.1rem;
-  }
+.check-icon {
+  font-size: 1rem;
 }
 
-.subtitle-text {
+.divider-text {
   font-size: 0.75rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 0.9rem;
-  }
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 </style>

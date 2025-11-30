@@ -31,14 +31,15 @@
 
       <!-- Actual photo -->
       <div v-if="gotAttachments" class="photo-container">
+        <!-- Use 640x480 to match expanded view size for faster modal loading -->
         <OurUploadedImage
           v-if="message.attachments[0]?.ouruid"
           :src="message.attachments[0].ouruid"
           :modifiers="message.attachments[0].externalmods"
           alt="Item Photo"
           class="photo-image"
-          :width="400"
-          :height="400"
+          :width="640"
+          :height="480"
           :preload="preload"
         />
         <NuxtPicture
@@ -49,8 +50,8 @@
           :modifiers="message.attachments[0].externalmods"
           alt="Item Photo"
           class="photo-image"
-          :width="400"
-          :height="400"
+          :width="640"
+          :height="480"
           :preload="preload"
         />
         <ProxyImage
@@ -58,8 +59,8 @@
           class-name="photo-image"
           alt="Item picture"
           :src="message.attachments[0].path"
-          :width="400"
-          :height="400"
+          :width="640"
+          :height="480"
           fit="cover"
           :preload="preload"
         />
@@ -85,7 +86,10 @@
 
       <!-- No photo placeholder -->
       <div v-else class="no-photo-placeholder" :class="placeholderClass">
-        <v-icon :icon="categoryIcon" class="placeholder-icon" />
+        <div class="placeholder-pattern"></div>
+        <div class="icon-circle">
+          <v-icon :icon="categoryIcon" class="placeholder-icon" />
+        </div>
       </div>
 
       <!-- Title/info overlay at bottom of photo -->
@@ -206,6 +210,23 @@ function expand(e) {
   left: 0;
   width: 100%;
   height: 100%;
+  background: linear-gradient(
+    90deg,
+    $color-gray--light 0%,
+    lighten($color-gray--light, 5%) 50%,
+    $color-gray--light 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 :deep(.photo-image),
@@ -263,19 +284,49 @@ function expand(e) {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 
   &.offer-gradient {
-    background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+    background: linear-gradient(145deg, #4caf50 0%, #2e7d32 100%);
   }
 
   &.wanted-gradient {
-    background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
+    background: linear-gradient(145deg, #2196f3 0%, #1565c0 100%);
   }
+}
 
-  .placeholder-icon {
-    font-size: 3rem;
-    color: rgba(255, 255, 255, 0.6);
-  }
+.placeholder-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.08;
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      white 1px,
+      transparent 1px
+    ),
+    radial-gradient(circle at 80% 70%, white 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, white 2px, transparent 2px);
+  background-size: 30px 30px, 25px 25px, 40px 40px;
+}
+
+.icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-icon {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .status-overlay-image {

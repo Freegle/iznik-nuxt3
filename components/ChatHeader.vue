@@ -9,8 +9,9 @@
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >
           <ProfileImage
-            v-if="!collapsed && chat.icon"
+            v-if="!collapsed"
             :image="chat.icon"
+            :name="chat.name"
             class="pr-1 clickme d-none d-md-flex"
             is-thumbnail
             size="xl"

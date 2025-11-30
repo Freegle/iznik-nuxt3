@@ -140,7 +140,10 @@
 
       <!-- No photo placeholder (no attachments and no sample image) -->
       <div v-else class="no-photo-placeholder" :class="placeholderClass">
-        <v-icon :icon="categoryIcon" class="placeholder-icon" />
+        <div class="placeholder-pattern"></div>
+        <div class="icon-circle">
+          <v-icon :icon="categoryIcon" class="placeholder-icon" />
+        </div>
       </div>
 
       <!-- Title overlay at bottom of photo -->
@@ -829,21 +832,52 @@ onUnmounted(() => {
   justify-content: center;
   padding: 2rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .offer-gradient {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(145deg, #4caf50 0%, #2e7d32 100%);
   color: #fff;
 }
 
 .wanted-gradient {
-  background: linear-gradient(135deg, #6f42c1 0%, #007bff 100%);
+  background: linear-gradient(145deg, #2196f3 0%, #1565c0 100%);
   color: #fff;
 }
 
+.placeholder-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.08;
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      white 1px,
+      transparent 1px
+    ),
+    radial-gradient(circle at 80% 70%, white 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, white 2px, transparent 2px);
+  background-size: 30px 30px, 25px 25px, 40px 40px;
+}
+
+.icon-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
 .placeholder-icon {
-  font-size: 4rem;
-  opacity: 0.8;
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 // Blurred sample image (from similar posts)

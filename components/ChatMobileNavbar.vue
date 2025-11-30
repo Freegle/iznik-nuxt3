@@ -10,8 +10,8 @@
       </b-button>
     </div>
     <ProfileImage
-      v-if="chat.icon"
       :image="chat.icon"
+      :name="chat.name"
       class="profilepic clickme"
       is-thumbnail
       size="lg-always"

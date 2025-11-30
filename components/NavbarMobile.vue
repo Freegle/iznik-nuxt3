@@ -8,26 +8,24 @@
         fixed="top"
       >
         <OfflineIndicator v-if="!online" />
-        <b-button
-          v-if="online && (showBackButton || navBarBottomHidden)"
-          variant="white"
-          class="nohover ml-3"
-          to="/"
-        >
-          <v-icon icon="home" />
-        </b-button>
-        <b-button
+        <div
           v-if="online && showBackButton"
           ref="mobileNav"
-          variant="white"
-          class="nohover ml-2 mr-1"
+          class="nav-back-btn"
           @click="backButton"
         >
-          <v-icon icon="arrow-left" />
-          <b-badge v-if="backButtonCount" variant="danger" class="ml-1">
+          <v-icon icon="arrow-left" class="back-icon" />
+          <b-badge v-if="backButtonCount" variant="danger" class="back-badge">
             {{ backButtonCount }}
           </b-badge>
-        </b-button>
+        </div>
+        <nuxt-link
+          v-else-if="online && navBarBottomHidden"
+          to="/"
+          class="nav-back-btn"
+        >
+          <v-icon icon="arrow-left" class="back-icon" />
+        </nuxt-link>
         <NotificationOptions
           v-if="online && !showBackButton && loggedIn"
           v-model:unread-notification-count="unreadNotificationCount"
@@ -81,157 +79,92 @@
           </template>
           <b-dropdown-item
             href="/settings"
-            class="ourBack"
             @click="clickedMobileNav"
             @mousedown="maybeReload('/settings')"
           >
             <div class="d-flex align-items-center">
-              <v-icon icon="cog" size="2x" class="mr-2" />
-              <span class="text--large">Settings</span>
+              <v-icon icon="cog" class="menu-icon" />
+              <span class="menu-text">Settings</span>
             </div>
           </b-dropdown-item>
           <b-dropdown-item @click="logout">
             <div class="d-flex align-items-center clickme">
-              <v-icon icon="sign-out-alt" size="2x" class="mr-2" />
-              <span class="text--large">Logout</span>
+              <v-icon icon="sign-out-alt" class="menu-icon" />
+              <span class="menu-text">Logout</span>
             </div>
           </b-dropdown-item>
         </b-dropdown>
       </b-navbar>
-      <b-navbar
+      <nav
         v-if="!showBackButton && loggedIn"
-        type="dark"
-        class="ourBack d-flex justify-content-between d-xl-none navbot small"
-        fixed="bottom"
+        class="navbar-bottom d-xl-none"
         :class="{
           hideNavBarBottom: navBarBottomHidden,
           showNavBarBottom: !navBarBottomHidden,
           stickyAdRendered,
         }"
       >
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
+        <NavbarMobileItem
           to="/browse"
+          icon="eye"
+          label="Browse"
+          :badge="browseCount"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/browse')"
-        >
-          <div class="position-relative">
-            <v-icon icon="eye" class="fa-fw2" />
-            <br />
-            <b-badge
-              v-if="browseCount"
-              variant="info"
-              class="browsebadge2"
-              :title="browseCountPlural"
-            >
-              {{ browseCount }}
-            </b-badge>
-            <span class="nav-item__text">Browse</span>
-          </div>
-        </nuxt-link>
-        <div class="botmen ml-2">
-          <ChatMenu
-            v-if="loggedIn"
-            id="menu-option-chat-sm"
-            :is-list-item="false"
-            class="mr-4"
-          />
-          <div class="chatup text-white">Chats</div>
-        </div>
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
+        />
+        <NavbarMobileItem
+          to="/chats"
+          icon="comments"
+          label="Chats"
+          :badge="chatCount"
+          @click="clickedMobileNav"
+          @mousedown="maybeReload('/chats')"
+        />
+        <NavbarMobileItem
           to="/myposts"
+          icon="home"
+          label="My Posts"
+          :badge="activePostsCount"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/myposts')"
-        >
-          <div class="position-relative">
-            <v-icon icon="home" class="fa-fw2" />
-            <br />
-            <b-badge
-              v-if="activePostsCount"
-              variant="info"
-              class="mypostsbadge2"
-              :title="activePostsCountPlural"
-            >
-              {{ activePostsCount }}
-            </b-badge>
-            <span class="nav-item__text">My&nbsp;Posts</span>
-          </div>
-        </nuxt-link>
-        <div class="postWrapper">
+        />
+        <div class="post-button-wrapper">
           <NavbarMobilePost class="navpost" />
-          <div class="d-flex justify-content-around navpostnav">
-            <nuxt-link
-              no-prefetch
-              class="nav-link text-center p-0 botmen"
-              to="/post"
-              @click="clickedMobileNav"
-              @mousedown="maybeReload('/post')"
-            >
-              <div class="position-relative">
-                <v-icon icon="home" class="fa-fw2 invisible" />
-                <br />
-                <span class="nav-item__text">Post</span>
-              </div>
-            </nuxt-link>
-          </div>
         </div>
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
+        <NavbarMobileItem
           to="/chitchat"
+          icon="coffee"
+          label="ChitChat"
+          :badge="newsCount"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/chitchat')"
-        >
-          <div class="position-relative">
-            <v-icon icon="coffee" class="fa-fw2" />
-            <br />
-            <b-badge
-              v-if="newsCount"
-              variant="info"
-              class="newsbadge2"
-              :title="newsCountPlural"
-            >
-              {{ newsCount }}
-            </b-badge>
-            <div class="nav-item__text">ChitChat</div>
-          </div>
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
+        />
+        <NavbarMobileItem
           to="/promote"
+          icon="bullhorn"
+          label="Promote"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/promote')"
-        >
-          <v-icon icon="bullhorn" class="fa-fw2" />
-          <br />
-          <div class="nav-item__text">Promote</div>
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          class="nav-link text-center p-0 botmen"
+        />
+        <NavbarMobileItem
           to="/help"
+          icon="question-circle"
+          label="Help"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/help')"
-        >
-          <v-icon icon="question-circle" class="fa-fw2" />
-          <br />
-          <div class="nav-item__text">Help</div>
-        </nuxt-link>
+        />
         <about-me-modal
           v-if="showAboutMeModal"
           @hidden="showAboutMeModal = false"
         />
-      </b-navbar>
+      </nav>
     </div>
   </div>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
 import NavbarMobilePost from './NavbarMobilePost'
+import NavbarMobileItem from './NavbarMobileItem'
 import {
   clearNavBarTimeout,
   setNavBarHidden,
@@ -248,11 +181,9 @@ const {
   distance,
   unreadNotificationCount,
   activePostsCount,
-  activePostsCountPlural,
   newsCount,
-  newsCountPlural,
   browseCount,
-  browseCountPlural,
+  chatCount,
   showAboutMeModal,
   showBackButton,
   backButtonCount,
@@ -297,13 +228,16 @@ watch(notificationsShown, (newVal) => {
 })
 
 const signInDisabled = ref(true)
+const lastScrollY = ref(0)
+const scrollThreshold = 10
 
-// We want to hide the navbars when you scroll down.
+// We want to hide the navbars when scrolling down, show when scrolling up.
 onMounted(() => {
   // Keeping the button disabled until hygration has finished helps with Playwright tests.
   signInDisabled.value = false
+  lastScrollY.value = window.scrollY
 
-  window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onBeforeUnmount(() => {
@@ -318,19 +252,26 @@ function refresh() {
 
 function handleScroll() {
   const scrollY = window.scrollY
+  const scrollDelta = scrollY - lastScrollY.value
 
   if (notificationsShown.value) {
     if (navBarHidden.value) {
-      // Don't hide the navbar if the notifications are visible.s
       setNavBarHidden(false)
     }
-  } else if (scrollY > 200 && !navBarHidden.value) {
-    // Scrolling down.  Hide the navbars.
+  } else if (scrollY < 60) {
+    // Always show at top of page
+    if (navBarHidden.value) {
+      setNavBarHidden(false)
+    }
+  } else if (scrollDelta > scrollThreshold && !navBarHidden.value) {
+    // Scrolling down - hide
     setNavBarHidden(true)
-  } else if (scrollY < 100 && navBarHidden.value) {
-    // At the top. Show the navbars.
+  } else if (scrollDelta < -scrollThreshold && navBarHidden.value) {
+    // Scrolling up - show
     setNavBarHidden(false)
   }
+
+  lastScrollY.value = scrollY
 }
 
 const route = useRoute()
@@ -346,6 +287,7 @@ const navBarBottomHidden = computed(() => {
 })
 
 const loggedIn = computed(() => useAuthStore().user !== null)
+const me = computed(() => useAuthStore().user)
 </script>
 <style scoped lang="scss">
 @import 'assets/css/navbar.scss';
@@ -362,7 +304,43 @@ const loggedIn = computed(() => useAuthStore().user !== null)
   }
 }
 
-.navbot.stickyAdRendered {
+// Modern top navbar styling
+:deep(.navbar.ourBack) {
+  background: linear-gradient(
+    135deg,
+    $color-green-background 0%,
+    darken($color-green-background, 5%) 100%
+  ) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0.75rem;
+  min-height: 56px;
+
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+}
+
+// Bottom navbar - modern design
+// Total height should be 67px (same as before: 51 content + 8 pad top + 8 pad bottom)
+.navbar-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+  height: 67px;
+  box-sizing: border-box;
+}
+
+.navbar-bottom.stickyAdRendered {
   margin-bottom: $sticky-banner-height-mobile;
 
   @media (min-height: $mobile-tall) {
@@ -378,69 +356,66 @@ const loggedIn = computed(() => useAuthStore().user !== null)
   }
 }
 
-:deep(.dropdown-toggle) {
-  background-color: $color-green-background;
+.post-button-wrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 64px;
+  height: 51px;
+}
+
+// Modern user dropdown styling
+:deep(.userOptions .dropdown-toggle) {
+  background: transparent !important;
   border: none !important;
+  padding: 0 !important;
+  margin-right: 0.5rem;
+
+  &::after {
+    display: none;
+  }
 }
 
 :deep(.userOptions .dropdown-menu) {
-  background-color: $color-green-background;
+  background: white !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: 0;
+  min-width: 160px;
+  margin-top: 0.25rem;
 
   .dropdown-item {
-    color: $color-white !important;
+    background: white !important;
+    color: #333 !important;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover,
+    &:focus {
+      background: #f8f8f8 !important;
+    }
   }
 }
 
-.mypostsbadge2 {
-  position: absolute;
-  top: 1px;
-  right: -1px;
-  font-size: 11px;
-  color: white !important;
+.menu-icon {
+  color: $color-green-background !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  margin-right: 0.5rem;
 }
 
-.browsebadge2 {
-  position: absolute;
-  top: 1px;
-  right: -7px;
-  font-size: 11px;
-  color: white !important;
-}
-
-.chatup {
-  transform: translate(3px, 1px);
-}
-
-.newsbadge2 {
-  position: absolute;
-  top: 2px;
-  font-size: 11px;
-  color: white !important;
-}
-
-.botmen {
-  width: 51px;
-  min-width: 51px;
-  max-width: 51px;
-  height: 51px;
-  min-height: 51px;
-  max-height: 51px;
-
-  div {
-    font-size: 0.7rem;
-  }
-}
-
-.fa-fw2 {
-  width: 2rem !important;
-  height: 2rem !important;
+.menu-text {
+  font-size: 0.9rem;
+  color: #333;
 }
 
 .navpost {
-  transform: translateY(-40px);
-  color: $color-white;
-  width: 64px;
-  height: 64px;
+  transform: translateY(-24px);
 }
 
 :deep(.container-fluid) {
@@ -451,59 +426,63 @@ const loggedIn = computed(() => useAuthStore().user !== null)
   max-width: calc(100vw - 130px);
 }
 
+// Modern back button styling
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin-left: 4px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+  text-decoration: none;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  &:active {
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.back-icon {
+  color: white;
+  font-size: 1.25rem;
+}
+
+.back-badge {
+  margin-left: 6px;
+  font-size: 0.65rem;
+}
+
 .hideNavBarBottom {
   transform: translateY(150px);
-  transition: transform 1s;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1);
 
   .navpost {
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.15s ease-out;
   }
 }
 
 .showNavBarBottom {
   transform: translateY(0px);
-  transition: transform 1s;
+  transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 
   .navpost {
     opacity: 1;
-    transition: opacity 0.5s;
+    transition: opacity 0.2s ease-in 0.1s;
   }
 }
 
 .hideNavBarTop {
   transform: translateY(-150px);
-  transition: transform 1s;
-
-  .navpost {
-    opacity: 0;
-    transition: opacity 0.5s;
-  }
+  transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1);
 }
 
 .showNavBarTop {
   transform: translateY(0px);
-  transition: transform 1s;
-
-  .navpost {
-    opacity: 1;
-    transition: opacity 0.5s;
-  }
-}
-
-.postWrapper {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 51px;
-
-  .navpost {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .navpostnav {
-    grid-column: 1;
-    grid-row: 1;
-  }
+  transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 }
 </style>

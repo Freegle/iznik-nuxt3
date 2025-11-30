@@ -49,7 +49,12 @@
     </div>
     <div v-else>
       <!-- Mobile-optimized summary -->
-      <MessageSummaryMobile v-if="isMobile" :id="message.id" @expand="expand" />
+      <MessageSummaryMobile
+        v-if="isMobile"
+        :id="message.id"
+        :preload="preload"
+        @expand="expand"
+      />
       <!-- Desktop summary -->
       <MessageSummary
         v-else
@@ -148,6 +153,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: null,
+  },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 

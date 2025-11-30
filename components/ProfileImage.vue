@@ -31,6 +31,12 @@
       :width="width"
       :height="width"
     />
+    <GeneratedAvatar
+      v-else-if="useGeneratedAvatar"
+      :name="name || 'User'"
+      :size="width"
+      class="generated-avatar"
+    />
     <ProxyImage
       v-else
       :src="validImage"
@@ -113,9 +119,28 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  name: {
+    type: String,
+    required: false,
+    default: null,
+  },
 })
 
 const brokenImage = ref(false)
+
+// Check if this is a default/placeholder image that should use generated avatar
+const isDefaultImage = computed(() => {
+  const img = props.image
+  if (!img) return true
+  if (img.includes('defaultprofile')) return true
+  if (brokenImage.value) return true
+  return false
+})
+
+// Use generated avatar when we have a name and no real image
+const useGeneratedAvatar = computed(() => {
+  return props.name && isDefaultImage.value
+})
 
 const validImage = computed(() => {
   return !brokenImage.value && props.image ? props.image : '/defaultprofile.png'
@@ -332,5 +357,12 @@ const brokenProfileImage = (e) => {
 
 .circle {
   border-radius: 50%;
+}
+
+.generated-avatar {
+  grid-row: 1 / 2;
+  grid-column: 1 / 2;
+  border-radius: 50%;
+  overflow: hidden;
 }
 </style>
