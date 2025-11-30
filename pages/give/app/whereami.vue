@@ -1,5 +1,5 @@
 <template>
-  <div class="app-give-whereami">
+  <div class="app-give-whereami" :class="{ 'has-sticky-ad': stickyAdRendered }">
     <!-- Main content -->
     <div class="app-content">
       <h1 class="page-title">Now, tell us where it is</h1>
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Footer with Freegle it button -->
-    <div class="app-footer">
+    <div class="app-footer" :class="{ 'has-sticky-ad': stickyAdRendered }">
       <b-button
         v-if="canSubmit"
         variant="primary"
@@ -101,6 +101,7 @@ import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse.vu
 import { useComposeStore } from '~/stores/compose'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import {
   setup,
   postcodeSelect,
@@ -112,6 +113,10 @@ const router = useRouter()
 const composeStore = useComposeStore()
 const userStore = useUserStore()
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
+
+// Check if sticky ad is rendered
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
 // Get store state
 const { email } = storeToRefs(composeStore)
@@ -181,10 +186,14 @@ async function submitOffer() {
   flex-direction: column;
   min-height: 100vh;
   background: #fff;
-  padding-bottom: calc(80px + $sticky-banner-height-mobile);
+  padding-bottom: 80px;
 
-  @media (min-height: $mobile-tall) {
-    padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
+  &.has-sticky-ad {
+    padding-bottom: calc(80px + $sticky-banner-height-mobile);
+
+    @media (min-height: $mobile-tall) {
+      padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
+    }
   }
 }
 
@@ -253,7 +262,7 @@ async function submitOffer() {
 
 .app-footer {
   position: fixed;
-  bottom: $sticky-banner-height-mobile;
+  bottom: 0;
   left: 0;
   right: 0;
   padding: 1rem;
@@ -261,8 +270,12 @@ async function submitOffer() {
   background: #fff;
   z-index: 100;
 
-  @media (min-height: $mobile-tall) {
-    bottom: $sticky-banner-height-mobile-tall;
+  &.has-sticky-ad {
+    bottom: $sticky-banner-height-mobile;
+
+    @media (min-height: $mobile-tall) {
+      bottom: $sticky-banner-height-mobile-tall;
+    }
   }
 }
 
