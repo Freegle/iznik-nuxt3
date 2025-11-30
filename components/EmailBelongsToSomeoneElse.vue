@@ -16,7 +16,7 @@
             me.email
           }})
         </span>
-        <span v-else> an existing account </span>. But don't worry! You probably
+        <span v-else>an existing account</span>. But don't worry! You probably
         have two accounts, and we can merge them together.
       </p>
       <p>

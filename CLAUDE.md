@@ -21,7 +21,7 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Always add newly created files to git.  
 
 ## Build Commands
-- `npm run dev` - Start development server on port 3002
+- `npm run dev` - Start development server on port 3002 (HMR works for hot reloading)
 - `npm run build` - Build for production
 - `eslint --fix <file>` - Fix code style issues for specific files
 

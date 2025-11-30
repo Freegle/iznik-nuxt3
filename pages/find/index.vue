@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="layout fader">
+    <div v-if="!isApp" class="layout fader">
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
@@ -100,17 +100,28 @@
   </client-only>
 </template>
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
-import { onMounted } from '#imports'
+import { onMounted, computed } from '#imports'
+import { useMobileStore } from '~/stores/mobile'
 
 // Setup page head
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
+const router = useRouter()
+const mobileStore = useMobileStore()
+
+// Check if app - used to prevent flash of desktop UI
+const isApp = computed(() => mobileStore.isApp)
+
+// Redirect to app-specific flow if in app
+if (mobileStore.isApp) {
+  router.replace('/find/app/photos')
+}
 
 useHead(
   buildHead(
