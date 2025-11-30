@@ -1,11 +1,13 @@
 <template>
-  <div class="app-give-photos">
+  <div class="app-find-photos">
     <!-- Main content -->
     <div class="app-content">
       <AppPhotoUploader
         v-model="attachments"
         type="Message"
         :recognise="attachments.length === 0"
+        empty-title="What should it look like?"
+        empty-subtitle="Add a photo if you have one"
         @photo-processed="onPhotoProcessed"
         @skip="goNext"
       />
@@ -38,7 +40,7 @@ function getOrCreateMessageId() {
   // Note: composeStore.all may return synthetic default messages, so we must
   // call setType() to ensure the message actually exists in state.messages
   const existingMessages = composeStore.all.filter(
-    (m) => m.type === 'Offer' && (!m.savedBy || m.savedBy === myid)
+    (m) => m.type === 'Wanted' && (!m.savedBy || m.savedBy === myid)
   )
 
   const id =
@@ -47,7 +49,7 @@ function getOrCreateMessageId() {
   // Ensure the message exists in state.messages (like PostMessage.vue does)
   composeStore.setType({
     id,
-    type: 'Offer',
+    type: 'Wanted',
   })
 
   return id
@@ -74,14 +76,14 @@ function onPhotoProcessed() {
 }
 
 function goNext() {
-  router.push('/give/app/details')
+  router.push('/find/mobile/details')
 }
 </script>
 
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
 
-.app-give-photos {
+.app-find-photos {
   display: flex;
   flex-direction: column;
   min-height: 100vh;

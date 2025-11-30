@@ -106,7 +106,7 @@ onMounted(() => {
     messageId.value = existingMessages[0].id
   } else {
     // No message found, go back to photos
-    router.replace('/give/app/photos')
+    router.replace('/give/mobile/photos')
   }
 })
 
@@ -144,7 +144,7 @@ function goNext() {
   }
 
   // Continue to app whereami flow for location
-  router.push('/give/app/whereami')
+  router.push('/give/mobile/whereami')
 }
 </script>
 

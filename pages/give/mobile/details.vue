@@ -1,5 +1,5 @@
 <template>
-  <div class="app-find-details">
+  <div class="app-give-details">
     <!-- Main content -->
     <div class="app-content">
       <!-- Photo thumbnails (summary of what they added) -->
@@ -23,12 +23,13 @@
       <!-- Item name -->
       <div class="form-section">
         <label for="item-name" class="form-label">
-          What are you looking for?
+          What are you giving away?
         </label>
         <b-form-input
           id="item-name"
+          ref="itemInput"
           v-model="item"
-          placeholder="e.g. Kids bike for 8 year old"
+          placeholder="e.g. Red sofa"
           size="lg"
           :state="itemState"
         />
@@ -37,13 +38,24 @@
       <!-- Description -->
       <div class="form-section">
         <label for="description" class="form-label">
-          Tell us more about what you need:
+          Tell us more about it:
         </label>
         <b-form-textarea
           id="description"
           v-model="description"
-          placeholder="Size, colour, any specific requirements..."
+          placeholder="Condition, size, why you're giving it away..."
           rows="4"
+        />
+      </div>
+
+      <!-- Quantity -->
+      <div class="form-section">
+        <label class="form-label">How many are you giving away?</label>
+        <NumberIncrementDecrement
+          v-model="availablenow"
+          :min="1"
+          :max="99"
+          label-s-r-only
         />
       </div>
     </div>
@@ -67,6 +79,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useComposeStore } from '~/stores/compose'
 import { useAuthStore } from '~/stores/auth'
+import NumberIncrementDecrement from '~/components/NumberIncrementDecrement'
 
 const router = useRouter()
 const composeStore = useComposeStore()
@@ -76,25 +89,26 @@ const authStore = useAuthStore()
 function getMessageId() {
   const myid = authStore.user?.id
   const existingMessages = composeStore.all.filter(
-    (m) => m.type === 'Wanted' && (!m.savedBy || m.savedBy === myid)
+    (m) => m.type === 'Offer' && (!m.savedBy || m.savedBy === myid)
   )
 
   if (existingMessages.length > 0) {
     const id = existingMessages[0].id
     // Ensure message exists in state.messages (like PostMessage.vue does)
-    composeStore.setType({ id, type: 'Wanted' })
+    composeStore.setType({ id, type: 'Offer' })
     return id
   }
   return null
 }
 
 const messageId = ref(getMessageId())
+const itemInput = ref(null)
 const showItemError = ref(false)
 
 // Redirect if no message found
 onMounted(() => {
   if (messageId.value === null) {
-    router.replace('/find/app/photos')
+    router.replace('/give/mobile/photos')
   }
 })
 
@@ -140,8 +154,19 @@ const description = computed({
   },
 })
 
+// Quantity
+const availablenow = computed({
+  get() {
+    const msg = composeStore.message(messageId.value)
+    return msg?.availablenow || 1
+  },
+  set(newValue) {
+    composeStore.setAvailableNow(messageId.value, newValue)
+  },
+})
+
 function editPhotos() {
-  router.push('/find/app/photos')
+  router.push('/give/mobile/photos')
 }
 
 function validateAndNext() {
@@ -155,15 +180,14 @@ function validateAndNext() {
     })
     return
   }
-  // Continue to app whereami flow for location
-  router.push('/find/app/whereami')
+  router.push('/give/mobile/options')
 }
 </script>
 
 <style scoped lang="scss">
 @import 'assets/css/sticky-banner.scss';
 
-.app-find-details {
+.app-give-details {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -252,6 +276,16 @@ function validateAndNext() {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: #212529;
+}
+
+// Style the number input buttons to have visible borders
+:deep(.vue-number-input__button) {
+  border: 1px solid #ced4da !important;
+  background-color: #fff !important;
+}
+
+:deep(.vue-number-input__button:hover) {
+  background-color: #e9ecef !important;
 }
 
 .app-footer {
