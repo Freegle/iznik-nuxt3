@@ -1,5 +1,5 @@
 <template>
-  <div class="app-give-details">
+  <div class="app-give-details" :class="{ 'has-sticky-ad': stickyAdRendered }">
     <!-- Main content -->
     <div class="app-content">
       <!-- Photo thumbnails (summary of what they added) -->
@@ -61,7 +61,7 @@
     </div>
 
     <!-- Footer with Next button -->
-    <div class="app-footer">
+    <div class="app-footer" :class="{ 'has-sticky-ad': stickyAdRendered }">
       <b-button
         variant="primary"
         size="lg"
@@ -79,11 +79,16 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useComposeStore } from '~/stores/compose'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import NumberIncrementDecrement from '~/components/NumberIncrementDecrement'
 
 const router = useRouter()
 const composeStore = useComposeStore()
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
+
+// Check if sticky ad is rendered
+const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
 // Initialize message ID synchronously so it's available for computed properties
 function getMessageId() {
@@ -192,10 +197,14 @@ function validateAndNext() {
   flex-direction: column;
   min-height: 100vh;
   background: #fff;
-  padding-bottom: calc(80px + $sticky-banner-height-mobile);
+  padding-bottom: 80px;
 
-  @media (min-height: $mobile-tall) {
-    padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
+  &.has-sticky-ad {
+    padding-bottom: calc(80px + $sticky-banner-height-mobile);
+
+    @media (min-height: $mobile-tall) {
+      padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
+    }
   }
 }
 
@@ -290,7 +299,7 @@ function validateAndNext() {
 
 .app-footer {
   position: fixed;
-  bottom: $sticky-banner-height-mobile;
+  bottom: 0;
   left: 0;
   right: 0;
   padding: 1rem;
@@ -298,8 +307,12 @@ function validateAndNext() {
   background: #fff;
   z-index: 100;
 
-  @media (min-height: $mobile-tall) {
-    bottom: $sticky-banner-height-mobile-tall;
+  &.has-sticky-ad {
+    bottom: $sticky-banner-height-mobile;
+
+    @media (min-height: $mobile-tall) {
+      bottom: $sticky-banner-height-mobile-tall;
+    }
   }
 }
 </style>
