@@ -15,6 +15,9 @@
         </b-badge>
       </client-only>
     </div>
+    <div v-if="!attachments?.length && sampleImage" class="sample-badge">
+      Photo of similar item
+    </div>
     <div
       ref="imagewrapper"
       :class="{
@@ -24,11 +27,21 @@
       }"
     >
       <b-img
-        v-if="defaultAttachments || !attachments?.length"
+        v-if="defaultAttachments || (!attachments?.length && !sampleImage)"
         :width="width"
         :height="height"
         src="/camera.png"
         class="align-self-center justify-self-center h-100 fit-cover"
+      />
+      <ProxyImage
+        v-else-if="!attachments?.length && sampleImage"
+        class-name="p-0 rounded blurred-sample"
+        alt="Similar item"
+        :src="sampleImage.path"
+        :width="width"
+        :height="height"
+        :sizes="thumbnail ? '200px' : '320px md:768px'"
+        fit="cover"
       />
       <OurUploadedImage
         v-else-if="attachments[0].ouruid"
@@ -104,6 +117,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false,
+  },
+  sampleImage: {
+    type: Object,
+    required: false,
+    default: null,
   },
 })
 
@@ -201,5 +219,23 @@ function brokenImage() {
   background-color: $color-gray--light;
   width: 100%;
   height: 150px;
+}
+
+.blurred-sample {
+  filter: blur(4px) saturate(0.85);
+  transform: scale(1.03);
+}
+
+.sample-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(128, 128, 128, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  z-index: 100;
 }
 </style>

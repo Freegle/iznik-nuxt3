@@ -21,6 +21,22 @@
       <button class="back-button" @click.stop="goBack">
         <v-icon icon="arrow-left" />
       </button>
+
+      <!-- Status overlay images -->
+      <b-img
+        v-if="message.successful"
+        lazy
+        src="/freegled.jpg"
+        class="status-overlay-image"
+        :alt="successfulText"
+      />
+      <b-img
+        v-else-if="message.promised"
+        lazy
+        src="/promised.jpg"
+        class="status-overlay-image"
+        alt="Promised"
+      />
       <!-- Thumbnail carousel for multiple photos -->
       <div
         v-if="attachmentCount > 1"
@@ -35,7 +51,7 @@
           :key="attachment.id || index"
           class="thumbnail-item"
           :class="{ active: index === currentPhotoIndex }"
-          @click.stop="selectPhoto(index)"
+          @click.stop="handleThumbnailClick(index)"
         >
           <OurUploadedImage
             v-if="attachment.ouruid"
@@ -106,18 +122,29 @@
         />
       </div>
 
-      <!-- No photo placeholder -->
+      <!-- Blurred sample image from similar posts (no own photos) -->
+      <div
+        v-else-if="sampleImage"
+        class="photo-container sample-image-container"
+      >
+        <ProxyImage
+          class-name="photo-image blurred-sample"
+          alt="Similar item"
+          :src="sampleImage.path"
+          :width="640"
+          :height="480"
+          fit="cover"
+        />
+        <div class="sample-badge">Photo of similar item</div>
+      </div>
+
+      <!-- No photo placeholder (no attachments and no sample image) -->
       <div v-else class="no-photo-placeholder" :class="placeholderClass">
         <v-icon :icon="categoryIcon" class="placeholder-icon" />
       </div>
 
       <!-- Title overlay at bottom of photo -->
-      <div
-        class="title-overlay"
-        :style="{
-          background: `linear-gradient(to top, rgba(${dominantColor}, 0.95) 0%, rgba(${dominantColor}, 0.85) 40%, rgba(${dominantColor}, 0.5) 70%, rgba(${dominantColor}, 0) 100%)`,
-        }"
-      >
+      <div class="title-overlay">
         <div class="title-row">
           <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
           <span class="title-subject">{{ strippedSubject }}</span>
@@ -125,30 +152,54 @@
         <!-- Stats pills below subject -->
         <div class="stats-pills">
           <div class="pills-left">
-            <span class="stat-pill">
-              <v-icon icon="clock" /> {{ timeAgo }}
-            </span>
-            <span class="stat-pill">
-              <v-icon icon="comments" /> {{ replyCount }}
+            <span
+              v-b-tooltip.click.blur="distanceTooltip"
+              class="stat-pill clickable"
+              @click.stop="showMapModal = true"
+            >
+              <v-icon icon="map-marker-alt" /> {{ distanceText }}
             </span>
           </div>
-          <span class="stat-pill clickable" @click.stop="showMapModal = true">
-            <v-icon icon="map" /> {{ distanceText }}
-          </span>
+          <div class="pills-right">
+            <span
+              v-b-tooltip.click.blur="'Time since this was last posted'"
+              class="stat-pill clickable pill-time"
+            >
+              <v-icon icon="clock" /> {{ timeAgo }}
+            </span>
+            <span
+              v-b-tooltip.click.blur="
+                'Number of freeglers who have recently replied'
+              "
+              class="stat-pill clickable pill-replies"
+            >
+              <v-icon icon="comments" /> {{ replyCount }}
+            </span>
+            <template v-if="message.deliverypossible && isOffer">
+              <span
+                v-b-tooltip.click.blur="
+                  'They may be able to deliver - no guarantees, but you can ask'
+                "
+                class="stat-pill clickable pill-delivery"
+              >
+                <v-icon icon="truck" /><span class="delivery-maybe">?</span>
+              </span>
+            </template>
+            <template v-if="message.deadline">
+              <span
+                v-b-tooltip.click.blur="deadlineTooltip"
+                class="stat-pill clickable pill-deadline"
+              >
+                <v-icon icon="calendar" /> {{ formattedDeadline }}
+              </span>
+            </template>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Info Section -->
     <div class="info-section">
-      <!-- Promised banner -->
-      <MessagePromised
-        v-if="message.promised && replyable"
-        :id="message.id"
-        :to-me="message.promisedtome"
-        class="mb-2"
-      />
-
       <!-- Description -->
       <div class="description-section">
         <div class="description-label">DESCRIPTION</div>
@@ -164,8 +215,16 @@
       :class="{ expanded: replyExpanded, stickyAdRendered }"
     >
       <div v-if="!replyExpanded" class="w-100">
+        <!-- Promised notice -->
+        <div
+          v-if="message.promised && !message.successful && replyable && !fromme"
+          class="promised-notice mb-2"
+        >
+          <v-icon icon="handshake" />
+          {{ message.promisedtome ? 'Promised to you' : 'Already promised' }}
+        </div>
         <b-button
-          v-if="replyable && !replied && !fromme"
+          v-if="replyable && !replied && !fromme && !message.successful"
           variant="primary"
           size="lg"
           block
@@ -186,6 +245,13 @@
 
       <!-- Expanded reply section -->
       <div v-else class="reply-expanded-section">
+        <NoticeMessage
+          v-if="message.promised && !message.promisedtome"
+          variant="warning"
+          class="mb-2"
+        >
+          Already promised - you might not get it.
+        </NoticeMessage>
         <client-only>
           <MessageReplySection
             :id="id"
@@ -196,37 +262,28 @@
       </div>
     </div>
 
-    <!-- Map Modal -->
-    <b-modal
-      v-model="showMapModal"
-      hide-header
-      hide-footer
-      centered
-      size="lg"
-      body-class="map-modal-body"
-      content-class="map-modal-content-wrapper"
-      @shown="mapReady = true"
-      @hidden="mapReady = false"
-    >
-      <button class="map-close-btn" @click="showMapModal = false">
-        <v-icon icon="times" />
-      </button>
-      <client-only>
-        <MessageMap
-          v-if="validPosition && mapReady"
-          :home="home"
-          :position="{ lat: message.lat, lng: message.lng }"
-          class="map-modal-map"
-          :height="350"
-        />
-      </client-only>
-      <p class="map-modal-hint">
-        <v-icon icon="info-circle" /> Approximate location shown
-      </p>
-    </b-modal>
+    <!-- Map Modal - Full Screen -->
+    <Teleport v-if="showMapModal" to="body">
+      <div class="fullscreen-map-viewer">
+        <button class="map-back-button" @click="showMapModal = false">
+          <v-icon icon="arrow-left" />
+        </button>
+        <client-only>
+          <MessageMap
+            v-if="validPosition"
+            :home="home"
+            :position="{ lat: message.lat, lng: message.lng }"
+            class="fullscreen-map"
+          />
+        </client-only>
+        <div class="map-hint">
+          <v-icon icon="info-circle" /> Approximate location shown
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Photos Modal -->
-    <MessagePhotosModal
+    <MessagePhotosModalMobile
       v-if="showMessagePhotosModal && attachmentCount"
       :id="message.id"
       @hidden="showMessagePhotosModal = false"
@@ -239,25 +296,21 @@ import {
   ref,
   computed,
   defineAsyncComponent,
-  watch,
   onMounted,
   onUnmounted,
 } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMessageStore } from '~/stores/message'
-import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
-import { timeagoShort } from '~/composables/useTimeFormat'
-import { milesAway } from '~/composables/useDistance'
-import MessagePromised from '~/components/MessagePromised'
+import { useMessageDisplay } from '~/composables/useMessageDisplay'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
+import NoticeMessage from '~/components/NoticeMessage'
 import MessageReplySection from '~/components/MessageReplySection'
 
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
-const MessagePhotosModal = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModal')
+const MessagePhotosModalMobile = defineAsyncComponent(() =>
+  import('~/components/MessagePhotosModalMobile')
 )
 
 const props = defineProps({
@@ -282,10 +335,27 @@ const props = defineProps({
 const emit = defineEmits(['zoom', 'close'])
 
 const router = useRouter()
-const messageStore = useMessageStore()
-const authStore = useAuthStore()
 const miscStore = useMiscStore()
 const { me } = useMe()
+
+// Use shared composable for common message display logic
+const {
+  message,
+  strippedSubject,
+  fromme,
+  gotAttachments,
+  sampleImage,
+  attachmentCount,
+  timeAgo,
+  distanceText,
+  replyCount,
+  isOffer,
+  formattedDeadline,
+  deadlineTooltip,
+  successfulText,
+  placeholderClass,
+  categoryIcon,
+} = useMessageDisplay(props.id)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
@@ -293,10 +363,8 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 const replied = ref(false)
 const replyExpanded = ref(false)
 const showMapModal = ref(false)
-const mapReady = ref(false)
 const showMessagePhotosModal = ref(false)
 const currentPhotoIndex = ref(0)
-const dominantColor = ref('0, 0, 0') // Default to black
 const containerRef = ref(null)
 const thumbnailsRef = ref(null)
 const thumbnailTouchStartX = ref(0)
@@ -309,27 +377,7 @@ const MIN_PHOTO_HEIGHT = 150
 const SCROLL_RANGE = 150 // Pixels of scroll to complete transition
 const photoHeight = ref(MAX_PHOTO_HEIGHT)
 
-// Computed
-const message = computed(() => messageStore?.byId(props.id))
-
-const strippedSubject = computed(() => {
-  const subject = message.value?.subject || ''
-  // Strip "OFFER: " or "WANTED: " prefix
-  return subject.replace(/^(OFFER|WANTED):\s*/i, '')
-})
-
-const fromme = computed(() => {
-  return message.value?.fromuser === authStore.user?.id
-})
-
-const gotAttachments = computed(() => {
-  return message.value?.attachments?.length > 0
-})
-
-const attachmentCount = computed(() => {
-  return message.value?.attachments?.length || 0
-})
-
+// Computed (additional to composable)
 const currentAttachment = computed(() => {
   return message.value?.attachments?.[currentPhotoIndex.value]
 })
@@ -345,48 +393,13 @@ const home = computed(() => {
   return null
 })
 
-const timeAgo = computed(() => {
-  if (!message.value?.date) return ''
-  return timeagoShort(message.value.date)
-})
-
-const distanceText = computed(() => {
-  if (!me.value?.lat || !message.value?.lat) {
-    return message.value?.area || 'Unknown'
-  }
-  const miles = milesAway(
-    me.value.lat,
-    me.value.lng,
-    message.value.lat,
-    message.value.lng
-  )
-  if (miles < 1) {
-    return '< 1 mi'
-  }
-  return `${Math.round(miles)} mi`
-})
-
-const replyCount = computed(() => {
-  return message.value?.replies?.length || 0
+const distanceTooltip = computed(() => {
+  return 'Approximate distance - click for map'
 })
 
 const prefersReducedMotion = computed(() => {
   if (typeof window === 'undefined') return false
-  const result = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  console.log('DEBUG prefersReducedMotion:', result)
-  return result
-})
-
-const placeholderClass = computed(() => {
-  return message.value?.type === 'Offer' ? 'offer-gradient' : 'wanted-gradient'
-})
-
-const categoryIcon = computed(() => {
-  // Map item categories to icons - simplified for now
-  const type = message.value?.type
-  if (type === 'Offer') return 'gift'
-  if (type === 'Wanted') return 'search'
-  return 'gift'
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 })
 
 // Methods
@@ -403,6 +416,15 @@ function showPhotosModal() {
 
 function selectPhoto(index) {
   currentPhotoIndex.value = index
+}
+
+function handleThumbnailClick(index) {
+  if (index === currentPhotoIndex.value) {
+    // Clicking the already selected thumbnail opens the photo viewer
+    showPhotosModal()
+  } else {
+    selectPhoto(index)
+  }
 }
 
 function onThumbnailTouchStart(e) {
@@ -550,79 +572,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopThumbnailAutoScroll()
 })
-
-// Extract dominant color from image
-function extractDominantColor(imgSrc) {
-  if (!imgSrc || typeof window === 'undefined') return
-
-  const img = new Image()
-  img.crossOrigin = 'Anonymous'
-
-  img.onload = () => {
-    try {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      // Sample a small area from the bottom of the image (where gradient shows)
-      const sampleHeight = Math.min(50, img.height)
-      canvas.width = 10
-      canvas.height = sampleHeight
-
-      ctx.drawImage(
-        img,
-        0,
-        img.height - sampleHeight,
-        img.width,
-        sampleHeight,
-        0,
-        0,
-        10,
-        sampleHeight
-      )
-
-      const imageData = ctx.getImageData(0, 0, 10, sampleHeight)
-      const data = imageData.data
-      let r = 0
-      let g = 0
-      let b = 0
-      let count = 0
-
-      // Average the colors
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i]
-        g += data[i + 1]
-        b += data[i + 2]
-        count++
-      }
-
-      if (count > 0) {
-        r = Math.round(r / count)
-        g = Math.round(g / count)
-        b = Math.round(b / count)
-        // Darken the color slightly for better text contrast
-        r = Math.round(r * 0.6)
-        g = Math.round(g * 0.6)
-        b = Math.round(b * 0.6)
-        dominantColor.value = `${r}, ${g}, ${b}`
-      }
-    } catch (e) {
-      // CORS or other error, keep default black
-      console.log('Could not extract color:', e)
-    }
-  }
-
-  img.src = imgSrc
-}
-
-// Watch for attachment changes and extract color
-watch(
-  () => currentAttachment.value,
-  (attachment) => {
-    if (attachment?.path) {
-      extractDominantColor(attachment.path)
-    }
-  },
-  { immediate: true }
-)
 </script>
 
 <style scoped lang="scss">
@@ -698,23 +647,50 @@ watch(
 
 .pills-left {
   display: flex;
-  gap: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.pills-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 
 .stat-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.15rem;
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
-  padding: 0.2rem 0.5rem;
+  padding: 0.15rem 0.4rem;
   border-radius: 1rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 
   &.clickable {
     cursor: pointer;
     background: $color-blue--bright;
   }
+}
+
+.delivery-maybe {
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin-left: -0.1rem;
+}
+
+// Status overlay image (promised/freegled)
+.status-overlay-image {
+  position: absolute;
+  z-index: 10;
+  transform: rotate(15deg);
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  max-width: 200px;
+  margin-left: -25%;
+  margin-top: -15%;
+  pointer-events: none;
 }
 
 // Thumbnail carousel at top of photo area
@@ -798,7 +774,12 @@ watch(
   left: 0;
   right: 0;
   padding: 0.75rem 1rem;
-  // Background set dynamically via inline style based on image color
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
   color: #fff;
   z-index: 10;
   display: flex;
@@ -863,6 +844,29 @@ watch(
 .placeholder-icon {
   font-size: 4rem;
   opacity: 0.8;
+}
+
+// Blurred sample image (from similar posts)
+.sample-image-container {
+  position: relative;
+}
+
+.blurred-sample {
+  filter: blur(4px) saturate(0.85);
+  transform: scale(1.03); // Prevent blur edge artifacts
+}
+
+.sample-badge {
+  position: absolute;
+  top: 1rem;
+  right: 0.75rem;
+  background: rgba(128, 128, 128, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 400;
+  z-index: 11;
 }
 
 // Info Section - remove nested scroll so parent handles it
@@ -930,25 +934,33 @@ watch(
   overflow-y: auto;
 }
 
-// Map Modal - modern, non-Bootstrap styling
-:deep(.map-modal-content-wrapper) {
-  border-radius: 16px;
-  overflow: hidden;
-  border: none;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+.promised-notice {
+  text-align: center;
+  color: $color-orange--dark;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-:deep(.map-modal-body) {
-  padding: 0;
-  position: relative;
+// Fullscreen map viewer
+.fullscreen-map-viewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f0f0f0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
 }
 
-.map-close-btn {
+.map-back-button {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 36px;
-  height: 36px;
+  top: env(safe-area-inset-top, 0);
+  left: 0;
+  margin: 1rem;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.95);
   border: none;
@@ -957,31 +969,40 @@ watch(
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1000;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 10001;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
-  &:hover {
+  &:active {
     background: #fff;
   }
 }
 
-.map-modal-map {
+.fullscreen-map {
+  flex: 1;
   width: 100%;
-  border-radius: 0;
+  height: 100% !important;
 
   :deep(.leaflet-container) {
-    border-radius: 16px 16px 0 0;
+    height: 100% !important;
   }
 }
 
-.map-modal-hint {
-  margin: 0;
-  padding: 0.75rem 1rem;
-  background: #f8f9fa;
+.map-hint {
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 0);
+  left: 0;
+  right: 0;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.9);
   color: #666;
   font-size: 0.85rem;
   text-align: center;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
 

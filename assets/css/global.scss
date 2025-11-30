@@ -324,6 +324,11 @@ form {
 // Most tooltips aren't inside modals so move them down.
 .tooltip {
   z-index: 1030;
+
+  .tooltip-inner {
+    max-width: 250px;
+    min-width: 150px;
+  }
 }
 
 .modal.hide-footer {

@@ -48,7 +48,11 @@
       </template>
     </div>
     <div v-else>
+      <!-- Mobile-optimized summary -->
+      <MessageSummaryMobile v-if="isMobile" :id="message.id" @expand="expand" />
+      <!-- Desktop summary -->
       <MessageSummary
+        v-else
         :id="message.id"
         :expand-button-text="expandButtonText"
         :replyable="replyable"
@@ -80,6 +84,9 @@ import MessageSummary from '~/components/MessageSummary'
 
 const MessageExpandedMobile = defineAsyncComponent(() =>
   import('~/components/MessageExpandedMobile')
+)
+const MessageSummaryMobile = defineAsyncComponent(() =>
+  import('~/components/MessageSummaryMobile')
 )
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')

@@ -95,6 +95,7 @@ const tagForGroup = computed(() => {
   border-radius: 4px;
   text-transform: uppercase;
   max-width: calc(100% - 20px);
+  z-index: 5;
 
   &.tagdef {
     left: 0px;
