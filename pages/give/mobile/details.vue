@@ -113,7 +113,7 @@ const showItemError = ref(false)
 // Redirect if no message found
 onMounted(() => {
   if (messageId.value === null) {
-    router.replace('/give/mobile/photos')
+    router.replace('/give/app/photos')
   }
 })
 
@@ -171,7 +171,7 @@ const availablenow = computed({
 })
 
 function editPhotos() {
-  router.push('/give/mobile/photos')
+  router.push('/give/app/photos')
 }
 
 function validateAndNext() {
@@ -185,7 +185,7 @@ function validateAndNext() {
     })
     return
   }
-  router.push('/give/mobile/options')
+  router.push('/give/app/options')
 }
 </script>
 
