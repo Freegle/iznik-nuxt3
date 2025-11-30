@@ -278,7 +278,6 @@
                 spellcheck="true"
                 placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
                 class="mt-2 form-control"
-                :rules="validateTimeCommitment"
               />
               <ErrorMessage
                 name="timecommitment"
@@ -679,14 +678,6 @@ function validateTitle(value) {
 function validateDescription(value) {
   if (!value) {
     return 'Please enter a description.'
-  }
-
-  return true
-}
-
-function validateTimeCommitment(value) {
-  if (!value) {
-    return 'Please enter the time commitment.'
   }
 
   return true
