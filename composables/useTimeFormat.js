@@ -80,6 +80,31 @@ export function timeago(val, past) {
   return f
 }
 
+export function timeagoShort(val) {
+  // Compact time format: "25d", "3h", "5m", "now"
+  const now = dayjs()
+  const then = dayjs(val)
+  const diffMinutes = now.diff(then, 'minute')
+  const diffHours = now.diff(then, 'hour')
+  const diffDays = now.diff(then, 'day')
+  const diffWeeks = now.diff(then, 'week')
+  const diffMonths = now.diff(then, 'month')
+
+  if (diffMinutes < 1) {
+    return 'now'
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes}m`
+  } else if (diffHours < 24) {
+    return `${diffHours}h`
+  } else if (diffDays < 7) {
+    return `${diffDays}d`
+  } else if (diffWeeks < 5) {
+    return `${diffWeeks}w`
+  } else {
+    return `${diffMonths}mo`
+  }
+}
+
 export function timeadapt(val) {
   const t = dayjs(val)
 

@@ -18,22 +18,34 @@
       <span itemprop="availability">Instock</span>
     </div>
     <div v-if="startExpanded">
-      <MessageExpanded
+      <!-- Mobile-optimized view -->
+      <MessageExpandedMobile
+        v-if="isMobile"
         :id="message.id"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        :show-map="true"
-        class="bg-white p-2"
-        :ad-unit-path="adUnitPath"
-        :ad-id="adId"
         @zoom="showPhotosModal"
       />
-      <MessagePhotosModal
-        v-if="showMessagePhotosModal && message.attachments?.length"
-        :id="message.id"
-        @hidden="showMessagePhotosModal = false"
-      />
+      <!-- Desktop view -->
+      <template v-else>
+        <MessageExpanded
+          :id="message.id"
+          :replyable="replyable"
+          :hide-close="hideClose"
+          :actions="actions"
+          :show-map="true"
+          class="bg-white p-2"
+          :ad-unit-path="adUnitPath"
+          :ad-id="adId"
+          @zoom="showPhotosModal"
+        />
+        <MessagePhotosModal
+          v-if="showMessagePhotosModal && message.attachments?.length"
+          :id="message.id"
+          @hidden="showMessagePhotosModal = false"
+        />
+      </template>
     </div>
     <div v-else>
       <MessageSummary
@@ -58,12 +70,17 @@
 
 <script setup>
 import { ref, computed, defineAsyncComponent, nextTick, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import MessageExpanded from '~/components/MessageExpanded'
 import MessageSummary from '~/components/MessageSummary'
 
+const MessageExpandedMobile = defineAsyncComponent(() =>
+  import('~/components/MessageExpandedMobile')
+)
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')
 )
@@ -133,7 +150,14 @@ const emit = defineEmits(['notFound', 'view', 'visible'])
 const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const router = useRouter()
 const me = computed(() => authStore.user)
+
+// Check if mobile breakpoint
+const isMobile = computed(() => {
+  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+})
 
 // Refs
 const msg = ref(null)
@@ -149,8 +173,13 @@ const message = computed(() => {
 // Methods
 function expand() {
   if (!message.value?.successful) {
-    expanded.value = true
-    view()
+    if (isMobile.value) {
+      // Navigate to full-page mobile view
+      router.push('/message/' + props.id)
+    } else {
+      expanded.value = true
+      view()
+    }
   }
 }
 
