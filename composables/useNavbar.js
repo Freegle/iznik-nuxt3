@@ -231,6 +231,9 @@ export function useNavbar() {
       // From a single chat we should always go back to the chat list.  This can happen if we've clicked on an
       // email notification and then clicked back.
       router.push('/chats')
+    } else if (router?.currentRoute?.value?.path === '/chats') {
+      // From the chat list we should go home since there's no home button on mobile.
+      router.push('/')
     } else {
       try {
         router.back()
