@@ -91,7 +91,7 @@ jobs:
           name: Increment Version Number
           command: |
             # Get current version from environment variable
-            CURRENT_VERSION="${CURRENT_VERSION:-3.2.37}"
+            CURRENT_VERSION="${CURRENT_VERSION:-100.0.0}"
             echo "Current version: $CURRENT_VERSION"
 
             # Parse and increment patch version
@@ -100,6 +100,12 @@ jobs:
             patch=$(echo "$CURRENT_VERSION" | cut -d. -f3)
             NEW_PATCH=$((patch + 1))
             NEW_VERSION="$major.$minor.$NEW_PATCH"
+
+            # Enforce minimum version of 100.0.0 (due to errant 99.0.1066 upload to App Store)
+            if [ "$major" -lt 100 ]; then
+              NEW_VERSION="100.0.0"
+              echo "Version below minimum, jumping to 100.0.0"
+            fi
 
             echo "New version: $NEW_VERSION"
 
