@@ -415,13 +415,7 @@ onMounted(async () => {
   font-weight: bold;
 }
 
-// Remove rounded corners from modal
-:deep(.modal-content) {
-  border-radius: 0 !important;
-}
-
 :deep(.modal-header) {
-  border-radius: 0 !important;
   background: $colour-success;
   color: $color-white;
 
@@ -433,15 +427,10 @@ onMounted(async () => {
 }
 
 :deep(.modal-footer) {
-  border-radius: 0 !important;
   background: $color-gray--lighter;
 }
 
-:deep(.btn) {
-  border-radius: 0 !important;
-}
-
-// Heart icons styling
+/* Heart icons styling */
 .text-faded {
   opacity: 0.3;
 }

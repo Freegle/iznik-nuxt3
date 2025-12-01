@@ -309,10 +309,4 @@ async function approve(callback) {
   margin-top: 0.5rem;
   margin-bottom: 0;
 }
-
-// Remove rounded corners
-:deep(.form-control),
-:deep(.btn) {
-  border-radius: 0 !important;
-}
 </style>
