@@ -799,12 +799,6 @@ function showReplyPhotoModal() {
     background: darken($color-gray--lighter, 5%);
     color: $color-green-background;
   }
-
-  .toolbar-label {
-    @include media-breakpoint-down(sm) {
-      display: none;
-    }
-  }
 }
 
 .send-btn {
