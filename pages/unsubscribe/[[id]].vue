@@ -372,7 +372,11 @@ onMounted(() => {
 
 .mobile-unsubscribe {
   min-height: 100vh;
-  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 50%);
+  background: linear-gradient(
+    180deg,
+    $color-red--bg-gradient 0%,
+    $color-white 50%
+  );
 }
 
 .mobile-content {
@@ -404,10 +408,9 @@ onMounted(() => {
 }
 
 .mobile-body {
-  background: white;
-  border-radius: 8px;
+  background: $color-white;
   padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 4px $color-black-opacity-08;
 }
 
 .mobile-section {
@@ -441,7 +444,6 @@ onMounted(() => {
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 4px;
   border: none;
   text-decoration: none;
   cursor: pointer;

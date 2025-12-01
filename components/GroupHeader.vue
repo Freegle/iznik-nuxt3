@@ -372,6 +372,7 @@ async function join(callback) {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .img-thumbnail {
   margin-bottom: 20px;
@@ -521,7 +522,7 @@ async function join(callback) {
 
 // Mobile Layout Styles
 .mobile-group-header {
-  background: white;
+  background: $color-white;
   padding: 0.75rem;
 }
 
@@ -599,7 +600,6 @@ async function join(callback) {
   padding: 0.6rem 1rem;
   font-size: 0.9rem;
   font-weight: 600;
-  border-radius: 4px;
   text-decoration: none;
   transition: transform 0.1s;
 
@@ -609,21 +609,21 @@ async function join(callback) {
 
   &--give {
     background: $colour-success;
-    color: white;
+    color: $color-white;
 
     &:hover {
       background: darken($colour-success, 5%);
-      color: white;
+      color: $color-white;
     }
   }
 
   &--find {
     background: $colour-secondary;
-    color: white;
+    color: $color-white;
 
     &:hover {
       background: darken($colour-secondary, 5%);
-      color: white;
+      color: $color-white;
     }
   }
 }
@@ -663,7 +663,6 @@ async function join(callback) {
     display: flex;
     align-items: center;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
     background: rgba($colour-success, 0.08);
 
     &:hover {

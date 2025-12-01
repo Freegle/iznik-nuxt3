@@ -372,6 +372,7 @@ onBeforeUnmount(() => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 // ==========================================
 // Mobile Layout Styles
@@ -383,7 +384,11 @@ onBeforeUnmount(() => {
 
 .mobile-layout {
   padding: 0;
-  background: linear-gradient(180deg, #f0f7ed 0%, #ffffff 35%);
+  background: linear-gradient(
+    180deg,
+    $color-green--bg-gradient 0%,
+    $color-white 35%
+  );
   min-height: 100vh;
 }
 
@@ -407,10 +412,9 @@ onBeforeUnmount(() => {
   right: 12%;
   z-index: 20;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 4px;
+  background: $color-white-opacity-85;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px $color-black-opacity-15;
 }
 
 .hero-title {
@@ -459,7 +463,6 @@ onBeforeUnmount(() => {
   padding: 0.6rem 1.25rem;
   font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 2px;
   text-decoration: none;
   transition: transform 0.1s, box-shadow 0.15s;
   min-width: 100px;
@@ -520,7 +523,6 @@ onBeforeUnmount(() => {
   }
 
   :deep(.form-control) {
-    border-radius: 2px;
     border: 1px solid $color-gray--light;
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
@@ -534,7 +536,7 @@ onBeforeUnmount(() => {
 
     &:focus {
       border-color: $colour-success;
-      background: white;
+      background: $color-white;
       box-shadow: 0 0 0 2px rgba($colour-success, 0.15);
       text-align: left;
 
@@ -555,7 +557,6 @@ onBeforeUnmount(() => {
 // SSR fallback input - matches browse-input styling exactly
 .browse-input-ssr {
   width: 100%;
-  border-radius: 2px;
   border: 1px solid $color-gray--light;
   padding: 0.6rem 0.75rem;
   font-size: 0.9rem;
@@ -590,7 +591,7 @@ onBeforeUnmount(() => {
 // Mobile Footer
 .mobile-footer {
   padding: 0.75rem 1rem;
-  background: white;
+  background: $color-white;
 }
 
 // ==========================================
