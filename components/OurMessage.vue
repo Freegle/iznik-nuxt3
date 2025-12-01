@@ -73,13 +73,22 @@
         :actions="actions"
         @hidden="expanded = false"
       />
+      <!-- Mobile full-screen modal (only inserted when clicked) -->
+      <MessageExpandedMobile
+        v-if="showMobileExpanded"
+        :id="message.id"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+        is-modal
+        @close="closeMobileExpanded"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, defineAsyncComponent, nextTick, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
@@ -168,7 +177,6 @@ const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
-const router = useRouter()
 const me = computed(() => authStore.user)
 
 // Check if mobile breakpoint
@@ -179,6 +187,7 @@ const isMobile = computed(() => {
 // Refs
 const msg = ref(null)
 const expanded = ref(false)
+const showMobileExpanded = ref(false)
 const showImages = ref(false)
 const showMessagePhotosModal = ref(false)
 
@@ -191,13 +200,19 @@ const message = computed(() => {
 function expand() {
   if (!message.value?.successful) {
     if (isMobile.value) {
-      // Navigate to full-page mobile view
-      router.push('/message/' + props.id)
+      // Show full-screen modal overlay instead of navigating
+      // This preserves the browse page scroll position
+      showMobileExpanded.value = true
+      view()
     } else {
       expanded.value = true
       view()
     }
   }
+}
+
+function closeMobileExpanded() {
+  showMobileExpanded.value = false
 }
 
 function showPhotosModal() {

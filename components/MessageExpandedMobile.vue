@@ -383,6 +383,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  isModal: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['zoom', 'close'])
@@ -459,7 +463,13 @@ const prefersReducedMotion = computed(() => {
 
 // Methods
 function goBack() {
-  router.back()
+  if (props.isModal) {
+    // When used as a modal overlay, emit close to parent
+    emit('close')
+  } else {
+    // When used as a standalone page, navigate back
+    router.back()
+  }
 }
 
 function showPhotosModal() {
@@ -573,7 +583,12 @@ function expandReply() {
 function sent() {
   replyExpanded.value = false
   replied.value = true
-  emit('close')
+  // When used as modal, close after a brief delay so user sees confirmation
+  if (props.isModal) {
+    setTimeout(() => {
+      emit('close')
+    }, 1500)
+  }
 }
 
 // Scroll handler to shrink photo

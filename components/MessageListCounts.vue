@@ -3,7 +3,7 @@
   <div v-if="browseCount" class="d-block d-md-none unread-divider">
     <div class="divider-line" />
     <div class="divider-content">
-      <v-icon icon="envelope" class="unread-icon" />
+      <v-icon icon="eye" class="unread-icon" />
       <span class="unread-text">{{ browseCountPlural }}</span>
       <button class="mark-seen-btn" @click="markSeen">Mark seen</button>
     </div>
