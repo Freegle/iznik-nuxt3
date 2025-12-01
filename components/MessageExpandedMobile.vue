@@ -146,6 +146,20 @@
         </div>
       </div>
 
+      <!-- Poster overlay on photo (shown on shorter screens) -->
+      <NuxtLink
+        v-if="poster"
+        :to="posterProfileUrl"
+        class="poster-overlay"
+        :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
+        @click.stop
+      >
+        {{ poster.displayname }}
+        <span v-if="distanceText" class="poster-overlay-distance"
+          >· {{ distanceText }}</span
+        >
+      </NuxtLink>
+
       <!-- Title overlay at bottom of photo -->
       <div class="title-overlay">
         <div class="title-row">
@@ -203,6 +217,42 @@
 
     <!-- Info Section -->
     <div class="info-section">
+      <!-- Posted by section (shown on taller screens) -->
+      <NuxtLink
+        v-if="poster"
+        :to="posterProfileUrl"
+        class="poster-section"
+        @click.stop
+      >
+        <div class="poster-avatar">
+          <b-img
+            v-if="poster.profile?.paththumb"
+            :src="poster.profile.paththumb"
+            alt="Profile"
+            class="poster-avatar-img"
+            rounded="circle"
+          />
+          <div v-else class="poster-avatar-placeholder">
+            <v-icon icon="user" />
+          </div>
+        </div>
+        <div class="poster-details">
+          <span class="poster-name">{{ poster.displayname }}</span>
+          <div class="poster-stats">
+            <span class="poster-distance">
+              <v-icon icon="map-marker-alt" />{{ distanceText }}
+            </span>
+            <span v-if="poster.info?.offers" class="poster-stat">
+              <v-icon icon="gift" />{{ poster.info.offers }}
+            </span>
+            <span v-if="poster.info?.wanteds" class="poster-stat">
+              <v-icon icon="search" />{{ poster.info.wanteds }}
+            </span>
+          </div>
+        </div>
+        <v-icon icon="chevron-right" class="poster-chevron" />
+      </NuxtLink>
+
       <!-- Description -->
       <div class="description-section">
         <div class="description-label">DESCRIPTION</div>
@@ -358,6 +408,8 @@ const {
   successfulText,
   placeholderClass,
   categoryIcon,
+  poster,
+  posterProfileUrl,
 } = useMessageDisplay(props.id)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
@@ -798,7 +850,7 @@ onUnmounted(() => {
 }
 
 .title-tag {
-  font-size: 0.75rem !important;
+  font-size: 0.94rem !important;
   white-space: nowrap !important;
   flex-shrink: 0;
 }
@@ -907,6 +959,128 @@ onUnmounted(() => {
 .info-section {
   flex: 1 0 auto;
   padding: 1rem;
+}
+
+// Poster overlay on photo (shown on shorter screens)
+.poster-overlay {
+  display: none; // Hidden by default, shown on short screens
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: $color-black-opacity-60;
+  color: $color-white;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 11;
+  text-decoration: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    background: $color-black-opacity-70;
+    color: $color-white;
+    text-decoration: none;
+  }
+
+  &--below-carousel {
+    top: 75px; // Below the thumbnail carousel
+  }
+
+  // Show on short screens (less than 700px height)
+  @media (max-height: 700px) {
+    display: block;
+  }
+}
+
+.poster-overlay-distance {
+  opacity: 0.85;
+}
+
+// Poster section in info area (shown on taller screens)
+.poster-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid $color-gray-3;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  // Hide on short screens where overlay is shown
+  @media (max-height: 700px) {
+    display: none;
+  }
+}
+
+.poster-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.poster-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.poster-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: $color-gray--light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-gray--dark;
+  font-size: 1.25rem;
+}
+
+.poster-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.poster-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.poster-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+}
+
+.poster-distance,
+.poster-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.poster-chevron {
+  flex-shrink: 0;
+  color: $color-gray--dark;
+  font-size: 1rem;
 }
 
 // Description

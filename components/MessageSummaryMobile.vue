@@ -68,19 +68,6 @@
         <div v-if="attachmentCount > 1" class="photo-count">
           {{ attachmentCount }} <v-icon icon="camera" />
         </div>
-        <!-- Poster info overlay -->
-        <NuxtLink
-          v-if="posterName"
-          :to="posterProfileUrl"
-          class="poster-info"
-          :class="{ 'poster-info--below': attachmentCount > 1 }"
-          @click.stop
-        >
-          {{ posterName
-          }}<span v-if="distanceText" class="poster-distance">
-            · {{ distanceText }}</span
-          >
-        </NuxtLink>
       </div>
 
       <!-- Blurred sample image from similar posts -->
@@ -95,18 +82,6 @@
           :preload="preload"
         />
         <div class="sample-badge">Photo of similar item</div>
-        <!-- Poster info overlay -->
-        <NuxtLink
-          v-if="posterName"
-          :to="posterProfileUrl"
-          class="poster-info poster-info--below"
-          @click.stop
-        >
-          {{ posterName
-          }}<span v-if="distanceText" class="poster-distance">
-            · {{ distanceText }}</span
-          >
-        </NuxtLink>
       </div>
 
       <!-- No photo placeholder -->
@@ -115,18 +90,6 @@
         <div class="icon-circle">
           <v-icon :icon="categoryIcon" class="placeholder-icon" />
         </div>
-        <!-- Poster info overlay for no-photo case -->
-        <NuxtLink
-          v-if="posterName"
-          :to="posterProfileUrl"
-          class="poster-info"
-          @click.stop
-        >
-          {{ posterName
-          }}<span v-if="distanceText" class="poster-distance">
-            · {{ distanceText }}</span
-          >
-        </NuxtLink>
       </div>
 
       <!-- Title/info overlay at bottom of photo -->
@@ -188,8 +151,6 @@ const {
   successfulText,
   placeholderClass,
   categoryIcon,
-  posterName,
-  posterProfileUrl,
 } = useMessageDisplay(idRef)
 
 const locationText = computed(() => {
@@ -320,38 +281,6 @@ function expand(e) {
   height: auto;
 }
 
-.poster-info {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: $color-black-opacity-60;
-  color: $color-white;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  z-index: 4;
-  height: auto;
-  text-decoration: none;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover {
-    background: $color-black-opacity-70;
-    color: $color-white;
-    text-decoration: none;
-  }
-
-  &--below {
-    top: 32px;
-  }
-}
-
-.poster-distance {
-  opacity: 0.85;
-}
-
 .no-photo-placeholder {
   position: absolute;
   top: 0;
@@ -451,7 +380,7 @@ function expand(e) {
 
 .title-tag {
   flex-shrink: 0;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   height: auto;
   align-self: flex-start;
   margin-top: 0.15rem;
@@ -461,7 +390,7 @@ function expand(e) {
   position: relative;
   left: auto;
   top: auto;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
 }
 
 .title-subject {
