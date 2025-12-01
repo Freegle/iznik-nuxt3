@@ -1,5 +1,17 @@
 <template>
-  <div>
+  <!-- Mobile Layout -->
+  <div v-if="browseCount" class="d-block d-md-none unread-divider">
+    <div class="divider-line" />
+    <div class="divider-content">
+      <v-icon icon="envelope" class="unread-icon" />
+      <span class="unread-text">{{ browseCountPlural }}</span>
+      <button class="mark-seen-btn" @click="markSeen">Mark seen</button>
+    </div>
+    <div class="divider-line" />
+  </div>
+
+  <!-- Desktop Layout (original) -->
+  <div class="d-none d-md-block">
     <NoticeMessage
       v-if="browseCount"
       variant="info"
@@ -36,3 +48,60 @@ function markSeen() {
   emit('markSeen')
 }
 </script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.unread-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 4px 0;
+  background: $color-white;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba($colour-secondary, 0.3),
+    rgba($colour-secondary, 0.3),
+    transparent
+  );
+}
+
+.divider-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.unread-icon {
+  font-size: 0.9rem;
+  color: $colour-secondary;
+}
+
+.unread-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $colour-secondary;
+}
+
+.mark-seen-btn {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $color-gray--dark;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: $colour-secondary;
+  }
+}
+</style>

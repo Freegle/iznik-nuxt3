@@ -18,6 +18,7 @@
   gap: 12px;
   padding: 12px 16px;
   margin: 4px 0;
+  background: $color-white;
 }
 
 .divider-line {
@@ -26,8 +27,8 @@
   background: linear-gradient(
     to right,
     transparent,
-    rgba($color-green-background, 0.3),
-    rgba($color-green-background, 0.3),
+    rgba($colour-success, 0.4),
+    rgba($colour-success, 0.4),
     transparent
   );
 }
@@ -36,7 +37,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: $color-green-background;
+  color: $colour-success;
   white-space: nowrap;
 }
 
