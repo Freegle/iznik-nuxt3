@@ -10,114 +10,139 @@
     @shown="onShow"
   >
     <template #default>
-      <notice-message v-if="!maybe" class="mb-3">
-        This lets them know you're planning to give it to them, and helps you
-        keep track. You can change your mind later if it doesn't work out, using
-        the <em>Unpromise</em> button.
-      </notice-message>
-      <notice-message v-else class="mb-3" variant="warning">
-        <p>
-          If you are, then please confirm that here. It helps the system keep
-          track and means we can send them reminders. You can change your mind
-          later if it doesn't work out, using the <em>Unpromise</em> button.
-        </p>
-        <p>
-          If you're not promising it to them, then please just press
-          <em>Cancel</em>.
-        </p>
-      </notice-message>
-      <p v-if="maybe">Are you promising:</p>
-      <p v-else>You're promising:</p>
-      <b-form-select
-        v-model="message"
-        :options="messageOptions"
-        class="mb-2 font-weight-bold"
-      />
-      <div>
-        <label for="who" class="font-weight-normal">...to:</label>
-        <b-form-select
-          id="who"
-          v-model="currentlySelected"
-          :options="userOptions"
-          class="mt-2 mb-2 font-weight-bold"
-        />
-      </div>
-      <p class="mt-2">
-        If you've organised a date and time for the handover, then please tell
-        us so that we can remind both of you, which makes things go more
-        smoothly.
-      </p>
-      <div class="d-flex justify-content-between flex-wrap">
-        <div>
-          <label for="date"> Handover on: </label>
-          <b-input-group class="mb-3">
-            <b-form-input
-              id="date"
-              ref="dateInput"
-              v-model="formattedDate"
-              type="text"
-              placeholder="No day yet"
-              autocomplete="off"
-              class="d-none"
-            />
-            <slot name="append">
+      <div class="promise-content">
+        <notice-message v-if="!maybe" class="mb-3">
+          This lets them know you're planning to give it to them, and helps you
+          keep track. You can change your mind later if it doesn't work out,
+          using the <em>Unpromise</em> button.
+        </notice-message>
+        <notice-message v-else class="mb-3" variant="warning">
+          <p>
+            If you are, then please confirm that here. It helps the system keep
+            track and means we can send them reminders. You can change your mind
+            later if it doesn't work out, using the <em>Unpromise</em> button.
+          </p>
+          <p class="mb-0">
+            If you're not promising it to them, then please just press
+            <em>Cancel</em>.
+          </p>
+        </notice-message>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="gift" class="section-icon" />
+            <span class="section-title">{{
+              maybe ? 'Are you promising:' : "You're promising:"
+            }}</span>
+          </div>
+          <b-form-select
+            v-model="message"
+            :options="messageOptions"
+            class="form-select-modern"
+          />
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="user" class="section-icon" />
+            <span class="section-title">...to:</span>
+          </div>
+          <b-form-select
+            id="who"
+            v-model="currentlySelected"
+            :options="userOptions"
+            class="form-select-modern"
+          />
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="calendar-alt" class="section-icon" />
+            <span class="section-title">Handover Arrangement</span>
+            <span class="section-hint">(optional)</span>
+          </div>
+          <p class="section-description">
+            If you've organised a date and time for the handover, tell us so
+            that we can remind both of you.
+          </p>
+          <div class="date-time-row">
+            <div class="date-input-group">
+              <label for="date" class="input-label">Day:</label>
               <b-form-input
                 id="date"
+                ref="dateInput"
+                v-model="formattedDate"
+                type="text"
+                placeholder="No day yet"
+                autocomplete="off"
+                class="d-none"
+              />
+              <b-form-input
                 v-model="date"
                 type="date"
                 placeholder="Choose a day"
                 :min="minDate"
                 :max="maxDate"
+                class="date-input"
               />
-            </slot>
-          </b-input-group>
-        </div>
-        <div>
-          <label for="time">at:</label>
-          <b-form-input
-            id="time"
-            v-model="time"
-            type="time"
-            placeholder="Choose a time"
-            step="900"
-            :offset="-10"
-            menu-class="border-primary shadow-lg"
-            :class="formattedDate && !time ? 'border-danger' : ''"
-          />
-        </div>
-        <div class="d-flex flex-column justify-content-center">
-          <b-button
-            v-if="time && tryst?.id"
-            variant="link"
-            @click="deleteTryst"
-          >
-            Cancel
-          </b-button>
-          <b-button v-else-if="date || time" variant="link" @click="clearTryst">
-            Clear
-          </b-button>
+            </div>
+            <div class="time-input-group">
+              <label for="time" class="input-label">Time:</label>
+              <b-form-input
+                id="time"
+                v-model="time"
+                type="time"
+                placeholder="Choose a time"
+                step="900"
+                class="time-input"
+                :class="formattedDate && !time ? 'border-warning' : ''"
+              />
+            </div>
+            <div class="clear-action">
+              <b-button
+                v-if="time && tryst?.id"
+                variant="link"
+                class="clear-btn"
+                @click="deleteTryst"
+              >
+                <v-icon icon="times" /> Cancel
+              </b-button>
+              <b-button
+                v-else-if="date || time"
+                variant="link"
+                class="clear-btn"
+                @click="clearTryst"
+              >
+                <v-icon icon="times" /> Clear
+              </b-button>
+            </div>
+          </div>
+          <b-alert v-if="showOddTime" :model-value="true" variant="warning">
+            This is an early/late time. Just saying, in case it's not right.
+          </b-alert>
+          <p v-if="formattedDate && !time" class="time-warning">
+            <v-icon icon="exclamation-circle" /> Please add a time.
+          </p>
+          <p class="section-note">
+            If you don't want to specify a precise day and time yet, clear the
+            day and click <em>Promise</em>. You can come back here later.
+          </p>
         </div>
       </div>
-      <b-alert v-if="showOddTime" :model-value="true" variant="warning">
-        This is an early/late time. Just saying, in case it's not right.
-      </b-alert>
-      <p class="mt-2">
-        <span v-if="formattedDate && !time" class="text-danger font-weight-bold"
-          >Please add a time.</span
-        >
-        If you don't want to specify a precise day and time yet, clear the day
-        and click the <em>Promise</em> button. You can come back here later.
-      </p>
     </template>
     <template #footer>
-      <b-button variant="white" @click="hide"> Cancel </b-button>
-      <SpinButton
-        variant="primary"
-        icon-name="handshake"
-        label="Promise"
-        :disabled="buttonDisabled"
-        @handle="promise"
-      />
+      <div class="modal-actions">
+        <b-button variant="link" class="cancel-btn" @click="hide">
+          Cancel
+        </b-button>
+        <SpinButton
+          variant="primary"
+          icon-name="handshake"
+          label="Promise"
+          :disabled="buttonDisabled"
+          @handle="promise"
+        />
+      </div>
     </template>
   </b-modal>
 </template>
@@ -387,8 +412,126 @@ function clearTryst() {
   time.value = null
 }
 </script>
-<style scoped>
-label {
-  font-weight: bold;
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.promise-content {
+  padding: 0;
+}
+
+.form-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid $color-gray--lighter;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.section-icon {
+  color: $colour-success;
+  font-size: 1rem;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: $color-gray--darker;
+}
+
+.section-hint {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  font-weight: 400;
+}
+
+.section-description {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+}
+
+.section-note {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  margin: 0.75rem 0 0;
+}
+
+.form-select-modern {
+  font-weight: 600;
+}
+
+.date-time-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.date-input-group,
+.time-input-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.input-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: $color-gray--darker;
+  margin-bottom: 0.25rem;
+}
+
+.date-input,
+.time-input {
+  width: 100%;
+}
+
+.border-warning {
+  border-color: $color-orange--dark !important;
+}
+
+.clear-action {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0.25rem;
+}
+
+.clear-btn {
+  color: $color-gray--dark;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.time-warning {
+  color: $color-orange--dark;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.cancel-btn {
+  color: $color-gray--dark;
 }
 </style>
