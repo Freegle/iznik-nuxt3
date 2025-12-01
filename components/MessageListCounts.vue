@@ -54,10 +54,12 @@ function markSeen() {
 .unread-divider {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   padding: 12px 16px;
   margin: 4px 0;
   background: $color-white;
+  text-align: center;
 }
 
 .divider-line {
@@ -75,8 +77,10 @@ function markSeen() {
 .divider-content {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .unread-icon {
