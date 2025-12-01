@@ -42,8 +42,13 @@ export function useMessageDisplay(messageId) {
   })
 
   const timeAgo = computed(() => {
-    if (!message.value?.date) return ''
-    return timeagoShort(message.value.date)
+    // Use group arrival time (like MessageHistory does) for accurate autopost times
+    const timestamp =
+      message.value?.groups?.[0]?.arrival ||
+      message.value?.arrival ||
+      message.value?.date
+    if (!timestamp) return ''
+    return timeagoShort(timestamp)
   })
 
   const distanceText = computed(() => {

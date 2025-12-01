@@ -99,10 +99,11 @@
           <span class="title-subject">{{ strippedSubject }}</span>
         </div>
         <div class="info-row">
-          <span class="location">
+          <span v-if="hasLocation" class="location">
             <v-icon icon="map-marker-alt" class="me-1" />{{ locationText }}
           </span>
-          <span class="time">{{ timeAgo }}</span>
+          <span v-else class="location-placeholder">&nbsp;</span>
+          <span class="time">{{ timeAgo || '...' }}</span>
         </div>
       </div>
     </div>
@@ -158,6 +159,16 @@ const locationText = computed(() => {
     return message.value.area
   }
   return distanceText.value
+})
+
+const hasLocation = computed(() => {
+  const loc = locationText.value
+  // Hide if empty, unknown, or just whitespace
+  if (!loc) return false
+  const lower = loc.toLowerCase().trim()
+  if (!lower) return false
+  if (lower === 'unknown' || lower === 'unknown location') return false
+  return true
 })
 
 function expand(e) {
@@ -409,6 +420,10 @@ function expand(e) {
   display: flex;
   align-items: center;
   height: auto;
+}
+
+.location-placeholder {
+  flex: 1;
 }
 
 .time {

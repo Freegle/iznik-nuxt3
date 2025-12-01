@@ -1,144 +1,226 @@
 <template>
-  <div
-    v-if="!me"
-    class="grid m-0 pl-1 pr-1 pl-sm-0 pr-sm-0 mt-0 mt-lg-5 ml-2 mr-2"
-  >
-    <div class="d-none d-sm-flex eyecandy justify-content-start flex-column">
-      <FreeglerPhotos
-        v-if="!breakpoint || breakpoint !== 'xs'"
-        class="ps-4 h-100"
-      />
-    </div>
-    <div class="info">
-      <client-only>
-        <BreakpointFettler />
-      </client-only>
-      <div class="d-block d-sm-none">
-        <h1 class="text--large-responsive">
-          Freegle - online dating for stuff.
-        </h1>
-        <p class="text--medium-responsive black font-weight-bold">
-          Got things you don't need? Need stuff?
-          <br />
-          Match with someone local. Completely free.
-        </p>
+  <div v-if="!me" class="landing-page">
+    <client-only>
+      <BreakpointFettler />
+    </client-only>
+
+    <!-- Mobile Layout -->
+    <div class="d-block d-md-none mobile-layout">
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <!-- Frame with overlaid slogan -->
+        <div class="hero-frame">
+          <FreeglerPhotos class="hero-photos" />
+          <div class="hero-slogan">
+            <h1 class="hero-title">
+              <span class="hero-line1">Share the love.</span>
+              <span class="hero-line2">Love the share.</span>
+            </h1>
+          </div>
+        </div>
+        <!-- CTA section below frame -->
+        <div class="hero-cta">
+          <p class="hero-subtitle">Give and get stuff locally for free.</p>
+          <div class="action-buttons">
+            <client-only>
+              <NuxtLink
+                to="/give"
+                class="action-btn action-btn--give"
+                @click="clicked('give')"
+              >
+                <v-icon icon="gift" class="action-btn__icon" />
+                <span>Give</span>
+              </NuxtLink>
+              <NuxtLink
+                to="/find"
+                class="action-btn action-btn--find"
+                @click="clicked('ask')"
+              >
+                <v-icon icon="search" class="action-btn__icon" />
+                <span>Find</span>
+              </NuxtLink>
+              <template #fallback>
+                <a href="/give" class="action-btn action-btn--give">
+                  <span>Give</span>
+                </a>
+                <a href="/find" class="action-btn action-btn--find">
+                  <span>Find</span>
+                </a>
+              </template>
+            </client-only>
+          </div>
+          <p class="browse-label">
+            <v-icon icon="map-marker-alt" class="browse-icon" />
+            Just browsing? See what's near you.
+          </p>
+          <client-only>
+            <PlaceAutocomplete
+              class="browse-input"
+              input-id="placeautocomplete-mobile"
+              labeltext=""
+              labeltext-sr="Enter your location"
+              @selected="explorePlace($event)"
+            />
+            <template #fallback>
+              <input
+                type="text"
+                class="form-control browse-input-ssr"
+                placeholder="Type your location"
+                disabled
+              />
+            </template>
+          </client-only>
+        </div>
       </div>
-      <div class="d-none d-sm-block">
-        <h1 class="text--largest-responsive">
-          Freegle - like online dating for stuff.
-        </h1>
-        <p class="text--medium-responsive black font-weight-bold">
-          Got stuff you don't need? Looking for something?
-        </p>
-        <p class="text--medium-responsive black font-weight-bold">
-          We'll match you with someone local. All completely free.
-        </p>
-      </div>
-      <div
-        class="d-flex justify-content-between justify-content-lg-start w-100"
-      >
+
+      <!-- Sample Offers -->
+      <div class="sample-section">
         <client-only>
-          <b-button
-            variant="primary"
-            size="xl"
-            to="/give"
-            class="text--medium-responsive ml-1 ml-sm-0"
-            @click="clicked('give')"
-          >
-            Give Stuff
-          </b-button>
-          <div style="width: 4vw" class="d-none d-lg-block" />
-          <b-button
-            variant="secondary"
-            size="xl"
-            to="/find"
-            class="text--medium-responsive mr-1 mr-sm-0"
-            @click="clicked('ask')"
-          >
-            Ask for Stuff
-          </b-button>
-          <template #fallback>
-            <a
-              variant="primary"
-              size="xl"
-              href="/give"
-              class="btn btn-xl btn-primary text--medium-responsive ml-1 ml-sm-0"
-            >
-              Give Stuff
-            </a>
-            <div style="width: 4rem" class="d-none d-lg-block" />
-            <a
-              variant="secondary"
-              size="xl"
-              href="/find"
-              class="btn btn-xl btn-secondary text--medium-responsive mr-1 ml-sm-0"
-            >
-              Ask for Stuff
-            </a>
-          </template>
+          <MobileVisualiseList class="sample-grid" />
         </client-only>
       </div>
-      <div
-        class="font-weight-bold text-header text--medium-responsive mt-3 mb-4 d-none d-md-block"
-      >
-        Don't throw it away, give it away!
-      </div>
-      <h2
-        class="text--medium-responsive font-weight-bold black d-none d-md-block"
-      >
-        Just looking?
-      </h2>
-      <div
-        class="d-flex justify-content-around justify-content-lg-start flex-wrap mt-2 mt-md-0"
-      >
-        <client-only>
-          <PlaceAutocomplete
-            class="mb-2"
-            labeltext="See what's being freegled near you:"
-            labeltext-sr="Enter your location and"
-            @selected="explorePlace($event)"
+
+      <!-- App Download -->
+      <div v-if="!isApp" class="app-section">
+        <a
+          href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ProxyImage
+            preload
+            alt="Get it on Google Play"
+            class="app-badge"
+            src="/en-play-badge.png"
+            sizes="100px"
           />
-        </client-only>
+        </a>
+        <a
+          href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ProxyImage
+            preload
+            alt="Download on the App Store"
+            class="app-badge"
+            src="/app-store-black-sm.png"
+            sizes="100px"
+          />
+        </a>
       </div>
-      <client-only>
-        <VisualiseList
-          v-if="!breakpoint || breakpoint === 'xs'"
-          class="mt-2 mb-2 d-block d-sm-none"
-        />
-      </client-only>
+
+      <!-- Footer -->
+      <MainFooter class="mobile-footer" />
     </div>
-    <div v-if="!isApp" class="app-download mt-2">
-      <a
-        href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-        target="_blank"
-        class="mr-2"
-        rel="noopener noreferrer"
-      >
-        <ProxyImage
-          preload
-          alt="Freegle Android app on Google Play"
-          title="Freegle Android app on Google Play"
-          class="app-download__image"
-          src="/en-play-badge.png"
-          sizes="75px"
-        />
-      </a>
-      <a
-        href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <ProxyImage
-          preload
-          alt="Freegle app for iPhone, iPad, and iPod touch"
-          title="Freegle app for iPhone, iPad, and iPod Touch"
-          class="app-download__image"
-          src="/app-store-black-sm.png"
-          sizes="75px"
-        />
-      </a>
+
+    <!-- Desktop Layout (original structure) -->
+    <div class="d-none d-md-block desktop-layout">
+      <div class="grid m-0 mt-lg-5 ml-2 mr-2">
+        <div class="eyecandy d-flex justify-content-start flex-column">
+          <FreeglerPhotos class="ps-4 h-100" />
+        </div>
+        <div class="info">
+          <h1 class="text--largest-responsive">
+            Freegle - like online dating for stuff.
+          </h1>
+          <p class="text--medium-responsive black font-weight-bold">
+            Got stuff you don't need? Looking for something?
+          </p>
+          <p class="text--medium-responsive black font-weight-bold">
+            We'll match you with someone local. All completely free.
+          </p>
+          <div class="d-flex justify-content-lg-start w-100">
+            <client-only>
+              <b-button
+                variant="primary"
+                size="xl"
+                to="/give"
+                class="text--medium-responsive"
+                @click="clicked('give')"
+              >
+                Give Stuff
+              </b-button>
+              <div style="width: 4vw" class="d-none d-lg-block" />
+              <b-button
+                variant="secondary"
+                size="xl"
+                to="/find"
+                class="text--medium-responsive"
+                @click="clicked('ask')"
+              >
+                Ask for Stuff
+              </b-button>
+              <template #fallback>
+                <a
+                  href="/give"
+                  class="btn btn-xl btn-primary text--medium-responsive"
+                >
+                  Give Stuff
+                </a>
+                <div style="width: 4rem" class="d-none d-lg-block" />
+                <a
+                  href="/find"
+                  class="btn btn-xl btn-secondary text--medium-responsive"
+                >
+                  Ask for Stuff
+                </a>
+              </template>
+            </client-only>
+          </div>
+          <div
+            class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
+          >
+            Don't throw it away, give it away!
+          </div>
+          <h2 class="text--medium-responsive font-weight-bold black">
+            Just looking?
+          </h2>
+          <div class="d-flex justify-content-lg-start flex-wrap">
+            <client-only>
+              <PlaceAutocomplete
+                class="mb-2"
+                labeltext="See what's being freegled near you:"
+                labeltext-sr="Enter your location and"
+                @selected="explorePlace($event)"
+              />
+            </client-only>
+          </div>
+        </div>
+        <div v-if="!isApp" class="app-download mt-2">
+          <a
+            href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+            target="_blank"
+            class="mr-2"
+            rel="noopener noreferrer"
+          >
+            <ProxyImage
+              preload
+              alt="Freegle Android app on Google Play"
+              title="Freegle Android app on Google Play"
+              class="app-download__image"
+              src="/en-play-badge.png"
+              sizes="75px"
+            />
+          </a>
+          <a
+            href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ProxyImage
+              preload
+              alt="Freegle app for iPhone, iPad, and iPod touch"
+              title="Freegle app for iPhone, iPad, and iPod Touch"
+              class="app-download__image"
+              src="/app-store-black-sm.png"
+              sizes="75px"
+            />
+          </a>
+        </div>
+        <MainFooter class="thefooter" />
+      </div>
     </div>
-    <MainFooter class="thefooter" />
   </div>
 </template>
 <script setup>
@@ -164,8 +246,8 @@ import {
 } from '#imports'
 import Api from '~/api'
 
-const VisualiseList = defineAsyncComponent(() =>
-  import('~/components/VisualiseList')
+const MobileVisualiseList = defineAsyncComponent(() =>
+  import('~/components/MobileVisualiseList')
 )
 
 // Setup
@@ -213,12 +295,6 @@ head.link = [
 useHead(head)
 
 // Computed properties
-const breakpoint = computed(() => {
-  // We show different stuff on xs screens. In SSR we can't tell what the screen size will be.
-  // But removing the irrelevant option from the DOM once the client loads will save some network/CPU.
-  return process.server ? null : miscStore.breakpoint
-})
-
 const me = computed(() => {
   // Access the user store to get the current user
   const authStore = useAuthStore()
@@ -297,115 +373,297 @@ onBeforeUnmount(() => {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.black {
-  color: $color-black !important;
+// ==========================================
+// Mobile Layout Styles
+// ==========================================
+
+.landing-page {
+  min-height: 100vh;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  grid-template-rows: 0px 1fr 60px minmax(50px, auto);
+.mobile-layout {
+  padding: 0;
+  background: linear-gradient(180deg, #f0f7ed 0%, #ffffff 35%);
+  min-height: 100vh;
+}
 
-  @include media-breakpoint-up(sm) {
+// Hero Section
+.hero-section {
+  text-align: center;
+}
+
+.hero-frame {
+  position: relative;
+  max-width: min(100%, 38vh);
+  margin: 0 auto;
+}
+
+// Slogan positioned just below photo, overlapping with gold frame border
+// Spans full width of frame opening for visual balance
+.hero-slogan {
+  position: absolute;
+  bottom: 6%;
+  left: 12%;
+  right: 12%;
+  z-index: 20;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.hero-title {
+  font-size: clamp(0.75rem, 2.5vh, 1.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  color: $colour-header;
+}
+
+.hero-line1 {
+  display: block;
+}
+
+.hero-line2 {
+  display: block;
+  color: $colour-success;
+}
+
+// CTA section below frame
+.hero-cta {
+  padding: 0.5rem 1rem 0.75rem;
+  text-align: center;
+}
+
+.hero-subtitle {
+  font-size: 0.95rem;
+  color: $color-gray--darker;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+// Action Buttons - compact
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: transform 0.1s, box-shadow 0.15s;
+  min-width: 100px;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.action-btn--give {
+  background: $colour-success;
+  color: white;
+  box-shadow: 0 2px 8px rgba($colour-success, 0.3);
+
+  &:hover {
+    background: darken($colour-success, 5%);
+    color: white;
+    text-decoration: none;
+  }
+}
+
+.action-btn--find {
+  background: $colour-secondary;
+  color: white;
+  box-shadow: 0 2px 8px rgba($colour-secondary, 0.3);
+
+  &:hover {
+    background: darken($colour-secondary, 5%);
+    color: white;
+    text-decoration: none;
+  }
+}
+
+.action-btn__icon {
+  font-size: 1rem;
+}
+
+.browse-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: $color-gray--dark;
+  margin: 0.75rem 0 0.4rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.browse-icon {
+  color: $colour-success;
+  font-size: 0.85rem;
+}
+
+.browse-input {
+  // Hide the label - we have our own
+  :deep(label) {
+    display: none !important;
+  }
+
+  :deep(.form-control) {
+    border-radius: 2px;
+    border: 1px solid $color-gray--light;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    background: $color-gray--lighter;
+    text-align: center;
+
+    &::placeholder {
+      color: $color-gray--normal;
+      text-align: center;
+    }
+
+    &:focus {
+      border-color: $colour-success;
+      background: white;
+      box-shadow: 0 0 0 2px rgba($colour-success, 0.15);
+      text-align: left;
+
+      &::placeholder {
+        text-align: left;
+      }
+    }
+  }
+
+  // Hide any extra elements that might show as white boxes
+  :deep(.input-group-text),
+  :deep(.btn),
+  :deep(.autocomplete-clear) {
+    display: none !important;
+  }
+}
+
+// SSR fallback input - matches browse-input styling exactly
+.browse-input-ssr {
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid $color-gray--light;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  background: $color-gray--lighter;
+  text-align: center;
+
+  &::placeholder {
+    color: $color-gray--normal;
+    text-align: center;
+  }
+}
+
+// Sample Offers Section
+.sample-section {
+  padding: 0.5rem;
+}
+
+// App Download Section
+.app-section {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: $color-gray--lighter;
+}
+
+.app-badge {
+  height: 32px;
+  width: auto;
+}
+
+// Mobile Footer
+.mobile-footer {
+  padding: 0.75rem 1rem;
+  background: white;
+}
+
+// ==========================================
+// Desktop Layout Styles (original)
+// ==========================================
+
+.desktop-layout {
+  .grid {
+    display: grid;
     grid-template-columns: 0.4fr 0.6fr;
     grid-template-rows: 100px auto auto auto;
     grid-column-gap: 50px;
     grid-row-gap: 30px;
   }
-}
 
-.eyecandy {
-  grid-row: 3 / 4;
-  grid-column: 1 / 3;
-  align-items: center !important;
-
-  @include media-breakpoint-up(sm) {
+  .eyecandy {
+    align-items: center !important;
     height: 300px;
-  }
 
-  @include media-breakpoint-up(lg) {
-    grid-row: 1 / 3;
-    grid-column: 1 / 2;
-    // 100vh includes the header and margins etc so they need to be taken off
-    height: max(500px, calc(100vh - 450px));
+    @include media-breakpoint-up(lg) {
+      grid-row: 1 / 3;
+      grid-column: 1 / 2;
+      height: max(500px, calc(100vh - 450px));
 
-    @supports (height: 100dvh) {
-      height: max(500px, calc(100dvh - 450px));
+      @supports (height: 100dvh) {
+        height: max(500px, calc(100dvh - 450px));
+      }
+
+      max-height: 800px;
     }
-
-    max-height: 800px;
   }
-}
 
-.info {
-  grid-row: 1 / 3;
-  grid-column: 1 / 3;
-  text-align: center;
-  justify-self: center;
+  .info {
+    grid-row: 1 / 3;
+    grid-column: 1 / 3;
+    text-align: center;
+    justify-self: center;
 
-  @include media-breakpoint-up(lg) {
-    grid-column: 2 / 3;
-    text-align: left;
+    @include media-breakpoint-up(lg) {
+      grid-column: 2 / 3;
+      text-align: left;
+    }
   }
-}
 
-.app-download {
-  grid-row: 3 / 4;
-  grid-column: 1 / 3;
-  justify-self: center;
-
-  @include media-breakpoint-up(sm) {
+  .app-download {
     grid-row: 4 / 5;
+    grid-column: 1 / 3;
+    justify-self: center;
+
+    @include media-breakpoint-up(lg) {
+      grid-row: 3 / 4;
+    }
   }
 
-  @include media-breakpoint-up(lg) {
-    grid-row: 3 / 4;
+  .app-download__image {
+    max-height: 25px;
+
+    @include media-breakpoint-up(lg) {
+      max-height: 40px;
+    }
   }
-}
 
-.app-download__image {
-  max-height: 25px;
-
-  @include media-breakpoint-up(lg) {
-    max-height: 40px;
-  }
-}
-
-.thefooter {
-  grid-row: 4 / 5;
-  grid-column: 1 / 3;
-
-  @include media-breakpoint-up(sm) {
+  .thefooter {
     grid-row: 5 / 6;
-  }
+    grid-column: 1 / 3;
 
-  @include media-breakpoint-up(lg) {
-    grid-row: 4 / 5;
-  }
-}
-
-.shadow {
-  box-shadow: 0px 0px 20px 10px grey !important;
-
-  @include media-breakpoint-down(md) {
-    box-shadow: 0px 0px 10px 5px grey !important;
-  }
-
-  @include media-breakpoint-down(md) {
-    box-shadow: none;
+    @include media-breakpoint-up(lg) {
+      grid-row: 4 / 5;
+    }
   }
 }
 
-.iconlarge {
-  min-width: 48px;
-}
-
-.explore {
-  padding-top: 9px;
-  padding-bottom: 9px;
-}
-
-main {
-  margin-top: 0px;
+.black {
+  color: $color-black !important;
 }
 </style>
