@@ -50,8 +50,8 @@ export function useMessageDisplay(messageId) {
 
   const strippedSubject = computed(() => {
     const subject = message.value?.subject || ''
-    // Strip "OFFER: " or "WANTED: " prefix
-    return subject.replace(/^(OFFER|WANTED):\s*/i, '')
+    // Strip "OFFER: ", "OFFERED: ", or "WANTED: " prefix
+    return subject.replace(/^(OFFERED|OFFER|WANTED):\s*/i, '')
   })
 
   const fromme = computed(() => {
