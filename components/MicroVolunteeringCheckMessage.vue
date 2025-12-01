@@ -45,33 +45,80 @@
           @handle="notRight"
         />
       </div>
-      <div v-if="showComments" class="mt-2">
-        <b-form-group label="What's wrong?">
-          <b-form-radio v-model="msgcategory" value="CouldBeBetter">
-            This could be better
-          </b-form-radio>
-          <b-form-radio v-model="msgcategory" value="ShouldntBeHere">
-            This shouldn't be on Freegle
-          </b-form-radio>
-        </b-form-group>
-        <b-form-group>
-          <label for="comments"> Please explain what's wrong: </label>
-          <b-form-textarea
-            id="comments"
-            v-model="comments"
-            rows="2"
-            placeholder="Could you give us a quick indication of what's not right?"
-          />
+      <div v-if="showComments" class="mt-3 feedback-section">
+        <div class="feedback-step" :class="{ completed: msgcategory }">
+          <div class="step-header">
+            <span class="step-number">1</span>
+            <span class="step-label">What's wrong?</span>
+            <v-icon v-if="msgcategory" icon="check" class="step-check" />
+          </div>
+          <div class="step-content">
+            <div class="category-options">
+              <button
+                type="button"
+                class="category-btn"
+                :class="{ active: msgcategory === 'CouldBeBetter' }"
+                @click="msgcategory = 'CouldBeBetter'"
+              >
+                <v-icon icon="edit" class="me-2" />
+                This could be better
+              </button>
+              <button
+                type="button"
+                class="category-btn"
+                :class="{ active: msgcategory === 'ShouldntBeHere' }"
+                @click="msgcategory = 'ShouldntBeHere'"
+              >
+                <v-icon icon="ban" class="me-2" />
+                This shouldn't be on Freegle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="feedback-step"
+          :class="{ completed: comments, disabled: !msgcategory }"
+        >
+          <div class="step-header">
+            <span class="step-number">2</span>
+            <span class="step-label">Tell us more</span>
+            <v-icon v-if="comments" icon="check" class="step-check" />
+          </div>
+          <div class="step-content">
+            <b-form-textarea
+              id="comments"
+              v-model="comments"
+              rows="2"
+              :disabled="!msgcategory"
+              :placeholder="
+                msgcategory
+                  ? 'Please explain what\'s not right...'
+                  : 'Select an option above first'
+              "
+              class="comments-input"
+            />
+          </div>
+        </div>
+
+        <div class="submit-section">
           <SpinButton
-            v-if="msgcategory && comments"
             variant="primary"
-            class="mt-2"
-            icon-name="save"
-            label="Send your comments"
+            icon-name="paper-plane"
+            label="Send feedback"
             size="lg"
+            :disabled="!msgcategory || !comments"
             @handle="sendComments"
           />
-        </b-form-group>
+          <p v-if="!msgcategory" class="help-hint">
+            <v-icon icon="arrow-up" class="me-1" />
+            Please select what's wrong first
+          </p>
+          <p v-else-if="!comments" class="help-hint">
+            <v-icon icon="arrow-up" class="me-1" />
+            Please add a brief explanation
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -150,7 +197,122 @@ async function approve(callback) {
 }
 </script>
 <style scoped lang="scss">
-:deep(label) {
-  font-weight: bold;
+@import 'assets/css/_color-vars.scss';
+
+.feedback-section {
+  background: $color-gray--lighter;
+  padding: 1rem;
+}
+
+.feedback-step {
+  background: $color-white;
+  margin-bottom: 1rem;
+  border-left: 3px solid $color-gray-3;
+  transition: border-color 0.2s;
+
+  &.completed {
+    border-left-color: $colour-success;
+  }
+
+  &.disabled {
+    opacity: 0.6;
+  }
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: $color-gray--lighter;
+  font-weight: 600;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  background: $colour-success;
+  color: $color-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.step-label {
+  flex: 1;
+  color: $color-gray--darker;
+}
+
+.step-check {
+  color: $colour-success;
+}
+
+.step-content {
+  padding: 1rem;
+}
+
+.category-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.category-btn {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: $color-white;
+  border: 2px solid $color-gray-3;
+  color: $color-gray--darker;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+
+  &:hover {
+    border-color: $colour-success;
+    background: lighten($colour-success, 45%);
+  }
+
+  &.active {
+    border-color: $colour-success;
+    background: lighten($colour-success, 40%);
+    color: darken($colour-success, 15%);
+    font-weight: 600;
+  }
+}
+
+.comments-input {
+  border: 2px solid $color-gray-3;
+
+  &:focus {
+    border-color: $colour-success;
+    box-shadow: none;
+  }
+
+  &:disabled {
+    background: $color-gray--lighter;
+    cursor: not-allowed;
+  }
+}
+
+.submit-section {
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
+.help-hint {
+  color: $color-gray--dark;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+// Remove rounded corners
+:deep(.form-control),
+:deep(.btn) {
+  border-radius: 0 !important;
 }
 </style>

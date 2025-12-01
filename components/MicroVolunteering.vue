@@ -409,7 +409,44 @@ onMounted(async () => {
 })
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 :deep(label) {
   font-weight: bold;
+}
+
+// Remove rounded corners from modal
+:deep(.modal-content) {
+  border-radius: 0 !important;
+}
+
+:deep(.modal-header) {
+  border-radius: 0 !important;
+  background: $colour-success;
+  color: $color-white;
+
+  h1 {
+    color: $color-white;
+    font-size: 1.25rem;
+    margin: 0;
+  }
+}
+
+:deep(.modal-footer) {
+  border-radius: 0 !important;
+  background: $color-gray--lighter;
+}
+
+:deep(.btn) {
+  border-radius: 0 !important;
+}
+
+// Heart icons styling
+.text-faded {
+  opacity: 0.3;
+}
+
+.text-danger {
+  color: #dc3545;
 }
 </style>
