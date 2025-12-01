@@ -30,7 +30,7 @@
         </span>
         <span v-if="group.founded" class="mobile-hero__stat">
           <v-icon icon="calendar" class="me-1" />
-          Since <DateFormatted :value="group.founded" format="dateonly" />
+          Since&nbsp;<DateFormatted :value="group.founded" format="dateonly" />
         </span>
       </div>
     </div>
