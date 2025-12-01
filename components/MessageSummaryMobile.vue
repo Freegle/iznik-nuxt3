@@ -68,6 +68,19 @@
         <div v-if="attachmentCount > 1" class="photo-count">
           {{ attachmentCount }} <v-icon icon="camera" />
         </div>
+        <!-- Poster info overlay -->
+        <NuxtLink
+          v-if="posterName"
+          :to="posterProfileUrl"
+          class="poster-info"
+          :class="{ 'poster-info--below': attachmentCount > 1 }"
+          @click.stop
+        >
+          {{ posterName
+          }}<span v-if="distanceText" class="poster-distance">
+            · {{ distanceText }}</span
+          >
+        </NuxtLink>
       </div>
 
       <!-- Blurred sample image from similar posts -->
@@ -82,6 +95,18 @@
           :preload="preload"
         />
         <div class="sample-badge">Photo of similar item</div>
+        <!-- Poster info overlay -->
+        <NuxtLink
+          v-if="posterName"
+          :to="posterProfileUrl"
+          class="poster-info poster-info--below"
+          @click.stop
+        >
+          {{ posterName
+          }}<span v-if="distanceText" class="poster-distance">
+            · {{ distanceText }}</span
+          >
+        </NuxtLink>
       </div>
 
       <!-- No photo placeholder -->
@@ -90,6 +115,18 @@
         <div class="icon-circle">
           <v-icon :icon="categoryIcon" class="placeholder-icon" />
         </div>
+        <!-- Poster info overlay for no-photo case -->
+        <NuxtLink
+          v-if="posterName"
+          :to="posterProfileUrl"
+          class="poster-info"
+          @click.stop
+        >
+          {{ posterName
+          }}<span v-if="distanceText" class="poster-distance">
+            · {{ distanceText }}</span
+          >
+        </NuxtLink>
       </div>
 
       <!-- Title/info overlay at bottom of photo -->
@@ -151,6 +188,8 @@ const {
   successfulText,
   placeholderClass,
   categoryIcon,
+  posterName,
+  posterProfileUrl,
 } = useMessageDisplay(idRef)
 
 const locationText = computed(() => {
@@ -191,9 +230,8 @@ function expand(e) {
 // Use very specific selectors to override MessageList.vue's deep selectors
 .message-summary-mobile {
   position: relative;
-  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px $color-black-opacity-12;
   cursor: pointer;
   background: $color-white;
   height: auto;
@@ -261,10 +299,9 @@ function expand(e) {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(128, 128, 128, 0.7);
-  color: rgba(255, 255, 255, 0.95);
+  background: $color-gray-opacity-70;
+  color: $color-white-opacity-95;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
   font-size: 0.65rem;
   font-weight: 500;
   z-index: 5;
@@ -275,13 +312,44 @@ function expand(e) {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
+  background: $color-black-opacity-60;
+  color: $color-white;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
   font-size: 0.7rem;
   z-index: 5;
   height: auto;
+}
+
+.poster-info {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: $color-black-opacity-60;
+  color: $color-white;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  z-index: 4;
+  height: auto;
+  text-decoration: none;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    background: $color-black-opacity-70;
+    color: $color-white;
+    text-decoration: none;
+  }
+
+  &--below {
+    top: 32px;
+  }
+}
+
+.poster-distance {
+  opacity: 0.85;
 }
 
 .no-photo-placeholder {

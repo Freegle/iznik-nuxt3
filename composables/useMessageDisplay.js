@@ -1,6 +1,7 @@
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 import { timeagoShort, dateonlyNoYear } from '~/composables/useTimeFormat'
 import { milesAway } from '~/composables/useDistance'
@@ -12,11 +13,40 @@ import { milesAway } from '~/composables/useDistance'
 export function useMessageDisplay(messageId) {
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
+  const userStore = useUserStore()
   const { me } = useMe()
 
   const message = computed(() =>
     messageStore?.byId(messageId.value || messageId)
   )
+
+  // Fetch poster info when message changes
+  watch(
+    () => message.value?.fromuser,
+    (userId) => {
+      if (userId) {
+        userStore.fetch(userId)
+      }
+    },
+    { immediate: true }
+  )
+
+  const poster = computed(() => {
+    return message.value?.fromuser
+      ? userStore?.byId(message.value?.fromuser)
+      : null
+  })
+
+  const posterName = computed(() => {
+    if (!poster.value) return null
+    // Use first name only for compact display
+    const displayname = poster.value.displayname || ''
+    return displayname.split(' ')[0] || displayname
+  })
+
+  const posterProfileUrl = computed(() => {
+    return poster.value ? `/profile/${poster.value.id}` : null
+  })
 
   const strippedSubject = computed(() => {
     const subject = message.value?.subject || ''
@@ -125,5 +155,8 @@ export function useMessageDisplay(messageId) {
     successfulText,
     placeholderClass,
     categoryIcon,
+    poster,
+    posterName,
+    posterProfileUrl,
   }
 }
