@@ -1,31 +1,20 @@
 <template>
-  <b-card
-    border-variant="info"
-    header-bg-variant="info"
-    header-text-variant="white"
-    class="mt-2"
-  >
-    <template #header>
-      <h2 class="bg-info header--size5 mb-0">
-        <v-icon icon="address-book" />
-        Your Address Book
-      </h2>
-    </template>
-    <b-card-body class="p-0 pt-1">
-      <p>
-        You can save your address and directions, and send them to other
-        freeglers, so you don't have to type it each time.
+  <div class="settings-section">
+    <div class="section-header">
+      <v-icon icon="address-book" class="section-icon" />
+      <h2>Address Book</h2>
+      <span class="private-badge"><v-icon icon="lock" /> Private</span>
+    </div>
+
+    <div class="section-content">
+      <p class="description">
+        Save your address to quickly send it to other freeglers.
       </p>
-      <b-button variant="secondary" @click="addressBook">
+      <b-button variant="secondary" size="sm" @click="addressBook">
         Open Address Book
       </b-button>
-      <p class="text-muted mt-2">
-        <v-icon icon="lock" />
-        This is private. Other freeglers can't see this unless you send it to
-        them.
-      </p>
-    </b-card-body>
-  </b-card>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -41,3 +30,53 @@ const addressBook = async () => {
   emit('show-address-modal')
 }
 </script>
+
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $color-green-background;
+    flex: 1;
+  }
+
+  .section-icon {
+    color: $color-green-background;
+  }
+}
+
+.private-badge {
+  font-size: 0.75rem;
+  color: $color-gray--dark;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.section-content {
+  padding: 1rem 1.25rem;
+}
+
+.description {
+  color: $color-gray--dark;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+</style>
