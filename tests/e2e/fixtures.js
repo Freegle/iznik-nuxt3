@@ -263,7 +263,6 @@ const test = base.test.extend({
       /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
       /accounts\.google\.com\/gsi/, // Google authentication/sign-in errors in test
       /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
-      /modtools-prod\.localhost/, // ModTools prod URL variant (may differ from modtools-prod-local)
       // CSP (Content Security Policy) violations - common in development/testing
       /Refused to apply inline style because it violates the following Content Security Policy directive/,
       /Content Security Policy directive.*style-src/,
