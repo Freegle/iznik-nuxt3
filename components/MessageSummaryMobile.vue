@@ -295,11 +295,41 @@ function expand(e) {
   overflow: hidden;
 
   &.offer-gradient {
-    background: linear-gradient(145deg, #4caf50 0%, #2e7d32 100%);
+    background: radial-gradient(
+        ellipse at 30% 20%,
+        rgba(129, 199, 132, 0.9) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 70% 80%,
+        rgba(56, 142, 60, 0.8) 0%,
+        transparent 50%
+      ),
+      linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
+
+    .placeholder-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M20 25h20v2H20zM25 20h10v2H25zM22 27h16v8H22zM28 35h4v5H28z' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
+      background-size: 60px 60px;
+    }
   }
 
   &.wanted-gradient {
-    background: linear-gradient(145deg, #2196f3 0%, #1565c0 100%);
+    background: radial-gradient(
+        ellipse at 25% 25%,
+        rgba(144, 202, 249, 0.9) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        ellipse at 75% 75%,
+        rgba(66, 165, 245, 0.7) 0%,
+        transparent 45%
+      ),
+      linear-gradient(160deg, #64b5f6 0%, #42a5f5 50%, #1e88e5 100%);
+
+    .placeholder-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
+      background-size: 70px 70px;
+    }
   }
 }
 
@@ -309,15 +339,6 @@ function expand(e) {
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.08;
-  background-image: radial-gradient(
-      circle at 20% 30%,
-      white 1px,
-      transparent 1px
-    ),
-    radial-gradient(circle at 80% 70%, white 1px, transparent 1px),
-    radial-gradient(circle at 50% 50%, white 2px, transparent 2px);
-  background-size: 30px 30px, 25px 25px, 40px 40px;
 }
 
 .icon-circle {

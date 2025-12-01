@@ -4,6 +4,7 @@
       inline: inline,
       tagbadge: true,
       tagdef: def,
+      'tagbadge--wanted': isWanted,
       'font-weight-bold': true,
       forcebreak: true,
       'text-wrap': true,
@@ -56,6 +57,10 @@ const message = computed(() => {
   return messageStore?.byId(props.id)
 })
 
+const isWanted = computed(() => {
+  return message.value?.type === 'Wanted'
+})
+
 const tagForGroup = computed(() => {
   let ret = null
 
@@ -85,6 +90,7 @@ const tagForGroup = computed(() => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .tagbadge {
   left: 10px;
@@ -96,6 +102,10 @@ const tagForGroup = computed(() => {
   text-transform: uppercase;
   max-width: calc(100% - 20px);
   z-index: 5;
+
+  &--wanted {
+    background-color: $color-blue--light;
+  }
 
   &.tagdef {
     left: 0px;
