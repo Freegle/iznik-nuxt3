@@ -693,14 +693,11 @@ if (me.value) {
 
 // Filter section
 .filter-section {
-  margin-top: 0.5rem;
+  margin-top: 0;
   background: white;
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
-  @include media-breakpoint-up(lg) {
-    margin-top: 0.25rem;
-  }
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .filter-row {

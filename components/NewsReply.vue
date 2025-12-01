@@ -103,8 +103,8 @@
               variant="link"
               size="sm"
               :show-icon="true"
-              btn-class="text-muted p-0"
-              title-class="d-none d-sm-inline ms-1"
+              btn-class="p-0 chat-btn"
+              title-class="ms-1"
             />
           </template>
           <!-- More actions dropdown -->
@@ -710,15 +710,14 @@ function showReplyPhotoModal() {
   padding: 0.25rem 0.5rem;
   background: transparent;
   border: none;
-  color: $colour-secondary;
-  font-size: 0.8rem;
+  color: $color-blue--base;
+  font-size: 0.85rem;
   cursor: pointer;
-  border-radius: 3px;
   transition: background 0.15s, color 0.15s;
 
   &:hover {
     background: $color-gray--lighter;
-    color: darken($colour-secondary, 10%);
+    color: darken($color-blue--base, 10%);
   }
 
   .action-icon {
@@ -726,12 +725,41 @@ function showReplyPhotoModal() {
   }
 
   &.loved {
-    color: $colour-secondary;
+    color: $color-blue--base;
   }
 
   &.love-count {
     padding: 0.25rem 0.375rem;
     font-size: 0.75rem;
+  }
+
+  :deep(.chat-btn) {
+    color: $color-blue--base !important;
+    font-size: 0.85rem !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    padding: 0.25rem 0.5rem !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+
+    &:hover {
+      color: darken($color-blue--base, 10%) !important;
+      background: $color-gray--lighter !important;
+    }
+
+    span {
+      font-weight: 400 !important;
+    }
+  }
+
+  /* Show Message button on all screen sizes */
+  :deep(.d-none) {
+    display: inline-flex !important;
+  }
+  :deep(.d-sm-none) {
+    display: none !important;
   }
 }
 
