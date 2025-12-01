@@ -63,110 +63,86 @@
         </div>
         <div v-if="userid" class="text-muted align-items-center">
           <span class="text-muted small mr-1">
-            {{ replyaddedago }}
+            <span class="d-none d-md-inline">{{ replyaddedago }}</span>
+            <span class="d-md-none">{{ replyaddedagoShort }}</span>
           </span>
           <NewsUserInfo :id="id" class="mr-1 d-inline" />
         </div>
-        <div class="d-flex flex-row align-items-center flex-wrap">
-          <b-button
-            variant="link"
-            size="sm"
-            class="reply__button text-muted m-0"
-            @click="replyReply"
-          >
-            Reply
-          </b-button>
+        <div class="reply-actions">
+          <button class="reply-action" @click="replyReply">
+            <v-icon icon="reply" class="action-icon" />
+            <span class="action-text">Reply</span>
+          </button>
           <template v-if="!reply.loved && reply.userid !== myid">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
-              @click="love"
-            >
-              Love this
-            </b-button>
+            <button class="reply-action" @click="love">
+              <v-icon icon="heart" class="action-icon" />
+              <span class="action-text">Love</span>
+            </button>
           </template>
           <template v-if="reply.loved">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
-              @click="unlove"
-            >
-              Unlove this
-            </b-button>
+            <button class="reply-action loved" @click="unlove">
+              <v-icon icon="heart" class="action-icon text-danger" />
+              <span class="action-text">Loved</span>
+            </button>
           </template>
           <template v-if="reply.loves">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="mr-1 small text-muted showlove m-0"
+            <button
+              class="reply-action love-count"
               :aria-label="getShowLovesLabel"
               @click="showLove"
             >
-              <v-icon icon="heart" class="text-danger" />&nbsp;{{ reply.loves }}
-            </b-button>
-          </template>
-          <template v-if="parseInt(me.id) === parseInt(userid) || admin">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
-              @click="showEdit"
-            >
-              Edit
-            </b-button>
-          </template>
-          <template v-if="parseInt(me.id) === parseInt(userid) || mod">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
-              @click="deleteReply"
-            >
-              Delete
-            </b-button>
+              <v-icon icon="heart" class="text-danger" />
+              <span>{{ reply.loves }}</span>
+            </button>
           </template>
           <template v-if="parseInt(me.id) !== parseInt(userid)">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
             <ChatButton
-              class="reply__button text-muted d-flex align-items-center m-0"
+              class="reply-action"
               :userid="userid"
               title="Message"
               variant="link"
               size="sm"
-              :show-icon="false"
+              :show-icon="true"
               btn-class="text-muted p-0"
-              title-class="ml-0"
+              title-class="d-none d-sm-inline ms-1"
             />
           </template>
-          <template v-if="chitChatMod && !reply.hidden">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
+          <!-- More actions dropdown -->
+          <b-dropdown
+            v-if="hasMoreActions"
+            variant="link"
+            no-caret
+            right
+            class="more-actions-dropdown"
+          >
+            <template #button-content>
+              <v-icon icon="ellipsis-h" class="text-muted" />
+            </template>
+            <b-dropdown-item
+              v-if="parseInt(me.id) === parseInt(userid) || admin"
+              @click="showEdit"
+            >
+              <v-icon icon="pen" class="me-2" />Edit
+            </b-dropdown-item>
+            <b-dropdown-item
+              v-if="parseInt(me.id) === parseInt(userid) || mod"
+              @click="deleteReply"
+            >
+              <v-icon icon="trash" class="me-2" />Delete
+            </b-dropdown-item>
+            <b-dropdown-item
+              v-if="chitChatMod && !reply.hidden"
               @click="hideReply"
             >
-              Hide
-            </b-button>
-          </template>
-          <template v-if="chitChatMod && reply.hidden">
-            <span class="text-muted small ms-1 me-1">&bull;</span>
-            <b-button
-              variant="link"
-              size="sm"
-              class="reply__button text-muted m-0"
+              <v-icon icon="eye-slash" class="me-2" />Hide
+            </b-dropdown-item>
+            <b-dropdown-item
+              v-if="chitChatMod && reply.hidden"
               @click="unHideReply"
             >
-              Unhide
-            </b-button>
-          </template>
+              <v-icon icon="eye" class="me-2" />Unhide
+            </b-dropdown-item>
+          </b-dropdown>
         </div>
         <NewsPreviews
           v-if="reply.previews?.length"
@@ -209,16 +185,13 @@
               />
             </span>
           </template>
-          <b-form-textarea
+          <AutoHeightTextarea
             ref="replyboxref"
             v-model="replybox"
-            size="sm"
             rows="1"
             max-rows="8"
-            maxlength="2048"
-            spellcheck="true"
-            placeholder="Write a reply to this comment..."
-            class="p-0 pl-1 pt-1"
+            :placeholder="replyPlaceholder"
+            class="reply-textarea"
             @focus="focusedReply"
           />
         </OurAtTa>
@@ -247,17 +220,13 @@
                 />
               </span>
             </slot>
-            <b-form-textarea
+            <AutoHeightTextarea
               ref="replyboxref"
               v-model="replybox"
-              size="sm"
               rows="1"
               max-rows="8"
-              maxlength="2048"
-              spellcheck="true"
-              placeholder="Write a reply to this comment and hit enter to send..."
-              class="p-0 pl-1 pt-1"
-              autocapitalize="none"
+              :placeholder="replyPlaceholder"
+              class="reply-textarea"
               @keydown.enter.exact.prevent
               @keyup.enter.exact="sendReply"
               @keydown.enter.shift.exact.prevent="newlineReply"
@@ -267,18 +236,20 @@
           </b-input-group>
         </OurAtTa>
       </div>
-      <div class="d-flex justify-content-between flex-wrap m-1 mt-2">
-        <b-button size="sm" variant="secondary" @click="photoAdd">
-          <v-icon icon="camera" />&nbsp;Add Photo
-        </b-button>
-        <SpinButton
+      <div class="reply-toolbar">
+        <button class="toolbar-btn" title="Add photo" @click="photoAdd">
+          <v-icon icon="camera" />
+          <span class="toolbar-label">Photo</span>
+        </button>
+        <button
           v-if="enterNewLine"
-          variant="primary"
-          icon-name="angle-double-right"
-          label="Post"
-          iconlast
-          @handle="sendReply"
-        />
+          class="toolbar-btn send-btn"
+          :disabled="!replybox?.trim()"
+          @click="sendReply"
+        >
+          <v-icon icon="paper-plane" />
+          <span class="toolbar-label">Send</span>
+        </button>
       </div>
     </div>
     <NuxtPicture
@@ -341,7 +312,6 @@ import {
   onMounted,
   watch,
 } from 'vue'
-import SpinButton from './SpinButton'
 import { useNewsfeedStore } from '~/stores/newsfeed'
 import { useMiscStore } from '~/stores/misc'
 import { twem, untwem } from '~/composables/useTwem'
@@ -350,7 +320,8 @@ import NewsHighlight from '~/components/NewsHighlight'
 import ChatButton from '~/components/ChatButton'
 import NewsPreviews from '~/components/NewsPreviews'
 import ProfileImage from '~/components/ProfileImage'
-import { timeago } from '~/composables/useTimeFormat'
+import AutoHeightTextarea from '~/components/AutoHeightTextarea'
+import { timeago, timeagoShort } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
 
 const NewsPhotoModal = defineAsyncComponent(() =>
@@ -401,6 +372,14 @@ const authStore = useAuthStore()
 const me = computed(() => authStore.user)
 const myid = computed(() => me.value?.id)
 
+const isMobile = computed(() => {
+  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+})
+
+const replyPlaceholder = computed(() => {
+  return isMobile.value ? 'Reply...' : 'Write a reply...'
+})
+
 // Refs
 const at = ref(null)
 const replybox = ref(null)
@@ -436,6 +415,10 @@ const reply = computed(() => {
 
 const replyaddedago = computed(() => {
   return timeago(reply.value.added)
+})
+
+const replyaddedagoShort = computed(() => {
+  return timeagoShort(reply.value.added)
 })
 
 const tagusers = computed(() => {
@@ -483,6 +466,15 @@ const getShowLovesLabel = computed(() => {
     'This comment has ' +
     pluralize('love', reply.value.loves, true) +
     '. Who loves this?'
+  )
+})
+
+const hasMoreActions = computed(() => {
+  return (
+    parseInt(me.value?.id) === parseInt(userid.value) ||
+    admin.value ||
+    mod.value ||
+    chitChatMod.value
   )
 })
 
@@ -688,6 +680,7 @@ function showReplyPhotoModal() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .reply {
   display: flex;
@@ -701,16 +694,132 @@ function showReplyPhotoModal() {
   width: 100px;
 }
 
-.reply__button {
-  margin-left: 3px;
-  margin-right: 3px;
-  padding: 0;
+// Modern reply actions
+.reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
 }
 
-.showlove {
+.reply-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: transparent;
   border: none;
-  padding: 3px;
+  color: $color-gray--dark;
   font-size: 0.8rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: $color-gray--lighter;
+    color: $color-green-background;
+  }
+
+  .action-icon {
+    font-size: 0.75rem;
+  }
+
+  .action-text {
+    @include media-breakpoint-down(sm) {
+      display: none;
+    }
+  }
+
+  &.loved {
+    color: $color-green-background;
+  }
+
+  &.love-count {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.75rem;
+  }
+}
+
+.more-actions-dropdown {
+  :deep(.btn) {
+    padding: 0.25rem 0.375rem;
+    line-height: 1;
+
+    &:hover {
+      background: $color-gray--lighter;
+    }
+  }
+
+  :deep(.dropdown-menu) {
+    font-size: 0.9rem;
+    min-width: 140px;
+  }
+
+  :deep(.dropdown-item) {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+.reply-textarea {
+  flex: 1;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  min-height: 32px;
+
+  &:focus {
+    border-color: $color-green-background;
+    outline: none;
+  }
+}
+
+.reply-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  background: $color-gray--lighter;
+  border: none;
+  border-radius: 4px;
+  color: $color-gray--darker;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: darken($color-gray--lighter, 5%);
+    color: $color-green-background;
+  }
+
+  .toolbar-label {
+    @include media-breakpoint-down(sm) {
+      display: none;
+    }
+  }
+}
+
+.send-btn {
+  background: $color-green-background;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: darken($color-green-background, 8%);
+    color: white;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 :deep(.fa-icon) {

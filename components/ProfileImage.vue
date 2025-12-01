@@ -201,12 +201,12 @@ const brokenProfileImage = (e) => {
 }
 
 :deep(.profile--sm img) {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  max-width: 20px !important;
-  max-height: 20px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
 
   @include media-breakpoint-up(md) {
     width: 25px !important;
@@ -219,12 +219,12 @@ const brokenProfileImage = (e) => {
 }
 
 :deep(.profile--md img) {
-  width: 20px !important;
-  height: 20px !important;
-  min-width: 20px !important;
-  min-height: 20px !important;
-  max-width: 20px !important;
-  max-height: 20px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
 
   @include media-breakpoint-up(md) {
     width: 35px !important;
@@ -237,12 +237,12 @@ const brokenProfileImage = (e) => {
 }
 
 :deep(.profile--lg img) {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  min-height: 30px !important;
-  max-width: 30px !important;
-  max-height: 30px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
 
   @include media-breakpoint-up(sm) {
     width: 50px !important;
@@ -289,16 +289,15 @@ const brokenProfileImage = (e) => {
   grid-row: 1 / 2;
   grid-column: 1 / 2;
   translate: 3px 3px;
-
-  :not(.badge) {
-    background-color: $color-white;
-    color: $colour-success;
-  }
+  background-color: $color-white;
+  color: $colour-success;
+  padding: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .ProfileImage__moderator--sm {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 
   @include media-breakpoint-up(md) {
     width: 16px;
@@ -317,9 +316,9 @@ const brokenProfileImage = (e) => {
 }
 
 .ProfileImage__moderator--lg {
-  width: 18px;
-  height: 18px;
-  font-size: 0.5rem;
+  width: 20px;
+  height: 20px;
+  font-size: 0.6rem;
 
   @include media-breakpoint-up(md) {
     width: 24px;

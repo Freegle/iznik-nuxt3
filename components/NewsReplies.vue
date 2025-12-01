@@ -256,6 +256,10 @@ function rendered(id) {
 }
 </script>
 <style lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
 .lines {
   display: grid;
   grid-template-columns: 1fr;
@@ -270,9 +274,16 @@ function rendered(id) {
   .line {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
-    border-left: 1px solid #e0e0e0;
+    border-left: 1px solid #e8e8e8;
     margin-left: 21px;
     z-index: 1000;
+
+    // Thinner/subtler line on mobile
+    @include media-breakpoint-down(md) {
+      margin-left: 16px;
+      border-left-width: 1px;
+      border-color: #ececec;
+    }
   }
 }
 </style>
