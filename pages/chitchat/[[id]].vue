@@ -693,11 +693,14 @@ if (me.value) {
 
 // Filter section
 .filter-section {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   background: white;
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  @include media-breakpoint-up(lg) {
+    margin-top: 0.25rem;
+  }
 }
 
 .filter-row {
@@ -777,14 +780,12 @@ if (me.value) {
     }
   }
 
-  // Modernize action buttons
+  // Action buttons
   :deep(.btn-link) {
     font-size: 0.85rem;
     padding: 0.25rem 0.5rem;
-    color: $color-gray--darker;
 
     &:hover {
-      color: $color-green-background;
       text-decoration: none;
     }
   }
