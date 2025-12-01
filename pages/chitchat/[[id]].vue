@@ -573,7 +573,7 @@ if (me.value) {
 
 // Composer section
 .composer-section {
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
 
   @include media-breakpoint-up(lg) {
     padding: 1rem 0;
@@ -591,7 +591,7 @@ if (me.value) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1rem;
+  padding: 0.625rem 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
   .header-icon {
@@ -734,8 +734,7 @@ if (me.value) {
 
 // Events section
 .events-section {
-  margin: 0.75rem;
-  border-radius: 4px;
+  margin: 0.5rem 0.75rem;
   overflow: hidden;
 }
 
