@@ -710,7 +710,7 @@ function showReplyPhotoModal() {
   padding: 0.25rem 0.5rem;
   background: transparent;
   border: none;
-  color: $color-gray--dark;
+  color: $colour-secondary;
   font-size: 0.8rem;
   cursor: pointer;
   border-radius: 3px;
@@ -718,21 +718,15 @@ function showReplyPhotoModal() {
 
   &:hover {
     background: $color-gray--lighter;
-    color: $color-green-background;
+    color: darken($colour-secondary, 10%);
   }
 
   .action-icon {
     font-size: 0.75rem;
   }
 
-  .action-text {
-    @include media-breakpoint-down(sm) {
-      display: none;
-    }
-  }
-
   &.loved {
-    color: $color-green-background;
+    color: $colour-secondary;
   }
 
   &.love-count {
