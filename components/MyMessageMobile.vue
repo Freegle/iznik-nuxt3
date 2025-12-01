@@ -26,7 +26,7 @@
               class="promised-banner"
             >
               <v-icon icon="handshake" class="me-2" />
-              Promised to <strong>{{ promisedToName }}</strong>
+              Promised to{{ ' ' }}<strong>{{ promisedToName }}</strong>
             </div>
 
             <!-- Photo -->
