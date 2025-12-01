@@ -52,20 +52,9 @@
           @add="showAddIsochrone = true"
         />
         <IsoChrone v-if="showAddIsochrone" @added="added" @cancel="cancel" />
-        <p class="mt-2">
-          You'll see posts from near your postcode - see the area shaded on the
-          map below. The slider above controls how far away to include. Click
-          the <em>Near</em> and <em>Far</em> buttons, or drag the slider, to
-          change it.
-        </p>
-        <p>
-          You can set your postcode in
-          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>, and you
-          can
-          <nuxt-link to="#" @click="showAddIsochrone = true"
-            >add a location</nuxt-link
-          >
-          to show posts near another postcode (e.g. work as well as home).
+        <p class="help-text d-none d-md-block">
+          Adjust the slider to show posts from nearer or further away.
+          <nuxt-link no-prefetch to="/settings">Change postcode</nuxt-link>
         </p>
       </div>
       <hr />
@@ -366,15 +355,21 @@ const sort = computed({
 
 // Remove curved corners from form controls
 :deep(.form-select),
-:deep(.form-control) {
-  border-radius: 0;
+:deep(.form-control),
+:deep(select),
+:deep(input) {
+  border-radius: 0 !important;
 }
 
 :deep(.input-group) {
   .form-control,
   .btn {
-    border-radius: 0;
+    border-radius: 0 !important;
   }
+}
+
+:deep(.btn) {
+  border-radius: 0 !important;
 }
 
 // Compact labels for mobile
@@ -444,11 +439,11 @@ const sort = computed({
   }
 }
 
-// Compact isochrone section on mobile
-.isochrones {
-  p {
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-  }
+// Help text - hidden on mobile
+.help-text {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 </style>

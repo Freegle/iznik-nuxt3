@@ -595,14 +595,14 @@ if (me.value) {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
   .header-icon {
-    color: $color-green-background;
+    color: $colour-success;
     font-size: 1.1rem;
   }
 
   .header-title {
     font-weight: 600;
     font-size: 1rem;
-    color: $color-green-background;
+    color: $colour-success;
   }
 }
 
