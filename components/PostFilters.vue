@@ -364,6 +364,27 @@ const sort = computed({
   border-color: $color-white !important;
 }
 
+// Remove curved corners from form controls
+:deep(.form-select),
+:deep(.form-control) {
+  border-radius: 0;
+}
+
+:deep(.input-group) {
+  .form-control,
+  .btn {
+    border-radius: 0;
+  }
+}
+
+// Compact labels for mobile
+.filters label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: $color-gray--darker;
+}
+
 .filters {
   display: grid;
 
@@ -420,6 +441,14 @@ const sort = computed({
       grid-column: 1 / 4;
       grid-row: 3 / 4;
     }
+  }
+}
+
+// Compact isochrone section on mobile
+.isochrones {
+  p {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
   }
 }
 </style>

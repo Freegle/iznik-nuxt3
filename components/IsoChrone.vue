@@ -344,9 +344,23 @@ watch(minutes, (newVal) => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-:deep(button) {
+// Remove curved corners from buttons
+:deep(button),
+:deep(.btn) {
   box-shadow: none !important;
+  border-radius: 0;
+}
+
+// Compact labels
+label {
+  font-size: 0.85rem;
+}
+
+// Slider styling
+:deep(input[type='range']) {
+  accent-color: $colour-success;
 }
 
 .layout {
