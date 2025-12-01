@@ -1,101 +1,160 @@
 <template>
-  <div class="help-chat">
-    <div class="chat-container">
-      <!-- Chat messages -->
-      <div ref="messagesContainer" class="chat-messages">
-        <TransitionGroup name="message">
-          <div
-            v-for="(msg, index) in messages"
-            :key="index"
-            :class="['chat-message', msg.type]"
+  <div class="help-flow">
+    <!-- Current question/answer -->
+    <div class="flow-content">
+      <div v-if="currentNode" class="flow-card">
+        <p v-if="currentNode.text" class="flow-text">{{ currentNode.text }}</p>
+
+        <!-- Options to choose from -->
+        <div v-if="currentNode.options" class="flow-options">
+          <button
+            v-for="opt in currentNode.options"
+            :key="opt.id"
+            class="flow-option"
+            @click="selectOption(opt)"
           >
-            <div v-if="msg.type === 'bot'" class="bot-avatar">
-              <v-icon icon="heart" />
-            </div>
-            <div class="message-content">
-              <p v-if="msg.text" class="message-text">{{ msg.text }}</p>
-              <div v-if="msg.options" class="message-options">
-                <button
-                  v-for="opt in msg.options"
-                  :key="opt.id"
-                  class="option-btn"
-                  @click="selectOption(opt)"
-                >
-                  <v-icon v-if="opt.icon" :icon="opt.icon" class="me-2" />
-                  {{ opt.label }}
-                </button>
-              </div>
-              <div v-if="msg.component" class="message-component">
-                <component :is="msg.component" v-bind="msg.componentProps" />
-              </div>
-              <div v-if="msg.link" class="message-link">
-                <nuxt-link :to="msg.link.to" class="help-link">
-                  <v-icon
-                    v-if="msg.link.icon"
-                    :icon="msg.link.icon"
-                    class="me-1"
-                  />
-                  {{ msg.link.text }}
-                </nuxt-link>
-              </div>
-              <div v-if="msg.action" class="message-action">
-                <button class="action-btn" @click="msg.action.handler">
-                  <v-icon
-                    v-if="msg.action.icon"
-                    :icon="msg.action.icon"
-                    class="me-1"
-                  />
-                  {{ msg.action.text }}
-                </button>
-              </div>
-            </div>
+            <v-icon v-if="opt.icon" :icon="opt.icon" class="option-icon" />
+            <span>{{ opt.label }}</span>
+            <v-icon icon="chevron-right" class="chevron" />
+          </button>
+        </div>
+
+        <!-- Link to another page -->
+        <div v-if="currentNode.link" class="flow-link">
+          <nuxt-link :to="currentNode.link.to" class="link-btn">
+            <v-icon
+              v-if="currentNode.link.icon"
+              :icon="currentNode.link.icon"
+              class="me-2"
+            />
+            {{ currentNode.link.text }}
+          </nuxt-link>
+        </div>
+
+        <!-- Action button -->
+        <div v-if="currentNode.action" class="flow-action">
+          <button class="action-btn" @click="currentNode.action.handler">
+            <v-icon
+              v-if="currentNode.action.icon"
+              :icon="currentNode.action.icon"
+              class="me-2"
+            />
+            {{ currentNode.action.text }}
+          </button>
+        </div>
+
+        <!-- HTML content for detailed answers -->
+        <div
+          v-if="currentNode.html"
+          class="flow-html"
+          v-html="currentNode.html"
+        />
+
+        <!-- Inline contact form -->
+        <div v-if="currentNode.showContactForm" class="flow-contact-form">
+          <div v-if="loggedIn" class="contact-card">
+            <GroupRememberSelect
+              v-model="contactGroupId"
+              remember="contactmods"
+              class="mb-3"
+            />
+            <ChatButton
+              :groupid="contactGroupId"
+              size="md"
+              title="Contact community volunteers"
+              variant="primary"
+            />
           </div>
-        </TransitionGroup>
-        <div v-if="typing" class="chat-message bot typing">
-          <div class="bot-avatar">
-            <v-icon icon="heart" />
+          <NoticeMessage v-else variant="info">
+            Please log in to contact your community volunteers.
+          </NoticeMessage>
+        </div>
+
+        <!-- Inline technical support -->
+        <div v-if="currentNode.showTechnicalSupport" class="flow-support">
+          <div class="support-card">
+            <SupportLink />
+            <p class="support-note">
+              Please include details of what you were trying to do and any error
+              messages you saw.
+            </p>
           </div>
-          <div class="message-content">
-            <div class="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+        </div>
+
+        <!-- App download links -->
+        <div v-if="currentNode.showAppLinks" class="flow-app-links">
+          <div class="app-links">
+            <ExternalLink
+              href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
+            >
+              <img src="/en-play-badge.png" alt="Get it on Google Play" />
+            </ExternalLink>
+            <ExternalLink
+              href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&mt=8"
+            >
+              <img
+                src="/app-store-black-sm.png"
+                alt="Download on the App Store"
+              />
+            </ExternalLink>
           </div>
+          <p class="app-note">
+            Available in UK app stores. Android 5.1/iOS 13 or later.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- Reset button -->
-    <div v-if="messages.length > 1" class="chat-reset">
-      <button class="reset-btn" @click="reset">
-        <v-icon icon="redo" class="me-1" /> Start over
+    <!-- Breadcrumb trail -->
+    <div v-if="history.length > 0" class="flow-breadcrumb">
+      <button class="breadcrumb-btn" @click="goToStart">
+        <v-icon icon="home" class="me-1" />Start
       </button>
+      <span
+        v-for="(item, index) in history"
+        :key="index"
+        class="breadcrumb-item"
+      >
+        <v-icon icon="chevron-right" class="breadcrumb-sep" />
+        <button class="breadcrumb-btn" @click="goBack(index)">
+          {{ item.label }}
+        </button>
+      </span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
+import GroupRememberSelect from '~/components/GroupRememberSelect'
+import ChatButton from '~/components/ChatButton'
+import NoticeMessage from '~/components/NoticeMessage'
+import SupportLink from '~/components/SupportLink'
+import ExternalLink from '~/components/ExternalLink'
+import { useAuthStore } from '~/stores/auth'
 
-const emit = defineEmits(['contact-volunteers', 'show-faq'])
+const authStore = useAuthStore()
+const loggedIn = computed(() => authStore.user !== null)
+const contactGroupId = ref(null)
 
-const messagesContainer = ref(null)
-const messages = ref([])
-const typing = ref(false)
+const currentNodeId = ref('start')
+const history = ref([])
 
 const helpTree = {
   start: {
-    text: "Hi! I'm here to help. What do you need assistance with?",
     options: [
       { id: 'posting', label: 'Posting items', icon: 'gift' },
+      { id: 'replying', label: 'Replying to posts', icon: 'comments' },
       { id: 'emails', label: 'Emails & notifications', icon: 'envelope' },
       { id: 'account', label: 'My account', icon: 'user' },
-      { id: 'other', label: 'Something else', icon: 'question-circle' },
+      { id: 'about', label: 'About Freegle', icon: 'info-circle' },
+      { id: 'contact', label: 'Contact volunteers', icon: 'comment' },
     ],
   },
+
+  // === POSTING ===
   posting: {
-    text: 'What would you like to know about posting?',
+    text: 'What about posting?',
     options: [
       {
         id: 'posting-taken',
@@ -104,27 +163,76 @@ const helpTree = {
       },
       { id: 'posting-repost', label: 'Repost an item', icon: 'redo' },
       { id: 'posting-edit', label: 'Edit my post', icon: 'pen' },
-      { id: 'posting-back', label: 'Back', icon: 'arrow-left' },
+      { id: 'posting-choosing', label: 'Choosing who gets it', icon: 'users' },
+      {
+        id: 'posting-selling',
+        label: 'Can I sell freecycled items?',
+        icon: 'shopping-cart',
+      },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
   'posting-taken': {
-    text: 'To mark your item as TAKEN or RECEIVED:',
-    followUp: {
-      text: "Go to My Posts, find your post, and click the 'Mark as TAKEN' or 'Mark as RECEIVED' button.",
-      link: { to: '/myposts', text: 'Go to My Posts', icon: 'arrow-right' },
-    },
+    text: "To mark your item as TAKEN or RECEIVED, go to My Posts, find your post, and click the 'Mark as TAKEN' or 'Mark as RECEIVED' button. If you have multiple posts, you may need to click the post to expand it first.",
+    link: { to: '/myposts', text: 'Go to My Posts', icon: 'arrow-right' },
   },
   'posting-repost': {
-    text: 'Items without replies auto-repost. If you have replies, use the Repost button in My Posts.',
+    text: "If you've not had any replies, your post will auto-repost. You can see when in My Posts. If you have had replies, use the Repost button there.",
     link: { to: '/myposts', text: 'Go to My Posts', icon: 'arrow-right' },
   },
   'posting-edit': {
     text: 'To edit your post, go to My Posts, click on your post, then use the Edit button.',
     link: { to: '/myposts', text: 'Go to My Posts', icon: 'arrow-right' },
   },
-  'posting-back': {
-    goto: 'start',
+  'posting-choosing': {
+    text: "Unless you're in a hurry, it's better to wait and see who replies before choosing. You can see in someone's profile how close they are and their ratings from other freeglers. Some people use first-come-first-served, but you don't have to. It's up to you!",
+    options: [
+      { id: 'posting', label: 'More posting help', icon: 'arrow-left' },
+      { id: 'start', label: 'Start over', icon: 'home' },
+    ],
   },
+  'posting-selling': {
+    text: "Reselling keeps stuff out of landfill too, but please don't sell items you got from Freegle without the agreement of the person who gave them to you.",
+    options: [
+      { id: 'posting', label: 'More posting help', icon: 'arrow-left' },
+      { id: 'start', label: 'Start over', icon: 'home' },
+    ],
+  },
+
+  // === REPLYING ===
+  replying: {
+    text: 'What about replying to posts?',
+    options: [
+      { id: 'replying-how', label: 'How to reply to a post', icon: 'reply' },
+      { id: 'replying-withdrawn', label: 'Post was withdrawn', icon: 'times' },
+      {
+        id: 'replying-no-response',
+        label: "Poster hasn't replied",
+        icon: 'clock',
+      },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
+    ],
+  },
+  'replying-how': {
+    text: "When you see something you want, click the Reply button on the post. Send a friendly message - many people like to know why you want the item or what you'll use it for.",
+    options: [
+      { id: 'replying', label: 'More replying help', icon: 'arrow-left' },
+      { id: 'start', label: 'Start over', icon: 'home' },
+    ],
+  },
+  'replying-withdrawn': {
+    text: 'If a post has been withdrawn, it means the item is no longer available. The poster may have given it to someone else or changed their mind. Keep browsing - new items are posted all the time!',
+    options: [
+      { id: 'replying', label: 'More replying help', icon: 'arrow-left' },
+      { id: 'start', label: 'Start over', icon: 'home' },
+    ],
+  },
+  'replying-no-response': {
+    text: "Posters can get lots of replies and may take time to respond. If you haven't heard back after a few days, the item may have gone to someone else. You can check your Chats to see if there's been any response.",
+    link: { to: '/chats', text: 'Go to Chats', icon: 'arrow-right' },
+  },
+
+  // === EMAILS ===
   emails: {
     text: 'What about emails?',
     options: [
@@ -135,365 +243,321 @@ const helpTree = {
         icon: 'times',
       },
       { id: 'emails-change', label: 'Change email address', icon: 'pen' },
-      { id: 'emails-back', label: 'Back', icon: 'arrow-left' },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
   'emails-fewer': {
-    text: "You can reduce emails in Settings under 'Mail Settings'.",
+    text: "You can reduce the number and frequency of emails in Settings under 'Mail Settings'. You can choose to get a daily digest instead of individual emails.",
     link: { to: '/settings', text: 'Go to Settings', icon: 'arrow-right' },
   },
   'emails-unsubscribe': {
-    text: 'Sorry to see you go! You can unsubscribe here.',
+    text: 'Sorry to see you go! You can unsubscribe from all Freegle emails. If you just want fewer emails, consider changing your mail settings instead.',
     link: { to: '/unsubscribe', text: 'Unsubscribe', icon: 'arrow-right' },
   },
   'emails-change': {
-    text: "Change your email in Settings under 'Personal Information'.",
+    text: "You can change your email address in Settings under 'Personal Information'.",
     link: { to: '/settings', text: 'Go to Settings', icon: 'arrow-right' },
   },
-  'emails-back': {
-    goto: 'start',
-  },
+
+  // === ACCOUNT ===
   account: {
     text: 'What about your account?',
     options: [
       { id: 'account-data', label: 'My data & privacy', icon: 'shield-alt' },
       { id: 'account-settings', label: 'Account settings', icon: 'cog' },
-      { id: 'account-back', label: 'Back', icon: 'arrow-left' },
+      { id: 'account-app', label: 'Mobile app', icon: 'mobile-alt' },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
   'account-data': {
-    text: 'You can view and download your data, and read our privacy policy.',
+    text: 'You can view and download your data, and read our privacy policy. We take your privacy seriously.',
     link: { to: '/mydata', text: 'View my data', icon: 'arrow-right' },
   },
   'account-settings': {
-    text: 'Manage your account settings here.',
+    text: 'Manage your account settings including notifications, email preferences, and personal information.',
     link: { to: '/settings', text: 'Go to Settings', icon: 'arrow-right' },
   },
-  'account-back': {
-    goto: 'start',
+  'account-app': {
+    text: "We have free apps for iOS and Android! Search 'Freegle' in your app store. The app gives you notifications of replies so you don't have to rely on email.",
+    showAppLinks: true,
   },
-  other: {
-    text: 'I can help with a few more things:',
+
+  // === ABOUT FREEGLE ===
+  about: {
+    text: 'What would you like to know about Freegle?',
     options: [
-      { id: 'other-app', label: 'Mobile app', icon: 'mobile-alt' },
-      { id: 'other-volunteer', label: 'Volunteering', icon: 'hands-helping' },
-      { id: 'other-contact', label: 'Contact a human', icon: 'comment' },
-      { id: 'other-faq', label: 'Browse all FAQs', icon: 'list' },
-      { id: 'other-back', label: 'Back', icon: 'arrow-left' },
+      { id: 'about-rules', label: 'Rules & guidelines', icon: 'list' },
+      {
+        id: 'about-integrations',
+        label: 'TrashNothing & LoveJunk',
+        icon: 'handshake',
+      },
+      { id: 'about-how', label: 'How Freegle is run', icon: 'users' },
+      { id: 'about-volunteer', label: 'Volunteering', icon: 'hands-helping' },
+      { id: 'about-donate', label: 'Donate', icon: 'heart' },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
-  'other-app': {
-    text: "We have free apps for iOS and Android! Search 'Freegle' in your app store.",
-    options: [{ id: 'start', label: 'Ask something else', icon: 'arrow-left' }],
+  'about-rules': {
+    text: 'Freegle is about giving and receiving freely. Items must be legal, appropriate, and genuinely free. Be respectful, turn up when you say you will, and let people know if plans change.',
+    link: { to: '/terms', text: 'Read full terms', icon: 'arrow-right' },
   },
-  'other-volunteer': {
-    text: 'Freegle is run by volunteers. You can help by becoming a supporter or joining your local team.',
+  'about-integrations': {
+    text: "TrashNothing is another reuse platform - we're friends with them! Posts often appear on both sites, and you might get replies from their members. LoveJunk is mainly for paid disposal but also shows some Freegle posts. Treat replies from either just like any other freegler.",
+    options: [
+      { id: 'about', label: 'More about Freegle', icon: 'arrow-left' },
+      { id: 'start', label: 'Start over', icon: 'home' },
+    ],
+  },
+  'about-how': {
+    text: 'Freegle is a registered charity run entirely by volunteers. We have no paid staff - every penny donated goes towards keeping the service running.',
+    link: { to: '/about', text: 'Learn more about us', icon: 'arrow-right' },
+  },
+  'about-volunteer': {
+    text: 'Freegle is run by volunteers! You can help by becoming a supporter, helping run your local community, or volunteering nationally with publicity, fundraising, graphics, UX, or development.',
     link: { to: '/donate', text: 'Become a supporter', icon: 'heart' },
   },
-  'other-contact': {
-    text: "I'll connect you with our community volunteers.",
-    action: {
-      text: 'Contact volunteers',
-      icon: 'comment',
-      handler: () => emit('contact-volunteers'),
-    },
+  'about-donate': {
+    text: "If you're able to donate, it helps keep Freegle running. Monthly donations are particularly helpful. We can claim Gift Aid if you're a UK taxpayer.",
+    link: { to: '/donate', text: 'Donate to Freegle', icon: 'heart' },
   },
-  'other-faq': {
-    text: 'Here are all our frequently asked questions:',
-    action: {
-      text: 'Show all FAQs',
-      icon: 'list',
-      handler: () => emit('show-faq'),
-    },
+
+  // === CONTACT ===
+  contact: {
+    text: 'What kind of help do you need?',
+    options: [
+      {
+        id: 'contact-usage',
+        label: 'Help using Freegle',
+        icon: 'question-circle',
+      },
+      { id: 'contact-technical', label: 'A technical problem', icon: 'bug' },
+      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
+    ],
   },
-  'other-back': {
+  'contact-usage': {
+    text: "Your local volunteer team are happy to help with questions about using Freegle. They're fellow freeglers who give their time to help the community.",
+    showContactForm: true,
+  },
+  'contact-technical': {
+    text: 'For technical problems like bugs or errors, please contact our technical support team.',
+    showTechnicalSupport: true,
+  },
+
+  // === NAVIGATION ===
+  'back-start': {
     goto: 'start',
   },
 }
 
-async function addBotMessage(nodeId) {
-  const node = helpTree[nodeId]
-  if (!node) return
+const currentNode = computed(() => {
+  return helpTree[currentNodeId.value]
+})
 
-  if (node.goto) {
-    await addBotMessage(node.goto)
+// Handle goto redirects
+watch(
+  currentNodeId,
+  (newId) => {
+    const node = helpTree[newId]
+    if (node?.goto) {
+      currentNodeId.value = node.goto
+      history.value = []
+    }
+  },
+  { immediate: true }
+)
+
+function selectOption(opt) {
+  if (opt.id === 'start') {
+    goToStart()
     return
   }
 
-  typing.value = true
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  typing.value = false
-
-  const msg = { type: 'bot' }
-
-  if (node.text) msg.text = node.text
-  if (node.options) msg.options = node.options
-  if (node.link) msg.link = node.link
-  if (node.action) msg.action = node.action
-  if (node.component) {
-    msg.component = node.component
-    msg.componentProps = node.componentProps
+  // Add to history unless going back
+  if (!opt.id.startsWith('back-')) {
+    history.value.push({ id: currentNodeId.value, label: opt.label })
   }
 
-  messages.value.push(msg)
-
-  if (node.followUp) {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    typing.value = true
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    typing.value = false
-
-    const followMsg = { type: 'bot' }
-    if (node.followUp.text) followMsg.text = node.followUp.text
-    if (node.followUp.link) followMsg.link = node.followUp.link
-    if (node.followUp.action) followMsg.action = node.followUp.action
-    messages.value.push(followMsg)
-  }
-
-  await nextTick()
-  scrollToBottom()
+  currentNodeId.value = opt.id
 }
 
-function selectOption(opt) {
-  // Add user message
-  messages.value.push({
-    type: 'user',
-    text: opt.label,
-  })
-
-  // Process the selection
-  addBotMessage(opt.id)
+function goToStart() {
+  currentNodeId.value = 'start'
+  history.value = []
 }
 
-function scrollToBottom() {
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-  }
+function goBack(index) {
+  const target = history.value[index]
+  history.value = history.value.slice(0, index)
+  currentNodeId.value = target.id
 }
-
-function reset() {
-  messages.value = []
-  addBotMessage('start')
-}
-
-onMounted(() => {
-  addBotMessage('start')
-})
 </script>
 
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
 
-.help-chat {
+.help-flow {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
-.chat-container {
-  max-height: 500px;
-  overflow: hidden;
+.flow-content {
+  padding: 1.5rem;
 }
 
-.chat-messages {
-  padding: 20px;
-  max-height: 500px;
-  overflow-y: auto;
+.flow-card {
+  min-height: 200px;
 }
 
-.chat-message {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  animation: fadeIn 0.3s ease;
-
-  &.user {
-    flex-direction: row-reverse;
-
-    .message-content {
-      background: $color-green-background;
-      color: white;
-      border-radius: 18px 18px 4px 18px;
-    }
-  }
-
-  &.bot {
-    .message-content {
-      background: $color-gray--lighter;
-      border-radius: 18px 18px 18px 4px;
-    }
-  }
-
-  &.typing {
-    .message-content {
-      padding: 16px 20px;
-    }
-  }
-}
-
-.bot-avatar {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  background: $color-green-background;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.message-content {
-  max-width: 80%;
-  padding: 12px 16px;
-}
-
-.message-text {
-  margin: 0;
+.flow-text {
+  font-size: 1.1rem;
+  color: $color-gray--darker;
+  margin-bottom: 1.25rem;
   line-height: 1.5;
 }
 
-.message-options {
+.flow-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 0.5rem;
 }
 
-.option-btn {
+.flow-option {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
-  background: white;
-  border: 1px solid $color-gray--light;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 0.875rem 1rem;
+  background: $color-gray--lighter;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s;
   text-align: left;
 
   &:hover {
-    background: $color-green-background;
-    color: white;
+    background: white;
     border-color: $color-green-background;
+    color: $color-green-background;
+
+    .chevron {
+      transform: translateX(4px);
+    }
+  }
+
+  .option-icon {
+    width: 20px;
+    margin-right: 0.75rem;
+    color: $color-green-background;
+  }
+
+  span {
+    flex: 1;
+  }
+
+  .chevron {
+    color: $color-gray--dark;
+    font-size: 0.8rem;
+    transition: transform 0.2s;
   }
 }
 
-.message-link {
-  margin-top: 12px;
+.flow-link,
+.flow-action {
+  margin-top: 1.25rem;
 }
 
-.help-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  background: $color-blue--bright;
-  color: white;
-  border-radius: 20px;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-
-  &:hover {
-    background: darken($color-blue--bright, 10%);
-    color: white;
-  }
-}
-
-.message-action {
-  margin-top: 12px;
-}
-
+.link-btn,
 .action-btn {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 0.75rem 1.25rem;
   background: $color-green-background;
   color: white;
   border: none;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 
   &:hover {
-    background: darken($color-green-background, 10%);
+    background: darken($color-green-background, 8%);
+    color: white;
   }
 }
 
-.typing-indicator {
+.flow-html {
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.flow-app-links {
+  margin-top: 1rem;
+}
+
+.app-links {
   display: flex;
-  gap: 4px;
+  gap: 1rem;
+  margin: 1rem 0;
 
-  span {
-    width: 8px;
-    height: 8px;
-    background: $color-gray--dark;
-    border-radius: 50%;
-    animation: bounce 1.4s infinite ease-in-out both;
-
-    &:nth-child(1) {
-      animation-delay: -0.32s;
-    }
-    &:nth-child(2) {
-      animation-delay: -0.16s;
-    }
+  img {
+    height: 40px;
   }
 }
 
-.chat-reset {
-  padding: 12px 20px;
-  border-top: 1px solid $color-gray--lighter;
-  text-align: center;
+.app-note {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-top: 0.5rem;
 }
 
-.reset-btn {
-  display: inline-flex;
+.flow-breadcrumb {
+  display: flex;
   align-items: center;
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid $color-gray--light;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  color: $color-gray--dark;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.75rem 1.5rem;
+  background: $color-gray--lighter;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 0.85rem;
+}
+
+.breadcrumb-btn {
+  background: none;
+  border: none;
+  color: $color-blue--bright;
   cursor: pointer;
-  transition: all 0.2s;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 
   &:hover {
-    background: $color-gray--lighter;
+    background: rgba(0, 0, 0, 0.05);
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.breadcrumb-sep {
+  color: $color-gray--dark;
+  font-size: 0.7rem;
 }
 
-@keyframes bounce {
-  0%,
-  80%,
-  100% {
-    transform: scale(0);
-  }
-  40% {
-    transform: scale(1);
-  }
+.flow-contact-form,
+.flow-support {
+  margin-top: 1.25rem;
 }
 
-.message-enter-active,
-.message-leave-active {
-  transition: all 0.3s ease;
+.contact-card,
+.support-card {
+  padding: 1rem;
+  background: $color-gray--lighter;
+  border-radius: 8px;
 }
 
-.message-enter-from {
-  opacity: 0;
-  transform: translateY(20px);
+.support-note {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: $color-gray--dark;
 }
 </style>
