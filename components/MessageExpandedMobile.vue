@@ -980,7 +980,7 @@ onUnmounted(() => {
 
 .sample-badge {
   position: absolute;
-  top: 1rem;
+  top: 4rem;
   right: 0.75rem;
   background: rgba(128, 128, 128, 0.6);
   color: rgba(255, 255, 255, 0.9);
