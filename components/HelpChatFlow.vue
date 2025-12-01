@@ -1,5 +1,27 @@
 <template>
   <div class="help-flow">
+    <!-- Breadcrumb trail (at top) -->
+    <div v-if="history.length > 0" class="flow-breadcrumb">
+      <button class="breadcrumb-btn" @click="goToStart">
+        <v-icon icon="home" class="me-1" />Start
+      </button>
+      <span
+        v-for="(item, index) in history"
+        :key="index"
+        class="breadcrumb-item"
+      >
+        <v-icon icon="chevron-right" class="breadcrumb-sep" />
+        <button class="breadcrumb-btn" @click="goBack(index)">
+          {{ item.label }}
+        </button>
+      </span>
+    </div>
+
+    <!-- Header (only on start) -->
+    <h2 v-if="currentNodeId === 'start'" class="flow-header">
+      How can we help?
+    </h2>
+
     <!-- Current question/answer -->
     <div class="flow-content">
       <div v-if="currentNode" class="flow-card">
@@ -11,11 +33,16 @@
             v-for="opt in currentNode.options"
             :key="opt.id"
             class="flow-option"
+            :class="{ 'flow-option--back': opt.id.startsWith('back-') }"
             @click="selectOption(opt)"
           >
             <v-icon v-if="opt.icon" :icon="opt.icon" class="option-icon" />
             <span>{{ opt.label }}</span>
-            <v-icon icon="chevron-right" class="chevron" />
+            <v-icon
+              v-if="!opt.id.startsWith('back-')"
+              icon="chevron-right"
+              class="chevron"
+            />
           </button>
         </div>
 
@@ -50,37 +77,6 @@
           v-html="currentNode.html"
         />
 
-        <!-- Inline contact form -->
-        <div v-if="currentNode.showContactForm" class="flow-contact-form">
-          <div v-if="loggedIn" class="contact-card">
-            <GroupRememberSelect
-              v-model="contactGroupId"
-              remember="contactmods"
-              class="mb-3"
-            />
-            <ChatButton
-              :groupid="contactGroupId"
-              size="md"
-              title="Contact community volunteers"
-              variant="primary"
-            />
-          </div>
-          <NoticeMessage v-else variant="info">
-            Please log in to contact your community volunteers.
-          </NoticeMessage>
-        </div>
-
-        <!-- Inline technical support -->
-        <div v-if="currentNode.showTechnicalSupport" class="flow-support">
-          <div class="support-card">
-            <SupportLink />
-            <p class="support-note">
-              Please include details of what you were trying to do and any error
-              messages you saw.
-            </p>
-          </div>
-        </div>
-
         <!-- App download links -->
         <div v-if="currentNode.showAppLinks" class="flow-app-links">
           <div class="app-links">
@@ -104,22 +100,77 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Breadcrumb trail -->
-    <div v-if="history.length > 0" class="flow-breadcrumb">
-      <button class="breadcrumb-btn" @click="goToStart">
-        <v-icon icon="home" class="me-1" />Start
+  <!-- Contact section (separate card) -->
+  <div class="contact-wrapper">
+    <div class="contact-section">
+      <button class="contact-header" @click="toggleContact">
+        <v-icon icon="comment" class="contact-icon" />
+        <span>Contact volunteers</span>
+        <v-icon
+          :icon="contactExpanded ? 'chevron-up' : 'chevron-down'"
+          class="expand-icon"
+        />
       </button>
-      <span
-        v-for="(item, index) in history"
-        :key="index"
-        class="breadcrumb-item"
-      >
-        <v-icon icon="chevron-right" class="breadcrumb-sep" />
-        <button class="breadcrumb-btn" @click="goBack(index)">
-          {{ item.label }}
+
+      <div v-if="contactExpanded" class="contact-options">
+        <button
+          class="contact-option"
+          :class="{ active: contactMode === 'usage' }"
+          @click="contactMode = 'usage'"
+        >
+          <v-icon icon="question-circle" class="option-icon" />
+          <span>Help using Freegle</span>
         </button>
-      </span>
+        <button
+          class="contact-option"
+          :class="{ active: contactMode === 'technical' }"
+          @click="contactMode = 'technical'"
+        >
+          <v-icon icon="bug" class="option-icon" />
+          <span>A technical problem</span>
+        </button>
+
+        <!-- Contact form for usage help -->
+        <div v-if="contactMode === 'usage'" class="contact-content">
+          <p class="contact-text">
+            Your local volunteer team are happy to help with questions about
+            using Freegle.
+          </p>
+          <div v-if="loggedIn" class="contact-card">
+            <GroupRememberSelect
+              v-model="contactGroupId"
+              remember="contactmods"
+              class="mb-3"
+            />
+            <ChatButton
+              :groupid="contactGroupId"
+              size="md"
+              title="Contact community volunteers"
+              variant="primary"
+            />
+          </div>
+          <NoticeMessage v-else variant="info">
+            Please log in to contact your community volunteers.
+          </NoticeMessage>
+        </div>
+
+        <!-- Technical support -->
+        <div v-if="contactMode === 'technical'" class="contact-content">
+          <p class="contact-text">
+            For technical problems like bugs or errors, please contact our
+            technical support team.
+          </p>
+          <div class="support-card">
+            <SupportLink />
+            <p class="support-note">
+              Please include details of what you were trying to do and any error
+              messages you saw.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -137,6 +188,17 @@ const authStore = useAuthStore()
 const loggedIn = computed(() => authStore.user !== null)
 const contactGroupId = ref(null)
 
+// Contact section state (separate from main flow)
+const contactExpanded = ref(false)
+const contactMode = ref(null)
+
+function toggleContact() {
+  contactExpanded.value = !contactExpanded.value
+  if (!contactExpanded.value) {
+    contactMode.value = null
+  }
+}
+
 const currentNodeId = ref('start')
 const history = ref([])
 
@@ -148,7 +210,6 @@ const helpTree = {
       { id: 'emails', label: 'Emails & notifications', icon: 'envelope' },
       { id: 'account', label: 'My account', icon: 'user' },
       { id: 'about', label: 'About Freegle', icon: 'info-circle' },
-      { id: 'contact', label: 'Contact volunteers', icon: 'comment' },
     ],
   },
 
@@ -322,28 +383,6 @@ const helpTree = {
     link: { to: '/donate', text: 'Donate to Freegle', icon: 'heart' },
   },
 
-  // === CONTACT ===
-  contact: {
-    text: 'What kind of help do you need?',
-    options: [
-      {
-        id: 'contact-usage',
-        label: 'Help using Freegle',
-        icon: 'question-circle',
-      },
-      { id: 'contact-technical', label: 'A technical problem', icon: 'bug' },
-      { id: 'back-start', label: 'Back', icon: 'arrow-left' },
-    ],
-  },
-  'contact-usage': {
-    text: "Your local volunteer team are happy to help with questions about using Freegle. They're fellow freeglers who give their time to help the community.",
-    showContactForm: true,
-  },
-  'contact-technical': {
-    text: 'For technical problems like bugs or errors, please contact our technical support team.',
-    showTechnicalSupport: true,
-  },
-
   // === NAVIGATION ===
   'back-start': {
     goto: 'start',
@@ -401,6 +440,15 @@ function goBack(index) {
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+}
+
+.flow-header {
+  color: $color-green-background;
+  font-size: 1.75rem;
+  font-weight: 500;
+  margin: 0;
+  padding: 1.5rem 1.5rem 0;
+  text-align: center;
 }
 
 .flow-content {
@@ -461,6 +509,30 @@ function goBack(index) {
     font-size: 0.8rem;
     transition: transform 0.2s;
   }
+
+  &--back {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: $color-gray--dark;
+    margin-top: 0.5rem;
+
+    .option-icon {
+      color: $color-gray--dark;
+      width: 16px;
+    }
+
+    &:hover {
+      background: transparent;
+      border: none;
+      color: $color-green-background;
+
+      .option-icon {
+        color: $color-green-background;
+      }
+    }
+  }
 }
 
 .flow-link,
@@ -520,7 +592,7 @@ function goBack(index) {
   gap: 0.25rem;
   padding: 0.75rem 1.5rem;
   background: $color-gray--lighter;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-size: 0.85rem;
 }
 
@@ -542,9 +614,97 @@ function goBack(index) {
   font-size: 0.7rem;
 }
 
-.flow-contact-form,
-.flow-support {
-  margin-top: 1.25rem;
+.contact-wrapper {
+  margin-top: 1rem;
+}
+
+.contact-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $color-green-background;
+
+  .contact-icon {
+    width: 20px;
+    margin-right: 0.75rem;
+    color: $color-green-background;
+  }
+
+  span {
+    flex: 1;
+    text-align: left;
+  }
+
+  .expand-icon {
+    color: $color-gray--dark;
+    transition: transform 0.2s;
+  }
+
+  &:hover .expand-icon {
+    color: $color-green-background;
+  }
+}
+
+.contact-options {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.contact-option {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: $color-gray--lighter;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: $color-green-background;
+  }
+
+  &.active {
+    background: white;
+    border-color: $color-green-background;
+    color: $color-green-background;
+  }
+
+  .option-icon {
+    width: 18px;
+    margin-right: 0.75rem;
+    color: $color-green-background;
+  }
+}
+
+.contact-content {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.contact-text {
+  font-size: 0.95rem;
+  color: $color-gray--darker;
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .contact-card,

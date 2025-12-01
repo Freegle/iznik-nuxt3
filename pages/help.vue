@@ -13,15 +13,12 @@
           @hidden="showRateAppModal = false"
         />
 
-        <!-- Help header -->
-        <div class="help-header">
-          <h1>How can we help?</h1>
-          <p v-if="isApp" class="app-review">
-            <a href="#" @click.stop.prevent="showRateMe">
-              <v-icon icon="star" class="me-1" />Rate this app
-            </a>
-          </p>
-        </div>
+        <!-- Rate app link (app only) -->
+        <p v-if="isApp" class="app-review">
+          <a href="#" @click.stop.prevent="showRateMe">
+            <v-icon icon="star" class="me-1" />Rate this app
+          </a>
+        </p>
 
         <!-- Guided help flow -->
         <HelpChatFlow class="mb-4" />
@@ -151,19 +148,14 @@ useHead(
 
 .help-page {
   padding-bottom: 2rem;
+  padding-top: 1rem;
 }
 
-.help-header {
+.app-review {
   text-align: center;
-  padding: 1.5rem 0;
+  margin-bottom: 1rem;
 
-  h1 {
-    color: $color-green-background;
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .app-review a {
+  a {
     color: $color-gold;
     text-decoration: none;
 
@@ -190,5 +182,6 @@ useHead(
   text-align: center;
   font-size: 0.8rem;
   color: $color-gray--dark;
+  margin-top: 1.5rem;
 }
 </style>
