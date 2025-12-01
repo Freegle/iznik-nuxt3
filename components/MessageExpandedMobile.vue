@@ -181,6 +181,7 @@
             <span
               v-b-tooltip.click.blur="'Time since this was last posted'"
               class="stat-pill clickable pill-time"
+              @click.stop
             >
               <v-icon icon="clock" /> {{ timeAgo }}
             </span>
@@ -189,6 +190,7 @@
                 'Number of freeglers who have recently replied'
               "
               class="stat-pill clickable pill-replies"
+              @click.stop
             >
               <v-icon icon="comments" /> {{ replyCount }}
             </span>
@@ -198,6 +200,7 @@
                   'They may be able to deliver - no guarantees, but you can ask'
                 "
                 class="stat-pill clickable pill-delivery"
+                @click.stop
               >
                 <v-icon icon="truck" /><span class="delivery-maybe">?</span>
               </span>
@@ -206,6 +209,7 @@
               <span
                 v-b-tooltip.click.blur="deadlineTooltip"
                 class="stat-pill clickable pill-deadline"
+                @click.stop
               >
                 <v-icon icon="calendar" /> {{ formattedDeadline }}
               </span>
