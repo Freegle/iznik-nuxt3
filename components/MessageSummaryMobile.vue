@@ -385,12 +385,22 @@ function expand(e) {
   padding: 2rem 0.5rem 0.5rem;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.88) 8%,
+    rgba(0, 0, 0, 0.84) 16%,
+    rgba(0, 0, 0, 0.78) 24%,
+    rgba(0, 0, 0, 0.68) 32%,
+    rgba(0, 0, 0, 0.55) 42%,
+    rgba(0, 0, 0, 0.4) 52%,
+    rgba(0, 0, 0, 0.26) 62%,
+    rgba(0, 0, 0, 0.15) 72%,
+    rgba(0, 0, 0, 0.08) 82%,
+    rgba(0, 0, 0, 0.03) 92%,
     rgba(0, 0, 0, 0) 100%
   );
   color: white;
   z-index: 3;
+  overflow: hidden;
 }
 
 .info-row {
@@ -439,16 +449,19 @@ function expand(e) {
 
 .title-row {
   height: auto;
+  width: 100%;
+  min-width: 0;
 }
 
 .title-subject {
+  display: block;
+  width: 100%;
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
   height: auto;
 }
 </style>
