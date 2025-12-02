@@ -151,6 +151,9 @@
       >
         <ProfileImage
           :image="poster.profile?.paththumb"
+          :externaluid="poster.profile?.externaluid"
+          :ouruid="poster.profile?.ouruid"
+          :externalmods="poster.profile?.externalmods"
           :name="poster.displayname"
           class="poster-overlay-avatar"
           is-thumbnail
@@ -246,6 +249,9 @@
       >
         <ProfileImage
           :image="poster.profile?.paththumb"
+          :externaluid="poster.profile?.externaluid"
+          :ouruid="poster.profile?.ouruid"
+          :externalmods="poster.profile?.externalmods"
           :name="poster.displayname"
           class="poster-avatar"
           is-thumbnail
