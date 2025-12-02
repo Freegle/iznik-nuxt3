@@ -117,29 +117,12 @@
           />
         </div>
 
-        <!-- No photo - show placeholder, with line drawing fading in when loaded -->
-        <div
-          v-else
-          class="photo-container sample-image-container position-relative"
-        >
+        <!-- No photo - show placeholder -->
+        <div v-else class="photo-container">
           <MessagePhotoPlaceholder
             :placeholder-class="placeholderClass"
             :icon="categoryIcon"
-            :hidden="lineDrawingLoaded"
           />
-
-          <!-- Line drawing (fades in over placeholder when loaded) -->
-          <NuxtImg
-            v-if="lineDrawingUrl && !lineDrawingFailed"
-            :src="lineDrawingUrl"
-            alt="Item illustration"
-            class="line-drawing"
-            :class="{ loaded: lineDrawingLoaded }"
-            loading="lazy"
-            @load="lineDrawingLoaded = true"
-            @error="lineDrawingFailed = true"
-          />
-          <div v-if="lineDrawingLoaded" class="sample-badge">Illustration</div>
         </div>
 
         <!-- Poster overlay on photo (shown on shorter screens) -->
@@ -379,7 +362,6 @@ import { useRouter } from 'vue-router'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
-import { useLineDrawing } from '~/composables/useLineDrawing'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -443,12 +425,6 @@ const {
   poster,
   posterProfileUrl,
 } = useMessageDisplay(props.id)
-
-// Line drawing when no photo attached
-const subjectRef = computed(() => message.value?.subject)
-const { lineDrawingUrl } = useLineDrawing(subjectRef)
-const lineDrawingLoaded = ref(false)
-const lineDrawingFailed = ref(false)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
@@ -932,42 +908,6 @@ onUnmounted(() => {
   padding: 0.25rem 0.6rem;
   border-radius: 1rem;
   font-size: 0.8rem;
-  z-index: 11;
-}
-
-// Blurred sample image (from similar posts)
-.sample-image-container {
-  position: relative;
-}
-
-.line-drawing {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  z-index: 2;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  object-fit: cover;
-  background: white;
-
-  &.loaded {
-    opacity: 1;
-  }
-}
-
-.sample-badge {
-  position: absolute;
-  top: 4rem;
-  right: 0.75rem;
-  background: $color-gray-opacity-60;
-  color: $color-white-opacity-90;
-  padding: 0.35rem 0.6rem;
-  border-radius: 3px;
-  font-size: 0.85rem;
-  font-weight: 500;
   z-index: 11;
 }
 

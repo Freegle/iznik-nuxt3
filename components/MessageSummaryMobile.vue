@@ -70,26 +70,12 @@
         </div>
       </div>
 
-      <!-- No photo - show placeholder, with line drawing fading in when loaded -->
+      <!-- No photo - show placeholder -->
       <div v-else class="photo-container">
         <MessagePhotoPlaceholder
           :placeholder-class="placeholderClass"
           :icon="categoryIcon"
-          :hidden="lineDrawingLoaded"
         />
-
-        <!-- Line drawing (fades in over placeholder when loaded) -->
-        <NuxtImg
-          v-if="lineDrawingUrl && !lineDrawingFailed"
-          :src="lineDrawingUrl"
-          alt="Item illustration"
-          class="line-drawing"
-          :class="{ loaded: lineDrawingLoaded }"
-          loading="lazy"
-          @load="lineDrawingLoaded = true"
-          @error="lineDrawingFailed = true"
-        />
-        <div v-if="lineDrawingLoaded" class="sample-badge">Illustration</div>
       </div>
 
       <!-- Title/info overlay at bottom of photo -->
@@ -114,9 +100,8 @@
 </template>
 
 <script setup>
-import { computed, ref, toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
-import { useLineDrawing } from '~/composables/useLineDrawing'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -155,12 +140,6 @@ const {
   placeholderClass,
   categoryIcon,
 } = useMessageDisplay(idRef)
-
-// Line drawing when no photo attached
-const subjectRef = computed(() => message.value?.subject)
-const { lineDrawingUrl } = useLineDrawing(subjectRef)
-const lineDrawingLoaded = ref(false)
-const lineDrawingFailed = ref(false)
 
 const locationText = computed(() => {
   // Show area name if available, otherwise distance
@@ -242,39 +221,6 @@ function expand(e) {
   position: absolute;
   top: 0;
   left: 0;
-}
-
-.line-drawing {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  object-fit: cover;
-  background: white;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  z-index: 2;
-
-  &.loaded {
-    opacity: 1;
-  }
-}
-
-.sample-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: $color-black-opacity-60;
-  color: $color-white;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  z-index: 5;
-  height: auto;
-  text-align: center;
-  white-space: nowrap;
 }
 
 .photo-count {

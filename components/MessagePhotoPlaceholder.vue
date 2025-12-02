@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="message-placeholder"
-    :class="[placeholderClass, { hidden: hidden }]"
-  >
+  <div class="message-placeholder" :class="placeholderClass">
     <div class="placeholder-pattern"></div>
     <div class="icon-circle">
       <v-icon :icon="icon" class="placeholder-icon" />
@@ -19,10 +16,6 @@ defineProps({
   icon: {
     type: String,
     required: true,
-  },
-  hidden: {
-    type: Boolean,
-    default: false,
   },
 })
 </script>
@@ -42,11 +35,6 @@ defineProps({
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: opacity 0.5s ease-in-out;
-
-  &.hidden {
-    opacity: 0;
-  }
 
   &.offer-gradient {
     background: radial-gradient(
