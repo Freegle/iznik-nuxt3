@@ -4,7 +4,6 @@
     ref="containerRef"
     class="message-expanded-mobile"
     :class="{ stickyAdRendered }"
-    @scroll="onScroll"
   >
     <!-- Hide the default navbar by teleporting an empty replacement -->
     <Teleport to="#navbar-mobile">
@@ -12,11 +11,7 @@
     </Teleport>
 
     <!-- Photo Area with Ken Burns animation -->
-    <div
-      class="photo-area"
-      :style="{ height: `${photoHeight}px` }"
-      @click="showPhotosModal"
-    >
+    <div class="photo-area" @click="showPhotosModal">
       <!-- Back button on photo -->
       <button class="back-button" @click.stop="goBack">
         <v-icon icon="arrow-left" />
@@ -154,67 +149,60 @@
         :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
         @click.stop
       >
-        {{ poster.displayname }}
-        <span v-if="distanceText" class="poster-overlay-distance"
-          >· {{ distanceText }}</span
-        >
+        <ProfileImage
+          :image="poster.profile?.paththumb"
+          :name="poster.displayname"
+          class="poster-overlay-avatar"
+          is-thumbnail
+          size="sm"
+        />
+        <div class="poster-overlay-info">
+          <span class="poster-overlay-name">{{ poster.displayname }}</span>
+          <div class="poster-overlay-stats">
+            <span v-if="poster.info?.offers" class="poster-overlay-stat">
+              <v-icon icon="gift" />{{ poster.info.offers }}
+            </span>
+            <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
+              <v-icon icon="search" />{{ poster.info.wanteds }}
+            </span>
+          </div>
+        </div>
+        <v-icon icon="chevron-right" class="poster-overlay-chevron" />
       </NuxtLink>
 
-      <!-- Title overlay at bottom of photo -->
+      <!-- Title overlay at bottom of photo - matches summary layout -->
       <div class="title-overlay">
-        <div class="title-row">
+        <div class="info-row">
           <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
-          <span class="title-subject">{{ strippedSubject }}</span>
-        </div>
-        <!-- Stats pills below subject -->
-        <div class="stats-pills">
-          <div class="pills-left">
+          <div class="info-icons">
             <span
-              v-b-tooltip.click.blur="distanceTooltip"
-              class="stat-pill clickable"
+              v-if="distanceText"
+              class="location"
               @click.stop="showMapModal = true"
             >
-              <v-icon icon="map-marker-alt" /> {{ distanceText }}
+              <v-icon icon="map-marker-alt" />{{ distanceText }}
             </span>
-          </div>
-          <div class="pills-right">
-            <span
-              v-b-tooltip.click.blur="'Time since this was last posted'"
-              class="stat-pill clickable pill-time"
-              @click.stop
-            >
-              <v-icon icon="clock" /> {{ timeAgo }}
+            <span class="time"><v-icon icon="clock" />{{ timeAgo }}</span>
+            <span class="replies" @click.stop>
+              <v-icon icon="comments" />{{ replyCount }}
             </span>
             <span
-              v-b-tooltip.click.blur="
-                'Number of freeglers who have recently replied'
-              "
-              class="stat-pill clickable pill-replies"
+              v-if="message.deliverypossible && isOffer"
+              class="delivery"
               @click.stop
             >
-              <v-icon icon="comments" /> {{ replyCount }}
+              <v-icon icon="truck" />?
             </span>
-            <template v-if="message.deliverypossible && isOffer">
-              <span
-                v-b-tooltip.click.blur="
-                  'They may be able to deliver - no guarantees, but you can ask'
-                "
-                class="stat-pill clickable pill-delivery"
-                @click.stop
-              >
-                <v-icon icon="truck" /><span class="delivery-maybe">?</span>
-              </span>
-            </template>
-            <template v-if="message.deadline">
-              <span
-                v-b-tooltip.click.blur="deadlineTooltip"
-                class="stat-pill clickable pill-deadline"
-                @click.stop
-              >
-                <v-icon icon="calendar" /> {{ formattedDeadline }}
-              </span>
-            </template>
+            <span v-if="message.deadline" class="deadline" @click.stop>
+              <v-icon icon="calendar" />{{ formattedDeadline }}
+            </span>
           </div>
+        </div>
+        <div class="title-row">
+          <span class="title-subject">{{ subjectItemName }}</span>
+        </div>
+        <div v-if="subjectLocation" class="title-location">
+          {{ subjectLocation }}
         </div>
       </div>
     </div>
@@ -228,22 +216,17 @@
         class="poster-section"
         @click.stop
       >
-        <div class="poster-avatar">
-          <b-img
-            v-if="poster.profile?.paththumb"
-            :src="poster.profile.paththumb"
-            alt="Profile"
-            class="poster-avatar-img"
-            rounded="circle"
-          />
-          <div v-else class="poster-avatar-placeholder">
-            <v-icon icon="user" />
-          </div>
-        </div>
+        <ProfileImage
+          :image="poster.profile?.paththumb"
+          :name="poster.displayname"
+          class="poster-avatar"
+          is-thumbnail
+          size="lg"
+        />
         <div class="poster-details">
           <span class="poster-name">{{ poster.displayname }}</span>
           <div class="poster-stats">
-            <span class="poster-distance">
+            <span v-if="distanceText" class="poster-distance">
               <v-icon icon="map-marker-alt" />{{ distanceText }}
             </span>
             <span v-if="poster.info?.offers" class="poster-stat">
@@ -364,6 +347,7 @@ import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageReplySection from '~/components/MessageReplySection'
+import ProfileImage from '~/components/ProfileImage'
 
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
 const MessagePhotosModalMobile = defineAsyncComponent(() =>
@@ -402,7 +386,8 @@ const { me } = useMe()
 // Use shared composable for common message display logic
 const {
   message,
-  strippedSubject,
+  subjectItemName,
+  subjectLocation,
   fromme,
   gotAttachments,
   sampleImage,
@@ -412,7 +397,6 @@ const {
   replyCount,
   isOffer,
   formattedDeadline,
-  deadlineTooltip,
   successfulText,
   placeholderClass,
   categoryIcon,
@@ -434,12 +418,6 @@ const thumbnailTouchStartX = ref(0)
 const thumbnailScrollStart = ref(0)
 let thumbnailScrollInterval = null
 
-// Photo height animation on scroll
-const MAX_PHOTO_HEIGHT = 400
-const MIN_PHOTO_HEIGHT = 150
-const SCROLL_RANGE = 150 // Pixels of scroll to complete transition
-const photoHeight = ref(MAX_PHOTO_HEIGHT)
-
 // Computed (additional to composable)
 const currentAttachment = computed(() => {
   return message.value?.attachments?.[currentPhotoIndex.value]
@@ -454,10 +432,6 @@ const home = computed(() => {
     return { lat: me.value.lat, lng: me.value.lng }
   }
   return null
-})
-
-const distanceTooltip = computed(() => {
-  return 'Approximate distance - click for map'
 })
 
 const prefersReducedMotion = computed(() => {
@@ -595,22 +569,6 @@ function sent() {
   }
 }
 
-// Scroll handler to shrink photo
-function onScroll(e) {
-  const scrollTop = e.target.scrollTop
-
-  // Only animate photo height within the scroll range
-  if (scrollTop <= SCROLL_RANGE) {
-    const progress = scrollTop / SCROLL_RANGE
-    const newHeight =
-      MAX_PHOTO_HEIGHT - progress * (MAX_PHOTO_HEIGHT - MIN_PHOTO_HEIGHT)
-    photoHeight.value = newHeight
-  } else if (photoHeight.value !== MIN_PHOTO_HEIGHT) {
-    // Ensure it's at minimum when scrolled past range
-    photoHeight.value = MIN_PHOTO_HEIGHT
-  }
-}
-
 // Debug check on mount
 onMounted(() => {
   console.log('DEBUG MessageExpandedMobile mounted')
@@ -656,37 +614,43 @@ onUnmounted(() => {
 @import 'assets/css/_color-vars.scss';
 
 .message-expanded-mobile {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: #fff;
-  padding-bottom: 80px;
+  bottom: 80px;
+  background: $color-white;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   z-index: 1000;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &.stickyAdRendered {
-    padding-bottom: calc(80px + $sticky-banner-height-mobile);
+    bottom: calc(80px + $sticky-banner-height-mobile);
 
     @media (min-height: $mobile-tall) {
-      padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
+      bottom: calc(80px + $sticky-banner-height-mobile-tall);
     }
   }
 }
 
-// Photo Area
+// Photo Area - fixed height, scrollable with content
 .photo-area {
   position: relative;
   width: 100%;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  height: 50vh;
+  min-height: 200px;
   overflow: hidden;
-  background: #f0f0f0;
+  background: $color-gray--lighter;
   cursor: pointer;
-  transition: height 0.05s linear;
 }
 
 // Photo container - positioned to fill photo-area
@@ -735,8 +699,8 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  background: $color-white-opacity-25;
+  color: $color-white;
   padding: 0.15rem 0.4rem;
   border-radius: 1rem;
   font-size: 0.7rem;
@@ -798,17 +762,17 @@ onUnmounted(() => {
   height: 50px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid $color-white-opacity-50;
   cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
 
   &.active {
-    border-color: #fff;
+    border-color: $color-white;
     transform: scale(1.1);
   }
 
   &:not(.active):hover {
-    border-color: rgba(255, 255, 255, 0.8);
+    border-color: $color-white-opacity-80;
   }
 }
 
@@ -826,9 +790,9 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
+  background: $color-black-opacity-50;
   border: none;
-  color: #fff;
+  color: $color-white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -837,7 +801,7 @@ onUnmounted(() => {
   font-size: 1.2rem;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: $color-black-opacity-70;
   }
 }
 
@@ -847,46 +811,93 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1rem 0.75rem;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.9) 8%,
+    rgba(0, 0, 0, 0.86) 16%,
+    rgba(0, 0, 0, 0.8) 24%,
+    rgba(0, 0, 0, 0.7) 32%,
+    rgba(0, 0, 0, 0.58) 42%,
+    rgba(0, 0, 0, 0.44) 52%,
+    rgba(0, 0, 0, 0.3) 62%,
+    rgba(0, 0, 0, 0.18) 72%,
+    rgba(0, 0, 0, 0.1) 82%,
+    rgba(0, 0, 0, 0.04) 92%,
     rgba(0, 0, 0, 0) 100%
   );
-  color: #fff;
+  color: $color-white;
   z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: stretch;
 }
 
-.title-row {
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.info-icons {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+}
+
+.location,
+.time,
+.replies,
+.delivery,
+.deadline {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: $color-black-opacity-50;
+  padding: 0.15rem 0.4rem;
+  backdrop-filter: blur(4px);
+}
+
+.location {
+  cursor: pointer;
+}
+
+.title-row {
+  width: 100%;
+  min-width: 0;
 }
 
 .title-tag {
-  font-size: 0.94rem !important;
+  font-size: 0.9rem !important;
   white-space: nowrap !important;
   flex-shrink: 0;
 }
 
 .title-subject {
+  display: block;
+  width: 100%;
   font-size: clamp(1rem, 4vw, 1.25rem);
   font-weight: 700;
   line-height: 1.2;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+.title-location {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-top: 0.15rem;
+}
+
 .photo-counter {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
+  background: $color-black-opacity-60;
+  color: $color-white;
   padding: 0.25rem 0.6rem;
   border-radius: 1rem;
   font-size: 0.8rem;
@@ -919,7 +930,7 @@ onUnmounted(() => {
       transparent 50%
     ),
     linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
-  color: #fff;
+  color: $color-white;
 
   .placeholder-pattern {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M20 25h20v2H20zM25 20h10v2H25zM22 27h16v8H22zM28 35h4v5H28z' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
@@ -939,7 +950,7 @@ onUnmounted(() => {
       transparent 45%
     ),
     linear-gradient(160deg, #64b5f6 0%, #42a5f5 50%, #1e88e5 100%);
-  color: #fff;
+  color: $color-white;
 
   .placeholder-pattern {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
@@ -959,17 +970,17 @@ onUnmounted(() => {
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: $color-white-opacity-20;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(4px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px $color-black-opacity-10;
 }
 
 .placeholder-icon {
   font-size: 2.5rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: $color-white-opacity-90;
 }
 
 // Blurred sample image (from similar posts)
@@ -986,8 +997,8 @@ onUnmounted(() => {
   position: absolute;
   top: 4rem;
   right: 0.75rem;
-  background: rgba(128, 128, 128, 0.6);
-  color: rgba(255, 255, 255, 0.9);
+  background: $color-gray-opacity-60;
+  color: $color-white-opacity-90;
   padding: 0.25rem 0.5rem;
   border-radius: 3px;
   font-size: 0.6rem;
@@ -995,48 +1006,86 @@ onUnmounted(() => {
   z-index: 11;
 }
 
-// Info Section - remove nested scroll so parent handles it
+// Info Section - natural height, scrolls with main container
 .info-section {
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   padding: 1rem;
 }
 
 // Poster overlay on photo (shown on shorter screens)
 .poster-overlay {
-  display: none; // Hidden by default, shown on short screens
+  display: none;
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: $color-black-opacity-60;
-  color: $color-white;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 500;
+  background: $color-white-opacity-95;
+  backdrop-filter: blur(8px);
+  color: $color-gray--darker;
+  padding: 0.4rem 0.6rem;
   z-index: 11;
   text-decoration: none;
-  max-width: 50%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  max-width: 60%;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px $color-black-opacity-15;
+  border: 1px solid $color-gray-3;
 
   &:hover {
-    background: $color-black-opacity-70;
-    color: $color-white;
+    background: $color-white;
+    color: $color-gray--darker;
     text-decoration: none;
   }
 
   &--below-carousel {
-    top: 75px; // Below the thumbnail carousel
+    top: 75px;
   }
 
-  // Show on short screens (less than 700px height)
   @media (max-height: 700px) {
-    display: block;
+    display: flex;
   }
 }
 
-.poster-overlay-distance {
-  opacity: 0.85;
+.poster-overlay-avatar {
+  flex-shrink: 0;
+
+  :deep(.ProfileImage__container) {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+.poster-overlay-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.poster-overlay-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.poster-overlay-stats {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  color: $color-gray--dark;
+}
+
+.poster-overlay-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.poster-overlay-chevron {
+  flex-shrink: 0;
+  color: $color-gray--dark;
+  font-size: 0.9rem;
+  margin-left: auto;
 }
 
 // Poster section in info area (shown on taller screens)
@@ -1063,26 +1112,11 @@ onUnmounted(() => {
 
 .poster-avatar {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-}
 
-.poster-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.poster-avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: $color-gray--light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: $color-gray--dark;
-  font-size: 1.25rem;
+  :deep(.ProfileImage__container) {
+    width: 48px !important;
+    height: 48px !important;
+  }
 }
 
 .poster-details {
@@ -1131,19 +1165,19 @@ onUnmounted(() => {
 .description-label {
   font-size: 0.7rem;
   font-weight: 600;
-  color: #999;
+  color: $color-gray--base;
   letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
 }
 
 .description-content {
-  background: #f8f9fa;
+  background: $color-gray-3;
   border-left: 3px solid $color-green--darker;
   padding: 1rem;
   border-radius: 0 8px 8px 0;
   font-size: 1rem;
   line-height: 1.7;
-  color: #444;
+  color: $color-gray--darker;
 }
 
 // Fixed footer (matches give/mobile pattern)
@@ -1153,9 +1187,9 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   padding: 1rem;
-  border-top: 1px solid #e9ecef;
-  background: #fff;
-  z-index: 1100; // Above the fixed container
+  border-top: 1px solid $color-gray-3;
+  background: $color-white;
+  z-index: 1100;
 
   &.stickyAdRendered {
     bottom: $sticky-banner-height-mobile;
@@ -1196,7 +1230,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #f0f0f0;
+  background: $color-gray--lighter;
   z-index: 10000;
   display: flex;
   flex-direction: column;
@@ -1210,19 +1244,19 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
+  background: $color-white-opacity-95;
   border: none;
-  color: #333;
+  color: $color-gray--darker;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10001;
   font-size: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px $color-black-opacity-20;
 
   &:active {
-    background: #fff;
+    background: $color-white;
   }
 }
 
@@ -1243,14 +1277,14 @@ onUnmounted(() => {
   right: 0;
   margin-bottom: 1rem;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #666;
+  background: $color-white-opacity-90;
+  color: $color-gray--dark;
   font-size: 0.85rem;
   text-align: center;
   margin-left: 1rem;
   margin-right: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px $color-black-opacity-10;
 }
 </style>
 

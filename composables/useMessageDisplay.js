@@ -54,6 +54,21 @@ export function useMessageDisplay(messageId) {
     return subject.replace(/^(OFFERED|OFFER|WANTED):\s*/i, '')
   })
 
+  // Parse well-formatted subjects like "Item name (Location EH17)"
+  const subjectItemName = computed(() => {
+    const subject = strippedSubject.value
+    // Match location in parentheses at end, e.g. "(Gracemount EH17)"
+    const match = subject.match(/^(.+?)\s*\([^)]+\)\s*$/)
+    return match ? match[1].trim() : subject
+  })
+
+  const subjectLocation = computed(() => {
+    const subject = strippedSubject.value
+    // Extract location from parentheses at end
+    const match = subject.match(/\(([^)]+)\)\s*$/)
+    return match ? match[1].trim() : null
+  })
+
   const fromme = computed(() => {
     return message.value?.fromuser === authStore.user?.id
   })
@@ -83,7 +98,7 @@ export function useMessageDisplay(messageId) {
 
   const distanceText = computed(() => {
     if (!me.value?.lat || !message.value?.lat) {
-      return message.value?.area || 'Unknown'
+      return message.value?.area || null
     }
     const miles = milesAway(
       me.value.lat,
@@ -141,6 +156,8 @@ export function useMessageDisplay(messageId) {
   return {
     message,
     strippedSubject,
+    subjectItemName,
+    subjectLocation,
     fromme,
     gotAttachments,
     sampleImage,
