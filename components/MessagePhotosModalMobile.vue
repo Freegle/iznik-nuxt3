@@ -31,6 +31,11 @@
           >
             <PinchMe
               v-if="isReady && Math.abs(index - currentIndex) <= 1"
+              :ref="
+                (el) => {
+                  if (el) pinchRefs[index] = el
+                }
+              "
               :attachment="attachment"
               :width="containerWidth"
               :height="containerHeight"
@@ -58,6 +63,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { useMessageStore } from '~/stores/message'
+import { useModalHistory } from '~/composables/useModalHistory'
 import PinchMe from '~/components/PinchMe.vue'
 import 'zoompinch/style.css'
 
@@ -71,6 +77,9 @@ const props = defineProps({
 const emit = defineEmits(['hidden'])
 
 const messageStore = useMessageStore()
+
+// Handle browser back button/swipe to close modal
+useModalHistory(`photos-${props.id}`, () => emit('hidden'))
 
 const message = computed(() => messageStore?.byId(props.id))
 
@@ -87,12 +96,21 @@ const imageContainer = ref(null)
 const { width: containerWidth, height: containerHeight } =
   useElementSize(imageContainer)
 
+// Refs to PinchMe components to check zoom state
+const pinchRefs = ref({})
+
 // Touch handling for swipe
 const touchStartX = ref(0)
 const touchStartY = ref(0)
 const touchDeltaX = ref(0)
 const isSwiping = ref(false)
 const isTransitioning = ref(false)
+
+// Check if current image is zoomed
+const isCurrentImageZoomed = computed(() => {
+  const currentPinch = pinchRefs.value[currentIndex.value]
+  return currentPinch?.isZoomed?.value || false
+})
 
 // Computed style for the images wrapper
 const imagesWrapperStyle = computed(() => {
@@ -106,8 +124,8 @@ const imagesWrapperStyle = computed(() => {
 })
 
 function onTouchStart(e) {
-  // Don't interfere with pinch gestures (2+ fingers)
-  if (e.touches.length > 1) return
+  // Don't interfere with pinch gestures (2+ fingers) or when zoomed
+  if (e.touches.length > 1 || isCurrentImageZoomed.value) return
 
   touchStartX.value = e.touches[0].clientX
   touchStartY.value = e.touches[0].clientY
@@ -116,7 +134,11 @@ function onTouchStart(e) {
 }
 
 function onTouchMove(e) {
-  if (e.touches.length > 1) return
+  // Don't swipe when zoomed - let pinch-zoom handle panning
+  if (e.touches.length > 1 || isCurrentImageZoomed.value) {
+    isSwiping.value = false
+    return
+  }
 
   const deltaX = e.touches[0].clientX - touchStartX.value
   const deltaY = e.touches[0].clientY - touchStartY.value

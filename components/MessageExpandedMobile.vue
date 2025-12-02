@@ -348,6 +348,7 @@ import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageReplySection from '~/components/MessageReplySection'
 import ProfileImage from '~/components/ProfileImage'
+import { useModalHistory } from '~/composables/useModalHistory'
 
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
 const MessagePhotosModalMobile = defineAsyncComponent(() =>
@@ -569,34 +570,10 @@ function sent() {
   }
 }
 
-// Debug check on mount
-onMounted(() => {
-  console.log('DEBUG MessageExpandedMobile mounted')
-  console.log('DEBUG containerRef:', containerRef.value)
-  console.log(
-    'DEBUG container scrollHeight:',
-    containerRef.value?.scrollHeight,
-    'clientHeight:',
-    containerRef.value?.clientHeight
-  )
-  console.log(
-    'DEBUG container overflow:',
-    containerRef.value?.style?.overflow,
-    'computedStyle:',
-    containerRef.value
-      ? window.getComputedStyle(containerRef.value).overflow
-      : 'N/A'
-  )
-  // Debug reply button conditions
-  console.log('DEBUG Reply button conditions:')
-  console.log('  - props.replyable:', props.replyable)
-  console.log('  - replied.value:', replied.value)
-  console.log('  - fromme.value:', fromme.value)
-  console.log(
-    '  - Button should show:',
-    props.replyable && !replied.value && !fromme.value
-  )
+// Handle browser back button/swipe when used as modal
+useModalHistory(`message-${props.id}`, () => emit('close'), props.isModal)
 
+onMounted(() => {
   // Start auto-scroll hint for thumbnail carousel
   startThumbnailAutoScroll()
 })

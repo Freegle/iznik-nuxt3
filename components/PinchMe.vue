@@ -54,7 +54,7 @@
 </template>
 <script setup>
 import { Zoompinch as ZoomPinch } from 'zoompinch'
-import { onBeforeUnmount } from 'vue'
+import { onBeforeUnmount, computed } from 'vue'
 import { ref } from '#imports'
 
 const props = defineProps({
@@ -79,6 +79,14 @@ const props = defineProps({
 
 const zoompinchRef = ref(null)
 const transform = ref({ x: 0, y: 0, scale: 1, rotate: 0 })
+
+// Expose whether image is zoomed for parent component
+const isZoomed = computed(() => transform.value.scale > 1.05)
+
+defineExpose({
+  isZoomed,
+  transform,
+})
 
 function fit() {
   requestAnimationFrame(() => {
