@@ -11,24 +11,24 @@
     }"
     @click="expand"
   >
+    <!-- Status overlay images - outside photo-area to stack above everything -->
+    <b-img
+      v-if="message.successful"
+      lazy
+      src="/freegled.jpg"
+      class="status-overlay-image"
+      :alt="successfulText"
+    />
+    <b-img
+      v-else-if="message.promised && showPromised"
+      lazy
+      src="/promised.jpg"
+      class="status-overlay-image"
+      alt="Promised"
+    />
+
     <!-- Photo area with overlay -->
     <div class="photo-area">
-      <!-- Status overlay images -->
-      <b-img
-        v-if="message.successful"
-        lazy
-        src="/freegled.jpg"
-        class="status-overlay-image"
-        :alt="successfulText"
-      />
-      <b-img
-        v-else-if="message.promised && showPromised"
-        lazy
-        src="/promised.jpg"
-        class="status-overlay-image"
-        alt="Promised"
-      />
-
       <!-- Actual photo -->
       <div v-if="gotAttachments" class="photo-container">
         <!-- Use 640x480 to match expanded view size for faster modal loading -->
@@ -201,11 +201,6 @@ function expand(e) {
   height: auto;
   min-height: 0;
   max-height: none;
-
-  &.freegled,
-  &.promisedfade {
-    filter: contrast(50%);
-  }
 }
 
 .photo-area {
@@ -215,6 +210,11 @@ function expand(e) {
   padding-bottom: 115%;
   background: $color-gray--light;
   overflow: hidden;
+
+  .freegled &,
+  .promisedfade & {
+    filter: contrast(50%);
+  }
 }
 
 .photo-container {
@@ -363,7 +363,7 @@ function expand(e) {
 
 .status-overlay-image {
   position: absolute;
-  z-index: 10;
+  z-index: 20;
   transform: rotate(15deg);
   top: 50%;
   left: 50%;

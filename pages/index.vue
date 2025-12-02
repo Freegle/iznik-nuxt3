@@ -77,6 +77,13 @@
       <div class="sample-section">
         <client-only>
           <MobileVisualiseList class="sample-grid" />
+          <template #fallback>
+            <div class="loading-grid-ssr">
+              <div v-for="i in 4" :key="i" class="loading-card-ssr">
+                <div class="loading-shimmer-ssr"></div>
+              </div>
+            </div>
+          </template>
         </client-only>
       </div>
 
