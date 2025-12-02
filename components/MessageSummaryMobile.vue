@@ -70,21 +70,18 @@
         </div>
       </div>
 
-      <!-- Blurred sample image from similar posts -->
-      <div v-else-if="sampleImage" class="photo-container">
-        <ProxyImage
-          class-name="photo-image blurred-sample"
-          alt="Similar item"
-          :src="sampleImage.path"
-          :width="400"
-          :height="400"
-          fit="cover"
-          :preload="preload"
+      <!-- AI-generated image when no photo -->
+      <div v-else-if="aiImageUrl" class="photo-container">
+        <img
+          :src="aiImageUrl"
+          alt="AI generated item"
+          class="photo-image sample-image"
+          loading="lazy"
         />
-        <div class="sample-badge">Photo of similar item</div>
+        <div class="sample-badge">AI illustration</div>
       </div>
 
-      <!-- No photo placeholder -->
+      <!-- No photo placeholder (fallback if AI URL not generated) -->
       <div v-else class="no-photo-placeholder" :class="placeholderClass">
         <div class="placeholder-pattern"></div>
         <div class="icon-circle">
@@ -116,6 +113,7 @@
 <script setup>
 import { computed, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { useAiSampleImage } from '~/composables/useAiSampleImage'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -145,7 +143,6 @@ const {
   message,
   strippedSubject,
   gotAttachments,
-  sampleImage,
   attachmentCount,
   timeAgo,
   distanceText,
@@ -155,6 +152,10 @@ const {
   placeholderClass,
   categoryIcon,
 } = useMessageDisplay(idRef)
+
+// AI-generated image when no photo attached
+const subjectRef = computed(() => message.value?.subject)
+const { aiImageUrl } = useAiSampleImage(subjectRef)
 
 const locationText = computed(() => {
   // Show area name if available, otherwise distance
@@ -254,22 +255,24 @@ function expand(e) {
   left: 0;
 }
 
-.blurred-sample {
-  filter: blur(4px) saturate(0.85);
-  transform: scale(1.03);
+.sample-image {
+  filter: grayscale(100%);
 }
 
 .sample-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: $color-gray-opacity-70;
-  color: $color-white-opacity-95;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 500;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: $color-black-opacity-60;
+  color: $color-white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   z-index: 5;
   height: auto;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .photo-count {

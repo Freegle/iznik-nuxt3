@@ -2,6 +2,7 @@ import { computed, watch } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
 import {
   timeagoShort,
@@ -18,11 +19,18 @@ export function useMessageDisplay(messageId) {
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
   const userStore = useUserStore()
+  const groupStore = useGroupStore()
   const { me } = useMe()
 
   const message = computed(() =>
     messageStore?.byId(messageId.value || messageId)
   )
+
+  // Get the group for this message (first group it's posted to)
+  const messageGroup = computed(() => {
+    const groupId = message.value?.groups?.[0]?.groupid
+    return groupId ? groupStore.get(groupId) : null
+  })
 
   // Fetch poster info when message changes
   watch(
@@ -54,8 +62,22 @@ export function useMessageDisplay(messageId) {
 
   const strippedSubject = computed(() => {
     const subject = message.value?.subject || ''
-    // Strip "OFFER: ", "OFFERED: ", or "WANTED: " prefix
-    return subject.replace(/^(OFFERED|OFFER|WANTED):\s*/i, '')
+    // Build regex from group keywords if available, otherwise use defaults
+    const keywords = messageGroup.value?.settings?.keywords || {}
+    const keywordList = [
+      keywords.offer || 'OFFER',
+      'OFFERED', // Common variant
+      keywords.taken || 'TAKEN',
+      keywords.wanted || 'WANTED',
+      'REQUESTED', // Common variant for wanted
+      keywords.received || 'RECEIVED',
+    ]
+    // Escape any regex special chars and build pattern
+    const pattern = keywordList
+      .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('|')
+    const regex = new RegExp(`^(${pattern}):\\s*`, 'i')
+    return subject.replace(regex, '')
   })
 
   // Parse well-formatted subjects like "Item name (Location EH17)"
