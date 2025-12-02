@@ -40,6 +40,7 @@
               :width="containerWidth"
               :height="containerHeight"
               :zoom="1"
+              @zoom-change="(zoomed) => handleZoomChange(index, zoomed)"
             />
           </div>
         </div>
@@ -60,7 +61,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import {
+  ref,
+  reactive,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+  nextTick,
+} from 'vue'
 import { useElementSize } from '@vueuse/core'
 import { useMessageStore } from '~/stores/message'
 import { useModalHistory } from '~/composables/useModalHistory'
@@ -96,8 +105,8 @@ const imageContainer = ref(null)
 const { width: containerWidth, height: containerHeight } =
   useElementSize(imageContainer)
 
-// Refs to PinchMe components to check zoom state
-const pinchRefs = ref({})
+// Track zoom state per image via events (more reliable than accessing exposed refs)
+const zoomStates = reactive({})
 
 // Touch handling for swipe
 const touchStartX = ref(0)
@@ -105,11 +114,29 @@ const touchStartY = ref(0)
 const touchDeltaX = ref(0)
 const isSwiping = ref(false)
 const isTransitioning = ref(false)
+const wasPinching = ref(false) // Track if we were just pinching
+const pinchEndTime = ref(0) // Track when pinch ended for cooldown
+const PINCH_COOLDOWN_MS = 400 // Block swipes for 400ms after pinch
+
+// Refs to PinchMe components for resetTransform
+const pinchRefs = reactive({})
+
+// Handle zoom state change from PinchMe
+function handleZoomChange(index, isZoomed) {
+  console.log('[ZOOM] handleZoomChange index:', index, 'isZoomed:', isZoomed)
+  zoomStates[index] = isZoomed
+}
 
 // Check if current image is zoomed
 const isCurrentImageZoomed = computed(() => {
-  const currentPinch = pinchRefs.value[currentIndex.value]
-  return currentPinch?.isZoomed?.value || false
+  const zoomed = zoomStates[currentIndex.value] || false
+  console.log(
+    '[ZOOM] isCurrentImageZoomed:',
+    zoomed,
+    'states:',
+    JSON.stringify(zoomStates)
+  )
+  return zoomed
 })
 
 // Computed style for the images wrapper
@@ -123,10 +150,38 @@ const imagesWrapperStyle = computed(() => {
   }
 })
 
-function onTouchStart(e) {
-  // Don't interfere with pinch gestures (2+ fingers) or when zoomed
-  if (e.touches.length > 1 || isCurrentImageZoomed.value) return
+function isInPinchCooldown() {
+  return Date.now() - pinchEndTime.value < PINCH_COOLDOWN_MS
+}
 
+function onTouchStart(e) {
+  const inCooldown = isInPinchCooldown()
+  console.log(
+    '[TOUCH] START touches:',
+    e.touches.length,
+    'wasPinching:',
+    wasPinching.value,
+    'isZoomed:',
+    isCurrentImageZoomed.value,
+    'cooldown:',
+    inCooldown
+  )
+
+  // Track if this is a pinch gesture
+  if (e.touches.length > 1) {
+    console.log('[TOUCH] START -> pinch detected, blocking swipe')
+    wasPinching.value = true
+    isSwiping.value = false
+    return
+  }
+
+  // Ignore single touch if we were just pinching, in cooldown, or zoomed
+  if (wasPinching.value || inCooldown || isCurrentImageZoomed.value) {
+    console.log('[TOUCH] START -> ignored (wasPinching, cooldown, or zoomed)')
+    return
+  }
+
+  console.log('[TOUCH] START -> tracking swipe from', e.touches[0].clientX)
   touchStartX.value = e.touches[0].clientX
   touchStartY.value = e.touches[0].clientY
   touchDeltaX.value = 0
@@ -134,8 +189,27 @@ function onTouchStart(e) {
 }
 
 function onTouchMove(e) {
-  // Don't swipe when zoomed - let pinch-zoom handle panning
-  if (e.touches.length > 1 || isCurrentImageZoomed.value) {
+  // Track pinch gestures
+  if (e.touches.length > 1) {
+    console.log('[TOUCH] MOVE -> pinch detected, blocking swipe')
+    wasPinching.value = true
+    isSwiping.value = false
+    return
+  }
+
+  const inCooldown = isInPinchCooldown()
+
+  // Don't swipe when zoomed, after pinching, or in cooldown
+  if (wasPinching.value || inCooldown || isCurrentImageZoomed.value) {
+    console.log(
+      '[TOUCH] MOVE -> blocked (wasPinching:',
+      wasPinching.value,
+      'cooldown:',
+      inCooldown,
+      'isZoomed:',
+      isCurrentImageZoomed.value,
+      ')'
+    )
     isSwiping.value = false
     return
   }
@@ -149,6 +223,7 @@ function onTouchMove(e) {
     Math.abs(deltaX) > Math.abs(deltaY) &&
     Math.abs(deltaX) > 10
   ) {
+    console.log('[TOUCH] MOVE -> swipe started, deltaX:', deltaX)
     isSwiping.value = true
   }
 
@@ -158,20 +233,52 @@ function onTouchMove(e) {
   }
 }
 
-function onTouchEnd() {
-  if (!isSwiping.value) return
+function onTouchEnd(e) {
+  console.log(
+    '[TOUCH] END touches remaining:',
+    e.touches.length,
+    'isSwiping:',
+    isSwiping.value,
+    'wasPinching:',
+    wasPinching.value,
+    'deltaX:',
+    touchDeltaX.value
+  )
+
+  // Reset pinch flag when all fingers lifted and start cooldown
+  if (e.touches.length === 0) {
+    if (wasPinching.value) {
+      console.log('[TOUCH] END -> pinch ended, starting cooldown')
+      pinchEndTime.value = Date.now()
+    }
+    console.log('[TOUCH] END -> all fingers lifted, resetting wasPinching')
+    wasPinching.value = false
+  }
+
+  if (!isSwiping.value) {
+    console.log('[TOUCH] END -> not swiping, no action')
+    return
+  }
 
   const threshold = (containerWidth.value || 375) * 0.2 // 20% of screen width
+  console.log(
+    '[TOUCH] END -> swipe ended, deltaX:',
+    touchDeltaX.value,
+    'threshold:',
+    threshold
+  )
 
   if (touchDeltaX.value > threshold && currentIndex.value > 0) {
-    // Swipe right - go to previous
+    console.log('[TOUCH] END -> SWIPE RIGHT to previous image')
     goToImage(currentIndex.value - 1)
   } else if (
     touchDeltaX.value < -threshold &&
     currentIndex.value < attachmentCount.value - 1
   ) {
-    // Swipe left - go to next
+    console.log('[TOUCH] END -> SWIPE LEFT to next image')
     goToImage(currentIndex.value + 1)
+  } else {
+    console.log('[TOUCH] END -> swipe below threshold, no change')
   }
 
   isSwiping.value = false
@@ -179,8 +286,25 @@ function onTouchEnd() {
 }
 
 function goToImage(index) {
+  console.log(
+    '[CAROUSEL] goToImage called, changing from',
+    currentIndex.value,
+    'to',
+    index
+  )
   isTransitioning.value = true
   currentIndex.value = index
+
+  // Reset the target image's transform and zoom state
+  nextTick(() => {
+    const pinch = pinchRefs[index]
+    if (pinch?.resetTransform) {
+      pinch.resetTransform()
+    }
+    // Clear zoom state since we're resetting
+    zoomStates[index] = false
+  })
+
   setTimeout(() => {
     isTransitioning.value = false
   }, 300)
