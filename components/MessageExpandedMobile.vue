@@ -628,7 +628,7 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  bottom: 130px;
   background: $color-white;
   overflow-y: auto;
   overflow-x: hidden;
@@ -641,15 +641,10 @@ onUnmounted(() => {
   }
 
   &.stickyAdRendered {
-    bottom: calc(
-      80px + env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile
-    );
+    bottom: calc(130px + $sticky-banner-height-mobile);
 
     @media (min-height: $mobile-tall) {
-      bottom: calc(
-        80px + env(safe-area-inset-bottom, 0px) +
-          $sticky-banner-height-mobile-tall
-      );
+      bottom: calc(130px + $sticky-banner-height-mobile-tall);
     }
   }
 }
@@ -1194,26 +1189,22 @@ onUnmounted(() => {
 }
 
 // Fixed footer (matches give/mobile pattern)
+// Use bottom offset for iOS Safari toolbar
 .app-footer {
   position: fixed;
-  bottom: 0;
+  bottom: 50px;
   left: 0;
   right: 0;
   padding: 1rem;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid $color-gray-3;
   background: $color-white;
   z-index: 1100;
 
   &.stickyAdRendered {
-    bottom: calc(
-      env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile
-    );
+    bottom: calc(50px + $sticky-banner-height-mobile);
 
     @media (min-height: $mobile-tall) {
-      bottom: calc(
-        env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile-tall
-      );
+      bottom: calc(50px + $sticky-banner-height-mobile-tall);
     }
   }
 
