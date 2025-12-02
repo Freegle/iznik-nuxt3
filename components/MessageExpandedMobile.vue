@@ -117,28 +117,29 @@
           />
         </div>
 
-        <!-- Blurred sample image from similar posts (no own photos) -->
+        <!-- No photo - show placeholder, with line drawing fading in when loaded -->
         <div
-          v-else-if="sampleImage"
-          class="photo-container sample-image-container"
+          v-else
+          class="photo-container sample-image-container position-relative"
         >
-          <ProxyImage
-            class-name="photo-image blurred-sample"
-            alt="Similar item"
-            :src="sampleImage.path"
-            :width="640"
-            :height="480"
-            fit="cover"
+          <MessagePhotoPlaceholder
+            :placeholder-class="placeholderClass"
+            :icon="categoryIcon"
+            :hidden="lineDrawingLoaded"
           />
-          <div class="sample-badge">Photo of similar item</div>
-        </div>
 
-        <!-- No photo placeholder (no attachments and no sample image) -->
-        <div v-else class="no-photo-placeholder" :class="placeholderClass">
-          <div class="placeholder-pattern"></div>
-          <div class="icon-circle">
-            <v-icon :icon="categoryIcon" class="placeholder-icon" />
-          </div>
+          <!-- Line drawing (fades in over placeholder when loaded) -->
+          <NuxtImg
+            v-if="lineDrawingUrl && !lineDrawingFailed"
+            :src="lineDrawingUrl"
+            alt="Item illustration"
+            class="line-drawing"
+            :class="{ loaded: lineDrawingLoaded }"
+            loading="lazy"
+            @load="lineDrawingLoaded = true"
+            @error="lineDrawingFailed = true"
+          />
+          <div v-if="lineDrawingLoaded" class="sample-badge">Illustration</div>
         </div>
 
         <!-- Poster overlay on photo (shown on shorter screens) -->
@@ -378,6 +379,7 @@ import { useRouter } from 'vue-router'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { useLineDrawing } from '~/composables/useLineDrawing'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -426,7 +428,6 @@ const {
   subjectLocation,
   fromme,
   gotAttachments,
-  sampleImage,
   attachmentCount,
   timeAgo,
   fullTimeAgo,
@@ -442,6 +443,12 @@ const {
   poster,
   posterProfileUrl,
 } = useMessageDisplay(props.id)
+
+// Line drawing when no photo attached
+const subjectRef = computed(() => message.value?.subject)
+const { lineDrawingUrl } = useLineDrawing(subjectRef)
+const lineDrawingLoaded = ref(false)
+const lineDrawingFailed = ref(false)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 
@@ -928,93 +935,27 @@ onUnmounted(() => {
   z-index: 11;
 }
 
-// No photo placeholder
-.no-photo-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.offer-gradient {
-  background: radial-gradient(
-      ellipse at 30% 20%,
-      rgba(129, 199, 132, 0.9) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse at 70% 80%,
-      rgba(56, 142, 60, 0.8) 0%,
-      transparent 50%
-    ),
-    linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
-  color: $color-white;
-
-  .placeholder-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M20 25h20v2H20zM25 20h10v2H25zM22 27h16v8H22zM28 35h4v5H28z' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
-    background-size: 60px 60px;
-  }
-}
-
-.wanted-gradient {
-  background: radial-gradient(
-      ellipse at 25% 25%,
-      rgba(144, 202, 249, 0.9) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      ellipse at 75% 75%,
-      rgba(66, 165, 245, 0.7) 0%,
-      transparent 45%
-    ),
-    linear-gradient(160deg, #64b5f6 0%, #42a5f5 50%, #1e88e5 100%);
-  color: $color-white;
-
-  .placeholder-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
-    background-size: 70px 70px;
-  }
-}
-
-.placeholder-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.icon-circle {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: $color-white-opacity-20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 4px 15px $color-black-opacity-10;
-}
-
-.placeholder-icon {
-  font-size: 2.5rem;
-  color: $color-white-opacity-90;
-}
-
 // Blurred sample image (from similar posts)
 .sample-image-container {
   position: relative;
 }
 
-.blurred-sample {
-  filter: blur(4px) saturate(0.85);
-  transform: scale(1.03); // Prevent blur edge artifacts
+.line-drawing {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  object-fit: cover;
+  background: white;
+
+  &.loaded {
+    opacity: 1;
+  }
 }
 
 .sample-badge {
@@ -1023,10 +964,10 @@ onUnmounted(() => {
   right: 0.75rem;
   background: $color-gray-opacity-60;
   color: $color-white-opacity-90;
-  padding: 0.25rem 0.5rem;
+  padding: 0.35rem 0.6rem;
   border-radius: 3px;
-  font-size: 0.6rem;
-  font-weight: 400;
+  font-size: 0.85rem;
+  font-weight: 500;
   z-index: 11;
 }
 

@@ -70,23 +70,26 @@
         </div>
       </div>
 
-      <!-- AI-generated image when no photo -->
-      <div v-else-if="aiImageUrl" class="photo-container">
-        <img
-          :src="aiImageUrl"
-          alt="AI generated item"
-          class="photo-image sample-image"
-          loading="lazy"
+      <!-- No photo - show placeholder, with line drawing fading in when loaded -->
+      <div v-else class="photo-container">
+        <MessagePhotoPlaceholder
+          :placeholder-class="placeholderClass"
+          :icon="categoryIcon"
+          :hidden="lineDrawingLoaded"
         />
-        <div class="sample-badge">AI illustration</div>
-      </div>
 
-      <!-- No photo placeholder (fallback if AI URL not generated) -->
-      <div v-else class="no-photo-placeholder" :class="placeholderClass">
-        <div class="placeholder-pattern"></div>
-        <div class="icon-circle">
-          <v-icon :icon="categoryIcon" class="placeholder-icon" />
-        </div>
+        <!-- Line drawing (fades in over placeholder when loaded) -->
+        <NuxtImg
+          v-if="lineDrawingUrl && !lineDrawingFailed"
+          :src="lineDrawingUrl"
+          alt="Item illustration"
+          class="line-drawing"
+          :class="{ loaded: lineDrawingLoaded }"
+          loading="lazy"
+          @load="lineDrawingLoaded = true"
+          @error="lineDrawingFailed = true"
+        />
+        <div v-if="lineDrawingLoaded" class="sample-badge">Illustration</div>
       </div>
 
       <!-- Title/info overlay at bottom of photo -->
@@ -111,9 +114,9 @@
 </template>
 
 <script setup>
-import { computed, toRef } from 'vue'
+import { computed, ref, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
-import { useAiSampleImage } from '~/composables/useAiSampleImage'
+import { useLineDrawing } from '~/composables/useLineDrawing'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -153,9 +156,11 @@ const {
   categoryIcon,
 } = useMessageDisplay(idRef)
 
-// AI-generated image when no photo attached
+// Line drawing when no photo attached
 const subjectRef = computed(() => message.value?.subject)
-const { aiImageUrl } = useAiSampleImage(subjectRef)
+const { lineDrawingUrl } = useLineDrawing(subjectRef)
+const lineDrawingLoaded = ref(false)
+const lineDrawingFailed = ref(false)
 
 const locationText = computed(() => {
   // Show area name if available, otherwise distance
@@ -222,25 +227,9 @@ function expand(e) {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    $color-gray--light 0%,
-    lighten($color-gray--light, 5%) 50%,
-    $color-gray--light 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  right: 0;
+  bottom: 0;
+  background: $color-gray--light;
 }
 
 :deep(.photo-image),
@@ -255,20 +244,33 @@ function expand(e) {
   left: 0;
 }
 
-.sample-image {
-  filter: grayscale(100%);
+.line-drawing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  object-fit: cover;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 2;
+
+  &.loaded {
+    opacity: 1;
+  }
 }
 
 .sample-badge {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 8px;
+  right: 8px;
   background: $color-black-opacity-60;
   color: $color-white;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 500;
   z-index: 5;
   height: auto;
   text-align: center;
@@ -285,83 +287,6 @@ function expand(e) {
   font-size: 0.7rem;
   z-index: 5;
   height: auto;
-}
-
-.no-photo-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-
-  &.offer-gradient {
-    background: radial-gradient(
-        ellipse at 30% 20%,
-        rgba(129, 199, 132, 0.9) 0%,
-        transparent 50%
-      ),
-      radial-gradient(
-        ellipse at 70% 80%,
-        rgba(56, 142, 60, 0.8) 0%,
-        transparent 50%
-      ),
-      linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
-
-    .placeholder-pattern {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
-      background-size: 70px 70px;
-    }
-  }
-
-  &.wanted-gradient {
-    background: radial-gradient(
-        ellipse at 25% 25%,
-        rgba(144, 202, 249, 0.9) 0%,
-        transparent 45%
-      ),
-      radial-gradient(
-        ellipse at 75% 75%,
-        rgba(66, 165, 245, 0.7) 0%,
-        transparent 45%
-      ),
-      linear-gradient(160deg, #64b5f6 0%, #42a5f5 50%, #1e88e5 100%);
-
-    .placeholder-pattern {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
-      background-size: 70px 70px;
-    }
-  }
-}
-
-.placeholder-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.icon-circle {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.placeholder-icon {
-  font-size: 2rem;
-  color: rgba(255, 255, 255, 0.9);
 }
 
 .status-overlay-image {

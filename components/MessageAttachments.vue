@@ -35,7 +35,7 @@
       />
       <ProxyImage
         v-else-if="!attachments?.length && sampleImage"
-        class-name="p-0 rounded blurred-sample"
+        class-name="p-0 rounded"
         alt="Similar item"
         :src="sampleImage.path"
         :width="width"
@@ -221,20 +221,15 @@ function brokenImage() {
   height: 150px;
 }
 
-.blurred-sample {
-  filter: blur(4px) saturate(0.85);
-  transform: scale(1.03);
-}
-
 .sample-badge {
   position: absolute;
   bottom: 10px;
   right: 10px;
   background: rgba(128, 128, 128, 0.6);
   color: rgba(255, 255, 255, 0.9);
-  padding: 0.15rem 0.4rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 3px;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 500;
   z-index: 100;
 }
