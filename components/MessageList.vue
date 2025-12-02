@@ -15,6 +15,7 @@
       >
         <MessageListCounts
           v-if="browseCount && !search"
+          :count="browseCount"
           @mark-seen="markSeen"
         />
       </div>
@@ -238,7 +239,9 @@ const markUnseenTries = ref(10)
 
 // Computed properties
 const browseCount = computed(() => {
-  return messageStore.count
+  // Count the actual unseen messages that will be displayed (after de-duplication)
+  return deDuplicatedMessages.value.filter((m) => m.unseen && !m.successful)
+    .length
 })
 
 const group = computed(() => {

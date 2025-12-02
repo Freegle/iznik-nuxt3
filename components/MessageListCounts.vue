@@ -31,17 +31,23 @@
 <script setup>
 import pluralize from 'pluralize'
 import { computed } from 'vue'
-import { useMessageStore } from '~/stores/message'
+
+const props = defineProps({
+  count: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+})
 
 const emit = defineEmits(['markSeen'])
-const messageStore = useMessageStore()
 
 const browseCount = computed(() => {
-  return Math.min(99, messageStore.count)
+  return Math.min(99, props.count)
 })
 
 const browseCountPlural = computed(() => {
-  return pluralize('unread post', messageStore.count, true)
+  return pluralize('unread post', props.count, true)
 })
 
 function markSeen() {
