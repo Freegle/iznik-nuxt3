@@ -85,7 +85,7 @@ function onPhotoProcessed() {
 }
 
 function goNext() {
-  router.push('/find/app/details')
+  router.push('/find/mobile/details')
 }
 </script>
 

@@ -628,7 +628,7 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 130px;
+  bottom: 80px;
   background: $color-white;
   overflow-y: auto;
   overflow-x: hidden;
@@ -641,10 +641,10 @@ onUnmounted(() => {
   }
 
   &.stickyAdRendered {
-    bottom: calc(130px + $sticky-banner-height-mobile);
+    bottom: calc(80px + $sticky-banner-height-mobile);
 
     @media (min-height: $mobile-tall) {
-      bottom: calc(130px + $sticky-banner-height-mobile-tall);
+      bottom: calc(80px + $sticky-banner-height-mobile-tall);
     }
   }
 }
@@ -1188,11 +1188,9 @@ onUnmounted(() => {
   color: $color-gray--darker;
 }
 
-// Fixed footer (matches give/mobile pattern)
-// Use bottom offset for iOS Safari toolbar
 .app-footer {
   position: fixed;
-  bottom: 50px;
+  bottom: 0;
   left: 0;
   right: 0;
   padding: 1rem;
@@ -1201,10 +1199,10 @@ onUnmounted(() => {
   z-index: 1100;
 
   &.stickyAdRendered {
-    bottom: calc(50px + $sticky-banner-height-mobile);
+    bottom: $sticky-banner-height-mobile;
 
     @media (min-height: $mobile-tall) {
-      bottom: calc(50px + $sticky-banner-height-mobile-tall);
+      bottom: $sticky-banner-height-mobile-tall;
     }
   }
 
