@@ -1,289 +1,290 @@
 <template>
-  <div
-    v-if="message"
-    ref="containerRef"
-    class="message-expanded-mobile"
-    :class="{ stickyAdRendered }"
-  >
-    <!-- Hide the default navbar by teleporting an empty replacement -->
-    <Teleport to="#navbar-mobile">
-      <div class="hidden-navbar" />
-    </Teleport>
+  <div v-if="message" class="message-expanded-wrapper">
+    <div
+      ref="containerRef"
+      class="message-expanded-mobile"
+      :class="{ stickyAdRendered }"
+    >
+      <!-- Hide the default navbar by teleporting an empty replacement -->
+      <Teleport to="#navbar-mobile">
+        <div class="hidden-navbar" />
+      </Teleport>
 
-    <!-- Photo Area with Ken Burns animation -->
-    <div class="photo-area" @click="showPhotosModal">
-      <!-- Back button on photo -->
-      <button class="back-button" @click.stop="goBack">
-        <v-icon icon="arrow-left" />
-      </button>
+      <!-- Photo Area with Ken Burns animation -->
+      <div class="photo-area" @click="showPhotosModal">
+        <!-- Back button on photo -->
+        <button class="back-button" @click.stop="goBack">
+          <v-icon icon="arrow-left" />
+        </button>
 
-      <!-- Status overlay images -->
-      <b-img
-        v-if="message.successful"
-        lazy
-        src="/freegled.jpg"
-        class="status-overlay-image"
-        :alt="successfulText"
-      />
-      <b-img
-        v-else-if="message.promised"
-        lazy
-        src="/promised.jpg"
-        class="status-overlay-image"
-        alt="Promised"
-      />
-      <!-- Thumbnail carousel for multiple photos -->
-      <div
-        v-if="attachmentCount > 1"
-        ref="thumbnailsRef"
-        class="thumbnail-carousel"
-        @touchstart="onThumbnailTouchStart"
-        @touchmove="onThumbnailTouchMove"
-        @touchend="onThumbnailTouchEnd"
-      >
+        <!-- Status overlay images -->
+        <b-img
+          v-if="message.successful"
+          lazy
+          src="/freegled.jpg"
+          class="status-overlay-image"
+          :alt="successfulText"
+        />
+        <b-img
+          v-else-if="message.promised"
+          lazy
+          src="/promised.jpg"
+          class="status-overlay-image"
+          alt="Promised"
+        />
+        <!-- Thumbnail carousel for multiple photos -->
         <div
-          v-for="(attachment, index) in message.attachments"
-          :key="attachment.id || index"
-          class="thumbnail-item"
-          :class="{ active: index === currentPhotoIndex }"
-          @click.stop="handleThumbnailClick(index)"
+          v-if="attachmentCount > 1"
+          ref="thumbnailsRef"
+          class="thumbnail-carousel"
+          @touchstart="onThumbnailTouchStart"
+          @touchmove="onThumbnailTouchMove"
+          @touchend="onThumbnailTouchEnd"
+        >
+          <div
+            v-for="(attachment, index) in message.attachments"
+            :key="attachment.id || index"
+            class="thumbnail-item"
+            :class="{ active: index === currentPhotoIndex }"
+            @click.stop="handleThumbnailClick(index)"
+          >
+            <OurUploadedImage
+              v-if="attachment.ouruid"
+              :src="attachment.ouruid"
+              :modifiers="attachment.externalmods"
+              alt="Thumbnail"
+              class="thumbnail-image"
+              :width="80"
+              :height="80"
+            />
+            <NuxtPicture
+              v-else-if="attachment.externaluid"
+              format="webp"
+              provider="uploadcare"
+              :src="attachment.externaluid"
+              :modifiers="attachment.externalmods"
+              alt="Thumbnail"
+              class="thumbnail-image"
+              :width="80"
+              :height="80"
+            />
+            <ProxyImage
+              v-else-if="attachment.path"
+              class-name="thumbnail-image"
+              alt="Thumbnail"
+              :src="attachment.path"
+              :width="80"
+              :height="80"
+              fit="cover"
+            />
+          </div>
+        </div>
+
+        <!-- Actual photo or placeholder -->
+        <div
+          v-if="gotAttachments"
+          class="photo-container"
+          :class="{ 'ken-burns': !prefersReducedMotion }"
         >
           <OurUploadedImage
-            v-if="attachment.ouruid"
-            :src="attachment.ouruid"
-            :modifiers="attachment.externalmods"
-            alt="Thumbnail"
-            class="thumbnail-image"
-            :width="80"
-            :height="80"
+            v-if="currentAttachment?.ouruid"
+            :src="currentAttachment.ouruid"
+            :modifiers="currentAttachment.externalmods"
+            alt="Item Photo"
+            class="photo-image"
+            :width="640"
+            :height="480"
           />
           <NuxtPicture
-            v-else-if="attachment.externaluid"
+            v-else-if="currentAttachment?.externaluid"
             format="webp"
             provider="uploadcare"
-            :src="attachment.externaluid"
-            :modifiers="attachment.externalmods"
-            alt="Thumbnail"
-            class="thumbnail-image"
-            :width="80"
-            :height="80"
+            :src="currentAttachment.externaluid"
+            :modifiers="currentAttachment.externalmods"
+            alt="Item Photo"
+            class="photo-image"
+            :width="640"
+            :height="480"
           />
           <ProxyImage
-            v-else-if="attachment.path"
-            class-name="thumbnail-image"
-            alt="Thumbnail"
-            :src="attachment.path"
-            :width="80"
-            :height="80"
+            v-else-if="currentAttachment?.path"
+            class-name="photo-image"
+            alt="Item picture"
+            :src="currentAttachment.path"
+            :width="640"
+            :height="480"
             fit="cover"
           />
         </div>
-      </div>
 
-      <!-- Actual photo or placeholder -->
-      <div
-        v-if="gotAttachments"
-        class="photo-container"
-        :class="{ 'ken-burns': !prefersReducedMotion }"
-      >
-        <OurUploadedImage
-          v-if="currentAttachment?.ouruid"
-          :src="currentAttachment.ouruid"
-          :modifiers="currentAttachment.externalmods"
-          alt="Item Photo"
-          class="photo-image"
-          :width="640"
-          :height="480"
-        />
-        <NuxtPicture
-          v-else-if="currentAttachment?.externaluid"
-          format="webp"
-          provider="uploadcare"
-          :src="currentAttachment.externaluid"
-          :modifiers="currentAttachment.externalmods"
-          alt="Item Photo"
-          class="photo-image"
-          :width="640"
-          :height="480"
-        />
-        <ProxyImage
-          v-else-if="currentAttachment?.path"
-          class-name="photo-image"
-          alt="Item picture"
-          :src="currentAttachment.path"
-          :width="640"
-          :height="480"
-          fit="cover"
-        />
-      </div>
-
-      <!-- Blurred sample image from similar posts (no own photos) -->
-      <div
-        v-else-if="sampleImage"
-        class="photo-container sample-image-container"
-      >
-        <ProxyImage
-          class-name="photo-image blurred-sample"
-          alt="Similar item"
-          :src="sampleImage.path"
-          :width="640"
-          :height="480"
-          fit="cover"
-        />
-        <div class="sample-badge">Photo of similar item</div>
-      </div>
-
-      <!-- No photo placeholder (no attachments and no sample image) -->
-      <div v-else class="no-photo-placeholder" :class="placeholderClass">
-        <div class="placeholder-pattern"></div>
-        <div class="icon-circle">
-          <v-icon :icon="categoryIcon" class="placeholder-icon" />
+        <!-- Blurred sample image from similar posts (no own photos) -->
+        <div
+          v-else-if="sampleImage"
+          class="photo-container sample-image-container"
+        >
+          <ProxyImage
+            class-name="photo-image blurred-sample"
+            alt="Similar item"
+            :src="sampleImage.path"
+            :width="640"
+            :height="480"
+            fit="cover"
+          />
+          <div class="sample-badge">Photo of similar item</div>
         </div>
-      </div>
 
-      <!-- Poster overlay on photo (shown on shorter screens) -->
-      <NuxtLink
-        v-if="poster"
-        :to="posterProfileUrl"
-        class="poster-overlay"
-        :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
-        @click.stop
-      >
-        <ProfileImage
-          :image="poster.profile?.paththumb"
-          :externaluid="poster.profile?.externaluid"
-          :ouruid="poster.profile?.ouruid"
-          :externalmods="poster.profile?.externalmods"
-          :name="poster.displayname"
-          class="poster-overlay-avatar"
-          is-thumbnail
-          size="sm"
-        />
-        <div class="poster-overlay-info">
-          <span class="poster-overlay-name">{{ poster.displayname }}</span>
-          <div class="poster-overlay-stats">
-            <span v-if="poster.info?.offers" class="poster-overlay-stat">
-              <v-icon icon="gift" />{{ poster.info.offers }}
-            </span>
-            <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
-              <v-icon icon="search" />{{ poster.info.wanteds }}
-            </span>
+        <!-- No photo placeholder (no attachments and no sample image) -->
+        <div v-else class="no-photo-placeholder" :class="placeholderClass">
+          <div class="placeholder-pattern"></div>
+          <div class="icon-circle">
+            <v-icon :icon="categoryIcon" class="placeholder-icon" />
           </div>
         </div>
-        <v-icon icon="chevron-right" class="poster-overlay-chevron" />
-      </NuxtLink>
 
-      <!-- Title overlay at bottom of photo - matches summary layout -->
-      <div class="title-overlay">
-        <div class="info-row">
-          <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
-          <div class="info-icons">
-            <span
-              v-if="distanceText"
-              class="location"
-              @click.stop="showMapModal = true"
-            >
-              <v-icon icon="map-marker-alt" />{{ distanceText }}
-            </span>
-            <span
-              v-b-tooltip.click.blur="{
-                title: fullTimeAgo,
-                customClass: 'mobile-tooltip',
-              }"
-              class="time"
-              @click.stop
-            >
-              <v-icon icon="clock" />{{ timeAgo }}
-            </span>
-            <span
-              v-b-tooltip.click.blur="{
-                title: replyTooltip,
-                customClass: 'mobile-tooltip',
-              }"
-              class="replies"
-              @click.stop
-            >
-              <v-icon icon="comments" />{{ replyCount }}
-            </span>
-            <span
-              v-if="message.deliverypossible && isOffer"
-              v-b-tooltip.click.blur="{
-                title: 'Delivery may be possible',
-                customClass: 'mobile-tooltip',
-              }"
-              class="delivery"
-              @click.stop
-            >
-              <v-icon icon="truck" />?
-            </span>
-            <span
-              v-if="message.deadline"
-              v-b-tooltip.click.blur="{
-                title: deadlineTooltip,
-                customClass: 'mobile-tooltip',
-              }"
-              class="deadline"
-              @click.stop
-            >
-              <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
-            </span>
+        <!-- Poster overlay on photo (shown on shorter screens) -->
+        <NuxtLink
+          v-if="poster"
+          :to="posterProfileUrl"
+          class="poster-overlay"
+          :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
+          @click.stop
+        >
+          <ProfileImage
+            :image="poster.profile?.paththumb"
+            :externaluid="poster.profile?.externaluid"
+            :ouruid="poster.profile?.ouruid"
+            :externalmods="poster.profile?.externalmods"
+            :name="poster.displayname"
+            class="poster-overlay-avatar"
+            is-thumbnail
+            size="sm"
+          />
+          <div class="poster-overlay-info">
+            <span class="poster-overlay-name">{{ poster.displayname }}</span>
+            <div class="poster-overlay-stats">
+              <span v-if="poster.info?.offers" class="poster-overlay-stat">
+                <v-icon icon="gift" />{{ poster.info.offers }}
+              </span>
+              <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
+                <v-icon icon="search" />{{ poster.info.wanteds }}
+              </span>
+            </div>
+          </div>
+          <v-icon icon="chevron-right" class="poster-overlay-chevron" />
+        </NuxtLink>
+
+        <!-- Title overlay at bottom of photo - matches summary layout -->
+        <div class="title-overlay">
+          <div class="info-row">
+            <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
+            <div class="info-icons">
+              <span
+                v-if="distanceText"
+                class="location"
+                @click.stop="showMapModal = true"
+              >
+                <v-icon icon="map-marker-alt" />{{ distanceText }}
+              </span>
+              <span
+                v-b-tooltip.click.blur="{
+                  title: fullTimeAgo,
+                  customClass: 'mobile-tooltip',
+                }"
+                class="time"
+                @click.stop
+              >
+                <v-icon icon="clock" />{{ timeAgo }}
+              </span>
+              <span
+                v-b-tooltip.click.blur="{
+                  title: replyTooltip,
+                  customClass: 'mobile-tooltip',
+                }"
+                class="replies"
+                @click.stop
+              >
+                <v-icon icon="comments" />{{ replyCount }}
+              </span>
+              <span
+                v-if="message.deliverypossible && isOffer"
+                v-b-tooltip.click.blur="{
+                  title: 'Delivery may be possible',
+                  customClass: 'mobile-tooltip',
+                }"
+                class="delivery"
+                @click.stop
+              >
+                <v-icon icon="truck" />?
+              </span>
+              <span
+                v-if="message.deadline"
+                v-b-tooltip.click.blur="{
+                  title: deadlineTooltip,
+                  customClass: 'mobile-tooltip',
+                }"
+                class="deadline"
+                @click.stop
+              >
+                <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
+              </span>
+            </div>
+          </div>
+          <div class="title-row">
+            <span class="title-subject">{{ subjectItemName }}</span>
+          </div>
+          <div v-if="subjectLocation" class="title-location">
+            {{ subjectLocation }}
           </div>
         </div>
-        <div class="title-row">
-          <span class="title-subject">{{ subjectItemName }}</span>
-        </div>
-        <div v-if="subjectLocation" class="title-location">
-          {{ subjectLocation }}
+      </div>
+
+      <!-- Info Section -->
+      <div class="info-section">
+        <!-- Posted by section (shown on taller screens) -->
+        <NuxtLink
+          v-if="poster"
+          :to="posterProfileUrl"
+          class="poster-section"
+          @click.stop
+        >
+          <ProfileImage
+            :image="poster.profile?.paththumb"
+            :externaluid="poster.profile?.externaluid"
+            :ouruid="poster.profile?.ouruid"
+            :externalmods="poster.profile?.externalmods"
+            :name="poster.displayname"
+            class="poster-avatar"
+            is-thumbnail
+            size="lg"
+          />
+          <div class="poster-details">
+            <span class="poster-name">{{ poster.displayname }}</span>
+            <div class="poster-stats">
+              <span v-if="distanceText" class="poster-distance">
+                <v-icon icon="map-marker-alt" />{{ distanceText }}
+              </span>
+              <span v-if="poster.info?.offers" class="poster-stat">
+                <v-icon icon="gift" />{{ poster.info.offers }}
+              </span>
+              <span v-if="poster.info?.wanteds" class="poster-stat">
+                <v-icon icon="search" />{{ poster.info.wanteds }}
+              </span>
+            </div>
+          </div>
+          <v-icon icon="chevron-right" class="poster-chevron" />
+        </NuxtLink>
+
+        <!-- Description -->
+        <div class="description-section">
+          <div class="description-label">DESCRIPTION</div>
+          <div class="description-content">
+            <MessageTextBody :id="id" />
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Info Section -->
-    <div class="info-section">
-      <!-- Posted by section (shown on taller screens) -->
-      <NuxtLink
-        v-if="poster"
-        :to="posterProfileUrl"
-        class="poster-section"
-        @click.stop
-      >
-        <ProfileImage
-          :image="poster.profile?.paththumb"
-          :externaluid="poster.profile?.externaluid"
-          :ouruid="poster.profile?.ouruid"
-          :externalmods="poster.profile?.externalmods"
-          :name="poster.displayname"
-          class="poster-avatar"
-          is-thumbnail
-          size="lg"
-        />
-        <div class="poster-details">
-          <span class="poster-name">{{ poster.displayname }}</span>
-          <div class="poster-stats">
-            <span v-if="distanceText" class="poster-distance">
-              <v-icon icon="map-marker-alt" />{{ distanceText }}
-            </span>
-            <span v-if="poster.info?.offers" class="poster-stat">
-              <v-icon icon="gift" />{{ poster.info.offers }}
-            </span>
-            <span v-if="poster.info?.wanteds" class="poster-stat">
-              <v-icon icon="search" />{{ poster.info.wanteds }}
-            </span>
-          </div>
-        </div>
-        <v-icon icon="chevron-right" class="poster-chevron" />
-      </NuxtLink>
-
-      <!-- Description -->
-      <div class="description-section">
-        <div class="description-label">DESCRIPTION</div>
-        <div class="description-content">
-          <MessageTextBody :id="id" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Fixed footer with Reply button -->
+    <!-- Fixed footer with Reply button - outside scrollable container for Safari compatibility -->
     <div
       class="app-footer"
       :class="{ expanded: replyExpanded, stickyAdRendered }"
@@ -626,6 +627,15 @@ onUnmounted(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/_color-vars.scss';
+
+.message-expanded-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
 
 .message-expanded-mobile {
   display: flex;
