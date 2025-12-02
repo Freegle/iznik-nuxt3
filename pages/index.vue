@@ -74,16 +74,14 @@
       </div>
 
       <!-- Sample Offers -->
-      <div class="sample-section">
+      <div class="sample-section sample-stack">
+        <div class="loading-grid-ssr">
+          <div v-for="i in 8" :key="i" class="loading-card-ssr">
+            <div class="loading-shimmer-ssr"></div>
+          </div>
+        </div>
         <client-only>
           <MobileVisualiseList class="sample-grid" />
-          <template #fallback>
-            <div class="loading-grid-ssr">
-              <div v-for="i in 4" :key="i" class="loading-card-ssr">
-                <div class="loading-shimmer-ssr"></div>
-              </div>
-            </div>
-          </template>
         </client-only>
       </div>
 
@@ -589,10 +587,11 @@ onBeforeUnmount(() => {
   }
 }
 
-// SSR fallback input - matches browse-input styling exactly
+/* SSR fallback input - matches browse-input styling exactly */
 .browse-input-ssr {
   width: 100%;
-  border: 1px solid $color-gray--light;
+  border: 2px solid $color-gray--dark;
+  border-radius: 0;
   padding: 0.6rem 0.75rem;
   font-size: 0.9rem;
   background: $color-gray--lighter;
@@ -607,6 +606,46 @@ onBeforeUnmount(() => {
 // Sample Offers Section
 .sample-section {
   padding: 0.5rem;
+}
+
+.sample-stack {
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+.loading-grid-ssr {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 0 0.5rem;
+  max-height: 320px;
+  overflow: hidden;
+}
+
+.loading-card-ssr {
+  aspect-ratio: 0.87;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.loading-shimmer-ssr {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f5f5f5 0%, #fafafa 50%, #f5f5f5 100%);
+  background-size: 200% 100%;
+  animation: shimmer-ssr 1.5s infinite;
+}
+
+@keyframes shimmer-ssr {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 // App Download Section

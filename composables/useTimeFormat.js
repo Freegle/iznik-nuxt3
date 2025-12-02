@@ -158,6 +158,10 @@ export function dateonlyNoYear(val) {
   return dayjs(val).format('Do MMMM')
 }
 
+export function dateshortNoYear(val) {
+  return dayjs(val).format('D MMM')
+}
+
 export function weekdayshort(val) {
   return dayjs(val).format('dddd Do HH:mm a')
 }

@@ -5,7 +5,7 @@ import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 import {
   timeagoShort,
-  dateonlyNoYear,
+  dateshortNoYear,
   timeago,
 } from '~/composables/useTimeFormat'
 import { milesAway } from '~/composables/useDistance'
@@ -147,7 +147,7 @@ export function useMessageDisplay(messageId) {
 
   const formattedDeadline = computed(() => {
     if (!message.value?.deadline) return ''
-    return dateonlyNoYear(message.value.deadline)
+    return dateshortNoYear(message.value.deadline)
   })
 
   const deadlineTooltip = computed(() => {

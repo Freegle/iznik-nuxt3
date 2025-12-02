@@ -47,12 +47,25 @@ const scrollDuration = computed(() => {
   return items.value.length * 4 + 's'
 })
 
+// Helper to deduplicate by subject line
+function dedupeBySubject(offers) {
+  const seen = new Set()
+  return offers.filter((offer) => {
+    const subject = (offer.subject || '').toLowerCase().trim()
+    if (seen.has(subject)) return false
+    seen.add(subject)
+    return true
+  })
+}
+
 const cachedOffers = messageStore.all.filter(
   (msg) => msg?.type === 'Offer' && msg?.attachments?.length
 )
 
-if (cachedOffers.length >= 8) {
-  items.value = cachedOffers.slice(0, 8)
+const uniqueCached = dedupeBySubject(cachedOffers)
+
+if (uniqueCached.length >= 8) {
+  items.value = uniqueCached.slice(0, 8)
   loading.value = false
 } else {
   await groupStore.fetch()
@@ -85,7 +98,8 @@ if (cachedOffers.length >= 8) {
 
     await Promise.all(preloadPromises)
 
-    items.value = withPhotos.slice(0, 8)
+    const uniqueWithPhotos = dedupeBySubject(withPhotos)
+    items.value = uniqueWithPhotos.slice(0, 8)
     loading.value = false
   } catch (e) {
     console.log('Failed to fetch visualise items', e)
@@ -105,6 +119,7 @@ function goToMessage(id) {
 .mobile-visualise {
   overflow: hidden;
   padding: 0 0.5rem;
+  background: white;
 }
 
 .scroll-container {

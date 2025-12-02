@@ -213,8 +213,16 @@
             >
               <v-icon icon="truck" />?
             </span>
-            <span v-if="message.deadline" class="deadline" @click.stop>
-              <v-icon icon="calendar" />{{ formattedDeadline }}
+            <span
+              v-if="message.deadline"
+              v-b-tooltip.click.blur="{
+                title: deadlineTooltip,
+                customClass: 'mobile-tooltip',
+              }"
+              class="deadline"
+              @click.stop
+            >
+              <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
             </span>
           </div>
         </div>
@@ -420,6 +428,7 @@ const {
   replyTooltip,
   isOffer,
   formattedDeadline,
+  deadlineTooltip,
   successfulText,
   placeholderClass,
   categoryIcon,
