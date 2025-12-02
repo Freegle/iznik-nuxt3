@@ -182,12 +182,32 @@
             >
               <v-icon icon="map-marker-alt" />{{ distanceText }}
             </span>
-            <span class="time"><v-icon icon="clock" />{{ timeAgo }}</span>
-            <span class="replies" @click.stop>
+            <span
+              v-b-tooltip.click.blur="{
+                title: fullTimeAgo,
+                customClass: 'mobile-tooltip',
+              }"
+              class="time"
+              @click.stop
+            >
+              <v-icon icon="clock" />{{ timeAgo }}
+            </span>
+            <span
+              v-b-tooltip.click.blur="{
+                title: replyTooltip,
+                customClass: 'mobile-tooltip',
+              }"
+              class="replies"
+              @click.stop
+            >
               <v-icon icon="comments" />{{ replyCount }}
             </span>
             <span
               v-if="message.deliverypossible && isOffer"
+              v-b-tooltip.click.blur="{
+                title: 'Delivery may be possible',
+                customClass: 'mobile-tooltip',
+              }"
               class="delivery"
               @click.stop
             >
@@ -394,8 +414,10 @@ const {
   sampleImage,
   attachmentCount,
   timeAgo,
+  fullTimeAgo,
   distanceText,
   replyCount,
+  replyTooltip,
   isOffer,
   formattedDeadline,
   successfulText,

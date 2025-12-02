@@ -3,7 +3,11 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
-import { timeagoShort, dateonlyNoYear } from '~/composables/useTimeFormat'
+import {
+  timeagoShort,
+  dateonlyNoYear,
+  timeago,
+} from '~/composables/useTimeFormat'
 import { milesAway } from '~/composables/useDistance'
 
 /**
@@ -96,6 +100,16 @@ export function useMessageDisplay(messageId) {
     return timeagoShort(timestamp)
   })
 
+  const fullTimeAgo = computed(() => {
+    // Full time description for tooltip
+    const timestamp =
+      message.value?.groups?.[0]?.arrival ||
+      message.value?.arrival ||
+      message.value?.date
+    if (!timestamp) return ''
+    return `Posted ${timeago(timestamp)}`
+  })
+
   const distanceText = computed(() => {
     if (!me.value?.lat || !message.value?.lat) {
       return message.value?.area || null
@@ -114,6 +128,13 @@ export function useMessageDisplay(messageId) {
 
   const replyCount = computed(() => {
     return message.value?.replies?.length || 0
+  })
+
+  const replyTooltip = computed(() => {
+    const count = replyCount.value
+    if (count === 0) return 'No replies yet'
+    if (count === 1) return '1 person has replied'
+    return `${count} people have replied`
   })
 
   const isOffer = computed(() => {
@@ -163,8 +184,10 @@ export function useMessageDisplay(messageId) {
     sampleImage,
     attachmentCount,
     timeAgo,
+    fullTimeAgo,
     distanceText,
     replyCount,
+    replyTooltip,
     isOffer,
     isWanted,
     formattedDeadline,
