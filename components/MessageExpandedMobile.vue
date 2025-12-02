@@ -628,7 +628,7 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 80px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   background: $color-white;
   overflow-y: auto;
   overflow-x: hidden;
@@ -641,10 +641,15 @@ onUnmounted(() => {
   }
 
   &.stickyAdRendered {
-    bottom: calc(80px + $sticky-banner-height-mobile);
+    bottom: calc(
+      80px + env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile
+    );
 
     @media (min-height: $mobile-tall) {
-      bottom: calc(80px + $sticky-banner-height-mobile-tall);
+      bottom: calc(
+        80px + env(safe-area-inset-bottom, 0px) +
+          $sticky-banner-height-mobile-tall
+      );
     }
   }
 }
@@ -1195,15 +1200,20 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid $color-gray-3;
   background: $color-white;
   z-index: 1100;
 
   &.stickyAdRendered {
-    bottom: $sticky-banner-height-mobile;
+    bottom: calc(
+      env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile
+    );
 
     @media (min-height: $mobile-tall) {
-      bottom: $sticky-banner-height-mobile-tall;
+      bottom: calc(
+        env(safe-area-inset-bottom, 0px) + $sticky-banner-height-mobile-tall
+      );
     }
   }
 
