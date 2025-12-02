@@ -236,6 +236,8 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
+import { useMessageStore } from '~/stores/message'
+import { useGroupStore } from '~/stores/group'
 import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
@@ -264,6 +266,8 @@ const route = useRoute()
 const router = useRouter()
 const miscStore = useMiscStore()
 const mobileStore = useMobileStore()
+const messageStore = useMessageStore()
+const groupStore = useGroupStore()
 const userWatch = ref(null)
 const type = ref('landing')
 
@@ -300,6 +304,29 @@ head.link = [
 ]
 
 useHead(head)
+
+await groupStore.fetch()
+
+try {
+  const list = await messageStore.fetchInBounds(
+    49.45,
+    -9,
+    61,
+    2,
+    null,
+    50,
+    true
+  )
+  const offers = list.filter((item) => item.type === 'Offer')
+
+  const preloadPromises = []
+  for (const offer of offers.slice(0, 12)) {
+    preloadPromises.push(messageStore.fetch(offer.id))
+  }
+  await Promise.all(preloadPromises)
+} catch (e) {
+  console.log('SSR: Failed to prefetch messages', e)
+}
 
 // Computed properties
 const me = computed(() => {
@@ -419,9 +446,10 @@ onBeforeUnmount(() => {
   right: 12%;
   z-index: 20;
   padding: 0.5rem 1rem;
-  background: $color-white-opacity-85;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   text-align: center;
-  box-shadow: 0 2px 8px $color-black-opacity-15;
 }
 
 .hero-title {

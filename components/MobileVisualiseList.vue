@@ -47,45 +47,50 @@ const scrollDuration = computed(() => {
   return items.value.length * 4 + 's'
 })
 
-await groupStore.fetch()
+const cachedOffers = messageStore.all.filter(
+  (msg) => msg?.type === 'Offer' && msg?.attachments?.length
+)
 
-// Fetch offers from across the UK
-try {
-  const list = await messageStore.fetchInBounds(
-    49.45,
-    -9,
-    61,
-    2,
-    null,
-    50,
-    true
-  )
-  const offers = list.filter((item) => item.type === 'Offer')
+if (cachedOffers.length >= 8) {
+  items.value = cachedOffers.slice(0, 8)
+  loading.value = false
+} else {
+  await groupStore.fetch()
 
-  // Preload all messages first to get attachment info
-  const withPhotos = []
-  const preloadPromises = []
-
-  for (const offer of offers.slice(0, 30)) {
-    preloadPromises.push(
-      messageStore.fetch(offer.id).then(() => {
-        const msg = messageStore.byId(offer.id)
-        if (msg?.attachments?.length) {
-          withPhotos.push(offer)
-        }
-      })
+  try {
+    const list = await messageStore.fetchInBounds(
+      49.45,
+      -9,
+      61,
+      2,
+      null,
+      50,
+      true
     )
+    const offers = list.filter((item) => item.type === 'Offer')
+
+    const withPhotos = []
+    const preloadPromises = []
+
+    for (const offer of offers.slice(0, 30)) {
+      preloadPromises.push(
+        messageStore.fetch(offer.id).then(() => {
+          const msg = messageStore.byId(offer.id)
+          if (msg?.attachments?.length) {
+            withPhotos.push(offer)
+          }
+        })
+      )
+    }
+
+    await Promise.all(preloadPromises)
+
+    items.value = withPhotos.slice(0, 8)
+    loading.value = false
+  } catch (e) {
+    console.log('Failed to fetch visualise items', e)
+    loading.value = false
   }
-
-  // Wait for all preloads
-  await Promise.all(preloadPromises)
-
-  // Take up to 8 items with photos
-  items.value = withPhotos.slice(0, 8)
-  loading.value = false
-} catch (e) {
-  console.log('Failed to fetch visualise items', e)
-  loading.value = false
 }
 
 function goToMessage(id) {
