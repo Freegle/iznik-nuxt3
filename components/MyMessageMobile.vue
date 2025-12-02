@@ -705,8 +705,8 @@ onMounted(() => {
       linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
 
     .placeholder-pattern {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M20 25h20v2H20zM25 20h10v2H25zM22 27h16v8H22zM28 35h4v5H28z' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 60px 60px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
+      background-size: 70px 70px;
     }
   }
 

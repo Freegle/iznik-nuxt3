@@ -94,16 +94,19 @@
 
       <!-- Title/info overlay at bottom of photo -->
       <div class="title-overlay">
-        <div class="title-row">
-          <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
-          <span class="title-subject">{{ strippedSubject }}</span>
-        </div>
         <div class="info-row">
-          <span v-if="hasLocation" class="location">
-            <v-icon icon="map-marker-alt" class="me-1" />{{ locationText }}
-          </span>
-          <span v-else class="location-placeholder">&nbsp;</span>
-          <span class="time">{{ timeAgo || '...' }}</span>
+          <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
+          <div class="info-icons">
+            <span v-if="hasLocation" class="location">
+              <v-icon icon="map-marker-alt" />{{ locationText }}
+            </span>
+            <span class="time"
+              ><v-icon icon="clock" />{{ timeAgo || '...' }}</span
+            >
+          </div>
+        </div>
+        <div class="title-row">
+          <span class="title-subject">{{ strippedSubject }}</span>
         </div>
       </div>
     </div>
@@ -308,8 +311,8 @@ function expand(e) {
       linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
 
     .placeholder-pattern {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M20 25h20v2H20zM25 20h10v2H25zM22 27h16v8H22zM28 35h4v5H28z' fill='white' fill-opacity='0.15'/%3E%3C/svg%3E");
-      background-size: 60px 60px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
+      background-size: 70px 70px;
     }
   }
 
@@ -390,11 +393,11 @@ function expand(e) {
   z-index: 3;
 }
 
-.title-row {
+.info-row {
   display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 0.35rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.25rem;
   height: auto;
 }
@@ -403,8 +406,6 @@ function expand(e) {
   flex-shrink: 0;
   font-size: 0.8rem;
   height: auto;
-  align-self: flex-start;
-  margin-top: 0.15rem;
 }
 
 :deep(.title-tag .tagbadge) {
@@ -412,6 +413,32 @@ function expand(e) {
   left: auto;
   top: auto;
   font-size: 0.8rem;
+}
+
+.info-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: auto;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: auto;
+}
+
+.title-row {
+  height: auto;
 }
 
 .title-subject {
@@ -422,30 +449,6 @@ function expand(e) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: auto;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.7rem;
-  opacity: 0.9;
-  height: auto;
-}
-
-.location {
-  display: flex;
-  align-items: center;
-  height: auto;
-}
-
-.location-placeholder {
-  flex: 1;
-}
-
-.time {
-  text-align: right;
   height: auto;
 }
 </style>
