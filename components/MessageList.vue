@@ -408,7 +408,8 @@ function wantMessage(m) {
 }
 
 function messageNotFound(id) {
-  failedIds.value.add(id)
+  // Create new Set to ensure Vue reactivity detects the change
+  failedIds.value = new Set([...failedIds.value, id])
 }
 
 function visibilityChanged(visible) {
