@@ -704,7 +704,7 @@ function showReplyPhotoModal() {
 }
 
 .reply-action {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
@@ -731,6 +731,11 @@ function showReplyPhotoModal() {
   &.love-count {
     padding: 0.25rem 0.375rem;
     font-size: 0.75rem;
+  }
+
+  /* ChatButton wrapper - remove padding since button has its own */
+  &:has(.chat-btn) {
+    padding: 0;
   }
 
   :deep(.chat-btn) {
