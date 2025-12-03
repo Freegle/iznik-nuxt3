@@ -100,7 +100,7 @@
         </b-dropdown>
       </b-navbar>
       <nav
-        v-if="!showBackButton && loggedIn"
+        v-if="loggedIn"
         class="navbar-bottom d-xl-none"
         :class="{
           hideNavBarBottom: navBarBottomHidden,
