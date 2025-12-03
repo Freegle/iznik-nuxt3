@@ -36,17 +36,16 @@
         v-if="showClosestGroups && closestGroups?.length && !mapHidden"
         class="mb-1 border p-2 bg-white"
       >
-        <h2 class="visually-hidden">Nearby commmunities</h2>
-        <div class="d-flex flex-wrap justify-content-center">
-          <div v-for="g in closestGroups" :key="'group-' + g.id">
-            <JoinWithConfirm
-              :id="g.id"
-              :name="g.namedisplay"
-              size="md"
-              variant="primary"
-              class="m-1"
-            />
-          </div>
+        <h2 class="visually-hidden">Nearby communities</h2>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <JoinWithConfirm
+            v-for="g in closestGroups"
+            :id="g.id"
+            :key="'group-' + g.id"
+            :name="g.namedisplay"
+            size="sm"
+            variant="primary"
+          />
         </div>
       </div>
       <div v-if="showGroups" class="bg-white pt-3">
