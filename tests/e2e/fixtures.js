@@ -1164,6 +1164,22 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
+      // Set up console listener to capture browser errors
+      const consoleMessages = []
+      const consoleListener = (msg) => {
+        const msgType = msg.type()
+        const msgText = msg.text()
+        if (
+          msgType === 'error' ||
+          msgType === 'warning' ||
+          msgText.includes('Error')
+        ) {
+          consoleMessages.push(`[${msgType}] ${msgText}`)
+          console.log(`BROWSER CONSOLE [${msgType}]: ${msgText}`)
+        }
+      }
+      page.on('console', consoleListener)
+
       // Click the Submit/Post button to finalize
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
@@ -1205,6 +1221,17 @@ const testWithFixtures = test.extend({
         console.log('Expected URL pattern:', myPostsUrl)
         console.log('Time elapsed during navigation attempt:', currentTime)
 
+        // Log all captured console messages
+        console.log('=== CAPTURED BROWSER CONSOLE MESSAGES ===')
+        if (consoleMessages.length === 0) {
+          console.log('No error/warning messages captured')
+        } else {
+          consoleMessages.forEach((msg, i) => {
+            console.log(`Console message ${i + 1}: ${msg}`)
+          })
+        }
+        console.log('=== END BROWSER CONSOLE MESSAGES ===')
+
         // Check page state at timeout
         try {
           const title = await page.title()
@@ -1225,21 +1252,91 @@ const testWithFixtures = test.extend({
           console.log('Could not check loading elements:', e.message)
         }
 
-        // Check if there are any error messages visible
+        // Check if there are any error messages visible (including NoticeMessage component)
         try {
           const errorElements = await page
-            .locator('.error, .alert-danger, [role="alert"]')
+            .locator('.error, .alert-danger, [role="alert"], .notice--danger')
             .count()
           console.log('Error elements visible:', errorElements)
           if (errorElements > 0) {
             const errorText = await page
-              .locator('.error, .alert-danger, [role="alert"]')
+              .locator('.error, .alert-danger, [role="alert"], .notice--danger')
               .first()
               .textContent()
             console.log('First error message text:', errorText)
           }
         } catch (e) {
           console.log('Could not check error elements:', e.message)
+        }
+
+        // Also check for any text containing common error keywords
+        try {
+          const errorKeywords = await page
+            .locator('text=/Something went wrong|Error|failed|not allowed/i')
+            .count()
+          console.log('Error keyword elements:', errorKeywords)
+        } catch (e) {
+          console.log('Could not check error keywords:', e.message)
+        }
+
+        // Check compose store debug info if on whoami page
+        try {
+          const debugElement = page.locator('.debug-compose-state')
+          const debugExists = (await debugElement.count()) > 0
+          console.log('Debug element exists:', debugExists)
+          if (debugExists) {
+            const messageCount = await debugElement.getAttribute(
+              'data-message-count'
+            )
+            const hasApi = await debugElement.getAttribute('data-has-api')
+            const postcodeId = await debugElement.getAttribute(
+              'data-postcode-id'
+            )
+            const messageValid = await debugElement.getAttribute(
+              'data-message-valid'
+            )
+            const postcodeValid = await debugElement.getAttribute(
+              'data-postcode-valid'
+            )
+            const loggedIn = await debugElement.getAttribute('data-logged-in')
+            const emailValid = await debugElement.getAttribute(
+              'data-email-valid'
+            )
+            console.log('=== COMPOSE STORE DEBUG ===')
+            console.log('Message count:', messageCount)
+            console.log('Has $api:', hasApi)
+            console.log('Postcode ID:', postcodeId)
+            console.log('Message valid:', messageValid)
+            console.log('Postcode valid:', postcodeValid)
+            console.log('Logged in:', loggedIn)
+            console.log('Email valid:', emailValid)
+            console.log('=== END COMPOSE STORE DEBUG ===')
+          } else {
+            console.log(
+              'Debug element NOT found - checking page HTML for client-only wrapper...'
+            )
+            const pageHtml = await page.content()
+            const hasClientOnly = pageHtml.includes('client-only')
+            console.log('Page has client-only wrapper:', hasClientOnly)
+          }
+
+          // Check localStorage for compose store data (always)
+          const localStorageData = await page.evaluate(() => {
+            const composeData = localStorage.getItem('compose')
+            try {
+              return composeData ? JSON.parse(composeData) : null
+            } catch (e) {
+              return { error: e.message, raw: composeData?.substring(0, 500) }
+            }
+          })
+          console.log('=== LOCALSTORAGE COMPOSE DEBUG ===')
+          console.log(
+            'Compose store in localStorage:',
+            JSON.stringify(localStorageData, null, 2)
+          )
+          console.log('=== END LOCALSTORAGE DEBUG ===')
+        } catch (e) {
+          console.log('Could not check compose store debug:', e.message)
         }
 
         console.log('=== END NAVIGATION TIMEOUT DEBUG ===')
@@ -1432,7 +1529,8 @@ const testWithFixtures = test.extend({
         })
 
         // Find the post we want to withdraw.
-        const postSelector = `.card-body:has-text("${item}"):visible`
+        // Use .card or .messagecard (consistent with postMessage fixture) rather than .card-body
+        const postSelector = `.card:has-text("${item}"), .messagecard:has-text("${item}")`
         console.log(`Looking for post with selector: ${postSelector}`)
         const postCard = page.locator(postSelector).first()
 
@@ -1838,9 +1936,10 @@ const testWithFixtures = test.extend({
             timeout: 3000,
           })
 
-          console.log('ContactDetailsAskModal appeared, filling details')
+          console.log('ContactDetailsAskModal appeared, filling postcode')
 
           // Fill in postcode - look for the postcode input
+          // Note: Mobile phone input was removed in SMS notifications removal (commit 9fac7ae9)
           const postcodeInput = contactModal.locator(
             'input[placeholder*="postcode"], .pcinp'
           )
@@ -1851,27 +1950,19 @@ const testWithFixtures = test.extend({
           await postcodeInput.fill('EH3 6SS')
           console.log('Filled postcode')
 
-          // Fill in phone number - look for the phone input
-          const phoneInput = contactModal.locator(
-            'input[placeholder*="mobile"]'
-          )
-          await phoneInput.waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance,
-          })
-          await phoneInput.fill('07700900123')
-          console.log('Filled phone number')
-
-          // Click OK/Save button
-          const okButton = contactModal.locator(
-            '.btn:has-text("OK"), .btn:has-text("Save")'
-          )
-          await okButton.waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance,
-          })
-          await okButton.click()
-          console.log('Clicked OK button in ContactDetailsAskModal')
+          // The modal auto-saves when postcode is selected, just need to close it
+          // Look for the close button or wait for modal to close automatically
+          try {
+            const closeButton = contactModal.locator(
+              '.btn-close, .close, button[aria-label="Close"]'
+            )
+            if ((await closeButton.count()) > 0) {
+              await closeButton.click()
+              console.log('Clicked close button in ContactDetailsAskModal')
+            }
+          } catch (e) {
+            console.log('No close button found, modal may auto-close')
+          }
 
           // Wait for the contact modal to disappear
           await contactModal.waitFor({
@@ -1887,12 +1978,14 @@ const testWithFixtures = test.extend({
         }
 
         // Wait for the chat list to load and look for a chat entry
-        await page.waitForSelector('.chatentry', {
+        await page.waitForSelector('.chat-entry', {
           timeout: timeouts.ui.appearance,
         })
 
         // Check that there's one chat entry
-        const chatEntries = page.locator('.chatentry').filter({ visible: true })
+        const chatEntries = page
+          .locator('.chat-entry')
+          .filter({ visible: true })
         const chatCount = await chatEntries.count()
 
         if (chatCount > 0) {

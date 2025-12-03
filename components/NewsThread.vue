@@ -278,6 +278,7 @@ import { useMiscStore } from '~/stores/misc'
 import NewsReplies from '~/components/NewsReplies'
 import { untwem } from '~/composables/useTwem'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 // Use standard import to avoid screen-flicker
 import NewsRefer from '~/components/NewsRefer'
@@ -323,6 +324,7 @@ const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const miscStore = useMiscStore()
+const { chitChatMod, supportOrAdmin } = useMe()
 
 const isMobile = computed(() => {
   return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
@@ -410,17 +412,6 @@ const mod = computed(() => {
     (me.value.systemrole === 'Moderator' ||
       me.value.systemrole === 'Admin' ||
       me.value.systemrole === 'Support')
-  )
-})
-
-const chitChatMod = computed(() => {
-  return mod.value
-})
-
-const supportOrAdmin = computed(() => {
-  return (
-    me.value &&
-    (me.value.systemrole === 'Support' || me.value.systemrole === 'Admin')
   )
 })
 
