@@ -113,12 +113,12 @@ test.describe('Post flow tests', () => {
     await page.gotoAndVerify('/chats')
 
     // Wait for the chat list to load and look for a chat entry
-    await page.waitForSelector('.chatentry', {
+    await page.waitForSelector('.chat-entry', {
       timeout: timeouts.background,
     })
 
     // Check that there's one chat entry (the reply)
-    const chatEntries = page.locator('.chatentry').filter({ visible: true })
+    const chatEntries = page.locator('.chat-entry').filter({ visible: true })
     const chatCount = await chatEntries.count()
     expect(chatCount).toEqual(1)
     console.log(`Found ${chatCount} chat entries in /chats`)
