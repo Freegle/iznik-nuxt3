@@ -797,15 +797,11 @@ function installGoogleSDK() {
       client_id: clientId.value,
       callback: handleGoogleCredentialsResponse,
     })
-    console.log(
-      'Render google button',
-      document.getElementById('googleLoginButton')
-    )
 
-    console.log('Found google button ref')
+    console.log('Render google button')
     window.google.accounts.id.renderButton(
       document.getElementById('googleLoginButton'),
-      { theme: 'outline', size: 'large', width: '300px' }
+      { theme: 'outline', size: 'large' }
     )
   } else {
     console.log('Google not yet fully loaded')
@@ -1062,7 +1058,14 @@ $color-apple: #000000;
 
 .signin__section--social,
 .signin__section--freegle {
-  flex: 1;
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.signin__section--social {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .section-label {
@@ -1074,7 +1077,6 @@ $color-apple: #000000;
 .social-button {
   display: flex;
   align-items: center;
-  width: 100%;
   padding: 0;
   margin-bottom: 0.5rem;
   color: $color-white;
@@ -1173,7 +1175,7 @@ $color-apple: #000000;
 <style lang="scss">
 .verytop .modal-content {
   position: relative;
-  overflow: visible;
+  overflow-x: hidden;
 }
 
 .verytop .modal-header {
