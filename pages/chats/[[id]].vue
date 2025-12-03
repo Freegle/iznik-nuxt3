@@ -24,7 +24,14 @@
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
-        <b-col id="chatlist" cols="12" md="4" xl="3" class="p-0 bg-white">
+        <b-col
+          id="chatlist"
+          cols="12"
+          md="5"
+          lg="4"
+          xl="3"
+          class="p-0 bg-white"
+        >
           <VisibleWhen
             :at="
               selectedChatId
@@ -185,7 +192,7 @@
             </div>
           </VisibleWhen>
         </b-col>
-        <b-col cols="12" md="8" xl="6" class="chatback p-0">
+        <b-col cols="12" md="7" lg="8" xl="6" class="chatback p-0">
           <VisibleWhen
             :at="
               selectedChatId

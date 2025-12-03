@@ -129,7 +129,7 @@
         </p>
       </div>
     </b-col>
-    <b-col cols="0" md="3" class="d-none d-md-block" />
+    <b-col cols="0" lg="3" class="d-none d-lg-block" />
   </b-row>
 </template>
 <script setup>
