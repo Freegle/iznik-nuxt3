@@ -22,9 +22,8 @@
               :src="story?.image?.ouruid"
               :modifiers="story?.image?.externalmods"
               alt="Freegler Story Photo"
-              :width="200"
-              :height="200"
-              class="clickme float-end ml-2"
+              sizes="100vw md:200px"
+              class="clickme story-image"
               @click="showPhotoModal"
             />
             <NuxtPicture
@@ -35,9 +34,8 @@
               :src="story?.image?.externaluid"
               :modifiers="story?.image?.externalmods"
               alt="Freegler Story Photo"
-              :width="200"
-              :height="200"
-              class="clickme float-end ml-2"
+              sizes="100vw md:200px"
+              class="clickme story-image"
               @click="showPhotoModal"
             />
             <b-img
@@ -45,10 +43,8 @@
               thumbnail
               rounded
               lazy
-              :width="200"
-              :height="200"
               :src="story.image.paththumb"
-              class="clickme float-end ml-2"
+              class="clickme story-image"
               @click="showPhotoModal"
             />
             <read-more
@@ -187,3 +183,21 @@ function showAddModal() {
   showAdd.value = true
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.story-image,
+:deep(.story-image img) {
+  width: 100%;
+  margin-bottom: 0.5rem;
+
+  @include media-breakpoint-up(md) {
+    width: 200px;
+    float: right;
+    margin-left: 0.5rem;
+    margin-bottom: 0;
+  }
+}
+</style>

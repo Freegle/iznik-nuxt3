@@ -189,16 +189,24 @@ const showAboutMe = () => {
   }
 }
 
-:deep(.notification-list .dropdown-item) {
+.notification-list :deep(.dropdown-item) {
   width: min(400px, 100vw) !important;
   max-width: 100%;
   padding-left: 5px;
   overflow-wrap: break-word;
+  // Remove Bootstrap borders - NotificationOne handles its own borders
+  border: none !important;
 
   @include media-breakpoint-down(md) {
     width: 300px;
     right: -51px;
   }
+}
+
+// Reduce divider visibility to prevent flash
+.notification-list :deep(.dropdown-divider) {
+  margin: 0;
+  border-color: transparent;
 }
 
 :deep(.dropdown-toggle.show) {

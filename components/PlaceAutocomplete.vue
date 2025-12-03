@@ -1,13 +1,13 @@
 <template>
   <div class="test-place-autocomplete">
-    <label for="placeautocomplete" class="smaller font-weight-bold mb-1">
+    <label :for="inputId" class="smaller font-weight-bold mb-1">
       <span v-if="labeltextSr" class="visually-hidden">
         {{ labeltextSr }}
       </span>
       {{ labeltext }}
     </label>
     <AutoComplete
-      id="placeautocomplete"
+      :id="inputId"
       ref="autocomplete"
       v-model="wip"
       :init-value="value"
@@ -64,6 +64,11 @@ defineProps({
     type: String,
     required: false,
     default: 'lg',
+  },
+  inputId: {
+    type: String,
+    required: false,
+    default: 'placeautocomplete',
   },
 })
 

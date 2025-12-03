@@ -1,6 +1,6 @@
 <template>
-  <div :class="{ 'pl-1': depth === 1 }">
-    <div v-if="showEarlierRepliesOption">
+  <div class="replies-container" :class="'depth-' + depth">
+    <div v-if="showEarlierRepliesOption" class="show-earlier">
       <b-button
         v-if="!showAllReplies"
         variant="link"
@@ -23,14 +23,14 @@
     <div
       v-for="reply in repliestoshow"
       :key="'newsfeed-' + reply"
-      class="lines"
+      class="reply-thread"
     >
       <NewsRefer
         v-if="reply.type.indexOf('ReferTo') === 0"
         :id="reply.id"
         :type="reply.type"
         :threadhead="threadhead"
-        class="content pt-1 pb-1"
+        class="reply-content"
       />
       <NewsReply
         v-else
@@ -38,16 +38,10 @@
         :key="'reply-' + reply.id"
         :threadhead="threadhead"
         :scroll-to="scrollTo"
-        :class="{
-          content: true,
-          'pt-1': true,
-          'pb-1': true,
-          'pl-4': depth === 2,
-        }"
+        class="reply-content"
         :depth="depth"
         @rendered="rendered"
       />
-      <div v-if="depth === 1" class="line" />
     </div>
   </div>
 </template>
@@ -256,23 +250,44 @@ function rendered(id) {
 }
 </script>
 <style lang="scss">
-.lines {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-  .content {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    z-index: 1001;
+.replies-container {
+  margin-left: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba($colour-success, 0.4);
+
+  @include media-breakpoint-up(md) {
+    margin-left: 1rem;
+    padding-left: 1rem;
   }
 
-  .line {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    border-left: 1px solid #e0e0e0;
-    margin-left: 21px;
-    z-index: 1000;
+  /* Nested replies get lighter borders */
+  &.depth-2 {
+    border-left-color: rgba($colour-success, 0.25);
   }
+
+  &.depth-3 {
+    border-left-color: rgba($colour-success, 0.15);
+  }
+}
+
+.show-earlier {
+  margin-bottom: 0.5rem;
+}
+
+.reply-thread {
+  padding: 0.5rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+.reply-content {
+  /* Content styling handled by NewsReply */
 }
 </style>

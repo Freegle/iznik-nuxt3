@@ -1,51 +1,44 @@
 <template>
-  <div v-if="job" @click="clicked">
-    <div v-if="summary" class="ml-2 mr-2">
-      <ExternalLink :href="job.url">
-        <h4 :class="className" class="text-truncate">
-          {{ title }}
-          <span v-if="job.location" class="text-muted small">
-            <span class="small">
-              {{ location }}
-            </span>
-          </span>
-        </h4>
-        <p v-if="showBody" class="text-truncate mt-2 d-none d-lg-block black">
-          {{ body }}
-        </p>
-      </ExternalLink>
-    </div>
-    <b-card v-else no-body :class="highlight ? 'job-row bg-info' : 'job-row'">
-      <b-card-body class="job-row">
-        <b-card-title class="job-title">
-          {{ title }}
-        </b-card-title>
-        <b-card-subtitle v-if="job.location">
-          <span class="location">
+  <div v-if="job" class="job-item" @click="clicked">
+    <ExternalLink :href="job.url" class="job-link">
+      <div v-if="summary" class="job-summary">
+        <div class="job-icon">
+          <v-icon icon="briefcase" />
+        </div>
+        <div class="job-content">
+          <div class="job-title-row">
+            <span class="job-title">{{ title }}</span>
+          </div>
+          <span v-if="job.location" class="job-location">
+            <v-icon icon="map-marker-alt" class="location-icon" />
             {{ location }}
           </span>
-        </b-card-subtitle>
-        <b-row>
-          <b-col>
-            <div class="media clickme">
-              <div class="media-left" />
-              <div class="media-body w-100">
-                <p class="text-truncate mt-2 job-description">
-                  {{ body }}
-                </p>
-              </div>
-            </div>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <ExternalLink :href="job.url">
-              <b-button variant="primary"> More Info </b-button>
-            </ExternalLink>
-          </b-col>
-        </b-row>
-      </b-card-body>
-    </b-card>
+        </div>
+        <v-icon icon="chevron-right" class="job-chevron" />
+      </div>
+      <div
+        v-else
+        class="job-card"
+        :class="{ 'job-card--highlight': highlight }"
+      >
+        <div class="job-card-header">
+          <div class="job-icon job-icon--large">
+            <v-icon icon="briefcase" />
+          </div>
+          <div class="job-card-info">
+            <h4 class="job-card-title">{{ title }}</h4>
+            <span v-if="job.location" class="job-location">
+              <v-icon icon="map-marker-alt" class="location-icon" />
+              {{ location }}
+            </span>
+          </div>
+        </div>
+        <p v-if="body" class="job-description">{{ body }}</p>
+        <div class="job-card-footer">
+          <span class="job-cta"> View Job <v-icon icon="arrow-right" /> </span>
+        </div>
+      </div>
+    </ExternalLink>
   </div>
 </template>
 <script setup>
@@ -137,8 +130,177 @@ function filterNonsense(val) {
     .replace(/[\u0300-\u036F]/g, '')
 }
 </script>
-<style scoped>
-.job__summary {
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.job-item {
+  margin-bottom: 0.5rem;
+}
+
+.job-link {
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+/* Summary mode - compact row */
+.job-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: $white;
+  border-bottom: 1px solid $gray-200;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: $gray-100;
+  }
+
+  &:active {
+    background: $gray-200;
+  }
+}
+
+.job-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  color: $white;
+  flex-shrink: 0;
+
+  &--large {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+}
+
+.job-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.job-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $gray-800;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+}
+
+.job-location {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: $gray-600;
+  margin-top: 0.15rem;
+
+  .location-icon {
+    font-size: 0.7rem;
+    color: $gray-500;
+  }
+}
+
+.job-chevron {
+  color: $gray-400;
+  flex-shrink: 0;
+}
+
+/* Card mode - full display */
+.job-card {
+  background: $white;
+  border: 1px solid $gray-200;
+  padding: 1rem;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: #61ae24;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  &--highlight {
+    border-left: 3px solid #61ae24;
+    background: linear-gradient(to right, rgba(97, 174, 36, 0.05), transparent);
+  }
+}
+
+.job-card-header {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.job-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: $gray-800;
+  margin: 0 0 0.25rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1.2rem;
+  }
+}
+
+.job-description {
+  font-size: 0.9rem;
+  color: $gray-600;
+  margin: 0 0 0.75rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.job-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.job-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
   font-weight: 500;
+  color: #61ae24;
+  padding: 0.5rem 1rem;
+  background: rgba(97, 174, 36, 0.1);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(97, 174, 36, 0.2);
+  }
 }
 </style>

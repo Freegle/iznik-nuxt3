@@ -1,64 +1,52 @@
 <template>
-  <div>
-    <b-row class="align-items-end">
-      <b-col cols="12" sm="6">
-        <b-form-group :label="label">
-          <b-form-select
-            v-model="emailfreq"
-            :class="highlightEmailFrequencyIfOn"
-          >
-            <option value="-1">Immediately</option>
-            <option value="24">Every day</option>
-            <option value="0">Never</option>
-          </b-form-select>
-        </b-form-group>
-      </b-col>
-      <b-col v-if="leave" cols="12" sm="6">
-        <SpinButton
-          variant="secondary"
-          icon-name="trash-alt"
-          label="Leave"
-          class="mb-3"
-          @handle="leaveGroup"
-        />
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col v-if="!eventshide" cols="12" sm="6">
-        <b-form-group label="Community Event mails:">
-          <OurToggle
-            v-model="eventsallowed"
-            class="mt-2"
-            :height="30"
-            :width="100"
-            font-size="14"
-            :sync="true"
-            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
-            color="#61AE24"
-          />
-        </b-form-group>
-      </b-col>
-      <b-col v-if="!volunteerhide" cols="12" sm="6">
-        <b-form-group label="Volunteer Opportunity mails:">
-          <OurToggle
-            v-model="volunteeringallowed"
-            class="mt-2"
-            :height="30"
-            :width="100"
-            font-size="14"
-            :sync="true"
-            :labels="{ checked: 'Sending weekly', unchecked: 'Not sending' }"
-            color="#61AE24"
-          />
-        </b-form-group>
-      </b-col>
-    </b-row>
+  <div class="settings-group">
+    <div class="setting-row">
+      <span class="setting-label">{{ label }}</span>
+      <b-form-select
+        v-model="emailfreq"
+        :class="highlightEmailFrequencyIfOn"
+        class="frequency-select"
+      >
+        <option value="-1">Immediately</option>
+        <option value="24">Daily</option>
+        <option value="0">Never</option>
+      </b-form-select>
+    </div>
+
+    <div v-if="!eventshide" class="setting-row">
+      <span class="setting-label">Community events</span>
+      <OurToggle
+        v-model="eventsallowed"
+        size="sm"
+        :labels="{ checked: 'On', unchecked: 'Off' }"
+      />
+    </div>
+
+    <div v-if="!volunteerhide" class="setting-row">
+      <span class="setting-label">Volunteer opportunities</span>
+      <OurToggle
+        v-model="volunteeringallowed"
+        size="sm"
+        :labels="{ checked: 'On', unchecked: 'Off' }"
+      />
+    </div>
+
+    <div v-if="leave" class="leave-row">
+      <SpinButton
+        variant="link"
+        icon-name="trash-alt"
+        label="Leave this community"
+        class="leave-btn"
+        @handle="leaveGroup"
+      />
+    </div>
   </div>
 </template>
 <script setup>
 import { computed } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import OurToggle from '~/components/OurToggle'
+import SpinButton from '~/components/SpinButton'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
@@ -80,7 +68,7 @@ const props = defineProps({
   label: {
     type: String,
     required: false,
-    default: 'OFFER and WANTED posts:',
+    default: 'OFFER/WANTED emails',
   },
   eventshide: {
     type: Boolean,
@@ -110,7 +98,6 @@ const membership = computed(() => {
 
   if (myGroups.value) {
     myGroups.value.forEach((g) => {
-      // Groupid can be null for the simple settings which are shared across all groups.
       if (!props.groupid || g.id === props.groupid) {
         ret = g
       }
@@ -121,20 +108,14 @@ const membership = computed(() => {
 })
 
 const highlightEmailFrequencyIfOn = computed(() => {
-  // 0 = Never receive email
-  // All other values are receiving email
-  return props.emailfrequency === 0
-    ? 'email-frequency__dropdown--off'
-    : 'email-frequency__dropdown--on'
+  return props.emailfrequency === 0 ? 'frequency-off' : 'frequency-on'
 })
 
-// Computed with getters and setters
 const emailfreq = computed({
   get() {
     if (membership.value) {
       return membership.value.emailfrequency.toString()
     }
-
     return props.emailfrequency?.toString()
   },
   async set(newval) {
@@ -147,7 +128,6 @@ const eventsallowed = computed({
     return Boolean(membership.value?.eventsallowed)
   },
   async set(newval) {
-    console.log('Set eventsallowed', newval)
     await changeValue('eventsallowed', newval ? 1 : 0)
   },
 })
@@ -161,7 +141,6 @@ const volunteeringallowed = computed({
   },
 })
 
-// Methods
 async function changeValue(param, val) {
   emit('update:' + param, val)
 
@@ -170,9 +149,7 @@ async function changeValue(param, val) {
       userid: myid.value,
       groupid: props.groupid,
     }
-
     params[param] = parseInt(val)
-
     await authStore.setGroup(params)
   }
 }
@@ -183,11 +160,53 @@ function leaveGroup(callback) {
 }
 </script>
 <style scoped lang="scss">
-.email-frequency__dropdown--on {
-  border: 2px solid $colour-success;
+@import 'assets/css/_color-vars.scss';
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.email-frequency__dropdown--off {
-  border: 1px solid $color-gray-4;
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.setting-label {
+  font-size: 0.9rem;
+  color: $color-gray--darker;
+}
+
+.frequency-select {
+  width: auto;
+  min-width: 120px;
+  font-size: 0.9rem;
+
+  &.frequency-on {
+    border: 2px solid $color-green-background;
+  }
+
+  &.frequency-off {
+    border: 1px solid $color-gray--dark;
+  }
+}
+
+.leave-row {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.leave-btn {
+  color: $color-gray--dark;
+  padding: 0;
+  font-size: 0.85rem;
+
+  &:hover {
+    color: $color-red;
+  }
 }
 </style>

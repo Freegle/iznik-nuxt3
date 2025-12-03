@@ -16,7 +16,8 @@
         <span v-if="appendBold"> "{{ appendBold }}" </span>
         <br />
         <span class="text-muted small pl-0">
-          {{ addedago }}
+          <span class="d-none d-md-inline">{{ addedago }}</span>
+          <span class="d-md-none">{{ addedagoShort }}</span>
         </span>
         <NewsUserInfo :id="newsfeed.id" />
       </div>
@@ -35,7 +36,7 @@
 </template>
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue'
-import { timeago } from '~/composables/useTimeFormat'
+import { timeago, timeagoShort } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
 import NewsUserInfo from '~/components/NewsUserInfo'
 import ProfileImage from '~/components/ProfileImage'
@@ -71,6 +72,10 @@ const showProfileModal = ref(false)
 
 const addedago = computed(() => {
   return timeago(props.newsfeed.added)
+})
+
+const addedagoShort = computed(() => {
+  return timeagoShort(props.newsfeed.added)
 })
 
 const mod = computed(() => {

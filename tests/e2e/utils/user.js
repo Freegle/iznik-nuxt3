@@ -111,46 +111,53 @@ async function signUpViaHomepage(
   }
 
   // Wait for page to be fully loaded with JavaScript
-  await page.waitForLoadState('networkidle', { timeout: timeouts.navigation.default });
-  
+  await page.waitForLoadState('networkidle', {
+    timeout: timeouts.navigation.default,
+  })
+
   // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
 
   const buttons = page.locator('.test-signinbutton')
   // Wait for at least one element to be visible
-  await page.locator('.test-signinbutton:visible').first().waitFor({ timeout: timeouts.ui.appearance })
+  await page
+    .locator('.test-signinbutton:visible')
+    .first()
+    .waitFor({ timeout: timeouts.ui.appearance })
   const count = await buttons.count()
   console.log(`Found ${count} .test-signinbutton elements`)
-  
+
   if (count === 0) {
     console.error('Could not find .test-signinbutton on homepage')
     return false
   }
-  
+
   // Look for the first visible and enabled button
   let signInButton = null
   for (let i = 0; i < count; i++) {
     const btn = buttons.nth(i)
-    
+
     // Check if this button is visible
     const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
-    
+
     if (isVisible) {
       // Check if it's enabled by checking various disabled states
-      const isDisabled = await btn.evaluate((el) => {
-        // For button elements, check the disabled property
-        if (el.disabled) return true
-        
-        // For any element, check disabled attribute values
-        const disabledAttr = el.getAttribute('disabled')
-        if (disabledAttr === 'true' || disabledAttr === '') return true
-        
-        // Check for disabled classes
-        if (el.classList.contains('disabled')) return true
-        
-        return false
-      }).catch(() => false)
-      
+      const isDisabled = await btn
+        .evaluate((el) => {
+          // For button elements, check the disabled property
+          if (el.disabled) return true
+
+          // For any element, check disabled attribute values
+          const disabledAttr = el.getAttribute('disabled')
+          if (disabledAttr === 'true' || disabledAttr === '') return true
+
+          // Check for disabled classes
+          if (el.classList.contains('disabled')) return true
+
+          return false
+        })
+        .catch(() => false)
+
       if (!isDisabled) {
         console.log(`Found visible, enabled button at index ${i}`)
         signInButton = btn
@@ -162,18 +169,20 @@ async function signUpViaHomepage(
       console.log(`Button at index ${i} is not visible`)
     }
   }
-  
+
   if (!signInButton) {
-    console.error('Could not find visible, enabled .test-signinbutton on homepage')
+    console.error(
+      'Could not find visible, enabled .test-signinbutton on homepage'
+    )
     return false
   }
-  
+
   // Wait for the button to be ready and click it
   await signInButton.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  
+
   console.log(`Found valid sign-in button, clicking...`)
   await signInButton.click()
 
@@ -298,7 +307,7 @@ async function signUpViaHomepage(
   // Find and click the Register button in the modal
   console.log('Clicking register button')
   const registerButton = page.locator(
-    'button:has-text("Register on Freegle"), .btn:has-text("Register on Freegle")'
+    'button:has-text("Join Freegle!"), .btn:has-text("Join Freegle!")'
   )
   await registerButton.waitFor({
     state: 'visible',
@@ -403,7 +412,10 @@ async function loginViaHomepage(
 
   const buttons = page.locator('.test-signinbutton')
   // Wait for at least one element to be visible
-  await page.locator('.test-signinbutton:visible').first().waitFor({ timeout: timeouts.ui.appearance })
+  await page
+    .locator('.test-signinbutton:visible')
+    .first()
+    .waitFor({ timeout: timeouts.ui.appearance })
   const count = await buttons.count()
   console.log(`Found ${count} .test-signinbutton elements`)
 
@@ -411,31 +423,33 @@ async function loginViaHomepage(
     console.error('Could not find .test-signinbutton on homepage')
     return false
   }
-  
+
   // Look for the first visible and enabled button
   let signInButton = null
   for (let i = 0; i < count; i++) {
     const btn = buttons.nth(i)
-    
+
     // Check if this button is visible
     const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
-    
+
     if (isVisible) {
       // Check if it's enabled by checking various disabled states
-      const isDisabled = await btn.evaluate((el) => {
-        // For button elements, check the disabled property
-        if (el.disabled) return true
-        
-        // For any element, check disabled attribute values
-        const disabledAttr = el.getAttribute('disabled')
-        if (disabledAttr === 'true' || disabledAttr === '') return true
-        
-        // Check for disabled classes
-        if (el.classList.contains('disabled')) return true
-        
-        return false
-      }).catch(() => false)
-      
+      const isDisabled = await btn
+        .evaluate((el) => {
+          // For button elements, check the disabled property
+          if (el.disabled) return true
+
+          // For any element, check disabled attribute values
+          const disabledAttr = el.getAttribute('disabled')
+          if (disabledAttr === 'true' || disabledAttr === '') return true
+
+          // Check for disabled classes
+          if (el.classList.contains('disabled')) return true
+
+          return false
+        })
+        .catch(() => false)
+
       if (!isDisabled) {
         console.log(`Found visible, enabled button at index ${i}`)
         signInButton = btn
@@ -447,18 +461,20 @@ async function loginViaHomepage(
       console.log(`Button at index ${i} is not visible`)
     }
   }
-  
+
   if (!signInButton) {
-    console.error('Could not find visible, enabled .test-signinbutton on homepage')
+    console.error(
+      'Could not find visible, enabled .test-signinbutton on homepage'
+    )
     return false
   }
-  
+
   // Wait for the button to be ready and click it
   await signInButton.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  
+
   console.log(`Found valid sign-in button, clicking...`)
   await signInButton.click()
 
@@ -473,9 +489,16 @@ async function loginViaHomepage(
   console.log('Checking if in signin mode')
 
   // Define our locators
-  const loginLink = page.locator('.test-already-a-freegler').filter({ visible: true }).first()
-  const emailField = page.locator('input[type="email"], input[name="email"]').first()
-  const passwordField = page.locator('input[type="password"], input[name="password"]').first()
+  const loginLink = page
+    .locator('.test-already-a-freegler')
+    .filter({ visible: true })
+    .first()
+  const emailField = page
+    .locator('input[type="email"], input[name="email"]')
+    .first()
+  const passwordField = page
+    .locator('input[type="password"], input[name="password"]')
+    .first()
   const fullnameField = page.locator('#fullname, input[name="fullname"]')
 
   // Wait for modal to be ready by waiting for either the login link or form fields to appear
@@ -484,13 +507,18 @@ async function loginViaHomepage(
     await page.waitForFunction(
       () => {
         const loginLinkEl = document.querySelector('.test-already-a-freegler')
-        const emailEl = document.querySelector('input[type="email"], input[name="email"]')
-        const passwordEl = document.querySelector('input[type="password"], input[name="password"]')
-        
+        const emailEl = document.querySelector(
+          'input[type="email"], input[name="email"]'
+        )
+        const passwordEl = document.querySelector(
+          'input[type="password"], input[name="password"]'
+        )
+
         // Check if login link is visible OR if form fields are present (regardless of fullname)
-        const loginLinkVisible = loginLinkEl && getComputedStyle(loginLinkEl).display !== 'none'
+        const loginLinkVisible =
+          loginLinkEl && getComputedStyle(loginLinkEl).display !== 'none'
         const formFieldsPresent = emailEl && passwordEl
-        
+
         return loginLinkVisible || formFieldsPresent
       },
       { timeout: timeouts.ui.appearance }
@@ -501,56 +529,72 @@ async function loginViaHomepage(
 
   // Check which mode we're in - be more thorough
   console.log('Checking modal mode...')
-  
+
   // First check current field visibility
   const emailVisible = await emailField.isVisible().catch(() => false)
   const passwordVisible = await passwordField.isVisible().catch(() => false)
   const fullnameVisible = await fullnameField.isVisible().catch(() => false)
-  console.log(`Current field visibility - email: ${emailVisible}, password: ${passwordVisible}, fullname: ${fullnameVisible}`)
-  
+  console.log(
+    `Current field visibility - email: ${emailVisible}, password: ${passwordVisible}, fullname: ${fullnameVisible}`
+  )
+
   const loginLinkVisible = await loginLink.isVisible().catch(() => false)
   console.log(`Login link visible: ${loginLinkVisible}`)
-  
+
   // If we have all three fields, we're in signup mode - try to work with it
   if (emailVisible && passwordVisible && fullnameVisible) {
-    console.log('Detected signup mode - attempting to use existing user credentials')
-    
+    console.log(
+      'Detected signup mode - attempting to use existing user credentials'
+    )
+
     // Try to switch to login mode first
     if (loginLinkVisible) {
       console.log('Found visible login link, clicking to switch to login mode')
       await loginLink.click()
       await page.waitForTimeout(1000)
-      
+
       // Check if it worked
-      const fullnameStillVisible = await fullnameField.isVisible().catch(() => true)
+      const fullnameStillVisible = await fullnameField
+        .isVisible()
+        .catch(() => true)
       if (!fullnameStillVisible) {
         console.log('Successfully switched to login mode!')
       } else {
         console.log('Mode switch failed, continuing with signup mode approach')
       }
     } else {
-      console.log('No visible login link found, will use signup mode with existing user approach')
-      
-      // Since modal switching doesn't work, we'll fill the form as a "signup" 
-      // but use existing user credentials. The backend should recognize the 
+      console.log(
+        'No visible login link found, will use signup mode with existing user approach'
+      )
+
+      // Since modal switching doesn't work, we'll fill the form as a "signup"
+      // but use existing user credentials. The backend should recognize the
       // existing user and log them in instead of creating a new account.
       console.log('Using signup form with existing user credentials to log in')
     }
   } else if (emailVisible && passwordVisible && !fullnameVisible) {
     console.log('Already in login mode')
   } else {
-    console.log(`Unexpected modal state - email: ${emailVisible}, password: ${passwordVisible}, fullname: ${fullnameVisible}`)
+    console.log(
+      `Unexpected modal state - email: ${emailVisible}, password: ${passwordVisible}, fullname: ${fullnameVisible}`
+    )
   }
 
   // Final verification - check if we're in login mode
   const finalEmailVisible = await emailField.isVisible().catch(() => false)
-  const finalPasswordVisible = await passwordField.isVisible().catch(() => false)
-  const finalFullnameVisible = await fullnameField.isVisible().catch(() => false)
+  const finalPasswordVisible = await passwordField
+    .isVisible()
+    .catch(() => false)
+  const finalFullnameVisible = await fullnameField
+    .isVisible()
+    .catch(() => false)
 
   // Accept either login mode OR signup mode (we can work with both)
-  const inLoginMode = finalEmailVisible && finalPasswordVisible && !finalFullnameVisible
-  const inSignupMode = finalEmailVisible && finalPasswordVisible && finalFullnameVisible
-  
+  const inLoginMode =
+    finalEmailVisible && finalPasswordVisible && !finalFullnameVisible
+  const inSignupMode =
+    finalEmailVisible && finalPasswordVisible && finalFullnameVisible
+
   if (!inLoginMode && !inSignupMode) {
     console.log(
       'Neither login nor signup mode detected',
@@ -567,53 +611,68 @@ async function loginViaHomepage(
 
     return false
   }
-  
+
   if (inSignupMode) {
-    console.log('Continuing with signup mode - will use existing user credentials')
+    console.log(
+      'Continuing with signup mode - will use existing user credentials'
+    )
   } else {
     console.log('In login mode - proceeding normally')
   }
 
   // Fill in the login form
   console.log('Filling in login form')
-  
+
   // DEBUG: Form field debug before filling
   console.log('=== FORM FIELDS BEFORE FILLING DEBUG ===')
   try {
     const emailValue = await Promise.race([
       emailField.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
     const emailVisible = await emailField.isVisible().catch(() => false)
     const emailEnabled = await emailField.isEnabled().catch(() => false)
-    console.log(`Email field - value: "${emailValue}", visible: ${emailVisible}, enabled: ${emailEnabled}`)
-    
+    console.log(
+      `Email field - value: "${emailValue}", visible: ${emailVisible}, enabled: ${emailEnabled}`
+    )
+
     const passwordValue = await Promise.race([
       passwordField.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
     const passwordVisible = await passwordField.isVisible().catch(() => false)
     const passwordEnabled = await passwordField.isEnabled().catch(() => false)
-    console.log(`Password field - value: "${passwordValue}", visible: ${passwordVisible}, enabled: ${passwordEnabled}`)
-    
+    console.log(
+      `Password field - value: "${passwordValue}", visible: ${passwordVisible}, enabled: ${passwordEnabled}`
+    )
+
     if (finalFullnameVisible && fullnameField) {
       try {
         console.log('About to get fullname field value in debug section...')
         const fullnameValue = await Promise.race([
           fullnameField.inputValue(),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-          )
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('inputValue timeout after 3s')),
+              3000
+            )
+          ),
         ]).catch(() => 'NO_VALUE')
         console.log('Got fullname value in debug section')
-        
-        const fullnameVisible = await fullnameField.isVisible().catch(() => false) 
-        const fullnameEnabled = await fullnameField.isEnabled().catch(() => false)
-        console.log(`Fullname field - value: "${fullnameValue}", visible: ${fullnameVisible}, enabled: ${fullnameEnabled}`)
+
+        const fullnameVisible = await fullnameField
+          .isVisible()
+          .catch(() => false)
+        const fullnameEnabled = await fullnameField
+          .isEnabled()
+          .catch(() => false)
+        console.log(
+          `Fullname field - value: "${fullnameValue}", visible: ${fullnameVisible}, enabled: ${fullnameEnabled}`
+        )
       } catch (fullnameError) {
         console.log(`Fullname debug section failed: ${fullnameError.message}`)
       }
@@ -632,7 +691,7 @@ async function loginViaHomepage(
   console.log(`About to type email: ${email}`)
   await emailInput.type(email)
   console.log('Email typed successfully')
-  
+
   // Wait for email validation to complete
   await page.waitForTimeout(timeouts.ui.settleTime)
 
@@ -645,7 +704,7 @@ async function loginViaHomepage(
     })
     // Use a generic name for existing user login attempts
     await fullnameField.type('Test User')
-    
+
     // Wait for fullname validation to complete
     await page.waitForTimeout(timeouts.ui.settleTime)
   }
@@ -659,45 +718,55 @@ async function loginViaHomepage(
   console.log(`About to type password: [REDACTED ${password.length} chars]`)
   await passwordInput.type(password)
   console.log('Password typed successfully')
-  
+
   // Wait for password validation to complete
   await page.waitForTimeout(timeouts.ui.settleTime)
-  
+
   // DEBUG: Check form state after filling all fields
   console.log('=== FORM STATE AFTER FILLING ===')
   try {
     const emailValue = await Promise.race([
       emailField.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
-    
+
     const passwordValue = await Promise.race([
       passwordField.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
-    
-    console.log(`Final email value: "${emailValue}" (length: ${emailValue.length})`)
-    console.log(`Final password value: [REDACTED ${passwordValue.length} chars]`)
-    
+
+    console.log(
+      `Final email value: "${emailValue}" (length: ${emailValue.length})`
+    )
+    console.log(
+      `Final password value: [REDACTED ${passwordValue.length} chars]`
+    )
+
     if (finalFullnameVisible && fullnameField) {
       const fullnameValue = await Promise.race([
         fullnameField.inputValue(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-        )
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('inputValue timeout after 3s')),
+            3000
+          )
+        ),
       ]).catch(() => 'NO_VALUE')
-      console.log(`Final fullname value: "${fullnameValue}" (length: ${fullnameValue.length})`)
+      console.log(
+        `Final fullname value: "${fullnameValue}" (length: ${fullnameValue.length})`
+      )
     }
-    
+
     // Check if form is valid
     const form = page.locator('form').first()
-    const formValid = await form.evaluate((el) => el.checkValidity()).catch(() => false)
+    const formValid = await form
+      .evaluate((el) => el.checkValidity())
+      .catch(() => false)
     console.log(`Form validity: ${formValid}`)
-    
   } catch (debugError) {
     console.log(`Final form state debug error: ${debugError.message}`)
   }
@@ -729,26 +798,30 @@ async function loginViaHomepage(
     console.log('About to get email input value...')
     const emailValue = await Promise.race([
       emailInput.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
-    
+
     console.log('About to get password input value...')
     const passwordValue = await Promise.race([
       passwordInput.inputValue(),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
-      )
+      ),
     ]).catch(() => 'NO_VALUE')
-    
+
     console.log(`Form field values before submit:`)
     console.log(`  Email: "${emailValue}" (length: ${emailValue.length})`)
-    console.log(`  Password: "${passwordValue}" (length: ${passwordValue.length})`)
+    console.log(
+      `  Password: "${passwordValue}" (length: ${passwordValue.length})`
+    )
     console.log('Just printed password, about to continue...')
-    
-    console.log(`About to check signup mode - inSignupMode: ${inSignupMode}, finalFullnameVisible: ${finalFullnameVisible}`)
-    
+
+    console.log(
+      `About to check signup mode - inSignupMode: ${inSignupMode}, finalFullnameVisible: ${finalFullnameVisible}`
+    )
+
     if (inSignupMode && finalFullnameVisible) {
       console.log(`  Fullname: (skipping value retrieval to avoid hang)`)
     }
@@ -756,11 +829,11 @@ async function loginViaHomepage(
   } catch (error) {
     console.log(`Error getting field values: ${error.message}`)
   }
-  
+
   console.log('Exited field values try-catch block successfully')
 
   console.log('About to take screenshot before submitting...')
-  
+
   // Take a screenshot before submitting
   try {
     console.log('Skipping screenshot to avoid hang - will investigate later')
@@ -770,15 +843,17 @@ async function loginViaHomepage(
   }
 
   // Find and click the submit button (text varies by mode)
-  console.log(`Clicking submit button (mode: ${inSignupMode ? 'signup' : 'login'})`)
-  
+  console.log(
+    `Clicking submit button (mode: ${inSignupMode ? 'signup' : 'login'})`
+  )
+
   // DEBUG: Before looking for submit buttons
   console.log('=== SUBMIT BUTTON DEBUG START ===')
-  
+
   // Debug: Check all buttons on the page
   const allButtons = await page.locator('button').all()
   console.log(`Total buttons found on page: ${allButtons.length}`)
-  
+
   for (let i = 0; i < Math.min(allButtons.length, 10); i++) {
     try {
       const button = allButtons[i]
@@ -787,25 +862,31 @@ async function loginViaHomepage(
       const isDisabled = await button.isDisabled().catch(() => 'UNKNOWN')
       const classes = await button.getAttribute('class').catch(() => 'NO_CLASS')
       const type = await button.getAttribute('type').catch(() => 'NO_TYPE')
-      console.log(`  Button ${i}: text="${text}", visible=${isVisible}, disabled=${isDisabled}, type="${type}", class="${classes}"`)
+      console.log(
+        `  Button ${i}: text="${text}", visible=${isVisible}, disabled=${isDisabled}, type="${type}", class="${classes}"`
+      )
     } catch (error) {
       console.log(`  Button ${i}: Error getting info - ${error.message}`)
     }
   }
-  
+
   // Debug: Check form state
   try {
     const modal = page.locator('#loginModal')
     const modalVisible = await modal.isVisible().catch(() => false)
     console.log(`Login modal visible: ${modalVisible}`)
-    
+
     if (modalVisible) {
-      const modalHTML = await modal.innerHTML().catch(() => 'ERROR_GETTING_HTML')
+      const modalHTML = await modal
+        .innerHTML()
+        .catch(() => 'ERROR_GETTING_HTML')
       console.log(`Modal HTML length: ${modalHTML.length}`)
-      
+
       // Look for specific text patterns in the modal
-      const hasSignupText = modalHTML.includes('Join') || modalHTML.includes('Sign up')
-      const hasLoginText = modalHTML.includes('Log in') || modalHTML.includes('Login')
+      const hasSignupText =
+        modalHTML.includes('Join') || modalHTML.includes('Sign up')
+      const hasLoginText =
+        modalHTML.includes('Log in') || modalHTML.includes('Login')
       console.log(`Modal contains signup text: ${hasSignupText}`)
       console.log(`Modal contains login text: ${hasLoginText}`)
     }
@@ -815,12 +896,12 @@ async function loginViaHomepage(
 
   const submitSelectors = [
     'button:has-text("Log in to Freegle"):not([disabled]):not([disable]):not(.disabled)',
-    'button:has-text("Join Freegle"):not([disabled]):not([disable]):not(.disabled)', 
+    'button:has-text("Join Freegle"):not([disabled]):not([disable]):not(.disabled)',
     'button:has-text("Sign up"):not([disabled]):not([disable]):not(.disabled)',
     'button:has-text("Join"):not([disabled]):not([disable]):not(.disabled)',
-    'button[type="submit"]:not([disabled]):not([disable]):not(.disabled)'
+    'button[type="submit"]:not([disabled]):not([disable]):not(.disabled)',
   ]
-  
+
   let submitButton = null
   console.log('Trying submit button selectors...')
   for (let i = 0; i < submitSelectors.length; i++) {
@@ -830,18 +911,28 @@ async function loginViaHomepage(
       const button = page.locator(selector)
       const count = await button.count()
       console.log(`    Found ${count} buttons matching this selector`)
-      
+
       if (count > 0) {
-        const isVisible = await button.first().isVisible({ timeout: 2000 }).catch(() => false)
-        const isEnabled = await button.first().isEnabled().catch(() => false)
-        console.log(`    First button: visible=${isVisible}, enabled=${isEnabled}`)
-        
+        const isVisible = await button
+          .first()
+          .isVisible({ timeout: 2000 })
+          .catch(() => false)
+        const isEnabled = await button
+          .first()
+          .isEnabled()
+          .catch(() => false)
+        console.log(
+          `    First button: visible=${isVisible}, enabled=${isEnabled}`
+        )
+
         if (isVisible && isEnabled) {
           console.log(`✅ Found working submit button: ${selector}`)
           submitButton = button.first()
           break
         } else {
-          console.log(`❌ Button found but not usable: visible=${isVisible}, enabled=${isEnabled}`)
+          console.log(
+            `❌ Button found but not usable: visible=${isVisible}, enabled=${isEnabled}`
+          )
         }
       } else {
         console.log(`    No buttons found for this selector`)
@@ -850,34 +941,34 @@ async function loginViaHomepage(
       console.log(`    Selector error: ${error.message}`)
     }
   }
-  
+
   console.log('=== SUBMIT BUTTON DEBUG END ===')
-  
+
   if (!submitButton) {
     console.error('❌ Could not find any usable submit button')
-    
+
     // Take a screenshot for debugging
     await page.screenshot({
       path: `playwright-screenshots/login-no-button-${Date.now()}.png`,
       fullPage: true,
     })
-    
+
     return false
   }
-  
+
   // Wait for button to be enabled and clickable
-  await submitButton.waitFor({ 
-    state: 'visible', 
-    timeout: timeouts.ui.interaction 
+  await submitButton.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.interaction,
   })
-  
+
   // Double check that the button is enabled
   const isEnabled = await submitButton.isEnabled()
   if (!isEnabled) {
     console.error('Submit button is disabled')
     return false
   }
-  
+
   await submitButton.click()
 
   // Wait for successful login
@@ -896,11 +987,17 @@ async function loginViaHomepage(
     ) {
       const errorText = await errorElement.textContent()
       console.error(`Login failed with error: ${errorText}`)
-      
+
       // Debug: Get all error elements and their text
       try {
-        const allErrorElements = await page.locator('.alert, .text-danger, .invalid-feedback, [class*="error"], [class*="danger"]').all()
-        console.log(`Found ${allErrorElements.length} potential error elements:`)
+        const allErrorElements = await page
+          .locator(
+            '.alert, .text-danger, .invalid-feedback, [class*="error"], [class*="danger"]'
+          )
+          .all()
+        console.log(
+          `Found ${allErrorElements.length} potential error elements:`
+        )
         for (let i = 0; i < allErrorElements.length; i++) {
           const element = allErrorElements[i]
           const isVisible = await element.isVisible().catch(() => false)
@@ -910,7 +1007,7 @@ async function loginViaHomepage(
       } catch (debugError) {
         console.log(`Error debugging error elements: ${debugError.message}`)
       }
-      
+
       return false
     }
 
@@ -952,26 +1049,30 @@ async function loginViaHomepage(
       .catch(() => false)
     if (!loginModalVisible) {
       console.log('Login appears successful - modal closed')
-      
+
       // Additional verification - wait a moment and check for login state
       await page.waitForTimeout(2000)
-      
+
       // Try to verify login by checking user state
       try {
         console.log('Verifying login state after modal close...')
         const currentUrl = page.url()
         console.log(`Current URL after login: ${currentUrl}`)
-        
+
         // Take a screenshot to see current state
         await page.screenshot({
           path: `playwright-screenshots/after-login-verification-${Date.now()}.png`,
           fullPage: true,
         })
-        
+
         // Check if we can find any logged-in user elements
-        const userElements = await page.locator('.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")').count()
+        const userElements = await page
+          .locator(
+            '.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")'
+          )
+          .count()
         console.log(`Found ${userElements} logged-in user elements`)
-        
+
         if (userElements > 0) {
           console.log('Login verification successful - found user elements')
         } else {
@@ -980,7 +1081,7 @@ async function loginViaHomepage(
       } catch (verificationError) {
         console.log(`Login verification warning: ${verificationError.message}`)
       }
-      
+
       return true
     }
 

@@ -1,30 +1,18 @@
 <template>
   <client-only>
-    <b-row v-if="invalid" class="m-0">
-      <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-        <NoticeMessage variant="danger" class="mt-2">
+    <div class="volunteering-page">
+      <div class="volunteering-page__content">
+        <NoticeMessage v-if="invalid" variant="danger">
           Sorry, that volunteer opportunity isn't around any more.
         </NoticeMessage>
-      </b-col>
-    </b-row>
-    <div v-else>
-      <b-row class="m-0">
-        <b-col cols="0" md="3" class="d-none d-md-block" />
-        <b-col cols="12" md="6" class="p-0">
-          <VolunteerOpportunity
-            v-if="!invalid"
-            :id="id"
-            :summary="false"
-            class="mt-1"
-            title-tag="h1"
-            @hide="invalid = true"
-          />
-          <NoticeMessage v-else>
-            Sorry, we can't find that volunteer opportunity.
-          </NoticeMessage>
-        </b-col>
-        <b-col cols="0" md="3" class="d-none d-md-block" />
-      </b-row>
+        <VolunteerOpportunity
+          v-else
+          :id="id"
+          :summary="false"
+          title-tag="h1"
+          @hide="invalid = true"
+        />
+      </div>
     </div>
   </client-only>
 </template>
@@ -75,3 +63,24 @@ try {
   )
 }
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
+
+.volunteering-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding: 1rem;
+
+  @include media-breakpoint-up(md) {
+    padding: 1.5rem;
+  }
+}
+
+.volunteering-page__content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+</style>

@@ -36,17 +36,16 @@
         v-if="showClosestGroups && closestGroups?.length && !mapHidden"
         class="mb-1 border p-2 bg-white"
       >
-        <h2 class="visually-hidden">Nearby commmunities</h2>
-        <div class="d-flex flex-wrap justify-content-center">
-          <div v-for="g in closestGroups" :key="'group-' + g.id">
-            <JoinWithConfirm
-              :id="g.id"
-              :name="g.namedisplay"
-              size="md"
-              variant="primary"
-              class="m-1"
-            />
-          </div>
+        <h2 class="visually-hidden">Nearby communities</h2>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <JoinWithConfirm
+            v-for="g in closestGroups"
+            :id="g.id"
+            :key="'group-' + g.id"
+            :name="g.namedisplay"
+            size="sm"
+            variant="primary"
+          />
         </div>
       </div>
       <div v-if="showGroups" class="bg-white pt-3">
@@ -373,29 +372,29 @@ const filteredMessages = computed(() => {
 })
 
 const sortedMessagesOnMap = computed(() => {
-  if (messagesOnMap.value) {
-    return messagesOnMap.value.slice().sort((a, b) => {
-      if (props.selectedSort === 'Unseen') {
-        // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
-        // unseen otherwise they bob up to the top.
-        const aunseen = a.unseen && !a.successful
-        const bunseen = b.unseen && !b.successful
-
-        if (aunseen && !bunseen) {
-          return -1
-        } else if (!aunseen && bunseen) {
-          return 1
-        } else {
-          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-        }
-      } else {
-        // Descending date/time.
-        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-      }
-    })
-  } else {
+  if (!messagesOnMap.value) {
     return []
   }
+
+  return messagesOnMap.value.slice().sort((a, b) => {
+    if (props.selectedSort === 'Unseen') {
+      // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
+      // unseen otherwise they bob up to the top.
+      const aunseen = a.unseen && !a.successful
+      const bunseen = b.unseen && !b.successful
+
+      if (aunseen && !bunseen) {
+        return -1
+      } else if (!aunseen && bunseen) {
+        return 1
+      } else {
+        return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+      }
+    } else {
+      // Descending date/time.
+      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+    }
+  })
 })
 
 const showRegions = computed(() => {
@@ -470,6 +469,29 @@ const closestGroups = computed(() => {
 })
 
 // Watchers
+watch(
+  () => isochroneStore.messageList,
+  (newList) => {
+    if (updatedMessagesOnMap.value && newList?.length) {
+      const unseenMap = new Map(newList.map((m) => [m.id, m.unseen]))
+      let changed = false
+
+      updatedMessagesOnMap.value.forEach((m) => {
+        const newUnseen = unseenMap.get(m.id)
+        if (newUnseen !== undefined && m.unseen !== newUnseen) {
+          m.unseen = newUnseen
+          changed = true
+        }
+      })
+
+      if (changed) {
+        updatedMessagesOnMap.value = [...updatedMessagesOnMap.value]
+      }
+    }
+  },
+  { deep: true }
+)
+
 watch(
   filteredMessages,
   (newVal) => {

@@ -1,5 +1,36 @@
 <template>
   <div class="mb-2 mt-2">
+    <div v-if="group" class="group-header bg-white p-3 mb-3">
+      <div class="d-flex align-items-start gap-3">
+        <GroupProfileImage
+          :image="group.profile ? group.profile : '/icon.png'"
+          :alt-text="'Profile picture for ' + group.namedisplay"
+        />
+        <div class="flex-grow-1">
+          <h1 class="h4 mb-1">{{ group.namedisplay }}</h1>
+          <p v-if="group.tagline" class="text-muted mb-2">
+            {{ group.tagline }}
+          </p>
+          <div class="d-flex flex-wrap gap-2 align-items-center">
+            <JoinWithConfirm
+              v-if="!oneOfMyGroups(group.id)"
+              :id="group.id"
+              :name="group.namedisplay"
+              size="md"
+              variant="primary"
+            />
+            <span v-else class="badge bg-success">Member</span>
+            <ExternalLink
+              :href="'mailto:' + group.modsemail"
+              class="text-muted small"
+            >
+              <v-icon icon="envelope" class="fa-fw" />
+              Contact volunteers
+            </ExternalLink>
+          </div>
+        </div>
+      </div>
+    </div>
     <OurMessage v-if="msgid" :id="msgid" record-view class="mt-3" />
     <MessageList
       :messages-for-list="messagesToShow"
@@ -14,7 +45,11 @@
 import { ref, computed, watch } from 'vue'
 import MessageList from './MessageList'
 import OurMessage from './OurMessage'
+import GroupProfileImage from './GroupProfileImage'
+import JoinWithConfirm from './JoinWithConfirm'
+import ExternalLink from './ExternalLink'
 import { useGroupStore } from '~/stores/group'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   id: {
@@ -34,6 +69,11 @@ const props = defineProps({
 })
 
 const groupStore = useGroupStore()
+const { oneOfMyGroups } = useMe()
+
+const group = computed(() => {
+  return groupStore?.get(props.id)
+})
 
 // Methods
 function loadMore($state) {

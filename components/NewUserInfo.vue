@@ -1,54 +1,67 @@
 <template>
-  <div>
-    <h5 class="text-center">
-      It looks like this is your first time freegling. Hello!
-    </h5>
-    <b-card variant="white">
-      <h2 class="text-center">Your Account Password</h2>
-      <p class="text-center">We've emailed a password to you:</p>
-      <div class="d-flex justify-content-around">
-        <b-card variant="white">
-          <h1 class="text-primary">
-            <span class="large">
-              {{ password }}
-            </span>
-          </h1>
-        </b-card>
+  <div class="new-user-info">
+    <div class="welcome-header">
+      <v-icon icon="hand-sparkles" class="welcome-icon" />
+      <h5 class="welcome-title">Welcome to Freegle!</h5>
+      <p class="welcome-subtitle">
+        It looks like this is your first time. Hello!
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="card-header">
+        <v-icon icon="key" class="header-icon" />
+        <h6 class="header-title">Your Account Password</h6>
       </div>
-      <p class="text-center mt-2">...or you can set your own:</p>
-      <div class="d-flex justify-content-around">
-        <b-input-group>
-          <b-form-input v-model="newPassword" type="password" />
-          <slot name="append">
-            <SpinButton
-              variant="secondary"
-              icon-name="save"
-              label="Save"
-              @handle="setPassword"
+      <div class="card-content">
+        <p class="password-intro">We've emailed a password to you:</p>
+        <div class="password-display">
+          <span class="password-value">{{ password }}</span>
+        </div>
+        <p class="password-alt">...or set your own:</p>
+        <div class="password-input">
+          <b-input-group>
+            <b-form-input
+              v-model="newPassword"
+              type="password"
+              placeholder="Enter new password"
             />
-          </slot>
-        </b-input-group>
+            <template #append>
+              <SpinButton
+                variant="primary"
+                icon-name="save"
+                label="Save"
+                @handle="setPassword"
+              />
+            </template>
+          </b-input-group>
+        </div>
+        <p class="login-hint">
+          <v-icon icon="info-circle" class="hint-icon" />
+          You can also log in with Facebook, Google, or Yahoo.
+        </p>
       </div>
-      <p class="mt-2 text-center text-muted">
-        You can also log in later with your Facebook, Google or Yahoo account
-        for that email address if you have one.
-      </p>
-    </b-card>
-    <b-card v-if="me" variant="white">
-      <h2 class="text-center">How often do you want emails?</h2>
-      <p class="text-center">
-        We'll email you OFFERs and WANTEDs from other freeglers. How often do
-        you want them?
-      </p>
-      <div class="d-flex justify-content-around w-100 settings">
-        <SettingsGroup
-          v-model:emailfrequency="emailSimple"
-          eventshide
-          volunteerhide
-          label="Choose OFFER/WANTED frequency:"
-        />
+    </div>
+
+    <div v-if="me" class="info-card">
+      <div class="card-header">
+        <v-icon icon="envelope" class="header-icon" />
+        <h6 class="header-title">Email Preferences</h6>
       </div>
-    </b-card>
+      <div class="card-content">
+        <p class="email-intro">
+          How often do you want to receive OFFERs and WANTEDs?
+        </p>
+        <div class="settings-wrapper">
+          <SettingsGroup
+            v-model:emailfrequency="emailSimple"
+            eventshide
+            volunteerhide
+            label="Choose OFFER/WANTED frequency:"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
@@ -95,12 +108,114 @@ async function setPassword(callback) {
 }
 </script>
 <style scoped lang="scss">
-:deep(.settings) {
-  legend {
+@import 'assets/css/_color-vars.scss';
+
+.new-user-info {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.welcome-header {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  margin-bottom: 1rem;
+
+  .welcome-icon {
+    font-size: 2.5rem;
+    color: $colour-success;
+    margin-bottom: 0.75rem;
+  }
+
+  .welcome-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: $color-gray--darker;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.9rem;
+    color: $color-gray--dark;
+    margin: 0;
+  }
+}
+
+.info-card {
+  background: white;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: $color-gray--lighter;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  .header-icon {
+    color: $colour-success;
+  }
+
+  .header-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    color: $color-gray--darker;
+  }
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.password-intro,
+.password-alt,
+.email-intro {
+  font-size: 0.9rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.password-display {
+  background: $color-gray--lighter;
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+
+  .password-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $colour-success;
+    letter-spacing: 0.1em;
+  }
+}
+
+.password-input {
+  max-width: 300px;
+  margin: 0 auto 1rem;
+}
+
+.login-hint {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  text-align: center;
+  margin: 0;
+
+  .hint-icon {
+    margin-right: 0.25rem;
+  }
+}
+
+.settings-wrapper {
+  :deep(legend) {
     display: none;
   }
 
-  select {
+  :deep(select) {
     min-width: 200px;
   }
 }

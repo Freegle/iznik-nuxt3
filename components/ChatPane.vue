@@ -28,7 +28,11 @@
         }"
       >
         <div class="pt-1 mb-1 w-100 itemwrapper">
-          <ChatTypingIndicator :chatid="id" :icon="chat?.icon" />
+          <ChatTypingIndicator
+            :chatid="id"
+            :icon="chat?.icon"
+            :name="chat?.name"
+          />
           <div
             v-for="(chatmessage, index) in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -231,6 +235,7 @@ function typing(val) {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
 // The height is complex:
 // - By default we use the whole height.
@@ -344,8 +349,12 @@ function typing(val) {
   display: flex;
   flex-direction: column-reverse;
   transition: opacity 0.1s ease-in;
-  padding-right: 5px;
-  padding-left: 5px;
+  padding-right: 8px;
+  padding-left: 8px;
+  background-color: $color-gray--lighter;
+  background-image: url('/chat-pattern.svg');
+  background-repeat: repeat;
+  background-size: 200px 200px;
 }
 
 .chatFooter {

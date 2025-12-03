@@ -11,6 +11,6 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 onMounted(() => {
-  router.replace('/find/app/photos')
+  router.replace('/give/mobile/photos')
 })
 </script>

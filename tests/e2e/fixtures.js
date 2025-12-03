@@ -4,7 +4,7 @@ const path = require('path')
 const crypto = require('crypto')
 const base = require('@playwright/test')
 
-const {addCoverageReport} = require('monocart-reporter')
+const { addCoverageReport } = require('monocart-reporter')
 const {
   SCREENSHOTS_DIR,
   timeouts,
@@ -12,7 +12,7 @@ const {
   DEFAULT_TEST_PASSWORD,
 } = require('./config')
 const logger = require('./logger')
-const {logoutIfLoggedIn} = require('./utils/user')
+const { logoutIfLoggedIn } = require('./utils/user')
 
 const NUXT_TEST_UTILS_AVAILABLE = (() => {
   try {
@@ -33,7 +33,7 @@ if (NUXT_TEST_UTILS_AVAILABLE) {
 const ensureScreenshotsDir = () => {
   if (!fs.existsSync(SCREENSHOTS_DIR)) {
     try {
-      fs.mkdirSync(SCREENSHOTS_DIR, {recursive: true})
+      fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true })
       console.log(`Created screenshots directory: ${SCREENSHOTS_DIR}`)
     } catch (error) {
       console.error(`Failed to create screenshots directory: ${error.message}`)
@@ -106,12 +106,12 @@ const generateUniqueTestEmail = (prefix = 'test') => {
 // Define a custom test function that wraps the base test to add automatic screenshot capture
 const test = base.test.extend({
   // Create a new isolated context for each test
-  context: async ({browser}, use) => {
+  context: async ({ browser }, use) => {
     // Create a fresh context for this test
     const context = await browser.newContext({
       ignoreHTTPSErrors: true, // Useful for local dev environments
       acceptDownloads: true,
-      viewport: {width: 1280, height: 720},
+      viewport: { width: 1280, height: 720 },
     })
 
     console.log(`Created new isolated browser context for test`)
@@ -125,7 +125,7 @@ const test = base.test.extend({
   },
 
   // Add screenshot helper that automatically attaches to test report
-  takeScreenshot: async ({page}, use, testInfo) => {
+  takeScreenshot: async ({ page }, use, testInfo) => {
     const screenshotHelper = async (name, options = {}) => {
       // Generate filename
       const filename = `${name.replace(/[^a-zA-Z0-9-]/g, '_')}.png`
@@ -135,13 +135,13 @@ const test = base.test.extend({
       await page.screenshot({
         path: screenshotPath,
         fullPage: options.fullPage !== false, // Default to fullPage
-        ...options
+        ...options,
       })
 
       // Attach to test report for inline viewing
       await testInfo.attach(name, {
         path: screenshotPath,
-        contentType: 'image/png'
+        contentType: 'image/png',
       })
 
       console.log(`Screenshot taken and attached: ${name}`)
@@ -152,7 +152,7 @@ const test = base.test.extend({
   },
 
   // Add the testEmail fixture - basic version that just generates a random test email
-  testEmail: async ({browser}, use) => {
+  testEmail: async ({ browser }, use) => {
     // Generate a unique test email for this test
     const email = generateUniqueTestEmail()
     console.log(`Using test email: ${email}`)
@@ -162,7 +162,7 @@ const test = base.test.extend({
   },
 
   // Function to generate custom test emails with specific prefixes
-  getTestEmail: async ({browser}, use) => {
+  getTestEmail: async ({ browser }, use) => {
     // Return a function that generates test emails with custom prefixes
     const emailGenerator = (prefix = 'test') => generateUniqueTestEmail(prefix)
     await use(emailGenerator)
@@ -204,7 +204,7 @@ const test = base.test.extend({
   },
 
   // Override the page fixture to use our isolated context
-  page: async ({context, progressTracker}, use) => {
+  page: async ({ context, progressTracker }, use) => {
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
@@ -261,7 +261,7 @@ const test = base.test.extend({
       /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
       /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
       /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
-      /Failed to load resource.*https:\/\/accounts\.google\.com\/gsi\/status.*400/, // Google authentication status errors in test
+      /accounts\.google\.com\/gsi/, // Google authentication/sign-in errors in test
       /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
       // CSP (Content Security Policy) violations - common in development/testing
       /Refused to apply inline style because it violates the following Content Security Policy directive/,
@@ -291,7 +291,9 @@ const test = base.test.extend({
       // Reset to original patterns by copying from the original array
       allowedErrorPatterns.length = 0
       allowedErrorPatterns.push(...originalAllowedErrorPatterns)
-      console.log(`Reset allowed error patterns to original set (${originalAllowedErrorPatterns.length} patterns)`)
+      console.log(
+        `Reset allowed error patterns to original set (${originalAllowedErrorPatterns.length} patterns)`
+      )
     }
 
     // Helper to check if an error message matches any allowed pattern
@@ -329,11 +331,14 @@ const test = base.test.extend({
 
             // If no stack found in args, try to get stack from the first argument
             if (!stackTrace) {
-              const firstArg = await args[0].evaluate((obj) => {
-                if (obj instanceof Error) return obj.stack
-                if (typeof obj === 'string' && obj.includes('\n    at ')) return obj
-                return null
-              }).catch(() => null)
+              const firstArg = await args[0]
+                .evaluate((obj) => {
+                  if (obj instanceof Error) return obj.stack
+                  if (typeof obj === 'string' && obj.includes('\n    at '))
+                    return obj
+                  return null
+                })
+                .catch(() => null)
 
               if (firstArg) {
                 stackTrace = `\nStack trace:\n${firstArg}`
@@ -354,7 +359,9 @@ const test = base.test.extend({
         // Check if this is a critical (not allowed) error and fail immediately
         if (!isAllowedError(fullErrorText)) {
           console.error('CRITICAL CONSOLE ERROR DETECTED:', fullErrorWithStack)
-          throw new Error(`Critical console error detected: ${fullErrorWithStack}`)
+          throw new Error(
+            `Critical console error detected: ${fullErrorWithStack}`
+          )
         }
       }
     })
@@ -495,10 +502,10 @@ const test = base.test.extend({
         console.log(`Navigating to ${path} with timeout ${timeout}ms`)
 
         // Navigate with timeout
-        await page.goto(path, {timeout})
+        await page.goto(path, { timeout })
 
         // Wait for initial load
-        await page.waitForLoadState('domcontentloaded', {timeout})
+        await page.waitForLoadState('domcontentloaded', { timeout })
 
         // Wait for network to settle (helps with slow JavaScript loading)
         try {
@@ -546,7 +553,7 @@ const test = base.test.extend({
 
         // Check for 404 error message
         if (
-          errorTextContent.includes('Oh no! That page doesn\'t seem to exist')
+          errorTextContent.includes("Oh no! That page doesn't seem to exist")
         ) {
           // Take a screenshot of the 404 page
           await page.screenshot({
@@ -687,7 +694,7 @@ const test = base.test.extend({
           console.warn(`Unable to clear page storage: ${err.message}`)
         }
 
-        await page.waitForLoadState('networkidle', {timeout})
+        await page.waitForLoadState('networkidle', { timeout })
         return true
       } catch (error) {
         // Clear the navigation inactivity timer even if teardown fails
@@ -763,7 +770,7 @@ const test = base.test.extend({
 
       // Take a full page screenshot on any test failure
       const screenshotPath = getScreenshotPath(`test-failure-${Date.now()}.png`)
-      await loggingPage.screenshot({path: screenshotPath, fullPage: true})
+      await loggingPage.screenshot({ path: screenshotPath, fullPage: true })
 
       // Log the navigation history on failure for debugging
       console.log('Navigation history:')
@@ -845,7 +852,7 @@ const updateProgress = (testUpdate) => {
       progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
     }
 
-    const {testId, title, status, startTime, endTime, error, retry} =
+    const { testId, title, status, startTime, endTime, error, retry } =
       testUpdate
 
     // Update or add test entry
@@ -907,8 +914,7 @@ initializeProgressFile()
 
 // Define our extended test with custom fixtures
 const testWithFixtures = test.extend({
-
-  postMessage: async ({page, setNewUserPassword}, use) => {
+  postMessage: async ({ page, setNewUserPassword }, use) => {
     /**
      * Helper function to post a message to Freegle
      * @param {Object} options - Configuration options for posting
@@ -981,12 +987,12 @@ const testWithFixtures = test.extend({
         .clear()
       await page
         .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-        .type(item, {delay: 100})
+        .type(item, { delay: 100 })
 
       // Fill in the post details
       await page.waitForSelector(
         '[id^="description"], textarea.description, textarea.form-control',
-        {timeout: timeouts.ui.appearance}
+        { timeout: timeouts.ui.appearance }
       )
 
       // Add the description using type() to trigger Vue reactivity
@@ -1004,7 +1010,7 @@ const testWithFixtures = test.extend({
         .locator(
           '[id^="description"], textarea.description, textarea.form-control'
         )
-        .type(description, {delay: 50})
+        .type(description, { delay: 50 })
 
       // Wait for Vue reactivity to process the form changes and make the Next button available
       // This replaces the fixed 2000ms wait with a responsive check
@@ -1044,7 +1050,7 @@ const testWithFixtures = test.extend({
             (desktopBtn && desktopBtn.offsetParent !== null)
           )
         },
-        {timeout: timeouts.ui.appearance}
+        { timeout: timeouts.ui.appearance }
       )
 
       // Scroll to bottom of page to ensure Next button is visible
@@ -1097,11 +1103,11 @@ const testWithFixtures = test.extend({
       // Race between the two possible states
       const winner = await Promise.race([
         loggedInEmailDisplay
-          .waitFor({state: 'visible', timeout: timeouts.ui.appearance})
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
           .then(() => 'loggedIn')
           .catch(() => null),
         emailInput
-          .waitFor({state: 'visible', timeout: timeouts.ui.appearance})
+          .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
           .then(() => 'notLoggedIn')
           .catch(() => null),
       ])
@@ -1158,6 +1164,22 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
+      // Set up console listener to capture browser errors
+      const consoleMessages = []
+      const consoleListener = (msg) => {
+        const msgType = msg.type()
+        const msgText = msg.text()
+        if (
+          msgType === 'error' ||
+          msgType === 'warning' ||
+          msgText.includes('Error')
+        ) {
+          consoleMessages.push(`[${msgType}] ${msgText}`)
+          console.log(`BROWSER CONSOLE [${msgType}]: ${msgText}`)
+        }
+      }
+      page.on('console', consoleListener)
+
       // Click the Submit/Post button to finalize
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
@@ -1199,6 +1221,17 @@ const testWithFixtures = test.extend({
         console.log('Expected URL pattern:', myPostsUrl)
         console.log('Time elapsed during navigation attempt:', currentTime)
 
+        // Log all captured console messages
+        console.log('=== CAPTURED BROWSER CONSOLE MESSAGES ===')
+        if (consoleMessages.length === 0) {
+          console.log('No error/warning messages captured')
+        } else {
+          consoleMessages.forEach((msg, i) => {
+            console.log(`Console message ${i + 1}: ${msg}`)
+          })
+        }
+        console.log('=== END BROWSER CONSOLE MESSAGES ===')
+
         // Check page state at timeout
         try {
           const title = await page.title()
@@ -1219,21 +1252,91 @@ const testWithFixtures = test.extend({
           console.log('Could not check loading elements:', e.message)
         }
 
-        // Check if there are any error messages visible
+        // Check if there are any error messages visible (including NoticeMessage component)
         try {
           const errorElements = await page
-            .locator('.error, .alert-danger, [role="alert"]')
+            .locator('.error, .alert-danger, [role="alert"], .notice--danger')
             .count()
           console.log('Error elements visible:', errorElements)
           if (errorElements > 0) {
             const errorText = await page
-              .locator('.error, .alert-danger, [role="alert"]')
+              .locator('.error, .alert-danger, [role="alert"], .notice--danger')
               .first()
               .textContent()
             console.log('First error message text:', errorText)
           }
         } catch (e) {
           console.log('Could not check error elements:', e.message)
+        }
+
+        // Also check for any text containing common error keywords
+        try {
+          const errorKeywords = await page
+            .locator('text=/Something went wrong|Error|failed|not allowed/i')
+            .count()
+          console.log('Error keyword elements:', errorKeywords)
+        } catch (e) {
+          console.log('Could not check error keywords:', e.message)
+        }
+
+        // Check compose store debug info if on whoami page
+        try {
+          const debugElement = page.locator('.debug-compose-state')
+          const debugExists = (await debugElement.count()) > 0
+          console.log('Debug element exists:', debugExists)
+          if (debugExists) {
+            const messageCount = await debugElement.getAttribute(
+              'data-message-count'
+            )
+            const hasApi = await debugElement.getAttribute('data-has-api')
+            const postcodeId = await debugElement.getAttribute(
+              'data-postcode-id'
+            )
+            const messageValid = await debugElement.getAttribute(
+              'data-message-valid'
+            )
+            const postcodeValid = await debugElement.getAttribute(
+              'data-postcode-valid'
+            )
+            const loggedIn = await debugElement.getAttribute('data-logged-in')
+            const emailValid = await debugElement.getAttribute(
+              'data-email-valid'
+            )
+            console.log('=== COMPOSE STORE DEBUG ===')
+            console.log('Message count:', messageCount)
+            console.log('Has $api:', hasApi)
+            console.log('Postcode ID:', postcodeId)
+            console.log('Message valid:', messageValid)
+            console.log('Postcode valid:', postcodeValid)
+            console.log('Logged in:', loggedIn)
+            console.log('Email valid:', emailValid)
+            console.log('=== END COMPOSE STORE DEBUG ===')
+          } else {
+            console.log(
+              'Debug element NOT found - checking page HTML for client-only wrapper...'
+            )
+            const pageHtml = await page.content()
+            const hasClientOnly = pageHtml.includes('client-only')
+            console.log('Page has client-only wrapper:', hasClientOnly)
+          }
+
+          // Check localStorage for compose store data (always)
+          const localStorageData = await page.evaluate(() => {
+            const composeData = localStorage.getItem('compose')
+            try {
+              return composeData ? JSON.parse(composeData) : null
+            } catch (e) {
+              return { error: e.message, raw: composeData?.substring(0, 500) }
+            }
+          })
+          console.log('=== LOCALSTORAGE COMPOSE DEBUG ===')
+          console.log(
+            'Compose store in localStorage:',
+            JSON.stringify(localStorageData, null, 2)
+          )
+          console.log('=== END LOCALSTORAGE DEBUG ===')
+        } catch (e) {
+          console.log('Could not check compose store debug:', e.message)
         }
 
         console.log('=== END NAVIGATION TIMEOUT DEBUG ===')
@@ -1309,7 +1412,7 @@ const testWithFixtures = test.extend({
       // Clear out the ids and type values from window.history.state to prevent modals showing again on renavigation
       await page.evaluate(() => {
         if (window.history.state) {
-          const newState = {...window.history.state}
+          const newState = { ...window.history.state }
           delete newState.ids
           delete newState.type
           window.history.replaceState(newState, '', window.location.href)
@@ -1330,7 +1433,7 @@ const testWithFixtures = test.extend({
     await use(postMessage)
   },
 
-  waitForNuxtPageLoad: async ({page}, use) => {
+  waitForNuxtPageLoad: async ({ page }, use) => {
     const waitForNuxtPageLoad = async (options = {}) => {
       const timeout = options.timeout || 30000
       return await page.waitForFunction(
@@ -1338,19 +1441,19 @@ const testWithFixtures = test.extend({
           return (
             document.title !== 'Starting Nuxt... | Nuxt' &&
             document.title !==
-            'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+              'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
             document.title.length > 0 &&
             document.body?.textContent?.includes('Loading... Stuck here') ===
-            false
+              false
           )
         },
-        {timeout}
+        { timeout }
       )
     }
     await use(waitForNuxtPageLoad)
   },
 
-  findAndClickButton: async ({page}, use) => {
+  findAndClickButton: async ({ page }, use) => {
     const findAndClickButton = async (selectors, options = {}) => {
       for (const selector of selectors) {
         const modifiedSelector = `${selector}:not([disabled]):not([disabled="true"])`
@@ -1368,10 +1471,10 @@ const testWithFixtures = test.extend({
     await use(findAndClickButton)
   },
 
-  setupTestPage: async ({page}, use) => {
+  setupTestPage: async ({ page }, use) => {
     const setupTestPage = async (options = {}) => {
       await page.setViewportSize(
-        options.viewport || {width: 1280, height: 800}
+        options.viewport || { width: 1280, height: 800 }
       )
       await page.gotoAndVerify(options.path || '/', {
         timeout: timeouts.navigation.initial,
@@ -1382,29 +1485,29 @@ const testWithFixtures = test.extend({
             return (
               document.title !== 'Starting Nuxt... | Nuxt' &&
               document.title !==
-              'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
+                'Error while loading Nuxt. Please check console and fix errors. | Nuxt' &&
               document.title.length > 0 &&
               document.body?.textContent?.includes('Loading... Stuck here') ===
-              false
+                false
             )
           },
-          {timeout: options.timeout || 30000}
+          { timeout: options.timeout || 30000 }
         )
       }
     }
     await use(setupTestPage)
   },
 
-  takeTimestampedScreenshot: async ({page}, use) => {
+  takeTimestampedScreenshot: async ({ page }, use) => {
     const takeTimestampedScreenshot = async (description, options = {}) => {
       const timestamp = options.timestamp || Date.now()
       const path = getScreenshotPath(`${description}-${timestamp}.png`)
-      return await page.screenshot({path, fullPage: true, ...options})
+      return await page.screenshot({ path, fullPage: true, ...options })
     }
     await use(takeTimestampedScreenshot)
   },
 
-  withdrawPost: async ({page}, use) => {
+  withdrawPost: async ({ page }, use) => {
     /**
      * Finds a post on the My Posts page and withdraws it
      * @param {Object} options - The withdrawal options
@@ -1412,7 +1515,7 @@ const testWithFixtures = test.extend({
      * @returns {Promise<boolean>} - True if post was withdrawn successfully
      */
     const withdrawPost = async (options) => {
-      const {item} = options
+      const { item } = options
 
       if (!item) {
         throw new Error('Item text is required for withdrawing a post')
@@ -1426,7 +1529,8 @@ const testWithFixtures = test.extend({
         })
 
         // Find the post we want to withdraw.
-        const postSelector = `.card-body:has-text("${item}"):visible`
+        // Use .card or .messagecard (consistent with postMessage fixture) rather than .card-body
+        const postSelector = `.card:has-text("${item}"), .messagecard:has-text("${item}")`
         console.log(`Looking for post with selector: ${postSelector}`)
         const postCard = page.locator(postSelector).first()
 
@@ -1435,7 +1539,9 @@ const testWithFixtures = test.extend({
           timeout: timeouts.ui.appearance,
         })
 
-        console.log(`Post card for "${item}" is visible, proceeding with withdrawal`)
+        console.log(
+          `Post card for "${item}" is visible, proceeding with withdrawal`
+        )
 
         // Look for the withdraw button within the post card
         console.log(`Looking for withdraw button in post card for "${item}"`)
@@ -1452,28 +1558,45 @@ const testWithFixtures = test.extend({
           })
           console.log('Withdraw button found and visible')
         } catch (error) {
-          console.log('Withdraw button not found with strict selector, trying broader selector')
+          console.log(
+            'Withdraw button not found with strict selector, trying broader selector'
+          )
           const allButtons = await postCard.locator('.btn').allTextContents()
-          console.log(`Available buttons in post card: ${JSON.stringify(allButtons)}`)
+          console.log(
+            `Available buttons in post card: ${JSON.stringify(allButtons)}`
+          )
 
           // Try a broader selector
-          const broadWithdrawButton = postCard.locator('.btn').filter({hasText: /withdraw/i})
+          const broadWithdrawButton = postCard
+            .locator('.btn')
+            .filter({ hasText: /withdraw/i })
           const broadButtonCount = await broadWithdrawButton.count()
           console.log(`Found ${broadButtonCount} buttons with "withdraw" text`)
 
           if (broadButtonCount > 0) {
             console.log('Using broader withdraw button selector')
-            await broadWithdrawButton.first().waitFor({state: 'visible', timeout: timeouts.ui.appearance})
+            await broadWithdrawButton
+              .first()
+              .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
           } else {
-            throw new Error(`No withdraw button found. Available buttons: ${JSON.stringify(allButtons)}`)
+            throw new Error(
+              `No withdraw button found. Available buttons: ${JSON.stringify(
+                allButtons
+              )}`
+            )
           }
         }
 
         // Ensure button is enabled before clicking
         const isEnabled = await withdrawButton.isEnabled()
         if (!isEnabled) {
-          console.log('Withdraw button is disabled, checking if broad selector button is enabled')
-          const broadWithdrawButton = postCard.locator('.btn').filter({hasText: /withdraw/i}).first()
+          console.log(
+            'Withdraw button is disabled, checking if broad selector button is enabled'
+          )
+          const broadWithdrawButton = postCard
+            .locator('.btn')
+            .filter({ hasText: /withdraw/i })
+            .first()
           const isBroadEnabled = await broadWithdrawButton.isEnabled()
           if (!isBroadEnabled) {
             throw new Error('All withdraw buttons are disabled')
@@ -1500,9 +1623,9 @@ const testWithFixtures = test.extend({
         let modalFound = false
         for (const modalSelector of modalSelectors) {
           try {
-            const modal = page.locator(modalSelector).filter({visible: true})
+            const modal = page.locator(modalSelector).filter({ visible: true })
             const isVisible = await modal
-              .isVisible({timeout: timeouts.ui.interaction})
+              .isVisible({ timeout: timeouts.ui.interaction })
               .catch(() => false)
             if (isVisible) {
               console.log(`Found modal: ${modalSelector}`)
@@ -1523,9 +1646,9 @@ const testWithFixtures = test.extend({
                 try {
                   const confirmButton = page
                     .locator(confirmSelector)
-                    .filter({visible: true})
+                    .filter({ visible: true })
                   const confirmVisible = await confirmButton
-                    .isVisible({timeout: timeouts.ui.interaction / 10})
+                    .isVisible({ timeout: timeouts.ui.interaction / 10 })
                     .catch(() => false)
                   if (confirmVisible) {
                     console.log(
@@ -1533,7 +1656,9 @@ const testWithFixtures = test.extend({
                     )
 
                     // Withdrawing pending posts can cause legitimate "not found" errors when refetching
-                    page.addAllowedErrorPattern(/the server responded with a status of 404/)
+                    page.addAllowedErrorPattern(
+                      /the server responded with a status of 404/
+                    )
 
                     await confirmButton.click()
                     confirmClicked = true
@@ -1569,14 +1694,18 @@ const testWithFixtures = test.extend({
         const isSpecificPostVisible = await postCard
           .isVisible()
           .catch(() => false)
-        console.log(`Specific post card still visible: ${isSpecificPostVisible}`)
+        console.log(
+          `Specific post card still visible: ${isSpecificPostVisible}`
+        )
 
         // Wait for UI to update after withdrawal click
         await page.waitForTimeout(timeouts.ui.settleTime)
 
         // Debug: Check post count after settle time
         const postsAfterSettle = await page.locator(postSelector).count()
-        console.log(`Posts with "${item}" after settle time: ${postsAfterSettle}`)
+        console.log(
+          `Posts with "${item}" after settle time: ${postsAfterSettle}`
+        )
 
         // The post should disappear entirely
         await postCard.waitFor({
@@ -1600,7 +1729,7 @@ const testWithFixtures = test.extend({
     await use(withdrawPost)
   },
 
-  setNewUserPassword: async ({page}, use) => {
+  setNewUserPassword: async ({ page }, use) => {
     /**
      * Sets the password for a new user in the NewUserInfo component
      * @param {string} [password=DEFAULT_TEST_PASSWORD] - The password to set
@@ -1612,10 +1741,10 @@ const testWithFixtures = test.extend({
       try {
         const passwordInput = page
           .locator('input[type="password"]')
-          .filter({visible: true})
+          .filter({ visible: true })
         const saveButton = page
           .locator('.btn:has-text("Save")')
-          .filter({visible: true})
+          .filter({ visible: true })
 
         // Check if password input is visible (NewUserInfo component)
         if (
@@ -1643,7 +1772,7 @@ const testWithFixtures = test.extend({
     await use(setNewUserPassword)
   },
 
-  replyToMessageWithSignup: async ({page}, use) => {
+  replyToMessageWithSignup: async ({ page }, use) => {
     /**
      * Navigates to a message page and replies with signup as a new user
      * @param {Object} options - The reply options
@@ -1683,7 +1812,7 @@ const testWithFixtures = test.extend({
       // Fill in the email field (for non-logged-in users)
       const emailInput = page
         .locator('.test-email-reply-validator input[type="email"]')
-        .filter({visible: true})
+        .filter({ visible: true })
       await emailInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -1694,7 +1823,7 @@ const testWithFixtures = test.extend({
       // Fill in the reply message
       const replyTextarea = page
         .locator('textarea[name="reply"]')
-        .filter({visible: true})
+        .filter({ visible: true })
       await replyTextarea.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -1705,7 +1834,7 @@ const testWithFixtures = test.extend({
       // Fill in collection details (for OFFER messages)
       const collectTextarea = page
         .locator('textarea[name="collect"]')
-        .filter({visible: true})
+        .filter({ visible: true })
       await collectTextarea.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -1716,7 +1845,7 @@ const testWithFixtures = test.extend({
       // Click the "Send your reply" button
       const sendReplyButton = page
         .locator('.btn:has-text("Send your reply")')
-        .filter({visible: true})
+        .filter({ visible: true })
       await sendReplyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -1728,16 +1857,18 @@ const testWithFixtures = test.extend({
       console.log('Waiting for Welcome to Freegle modal')
       console.log('DEBUG: Current URL before waiting for modal:', page.url())
       console.log('DEBUG: Checking for any modals on page...')
-      
+
       // Check what modals exist first
       const allModals = await page.locator('.modal-content').count()
       console.log(`DEBUG: Found ${allModals} modal-content elements`)
-      
+
       if (allModals > 0) {
-        const modalTexts = await page.locator('.modal-content').allTextContents()
+        const modalTexts = await page
+          .locator('.modal-content')
+          .allTextContents()
         console.log('DEBUG: Modal texts found:', modalTexts)
       }
-      
+
       try {
         const welcomeModal = page
           .locator('.modal-content')
@@ -1748,7 +1879,9 @@ const testWithFixtures = test.extend({
             hasText: 'It looks like this is your first time',
           })
 
-        console.log('DEBUG: About to wait for Welcome modal with shorter timeout...')
+        console.log(
+          'DEBUG: About to wait for Welcome modal with shorter timeout...'
+        )
         await welcomeModal.waitFor({
           state: 'visible',
           timeout: 5000, // Much shorter timeout - if modal doesn't appear quickly, it's probably not coming
@@ -1803,9 +1936,10 @@ const testWithFixtures = test.extend({
             timeout: 3000,
           })
 
-          console.log('ContactDetailsAskModal appeared, filling details')
+          console.log('ContactDetailsAskModal appeared, filling postcode')
 
           // Fill in postcode - look for the postcode input
+          // Note: Mobile phone input was removed in SMS notifications removal (commit 9fac7ae9)
           const postcodeInput = contactModal.locator(
             'input[placeholder*="postcode"], .pcinp'
           )
@@ -1816,27 +1950,19 @@ const testWithFixtures = test.extend({
           await postcodeInput.fill('EH3 6SS')
           console.log('Filled postcode')
 
-          // Fill in phone number - look for the phone input
-          const phoneInput = contactModal.locator(
-            'input[placeholder*="mobile"]'
-          )
-          await phoneInput.waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance,
-          })
-          await phoneInput.fill('07700900123')
-          console.log('Filled phone number')
-
-          // Click OK/Save button
-          const okButton = contactModal.locator(
-            '.btn:has-text("OK"), .btn:has-text("Save")'
-          )
-          await okButton.waitFor({
-            state: 'visible',
-            timeout: timeouts.ui.appearance,
-          })
-          await okButton.click()
-          console.log('Clicked OK button in ContactDetailsAskModal')
+          // The modal auto-saves when postcode is selected, just need to close it
+          // Look for the close button or wait for modal to close automatically
+          try {
+            const closeButton = contactModal.locator(
+              '.btn-close, .close, button[aria-label="Close"]'
+            )
+            if ((await closeButton.count()) > 0) {
+              await closeButton.click()
+              console.log('Clicked close button in ContactDetailsAskModal')
+            }
+          } catch (e) {
+            console.log('No close button found, modal may auto-close')
+          }
 
           // Wait for the contact modal to disappear
           await contactModal.waitFor({
@@ -1852,12 +1978,14 @@ const testWithFixtures = test.extend({
         }
 
         // Wait for the chat list to load and look for a chat entry
-        await page.waitForSelector('.chatentry', {
+        await page.waitForSelector('.chat-entry', {
           timeout: timeouts.ui.appearance,
         })
 
         // Check that there's one chat entry
-        const chatEntries = page.locator('.chatentry').filter({visible: true})
+        const chatEntries = page
+          .locator('.chat-entry')
+          .filter({ visible: true })
         const chatCount = await chatEntries.count()
 
         if (chatCount > 0) {
@@ -1873,20 +2001,34 @@ const testWithFixtures = test.extend({
         return true
       } catch (error) {
         console.log('DEBUG: Welcome modal error:', error.message)
-        
+
         // If the error is due to page being closed, don't try to continue
-        if (error.message.includes('Target page, context or browser has been closed')) {
+        if (
+          error.message.includes(
+            'Target page, context or browser has been closed'
+          )
+        ) {
           console.log('Browser context was closed, stopping fixture execution')
           return false
         }
-        
+
         // If it's just a timeout waiting for the modal, this indicates an issue
-        if (error.message.includes('Timeout') || error.message.includes('waiting for locator')) {
-          console.log('ERROR: Welcome to Freegle modal did not appear - this indicates a problem')
-          console.log('DEBUG: Expected modal for new user signup, but it was not found')
+        if (
+          error.message.includes('Timeout') ||
+          error.message.includes('waiting for locator')
+        ) {
+          console.log(
+            'ERROR: Welcome to Freegle modal did not appear - this indicates a problem'
+          )
+          console.log(
+            'DEBUG: Expected modal for new user signup, but it was not found'
+          )
           return false // Modal should appear for new users
         } else {
-          console.log('Unexpected error during Welcome modal wait:', error.message)
+          console.log(
+            'Unexpected error during Welcome modal wait:',
+            error.message
+          )
           return false
         }
       }

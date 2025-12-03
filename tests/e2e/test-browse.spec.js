@@ -4,7 +4,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts, environment, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, environment } = require('./config')
 const {
   signUpViaHomepage,
   logoutIfLoggedIn,
@@ -23,32 +23,45 @@ test.describe('Browse Page Tests', () => {
     withdrawPost,
     takeScreenshot,
   }) => {
-
     let offerResult = null
-    let uniqueItem = null  // Declare at outer scope for use in finally block
+    let uniqueItem = null // Declare at outer scope for use in finally block
 
     try {
       // Create  test message.
-      const loginSuccess = await loginViaHomepage(page, environment.unmodded_email, environment.unmodded_password)
+      const loginSuccess = await loginViaHomepage(
+        page,
+        environment.unmodded_email,
+        environment.unmodded_password
+      )
       console.log(`Login result: ${loginSuccess}`)
-      
+
       if (!loginSuccess) {
         throw new Error('Failed to login before posting message')
       }
 
       // Debug: Wait and check login state before posting
-      console.log('Waiting 3 seconds before posting to ensure session is stable...')
+      console.log(
+        'Waiting 3 seconds before posting to ensure session is stable...'
+      )
       await page.waitForTimeout(3000)
-      
+
       // Debug: Check if still logged in before postMessage
       console.log('About to call postMessage - checking login status')
       try {
-        const loggedInElements = await page.locator('.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")').count()
-        console.log(`Found ${loggedInElements} logged-in elements before posting`)
-        
+        const loggedInElements = await page
+          .locator(
+            '.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")'
+          )
+          .count()
+        console.log(
+          `Found ${loggedInElements} logged-in elements before posting`
+        )
+
         if (loggedInElements === 0) {
-          console.warn('WARNING: No logged-in elements found before posting - this may cause issues')
-          
+          console.warn(
+            'WARNING: No logged-in elements found before posting - this may cause issues'
+          )
+
           // Take screenshot for debugging
           await takeScreenshot(`No Login Elements Debug ${Date.now()}`, {
             fullPage: true,
@@ -57,10 +70,10 @@ test.describe('Browse Page Tests', () => {
       } catch (debugError) {
         console.log(`Login check error: ${debugError.message}`)
       }
-      
+
       // Use unique timestamp to avoid conflicts with other test runs
       const uniqueId = Date.now()
-      uniqueItem = `Test Table ${uniqueId}`  // Assign to outer scope variable
+      uniqueItem = `Test Table ${uniqueId}` // Assign to outer scope variable
       offerResult = await postMessage({
         type: 'OFFER',
         item: uniqueItem,
@@ -104,10 +117,14 @@ test.describe('Browse Page Tests', () => {
       await joinButton.click()
 
       // Wait for confirmation of joining
-      await page.locator('.btn:has-text("Leave")').first().waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.interaction,
-      })
+      await page
+        .locator('.btn:has-text("Leave")')
+        .filter({ visible: true })
+        .first()
+        .waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.interaction,
+        })
 
       // Now test browsing functionality
       console.log('Testing browse page with created message')
@@ -117,13 +134,18 @@ test.describe('Browse Page Tests', () => {
 
       // Wait for postcode prompt and enter postcode
       console.log('Waiting for postcode prompt on browse page')
-      await page.waitForSelector('text=What\'s your postcode? We\'ll show you posts nearby.', {
-        timeout: timeouts.ui.appearance,
-      })
+      await page.waitForSelector(
+        "text=What's your postcode? We'll show you posts nearby.",
+        {
+          timeout: timeouts.ui.appearance,
+        }
+      )
 
       // Enter postcode from config
       console.log(`Entering postcode ${environment.postcode}`)
-      const postcodeInput = page.locator('.pcinp, input[placeholder="Type postcode"]')
+      const postcodeInput = page.locator(
+        '.pcinp, input[placeholder="Type postcode"]'
+      )
       await postcodeInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -132,37 +154,38 @@ test.describe('Browse Page Tests', () => {
 
       // Debug postcode validation before waiting
       console.log(`Filled postcode: ${environment.postcode}`)
-      
+
       // Wait a moment for any immediate validation
       await page.waitForTimeout(2000)
-      
+
       // Check what validation elements exist and their state
       console.log('Checking validation elements...')
       const validationSelectors = [
         '.text-success.fa-bh',
-        '.fa-check-circle', 
+        '.fa-check-circle',
         '.v-icon[class*="check"]',
         '.text-success',
         '[class*="success"]',
         '.valid-feedback',
         '[class*="valid"]',
         '.fa-check',
-        '[class*="check"]'
+        '[class*="check"]',
       ]
-      
+
       for (const selector of validationSelectors) {
         try {
           const count = await page.locator(selector).count()
-          const visible = count > 0 ? await page.locator(selector).first().isVisible() : false
+          const visible =
+            count > 0 ? await page.locator(selector).first().isVisible() : false
           console.log(`  ${selector}: ${count} found, visible: ${visible}`)
         } catch (error) {
           console.log(`  ${selector}: error - ${error.message}`)
         }
       }
-      
+
       // Take screenshot to see current state
       await takeScreenshot(`Postcode Debug ${Date.now()}`)
-      
+
       // Wait for postcode section to disappear (indicates successful validation)
       await postcodeInput.waitFor({
         state: 'detached',
@@ -175,7 +198,9 @@ test.describe('Browse Page Tests', () => {
       })
 
       // Check that the page loads successfully
-      await page.locator('body').waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+      await page
+        .locator('body')
+        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
 
       // Verify page title
       const title = await page.title()
@@ -193,18 +218,22 @@ test.describe('Browse Page Tests', () => {
 
       // Debug: Get the HTML of the first message card to see its structure
       const firstCard = page.locator('.messagecard').first()
-      if (await firstCard.count() > 0) {
+      if ((await firstCard.count()) > 0) {
         const cardHTML = await firstCard.innerHTML()
         console.log('First message card HTML:', cardHTML)
       }
 
       // Debug: Check what text content is visible on the page
       const allText = await page.locator('body').allTextContents()
-      const tableRelatedText = allText.join(' ').match(new RegExp(`[^]*${uniqueItem}[^]*`, 'g'))
+      const tableRelatedText = allText
+        .join(' ')
+        .match(new RegExp(`[^]*${uniqueItem}[^]*`, 'g'))
       console.log(`Text containing "${uniqueItem}":`, tableRelatedText)
 
       // Check that we can see the specific test item we created
-      const testTableMessage = page.getByText(uniqueItem, { exact: false }).first()
+      const testTableMessage = page
+        .getByText(uniqueItem, { exact: false })
+        .first()
       await testTableMessage.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
@@ -216,7 +245,11 @@ test.describe('Browse Page Tests', () => {
         console.log('Cleaning up test message')
         try {
           await logoutIfLoggedIn(page)
-          await loginViaHomepage(page, environment.unmodded_email, environment.unmodded_password)
+          await loginViaHomepage(
+            page,
+            environment.unmodded_email,
+            environment.unmodded_password
+          )
 
           // Now withdraw the post using the unique item name
           await withdrawPost({ item: uniqueItem })
@@ -248,16 +281,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test search with search term in URL
     console.log('Testing browse page with search term in URL')
@@ -293,16 +331,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Navigate to browse page
     await page.gotoAndVerify('/browse', {
@@ -336,16 +379,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test different viewport sizes
     const viewports = [
@@ -393,16 +441,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test general browse page
     console.log('Testing general browse page')

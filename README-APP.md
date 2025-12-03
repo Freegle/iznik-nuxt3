@@ -14,10 +14,10 @@ This document describes the mobile app version of Freegle, which is built using 
 
 The mobile app is built from the `production` branch (same as the web app) and includes native Android and iOS platform code. The app shares all Vue components and business logic with the web version but uses a different build configuration controlled by the `ISAPP` environment variable.
 
+Understanding the differences between mobile and web builds helps when debugging platform-specific issues.
+
 <details>
 <summary><h2>Mobile App vs Web App</h2></summary>
-
-Understanding the differences between mobile and web builds helps when debugging platform-specific issues.
 
 The mobile and web apps are built from the **same codebase** (`production` branch) with build-time differences:
 
@@ -40,10 +40,10 @@ The mobile and web apps are built from the **same codebase** (`production` branc
 
 ---
 
+The app uses Capacitor to bridge web code with native device features. This section covers the core configuration and project structure.
+
 <details>
 <summary><h2>Core Mobile Infrastructure</h2></summary>
-
-The app uses Capacitor to bridge web code with native device features. This section covers the core configuration and project structure.
 
 ### Capacitor Framework
 
@@ -82,10 +82,10 @@ Located in `ios/` directory:
 
 ---
 
+These features use native device capabilities not available in web browsers.
+
 <details>
 <summary><h2>Mobile-Specific Features</h2></summary>
-
-These features use native device capabilities not available in web browsers.
 
 ### Authentication Methods
 
@@ -183,10 +183,10 @@ Mobile-specific Stripe implementation:
 
 ---
 
+All mobile-specific state and functionality is managed through a dedicated Pinia store.
+
 <details>
 <summary><h2>Mobile Store (stores/mobile.js)</h2></summary>
-
-All mobile-specific state and functionality is managed through a dedicated Pinia store.
 
 A dedicated Pinia store handles all mobile-specific state and functionality:
 
@@ -217,10 +217,10 @@ A dedicated Pinia store handles all mobile-specific state and functionality:
 
 ---
 
+Several components have mobile-specific behavior to optimize for touch screens and native capabilities.
+
 <details>
 <summary><h2>UI/UX Adjustments</h2></summary>
-
-Several components have mobile-specific behavior to optimize for touch screens and native capabilities.
 
 ### Modified Components
 
@@ -262,10 +262,10 @@ Several components have mobile-specific behavior:
 
 ---
 
+The mobile app requires specific Capacitor plugins and dependencies for native functionality.
+
 <details>
 <summary><h2>Dependencies</h2></summary>
-
-The mobile app requires specific Capacitor plugins and dependencies for native functionality.
 
 ### Capacitor Core Packages
 
@@ -320,10 +320,10 @@ The mobile app requires specific Capacitor plugins and dependencies for native f
 
 ---
 
+Version numbers are managed automatically by CircleCI to ensure consistency across platforms.
+
 <details>
 <summary><h2>Version Management</h2></summary>
-
-Version numbers are managed automatically by CircleCI to ensure consistency across platforms.
 
 ### Unified Version Management (Both Platforms)
 
@@ -412,10 +412,10 @@ This ensures the version shown in the app's Help page matches the actual build v
 
 ---
 
+CircleCI builds require various environment variables for signing, store APIs, and service integrations.
+
 <details>
 <summary><h2>Environment Variables</h2></summary>
-
-CircleCI builds require various environment variables for signing, store APIs, and service integrations.
 
 ### Required for CircleCI Builds
 
@@ -556,10 +556,10 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 ---
 
+Production builds are fully automated via CircleCI. Local builds are useful for testing.
+
 <details>
 <summary><h2>Build Process</h2></summary>
-
-Production builds are fully automated via CircleCI. Local builds are useful for testing.
 
 ### CircleCI Automated Builds (Both Platforms)
 
@@ -647,10 +647,10 @@ xcodebuild -workspace App.xcworkspace -scheme App -configuration Release
 
 ---
 
+A separate development app allows rapid iteration by loading code from your local dev server instead of bundled assets.
+
 <details>
 <summary><h2>Freegle Dev App (Live Reload)</h2></summary>
-
-A separate development app allows rapid iteration by loading code from your local dev server instead of bundled assets.
 
 ### Overview
 
@@ -699,29 +699,44 @@ The "Freegle Dev" app is a separate Android app that:
    - Go to `http://status.localhost`
    - Click "Start" on the freegle-dev-live container (requires confirmation as it uses live APIs)
 
-3. **Set up mDNS hostname broadcast** (Windows with Bonjour):
+3. **Connect phone to dev server** - choose ONE of these methods:
+
+   **Option A: ADB Reverse (Recommended - simpler)**
+
+   If you have ADB connected (USB or wireless ADB):
+   ```cmd
+   REM Run in Windows CMD/PowerShell
+   adb reverse tcp:3004 tcp:3004
+   adb reverse tcp:24678 tcp:24678
+   ```
+   This makes `localhost:3004` on the phone forward to your PC's port 3004.
+
+   For WSL users, also set up port forwarding (one-time, run as Admin):
+   ```powershell
+   netsh interface portproxy add v4tov4 listenport=3004 listenaddress=0.0.0.0 connectport=3004 connectaddress=127.0.0.1
+   netsh interface portproxy add v4tov4 listenport=24678 listenaddress=0.0.0.0 connectport=24678 connectaddress=127.0.0.1
+   ```
+
+   **Option B: mDNS (WiFi without ADB)**
+
+   If not using ADB, set up mDNS hostname broadcast (Windows with Bonjour):
    ```cmd
    dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local YOUR_IP
    ```
    Replace `YOUR_IP` with your LAN IP (e.g., `192.168.1.50`). Keep this window open.
 
-4. **Set up port forwarding** (WSL users - run in PowerShell as Admin):
+   For WSL users, also add firewall rules (one-time, run as Admin):
    ```powershell
-   # Port forwarding
-   netsh interface portproxy add v4tov4 listenport=3004 listenaddress=0.0.0.0 connectport=3004 connectaddress=127.0.0.1
-   netsh interface portproxy add v4tov4 listenport=24678 listenaddress=0.0.0.0 connectport=24678 connectaddress=127.0.0.1
-
-   # Firewall rules
    New-NetFirewallRule -DisplayName "WSL Freegle Dev App" -Direction Inbound -LocalPort 3004 -Protocol TCP -Action Allow
    New-NetFirewallRule -DisplayName "WSL Freegle Dev HMR" -Direction Inbound -LocalPort 24678 -Protocol TCP -Action Allow
    ```
 
-5. **Connect the app**:
-   - Open Freegle Dev on your phone (must be on same WiFi network)
-   - App automatically connects to `freegle-app-dev.local:3004`
-   - If connection fails, check mDNS setup and port forwarding
+4. **Connect the app**:
+   - Open Freegle Dev on your phone
+   - App connects to `freegle-app-dev.local:3004` (works with both ADB reverse and mDNS)
+   - If connection fails, check your chosen setup method
 
-6. **Develop**:
+5. **Develop**:
    - Make code changes → app hot reloads via HMR
    - No rebuild needed for Vue/JS/CSS changes
    - Only rebuild APK when Capacitor plugins change
@@ -740,27 +755,37 @@ The "Freegle Dev" app is a separate Android app that:
 
 ### Network Requirements
 
+**With ADB Reverse (recommended):**
+- ADB connected (USB or wireless)
+- For WSL: netsh port forwarding configured
+
+**With mDNS:**
 - Phone and dev machine on same WiFi network
 - mDNS broadcast running (`dns-sd` command)
 - Port 3004 (app) and 24678 (HMR) accessible
-- For WSL: port forwarding configured
+- For WSL: port forwarding and firewall rules configured
 
 ### Troubleshooting
 
-**Cannot resolve freegle-app-dev.local:**
+**ADB reverse not working:**
+- Check ADB is connected: `adb devices`
+- Re-run `adb reverse` commands after reconnecting
+- For WSL: ensure netsh port forwarding is set up
+
+**Cannot resolve freegle-app-dev.local (mDNS):**
 - Ensure Bonjour is installed and `dns-sd` command is running
 - Check phone is on same WiFi as dev machine
-- Some corporate networks block mDNS - try a home network
+- Some corporate networks block mDNS - try ADB reverse instead
 
 **App loads but HMR not working:**
-- Check port 24678 is forwarded and accessible
+- Check port 24678 is forwarded: `adb reverse tcp:24678 tcp:24678`
 - Check firewall allows port 24678
 - Check container logs for HMR errors
 
 **Cannot connect to dev server:**
 - Ensure freegle-dev-live container is running
-- Check mDNS is broadcasting (should show in dns-sd output)
-- Try pinging `freegle-app-dev.local` from another device
+- For ADB: verify with `adb reverse --list`
+- For mDNS: check broadcast is running
 
 **Changes not appearing:**
 - Nuxt dev server should auto-reload
@@ -770,10 +795,10 @@ The "Freegle Dev" app is a separate Android app that:
 
 ---
 
+Testing the mobile app requires checking native features that cannot be tested via browser automation.
+
 <details>
 <summary><h2>Testing</h2></summary>
-
-Testing the mobile app requires checking native features that cannot be tested via browser automation.
 
 ### App-Specific Test Checklist
 
@@ -807,10 +832,10 @@ showDonationAskModal.value = true
 
 ---
 
+Some features are excluded from the mobile build to reduce app size and complexity.
+
 <details>
 <summary><h2>Removed/Disabled for Mobile</h2></summary>
-
-Some features are excluded from the mobile build to reduce app size and complexity.
 
 To reduce app size and complexity:
 
@@ -825,10 +850,10 @@ To reduce app size and complexity:
 
 ---
 
+Common issues encountered during development and their solutions.
+
 <details>
 <summary><h2>Known Issues & Workarounds</h2></summary>
-
-Common issues encountered during development and their solutions.
 
 ### npm Install Issues
 
@@ -853,10 +878,10 @@ Some packages require specific versions for compatibility. Check `package.json` 
 
 ---
 
+Production releases are fully automated with scheduled promotions to app stores.
+
 <details>
 <summary><h2>Deployment</h2></summary>
-
-Production releases are fully automated with scheduled promotions to app stores.
 
 ### Fully Automated Dual-Platform Deployment
 
@@ -1028,10 +1053,10 @@ bundle exec fastlane ios auto_submit
 
 ---
 
+Guidelines for keeping the mobile app codebase up to date.
+
 <details>
 <summary><h2>Maintenance</h2></summary>
-
-Guidelines for keeping the mobile app codebase up to date.
 
 ### Development Workflow
 
@@ -1060,10 +1085,10 @@ When updating Capacitor major versions:
 
 ---
 
+Useful links for mobile app development.
+
 <details>
 <summary><h2>Resources</h2></summary>
-
-Useful links for mobile app development.
 
 - **Capacitor Docs**: https://capacitorjs.com/docs
 - **App Release Plan**: `/plans/app-releases.md`
@@ -1075,10 +1100,10 @@ Useful links for mobile app development.
 
 ---
 
+Steps for debugging mobile app issues.
+
 <details>
 <summary><h2>Support</h2></summary>
-
-Steps for debugging mobile app issues.
 
 For mobile app specific issues:
 

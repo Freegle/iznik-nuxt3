@@ -125,7 +125,6 @@ import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import ChatButton from '~/components/ChatButton'
-import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
 import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
 import DeletedRestore from '~/components/DeletedRestore.vue'
@@ -170,7 +169,8 @@ const allowAd = computed(() => {
   // We don't want to show the ad on the landing page when logged out - looks tacky.
   return routePath.value !== '/' || loggedIn.value
 })
-const marginTop = computed(() => (navBarHidden.value ? '0px' : '60px'))
+// Keep constant margin - navbar is fixed position so content shouldn't shift when it hides/shows
+const marginTop = computed(() => '60px')
 
 // Methods
 function updateTime() {

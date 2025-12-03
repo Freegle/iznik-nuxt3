@@ -25,8 +25,10 @@ test.describe('Explore Page Tests', () => {
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Look for the join button - it should be a .btn element
+    // Use filter({ visible: true }) to avoid hidden mobile variant
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
 
     // Wait for the join button to be visible
@@ -39,7 +41,11 @@ test.describe('Explore Page Tests', () => {
     await joinButton.click()
 
     // Wait for the Leave button to appear, indicating successful join
-    const leaveButton = page.locator('.btn:has-text("Leave")').first()
+    // Use filter({ visible: true }) to avoid hidden mobile variant
+    const leaveButton = page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
 
     // Wait for the Leave button to be visible as confirmation of successful join
     await leaveButton.waitFor({
@@ -53,6 +59,7 @@ test.describe('Explore Page Tests', () => {
     // Wait for the Join button to reappear, indicating successful leave
     const joinButtonAfterLeave = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
 
     // Wait for the Join button to be visible again as confirmation of successful leave

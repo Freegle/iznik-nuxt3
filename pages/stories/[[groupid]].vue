@@ -1,51 +1,57 @@
 <template>
   <client-only>
-    <div>
+    <div class="stories-page">
       <b-row class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-          <div class="bg-white p-4">
-            <h1>
-              Stories from Freeglers<span v-if="groupname">
-                on {{ groupname }}</span
-              >
-            </h1>
-            <p>
+          <div class="page-header">
+            <p class="page-description">
               We love to hear why you freegle and what your experiences have
-              been - and it helps show new freeglers what it's all about.
+              been - and it helps show new freeglers what it's all about. So
+              please tell us your story!
             </p>
-            <p>So please tell us your story!</p>
-            <b-row>
-              <b-col>
-                <GroupSelect
-                  v-if="loggedIn"
-                  v-model="groupid"
-                  all
-                  :restrict="false"
-                  @update:model-value="changeGroup"
-                />
-              </b-col>
-              <b-col>
-                <b-button variant="primary" @click="showAddModal">
-                  <v-icon icon="book-open" /> Tell us your story!
-                </b-button>
-              </b-col>
-            </b-row>
+            <div class="filter-actions">
+              <GroupSelect
+                v-if="loggedIn"
+                v-model="groupid"
+                all
+                :restrict="false"
+                class="group-filter"
+                @update:model-value="changeGroup"
+              />
+              <b-button
+                variant="primary"
+                size="sm"
+                class="add-btn"
+                @click="showAddModal"
+              >
+                <v-icon icon="book-open" /> Tell us your story!
+              </b-button>
+            </div>
           </div>
-          <div
-            v-for="story in storiesToShow"
-            :key="'story-' + story"
-            class="mt-2"
-          >
-            <StoryOne :id="story" :group-id="groupid" />
+          <h2 class="visually-hidden">List of stories</h2>
+          <div v-if="stories?.length" class="stories-list">
+            <div
+              v-for="story in storiesToShow"
+              :key="'story-' + story"
+              class="story-item"
+            >
+              <StoryOne :id="story" :group-id="groupid" />
+            </div>
+            <infinite-loading
+              :key="'infinite-' + groupid"
+              force-use-infinite-wrapper="body"
+              :distance="1000"
+              @infinite="loadMore"
+            />
           </div>
-          <infinite-loading
-            :key="'infinite-' + groupid"
-            force-use-infinite-wrapper="body"
-            :distance="1000"
-            @infinite="loadMore"
-          />
+          <div v-else class="empty-state">
+            <v-icon icon="book-open" class="empty-icon" />
+            <p>No stories yet.</p>
+            <b-button variant="primary" size="sm" @click="showAddModal">
+              <v-icon icon="book-open" /> Be the first to share your story!
+            </b-button>
+          </div>
         </b-col>
-        <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
       <StoryAddModal
         v-if="showStoryAddModal"
@@ -58,9 +64,10 @@
 import { useStoryStore } from '~/stores/stories'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
+import { useAuthStore } from '~/stores/auth'
 import GroupSelect from '~/components/GroupSelect'
 import StoryOne from '~/components/StoryOne'
-import { useRoute } from '#imports'
+import { useRoute, computed } from '#imports'
 
 const StoryAddModal = defineAsyncComponent(() =>
   import('~/components/StoryAddModal')
@@ -72,6 +79,9 @@ const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const storyStore = useStoryStore()
 const groupStore = useGroupStore()
+const authStore = useAuthStore()
+
+const loggedIn = computed(() => authStore.user !== null)
 
 const groupid = ref(parseInt(route.params.groupid) || 0)
 const limit = parseInt(route.query.limit) || LIMIT
@@ -142,3 +152,67 @@ const changeGroup = function (newval) {
   router.push(newval ? '/stories/' + newval : '/stories')
 }
 </script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.stories-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.page-header {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.page-description {
+  font-size: 0.9rem;
+  color: $color-gray--dark;
+  margin: 0 0 0.75rem 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .group-filter {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+  }
+}
+
+.stories-list {
+  padding: 0 0.5rem;
+}
+
+.story-item {
+  margin-bottom: 0.75rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  margin: 0.5rem;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+}
+</style>

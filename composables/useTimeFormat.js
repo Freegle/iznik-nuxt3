@@ -80,6 +80,31 @@ export function timeago(val, past) {
   return f
 }
 
+export function timeagoShort(val) {
+  // Compact time format: "25d", "3h", "5m", "now"
+  const now = dayjs()
+  const then = dayjs(val)
+  const diffMinutes = now.diff(then, 'minute')
+  const diffHours = now.diff(then, 'hour')
+  const diffDays = now.diff(then, 'day')
+  const diffWeeks = now.diff(then, 'week')
+  const diffMonths = now.diff(then, 'month')
+
+  if (diffMinutes < 1) {
+    return 'now'
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes}m`
+  } else if (diffHours < 24) {
+    return `${diffHours}h`
+  } else if (diffDays < 7) {
+    return `${diffDays}d`
+  } else if (diffWeeks < 5) {
+    return `${diffWeeks}w`
+  } else {
+    return `${diffMonths}mo`
+  }
+}
+
 export function timeadapt(val) {
   const t = dayjs(val)
 
@@ -88,6 +113,24 @@ export function timeadapt(val) {
     return t.format('HH:mm')
   } else {
     return t.format('DD MMM YYYY HH:mm')
+  }
+}
+
+export function timeadaptChat(val) {
+  // Compact chat timestamp: time only for today, day+time for this week, date+time otherwise
+  const t = dayjs(val)
+  const now = dayjs()
+
+  if (t.isToday()) {
+    return t.format('HH:mm')
+  } else if (now.diff(t, 'day') < 7) {
+    // Within last week, show day and time
+    return t.format('ddd HH:mm')
+  } else if (t.year() === now.year()) {
+    // This year, no need to show year
+    return t.format('D MMM HH:mm')
+  } else {
+    return t.format('D MMM YYYY HH:mm')
   }
 }
 
@@ -113,6 +156,10 @@ export function dateshort(val) {
 
 export function dateonlyNoYear(val) {
   return dayjs(val).format('Do MMMM')
+}
+
+export function dateshortNoYear(val) {
+  return dayjs(val).format('D MMM')
 }
 
 export function weekdayshort(val) {

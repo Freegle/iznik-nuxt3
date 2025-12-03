@@ -63,6 +63,15 @@ export const useComposeStore = defineStore({
       this.max = steps + 2
     },
     async createDraft(message, email) {
+      if (!this.$api) {
+        throw new Error('Compose store not initialized - $api is not available')
+      }
+      if (!this.postcode?.id) {
+        throw new Error(
+          'No postcode set - please go back and enter your postcode'
+        )
+      }
+
       const attids = []
 
       // Extract the server attachment id from message.attachments.

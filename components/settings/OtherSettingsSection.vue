@@ -1,80 +1,62 @@
 <template>
-  <b-card
-    border-variant="info"
-    header-bg-variant="info"
-    header-text-variant="white"
-    class="mt-2"
-  >
-    <template #header>
-      <h2 class="bg-info header--size5 mb-0">
-        <v-icon icon="cog" />
-        Other
-      </h2>
-    </template>
-    <b-card-body class="p-0 pt-1">
-      <b-form-group>
-        <h3 class="header--size5 header5__color">What the enter key does</h3>
-        <p>
-          Normally hitting enter/return sends chat messages, rather than add a
-          new line.
-        </p>
-        <p v-if="enterNewLineLocal">
-          You have this set to add a new line. This can cause problems on some
-          devices, so if you have problems with this setting, then please change
-          it back.
-        </p>
+  <div class="settings-section">
+    <div class="section-header">
+      <v-icon icon="cog" class="section-icon" />
+      <h2>Other Settings</h2>
+    </div>
+
+    <div class="section-content">
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-label">Enter key in chat</span>
+          <span class="option-desc">Send message or add new line</span>
+        </div>
         <OurToggle
           v-model="enterNewLineLocal"
-          class="mt-2"
-          :width="150"
+          :width="130"
           :sync="true"
-          :labels="{
-            checked: 'Inserts new line',
-            unchecked: 'Sends message',
-          }"
+          :labels="{ checked: 'New line', unchecked: 'Send' }"
           color="#61AE24"
           @change="changeNewLine"
         />
-      </b-form-group>
-      <b-form-group>
-        <h3 class="header--size5 header5__color mt-2">Auto-reposts</h3>
-        <p>
-          In most Freegle communities, your OFFER/WANTED posts will be
-          automatically reposted (or "bumped") unless you've marked them as
-          TAKEN/RECEIVED/Withdrawn from
-          <!-- eslint-disable-next-line-->
-            <nuxt-link  no-prefetch to="/myposts">My Posts</nuxt-link>.
-        </p>
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-label">Auto-repost</span>
+          <span class="option-desc">
+            Bump posts until marked as done in
+            <nuxt-link no-prefetch to="/myposts">My Posts</nuxt-link>
+          </span>
+        </div>
         <OurToggle
           v-model="autorepostsLocal"
-          :width="150"
+          :width="100"
           :sync="true"
-          :labels="{
-            checked: 'Autoreposting is On',
-            unchecked: 'Autoreposting is Off',
-          }"
+          :labels="{ checked: 'On', unchecked: 'Off' }"
           color="#61AE24"
           @change="changeAutorepost"
         />
-      </b-form-group>
-      <b-form-group>
-        <h3 class="header--size5 header5__color mt-2">Keeping in touch</h3>
-        <p>
-          We'll also keep in touch by email about what's happening in Freegle
-          and other ways you can support Freegle in future.
-        </p>
+      </div>
+
+      <div class="option-row">
+        <div class="option-info">
+          <span class="option-label">Freegle updates</span>
+          <span class="option-desc">News and ways to support Freegle</span>
+        </div>
         <OurToggle
           v-model="marketingConsentLocal"
-          :width="150"
+          :width="100"
           :sync="true"
-          :labels="{ checked: 'Sending', unchecked: 'Not sending' }"
+          :labels="{ checked: 'On', unchecked: 'Off' }"
           color="#61AE24"
           @change="changeMarketingConsent"
         />
-      </b-form-group>
-    </b-card-body>
-  </b-card>
+      </div>
+    </div>
+  </div>
 </template>
+
 <script setup>
 import { ref, defineEmits, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
@@ -98,10 +80,7 @@ const marketingConsentLocal = ref(true)
 const changeNewLine = async (e) => {
   const settings = me.value.settings
   settings.enterNewLine = e
-  await authStore.saveAndGet({
-    settings,
-  })
-
+  await authStore.saveAndGet({ settings })
   enterNewLineLocal.value = e
   emit('update')
 }
@@ -109,10 +88,7 @@ const changeNewLine = async (e) => {
 const changeAutorepost = async (e) => {
   const settings = me.value.settings
   settings.autorepostsdisable = !e
-  await authStore.saveAndGet({
-    settings,
-  })
-
+  await authStore.saveAndGet({ settings })
   emit('update')
 }
 
@@ -135,8 +111,73 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.header5__color {
-  /* Need to override the h5 as it has higher specificity */
-  color: #212529 !important;
+@import 'assets/css/_color-vars.scss';
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $color-green-background;
+  }
+
+  .section-icon {
+    color: $color-green-background;
+  }
+}
+
+.section-content {
+  padding: 1rem 1.25rem;
+}
+
+.option-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.option-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.option-desc {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+
+  a {
+    color: $color-blue--bright;
+  }
 }
 </style>

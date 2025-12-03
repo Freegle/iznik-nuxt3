@@ -1,7 +1,7 @@
 <template>
-  <client-only>
-    <div class="d-flex justify-content-center">
-      <div class="privacy__container px-3 bg-white">
+  <div class="privacy-page">
+    <div class="privacy-page__content">
+      <client-only>
         <h2>1. What data we process</h2>
         <p>
           We process your email address, name, approximate location, and profile
@@ -214,9 +214,9 @@
           <li>31/12/2019: Explain why we don't have or need a cookie popup.</li>
           <li>29/12/2019: Add use of Sentry.</li>
         </ul>
-      </div>
+      </client-only>
     </div>
-  </client-only>
+  </div>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
@@ -240,12 +240,62 @@ useHead(
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-.privacy__container {
-  width: 100%;
+.privacy-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding: 1rem;
 
   @include media-breakpoint-up(md) {
-    width: 50%;
+    padding: 1.5rem;
+  }
+}
+
+.privacy-page__content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-green--darker;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $gray-700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: $gray-700;
+    margin-bottom: 0.75rem;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+
+    li {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: $gray-700;
+      margin-bottom: 0.5rem;
+    }
   }
 }
 </style>

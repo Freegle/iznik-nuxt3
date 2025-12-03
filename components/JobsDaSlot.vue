@@ -1,78 +1,34 @@
 <template>
   <div
-    v-if="location"
-    class="jobbox bg-light overflow-hidden forcewrap"
+    v-if="location && list.length"
+    class="jobs-slot"
     :style="{
       maxHeight: maxHeight,
       minHeight: minHeight,
       maxWidth: maxWidth,
       minWidth: minWidth,
-      overflowY: 'scroll',
-      overflowX: 'wrap',
     }"
   >
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
-      <h2 class="header--size3 d-none d-md-block">
-        Please help keep Freegle running
-      </h2>
-      <p class="d-none d-md-block">
-        We normally show job ads here. It looks like you may have an AdBlocker
-        or security software which is blocking those. We're not mad on ads
-        either, but please consider donating to help us keep going:
-      </p>
-      <p class="d-block d-md-none">
-        It looks like you're blocking job ads. Please consider donating:
-      </p>
+      <p>It looks like you're blocking job ads. Please consider donating:</p>
       <donation-button />
     </NoticeMessage>
-    <div v-else-if="list.length" style="font-size: 10px">
-      <h2 class="visually-hidden">Jobs</h2>
-      <b-button
-        v-if="minWidth === '100vw'"
-        to="/jobs"
-        variant="link"
-        class="seemore p-0"
-      >
-        See more jobs <v-icon icon="angle-double-right" />
-      </b-button>
-      <div
-        :class="{
-          'card-columns': minWidth === '100vw',
-        }"
-        :style="{
-          maxHeight: maxHeight,
-          minHeight: minHeight,
-          maxWidth: maxWidth,
-          minWidth: minWidth,
-        }"
-      >
-        <b-card
-          v-for="job in list"
-          :key="'job-' + job.job_reference"
-          no-body
-          class="mb-0"
-          :class="{
-            'w-100': minWidth !== '100vw',
-          }"
-        >
-          <b-card-body class="p-0">
-            <JobOne
-              :id="job.id"
-              :summary="true"
-              :show-body="false"
-              class-name="header--size5 mb-0"
-            />
-          </b-card-body>
-        </b-card>
+    <div v-else>
+      <div class="jobs-slot-header">
+        <v-icon icon="briefcase" class="jobs-slot-icon" />
+        <span>Jobs near you</span>
+        <nuxt-link to="/jobs" class="jobs-slot-more">
+          See all <v-icon icon="chevron-right" />
+        </nuxt-link>
       </div>
-      <b-button
-        v-if="minWidth !== '100vw'"
-        to="/jobs"
-        variant="link"
-        class="seemore p-0"
-      >
-        See more jobs <v-icon icon="angle-double-right" />
-      </b-button>
+      <div class="jobs-slot-list">
+        <JobOne
+          v-for="job in list"
+          :id="job.id"
+          :key="'job-' + job.job_reference"
+          :summary="true"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -165,25 +121,66 @@ const list = computed(() => {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins/_breakpoints';
 
-:deep(a) {
-  text-decoration: none;
+.jobs-slot {
+  background: $white;
+  border: 1px solid $gray-200;
+  overflow-y: auto;
 }
 
-:deep(.seemore) {
-  font-size: 0.6rem !important;
+.jobs-slot-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  color: $white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
 
-  @include media-breakpoint-up(md) {
-    font-size: 0.8rem !important;
+.jobs-slot-icon {
+  font-size: 0.9rem;
+}
+
+.jobs-slot-more {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  color: $white;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+    text-decoration: none;
+    color: $white;
   }
 }
 
-:deep(.header--size5) {
-  font-size: 0.8rem;
+.jobs-slot-list {
+  :deep(.job-item) {
+    margin-bottom: 0;
+  }
 
-  @include media-breakpoint-up(md) {
-    font-size: 1.25rem;
+  :deep(.job-summary) {
+    padding: 0.5rem 0.6rem;
+  }
+
+  :deep(.job-icon) {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  :deep(.job-title) {
+    font-size: 0.85rem;
+  }
+
+  :deep(.job-location) {
+    font-size: 0.7rem;
   }
 }
 </style>

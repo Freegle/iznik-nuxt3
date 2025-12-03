@@ -5,8 +5,20 @@
       @hidden="showContactDetailsAskModal = false"
     />
     <VisibleWhen :at="['xs', 'sm']">
-      <Teleport v-if="loggedIn && id && chat" to="#navbar-mobile">
-        <ChatMobileNavbar :id="id" />
+      <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+        <ChatMobileNavbar v-if="chat" :id="id" />
+        <div v-else class="ourBack layout fixed-top pt-1 pb-1">
+          <div class="backbutton nav-back-btn">
+            <v-icon icon="arrow-left" class="back-icon" />
+          </div>
+          <div
+            class="name d-flex flex-column justify-content-around text-center"
+          >
+            <h1 class="text-white truncate text-center header--size5 m-0">
+              Loading...
+            </h1>
+          </div>
+        </div>
       </Teleport>
     </VisibleWhen>
     <div>
@@ -36,33 +48,26 @@
                     <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
                   </div>
                 </div>
-                <div v-else class="mt-3"></div>
-                <div
-                  class="d-flex justify-content-between flex-wrap mb-2 border-bottom"
-                >
-                  <form
-                    role="search"
-                    class="mb-1 mr-1 ml-1 ml-md-0"
-                    @submit.prevent
-                  >
+                <div v-else class="mt-2"></div>
+                <div class="chat-toolbar">
+                  <form role="search" class="search-form" @submit.prevent>
                     <label for="search-bar" class="visually-hidden"
                       >Search chats</label
                     >
-                    <b-form-input
-                      id="search-bar"
-                      v-model="search"
-                      placeholder="Search chats"
-                      class="flex-shrink-1"
-                    />
+                    <div class="search-wrapper">
+                      <v-icon icon="search" class="search-icon" />
+                      <b-form-input
+                        id="search-bar"
+                        v-model="search"
+                        placeholder="Search chats"
+                        class="search-input"
+                      />
+                    </div>
                   </form>
-                  <b-button
-                    variant="primary"
-                    class="mb-1 ml-1 ml-md-0"
-                    @click="markAllRead"
-                  >
-                    <v-icon icon="check" />
-                    Mark all read
-                  </b-button>
+                  <button class="mark-read-btn" @click="markAllRead">
+                    <v-icon icon="check-double" />
+                    <span class="d-none d-sm-inline">Mark all read</span>
+                  </button>
                 </div>
                 <p
                   v-if="!visibleChats?.length && !closedChats?.length"
@@ -546,34 +551,104 @@ async function searchMore() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/sidebar-ads.scss';
+@import 'assets/css/navbar.scss';
 
 .chatback {
   background-color: $color-yellow--light;
 }
 
 .active {
-  background-color: $color-gray-4 !important;
+  background-color: rgba($color-green-background, 0.08) !important;
 }
 
 .chat:hover {
-  background-color: $color-gray--lighter;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+// Modern chat toolbar
+.chat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.search-form {
+  flex: 1;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #999;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 32px !important;
+  border-radius: 20px !important;
+  border: 1px solid #e0e0e0 !important;
+  background: white !important;
+  font-size: 0.9rem !important;
+  height: 36px !important;
+
+  &:focus {
+    border-color: $color-green-background !important;
+    box-shadow: 0 0 0 2px rgba($color-green-background, 0.1) !important;
+  }
+}
+
+.mark-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: $color-green-background;
+    border-color: $color-green-background;
+    color: white;
+  }
 }
 
 .chatlist {
   // On mobile we substitute a different height navbar on this page.
-  height: calc(100vh - 58px);
+  height: calc(100vh - $navbar-mobile-chat-height);
 
   @include media-breakpoint-up(md) {
     height: calc(100vh - var(--header-navbar-height));
   }
 
   &.stickyAdRendered {
-    height: calc(100vh - 58px - $sticky-banner-height-mobile);
+    height: calc(
+      100vh - $navbar-mobile-chat-height - $sticky-banner-height-mobile
+    );
 
     @media (min-height: $mobile-tall) {
-      height: calc(100vh - 58px - $sticky-banner-height-mobile-tall);
+      height: calc(
+        100vh - $navbar-mobile-chat-height - $sticky-banner-height-mobile-tall
+      );
     }
 
     @include media-breakpoint-up(md) {
@@ -591,17 +666,22 @@ async function searchMore() {
   }
 
   @supports (height: 100dvh) {
-    height: calc(100dvh - 58px);
+    height: calc(100dvh - $navbar-mobile-chat-height);
 
     @include media-breakpoint-up(md) {
       height: calc(100dvh - var(--header-navbar-height));
     }
 
     &.stickyAdRendered {
-      height: calc(100dvh - 58px - $sticky-banner-height-mobile);
+      height: calc(
+        100dvh - $navbar-mobile-chat-height - $sticky-banner-height-mobile
+      );
 
       @media (min-height: $mobile-tall) {
-        height: calc(100dvh - 58px - $sticky-banner-height-mobile-tall);
+        height: calc(
+          100dvh - $navbar-mobile-chat-height -
+            $sticky-banner-height-mobile-tall
+        );
       }
 
       @include media-breakpoint-up(md) {
@@ -639,5 +719,38 @@ async function searchMore() {
 
 .closedCount {
   border-radius: 50%;
+}
+
+// Loading navbar (before chat data loads) - must match ChatMobileNavbar exactly
+// Total height should match $navbar-mobile-chat-height
+.layout {
+  display: grid;
+  grid-template-columns: 0.25em 40px 1fr 48px 0.25em;
+  grid-column-gap: 0.25em;
+  align-items: center;
+  min-height: 56px;
+
+  .backbutton {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+  }
+
+  .name {
+    grid-row: 1 / 2;
+    grid-column: 3 / 4;
+  }
+}
+
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.back-icon {
+  color: white;
+  font-size: 1.25rem;
 }
 </style>

@@ -14,8 +14,16 @@
             and is only visible to volunteers and the person who posted it.
           </div>
           <div v-if="isNewsComponent">
-            <b-dropdown lazy class="float-end" right variant="white">
-              <template #button-content />
+            <b-dropdown
+              lazy
+              class="float-end thread-menu"
+              right
+              variant="link"
+              no-caret
+            >
+              <template #button-content>
+                <v-icon icon="ellipsis-h" class="text-muted" />
+              </template>
               <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
                 target="_blank"
@@ -182,7 +190,7 @@
                   max-rows="8"
                   maxlength="2048"
                   spellcheck="true"
-                  placeholder="Write a comment on this thread and hit enter to post..."
+                  :placeholder="commentPlaceholder"
                   class="p-0 pl-2 pt-2 entersend"
                   autocapitalize="none"
                   @keydown.enter.shift.exact.prevent="newlineComment"
@@ -192,23 +200,20 @@
               </b-input-group>
             </OurAtTa>
           </div>
-          <div
-            v-if="threadcomment"
-            class="d-flex justify-content-between flex-wrap m-1 mt-2"
-          >
-            <b-button variant="secondary" @click="photoAdd">
-              <v-icon icon="camera" /><span class="d-none d-sm-inline"
-                >&nbsp;Add Photo</span
-              >
-            </b-button>
-            <SpinButton
+          <div v-if="threadcomment" class="comment-toolbar">
+            <button class="toolbar-btn" title="Add photo" @click="photoAdd">
+              <v-icon icon="camera" />
+              <span class="toolbar-label">Photo</span>
+            </button>
+            <button
               v-if="enterNewLine"
-              variant="primary"
-              icon-name="angle-double-right"
-              label="Post"
-              iconlast
-              @handle="sendComment"
-            />
+              class="toolbar-btn send-btn"
+              :disabled="!threadcomment?.trim()"
+              @click="sendComment"
+            >
+              <v-icon icon="paper-plane" />
+              <span class="toolbar-label">Send</span>
+            </button>
           </div>
           <OurUploadedImage
             v-if="ouruid"
@@ -267,12 +272,13 @@ import {
   onMounted,
   nextTick,
 } from 'vue'
-import SpinButton from './SpinButton'
 import AutoHeightTextarea from './AutoHeightTextarea'
 import { useNewsfeedStore } from '~/stores/newsfeed'
+import { useMiscStore } from '~/stores/misc'
 import NewsReplies from '~/components/NewsReplies'
 import { untwem } from '~/composables/useTwem'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 // Use standard import to avoid screen-flicker
 import NewsRefer from '~/components/NewsRefer'
@@ -317,6 +323,16 @@ const newsfeedStore = useNewsfeedStore()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const miscStore = useMiscStore()
+const { chitChatMod, supportOrAdmin } = useMe()
+
+const isMobile = computed(() => {
+  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+})
+
+const commentPlaceholder = computed(() => {
+  return isMobile.value ? 'Comment...' : 'Write a comment...'
+})
 const me = computed(() => authStore.user)
 const myid = computed(() => me.value?.id)
 
@@ -396,17 +412,6 @@ const mod = computed(() => {
     (me.value.systemrole === 'Moderator' ||
       me.value.systemrole === 'Admin' ||
       me.value.systemrole === 'Support')
-  )
-})
-
-const chitChatMod = computed(() => {
-  return mod.value
-})
-
-const supportOrAdmin = computed(() => {
-  return (
-    me.value &&
-    (me.value.systemrole === 'Support' || me.value.systemrole === 'Admin')
   )
 })
 
@@ -645,5 +650,50 @@ async function unmute() {
 
 :deep(.strike) {
   text-decoration: line-through;
+}
+
+.comment-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  background: $color-gray--lighter;
+  border: none;
+  border-radius: 4px;
+  color: $color-gray--darker;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: darken($color-gray--lighter, 5%);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.send-btn {
+  background: $colour-success;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: darken($colour-success, 8%);
+  }
+}
+
+.toolbar-label {
+  @include media-breakpoint-down(sm) {
+    display: none;
+  }
 }
 </style>

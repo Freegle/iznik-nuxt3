@@ -10,6 +10,7 @@
     <ProfileImage
       v-if="!messageIsFromCurrentUser"
       :image="chatMessageProfileImage"
+      :name="chatMessageProfileName"
       is-thumbnail
       size="sm"
       class="mr-1 mb-1 mt-1 inline"
@@ -47,6 +48,7 @@
     <ProfileImage
       v-if="messageIsFromCurrentUser"
       :image="chatMessageProfileImage"
+      :name="chatMessageProfileName"
       is-thumbnail
       size="sm"
       class="ml-1 mb-1 mt-1 inline"
@@ -127,8 +129,12 @@ defineEmits(['delete'])
 const zoom = ref(false)
 
 // Use the chat base composable
-const { chatmessage, messageIsFromCurrentUser, chatMessageProfileImage } =
-  useChatMessageBase(props.chatid, props.id, props.pov)
+const {
+  chatmessage,
+  messageIsFromCurrentUser,
+  chatMessageProfileImage,
+  chatMessageProfileName,
+} = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Methods
 function imageError(event) {

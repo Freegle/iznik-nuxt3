@@ -2,17 +2,12 @@
   <client-only>
     <div class="about__wrapper">
       <div class="about">
-        <h1 class="text-center">About Us</h1>
-        <p class="text-center font-weight-bold">
-          Please click on a section to find out more.
-        </p>
         <div role="tablist">
           <b-card no-body class="mb-1">
             <b-card-header header-tag="header" class="p-1" role="tab">
               <b-button
                 v-b-toggle.accordion-what
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -47,7 +42,6 @@
               <b-button
                 v-b-toggle.accordion-how
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -85,7 +79,6 @@
               <b-button
                 v-b-toggle.accordion-who
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -174,9 +167,9 @@
                   </p>
                   <p>
                     If you'd like to get involved,
-                    <nuxt-link no-prefetch to="/help">
-                      contact your local community.
-                    </nuxt-link>
+                    <nuxt-link no-prefetch to="/help"
+                      >contact your local community</nuxt-link
+                    >.
                   </p>
                 </b-card-text>
               </b-card-body>
@@ -187,7 +180,6 @@
               <b-button
                 v-b-toggle.accordion-funding
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -229,7 +221,7 @@
                     charity funding. It usually goes to bigger charities than us
                     doing more important work, so we currently rely on voluntary
                     donations to cover our costs. You can donate
-                    <nuxt-link no-prefetch to="/donate"> here. </nuxt-link>
+                    <nuxt-link no-prefetch to="/donate">here</nuxt-link>.
                   </p>
                   <p>
                     Many current donations come from our volunteers, who are
@@ -252,7 +244,6 @@
               <b-button
                 v-b-toggle.accordion-legal
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -332,7 +323,6 @@
               <b-button
                 v-b-toggle.accordion-questions
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -348,7 +338,7 @@
                 <b-card-text>
                   <p>
                     If you have questions, please
-                    <nuxt-link no-prefetch to="/help"> contact us. </nuxt-link>
+                    <nuxt-link no-prefetch to="/help">contact us</nuxt-link>.
                   </p>
                 </b-card-text>
               </b-card-body>
@@ -389,20 +379,110 @@ const board = computed(() => teamStore.getTeam('Board')?.members)
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .about__wrapper {
   display: flex;
   justify-content: center;
+  background: $gray-100;
+  min-height: 100vh;
 }
 
 .about {
   width: 100%;
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-bottom: 20px;
+  max-width: 800px;
+  padding: 1rem;
 
   @include media-breakpoint-up(md) {
-    width: 50%;
+    padding: 1.5rem;
+  }
+}
+
+:deep(.card) {
+  border: none;
+  background: $white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.5rem;
+
+  .card-header {
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: $gray-800;
+    background: $white;
+    border: none;
+    text-align: left;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: $gray-100;
+      color: $gray-900;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    &::after {
+      content: '+';
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: $gray-500;
+    }
+
+    &:not(.collapsed)::after {
+      content: '−';
+    }
+  }
+
+  .card-body {
+    padding: 0 1.25rem 1.25rem;
+    border-top: 1px solid $gray-200;
+
+    p {
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      color: $gray-700;
+      margin-bottom: 0.75rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul,
+    ol {
+      padding-left: 1.25rem;
+      margin-bottom: 0.75rem;
+
+      li {
+        font-size: 0.9375rem;
+        line-height: 1.7;
+        color: $gray-700;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $gray-800;
+      margin: 1.25rem 0 0.75rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
   }
 }
 </style>

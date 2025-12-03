@@ -528,7 +528,49 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   destroyed.value = true
+  if (markerFixInterval.value) {
+    clearInterval(markerFixInterval.value)
+  }
 })
+
+const markerFixInterval = ref(null)
+
+function fixDefaultMarkers() {
+  if (!mapcont.value) return
+
+  // Find any default Leaflet marker icons and replace with our custom icon
+  const defaultMarkers = mapcont.value.querySelectorAll(
+    'img[src*="marker-icon"]'
+  )
+
+  defaultMarkers.forEach((img) => {
+    img.src = '/mapmarker.gif'
+    img.style.width = '15px'
+    img.style.height = '19px'
+    img.style.marginLeft = '-7px'
+    img.style.marginTop = '-19px'
+  })
+
+  // Stop checking once no default markers found for a while
+  if (defaultMarkers.length === 0) {
+    markerFixCount.value++
+    if (markerFixCount.value > 10) {
+      clearInterval(markerFixInterval.value)
+      markerFixInterval.value = null
+    }
+  } else {
+    markerFixCount.value = 0
+  }
+}
+
+const markerFixCount = ref(0)
+
+function startMarkerFix() {
+  if (!markerFixInterval.value) {
+    markerFixCount.value = 0
+    markerFixInterval.value = setInterval(fixDefaultMarkers, 500)
+  }
+}
 
 // Methods
 async function ready() {
@@ -538,6 +580,10 @@ async function ready() {
   if (process.client && mapObject.value) {
     try {
       mapObject.value.fitBounds(props.initialBounds)
+
+      // Start checking for and fixing default markers
+      startMarkerFix()
+
       const runtimeConfig = useRuntimeConfig()
 
       const { Geocoder } = await import('leaflet-control-geocoder/src/control')
@@ -920,6 +966,11 @@ function dragEnd(e) {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+
+/* Hide default Leaflet markers until our fix replaces them */
+:deep(img[src*='marker-icon']) {
+  display: none !important;
+}
 
 .mapbox {
   width: 100%;

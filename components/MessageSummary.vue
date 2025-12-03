@@ -34,7 +34,7 @@
       <div
         class="mb-1 header-description"
         :class="{
-          noAttachments: !message?.attachments?.length,
+          noAttachments: !message?.attachments?.length && !message?.sampleimage,
         }"
       >
         <MessageDescription
@@ -60,6 +60,7 @@
         <MessageAttachments
           :id="id"
           :attachments="message.attachments"
+          :sample-image="message.sampleimage"
           :disabled="message.successful"
           thumbnail
           :preload="preload"
@@ -150,7 +151,8 @@ const classes = computed(() => {
       props.replyable &&
       !message.value?.promisedtome &&
       !message.value?.successful,
-    noAttachments: !message.value?.attachments?.length,
+    noAttachments:
+      !message.value?.attachments?.length && !message.value?.sampleimage,
   }
 
   if (props.bgClass) {

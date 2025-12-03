@@ -76,6 +76,17 @@ export const useIsochroneStore = defineStore({
       this.fetchMessages(true)
       await this.fetch(true)
     },
+    markSeen(ids) {
+      if (this.messageList?.length) {
+        const idSet = new Set(ids)
+        this.messageList = this.messageList.map((m) => {
+          if (idSet.has(m.id)) {
+            return { ...m, unseen: false }
+          }
+          return m
+        })
+      }
+    },
     computeBounds() {
       // We have a problem with getting the bounds using leaflet - it looks like a timing error.  So do it ourselves.
       const isochrones = this.list

@@ -5,6 +5,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMobileStore } from '@/stores/mobile'
 
 export default {
   data: function () {
@@ -84,6 +85,12 @@ export default {
         const totalCount = work?.total + this.chatcount
         const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
         document.title = title
+
+        // Sync phone badge with total work count
+        const mobileStore = useMobileStore()
+        if (mobileStore.isApp) {
+          mobileStore.setBadgeCount(totalCount)
+        }
       }
       miscStore.deferGetMessages = false
       miscStore.workTimer = setTimeout(this.checkWork, 30000)

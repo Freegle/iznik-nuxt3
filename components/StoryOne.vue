@@ -1,92 +1,84 @@
 <template>
-  <div>
-    <b-card no-body>
-      <b-card-header bg-variant="primary" text-variant="white">
-        <div v-if="story" class="d-flex justify-content-between">
-          <div>&quot;{{ story.headline }}&quot;</div>
-          <div>
-            <span v-if="story.likes">
-              <v-icon icon="heart" class="fa-fw mr-2" /> {{ story.likes }}
-            </span>
-            <b-button
-              v-if="loggedIn && !story.liked"
-              variant="secondary"
-              class="mr-2"
-              @click="love"
-            >
-              <v-icon icon="heart" class="fa-fw" /><span
-                class="d-none d-sm-inline"
-                >&nbsp;Love this</span
-              >
-            </b-button>
-            <b-button
-              v-if="loggedIn && story.liked"
-              variant="secondary"
-              class="mr-2"
-              @click="unlove"
-            >
-              <v-icon icon="heart" class="text-danger fa-fw" /><span
-                class="d-none d-sm-inline"
-                >&nbsp;Unlove this</span
-              >
-            </b-button>
-            <b-button variant="secondary" class="mr-2" @click="share(story)">
-              <v-icon icon="share-alt" class="fa-fw" />
-            </b-button>
-          </div>
-        </div>
-      </b-card-header>
-      <b-card-body>
-        <b-card-text class="pl-4 pr-4">
-          <div v-if="story">
-            <div v-if="story.story" class="preline">
-              <div v-if="story.image">
-                <b-img
-                  lazy
-                  :src="story.image.path"
-                  class="storyphoto clickme"
-                  thumbnail
-                  @click="showPhotoModal = true"
-                />
-                <br />
-              </div>
-              <read-more
-                v-if="story.story"
-                :text="story.story"
-                :max-chars="300"
-              />
-            </div>
-            <div class="text-muted small d-flex justify-content-between">
-              <span>
-                {{ storydateago }}
-                <span v-if="user?.displayname"> by {{ user.displayname }}</span>
-                <span v-if="displayGroupName"> in {{ displayGroupName }} </span>
-                <span v-else-if="userLocation?.display">
-                  in {{ userLocation.display }}
-                </span>
-                <span v-else-if="userLocation?.groupname">
-                  in {{ userLocation.groupname }}
-                </span>
-              </span>
-              <nuxt-link
-                no-prefetch
-                :to="'/story/' + story.id"
-                class="text-muted nodecor"
-              >
-                #{{ story.id }}
-              </nuxt-link>
-            </div>
-          </div>
-        </b-card-text>
-      </b-card-body>
-    </b-card>
+  <div v-if="story" class="story-card">
+    <div class="story-card__header">
+      <nuxt-link
+        no-prefetch
+        :to="'/story/' + story.id"
+        class="story-card__headline"
+      >
+        "{{ story.headline }}"
+      </nuxt-link>
+      <div class="story-card__actions">
+        <span v-if="story.likes" class="story-card__likes">
+          <v-icon icon="heart" /> {{ story.likes }}
+        </span>
+        <b-button
+          v-if="loggedIn && !story.liked"
+          variant="secondary"
+          size="sm"
+          @click="love"
+        >
+          <v-icon icon="heart" />
+          <span class="d-none d-sm-inline"> Love</span>
+        </b-button>
+        <b-button
+          v-if="loggedIn && story.liked"
+          variant="secondary"
+          size="sm"
+          @click="unlove"
+        >
+          <v-icon icon="heart" class="text-danger" />
+          <span class="d-none d-sm-inline"> Unlove</span>
+        </b-button>
+        <b-button variant="secondary" size="sm" @click="share(story)">
+          <v-icon icon="share-alt" />
+        </b-button>
+      </div>
+    </div>
+
+    <div class="story-card__body">
+      <div v-if="story.image" class="story-card__image">
+        <b-img
+          lazy
+          :src="story.image.path"
+          class="story-card__photo"
+          @click="showPhotoModal = true"
+        />
+      </div>
+      <read-more
+        v-if="story.story"
+        :text="story.story"
+        :max-chars="300"
+        class="story-card__text"
+      />
+      <div class="story-card__meta">
+        <span>
+          {{ storydateago }}
+          <span v-if="user?.displayname"> by {{ user.displayname }}</span>
+          <span v-if="displayGroupName"> in {{ displayGroupName }}</span>
+          <span v-else-if="userLocation?.display">
+            in {{ userLocation.display }}
+          </span>
+          <span v-else-if="userLocation?.groupname">
+            in {{ userLocation.groupname }}
+          </span>
+        </span>
+        <nuxt-link
+          no-prefetch
+          :to="'/story/' + story.id"
+          class="story-card__id"
+        >
+          #{{ story.id }}
+        </nuxt-link>
+      </div>
+    </div>
+
     <b-modal
       v-if="story?.image"
       ref="photoModal"
       v-model="showPhotoModal"
       scrollable
       title="Story Photo"
-      generator-unable-to-provide-required-alt=""
       size="lg"
       no-stacking
       ok-only
@@ -169,9 +161,88 @@ async function unlove() {
   await storyStore.unlove(props.id)
 }
 </script>
-<style scoped>
-.storyphoto {
-  max-height: 250px !important;
-  max-width: 250px !important;
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
+
+.story-card {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.story-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: $color-green--darker;
+  color: white;
+}
+
+.story-card__headline {
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  flex: 1;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.story-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.story-card__likes {
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+.story-card__body {
+  padding: 1rem;
+}
+
+.story-card__image {
+  margin-bottom: 1rem;
+}
+
+.story-card__photo {
+  max-height: 250px;
+  max-width: 250px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+.story-card__text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: $gray-700;
+  margin-bottom: 1rem;
+  white-space: pre-line;
+}
+
+.story-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: $gray-500;
+}
+
+.story-card__id {
+  color: $gray-500;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>
