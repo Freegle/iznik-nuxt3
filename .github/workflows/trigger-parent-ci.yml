@@ -9,6 +9,8 @@ jobs:
   trigger-parent:
     runs-on: ubuntu-latest
     steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Trigger FreegleDocker CircleCI
         run: |
           echo "🔔 Checking for recent FreegleDocker CircleCI pipelines before triggering"
