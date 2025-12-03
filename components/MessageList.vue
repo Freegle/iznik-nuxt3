@@ -40,13 +40,18 @@
                 :ref="'messagewrapper-' + m.id"
                 class="onecolumn"
               >
-                <OurMessage
-                  :id="m.id"
-                  :matchedon="m.matchedon"
-                  :preload="ix < 6"
-                  record-view
-                  @not-found="messageNotFound(m.id)"
-                />
+                <Suspense>
+                  <OurMessage
+                    :id="m.id"
+                    :matchedon="m.matchedon"
+                    :preload="ix < 6"
+                    record-view
+                    @not-found="messageNotFound(m.id)"
+                  />
+                  <template #fallback>
+                    <MessageSkeleton />
+                  </template>
+                </Suspense>
               </div>
               <div
                 v-if="ix + 1 < deDuplicatedMessages.length"
@@ -54,13 +59,20 @@
                 :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
                 class="onecolumn"
               >
-                <OurMessage
-                  :id="deDuplicatedMessages[ix + 1].id"
-                  :matchedon="deDuplicatedMessages[ix + 1].matchedon"
-                  :preload="ix + 1 < 6"
-                  record-view
-                  @not-found="messageNotFound(deDuplicatedMessages[ix + 1].id)"
-                />
+                <Suspense>
+                  <OurMessage
+                    :id="deDuplicatedMessages[ix + 1].id"
+                    :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                    :preload="ix + 1 < 6"
+                    record-view
+                    @not-found="
+                      messageNotFound(deDuplicatedMessages[ix + 1].id)
+                    "
+                  />
+                  <template #fallback>
+                    <MessageSkeleton />
+                  </template>
+                </Suspense>
               </div>
             </div>
           </div>
@@ -84,12 +96,17 @@
             :ref="'messagewrapper-' + message.id"
             class=""
           >
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-              @not-found="messageNotFound(message.id)"
-            />
+            <Suspense>
+              <OurMessage
+                :id="message.id"
+                :matchedon="message.matchedon"
+                record-view
+                @not-found="messageNotFound(message.id)"
+              />
+              <template #fallback>
+                <MessageSkeleton />
+              </template>
+            </Suspense>
           </div>
         </div>
       </VisibleWhen>
@@ -132,6 +149,9 @@ const OurMessage = defineAsyncComponent(() =>
 )
 const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
+)
+const MessageSkeleton = defineAsyncComponent(() =>
+  import('~/components/MessageSkeleton.vue')
 )
 
 const MIN_TO_SHOW = 10
