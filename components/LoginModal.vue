@@ -15,15 +15,17 @@
     scrollable
   >
     <template #title>
+      <div class="signin-accent" />
       <div class="signin-header">
+        <span class="signin-logo-wrap">
+          <img src="/icons/favicon-32x32.png" class="signin-logo" />
+        </span>
         <span class="signin-title">
-          {{ signUp ? 'Create account' : 'Log in' }}
+          {{ signUp ? 'Join the Reuse Revolution!' : 'Welcome back' }}
         </span>
         <span class="signin-switch">
           <a v-if="signUp" href="#" @click.prevent="clickShowSignIn">Log in</a
-          ><a v-else href="#" @click.prevent="clickShowSignUp"
-            >Create account</a
-          >
+          ><a v-else href="#" @click.prevent="clickShowSignUp">Join</a>
         </span>
       </div>
     </template>
@@ -138,7 +140,7 @@
             type="submit"
             value="login"
           >
-            {{ signUp ? 'Create account' : 'Log in' }}
+            {{ signUp ? 'Join Freegle!' : 'Log in' }}
           </b-button>
           <b-alert
             v-if="nativeLoginError"
@@ -795,15 +797,11 @@ function installGoogleSDK() {
       client_id: clientId.value,
       callback: handleGoogleCredentialsResponse,
     })
-    console.log(
-      'Render google button',
-      document.getElementById('googleLoginButton')
-    )
 
-    console.log('Found google button ref')
+    console.log('Render google button')
     window.google.accounts.id.renderButton(
       document.getElementById('googleLoginButton'),
-      { theme: 'outline', size: 'large', width: '300px' }
+      { theme: 'outline', size: 'large' }
     )
   } else {
     console.log('Google not yet fully loaded')
@@ -986,26 +984,59 @@ defineExpose({
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-apple: #000000;
 
+.signin-accent {
+  position: absolute;
+  top: -0.5rem;
+  left: -1rem;
+  right: -1rem;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    $color-green--darker,
+    $color-green-background
+  );
+}
+
 .signin-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   width: 100%;
 }
 
+.signin-logo-wrap,
+.signin-switch {
+  flex: 0 0 3rem;
+  min-width: 3rem;
+}
+
+.signin-logo {
+  width: 24px;
+  height: 24px;
+}
+
 .signin-title {
-  font-size: 1.25rem;
+  flex: 1;
+  text-align: center;
+  font-size: 1rem;
   font-weight: 600;
+  white-space: nowrap;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 1.25rem;
+  }
 }
 
 .signin-switch {
   font-size: 0.875rem;
   font-weight: normal;
+  text-align: right;
   color: $color-gray--dark;
 
   a {
@@ -1016,18 +1047,25 @@ $color-apple: #000000;
 .signin-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 0.5rem 0;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 
   @include media-breakpoint-up(lg) {
     flex-direction: row;
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 }
 
 .signin__section--social,
 .signin__section--freegle {
-  flex: 1;
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.signin__section--social {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .section-label {
@@ -1039,7 +1077,6 @@ $color-apple: #000000;
 .social-button {
   display: flex;
   align-items: center;
-  width: 100%;
   padding: 0;
   margin-bottom: 0.5rem;
   color: $color-white;
@@ -1090,12 +1127,12 @@ $color-apple: #000000;
 .divider__wrapper {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin: 0.25rem 0;
+  gap: 0.5rem;
+  margin: 0;
 
   @include media-breakpoint-up(lg) {
     flex-direction: column;
-    margin: 0 1rem;
+    margin: 0 0.5rem;
   }
 }
 
@@ -1136,8 +1173,14 @@ $color-apple: #000000;
 </style>
 
 <style lang="scss">
+.verytop .modal-content {
+  position: relative;
+  overflow-x: hidden;
+}
+
 .verytop .modal-header {
   padding: 0.5rem;
+  position: relative;
 }
 
 .verytop .modal-title {
