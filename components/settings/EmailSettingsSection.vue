@@ -187,7 +187,6 @@ const notificationSettingsLocal = ref({
   emailmine: false,
   push: true,
   facebook: true,
-  app: true,
 })
 const notificationmailsLocal = ref(true)
 const relevantallowedLocal = ref(true)
@@ -265,7 +264,6 @@ const notificationSettings = computed(() => {
     emailmine: false,
     push: true,
     facebook: true,
-    app: true,
   }
 
   const settings = me.value?.settings?.notifications
@@ -275,7 +273,6 @@ const notificationSettings = computed(() => {
     if ('emailmine' in settings) ret.emailmine = settings.emailmine
     if ('push' in settings) ret.push = settings.push
     if ('facebook' in settings) ret.facebook = settings.facebook
-    if ('app' in settings) ret.app = settings.app
   }
 
   return ret
