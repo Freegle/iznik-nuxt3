@@ -9,7 +9,9 @@
     <div class="item-content">
       <div class="icon-container">
         <v-icon :icon="icon" class="nav-icon" />
-        <span v-if="badge" class="nav-badge">{{ badge }}</span>
+        <span v-if="badge" class="nav-badge" :class="'badge-' + badgeVariant">{{
+          badge
+        }}</span>
       </div>
       <span class="nav-label">{{ label }}</span>
     </div>
@@ -33,6 +35,11 @@ defineProps({
   badge: {
     type: [Number, String],
     default: null,
+  },
+  badgeVariant: {
+    type: String,
+    default: 'info',
+    validator: (value) => ['info', 'danger'].includes(value),
   },
 })
 
@@ -92,7 +99,6 @@ defineEmits(['click', 'mousedown'])
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: #ef5350;
   color: white;
   font-size: 10px;
   font-weight: 600;
@@ -100,6 +106,14 @@ defineEmits(['click', 'mousedown'])
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &.badge-info {
+    background: #17a2b8;
+  }
+
+  &.badge-danger {
+    background: #ef5350;
+  }
 }
 
 // Active state
