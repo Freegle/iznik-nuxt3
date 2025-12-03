@@ -470,6 +470,29 @@ const closestGroups = computed(() => {
 
 // Watchers
 watch(
+  () => isochroneStore.messageList,
+  (newList) => {
+    if (updatedMessagesOnMap.value && newList?.length) {
+      const unseenMap = new Map(newList.map((m) => [m.id, m.unseen]))
+      let changed = false
+
+      updatedMessagesOnMap.value.forEach((m) => {
+        const newUnseen = unseenMap.get(m.id)
+        if (newUnseen !== undefined && m.unseen !== newUnseen) {
+          m.unseen = newUnseen
+          changed = true
+        }
+      })
+
+      if (changed) {
+        updatedMessagesOnMap.value = [...updatedMessagesOnMap.value]
+      }
+    }
+  },
+  { deep: true }
+)
+
+watch(
   filteredMessages,
   (newVal) => {
     // We want to save the first message we have seen so that we show a message when we have scrolled down to it.
