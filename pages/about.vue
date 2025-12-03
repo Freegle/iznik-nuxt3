@@ -8,7 +8,6 @@
               <b-button
                 v-b-toggle.accordion-what
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -43,7 +42,6 @@
               <b-button
                 v-b-toggle.accordion-how
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -81,7 +79,6 @@
               <b-button
                 v-b-toggle.accordion-who
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -183,7 +180,6 @@
               <b-button
                 v-b-toggle.accordion-funding
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -248,7 +244,6 @@
               <b-button
                 v-b-toggle.accordion-legal
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
@@ -328,7 +323,6 @@
               <b-button
                 v-b-toggle.accordion-questions
                 block
-                href="#"
                 variant="default"
                 class="w-100"
               >
