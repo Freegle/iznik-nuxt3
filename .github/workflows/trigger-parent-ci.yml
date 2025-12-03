@@ -51,9 +51,10 @@ jobs:
 
           # Commit and push
           git add "$REPO_NAME"
-          git commit -m "Update $REPO_NAME submodule to ${{ github.sha }}
-
-Triggered by: ${{ github.event.head_commit.message }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          # Sanitize commit message - take first line only, remove quotes
+          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"')
+          git commit -m "Update $REPO_NAME submodule - $COMMIT_MSG"
 
           echo "Pushing to FreegleDocker..."
           git push origin master
