@@ -113,12 +113,12 @@ test.describe('Post flow tests', () => {
     await page.gotoAndVerify('/chats')
 
     // Wait for the chat list to load and look for a chat entry
-    await page.waitForSelector('.chatentry', {
+    await page.waitForSelector('.chat-entry', {
       timeout: timeouts.background,
     })
 
     // Check that there's one chat entry (the reply)
-    const chatEntries = page.locator('.chatentry').filter({ visible: true })
+    const chatEntries = page.locator('.chat-entry').filter({ visible: true })
     const chatCount = await chatEntries.count()
     expect(chatCount).toEqual(1)
     console.log(`Found ${chatCount} chat entries in /chats`)
@@ -185,9 +185,11 @@ test.describe('Post flow tests', () => {
     expect(result.id).not.toBe(null)
     console.log(`WANTED post created with ID: ${result.id}`)
 
-    // Navigate to /browse and verify a post is visible
-    console.log('Navigating to /browse to verify WANTED post visibility')
-    await page.gotoAndVerify('/browse', {
+    // Navigate to /myposts and verify the post is visible there
+    // (We use /myposts instead of /browse because /browse may have many posts
+    // and the newly created one might not be immediately visible without scrolling)
+    console.log('Navigating to /myposts to verify WANTED post visibility')
+    await page.gotoAndVerify('/myposts', {
       timeout: timeouts.navigation.default,
     })
 
@@ -204,7 +206,7 @@ test.describe('Post flow tests', () => {
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log(`Found our test WANTED item "${uniqueItem}" on browse page`)
+    console.log(`Found our test WANTED item "${uniqueItem}" on myposts page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
@@ -377,7 +379,6 @@ test.describe('Post flow tests', () => {
     expect(await errorMessage.isVisible()).toBe(true)
 
     // Verify the "Freegle it!" button is no longer visible after error
-    const buttonCount = await freegleButton.count()
     const isButtonVisible = await freegleButton
       .first()
       .isVisible()

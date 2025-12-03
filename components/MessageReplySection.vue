@@ -103,7 +103,7 @@
     <div class="d-flex justify-content-between">
       <div class="pr-2 w-50">
         <b-button variant="secondary" size="lg" block @click="close">
-          Close
+          Cancel
         </b-button>
       </div>
       <div

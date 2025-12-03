@@ -1,38 +1,42 @@
 <template>
   <client-only>
-    <div>
+    <div class="volunteerings-page">
       <b-row class="m-0">
-        <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
-          <div>
-            <h1>Volunteer Opportunities</h1>
-            <GlobalMessage />
-            <p>
-              Are you a charity or good cause that needs volunteers? Ask our
-              lovely community of freeglers to help.
+        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+          <div class="page-header">
+            <p class="page-description">
+              Are you a charity or good cause? Ask our lovely freeglers to help.
             </p>
-            <div class="d-flex justify-content-between mb-3">
+            <GlobalMessage />
+            <div class="filter-actions">
               <GroupSelect
                 v-if="me"
                 v-model="groupid"
-                class="pr-2"
                 all
                 :value="groupid"
+                class="group-filter"
                 @update:model-value="changeGroup"
               />
-              <b-button v-if="me" variant="primary" @click="openVolunteerModal">
-                <v-icon icon="plus" /> Add an opportunity
+              <b-button
+                v-if="me"
+                variant="primary"
+                size="sm"
+                class="add-btn"
+                @click="openVolunteerModal"
+              >
+                <v-icon icon="plus" /> Add opportunity
               </b-button>
-              <NoticeMessage v-else variant="info">
-                Please sign in and join a community to add an event.
+              <NoticeMessage v-else variant="info" class="sign-in-notice">
+                Please sign in and join a community to add an opportunity.
               </NoticeMessage>
             </div>
           </div>
           <h2 class="visually-hidden">List of volunteer opportunities</h2>
-          <div v-if="allOfEm?.length">
+          <div v-if="allOfEm?.length" class="volunteerings-list">
             <div
               v-for="id in volunteerings"
               :key="'volunteering-' + id"
-              class="mt-2"
+              class="volunteering-item"
             >
               <VolunteerOpportunity
                 :id="id"
@@ -48,11 +52,19 @@
               @infinite="loadMore"
             />
           </div>
-          <div v-else>
-            <NoticeMessage>No opportunities at the moment.</NoticeMessage>
+          <div v-else class="empty-state">
+            <v-icon icon="hand-holding-heart" class="empty-icon" />
+            <p>No opportunities at the moment.</p>
+            <b-button
+              v-if="me"
+              variant="primary"
+              size="sm"
+              @click="openVolunteerModal"
+            >
+              <v-icon icon="plus" /> Add the first opportunity
+            </b-button>
           </div>
         </b-col>
-        <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
       <VolunteerOpportunityModal
         v-if="showVolunteerModal"
@@ -69,6 +81,7 @@ import { useVolunteeringStore } from '~/stores/volunteering'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import GlobalMessage from '~/components/GlobalMessage'
+import NoticeMessage from '~/components/NoticeMessage'
 import { ref, computed, useRoute, useRouter } from '#imports'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import GroupSelect from '~/components/GroupSelect'
@@ -169,7 +182,77 @@ const loadMore = function ($state) {
 
 const showVolunteerModal = ref(false)
 
+const me = computed(() => authStore.user)
+
 function openVolunteerModal() {
   showVolunteerModal.value = true
 }
 </script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.volunteerings-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.page-header {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.page-description {
+  font-size: 0.9rem;
+  color: $color-gray--dark;
+  margin: 0 0 0.75rem 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .group-filter {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+  }
+
+  .sign-in-notice {
+    width: 100%;
+  }
+}
+
+.volunteerings-list {
+  padding: 0 0.5rem;
+}
+
+.volunteering-item {
+  margin-bottom: 0.75rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  margin: 0.5rem;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+}
+</style>

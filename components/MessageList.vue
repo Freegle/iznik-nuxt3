@@ -15,6 +15,7 @@
       >
         <MessageListCounts
           v-if="browseCount && !search"
+          :count="browseCount"
           @mark-seen="markSeen"
         />
       </div>
@@ -39,7 +40,18 @@
                 :ref="'messagewrapper-' + m.id"
                 class="onecolumn"
               >
-                <OurMessage :id="m.id" :matchedon="m.matchedon" record-view />
+                <Suspense>
+                  <OurMessage
+                    :id="m.id"
+                    :matchedon="m.matchedon"
+                    :preload="ix < 6"
+                    record-view
+                    @not-found="messageNotFound(m.id)"
+                  />
+                  <template #fallback>
+                    <MessageSkeleton />
+                  </template>
+                </Suspense>
               </div>
               <div
                 v-if="ix + 1 < deDuplicatedMessages.length"
@@ -47,11 +59,20 @@
                 :ref="'messagewrapper-' + deDuplicatedMessages[ix + 1].id"
                 class="onecolumn"
               >
-                <OurMessage
-                  :id="deDuplicatedMessages[ix + 1].id"
-                  :matchedon="deDuplicatedMessages[ix + 1].matchedon"
-                  record-view
-                />
+                <Suspense>
+                  <OurMessage
+                    :id="deDuplicatedMessages[ix + 1].id"
+                    :matchedon="deDuplicatedMessages[ix + 1].matchedon"
+                    :preload="ix + 1 < 6"
+                    record-view
+                    @not-found="
+                      messageNotFound(deDuplicatedMessages[ix + 1].id)
+                    "
+                  />
+                  <template #fallback>
+                    <MessageSkeleton />
+                  </template>
+                </Suspense>
               </div>
             </div>
           </div>
@@ -75,11 +96,17 @@
             :ref="'messagewrapper-' + message.id"
             class=""
           >
-            <OurMessage
-              :id="message.id"
-              :matchedon="message.matchedon"
-              record-view
-            />
+            <Suspense>
+              <OurMessage
+                :id="message.id"
+                :matchedon="message.matchedon"
+                record-view
+                @not-found="messageNotFound(message.id)"
+              />
+              <template #fallback>
+                <MessageSkeleton />
+              </template>
+            </Suspense>
           </div>
         </div>
       </VisibleWhen>
@@ -122,6 +149,9 @@ const OurMessage = defineAsyncComponent(() =>
 )
 const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
+)
+const MessageSkeleton = defineAsyncComponent(() =>
+  import('~/components/MessageSkeleton.vue')
 )
 
 const MIN_TO_SHOW = 10
@@ -219,6 +249,7 @@ if (initialIds?.length) {
 // Data
 const myGroups = []
 const toShow = ref(MIN_TO_SHOW)
+const failedIds = ref(new Set())
 const infiniteId = ref(props.bump)
 const distance = ref(2000)
 const prefetched = ref(0)
@@ -228,7 +259,9 @@ const markUnseenTries = ref(10)
 
 // Computed properties
 const browseCount = computed(() => {
-  return messageStore.count
+  // Count the actual unseen messages that will be displayed (after de-duplication)
+  return deDuplicatedMessages.value.filter((m) => m.unseen && !m.successful)
+    .length
 })
 
 const group = computed(() => {
@@ -326,43 +359,45 @@ const deDuplicatedMessages = computed(() => {
   const dups = []
   const ids = {}
 
-  filteredMessagesToShow.value.forEach((m) => {
-    // Filter out dups by subject (for crossposting).
-    const message = filteredMessagesInStore.value[m.id]
+  filteredMessagesToShow.value
+    .filter((m) => !failedIds.value.has(m.id))
+    .forEach((m) => {
+      // Filter out dups by subject (for crossposting).
+      const message = filteredMessagesInStore.value[m.id]
 
-    if (!message) {
-      // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
-      // then we'll come back through here.
-      ret.push(m)
-    } else if (m.id in ids) {
-      // We have already got this id in our list
-    } else if (m.id !== props.exclude) {
-      // We don't want our duplicate-detection to be confused by different keywords on different groups, so strip
-      // out the keyword and put in the type.
-      ids[m.id] = true
-      let key = message.fromuser + '|' + message.subject
-      const p = message.subject.indexOf(':')
+      if (!message) {
+        // We haven't yet fetched it, so we don't yet know if it's a dup.  We return it, which will fetch it, and
+        // then we'll come back through here.
+        ret.push(m)
+      } else if (m.id in ids) {
+        // We have already got this id in our list
+      } else if (m.id !== props.exclude) {
+        // We don't want our duplicate-detection to be confused by different keywords on different groups, so strip
+        // out the keyword and put in the type.
+        ids[m.id] = true
+        let key = message.fromuser + '|' + message.subject
+        const p = message.subject.indexOf(':')
 
-      if (p !== -1) {
-        key =
-          message.fromuser + '|' + message.type + message.subject.substring(p)
-      }
-
-      const already = key in dups
-
-      if (m.id === props.firstSeenMessage) {
-        if (already) {
-          // We are planning to show a message which is a duplicate of the first seen.  To make sure we show
-          // the notice about having seen messages below here, show this one instead.
-          ret = ret.filter((m) => m.id !== dups[key])
+        if (p !== -1) {
+          key =
+            message.fromuser + '|' + message.type + message.subject.substring(p)
         }
-        ret.push(m)
-      } else if (!already) {
-        ret.push(m)
-        dups[key] = m.id
+
+        const already = key in dups
+
+        if (m.id === props.firstSeenMessage) {
+          if (already) {
+            // We are planning to show a message which is a duplicate of the first seen.  To make sure we show
+            // the notice about having seen messages below here, show this one instead.
+            ret = ret.filter((m) => m.id !== dups[key])
+          }
+          ret.push(m)
+        } else if (!already) {
+          ret.push(m)
+          dups[key] = m.id
+        }
       }
-    }
-  })
+    })
 
   return ret
 })
@@ -390,6 +425,11 @@ function wantMessage(m) {
     (!props.selectedGroup ||
       parseInt(m?.groupid) === parseInt(props.selectedGroup))
   )
+}
+
+function messageNotFound(id) {
+  // Create new Set to ensure Vue reactivity detects the change
+  failedIds.value = new Set([...failedIds.value, id])
 }
 
 function visibilityChanged(visible) {
@@ -587,10 +627,6 @@ onBeforeUnmount(() => {
       button {
         background-color: transparent;
       }
-
-      .thumbnail img {
-        opacity: 0;
-      }
     }
   }
 
@@ -605,10 +641,13 @@ onBeforeUnmount(() => {
       width: unset;
     }
 
-    :deep(div) {
+    // Only apply height:100% to old MessageSummary, not new MessageSummaryMobile
+    :deep(.messagecard) {
       height: 100%;
 
-      .messagecard div {
+      div {
+        height: 100%;
+
         div {
           height: unset;
         }
@@ -619,6 +658,11 @@ onBeforeUnmount(() => {
     :deep(.promised),
     :deep(.image-wrapper) {
       height: unset;
+    }
+
+    // MessageSummaryMobile uses its own layout
+    :deep(.message-summary-mobile) {
+      height: auto;
     }
   }
 }

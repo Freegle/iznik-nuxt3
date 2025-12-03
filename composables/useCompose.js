@@ -414,13 +414,25 @@ export async function freegleIt(type, router, options = {}) {
       await Promise.all(patchPromises)
     }
 
+    // Debug: log results count
+    console.log('Submit results:', results.length, 'messages submitted')
+
     // We pass the data in the history state to avoid it showing up in the URL.
     console.log('Navigate to myposts', params)
-    await router.push({
+    const navigationResult = await router.push({
       name: 'myposts',
       state: params,
     })
-    console.log('Navigated')
+
+    // Check for navigation failure (Vue Router 4 returns NavigationFailure on failure)
+    if (navigationResult) {
+      console.log('Navigation failed:', navigationResult)
+      // Navigation was prevented - this is unexpected
+      throw new Error(
+        `Navigation failed: ${navigationResult.type || 'unknown'}`
+      )
+    }
+    console.log('Navigated successfully')
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
     submitting.value = false

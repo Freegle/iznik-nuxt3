@@ -1,101 +1,89 @@
 <template>
-  <b-card
-    border-variant="info"
-    header-bg-variant="info"
-    header-text-variant="white"
-    class="mt-2"
-  >
-    <template #header>
-      <h2 class="bg-info header--size5 mb-0">
-        <v-icon icon="user" />
-        Your Account Settings
-      </h2>
-    </template>
-    <b-card-body class="p-0 pt-1">
-      <p class="text-muted">
-        <v-icon icon="lock" /> This is private. Other freeglers can't see this.
-      </p>
-      <div class="d-flex">
-        <EmailValidator
-          ref="email"
-          v-model:email="emailLocal"
-          v-model:valid="emailValid"
-          size="md"
-          label="Your primary email address:"
-        />
-        <div class="d-flex flex-column justify-content-end">
-          <SpinButton
-            variant="primary"
-            icon-name="save"
-            label="Save"
-            :disabled="!emailValid"
-            @handle="saveEmail"
-          />
-        </div>
+  <div class="settings-section">
+    <div class="section-header">
+      <v-icon icon="user" class="section-icon" />
+      <h2>Account Settings</h2>
+      <span class="private-badge"><v-icon icon="lock" /> Private</span>
+    </div>
+
+    <div class="section-content">
+      <!-- Email -->
+      <div class="setting-row">
+        <label>Email address:</label>
+        <b-input-group>
+          <b-form-input v-model="emailLocal" type="email" />
+          <template #append>
+            <SpinButton
+              variant="primary"
+              icon-name="save"
+              label="Save"
+              :disabled="!emailLocal"
+              @handle="saveEmail"
+            />
+          </template>
+        </b-input-group>
       </div>
+
       <div
         v-if="otherEmails.length"
         :key="JSON.stringify(otherEmails) + emailLocal"
-        class="mt-1 mb-3"
+        class="other-emails"
       >
-        <p class="m-0">Other emails:</p>
+        <p class="other-emails-label">
+          <v-icon icon="envelope" /> Other emails
+        </p>
         <EmailOwn
           v-for="email in otherEmails"
           :key="'ownemail-' + email.id"
           :email="email"
         />
       </div>
+
       <NoticeMessage v-if="me?.bouncing" variant="danger" class="mb-2">
-        <p>
-          We can't send to your email address. Please change it to a valid one
-          and press <em>Save</em>.
-        </p>
-        <p>Or if you're sure it's valid:</p>
+        <p>Can't deliver to your email. Please update it.</p>
         <SpinButton
           variant="white"
           icon-name="check"
           label="Try again"
+          size="sm"
           @handle="unbounce"
         />
       </NoticeMessage>
-      <b-row>
-        <b-col cols="12" sm="6">
-          <PasswordEntry
-            :original-password="me.value?.password"
-            show-save-option
-            placeholder="Your password"
-          />
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <b-form-group label="Your Postcode:">
-            <div class="d-flex flex-wrap align-items-start">
-              <PostCode @selected="selectPostcode" @cleared="clearPostcode" />
-              <SpinButton
-                variant="white"
-                size="lg"
-                class="mb-2"
-                :disabled="!pc"
-                icon-name="save"
-                label="Save"
-                @handle="savePostcode"
-              />
-            </div>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <hr />
-          <b-button variant="secondary" size="lg" to="/unsubscribe">
-            <v-icon icon="trash-alt" />
-            Unsubscribe or Leave Communities
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+
+      <!-- Password -->
+      <div class="setting-row">
+        <PasswordEntry
+          :original-password="me.value?.password"
+          show-save-option
+          placeholder="Your password"
+        />
+      </div>
+
+      <!-- Postcode -->
+      <div class="setting-row">
+        <label>Your postcode:</label>
+        <b-input-group>
+          <PostCode @selected="selectPostcode" @cleared="clearPostcode" />
+          <template #append>
+            <SpinButton
+              variant="primary"
+              :disabled="!pc"
+              icon-name="save"
+              label="Save"
+              @handle="savePostcode"
+            />
+          </template>
+        </b-input-group>
+      </div>
+
+      <!-- Leave communities -->
+      <div class="leave-section">
+        <b-button variant="outline-danger" to="/unsubscribe" class="leave-btn">
+          <v-icon icon="trash-alt" /> Unsubscribe or leave communities
+        </b-button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -103,7 +91,6 @@ import { ref, computed, defineEmits, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useMe } from '~/composables/useMe'
 import EmailOwn from '~/components/EmailOwn'
-import EmailValidator from '~/components/EmailValidator'
 import PostCode from '~/components/PostCode'
 import NoticeMessage from '~/components/NoticeMessage'
 import PasswordEntry from '~/components/PasswordEntry'
@@ -116,7 +103,6 @@ const { me, myid } = useMe()
 
 // State
 const pc = ref(null)
-const emailValid = ref(false)
 const emailLocal = ref('')
 
 // Computed properties
@@ -185,3 +171,86 @@ watch(
   { immediate: true }
 )
 </script>
+
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $color-green-background;
+    flex: 1;
+  }
+
+  .section-icon {
+    color: $color-green-background;
+  }
+}
+
+.private-badge {
+  font-size: 0.75rem;
+  color: $color-gray--dark;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.section-content {
+  padding: 1rem 1.25rem;
+}
+
+.setting-row {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+.other-emails {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: $color-gray--lighter;
+  border-radius: 8px;
+}
+
+.other-emails-label {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.leave-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.leave-btn {
+  width: 100%;
+}
+</style>

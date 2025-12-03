@@ -1,4 +1,4 @@
-name: Trigger Parent Repository CI
+name: Update Parent Repository Submodule
 
 on:
   push:
@@ -6,53 +6,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  trigger-parent:
+  update-parent-submodule:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger FreegleDocker CircleCI
+      - name: Update FreegleDocker submodule reference
+        env:
+          GH_TOKEN: ${{ secrets.FREEGLE_DOCKER_TOKEN }}
         run: |
-          echo "🔔 Checking for recent FreegleDocker CircleCI pipelines before triggering"
+          echo "🔄 Updating FreegleDocker submodule reference"
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref_name }}"
           echo "Commit: ${{ github.sha }}"
           echo "Commit Message: ${{ github.event.head_commit.message }}"
-          
-          # Check for recent pipelines to avoid duplicate triggers
-          echo "Checking for recent pipelines..."
-          five_mins_ago=$(date -u -d '5 minutes ago' +%Y-%m-%dT%H:%M:%SZ)
-          echo "Looking for pipelines created after: $five_mins_ago"
-          recent_pipelines=$(curl -s -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
-            "https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline?branch=master" | \
-            jq -r --arg cutoff "$five_mins_ago" '.items[] | select(.state == "created" or .state == "running") | select(.created_at > $cutoff) | .id' 2>/dev/null | head -3)
 
-          if [ -n "$recent_pipelines" ]; then
-            echo "⚠️ Found recent pipelines within 5 minutes - skipping trigger to avoid duplicates:"
-            echo "$recent_pipelines"
-            echo "If this is a standalone submodule change, wait 5 minutes and manually trigger."
+          # Determine submodule name from repository
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "Submodule name: $REPO_NAME"
+
+          # Clone FreegleDocker
+          echo "Cloning FreegleDocker..."
+          git clone --depth 1 https://x-access-token:${GH_TOKEN}@github.com/Freegle/FreegleDocker.git
+          cd FreegleDocker
+
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Initialize and update just this submodule to get .git metadata
+          git submodule init "$REPO_NAME"
+          git submodule update "$REPO_NAME"
+
+          # Update submodule to the specific commit that triggered this workflow
+          echo "Updating $REPO_NAME submodule to commit ${{ github.sha }}..."
+          cd "$REPO_NAME"
+          git fetch origin "${{ github.sha }}"
+          git checkout "${{ github.sha }}"
+          cd ..
+
+          # Check if there are changes
+          if git diff --quiet "$REPO_NAME"; then
+            echo "✅ Submodule already at correct commit - no update needed"
             exit 0
           fi
 
-          # Add a small delay to coordinate with other potential triggers
-          echo "Waiting 30 seconds to coordinate with other potential triggers..."
-          sleep 30
+          # Commit and push
+          git add "$REPO_NAME"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          # Sanitize commit message - take first line only, remove quotes
+          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"')
+          git commit -m "Update $REPO_NAME submodule - $COMMIT_MSG"
 
-          echo "No recent pipelines found - proceeding with trigger"
-          
-          response=$(curl -s -w "%{http_code}" -X POST \
-            -H "Circle-Token: ${{ secrets.CIRCLECI_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"branch": "master"}' \
-            https://circleci.com/api/v2/project/github/Freegle/FreegleDocker/pipeline)
-          
-          http_code="${response: -3}"
-          response_body="${response%???}"
-          
-          if [ "$http_code" -eq "201" ] || [ "$http_code" -eq "200" ]; then
-            echo "✅ Successfully triggered FreegleDocker CircleCI pipeline"
-            echo "Response: $response_body"
-          else
-            echo "❌ Failed to trigger CircleCI pipeline"
-            echo "HTTP Status: $http_code"
-            echo "Response: $response_body"
-            exit 1
-          fi
+          echo "Pushing to FreegleDocker..."
+          git push origin master
+
+          echo "✅ Successfully updated FreegleDocker submodule reference"
+          echo "CircleCI will automatically trigger from this push"

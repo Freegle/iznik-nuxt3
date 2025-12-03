@@ -1,7 +1,109 @@
 <template>
   <client-only>
-    <div>
-      <b-row class="m-0">
+    <div class="unsubscribe-page">
+      <!-- Mobile Layout -->
+      <div class="d-block d-md-none mobile-unsubscribe">
+        <NoticeMessage v-if="wrongUser" class="m-3">
+          <p>
+            You've tried to unsubscribe from one user, but you're logged in as
+            another. Please log out and try again.
+          </p>
+          <p>
+            <!-- eslint-disable-next-line -->
+            If you need help, please mail <ExternalLink href="mailto:support@ilovefreegle.org">our Support Volunteers</ExternalLink>.
+          </p>
+        </NoticeMessage>
+        <DeletedRestore v-else-if="me?.deleted" :bottom="false" class="m-3" />
+        <div v-else class="mobile-content">
+          <div class="mobile-header">
+            <v-icon icon="heart-broken" class="mobile-header__icon" />
+            <h1 class="mobile-header__title">Want to leave?</h1>
+            <p class="mobile-header__subtitle">
+              We'd love you to stay, but sometimes you have to let go.
+            </p>
+          </div>
+
+          <div v-if="loggedIn" class="mobile-body">
+            <div v-if="groupCount" class="mobile-section">
+              <p class="mobile-section__label">Leave a specific community:</p>
+              <GroupSelect v-model="groupid" size="lg" class="mb-2" />
+              <SpinButton
+                v-if="groupid"
+                variant="primary"
+                icon-name="trash-alt"
+                label="Leave this community"
+                class="w-100"
+                @handle="leave"
+              />
+            </div>
+
+            <NoticeMessage v-if="left" class="mb-3" variant="info">
+              We've removed you from {{ left }}.
+            </NoticeMessage>
+
+            <div v-if="!groupid" class="mobile-section">
+              <p class="mobile-section__label">Or choose an option:</p>
+              <div class="mobile-actions">
+                <NuxtLink to="/settings" class="mobile-btn mobile-btn--primary">
+                  <v-icon icon="cog" class="me-2" />
+                  Get fewer emails
+                </NuxtLink>
+                <button
+                  class="mobile-btn mobile-btn--danger"
+                  @click="unsubscribe"
+                >
+                  <v-icon icon="trash-alt" class="me-2" />
+                  Leave completely
+                </button>
+              </div>
+            </div>
+
+            <p class="mobile-help">Need help? Contact <SupportLink />.</p>
+          </div>
+
+          <div v-else class="mobile-body">
+            <div class="mobile-section">
+              <p class="mobile-section__label">Enter your email to continue:</p>
+              <EmailValidator
+                v-model:email="email"
+                v-model:valid="emailValid"
+                label=""
+                class="mb-3"
+              />
+              <div class="mobile-actions">
+                <NuxtLink to="/settings" class="mobile-btn mobile-btn--primary">
+                  <v-icon icon="cog" class="me-2" />
+                  Get fewer emails
+                </NuxtLink>
+                <SpinButton
+                  icon-name="trash-alt"
+                  variant="danger"
+                  class="mobile-btn mobile-btn--danger"
+                  label="Leave completely"
+                  @handle="emailConfirm"
+                />
+              </div>
+            </div>
+
+            <NoticeMessage v-if="emailSent" variant="primary" class="mt-3">
+              We've sent you an email to confirm. Please check your inbox and
+              spam folder.
+            </NoticeMessage>
+            <NoticeMessage
+              v-else-if="emailProblem"
+              variant="warning"
+              class="mt-3"
+            >
+              <span v-if="unknown">We don't recognise that email.</span>
+              <span v-else>Something went wrong.</span>
+              Please email <SupportLink />.
+            </NoticeMessage>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Layout -->
+      <b-row class="m-0 d-none d-md-flex">
         <b-col cols="0" md="3" />
         <b-col cols="12" md="6" class="bg-white pt-2">
           <NoticeMessage v-if="wrongUser">
@@ -263,3 +365,119 @@ onMounted(() => {
   }
 })
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
+
+.mobile-unsubscribe {
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    $color-red--bg-gradient 0%,
+    $color-white 50%
+  );
+}
+
+.mobile-content {
+  padding: 1rem;
+}
+
+.mobile-header {
+  text-align: center;
+  padding: 1.5rem 0 1rem;
+
+  &__icon {
+    font-size: 2.5rem;
+    color: $color-red;
+    margin-bottom: 0.75rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $color-black;
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__subtitle {
+    font-size: 0.9rem;
+    color: $color-gray--darker;
+    margin: 0;
+  }
+}
+
+.mobile-body {
+  background: $color-white;
+  padding: 1rem;
+  box-shadow: 0 1px 4px $color-black-opacity-08;
+}
+
+.mobile-section {
+  margin-bottom: 1rem;
+
+  &__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $color-gray--dark;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  :deep(.btn) {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.mobile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--primary {
+    background: $colour-success;
+    color: white;
+
+    &:hover {
+      background: darken($colour-success, 5%);
+      color: white;
+    }
+  }
+
+  &--danger {
+    background: $color-red;
+    color: white;
+
+    &:hover {
+      background: darken($color-red, 5%);
+      color: white;
+    }
+  }
+}
+
+.mobile-help {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  text-align: center;
+  margin: 1rem 0 0 0;
+}
+</style>

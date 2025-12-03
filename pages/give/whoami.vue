@@ -1,6 +1,18 @@
 <template>
   <client-only>
     <div class="layout fader">
+      <!-- Debug info for Playwright tests -->
+      <div
+        class="debug-compose-state"
+        style="display: none"
+        :data-message-count="composeStore.messages?.length || 0"
+        :data-has-api="!!composeStore.$api"
+        :data-postcode-id="composeStore.postcode?.id || 'none'"
+        :data-message-valid="messageValid"
+        :data-postcode-valid="postcodeValid"
+        :data-logged-in="loggedIn"
+        :data-email-valid="emailValid"
+      ></div>
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="3" class="maxbutt" />
       </div>
@@ -150,7 +162,7 @@ const { me } = useMe()
 const emailValid = ref(false)
 const emailBelongsToSomeoneElse = ref(false)
 const previousScreensValid = computed(
-  () => messageValid && postcodeValid && loggedIn
+  () => messageValid.value && postcodeValid.value && loggedIn.value
 )
 
 // Get store state
@@ -182,24 +194,29 @@ const {
 async function next() {
   emailBelongsToSomeoneElse.value = false
 
-  if (emailIsntOurs.value) {
-    // Need to check if it's ok to use.
-    const inuse = await userStore.emailIsInUse(email.value)
+  try {
+    if (emailIsntOurs.value) {
+      // Need to check if it's ok to use.
+      const inuse = await userStore.emailIsInUse(email.value)
 
-    if (!inuse) {
-      // Not in use - that's ok.
-      await freegleIt('Offer', router)
-    } else if (!loggedIn.value) {
-      // User is not logged in and the email belongs to an existing account.
-      // Force them to log in rather than showing the merge dialog.
-      authStore.forceLogin = true
+      if (!inuse) {
+        // Not in use - that's ok.
+        await freegleIt('Offer', router)
+      } else if (!loggedIn.value) {
+        // User is not logged in and the email belongs to an existing account.
+        // Force them to log in rather than showing the merge dialog.
+        authStore.forceLogin = true
+      } else {
+        // User is logged in but trying to use an email from a different account.
+        // Show the merge dialog.
+        emailBelongsToSomeoneElse.value = true
+      }
     } else {
-      // User is logged in but trying to use an email from a different account.
-      // Show the merge dialog.
-      emailBelongsToSomeoneElse.value = true
+      await freegleIt('Offer', router)
     }
-  } else {
-    await freegleIt('Offer', router)
+  } catch (e) {
+    console.error('Error in next():', e)
+    wentWrong.value = true
   }
 }
 

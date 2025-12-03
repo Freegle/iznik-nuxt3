@@ -99,7 +99,7 @@ const showItemError = ref(false)
 // Redirect if no message found
 onMounted(() => {
   if (messageId.value === null) {
-    router.replace('/find/app/photos')
+    router.replace('/find/mobile/photos')
   }
 })
 
@@ -146,7 +146,7 @@ const description = computed({
 })
 
 function editPhotos() {
-  router.push('/find/app/photos')
+  router.push('/find/mobile/photos')
 }
 
 function validateAndNext() {
@@ -161,7 +161,7 @@ function validateAndNext() {
     return
   }
   // Continue to app whereami flow for location
-  router.push('/find/app/whereami')
+  router.push('/find/mobile/whereami')
 }
 </script>
 
