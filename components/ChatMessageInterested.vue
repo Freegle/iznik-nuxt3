@@ -3,6 +3,15 @@
     class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
+    <div class="chatMessageProfilePic">
+      <ProfileImage
+        :image="chatMessageProfileImage"
+        :name="chatMessageProfileName"
+        class="inline"
+        is-thumbnail
+        size="sm"
+      />
+    </div>
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
         <ChatMessageSummary
@@ -138,14 +147,6 @@
         </div>
       </div>
     </div>
-    <div class="chatMessageProfilePic">
-      <ProfileImage
-        :image="chatMessageProfileImage"
-        class="ml-1 mb-1 mt-1 inline"
-        is-thumbnail
-        size="sm"
-      />
-    </div>
   </div>
 </template>
 <script setup>
@@ -205,6 +206,7 @@ const {
   emessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
+  chatMessageProfileName,
   regexEmail,
   otheruser,
 } = useChatMessageBase(props.chatid, props.id, props.pov)

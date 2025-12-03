@@ -7,15 +7,15 @@
           :alt-text="'Profile picture for ' + group.namedisplay"
         />
       </div>
-      <nuxt-link
-        no-prefetch
-        :to="'/explore/' + group.nameshort"
-        class="name font-weight-bold"
-      >
-        {{ group.namedisplay }}
-      </nuxt-link>
-      <div class="tagline">
-        <div v-if="group.tagline">
+      <div class="content">
+        <nuxt-link
+          no-prefetch
+          :to="'/explore/' + group.nameshort"
+          class="name font-weight-bold"
+        >
+          {{ group.namedisplay }}
+        </nuxt-link>
+        <div v-if="group.tagline" class="tagline text-muted small">
           {{ group.tagline }}
         </div>
         <ExternalLink
@@ -26,26 +26,25 @@
           Contact volunteers
         </ExternalLink>
       </div>
-      <div class="join">
-        <div>
-          <b-button
-            v-if="!oneOfMyGroups(group.id)"
-            variant="primary"
-            :to="'/explore/join/' + group.id"
-          >
-            Join
-          </b-button>
-        </div>
-      </div>
-      <div class="explore">
-        <div>
-          <b-button variant="secondary" :to="'/explore/' + group.nameshort">
-            Explore
-          </b-button>
-        </div>
+      <div class="actions">
+        <b-button
+          v-if="!oneOfMyGroups(group.id)"
+          variant="primary"
+          size="sm"
+          :to="'/explore/join/' + group.id"
+        >
+          Join
+        </b-button>
+        <b-button
+          variant="secondary"
+          size="sm"
+          :to="'/explore/' + group.nameshort"
+        >
+          Explore
+        </b-button>
       </div>
     </div>
-    <hr class="text-muted mt-0" />
+    <hr class="text-muted mt-0 mb-2" />
   </div>
 </template>
 <script setup>
@@ -78,65 +77,44 @@ const group = computed(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 .layout {
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
-  grid-template-rows: auto auto auto auto;
-  grid-column-gap: 0.5rem;
-  grid-row-gap: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
 
   .profile {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
-    margin-left: 0.5rem;
+    flex-shrink: 0;
 
     :deep(.img-thumbnail) {
-      max-width: unset;
+      width: 50px;
+      height: 50px;
     }
   }
 
-  .name {
-    grid-column: 2 / 4;
-    grid-row: 1 / 2;
+  .content {
+    flex: 1;
+    min-width: 0;
 
-    @include media-breakpoint-up(lg) {
-      grid-column: 2 / 3;
+    .name {
+      display: block;
+      line-height: 1.2;
+    }
+
+    .tagline {
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
     }
   }
 
-  .tagline {
-    grid-column: 2 / 4;
-    grid-row: 2 / 3;
-
-    @include media-breakpoint-up(lg) {
-      grid-column: 2 / 3;
-    }
-  }
-
-  .join {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
-    margin-left: 0.5rem;
-
-    @include media-breakpoint-up(lg) {
-      grid-column: 3 / 4;
-      grid-row: 1 / 2;
-      margin-left: unset;
-      margin-right: 0.5rem;
-      display: flex;
-      justify-content: flex-end;
-    }
-  }
-
-  .explore {
-    grid-column: 3 / 4;
-    grid-row: 3 / 4;
-    margin-right: 0.5rem;
+  .actions {
+    flex-shrink: 0;
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 0.25rem;
 
-    @include media-breakpoint-up(lg) {
-      grid-column: 3 / 4;
-      grid-row: 2 / 3;
+    @include media-breakpoint-up(md) {
+      flex-direction: row;
+      gap: 0.5rem;
     }
   }
 }

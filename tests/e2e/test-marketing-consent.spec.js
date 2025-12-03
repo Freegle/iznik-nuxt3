@@ -1,8 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const {
-  logoutIfLoggedIn,
-  signUpViaHomepage,
-} = require('./utils/user')
+const { logoutIfLoggedIn, signUpViaHomepage } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
 const { clickToggle } = require('./utils/ui')
 const { testUsers, timeouts } = require('./config')
@@ -18,37 +15,39 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
   await page.waitForLoadState('networkidle')
   console.log('[DEBUG] Navigated to /settings and waited for networkidle')
 
-  // First, try to find the "Keeping in touch" text - scroll if needed
-  const keepingInTouchText = page.locator('h3:has-text("Keeping in touch")')
+  // Find the "Freegle updates" option row (marketing consent setting)
+  // Structure is: .option-row > .option-info > span.option-label "Freegle updates"
+  const freegleUpdatesText = page.locator(
+    '.option-label:has-text("Freegle updates")'
+  )
 
   try {
     // Wait briefly to see if it's already visible
-    await keepingInTouchText.waitFor({
+    await freegleUpdatesText.waitFor({
       state: 'visible',
       timeout: 2000,
     })
-    console.log('[DEBUG] "Keeping in touch" header found immediately')
+    console.log('[DEBUG] "Freegle updates" label found immediately')
   } catch {
     // If not visible, scroll the element into view
-    console.log('[DEBUG] Scrolling "Keeping in touch" setting into view')
-    await keepingInTouchText.scrollIntoViewIfNeeded()
+    console.log('[DEBUG] Scrolling "Freegle updates" setting into view')
+    await freegleUpdatesText.scrollIntoViewIfNeeded()
 
     // Wait for it to become visible after scrolling
-    await keepingInTouchText.waitFor({
+    await freegleUpdatesText.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log('[DEBUG] "Keeping in touch" header found after scrolling')
+    console.log('[DEBUG] "Freegle updates" label found after scrolling')
   }
 
-  // Now find the toggle associated with "Keeping in touch"
-  // Look for the specific "Keeping in touch" header in the settings section, then find its form group
-  const toggleSection = page
-    .locator('h3:has-text("Keeping in touch")')
-    .locator('..')
-  const ourToggle = toggleSection
+  // Find the toggle in the same option-row as "Freegle updates"
+  // Navigate up to option-row and find the toggle-container within it
+  const optionRow = freegleUpdatesText.locator(
+    'xpath=ancestor::div[contains(@class, "option-row")]'
+  )
 
-  const toggleContainer = ourToggle.locator('.toggle-container')
+  const toggleContainer = optionRow.locator('.toggle-container')
   await toggleContainer.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
@@ -78,7 +77,8 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
   }
 
   console.log(`[DEBUG] Marketing consent verification completed successfully`)
-  return ourToggle
+  // Return optionRow so clickToggle can find the .toggle-container inside it
+  return optionRow
 }
 
 // Helper function for signup marketing consent tests

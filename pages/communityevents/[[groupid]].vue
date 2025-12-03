@@ -1,32 +1,39 @@
 <template>
   <client-only>
-    <div>
+    <div class="events-page">
       <b-row class="m-0">
-        <b-col cols="12" lg="6" class="p-0 mt-1" offset-lg="3">
-          <div>
-            <h1>Community Events</h1>
+        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+          <div class="page-header">
+            <p class="page-description">
+              Local events posted by freeglers like you.
+            </p>
             <GlobalMessage />
-            <p>These are local events, posted by other freeglers like you.</p>
-            <div class="d-flex justify-content-between mb-3">
+            <div class="filter-actions">
               <GroupSelect
                 v-if="me"
                 v-model="groupid"
-                class="pr-2"
                 all
                 :value="groupid"
+                class="group-filter"
                 @update:model-value="changeGroup"
               />
-              <b-button v-if="me" variant="primary" @click="openEventModal">
-                <v-icon icon="plus" /> Add a community event
+              <b-button
+                v-if="me"
+                variant="primary"
+                size="sm"
+                class="add-btn"
+                @click="openEventModal"
+              >
+                <v-icon icon="plus" /> Add event
               </b-button>
-              <NoticeMessage v-else variant="info">
+              <NoticeMessage v-else variant="info" class="sign-in-notice">
                 Please sign in and join a community to add an event.
               </NoticeMessage>
             </div>
           </div>
           <h2 class="visually-hidden">List of community events</h2>
-          <div v-if="allOfEm?.length">
-            <div v-for="id in events" :key="'event-' + id" class="mt-2">
+          <div v-if="allOfEm?.length" class="events-list">
+            <div v-for="id in events" :key="'event-' + id" class="event-item">
               <CommunityEvent
                 :id="id"
                 :filter-group="groupid"
@@ -41,13 +48,19 @@
               @infinite="loadMore"
             />
           </div>
-          <div v-else>
-            <NoticeMessage variant="warning"
-              >No events at the moment.</NoticeMessage
+          <div v-else class="empty-state">
+            <v-icon icon="calendar-times" class="empty-icon" />
+            <p>No events at the moment.</p>
+            <b-button
+              v-if="me"
+              variant="primary"
+              size="sm"
+              @click="openEventModal"
             >
+              <v-icon icon="plus" /> Add the first event
+            </b-button>
           </div>
         </b-col>
-        <b-col cols="0" md="3" class="d-none d-md-block" />
       </b-row>
       <CommunityEventModal
         v-if="showEventModal"
@@ -165,7 +178,77 @@ const loadMore = function ($state) {
 
 const showEventModal = ref(false)
 
+const me = computed(() => authStore.user)
+
 function openEventModal() {
   showEventModal.value = true
 }
 </script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.events-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.page-header {
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.page-description {
+  font-size: 0.9rem;
+  color: $color-gray--dark;
+  margin: 0 0 0.75rem 0;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .group-filter {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+  }
+
+  .sign-in-notice {
+    width: 100%;
+  }
+}
+
+.events-list {
+  padding: 0 0.5rem;
+}
+
+.event-item {
+  margin-bottom: 0.75rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  margin: 0.5rem;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: $color-gray--dark;
+    margin-bottom: 1rem;
+  }
+}
+</style>

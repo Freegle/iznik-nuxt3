@@ -6,6 +6,7 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
+import { useIsochroneStore } from '~/stores/isochrone'
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -346,6 +347,10 @@ export const useMessageStore = defineStore({
     },
     async markSeen(ids) {
       await api(this.config).message.markSeen(ids)
+
+      const isochroneStore = useIsochroneStore()
+      isochroneStore.markSeen(ids)
+
       await this.fetchCount()
     },
   },

@@ -1,72 +1,72 @@
 <template>
   <div class="cont bg-white">
     <div>
-      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+      <ChatNotice v-if="otheruser?.deleted" variant="info">
         This freegler has deleted their account, so you can't chat to them.
-      </notice-message>
-      <div v-else-if="showNotices && noticesToShow" class="d-flex">
-        <div class="flex-grow-1">
-          <notice-message
-            v-if="badratings"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;This freegler has a
-              lot of thumbs down ratings. That might not be their fault, but
-              please make very clear arrangements. If you have a good experience
-              with them, give them a thumbs up.
-            </p>
-            <UserRatings
-              v-if="chat.otheruid"
-              :id="chat.otheruid"
-              :key="'otheruser-' + chat.otheruid"
-            />
-          </notice-message>
-          <notice-message
-            v-else-if="expectedreplies"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
-            still waiting for them to reply on here.
-          </notice-message>
-          <notice-message v-if="otheruser?.spammer" variant="danger">
-            This person has been reported as a spammer or scammer. Please do not
-            talk to them and under no circumstances send them any money. Do not
-            arrange anything by courier.
-          </notice-message>
-          <notice-message
-            v-if="faraway"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;This freegler is
-              {{ milesstring }}
-              from you. If you are collecting from them, please make sure you
-              can get there. If they are collecting from you, please
-              double-check they have transport.
-            </p>
-          </notice-message>
-          <notice-message v-if="thumbsdown" variant="warning">
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;You previously gave
-              this freegler a thumbs down.
-            </p>
-          </notice-message>
-        </div>
-        <b-button
-          variant="warning"
-          class="float-end bg-warning"
-          title="Hide warnings"
-          @click="showNotices = false"
+      </ChatNotice>
+      <div v-else-if="showNotices && noticesToShow" class="notices-container">
+        <ChatNotice
+          v-if="otheruser?.spammer"
+          variant="danger"
+          title="Spammer Alert"
+          dismissible
+          @dismiss="showNotices = false"
         >
-          <v-icon icon="times-circle" scale="1.5" />
-        </b-button>
+          This person has been reported as a spammer or scammer. Please do not
+          talk to them and under no circumstances send them any money. Do not
+          arrange anything by courier.
+        </ChatNotice>
+        <ChatNotice
+          v-if="badratings && !otheruser?.spammer"
+          variant="warning"
+          title="Low Ratings"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          This freegler has a lot of thumbs down ratings. That might not be
+          their fault, but please make very clear arrangements. If you have a
+          good experience with them, give them a thumbs up.
+          <UserRatings
+            v-if="chat.otheruid"
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mt-2"
+          />
+        </ChatNotice>
+        <ChatNotice
+          v-else-if="expectedreplies && !otheruser?.spammer"
+          variant="warning"
+          title="Slow Replies"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          {{ expectedreplies }} still waiting for them to reply on here.
+        </ChatNotice>
+        <ChatNotice
+          v-if="faraway && !otheruser?.spammer"
+          variant="warning"
+          title="Far Away"
+          icon="map-marker-alt"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          This freegler is {{ milesstring }} from you. If you are collecting
+          from them, please make sure you can get there. If they are collecting
+          from you, please double-check they have transport.
+        </ChatNotice>
+        <ChatNotice
+          v-if="thumbsdown && !otheruser?.spammer"
+          variant="warning"
+          title="Previous Rating"
+          icon="thumbs-down"
+          dismissible
+          @dismiss="showNotices = false"
+        >
+          You previously gave this freegler a thumbs down.
+        </ChatNotice>
       </div>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
@@ -78,33 +78,39 @@
           />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <b-form-textarea
-          v-if="enterNewLine && !otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          class="h-100"
-          placeholder="Type here..."
-          enterkeyhint="enter"
-          @keydown="typing"
-          @focus="markRead"
-        />
-        <b-form-textarea
-          v-else-if="!otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          class="h-100"
-          placeholder="Type here..."
-          enterkeyhint="send"
-          autocapitalize="none"
-          @keydown="typing"
-          @keydown.enter.exact.prevent
-          @keyup.enter.exact="sendOnEnter"
-          @keydown.enter.shift.exact.prevent="newline"
-          @keydown.alt.shift.enter.exact.prevent="newline"
-          @focus="markRead"
-        />
+        <div class="textarea-wrapper">
+          <div v-if="!sendmessage && !isFocused" class="textarea-placeholder">
+            <span class="placeholder-text">{{ displayedText }}</span>
+            <JumpingDots v-if="showDots" size="sm" class="placeholder-dots" />
+          </div>
+          <b-form-textarea
+            v-if="enterNewLine && !otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            class="h-100"
+            enterkeyhint="enter"
+            @keydown="typing"
+            @focus="onFocus"
+            @blur="onBlur"
+          />
+          <b-form-textarea
+            v-else-if="!otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            class="h-100"
+            enterkeyhint="send"
+            autocapitalize="none"
+            @keydown="typing"
+            @keydown.enter.exact.prevent
+            @keyup.enter.exact="sendOnEnter"
+            @keydown.enter.shift.exact.prevent="newline"
+            @keydown.alt.shift.enter.exact.prevent="newline"
+            @focus="onFocus"
+            @blur="onBlur"
+          />
+        </div>
         <Dropdown
           v-if="showSuggested"
           placement="top"
@@ -358,6 +364,9 @@ import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
 import Api from '~/api'
 import { useMe } from '~/composables/useMe'
+import { useTypewriter } from '~/composables/useTypewriter'
+import JumpingDots from '~/components/JumpingDots.vue'
+import ChatNotice from '~/components/ChatNotice.vue'
 
 // Define props
 const props = defineProps({
@@ -382,9 +391,6 @@ const ProfileModal = defineAsyncComponent(() =>
 )
 const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
-)
-const NoticeMessage = defineAsyncComponent(() =>
-  import('~/components/NoticeMessage')
 )
 const ChatRSVPModal = defineAsyncComponent(() =>
   import('~/components/ChatRSVPModal')
@@ -440,6 +446,19 @@ const caretPosition = ref({ top: 0, left: 0 })
 const currentAtts = ref([])
 const chatarea = ref(null)
 const rsvp = ref(null)
+const isFocused = ref(false)
+
+// Typewriter animation for placeholder
+const {
+  displayedText,
+  showDots,
+  startAnimation: startTypewriterAnimation,
+} = useTypewriter('Type here', {
+  typingSpeed: 80,
+  dotsDisplayTime: 1500,
+  maxCycles: 3,
+  finalText: 'Type here.',
+})
 
 // Computed properties
 const shrink = computed(() => {
@@ -616,6 +635,15 @@ const _updateAfterSend = async () => {
 const markRead = async () => {
   await chatStore.markRead(props.id)
   _updateAfterSend()
+}
+
+const onFocus = () => {
+  isFocused.value = true
+  markRead()
+}
+
+const onBlur = () => {
+  isFocused.value = false
 }
 
 const doNudge = async () => {
@@ -842,16 +870,32 @@ onMounted(() => {
   setTimeout(() => {
     showNotices.value = false
   }, 30000)
+
+  // Delay typewriter animation to start after the profile card collapses
+  // Profile card: 800ms delay + 3000ms display + 500ms collapse animation = ~4300ms
+  setTimeout(() => {
+    startTypewriterAnimation()
+  }, 4500)
 })
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
+
 .mobtext {
   text-align: center !important;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: $color-gray--dark;
+  margin-top: 2px;
 }
 
 .fa-mob {
-  height: 2rem;
+  height: 1.25rem;
   width: 100%;
+  color: $colour-success;
 }
 
 .shrink {
@@ -866,6 +910,14 @@ onMounted(() => {
   display: grid;
   grid-template-columns: auto;
   grid-auto-rows: max-content;
+  border-top: 1px solid $color-gray--light;
+}
+
+.notices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 4px;
 }
 
 .btn-warning {
@@ -878,9 +930,73 @@ onMounted(() => {
   max-height: 33vh;
 }
 
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.textarea-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.placeholder-text {
+  color: $color-gray--normal;
+  font-size: 0.9rem;
+}
+
+.placeholder-dots {
+  margin-left: 2px;
+  margin-top: 4px;
+}
+
 :deep(textarea) {
   transition: height 1s;
-
   height: v-bind(height) !important;
+  border: 1px solid $color-gray--light;
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  resize: none;
+  background-color: #fafafa;
+
+  &:focus {
+    outline: none;
+    background-color: $color-white;
+    border-color: $color-gray--normal;
+  }
+
+  @include media-breakpoint-down(md) {
+    padding: 8px 10px;
+  }
+}
+
+// Mobile action bar styling
+.d-flex.d-lg-none {
+  padding: 4px 2px;
+  gap: 2px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    min-width: 44px;
+
+    &:active {
+      background-color: $color-gray--lighter;
+    }
+  }
 }
 </style>

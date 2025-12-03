@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div v-if="!isApp" class="layout fader">
+    <div v-if="showDesktopLayout" class="layout fader">
       <div class="d-none d-md-flex justify-content-around">
         <WizardProgress :active-stage="1" class="maxbutt" />
       </div>
@@ -106,22 +106,38 @@ import NoticeMessage from '~/components/NoticeMessage'
 import { setup, deleteItem, addItem } from '~/composables/useCompose'
 import PostMessage from '~/components/PostMessage'
 import WizardProgress from '~/components/WizardProgress'
-import { onMounted, computed } from '#imports'
-import { useMobileStore } from '~/stores/mobile'
+import { onMounted, computed, watch } from '#imports'
+import { useMiscStore } from '~/stores/misc'
 
 // Setup page head
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const router = useRouter()
-const mobileStore = useMobileStore()
+const miscStore = useMiscStore()
 
-// Check if app - used to prevent flash of desktop UI
-const isApp = computed(() => mobileStore.isApp)
+// Track if we've determined the breakpoint yet (to prevent flash of wrong layout)
+const breakpointReady = computed(() => miscStore.breakpoint !== null)
 
-// Redirect to app-specific flow if in app
-if (mobileStore.isApp) {
-  router.replace('/find/app/photos')
-}
+// Check if mobile - used to redirect to mobile flow
+const isMobile = computed(
+  () => miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+)
+
+// Show desktop layout only when breakpoint is known AND it's not mobile
+const showDesktopLayout = computed(
+  () => breakpointReady.value && !isMobile.value
+)
+
+// Redirect to mobile-optimized flow on small screens (client-side only)
+watch(
+  () => ({ ready: breakpointReady.value, mobile: isMobile.value }),
+  ({ ready, mobile }) => {
+    if (ready && mobile && process.client) {
+      router.replace('/find/mobile/photos')
+    }
+  },
+  { immediate: true }
+)
 
 useHead(
   buildHead(

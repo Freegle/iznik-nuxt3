@@ -1,12 +1,29 @@
 <template>
-  <div
-    class="d-flex flex-column justify-content-between ps-4 h-100 test-freegler-photos"
-  >
-    <div class="flex-grow-1">
-      <client-only fallback-tag="div">
+  <div class="freegler-photos test-freegler-photos">
+    <div class="photo-container">
+      <!-- Static frame overlay -->
+      <ProxyImage
+        src="/landingpage/frame.png"
+        class-name="static-frame"
+        alt="Ornate gold picture frame"
+        sizes="1px sm:576px md:768px"
+      />
+
+      <!-- Static first photo for SSR -->
+      <div class="ssr-photo">
+        <ProxyImage
+          preload
+          :src="photo(1)"
+          alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
+          class-name="freegler-image test-freegler-image"
+          sizes="1px sm:576px md:768px"
+        />
+      </div>
+
+      <!-- Rotating photos (client-side only) -->
+      <client-only>
         <BCarousel
-          class="carousel test-photos-carousel"
-          background="/landingpage/frame.png"
+          class="photos-carousel test-photos-carousel"
           ride="carousel"
           fade
         >
@@ -19,57 +36,25 @@
             class="test-photo-slide"
           >
             <template #img>
-              <div class="layout">
-                <ProxyImage
-                  loading="lazy"
-                  src="/landingpage/frame.png"
-                  class-name="frame test-photo-frame"
-                  alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-                  sizes="1px sm:576px md:768px"
-                />
-                <ProxyImage
-                  loading="lazy"
-                  :src="photo(img)"
-                  alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
-                  class-name="image test-freegler-image"
-                  sizes="1px sm:576px md:768px"
-                />
-                <p class="text-center text--smallest credit test-photo-credit">
-                  Photos of real freeglers, kindly taken by
-                  <ExternalLink href="https://www.alexbamford.com/"
-                    >Alex Bamford</ExternalLink
-                  >. Back when wearing masks was a thing...
-                </p>
-              </div>
+              <ProxyImage
+                loading="lazy"
+                :src="photo(img)"
+                alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
+                class-name="freegler-image test-freegler-image"
+                sizes="1px sm:576px md:768px"
+              />
             </template>
           </BCarouselSlide>
         </BCarousel>
-        <template #fallback>
-          <div class="layout">
-            <ProxyImage
-              preload
-              src="/landingpage/frame.png"
-              class-name="frame test-photo-frame"
-              alt="Ornate gold picture frame. Image courtesy of https://pixabay.com/users/avantrend-321510/"
-              sizes="1px sm:576px md:768px"
-            />
-            <ProxyImage
-              preload
-              :src="photo(1)"
-              alt="Picture of a real freegler, looking happy. Photo by Alex Bamford."
-              class-name="image test-freegler-image"
-              sizes="1px sm:576px md:768px"
-            />
-            <p class="text-center text--smallest credit test-photo-credit">
-              Photos of real freeglers, kindly taken by
-              <ExternalLink href="https://www.alexbamford.com/"
-                >Alex Bamford</ExternalLink
-              >. Back when wearing masks was a thing...
-            </p>
-          </div>
-        </template>
       </client-only>
     </div>
+
+    <p class="credit text-center text--smallest test-photo-credit">
+      Photos of real freeglers, kindly taken by
+      <ExternalLink href="https://www.alexbamford.com/"
+        >Alex Bamford</ExternalLink
+      >. Back when wearing masks was a thing...
+    </p>
   </div>
 </template>
 <script setup lang="ts">
@@ -82,64 +67,94 @@ function photo(img) {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.layout {
-  max-height: 100%;
-  display: grid;
-  grid-template-columns: min-content;
-  grid-template-rows: 1fr;
+.freegler-photos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
-.frame,
-.image {
-  grid-row: 1/2;
-  grid-column: 1/2;
-  max-height: 100%;
+.photo-container {
+  position: relative;
+  display: block;
+  width: 100%;
 }
 
-.frame {
-  :deep(img) {
-    pointer-events: none;
-    z-index: 2;
-    min-height: 300px;
-    position: relative;
-    max-height: 50vh;
-
-    @include media-breakpoint-up(sm) {
-      max-height: 28vh;
-    }
-
-    @include media-breakpoint-up(lg) {
-      max-height: 50vh;
-    }
-  }
+// Static frame - always on top
+:deep(.static-frame),
+:deep(.static-frame img) {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.image {
-  max-width: 100%;
+// Carousel positioned behind frame - must exactly fill frame opening
+.photos-carousel {
+  position: absolute;
+  top: 11%;
+  left: 12%;
+  right: 12%;
+  bottom: 13%;
+  z-index: 1;
+  overflow: hidden;
+}
 
-  :deep(img) {
-    padding: 7vh;
-    z-index: 1;
+:deep(.carousel-inner),
+:deep(.carousel-item) {
+  height: 100%;
+}
+
+// Fade transition
+:deep(.carousel-item) {
+  transition: opacity 0.8s ease-in-out;
+}
+
+:deep(.carousel-item-start) {
+  opacity: 0;
+}
+
+:deep(.freegler-image),
+:deep(.freegler-image img) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: top;
+  padding: 0 !important;
+}
+
+// SSR photo - same positioning as carousel, hidden when carousel loads
+.ssr-photo {
+  position: absolute;
+  top: 11%;
+  left: 12%;
+  right: 12%;
+  bottom: 13%;
+  z-index: 1;
+  overflow: hidden;
+
+  :deep(.freegler-image),
+  :deep(.freegler-image img) {
+    width: 100% !important;
+    height: 100% !important;
     object-fit: cover;
-    max-height: 50vh;
-    min-height: 300px;
-    position: relative;
-
-    @include media-breakpoint-up(sm) {
-      padding: 4vh;
-      max-height: 28vh;
-    }
-
-    @include media-breakpoint-up(lg) {
-      padding: 7vh;
-      max-height: 50vh;
-    }
+    object-position: top;
+    padding: 0 !important;
   }
 }
 
-:deep {
-  .carousel-item-start {
-    transition: opacity 0s 0s;
+// Hide SSR photo when carousel is present
+.photos-carousel ~ .ssr-photo,
+.photos-carousel + .ssr-photo {
+  display: none;
+}
+
+.credit {
+  margin-top: 0.5rem;
+
+  @include media-breakpoint-down(md) {
     display: none;
   }
 }

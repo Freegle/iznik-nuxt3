@@ -409,7 +409,33 @@ onMounted(async () => {
 })
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 :deep(label) {
   font-weight: bold;
+}
+
+:deep(.modal-header) {
+  background: $colour-success;
+  color: $color-white;
+
+  h1 {
+    color: $color-white;
+    font-size: 1.25rem;
+    margin: 0;
+  }
+}
+
+:deep(.modal-footer) {
+  background: $color-gray--lighter;
+}
+
+/* Heart icons styling */
+.text-faded {
+  opacity: 0.3;
+}
+
+.text-danger {
+  color: #dc3545;
 }
 </style>

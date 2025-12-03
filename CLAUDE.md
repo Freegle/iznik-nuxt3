@@ -64,5 +64,10 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 - Two separate checkouts are required because different services need different branches
 - The `modtools` branch contains ModTools-specific configuration and components
 
+## CSS/SCSS Guidelines
+- **Never use `//` comments in SCSS** - they cause Vite compilation errors. Always use `/* */` style comments.
+- Bootstrap is already configured for sharp corners - don't add `border-radius: 0` overrides.
+- After editing Vue component styles, check the Docker logs for compilation errors: `docker logs freegle-dev-local --tail 20`
+
 ## Debugging and Investigation
 - No need to run lint before investigating problems
