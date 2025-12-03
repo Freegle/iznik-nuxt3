@@ -4,16 +4,9 @@
       <b-row class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
           <div class="page-header">
-            <div class="header-content">
-              <h1 class="page-title">
-                <v-icon icon="hand-holding-heart" class="title-icon" />
-                Volunteer Opportunities
-              </h1>
-              <p class="page-description">
-                Are you a charity or good cause? Ask our lovely freeglers to
-                help.
-              </p>
-            </div>
+            <p class="page-description">
+              Are you a charity or good cause? Ask our lovely freeglers to help.
+            </p>
             <GlobalMessage />
             <div class="filter-actions">
               <GroupSelect
@@ -211,27 +204,10 @@ function openVolunteerModal() {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.header-content {
-  margin-bottom: 0.75rem;
-}
-
-.page-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  .title-icon {
-    color: $colour-success;
-  }
-}
-
 .page-description {
   font-size: 0.9rem;
   color: $color-gray--dark;
-  margin: 0;
+  margin: 0 0 0.75rem 0;
 }
 
 .filter-actions {
