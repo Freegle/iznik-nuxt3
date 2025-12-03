@@ -1,19 +1,10 @@
 <template>
   <client-only>
     <div class="jobs-page">
-      <div class="jobs-page-header">
-        <div class="jobs-page-header-content">
-          <v-icon icon="briefcase" class="jobs-page-icon" />
-          <div>
-            <h1 class="jobs-page-title">Jobs Near You</h1>
-            <p class="jobs-page-subtitle">
-              Freegle gets a small amount if you click, helping keep us running
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div class="jobs-page-content">
+        <p class="jobs-page-intro">
+          Freegle gets a small amount if you click, helping keep us running.
+        </p>
         <div class="jobs-filters">
           <PlaceAutocomplete
             :value="location"
@@ -187,49 +178,6 @@ onMounted(async () => {
   background: $gray-100;
 }
 
-.jobs-page-header {
-  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
-  padding: 1.5rem 1rem;
-  color: $white;
-
-  @include media-breakpoint-up(md) {
-    padding: 2rem;
-  }
-}
-
-.jobs-page-header-content {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.jobs-page-icon {
-  font-size: 2rem;
-  opacity: 0.9;
-
-  @include media-breakpoint-up(md) {
-    font-size: 2.5rem;
-  }
-}
-
-.jobs-page-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-
-  @include media-breakpoint-up(md) {
-    font-size: 1.75rem;
-  }
-}
-
-.jobs-page-subtitle {
-  font-size: 0.9rem;
-  margin: 0.25rem 0 0 0;
-  opacity: 0.9;
-}
-
 .jobs-page-content {
   max-width: 800px;
   margin: 0 auto;
@@ -238,6 +186,13 @@ onMounted(async () => {
   @include media-breakpoint-up(md) {
     padding: 1.5rem;
   }
+}
+
+.jobs-page-intro {
+  font-size: 0.9rem;
+  color: $gray-600;
+  text-align: center;
+  margin-bottom: 1rem;
 }
 
 .jobs-filters {

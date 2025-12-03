@@ -1,8 +1,6 @@
 <template>
   <client-only>
     <div class="disclaimer">
-      <h1 class="disclaimer__title">Disclaimer</h1>
-
       <div class="disclaimer__content">
         <section class="disclaimer__section">
           <div class="disclaimer__icon">
@@ -120,18 +118,6 @@ useHead(
 
   @include media-breakpoint-up(md) {
     padding: 2rem;
-  }
-}
-
-.disclaimer__title {
-  text-align: center;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: $colour-success-fg;
-  margin-bottom: 1.5rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 2rem;
   }
 }
 
