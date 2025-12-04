@@ -1073,7 +1073,7 @@ const testWithFixtures = test.extend({
 
       // Wait for the location to be confirmed using locator.waitFor()
       const confirmationIcon = page.locator(
-        '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+        '.validation-tick, .text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
       )
       await confirmationIcon.waitFor({
         state: 'visible',

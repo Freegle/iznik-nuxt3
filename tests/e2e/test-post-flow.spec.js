@@ -327,7 +327,7 @@ test.describe('Post flow tests', () => {
 
     // Wait for location confirmation
     const confirmationIcon = page.locator(
-      '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+      '.validation-tick, .text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
     )
     await confirmationIcon.waitFor({
       state: 'visible',

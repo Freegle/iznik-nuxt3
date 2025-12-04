@@ -4,8 +4,8 @@
       <BreakpointFettler />
     </client-only>
 
-    <!-- Mobile/Tablet Layout -->
-    <div class="d-block d-lg-none mobile-layout">
+    <!-- Main Layout (all breakpoints) -->
+    <div class="main-layout">
       <!-- Hero Section with wallpaper background -->
       <div class="hero-section">
         <div class="hero-wallpaper">
@@ -13,8 +13,8 @@
           <div class="d-block d-md-none hero-frame">
             <FreeglerPhotos class="hero-photos" />
           </div>
-          <!-- Triple frame for tablet (md) -->
-          <div class="d-none d-md-block d-lg-none">
+          <!-- Triple frame carousel for tablet and desktop (md+) -->
+          <div class="d-none d-md-block">
             <FreeglerPhotosCarousel />
           </div>
           <!-- Slogan on wallpaper - only for mobile, tablet carousel has its own -->
@@ -125,115 +125,7 @@
       </div>
 
       <!-- Footer -->
-      <MainFooter class="mobile-footer" />
-    </div>
-
-    <!-- Desktop Layout (lg and above) -->
-    <div class="d-none d-lg-block desktop-layout">
-      <div class="grid m-0 mt-lg-5 ml-2 mr-2">
-        <div class="eyecandy d-flex justify-content-start flex-column">
-          <FreeglerPhotos class="ps-4 h-100" />
-        </div>
-        <div class="info">
-          <h1 class="text--largest-responsive">
-            Freegle - like online dating for stuff.
-          </h1>
-          <p class="text--medium-responsive black font-weight-bold">
-            Got stuff you don't need? Looking for something?
-          </p>
-          <p class="text--medium-responsive black font-weight-bold">
-            We'll match you with someone local. All completely free.
-          </p>
-          <div class="d-flex justify-content-lg-start w-100">
-            <client-only>
-              <b-button
-                variant="primary"
-                size="xl"
-                to="/give"
-                class="text--medium-responsive"
-                @click="clicked('give')"
-              >
-                Give Stuff
-              </b-button>
-              <div style="width: 4vw" class="d-none d-lg-block" />
-              <b-button
-                variant="secondary"
-                size="xl"
-                to="/find"
-                class="text--medium-responsive"
-                @click="clicked('ask')"
-              >
-                Ask for Stuff
-              </b-button>
-              <template #fallback>
-                <a
-                  href="/give"
-                  class="btn btn-xl btn-primary text--medium-responsive"
-                >
-                  Give Stuff
-                </a>
-                <div style="width: 4rem" class="d-none d-lg-block" />
-                <a
-                  href="/find"
-                  class="btn btn-xl btn-secondary text--medium-responsive"
-                >
-                  Ask for Stuff
-                </a>
-              </template>
-            </client-only>
-          </div>
-          <div
-            class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
-          >
-            Don't throw it away, give it away!
-          </div>
-          <h2 class="text--medium-responsive font-weight-bold black">
-            Just looking?
-          </h2>
-          <div class="d-flex justify-content-lg-start flex-wrap">
-            <client-only>
-              <PlaceAutocomplete
-                class="mb-2"
-                labeltext="See what's being freegled near you:"
-                labeltext-sr="Enter your location and"
-                @selected="explorePlace($event)"
-              />
-            </client-only>
-          </div>
-        </div>
-        <div v-if="!isApp" class="app-download mt-2">
-          <a
-            href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-            target="_blank"
-            class="mr-2"
-            rel="noopener noreferrer"
-          >
-            <ProxyImage
-              preload
-              alt="Freegle Android app on Google Play"
-              title="Freegle Android app on Google Play"
-              class="app-download__image"
-              src="/en-play-badge.png"
-              sizes="75px"
-            />
-          </a>
-          <a
-            href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ProxyImage
-              preload
-              alt="Freegle app for iPhone, iPad, and iPod touch"
-              title="Freegle app for iPhone, iPad, and iPod Touch"
-              class="app-download__image"
-              src="/app-store-black-sm.png"
-              sizes="75px"
-            />
-          </a>
-        </div>
-        <MainFooter class="thefooter" />
-      </div>
+      <MainFooter class="thefooter" />
     </div>
   </div>
 </template>
@@ -411,14 +303,14 @@ onBeforeUnmount(() => {
 @import 'assets/css/_color-vars.scss';
 
 // ==========================================
-// Mobile Layout Styles
+// Main Layout Styles
 // ==========================================
 
 .landing-page {
   min-height: 100vh;
 }
 
-.mobile-layout {
+.main-layout {
   padding: 0;
   background: $color-white;
   min-height: 100vh;
@@ -661,6 +553,11 @@ onBeforeUnmount(() => {
   padding: 0 0.5rem;
   max-height: 320px;
   overflow: hidden;
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: repeat(3, 1fr);
+    max-height: 640px;
+  }
 }
 
 .loading-card-ssr {
@@ -700,85 +597,5 @@ onBeforeUnmount(() => {
 .app-badge {
   height: 32px;
   width: auto;
-}
-
-// Mobile Footer
-.mobile-footer {
-  padding: 0.75rem 1rem;
-  background: $color-white;
-}
-
-// ==========================================
-// Desktop Layout Styles (original)
-// ==========================================
-
-.desktop-layout {
-  .grid {
-    display: grid;
-    grid-template-columns: 0.4fr 0.6fr;
-    grid-template-rows: 100px auto auto auto;
-    grid-column-gap: 50px;
-    grid-row-gap: 30px;
-  }
-
-  .eyecandy {
-    align-items: center !important;
-    height: 300px;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 1 / 3;
-      grid-column: 1 / 2;
-      height: max(500px, calc(100vh - 450px));
-
-      @supports (height: 100dvh) {
-        height: max(500px, calc(100dvh - 450px));
-      }
-
-      max-height: 800px;
-    }
-  }
-
-  .info {
-    grid-row: 1 / 3;
-    grid-column: 1 / 3;
-    text-align: center;
-    justify-self: center;
-
-    @include media-breakpoint-up(lg) {
-      grid-column: 2 / 3;
-      text-align: left;
-    }
-  }
-
-  .app-download {
-    grid-row: 4 / 5;
-    grid-column: 1 / 3;
-    justify-self: center;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 3 / 4;
-    }
-  }
-
-  .app-download__image {
-    max-height: 25px;
-
-    @include media-breakpoint-up(lg) {
-      max-height: 40px;
-    }
-  }
-
-  .thefooter {
-    grid-row: 5 / 6;
-    grid-column: 1 / 3;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 4 / 5;
-    }
-  }
-}
-
-.black {
-  color: $color-black !important;
 }
 </style>
