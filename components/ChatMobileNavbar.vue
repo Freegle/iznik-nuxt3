@@ -54,7 +54,11 @@
               size="lg"
               @click="showInfo"
             />
-            <span v-if="otheruser.supporter" class="supporter-dot" />
+            <v-icon
+              v-if="otheruser.supporter"
+              icon="trophy"
+              class="supporter-icon"
+            />
           </div>
           <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
         </div>
@@ -498,15 +502,15 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-.supporter-dot {
+.supporter-icon {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 12px;
-  height: 12px;
-  background: linear-gradient(135deg, #ffd700, #ffb800);
-  border: 2px solid white;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.75rem;
+  color: #ffd700;
+  background: white;
   border-radius: 50%;
+  padding: 2px;
 }
 
 .supporter-badge {
