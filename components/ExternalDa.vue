@@ -178,7 +178,11 @@ function visibilityChanged(visible) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
 
-    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES && !props.video) {
+    if (
+      runtimeConfig.public.ISAPP &&
+      !runtimeConfig.public.USE_COOKIES &&
+      !props.video
+    ) {
       // App without cookies - show fallback donation ad unless recent donor (but not for video ads)
       console.log('Running in app with no cookies - using fallback ad')
       const me = useAuthStore().user
@@ -231,10 +235,11 @@ function visibilityChanged(visible) {
               prebidRetry++
 
               if (prebidRetry > 20) {
-                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-                // a fallback ad.
-                console.log('Give up on prebid load')
-                emit('rendered', false)
+                // Give up.  Probably blocked - show fallback donation ad.
+                console.log('Give up on prebid load - showing fallback')
+                fallbackAdVisible.value = true
+                adShown.value = true
+                emit('rendered', true)
               } else {
                 // Try again for prebid later.
                 visibleAndScriptsLoadedTimer = setTimeout(() => {
@@ -260,10 +265,11 @@ function visibilityChanged(visible) {
             tcDataRetry++
 
             if (tcDataRetry > 50) {
-              // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-              // a fallback ad.
-              console.log('Give up on TC data load')
-              emit('rendered', false)
+              // Give up.  Probably blocked - show fallback donation ad.
+              console.log('Give up on TC data load - showing fallback')
+              fallbackAdVisible.value = true
+              adShown.value = true
+              emit('rendered', true)
             } else {
               visibleAndScriptsLoadedTimer = window.setTimeout(() => {
                 visibilityChanged(visible)
@@ -325,10 +331,15 @@ async function checkStillVisible() {
     } else if (showingAds?.length && parseInt(showingAds[0].value)) {
       renderAd.value = true
     } else {
-      console.log('Ads disabled in server config', showingAds)
+      console.log(
+        'Ads disabled in server config - showing fallback',
+        showingAds
+      )
       useMiscStore().adsDisabled = true
-      emit('rendered', false)
-      emit('disabled')
+      // Show fallback donation ad instead of empty space
+      fallbackAdVisible.value = true
+      adShown.value = true
+      emit('rendered', true)
     }
   } else {
     emit('rendered', false)
@@ -336,8 +347,16 @@ async function checkStillVisible() {
 }
 
 function rippleRendered(rendered) {
-  adShown.value = rendered
-  emit('rendered', rendered)
+  if (rendered) {
+    adShown.value = true
+    emit('rendered', true)
+  } else {
+    // Ad failed to render - show fallback donation ad
+    console.log('Ad failed to render - showing fallback')
+    fallbackAdVisible.value = true
+    adShown.value = true
+    emit('rendered', true)
+  }
 }
 
 const passClicks = computed(() => {

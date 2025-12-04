@@ -349,6 +349,7 @@ const me = computed(() => useAuthStore().user)
   justify-content: space-around;
   background: white;
   border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   height: 67px;
   box-sizing: border-box;
