@@ -1,5 +1,9 @@
 <template>
-  <div v-if="message" class="message-expanded-wrapper">
+  <div
+    v-if="message"
+    class="message-expanded-wrapper"
+    :class="{ 'in-modal': inModal }"
+  >
     <div
       ref="containerRef"
       class="message-expanded-mobile"
@@ -447,6 +451,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  inModal: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['zoom', 'close'])
@@ -677,12 +685,14 @@ onUnmounted(() => {
   bottom: 0;
   z-index: 1000;
 
-  /* Desktop: constrain to centered modal */
-  @include media-breakpoint-up(lg) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: $color-black-opacity-50;
+  /* When inside a b-modal, disable fixed positioning */
+  &.in-modal {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
   }
 }
 
@@ -713,16 +723,19 @@ onUnmounted(() => {
     }
   }
 
-  /* Desktop: constrain size and position relative to wrapper */
-  @include media-breakpoint-up(lg) {
+  /* When inside a b-modal, disable fixed positioning */
+  .in-modal & {
     position: relative;
     top: auto;
     left: auto;
     right: auto;
     bottom: auto;
-    max-width: 700px;
-    max-height: 85vh;
-    box-shadow: 0 4px 24px $color-black-opacity-30;
+    z-index: auto;
+    max-height: 70vh;
+
+    &.stickyAdRendered {
+      bottom: auto;
+    }
   }
 }
 
@@ -1314,14 +1327,13 @@ onUnmounted(() => {
     }
   }
 
-  /* Desktop: position relative within modal, constrained width */
-  @include media-breakpoint-up(lg) {
+  /* When inside a b-modal, disable fixed positioning */
+  .in-modal & {
     position: relative;
     bottom: auto;
     left: auto;
     right: auto;
-    max-width: 700px;
-    margin: 0 auto;
+    z-index: auto;
 
     &.stickyAdRendered {
       bottom: auto;
