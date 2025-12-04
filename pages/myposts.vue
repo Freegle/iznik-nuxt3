@@ -49,7 +49,7 @@
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen :at="['xl', 'xxl']">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight
               :show-job-opportunities="false"
               ad-unit-path="/22794232631/freegle_myposts_desktop_right"

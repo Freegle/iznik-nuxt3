@@ -31,37 +31,18 @@
     <!-- Posts list -->
     <div v-if="visiblePosts.length > 0" class="posts-container">
       <div v-for="post in visiblePosts" :key="'post-' + post.id">
-        <!-- Mobile view -->
-        <VisibleWhen :at="['xs', 'sm', 'md']">
-          <Suspense>
-            <MyMessageMobile
-              :id="post.id"
-              :show-old="showOldPosts"
-              :expand="defaultExpanded"
-            />
-            <template #fallback>
-              <div class="loading-placeholder">
-                <b-img lazy src="/loader.gif" alt="Loading" width="80px" />
-              </div>
-            </template>
-          </Suspense>
-        </VisibleWhen>
-        <!-- Desktop view -->
-        <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <Suspense>
-            <MyMessage
-              :id="post.id"
-              :show-old="showOldPosts"
-              :expand="defaultExpanded"
-              class="minheight"
-            />
-            <template #fallback>
-              <div class="loading-placeholder">
-                <b-img lazy src="/loader.gif" alt="Loading" width="80px" />
-              </div>
-            </template>
-          </Suspense>
-        </VisibleWhen>
+        <Suspense>
+          <MyMessageMobile
+            :id="post.id"
+            :show-old="showOldPosts"
+            :expand="defaultExpanded"
+          />
+          <template #fallback>
+            <div class="loading-placeholder">
+              <b-img lazy src="/loader.gif" alt="Loading" width="80px" />
+            </div>
+          </template>
+        </Suspense>
       </div>
       <div v-if="loading" class="loading-more">
         <b-img lazy src="/loader.gif" alt="Loading..." width="60px" />
@@ -102,10 +83,8 @@
 <script setup>
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import MyMessage from '~/components/MyMessage.vue'
 import MyMessageMobile from '~/components/MyMessageMobile.vue'
 import InfiniteLoading from '~/components/InfiniteLoading.vue'
-import VisibleWhen from '~/components/VisibleWhen'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
 import { useTrystStore } from '~/stores/tryst'

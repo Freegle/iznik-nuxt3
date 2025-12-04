@@ -18,50 +18,18 @@
       <span itemprop="availability">Instock</span>
     </div>
     <div v-if="startExpanded">
-      <!-- Mobile-optimized view -->
       <MessageExpandedMobile
-        v-if="isMobile"
         :id="message.id"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        @zoom="showPhotosModal"
       />
-      <!-- Desktop view -->
-      <template v-else>
-        <MessageExpanded
-          :id="message.id"
-          :replyable="replyable"
-          :hide-close="hideClose"
-          :actions="actions"
-          :show-map="true"
-          class="bg-white p-2"
-          :ad-unit-path="adUnitPath"
-          :ad-id="adId"
-          @zoom="showPhotosModal"
-        />
-        <MessagePhotosModal
-          v-if="showMessagePhotosModal && message.attachments?.length"
-          :id="message.id"
-          @hidden="showMessagePhotosModal = false"
-        />
-      </template>
     </div>
     <div v-else>
-      <!-- Mobile-optimized summary -->
+      <!-- Modern card summary for all breakpoints -->
       <MessageSummaryMobile
-        v-if="isMobile"
         :id="message.id"
         :preload="preload"
-        @expand="expand"
-      />
-      <!-- Desktop summary -->
-      <MessageSummary
-        v-else
-        :id="message.id"
-        :expand-button-text="expandButtonText"
-        :replyable="replyable"
-        :matchedon="matchedon"
         @expand="expand"
       />
       <MessageModal
@@ -93,8 +61,6 @@ import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
-import MessageExpanded from '~/components/MessageExpanded'
-import MessageSummary from '~/components/MessageSummary'
 
 const MessageExpandedMobile = defineAsyncComponent(() =>
   import('~/components/MessageExpandedMobile')
@@ -104,9 +70,6 @@ const MessageSummaryMobile = defineAsyncComponent(() =>
 )
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')
-)
-const MessagePhotosModal = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModal')
 )
 
 const props = defineProps({
@@ -193,7 +156,6 @@ const msg = ref(null)
 const expanded = ref(false)
 const showMobileExpanded = ref(false)
 const showImages = ref(false)
-const showMessagePhotosModal = ref(false)
 
 // Computed properties
 const message = computed(() => {
@@ -217,10 +179,6 @@ function expand() {
 
 function closeMobileExpanded() {
   showMobileExpanded.value = false
-}
-
-function showPhotosModal() {
-  showMessagePhotosModal.value = true
 }
 
 async function view() {

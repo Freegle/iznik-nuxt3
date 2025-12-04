@@ -331,6 +331,8 @@ function expire() {
 }
 
 .volop-card__title {
+  flex: 1;
+  min-width: 0;
   color: $color-blue--base;
   text-decoration: none;
   overflow: hidden;

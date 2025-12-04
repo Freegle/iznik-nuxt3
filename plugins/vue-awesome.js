@@ -113,6 +113,8 @@ import {
 import {
   faFacebook,
   faTwitter,
+  faInstagram,
+  faGithub,
   faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons'
 
@@ -225,6 +227,8 @@ library.add(
   faWalking,
   faFacebook,
   faTwitter,
+  faInstagram,
+  faGithub,
   faWhatsapp
 )
 

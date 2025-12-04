@@ -7,7 +7,14 @@
             <SidebarLeft show-community-events show-volunteer-opportunities />
           </VisibleWhen>
         </b-col>
-        <b-col cols="12" lg="6" class="newsfeedHolder p-0">
+        <b-col
+          cols="12"
+          md="8"
+          offset-md="2"
+          lg="6"
+          offset-lg="0"
+          class="newsfeedHolder p-0"
+        >
           <GlobalMessage />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
@@ -577,6 +584,10 @@ if (me.value) {
 .composer-section {
   padding: 0.5rem 0.75rem;
 
+  @include media-breakpoint-up(md) {
+    padding: 0.75rem 1rem;
+  }
+
   @include media-breakpoint-up(lg) {
     padding: 1rem 0;
   }
@@ -738,11 +749,19 @@ if (me.value) {
 .events-section {
   margin: 0.5rem 0.75rem;
   overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    margin: 0.75rem 1rem;
+  }
 }
 
 // Posts feed
 .posts-feed {
   padding: 0 0.5rem;
+
+  @include media-breakpoint-up(md) {
+    padding: 0 1rem;
+  }
 
   @include media-breakpoint-up(lg) {
     padding: 0;

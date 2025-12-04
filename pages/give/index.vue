@@ -76,7 +76,10 @@ const miscStore = useMiscStore()
 const breakpointReady = computed(() => miscStore.breakpoint !== null)
 
 const isMobile = computed(
-  () => miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+  () =>
+    miscStore.breakpoint === 'xs' ||
+    miscStore.breakpoint === 'sm' ||
+    miscStore.breakpoint === 'md'
 )
 
 const showDesktopLayout = computed(

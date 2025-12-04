@@ -10,12 +10,11 @@
         <b-col cols="12" lg="6" offset-lg="3" class="p-0">
           <div>
             <GlobalMessage />
-            <MyMessage
+            <MyMessageMobile
               v-if="message?.fromuser === myid"
               :id="id"
               :show-old="true"
               :expand="true"
-              :action="action"
             />
             <b-alert v-else variant="warning" class="mt-2" :model-value="true">
               <h3>That post wasn't made from {{ me.email }}.</h3>
@@ -55,8 +54,8 @@ import NoticeMessage from '~/components/NoticeMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 
-const MyMessage = defineAsyncComponent(() =>
-  import('~/components/MyMessage.vue')
+const MyMessageMobile = defineAsyncComponent(() =>
+  import('~/components/MyMessageMobile.vue')
 )
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')

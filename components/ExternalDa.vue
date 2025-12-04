@@ -14,7 +14,7 @@
     >
       <div
         v-if="fallbackAdVisible && !video"
-        class="d-flex justify-content-md-around"
+        class="d-flex w-100 justify-content-md-around"
         :style="maxWidth ? `max-width: ${maxWidth}` : ''"
       >
         <!-- Use job ads as fallback when main ads fail to load -->

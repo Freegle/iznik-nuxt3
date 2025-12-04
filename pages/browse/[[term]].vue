@@ -11,7 +11,7 @@
             />
           </VisibleWhen>
         </b-col>
-        <b-col cols="12" lg="6" class="p-0">
+        <b-col cols="12" md="10" offset-md="1" lg="6" offset-lg="0" class="p-0">
           <AppUpdateAvailable v-if="mobileStore.isApp" />
           <MicroVolunteering />
           <div>
@@ -90,7 +90,7 @@
             @donation-click="onBirthdayDonationClick"
           />
         </b-col>
-        <b-col cols="0" lg="3" class="p-0 pl-1">
+        <b-col cols="0" md="2" lg="3" class="p-0 pl-1">
           <div class="d-flex justify-content-end">
             <VisibleWhen
               :not="['xs', 'sm', 'md', 'lg']"
@@ -634,6 +634,19 @@ if (existingHomepage !== 'mygroups') {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+/* Constrain maximum width on very wide monitors to prevent excessive whitespace */
+.container-fluid {
+  @include media-breakpoint-up(xxl) {
+    max-width: 1920px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 .selection__wrapper {
   background-color: $color-blue--x-light;
   border: 1px solid $color-blue-x-light2;

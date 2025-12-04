@@ -4,10 +4,10 @@
       <MicroVolunteering />
     </client-only>
     <b-row class="m-0">
-      <b-col cols="0" xl="3" class="d-none d-xl-block">
+      <b-col cols="0" lg="3" class="d-none d-lg-block">
         <client-only>
           <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
+            :not="['xs', 'sm', 'md']"
             class="position-fixed"
             style="width: 300px"
           >
@@ -21,7 +21,7 @@
           </VisibleWhen>
         </client-only>
       </b-col>
-      <b-col cols="12" xl="6" class="p-0">
+      <b-col cols="12" lg="6" class="p-0">
         <div
           v-if="
             !showtaken &&
@@ -92,7 +92,7 @@
           "
         >
           <client-only>
-            <MyMessage :id="id" :show-old="true" expand />
+            <MyMessageMobile :id="id" :show-old="true" expand />
           </client-only>
         </div>
         <div v-else class="botpad">
@@ -108,7 +108,7 @@
               />
             </template>
             <GlobalMessage />
-            <VisibleWhen :at="['xs', 'sm', 'md', 'lg']">
+            <VisibleWhen :at="['xs', 'sm', 'md']">
               <OurMessage
                 :id="id"
                 class="mt-3"
@@ -120,7 +120,7 @@
                 @not-found="error = true"
               />
             </VisibleWhen>
-            <VisibleWhen :not="['xs', 'sm', 'md', 'lg']">
+            <VisibleWhen :not="['xs', 'sm', 'md']">
               <OurMessage
                 :id="id"
                 class="mt-3"
@@ -133,10 +133,10 @@
           </client-only>
         </div>
       </b-col>
-      <b-col cols="0" xl="3" class="d-none d-xl-flex justify-content-end">
+      <b-col cols="0" lg="3" class="d-none d-lg-flex justify-content-end">
         <client-only>
           <VisibleWhen
-            :not="['xs', 'sm', 'md', 'lg']"
+            :not="['xs', 'sm', 'md']"
             class="position-fixed"
             style="width: 300px"
           >
@@ -162,7 +162,7 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
 import { dateonlyNoYear } from '~/composables/useTimeFormat'
-import MyMessage from '~/components/MyMessage'
+import MyMessageMobile from '~/components/MyMessageMobile'
 import OurMessage from '~/components/OurMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -231,8 +231,8 @@ if (message.value) {
   }
 }
 
-// We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
-// contain the reply information correctly.
+/* We want to delay render of MyMessageMobile until the mount fetch is complete, as it would otherwise not
+contain the reply information correctly. */
 
 onMounted(async () => {
   // We need to fetch again on the client, as the server may have rendered the page with data censored, because

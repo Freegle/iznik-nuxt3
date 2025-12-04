@@ -231,15 +231,27 @@
       <div class="info-section">
         <!-- Description -->
         <div class="description-section">
-          <div class="description-label">DESCRIPTION</div>
+          <div class="section-header">
+            <span class="section-header-text">DESCRIPTION</span>
+            <NuxtLink
+              :to="'/message/' + id"
+              class="section-id-link"
+              @click.stop
+            >
+              #{{ id }}
+            </NuxtLink>
+          </div>
           <div class="description-content">
             <MessageTextBody :id="id" />
           </div>
         </div>
 
         <!-- Posted by divider and section (shown on taller screens, after description) -->
-        <div v-if="poster" class="section-divider">
-          <span class="section-divider-text">POSTED BY</span>
+        <div v-if="poster" class="section-header section-header--poster">
+          <span class="section-header-text">POSTED BY</span>
+          <NuxtLink :to="posterProfileUrl" class="section-id-link" @click.stop>
+            #{{ poster.id }}
+          </NuxtLink>
         </div>
         <NuxtLink
           v-if="poster"
@@ -266,10 +278,16 @@
             <span class="poster-name">{{ poster.displayname }}</span>
             <div class="poster-stats">
               <span v-if="poster.info?.offers" class="poster-stat">
-                <v-icon icon="gift" />{{ poster.info.offers }}
+                <v-icon icon="gift" />{{ poster.info.offers
+                }}<span class="poster-stat-label">OFFERs</span>
               </span>
               <span v-if="poster.info?.wanteds" class="poster-stat">
-                <v-icon icon="search" />{{ poster.info.wanteds }}
+                <v-icon icon="search" />{{ poster.info.wanteds
+                }}<span class="poster-stat-label">WANTEDs</span>
+              </span>
+              <span v-if="poster.info?.replies" class="poster-stat">
+                <v-icon icon="envelope" />{{ poster.info.replies
+                }}<span class="poster-stat-label">replies</span>
               </span>
             </div>
             <div v-if="posterAboutMe" class="poster-aboutme">
@@ -1069,31 +1087,41 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-/* Section divider with left-aligned text and line */
-.section-divider {
+/* Section header with label on left, ID link on right */
+.section-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-top: 1rem;
-  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid $color-gray-3;
+  padding-bottom: 0.25rem;
 
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: $color-gray-3;
-  }
-
-  /* Hide on short screens where overlay is shown */
-  @media (max-height: 700px) {
-    display: none;
+  /* POSTED BY header hides on short screens where overlay is shown */
+  &--poster {
+    @media (max-height: 700px) {
+      display: none;
+    }
   }
 }
 
-.section-divider-text {
+.section-header-text {
   font-size: 0.7rem;
   font-weight: 600;
   color: $color-gray--base;
   letter-spacing: 0.1em;
+}
+
+.section-id-link {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: $color-gray--base;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-gray--dark;
+    text-decoration: underline;
+  }
 }
 
 /* Poster section wrapper - now a link for tablet layout with ratings */
@@ -1215,6 +1243,15 @@ onUnmounted(() => {
   gap: 0.2rem;
 }
 
+.poster-stat-label {
+  display: none;
+  margin-left: 0.15rem;
+
+  @include media-breakpoint-up(md) {
+    display: inline;
+  }
+}
+
 .poster-chevron {
   flex-shrink: 0;
   align-self: center;
@@ -1227,14 +1264,6 @@ onUnmounted(() => {
 // Description
 .description-section {
   margin-bottom: 1rem;
-}
-
-.description-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: $color-gray--base;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
 }
 
 .description-content {

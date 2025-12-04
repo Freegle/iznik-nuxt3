@@ -16,29 +16,16 @@
         </div>
       </div>
     </div>
-    <!-- Mobile view -->
-    <ProfileInfoMobile v-else-if="isMobile" :id="id" />
-    <!-- Desktop view -->
-    <div v-else class="profile-page">
-      <div class="profile-content">
-        <ProfileInfo :id="id" />
-      </div>
-    </div>
+    <ProfileInfoMobile v-else :id="id" />
   </client-only>
 </template>
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { ref, computed, defineAsyncComponent } from '#imports'
+import { ref } from '#imports'
 import { useUserStore } from '~/stores/user'
-import { useMiscStore } from '~/stores/misc'
-import ProfileInfo from '~/components/ProfileInfo'
-
-const ProfileInfoMobile = defineAsyncComponent(() =>
-  import('~/components/ProfileInfoMobile')
-)
+import ProfileInfoMobile from '~/components/ProfileInfoMobile'
 
 const userStore = useUserStore()
-const miscStore = useMiscStore()
 const route = useRoute()
 const router = useRouter()
 const id = parseInt(route.params.id)
@@ -51,14 +38,6 @@ function goBack() {
     router.push('/browse')
   }
 }
-
-const isMobile = computed(() => {
-  return (
-    miscStore.breakpoint === 'xs' ||
-    miscStore.breakpoint === 'sm' ||
-    miscStore.breakpoint === 'md'
-  )
-})
 
 if (id) {
   try {
@@ -76,17 +55,6 @@ if (id) {
 
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
-
-.profile-page {
-  min-height: 100vh;
-  background: #f8f9fa;
-}
-
-.profile-content {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 1rem;
-}
 
 .error-page {
   min-height: 100vh;

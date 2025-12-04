@@ -31,15 +31,50 @@
         </div>
       </VisibleWhen>
 
-      <!-- Desktop: single column -->
+      <!-- Desktop: 3-column grid -->
       <VisibleWhen :not="['xs', 'sm', 'md']">
-        <div
-          v-for="(item, ix) in visibleItems"
-          :key="itemKey(item, ix)"
-          class="scroll-grid__item"
-        >
-          <slot name="before-row" :item="item" :index="ix" />
-          <slot name="item" :item="item" :index="ix" />
+        <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
+          <div v-if="ix % 3 === 0">
+            <!-- Full-width slots before this row -->
+            <slot name="before-row" :item="item" :index="ix" />
+            <slot
+              v-if="ix + 1 < visibleItems.length"
+              name="before-row"
+              :item="visibleItems[ix + 1]"
+              :index="ix + 1"
+            />
+            <slot
+              v-if="ix + 2 < visibleItems.length"
+              name="before-row"
+              :item="visibleItems[ix + 2]"
+              :index="ix + 2"
+            />
+            <div class="threecolumn">
+              <div class="threecolumn__item">
+                <slot name="item" :item="item" :index="ix" />
+              </div>
+              <div
+                v-if="ix + 1 < visibleItems.length"
+                class="threecolumn__item"
+              >
+                <slot
+                  name="item"
+                  :item="visibleItems[ix + 1]"
+                  :index="ix + 1"
+                />
+              </div>
+              <div
+                v-if="ix + 2 < visibleItems.length"
+                class="threecolumn__item"
+              >
+                <slot
+                  name="item"
+                  :item="visibleItems[ix + 2]"
+                  :index="ix + 2"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </VisibleWhen>
 
@@ -144,28 +179,19 @@ watch(
   margin-bottom: 0.5rem;
 }
 
-.twocolumn {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 5px;
-
-  @media only screen and (min-width: 360px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-column-gap: 5px;
-    align-items: stretch;
-  }
+.threecolumn {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-column-gap: 0.5rem;
+  grid-row-gap: 0.5rem;
+  align-items: stretch;
+  margin-bottom: 0.5rem;
 }
 
-.onecolumn {
+.threecolumn__item {
   display: flex;
   flex-direction: column;
-  margin-bottom: 5px;
   min-width: 0;
-
-  @media only screen and (min-width: 360px) {
-    margin-bottom: 0;
-  }
 
   :deep(> *) {
     flex: 1;
@@ -189,6 +215,59 @@ watch(
     flex: 1;
     display: flex;
     flex-direction: column;
+  }
+}
+
+.twocolumn {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5px;
+
+  @media only screen and (min-width: 360px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 5px;
+    align-items: stretch;
+  }
+}
+
+.onecolumn {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5px;
+  min-width: 0;
+  overflow: hidden;
+
+  @media only screen and (min-width: 360px) {
+    margin-bottom: 0;
+  }
+
+  :deep(> *) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  :deep(> * > *) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  :deep(> * > * > *) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  :deep(> * > * > * > *) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 }
 

@@ -173,8 +173,8 @@ function filterNonsense(val) {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
-  color: $white;
+  background: $gray-100;
+  color: $gray-500;
   flex-shrink: 0;
 
   &--large {
