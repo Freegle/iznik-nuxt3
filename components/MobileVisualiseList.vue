@@ -140,14 +140,16 @@ function goToMessage(id) {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   animation: scrollUp linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes scrollUp {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translate3d(0, -50%, 0);
   }
 }
 
