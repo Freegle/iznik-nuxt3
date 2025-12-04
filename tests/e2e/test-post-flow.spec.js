@@ -353,7 +353,7 @@ test.describe('Post flow tests', () => {
 
     // Wait for the "Freegle it!" button to appear (email passes basic validation)
     console.log('Waiting for Freegle it button to appear')
-    const freegleButton = page.locator('.maxbutt .btn:has-text("Freegle it!")')
+    const freegleButton = page.locator('button:has-text("Freegle it!")')
     await freegleButton.first().waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,

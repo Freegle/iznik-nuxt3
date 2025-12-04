@@ -1151,8 +1151,8 @@ const testWithFixtures = test.extend({
         'Waiting for Freegle it button to appear after email validation'
       )
       const freegleButton = page
-        .locator('.maxbutt .btn:has-text("Freegle it!")')
-        .first() // Target desktop version using maxbutt class
+        .locator('button:has-text("Freegle it!")')
+        .first()
 
       // Wait for button to be visible
       await freegleButton.waitFor({
