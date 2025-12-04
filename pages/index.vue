@@ -654,7 +654,9 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
+  margin: 0 1rem;
   background: $color-gray--lighter;
+  border-radius: 12px;
 }
 
 .app-badge {
