@@ -4,23 +4,20 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-    <VisibleWhen :at="['xs', 'sm']">
-      <Teleport v-if="loggedIn && id" to="#navbar-mobile">
-        <ChatMobileNavbar v-if="chat" :id="id" />
-        <div v-else class="ourBack layout fixed-top pt-1 pb-1">
-          <div class="backbutton nav-back-btn">
-            <v-icon icon="arrow-left" class="back-icon" />
-          </div>
-          <div
-            class="name d-flex flex-column justify-content-around text-center"
-          >
-            <h1 class="text-white truncate text-center header--size5 m-0">
-              Loading...
-            </h1>
-          </div>
+    <!-- ChatMobileNavbar is used at all breakpoints for consistent modern UI -->
+    <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+      <ChatMobileNavbar v-if="chat" :id="id" />
+      <div v-else class="ourBack layout fixed-top pt-1 pb-1">
+        <div class="backbutton nav-back-btn">
+          <v-icon icon="arrow-left" class="back-icon" />
         </div>
-      </Teleport>
-    </VisibleWhen>
+        <div class="name d-flex flex-column justify-content-around text-center">
+          <h1 class="text-white truncate text-center header--size5 m-0">
+            Loading...
+          </h1>
+        </div>
+      </div>
+    </Teleport>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
@@ -76,13 +73,22 @@
                     <span class="d-none d-sm-inline">Mark all read</span>
                   </button>
                 </div>
-                <p
+                <div
                   v-if="!visibleChats?.length && !closedChats?.length"
-                  class="ml-2"
+                  class="empty-state"
                 >
-                  <span v-if="searching" class="pulsate"> Searching... </span>
-                  <span v-else> No chats to show. </span>
-                </p>
+                  <div v-if="searching" class="empty-state-content">
+                    <v-icon icon="spinner" class="empty-state-icon fa-spin" />
+                    <p class="empty-state-text">Searching...</p>
+                  </div>
+                  <div v-else class="empty-state-content">
+                    <v-icon icon="comments" class="empty-state-icon" />
+                    <p class="empty-state-text">No chats to show.</p>
+                    <p class="empty-state-hint">
+                      Start a conversation by replying to a post.
+                    </p>
+                  </div>
+                </div>
                 <div v-else>
                   <div
                     v-if="closedChats.length"
@@ -153,27 +159,25 @@
                     <template #spinner>&nbsp;</template>
                   </infinite-loading>
                 </div>
-                <div class="d-flex justify-content-around">
-                  <b-button
+                <div class="chat-actions">
+                  <button
                     v-if="
                       !search && mightBeOldChats && complete && !showingOlder
                     "
-                    variant="link"
-                    size="sm"
+                    class="chat-action-btn"
                     @click="fetchOlder"
                   >
-                    Show older chats
-                  </b-button>
-                </div>
-                <div class="d-flex justify-content-around mt-2">
-                  <b-button
+                    <v-icon icon="history" class="action-icon" />
+                    <span>Show older chats</span>
+                  </button>
+                  <button
                     v-if="complete && visibleChats && visibleChats.length"
-                    variant="link"
-                    size="sm"
+                    class="chat-action-btn"
                     @click="showHideAll"
                   >
-                    Hide all chats
-                  </b-button>
+                    <v-icon icon="eye-slash" class="action-icon" />
+                    <span>Hide all chats</span>
+                  </button>
                 </div>
               </div>
               <VisibleWhen
@@ -636,6 +640,72 @@ async function searchMore() {
     background: $color-green-background;
     border-color: $color-green-background;
     color: white;
+  }
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.empty-state-content {
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  color: $color-gray--light;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $color-gray--dark;
+  margin-bottom: 4px;
+}
+
+.empty-state-hint {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin: 0;
+}
+
+/* Chat action buttons (Show older, Hide all) */
+.chat-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+}
+
+.chat-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .action-icon {
+    font-size: 0.85rem;
+    color: $color-green-background;
+  }
+
+  &:hover {
+    background: rgba($color-green-background, 0.08);
+    border-color: $color-green-background;
+    color: $color-green--dark;
   }
 }
 

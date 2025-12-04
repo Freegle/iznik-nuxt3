@@ -17,7 +17,20 @@
         class="d-flex justify-content-md-around"
         :style="maxWidth ? `max-width: ${maxWidth}` : ''"
       >
-        <nuxt-link to="/adsoff" style="display: block; max-width: 100%">
+        <!-- Use job ads as fallback when main ads fail to load -->
+        <JobsDaSlot
+          v-if="jobs"
+          :min-width="minWidth"
+          :max-width="maxWidth"
+          :min-height="minHeight"
+          :max-height="maxHeight"
+          :class="{
+            'text-center': maxWidth === '100vw',
+          }"
+          @rendered="rippleRendered"
+        />
+        <!-- Final fallback: donate ad if job ads not enabled -->
+        <nuxt-link v-else to="/adsoff" style="display: block; max-width: 100%">
           <img
             src="/donate/SupportFreegle_970x250px_20May20215.png"
             alt="Please donate to help keep Freegle running"

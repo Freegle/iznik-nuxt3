@@ -165,7 +165,7 @@
       </nav>
     </div>
     <!-- Placeholder for chat pages - prevents flicker before ChatMobileNavbar teleports in -->
-    <div v-else class="chat-navbar-placeholder ourBack fixed-top d-xl-none" />
+    <div v-else class="chat-navbar-placeholder ourBack fixed-top" />
   </div>
 </template>
 <script setup>
