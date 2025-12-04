@@ -510,7 +510,7 @@ onBeforeUnmount(() => {
 }
 
 .supporter-badge {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
 }
 
 .profile-card-avatar {
