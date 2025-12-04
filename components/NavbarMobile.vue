@@ -338,6 +338,7 @@ const me = computed(() => useAuthStore().user)
 
 // Bottom navbar - modern design
 // Total height should be 67px (same as before: 51 content + 8 pad top + 8 pad bottom)
+// On tablets (md+), increase to 76px (60 content + 8 pad top + 8 pad bottom)
 .navbar-bottom {
   position: fixed;
   bottom: 0;
@@ -353,6 +354,10 @@ const me = computed(() => useAuthStore().user)
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   height: 67px;
   box-sizing: border-box;
+
+  @include media-breakpoint-up(md) {
+    height: 76px;
+  }
 }
 
 .navbar-bottom.stickyAdRendered {
@@ -377,6 +382,10 @@ const me = computed(() => useAuthStore().user)
   justify-content: center;
   width: 64px;
   height: 51px;
+
+  @include media-breakpoint-up(md) {
+    height: 60px;
+  }
 }
 
 // Modern user dropdown styling
