@@ -1,18 +1,20 @@
 <template>
-  <div class="footer w-100 mt-4 test-main-footer thefooter">
-    <div class="d-flex flex-column">
-      <div class="d-flex justify-content-center mb-2 test-footer-sponsors">
+  <div class="footer w-100 test-main-footer thefooter">
+    <!-- Sponsors section -->
+    <div class="sponsors-section test-footer-sponsors">
+      <p class="sponsors-label">Kindly supported by</p>
+      <div class="sponsors-logos">
         <a
           target="_blank"
           rel="noopener"
           href="/shortlink/krystalaffiliate"
-          class="d-flex justify-content-start flex-column mr-4 test-sponsor-krystal"
+          class="sponsor-link test-sponsor-krystal"
         >
           <ProxyImage
             preload
             src="/krystal.png"
             alt="Krystal Logo"
-            class="sponsor"
+            class="sponsor-logo"
             sizes="75px md:100px lg:165px"
           />
         </a>
@@ -20,78 +22,45 @@
           target="_blank"
           rel="noopener"
           href="https://www.mythic-beasts.com"
-          class="d-flex justify-content-start flex-column ml-4 test-sponsor-mythic"
+          class="sponsor-link test-sponsor-mythic"
         >
           <ProxyImage
             preload
             src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
-            class="sponsor"
+            class="sponsor-logo"
             sizes="75px md:100px lg:165px"
           />
         </a>
       </div>
-      <div class="d-flex flex-column justify-content-end small mb-2">
-        <div class="text-muted text-center mb-1 test-footer-charity-text">
-          Freegle is registered as a charity with HMRC (ref. XT32865). Kind
-          support from Krystal & Mythic Beasts.
-        </div>
-      </div>
-      <div class="d-flex justify-content-between navlinks test-footer-links">
-        <!-- eslint-disable-next-line -->
-        <nuxt-link no-prefetch to="/about" class="menu__link test-footer-about">
-          <client-only>
-            <v-icon icon="info-circle" class="link__icon" />
-          </client-only>
-          About
-        </nuxt-link>
-        <nuxt-link no-prefetch to="/terms" class="menu__link test-footer-terms">
-          <client-only>
-            <v-icon icon="book-open" class="link__icon" />
-          </client-only>
-          Terms
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          to="/privacy"
-          class="menu__link test-footer-privacy"
-        >
-          <client-only>
-            <v-icon icon="lock" class="link__icon" />
-          </client-only>
-          Privacy
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          to="/disclaimer"
-          class="menu__link test-footer-disclaimer"
-        >
-          <client-only>
-            <v-icon icon="gavel" class="link__icon" />
-          </client-only>
-          Disclaimer
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          to="/donate"
-          class="menu__link test-footer-donate"
-        >
-          <client-only>
-            <v-icon icon="hand-holding-heart" class="link__icon" />
-          </client-only>
-          Donate
-        </nuxt-link>
-        <nuxt-link
-          no-prefetch
-          to="/help"
-          class="menu__link test-footer-contact"
-        >
-          <client-only>
-            <v-icon icon="envelope" class="link__icon" />
-          </client-only>
-          Contact
-        </nuxt-link>
-      </div>
+    </div>
+
+    <!-- Charity info -->
+    <p class="charity-text test-footer-charity-text">
+      Freegle is registered as a charity with HMRC (ref. XT32865).
+    </p>
+
+    <!-- Navigation links -->
+    <div class="nav-links test-footer-links">
+      <nuxt-link no-prefetch to="/about" class="nav-link test-footer-about">
+        About
+      </nuxt-link>
+      <span class="nav-divider">·</span>
+      <nuxt-link no-prefetch to="/terms" class="nav-link test-footer-terms">
+        Terms
+      </nuxt-link>
+      <span class="nav-divider">·</span>
+      <nuxt-link no-prefetch to="/privacy" class="nav-link test-footer-privacy">
+        Privacy
+      </nuxt-link>
+      <span class="nav-divider">·</span>
+      <nuxt-link no-prefetch to="/donate" class="nav-link test-footer-donate">
+        Donate
+      </nuxt-link>
+      <span class="nav-divider">·</span>
+      <nuxt-link no-prefetch to="/help" class="nav-link test-footer-contact">
+        Help
+      </nuxt-link>
     </div>
   </div>
 </template>
@@ -102,38 +71,81 @@
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .footer {
-  //max-width: map-get($grid-breakpoints, 'md');
   margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
 }
 
-.menu__link {
-  color: $color-black;
+.sponsors-section {
+  background: $color-gray--lighter;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.sponsors-label {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sponsors-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sponsor-link {
+  display: block;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.sponsor-logo {
+  width: 120px;
+  height: auto;
+
+  @include media-breakpoint-down(sm) {
+    width: 90px;
+  }
+}
+
+.charity-text {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.nav-link {
+  color: $color-gray--darker;
   text-decoration: none;
-}
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
 
-.link__icon {
-  display: none;
-}
-
-@include media-breakpoint-up(lg) {
-  .link__icon {
-    display: inline-block;
+  &:hover {
+    color: $colour-success;
   }
 }
 
-.sponsor {
-  width: 165px;
-
-  @include media-breakpoint-down(md) {
-    width: 99px;
-  }
-}
-
-.navlinks {
-  @include media-breakpoint-down(xs) {
-    font-size: 0.8rem;
-  }
+.nav-divider {
+  color: $color-gray--light;
 }
 </style>

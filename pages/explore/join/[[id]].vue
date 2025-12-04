@@ -2,7 +2,7 @@
   <client-only v-if="me">
     <div>
       <b-row class="m-0">
-        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+        <b-col cols="12" md="6" lg="6" class="p-0" offset-md="3" offset-lg="3">
           <NoticeMessage v-if="invalid" variant="danger" class="mt-2">
             That community name is invalid - please check it.
           </NoticeMessage>

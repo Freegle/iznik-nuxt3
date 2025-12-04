@@ -255,6 +255,7 @@ const deleteMessage = async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .selected {
   border: 1px solid $color-blue--bright;
@@ -307,14 +308,14 @@ const deleteMessage = async () => {
 }
 
 :deep(.myChatMessage) {
-  // Only apply green gradient to simple text messages without buttons/complex content
+  /* Use light green for sent messages - distinct from navbar but not overpowering */
   .chatMessage.chatMessage__owner:not(:has(button)):not(:has(hr)):not(
       :has(.messagecard)
     ) {
-    background: linear-gradient(135deg, #5cb85c 0%, #4cae4c 100%);
-    color: white;
-    border: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    background: $color-green--light;
+    color: $color-gray--darker;
+    border: 1px solid $color-green--medium;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
 
   .chatMessage {

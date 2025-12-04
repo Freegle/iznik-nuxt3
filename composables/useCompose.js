@@ -270,26 +270,6 @@ export function postcodeSelect(pc) {
   }
 }
 
-export function addItem() {
-  const composeStore = useComposeStore()
-  const authStore = useAuthStore()
-
-  const id = composeStore.add()
-  const me = authStore.user
-
-  composeStore.setMessage(
-    id,
-    {
-      id,
-      item: null,
-      description: null,
-      type: postType.value,
-      availablenow: 1,
-    },
-    me
-  )
-}
-
 export async function freegleIt(type, router, options = {}) {
   const composeStore = useComposeStore()
   const messageStore = useMessageStore()

@@ -47,6 +47,27 @@
             </template>
             <template v-else>Nearby</template>
           </span>
+          <!-- Transport chips - inline with postcode on desktop -->
+          <div class="transport-chips transport-chips-desktop">
+            <button
+              :class="['transport-chip', { active: transport === 'Walk' }]"
+              @click="changeTransport('Walk')"
+            >
+              <v-icon icon="walking" />
+            </button>
+            <button
+              :class="['transport-chip', { active: transport === 'Cycle' }]"
+              @click="changeTransport('Cycle')"
+            >
+              <v-icon icon="bicycle" />
+            </button>
+            <button
+              :class="['transport-chip', { active: transport === 'Drive' }]"
+              @click="changeTransport('Drive')"
+            >
+              <v-icon icon="car" />
+            </button>
+          </div>
           <div class="header-actions">
             <button v-if="addButton" class="link-btn" @click="$emit('add')">
               + Add
@@ -81,8 +102,8 @@
           </button>
         </div>
 
-        <!-- Transport chips -->
-        <div class="transport-chips">
+        <!-- Transport chips - mobile only -->
+        <div class="transport-chips transport-chips-mobile">
           <button
             :class="['transport-chip', { active: transport === 'Walk' }]"
             @click="changeTransport('Walk')"
@@ -412,6 +433,15 @@ watch(minutes, (newVal) => {
   gap: 0.25rem;
 }
 
+/* Mobile: show bottom chips, hide header chips */
+.transport-chips-mobile {
+  display: flex;
+}
+
+.transport-chips-desktop {
+  display: none;
+}
+
 .transport-chip {
   width: 40px;
   height: 32px;
@@ -435,36 +465,39 @@ watch(minutes, (newVal) => {
   }
 }
 
-// Desktop layout
+/* Desktop layout */
 @include media-breakpoint-up(md) {
   .isochrone-card {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: 0.5rem;
     padding: 1rem;
   }
 
   .isochrone-header {
-    grid-column: 1 / 2;
-    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .slider-row {
-    grid-column: 1 / 2;
     margin-bottom: 0;
   }
 
-  .transport-chips {
-    grid-column: 2 / 3;
-    grid-row: 1 / 3;
-    flex-direction: column;
-    align-self: center;
+  /* Desktop: show header chips, hide bottom chips */
+  .transport-chips-mobile {
+    display: none;
+  }
+
+  .transport-chips-desktop {
+    display: flex;
+  }
+
+  .header-actions {
+    margin-left: auto;
   }
 
   .transport-chip {
-    width: 48px;
-    height: 36px;
+    width: 36px;
+    height: 32px;
   }
 }
 </style>

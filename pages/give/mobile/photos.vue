@@ -2,7 +2,7 @@
   <div class="app-give-photos" :class="{ 'has-sticky-ad': stickyAdRendered }">
     <!-- Main content -->
     <div class="app-content">
-      <AppPhotoUploader
+      <PhotoUploader
         v-model="attachments"
         type="Message"
         :recognise="attachments.length === 0"

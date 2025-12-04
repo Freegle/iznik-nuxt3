@@ -1,8 +1,8 @@
 <template>
   <div class="pt-4">
     <b-row class="m-0">
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-      <b-col cols="12" md="6" class="p-0">
+      <b-col cols="0" lg="3" class="d-none d-lg-block" />
+      <b-col cols="12" lg="6" class="p-0">
         <h2>Statistics by Local Authority, Council etc</h2>
         <p>
           You can search for a council, local authority etc. Then we'll show you

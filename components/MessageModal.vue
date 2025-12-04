@@ -75,14 +75,9 @@
           :replyable="replyable"
           :hide-close="hideClose"
           :actions="actions"
-          :show-map="true"
-          :show-ad="true"
-          ad-unit-path="/22794232631/freegle_product"
-          ad-id="div-gpt-ad-1691925699378-0"
           class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
           in-modal
           @close="hide"
-          @zoom="showImagesProxy = true"
         />
       </div>
       <div
@@ -95,11 +90,14 @@
   </b-modal>
 </template>
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, defineAsyncComponent } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
-import MessageExpanded from '~/components/MessageExpanded'
+
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
+)
 
 const messageStore = useMessageStore()
 

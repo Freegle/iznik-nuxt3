@@ -115,6 +115,7 @@ function goToMessage(id) {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .mobile-visualise {
   overflow: hidden;
@@ -133,6 +134,10 @@ function goToMessage(id) {
     black 92%,
     transparent 100%
   );
+
+  @include media-breakpoint-up(lg) {
+    height: 640px;
+  }
 }
 
 .scroll-track {
@@ -140,14 +145,20 @@ function goToMessage(id) {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   animation: scrollUp linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @keyframes scrollUp {
   0% {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateY(-50%);
+    transform: translate3d(0, -50%, 0);
   }
 }
 
@@ -170,6 +181,10 @@ function goToMessage(id) {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .loading-card {

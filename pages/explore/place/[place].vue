@@ -2,8 +2,8 @@
   <client-only>
     <b-container fluid class="p-0 p-xl-2">
       <b-row class="m-0">
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pr-1" />
-        <b-col cols="12" lg="6" class="p-0">
+        <b-col cols="0" md="3" lg="3" class="d-none d-md-block p-0 pr-1" />
+        <b-col cols="12" md="6" lg="6" class="p-0">
           <div v-if="place">
             <h1 class="visually-hidden">Freegling map near {{ place.name }}</h1>
             <PostMapAndList
@@ -19,7 +19,7 @@
             trying to do at <SupportLink />
           </b-alert>
         </b-col>
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pl-1" />
+        <b-col cols="0" md="3" lg="3" class="d-none d-md-block p-0 pl-1" />
       </b-row>
     </b-container>
   </client-only>

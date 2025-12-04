@@ -1,8 +1,8 @@
 <template>
-  <div class="d-flex">
+  <div class="d-flex align-items-center">
     <div class="d-flex flex-column">
       <label v-if="label" :for="id">{{ label }}</label>
-      <div class="d-flex">
+      <div class="d-flex align-items-center">
         <div
           v-b-tooltip="{
             title: 'Keep typing your full postcode...',
@@ -11,6 +11,7 @@
             placement: 'top',
             delay: { show: 3000 },
           }"
+          class="postcode-input-wrapper"
         >
           <AutoComplete
             :id="id"
@@ -38,6 +39,7 @@
             not-found-message="Not a valid postcode."
             @invalid="invalid"
           />
+          <v-icon v-if="isValid" icon="check" class="validation-tick" />
         </div>
         <b-popover
           v-if="showLocated"
@@ -137,6 +139,7 @@ const locationFailed = ref(false)
 const showLocated = ref(false)
 const callbackToCall = ref(null)
 const autocomplete = ref(null)
+const isValid = ref(false)
 
 // Unique id
 const id = uid('postcode')
@@ -166,6 +169,7 @@ function invalid() {
   emit('cleared')
   wip.value = null
   results.value = []
+  isValid.value = false
 }
 
 function keydown(e) {
@@ -209,8 +213,10 @@ async function select(pc) {
       }
     }
     emit('selected', pc)
+    isValid.value = true
   } else {
     emit('cleared')
+    isValid.value = false
   }
 
   locationFailed.value = false
@@ -290,6 +296,14 @@ onBeforeUnmount(() => {
 })
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.postcode-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 :deep(.listentry) {
   width: 100%;
   right: 0 !important;
@@ -301,5 +315,16 @@ onBeforeUnmount(() => {
 
 :deep(.popover) {
   background-color: black;
+}
+
+.validation-tick {
+  position: absolute;
+  right: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-green-background;
+  font-size: 1.25rem;
+  pointer-events: none;
+  z-index: 10;
 }
 </style>

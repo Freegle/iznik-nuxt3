@@ -313,7 +313,10 @@ function expire() {
 
 .volop-card {
   background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .volop-card__header {
@@ -328,6 +331,8 @@ function expire() {
 }
 
 .volop-card__title {
+  flex: 1;
+  min-width: 0;
   color: $color-blue--base;
   text-decoration: none;
   overflow: hidden;
@@ -349,6 +354,9 @@ function expire() {
 
 .volop-card__body {
   padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .volop-card__owner-actions {
@@ -399,16 +407,21 @@ function expire() {
   line-height: 1.6;
   color: $gray-700;
   margin-bottom: 1rem;
-}
+  flex: 1;
 
-.volop-card__actions {
-  margin-bottom: 1rem;
+  :deep(.read-more-text) {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 
 .volop-card__detail {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
 
   @include media-breakpoint-up(sm) {
     flex-direction: row;
@@ -417,6 +430,14 @@ function expire() {
 
 .volop-card__content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.volop-card__actions {
+  margin-top: auto;
+  margin-bottom: 0;
+  padding-top: 0.5rem;
 }
 
 .volop-card__image {

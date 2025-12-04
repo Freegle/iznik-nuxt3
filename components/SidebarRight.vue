@@ -3,8 +3,8 @@
     <ExternalDa
       v-if="adUnitPath"
       :ad-unit-path="adUnitPath"
-      max-width="300px"
-      max-height="600px"
+      max-width="100%"
+      max-height="100%"
       :div-id="adDivId"
       class="da"
       :jobs="showJobOpportunities"
@@ -40,38 +40,43 @@ defineProps({
 @import 'assets/css/navbar.scss';
 
 .sidebar__wrapper {
-  height: calc(100vh - $sticky-banner-height-desktop - $navbar-height - 10px);
+  height: calc(
+    100vh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
+  );
 
   @media (min-height: $desktop-tall) {
     height: calc(
-      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+      100vh - $sticky-banner-height-desktop-tall - $navbar-height - 75px - 10px
     );
   }
 
   @supports (height: 100dvh) {
     height: calc(
-      100dvh - $sticky-banner-height-desktop - $navbar-height - 10px
+      100dvh - $sticky-banner-height-desktop - $navbar-height - 75px - 10px
     );
 
     @media (min-height: $desktop-tall) {
       height: calc(
-        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 10px
+        100dvh - $sticky-banner-height-desktop-tall - $navbar-height - 75px -
+          10px
       );
     }
   }
 
-  display: grid;
-  grid-template-rows: max-content minmax(0, 1fr);
-  grid-row-gap: 10px;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   overflow-y: hidden;
 
   .da {
-    grid-row: 1 / 2;
-  }
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 
-  .jobs {
-    grid-row: 2 / 3;
+    :deep(.jobs-slot) {
+      flex: 1;
+      height: 100%;
+    }
   }
 }
 </style>

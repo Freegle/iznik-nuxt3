@@ -1,97 +1,62 @@
 <template>
   <div class="app-photo-uploader">
-    <!-- Photo Grid -->
-    <div class="photo-grid">
+    <!-- Featured photo - always shows first photo (the primary one for post) -->
+    <Transition name="fade">
+      <div v-if="selectedPhoto" class="featured-photo">
+        <PhotoCard
+          :ouruid="selectedPhoto.ouruid"
+          :src="
+            selectedPhoto.preview ||
+            selectedPhoto.path ||
+            selectedPhoto.paththumb
+          "
+          :selected="true"
+          :uploading="selectedPhoto.uploading"
+          :progress="selectedPhoto.progress"
+          :error="selectedPhoto.error"
+          :quality-warning="selectedPhoto.qualityWarning"
+          :show-rotate="!!selectedPhoto.id"
+          @remove="removePhoto(selectedPhoto)"
+          @rotate="rotatePhoto(selectedPhoto, 90)"
+          @retry="retryUpload(selectedPhoto)"
+          @show-quality="showQualityWarning(selectedPhoto)"
+        />
+      </div>
+    </Transition>
+
+    <!-- Thumbnail carousel (excluding selected photo) -->
+    <div v-if="photos.length > 1" class="thumbnail-carousel">
       <draggable
         v-model="photos"
-        class="photo-grid-inner"
-        :item-key="(el) => `photo-${el.id || el.tempId}`"
+        class="thumbnail-strip"
+        :item-key="(el) => `thumb-${el.id || el.tempId}`"
         :animation="150"
         ghost-class="ghost"
-        filter=".no-drag"
-        :prevent-on-filter="false"
         @start="dragging = true"
         @end="dragging = false"
       >
         <template #item="{ element, index }">
           <div
-            class="photo-card"
-            :class="{
-              'photo-primary': index === 0,
-              'photo-uploading': element.uploading,
-            }"
+            v-if="selectedIndex !== index"
+            class="thumbnail"
+            @click="selectPhoto(index)"
           >
-            <!-- Photo preview -->
+            <OurUploadedImage
+              v-if="element.ouruid"
+              :src="element.ouruid"
+              class="thumbnail-image"
+              alt="Photo"
+              :width="80"
+            />
             <img
+              v-else
               :src="element.preview || element.path || element.paththumb"
-              class="photo-image"
+              class="thumbnail-image"
               alt="Photo"
             />
-
-            <!-- Upload progress overlay -->
-            <div v-if="element.uploading" class="photo-progress-overlay">
-              <div class="progress-circle">
-                <svg viewBox="0 0 36 36" class="circular-chart">
-                  <path
-                    class="circle-bg"
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                  <path
-                    class="circle"
-                    :stroke-dasharray="`${element.progress || 0}, 100`"
-                    d="M18 2.0845
-                      a 15.9155 15.9155 0 0 1 0 31.831
-                      a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
-                </svg>
-                <span class="progress-text">{{ element.progress || 0 }}%</span>
-              </div>
+            <div v-if="element.uploading" class="thumbnail-uploading">
+              {{ element.progress || 0 }}%
             </div>
-
-            <!-- Error overlay with retry/delete -->
-            <div v-if="element.error" class="photo-error-overlay no-drag">
-              <div class="error-message">Upload failed</div>
-              <div class="error-actions">
-                <button
-                  class="error-btn no-drag"
-                  @click.stop="retryUpload(element)"
-                >
-                  <v-icon icon="redo" /> Retry
-                </button>
-                <button
-                  class="error-btn no-drag"
-                  @click.stop="removePhoto(element)"
-                >
-                  <v-icon icon="times" /> Delete
-                </button>
-              </div>
-            </div>
-
-            <!-- Quality warning - shown inline with short label -->
-            <div
-              v-if="
-                element.qualityWarning && !element.uploading && !element.error
-              "
-              class="quality-warning-inline no-drag"
-              :class="`quality-${element.qualityWarning.severity}`"
-              @click.stop="showQualityWarning(element)"
-            >
-              <v-icon icon="exclamation-triangle" />
-              <span class="quality-text">{{
-                getShortLabel(element.qualityWarning)
-              }}</span>
-            </div>
-
-            <!-- Delete button -->
-            <button
-              v-if="!element.uploading && !element.error"
-              class="delete-button no-drag"
-              @click.stop="removePhoto(element)"
-            >
-              <v-icon icon="times" />
-            </button>
           </div>
         </template>
       </draggable>
@@ -127,9 +92,11 @@
       >
         <v-icon icon="camera" /> Add Photos
       </b-button>
-      <p class="skip-link">
-        <a href="#" @click.prevent="emit('skip')">Skip</a>
-      </p>
+      <VisibleWhen :at="['xs', 'sm']">
+        <p class="skip-link">
+          <a href="#" @click.prevent="emit('skip')">Skip</a>
+        </p>
+      </VisibleWhen>
     </div>
 
     <!-- Photo source selection modal -->
@@ -174,9 +141,12 @@
 </template>
 
 <script setup>
-import { ref, watch, defineAsyncComponent, reactive } from 'vue'
+import { ref, watch, defineAsyncComponent, reactive, computed } from 'vue'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
+import PhotoCard from './PhotoCard.vue'
+import OurUploadedImage from '~/components/OurUploadedImage.vue'
+import VisibleWhen from '~/components/VisibleWhen.vue'
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
 import {
@@ -232,8 +202,29 @@ const showQualityModal = ref(false)
 const qualityModalTitle = ref('')
 const qualityModalMessage = ref('')
 const pendingPhoto = ref(null)
+// Always show first photo as the featured/primary one
+const selectedIndex = ref(0)
 let uploadInstance = null
 let tempIdCounter = 0
+
+// Computed property for the selected photo
+const selectedPhoto = computed(() => {
+  if (selectedIndex.value !== null && photos.value[selectedIndex.value]) {
+    return photos.value[selectedIndex.value]
+  }
+  return null
+})
+
+// Select a photo as primary - moves it to front of array
+function selectPhoto(index) {
+  if (index > 0 && index < photos.value.length) {
+    // Move the clicked photo to the front (making it primary)
+    const photo = photos.value.splice(index, 1)[0]
+    photos.value.unshift(photo)
+    // Keep selectedIndex at 0 (always show first photo as featured)
+    selectedIndex.value = 0
+  }
+}
 
 // Sync with parent
 watch(
@@ -437,15 +428,32 @@ function removePhoto(photo) {
   }
 }
 
-// Get short label for inline quality warning
-function getShortLabel(warning) {
-  // Return a single word with ? to invite tapping for more info
-  const msg = warning.message?.toLowerCase() || ''
-  if (msg.includes('blur')) return 'Blurry?'
-  if (msg.includes('dark')) return 'Dark?'
-  if (msg.includes('bright') || msg.includes('overexposed')) return 'Bright?'
-  if (msg.includes('contrast')) return 'Contrast?'
-  return 'Check?'
+// Rotate a photo
+async function rotatePhoto(photo, degrees) {
+  if (!photo.id) return
+
+  // Calculate new rotation
+  const currentRotation = photo.externalmods?.rotate || 0
+  let newRotation = currentRotation + degrees
+  newRotation = ((newRotation % 360) + 360) % 360
+
+  // Update local state
+  if (!photo.externalmods) {
+    photo.externalmods = {}
+  }
+  photo.externalmods.rotate = newRotation
+
+  // Save to server
+  try {
+    await imageStore.post({
+      id: photo.id,
+      rotate: newRotation,
+      bust: Date.now(),
+      type: props.type,
+    })
+  } catch (e) {
+    console.error('Failed to rotate photo:', e)
+  }
 }
 
 // Show quality warning for a photo
@@ -490,19 +498,99 @@ function retakePhoto() {
 </script>
 
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 .app-photo-uploader {
   padding: 1rem;
 }
 
-.photo-grid {
-  margin-top: 1rem;
+/* Featured photo area - square */
+.featured-photo {
+  margin-bottom: 1rem;
+  max-width: 280px;
+}
+
+.featured-photo :deep(.photo-card) {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+/* Fade transition for featured photo */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Thumbnail carousel container */
+.thumbnail-carousel {
   margin-bottom: 1rem;
 }
 
-.photo-grid-inner {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
+/* Thumbnail strip - draggable, no scrollbar */
+.thumbnail-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  :deep(picture),
+  :deep(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.thumbnail-uploading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .photo-card {

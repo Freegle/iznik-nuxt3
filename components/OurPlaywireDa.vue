@@ -58,6 +58,8 @@ const props = defineProps({
 const daDiv = ref(null)
 let addAdTimer = null
 let queueAdTimer = null
+let queueRetryCount = 0
+const MAX_QUEUE_RETRIES = 100 // 5 seconds at 50ms intervals
 
 const showAd = ref(false)
 
@@ -84,9 +86,7 @@ watch(
       })
 
       showAd.value = true
-
-      // Playwire ads will always show something - we have house ads as a fallback.
-      emit('rendered', true)
+      queueRetryCount = 0
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
@@ -168,10 +168,18 @@ watch(
 
         function doQueueAd() {
           queueAdTimer = null
+          queueRetryCount++
 
           if (window.playwireScriptLoaded) {
             window.ramp.que.push(addAd)
             console.log('Queued ad count', window.ramp.que.length)
+            // Playwire ads will always show something - we have house ads as a fallback.
+            emit('rendered', true)
+          } else if (queueRetryCount >= MAX_QUEUE_RETRIES) {
+            console.log(
+              'Playwire script failed to load after max retries - giving up'
+            )
+            emit('rendered', false)
           } else {
             console.log('Playwire script not loaded yet, retrying in 50ms')
             queueAdTimer = setTimeout(doQueueAd, 50)

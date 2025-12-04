@@ -91,8 +91,8 @@ const update = (newVal, oldVal) => {
   border-top-right-radius: 0 !important;
   font-size: 1.6rem !important;
   line-height: 2rem !important;
-  padding-top: 0.2rem !important;
-  padding-bottom: 0.7rem !important;
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
   padding-left: 1rem;
   padding-right: 1rem;
 }

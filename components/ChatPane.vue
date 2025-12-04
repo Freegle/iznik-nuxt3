@@ -1,15 +1,21 @@
 <template>
   <client-only>
     <ChatNotVisible v-if="notVisible" id="notvisible" />
-    <p
+    <div
       v-else-if="!id"
-      class="text-center text-info font-weight-bold mt-2 chatHolder"
+      class="empty-state-pane chatHolder"
       :class="{
         stickyAdRendered,
       }"
     >
-      Please click on a chat in the left pane.
-    </p>
+      <div class="empty-state-content">
+        <v-icon icon="hand-pointer" class="empty-state-icon" />
+        <p class="empty-state-text">Select a chat</p>
+        <p class="empty-state-hint">
+          Click on a conversation in the left pane to view it.
+        </p>
+      </div>
+    </div>
     <div
       v-else-if="me"
       class="chatHolder"
@@ -18,7 +24,7 @@
         navBarHidden,
       }"
     >
-      <ChatHeader :id="id" ref="chatheader" class="chatTitle" />
+      <!-- Old ChatHeader removed - now using ChatMobileNavbar at all breakpoints -->
       <div
         v-if="chat && chatmessages?.length"
         ref="chatContent"
@@ -68,7 +74,6 @@
   </client-only>
 </template>
 <script setup>
-import ChatHeader from './ChatHeader'
 import ChatFooter from './ChatFooter'
 import ChatTypingIndicator from './ChatTypingIndicator'
 import { navBarHidden } from '~/composables/useNavbar'
@@ -219,15 +224,8 @@ function topChanged(isVisible) {
   }
 }
 
-const chatheader = ref(null)
-
-function typing(val) {
-  if (miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm') {
-    // Also collapse the chat header, to make even more room.
-    if (chatheader.value) {
-      chatheader.value.collapse(val)
-    }
-  }
+function typing() {
+  // No longer need to collapse header - using simplified mobile navbar
 }
 </script>
 <style scoped lang="scss">
@@ -364,5 +362,43 @@ function typing(val) {
 .itemwrapper {
   display: flex;
   flex-direction: column-reverse;
+}
+
+/* Empty state for no chat selected */
+.empty-state-pane {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $color-gray--lighter;
+  background-image: url('/chat-pattern.svg');
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+.empty-state-content {
+  text-align: center;
+  background: white;
+  padding: 32px 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  color: $color-green-background;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  margin-bottom: 4px;
+}
+
+.empty-state-hint {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin: 0;
 }
 </style>

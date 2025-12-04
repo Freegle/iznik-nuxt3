@@ -1,23 +1,17 @@
 <template>
   <div class="d-flex justify-content-around minheight test-visualise-list">
-    <MessageSummary
+    <MessageSummaryMobile
       v-if="msgid"
       :id="msgid"
       ref="clickSummary"
-      :replyable="false"
-      :show-freegled="false"
-      :show-promised="false"
-      :show-location="false"
       class="w-100 mb-2 test-visualise-message"
-      preload
-      wide
-      @click.prevent.self
     />
   </div>
 </template>
 <script setup>
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
+import MessageSummaryMobile from '~/components/MessageSummaryMobile'
 
 console.log(
   '[VISUALISE_LIST_DEBUG] ========== COMPONENT SETUP START =========='
@@ -285,7 +279,7 @@ console.log(
   min-height: 320px;
 }
 
-// Hack MessageSummary to look better in this context.
+/* Hack MessageSummaryMobile to look better in this context. */
 :deep {
   .thumbnail img {
     width: unset !important;

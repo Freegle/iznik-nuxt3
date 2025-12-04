@@ -38,7 +38,7 @@
         </div>
         <p class="login-hint">
           <v-icon icon="info-circle" class="hint-icon" />
-          You can also log in with Facebook, Google, or Yahoo.
+          You can also log in with Facebook, Google, or Apple.
         </p>
       </div>
     </div>

@@ -47,6 +47,9 @@ defineEmits(['click', 'mousedown'])
 </script>
 
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
 .navbar-mobile-item {
@@ -57,6 +60,10 @@ defineEmits(['click', 'mousedown'])
   text-decoration: none;
   min-width: 0;
   height: 51px;
+
+  @include media-breakpoint-up(md) {
+    height: 60px;
+  }
 }
 
 .item-content {
@@ -66,6 +73,10 @@ defineEmits(['click', 'mousedown'])
   justify-content: center;
   gap: 2px;
   height: 100%;
+
+  @include media-breakpoint-up(md) {
+    gap: 4px;
+  }
 }
 
 .icon-container {
@@ -75,12 +86,22 @@ defineEmits(['click', 'mousedown'])
   justify-content: center;
   width: 28px;
   height: 26px;
+
+  @include media-breakpoint-up(md) {
+    width: 36px;
+    height: 32px;
+  }
 }
 
 .nav-icon {
   width: 24px !important;
   height: 24px !important;
   color: #757575;
+
+  @include media-breakpoint-up(md) {
+    width: 28px !important;
+    height: 28px !important;
+  }
 }
 
 .nav-label {
@@ -90,6 +111,10 @@ defineEmits(['click', 'mousedown'])
   line-height: 1;
   text-align: center;
   white-space: nowrap;
+
+  @include media-breakpoint-up(md) {
+    font-size: 12px;
+  }
 }
 
 .nav-badge {
@@ -106,6 +131,14 @@ defineEmits(['click', 'mousedown'])
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @include media-breakpoint-up(md) {
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+    top: -8px;
+    right: -10px;
+  }
 
   &.badge-info {
     background: #17a2b8;

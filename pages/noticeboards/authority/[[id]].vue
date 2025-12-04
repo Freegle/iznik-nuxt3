@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-row class="m-0">
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-      <b-col cols="12" md="6" class="p-0">
+      <b-col cols="0" lg="3" class="d-none d-lg-block" />
+      <b-col cols="12" lg="6" class="p-0">
         <div>
           <h1>Noticeboards in {{ authority.name }}</h1>
           <p>
@@ -56,7 +56,7 @@
           </div>
         </div>
       </b-col>
-      <b-col cols="0" md="3" class="d-none d-md-block" />
+      <b-col cols="0" lg="3" class="d-none d-lg-block" />
     </b-row>
   </div>
 </template>

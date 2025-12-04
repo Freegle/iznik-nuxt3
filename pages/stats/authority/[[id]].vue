@@ -10,8 +10,8 @@
     <div>
       <div v-if="tables">
         <b-row class="m-0">
-          <b-col cols="0" md="3" class="d-none d-md-block" />
-          <b-col v-if="authority" cols="12" md="6" class="p-0 bg-white">
+          <b-col cols="0" lg="3" class="d-none d-lg-block" />
+          <b-col v-if="authority" cols="12" lg="6" class="p-0 bg-white">
             <b-img
               thumbnail
               src="/icon.png"
@@ -234,8 +234,8 @@
       </div>
       <div v-else>
         <b-row class="m-0">
-          <b-col cols="0" md="3" class="d-none d-md-block" />
-          <b-col ref="mapcont" cols="12" md="6" class="p-0">
+          <b-col cols="0" lg="3" class="d-none d-lg-block" />
+          <b-col ref="mapcont" cols="12" lg="6" class="p-0">
             <div v-if="authority">
               <div class="title pl-2">
                 <b-img

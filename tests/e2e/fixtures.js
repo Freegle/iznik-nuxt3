@@ -1058,8 +1058,8 @@ const testWithFixtures = test.extend({
       await page.waitForTimeout(500) // Allow scroll to complete
 
       // Click the Next/Continue button to go to location page
-      // Target the desktop version specifically using maxbutt class
-      await page.locator('.d-none.d-md-flex .btn:has-text("Next")').click()
+      // Target the modernized Next button
+      await page.locator('.next-btn:has-text("Next")').click()
 
       // Fill in location details
       await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
@@ -1073,7 +1073,7 @@ const testWithFixtures = test.extend({
 
       // Wait for the location to be confirmed using locator.waitFor()
       const confirmationIcon = page.locator(
-        '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+        '.validation-tick, .text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
       )
       await confirmationIcon.waitFor({
         state: 'visible',
@@ -1085,10 +1085,8 @@ const testWithFixtures = test.extend({
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
       await page.waitForTimeout(500) // Allow scroll to complete
 
-      // Target the desktop version specifically using maxbutt class
-      await page
-        .locator('.d-none.d-md-flex.maxbutt .btn:has-text("Next")')
-        .click()
+      // Target the modernized Next button
+      await page.locator('.next-btn:has-text("Next")').click()
 
       // Wait for either the logged-in email display or the email input to appear
       console.log(
@@ -1153,8 +1151,8 @@ const testWithFixtures = test.extend({
         'Waiting for Freegle it button to appear after email validation'
       )
       const freegleButton = page
-        .locator('.maxbutt .btn:has-text("Freegle it!")')
-        .first() // Target desktop version using maxbutt class
+        .locator('button:has-text("Freegle it!")')
+        .first()
 
       // Wait for button to be visible
       await freegleButton.waitFor({

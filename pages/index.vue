@@ -4,21 +4,28 @@
       <BreakpointFettler />
     </client-only>
 
-    <!-- Mobile Layout -->
-    <div class="d-block d-md-none mobile-layout">
-      <!-- Hero Section -->
+    <!-- Main Layout (all breakpoints) -->
+    <div class="main-layout">
+      <!-- Hero Section with wallpaper background -->
       <div class="hero-section">
-        <!-- Frame with overlaid slogan -->
-        <div class="hero-frame">
-          <FreeglerPhotos class="hero-photos" />
-          <div class="hero-slogan">
+        <div class="hero-wallpaper">
+          <!-- Single frame for mobile (xs, sm) -->
+          <div class="d-block d-md-none hero-frame">
+            <FreeglerPhotos class="hero-photos" />
+          </div>
+          <!-- Triple frame carousel for tablet and desktop (md+) -->
+          <div class="d-none d-md-block">
+            <FreeglerPhotosCarousel />
+          </div>
+          <!-- Slogan on wallpaper - only for mobile, tablet carousel has its own -->
+          <div class="d-block d-md-none hero-slogan-section">
             <h1 class="hero-title">
               <span class="hero-line1">Share the love.</span>
               <span class="hero-line2">Love the share.</span>
             </h1>
           </div>
         </div>
-        <!-- CTA section below frame -->
+        <!-- CTA section below wallpaper -->
         <div class="hero-cta">
           <p class="hero-subtitle">Give and get stuff locally for free.</p>
           <div class="action-buttons">
@@ -41,9 +48,11 @@
               </NuxtLink>
               <template #fallback>
                 <a href="/give" class="action-btn action-btn--give">
+                  <span class="action-btn__icon-placeholder"></span>
                   <span>Give</span>
                 </a>
                 <a href="/find" class="action-btn action-btn--find">
+                  <span class="action-btn__icon-placeholder"></span>
                   <span>Find</span>
                 </a>
               </template>
@@ -116,115 +125,7 @@
       </div>
 
       <!-- Footer -->
-      <MainFooter class="mobile-footer" />
-    </div>
-
-    <!-- Desktop Layout (original structure) -->
-    <div class="d-none d-md-block desktop-layout">
-      <div class="grid m-0 mt-lg-5 ml-2 mr-2">
-        <div class="eyecandy d-flex justify-content-start flex-column">
-          <FreeglerPhotos class="ps-4 h-100" />
-        </div>
-        <div class="info">
-          <h1 class="text--largest-responsive">
-            Freegle - like online dating for stuff.
-          </h1>
-          <p class="text--medium-responsive black font-weight-bold">
-            Got stuff you don't need? Looking for something?
-          </p>
-          <p class="text--medium-responsive black font-weight-bold">
-            We'll match you with someone local. All completely free.
-          </p>
-          <div class="d-flex justify-content-lg-start w-100">
-            <client-only>
-              <b-button
-                variant="primary"
-                size="xl"
-                to="/give"
-                class="text--medium-responsive"
-                @click="clicked('give')"
-              >
-                Give Stuff
-              </b-button>
-              <div style="width: 4vw" class="d-none d-lg-block" />
-              <b-button
-                variant="secondary"
-                size="xl"
-                to="/find"
-                class="text--medium-responsive"
-                @click="clicked('ask')"
-              >
-                Ask for Stuff
-              </b-button>
-              <template #fallback>
-                <a
-                  href="/give"
-                  class="btn btn-xl btn-primary text--medium-responsive"
-                >
-                  Give Stuff
-                </a>
-                <div style="width: 4rem" class="d-none d-lg-block" />
-                <a
-                  href="/find"
-                  class="btn btn-xl btn-secondary text--medium-responsive"
-                >
-                  Ask for Stuff
-                </a>
-              </template>
-            </client-only>
-          </div>
-          <div
-            class="font-weight-bold text-header text--medium-responsive mt-3 mb-4"
-          >
-            Don't throw it away, give it away!
-          </div>
-          <h2 class="text--medium-responsive font-weight-bold black">
-            Just looking?
-          </h2>
-          <div class="d-flex justify-content-lg-start flex-wrap">
-            <client-only>
-              <PlaceAutocomplete
-                class="mb-2"
-                labeltext="See what's being freegled near you:"
-                labeltext-sr="Enter your location and"
-                @selected="explorePlace($event)"
-              />
-            </client-only>
-          </div>
-        </div>
-        <div v-if="!isApp" class="app-download mt-2">
-          <a
-            href="https://play.google.com/store/apps/details?id=org.ilovefreegle.direct"
-            target="_blank"
-            class="mr-2"
-            rel="noopener noreferrer"
-          >
-            <ProxyImage
-              preload
-              alt="Freegle Android app on Google Play"
-              title="Freegle Android app on Google Play"
-              class="app-download__image"
-              src="/en-play-badge.png"
-              sizes="75px"
-            />
-          </a>
-          <a
-            href="https://itunes.apple.com/gb/app/freegle/id970045029?ls=1&amp;mt=8"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ProxyImage
-              preload
-              alt="Freegle app for iPhone, iPad, and iPod touch"
-              title="Freegle app for iPhone, iPad, and iPod Touch"
-              class="app-download__image"
-              src="/app-store-black-sm.png"
-              sizes="75px"
-            />
-          </a>
-        </div>
-        <MainFooter class="thefooter" />
-      </div>
+      <MainFooter class="thefooter" />
     </div>
   </div>
 </template>
@@ -240,6 +141,7 @@ import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import FreeglerPhotos from '~/components/FreeglerPhotos.vue'
+import FreeglerPhotosCarousel from '~/components/FreeglerPhotosCarousel.vue'
 import ProxyImage from '~/components/ProxyImage.vue'
 import {
   computed,
@@ -285,7 +187,6 @@ const head = buildHead(
 const userSite = runtimeConfig.public.USER_SITE
 const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
-const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
 const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
 
 head.link = [
@@ -293,11 +194,6 @@ head.link = [
     rel: 'preload',
     as: 'image',
     href: logo,
-  },
-  {
-    rel: 'preload',
-    as: 'image',
-    href: bg,
   },
 ]
 
@@ -407,26 +303,31 @@ onBeforeUnmount(() => {
 @import 'assets/css/_color-vars.scss';
 
 // ==========================================
-// Mobile Layout Styles
+// Main Layout Styles
 // ==========================================
 
 .landing-page {
   min-height: 100vh;
 }
 
-.mobile-layout {
+.main-layout {
   padding: 0;
-  background: linear-gradient(
-    180deg,
-    $color-green--bg-gradient 0%,
-    $color-white 35%
-  );
+  background: $color-white;
   min-height: 100vh;
 }
 
-// Hero Section
+// Hero Section - wallpaper covers entire section including CTA
 .hero-section {
   text-align: center;
+  background-image: url('/wallpaper.png');
+  background-repeat: repeat;
+  background-size: auto;
+  padding-bottom: 1rem;
+}
+
+// Wrapper for frames and slogan
+.hero-wallpaper {
+  /* Wallpaper now on parent .hero-section */
 }
 
 .hero-frame {
@@ -435,27 +336,25 @@ onBeforeUnmount(() => {
   margin: 0 auto;
 }
 
-// Slogan positioned just below photo, overlapping with gold frame border
-// Spans full width of frame opening for visual balance
-.hero-slogan {
-  position: absolute;
-  bottom: 6%;
-  left: 12%;
-  right: 12%;
-  z-index: 20;
-  padding: 0.5rem 1rem;
+// Slogan section below frames, on wallpaper with frosted effect
+.hero-slogan-section {
+  padding: 0.75rem 1.5rem;
+  margin: 0 auto;
+  max-width: fit-content;
+  text-align: center;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  text-align: center;
+  border-radius: 12px;
 }
 
 .hero-title {
-  font-size: clamp(0.75rem, 2.5vh, 1.2rem);
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   margin: 0;
   color: $colour-header;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .hero-line1 {
@@ -467,10 +366,18 @@ onBeforeUnmount(() => {
   color: $colour-success;
 }
 
-// CTA section below frame
+// CTA section below frame - card style with subtle green tint
 .hero-cta {
-  padding: 0.5rem 1rem 0.75rem;
+  padding: 1rem 1rem 1.25rem;
+  margin: 1rem 0.75rem 0;
   text-align: center;
+  background: linear-gradient(
+    135deg,
+    $color-green--bg-gradient 0%,
+    $color-white 100%
+  );
+  border: 1px solid rgba($colour-success, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .hero-subtitle {
@@ -492,13 +399,13 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.25rem;
-  font-size: 0.95rem;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   font-weight: 600;
   text-decoration: none;
   transition: transform 0.1s, box-shadow 0.15s;
-  min-width: 100px;
+  min-width: clamp(80px, 20vw, 140px);
 
   &:active {
     transform: scale(0.98);
@@ -531,6 +438,17 @@ onBeforeUnmount(() => {
 
 .action-btn__icon {
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  top: -1px;
+}
+
+.action-btn__icon-placeholder {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
 }
 
 .browse-label {
@@ -585,6 +503,12 @@ onBeforeUnmount(() => {
   :deep(.autocomplete-clear) {
     display: none !important;
   }
+
+  @include media-breakpoint-up(md) {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 /* SSR fallback input - matches browse-input styling exactly */
@@ -600,6 +524,12 @@ onBeforeUnmount(() => {
   &::placeholder {
     color: $color-gray--normal;
     text-align: center;
+  }
+
+  @include media-breakpoint-up(md) {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
@@ -623,6 +553,11 @@ onBeforeUnmount(() => {
   padding: 0 0.5rem;
   max-height: 320px;
   overflow: hidden;
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: repeat(3, 1fr);
+    max-height: 640px;
+  }
 }
 
 .loading-card-ssr {
@@ -654,91 +589,13 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
+  margin: 0 1rem;
   background: $color-gray--lighter;
+  border-radius: 12px;
 }
 
 .app-badge {
   height: 32px;
   width: auto;
-}
-
-// Mobile Footer
-.mobile-footer {
-  padding: 0.75rem 1rem;
-  background: $color-white;
-}
-
-// ==========================================
-// Desktop Layout Styles (original)
-// ==========================================
-
-.desktop-layout {
-  .grid {
-    display: grid;
-    grid-template-columns: 0.4fr 0.6fr;
-    grid-template-rows: 100px auto auto auto;
-    grid-column-gap: 50px;
-    grid-row-gap: 30px;
-  }
-
-  .eyecandy {
-    align-items: center !important;
-    height: 300px;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 1 / 3;
-      grid-column: 1 / 2;
-      height: max(500px, calc(100vh - 450px));
-
-      @supports (height: 100dvh) {
-        height: max(500px, calc(100dvh - 450px));
-      }
-
-      max-height: 800px;
-    }
-  }
-
-  .info {
-    grid-row: 1 / 3;
-    grid-column: 1 / 3;
-    text-align: center;
-    justify-self: center;
-
-    @include media-breakpoint-up(lg) {
-      grid-column: 2 / 3;
-      text-align: left;
-    }
-  }
-
-  .app-download {
-    grid-row: 4 / 5;
-    grid-column: 1 / 3;
-    justify-self: center;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 3 / 4;
-    }
-  }
-
-  .app-download__image {
-    max-height: 25px;
-
-    @include media-breakpoint-up(lg) {
-      max-height: 40px;
-    }
-  }
-
-  .thefooter {
-    grid-row: 5 / 6;
-    grid-column: 1 / 3;
-
-    @include media-breakpoint-up(lg) {
-      grid-row: 4 / 5;
-    }
-  }
-}
-
-.black {
-  color: $color-black !important;
 }
 </style>

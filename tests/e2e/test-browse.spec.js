@@ -161,6 +161,7 @@ test.describe('Browse Page Tests', () => {
       // Check what validation elements exist and their state
       console.log('Checking validation elements...')
       const validationSelectors = [
+        '.validation-tick',
         '.text-success.fa-bh',
         '.fa-check-circle',
         '.v-icon[class*="check"]',

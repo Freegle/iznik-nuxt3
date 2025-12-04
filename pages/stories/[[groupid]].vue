@@ -3,60 +3,62 @@
     <div class="stories-page">
       <b-row class="m-0">
         <b-col cols="12" lg="6" class="p-0" offset-lg="3">
-          <div class="page-header">
-            <p class="page-description">
-              We love to hear why you freegle and what your experiences have
-              been - and it helps show new freeglers what it's all about. So
-              please tell us your story!
-            </p>
-            <div class="filter-actions">
-              <GroupSelect
-                v-if="loggedIn"
-                v-model="groupid"
-                all
-                :restrict="false"
-                class="group-filter"
-                @update:model-value="changeGroup"
-              />
-              <b-button
-                variant="primary"
-                size="sm"
-                class="add-btn"
-                @click="showAddModal"
-              >
-                <v-icon icon="book-open" /> Tell us your story!
+          <ScrollGrid
+            :items="stories"
+            key-field="id"
+            empty-icon="book-open"
+            empty-text="No stories yet."
+          >
+            <template #header>
+              <div class="page-header">
+                <p class="page-description">
+                  We love to hear why you freegle and what your experiences have
+                  been - and it helps show new freeglers what it's all about. So
+                  please tell us your story!
+                </p>
+                <div class="filter-actions">
+                  <GroupSelect
+                    v-if="loggedIn"
+                    v-model="groupid"
+                    all
+                    :restrict="false"
+                    class="group-filter"
+                    @update:model-value="changeGroup"
+                  />
+                  <b-button
+                    variant="primary"
+                    size="sm"
+                    class="add-btn"
+                    @click="showAddModal"
+                  >
+                    <v-icon icon="book-open" /> Tell us your story!
+                  </b-button>
+                </div>
+              </div>
+              <h2 class="visually-hidden">List of stories</h2>
+            </template>
+
+            <template #item="{ item: id }">
+              <StoryOne :id="id" :group-id="groupid" />
+            </template>
+
+            <template #empty>
+              <v-icon icon="book-open" class="scroll-grid__empty-icon" />
+              <p>No stories yet.</p>
+              <b-button variant="primary" size="sm" @click="showAddModal">
+                <v-icon icon="book-open" /> Be the first to share your story!
               </b-button>
-            </div>
-          </div>
-          <h2 class="visually-hidden">List of stories</h2>
-          <div v-if="stories?.length" class="stories-list">
-            <div
-              v-for="story in storiesToShow"
-              :key="'story-' + story"
-              class="story-item"
-            >
-              <StoryOne :id="story" :group-id="groupid" />
-            </div>
-            <infinite-loading
-              :key="'infinite-' + groupid"
-              force-use-infinite-wrapper="body"
-              :distance="1000"
-              @infinite="loadMore"
-            />
-          </div>
-          <div v-else class="empty-state">
-            <v-icon icon="book-open" class="empty-icon" />
-            <p>No stories yet.</p>
-            <b-button variant="primary" size="sm" @click="showAddModal">
-              <v-icon icon="book-open" /> Be the first to share your story!
-            </b-button>
-          </div>
+            </template>
+
+            <template #footer>
+              <StoryAddModal
+                v-if="showStoryAddModal"
+                @hidden="showStoryAddModal = false"
+              />
+            </template>
+          </ScrollGrid>
         </b-col>
       </b-row>
-      <StoryAddModal
-        v-if="showStoryAddModal"
-        @hidden="showStoryAddModal = false"
-      />
     </div>
   </client-only>
 </template>
@@ -67,6 +69,7 @@ import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import GroupSelect from '~/components/GroupSelect'
 import StoryOne from '~/components/StoryOne'
+import ScrollGrid from '~/components/ScrollGrid'
 import { useRoute, computed } from '#imports'
 
 const StoryAddModal = defineAsyncComponent(() =>
@@ -130,22 +133,6 @@ const stories = computed(() => {
   return storyStore.recent
 })
 
-const toShow = ref(1)
-
-const storiesToShow = computed(() => {
-  return stories.value.slice(0, toShow.value)
-})
-
-function loadMore(infiniteLoaderInstance) {
-  toShow.value++
-
-  if (toShow.value >= stories.value.length) {
-    infiniteLoaderInstance.complete()
-  } else {
-    infiniteLoaderInstance.loaded()
-  }
-}
-
 const changeGroup = function (newval) {
   storyStore.list = {}
   const router = useRouter()
@@ -153,12 +140,16 @@ const changeGroup = function (newval) {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
+@import 'assets/css/navbar.scss';
 
 .stories-page {
   background: $color-gray--lighter;
   min-height: 100vh;
-  padding-bottom: 2rem;
+  padding-bottom: $page-bottom-padding;
 }
 
 .page-header {
@@ -187,32 +178,6 @@ const changeGroup = function (newval) {
 
   .add-btn {
     flex-shrink: 0;
-  }
-}
-
-.stories-list {
-  padding: 0 0.5rem;
-}
-
-.story-item {
-  margin-bottom: 0.75rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  background: white;
-  margin: 0.5rem;
-
-  .empty-icon {
-    font-size: 3rem;
-    color: $color-gray--dark;
-    margin-bottom: 1rem;
-  }
-
-  p {
-    color: $color-gray--dark;
-    margin-bottom: 1rem;
   }
 }
 </style>
