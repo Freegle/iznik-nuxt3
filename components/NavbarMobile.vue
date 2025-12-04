@@ -121,6 +121,7 @@
           icon="comments"
           label="Chats"
           :badge="chatCount"
+          badge-variant="danger"
           @click="clickedMobileNav"
           @mousedown="maybeReload('/chats')"
         />
