@@ -74,27 +74,25 @@
 
     <!-- Empty state -->
     <div v-else class="empty-state">
-      <div class="empty-icon">
-        <v-icon icon="folder-open" />
-      </div>
+      <v-icon icon="folder-open" class="empty-icon" />
       <p class="empty-text">You have no active posts.</p>
       <div class="empty-actions">
         <template v-if="props.type === 'Offer'">
-          <nuxt-link to="/give" class="action-link action-link--primary">
-            <v-icon icon="gift" class="me-2" />OFFER something
+          <nuxt-link to="/give" class="mobile-btn mobile-btn--give">
+            <v-icon icon="gift" class="me-2" />Give stuff
           </nuxt-link>
         </template>
         <template v-else-if="props.type === 'Wanted'">
-          <nuxt-link to="/find" class="action-link action-link--primary">
-            <v-icon icon="search" class="me-2" />Ask for something
+          <nuxt-link to="/find" class="mobile-btn mobile-btn--find">
+            <v-icon icon="search" class="me-2" />Find stuff
           </nuxt-link>
         </template>
         <template v-else>
-          <nuxt-link to="/give" class="action-link action-link--offer">
-            <v-icon icon="gift" class="me-2" />OFFER
+          <nuxt-link to="/give" class="mobile-btn mobile-btn--give">
+            <v-icon icon="gift" class="me-2" />Give stuff
           </nuxt-link>
-          <nuxt-link to="/find" class="action-link action-link--wanted">
-            <v-icon icon="search" class="me-2" />WANTED
+          <nuxt-link to="/find" class="mobile-btn mobile-btn--find">
+            <v-icon icon="search" class="me-2" />Find stuff
           </nuxt-link>
         </template>
       </div>
@@ -350,24 +348,13 @@ const upcomingTrysts = computed(() => {
   justify-content: center;
   padding: 48px 24px;
   background: white;
-  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .empty-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: $color-gray--lighter;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 3rem;
+  color: $color-gray--base;
   margin-bottom: 16px;
-
-  svg {
-    font-size: 2rem;
-    color: $color-gray--base;
-  }
 }
 
 .empty-text {
@@ -383,43 +370,37 @@ const upcomingTrysts = computed(() => {
   justify-content: center;
 }
 
-.action-link {
-  display: inline-flex;
+.mobile-btn {
+  display: flex;
   align-items: center;
-  padding: 12px 24px;
-  border-radius: 25px;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 1rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: transform 0.1s;
 
-  &--primary {
-    background: $color-green-background;
-    color: white;
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--give {
+    background: $colour-success;
+    color: $color-white;
 
     &:hover {
-      background: darken($color-green-background, 10%);
-      color: white;
+      background: darken($colour-success, 5%);
+      color: $color-white;
     }
   }
 
-  &--offer {
-    background: $color-green-background;
-    color: white;
+  &--find {
+    background: $colour-secondary;
+    color: $color-white;
 
     &:hover {
-      background: darken($color-green-background, 10%);
-      color: white;
-    }
-  }
-
-  &--wanted {
-    background: $color-blue--bright;
-    color: white;
-
-    &:hover {
-      background: darken($color-blue--bright, 10%);
-      color: white;
+      background: darken($colour-secondary, 5%);
+      color: $color-white;
     }
   }
 }

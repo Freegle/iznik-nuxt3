@@ -13,7 +13,7 @@
       }"
     >
       <div
-        v-if="fallbackAdVisible"
+        v-if="fallbackAdVisible && !video"
         class="d-flex justify-content-md-around"
         :style="maxWidth ? `max-width: ${maxWidth}` : ''"
       >
@@ -353,6 +353,7 @@ function rippleRendered(rendered) {
   } else {
     // Ad failed to render - show fallback donation ad
     console.log('Ad failed to render - showing fallback')
+    useMiscStore().adsDisabled = true
     fallbackAdVisible.value = true
     adShown.value = true
     emit('rendered', true)
