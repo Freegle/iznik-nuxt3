@@ -1215,11 +1215,11 @@ onUnmounted(() => {
 
 /* Poster ratings - hidden on mobile, shown on tablet */
 .poster-ratings {
-  display: none;
+  display: none !important;
   flex-shrink: 0;
 
   @include media-breakpoint-up(md) {
-    display: flex;
+    display: flex !important;
   }
 }
 

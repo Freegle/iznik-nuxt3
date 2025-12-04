@@ -489,6 +489,10 @@ function unpromise() {
   display: flex;
   align-items: center;
   gap: 6px;
+
+  @media (max-width: 320px) {
+    display: none;
+  }
 }
 
 .badges-row {

@@ -1,5 +1,13 @@
 <template>
   <nav class="footer-nav">
+    <div class="footer-links">
+      <nuxt-link no-prefetch to="/about">About</nuxt-link>
+      <nuxt-link no-prefetch to="/terms">Terms</nuxt-link>
+      <nuxt-link no-prefetch to="/privacy">Privacy</nuxt-link>
+      <nuxt-link no-prefetch to="/disclaimer">Disclaimer</nuxt-link>
+      <nuxt-link to="/donate">Donate</nuxt-link>
+      <nuxt-link to="/help">Contact</nuxt-link>
+    </div>
     <div class="footer-social">
       <ExternalLink
         href="https://www.facebook.com/Freegle/"
@@ -29,24 +37,6 @@
       >
         <v-icon :icon="['fab', 'github']" />
       </ExternalLink>
-      <nuxt-link to="/donate" title="Donate" class="footer-social-link">
-        <v-icon icon="heart" />
-      </nuxt-link>
-      <nuxt-link to="/help" title="Contact" class="footer-social-link">
-        <v-icon icon="envelope" />
-      </nuxt-link>
-    </div>
-    <div class="footer-links">
-      <nuxt-link no-prefetch to="/about">About</nuxt-link>
-      <nuxt-link no-prefetch to="/terms">Terms</nuxt-link>
-      <nuxt-link no-prefetch to="/privacy">Privacy</nuxt-link>
-      <nuxt-link no-prefetch to="/disclaimer">Disclaimer</nuxt-link>
-      <nuxt-link to="/donate" class="footer-link--icon">
-        <v-icon icon="heart" />Donate
-      </nuxt-link>
-      <nuxt-link to="/help" class="footer-link--icon">
-        <v-icon icon="envelope" />Contact
-      </nuxt-link>
     </div>
   </nav>
 </template>
@@ -58,55 +48,54 @@ import ExternalLink from './ExternalLink'
 @import 'bootstrap/scss/variables';
 
 .footer-nav {
-  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
   background: $white;
   border-top: 1px solid $gray-200;
-}
-
-.footer-social {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  color: $gray-600;
-  transition: color 0.15s ease;
-
-  &:hover {
-    color: $gray-800;
-  }
-
-  :deep(.fa) {
-    font-size: 1.1rem;
-  }
+  gap: 0.5rem;
 }
 
 .footer-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 0.75rem;
-  font-size: 0.75rem;
+  gap: 0.2rem 0.5rem;
+  font-size: 0.7rem;
 
   a {
     color: $gray-600;
     text-decoration: none;
+    white-space: nowrap;
 
     &:hover {
       color: $gray-800;
       text-decoration: underline;
     }
   }
+}
 
-  .footer-link--icon {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
+.footer-social {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: $gray-500;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $gray-700;
+  }
+
+  :deep(.fa) {
+    font-size: 0.9rem;
   }
 }
 </style>

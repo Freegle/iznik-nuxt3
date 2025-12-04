@@ -17,7 +17,7 @@
       class="overflow-y-scroll border-top border-bottom"
     />
     <div class="sidebar__botleft align-content-end col-lg-3 col-0">
-      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper" />
     </div>
   </div>
 </template>
