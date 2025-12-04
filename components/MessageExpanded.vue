@@ -201,7 +201,7 @@
               <span
                 v-if="message.deliverypossible && isOffer"
                 v-b-tooltip.click.blur="{
-                  title: 'Delivery may be possible',
+                  title: `Delivery may be possible - you can ask, but don't assume it will be`,
                   customClass: 'mobile-tooltip',
                 }"
                 class="delivery"
@@ -1161,7 +1161,8 @@ onUnmounted(() => {
 .poster-section-wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
   margin-top: 0.5rem;
   text-decoration: none;
@@ -1178,6 +1179,12 @@ onUnmounted(() => {
   /* Hide on short screens where overlay is shown */
   @media (max-height: 700px) {
     display: none;
+  }
+
+  /* Very narrow screens: stack vertically */
+  @media (max-width: 320px) {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -1250,6 +1257,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+  overflow: hidden;
 }
 
 .poster-name {
@@ -1264,7 +1272,8 @@ onUnmounted(() => {
 .poster-stats {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   font-size: 0.8rem;
   color: $color-gray--dark;
 }
