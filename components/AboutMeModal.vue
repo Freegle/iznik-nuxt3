@@ -2,70 +2,71 @@
   <b-modal
     ref="modal"
     scrollable
-    :title="
-      !props.review
-        ? 'Why not complete your public profile?'
-        : 'Please review your public profile'
-    "
     size="lg"
     no-stacking
+    hide-header
+    content-class="aboutme-modal"
   >
     <template #default>
-      <notice-message v-if="props.review" type="info">
-        You added this a while ago - can you just check it still applies? If it
-        does, just click <em>Cancel</em>. If you want to change it, edit it and
-        click <em>Save</em>.
-      </notice-message>
-      <p>
-        It's nice to know a bit about other freeglers. We're not a dating site
-        but it makes freegling more fun and helps get a better response when
-        you're replying to OFFERs.
-      </p>
-      <p>
-        <strong>This is just about you generally</strong>. To give something
-        away, or ask for something you need, please use these buttons:
-      </p>
-      <div class="d-flex flex-wrap justify-content-start mb-2">
-        <b-button to="/give" variant="primary" class="m-1 mr-4"
-          >Give something</b-button
-        >
-        <b-button to="/find" variant="secondary" class="m-1"
-          >Ask for something</b-button
-        >
+      <div class="aboutme-content">
+        <div class="aboutme-header">
+          <v-icon icon="user-circle" class="header-icon" />
+          <h5 class="header-title">
+            {{
+              !props.review
+                ? 'Complete your public profile'
+                : 'Review your public profile'
+            }}
+          </h5>
+          <p class="header-subtitle">
+            {{
+              props.review
+                ? 'Check this still applies, then click Save or Cancel.'
+                : 'Tell other freeglers a bit about yourself.'
+            }}
+          </p>
+        </div>
+
+        <div class="aboutme-body">
+          <b-form-textarea
+            v-model="text"
+            placeholder="Tell us a bit about yourself - why you freegle, hobbies, general collection arrangements..."
+            rows="6"
+            class="aboutme-textarea"
+          />
+
+          <div class="info-hint">
+            <v-icon icon="globe-europe" class="hint-icon" />
+            <span
+              >This is public - visible on your profile and posted to
+              ChitChat.</span
+            >
+          </div>
+
+          <div class="suggestions">
+            <span class="suggestions-label">Ideas:</span>
+            <span class="suggestion-item">Why you freegle</span>
+            <span class="suggestion-item">Collection arrangements</span>
+            <span class="suggestion-item">Hobbies &amp; interests</span>
+          </div>
+        </div>
+
+        <div class="aboutme-footer">
+          <b-button variant="link" class="cancel-btn" @click="hide">
+            {{ props.review ? 'No changes' : 'Skip for now' }}
+          </b-button>
+          <b-button variant="primary" class="save-btn" @click="save">
+            <v-icon icon="check" /> Save
+          </b-button>
+        </div>
       </div>
-      <p>
-        <strong>Don't put anything private in here.</strong>
-        It's public, and it's what everyone on Freegle will see about you. We'll
-        post it on <em>ChitChat</em> as a way to say hello to everyone, too.
-      </p>
-      <p>
-        It's up to you what you say - why you freegle, general arrangements for
-        collection, hobbies. It'll be visible until you change it in
-        <em>Settings</em>, so write something that'll still make sense in a few
-        months time!
-      </p>
-      <p>
-        If you don't want to do this, that's fine - just click <em>Cancel</em>.
-      </p>
-      <b-form-textarea
-        v-model="text"
-        placeholder="Tell us a bit about yourself!"
-        rows="8"
-      />
-      <notice-message variant="info" class="mt-2">
-        <v-icon icon="globe-europe" /> Other freeglers will see what you put
-        here, in your profile and on ChitChat. That's the point!
-      </notice-message>
     </template>
-    <template #footer>
-      <b-button variant="white" @click="hide"> Cancel </b-button>
-      <b-button variant="primary" @click="save"> Save </b-button>
-    </template>
+    <template #footer><span /></template>
   </b-modal>
 </template>
 
 <script setup>
-import NoticeMessage from './NoticeMessage'
+import { ref } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useOurModal } from '~/composables/useOurModal'
 
@@ -87,3 +88,101 @@ async function save() {
   hide()
 }
 </script>
+
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.aboutme-content {
+  padding: 0;
+}
+
+.aboutme-header {
+  text-align: center;
+  padding: 1.5rem 1rem 1rem;
+  border-bottom: 1px solid $color-gray--lighter;
+
+  .header-icon {
+    font-size: 2.5rem;
+    color: $colour-success;
+    margin-bottom: 0.75rem;
+  }
+
+  .header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: $color-gray--darker;
+  }
+
+  .header-subtitle {
+    font-size: 0.9rem;
+    color: $color-gray--dark;
+    margin: 0;
+  }
+}
+
+.aboutme-body {
+  padding: 1.25rem;
+}
+
+.aboutme-textarea {
+  margin-bottom: 1rem;
+}
+
+.info-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  padding: 0.75rem;
+  background: $color-gray--lighter;
+  margin-bottom: 1rem;
+
+  .hint-icon {
+    color: $colour-success;
+    flex-shrink: 0;
+  }
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+
+  .suggestions-label {
+    color: $color-gray--dark;
+    font-weight: 500;
+  }
+
+  .suggestion-item {
+    background: $color-gray--lighter;
+    padding: 0.25rem 0.75rem;
+    color: $color-gray--darker;
+  }
+}
+
+.aboutme-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid $color-gray--lighter;
+  background: $color-gray--lightest;
+
+  .cancel-btn {
+    color: $color-gray--dark;
+    text-decoration: none;
+
+    &:hover {
+      color: $color-gray--darker;
+    }
+  }
+
+  .save-btn {
+    min-width: 120px;
+  }
+}
+</style>
