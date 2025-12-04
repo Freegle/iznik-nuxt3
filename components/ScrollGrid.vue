@@ -140,6 +140,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['loadMore'])
+
 const toShow = ref(props.initialCount)
 const infiniteId = ref(+new Date())
 
@@ -153,6 +155,8 @@ function itemKey(item, index) {
 
 function loadMore($state) {
   if (toShow.value < props.items.length) {
+    // Emit event so parent can fetch more data if needed
+    emit('loadMore', toShow.value)
     toShow.value++
     $state.loaded()
   } else {

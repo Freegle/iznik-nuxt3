@@ -26,6 +26,7 @@
       :loading="loading"
       :distance="distance"
       :initial-count="MIN_TO_SHOW"
+      @load-more="handleLoadMore"
     >
       <template #before-row="{ item: m }">
         <MessageListUpToDate
@@ -182,7 +183,6 @@ if (initialIds?.length) {
 
 // Data
 const myGroups = []
-const toShow = ref(MIN_TO_SHOW)
 const failedIds = ref(new Set())
 const distance = ref(2000)
 const prefetched = ref(0)
@@ -234,7 +234,8 @@ const reduceSuccessful = computed(() => {
 const filteredMessagesToShow = computed(() => {
   const ret = []
 
-  for (let i = 0; i < reduceSuccessful.value?.length && i < toShow.value; i++) {
+  // ScrollGrid handles visibility limits, so we provide all filtered messages
+  for (let i = 0; i < reduceSuccessful.value?.length; i++) {
     const m = reduceSuccessful.value[i]
 
     if (wantMessage(m)) {
@@ -381,32 +382,29 @@ function markSeen() {
   }, 100)
 }
 
-watch(
-  toShow,
-  async (newVal) => {
-    if (newVal + 5 > prefetched.value) {
-      const ids = []
+async function handleLoadMore(currentIndex) {
+  // Prefetch upcoming messages when scrolling
+  if (currentIndex + 5 > prefetched.value) {
+    const ids = []
 
-      for (
-        let i = Math.max(newVal + 1, prefetched.value);
-        i < reduceSuccessful.value.length && ids.length < 5;
-        i++
-      ) {
-        if (wantMessage(reduceSuccessful.value[i])) {
-          ids.push(reduceSuccessful.value[i].id)
-        }
-
-        prefetched.value = i
+    for (
+      let i = Math.max(currentIndex + 1, prefetched.value);
+      i < reduceSuccessful.value.length && ids.length < 5;
+      i++
+    ) {
+      if (wantMessage(reduceSuccessful.value[i])) {
+        ids.push(reduceSuccessful.value[i].id)
       }
 
-      if (ids.length) {
-        await throttleFetches()
-        await messageStore.fetchMultiple(ids)
-      }
+      prefetched.value = i
     }
-  },
-  { immediate: true }
-)
+
+    if (ids.length) {
+      await throttleFetches()
+      await messageStore.fetchMultiple(ids)
+    }
+  }
+}
 
 watch(
   noneFound,
