@@ -191,10 +191,8 @@ let markSeenTimer = null
 const markUnseenTries = ref(10)
 
 // Computed properties
-const browseCount = computed(() => {
-  return deDuplicatedMessages.value.filter((m) => m.unseen && !m.successful)
-    .length
-})
+// Use the same count as the navbar - from the API via messageStore
+const browseCount = computed(() => messageStore.count)
 
 const group = computed(() => {
   let ret = null

@@ -1,100 +1,86 @@
 <template>
   <client-only>
-    <div class="layout fader">
-      <GlobalMessage />
-      <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="2" class="maxbutt" />
+    <div class="location-page">
+      <!-- Compact progress stepper -->
+      <div class="stepper-container">
+        <WizardProgressCompact :active-stage="2" :show-options="false" />
       </div>
-      <h1 class="text-center">Now, tell us where you are</h1>
-      <p class="text-center">
-        We'll use this to show your wanted to people nearby. Don't worry, we
-        won't give other people your postcode.
-      </p>
-      <PostCode
-        class="justify-content-center"
-        :value="initialPostcode"
-        @selected="postcodeSelect"
-        @cleared="postcodeClear"
-      />
-      <div v-if="!closed && postcodeValid" class="text-center">
-        <transition name="fade">
-          <nuxt-link no-prefetch to="/find/whoami">
-            <v-icon
-              icon="check-circle"
-              class="text-success mt-2 fa-bh"
-              scale="5"
+
+      <!-- Main content -->
+      <div class="location-content">
+        <GlobalMessage />
+
+        <div class="location-card">
+          <h1 class="location-title">Where are you?</h1>
+          <p class="location-subtitle">
+            We'll use this to show your wanted to people nearby. Don't worry, we
+            won't give other people your postcode.
+          </p>
+
+          <!-- Postcode input -->
+          <div class="postcode-section">
+            <PostCode
+              :value="initialPostcode"
+              @selected="postcodeSelect"
+              @cleared="postcodeClear"
             />
-          </nuxt-link>
-        </transition>
-      </div>
-      <div
-        v-if="postcodeValid && noGroups"
-        class="d-flex justify-content-around"
-      >
-        <NoticeMessage variant="info" class="mt-2 flex-shrink-1">
-          We're really sorry, but there are no communities near there. If you'd
-          like to start one, please
-          <ExternalLink href="mailto:newgroups@ilovefreegle.org">
-            get in touch!
-          </ExternalLink>
-        </NoticeMessage>
-      </div>
-      <div v-else>
-        <div v-if="postcodeValid" class="mt-1 text-center">
-          Freegle has local communities for each area. We'll put anything you
-          post on here, and search this community and others nearby.
-        </div>
-        <div v-if="postcodeValid" class="mt-1 d-flex justify-content-around">
-          <ComposeGroup />
-        </div>
-        <div v-if="postcodeValid" class="mt-1 text-center text-muted small">
-          Click on the name above to choose a different community.
-        </div>
-      </div>
-      <div class="d-block d-md-none flex-grow-1" />
-      <div class="mt-1 d-block d-md-none">
-        <b-button
-          variant="primary"
-          size="lg"
-          block
-          class="w-100"
-          to="/find/whoami"
-        >
-          Next <v-icon icon="angle-double-right" />
-        </b-button>
-      </div>
-      <div class="w-100 d-flex justify-content-around">
-        <div class="mt-2 d-none d-md-flex justify-content-between maxbutt">
-          <b-button
-            variant="secondary"
-            size="lg"
-            to="/find"
-            class="d-none d-md-block"
+          </div>
+
+          <!-- No groups warning -->
+          <NoticeMessage
+            v-if="postcodeValid && noGroups"
+            variant="info"
+            class="mt-3"
           >
-            <v-icon icon="angle-double-left" /> Back
-          </b-button>
-          <b-button
-            v-if="postcodeValid && !closed"
-            variant="primary"
-            size="lg"
-            to="/find/whoami"
-          >
-            Next <v-icon icon="angle-double-right" />
-          </b-button>
+            We're really sorry, but there are no communities near there. If
+            you'd like to start one, please
+            <ExternalLink href="mailto:newgroups@ilovefreegle.org">
+              get in touch!
+            </ExternalLink>
+          </NoticeMessage>
+
+          <!-- Community selection -->
+          <div v-else-if="postcodeValid" class="community-section">
+            <div class="community-card">
+              <div class="community-header">
+                <v-icon icon="map-marker-alt" class="community-icon" />
+                <span class="community-label">Your local community</span>
+              </div>
+              <ComposeGroup class="community-select" />
+              <p class="community-hint">
+                Tap to choose a different community nearby.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation button -->
+        <div v-if="postcodeValid && !closed" class="next-section">
+          <div class="next-container">
+            <b-button
+              variant="primary"
+              size="lg"
+              to="/find/whoami"
+              class="next-btn"
+            >
+              Next: Who are you? <v-icon icon="angle-double-right" />
+            </b-button>
+          </div>
         </div>
       </div>
     </div>
   </client-only>
 </template>
+
 <script setup>
 import { useRoute, useHead, useRuntimeConfig } from '#imports'
 import NoticeMessage from '~/components/NoticeMessage.vue'
 import ExternalLink from '~/components/ExternalLink.vue'
 import GlobalMessage from '~/components/GlobalMessage.vue'
 import PostCode from '~/components/PostCode.vue'
-import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
-import WizardProgress from '~/components/WizardProgress.vue'
+import WizardProgressCompact from '~/components/WizardProgressCompact.vue'
 import ComposeGroup from '~/components/ComposeGroup.vue'
+import { setup, postcodeSelect, postcodeClear } from '~/composables/useCompose'
 import { buildHead } from '~/composables/useBuildHead'
 
 const route = useRoute()
@@ -109,54 +95,135 @@ useHead(
   )
 )
 
-// Get setup data from composable
 const { initialPostcode, postcodeValid, noGroups, closed } = await setup(
   'Wanted'
 )
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
-@import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
-select {
-  max-width: 400px !important;
+.location-page {
+  min-height: 100vh;
+  background: #f8f9fa;
 }
 
-.fader {
-  background-color: rgba(246, 246, 236, 0.6);
-  box-shadow: 0 0 80px 450px rgba(246, 246, 236, 0.6);
-  font-weight: bold;
-}
+.stepper-container {
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-@include media-breakpoint-down(md) {
-  .layout {
-    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
-    //mobile browsers.
-    min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
-
-    @media (min-height: $mobile-tall) {
-      min-height: calc(100vh - 84px - $sticky-banner-height-mobile-tall - 84px);
-    }
-
-    @supports (height: 100dvh) {
-      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
-
-      @media (min-height: $mobile-tall) {
-        min-height: calc(
-          100dvh - 84px - $sticky-banner-height-mobile-tall - 84px
-        );
-      }
-    }
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  @include media-breakpoint-up(lg) {
+    padding: 1.5rem 2rem;
   }
 }
 
-.maxbutt {
-  width: 33vw;
+.location-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  @include media-breakpoint-up(lg) {
+    padding: 2rem;
+  }
+}
+
+.location-card {
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.location-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-green-background;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.location-subtitle {
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.postcode-section {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.community-section {
+  margin-top: 1.5rem;
+}
+
+.community-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.community-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.community-icon {
+  color: $color-green-background;
+  font-size: 1.25rem;
+}
+
+.community-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.community-select {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+
+  :deep(select) {
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border: 2px solid $color-green-background;
+    color: $color-green-background;
+    max-width: 100%;
+  }
+}
+
+.community-hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 0;
+}
+
+.next-section {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.next-container {
+  display: flex;
+  justify-content: center;
+}
+
+.next-btn {
+  min-width: 280px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 </style>
