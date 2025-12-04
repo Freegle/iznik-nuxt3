@@ -1050,7 +1050,8 @@ $color-apple: #000000;
   gap: 0.5rem;
   padding: 0.25rem 0;
 
-  @include media-breakpoint-up(md) {
+  /* Only use side-by-side layout on large screens */
+  @include media-breakpoint-up(lg) {
     flex-direction: row;
     padding: 0.5rem 0;
   }
@@ -1130,7 +1131,8 @@ $color-apple: #000000;
   gap: 0.5rem;
   margin: 0;
 
-  @include media-breakpoint-up(md) {
+  /* Vertical divider only on large screens */
+  @include media-breakpoint-up(lg) {
     flex-direction: column;
     margin: 0 0.5rem;
   }
@@ -1141,7 +1143,8 @@ $color-apple: #000000;
   height: 1px;
   background: $color-gray--light;
 
-  @include media-breakpoint-up(md) {
+  /* Vertical divider only on large screens */
+  @include media-breakpoint-up(lg) {
     width: 1px;
     height: auto;
     flex: 1;
