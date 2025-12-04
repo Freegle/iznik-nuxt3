@@ -4,8 +4,6 @@
       v-if="showDonationAskModal"
       @hidden="showDonationAskModal = false"
     />
-    <DeadlineAskModal v-if="askDeadline" :ids="ids" @hide="maybeAskDelivery" />
-    <DeliveryAskModal v-if="askDelivery" :ids="ids" />
 
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
@@ -88,8 +86,6 @@ import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import MyPostsDonationAsk from '~/components/MyPostsDonationAsk.vue'
 import NewUserInfo from '~/components/NewUserInfo.vue'
-import DeadlineAskModal from '~/components/DeadlineAskModal.vue'
-import DeliveryAskModal from '~/components/DeliveryAskModal.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
 import { useRuntimeConfig } from '#app'
@@ -185,30 +181,12 @@ function forceLogin() {
 
 trystStore.fetch()
 
-// If we have just submitted some posts then we will have been passed ids.
-// In that case, we might want to ask if we can deliver.
-const askDelivery = ref(false)
-const askDeadline = ref(false)
-
-function maybeAskDelivery() {
-  if (type.value === 'Offer') {
-    askDelivery.value = true
-  }
-}
-
 onMounted(() => {
   type.value = window.history.state?.type || null
 
-  if (type.value && !window.history.state?.skipDeadline) {
-    askDeadline.value = true
-  }
-
   if (type.value) {
     window.setTimeout(() => {
-      window.history.replaceState(
-        { ids: null, type: null, skipDeadline: null },
-        null
-      )
+      window.history.replaceState({ ids: null, type: null }, null)
     }, 5000)
 
     if (type.value === 'Offer' && myid) {
@@ -220,12 +198,9 @@ onMounted(() => {
   }
 
   if (window.history.state?.ids?.length) {
-    // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
     ids.value = window.history.state.ids
     newUserPassword.value = window.history.state.newpassword
   }
-
-  // showDonationAskModal.value = true // debug: shows <DonationAskModal/> on My Posts
 })
 
 function donationMade() {

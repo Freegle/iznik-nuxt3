@@ -83,9 +83,6 @@
         <notice-message v-if="socialblocked" variant="warning" class="mt-2">
           Social sign in blocked - check your ad blocker settings.
         </notice-message>
-        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true">
-          {{ loginWaitMessage }}
-        </b-alert>
         <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
           {{ socialLoginError }}
         </b-alert>
@@ -247,7 +244,6 @@ let bumpTimer = null
 const form = ref(null)
 const loginModal = ref(null)
 const googleLoginButton = ref(null)
-const loginWaitMessage = ref(null) // APP
 
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
@@ -345,7 +341,6 @@ function tryLater(native) {
   } else {
     socialLoginError.value = 'Something went wrong; please try later.'
   }
-  loginWaitMessage.value = null
 }
 
 function bumpIt() {
@@ -365,7 +360,6 @@ function show() {
   pleaseShowModal.value = true
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
   buttonClicked.value = false
 
   setTimeout(() => {
@@ -400,7 +394,6 @@ function loginNative(e) {
 
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
   buttonClicked.value = true
   e.preventDefault()
   e.stopPropagation()
@@ -511,7 +504,6 @@ function loginNative(e) {
       })
   } else {
     // Login
-    loginWaitMessage.value = 'Please wait...'
     authStore
       .login({
         email: email.value,
@@ -550,7 +542,6 @@ function loginNative(e) {
         } else {
           throw e // let others bubble up
         }
-        loginWaitMessage.value = null
       })
   }
 }
@@ -567,7 +558,6 @@ async function loginFacebook() {
 
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
 
   // App: https://github.com/capacitor-community/facebook-login
 
@@ -599,7 +589,6 @@ async function loginFacebook() {
       if (accessToken) {
         // console.log("accessToken", accessToken)
         // Login successful.
-        loginWaitMessage.value = 'Please wait...'
         await authStore.login({
           fblogin: 1,
           fbaccesstoken: accessToken,
@@ -613,7 +602,6 @@ async function loginFacebook() {
     } catch (e) {
       socialLoginError.value = 'Facebook app login error: ' + e.message
     }
-    loginWaitMessage.value = null
     return
   }
 
@@ -658,7 +646,6 @@ function loginAppleApp() {
   }
   // https://github.com/capacitor-community/apple-sign-in
   socialLoginError.value = null
-  loginWaitMessage.value = null
   try {
     console.log('loginAppleApp')
     const options = { scopes: 'email name' }
@@ -668,7 +655,6 @@ function loginAppleApp() {
         // Sign in using token at server
         if (result.response.identityToken) {
           // identityToken, user, etc
-          loginWaitMessage.value = 'Please wait...'
           await authStore.login({
             applecredentials: result.response,
             applelogin: true,
@@ -677,7 +663,6 @@ function loginAppleApp() {
           self.pleaseShowModal = false
         } else {
           socialLoginError.value = 'No identityToken given'
-          loginWaitMessage.value = null
         }
       })
       .catch((e) => {
@@ -686,7 +671,6 @@ function loginAppleApp() {
         } else {
           socialLoginError.value = e.message
         }
-        loginWaitMessage.value = null
       })
   } catch (e) {
     console.log('Apple login error: ', e)
@@ -708,7 +692,6 @@ async function loginGoogleApp() {
     })
     // console.log(response)
     if (response.result && response.result.idToken) {
-      loginWaitMessage.value = 'Please wait...'
       await authStore.login({
         googlejwt: response.result.idToken,
         googlelogin: true,
@@ -719,12 +702,10 @@ async function loginGoogleApp() {
     } else {
       socialLoginError.value = 'Google: no result.idToken found'
     }
-    loginWaitMessage.value = null
   } catch (e) {
     console.log('Google login error: ', e)
     socialLoginError.value = 'Google login error: ' + e.message
   }
-  loginWaitMessage.value = null
 }
 
 async function handleGoogleCredentialsResponse(response) {
@@ -884,7 +865,6 @@ async function initializeAppSocialLogins() {
 watch(
   showModal,
   (newVal) => {
-    loginWaitMessage.value = null
     pleaseShowModal.value = newVal
 
     if (newVal) {
@@ -918,7 +898,6 @@ watch(
 watch(
   forceLogin,
   (newVal) => {
-    loginWaitMessage.value = null
     console.log('Force login changed to ' + newVal)
     showModal.value = pleaseShowModal.value || newVal
   },
