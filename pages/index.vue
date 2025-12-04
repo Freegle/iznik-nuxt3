@@ -4,8 +4,8 @@
       <BreakpointFettler />
     </client-only>
 
-    <!-- Mobile Layout -->
-    <div class="d-block d-md-none mobile-layout">
+    <!-- Mobile/Tablet Layout -->
+    <div class="d-block d-lg-none mobile-layout">
       <!-- Hero Section -->
       <div class="hero-section">
         <!-- Frame with overlaid slogan -->
@@ -119,8 +119,8 @@
       <MainFooter class="mobile-footer" />
     </div>
 
-    <!-- Desktop Layout (original structure) -->
-    <div class="d-none d-md-block desktop-layout">
+    <!-- Desktop Layout (lg and above) -->
+    <div class="d-none d-lg-block desktop-layout">
       <div class="grid m-0 mt-lg-5 ml-2 mr-2">
         <div class="eyecandy d-flex justify-content-start flex-column">
           <FreeglerPhotos class="ps-4 h-100" />
