@@ -34,69 +34,57 @@
                     message.groups.length &&
                     message.groups[0]?.collection === 'Rejected'))))
           "
-          class="bg-white p-2"
+          class="error-page"
         >
-          <h1>Sorry, that post isn't around any more.</h1>
-          <p
-            v-if="
-              message?.outcomes?.length &&
-              message?.outcomes[0].outcome === 'Taken'
-            "
-          >
-            It was successfully taken.
-          </p>
-          <p
-            v-else-if="
-              message?.outcomes?.length &&
-              message?.outcomes[0].outcome === 'Received'
-            "
-          >
-            It was successfully received.
-          </p>
-          <p
-            v-else-if="
-              message?.outcomes?.length &&
-              message?.outcomes[0].outcome === 'Withdrawn'
-            "
-          >
-            It was withdrawn.
-          </p>
-          <p v-else-if="message?.deadline">
-            There was a deadline of
-            {{ dateonlyNoYear(message.deadline) }}.
-          </p>
-          <div v-else>
-            <p>
-              If it was an OFFER, it's probably been TAKEN. If it was a WANTED,
-              it's probably been RECEIVED.
-            </p>
+          <div class="error-content">
+            <div class="error-card">
+              <v-icon icon="heart" class="error-icon" />
+              <h1 class="error-title">This post isn't available</h1>
+              <p
+                v-if="
+                  message?.outcomes?.length &&
+                  message?.outcomes[0].outcome === 'Taken'
+                "
+                class="error-message"
+              >
+                Great news - it was successfully taken!
+              </p>
+              <p
+                v-else-if="
+                  message?.outcomes?.length &&
+                  message?.outcomes[0].outcome === 'Received'
+                "
+                class="error-message"
+              >
+                Great news - it was successfully received!
+              </p>
+              <p
+                v-else-if="
+                  message?.outcomes?.length &&
+                  message?.outcomes[0].outcome === 'Withdrawn'
+                "
+                class="error-message"
+              >
+                This post was withdrawn by the poster.
+              </p>
+              <p v-else-if="message?.deadline" class="error-message">
+                This post had a deadline of
+                {{ dateonlyNoYear(message.deadline) }}.
+              </p>
+              <p v-else class="error-message">
+                If it was an OFFER, it's probably been TAKEN. If it was a
+                WANTED, it's probably been RECEIVED.
+              </p>
+              <div class="error-buttons">
+                <b-button to="/give" variant="primary">
+                  <v-icon icon="gift" class="me-1" />Give stuff
+                </b-button>
+                <b-button to="/find" variant="secondary">
+                  <v-icon icon="search" class="me-1" />Find stuff
+                </b-button>
+              </div>
+            </div>
           </div>
-          <b-row>
-            <b-col cols="5" class="mt-1">
-              <b-button
-                to="/give"
-                class="mt-1"
-                size="lg"
-                block
-                variant="primary"
-              >
-                <v-icon icon="gift" />&nbsp;Give stuff
-              </b-button>
-            </b-col>
-            <b-col cols="2" />
-            <b-col cols="5">
-              <b-button
-                to="/find"
-                class="mt-1"
-                size="lg"
-                block
-                variant="secondary"
-              >
-                <v-icon icon="shopping-cart" />
-                &nbsp;Ask for stuff
-              </b-button>
-            </b-col>
-          </b-row>
         </div>
         <div
           v-else-if="
@@ -258,3 +246,54 @@ onMounted(async () => {
   mountComplete.value = true
 })
 </script>
+
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.error-page {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.error-content {
+  max-width: 400px;
+  width: 100%;
+}
+
+.error-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 3rem;
+  color: $colour-success;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  margin-bottom: 0.75rem;
+}
+
+.error-message {
+  color: $color-gray--dark;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.error-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+</style>
