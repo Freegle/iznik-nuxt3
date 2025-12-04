@@ -307,7 +307,7 @@ async function signUpViaHomepage(
   // Find and click the Register button in the modal
   console.log('Clicking register button')
   const registerButton = page.locator(
-    'button:has-text("Join Freegle!"), .btn:has-text("Join Freegle!")'
+    'button:has-text("Join Freegle!"), .btn:has-text("Join Freegle!"), button:has-text("Register on Freegle"), .btn:has-text("Register on Freegle")'
   )
   await registerButton.waitFor({
     state: 'visible',
@@ -628,7 +628,7 @@ async function loginViaHomepage(
   try {
     const emailValue = await Promise.race([
       emailField.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
@@ -640,7 +640,7 @@ async function loginViaHomepage(
 
     const passwordValue = await Promise.race([
       passwordField.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
@@ -655,7 +655,7 @@ async function loginViaHomepage(
         console.log('About to get fullname field value in debug section...')
         const fullnameValue = await Promise.race([
           fullnameField.inputValue(),
-          new Promise((_, reject) =>
+          new Promise((_resolve, reject) =>
             setTimeout(
               () => reject(new Error('inputValue timeout after 3s')),
               3000
@@ -727,14 +727,14 @@ async function loginViaHomepage(
   try {
     const emailValue = await Promise.race([
       emailField.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
 
     const passwordValue = await Promise.race([
       passwordField.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
@@ -749,7 +749,7 @@ async function loginViaHomepage(
     if (finalFullnameVisible && fullnameField) {
       const fullnameValue = await Promise.race([
         fullnameField.inputValue(),
-        new Promise((_, reject) =>
+        new Promise((_resolve, reject) =>
           setTimeout(
             () => reject(new Error('inputValue timeout after 3s')),
             3000
@@ -798,7 +798,7 @@ async function loginViaHomepage(
     console.log('About to get email input value...')
     const emailValue = await Promise.race([
       emailInput.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
@@ -806,7 +806,7 @@ async function loginViaHomepage(
     console.log('About to get password input value...')
     const passwordValue = await Promise.race([
       passwordInput.inputValue(),
-      new Promise((_, reject) =>
+      new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error('inputValue timeout after 3s')), 3000)
       ),
     ]).catch(() => 'NO_VALUE')
