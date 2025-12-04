@@ -3,7 +3,10 @@
 @import 'bootstrap/scss/mixins/_breakpoints';
 
 $navbar-height: calc(8px + 8px + 64px);
-$navbar-mobile-chat-height: 58px; // Simplified navbar used on chat pages (mobile only)
+$navbar-mobile-chat-height: 66px; /* Simplified navbar used on chat pages - matches regular navbar height */
+$navbar-bottom-height: 67px; /* Bottom navigation bar height */
+$navbar-bottom-post-overhang: 24px; /* Post button extends above navbar */
+$page-bottom-padding: calc(#{$navbar-bottom-height} + #{$navbar-bottom-post-overhang} + 10px); /* Total padding for pages to clear bottom navbar */
 
 @include media-breakpoint-up(md) {
   $navbar-height: calc(8px + 8px + 58px);

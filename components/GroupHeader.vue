@@ -1,41 +1,67 @@
 <template>
-  <!-- Mobile Layout -->
-  <div class="d-block d-md-none mobile-group-header">
+  <!-- Mobile/Tablet Layout -->
+  <div class="d-block d-lg-none mobile-group-header">
     <div class="mobile-hero">
-      <div class="mobile-hero__content">
-        <b-img
-          rounded
-          alt="Community profile picture"
-          :src="group.profile ? group.profile : '/icon.png'"
-          class="mobile-hero__logo"
-        />
-        <div class="mobile-hero__info">
-          <h1 class="mobile-hero__title">
-            {{ group.namedisplay }}
-            <v-icon
-              v-if="amAMember === 'Owner' || amAMember === 'Moderator'"
-              icon="crown"
-              class="text-success"
-            />
-          </h1>
-          <p v-if="group.tagline" class="mobile-hero__tagline">
-            {{ group.tagline }}
-          </p>
+      <div class="mobile-hero__top">
+        <div class="mobile-hero__content">
+          <b-img
+            rounded
+            alt="Community profile picture"
+            :src="group.profile ? group.profile : '/icon.png'"
+            class="mobile-hero__logo"
+          />
+          <div class="mobile-hero__info">
+            <h1 class="mobile-hero__title">
+              {{ group.namedisplay }}
+              <v-icon
+                v-if="amAMember === 'Owner' || amAMember === 'Moderator'"
+                icon="crown"
+                class="text-success"
+              />
+            </h1>
+            <p v-if="group.tagline" class="mobile-hero__tagline">
+              {{ group.tagline }}
+            </p>
+            <div
+              v-if="group.membercount || group.founded"
+              class="mobile-hero__stats"
+            >
+              <span v-if="group.membercount" class="mobile-hero__stat">
+                <strong>{{ group.membercount.toLocaleString() }}</strong
+                >&nbsp;freeglers
+              </span>
+              <span class="mobile-hero__stat-divider">•</span>
+              <span v-if="group.founded" class="mobile-hero__stat">
+                Founded&nbsp;<DateFormatted
+                  :value="group.founded"
+                  format="dateonly"
+                />
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div v-if="group.membercount" class="mobile-hero__stats">
-        <span class="mobile-hero__stat">
-          <v-icon icon="users" class="me-1" />
-          {{ group.membercount.toLocaleString() }} freeglers
-        </span>
-        <span v-if="group.founded" class="mobile-hero__stat">
-          <v-icon icon="calendar" class="me-1" />
-          Since&nbsp;<DateFormatted :value="group.founded" format="dateonly" />
-        </span>
+        <!-- Leave/Join button at top right on tablet -->
+        <div class="mobile-hero__action d-none d-md-block">
+          <SpinButton
+            v-if="!amAMember"
+            icon-name="plus"
+            variant="primary"
+            label="Join"
+            @handle="join"
+          />
+          <SpinButton
+            v-if="amAMember === 'Member'"
+            icon-name="trash-alt"
+            variant="white"
+            label="Leave"
+            @handle="leave"
+          />
+        </div>
       </div>
     </div>
 
-    <div class="mobile-actions">
+    <!-- Join/Leave button full width on mobile only -->
+    <div class="mobile-actions d-md-none">
       <SpinButton
         v-if="!amAMember"
         icon-name="plus"
@@ -64,12 +90,24 @@
     </div>
 
     <div class="mobile-description">
-      <p v-if="!description">
-        Give and get stuff for free with {{ group.namedisplay }}. Offer things
-        you don't need, and ask for things you'd like.
-      </p>
-      <!-- eslint-disable-next-line -->
-      <span v-else v-html="description"/>
+      <span
+        class="mobile-description__text"
+        :class="{ 'mobile-description__text--expanded': descriptionExpanded }"
+      >
+        <span v-if="!description">
+          Give and get stuff for free with {{ group.namedisplay }}. Offer things
+          you don't need, and ask for things you'd like.
+        </span>
+        <!-- eslint-disable-next-line -->
+        <span v-else v-html="description"/>
+      </span>
+      <a
+        v-if="description && description.length > 400 && !descriptionExpanded"
+        href="#"
+        class="mobile-description__more"
+        @click.prevent="descriptionExpanded = true"
+        >read more</a
+      >
     </div>
 
     <div class="mobile-links">
@@ -77,7 +115,7 @@
         <v-icon icon="calendar-alt" class="me-1" />Events
       </nuxt-link>
       <nuxt-link no-prefetch :to="{ path: '/volunteerings/' + group.id }">
-        <v-icon icon="hands-helping" class="me-1" />Volunteer
+        <v-icon icon="hands-helping" class="me-1" />Volunteering
       </nuxt-link>
       <nuxt-link no-prefetch :to="{ path: '/stories/' + group.id }">
         <v-icon icon="book-open" class="me-1" />Stories
@@ -91,14 +129,14 @@
       <p class="mobile-volunteers__label">Questions? Contact our volunteers:</p>
       <div class="mobile-volunteers__list">
         <ExternalLink v-if="!me" :href="'mailto:' + group.modsemail">
-          <span class="btn btn-sm btn-outline-success">Contact</span>
+          <span class="btn btn-sm btn-primary">Contact</span>
         </ExternalLink>
         <ChatButton
           v-else
           :groupid="group.id"
           title="Contact"
           chattype="User2Mod"
-          variant="outline-success"
+          variant="primary"
           size="sm"
         />
         <div
@@ -151,8 +189,8 @@
     </div>
   </div>
 
-  <!-- Desktop Layout (original) -->
-  <b-card bg-light class="d-none d-md-block">
+  <!-- Desktop Layout (large screens only) -->
+  <b-card bg-light class="d-none d-lg-block">
     <div class="group mb-3">
       <div class="group__image">
         <b-img
@@ -306,7 +344,7 @@
   </b-card>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import SpinButton from './SpinButton'
 import ChatButton from '~/components/ChatButton'
@@ -331,6 +369,7 @@ const props = defineProps({
 const router = useRouter()
 const authStore = useAuthStore()
 const me = computed(() => authStore?.user)
+const descriptionExpanded = ref(false)
 const myid = computed(() => authStore?.user?.id)
 
 // Computed properties
@@ -530,10 +569,23 @@ async function join(callback) {
   margin-bottom: 0.75rem;
 }
 
+.mobile-hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
 .mobile-hero__content {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-hero__action {
+  flex-shrink: 0;
 }
 
 .mobile-hero__logo {
@@ -541,6 +593,12 @@ async function join(callback) {
   height: 60px;
   flex-shrink: 0;
   object-fit: cover;
+  border: 2px solid $color-gray--light;
+
+  @include media-breakpoint-up(md) {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 .mobile-hero__info {
@@ -565,16 +623,30 @@ async function join(callback) {
 
 .mobile-hero__stats {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 0.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .mobile-hero__stat {
-  font-size: 0.75rem;
-  color: $color-gray--dark;
+  font-size: 0.8rem;
+  color: $color-gray--darker;
   display: flex;
   align-items: center;
+
+  :deep(svg) {
+    color: $colour-success;
+  }
+
+  strong {
+    color: $colour-success;
+    margin-right: 0.2rem;
+  }
+}
+
+.mobile-hero__stat-divider {
+  color: $color-gray--light;
 }
 
 .mobile-actions {
@@ -634,12 +706,37 @@ async function join(callback) {
   margin-bottom: 0.75rem;
   line-height: 1.4;
 
+  &__text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    &--expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+  }
+
+  &__more {
+    color: $colour-success;
+    text-decoration: none;
+    margin-left: 0.25rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   p {
     margin: 0;
+    display: inline;
   }
 
   :deep(p) {
     margin-bottom: 0.5rem;
+    display: inline;
 
     &:last-child {
       margin-bottom: 0;

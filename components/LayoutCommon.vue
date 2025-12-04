@@ -34,7 +34,7 @@
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
-                  :jobs="false"
+                  :jobs="true"
                   @rendered="adRendered"
                   @failed="adFailed"
                 />
@@ -46,7 +46,7 @@
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
-                  :jobs="false"
+                  :jobs="true"
                   @rendered="adRendered"
                 />
               </VisibleWhen>
@@ -392,8 +392,14 @@ body.modal-open {
   margin-top: v-bind(marginTop);
   transition: margin-top 1s;
 
+  /* md-lg: Mobile-style navbar is shown (66px tall) */
   @include media-breakpoint-up(md) {
-    margin-top: 75px;
+    margin-top: 66px;
+  }
+
+  /* xl+: Desktop navbar is shown (76px tall) */
+  @include media-breakpoint-up(xl) {
+    margin-top: 76px;
   }
 }
 

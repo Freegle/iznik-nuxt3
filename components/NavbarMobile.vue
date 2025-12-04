@@ -165,7 +165,7 @@
       </nav>
     </div>
     <!-- Placeholder for chat pages - prevents flicker before ChatMobileNavbar teleports in -->
-    <div v-else class="chat-navbar-placeholder ourBack fixed-top d-xl-none" />
+    <div v-else class="chat-navbar-placeholder ourBack fixed-top" />
   </div>
 </template>
 <script setup>
@@ -338,6 +338,7 @@ const me = computed(() => useAuthStore().user)
 
 // Bottom navbar - modern design
 // Total height should be 67px (same as before: 51 content + 8 pad top + 8 pad bottom)
+// On tablets (md+), increase to 76px (60 content + 8 pad top + 8 pad bottom)
 .navbar-bottom {
   position: fixed;
   bottom: 0;
@@ -349,9 +350,14 @@ const me = computed(() => useAuthStore().user)
   justify-content: space-around;
   background: white;
   border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   height: 67px;
   box-sizing: border-box;
+
+  @include media-breakpoint-up(md) {
+    height: 76px;
+  }
 }
 
 .navbar-bottom.stickyAdRendered {
@@ -376,6 +382,10 @@ const me = computed(() => useAuthStore().user)
   justify-content: center;
   width: 64px;
   height: 51px;
+
+  @include media-breakpoint-up(md) {
+    height: 60px;
+  }
 }
 
 // Modern user dropdown styling

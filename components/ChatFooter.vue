@@ -143,65 +143,69 @@
       v-if="!otheruser?.spammer && !otheruser?.deleted"
       class="bg-white pt-1 pb-1"
     >
-      <div class="d-none d-lg-block">
-        <span v-if="chat && chat.chattype === 'User2User' && otheruser">
-          <b-button
+      <div class="d-none d-lg-flex action-bar">
+        <div
+          v-if="chat && chat.chattype === 'User2User' && otheruser"
+          class="action-buttons"
+        >
+          <button
             v-b-tooltip="'Promise an item to this freegler'"
-            variant="secondary"
-            class="ml-1 mr-2"
+            class="action-chip"
             @click="promise(null)"
           >
-            <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
-          </b-button>
-          <b-button
+            <v-icon icon="handshake" class="action-icon" />
+            <span>Promise</span>
+          </button>
+          <button
             v-b-tooltip="'Send your address'"
-            variant="secondary"
-            class="mr-2"
+            class="action-chip"
             @click="addressBook"
           >
-            <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
-          </b-button>
-          <b-button
+            <v-icon icon="address-book" class="action-icon" />
+            <span>Address</span>
+          </button>
+          <button
             v-if="!tooSoonToNudge"
-            v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
-            variant="secondary"
-            class="mr-2"
+            v-b-tooltip="'Waiting for a reply? Nudge this freegler.'"
+            class="action-chip"
             @click="nudge"
           >
-            <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
-          </b-button>
-          <div
+            <v-icon icon="bell" class="action-icon" />
+            <span>Nudge</span>
+          </button>
+          <button
             v-if="tooSoonToNudge"
             v-b-tooltip="
               'You need to wait a day since the last message before nudging.'
             "
-            class="d-inline"
+            class="action-chip disabled"
+            @click="nudgeTooSoon"
           >
-            <b-button variant="secondary" class="mr-2" @click="nudgeTooSoon">
-              <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
-            </b-button>
-          </div>
-        </span>
-        <SpinButton
-          size="md"
-          variant="primary"
-          class="float-end ml-2 mr-2"
-          :button-title="sending ? 'Sending...' : 'Send'"
-          label="Send"
-          icon-name="angle-double-right"
-          done-icon=""
-          iconlast
-          @handle="send"
-        />
-        <b-button
-          v-b-tooltip="'Upload a photo'"
-          variant="secondary"
-          class="float-end"
-          @click="photoAdd"
-        >
-          <v-icon icon="camera" />
-          Photo
-        </b-button>
+            <v-icon icon="bell" class="action-icon" />
+            <span>Nudge</span>
+          </button>
+        </div>
+        <div class="send-area">
+          <button
+            v-b-tooltip="'Upload a photo'"
+            class="action-chip"
+            @click="photoAdd"
+          >
+            <v-icon icon="camera" class="action-icon" />
+            <span>Photo</span>
+          </button>
+          <SpinButton
+            size="md"
+            variant="primary"
+            class="send-button"
+            :button-title="sending ? 'Sending...' : 'Send'"
+            label="Send"
+            icon-name="angle-double-right"
+            done-icon=""
+            iconlast
+            @handle="send"
+          />
+        </div>
       </div>
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
@@ -911,6 +915,62 @@ onMounted(() => {
   grid-template-columns: auto;
   grid-auto-rows: max-content;
   border-top: 1px solid $color-gray--light;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.send-area {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: $color-gray--lighter;
+  border: 1px solid $color-gray--light;
+  color: $color-gray--darker;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: darken($color-gray--lighter, 5%);
+    border-color: $color-gray--normal;
+  }
+
+  &:active {
+    background-color: darken($color-gray--lighter, 10%);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .action-icon {
+    color: $colour-success;
+    font-size: 1rem;
+  }
+}
+
+.send-button {
+  padding: 6px 16px;
 }
 
 .notices-container {

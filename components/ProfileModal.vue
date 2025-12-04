@@ -8,7 +8,7 @@
     content-class="profile-modal-content"
   >
     <template #default>
-      <ProfileInfoMobile :id="id" class="profile-modal-body" />
+      <ProfileInfo :id="id" class="profile-modal-body" />
     </template>
     <template #footer>
       <b-button variant="primary" @click="hide"> Close </b-button>
@@ -20,8 +20,8 @@
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
-const ProfileInfoMobile = defineAsyncComponent(() =>
-  import('~/components/ProfileInfoMobile')
+const ProfileInfo = defineAsyncComponent(() =>
+  import('~/components/ProfileInfo')
 )
 
 const userStore = useUserStore()
