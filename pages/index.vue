@@ -8,8 +8,8 @@
     <div class="d-block d-lg-none mobile-layout">
       <!-- Hero Section -->
       <div class="hero-section">
-        <!-- Frame with overlaid slogan -->
-        <div class="hero-frame">
+        <!-- Single frame for mobile (xs, sm) -->
+        <div class="d-block d-md-none hero-frame">
           <FreeglerPhotos class="hero-photos" />
           <div class="hero-slogan">
             <h1 class="hero-title">
@@ -17,6 +17,10 @@
               <span class="hero-line2">Love the share.</span>
             </h1>
           </div>
+        </div>
+        <!-- Triple frame for tablet (md) -->
+        <div class="d-none d-md-block d-lg-none">
+          <FreeglerPhotosCarousel />
         </div>
         <!-- CTA section below frame -->
         <div class="hero-cta">
@@ -240,6 +244,7 @@ import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import FreeglerPhotos from '~/components/FreeglerPhotos.vue'
+import FreeglerPhotosCarousel from '~/components/FreeglerPhotosCarousel.vue'
 import ProxyImage from '~/components/ProxyImage.vue'
 import {
   computed,
@@ -285,7 +290,6 @@ const head = buildHead(
 const userSite = runtimeConfig.public.USER_SITE
 const proxy = runtimeConfig.public.IMAGE_DELIVERY
 
-const bg = proxy + '?url=' + userSite + '/wallpaper.png&output=webp'
 const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
 
 head.link = [
@@ -293,11 +297,6 @@ head.link = [
     rel: 'preload',
     as: 'image',
     href: logo,
-  },
-  {
-    rel: 'preload',
-    as: 'image',
-    href: bg,
   },
 ]
 
@@ -416,11 +415,7 @@ onBeforeUnmount(() => {
 
 .mobile-layout {
   padding: 0;
-  background: linear-gradient(
-    180deg,
-    $color-green--bg-gradient 0%,
-    $color-white 35%
-  );
+  background: $color-white;
   min-height: 100vh;
 }
 
@@ -492,13 +487,13 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.25rem;
-  font-size: 0.95rem;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   font-weight: 600;
   text-decoration: none;
   transition: transform 0.1s, box-shadow 0.15s;
-  min-width: 100px;
+  min-width: clamp(80px, 20vw, 140px);
 
   &:active {
     transform: scale(0.98);
@@ -584,6 +579,12 @@ onBeforeUnmount(() => {
   :deep(.btn),
   :deep(.autocomplete-clear) {
     display: none !important;
+  }
+
+  @include media-breakpoint-up(md) {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
