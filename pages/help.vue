@@ -1,12 +1,7 @@
 <template>
   <client-only>
-    <b-row class="m-0">
-      <b-col cols="0" md="3">
-        <VisibleWhen :at="['lg', 'xl', 'xxl']">
-          <SidebarLeft />
-        </VisibleWhen>
-      </b-col>
-      <b-col cols="12" md="6" class="help-page">
+    <div class="help-wrapper">
+      <div class="help-page">
         <RateAppModal
           v-if="showRateAppModal"
           ref="rateAppModal"
@@ -53,9 +48,8 @@
         </div>
 
         <p class="version-info">Site version: {{ version }}</p>
-      </b-col>
-      <b-col cols="0" md="3" />
-    </b-row>
+      </div>
+    </div>
   </client-only>
 </template>
 <script setup>
@@ -63,16 +57,12 @@ import { useRoute } from 'vue-router'
 import dayjs from 'dayjs'
 import { defineAsyncComponent } from 'vue'
 import { buildHead } from '~/composables/useBuildHead'
-import VisibleWhen from '~/components/VisibleWhen'
 import HelpChatFlow from '~/components/HelpChatFlow.vue'
 import { ref, computed } from '#imports'
 import { useMobileStore } from '@/stores/mobile'
 import { useDebugStore } from '~/stores/debug'
 
 // Async components
-const SidebarLeft = defineAsyncComponent(() =>
-  import('~/components/SidebarLeft')
-)
 const DebugLogsModal = defineAsyncComponent(() =>
   import('~/components/DebugLogsModal.vue')
 )
@@ -146,9 +136,15 @@ useHead(
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
 
+.help-wrapper {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
 .help-page {
-  padding-bottom: 2rem;
-  padding-top: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 .app-review {

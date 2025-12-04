@@ -16,6 +16,8 @@ These commands can be run by Claude without asking for permission:
 
 IMPORTANT: After making code changes, always run `eslint --fix` on the specific files changed and remove any unused code detected by the linter.
 
+IMPORTANT: When making visual/layout changes (CSS, templates, component structure), ALWAYS verify the changes using the Chrome DevTools MCP browser tools. Navigate to the affected page and take a screenshot to confirm the changes look correct before moving on. Do not make visual changes blindly without checking them in a real browser. See `../BROWSER-TESTING.md` for the full workflow guide.
+
 ## File Creation Guidelines
 - When you create files, always add them to git
 - Always add newly created files to git.  

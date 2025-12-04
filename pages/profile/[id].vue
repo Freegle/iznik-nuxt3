@@ -6,13 +6,11 @@
     <!-- Mobile view -->
     <ProfileInfoMobile v-else-if="isMobile" :id="id" />
     <!-- Desktop view -->
-    <b-row v-else class="m-0">
-      <b-col cols="0" lg="3" class="d-none d-lg-block" />
-      <b-col cols="12" lg="6" class="p-0">
+    <div v-else class="profile-page">
+      <div class="profile-content">
         <ProfileInfo :id="id" />
-      </b-col>
-      <b-col cols="0" lg="3" class="d-none d-lg-block" />
-    </b-row>
+      </div>
+    </div>
   </client-only>
 </template>
 <script setup>
@@ -54,3 +52,16 @@ if (id) {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.profile-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.profile-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+</style>
