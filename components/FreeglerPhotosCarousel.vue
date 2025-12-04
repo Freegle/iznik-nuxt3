@@ -164,29 +164,21 @@ onBeforeUnmount(() => {
   width: 100%;
   margin: 0;
   padding: 0;
+  padding-bottom: 0.5rem;
+  background-image: url('/wallpaper.png');
+  background-repeat: repeat;
 }
 
 .gallery-wall {
-  /* Wallpaper background */
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
   min-height: 32vh;
-  padding: 1.5rem 1rem;
-  padding-top: calc(1.5rem + 17px);
+  padding: 1rem 1rem 0.5rem;
+  padding-top: calc(1rem + 17px);
   margin-top: -17px;
   position: relative;
-
-  /* Wallpaper background */
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('/wallpaper.png');
-    background-repeat: repeat;
-    pointer-events: none;
-  }
 }
 
 .frame-wrapper {
@@ -239,8 +231,13 @@ onBeforeUnmount(() => {
 
 .gallery-slogan {
   text-align: center;
-  padding: 0.75rem 1rem;
-  background: white;
+  padding: 0.75rem 1.5rem;
+  margin: 0 auto;
+  max-width: fit-content;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
 }
 
 .slogan-title {

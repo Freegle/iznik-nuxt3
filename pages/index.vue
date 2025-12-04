@@ -6,23 +6,26 @@
 
     <!-- Mobile/Tablet Layout -->
     <div class="d-block d-lg-none mobile-layout">
-      <!-- Hero Section -->
+      <!-- Hero Section with wallpaper background -->
       <div class="hero-section">
-        <!-- Single frame for mobile (xs, sm) -->
-        <div class="d-block d-md-none hero-frame">
-          <FreeglerPhotos class="hero-photos" />
-          <div class="hero-slogan">
+        <div class="hero-wallpaper">
+          <!-- Single frame for mobile (xs, sm) -->
+          <div class="d-block d-md-none hero-frame">
+            <FreeglerPhotos class="hero-photos" />
+          </div>
+          <!-- Triple frame for tablet (md) -->
+          <div class="d-none d-md-block d-lg-none">
+            <FreeglerPhotosCarousel />
+          </div>
+          <!-- Slogan on wallpaper - only for mobile, tablet carousel has its own -->
+          <div class="d-block d-md-none hero-slogan-section">
             <h1 class="hero-title">
               <span class="hero-line1">Share the love.</span>
               <span class="hero-line2">Love the share.</span>
             </h1>
           </div>
         </div>
-        <!-- Triple frame for tablet (md) -->
-        <div class="d-none d-md-block d-lg-none">
-          <FreeglerPhotosCarousel />
-        </div>
-        <!-- CTA section below frame -->
+        <!-- CTA section below wallpaper -->
         <div class="hero-cta">
           <p class="hero-subtitle">Give and get stuff locally for free.</p>
           <div class="action-buttons">
@@ -45,9 +48,11 @@
               </NuxtLink>
               <template #fallback>
                 <a href="/give" class="action-btn action-btn--give">
+                  <span class="action-btn__icon-placeholder"></span>
                   <span>Give</span>
                 </a>
                 <a href="/find" class="action-btn action-btn--find">
+                  <span class="action-btn__icon-placeholder"></span>
                   <span>Find</span>
                 </a>
               </template>
@@ -419,9 +424,18 @@ onBeforeUnmount(() => {
   min-height: 100vh;
 }
 
-// Hero Section
+// Hero Section - wallpaper covers entire section including CTA
 .hero-section {
   text-align: center;
+  background-image: url('/wallpaper.png');
+  background-repeat: repeat;
+  background-size: auto;
+  padding-bottom: 1rem;
+}
+
+// Wrapper for frames and slogan
+.hero-wallpaper {
+  /* Wallpaper now on parent .hero-section */
 }
 
 .hero-frame {
@@ -430,27 +444,25 @@ onBeforeUnmount(() => {
   margin: 0 auto;
 }
 
-// Slogan positioned just below photo, overlapping with gold frame border
-// Spans full width of frame opening for visual balance
-.hero-slogan {
-  position: absolute;
-  bottom: 6%;
-  left: 12%;
-  right: 12%;
-  z-index: 20;
-  padding: 0.5rem 1rem;
+// Slogan section below frames, on wallpaper with frosted effect
+.hero-slogan-section {
+  padding: 0.75rem 1.5rem;
+  margin: 0 auto;
+  max-width: fit-content;
+  text-align: center;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  text-align: center;
+  border-radius: 12px;
 }
 
 .hero-title {
-  font-size: clamp(0.75rem, 2.5vh, 1.2rem);
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   margin: 0;
   color: $colour-header;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .hero-line1 {
@@ -462,10 +474,18 @@ onBeforeUnmount(() => {
   color: $colour-success;
 }
 
-// CTA section below frame
+// CTA section below frame - card style with subtle green tint
 .hero-cta {
-  padding: 0.5rem 1rem 0.75rem;
+  padding: 1rem 1rem 1.25rem;
+  margin: 1rem 0.75rem 0;
   text-align: center;
+  background: linear-gradient(
+    135deg,
+    $color-green--bg-gradient 0%,
+    $color-white 100%
+  );
+  border: 1px solid rgba($colour-success, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .hero-subtitle {
@@ -526,6 +546,17 @@ onBeforeUnmount(() => {
 
 .action-btn__icon {
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  top: -1px;
+}
+
+.action-btn__icon-placeholder {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
 }
 
 .browse-label {
@@ -601,6 +632,12 @@ onBeforeUnmount(() => {
   &::placeholder {
     color: $color-gray--normal;
     text-align: center;
+  }
+
+  @include media-breakpoint-up(md) {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

@@ -92,9 +92,11 @@
       >
         <v-icon icon="camera" /> Add Photos
       </b-button>
-      <p class="skip-link">
-        <a href="#" @click.prevent="emit('skip')">Skip</a>
-      </p>
+      <VisibleWhen :at="['xs', 'sm']">
+        <p class="skip-link">
+          <a href="#" @click.prevent="emit('skip')">Skip</a>
+        </p>
+      </VisibleWhen>
     </div>
 
     <!-- Photo source selection modal -->
@@ -144,6 +146,7 @@ import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
 import PhotoCard from './PhotoCard.vue'
 import OurUploadedImage from '~/components/OurUploadedImage.vue'
+import VisibleWhen from '~/components/VisibleWhen.vue'
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
 import {
