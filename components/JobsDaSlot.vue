@@ -123,6 +123,7 @@ const list = computed(() => {
 @import 'bootstrap/scss/variables';
 
 .jobs-slot {
+  width: 100%;
   background: $white;
   border: 1px solid $gray-200;
   overflow-y: auto;
@@ -133,14 +134,16 @@ const list = computed(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
-  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
-  color: $white;
+  background: $gray-100;
+  color: $gray-700;
   font-weight: 600;
   font-size: 0.85rem;
+  border-bottom: 1px solid $gray-200;
 }
 
 .jobs-slot-icon {
   font-size: 0.9rem;
+  color: #6c757d;
 }
 
 .jobs-slot-more {
@@ -148,16 +151,14 @@ const list = computed(() => {
   align-items: center;
   gap: 0.2rem;
   margin-left: auto;
-  color: $white;
+  color: $gray-600;
   font-size: 0.75rem;
   font-weight: 400;
   text-decoration: none;
-  opacity: 0.9;
 
   &:hover {
-    opacity: 1;
+    color: $gray-800;
     text-decoration: none;
-    color: $white;
   }
 }
 

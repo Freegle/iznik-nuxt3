@@ -18,50 +18,18 @@
       <span itemprop="availability">Instock</span>
     </div>
     <div v-if="startExpanded">
-      <!-- Mobile-optimized view -->
-      <MessageExpandedMobile
-        v-if="isMobile"
+      <MessageExpanded
         :id="message.id"
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        @zoom="showPhotosModal"
       />
-      <!-- Desktop view -->
-      <template v-else>
-        <MessageExpanded
-          :id="message.id"
-          :replyable="replyable"
-          :hide-close="hideClose"
-          :actions="actions"
-          :show-map="true"
-          class="bg-white p-2"
-          :ad-unit-path="adUnitPath"
-          :ad-id="adId"
-          @zoom="showPhotosModal"
-        />
-        <MessagePhotosModal
-          v-if="showMessagePhotosModal && message.attachments?.length"
-          :id="message.id"
-          @hidden="showMessagePhotosModal = false"
-        />
-      </template>
     </div>
     <div v-else>
-      <!-- Mobile-optimized summary -->
+      <!-- Modern card summary for all breakpoints -->
       <MessageSummaryMobile
-        v-if="isMobile"
         :id="message.id"
         :preload="preload"
-        @expand="expand"
-      />
-      <!-- Desktop summary -->
-      <MessageSummary
-        v-else
-        :id="message.id"
-        :expand-button-text="expandButtonText"
-        :replyable="replyable"
-        :matchedon="matchedon"
         @expand="expand"
       />
       <MessageModal
@@ -74,7 +42,7 @@
         @hidden="expanded = false"
       />
       <!-- Mobile full-screen modal (only inserted when clicked) -->
-      <MessageExpandedMobile
+      <MessageExpanded
         v-if="showMobileExpanded"
         :id="message.id"
         :replyable="replyable"
@@ -93,20 +61,15 @@ import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
-import MessageExpanded from '~/components/MessageExpanded'
-import MessageSummary from '~/components/MessageSummary'
 
-const MessageExpandedMobile = defineAsyncComponent(() =>
-  import('~/components/MessageExpandedMobile')
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
 )
 const MessageSummaryMobile = defineAsyncComponent(() =>
   import('~/components/MessageSummaryMobile')
 )
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')
-)
-const MessagePhotosModal = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModal')
 )
 
 const props = defineProps({
@@ -179,9 +142,13 @@ const authStore = useAuthStore()
 const miscStore = useMiscStore()
 const me = computed(() => authStore.user)
 
-// Check if mobile breakpoint
+// Check if mobile/tablet breakpoint - use modern cards for xs/sm/md
 const isMobile = computed(() => {
-  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+  return (
+    miscStore.breakpoint === 'xs' ||
+    miscStore.breakpoint === 'sm' ||
+    miscStore.breakpoint === 'md'
+  )
 })
 
 // Refs
@@ -189,7 +156,6 @@ const msg = ref(null)
 const expanded = ref(false)
 const showMobileExpanded = ref(false)
 const showImages = ref(false)
-const showMessagePhotosModal = ref(false)
 
 // Computed properties
 const message = computed(() => {
@@ -213,10 +179,6 @@ function expand() {
 
 function closeMobileExpanded() {
   showMobileExpanded.value = false
-}
-
-function showPhotosModal() {
-  showMessagePhotosModal.value = true
 }
 
 async function view() {

@@ -1,153 +1,121 @@
 <template>
   <client-only>
-    <div class="layout fader">
-      <!-- Debug info for Playwright tests -->
-      <div
-        class="debug-compose-state"
-        style="display: none"
-        :data-message-count="composeStore.messages?.length || 0"
-        :data-has-api="!!composeStore.$api"
-        :data-postcode-id="composeStore.postcode?.id || 'none'"
-        :data-message-valid="messageValid"
-        :data-postcode-valid="postcodeValid"
-        :data-logged-in="loggedIn"
-        :data-email-valid="emailValid"
-      ></div>
-      <div class="d-none d-md-flex justify-content-around">
-        <WizardProgress :active-stage="3" class="maxbutt" />
+    <div class="whoami-page">
+      <!-- Compact progress stepper -->
+      <div class="stepper-container">
+        <WizardProgressCompact :active-stage="3" :show-options="false" />
       </div>
-      <h1 class="text-center">Finally, your email address</h1>
-      <div class="text-center">
-        <PostLoggedInEmail v-if="loggedIn" />
-        <div v-else>
-          <p class="text-muted">
-            We need your email address to let you know when you have replies. We
-            won't give your email to anyone else.
-          </p>
-          <p class="text-muted">
-            You will get emails from us, which you can control or turn off from
-            Settings. Read
-            <nuxt-link no-prefetch target="_blank" to="/terms">
-              Terms of Use
-            </nuxt-link>
-            and
-            <nuxt-link no-prefetch target="_blank" to="/privacy">
-              Privacy
-            </nuxt-link>
-            for details.
-          </p>
-          <p class="text-muted">
-            We may show this post to people who are not yet members of Freegle.
-            This helps the community grow by showing people what's happening and
-            encouraging them to join.
-          </p>
-          <EmailValidator
-            v-model:email="email"
-            v-model:valid="emailValid"
-            center
-            class="align-items-center font-weight-bold"
-          />
-          <EmailBelongsToSomeoneElse
-            v-if="emailValid && emailBelongsToSomeoneElse"
-            class="mb-2"
-            :theirs="email"
-          />
+
+      <!-- Main content -->
+      <div class="whoami-content">
+        <div class="whoami-card">
+          <h1 class="whoami-title">Finally, your email address</h1>
+
+          <PostLoggedInEmail v-if="loggedIn" class="logged-in-section" />
+
+          <template v-else>
+            <p class="whoami-subtitle">
+              We need your email address to let you know when you have replies.
+              We won't give your email to anyone else.
+            </p>
+
+            <div class="email-input-wrapper">
+              <EmailValidator
+                v-model:email="email"
+                v-model:valid="emailValid"
+                center
+              />
+            </div>
+
+            <EmailBelongsToSomeoneElse
+              v-if="emailValid && emailBelongsToSomeoneElse"
+              class="mt-3"
+              :theirs="email"
+            />
+
+            <p class="terms-text">
+              You will get emails from us, which you can control or turn off
+              from Settings. Read
+              <nuxt-link no-prefetch target="_blank" to="/terms">
+                Terms of Use
+              </nuxt-link>
+              and
+              <nuxt-link no-prefetch target="_blank" to="/privacy">
+                Privacy
+              </nuxt-link>
+              for details.
+            </p>
+          </template>
         </div>
-      </div>
-      <div class="d-block d-md-none flex-grow-1" />
-      <div class="mt-1 d-block d-md-none">
-        <b-button
-          v-if="
-            previousScreensValid &&
-            emailValid &&
-            !submitting &&
-            !emailBelongsToSomeoneElse
-          "
-          variant="primary"
-          size="lg"
-          block
-          class="w-100"
-          @click="next"
+
+        <!-- Error messages -->
+        <NoticeMessage v-if="notAllowed" variant="danger" class="mt-3">
+          You are not allowed to post on this community.
+        </NoticeMessage>
+        <NoticeMessage
+          v-else-if="unvalidatedEmail"
+          variant="danger"
+          class="mt-3"
         >
-          Freegle it! <v-icon icon="angle-double-right" />
-        </b-button>
-      </div>
-      <div class="mt-3 mb-5 d-none d-md-flex">
-        <div class="w-100 d-flex justify-content-around">
-          <div class="mt-2 d-flex justify-content-between maxbutt">
-            <div>
-              <b-button
-                variant="secondary"
-                size="lg"
-                to="/find/whereami"
-                class="d-none d-md-block"
-              >
-                <v-icon icon="angle-double-left" /> Back
-              </b-button>
-            </div>
-            <div>
-              <b-button
-                v-if="emailValid && !submitting && !emailBelongsToSomeoneElse"
-                variant="primary"
-                size="lg"
-                @click="next"
-              >
-                Freegle it! <v-icon icon="angle-double-right" />
-              </b-button>
-            </div>
+          You tried to post using an email address which has not yet been
+          validated. Please check your mailbox (including spam) and validate the
+          email, then try again.
+        </NoticeMessage>
+        <NoticeMessage v-else-if="wentWrong" variant="danger" class="mt-3">
+          Something went wrong. Please try again, and if this keeps happening
+          then contact
+          <ExternalLink href="mailto:support@ilovefreegle.org">
+            support </ExternalLink
+          >.
+        </NoticeMessage>
+
+        <!-- Submit button -->
+        <div class="next-section">
+          <div class="next-container">
+            <b-button
+              v-if="canSubmit"
+              variant="primary"
+              size="lg"
+              class="next-btn"
+              :disabled="submitting"
+              @click="next"
+            >
+              <span v-if="submitting">Posting...</span>
+              <span v-else
+                >Freegle it! <v-icon icon="angle-double-right"
+              /></span>
+            </b-button>
+            <b-button
+              v-else
+              variant="secondary"
+              size="lg"
+              class="next-btn"
+              disabled
+            >
+              Enter email to continue
+            </b-button>
           </div>
-        </div>
-        <div v-if="submitting" class="d-flex justify-content-around pt-2 mt-2">
-          <b-progress
-            height="48px"
-            class="mt-2 w-25"
-            animated
-            variant="success"
-          >
-            <b-progress-bar :value="progress" />
-          </b-progress>
-        </div>
-        <div v-else class="d-flex justify-content-around pt-2 mt-2">
-          <NoticeMessage v-if="notAllowed" variant="danger">
-            You are not allowed to post on this community.
-          </NoticeMessage>
-          <NoticeMessage v-else-if="unvalidatedEmail" variant="danger">
-            You tried to post using an email address which has not yet been
-            validated. Please check your mailbox (including spam) and validate
-            the email, then try again.
-          </NoticeMessage>
-          <NoticeMessage v-else-if="wentWrong" variant="danger">
-            <!-- eslint-disable-next-line -->
-            Something went wrong.  Please try again, and if this keeps happening then contact
-            <SupportLink />.
-          </NoticeMessage>
         </div>
       </div>
     </div>
   </client-only>
 </template>
+
 <script setup>
-import {
-  ref,
-  watch,
-  onMounted,
-  useRoute,
-  useHead,
-  useRuntimeConfig,
-  useRouter,
-  storeToRefs,
-} from '#imports'
+import { ref, computed, watch, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter, useHead, useRuntimeConfig } from '#imports'
+import WizardProgressCompact from '~/components/WizardProgressCompact.vue'
+import NoticeMessage from '~/components/NoticeMessage.vue'
+import ExternalLink from '~/components/ExternalLink.vue'
+import EmailValidator from '~/components/EmailValidator.vue'
+import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse.vue'
+import PostLoggedInEmail from '~/components/PostLoggedInEmail.vue'
 import { useComposeStore } from '~/stores/compose'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
-import { buildHead } from '~/composables/useBuildHead'
-import EmailValidator from '~/components/EmailValidator.vue'
-import NoticeMessage from '~/components/NoticeMessage.vue'
-import SupportLink from '~/components/SupportLink.vue'
 import { setup, freegleIt } from '~/composables/useCompose'
-import EmailBelongsToSomeoneElse from '~/components/EmailBelongsToSomeoneElse.vue'
-import PostLoggedInEmail from '~/components/PostLoggedInEmail.vue'
-import WizardProgress from '~/components/WizardProgress.vue'
+import { buildHead } from '~/composables/useBuildHead'
 import { useMe } from '~/composables/useMe'
 
 const route = useRoute()
@@ -158,17 +126,6 @@ const userStore = useUserStore()
 const authStore = useAuthStore()
 const { me } = useMe()
 
-// Data properties
-const emailValid = ref(false)
-const emailBelongsToSomeoneElse = ref(false)
-const previousScreensValid = computed(
-  () => messageValid.value && postcodeValid.value && loggedIn.value
-)
-
-// Get store state
-const { email, progress } = storeToRefs(composeStore)
-
-// Head
 useHead(
   buildHead(
     route,
@@ -178,10 +135,15 @@ useHead(
   )
 )
 
+// Get store state
+const { email } = storeToRefs(composeStore)
+
+// Local state
+const emailValid = ref(false)
+const emailBelongsToSomeoneElse = ref(false)
+
 // Get setup data from composable
 const {
-  messageValid,
-  postcodeValid,
   loggedIn,
   emailIsntOurs,
   submitting,
@@ -190,25 +152,38 @@ const {
   wentWrong,
 } = await setup('Wanted')
 
-// Methods
+// Can submit if logged in, or email is valid and not belonging to someone else
+const canSubmit = computed(() => {
+  if (loggedIn.value) {
+    return true
+  }
+  return emailValid.value && !emailBelongsToSomeoneElse.value
+})
+
+// Reset email belongs to someone else flag when email changes
+watch(email, () => {
+  emailBelongsToSomeoneElse.value = false
+})
+
+onMounted(() => {
+  if (loggedIn.value) {
+    email.value = me.value?.email
+    emailValid.value = email.value?.length > 0
+  }
+})
+
 async function next() {
   emailBelongsToSomeoneElse.value = false
 
   try {
     if (emailIsntOurs.value) {
-      // Need to check if it's ok to use.
       const inuse = await userStore.emailIsInUse(email.value)
 
       if (!inuse) {
-        // Not in use - that's ok.
         await freegleIt('Wanted', router)
       } else if (!loggedIn.value) {
-        // User is not logged in and the email belongs to an existing account.
-        // Force them to log in rather than showing the merge dialog.
         authStore.forceLogin = true
       } else {
-        // User is logged in but trying to use an email from a different account.
-        // Show the merge dialog.
         emailBelongsToSomeoneElse.value = true
       }
     } else {
@@ -219,57 +194,96 @@ async function next() {
     wentWrong.value = true
   }
 }
-
-onMounted(() => {
-  if (loggedIn.value) {
-    email.value = me.value?.email
-    emailValid.value = email.value?.length > 0
-  }
-})
-
-watch(email, () => {
-  emailBelongsToSomeoneElse.value = false
-})
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
-@import 'assets/css/sticky-banner.scss';
+@import 'assets/css/_color-vars.scss';
 
-.fader {
-  background-color: rgba(246, 246, 236, 0.6);
-  box-shadow: 0 0 80px 450px rgba(246, 246, 236, 0.6);
-  font-weight: bold;
+.whoami-page {
+  min-height: 100vh;
+  background: #f8f9fa;
 }
 
-@include media-breakpoint-down(md) {
-  .layout {
-    //We need to subtract space for the navbar, the ad bar, and also allow some extra because of the way vh works
-    //mobile browsers.
-    min-height: calc(100vh - 84px - $sticky-banner-height-mobile - 84px);
+.stepper-container {
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-    @media (min-height: $mobile-tall) {
-      min-height: calc(100vh - 84px - $sticky-banner-height-mobile-tall - 84px);
-    }
-
-    @supports (height: 100dvh) {
-      min-height: calc(100dvh - 84px - $sticky-banner-height-mobile - 84px);
-
-      @media (min-height: $mobile-tall) {
-        min-height: calc(
-          100dvh - 84px - $sticky-banner-height-mobile-tall - 84px
-        );
-      }
-    }
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  @include media-breakpoint-up(lg) {
+    padding: 1.5rem 2rem;
   }
 }
 
-.maxbutt {
-  width: 33vw;
+.whoami-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+
+  @include media-breakpoint-up(lg) {
+    padding: 2rem;
+  }
+}
+
+.whoami-card {
+  background: white;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.whoami-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: $color-green-background;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.whoami-subtitle {
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logged-in-section {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.email-input-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.terms-text {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 1.5rem;
+  line-height: 1.4;
+  text-align: center;
+
+  a {
+    color: $color-green-background;
+  }
+}
+
+.next-section {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.next-container {
+  display: flex;
+  justify-content: center;
+}
+
+.next-btn {
+  min-width: 280px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 </style>

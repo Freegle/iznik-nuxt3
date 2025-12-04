@@ -435,10 +435,10 @@ onBeforeUnmount(() => {
   }
 }
 
-// Expandable profile card
+/* Expandable profile card */
 .profile-card {
   position: fixed;
-  top: 60px;
+  top: 66px;
   right: 0;
   left: 0;
   background: white;
@@ -446,7 +446,7 @@ onBeforeUnmount(() => {
   max-height: 0;
   opacity: 0;
   transform: scale(0);
-  // Dynamic transform-origin set via v-bind (includes both X and Y)
+  /* Dynamic transform-origin set via v-bind (includes both X and Y) */
   transform-origin: v-bind(chevronX);
   transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
     transform 0.5s ease-out, padding 0.5s ease-out, visibility 0s linear 0.5s;
@@ -456,6 +456,14 @@ onBeforeUnmount(() => {
   border-bottom: none;
   visibility: hidden;
   will-change: transform, opacity;
+
+  /* Restrict width on md+ breakpoints */
+  @include media-breakpoint-up(md) {
+    left: auto;
+    right: 12px;
+    max-width: 400px;
+    border-radius: 0 0 8px 8px;
+  }
 
   &--expanded {
     max-height: 220px;

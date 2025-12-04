@@ -33,9 +33,9 @@
         </div>
         <div class="close d-flex justify-content-end">
           <b-button
-            variant="white"
+            variant="link"
             title="Hide map and post filters"
-            class="noborder close"
+            class="noborder close text-dark"
             @click="showFilters = false"
           >
             <v-icon icon="times" />
@@ -142,27 +142,8 @@ const emit = defineEmits([
   'update:selectedSort',
 ])
 
-const breakpoint = computed(() => {
-  const miscStore = useMiscStore()
-  return miscStore.breakpoint
-})
-
-const showFilters = ref(true)
-
-watch(
-  breakpoint,
-  (newVal) => {
-    if (newVal === 'xs' || newVal === 'sm') {
-      // Hide filters on mobile.
-      showFilters.value = false
-    } else {
-      showFilters.value = true
-    }
-  },
-  {
-    immediate: true,
-  }
-)
+// Filters should always start closed - users can expand them if needed
+const showFilters = ref(false)
 
 watch(
   () => props.forceShowFilters,

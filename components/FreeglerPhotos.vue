@@ -154,7 +154,8 @@ function photo(img) {
 .credit {
   margin-top: 0.5rem;
 
-  @include media-breakpoint-down(md) {
+  /* Hide on mobile/tablet layouts (below lg) - desktop layout starts at lg */
+  @include media-breakpoint-down(lg) {
     display: none;
   }
 }

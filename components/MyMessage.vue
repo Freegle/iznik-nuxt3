@@ -1,227 +1,236 @@
 <template>
-  <div v-observe-visibility="visibilityChanged">
+  <div v-observe-visibility="visibilityChanged" class="my-message-mobile">
     <div v-if="visible && message?.id">
-      <div v-if="showOld || !message.outcomes?.length">
-        <b-card
-          no-body
-          class="mb-1 bnuorder"
-          :border-variant="expanded ? 'success' : 'secondary'"
-        >
-          <b-card-header header-tag="header" class="p-0" role="tab">
-            <div class="bg-white clickme">
-              <notice-message v-if="rejected" class="mb-3" variant="warning">
-                <v-icon icon="exclamation-triangle" scale="2" /> This post has
-                been returned to you by the volunteers, as it is not yet
-                suitable. It is not public yet.
-              </notice-message>
-              <MessageSummary
-                :id="message.id"
-                :key="'summary-' + bump"
-                :replyable="false"
-                @attachments="showPhotos"
+      <div v-if="showOld || !message.outcomes?.length" class="message-card">
+        <!-- Rejected notice -->
+        <notice-message v-if="rejected" class="mb-2" variant="warning">
+          <v-icon icon="exclamation-triangle" /> This post has been returned to
+          you. It is not public yet.
+        </notice-message>
+
+        <!-- Main content area with photo -->
+        <div class="photo-section" @click="goToPost">
+          <!-- Photo area -->
+          <div class="photo-area">
+            <!-- Status overlays -->
+            <b-img
+              v-if="taken || received"
+              lazy
+              src="/freegled.jpg"
+              class="status-overlay"
+              alt="Completed"
+            />
+            <!-- Promised banner at top -->
+            <div
+              v-else-if="message.promised && !message.outcomes?.length"
+              class="promised-banner"
+            >
+              <v-icon icon="handshake" class="me-2" />
+              Promised to{{ ' ' }}<strong>{{ promisedToName }}</strong>
+            </div>
+
+            <!-- Photo -->
+            <div v-if="hasPhoto" class="photo-container">
+              <OurUploadedImage
+                v-if="message.attachments[0]?.ouruid"
+                :src="message.attachments[0].ouruid"
+                :modifiers="message.attachments[0].externalmods"
+                alt="Item Photo"
+                class="photo-image"
+                :width="400"
+                :height="200"
               />
-              <div
-                v-if="
-                  message.outcomes?.length === 0 && message.promisecount > 0
-                "
-              >
-                <div class="text-info">
-                  <MyMessagePromisedTo
-                    v-for="p in promisedTo"
+              <NuxtPicture
+                v-else-if="message.attachments[0]?.externaluid"
+                format="webp"
+                provider="uploadcare"
+                :src="message.attachments[0].externaluid"
+                :modifiers="message.attachments[0].externalmods"
+                alt="Item Photo"
+                class="photo-image"
+                :width="400"
+                :height="200"
+              />
+              <ProxyImage
+                v-else-if="message.attachments[0]?.path"
+                class-name="photo-image"
+                alt="Item picture"
+                :src="message.attachments[0].path"
+                :width="400"
+                :height="200"
+                fit="cover"
+              />
+            </div>
+
+            <!-- No photo placeholder -->
+            <div v-else class="no-photo-placeholder" :class="placeholderClass">
+              <div class="placeholder-pattern"></div>
+              <div class="icon-circle">
+                <v-icon :icon="categoryIcon" class="placeholder-icon" />
+              </div>
+            </div>
+
+            <!-- Title overlay -->
+            <div class="title-overlay">
+              <div class="title-row">
+                <div class="title-content">
+                  <MessageTag
                     :id="message.id"
-                    :key="'promised-' + p.id"
-                    class="mt-1 border border-info p-2"
-                    :promise="p"
-                    :replyusers="replyusers"
+                    :inline="true"
+                    class="title-tag"
                   />
+                  <span class="title-subject">{{ strippedSubject }}</span>
+                  <span class="title-time">{{ timeAgo }}</span>
+                </div>
+                <div class="photo-actions">
+                  <button
+                    v-if="!message.outcomes?.length"
+                    class="photo-action-btn"
+                    @click.stop="edit"
+                  >
+                    <v-icon icon="pen" />
+                  </button>
+                  <button class="photo-action-btn" @click.stop="share">
+                    <v-icon icon="share-alt" />
+                  </button>
                 </div>
               </div>
-              <div
-                class="d-flex justify-content-between flex-wrap mt-2 ps-2 neartop"
-              >
-                <b-button
-                  v-if="rejected && message.location && message.item"
-                  variant="warning"
-                  class="mr-1 mb-1"
-                  @click="repost"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="pen" /> Edit and
-                  Resend
-                </b-button>
-                <b-button
-                  v-if="rejected && !withdrawn"
-                  variant="secondary"
-                  class="mr-1 mb-1"
-                  @click="outcome('Withdrawn', $event)"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="trash-alt" />
-                  Withdraw
-                </b-button>
-                <b-button
-                  v-if="!rejected && message.type === 'Offer' && !taken"
-                  variant="primary"
-                  class="mr-1 mb-1"
-                  @click="outcome('Taken', $event)"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
-                  TAKEN
-                </b-button>
-                <b-button
-                  v-if="!rejected && message.type === 'Wanted' && !received"
-                  variant="primary"
-                  class="mr-1 mb-1"
-                  @click="outcome('Received', $event)"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="check" /> Mark as
-                  RECEIVED
-                </b-button>
-                <b-button
-                  v-if="!rejected && message.type === 'Offer' && !taken"
-                  variant="primary"
-                  class="mr-1 mb-1"
-                  @click="showPromiseModal = true"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="handshake" />
-                  Promise
-                </b-button>
-                <b-button
-                  v-if="!rejected && !message.outcomes?.length"
-                  variant="secondary"
-                  class="mr-1 mb-1"
-                  @click="edit"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="pen" /> Edit
-                </b-button>
-                <b-button
-                  v-if="!rejected && !taken && !received && !withdrawn"
-                  variant="secondary"
-                  class="mr-1 mb-1"
-                  @click="outcome('Withdrawn', $event)"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="trash-alt" />
-                  Withdraw
-                </b-button>
-                <b-button
-                  v-if="
-                    !rejected &&
-                    message.deadline &&
-                    new Date(message.deadline).getTime() <
-                      new Date().getTime() &&
-                    message.location &&
-                    message.item
-                  "
-                  variant="primary"
-                  class="mr-1 mb-1"
-                  @click="extendDeadline"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="sync" /> Extend
-                  deadline
-                </b-button>
-                <b-button
-                  v-else-if="
-                    !rejected &&
-                    message.canrepost &&
-                    message.location &&
-                    message.item
-                  "
-                  variant="secondary"
-                  class="mr-1 mb-1"
-                  @click="repost"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                </b-button>
-                <div
-                  v-else-if="
-                    !rejected &&
-                    message.repostat &&
-                    message.location &&
-                    message.item
-                  "
-                  class="position-relative"
-                >
-                  <b-button
-                    variant="secondary"
-                    class="mr-1 mb-1"
-                    title="You will be able to repost this soon"
-                    @click.stop="repostWhenUnavailable"
-                  >
-                    <v-icon class="d-none d-sm-inline" icon="sync" /> Repost
-                    <span class="repostsmall">{{ repostatago }}</span>
-                  </b-button>
-                  <p
-                    class="invalid-feedback position-absolute bg-white text-center"
-                    :class="triedToRepost ? 'd-block' : 'd-none'"
-                  >
-                    You can't repost until {{ datetimeshort(message.repostat) }}
-                  </p>
-                </div>
-                <b-button
-                  v-if="!rejected"
-                  variant="secondary"
-                  title="Share"
-                  class="mr-1 mb-1"
-                  @click="share"
-                >
-                  <v-icon class="d-none d-sm-inline" icon="share-alt" /> Share
-                </b-button>
+              <div v-if="message.area" class="info-row">
+                <span class="location">
+                  <v-icon icon="map-marker-alt" class="me-1" />{{
+                    message.area
+                  }}
+                </span>
               </div>
             </div>
-          </b-card-header>
-          <MyMessageReplySummary
-            v-if="!expanded"
-            :id="id"
-            @expand="expanded = true"
-          />
-          <b-collapse
-            :id="'mypost-' + message.id"
-            v-model="expanded"
-            role="tabpanel"
-            @show="expanded = true"
-            @hidden="expanded = false"
+          </div>
+        </div>
+
+        <!-- Action buttons - compact row -->
+        <div v-if="!rejected" class="action-buttons">
+          <button
+            v-if="message.type === 'Offer' && !taken && !withdrawn"
+            class="action-btn action-btn--primary"
+            @click="outcome('Taken', $event)"
           >
-            <div v-if="expanded">
-              <b-card-body
-                v-if="replies?.length > 0 || willAutoRepost"
-                class="p-2"
-              >
-                <b-card-text>
-                  <table
-                    v-if="replies?.length > 0"
-                    class="table table-borderless table-striped mb-0"
-                  >
-                    <tbody>
-                      <tr v-for="reply in replies" :key="'reply-' + reply.id">
-                        <MyMessageReply
-                          :reply="reply"
-                          :chats="chats"
-                          :message="message"
-                          :taken="taken"
-                          :received="received"
-                          :withdrawn="withdrawn"
-                          :closest="reply.userid === closestUser"
-                          :best="reply.userid === bestRatedUser"
-                          :quickest="reply.userid === quickestUser"
-                        />
-                      </tr>
-                    </tbody>
-                  </table>
-                  <p v-else class="text-muted">
-                    No replies yet.
-                    <span v-if="willAutoRepost"
-                      >Will auto-repost {{ canrepostatago }}.</span
-                    >
-                  </p>
-                </b-card-text>
-              </b-card-body>
+            <v-icon icon="check" />
+            <span>TAKEN</span>
+          </button>
+          <button
+            v-if="message.type === 'Wanted' && !received && !withdrawn"
+            class="action-btn action-btn--primary"
+            @click="outcome('Received', $event)"
+          >
+            <v-icon icon="check" />
+            <span>RECEIVED</span>
+          </button>
+          <button
+            v-if="
+              message.type === 'Offer' && !taken && !withdrawn && !isPromised
+            "
+            class="action-btn action-btn--secondary"
+            @click="showPromiseModal = true"
+          >
+            <v-icon icon="handshake" />
+            <span>Promise</span>
+          </button>
+          <button
+            v-if="!taken && !received && !withdrawn"
+            class="action-btn action-btn--light"
+            @click="outcome('Withdrawn', $event)"
+          >
+            <v-icon icon="trash-alt" />
+            <span>Withdraw</span>
+          </button>
+          <button
+            v-if="message.canrepost && message.location && message.item"
+            class="action-btn action-btn--light"
+            @click="repost"
+          >
+            <v-icon icon="sync" />
+            <span>Repost</span>
+          </button>
+        </div>
+
+        <!-- Rejected actions -->
+        <div v-else class="action-buttons">
+          <button
+            v-if="message.location && message.item"
+            class="action-btn action-btn--warning"
+            @click="repost"
+          >
+            <v-icon icon="pen" />
+            <span>Edit & Resend</span>
+          </button>
+          <button
+            v-if="!withdrawn"
+            class="action-btn action-btn--light"
+            @click="outcome('Withdrawn', $event)"
+          >
+            <v-icon icon="trash-alt" />
+            <span>Withdraw</span>
+          </button>
+        </div>
+
+        <!-- Replies section -->
+        <div v-if="replies?.length > 0" class="replies-section">
+          <div class="replies-header" @click="toggleExpanded">
+            <div class="replies-avatars">
+              <ProfileImage
+                v-for="(reply, index) in repliesPreview"
+                :key="'avatar-' + reply.userid"
+                :image="getUserProfile(reply.userid)?.paththumb"
+                :externaluid="getUserProfile(reply.userid)?.externaluid"
+                :ouruid="getUserProfile(reply.userid)?.ouruid"
+                :externalmods="getUserProfile(reply.userid)?.externalmods"
+                :name="getUserName(reply.userid)"
+                class="reply-avatar"
+                :style="{ zIndex: index + 1 }"
+                is-thumbnail
+                size="sm"
+              />
+              <div v-if="replies.length > 3" class="more-count">
+                +{{ replies.length - 3 }}
+              </div>
             </div>
-          </b-collapse>
-        </b-card>
-        <MessagePhotosModal
-          v-if="showMessagePhotosModal && message.attachments?.length"
-          :id="message.id"
-          @hidden="showMessagePhotosModal = false"
-        />
+            <div class="replies-text">
+              <span class="replies-count"
+                >{{ replies.length }}
+                {{ replies.length === 1 ? 'reply' : 'replies' }}</span
+              >
+              <v-icon
+                :icon="expanded ? 'caret-up' : 'caret-down'"
+                class="expand-icon"
+              />
+            </div>
+          </div>
+
+          <Transition name="replies-slide">
+            <div v-if="expanded" class="replies-list">
+              <MyMessageReply
+                v-for="reply in replies"
+                :key="'reply-' + reply.id"
+                :reply="reply"
+                :chats="chats"
+                :message="message"
+                :taken="taken"
+                :received="received"
+                :withdrawn="withdrawn"
+                :closest="reply.userid === closestUser"
+                :best="reply.userid === bestRatedUser"
+                :quickest="reply.userid === quickestUser"
+              />
+            </div>
+          </Transition>
+        </div>
+        <div v-else-if="willAutoRepost" class="no-replies">
+          <p class="text-muted small">
+            No replies yet. Will auto-repost {{ canrepostatago }}.
+          </p>
+        </div>
       </div>
+
+      <!-- Modals -->
       <OutcomeModal
         v-if="showOutcomeModal"
         :id="id"
@@ -242,14 +251,10 @@
         :users="replyusers"
         @hidden="showPromiseModal = false"
       />
-      <DeadlineAskModal
-        v-if="askDeadline"
-        :ids="[id]"
-        :set="message.deadline?.substring(0, 10)"
-      />
     </div>
   </div>
 </template>
+
 <script setup>
 import dayjs from 'dayjs'
 import { useComposeStore } from '~/stores/compose'
@@ -258,17 +263,17 @@ import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
 import { useTrystStore } from '~/stores/tryst'
 import { useLocationStore } from '~/stores/location'
+import { timeago } from '~/composables/useTimeFormat'
 import { milesAway } from '~/composables/useDistance'
-import { datetimeshort, timeago } from '~/composables/useTimeFormat'
-import { onMounted, ref, computed, watch, useRouter } from '#imports'
-import MyMessagePromisedTo from '~/components/MyMessagePromisedTo'
+import { onMounted, ref, computed, watch, useRouter, toRef } from '#imports'
 import { useMe } from '~/composables/useMe'
+import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import ProfileImage from '~/components/ProfileImage'
+import MessageTag from '~/components/MessageTag'
+import OurUploadedImage from '~/components/OurUploadedImage'
 
 const MyMessageReply = defineAsyncComponent(() =>
   import('./MyMessageReply.vue')
-)
-const MessagePhotosModal = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModal')
 )
 const MessageShareModal = defineAsyncComponent(() =>
   import('./MessageShareModal')
@@ -298,11 +303,6 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  action: {
-    type: String,
-    required: false,
-    default: null,
-  },
 })
 
 const messageStore = useMessageStore()
@@ -312,11 +312,20 @@ const trystStore = useTrystStore()
 const composeStore = useComposeStore()
 const locationStore = useLocationStore()
 const router = useRouter()
-
-// Store refs - access me from the user store
 const { me } = useMe()
 
-// Data properties as refs
+// Use shared display composable
+const idRef = toRef(props, 'id')
+const {
+  message,
+  strippedSubject,
+  gotAttachments: hasPhoto,
+  timeAgo,
+  placeholderClass,
+  categoryIcon,
+} = useMessageDisplay(idRef)
+
+// Data properties
 const visible = ref(false)
 const expanded = ref(false)
 const showOutcomeModal = ref(false)
@@ -324,26 +333,14 @@ const outcomeType = ref(null)
 const showEditModal = ref(false)
 const showShareModal = ref(false)
 const showPromiseModal = ref(false)
-const showMessagePhotosModal = ref(false)
-const triedToRepost = ref(false)
 const bump = ref(0)
-const askDeadline = ref(false)
 
-// Computed properties
-const message = computed(() => messageStore?.byId(props.id))
-
+// Computed
 const hasOutcome = (val) => {
-  let ret = false
-
   if (message.value?.outcomes?.length) {
-    for (const outcome of message.value.outcomes) {
-      if (outcome.outcome === val) {
-        ret = true
-      }
-    }
+    return message.value.outcomes.some((o) => o.outcome === val)
   }
-
-  return ret
+  return false
 }
 
 const taken = computed(() => hasOutcome('Taken'))
@@ -351,138 +348,73 @@ const received = computed(() => hasOutcome('Received'))
 const withdrawn = computed(() => hasOutcome('Withdrawn'))
 
 const rejected = computed(() => {
-  let rejected = false
-
   if (message.value?.groups) {
-    for (const group of message.value.groups) {
-      if (group.collection === 'Rejected') {
-        rejected = true
-      }
-    }
+    return message.value.groups.some((g) => g.collection === 'Rejected')
   }
-
-  return rejected
+  return false
 })
-
-const promisedUserids = computed(() => {
-  const ret = []
-
-  if (message.value?.promisecount && message.value.promises?.length) {
-    for (const promise of message.value.promises) {
-      ret.push(promise.userid)
-    }
-  }
-
-  return ret
-})
-
-const countUnseen = (reply) => {
-  let unseen = 0
-
-  for (const chat of chats.value) {
-    if (chat.id === reply.chatid) {
-      unseen = chat.unseen
-    }
-  }
-
-  return unseen
-}
 
 const replies = computed(() => {
-  // Show the replies with unseen messages first, then most recent
   if (message.value?.replies) {
-    return [...message.value?.replies].sort((a, b) => {
-      const aunseen = countUnseen(a)
-      const bunseen = countUnseen(b)
-      const adate = new Date(a.date).getTime()
-      const bdate = new Date(b.date).getTime()
-      const promisea = promisedUserids.value.includes(a.userid)
-      const promiseb = promisedUserids.value.includes(b.userid)
-
-      if (promisea && !promiseb) {
-        return -1
-      } else if (promiseb && !promisea) {
-        return 1
-      } else if (aunseen !== bunseen) {
-        return bunseen - aunseen
-      } else {
-        return bdate - adate
-      }
+    const promisedUserIds = new Set(
+      (message.value.promises || []).map((p) => p.userid)
+    )
+    return [...message.value.replies].sort((a, b) => {
+      // Promised users come first
+      const aPromised = promisedUserIds.has(a.userid)
+      const bPromised = promisedUserIds.has(b.userid)
+      if (aPromised && !bPromised) return -1
+      if (!aPromised && bPromised) return 1
+      // Then sort by date (most recent first)
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
   }
-
   return []
+})
+
+const repliesPreview = computed(() => {
+  return replies.value.slice(0, 3)
 })
 
 const replyuserids = computed(() => {
   const ret = []
-  const retids = {}
+  const seen = {}
 
   if (message.value?.replies) {
     for (const reply of message.value.replies) {
-      if (!retids[reply.userid]) {
+      if (!seen[reply.userid]) {
         ret.push(reply.userid)
-        retids[reply.userid] = true
+        seen[reply.userid] = true
       }
     }
   }
 
-  // Also add anyone who the message has been promised to.  It is possible to manually promise to someone who
-  // hasn't replied, during the course of a chat.
   if (message.value?.promises) {
     for (const promise of message.value.promises) {
-      if (!retids[promise.userid]) {
+      if (!seen[promise.userid]) {
         ret.push(promise.userid)
-        retids[promise.userid] = true
+        seen[promise.userid] = true
       }
     }
   }
-
-  // We want to add all the recent chat users.  This allows us to promise to
-  // people who reply in a chat asking informally for multiple items.
-  const chats = chatStore?.list ? chatStore.list : []
-  const visibleChats = scanChats(chats)
-
-  visibleChats.forEach((chat) => {
-    if (
-      chat.chattype === 'User2User' &&
-      chat.otheruid &&
-      !retids[chat.otheruid]
-    ) {
-      ret.push(chat.otheruid)
-      retids[chat.otheruid] = true
-    }
-  })
 
   return ret
 })
 
 const replyusers = computed(() => {
-  // Get the users in replyuserids from store
-  const ret = []
-
-  replyuserids.value.forEach((uid) => {
-    const u = userStore?.byId(uid)
-
-    if (u) {
-      ret.push(u)
-    }
-  })
-
-  return ret
+  return replyuserids.value.map((uid) => userStore?.byId(uid)).filter((u) => u)
 })
 
 const closestUser = computed(() => {
   let ret = null
   let dist = null
 
-  if (replyusers.value?.length > 1 && me) {
+  if (replyusers.value?.length > 1 && me.value) {
     replyusers.value.forEach((u) => {
       if (u) {
-        const milesaway = milesAway(u.lat, u.lng, me.lat, me.lng)
-
-        if (dist === null || milesaway < dist) {
-          dist = milesaway
+        const miles = milesAway(u.lat, u.lng, me.value.lat, me.value.lng)
+        if (dist === null || miles < dist) {
+          dist = miles
           ret = u.id
         }
       }
@@ -501,7 +433,6 @@ const bestRatedUser = computed(() => {
       if (u && u.info?.ratings?.Up + u.info?.ratings?.Down > 2) {
         const thisrating =
           u.info.ratings.Up / (u.info.ratings.Up + u.info.ratings.Down)
-
         if (
           u.info.ratings.Up > u.info.ratings.Down &&
           u.info.ratings.Up > 2 &&
@@ -526,8 +457,7 @@ const quickestUser = computed(() => {
       if (
         u &&
         u.info?.replytime &&
-        (replytime === null ||
-          (u.info.replytime && u.info.replytime < replytime))
+        (replytime === null || u.info.replytime < replytime)
       ) {
         replytime = u.info.replytime
         ret = u.id
@@ -539,70 +469,66 @@ const quickestUser = computed(() => {
 })
 
 const chats = computed(() => {
-  // We want all the chats which reference this message.  We fetch them in myposts, here we only need to
-  // get them from the store
-  const chatsList = chatStore?.list ? chatStore.list : []
-  const ret = chatsList.filter((c) => {
-    return message.value?.refchatids?.includes(c.id)
-  })
-
-  return ret
+  const chatsList = chatStore?.list || []
+  return chatsList.filter((c) => message.value?.refchatids?.includes(c.id))
 })
 
 const promisedTo = computed(() => {
   const ret = []
-
   if (message.value?.promises?.length) {
     message.value.promises.forEach((p) => {
       const user = userStore?.byId(p.userid)
-
       if (user) {
         const tryst = trystStore?.getByUser(p.userid)
         const date = tryst
-          ? dayjs(tryst.arrangedfor).format('dddd Do HH:mm a')
+          ? dayjs(tryst.arrangedfor).format('ddd Do HH:mm')
           : null
-
-        ret.push({
-          id: p.userid,
-          name: user.displayname,
-          tryst,
-          trystdate: date,
-        })
+        ret.push({ id: p.userid, name: user.displayname, trystdate: date })
       }
     })
   }
-
   return ret
+})
+
+const promisedToName = computed(() => {
+  if (promisedTo.value.length > 0) {
+    return promisedTo.value[0].name
+  }
+  return ''
+})
+
+const isPromised = computed(() => {
+  return message.value?.promised && !message.value?.outcomes?.length
 })
 
 const willAutoRepost = computed(() => {
   if (taken.value || received.value || !message.value?.canrepostat) {
     return false
   }
-
-  const d = dayjs(message.value.canrepostat)
-  const now = dayjs()
-
-  return d.isAfter(now)
-})
-
-const repostatago = computed(() => {
-  if (message.value?.repostat) {
-    return timeago(message.value.repostat)
-  }
-
-  return null
+  return dayjs(message.value.canrepostat).isAfter(dayjs())
 })
 
 const canrepostatago = computed(() => {
-  if (message.value?.canrepostat) {
-    return timeago(message.value.canrepostat)
-  }
-
-  return null
+  return message.value?.canrepostat ? timeago(message.value.canrepostat) : null
 })
 
 // Methods
+function getUserProfile(userid) {
+  return userStore?.byId(userid)?.profile
+}
+
+function getUserName(userid) {
+  return userStore?.byId(userid)?.displayname
+}
+
+function toggleExpanded() {
+  expanded.value = !expanded.value
+}
+
+function goToPost() {
+  router.push('/mypost/' + props.id)
+}
+
 const visibilityChanged = async (isVisible) => {
   if (isVisible) {
     await messageStore.fetch(props.id)
@@ -610,12 +536,11 @@ const visibilityChanged = async (isVisible) => {
   }
 }
 
-const showPhotos = () => {
-  console.log('Show photos')
-  showMessagePhotosModal.value = true
-}
-
-const outcome = (type) => {
+const outcome = (type, e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
   showOutcomeModal.value = true
   outcomeType.value = type
 }
@@ -624,9 +549,7 @@ const share = (e) => {
   if (e) {
     e.preventDefault()
     e.stopPropagation()
-    e.stopImmediatePropagation()
   }
-
   showShareModal.value = true
 }
 
@@ -634,9 +557,7 @@ const edit = async (e) => {
   if (e) {
     e.preventDefault()
     e.stopPropagation()
-    e.stopImmediatePropagation()
   }
-
   await messageStore.fetch(props.id, true)
   showEditModal.value = true
 }
@@ -645,23 +566,17 @@ const repost = async (e) => {
   if (e) {
     e.preventDefault()
     e.stopPropagation()
-    e.stopImmediatePropagation()
   }
 
-  // Remove any partially composed messages we currently have, because they'll be confusing.
   await composeStore.clearMessages()
 
-  // Add this message to the compose store so that it will show up on the compose page.
-  console.log('repost', props.id)
   await composeStore.setMessage(
     0,
     {
       id: message.value.id,
       savedBy: message.value.fromuser,
       item: message.value.item?.name.trim(),
-      description: message.value.textbody
-        ? message.value.textbody.trim()
-        : null,
+      description: message.value.textbody?.trim() || null,
       availablenow: message.value.availablenow,
       type: message.value.type,
       repostof: props.id,
@@ -670,32 +585,13 @@ const repost = async (e) => {
     me
   )
 
-  // Set the current location and nearby groups, too, since we're about to use them
   if (message.value.location) {
-    console.log('Fetch location for', message.value.location.name)
     const locs = await locationStore.typeahead(message.value.location.name)
-
-    console.log('Returned', locs)
     composeStore.postcode = locs[0]
   }
 
   await composeStore.setAttachmentsForMessage(0, message.value.attachments)
-
   router.push(message.value.type === 'Offer' ? '/give' : '/find')
-}
-
-const repostWhenUnavailable = async () => {
-  triedToRepost.value = true
-
-  await messageStore.fetch(props.id, true)
-
-  if (message.value.canrepost) {
-    // when trying to repost when it's forbidden, the fetch above would update the post, and if the post is allowed
-    // to be reposted now, we reset the blocking flag and reposting. This can happen if time passes while you stay
-    // on the page without refreshing it
-    triedToRepost.value = false
-    await repost()
-  }
 }
 
 const hidden = () => {
@@ -703,50 +599,15 @@ const hidden = () => {
   messageStore.fetch(props.id)
 }
 
-const extendDeadline = () => {
-  askDeadline.value = true
-}
-
-const scanChats = (chats) => {
-  chats = chats.filter((chat) => {
-    if (chat.status === 'Blocked' || chat.status === 'Closed') {
-      return false
-    }
-
-    return true
-  })
-
-  // Sort by last date.
-  chats.sort((a, b) => {
-    if (a.lastdate && b.lastdate) {
-      return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-    } else if (a.lastdate) {
-      return -1
-    } else if (b.lastdate) {
-      return 1
-    } else {
-      return 0
-    }
-  })
-
-  return chats
-}
-
 // Watchers
 watch(
   message,
   (newVal) => {
-    if (newVal) {
-      // We may need to fetch user info for promises.
-      if (newVal.promises) {
-        newVal.promises.forEach((p) => {
-          userStore.fetch(p.userid)
-        })
-      }
-
-      if (newVal.replycount === 1) {
-        expanded.value = true
-      }
+    if (newVal?.promises) {
+      newVal.promises.forEach((p) => userStore.fetch(p.userid))
+    }
+    if (newVal?.replycount === 1) {
+      expanded.value = true
     }
   },
   { immediate: true }
@@ -763,84 +624,472 @@ watch(
 )
 
 watch(replyuserids, (newVal) => {
-  // Make sure we have them in store.
-  newVal.forEach((uid) => {
-    userStore.fetch(uid)
-  })
+  newVal.forEach((uid) => userStore.fetch(uid))
 })
 
-// Lifecycle hooks
 onMounted(() => {
   expanded.value = props.expand
-
-  if (me.value) {
-    switch (props.action) {
-      case 'repost':
-        if (message.value?.canrepost) {
-          repost()
-        }
-        break
-      case 'withdraw':
-        outcome('Withdrawn')
-        break
-      case 'taken':
-        outcome('Taken')
-        break
-      case 'received':
-        outcome('Received')
-        break
-      case 'promise':
-        showPromiseModal.value = true
-        break
-      case 'extend':
-        askDeadline.value = true
-    }
-  }
 })
 </script>
+
 <style scoped lang="scss">
-.square {
-  object-fit: cover;
-  width: 75px;
-  height: 75px;
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'assets/css/_color-vars.scss';
+
+.my-message-mobile {
+  margin-bottom: 12px;
 }
 
-img.attachment {
-  max-height: 75px !important;
-  max-width: 75px !important;
+.message-card {
+  background: white;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.photobadge {
-  right: 5px;
-  position: absolute;
-  top: 5px;
+.photo-section {
+  cursor: pointer;
 }
 
-.noborder {
-  border: none !important;
-  border-color: $color-white !important;
-}
-
-.hover:hover {
-  color: initial;
-  background-color: $colour-success-bg !important;
-}
-
-:deep(.btn-content) {
+.photo-area {
+  position: relative;
   width: 100%;
+  height: 0;
+  padding-bottom: 50%;
+  background: $color-gray--light;
+  overflow: hidden;
 }
 
-.badge {
-  display: inline-flex;
+.photo-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.photo-image),
+:deep(picture),
+:deep(picture img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.no-photo-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.offer-gradient {
+    background: radial-gradient(
+        ellipse at 30% 20%,
+        rgba(129, 199, 132, 0.9) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 70% 80%,
+        rgba(56, 142, 60, 0.8) 0%,
+        transparent 50%
+      ),
+      linear-gradient(160deg, #66bb6a 0%, #43a047 50%, #2e7d32 100%);
+
+    .placeholder-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
+      background-size: 70px 70px;
+    }
+  }
+
+  &.wanted-gradient {
+    background: radial-gradient(
+        ellipse at 25% 25%,
+        rgba(144, 202, 249, 0.9) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        ellipse at 75% 75%,
+        rgba(66, 165, 245, 0.7) 0%,
+        transparent 45%
+      ),
+      linear-gradient(160deg, #64b5f6 0%, #42a5f5 50%, #1e88e5 100%);
+
+    .placeholder-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Ctext x='35' y='52' font-family='Arial,sans-serif' font-size='50' font-weight='bold' fill='white' fill-opacity='0.12' text-anchor='middle'%3E?%3C/text%3E%3C/svg%3E");
+      background-size: 70px 70px;
+    }
+  }
+}
+
+.placeholder-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.icon-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.placeholder-icon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.status-overlay {
+  position: absolute;
+  z-index: 10;
+  transform: rotate(15deg);
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  max-width: 80px;
+  margin-left: -20%;
+  margin-top: -10%;
+  pointer-events: none;
+}
+
+.promised-banner {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 123, 255, 0.95) 0%,
+    rgba(0, 123, 255, 0.85) 100%
+  );
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.photo-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.photo-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  svg {
+    font-size: 0.75rem;
+  }
+}
+
+.title-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem 0.75rem 0.5rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.5) 60%,
+    transparent 100%
+  );
+  color: white;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 0.15rem;
+}
+
+.title-content {
+  display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
 }
 
-:deep(.messagecard) {
-  border-radius: 0px !important;
+.title-tag {
+  flex-shrink: 0;
+  font-size: 0.6rem;
 }
 
-.repostsmall {
-  font-size: 0.5rem;
+:deep(.title-tag .tagbadge) {
+  font-size: 0.6rem;
+}
+
+.title-subject {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.title-time {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-left: 6px;
+  align-self: center;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid $color-gray--lighter;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &--primary {
+    background: $color-green-background;
+    color: white;
+
+    &:hover {
+      background: darken($color-green-background, 10%);
+    }
+  }
+
+  &--secondary {
+    background: $color-blue--bright;
+    color: white;
+
+    &:hover {
+      background: darken($color-blue--bright, 10%);
+    }
+  }
+
+  &--warning {
+    background: $color-orange--dark;
+    color: white;
+
+    &:hover {
+      background: darken($color-orange--dark, 10%);
+    }
+  }
+
+  &--light {
+    background: $color-gray--lighter;
+    color: $color-gray--dark;
+
+    &:hover {
+      background: darken($color-gray--lighter, 10%);
+    }
+  }
+}
+
+.replies-section {
+  padding: 0;
+}
+
+.replies-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: lighten($color-green-background, 45%);
+  border-left: 4px solid $color-green-background;
+
+  &:hover {
+    background: lighten($color-green-background, 40%);
+  }
+}
+
+.replies-avatars {
+  display: flex;
+  align-items: center;
+  height: 36px;
+}
+
+.reply-avatar {
+  margin-left: -8px;
+  position: relative;
+  width: 32px;
+  height: 32px;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  :deep(.ProfileImage__container) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  :deep(.profile) {
+    width: 32px !important;
+    height: 32px !important;
+    display: block !important;
+  }
+
+  :deep(.circle) {
+    width: 32px !important;
+    height: 32px !important;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    display: block !important;
+  }
+
+  :deep(picture) {
+    width: 32px !important;
+    height: 32px !important;
+    display: block !important;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  :deep(img) {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block !important;
+    border: none !important;
+    border-radius: 50%;
+  }
+
+  :deep(.generated-avatar) {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+
+    svg {
+      width: 32px !important;
+      height: 32px !important;
+      display: block !important;
+    }
+  }
+}
+
+.more-count {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: $color-green-background;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  margin-left: 4px;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  position: relative;
+}
+
+.replies-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: $color-green-background;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.replies-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.expand-icon {
+  color: white;
+}
+
+.replies-list {
+  padding: 0 12px 12px;
+}
+
+.no-replies {
+  padding: 12px;
+  text-align: center;
+}
+
+.replies-slide-enter-active,
+.replies-slide-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.replies-slide-enter-from,
+.replies-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+}
+
+.replies-slide-enter-to,
+.replies-slide-leave-from {
+  opacity: 1;
+  max-height: 2000px;
+  transform: translateY(0);
 }
 </style>

@@ -1,101 +1,105 @@
 <template>
-  <div class="border border-success rounded mb-1">
-    <div class="layout mb-1">
-      <div class="divider" />
-      <div class="user d-flex flex-wrap">
-        <MyMessageReplyUser :id="replyuser?.id" />
+  <div :class="['reply-mobile', { 'reply-mobile--promised': promised }]">
+    <!-- Chat bubble with avatar and name inside -->
+    <div
+      v-if="chat?.snippet"
+      :class="['chat-bubble', unseen > 0 ? 'chat-bubble--unread' : '']"
+      @click="openChat"
+    >
+      <ProfileImage
+        :image="replyuser?.profile?.paththumb"
+        :externaluid="replyuser?.profile?.externaluid"
+        :ouruid="replyuser?.profile?.ouruid"
+        :externalmods="replyuser?.profile?.externalmods"
+        :name="replyuser?.displayname || 'User'"
+        class="chat-avatar"
+        is-thumbnail
+        size="lg"
+        @click.stop="openProfile"
+      />
+      <div class="chat-content">
+        <span class="user-name" @click.stop="openProfile">{{
+          replyuser?.displayname
+        }}</span>
+        <span class="chat-text">{{ chat.snippet }}...</span>
       </div>
-      <div class="badges d-flex flex-wrap">
-        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="closest" variant="info" pill class="pb-1 text-white">
-            Nearby
-          </b-badge>
-        </div>
-        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="best" variant="info" pill class="pb-1 text-white">
-            Good rating
-          </b-badge>
-        </div>
-        <div class="mt-1 mb-1 ms-1 d-flex flex-column justify-content-center">
-          <b-badge v-if="quickest" variant="info" pill class="pb-1 text-white">
-            Quick reply
-          </b-badge>
-        </div>
-        <SupporterInfo
-          v-if="replyuser?.supporter"
-          class="ms-1 d-flex flex-column justify-content-center"
+      <span class="chat-time">{{ replyagoShort }}</span>
+      <button class="chat-btn">
+        <b-badge v-if="unseen > 0" variant="danger" class="chat-badge">
+          {{ unseen }}
+        </b-badge>
+        <span>Chat</span>
+        <v-icon icon="angle-double-right" />
+      </button>
+    </div>
+    <div v-else class="chat-bubble chat-bubble--empty" @click="openChat">
+      <ProfileImage
+        :image="replyuser?.profile?.paththumb"
+        :externaluid="replyuser?.profile?.externaluid"
+        :ouruid="replyuser?.profile?.ouruid"
+        :externalmods="replyuser?.profile?.externalmods"
+        :name="replyuser?.displayname || 'User'"
+        class="chat-avatar"
+        is-thumbnail
+        size="lg"
+        @click.stop="openProfile"
+      />
+      <div class="chat-content">
+        <span class="user-name" @click.stop="openProfile">{{
+          replyuser?.displayname
+        }}</span>
+      </div>
+      <span class="chat-time">{{ replyagoShort }}</span>
+      <button class="chat-btn">
+        <span>Chat</span>
+        <v-icon icon="angle-double-right" />
+      </button>
+    </div>
+
+    <!-- Action buttons row -->
+    <div class="action-row">
+      <div class="ratings-section">
+        <UserRatings
+          v-if="replyuser?.id"
+          :id="replyuser.id"
+          size="lg"
+          class="user-ratings"
         />
+        <SupporterInfo v-if="replyuser?.supporter" class="supporter-badge" />
       </div>
-      <div
-        class="pl-1 flex-shrink-1 ratings d-flex d-md-none justify-content-end align-self-center m-0"
-      >
-        <UserRatings v-if="replyuser?.id" :id="replyuser?.id" size="sm" />
-      </div>
-      <div
-        class="pl-1 flex-shrink-1 ratings d-none d-md-flex justify-content-end w-100 pr-1 m-0"
-      >
-        <UserRatings :id="replyuser?.id" />
-      </div>
-      <div class="d-flex flex-column justify-content-center wrote">
-        <div class="d-flex flex-wrap">
-          <span v-if="unseen > 0" class="bg-white snippet text-primary mr-w">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else-if="chat?.snippet" class="bg-white snippet mr-2">
-            {{ chat?.snippet }}...
-          </span>
-          <span v-else class="ml-4"> ... </span>
-          <div
-            class="text-muted small mb-1 d-flex flex-column justify-content-around"
-          >
-            <span :title="replylocale">
-              {{ replyago }}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="d-flex flex-column justify-content-center ml-2 buttons">
-        <div class="d-flex w-100 justify-content-between">
-          <b-button
-            v-if="promised && !taken && !withdrawn"
-            variant="warning"
-            class="align-middle mt-1 mb-1 mr-2"
-            :size="buttonSize"
-            @click="unpromise"
-          >
-            <div class="d-flex">
-              <span class="stacked mt-1">
-                <v-icon icon="handshake" />
-                <v-icon icon="slash" class="unpromise__slash" /> </span
-              >&nbsp;Unpromise
-            </div>
-          </b-button>
-          <b-button
-            v-else-if="message.type === 'Offer' && !taken && !withdrawn"
-            variant="primary"
-            class="align-middle mt-1 mb-1 mr-2"
-            :size="buttonSize"
-            @click="promise"
-          >
-            <v-icon icon="handshake" /> Promise
-          </b-button>
-          <b-button
-            variant="secondary"
-            class="align-middle mt-1 mb-1 mr-1"
-            :size="buttonSize"
-            @click="openChat"
-          >
-            <b-badge v-if="unseen > 0" variant="danger">
-              {{ unseen }}
-            </b-badge>
-            <span v-else>
-              <v-icon icon="comments" />
-            </span>
-            Chat
-          </b-button>
-        </div>
+      <div class="action-section">
+        <button
+          v-if="promised && !taken && !withdrawn"
+          class="action-btn action-btn--warning"
+          @click="unpromise"
+        >
+          <v-icon icon="handshake" />
+          <span>Unpromise</span>
+        </button>
+        <button
+          v-else-if="message.type === 'Offer' && !taken && !withdrawn"
+          class="action-btn action-btn--primary"
+          @click="promise"
+        >
+          <v-icon icon="handshake" />
+          <span>Promise</span>
+        </button>
       </div>
     </div>
+    <!-- Badges row -->
+    <div v-if="closest || best || quickest" class="badges-row">
+      <b-badge v-if="closest" variant="info" pill class="badge-item">
+        <v-icon icon="map-marker-alt" class="me-1" />Nearby
+      </b-badge>
+      <b-badge v-if="best" variant="info" pill class="badge-item">
+        <v-icon icon="star" class="me-1" />Good rating
+      </b-badge>
+      <b-badge v-if="quickest" variant="info" pill class="badge-item">
+        <v-icon icon="clock" class="me-1" />Quick reply
+      </b-badge>
+    </div>
+
+    <!-- Modals -->
     <PromiseModal
       v-if="replyuser && showPromiseModal"
       :messages="[message]"
@@ -112,17 +116,22 @@
       :selected-user="replyuser?.id"
       @hidden="showRenegeModal = false"
     />
+    <ProfileModal
+      v-if="showProfileModal"
+      :id="replyuser?.id"
+      @hidden="showProfileModal = false"
+    />
   </div>
 </template>
+
 <script setup>
 import { defineAsyncComponent, ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
-import MyMessageReplyUser from './MyMessageReplyUser'
 import { useUserStore } from '~/stores/user'
 import { useChatStore } from '~/stores/chat'
 import { useRouter } from '#imports'
-import { timeago, datelocale } from '~/composables/useTimeFormat'
-import { useMiscStore } from '~/stores/misc'
+import { timeagoShort } from '~/composables/useTimeFormat'
+import ProfileImage from '~/components/ProfileImage'
 import SupporterInfo from '~/components/SupporterInfo'
 
 const UserRatings = defineAsyncComponent(() =>
@@ -130,6 +139,9 @@ const UserRatings = defineAsyncComponent(() =>
 )
 const PromiseModal = defineAsyncComponent(() => import('./PromiseModal'))
 const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 const props = defineProps({
   message: {
@@ -178,50 +190,30 @@ const props = defineProps({
 
 const userStore = useUserStore()
 const chatStore = useChatStore()
-const miscStore = useMiscStore()
 const router = useRouter()
 
 const showPromiseModal = ref(false)
 const showRenegeModal = ref(false)
+const showProfileModal = ref(false)
 
-// Fetch necessary data
+// Initialize data
 const initialize = async () => {
-  const promises = []
+  await userStore.fetch(props.reply.userid)
 
-  promises.push(userStore.fetch(props.reply.userid))
-
-  if (chatStore.list?.length === 0) {
-    // Need to fetch chats
-    promises.push(chatStore.fetchChats)
+  const existingChat = chatStore.toUser(props.reply.userid)
+  if (!existingChat) {
+    await chatStore.openChatToUser({
+      userid: props.reply.userid,
+      updateRoster: false,
+    })
   }
-
-  const chat = chatStore.toUser(props.reply.userid)
-
-  if (!chat) {
-    // A chat that isn't fetched in the default chat list - maybe old, maybe closed.  We want to fetch it, but
-    // we don't want to update the roster - otherwise the act of viewing this reply will cause the chat to become
-    // active again.
-    promises.push(
-      chatStore.openChatToUser({
-        userid: props.reply.userid,
-        updateRoster: false,
-      })
-    )
-  }
-
-  await Promise.all(promises)
 }
 
-// Initialize on component creation
 initialize()
 
-const chat = computed(() => {
-  return chatStore?.toUser(props.reply.userid)
-})
+const chat = computed(() => chatStore?.toUser(props.reply.userid))
 
-const replyuser = computed(() => {
-  return userStore?.byId(props.reply.userid)
-})
+const replyuser = computed(() => userStore?.byId(props.reply.userid))
 
 const replyuserids = computed(() => {
   const ret = []
@@ -230,21 +222,14 @@ const replyuserids = computed(() => {
     ret.push(replyuser.value.id)
   }
 
-  let chats = chatStore?.list ? chatStore.list : []
+  let chats = chatStore?.list || []
+  chats = chats.filter(
+    (c) =>
+      c.status !== 'Blocked' &&
+      c.status !== 'Closed' &&
+      c.chattype === 'User2User'
+  )
 
-  chats = chats.filter((chat) => {
-    if (chat.status === 'Blocked' || chat.status === 'Closed') {
-      return false
-    }
-
-    if (chat.chattype !== 'User2User') {
-      return false
-    }
-
-    return true
-  })
-
-  // Sort by last date.
   chats.sort((a, b) => {
     if (a.lastdate && b.lastdate) {
       return dayjs(b.lastdate).diff(dayjs(a.lastdate))
@@ -252,14 +237,13 @@ const replyuserids = computed(() => {
       return -1
     } else if (b.lastdate) {
       return 1
-    } else {
-      return 0
     }
+    return 0
   })
 
-  chats.forEach((chat) => {
-    if (chat.otheruid && chat.otheruid !== replyuser.value?.id) {
-      ret.push(chat.otheruid)
+  chats.forEach((c) => {
+    if (c.otheruid && c.otheruid !== replyuser.value?.id) {
+      ret.push(c.otheruid)
     }
   })
 
@@ -267,72 +251,42 @@ const replyuserids = computed(() => {
 })
 
 const replyusers = computed(() => {
-  // Get the users in replyuserids from store
-  const ret = []
-
-  replyuserids.value.forEach((uid) => {
-    const u = userStore?.byId(uid)
-
-    if (u) {
-      ret.push(u)
-    }
-  })
-
-  console.log('Reply users', ret)
-  return ret
+  return replyuserids.value.map((uid) => userStore?.byId(uid)).filter((u) => u)
 })
 
-const replyago = computed(() => {
-  return timeago(chat.value?.lastdate)
-})
-
-const replylocale = computed(() => {
-  return datelocale(chat.value?.lastdate)
-})
+const replyagoShort = computed(() => timeagoShort(chat.value?.lastdate))
 
 const unseen = computed(() => {
-  // See if this reply has unseen messages in the chats.
   let count = 0
-
-  for (const chatItem of props.chats) {
-    if (chatItem.id === props.reply?.chatid) {
-      count += chatItem.unseen
+  for (const c of props.chats) {
+    if (c.id === props.reply?.chatid) {
+      count += c.unseen
     }
   }
-
   return count
 })
 
 const promised = computed(() => {
   if (props.message?.promisecount && props.message.promises?.length) {
-    for (const promise of props.message.promises) {
-      if (promise.userid === props.reply.userid) {
-        return true
-      }
-    }
+    return props.message.promises.some((p) => p.userid === props.reply.userid)
   }
-
   return false
 })
 
-const buttonSize = computed(() => {
-  const breakpoint = miscStore?.breakpoint
-  return breakpoint === 'xs' || breakpoint === 'sm' ? 'sm' : 'md'
-})
-
-// Ensure users are in store
 watch(
   replyuserids,
   (newVal) => {
-    newVal.forEach((uid) => {
-      userStore.fetch(uid)
-    })
+    newVal.forEach((uid) => userStore.fetch(uid))
   },
   { immediate: true }
 )
 
 function openChat() {
   router.push('/chats/' + chat.value?.id)
+}
+
+function openProfile() {
+  showProfileModal.value = true
 }
 
 function promise() {
@@ -343,134 +297,252 @@ function unpromise() {
   showRenegeModal.value = true
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-.snippet {
-  border: 1px solid $color-gray--light;
-  border-radius: 10px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
-  word-wrap: break-word;
-  line-height: 1.5;
-  font-weight: bold;
+.reply-mobile {
+  padding: 12px;
+  background: white;
+  border-bottom: 2px solid $color-gray--light;
+  margin-bottom: 8px;
 
-  @include media-breakpoint-up(md) {
-    font-size: 125%;
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  &--promised {
+    background: rgba($color-green-background, 0.06);
   }
 }
 
-.unpromise__slash {
-  transform: rotate(180deg);
-  transform: translate(2px, -7px);
-  color: $color-red;
-}
+.chat-avatar {
+  flex-shrink: 0;
+  cursor: pointer;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  align-self: flex-start;
+  position: relative;
+  overflow: visible;
 
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto auto auto auto;
+  :deep(.ProfileImage__container) {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    display: grid !important;
+    grid-template-columns: 36px !important;
+    grid-template-rows: 36px !important;
+  }
 
-  .user {
+  :deep(picture),
+  :deep(.profile) {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
     grid-row: 1 / 2;
     grid-column: 1 / 2;
-    align-self: start;
-    font-size: 150%;
+    border-radius: 50%;
+    overflow: hidden;
+    display: block;
   }
 
-  .badges {
-    grid-row: 2 / 3;
-    grid-column: 1 / 3;
-    justify-self: end;
+  :deep(img) {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
   }
 
-  .ratings {
+  :deep(.generated-avatar) {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
     grid-row: 1 / 2;
-    grid-column: 2 / 3;
-    align-self: end;
-    margin-top: 0.5rem;
-    margin-right: 0.5rem;
-  }
+    grid-column: 1 / 2;
+    border-radius: 50%;
+    overflow: hidden;
 
-  .divider {
-    border-bottom: 1px solid $color-gray--light;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    grid-row: 3 / 4;
-    grid-column: 1 / 3;
-  }
-
-  .wrote {
-    grid-row: 4 / 5;
-    grid-column: 1 / 3;
-    margin-top: 0.5rem;
-    margin-left: 0.5rem;
-  }
-
-  .buttons {
-    grid-row: 5 / 6;
-    grid-column: 1 / 3;
-    margin-top: 0.25rem;
-  }
-
-  @include media-breakpoint-up(md) {
-    grid-template-columns: 3fr 1fr;
-    grid-template-rows: auto auto auto;
-
-    .divider {
-      grid-column: 1 / 4;
-      grid-row: 3 / 4;
-      margin-top: 5px;
-    }
-
-    .user {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-    }
-
-    .badges {
-      grid-row: 2 / 3;
-      grid-column: 3 / 4;
-    }
-
-    .ratings {
-      grid-column: 3 / 4;
-      grid-row: 1 / 2;
-    }
-
-    .wrote {
-      grid-row: 4 / 5;
-      grid-column: 1 / 2;
-      border-top: 0;
-    }
-
-    .buttons {
-      grid-column: 2 / 4;
-      grid-row: 4 / 5;
-      justify-self: end;
-      border-top: 0;
+    svg {
+      width: 36px !important;
+      height: 36px !important;
+      display: block;
     }
   }
 }
 
-.stacked {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
+.chat-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-  svg {
-    grid-row: 1 / 2;
-    grid-column: 1 / 2;
+.user-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: $color-black;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
   }
+}
 
-  svg:nth-child(2) {
+.user-ratings {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 0;
+  transform: scale(0.65);
+  transform-origin: left center;
+  margin-right: -35%;
+}
+
+.supporter-badge {
+  flex-shrink: 0;
+}
+
+.chat-time {
+  font-size: 0.75rem;
+  color: $color-gray--dark;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+.chat-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: $color-gray--lighter;
+  border-radius: 12px;
+  cursor: pointer;
+
+  &--unread {
+    background: lighten($color-blue--bright, 40%);
+
+    .chat-text {
+      color: $color-blue--1;
+      font-weight: 500;
+    }
+  }
+}
+
+.chat-text {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  background: $color-gray--dark;
+  color: white;
+  flex-shrink: 0;
+
+  &:hover {
+    background: darken($color-gray--dark, 10%);
+  }
+}
+
+.chat-badge {
+  font-size: 0.65rem;
+}
+
+.action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.ratings-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  @media (max-width: 320px) {
+    display: none;
+  }
+}
+
+.badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.action-section {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &--primary {
+    background: $color-green-background;
     color: white;
-    padding-top: 7px;
-    padding-right: 7px;
+
+    &:hover {
+      background: darken($color-green-background, 10%);
+    }
   }
+
+  &--warning {
+    background: $color-orange--dark;
+    color: white;
+
+    &:hover {
+      background: darken($color-orange--dark, 10%);
+    }
+  }
+}
+
+.badge-item {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 4px 8px;
 }
 </style>
