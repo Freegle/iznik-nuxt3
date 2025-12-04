@@ -1080,13 +1080,55 @@ const testWithFixtures = test.extend({
         timeout: timeouts.api.default,
       })
 
-      // Click the Next/Continue button to go to email page
+      // Click the Next/Continue button
       // Scroll to bottom of page to ensure Next button is visible
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
       await page.waitForTimeout(500) // Allow scroll to complete
 
       // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
+
+      // For OFFER posts, handle the /give/options page (delivery and deadline options)
+      // WANTED posts go directly to whoami (no options page)
+      if (type.toUpperCase() === 'OFFER') {
+        console.log(
+          'Handling /give/options page - inline deadline and delivery options'
+        )
+
+        // Wait for the options page to load
+        await page.waitForURL(/\/give\/options/, {
+          timeout: timeouts.navigation.default,
+        })
+
+        // Set "Maybe" for delivery (it's a toggle button, not modal)
+        const maybeDeliveryButton = page.locator(
+          '.toggle-btn:has-text("Maybe")'
+        )
+        await maybeDeliveryButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+        await maybeDeliveryButton.click()
+        console.log('Clicked "Maybe" for delivery option')
+
+        // "No deadline" should be selected by default, but click it to be sure
+        const noDeadlineButton = page.locator(
+          '.toggle-btn:has-text("No deadline")'
+        )
+        await noDeadlineButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+        await noDeadlineButton.click()
+        console.log('Clicked "No deadline" for deadline option')
+
+        // Click Next to go to email/whoami page
+        await page.evaluate(() =>
+          window.scrollTo(0, document.body.scrollHeight)
+        )
+        await page.waitForTimeout(500)
+        await page.locator('.next-btn:has-text("Next")').click()
+      }
 
       // Wait for either the logged-in email display or the email input to appear
       console.log(
@@ -1376,49 +1418,8 @@ const testWithFixtures = test.extend({
         )
       }
 
-      // Handle deadline modal if it appears
-      const deadlineModal = page.locator(
-        '.modal:has-text("Is there a deadline?")'
-      )
-      await deadlineModal.waitFor({
-        state: 'visible',
-        timeout: timeouts.navigation.default,
-      })
-      const noDeadlineButton = page.locator('.btn:has-text("No deadline")')
-      await noDeadlineButton.click()
-      console.log('Clicked "No deadline" in deadline modal')
-
-      // Handle delivery modal if it appears (only for OFFER posts)
-      if (type.toUpperCase() === 'OFFER') {
-        const deliveryModal = page.locator(
-          '.modal:has-text("Could you deliver?")'
-        )
-        await deliveryModal.waitFor({
-          state: 'visible',
-          timeout: timeouts.navigation.default,
-        })
-        const maybeButton = page.locator('.btn:has-text("Maybe")')
-        await maybeButton.click()
-        console.log('Clicked "Maybe" in delivery modal')
-      } else {
-        console.log('Skipping delivery modal for WANTED post')
-      }
-
       // Set password to default test password in NewUserInfo component
       await setNewUserPassword()
-
-      // Clear out the ids and type values from window.history.state to prevent modals showing again on renavigation
-      await page.evaluate(() => {
-        if (window.history.state) {
-          const newState = { ...window.history.state }
-          delete newState.ids
-          delete newState.type
-          window.history.replaceState(newState, '', window.location.href)
-        }
-      })
-      console.log(
-        'Cleared ids and type from history state to prevent modal reappearance'
-      )
 
       // Return information about the post
       return {
