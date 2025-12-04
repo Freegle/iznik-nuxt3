@@ -34,7 +34,11 @@ const id = parseInt(route.params.id)
 const notFound = ref(false)
 
 const isMobile = computed(() => {
-  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+  return (
+    miscStore.breakpoint === 'xs' ||
+    miscStore.breakpoint === 'sm' ||
+    miscStore.breakpoint === 'md'
+  )
 })
 
 if (id) {

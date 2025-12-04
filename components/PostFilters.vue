@@ -33,9 +33,9 @@
         </div>
         <div class="close d-flex justify-content-end">
           <b-button
-            variant="white"
+            variant="link"
             title="Hide map and post filters"
-            class="noborder close"
+            class="noborder close text-dark"
             @click="showFilters = false"
           >
             <v-icon icon="times" />

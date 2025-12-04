@@ -133,16 +133,21 @@
           :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
           @click.stop
         >
-          <ProfileImage
-            :image="poster.profile?.paththumb"
-            :externaluid="poster.profile?.externaluid"
-            :ouruid="poster.profile?.ouruid"
-            :externalmods="poster.profile?.externalmods"
-            :name="poster.displayname"
-            class="poster-overlay-avatar"
-            is-thumbnail
-            size="sm"
-          />
+          <div class="poster-overlay-avatar-wrapper">
+            <ProfileImage
+              :image="poster.profile?.paththumb"
+              :externaluid="poster.profile?.externaluid"
+              :ouruid="poster.profile?.ouruid"
+              :externalmods="poster.profile?.externalmods"
+              :name="poster.displayname"
+              class="poster-overlay-avatar"
+              is-thumbnail
+              size="sm"
+            />
+            <div v-if="poster.supporter" class="supporter-badge-small">
+              <v-icon icon="trophy" />
+            </div>
+          </div>
           <div class="poster-overlay-info">
             <span class="poster-overlay-name">{{ poster.displayname }}</span>
             <div class="poster-overlay-stats">
@@ -224,40 +229,6 @@
 
       <!-- Info Section -->
       <div class="info-section">
-        <!-- Posted by section (shown on taller screens) -->
-        <NuxtLink
-          v-if="poster"
-          :to="posterProfileUrl"
-          class="poster-section"
-          @click.stop
-        >
-          <ProfileImage
-            :image="poster.profile?.paththumb"
-            :externaluid="poster.profile?.externaluid"
-            :ouruid="poster.profile?.ouruid"
-            :externalmods="poster.profile?.externalmods"
-            :name="poster.displayname"
-            class="poster-avatar"
-            is-thumbnail
-            size="lg"
-          />
-          <div class="poster-details">
-            <span class="poster-name">{{ poster.displayname }}</span>
-            <div class="poster-stats">
-              <span v-if="distanceText" class="poster-distance">
-                <v-icon icon="map-marker-alt" />{{ distanceText }}
-              </span>
-              <span v-if="poster.info?.offers" class="poster-stat">
-                <v-icon icon="gift" />{{ poster.info.offers }}
-              </span>
-              <span v-if="poster.info?.wanteds" class="poster-stat">
-                <v-icon icon="search" />{{ poster.info.wanteds }}
-              </span>
-            </div>
-          </div>
-          <v-icon icon="chevron-right" class="poster-chevron" />
-        </NuxtLink>
-
         <!-- Description -->
         <div class="description-section">
           <div class="description-label">DESCRIPTION</div>
@@ -265,6 +236,56 @@
             <MessageTextBody :id="id" />
           </div>
         </div>
+
+        <!-- Posted by divider and section (shown on taller screens, after description) -->
+        <div v-if="poster" class="section-divider">
+          <span class="section-divider-text">POSTED BY</span>
+        </div>
+        <NuxtLink
+          v-if="poster"
+          :to="posterProfileUrl"
+          class="poster-section-wrapper"
+          @click.stop
+        >
+          <div class="poster-avatar-wrapper">
+            <ProfileImage
+              :image="poster.profile?.paththumb"
+              :externaluid="poster.profile?.externaluid"
+              :ouruid="poster.profile?.ouruid"
+              :externalmods="poster.profile?.externalmods"
+              :name="poster.displayname"
+              class="poster-avatar"
+              is-thumbnail
+              size="lg"
+            />
+            <div v-if="poster.supporter" class="supporter-badge">
+              <v-icon icon="trophy" />
+            </div>
+          </div>
+          <div class="poster-details">
+            <span class="poster-name">{{ poster.displayname }}</span>
+            <div class="poster-stats">
+              <span v-if="poster.info?.offers" class="poster-stat">
+                <v-icon icon="gift" />{{ poster.info.offers }}
+              </span>
+              <span v-if="poster.info?.wanteds" class="poster-stat">
+                <v-icon icon="search" />{{ poster.info.wanteds }}
+              </span>
+            </div>
+            <div v-if="posterAboutMe" class="poster-aboutme">
+              {{ posterAboutMe }}
+            </div>
+          </div>
+          <UserRatings
+            v-if="poster.id"
+            :id="poster.id"
+            size="md"
+            :disabled="fromme"
+            class="poster-ratings"
+            @click.stop.prevent
+          />
+          <v-icon icon="chevron-right" class="poster-chevron" />
+        </NuxtLink>
       </div>
     </div>
 
@@ -282,16 +303,28 @@
           <v-icon icon="handshake" />
           {{ message.promisedtome ? 'Promised to you' : 'Already promised' }}
         </div>
-        <b-button
-          v-if="replyable && !replied && !fromme && !message.successful"
-          variant="primary"
-          size="lg"
-          block
-          class="reply-button"
-          @click="expandReply"
+        <div
+          v-if="replyable && !replied && !message.successful"
+          class="footer-buttons"
         >
-          Reply
-        </b-button>
+          <b-button
+            variant="secondary"
+            size="lg"
+            class="cancel-button"
+            @click="goBack"
+          >
+            Cancel
+          </b-button>
+          <b-button
+            v-if="!fromme"
+            variant="primary"
+            size="lg"
+            class="reply-button"
+            @click="expandReply"
+          >
+            Reply
+          </b-button>
+        </div>
         <b-alert
           v-else-if="replied"
           variant="info"
@@ -367,6 +400,7 @@ import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageReplySection from '~/components/MessageReplySection'
 import ProfileImage from '~/components/ProfileImage'
+import UserRatings from '~/components/UserRatings'
 import { useModalHistory } from '~/composables/useModalHistory'
 
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
@@ -459,6 +493,12 @@ const home = computed(() => {
 const prefersReducedMotion = computed(() => {
   if (typeof window === 'undefined') return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+})
+
+const posterAboutMe = computed(() => {
+  const text = poster.value?.aboutme?.text
+  if (!text) return null
+  return text
 })
 
 // Methods
@@ -854,6 +894,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.35rem;
   font-size: 0.7rem;
+
+  @include media-breakpoint-up(md) {
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
 }
 
 .location,
@@ -882,6 +927,10 @@ onUnmounted(() => {
   font-size: 0.9rem !important;
   white-space: nowrap !important;
   flex-shrink: 0;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem !important;
+  }
 }
 
 .title-subject {
@@ -891,12 +940,20 @@ onUnmounted(() => {
   font-weight: 700;
   line-height: 1.2;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+
+  @include media-breakpoint-up(md) {
+    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  }
 }
 
 .title-location {
   font-size: 0.85rem;
   opacity: 0.85;
   margin-top: 0.15rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
 }
 
 .photo-counter {
@@ -950,13 +1007,32 @@ onUnmounted(() => {
   }
 }
 
-.poster-overlay-avatar {
+.poster-overlay-avatar-wrapper {
+  position: relative;
   flex-shrink: 0;
+}
 
+.poster-overlay-avatar {
   :deep(.ProfileImage__container) {
     width: 28px !important;
     height: 28px !important;
   }
+}
+
+.supporter-badge-small {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: gold;
+  color: $color-white;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $color-white;
+  font-size: 0.45rem;
 }
 
 .poster-overlay-info {
@@ -993,35 +1069,118 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-// Poster section in info area (shown on taller screens)
-.poster-section {
+/* Section divider with left-aligned text and line */
+.section-divider {
   display: flex;
   align-items: center;
+  margin-top: 1rem;
   gap: 0.75rem;
-  padding: 0.75rem 0;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid $color-gray-3;
-  text-decoration: none;
-  color: inherit;
 
-  &:hover {
-    text-decoration: none;
-    color: inherit;
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $color-gray-3;
   }
 
-  // Hide on short screens where overlay is shown
+  /* Hide on short screens where overlay is shown */
   @media (max-height: 700px) {
     display: none;
   }
 }
 
-.poster-avatar {
+.section-divider-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: $color-gray--base;
+  letter-spacing: 0.1em;
+}
+
+/* Poster section wrapper - now a link for tablet layout with ratings */
+.poster-section-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  background: $colour-info-bg;
+  border-left: 3px solid $colour-info-fg;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+    background: darken($colour-info-bg, 3%);
+  }
+
+  /* Hide on short screens where overlay is shown */
+  @media (max-height: 700px) {
+    display: none;
+  }
+}
+
+/* Poster aboutme - hidden on mobile, shown on tablet */
+.poster-aboutme {
+  display: none;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: $color-gray--darker;
+  margin-top: 0.5rem;
+  font-style: italic;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  &::before {
+    content: '"';
+  }
+
+  &::after {
+    content: '"';
+  }
+
+  @include media-breakpoint-up(md) {
+    display: -webkit-box;
+  }
+}
+
+/* Poster ratings - hidden on mobile, shown on tablet */
+.poster-ratings {
+  display: none;
   flex-shrink: 0;
 
+  @include media-breakpoint-up(md) {
+    display: flex;
+  }
+}
+
+.poster-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.poster-avatar {
   :deep(.ProfileImage__container) {
     width: 48px !important;
     height: 48px !important;
   }
+}
+
+.supporter-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: gold;
+  color: $color-white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid $color-white;
+  font-size: 0.6rem;
 }
 
 .poster-details {
@@ -1029,7 +1188,7 @@ onUnmounted(() => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
 .poster-name {
@@ -1058,8 +1217,11 @@ onUnmounted(() => {
 
 .poster-chevron {
   flex-shrink: 0;
+  align-self: center;
   color: $color-gray--dark;
-  font-size: 1rem;
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  margin-right: -0.5rem;
 }
 
 // Description
@@ -1113,6 +1275,37 @@ onUnmounted(() => {
     max-width: none !important;
     box-sizing: border-box !important;
   }
+}
+
+.footer-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+
+  .cancel-button,
+  .reply-button {
+    flex: 1;
+    width: auto !important;
+    display: flex !important;
+    justify-content: center;
+  }
+
+  /* Mobile: only Reply button visible, full width */
+  @media (max-width: 767.98px) {
+    .cancel-button {
+      display: none !important;
+    }
+
+    .reply-button {
+      width: 100% !important;
+    }
+  }
+}
+
+/* When only Cancel button is shown (own posts), full width */
+.footer-buttons:has(.cancel-button:only-child) .cancel-button {
+  flex: 1;
+  width: 100% !important;
 }
 
 .reply-expanded-section {

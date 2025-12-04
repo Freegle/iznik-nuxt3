@@ -179,9 +179,13 @@ const authStore = useAuthStore()
 const miscStore = useMiscStore()
 const me = computed(() => authStore.user)
 
-// Check if mobile breakpoint
+// Check if mobile/tablet breakpoint - use modern cards for xs/sm/md
 const isMobile = computed(() => {
-  return miscStore.breakpoint === 'xs' || miscStore.breakpoint === 'sm'
+  return (
+    miscStore.breakpoint === 'xs' ||
+    miscStore.breakpoint === 'sm' ||
+    miscStore.breakpoint === 'md'
+  )
 })
 
 // Refs

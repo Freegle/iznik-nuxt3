@@ -105,6 +105,31 @@ export function timeagoShort(val) {
   }
 }
 
+export function timeagoMedium(val) {
+  // Medium time format: "2 hours", "3 days", "1 week"
+  const now = dayjs()
+  const then = dayjs(val)
+  const diffMinutes = now.diff(then, 'minute')
+  const diffHours = now.diff(then, 'hour')
+  const diffDays = now.diff(then, 'day')
+  const diffWeeks = now.diff(then, 'week')
+  const diffMonths = now.diff(then, 'month')
+
+  if (diffMinutes < 1) {
+    return 'just now'
+  } else if (diffMinutes < 60) {
+    return diffMinutes === 1 ? '1 min' : `${diffMinutes} mins`
+  } else if (diffHours < 24) {
+    return diffHours === 1 ? '1 hour' : `${diffHours} hours`
+  } else if (diffDays < 7) {
+    return diffDays === 1 ? '1 day' : `${diffDays} days`
+  } else if (diffWeeks < 5) {
+    return diffWeeks === 1 ? '1 week' : `${diffWeeks} weeks`
+  } else {
+    return diffMonths === 1 ? '1 month' : `${diffMonths} months`
+  }
+}
+
 export function timeadapt(val) {
   const t = dayjs(val)
 

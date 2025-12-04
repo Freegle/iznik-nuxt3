@@ -78,8 +78,8 @@
         />
       </div>
 
-      <!-- Title/info overlay at bottom of photo -->
-      <div class="title-overlay">
+      <!-- Title/info overlay at bottom of photo (mobile only) -->
+      <div class="title-overlay title-overlay-mobile">
         <div class="info-row">
           <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
           <div class="info-icons">
@@ -94,6 +94,25 @@
         <div class="title-row">
           <span class="title-subject">{{ strippedSubject }}</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Content section for tablet/desktop - shows below photo -->
+    <div class="content-section">
+      <div class="content-title">
+        <MessageTag :id="id" :inline="true" class="content-tag" />
+        <span class="content-subject">{{ strippedSubject }}</span>
+      </div>
+      <div class="content-description">
+        {{ descriptionText || 'Click to see more details.' }}
+      </div>
+      <div class="content-meta">
+        <span v-if="hasLocation" class="meta-location">
+          <v-icon icon="map-marker-alt" />{{ locationText }}
+        </span>
+        <span class="meta-time">
+          <v-icon icon="clock" />{{ timeAgo || '...' }}
+        </span>
       </div>
     </div>
   </div>
@@ -141,6 +160,15 @@ const {
   categoryIcon,
 } = useMessageDisplay(idRef)
 
+// Truncated description for tablet/desktop view
+const descriptionText = computed(() => {
+  const text = message.value?.textbody
+  if (!text || text === 'null') return null
+  const maxLen = 120
+  if (text.length <= maxLen) return text
+  return text.substring(0, maxLen).trim() + '...'
+})
+
 const locationText = computed(() => {
   // Show area name if available, otherwise distance
   if (message.value?.area) {
@@ -174,18 +202,20 @@ function expand(e) {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
-// Use very specific selectors to override MessageList.vue's deep selectors
+/* Use very specific selectors to override MessageList.vue's deep selectors */
 .message-summary-mobile {
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 8px $color-black-opacity-12;
   cursor: pointer;
   background: $color-white;
-  height: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   min-height: 0;
-  max-height: none;
 }
 
 .photo-area {
@@ -195,10 +225,16 @@ function expand(e) {
   padding-bottom: 115%;
   background: $color-gray--light;
   overflow: hidden;
+  flex-shrink: 0;
 
   .freegled &,
   .promisedfade & {
     filter: contrast(50%);
+  }
+
+  /* Smaller photo on tablet/desktop to make room for text */
+  @include media-breakpoint-up(md) {
+    padding-bottom: 75%;
   }
 }
 
@@ -249,7 +285,8 @@ function expand(e) {
   height: auto;
 }
 
-.title-overlay {
+/* Mobile overlay - hidden on tablet+ */
+.title-overlay-mobile {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -275,6 +312,10 @@ function expand(e) {
   color: white;
   z-index: 3;
   overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    display: none;
+  }
 }
 
 .info-row {
@@ -337,5 +378,84 @@ function expand(e) {
   overflow: hidden;
   text-overflow: ellipsis;
   height: auto;
+}
+
+/* Content section - hidden on mobile, visible on tablet+ */
+.content-section {
+  display: none;
+  padding: 0.75rem;
+  background: $color-white;
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.content-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  min-width: 0;
+}
+
+.content-tag {
+  flex-shrink: 0;
+  display: inline-flex !important;
+}
+
+:deep(.content-tag) {
+  position: static !important;
+  display: inline-flex !important;
+}
+
+:deep(.content-tag.tagbadge) {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.content-subject {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.content-description {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  line-height: 1.35;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.content-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.7rem;
+  color: $color-gray--dark;
+  margin-top: auto;
+}
+
+.meta-location,
+.meta-time {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 </style>

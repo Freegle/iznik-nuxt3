@@ -565,10 +565,12 @@ if (me.value) {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/_color-vars.scss';
+@import 'assets/css/navbar.scss';
 
 .chitchat-page {
   background: $color-gray--lighter;
   min-height: 100vh;
+  padding-bottom: $page-bottom-padding;
 }
 
 // Composer section

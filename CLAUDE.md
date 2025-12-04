@@ -71,3 +71,58 @@ IMPORTANT: After making code changes, always run `eslint --fix` on the specific 
 
 ## Debugging and Investigation
 - No need to run lint before investigating problems
+
+## Test User Credentials
+- Test user credentials are stored in the FreegleDocker `.env` file
+- Variables: `TEST_USER_EMAIL` and `TEST_USER_PASSWORD`
+- Use these when logging in during browser testing or Playwright tests
+
+## Browser Testing with Chrome DevTools MCP
+When using browser testing tools to inspect CSS and layout:
+
+### Site Selection
+- **Always use `http://freegle-dev-live.localhost`** for browser testing - it connects to live production data
+- `freegle-dev-local.localhost` uses local test database which may not have test users or sample data
+- The test user credentials from `.env` will work on `freegle-dev-live`
+
+### Login Flow
+- Never close login modals - always complete the login using test credentials from `.env`
+- Click "Log in" link to switch from signup to login form
+- Fill email and password fields, then click Log in button
+
+### Responsive Layout Testing
+- Bootstrap breakpoints: xs (<576px), sm (576-768px), md (768-992px), lg (992-1200px), xl (1200px+)
+- The VisibleWhen component uses BreakpointFettler to detect current breakpoint
+- 2-column layouts typically show at xs, sm, md breakpoints (< 992px)
+- Use `evaluate_script` to check current viewport: `window.innerWidth`
+- Use `take_screenshot` with `fullPage: true` to see full page layout
+- Use `resize_page` to dynamically change viewport size for different breakpoints
+
+### Chrome DevTools MCP Setup (WSL)
+The MCP launches Chrome in WSL and displays via X server (MobaXterm or WSLg).
+
+**Prerequisites:**
+1. Install Chrome in WSL: `sudo dpkg -i google-chrome-stable_current_amd64.deb`
+2. Have X server running (MobaXterm built-in, or WSLg on Windows 11)
+3. Set DISPLAY if needed: `export DISPLAY=:0`
+
+**MCP Configuration** (in `~/.claude.json` under project mcpServers):
+```json
+"chrome-devtools": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "chrome-devtools-mcp@latest", "--viewport", "820x1180"]
+}
+```
+
+**Viewport sizes for Bootstrap breakpoints:**
+- xs: 375x667 (mobile)
+- sm: 576x800 (large mobile)
+- md: 768x1024 (tablet portrait)
+- md-lg: 820x1180 (iPad Air - good for 2-column testing)
+- lg: 992x768 (tablet landscape)
+- xl: 1200x900 (desktop)
+
+**Dynamic resizing:** Use `resize_page` MCP tool to change viewport without restarting.
+
+**Note:** Connecting to Windows Chrome via `--browserUrl` doesn't work reliably due to WSL/Windows network issues. Use WSL Chrome instead.
