@@ -68,7 +68,7 @@
             </div>
           </div>
         </div>
-        <MessageExpandedMobile
+        <MessageExpanded
           v-else-if="bumpMessage"
           :id="id"
           :key="bumpMessage"
@@ -95,8 +95,8 @@ import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
 
-const MessageExpandedMobile = defineAsyncComponent(() =>
-  import('~/components/MessageExpandedMobile')
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
 )
 
 const messageStore = useMessageStore()

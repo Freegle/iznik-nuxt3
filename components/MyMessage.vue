@@ -207,7 +207,7 @@
 
           <Transition name="replies-slide">
             <div v-if="expanded" class="replies-list">
-              <MyMessageReplyMobile
+              <MyMessageReply
                 v-for="reply in replies"
                 :key="'reply-' + reply.id"
                 :reply="reply"
@@ -272,8 +272,8 @@ import ProfileImage from '~/components/ProfileImage'
 import MessageTag from '~/components/MessageTag'
 import OurUploadedImage from '~/components/OurUploadedImage'
 
-const MyMessageReplyMobile = defineAsyncComponent(() =>
-  import('./MyMessageReplyMobile.vue')
+const MyMessageReply = defineAsyncComponent(() =>
+  import('./MyMessageReply.vue')
 )
 const MessageShareModal = defineAsyncComponent(() =>
   import('./MessageShareModal')

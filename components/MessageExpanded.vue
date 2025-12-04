@@ -393,7 +393,7 @@
     </Teleport>
 
     <!-- Photos Modal -->
-    <MessagePhotosModalMobile
+    <MessagePhotosModal
       v-if="showMessagePhotosModal && attachmentCount"
       :id="message.id"
       @hidden="showMessagePhotosModal = false"
@@ -422,8 +422,8 @@ import UserRatings from '~/components/UserRatings'
 import { useModalHistory } from '~/composables/useModalHistory'
 
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
-const MessagePhotosModalMobile = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModalMobile')
+const MessagePhotosModal = defineAsyncComponent(() =>
+  import('~/components/MessagePhotosModal')
 )
 
 const props = defineProps({

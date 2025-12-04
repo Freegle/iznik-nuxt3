@@ -10,7 +10,7 @@
         <b-col cols="12" lg="6" offset-lg="3" class="p-0">
           <div>
             <GlobalMessage />
-            <MyMessageMobile
+            <MyMessage
               v-if="message?.fromuser === myid"
               :id="id"
               :show-old="true"
@@ -54,8 +54,8 @@ import NoticeMessage from '~/components/NoticeMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 
-const MyMessageMobile = defineAsyncComponent(() =>
-  import('~/components/MyMessageMobile.vue')
+const MyMessage = defineAsyncComponent(() =>
+  import('~/components/MyMessage.vue')
 )
 const DonationAskModal = defineAsyncComponent(() =>
   import('~/components/DonationAskModal')

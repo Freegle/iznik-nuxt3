@@ -32,7 +32,7 @@
     <div v-if="visiblePosts.length > 0" class="posts-container">
       <div v-for="post in visiblePosts" :key="'post-' + post.id">
         <Suspense>
-          <MyMessageMobile
+          <MyMessage
             :id="post.id"
             :show-old="showOldPosts"
             :expand="defaultExpanded"
@@ -83,7 +83,7 @@
 <script setup>
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import MyMessageMobile from '~/components/MyMessageMobile.vue'
+import MyMessage from '~/components/MyMessage.vue'
 import InfiniteLoading from '~/components/InfiniteLoading.vue'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'

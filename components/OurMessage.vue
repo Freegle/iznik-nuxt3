@@ -18,7 +18,7 @@
       <span itemprop="availability">Instock</span>
     </div>
     <div v-if="startExpanded">
-      <MessageExpandedMobile
+      <MessageExpanded
         :id="message.id"
         :replyable="replyable"
         :hide-close="hideClose"
@@ -42,7 +42,7 @@
         @hidden="expanded = false"
       />
       <!-- Mobile full-screen modal (only inserted when clicked) -->
-      <MessageExpandedMobile
+      <MessageExpanded
         v-if="showMobileExpanded"
         :id="message.id"
         :replyable="replyable"
@@ -62,8 +62,8 @@ import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
 
-const MessageExpandedMobile = defineAsyncComponent(() =>
-  import('~/components/MessageExpandedMobile')
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
 )
 const MessageSummaryMobile = defineAsyncComponent(() =>
   import('~/components/MessageSummaryMobile')

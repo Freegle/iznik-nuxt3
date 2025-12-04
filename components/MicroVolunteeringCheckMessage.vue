@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <MessagePhotosModalMobile
+      <MessagePhotosModal
         v-if="showMessagePhotosModal && message?.attachments?.length"
         :id="message.id"
         @hidden="showMessagePhotosModal = false"
@@ -193,7 +193,7 @@
 import { ref, computed } from 'vue'
 import { useTimeAgo } from '@vueuse/core'
 import SpinButton from './SpinButton'
-import MessagePhotosModalMobile from './MessagePhotosModalMobile'
+import MessagePhotosModal from './MessagePhotosModal'
 import NoticeMessage from './NoticeMessage'
 import MessageTag from './MessageTag'
 import OurUploadedImage from './OurUploadedImage'

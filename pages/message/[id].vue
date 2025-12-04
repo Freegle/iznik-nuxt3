@@ -92,7 +92,7 @@
           "
         >
           <client-only>
-            <MyMessageMobile :id="id" :show-old="true" expand />
+            <MyMessage :id="id" :show-old="true" expand />
           </client-only>
         </div>
         <div v-else class="botpad">
@@ -162,7 +162,7 @@ import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
 import { twem } from '~/composables/useTwem'
 import { dateonlyNoYear } from '~/composables/useTimeFormat'
-import MyMessageMobile from '~/components/MyMessageMobile'
+import MyMessage from '~/components/MyMessage'
 import OurMessage from '~/components/OurMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import VisibleWhen from '~/components/VisibleWhen'
@@ -231,7 +231,7 @@ if (message.value) {
   }
 }
 
-/* We want to delay render of MyMessageMobile until the mount fetch is complete, as it would otherwise not
+/* We want to delay render of MyMessage until the mount fetch is complete, as it would otherwise not
 contain the reply information correctly. */
 
 onMounted(async () => {

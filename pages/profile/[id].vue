@@ -16,14 +16,14 @@
         </div>
       </div>
     </div>
-    <ProfileInfoMobile v-else :id="id" />
+    <ProfileInfo v-else :id="id" />
   </client-only>
 </template>
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
 import { ref } from '#imports'
 import { useUserStore } from '~/stores/user'
-import ProfileInfoMobile from '~/components/ProfileInfoMobile'
+import ProfileInfo from '~/components/ProfileInfo'
 
 const userStore = useUserStore()
 const route = useRoute()
