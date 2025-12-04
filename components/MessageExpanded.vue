@@ -676,6 +676,14 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   z-index: 1000;
+
+  /* Desktop: constrain to centered modal */
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $color-black-opacity-50;
+  }
 }
 
 .message-expanded-mobile {
@@ -703,6 +711,18 @@ onUnmounted(() => {
     @media (min-height: $mobile-tall) {
       bottom: calc(80px + $sticky-banner-height-mobile-tall);
     }
+  }
+
+  /* Desktop: constrain size and position relative to wrapper */
+  @include media-breakpoint-up(lg) {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    max-width: 700px;
+    max-height: 85vh;
+    box-shadow: 0 4px 24px $color-black-opacity-30;
   }
 }
 
@@ -1294,15 +1314,18 @@ onUnmounted(() => {
     }
   }
 
-  // Force reply button to be full width
-  .reply-button,
-  :deep(.reply-button),
-  :deep(.btn),
-  :deep(button) {
-    width: 100% !important;
-    display: block !important;
-    max-width: none !important;
-    box-sizing: border-box !important;
+  /* Desktop: position relative within modal, constrained width */
+  @include media-breakpoint-up(lg) {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    max-width: 700px;
+    margin: 0 auto;
+
+    &.stickyAdRendered {
+      bottom: auto;
+    }
   }
 }
 
