@@ -170,7 +170,7 @@ async function save() {
   align-items: center;
   padding: 1rem 1.25rem;
   border-top: 1px solid $color-gray--lighter;
-  background: $color-gray--lightest;
+  background: $color-gray--lighter;
 
   .cancel-btn {
     color: $color-gray--dark;
