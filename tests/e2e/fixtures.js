@@ -1188,6 +1188,10 @@ const testWithFixtures = test.extend({
         fullPage: true,
       })
 
+      // Scroll to bottom of page to ensure "Freegle it!" button is visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForTimeout(500) // Allow scroll to complete
+
       // Wait for validation to complete and the button to appear using web assertions
       console.log(
         'Waiting for Freegle it button to appear after email validation'
