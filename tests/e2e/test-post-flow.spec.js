@@ -315,7 +315,7 @@ test.describe('Post flow tests', () => {
     // Scroll and click Next to go to location page
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await page.waitForTimeout(500)
-    await page.locator('.d-none.d-md-flex .btn:has-text("Next")').click()
+    await page.locator('.next-btn:has-text("Next")').click()
 
     // Fill in postcode
     await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
@@ -337,9 +337,7 @@ test.describe('Post flow tests', () => {
     // Scroll and click Next to go to email page
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await page.waitForTimeout(500)
-    await page
-      .locator('.d-none.d-md-flex.maxbutt .btn:has-text("Next")')
-      .click()
+    await page.locator('.next-btn:has-text("Next")').click()
 
     // Fill in the email that already belongs to someone else
     console.log(`Filling in email ${testEmail} that belongs to existing user`)

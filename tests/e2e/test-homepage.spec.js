@@ -264,6 +264,7 @@ test.describe('Homepage tests', () => {
       const mobileHeaderStart = Date.now()
       await page
         .locator('text=Share the love')
+        .first()
         .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       console.log(
         `[DEBUG] Mobile slogan found in ${Date.now() - mobileHeaderStart}ms`

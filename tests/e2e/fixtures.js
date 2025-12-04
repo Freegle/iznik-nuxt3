@@ -1058,8 +1058,8 @@ const testWithFixtures = test.extend({
       await page.waitForTimeout(500) // Allow scroll to complete
 
       // Click the Next/Continue button to go to location page
-      // Target the desktop version specifically using maxbutt class
-      await page.locator('.d-none.d-md-flex .btn:has-text("Next")').click()
+      // Target the modernized Next button
+      await page.locator('.next-btn:has-text("Next")').click()
 
       // Fill in location details
       await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
@@ -1085,10 +1085,8 @@ const testWithFixtures = test.extend({
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
       await page.waitForTimeout(500) // Allow scroll to complete
 
-      // Target the desktop version specifically using maxbutt class
-      await page
-        .locator('.d-none.d-md-flex.maxbutt .btn:has-text("Next")')
-        .click()
+      // Target the modernized Next button
+      await page.locator('.next-btn:has-text("Next")').click()
 
       // Wait for either the logged-in email display or the email input to appear
       console.log(
