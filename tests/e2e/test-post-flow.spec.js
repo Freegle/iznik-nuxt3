@@ -39,14 +39,14 @@ test.describe('Post flow tests', () => {
     })
 
     // Wait for message cards and verify our specific item is visible
-    // Note: My Posts uses .message-card class (with hyphen)
-    await page.waitForSelector('.message-card, .card-body', {
+    // Note: Browse page uses MessageSummary with .messagecard (no hyphen)
+    await page.waitForSelector('.messagecard, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards.
     const itemLocator = page
-      .locator('.message-card, .card-body')
+      .locator('.messagecard, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
