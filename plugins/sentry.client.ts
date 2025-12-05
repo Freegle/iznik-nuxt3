@@ -97,6 +97,14 @@ export default defineNuxtPlugin((nuxtApp) => {
             return null
           }
 
+          // Suppress Vue unmountComponent errors during navigation.
+          if (
+            hint?.originalException?.stack?.includes('unmountComponent') &&
+            hint?.originalException?.message?.includes("'bum' of 'instance' as it is null")
+          ) {
+            return null
+          }
+
           // Check if it is an exception, and if so, log it.
           if (event.exception) {
             console.error(
