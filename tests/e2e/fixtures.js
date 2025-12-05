@@ -1397,8 +1397,9 @@ const testWithFixtures = test.extend({
       })
 
       // Check for the posted item
+      // Look for the message card which uses .message-card class (with hyphen)
       const messageCard = page
-        .locator(`.messagecard:has-text("${item}")`)
+        .locator(`.message-card:has-text("${item}")`)
         .first()
       await messageCard.waitFor({
         state: 'visible',
@@ -1532,8 +1533,8 @@ const testWithFixtures = test.extend({
         })
 
         // Find the post we want to withdraw.
-        // Use .card or .messagecard (consistent with postMessage fixture) rather than .card-body
-        const postSelector = `.card:has-text("${item}"), .messagecard:has-text("${item}")`
+        // Use .card or .message-card (with hyphen, consistent with MyMessage component)
+        const postSelector = `.card:has-text("${item}"), .message-card:has-text("${item}")`
         console.log(`Looking for post with selector: ${postSelector}`)
         const postCard = page.locator(postSelector).first()
 
