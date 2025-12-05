@@ -1208,23 +1208,8 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
-      // Wait for any loading overlays to disappear before clicking
-      // The loading indicator can block clicks if positioned over the button
-      const loadingIndicator = page.locator('img[alt="Loading"]')
-      const loadingVisible = await loadingIndicator
-        .isVisible()
-        .catch(() => false)
-      if (loadingVisible) {
-        console.log('Waiting for loading indicator to disappear...')
-        await loadingIndicator.waitFor({
-          state: 'hidden',
-          timeout: timeouts.api.default,
-        })
-        console.log('Loading indicator hidden')
-      }
-
-      // Wait for button to be enabled and clickable
-      await page.waitForTimeout(500) // Allow Vue to hydrate
+      // Small delay to allow Vue to fully hydrate event handlers
+      await page.waitForTimeout(1000)
 
       // Set up console listener to capture browser errors
       const consoleMessages = []
