@@ -1824,12 +1824,33 @@ const testWithFixtures = test.extend({
       await page.gotoAndVerify(messageUrl)
       console.log(`Navigated to message page: ${messageUrl}`)
 
+      // Wait for any loading indicators to disappear before interacting
+      // This ensures Vue has fully hydrated the component
+      const loadingIndicator = page.locator('img[alt="Loading"], .loading-indicator')
+      try {
+        await loadingIndicator.waitFor({
+          state: 'hidden',
+          timeout: timeouts.ui.appearance,
+        })
+        console.log('Loading indicator disappeared')
+      } catch (e) {
+        // Loading indicator may not exist, that's fine
+        console.log('No loading indicator found or already hidden')
+      }
+
       // Wait for the Reply button to be visible and click it to expand the reply section
       const replyButton = page.locator('.reply-button:has-text("Reply")')
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
+      console.log('Reply button visible')
+
+      // Small delay to ensure Vue event handlers are attached
+      await page.waitForTimeout(500)
+
+      // Scroll into view and click - the button is in a fixed footer
+      await replyButton.scrollIntoViewIfNeeded()
       await replyButton.click()
       console.log('Clicked Reply button to expand reply section')
 
