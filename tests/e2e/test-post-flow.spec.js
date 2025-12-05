@@ -39,13 +39,14 @@ test.describe('Post flow tests', () => {
     })
 
     // Wait for message cards and verify our specific item is visible
-    await page.waitForSelector('.messagecard, .card-body', {
+    // Note: My Posts uses .message-card class (with hyphen)
+    await page.waitForSelector('.message-card, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards.
     const itemLocator = page
-      .locator('.messagecard, .card-body')
+      .locator('.message-card, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
@@ -194,13 +195,14 @@ test.describe('Post flow tests', () => {
     })
 
     // Wait for message cards and verify our specific item is visible
-    await page.waitForSelector('.messagecard, .card-body', {
+    // Note: My Posts uses .message-card class (with hyphen)
+    await page.waitForSelector('.message-card, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards
     const itemLocator = page
-      .locator('.messagecard, .card-body')
+      .locator('.message-card, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
