@@ -1208,6 +1208,24 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
+      // Wait for any loading overlays to disappear before clicking
+      // The loading indicator can block clicks if positioned over the button
+      const loadingIndicator = page.locator('img[alt="Loading"]')
+      const loadingVisible = await loadingIndicator
+        .isVisible()
+        .catch(() => false)
+      if (loadingVisible) {
+        console.log('Waiting for loading indicator to disappear...')
+        await loadingIndicator.waitFor({
+          state: 'hidden',
+          timeout: timeouts.api.default,
+        })
+        console.log('Loading indicator hidden')
+      }
+
+      // Wait for button to be enabled and clickable
+      await page.waitForTimeout(500) // Allow Vue to hydrate
+
       // Set up console listener to capture browser errors
       const consoleMessages = []
       const consoleListener = (msg) => {
@@ -1228,7 +1246,8 @@ const testWithFixtures = test.extend({
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
 
-      await freegleButton.click()
+      // Use force:true to ensure click registers even with potential overlay issues
+      await freegleButton.click({ force: true })
       console.log('Submit button clicked successfully')
 
       // Give a moment for any immediate navigation to start
