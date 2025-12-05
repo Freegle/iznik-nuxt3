@@ -22,7 +22,7 @@
         <div v-if="isApp" class="debug-section">
           <div class="app-info">
             <small class="text-muted">
-              App v{{ mobileVersion }}
+              App v{{ mobileVersion }} ({{ appBuildDate }})
               <span v-if="deviceuserinfo"> · {{ deviceuserinfo }}</span>
             </small>
             <b-button
@@ -93,6 +93,11 @@ const deviceuserinfo = computed(() => {
 const version = computed(() => {
   const date = dayjs(runtimeConfig.public.BUILD_DATE)
   return date.format('Do MMMM, YYYY') + ' at ' + date.format('HH:mm')
+})
+
+const appBuildDate = computed(() => {
+  const date = dayjs(runtimeConfig.public.BUILD_DATE)
+  return date.format('D MMM YYYY')
 })
 
 // Methods
