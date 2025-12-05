@@ -280,34 +280,6 @@ export async function freegleIt(type, router, options = {}) {
   wentWrong.value = false
   notAllowed.value = false
 
-  // Capture deadline and delivery values before submit clears them
-  const messageData = {}
-  const myid = authStore.user?.id
-  console.log(
-    'freegleIt: capturing message data, all messages:',
-    composeStore.all
-  )
-  composeStore.all.forEach((message) => {
-    if (
-      message.type === type &&
-      (!message.savedBy || message.savedBy === myid)
-    ) {
-      console.log(
-        'freegleIt: found message',
-        message.id,
-        'deadline:',
-        message.deadline,
-        'deliveryPossible:',
-        message.deliveryPossible
-      )
-      messageData[message.id] = {
-        deadline: message.deadline,
-        deliveryPossible: message.deliveryPossible,
-      }
-    }
-  })
-  console.log('freegleIt: messageData captured:', messageData)
-
   try {
     const results = await composeStore.submit({
       type,
@@ -320,7 +292,6 @@ export async function freegleIt(type, router, options = {}) {
       newpassword: null,
       ids: [],
       type,
-      skipDeadline: options.skipDeadline || false,
     }
 
     await Promise.all(
@@ -366,34 +337,6 @@ export async function freegleIt(type, router, options = {}) {
       })
 
       await Promise.all(promises)
-    }
-
-    // If we have deadline/delivery data from app flow, patch the messages now
-    if (options.skipDeadline && Object.keys(messageData).length > 0) {
-      const patchPromises = []
-      for (const res of results) {
-        // Find the matching message data (first one since we typically have one message)
-        const data = Object.values(messageData)[0]
-        if (data) {
-          if (data.deadline) {
-            patchPromises.push(
-              messageStore.patch({
-                id: res.id,
-                deadline: new Date(data.deadline).toISOString(),
-              })
-            )
-          }
-          if (data.deliveryPossible !== undefined) {
-            patchPromises.push(
-              messageStore.patch({
-                id: res.id,
-                deliverypossible: data.deliveryPossible,
-              })
-            )
-          }
-        }
-      }
-      await Promise.all(patchPromises)
     }
 
     // Debug: log results count

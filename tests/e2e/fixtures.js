@@ -1562,10 +1562,11 @@ const testWithFixtures = test.extend({
         )
 
         // Look for the withdraw button within the post card
+        // Note: MyMessage.vue uses .action-btn class, not .btn
         console.log(`Looking for withdraw button in post card for "${item}"`)
         const withdrawButton = postCard
           .locator(
-            '.btn:has-text("Withdraw"):not([disabled]):not([disable]):not(.disabled)'
+            '.action-btn:has-text("Withdraw"), .btn:has-text("Withdraw")'
           )
           .first()
 
@@ -1579,14 +1580,16 @@ const testWithFixtures = test.extend({
           console.log(
             'Withdraw button not found with strict selector, trying broader selector'
           )
-          const allButtons = await postCard.locator('.btn').allTextContents()
+          const allButtons = await postCard
+            .locator('.action-btn, .btn')
+            .allTextContents()
           console.log(
             `Available buttons in post card: ${JSON.stringify(allButtons)}`
           )
 
           // Try a broader selector
           const broadWithdrawButton = postCard
-            .locator('.btn')
+            .locator('.action-btn, .btn')
             .filter({ hasText: /withdraw/i })
           const broadButtonCount = await broadWithdrawButton.count()
           console.log(`Found ${broadButtonCount} buttons with "withdraw" text`)
@@ -1612,7 +1615,7 @@ const testWithFixtures = test.extend({
             'Withdraw button is disabled, checking if broad selector button is enabled'
           )
           const broadWithdrawButton = postCard
-            .locator('.btn')
+            .locator('.action-btn, .btn')
             .filter({ hasText: /withdraw/i })
             .first()
           const isBroadEnabled = await broadWithdrawButton.isEnabled()

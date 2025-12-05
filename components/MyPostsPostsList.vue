@@ -1,5 +1,11 @@
 <template>
   <div class="my-posts-list">
+    <!-- Active posts count header -->
+    <div v-if="activePosts.length > 0" class="active-posts-header">
+      <v-icon icon="gift" class="me-2" />
+      {{ formattedActivePostsCount }}
+    </div>
+
     <!-- Old posts toggle button -->
     <div v-if="oldPosts.length > 0" class="old-posts-toggle">
       <button class="toggle-btn" @click="toggleShowOldPosts">
@@ -123,6 +129,10 @@ const formattedOldPostsCount = computed(() => {
   return pluralize(`old post`, oldPosts.value.length, true)
 })
 
+const formattedActivePostsCount = computed(() => {
+  return pluralize(`active post`, activePosts.value.length, true)
+})
+
 const activePosts = computed(() => {
   const result = posts.value.filter((post) => !post.hasoutcome)
   console.log('DEBUG: activePosts computed', {
@@ -216,6 +226,21 @@ const upcomingTrysts = computed(() => {
 
 .my-posts-list {
   padding: 0;
+}
+
+.active-posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  margin: 0 12px 12px 12px;
+  background: white;
+  border: 1px solid $color-gray--light;
+  color: $colour-success;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .old-posts-toggle {

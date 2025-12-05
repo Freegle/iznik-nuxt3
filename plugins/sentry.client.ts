@@ -88,6 +88,15 @@ export default defineNuxtPlugin((nuxtApp) => {
             return null
           }
 
+          // Suppress Nuxt/Vue internal DOM removal errors before logging to console.
+          // These occur during navigation when components are unmounted.
+          if (
+            hint?.originalException?.stack?.includes('performRemove') &&
+            hint?.originalException?.message?.includes("reading 'parentNode'")
+          ) {
+            return null
+          }
+
           // Check if it is an exception, and if so, log it.
           if (event.exception) {
             console.error(
