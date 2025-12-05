@@ -194,7 +194,8 @@ test.describe('Browse Page Tests', () => {
       })
 
       // Wait for the page to load and messages to appear
-      await page.waitForSelector('.messagecard, .card-body', {
+      // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
+      await page.waitForSelector('.message-summary-mobile, .messagecard', {
         timeout: timeouts.ui.appearance,
       })
 
@@ -208,7 +209,7 @@ test.describe('Browse Page Tests', () => {
       expect(title).toContain('Browse')
 
       // Look for messages
-      const messageCards = page.locator('.messagecard, .card-body')
+      const messageCards = page.locator('.message-summary-mobile, .messagecard')
       const messageCount = await messageCards.count()
       expect(messageCount).toBeGreaterThan(0)
 

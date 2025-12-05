@@ -1824,7 +1824,16 @@ const testWithFixtures = test.extend({
       await page.gotoAndVerify(messageUrl)
       console.log(`Navigated to message page: ${messageUrl}`)
 
-      // Wait for the message content to load
+      // Wait for the Reply button to be visible and click it to expand the reply section
+      const replyButton = page.locator('.reply-button:has-text("Reply")')
+      await replyButton.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      await replyButton.click()
+      console.log('Clicked Reply button to expand reply section')
+
+      // Wait for the reply textarea to be visible after expanding
       await page.locator('textarea[name="reply"]').waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
