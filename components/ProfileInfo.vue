@@ -18,6 +18,9 @@
 
       <!-- User Name -->
       <h1 class="user-name">{{ user.displayname }}</h1>
+      <nuxt-link v-if="mod" :to="`/profile/${id}`" class="member-id"
+        >#{{ id }}</nuxt-link
+      >
 
       <!-- Freegler Since -->
       <div class="member-since">
@@ -155,7 +158,7 @@ const props = defineProps({
 
 const userStore = useUserStore()
 const messageStore = useMessageStore()
-const { me, myid } = useMe()
+const { me, myid, mod } = useMe()
 
 // Get active messages
 const messages = await messageStore.fetchByUser(props.id, true, true)
@@ -309,6 +312,18 @@ const replyTimeText = computed(() => {
   font-weight: 700;
   margin: 0;
   text-align: center;
+}
+
+.member-id {
+  font-size: 0.75rem;
+  color: $color-gray--base;
+  text-align: center;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-gray--dark;
+    text-decoration: underline;
+  }
 }
 
 .member-since {

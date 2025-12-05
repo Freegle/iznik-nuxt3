@@ -97,13 +97,17 @@ export const useComposeStore = defineStore({
       this._progress++
       return id
     },
-    async submitDraft(id, email) {
-      console.log('Submit draft', id, email)
-      const ret = await this.$api.message.joinAndPost(id, email, (data) => {
-        // ret = 8 is posting prohibited, which is due to mod choice not a server error.
-        // ret = 9 is banned, ditto.
-        console.log('Post failed', data, data.ret, data.ret !== 8)
-        return data.ret !== 8 && data.ret !== 9
+    async submitDraft(id, email, options = {}) {
+      console.log('Submit draft', id, email, options)
+      const ret = await this.$api.message.joinAndPost(id, email, {
+        deadline: options.deadline,
+        deliverypossible: options.deliverypossible,
+        logError: (data) => {
+          // ret = 8 is posting prohibited, which is due to mod choice not a server error.
+          // ret = 9 is banned, ditto.
+          console.log('Post failed', data, data.ret, data.ret !== 8)
+          return data.ret !== 8 && data.ret !== 9
+        },
       })
       console.log('Returned', ret)
 
@@ -318,6 +322,15 @@ export const useComposeStore = defineStore({
 
           let result
 
+          // Build options for submitDraft with deadline/delivery if set
+          const submitOptions = {}
+          if (message.deadline) {
+            submitOptions.deadline = new Date(message.deadline).toISOString()
+          }
+          if (message.deliveryPossible !== undefined) {
+            submitOptions.deliverypossible = message.deliveryPossible
+          }
+
           if (!message.repostof) {
             // This is a draft we have composed on the client, which doesn't have a corresponding server message yet.
             // We need to:
@@ -330,7 +343,8 @@ export const useComposeStore = defineStore({
 
             const { groupid, newuser, newpassword } = await this.submitDraft(
               id,
-              this.email
+              this.email,
+              submitOptions
             )
 
             result = { id, groupid, newuser, newpassword }
@@ -361,7 +375,8 @@ export const useComposeStore = defineStore({
 
             const { groupid, newuser, newpassword } = await this.submitDraft(
               id,
-              this.email
+              this.email,
+              submitOptions
             )
 
             result = { id, groupid, newuser, newpassword }

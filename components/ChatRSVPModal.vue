@@ -41,9 +41,12 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { useAuthStore } from '~/stores/auth'
+
+const router = useRouter()
 
 const props = defineProps({
   id: {
@@ -92,8 +95,10 @@ async function no() {
 
   if (dohide.value) {
     await chatStore.hide(props.id)
+    hide()
+    router.push('/chats')
+  } else {
+    hide()
   }
-
-  hide()
 }
 </script>

@@ -195,14 +195,14 @@ async function next() {
       const inuse = await userStore.emailIsInUse(email.value)
 
       if (!inuse) {
-        await freegleIt('Offer', router, { skipDeadline: true })
+        await freegleIt('Offer', router)
       } else if (!loggedIn.value) {
         authStore.forceLogin = true
       } else {
         emailBelongsToSomeoneElse.value = true
       }
     } else {
-      await freegleIt('Offer', router, { skipDeadline: true })
+      await freegleIt('Offer', router)
     }
   } catch (e) {
     console.error('Error in next():', e)

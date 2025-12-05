@@ -1,5 +1,5 @@
 <template>
-  <div class="notice p-2 rounded-sm" :class="'notice--' + variant">
+  <div class="notice p-2" :class="'notice--' + variant">
     <slot />
   </div>
 </template>
@@ -16,31 +16,30 @@ defineProps({
 
 <style scoped lang="scss">
 .notice {
-  border-width: 1px;
-  border-style: solid;
+  border-left: 4px solid;
 }
 
 .notice--primary {
   background-color: $colour-success-bg;
-  border-color: $colour-success-border;
+  border-left-color: $colour-success;
   color: $colour-success-fg;
 }
 
 .notice--info {
   background-color: $color-blue--x-light;
-  border-color: $color-blue-x-light2;
+  border-left-color: $color-blue--1;
   color: $color-blue--1;
 }
 
 .notice--warning {
   background-color: $color-yellow-1;
-  border-color: $color-yellow-2;
+  border-left-color: $color-yellow-3;
   color: $color-yellow-3;
 }
 
 .notice--danger {
   background-color: $color-red--lighter;
-  border-color: $color-red--light;
+  border-left-color: $color-red--dark;
   color: $color-red--dark;
 }
 </style>

@@ -1080,13 +1080,55 @@ const testWithFixtures = test.extend({
         timeout: timeouts.api.default,
       })
 
-      // Click the Next/Continue button to go to email page
+      // Click the Next/Continue button
       // Scroll to bottom of page to ensure Next button is visible
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
       await page.waitForTimeout(500) // Allow scroll to complete
 
       // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
+
+      // For OFFER posts, handle the /give/options page (delivery and deadline options)
+      // WANTED posts go directly to whoami (no options page)
+      if (type.toUpperCase() === 'OFFER') {
+        console.log(
+          'Handling /give/options page - inline deadline and delivery options'
+        )
+
+        // Wait for the options page to load
+        await page.waitForURL(/\/give\/options/, {
+          timeout: timeouts.navigation.default,
+        })
+
+        // Set "Maybe" for delivery (it's a toggle button, not modal)
+        const maybeDeliveryButton = page.locator(
+          '.toggle-btn:has-text("Maybe")'
+        )
+        await maybeDeliveryButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+        await maybeDeliveryButton.click()
+        console.log('Clicked "Maybe" for delivery option')
+
+        // "No deadline" should be selected by default, but click it to be sure
+        const noDeadlineButton = page.locator(
+          '.toggle-btn:has-text("No deadline")'
+        )
+        await noDeadlineButton.waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+        await noDeadlineButton.click()
+        console.log('Clicked "No deadline" for deadline option')
+
+        // Click Next to go to email/whoami page
+        await page.evaluate(() =>
+          window.scrollTo(0, document.body.scrollHeight)
+        )
+        await page.waitForTimeout(500)
+        await page.locator('.next-btn:has-text("Next")').click()
+      }
 
       // Wait for either the logged-in email display or the email input to appear
       console.log(
@@ -1146,6 +1188,10 @@ const testWithFixtures = test.extend({
         fullPage: true,
       })
 
+      // Scroll to bottom of page to ensure "Freegle it!" button is visible
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+      await page.waitForTimeout(500) // Allow scroll to complete
+
       // Wait for validation to complete and the button to appear using web assertions
       console.log(
         'Waiting for Freegle it button to appear after email validation'
@@ -1161,6 +1207,9 @@ const testWithFixtures = test.extend({
       })
 
       console.log('Button appeared, submit')
+
+      // Small delay to allow Vue to fully hydrate event handlers
+      await page.waitForTimeout(1000)
 
       // Set up console listener to capture browser errors
       const consoleMessages = []
@@ -1182,7 +1231,17 @@ const testWithFixtures = test.extend({
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
 
-      await freegleButton.click()
+      // Try multiple click methods to ensure it works
+      try {
+        // First try normal Playwright click with force
+        await freegleButton.click({ force: true })
+        console.log('Submit button clicked with force:true')
+      } catch (clickError) {
+        console.log('Force click failed, trying JS click:', clickError.message)
+        // Fallback to JavaScript click if Playwright click fails
+        await freegleButton.evaluate((el) => el.click())
+        console.log('Submit button clicked via JavaScript')
+      }
       console.log('Submit button clicked successfully')
 
       // Give a moment for any immediate navigation to start
@@ -1351,18 +1410,20 @@ const testWithFixtures = test.extend({
       })
 
       // Check for the posted item
+      // Look for the message card which uses .message-card class (with hyphen)
       const messageCard = page
-        .locator(`.messagecard:has-text("${item}")`)
+        .locator(`.message-card:has-text("${item}")`)
         .first()
       await messageCard.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
 
-      // Try to extract the post ID
+      // Try to extract the post ID from the message card's data-message-id attribute
       let postId = null
       try {
         postId =
+          (await messageCard.getAttribute('data-message-id')) ||
           (await messageCard.getAttribute('data-id')) ||
           (await messageCard.getAttribute('id'))
 
@@ -1376,49 +1437,8 @@ const testWithFixtures = test.extend({
         )
       }
 
-      // Handle deadline modal if it appears
-      const deadlineModal = page.locator(
-        '.modal:has-text("Is there a deadline?")'
-      )
-      await deadlineModal.waitFor({
-        state: 'visible',
-        timeout: timeouts.navigation.default,
-      })
-      const noDeadlineButton = page.locator('.btn:has-text("No deadline")')
-      await noDeadlineButton.click()
-      console.log('Clicked "No deadline" in deadline modal')
-
-      // Handle delivery modal if it appears (only for OFFER posts)
-      if (type.toUpperCase() === 'OFFER') {
-        const deliveryModal = page.locator(
-          '.modal:has-text("Could you deliver?")'
-        )
-        await deliveryModal.waitFor({
-          state: 'visible',
-          timeout: timeouts.navigation.default,
-        })
-        const maybeButton = page.locator('.btn:has-text("Maybe")')
-        await maybeButton.click()
-        console.log('Clicked "Maybe" in delivery modal')
-      } else {
-        console.log('Skipping delivery modal for WANTED post')
-      }
-
       // Set password to default test password in NewUserInfo component
       await setNewUserPassword()
-
-      // Clear out the ids and type values from window.history.state to prevent modals showing again on renavigation
-      await page.evaluate(() => {
-        if (window.history.state) {
-          const newState = { ...window.history.state }
-          delete newState.ids
-          delete newState.type
-          window.history.replaceState(newState, '', window.location.href)
-        }
-      })
-      console.log(
-        'Cleared ids and type from history state to prevent modal reappearance'
-      )
 
       // Return information about the post
       return {
@@ -1527,8 +1547,8 @@ const testWithFixtures = test.extend({
         })
 
         // Find the post we want to withdraw.
-        // Use .card or .messagecard (consistent with postMessage fixture) rather than .card-body
-        const postSelector = `.card:has-text("${item}"), .messagecard:has-text("${item}")`
+        // Use .card or .message-card (with hyphen, consistent with MyMessage component)
+        const postSelector = `.card:has-text("${item}"), .message-card:has-text("${item}")`
         console.log(`Looking for post with selector: ${postSelector}`)
         const postCard = page.locator(postSelector).first()
 
@@ -1542,10 +1562,11 @@ const testWithFixtures = test.extend({
         )
 
         // Look for the withdraw button within the post card
+        // Note: MyMessage.vue uses .action-btn class, not .btn
         console.log(`Looking for withdraw button in post card for "${item}"`)
         const withdrawButton = postCard
           .locator(
-            '.btn:has-text("Withdraw"):not([disabled]):not([disable]):not(.disabled)'
+            '.action-btn:has-text("Withdraw"), .btn:has-text("Withdraw")'
           )
           .first()
 
@@ -1559,14 +1580,16 @@ const testWithFixtures = test.extend({
           console.log(
             'Withdraw button not found with strict selector, trying broader selector'
           )
-          const allButtons = await postCard.locator('.btn').allTextContents()
+          const allButtons = await postCard
+            .locator('.action-btn, .btn')
+            .allTextContents()
           console.log(
             `Available buttons in post card: ${JSON.stringify(allButtons)}`
           )
 
           // Try a broader selector
           const broadWithdrawButton = postCard
-            .locator('.btn')
+            .locator('.action-btn, .btn')
             .filter({ hasText: /withdraw/i })
           const broadButtonCount = await broadWithdrawButton.count()
           console.log(`Found ${broadButtonCount} buttons with "withdraw" text`)
@@ -1592,7 +1615,7 @@ const testWithFixtures = test.extend({
             'Withdraw button is disabled, checking if broad selector button is enabled'
           )
           const broadWithdrawButton = postCard
-            .locator('.btn')
+            .locator('.action-btn, .btn')
             .filter({ hasText: /withdraw/i })
             .first()
           const isBroadEnabled = await broadWithdrawButton.isEnabled()

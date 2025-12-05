@@ -173,8 +173,8 @@ async function submitOffer() {
     }
   }
 
-  // Pass skipDeadline flag since we already collected deadline info in options page
-  await freegleIt('Offer', router, { skipDeadline: true })
+  // Deadline and delivery options are passed directly in the submit call
+  await freegleIt('Offer', router)
 }
 </script>
 
