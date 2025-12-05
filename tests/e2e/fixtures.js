@@ -1406,10 +1406,11 @@ const testWithFixtures = test.extend({
         timeout: timeouts.ui.appearance,
       })
 
-      // Try to extract the post ID
+      // Try to extract the post ID from the message card's data-message-id attribute
       let postId = null
       try {
         postId =
+          (await messageCard.getAttribute('data-message-id')) ||
           (await messageCard.getAttribute('data-id')) ||
           (await messageCard.getAttribute('id'))
 
