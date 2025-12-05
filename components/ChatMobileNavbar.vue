@@ -167,6 +167,7 @@
   </div>
 </template>
 <script setup>
+import { useRouter } from 'vue-router'
 import {
   clearNavBarTimeout,
   setNavBarHidden,
@@ -176,6 +177,8 @@ import {
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
 import { timeago } from '~/composables/useTimeFormat'
+
+const router = useRouter()
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -276,10 +279,12 @@ function toggleProfileCard() {
 // Action methods
 const hide = async () => {
   await chatStore.hide(props.id)
+  router.push('/chats')
 }
 
 const block = async () => {
   await chatStore.block(props.id)
+  router.push('/chats')
 }
 
 const unhide = async () => {
