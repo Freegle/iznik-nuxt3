@@ -1231,8 +1231,17 @@ const testWithFixtures = test.extend({
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
 
-      // Use force:true to ensure click registers even with potential overlay issues
-      await freegleButton.click({ force: true })
+      // Try multiple click methods to ensure it works
+      try {
+        // First try normal Playwright click with force
+        await freegleButton.click({ force: true })
+        console.log('Submit button clicked with force:true')
+      } catch (clickError) {
+        console.log('Force click failed, trying JS click:', clickError.message)
+        // Fallback to JavaScript click if Playwright click fails
+        await freegleButton.evaluate((el) => el.click())
+        console.log('Submit button clicked via JavaScript')
+      }
       console.log('Submit button clicked successfully')
 
       // Give a moment for any immediate navigation to start
