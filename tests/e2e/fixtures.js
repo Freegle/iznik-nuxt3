@@ -1833,7 +1833,15 @@ const testWithFixtures = test.extend({
       await replyButton.click()
       console.log('Clicked Reply button to expand reply section')
 
+      // Wait for the reply section to expand (indicated by .reply-expanded-section appearing)
+      await page.locator('.reply-expanded-section').waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      console.log('Reply section expanded')
+
       // Wait for the reply textarea to be visible after expanding
+      // The textarea is inside client-only and may take time to render
       await page.locator('textarea[name="reply"]').waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
