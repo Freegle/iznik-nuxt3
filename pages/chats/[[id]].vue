@@ -339,6 +339,13 @@ const distance = ref(1000)
 const selectedChatId = ref(null)
 const showClosed = computed(() => chatStore.showClosed)
 
+// Watch for external changes to showClosed (e.g., from store's unhide function)
+// to trigger reactivity updates that normally happen in toggleShowClosed.
+watch(showClosed, () => {
+  showChats.value = 20
+  bump.value++
+})
+
 function toggleShowClosed() {
   chatStore.showClosed = !chatStore.showClosed
   showChats.value = 20

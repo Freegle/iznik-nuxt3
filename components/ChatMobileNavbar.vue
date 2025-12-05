@@ -44,45 +44,48 @@
       :class="{ 'profile-card--expanded': profileCardExpanded }"
     >
       <div v-if="otheruser && otheruser.info" class="profile-card-content">
-        <ProfileImage
-          :image="chat.icon"
-          :name="chat.name"
-          class="profile-card-avatar clickme"
-          is-thumbnail
-          size="lg"
-          border
-          @click="showInfo"
-        />
+        <div class="profile-card-avatar-section">
+          <div class="avatar-wrapper">
+            <ProfileImage
+              :image="chat.icon"
+              :name="chat.name"
+              class="profile-card-avatar clickme"
+              is-thumbnail
+              size="lg"
+              @click="showInfo"
+            />
+            <v-icon
+              v-if="otheruser.supporter"
+              icon="trophy"
+              class="supporter-icon"
+            />
+          </div>
+          <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
+        </div>
         <div class="profile-card-details">
-          <div class="profile-card-info-row">
-            <div class="profile-card-stats">
-              <span v-if="otheruser.lastaccess" class="stat-item">
-                <v-icon icon="clock" class="stat-icon" />
-                <span class="stat-text"
-                  >Last seen <strong>{{ otheraccessFull }}</strong></span
-                >
-              </span>
-              <span v-if="replytimeFull" class="stat-item">
-                <v-icon icon="reply" class="stat-icon" />
-                <span class="stat-text"
-                  >Replies in <strong>{{ replytimeFull }}</strong></span
-                >
-              </span>
-              <span v-if="!otheruser?.deleted && milesaway" class="stat-item">
-                <v-icon icon="map-marker-alt" class="stat-icon" />
-                <span class="stat-text"
-                  >Distance <strong>{{ milesaway }} miles</strong></span
-                >
-              </span>
-            </div>
-            <div class="profile-card-ratings">
-              <UserRatings
-                :id="chat.otheruid"
-                :key="'otheruser-' + chat.otheruid"
-                size="sm"
-              />
-              <SupporterInfo v-if="otheruser.supporter" class="ml-2" />
-            </div>
+          <div class="profile-card-badges">
+            <UserRatings
+              :id="chat.otheruid"
+              :key="'otheruser-' + chat.otheruid"
+              size="sm"
+            />
+          </div>
+          <div class="profile-card-stats">
+            <span v-if="otheruser.lastaccess" class="stat-chip">
+              <v-icon icon="clock" class="stat-icon" />
+              <span class="stat-label">Last seen</span>
+              {{ otheraccessFull }}
+            </span>
+            <span v-if="replytimeFull" class="stat-chip">
+              <v-icon icon="reply" class="stat-icon" />
+              <span class="stat-label">Replies in</span>
+              {{ replytimeFull }}
+            </span>
+            <span v-if="!otheruser?.deleted && milesaway" class="stat-chip">
+              <v-icon icon="map-marker-alt" class="stat-icon" />
+              <span class="stat-label">Distance</span>
+              {{ milesaway }} miles
+            </span>
           </div>
         </div>
       </div>
@@ -164,6 +167,7 @@
   </div>
 </template>
 <script setup>
+import { useRouter } from 'vue-router'
 import {
   clearNavBarTimeout,
   setNavBarHidden,
@@ -173,6 +177,8 @@ import {
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
 import { timeago } from '~/composables/useTimeFormat'
+
+const router = useRouter()
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -273,10 +279,12 @@ function toggleProfileCard() {
 // Action methods
 const hide = async () => {
   await chatStore.hide(props.id)
+  router.push('/chats')
 }
 
 const block = async () => {
   await chatStore.block(props.id)
+  router.push('/chats')
 }
 
 const unhide = async () => {
@@ -487,6 +495,33 @@ onBeforeUnmount(() => {
   margin-bottom: 10px;
 }
 
+.profile-card-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.avatar-wrapper {
+  position: relative;
+}
+
+.supporter-icon {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.75rem;
+  color: #ffd700;
+  background: white;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.supporter-badge {
+  font-size: 0.85rem;
+}
+
 .profile-card-avatar {
   flex-shrink: 0;
 }
@@ -496,40 +531,42 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.profile-card-info-row {
+.profile-card-badges {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .profile-card-stats {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.stat-item {
-  display: flex;
+.stat-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
+  gap: 4px;
+  padding: 4px 8px;
+  background: $color-gray--lighter;
+  font-size: 0.75rem;
   color: $color-gray--darker;
+  font-weight: 500;
 }
 
 .stat-icon {
   font-size: 0.7rem;
   color: $color-green--dark;
-  width: 14px;
-  text-align: center;
 }
 
-.stat-text {
-  color: #333;
+.stat-label {
+  display: none;
+  color: $color-gray--dark;
+  font-weight: 400;
 
-  strong {
-    color: $color-black;
-    font-weight: 600;
+  @include media-breakpoint-up(md) {
+    display: inline;
   }
 }
 

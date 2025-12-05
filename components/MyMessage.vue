@@ -1,7 +1,11 @@
 <template>
   <div v-observe-visibility="visibilityChanged" class="my-message-mobile">
     <div v-if="visible && message?.id">
-      <div v-if="showOld || !message.outcomes?.length" class="message-card">
+      <div
+        v-if="showOld || !message.outcomes?.length"
+        class="message-card"
+        :data-message-id="message.id"
+      >
         <!-- Rejected notice -->
         <notice-message v-if="rejected" class="mb-2" variant="warning">
           <v-icon icon="exclamation-triangle" /> This post has been returned to

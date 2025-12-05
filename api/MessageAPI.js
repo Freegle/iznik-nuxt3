@@ -54,12 +54,22 @@ export default class MessageAPI extends BaseAPI {
     return this.$patch('/message', event)
   }
 
-  joinAndPost(id, email, logError = true) {
-    return this.$post(
-      '/message',
-      { id, email, action: 'JoinAndPost' },
-      logError
-    )
+  joinAndPost(id, email, options = {}, logError = true) {
+    const params = { id, email, action: 'JoinAndPost' }
+
+    // Add optional deadline and deliverypossible params from options
+    if (options.deadline) {
+      params.deadline = options.deadline
+    }
+    if (options.deliverypossible !== undefined) {
+      params.deliverypossible = options.deliverypossible
+    }
+
+    // If options.logError is provided, use it; otherwise use the logError param
+    const logErrorFn =
+      options.logError !== undefined ? options.logError : logError
+
+    return this.$post('/message', params, logErrorFn)
   }
 
   del(id) {

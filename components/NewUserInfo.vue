@@ -36,10 +36,6 @@
             </template>
           </b-input-group>
         </div>
-        <p class="login-hint">
-          <v-icon icon="info-circle" class="hint-icon" />
-          You can also log in with Facebook, Google, or Apple.
-        </p>
       </div>
     </div>
 
@@ -197,17 +193,6 @@ async function setPassword(callback) {
 .password-input {
   max-width: 300px;
   margin: 0 auto 1rem;
-}
-
-.login-hint {
-  font-size: 0.8rem;
-  color: $color-gray--dark;
-  text-align: center;
-  margin: 0;
-
-  .hint-icon {
-    margin-right: 0.25rem;
-  }
 }
 
 .settings-wrapper {

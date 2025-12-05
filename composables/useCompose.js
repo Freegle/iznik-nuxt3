@@ -280,34 +280,6 @@ export async function freegleIt(type, router, options = {}) {
   wentWrong.value = false
   notAllowed.value = false
 
-  // Capture deadline and delivery values before submit clears them
-  const messageData = {}
-  const myid = authStore.user?.id
-  console.log(
-    'freegleIt: capturing message data, all messages:',
-    composeStore.all
-  )
-  composeStore.all.forEach((message) => {
-    if (
-      message.type === type &&
-      (!message.savedBy || message.savedBy === myid)
-    ) {
-      console.log(
-        'freegleIt: found message',
-        message.id,
-        'deadline:',
-        message.deadline,
-        'deliveryPossible:',
-        message.deliveryPossible
-      )
-      messageData[message.id] = {
-        deadline: message.deadline,
-        deliveryPossible: message.deliveryPossible,
-      }
-    }
-  })
-  console.log('freegleIt: messageData captured:', messageData)
-
   try {
     const results = await composeStore.submit({
       type,
@@ -320,41 +292,42 @@ export async function freegleIt(type, router, options = {}) {
       newpassword: null,
       ids: [],
       type,
-      skipDeadline: options.skipDeadline || false,
     }
 
-    await results.forEach(async (res) => {
-      console.log('Consider result', res, type)
-      if (type === 'Offer' && res.id) {
-        params.ids.push(res.id)
-      }
-
-      if (res.newuser) {
-        params.newuser = res.newuser
-        params.newpassword = res.newpassword
-
-        // Make sure we're logged in, and so that we have permission to fetch messages
-        // below.
-        console.log('Login', composeStore.email)
-        await authStore.login({
-          email: composeStore.email,
-          password: params.newpassword,
-        })
-
-        // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
-        if (composeStore.postcode?.id) {
-          console.log(
-            'Saving postcode to new user settings',
-            composeStore.postcode
-          )
-          const settings = authStore.user?.settings || {}
-          settings.mylocation = composeStore.postcode
-          await authStore.saveAndGet({
-            settings,
-          })
+    await Promise.all(
+      results.map(async (res) => {
+        console.log('Consider result', res, type)
+        if (type === 'Offer' && res.id) {
+          params.ids.push(res.id)
         }
-      }
-    })
+
+        if (res.newuser) {
+          params.newuser = res.newuser
+          params.newpassword = res.newpassword
+
+          // Make sure we're logged in, and so that we have permission to fetch messages
+          // below.
+          console.log('Login', composeStore.email)
+          await authStore.login({
+            email: composeStore.email,
+            password: params.newpassword,
+          })
+
+          // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
+          if (composeStore.postcode?.id) {
+            console.log(
+              'Saving postcode to new user settings',
+              composeStore.postcode
+            )
+            const settings = authStore.user?.settings || {}
+            settings.mylocation = composeStore.postcode
+            await authStore.saveAndGet({
+              settings,
+            })
+          }
+        }
+      })
+    )
 
     const promises = []
 
@@ -364,34 +337,6 @@ export async function freegleIt(type, router, options = {}) {
       })
 
       await Promise.all(promises)
-    }
-
-    // If we have deadline/delivery data from app flow, patch the messages now
-    if (options.skipDeadline && Object.keys(messageData).length > 0) {
-      const patchPromises = []
-      for (const res of results) {
-        // Find the matching message data (first one since we typically have one message)
-        const data = Object.values(messageData)[0]
-        if (data) {
-          if (data.deadline) {
-            patchPromises.push(
-              messageStore.patch({
-                id: res.id,
-                deadline: new Date(data.deadline).toISOString(),
-              })
-            )
-          }
-          if (data.deliveryPossible !== undefined) {
-            patchPromises.push(
-              messageStore.patch({
-                id: res.id,
-                deliverypossible: data.deliveryPossible,
-              })
-            )
-          }
-        }
-      }
-      await Promise.all(patchPromises)
     }
 
     // Debug: log results count
