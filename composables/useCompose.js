@@ -323,38 +323,40 @@ export async function freegleIt(type, router, options = {}) {
       skipDeadline: options.skipDeadline || false,
     }
 
-    await results.forEach(async (res) => {
-      console.log('Consider result', res, type)
-      if (type === 'Offer' && res.id) {
-        params.ids.push(res.id)
-      }
-
-      if (res.newuser) {
-        params.newuser = res.newuser
-        params.newpassword = res.newpassword
-
-        // Make sure we're logged in, and so that we have permission to fetch messages
-        // below.
-        console.log('Login', composeStore.email)
-        await authStore.login({
-          email: composeStore.email,
-          password: params.newpassword,
-        })
-
-        // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
-        if (composeStore.postcode?.id) {
-          console.log(
-            'Saving postcode to new user settings',
-            composeStore.postcode
-          )
-          const settings = authStore.user?.settings || {}
-          settings.mylocation = composeStore.postcode
-          await authStore.saveAndGet({
-            settings,
-          })
+    await Promise.all(
+      results.map(async (res) => {
+        console.log('Consider result', res, type)
+        if (type === 'Offer' && res.id) {
+          params.ids.push(res.id)
         }
-      }
-    })
+
+        if (res.newuser) {
+          params.newuser = res.newuser
+          params.newpassword = res.newpassword
+
+          // Make sure we're logged in, and so that we have permission to fetch messages
+          // below.
+          console.log('Login', composeStore.email)
+          await authStore.login({
+            email: composeStore.email,
+            password: params.newpassword,
+          })
+
+          // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
+          if (composeStore.postcode?.id) {
+            console.log(
+              'Saving postcode to new user settings',
+              composeStore.postcode
+            )
+            const settings = authStore.user?.settings || {}
+            settings.mylocation = composeStore.postcode
+            await authStore.saveAndGet({
+              settings,
+            })
+          }
+        }
+      })
+    )
 
     const promises = []
 
