@@ -264,6 +264,7 @@ const updatedMessagesOnMap = ref(null)
 const firstSeenMessage = ref(null)
 const infiniteId = ref(+new Date())
 const noneFound = ref(false)
+const lastFilteredIds = ref(null)
 
 // Computed properties
 const showIsochrones = computed(() => {
@@ -507,7 +508,14 @@ watch(
       }
     }
 
-    infiniteId.value++
+    // Only reset the infinite scroll when the actual list of message IDs changes,
+    // not when other properties (like unseen status) change. This prevents the
+    // scroll position from being lost when messages are marked as seen.
+    const newIds = JSON.stringify(newVal.map((m) => m.id))
+    if (lastFilteredIds.value !== newIds) {
+      lastFilteredIds.value = newIds
+      infiniteId.value++
+    }
   },
   { immediate: true }
 )
