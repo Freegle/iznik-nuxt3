@@ -589,7 +589,8 @@ async function searchMore() {
 }
 
 .active {
-  background-color: rgba($color-green-background, 0.08) !important;
+  background-color: rgba($color-green-background, 0.15) !important;
+  border-left: 3px solid $color-green-background;
 }
 
 .chat:hover {
