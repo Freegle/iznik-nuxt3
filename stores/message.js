@@ -117,39 +117,57 @@ export const useMessageStore = defineStore({
         id = parseInt(id)
 
         if ((force || !this.list[id]) && !this.fetching[id]) {
-          // This is a message we need to fetch and aren't currently fetching.
           left.push(id)
         }
       })
 
       if (left.length) {
         this.fetchingCount++
+
+        // Create a shared promise for the batch fetch. Individual fetch() calls
+        // will await this promise instead of making duplicate API requests.
+        const batchPromise = api(this.config).message.fetch(
+          left.join(','),
+          false
+        )
+
+        // Set the fetching flag for each ID to the shared batch promise.
+        left.forEach((id) => {
+          this.fetching[id] = batchPromise
+        })
+
         try {
-          const msgs = await api(this.config).message.fetch(
-            left.join(','),
-            false
-          )
+          const msgs = await batchPromise
 
           if (msgs && msgs.forEach) {
             msgs.forEach((msg) => {
               this.list[msg.id] = msg
+              if (this.list[msg.id]) {
+                this.list[msg.id].addedToCache = Math.round(Date.now() / 1000)
+              }
             })
-
-            this.fetchingCount--
           } else if (typeof msgs === 'object') {
             this.list[msgs.id] = msgs
-            this.fetchingCount--
+            if (this.list[msgs.id]) {
+              this.list[msgs.id].addedToCache = Math.round(Date.now() / 1000)
+            }
           } else {
             console.error('Failed to fetch', msgs)
           }
+
+          this.fetchingCount--
         } catch (e) {
           console.log('Failed to fetch messages', e)
           if (e instanceof APIError && e.response.status === 404) {
-            // This can validly happen if a message is deleted under our feet.
             console.log('Ignore 404 error')
           } else {
             throw e
           }
+        } finally {
+          // Clear the fetching flags for all IDs in this batch.
+          left.forEach((id) => {
+            this.fetching[id] = null
+          })
         }
       }
     },

@@ -13,79 +13,115 @@
         </b-badge>
       </div>
       <div
-        class="flex-grow-1 d-flex justify-content-around clickme"
-        @click="toggleProfileCard"
-      >
-        <h1 class="text-white truncate text-center header--size5 m-0">
-          {{ chat.name }}
-        </h1>
-      </div>
-      <div
-        v-if="otheruser && otheruser.info && !otheruser?.deleted"
+        id="other-user-group"
         ref="expandBtnRef"
-        class="expand-btn clickme"
-        :class="{ pulsating: isPulsating }"
+        class="other-user-group clickme"
         @click="toggleProfileCard"
       >
         <ProfileImage
+          v-if="otheruser && otheruser.info && !otheruser?.deleted"
           :image="chat.icon"
           :name="chat.name"
-          class="navbar-avatar"
+          class="other-user-avatar"
           is-thumbnail
           size="md"
         />
+        <h1 class="text-white truncate header--size5 m-0 other-user-name">
+          {{ chat.name }}
+        </h1>
       </div>
+      <b-dropdown
+        no-caret
+        variant="primary"
+        class="userOptions"
+      >
+        <template #button-content>
+          <ProfileImage
+            v-if="me?.profile?.path"
+            :image="me.profile.path"
+            :name="me?.displayname"
+            class="m-0 inline"
+            is-thumbnail
+            size="lg"
+          />
+          <v-icon v-else icon="user" size="2x" />
+        </template>
+        <b-dropdown-item
+          href="/settings"
+        >
+          <div class="d-flex align-items-center">
+            <v-icon icon="cog" class="menu-icon" />
+            <span class="menu-text">Settings</span>
+          </div>
+        </b-dropdown-item>
+        <b-dropdown-item @click="logout">
+          <div class="d-flex align-items-center clickme">
+            <v-icon icon="sign-out-alt" class="menu-icon" />
+            <span class="menu-text">Logout</span>
+          </div>
+        </b-dropdown-item>
+      </b-dropdown>
     </div>
 
-    <!-- Expandable profile card -->
-    <div
+    <!-- Profile popover -->
+    <b-popover
       v-if="cssReady"
-      class="profile-card"
-      :class="{ 'profile-card--expanded': profileCardExpanded }"
+      v-model="profileCardExpanded"
+      target="other-user-group"
+      placement="bottom"
+      custom-class="profile-popover"
+      manual
     >
       <div v-if="otheruser && otheruser.info" class="profile-card-content">
-        <div class="profile-card-avatar-section">
-          <div class="avatar-wrapper">
-            <ProfileImage
-              :image="chat.icon"
-              :name="chat.name"
-              class="profile-card-avatar clickme"
-              is-thumbnail
-              size="lg"
-              @click="showInfo"
-            />
-            <v-icon
-              v-if="otheruser.supporter"
-              icon="trophy"
-              class="supporter-icon"
-            />
-          </div>
-          <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
+        <!-- Hint tip for first-time visitors -->
+        <div v-if="showProfileHint" class="profile-hint-tip">
+          <span>Tap here to show profile info.</span>
+          <button class="profile-hint-btn" @click="dismissHint">Got it</button>
         </div>
-        <div class="profile-card-details">
-          <div class="profile-card-badges">
-            <UserRatings
-              :id="chat.otheruid"
-              :key="'otheruser-' + chat.otheruid"
-              size="sm"
-            />
+        <div class="profile-card-main">
+          <div class="profile-card-avatar-section">
+            <div class="avatar-wrapper">
+              <ProfileImage
+                :image="chat.icon"
+                :name="chat.name"
+                class="profile-card-avatar clickme"
+                is-thumbnail
+                size="lg"
+                @click="showInfo"
+              />
+              <v-icon
+                v-if="otheruser.supporter"
+                icon="trophy"
+                class="supporter-icon"
+              />
+            </div>
+            <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
           </div>
-          <div class="profile-card-stats">
-            <span v-if="otheruser.lastaccess" class="stat-chip">
-              <v-icon icon="clock" class="stat-icon" />
-              <span class="stat-label">Last seen</span>
-              {{ otheraccessFull }}
-            </span>
-            <span v-if="replytimeFull" class="stat-chip">
-              <v-icon icon="reply" class="stat-icon" />
-              <span class="stat-label">Replies in</span>
-              {{ replytimeFull }}
-            </span>
-            <span v-if="!otheruser?.deleted && milesaway" class="stat-chip">
-              <v-icon icon="map-marker-alt" class="stat-icon" />
-              <span class="stat-label">Distance</span>
-              {{ milesaway }} miles
-            </span>
+          <div class="profile-card-details">
+            <div class="profile-card-badges">
+              <UserRatings
+                :id="chat.otheruid"
+                :key="'otheruser-' + chat.otheruid"
+                size="sm"
+              />
+            </div>
+            <div class="profile-card-stats">
+              <span v-if="otheruser.lastaccess" class="stat-chip">
+                <v-icon icon="clock" class="stat-icon" />
+                <span class="stat-label">Last seen</span>
+                {{ otheraccessFull }}
+              </span>
+              <span v-if="replytimeFull" class="stat-chip">
+                <v-icon icon="reply" class="stat-icon" />
+                <span class="stat-label">Replies in</span>
+                {{ replytimeFull }}
+              </span>
+              <span v-if="!otheruser?.deleted && milesaway" class="stat-chip">
+                <v-icon icon="map-marker-alt" class="stat-icon" />
+                <span class="stat-label">Distance</span>
+                {{ milesaway }} miles
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -129,7 +165,7 @@
           <span>Report</span>
         </button>
       </div>
-    </div>
+    </b-popover>
 
     <!-- Modals -->
     <ChatBlockModal
@@ -175,10 +211,14 @@ import {
   navBarHidden,
 } from '~/composables/useNavbar'
 import { useChatStore } from '~/stores/chat'
+import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '~/composables/useChat'
 import { timeago } from '~/composables/useTimeFormat'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const me = computed(() => authStore.user)
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -196,7 +236,7 @@ const props = defineProps({
 const chatStore = useChatStore()
 const chat = chatStore.byChatId(props.id)
 
-const { online, backButtonCount, backButton } = useNavbar()
+const { online, backButtonCount, backButton, logout } = useNavbar()
 
 const { otheruser, milesaway, unseen } = await setupChat(props.id)
 
@@ -241,39 +281,36 @@ const replytimeFull = computed(() => {
 
 const showProfileModal = ref(false)
 const profileCardExpanded = ref(false)
-const isPulsating = ref(false)
+const showProfileHint = ref(false)
 const cssReady = ref(false)
-const chevronX = ref('calc(100% - 24px) -30px')
 const expandBtnRef = ref(null)
-let autoCollapseTimer = null
-let expandTimer = null
-let pulsateTimer = null
+
+const miscStore = useMiscStore()
+
+// Check if we should show the profile hint (not dismissed in last 7 days)
+const shouldShowHint = computed(() => {
+  const dismissed = miscStore.vals?.profileHintDismissed
+  if (!dismissed) return true
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  return dismissed < sevenDaysAgo
+})
 
 function showInfo() {
   showProfileModal.value = true
 }
 
-function triggerPulsate() {
-  isPulsating.value = true
-  if (pulsateTimer) {
-    clearTimeout(pulsateTimer)
+function toggleProfileCard() {
+  profileCardExpanded.value = !profileCardExpanded.value
+  // Hide hint when user interacts with profile card
+  if (showProfileHint.value) {
+    showProfileHint.value = false
   }
-  pulsateTimer = setTimeout(() => {
-    isPulsating.value = false
-  }, 600)
 }
 
-function toggleProfileCard() {
-  triggerPulsate()
-  profileCardExpanded.value = !profileCardExpanded.value
-  if (autoCollapseTimer) {
-    clearTimeout(autoCollapseTimer)
-    autoCollapseTimer = null
-  }
-  if (expandTimer) {
-    clearTimeout(expandTimer)
-    expandTimer = null
-  }
+function dismissHint() {
+  showProfileHint.value = false
+  profileCardExpanded.value = false
+  miscStore.set({ key: 'profileHintDismissed', value: Date.now() })
 }
 
 // Action methods
@@ -324,29 +361,15 @@ onMounted(() => {
   // Use double requestAnimationFrame to ensure CSS is fully applied before showing
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      // Calculate the actual chevron position relative to profile card
-      if (expandBtnRef.value) {
-        const rect = expandBtnRef.value.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        // Y position: chevron center is above the profile card (which starts at top: 60px)
-        // So we need a negative Y to point back up to the chevron
-        const centerY = rect.top + rect.height / 2 - 60 // 60px is the profile card's top
-        chevronX.value = `${centerX}px ${centerY}px`
-      }
-
       cssReady.value = true
 
-      // Delay the profile card animation to let the page settle first
-      expandTimer = setTimeout(() => {
-        triggerPulsate()
-        profileCardExpanded.value = true
-
-        // Auto-collapse after 3 seconds of being expanded
-        autoCollapseTimer = setTimeout(() => {
-          triggerPulsate()
-          profileCardExpanded.value = false
-        }, 3000)
-      }, 800)
+      // Show the profile hint if not dismissed recently
+      if (shouldShowHint.value) {
+        setTimeout(() => {
+          showProfileHint.value = true
+          profileCardExpanded.value = true
+        }, 500)
+      }
     })
   })
 })
@@ -354,15 +377,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearNavBarTimeout()
   window.removeEventListener('scroll', handleScroll)
-  if (autoCollapseTimer) {
-    clearTimeout(autoCollapseTimer)
-  }
-  if (expandTimer) {
-    clearTimeout(expandTimer)
-  }
-  if (pulsateTimer) {
-    clearTimeout(pulsateTimer)
-  }
 })
 </script>
 <style scoped lang="scss">
@@ -421,78 +435,139 @@ onBeforeUnmount(() => {
   transition: transform 0.3s ease;
 }
 
-.expand-btn.pulsating .navbar-avatar {
-  animation: pulse-chevron 0.6s ease-in-out;
+.other-user-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 8px;
+  max-width: calc(100% - 120px);
 }
 
-@keyframes pulse-chevron {
-  0% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.4);
-  }
-  50% {
-    transform: scale(1);
-  }
-  75% {
-    transform: scale(1.3);
-  }
-  100% {
-    transform: scale(1);
-  }
+.other-user-avatar {
+  flex-shrink: 0;
+  margin-right: 8px;
 }
 
-/* Expandable profile card */
-.profile-card {
-  position: fixed;
-  top: 66px;
-  right: 0;
-  left: 0;
-  background: white;
+.other-user-name {
   overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transform: scale(0);
-  /* Dynamic transform-origin set via v-bind (includes both X and Y) */
-  transform-origin: v-bind(chevronX);
-  transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
-    transform 0.5s ease-out, padding 0.5s ease-out, visibility 0s linear 0.5s;
-  z-index: 1039;
-  padding: 0;
-  box-shadow: none;
-  border-bottom: none;
-  visibility: hidden;
-  will-change: transform, opacity;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  /* Restrict width on md+ breakpoints */
-  @include media-breakpoint-up(md) {
-    left: auto;
-    right: 12px;
-    max-width: 400px;
-    border-radius: 0 0 8px 8px;
+/* Hint tip at top of profile card */
+.profile-hint-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: #f0f4f8;
+  border: 1px solid #d0d8e0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.profile-hint-btn {
+  background: $color-green-background;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: darken($color-green-background, 5%);
+  }
+}
+
+:deep(.userOptions .dropdown-toggle) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-right: 0.5rem;
+
+  &::after {
+    display: none;
+  }
+}
+
+:deep(.userOptions .dropdown-menu) {
+  background: white !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: 0;
+  min-width: 160px;
+  margin-top: 0.25rem;
+
+  .dropdown-item {
+    background: white !important;
+    color: #333 !important;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #eee;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover,
+    &:focus {
+      background: #f8f8f8 !important;
+    }
+  }
+}
+
+.menu-icon {
+  color: $color-green-background !important;
+  width: 1.1rem !important;
+  height: 1.1rem !important;
+  margin-right: 0.5rem;
+}
+
+.menu-text {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+
+/* Profile popover styling */
+:deep(.profile-popover) {
+  max-width: calc(100vw - 24px);
+  width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .popover-body {
+    padding: 12px;
   }
 
-  &--expanded {
-    max-height: 220px;
-    opacity: 1;
-    transform: scale(1);
-    padding: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-bottom: 1px solid $color-gray--light;
-    visibility: visible;
-    transition: max-height 0.5s ease-out, opacity 0.5s ease-out,
-      transform 0.5s ease-out, padding 0.5s ease-out, visibility 0s linear 0s;
+  .popover-arrow::before,
+  .popover-arrow::after {
+    border-bottom-color: white;
   }
 }
 
 .profile-card-content {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
   padding-bottom: 12px;
   border-bottom: 1px solid $color-gray--lighter;
   margin-bottom: 10px;
+}
+
+.profile-card-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .profile-card-avatar-section {

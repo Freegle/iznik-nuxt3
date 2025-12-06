@@ -35,6 +35,7 @@
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
                   :jobs="true"
+                  :hide-jobs-header="true"
                   @rendered="adRendered"
                   @failed="adFailed"
                 />
@@ -47,6 +48,7 @@
                   min-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
                   :jobs="true"
+                  :hide-jobs-header="true"
                   @rendered="adRendered"
                 />
               </VisibleWhen>

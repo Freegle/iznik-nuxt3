@@ -1,15 +1,13 @@
 <template>
   <NoticeMessage v-if="showIt" variant="info">
-    <div class="d-flex justify-content-between">
-      <div class="d-flex flex-column justify-content-around">
-        <div>
-          <v-icon icon="info-circle" /> We've updated our
-          <nuxt-link to="/privacy">Privacy Policy</nuxt-link>.
-        </div>
-      </div>
-      <div>
-        <b-button variant="secondary" @click="seenIt">Hide this</b-button>
-      </div>
+    <div class="d-flex justify-content-between align-items-center">
+      <span>
+        We've updated our
+        <nuxt-link to="/privacy">Privacy Policy</nuxt-link>.
+      </span>
+      <b-button variant="secondary" size="sm" @click="seenIt">
+        Hide this
+      </b-button>
     </div>
   </NoticeMessage>
 </template>

@@ -164,8 +164,6 @@
         />
       </nav>
     </div>
-    <!-- Placeholder for chat pages - prevents flicker before ChatMobileNavbar teleports in -->
-    <div v-else class="chat-navbar-placeholder ourBack fixed-top" />
   </div>
 </template>
 <script setup>
@@ -293,11 +291,15 @@ const navBarBottomHidden = computed(() => {
   )
 })
 
-// Detect when on a specific chat page (e.g., /chats/123) - the ChatMobileNavbar
-// will be teleported in to replace this navbar, so hide our content to prevent flicker
+// Detect when on a specific chat page (e.g., /chats/123) at mobile breakpoints.
+// The ChatMobileNavbar will be teleported in to replace this navbar at xs/sm only,
+// so only show the placeholder at those breakpoints.
 const isSpecificChatPage = computed(() => {
   const match = route.path.match(/^\/chats\/(\d+)/)
-  return match !== null
+  if (!match) return false
+  // Only show placeholder at xs/sm breakpoints where ChatMobileNavbar is teleported
+  const bp = useMiscStore().breakpoint
+  return bp === 'xs' || bp === 'sm'
 })
 
 const loggedIn = computed(() => useAuthStore().user !== null)
@@ -510,14 +512,4 @@ const me = computed(() => useAuthStore().user)
   transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 }
 
-// Placeholder for chat pages to prevent flicker
-.chat-navbar-placeholder {
-  height: $navbar-mobile-chat-height;
-  background: linear-gradient(
-    135deg,
-    $color-green-background 0%,
-    darken($color-green-background, 5%) 100%
-  );
-  z-index: 1030;
-}
 </style>

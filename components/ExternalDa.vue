@@ -24,6 +24,7 @@
           :max-width="maxWidth"
           :min-height="minHeight"
           :max-height="maxHeight"
+          :hide-header="hideJobsHeader"
           :class="{
             'text-center': maxWidth === '100vw',
           }"
@@ -53,6 +54,7 @@
               :max-width="maxWidth"
               :min-height="minHeight"
               :max-height="maxHeight"
+              :hide-header="hideJobsHeader"
               :class="{
                 'text-center': maxWidth === '100vw',
               }"
@@ -152,6 +154,10 @@ const props = defineProps({
     default: true,
   },
   video: {
+    type: Boolean,
+    default: false,
+  },
+  hideJobsHeader: {
     type: Boolean,
     default: false,
   },

@@ -105,7 +105,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
 
@@ -157,21 +157,15 @@ function loadMore($state) {
   if (toShow.value < props.items.length) {
     // Emit event so parent can fetch more data if needed
     emit('loadMore', toShow.value)
-    toShow.value++
+    // Load a batch of items at once to avoid tight loops when user jumps to bottom
+    const batch = 10
+    toShow.value = Math.min(toShow.value + batch, props.items.length)
     $state.loaded()
   } else {
     $state.complete()
   }
 }
 
-/* Reset when items change */
-watch(
-  () => props.items?.length,
-  () => {
-    toShow.value = props.initialCount
-    infiniteId.value = +new Date()
-  }
-)
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';

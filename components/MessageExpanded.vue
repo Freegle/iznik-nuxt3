@@ -9,13 +9,15 @@
       class="message-expanded-mobile"
       :class="{ stickyAdRendered }"
     >
-      <!-- Hide the default navbar by teleporting an empty replacement -->
-      <Teleport to="#navbar-mobile">
+      <!-- Hide the default navbar by teleporting an empty replacement (only when target exists) -->
+      <Teleport v-if="navbarMobileExists" to="#navbar-mobile">
         <div class="hidden-navbar" />
       </Teleport>
 
-      <!-- Photo Area with Ken Burns animation -->
-      <div class="photo-area" @click="showPhotosModal">
+      <!-- Two-column layout wrapper for short wide screens -->
+      <div class="two-column-wrapper">
+        <!-- Photo Area with Ken Burns animation -->
+        <div class="photo-area" @click="showPhotosModal">
         <!-- Back button on photo -->
         <button class="back-button" @click.stop="goBack">
           <v-icon icon="arrow-left" />
@@ -88,7 +90,7 @@
         <div
           v-if="gotAttachments"
           class="photo-container"
-          :class="{ 'ken-burns': !prefersReducedMotion }"
+          :class="{ 'ken-burns': showKenBurns }"
         >
           <OurUploadedImage
             v-if="currentAttachment?.ouruid"
@@ -231,88 +233,155 @@
         </div>
       </div>
 
-      <!-- Info Section -->
-      <div class="info-section">
-        <!-- Description -->
-        <div class="description-section">
-          <div class="section-header">
-            <span class="section-header-text">DESCRIPTION</span>
+        <!-- Right column: Info + Reply (for two-column layout) -->
+        <div class="right-column">
+          <!-- Info Section -->
+          <div class="info-section">
+            <!-- Description -->
+            <div class="description-section">
+              <div class="section-header">
+                <span class="section-header-text">DESCRIPTION</span>
+                <NuxtLink
+                  :to="'/message/' + id"
+                  class="section-id-link"
+                  @click.stop
+                >
+                  #{{ id }}
+                </NuxtLink>
+              </div>
+              <div class="description-content">
+                <MessageTextBody :id="id" />
+              </div>
+            </div>
+
+            <!-- Posted by divider and section (shown on taller screens, after description) -->
+            <div v-if="poster" class="section-header section-header--poster">
+              <span class="section-header-text">POSTED BY</span>
+              <NuxtLink :to="posterProfileUrl" class="section-id-link" @click.stop>
+                #{{ poster.id }}
+              </NuxtLink>
+            </div>
             <NuxtLink
-              :to="'/message/' + id"
-              class="section-id-link"
+              v-if="poster"
+              :to="posterProfileUrl"
+              class="poster-section-wrapper"
               @click.stop
             >
-              #{{ id }}
+              <div class="poster-avatar-wrapper">
+                <ProfileImage
+                  :image="poster.profile?.paththumb"
+                  :externaluid="poster.profile?.externaluid"
+                  :ouruid="poster.profile?.ouruid"
+                  :externalmods="poster.profile?.externalmods"
+                  :name="poster.displayname"
+                  class="poster-avatar"
+                  is-thumbnail
+                  size="lg"
+                />
+                <div v-if="poster.supporter" class="supporter-badge">
+                  <v-icon icon="trophy" />
+                </div>
+              </div>
+              <div class="poster-details">
+                <span class="poster-name">{{ poster.displayname }}</span>
+                <div class="poster-stats">
+                  <span v-if="poster.info?.offers" class="poster-stat">
+                    <v-icon icon="gift" />{{ poster.info.offers
+                    }}<span class="poster-stat-label">OFFERs</span>
+                  </span>
+                  <span v-if="poster.info?.wanteds" class="poster-stat">
+                    <v-icon icon="search" />{{ poster.info.wanteds
+                    }}<span class="poster-stat-label">WANTEDs</span>
+                  </span>
+                  <span v-if="poster.info?.replies" class="poster-stat">
+                    <v-icon icon="envelope" />{{ poster.info.replies
+                    }}<span class="poster-stat-label">replies</span>
+                  </span>
+                </div>
+                <div v-if="posterAboutMe" class="poster-aboutme">
+                  {{ posterAboutMe }}
+                </div>
+              </div>
+              <UserRatings
+                v-if="poster.id"
+                :id="poster.id"
+                size="md"
+                :disabled="fromme"
+                class="poster-ratings"
+                @click.stop.prevent
+              />
+              <v-icon icon="chevron-right" class="poster-chevron" />
             </NuxtLink>
           </div>
-          <div class="description-content">
-            <MessageTextBody :id="id" />
-          </div>
-        </div>
 
-        <!-- Posted by divider and section (shown on taller screens, after description) -->
-        <div v-if="poster" class="section-header section-header--poster">
-          <span class="section-header-text">POSTED BY</span>
-          <NuxtLink :to="posterProfileUrl" class="section-id-link" @click.stop>
-            #{{ poster.id }}
-          </NuxtLink>
+          <!-- Inline reply section for two-column layout -->
+          <div v-if="isTwoColumnLayout" class="inline-reply-section">
+            <div v-if="!replyExpanded">
+              <!-- Promised notice -->
+              <div
+                v-if="message.promised && !message.successful && replyable && !fromme"
+                class="promised-notice mb-2"
+              >
+                <v-icon icon="handshake" />
+                {{ message.promisedtome ? 'Promised to you' : 'Already promised' }}
+              </div>
+              <div
+                v-if="replyable && !replied && !message.successful"
+                class="footer-buttons"
+              >
+                <b-button
+                  variant="secondary"
+                  size="lg"
+                  class="cancel-button"
+                  @click="goBack"
+                >
+                  Cancel
+                </b-button>
+                <b-button
+                  v-if="!fromme"
+                  variant="primary"
+                  size="lg"
+                  class="reply-button"
+                  @click="expandReply"
+                >
+                  Reply
+                </b-button>
+              </div>
+              <b-alert
+                v-else-if="replied"
+                variant="info"
+                :model-value="true"
+                class="mb-0"
+              >
+                Message sent! Check your <nuxt-link to="/chats">Chats</nuxt-link>.
+              </b-alert>
+            </div>
+
+            <!-- Expanded reply section -->
+            <div v-else class="reply-expanded-section">
+              <NoticeMessage
+                v-if="message.promised && !message.promisedtome"
+                variant="warning"
+                class="mb-2"
+              >
+                Already promised - you might not get it.
+              </NoticeMessage>
+              <client-only>
+                <MessageReplySection
+                  :id="id"
+                  @close="replyExpanded = false"
+                  @sent="sent"
+                />
+              </client-only>
+            </div>
+          </div>
         </div>
-        <NuxtLink
-          v-if="poster"
-          :to="posterProfileUrl"
-          class="poster-section-wrapper"
-          @click.stop
-        >
-          <div class="poster-avatar-wrapper">
-            <ProfileImage
-              :image="poster.profile?.paththumb"
-              :externaluid="poster.profile?.externaluid"
-              :ouruid="poster.profile?.ouruid"
-              :externalmods="poster.profile?.externalmods"
-              :name="poster.displayname"
-              class="poster-avatar"
-              is-thumbnail
-              size="lg"
-            />
-            <div v-if="poster.supporter" class="supporter-badge">
-              <v-icon icon="trophy" />
-            </div>
-          </div>
-          <div class="poster-details">
-            <span class="poster-name">{{ poster.displayname }}</span>
-            <div class="poster-stats">
-              <span v-if="poster.info?.offers" class="poster-stat">
-                <v-icon icon="gift" />{{ poster.info.offers
-                }}<span class="poster-stat-label">OFFERs</span>
-              </span>
-              <span v-if="poster.info?.wanteds" class="poster-stat">
-                <v-icon icon="search" />{{ poster.info.wanteds
-                }}<span class="poster-stat-label">WANTEDs</span>
-              </span>
-              <span v-if="poster.info?.replies" class="poster-stat">
-                <v-icon icon="envelope" />{{ poster.info.replies
-                }}<span class="poster-stat-label">replies</span>
-              </span>
-            </div>
-            <div v-if="posterAboutMe" class="poster-aboutme">
-              {{ posterAboutMe }}
-            </div>
-          </div>
-          <UserRatings
-            v-if="poster.id"
-            :id="poster.id"
-            size="md"
-            :disabled="fromme"
-            class="poster-ratings"
-            @click.stop.prevent
-          />
-          <v-icon icon="chevron-right" class="poster-chevron" />
-        </NuxtLink>
       </div>
     </div>
 
-    <!-- Fixed footer with Reply button - outside scrollable container for Safari compatibility -->
+    <!-- Fixed footer with Reply button - for single column layout only -->
     <div
+      v-if="!isTwoColumnLayout"
       class="app-footer"
       :class="{ expanded: replyExpanded, stickyAdRendered }"
     >
@@ -521,6 +590,29 @@ const prefersReducedMotion = computed(() => {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 })
 
+// Defer ken-burns animation to after mount to avoid SSR hydration mismatch
+const isMounted = ref(false)
+const showKenBurns = computed(() => {
+  return isMounted.value && !prefersReducedMotion.value
+})
+
+// Check if navbar-mobile teleport target exists (only after mount to avoid hydration mismatch)
+const navbarMobileExists = computed(() => {
+  if (!isMounted.value) return false
+  return !!document.getElementById('navbar-mobile')
+})
+
+// Detect two-column layout (width >= lg breakpoint AND height <= 800px)
+// Only evaluate after mount to avoid SSR hydration mismatch
+const windowHeight = ref(0)
+const isTwoColumnLayout = computed(() => {
+  if (!isMounted.value) return false
+  // Use miscStore breakpoint for width (lg = 992px+)
+  const isWideEnough = ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
+  const isShortEnough = windowHeight.value <= 800
+  return isWideEnough && isShortEnough
+})
+
 const posterAboutMe = computed(() => {
   const text = poster.value?.aboutme?.text
   if (!text) return null
@@ -660,13 +752,25 @@ function sent() {
 // Handle browser back button/swipe when used as modal
 useModalHistory(`message-${props.id}`, () => emit('close'), props.isModal)
 
+function updateWindowHeight() {
+  windowHeight.value = window.innerHeight
+}
+
 onMounted(() => {
+  // Enable ken-burns animation now that hydration is complete
+  isMounted.value = true
+
+  // Track window height for two-column layout detection (width via miscStore.breakpoint)
+  updateWindowHeight()
+  window.addEventListener('resize', updateWindowHeight)
+
   // Start auto-scroll hint for thumbnail carousel
   startThumbnailAutoScroll()
 })
 
 onUnmounted(() => {
   stopThumbnailAutoScroll()
+  window.removeEventListener('resize', updateWindowHeight)
 })
 </script>
 
@@ -676,6 +780,7 @@ onUnmounted(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/_color-vars.scss';
+@import 'assets/css/navbar.scss';
 
 .message-expanded-wrapper {
   position: fixed;
@@ -723,6 +828,11 @@ onUnmounted(() => {
     }
   }
 
+  /* Two-column layout for short wide screens */
+  @media (min-width: 992px) and (max-height: 800px) {
+    bottom: 0;
+  }
+
   /* When inside a b-modal, disable fixed positioning */
   .in-modal & {
     position: relative;
@@ -739,6 +849,44 @@ onUnmounted(() => {
   }
 }
 
+/* Two-column layout wrapper */
+.two-column-wrapper {
+  display: contents;
+
+  /* On short wide screens, use CSS Grid for side-by-side layout */
+  @media (min-width: 992px) and (max-height: 800px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Right column for two-column layout */
+.right-column {
+  display: contents;
+
+  @media (min-width: 992px) and (max-height: 800px) {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-width: 0;
+    overflow-y: auto;
+    background: $color-white;
+  }
+}
+
+/* Inline reply section - hidden by default, shown in two-column layout */
+.inline-reply-section {
+  display: none;
+
+  @media (min-width: 992px) and (max-height: 800px) {
+    display: block;
+    padding: 1rem;
+    border-top: 1px solid $color-gray-3;
+    background: $color-white;
+  }
+}
+
 // Photo Area - fixed height, scrollable with content
 .photo-area {
   position: relative;
@@ -749,6 +897,11 @@ onUnmounted(() => {
   overflow: hidden;
   background: $color-gray--lighter;
   cursor: pointer;
+
+  /* Two-column layout: photo fills left grid cell */
+  @media (min-width: 992px) and (max-height: 800px) {
+    height: 100%;
+  }
 }
 
 // Photo container - positioned to fill photo-area
@@ -1023,6 +1176,11 @@ onUnmounted(() => {
 .info-section {
   flex: 0 0 auto;
   padding: 1rem;
+
+  /* Two-column layout: add top padding to clear navbar */
+  @media (min-width: 992px) and (max-height: 800px) {
+    padding-top: $navbar-height;
+  }
 }
 
 // Poster overlay on photo (shown on shorter screens)
@@ -1336,6 +1494,11 @@ onUnmounted(() => {
     }
   }
 
+  /* Hide fixed footer in two-column layout (reply is inline) */
+  @media (min-width: 992px) and (max-height: 800px) {
+    display: none;
+  }
+
   /* When inside a b-modal, disable fixed positioning */
   .in-modal & {
     position: relative;
@@ -1354,6 +1517,8 @@ onUnmounted(() => {
   display: flex;
   gap: 0.75rem;
   width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 
   .cancel-button,
   .reply-button {
@@ -1460,7 +1625,11 @@ onUnmounted(() => {
 
 <!-- Unscoped styles for Ken Burns - scoped :deep() doesn't penetrate NuxtPicture -->
 <style lang="scss">
-// Ken Burns effect - slow pan and zoom
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+/* Ken Burns effect - slow pan and zoom, mobile/tablet only */
 @keyframes kenburns {
   0% {
     transform: scale(1.15) translate(0%, 3%);
@@ -1483,6 +1652,12 @@ onUnmounted(() => {
   animation: kenburns 20s ease-in-out infinite;
   will-change: transform;
   transform-origin: center center;
+
+  /* Disable on desktop (lg and up) */
+  @include media-breakpoint-up(lg) {
+    animation: none;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

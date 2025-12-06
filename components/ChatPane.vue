@@ -24,7 +24,55 @@
         navBarHidden,
       }"
     >
-      <!-- Old ChatHeader removed - now using ChatMobileNavbar at all breakpoints -->
+      <!-- Profile header for desktop (md+) - mobile uses ChatMobileNavbar -->
+      <VisibleWhen :at="['md', 'lg', 'xl', 'xxl']">
+        <div
+          v-if="chat && otheruser && otheruser.info && !otheruser?.deleted"
+          class="desktop-profile-header"
+        >
+          <div class="profile-header-main">
+            <ProfileImage
+              :image="chat.icon"
+              :name="chat.name"
+              class="profile-header-avatar clickme"
+              is-thumbnail
+              size="lg"
+              @click="showInfo"
+            />
+            <div class="profile-header-info">
+              <div class="profile-header-name">
+                <span class="clickme" @click="showInfo">{{ chat.name }}</span>
+                <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
+              </div>
+              <div class="profile-header-stats">
+                <UserRatings
+                  :id="chat.otheruid"
+                  :key="'otheruser-' + chat.otheruid"
+                  size="sm"
+                />
+                <span v-if="otheruser.lastaccess" class="stat-chip">
+                  <v-icon icon="clock" class="stat-icon" />
+                  {{ otheraccessFull }}
+                </span>
+                <span v-if="replytimeFull" class="stat-chip">
+                  <v-icon icon="reply" class="stat-icon" />
+                  {{ replytimeFull }}
+                </span>
+                <span v-if="milesaway" class="stat-chip">
+                  <v-icon icon="map-marker-alt" class="stat-icon" />
+                  {{ milesaway }} miles
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </VisibleWhen>
+      <ProfileModal
+        v-if="showProfileModal"
+        :id="otheruser?.id"
+        close-on-message
+        @hidden="showProfileModal = false"
+      />
       <div
         v-if="chat && chatmessages?.length"
         ref="chatContent"
@@ -76,15 +124,24 @@
 <script setup>
 import ChatFooter from './ChatFooter'
 import ChatTypingIndicator from './ChatTypingIndicator'
+import VisibleWhen from './VisibleWhen'
+import ProfileImage from './ProfileImage'
+import UserRatings from './UserRatings'
+import SupporterInfo from './SupporterInfo'
 import { navBarHidden } from '~/composables/useNavbar'
 import { useUserStore } from '~/stores/user'
 import { useChatStore } from '~/stores/chat'
 import { useMiscStore } from '~/stores/misc'
 import { setupChat } from '~/composables/useChat'
+import { timeago } from '~/composables/useTimeFormat'
 
 // Don't use dynamic imports because it stops us being able to scroll to the bottom after render.
 import ChatMessage from '~/components/ChatMessage.vue'
 import { useAuthStore } from '~/stores/auth'
+
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
+)
 
 const chatStore = useChatStore()
 const userStore = useUserStore()
@@ -107,7 +164,46 @@ const ChatNotVisible = defineAsyncComponent(() =>
   import('~/components/ChatNotVisible.vue')
 )
 
-const { chat } = await setupChat(props.id)
+const { chat, otheruser, milesaway } = await setupChat(props.id)
+
+const otheraccessFull = computed(() => {
+  if (!otheruser.value?.lastaccess) return null
+  const full = timeago(otheruser.value.lastaccess)
+  return full.replace(/ ago$/, '')
+})
+
+const replytimeFull = computed(() => {
+  let ret = null
+  let secs = null
+
+  if (otheruser?.value?.info) {
+    secs = otheruser.value.info.replytime
+  }
+
+  if (secs) {
+    if (secs < 60) {
+      const val = Math.round(secs)
+      ret = val + (val === 1 ? ' second' : ' seconds')
+    } else if (secs < 60 * 60) {
+      const val = Math.round(secs / 60)
+      ret = val + (val === 1 ? ' minute' : ' minutes')
+    } else if (secs < 24 * 60 * 60) {
+      const val = Math.round(secs / 60 / 60)
+      ret = val + (val === 1 ? ' hour' : ' hours')
+    } else {
+      const val = Math.round(secs / 60 / 60 / 24)
+      ret = val + (val === 1 ? ' day' : ' days')
+    }
+  }
+
+  return ret
+})
+
+const showProfileModal = ref(false)
+
+function showInfo() {
+  showProfileModal.value = true
+}
 
 if (props.id) {
   if (!chatStore.byChatId(props.id)) {
@@ -400,5 +496,67 @@ function typing() {
   font-size: 0.85rem;
   color: $color-gray--dark;
   margin: 0;
+}
+
+/* Desktop profile header */
+.desktop-profile-header {
+  order: 2;
+  background: white;
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.profile-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-header-avatar {
+  flex-shrink: 0;
+}
+
+.profile-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-header-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.profile-header-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: $color-gray--lighter;
+  font-size: 0.75rem;
+  color: $color-gray--darker;
+  font-weight: 500;
+}
+
+.stat-icon {
+  font-size: 0.7rem;
+  color: $color-green--dark;
+}
+
+.supporter-badge {
+  font-size: 0.8rem;
 }
 </style>

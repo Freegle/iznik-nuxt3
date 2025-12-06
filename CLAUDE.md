@@ -128,3 +128,10 @@ The MCP launches Chrome in WSL and displays via X server (MobaXterm or WSLg).
 **Dynamic resizing:** Use `resize_page` MCP tool to change viewport without restarting.
 
 **Note:** Connecting to Windows Chrome via `--browserUrl` doesn't work reliably due to WSL/Windows network issues. Use WSL Chrome instead.
+
+### Lightweight Dev Setup
+When using the lightweight dev setup (freegle-dev-live container):
+- The site is accessible at `http://localhost:3004/` (not via `.localhost` domains - Traefik is not running)
+- To launch Chrome for testing: `DISPLAY=:0 google-chrome --user-data-dir=/tmp/chrome-debug --remote-debugging-port=9222 "http://localhost:3004/chats/28" &`
+- Copy changed files to container: `docker cp /home/edward/FreegleDocker/iznik-nuxt3/components/MyComponent.vue freegle-dev-live:/app/components/`
+- The container uses live production APIs but runs the dev server locally with hot reloading
