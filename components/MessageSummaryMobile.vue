@@ -99,9 +99,14 @@
 
     <!-- Content section for tablet/desktop - shows below photo -->
     <div class="content-section">
-      <div class="content-title">
+      <div class="content-header">
         <MessageTag :id="id" :inline="true" class="content-tag" />
-        <span class="content-subject">{{ strippedSubject }}</span>
+        <div class="content-title-location">
+          <span class="content-subject">{{ subjectItemName }}</span>
+          <span v-if="subjectLocation" class="content-location">
+            {{ subjectLocation }}
+          </span>
+        </div>
       </div>
       <div class="content-description">
         {{ descriptionText || 'Click to see more details.' }}
@@ -149,6 +154,8 @@ const idRef = toRef(props, 'id')
 const {
   message,
   strippedSubject,
+  subjectItemName,
+  subjectLocation,
   gotAttachments,
   attachmentCount,
   timeAgo,
@@ -394,41 +401,59 @@ function expand(e) {
   }
 }
 
-.content-title {
-  display: flex;
-  align-items: center;
+.content-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 0.5rem;
   margin-bottom: 0.35rem;
-  min-width: 0;
+  align-items: center;
 }
 
 .content-tag {
-  flex-shrink: 0;
-  display: inline-flex !important;
+  align-self: center;
+  white-space: nowrap;
 }
 
 :deep(.content-tag) {
   position: static !important;
   display: inline-flex !important;
+  white-space: nowrap !important;
 }
 
+:deep(.content-tag .tagbadge),
 :deep(.content-tag.tagbadge) {
   position: static !important;
   left: auto !important;
   top: auto !important;
   font-size: 0.8rem;
   padding: 0.35rem 0.7rem;
+  white-space: nowrap !important;
+  max-width: none !important;
+  text-wrap: nowrap !important;
+}
+
+.content-title-location {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .content-subject {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: $color-gray--darker;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
-  flex: 1;
+}
+
+.content-location {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $color-gray--darker;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .content-description {

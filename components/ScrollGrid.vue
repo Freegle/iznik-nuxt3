@@ -3,8 +3,8 @@
     <slot name="header" />
 
     <div v-if="items?.length" class="scroll-grid">
-      <!-- Mobile/tablet: 2-column grid -->
-      <VisibleWhen :at="['xs', 'sm', 'md']">
+      <!-- Mobile/tablet/laptop: 2-column grid (up to xl) -->
+      <VisibleWhen :at="['xs', 'sm', 'md', 'lg', 'xl']">
         <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
           <div v-if="ix % 2 === 0">
             <!-- Full-width slot before this row -->
@@ -31,8 +31,8 @@
         </div>
       </VisibleWhen>
 
-      <!-- Desktop: 3-column grid -->
-      <VisibleWhen :not="['xs', 'sm', 'md']">
+      <!-- Large desktop: 3-column grid (xl+) -->
+      <VisibleWhen :at="['xl', 'xxl']">
         <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
           <div v-if="ix % 3 === 0">
             <!-- Full-width slots before this row -->
@@ -165,7 +165,6 @@ function loadMore($state) {
     $state.complete()
   }
 }
-
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/_functions';
