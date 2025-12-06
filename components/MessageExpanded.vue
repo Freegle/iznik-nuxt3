@@ -9,8 +9,8 @@
       class="message-expanded-mobile"
       :class="{ stickyAdRendered }"
     >
-      <!-- Hide the default navbar by teleporting an empty replacement -->
-      <Teleport to="#navbar-mobile">
+      <!-- Hide the default navbar by teleporting an empty replacement (only when target exists) -->
+      <Teleport v-if="navbarMobileExists" to="#navbar-mobile">
         <div class="hidden-navbar" />
       </Teleport>
 
@@ -525,6 +525,12 @@ const prefersReducedMotion = computed(() => {
 const isMounted = ref(false)
 const showKenBurns = computed(() => {
   return isMounted.value && !prefersReducedMotion.value
+})
+
+// Check if navbar-mobile teleport target exists (only after mount to avoid hydration mismatch)
+const navbarMobileExists = computed(() => {
+  if (!isMounted.value) return false
+  return !!document.getElementById('navbar-mobile')
 })
 
 const posterAboutMe = computed(() => {
@@ -1363,6 +1369,8 @@ onUnmounted(() => {
   display: flex;
   gap: 0.75rem;
   width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 
   .cancel-button,
   .reply-button {
@@ -1469,7 +1477,11 @@ onUnmounted(() => {
 
 <!-- Unscoped styles for Ken Burns - scoped :deep() doesn't penetrate NuxtPicture -->
 <style lang="scss">
-// Ken Burns effect - slow pan and zoom
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+/* Ken Burns effect - slow pan and zoom, mobile/tablet only */
 @keyframes kenburns {
   0% {
     transform: scale(1.15) translate(0%, 3%);
@@ -1492,6 +1504,12 @@ onUnmounted(() => {
   animation: kenburns 20s ease-in-out infinite;
   will-change: transform;
   transform-origin: center center;
+
+  /* Disable on desktop (lg and up) */
+  @include media-breakpoint-up(lg) {
+    animation: none;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
