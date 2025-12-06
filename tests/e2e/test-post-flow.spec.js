@@ -39,14 +39,14 @@ test.describe('Post flow tests', () => {
     })
 
     // Wait for message cards and verify our specific item is visible
-    // Note: Browse page uses MessageSummary with .messagecard and .test-message-card classes
-    await page.waitForSelector('.messagecard, .test-message-card, .card-body', {
+    // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
+    await page.waitForSelector('.message-summary-mobile, .messagecard', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards.
     const itemLocator = page
-      .locator('.messagecard, .test-message-card, .card-body')
+      .locator('.message-summary-mobile, .messagecard')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
