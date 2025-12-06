@@ -28,6 +28,10 @@ const show = computed(() => {
     // Drop all optional components for SSR, otherwise we might start to render them on the client when we
     // don't need to.
     return false
+  } else if (!breakpoint.value) {
+    // Breakpoint not yet determined (BreakpointFettler hasn't mounted).
+    // Return false to avoid showing duplicate content during hydration.
+    return false
   } else if (props.at) {
     return props.at.includes(breakpoint.value)
   } else {
