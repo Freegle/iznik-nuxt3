@@ -1821,8 +1821,11 @@ const testWithFixtures = test.extend({
 
       // Create a completely fresh browser context to ensure clean state
       // This is more reliable than trying to clear storage/cookies
+      // Use explicit viewport to avoid two-column layout (triggered at width >= 992px AND height <= 800px)
       const browser = page.context().browser()
-      const freshContext = await browser.newContext()
+      const freshContext = await browser.newContext({
+        viewport: { width: 1280, height: 900 }
+      })
       const freshPage = await freshContext.newPage()
 
       // Add gotoAndVerify helper to the fresh page
@@ -1854,10 +1857,9 @@ const testWithFixtures = test.extend({
         })
       console.log('Message content loaded')
 
-      // Wait for a visible Reply button and click it to expand the reply section
-      // There are two Reply buttons (inline-reply-section and app-footer) - only one is visible
-      // depending on viewport size. Use :visible to get the one that's actually displayed.
-      const replyButton = freshPage.locator('.reply-button:has-text("Reply"):visible')
+      // Wait for the Reply button in the app-footer and click it to expand the reply section
+      // With viewport height 900px, we avoid the two-column layout so only app-footer button is visible
+      const replyButton = freshPage.locator('.app-footer .reply-button:has-text("Reply")')
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,

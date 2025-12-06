@@ -315,7 +315,7 @@
           </div>
 
           <!-- Inline reply section for two-column layout -->
-          <div class="inline-reply-section">
+          <div v-if="isTwoColumnLayout" class="inline-reply-section">
             <div v-if="!replyExpanded">
               <!-- Promised notice -->
               <div
@@ -381,6 +381,7 @@
 
     <!-- Fixed footer with Reply button - for single column layout only -->
     <div
+      v-if="!isTwoColumnLayout"
       class="app-footer"
       :class="{ expanded: replyExpanded, stickyAdRendered }"
     >
@@ -601,6 +602,17 @@ const navbarMobileExists = computed(() => {
   return !!document.getElementById('navbar-mobile')
 })
 
+// Detect two-column layout (width >= lg breakpoint AND height <= 800px)
+// Only evaluate after mount to avoid SSR hydration mismatch
+const windowHeight = ref(0)
+const isTwoColumnLayout = computed(() => {
+  if (!isMounted.value) return false
+  // Use miscStore breakpoint for width (lg = 992px+)
+  const isWideEnough = ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
+  const isShortEnough = windowHeight.value <= 800
+  return isWideEnough && isShortEnough
+})
+
 const posterAboutMe = computed(() => {
   const text = poster.value?.aboutme?.text
   if (!text) return null
@@ -740,9 +752,17 @@ function sent() {
 // Handle browser back button/swipe when used as modal
 useModalHistory(`message-${props.id}`, () => emit('close'), props.isModal)
 
+function updateWindowHeight() {
+  windowHeight.value = window.innerHeight
+}
+
 onMounted(() => {
   // Enable ken-burns animation now that hydration is complete
   isMounted.value = true
+
+  // Track window height for two-column layout detection (width via miscStore.breakpoint)
+  updateWindowHeight()
+  window.addEventListener('resize', updateWindowHeight)
 
   // Start auto-scroll hint for thumbnail carousel
   startThumbnailAutoScroll()
@@ -750,6 +770,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopThumbnailAutoScroll()
+  window.removeEventListener('resize', updateWindowHeight)
 })
 </script>
 
