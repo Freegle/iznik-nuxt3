@@ -383,20 +383,22 @@ function markSeen() {
 }
 
 async function handleLoadMore(currentIndex) {
-  // Prefetch upcoming messages when scrolling
-  if (currentIndex + 5 > prefetched.value) {
+  // Prefetch upcoming messages when scrolling.
+  // ScrollGrid loads 10 items at a time, so we need to fetch at least 10 ahead.
+  const batchSize = 15
+  if (currentIndex + batchSize > prefetched.value) {
     const ids = []
 
     for (
-      let i = Math.max(currentIndex + 1, prefetched.value);
-      i < reduceSuccessful.value.length && ids.length < 5;
+      let i = Math.max(currentIndex, prefetched.value);
+      i < reduceSuccessful.value.length && ids.length < batchSize;
       i++
     ) {
       if (wantMessage(reduceSuccessful.value[i])) {
         ids.push(reduceSuccessful.value[i].id)
       }
 
-      prefetched.value = i
+      prefetched.value = i + 1
     }
 
     if (ids.length) {
