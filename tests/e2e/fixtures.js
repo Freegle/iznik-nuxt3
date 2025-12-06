@@ -1819,43 +1819,72 @@ const testWithFixtures = test.extend({
         )
       }
 
-      // Navigate to the specific message page
-      const messageUrl = `/message/${messageId}`
-      await page.gotoAndVerify(messageUrl)
-      console.log(`Navigated to message page: ${messageUrl}`)
+      // Create a completely fresh browser context to ensure clean state
+      // This is more reliable than trying to clear storage/cookies
+      const browser = page.context().browser()
+      const freshContext = await browser.newContext()
+      const freshPage = await freshContext.newPage()
 
-      // Wait for any loading indicators to disappear before interacting
-      // This ensures Vue has fully hydrated the component
-      const loadingIndicator = page.locator('img[alt="Loading"], .loading-indicator')
-      try {
-        await loadingIndicator.waitFor({
-          state: 'hidden',
-          timeout: timeouts.ui.appearance,
+      // Add gotoAndVerify helper to the fresh page
+      freshPage.gotoAndVerify = async (path, options = {}) => {
+        const baseUrl =
+          process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
+        const fullUrl = path.startsWith('http') ? path : `${baseUrl}${path}`
+        await freshPage.goto(fullUrl, {
+          waitUntil: 'networkidle',
+          timeout: options.timeout || 60000,
         })
-        console.log('Loading indicator disappeared')
-      } catch (e) {
-        // Loading indicator may not exist, that's fine
-        console.log('No loading indicator found or already hidden')
+        return freshPage
       }
 
+      console.log('Created fresh browser context for reply flow')
+
+      // Navigate to the specific message page
+      const messageUrl = `/message/${messageId}`
+      await freshPage.gotoAndVerify(messageUrl)
+      console.log(`Navigated to message page: ${messageUrl}`)
+
+      // Wait for the message content to load (the .message-expanded-wrapper contains the loaded message)
+      await freshPage
+        .locator('.message-expanded-wrapper, .message-expanded-mobile')
+        .first()
+        .waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.appearance,
+        })
+      console.log('Message content loaded')
+
       // Wait for the Reply button to be visible and click it to expand the reply section
-      const replyButton = page.locator('.reply-button:has-text("Reply")')
+      const replyButton = freshPage.locator('.reply-button:has-text("Reply")')
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
       console.log('Reply button visible')
 
-      // Small delay to ensure Vue event handlers are attached
-      await page.waitForTimeout(500)
+      // Wait for network to be idle to ensure Vue has hydrated
+      await freshPage.waitForLoadState('networkidle', { timeout: 30000 })
+      console.log('Network idle, attempting click')
 
-      // Scroll into view and click - the button is in a fixed footer
-      await replyButton.scrollIntoViewIfNeeded()
+      // Click the Reply button
       await replyButton.click()
-      console.log('Clicked Reply button to expand reply section')
+      console.log('Clicked Reply button')
+
+      // If the section doesn't appear, try clicking again (sometimes first click doesn't register during hydration)
+      try {
+        await freshPage.locator('.reply-expanded-section').waitFor({
+          state: 'visible',
+          timeout: 5000,
+        })
+        console.log('Reply section expanded on first click')
+      } catch (e) {
+        console.log('First click did not expand, retrying...')
+        await replyButton.click({ force: true })
+        console.log('Clicked Reply button again with force')
+      }
 
       // Wait for the reply section to expand (indicated by .reply-expanded-section appearing)
-      await page.locator('.reply-expanded-section').waitFor({
+      await freshPage.locator('.reply-expanded-section').waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
@@ -1863,13 +1892,13 @@ const testWithFixtures = test.extend({
 
       // Wait for the reply textarea to be visible after expanding
       // The textarea is inside client-only and may take time to render
-      await page.locator('textarea[name="reply"]').waitFor({
+      await freshPage.locator('textarea[name="reply"]').waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
 
       // Fill in the email field (for non-logged-in users)
-      const emailInput = page
+      const emailInput = freshPage
         .locator('.test-email-reply-validator input[type="email"]')
         .filter({ visible: true })
       await emailInput.waitFor({
@@ -1880,7 +1909,7 @@ const testWithFixtures = test.extend({
       console.log(`Filled email: ${email}`)
 
       // Fill in the reply message
-      const replyTextarea = page
+      const replyTextarea = freshPage
         .locator('textarea[name="reply"]')
         .filter({ visible: true })
       await replyTextarea.waitFor({
@@ -1891,7 +1920,7 @@ const testWithFixtures = test.extend({
       console.log('Filled reply message')
 
       // Fill in collection details (for OFFER messages)
-      const collectTextarea = page
+      const collectTextarea = freshPage
         .locator('textarea[name="collect"]')
         .filter({ visible: true })
       await collectTextarea.waitFor({
@@ -1902,7 +1931,7 @@ const testWithFixtures = test.extend({
       console.log('Filled collection details')
 
       // Click the "Send your reply" button
-      const sendReplyButton = page
+      const sendReplyButton = freshPage
         .locator('.btn:has-text("Send your reply")')
         .filter({ visible: true })
       await sendReplyButton.waitFor({
@@ -1914,22 +1943,25 @@ const testWithFixtures = test.extend({
 
       // Wait for "Welcome to Freegle" modal containing "It looks like this is your first time"
       console.log('Waiting for Welcome to Freegle modal')
-      console.log('DEBUG: Current URL before waiting for modal:', page.url())
+      console.log(
+        'DEBUG: Current URL before waiting for modal:',
+        freshPage.url()
+      )
       console.log('DEBUG: Checking for any modals on page...')
 
       // Check what modals exist first
-      const allModals = await page.locator('.modal-content').count()
+      const allModals = await freshPage.locator('.modal-content').count()
       console.log(`DEBUG: Found ${allModals} modal-content elements`)
 
       if (allModals > 0) {
-        const modalTexts = await page
+        const modalTexts = await freshPage
           .locator('.modal-content')
           .allTextContents()
         console.log('DEBUG: Modal texts found:', modalTexts)
       }
 
       try {
-        const welcomeModal = page
+        const welcomeModal = freshPage
           .locator('.modal-content')
           .filter({
             hasText: 'Welcome to Freegle',
@@ -1964,7 +1996,7 @@ const testWithFixtures = test.extend({
         // Use Promise.all to handle the click and navigation simultaneously
         try {
           await Promise.all([
-            page.waitForURL('**/chats/**', {
+            freshPage.waitForURL('**/chats/**', {
               timeout: timeouts.navigation.default,
             }),
             closeButton.click(),
@@ -1975,7 +2007,7 @@ const testWithFixtures = test.extend({
         } catch (error) {
           console.log('Navigation after close button click:', error.message)
           // Check if we're on the chats page anyway
-          if (page.url().includes('/chats/')) {
+          if (freshPage.url().includes('/chats/')) {
             console.log('Navigation completed despite error - continuing')
           } else {
             throw error
@@ -1985,7 +2017,7 @@ const testWithFixtures = test.extend({
         // Handle ContactDetailsAskModal if it appears on the chats page
         try {
           console.log('Checking for ContactDetailsAskModal on chats page')
-          const contactModal = page.locator('.modal-content').filter({
+          const contactModal = freshPage.locator('.modal-content').filter({
             hasText: 'Contact details',
           })
 
@@ -2012,11 +2044,11 @@ const testWithFixtures = test.extend({
           // The modal auto-saves when postcode is selected, just need to close it
           // Look for the close button or wait for modal to close automatically
           try {
-            const closeButton = contactModal.locator(
+            const modalCloseButton = contactModal.locator(
               '.btn-close, .close, button[aria-label="Close"]'
             )
-            if ((await closeButton.count()) > 0) {
-              await closeButton.click()
+            if ((await modalCloseButton.count()) > 0) {
+              await modalCloseButton.click()
               console.log('Clicked close button in ContactDetailsAskModal')
             }
           } catch (e) {
@@ -2037,12 +2069,12 @@ const testWithFixtures = test.extend({
         }
 
         // Wait for the chat list to load and look for a chat entry
-        await page.waitForSelector('.chat-entry', {
+        await freshPage.waitForSelector('.chat-entry', {
           timeout: timeouts.ui.appearance,
         })
 
         // Check that there's one chat entry
-        const chatEntries = page
+        const chatEntries = freshPage
           .locator('.chat-entry')
           .filter({ visible: true })
         const chatCount = await chatEntries.count()
@@ -2051,12 +2083,14 @@ const testWithFixtures = test.extend({
           console.log(`Found ${chatCount} chat entries in /chats after reply`)
         } else {
           console.log('Warning: No chat entries found in /chats after reply')
+          await freshContext.close()
           return false
         }
 
         console.log(
           'Reply process completed successfully with signup and contact details filled'
         )
+        await freshContext.close()
         return true
       } catch (error) {
         console.log('DEBUG: Welcome modal error:', error.message)
@@ -2082,12 +2116,14 @@ const testWithFixtures = test.extend({
           console.log(
             'DEBUG: Expected modal for new user signup, but it was not found'
           )
+          await freshContext.close()
           return false // Modal should appear for new users
         } else {
           console.log(
             'Unexpected error during Welcome modal wait:',
             error.message
           )
+          await freshContext.close()
           return false
         }
       }
