@@ -1855,11 +1855,10 @@ const testWithFixtures = test.extend({
       console.log('Message content loaded')
 
       // Wait for the Reply button to be visible and click it to expand the reply section
-      // Use filter({ visible: true }) because two-column layout may have hidden reply buttons
-      const replyButton = freshPage
-        .locator('.reply-button:has-text("Reply")')
-        .filter({ visible: true })
-        .first()
+      // Exclude .app-footer which contains a hidden duplicate button
+      const replyButton = freshPage.locator(
+        '.reply-button:has-text("Reply"):not(.app-footer .reply-button)'
+      )
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
