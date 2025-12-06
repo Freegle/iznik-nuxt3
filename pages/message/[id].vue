@@ -96,41 +96,15 @@
           </client-only>
         </div>
         <div v-else class="botpad">
-          <client-only>
-            <template #fallback>
-              <OurMessage
-                :id="id"
-                class="mt-3"
-                :start-expanded="true"
-                hide-close
-                :record-view="false"
-                @not-found="error = true"
-              />
-            </template>
-            <GlobalMessage />
-            <VisibleWhen :at="['xs', 'sm', 'md']">
-              <OurMessage
-                :id="id"
-                class="mt-3"
-                :start-expanded="true"
-                hide-close
-                record-view
-                ad-unit-path="/22794232631/freegle_productemail"
-                ad-id="div-gpt-ad-1691925773522-0"
-                @not-found="error = true"
-              />
-            </VisibleWhen>
-            <VisibleWhen :not="['xs', 'sm', 'md']">
-              <OurMessage
-                :id="id"
-                class="mt-3"
-                :start-expanded="true"
-                hide-close
-                record-view
-                @not-found="error = true"
-              />
-            </VisibleWhen>
-          </client-only>
+          <GlobalMessage />
+          <OurMessage
+            :id="id"
+            class="mt-3"
+            :start-expanded="true"
+            hide-close
+            record-view
+            @not-found="error = true"
+          />
         </div>
       </b-col>
       <b-col cols="0" lg="3" class="d-none d-lg-flex justify-content-end">

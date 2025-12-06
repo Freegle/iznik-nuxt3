@@ -88,7 +88,7 @@
         <div
           v-if="gotAttachments"
           class="photo-container"
-          :class="{ 'ken-burns': !prefersReducedMotion }"
+          :class="{ 'ken-burns': showKenBurns }"
         >
           <OurUploadedImage
             v-if="currentAttachment?.ouruid"
@@ -521,6 +521,12 @@ const prefersReducedMotion = computed(() => {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 })
 
+// Defer ken-burns animation to after mount to avoid SSR hydration mismatch
+const isMounted = ref(false)
+const showKenBurns = computed(() => {
+  return isMounted.value && !prefersReducedMotion.value
+})
+
 const posterAboutMe = computed(() => {
   const text = poster.value?.aboutme?.text
   if (!text) return null
@@ -661,6 +667,9 @@ function sent() {
 useModalHistory(`message-${props.id}`, () => emit('close'), props.isModal)
 
 onMounted(() => {
+  // Enable ken-burns animation now that hydration is complete
+  isMounted.value = true
+
   // Start auto-scroll hint for thumbnail carousel
   startThumbnailAutoScroll()
 })
