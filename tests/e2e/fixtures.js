@@ -1855,7 +1855,10 @@ const testWithFixtures = test.extend({
       console.log('Message content loaded')
 
       // Wait for the Reply button to be visible and click it to expand the reply section
-      const replyButton = freshPage.locator('.reply-button:has-text("Reply")')
+      // Exclude .app-footer which contains a hidden duplicate button
+      const replyButton = freshPage.locator(
+        '.reply-button:has-text("Reply"):not(.app-footer .reply-button)'
+      )
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,

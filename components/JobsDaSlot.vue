@@ -14,7 +14,7 @@
       <donation-button />
     </NoticeMessage>
     <div v-else>
-      <div class="jobs-slot-header">
+      <div v-if="!hideHeader" class="jobs-slot-header">
         <v-icon icon="briefcase" class="jobs-slot-icon" />
         <span>Jobs near you</span>
         <nuxt-link to="/jobs" class="jobs-slot-more">
@@ -60,6 +60,10 @@ defineProps({
     type: String,
     required: false,
     default: null,
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false,
   },
 })
 
