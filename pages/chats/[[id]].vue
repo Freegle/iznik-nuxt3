@@ -4,14 +4,16 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-    <!-- ChatMobileNavbar is used at all breakpoints for consistent modern UI -->
-    <Teleport v-if="loggedIn && id" to="#navbar-mobile">
+    <!-- ChatMobileNavbar replaces the default navbar only at xs/sm (when chat list is hidden) -->
+    <Teleport v-if="loggedIn && id && showMobileNavbar" to="#navbar-mobile">
       <ChatMobileNavbar v-if="chat" :id="id" />
       <div v-else class="ourBack layout fixed-top pt-1 pb-1">
         <div class="backbutton nav-back-btn">
           <v-icon icon="arrow-left" class="back-icon" />
         </div>
-        <div class="name d-flex flex-column justify-content-around text-center">
+        <div
+          class="name d-flex flex-column justify-content-around text-center"
+        >
           <h1 class="text-white truncate text-center header--size5 m-0">
             Loading...
           </h1>
@@ -269,6 +271,14 @@ const miscStore = useMiscStore()
 const stickyAdRendered = computed(() => {
   return miscStore.stickyAdRendered
 })
+
+// Show mobile navbar only at xs/sm breakpoints (when chat list is hidden on mobile)
+const showMobileNavbar = computed(() => {
+  const bp = miscStore.breakpoint
+  return bp === 'xs' || bp === 'sm'
+})
+
+const loggedIn = computed(() => authStore.user !== null)
 
 definePageMeta({
   layout: 'login',
