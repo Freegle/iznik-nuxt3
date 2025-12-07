@@ -30,11 +30,7 @@
           {{ chat.name }}
         </h1>
       </div>
-      <b-dropdown
-        no-caret
-        variant="primary"
-        class="userOptions"
-      >
+      <b-dropdown no-caret variant="primary" class="userOptions">
         <template #button-content>
           <ProfileImage
             v-if="me?.profile?.path"
@@ -46,9 +42,7 @@
           />
           <v-icon v-else icon="user" size="2x" />
         </template>
-        <b-dropdown-item
-          href="/settings"
-        >
+        <b-dropdown-item href="/settings">
           <div class="d-flex align-items-center">
             <v-icon icon="cog" class="menu-icon" />
             <span class="menu-text">Settings</span>
@@ -127,6 +121,10 @@
       </div>
       <!-- Action buttons -->
       <div class="profile-card-actions">
+        <button v-if="unseen" class="action-btn" @click="markRead">
+          <v-icon icon="check" class="action-icon" />
+          <span>Mark read</span>
+        </button>
         <button
           v-if="otheruser && otheruser.info && !otheruser?.deleted"
           class="action-btn"
@@ -326,6 +324,11 @@ const block = async () => {
 
 const unhide = async () => {
   await chatStore.unhide(props.id)
+}
+
+const markRead = async () => {
+  await chatStore.markRead(props.id)
+  profileCardExpanded.value = false
 }
 
 const showhide = () => {
@@ -536,7 +539,6 @@ onBeforeUnmount(() => {
   font-size: 0.9rem;
   color: #333;
 }
-
 
 /* Profile popover styling */
 :deep(.profile-popover) {
