@@ -1070,6 +1070,8 @@ onUnmounted(() => {
       grid-template-rows: minmax(0, 1fr) auto;
       min-width: 0;
       height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
   }
 }
@@ -1452,6 +1454,7 @@ onUnmounted(() => {
       min-height: 0;
       max-height: 100%;
       overflow-y: auto;
+      overscroll-behavior: contain;
     }
   }
 
