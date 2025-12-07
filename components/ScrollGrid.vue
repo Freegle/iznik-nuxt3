@@ -7,14 +7,8 @@
       <VisibleWhen :at="['xs', 'sm', 'md']">
         <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
           <div v-if="ix % 2 === 0">
-            <!-- Full-width slot before this row -->
+            <!-- Full-width slot before this row (only for first item in row) -->
             <slot name="before-row" :item="item" :index="ix" />
-            <slot
-              v-if="ix + 1 < visibleItems.length"
-              name="before-row"
-              :item="visibleItems[ix + 1]"
-              :index="ix + 1"
-            />
             <div class="twocolumn">
               <div class="onecolumn">
                 <slot name="item" :item="item" :index="ix" />
@@ -27,6 +21,13 @@
                 />
               </div>
             </div>
+            <!-- Before-row for second column item renders AFTER this row, before next row -->
+            <slot
+              v-if="ix + 1 < visibleItems.length"
+              name="before-row"
+              :item="visibleItems[ix + 1]"
+              :index="ix + 1"
+            />
           </div>
         </div>
       </VisibleWhen>
@@ -46,8 +47,8 @@
         :distance="distance"
         @infinite="loadMore"
       >
-        <template #error>&nbsp;</template>
-        <template #complete>&nbsp;</template>
+        <template #error><span /></template>
+        <template #complete><span /></template>
         <template #spinner>
           <div class="text-center">
             <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
