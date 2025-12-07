@@ -13,7 +13,7 @@
     @shown="bumpMessage++"
   >
     <template #default>
-      <div v-if="message">
+      <div v-if="message" class="message-content-wrapper">
         <div v-if="showImagesProxy">
           <div>
             <b-button
@@ -211,5 +211,14 @@ const showImagesProxy = computed({
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Wrapper div for conditional content - fill flex parent */
+.message-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 </style>
