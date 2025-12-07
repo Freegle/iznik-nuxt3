@@ -185,13 +185,17 @@
                 <client-only>
                   <span
                     v-if="distanceText"
+                    v-b-tooltip.hover.click.blur="{
+                      title: 'Show on map',
+                      customClass: 'mobile-tooltip',
+                    }"
                     class="location"
                     @click.stop="showMapModal = true"
                   >
                     <v-icon icon="map-marker-alt" />{{ distanceText }}
                   </span>
                   <span
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: fullTimeAgo,
                       customClass: 'mobile-tooltip',
                     }"
@@ -201,7 +205,7 @@
                     <v-icon icon="clock" />{{ timeAgo }}
                   </span>
                   <span
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: replyTooltip,
                       customClass: 'mobile-tooltip',
                     }"
@@ -212,7 +216,7 @@
                   </span>
                   <span
                     v-if="message.deliverypossible && isOffer"
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: `Delivery may be possible - you can ask, but don't assume it will be`,
                       customClass: 'mobile-tooltip',
                     }"
@@ -223,7 +227,7 @@
                   </span>
                   <span
                     v-if="message.deadline"
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: deadlineTooltip,
                       customClass: 'mobile-tooltip',
                     }"
@@ -354,6 +358,7 @@
                 class="footer-buttons"
               >
                 <b-button
+                  v-if="inModal || fullscreenOverlay"
                   variant="secondary"
                   size="lg"
                   class="cancel-button"
@@ -424,6 +429,7 @@
           class="footer-buttons"
         >
           <b-button
+            v-if="inModal || fullscreenOverlay"
             variant="secondary"
             size="lg"
             class="cancel-button"
@@ -630,6 +636,8 @@ const navbarMobileExists = computed(() => {
 const windowHeight = ref(0)
 const isTwoColumnLayout = computed(() => {
   if (!isMounted.value) return false
+  // Only use 2-column layout in modal or overlay - standalone pages use single column
+  if (!props.inModal && !props.fullscreenOverlay) return false
   // Use miscStore breakpoint for width (xl = 1200px+)
   const isWideEnough = ['xl', 'xxl'].includes(miscStore.breakpoint)
   const isShortEnough = windowHeight.value <= 700
@@ -801,43 +809,193 @@ onUnmounted(() => {
  * LAYOUT PLAN
  * ===========
  *
- * 1. Fullscreen Mode (xs to lg, < 1200px) - Single column, vertical stack:
+ * Two wrapper modes controlled by props:
+ *   - fullscreenOverlay: position: fixed (mobile expand from browse page)
+ *   - inModal: position: relative (b-modal handles positioning)
+ *
+ * Flexbox layout inside both modes:
+ *   - photo-area: flex: 1 1 0 (grows to fill available space)
+ *   - info-section: flex: 0 0 auto (sizes to content, max 50% height, scrolls)
+ *   - app-footer: flex-shrink: 0 (fixed height at bottom)
+ *
+ * DIAGRAM A: Single Column Mode
+ * =============================
  *
  *    ┌──────────────────────────┐
- *    │ [←] Photo Area           │  ← Back button overlaid
- *    │     (max-height: 50vh)   │
+ *    │ [←] Photo Area           │  ← Back button (fullscreen) or [×] (modal)
+ *    │     (flex: 1 1 0)        │
  *    │                          │
  *    │  ┌─────────────────────┐ │
  *    │  │ Title overlay       │ │  ← At bottom of photo
  *    │  │ OFFER · 2mi · 3h    │ │
  *    │  └─────────────────────┘ │
  *    ├──────────────────────────┤
- *    │ DESCRIPTION              │  ← Scrollable section
- *    │ ─────────────────────    │    max-height: 30vh
- *    │ Description text...      │
+ *    │ DESCRIPTION              │  ← Scrollable, max 50% height
+ *    │ Description text...      │    (flex: 0 0 auto)
  *    │                          │
- *    │ POSTED BY                │
- *    │ [Avatar] Name            │
+ *    │ POSTED BY                │  ← Hidden on short screens (≤700px height)
+ *    │ [Avatar] Name            │    (poster-overlay shown on photo instead)
  *    ├──────────────────────────┤
- *    │ [Cancel]     [Reply]     │  ← Fixed at bottom
+ *    │ [Cancel]     [Reply]     │  ← Fixed footer (flex-shrink: 0)
  *    └──────────────────────────┘
  *
- * 2. Framed Modal - Tall Screen (xl+, height > 700px):
- *    Same single column layout but within modal frame.
- *
- * 3. Framed Modal - Short Wide Screen (xl+, height ≤ 700px) - Two-column:
+ * DIAGRAM B: Two-Column Mode
+ * ==========================
  *
  *    ┌─────────────────────────────────────┐
- *    │                                 [×] │
+ *    │                                 [×] │  ← Close button, no back button
  *    ├──────────────────┬──────────────────┤
- *    │                  │ Description      │  ← Top-aligned
+ *    │                  │ Description      │  ← Right column: grid 1fr + auto
  *    │   Photo          │ (scrolls if      │
- *    │   (full height   │  needed)         │
- *    │    of modal)     │                  │
- *    │                  │ Posted by...     │
+ *    │   (50% width,    │  needed)         │
+ *    │    full height)  │                  │
+ *    │                  │ Posted by...     │  ← Always in section (not overlay)
  *    │                  ├──────────────────┤
- *    │                  │ [Cancel] [Reply] │  ← Bottom of right column
+ *    │                  │ [Cancel] [Reply] │  ← inline-reply-section (grid auto row)
  *    └──────────────────┴──────────────────┘
+ *
+ *    - app-footer hidden (uses inline-reply-section instead)
+ *    - CSS: grid-template-columns: 1fr 1fr at @media (min-width: 1200px) and (max-height: 700px)
+ *
+ * RESPONSIVE LAYOUT TABLE
+ * =======================
+ *
+ * Breakpoints: xs(<576) sm(576-767) md(768-991) lg(992-1199) xl(1200+)
+ * Height: Short(≤700px) Tall(>700px)
+ *
+ * ┌─────────┬────────┬─────────┬─────────┬────────┬────────┬──────────┬────────────┐
+ * │ Width   │ Height │ Columns │ Back [←]│Close[×]│ Poster │ Aboutme  │ Ratings    │
+ * │         │        │ (→ dia.)│(overlay)│(modal) │ where  │ visible  │ visible    │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xs      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ xs      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ sm      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ sm      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ md      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ md      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ lg      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ lg      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xl+     │ Short  │ 2 (B)   │ ✗       │ ✓      │ section│ ✓        │ ✓          │
+ * │ xl+     │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * └─────────┴────────┴─────────┴─────────┴────────┴────────┴──────────┴────────────┘
+ *
+ * Legend:
+ * - Columns: 1 (A) → see Diagram A above; 2 (B) → see Diagram B above
+ * - "overlay" = poster-overlay on photo; "section" = poster-section-wrapper below description
+ * - ✗* = Aboutme/Ratings are md+ features but hidden when poster-section is hidden (short)
+ * - Back [←] shown in fullscreen-overlay mode; Close [×] shown in in-modal mode
+ * - Footer (Cancel/Reply): fixed at bottom in 1-col, inline in right column for 2-col
+ *
+ * STANDALONE PAGE CONTEXT
+ * =======================
+ * When used on standalone message pages (e.g., /message/123456):
+ * - Always uses 1-column layout regardless of viewport size
+ * - No 2-column layout even at xl-short viewports
+ * - Cancel button is hidden (no modal to cancel back to)
+ * - Reply button only (no Cancel) in footer
+ * - Page scrolls naturally to show all content
+ * - info-section height unconstrained (no internal scrollbars when room)
+ *
+ * Standalone detection: neither `inModal` nor `fullscreenOverlay` props are true
+ *
+ * TEST VIEWPORTS
+ * ==============
+ * Viewport sizes to test all layout variations, whitespace, and scrollbar behavior:
+ *
+ * Layout breakpoint tests:
+ * │ Viewport      │ Width │ Height│ Breakpoint │ Expected Layout                    │
+ * ├───────────────┼───────┼───────┼────────────┼────────────────────────────────────┤
+ * │ 375 × 600     │ xs    │ Short │ xs-short   │ 1-col, poster overlay on photo     │
+ * │ 375 × 800     │ xs    │ Tall  │ xs-tall    │ 1-col, poster in section           │
+ * │ 576 × 600     │ sm    │ Short │ sm-short   │ 1-col, poster overlay on photo     │
+ * │ 576 × 800     │ sm    │ Tall  │ sm-tall    │ 1-col, poster in section           │
+ * │ 768 × 600     │ md    │ Short │ md-short   │ 1-col, poster overlay, no aboutme  │
+ * │ 768 × 800     │ md    │ Tall  │ md-tall    │ 1-col, poster section + aboutme    │
+ * │ 992 × 600     │ lg    │ Short │ lg-short   │ 1-col, poster overlay, no aboutme  │
+ * │ 992 × 800     │ lg    │ Tall  │ lg-tall    │ 1-col, poster section + aboutme    │
+ * │ 1200 × 600    │ xl    │ Short │ xl-short   │ 2-col side-by-side, close button   │
+ * │ 1200 × 800    │ xl    │ Tall  │ xl-tall    │ 1-col, poster section + aboutme    │
+ *
+ * Whitespace and scrollbar edge cases:
+ * │ Viewport      │ Purpose                                                        │
+ * ├───────────────┼────────────────────────────────────────────────────────────────┤
+ * │ 375 × 700     │ Height breakpoint edge - verify no layout jump at boundary     │
+ * │ 375 × 701     │ Just above threshold - poster section should appear            │
+ * │ 768 × 500     │ Very short - info-section should scroll, photo fills space     │
+ * │ 768 × 900     │ Extra tall - verify no excess whitespace below footer          │
+ * │ 1200 × 700    │ xl at height boundary - verify 2-col triggers correctly        │
+ * │ 1200 × 701    │ xl just above threshold - should switch to 1-col               │
+ * │ 1400 × 600    │ Wide 2-col - verify photo doesn't stretch, no horizontal gap   │
+ * │ 1400 × 900    │ Wide tall - verify content fills space without whitespace      │
+ * │ 320 × 568     │ iPhone SE - smallest common device, check no overflow          │
+ * │ 414 × 896     │ iPhone 11 - common device, verify proper spacing               │
+ *
+ * Scrollbar presence tests (use with long description text):
+ * - 1-col short: info-section scrolls internally, page doesn't scroll
+ * - 1-col tall: info-section may scroll if content exceeds 50% height
+ * - 2-col: right column scrolls, left photo column doesn't
+ *
+ * BROKEN LAYOUT INDICATORS
+ * ========================
+ * A layout is broken if ANY of these conditions exist:
+ *
+ * 1. UNUSED WHITESPACE
+ *    - Large gaps between content sections (description vs buttons)
+ *    - Empty space in columns that should contain content
+ *    - Right column in 2-col mode showing only description when poster section should appear
+ *
+ * 2. SCROLLBAR PRESENT BUT SPACE UNUSED
+ *    - Scrollbar visible on right column but whitespace exists above buttons
+ *    - Content scrolls when viewport has room to display it all
+ *    - Indicates content is hidden/collapsed that should be visible
+ *
+ * 3. CSS SPECIFICITY CONFLICTS
+ *    - Parent context selector (`.in-modal &`) overrides media query
+ *    - Fix: Nest media query INSIDE the parent context for equal specificity
+ *    - Symptom: Layout doesn't change at breakpoint despite correct media query
+ *
+ * 4. DISPLAY MODE CONFLICTS
+ *    - `display: flex` on parent prevents `grid-template-columns` from working
+ *    - Must set `display: grid` at same specificity level as the flex rule
+ *    - Symptom: 2-column grid doesn't trigger even at correct viewport
+ *
+ * 5. VISIBILITY CONFLICTS
+ *    - Element hidden by one media query not re-shown by more specific query
+ *    - Example: `@media (max-height: 700px) { display: none }` hides in ALL short
+ *    - Must add: `@media (min-width: 1200px) and (max-height: 700px) { display: flex }`
+ *    - to show element specifically in 2-column mode
+ *
+ * 6. CONTENT SECTIONS MISSING
+ *    - In 2-col mode: poster section should appear in right column below description
+ *    - In 1-col tall: poster section should appear below photo
+ *    - In 1-col short: poster overlay should appear on photo
+ *    - If poster is nowhere visible = broken
+ *
+ * 7. MODAL/OVERLAY CONTEXT AWARENESS
+ *    - Rules for `.in-modal` and `.fullscreen-overlay` must be consistent
+ *    - Both contexts need identical 2-column breakpoint behavior
+ *
+ * 8. MAX-HEIGHT CONSTRAINTS HIDING CONTENT
+ *    - `max-height: 50%` on scrollable section may hide content below the fold
+ *    - Scrollbar present but whitespace visible = content hidden that should fit
+ *    - Fix: In 2-column mode, set `max-height: 100%` to use full available space
+ *    - Must be nested inside parent context selector for proper specificity
+ *    - Note: In 1-column tall mode (xl-tall), poster section may be below fold
+ *      and require scrolling - this is acceptable tradeoff to show more photo
+ *
+ * 9. FLEX CONTAINER WRAPPER ISSUES (Modal context)
+ *    - Bootstrap Vue modal-body uses `display: flex` but slot creates intermediate div
+ *    - Intermediate div has default `flex: 0 1 auto` so doesn't grow to fill parent
+ *    - Symptom: Content wrapper has smaller height than modal-body (e.g. 597px vs 928px)
+ *    - Debug: Walk DOM from wrapper to modal-body, check each element's flex/height
+ *    - Fix: Add wrapper class with `flex: 1; display: flex; flex-direction: column; min-height: 0`
+ *    - See MessageModal.vue `.message-content-wrapper` class
+ *
+ * Chrome DevTools MCP: mcp__chrome-devtools__resize_page(width, height)
  */
 
 /* Main wrapper - handles both modal and page contexts */
@@ -852,6 +1010,8 @@ onUnmounted(() => {
     position: relative;
     width: 100%;
     height: 100%;
+    flex: 1; /* Fill the flex container (modal-body uses display: flex) */
+    min-height: 0; /* Allow flex shrinking */
   }
 
   /* When used as fullscreen overlay (mobile expand) */
@@ -879,46 +1039,54 @@ onUnmounted(() => {
   grid-template-rows: auto 1fr;
   min-height: 0;
 
+  /* Two-column layout only in modal/overlay contexts */
   .in-modal &,
   .fullscreen-overlay & {
     /* Use flexbox for priority-based sizing: photo grows, info sizes to content */
     display: flex;
     flex-direction: column;
     overflow: hidden;
-  }
 
-  /* Two-column on xl+ screens with short height (≤700px) */
-  @media (min-width: 1200px) and (max-height: 700px) {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-    align-items: stretch;
-    height: 100%;
+    /* Two-column on xl+ screens with short height (≤700px) */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      align-items: stretch;
+      height: 100%;
+    }
   }
 }
 
-/* Right column for two-column layout */
+/* Right column for two-column layout - only active in modal/overlay */
 .right-column {
   display: contents;
 
-  /* Two-column mode: use grid for precise control */
-  @media (min-width: 1200px) and (max-height: 700px) {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    min-width: 0;
-    height: 100%;
+  /* Two-column mode: use grid for precise control - only in modal/overlay */
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-width: 0;
+      height: 100%;
+    }
   }
 }
 
-/* Inline reply section - hidden by default, shown in two-column layout */
+/* Inline reply section - hidden by default, shown in two-column layout (modal/overlay only) */
 .inline-reply-section {
   display: none;
 
-  @media (min-width: 1200px) and (max-height: 700px) {
-    display: block;
-    flex-shrink: 0;
-    padding: 1rem;
-    border-top: 1px solid $color-gray-3;
-    background: $color-white;
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: block;
+      flex-shrink: 0;
+      padding: 1rem;
+      border-top: 1px solid $color-gray-3;
+      background: $color-white;
+    }
   }
 }
 
@@ -1248,9 +1416,7 @@ onUnmounted(() => {
 /* Info Section - scrollable with visible scrollbar */
 .info-section {
   min-height: 0;
-  max-height: 30vh;
   padding: 1rem;
-  overflow-y: auto;
 
   /* Visible scrollbar styling */
   scrollbar-width: thin;
@@ -1273,11 +1439,24 @@ onUnmounted(() => {
     }
   }
 
-  /* In modal/fullscreen: size to content, don't grow, scroll if exceeds 50% */
+  /* In modal/fullscreen: constrain height and scroll if needed */
   .in-modal &,
   .fullscreen-overlay & {
     flex: 0 0 auto;
     max-height: 50%;
+    min-height: 0;
+    overflow-y: auto;
+
+    /* Two-column layout: fill available space, scroll if needed - needs same specificity */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      min-height: 0;
+      max-height: 100%;
+      overflow-y: auto;
+    }
+  }
+
+  /* Two-column layout on standalone pages: scroll if needed */
+  @media (min-width: 1200px) and (max-height: 700px) {
     min-height: 0;
     overflow-y: auto;
   }
@@ -1286,16 +1465,9 @@ onUnmounted(() => {
   .in-modal & {
     padding-top: 2.5rem;
   }
-
-  /* Two-column layout: constrained by grid 1fr row, scrolls if content overflows */
-  @media (min-width: 1200px) and (max-height: 700px) {
-    min-height: 0;
-    max-height: 100%;
-    overflow-y: auto;
-  }
 }
 
-// Poster overlay on photo (shown on shorter screens)
+// Poster overlay on photo (shown on shorter screens, but NOT in 2-column mode)
 // Positioned above the title overlay (badges row)
 .poster-overlay {
   display: none;
@@ -1320,8 +1492,14 @@ onUnmounted(() => {
     text-decoration: none;
   }
 
+  /* Show on short screens (1-column only) */
   @media (max-height: 700px) {
     display: flex;
+  }
+
+  /* Hide in 2-column mode - poster goes in section instead */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    display: none;
   }
 }
 
@@ -1402,10 +1580,15 @@ onUnmounted(() => {
     padding-right: 3rem;
   }
 
-  /* POSTED BY header hides on short screens where overlay is shown */
+  /* POSTED BY header hides on short screens where overlay is shown (1-column only) */
   &--poster {
     @media (max-height: 700px) {
       display: none;
+    }
+
+    /* Show in 2-column mode - poster section is always visible there */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: flex;
     }
   }
 }
@@ -1449,9 +1632,14 @@ onUnmounted(() => {
     background: $color-gray-3;
   }
 
-  /* Hide on short screens where overlay is shown */
+  /* Hide on short screens where overlay is shown (1-column only) */
   @media (max-height: 700px) {
     display: none;
+  }
+
+  /* Show in 2-column mode - poster section is always visible there */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    display: flex;
   }
 
   /* Very narrow screens: stack vertically */
@@ -1599,10 +1787,16 @@ onUnmounted(() => {
   border-top: 1px solid $color-gray-3;
   background: $color-white;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 
-  /* Hide footer in two-column layout (reply is inline) */
-  @media (min-width: 1200px) and (max-height: 700px) {
-    display: none;
+  /* Hide footer in two-column layout (modal/overlay only - reply is inline there) */
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: none;
+    }
   }
 
   /* Sticky ad adjustment - add bottom padding instead of positioning */
