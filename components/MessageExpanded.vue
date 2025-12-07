@@ -185,13 +185,17 @@
                 <client-only>
                   <span
                     v-if="distanceText"
+                    v-b-tooltip.hover.click.blur="{
+                      title: 'Show on map',
+                      customClass: 'mobile-tooltip',
+                    }"
                     class="location"
                     @click.stop="showMapModal = true"
                   >
                     <v-icon icon="map-marker-alt" />{{ distanceText }}
                   </span>
                   <span
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: fullTimeAgo,
                       customClass: 'mobile-tooltip',
                     }"
@@ -201,7 +205,7 @@
                     <v-icon icon="clock" />{{ timeAgo }}
                   </span>
                   <span
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: replyTooltip,
                       customClass: 'mobile-tooltip',
                     }"
@@ -212,7 +216,7 @@
                   </span>
                   <span
                     v-if="message.deliverypossible && isOffer"
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: `Delivery may be possible - you can ask, but don't assume it will be`,
                       customClass: 'mobile-tooltip',
                     }"
@@ -223,7 +227,7 @@
                   </span>
                   <span
                     v-if="message.deadline"
-                    v-b-tooltip.click.blur="{
+                    v-b-tooltip.hover.click.blur="{
                       title: deadlineTooltip,
                       customClass: 'mobile-tooltip',
                     }"
@@ -801,43 +805,84 @@ onUnmounted(() => {
  * LAYOUT PLAN
  * ===========
  *
- * 1. Fullscreen Mode (xs to lg, < 1200px) - Single column, vertical stack:
+ * Two wrapper modes controlled by props:
+ *   - fullscreenOverlay: position: fixed (mobile expand from browse page)
+ *   - inModal: position: relative (b-modal handles positioning)
+ *
+ * Flexbox layout inside both modes:
+ *   - photo-area: flex: 1 1 0 (grows to fill available space)
+ *   - info-section: flex: 0 0 auto (sizes to content, max 50% height, scrolls)
+ *   - app-footer: flex-shrink: 0 (fixed height at bottom)
+ *
+ * RESPONSIVE LAYOUT TABLE
+ * =======================
+ *
+ * Breakpoints: xs(<576) sm(576-767) md(768-991) lg(992-1199) xl(1200+)
+ * Height: Short(≤700px) Tall(>700px)
+ *
+ * ┌─────────┬────────┬─────────┬─────────┬────────┬────────┬──────────┬────────────┐
+ * │ Width   │ Height │ Columns │ Back [←]│Close[×]│ Poster │ Aboutme  │ Ratings    │
+ * │         │        │ (→ dia.)│(overlay)│(modal) │ where  │ visible  │ visible    │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xs      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ xs      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ sm      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ sm      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ md      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ md      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ lg      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ lg      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xl+     │ Short  │ 2 (B)   │ ✗       │ ✓      │ section│ ✓        │ ✓          │
+ * │ xl+     │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * └─────────┴────────┴─────────┴─────────┴────────┴────────┴──────────┴────────────┘
+ *
+ * Legend:
+ * - Columns: 1 (A) → see Diagram A below; 2 (B) → see Diagram B below
+ * - "overlay" = poster-overlay on photo; "section" = poster-section-wrapper below description
+ * - ✗* = Aboutme/Ratings are md+ features but hidden when poster-section is hidden (short)
+ * - Back [←] shown in fullscreen-overlay mode; Close [×] shown in in-modal mode
+ * - Footer (Cancel/Reply): fixed at bottom in 1-col, inline in right column for 2-col
+ *
+ * DIAGRAM A: Single Column Mode (table rows with "1 (A)")
  *
  *    ┌──────────────────────────┐
- *    │ [←] Photo Area           │  ← Back button overlaid
- *    │     (max-height: 50vh)   │
+ *    │ [←] Photo Area           │  ← Back button (fullscreen) or [×] (modal)
+ *    │     (flex: 1 1 0)        │
  *    │                          │
  *    │  ┌─────────────────────┐ │
  *    │  │ Title overlay       │ │  ← At bottom of photo
  *    │  │ OFFER · 2mi · 3h    │ │
  *    │  └─────────────────────┘ │
  *    ├──────────────────────────┤
- *    │ DESCRIPTION              │  ← Scrollable section
- *    │ ─────────────────────    │    max-height: 30vh
- *    │ Description text...      │
+ *    │ DESCRIPTION              │  ← Scrollable, max 50% height
+ *    │ Description text...      │    (flex: 0 0 auto)
  *    │                          │
- *    │ POSTED BY                │
- *    │ [Avatar] Name            │
+ *    │ POSTED BY                │  ← Hidden on short screens (≤700px height)
+ *    │ [Avatar] Name            │    (poster-overlay shown on photo instead)
  *    ├──────────────────────────┤
- *    │ [Cancel]     [Reply]     │  ← Fixed at bottom
+ *    │ [Cancel]     [Reply]     │  ← Fixed footer (flex-shrink: 0)
  *    └──────────────────────────┘
  *
- * 2. Framed Modal - Tall Screen (xl+, height > 700px):
- *    Same single column layout but within modal frame.
- *
- * 3. Framed Modal - Short Wide Screen (xl+, height ≤ 700px) - Two-column:
+ * DIAGRAM B: Two-Column Mode (table row: xl+ Short only)
  *
  *    ┌─────────────────────────────────────┐
- *    │                                 [×] │
+ *    │                                 [×] │  ← Close button, no back button
  *    ├──────────────────┬──────────────────┤
- *    │                  │ Description      │  ← Top-aligned
+ *    │                  │ Description      │  ← Right column: grid 1fr + auto
  *    │   Photo          │ (scrolls if      │
- *    │   (full height   │  needed)         │
- *    │    of modal)     │                  │
- *    │                  │ Posted by...     │
+ *    │   (50% width,    │  needed)         │
+ *    │    full height)  │                  │
+ *    │                  │ Posted by...     │  ← Always in section (not overlay)
  *    │                  ├──────────────────┤
- *    │                  │ [Cancel] [Reply] │  ← Bottom of right column
+ *    │                  │ [Cancel] [Reply] │  ← inline-reply-section (grid auto row)
  *    └──────────────────┴──────────────────┘
+ *
+ *    - app-footer hidden (uses inline-reply-section instead)
+ *    - CSS: grid-template-columns: 1fr 1fr at @media (min-width: 1200px) and (max-height: 700px)
  */
 
 /* Main wrapper - handles both modal and page contexts */
