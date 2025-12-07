@@ -29,8 +29,13 @@
               v-else-if="message.promised && !message.outcomes?.length"
               class="promised-banner"
             >
-              <v-icon icon="handshake" class="me-2" />
-              Promised to{{ ' ' }}<strong>{{ promisedToName }}</strong>
+              <div class="promised-banner-text">
+                <v-icon icon="handshake" class="me-2" />
+                Promised to{{ ' ' }}<strong>{{ promisedToName }}</strong>
+              </div>
+              <button class="unpromise-btn" @click.stop="unpromise">
+                Unpromise
+              </button>
             </div>
 
             <!-- Photo -->
@@ -255,6 +260,14 @@
         :users="replyusers"
         @hidden="showPromiseModal = false"
       />
+      <RenegeModal
+        v-if="showRenegeModal && promisedTo.length > 0"
+        :messages="[message.id]"
+        :selected-message="message.id"
+        :users="promisedToUsers"
+        :selected-user="promisedTo[0]?.id"
+        @hidden="showRenegeModal = false"
+      />
     </div>
   </div>
 </template>
@@ -292,6 +305,7 @@ const OutcomeModal = defineAsyncComponent(() => import('./OutcomeModal'))
 const MessageEditModal = defineAsyncComponent(() =>
   import('./MessageEditModal')
 )
+const RenegeModal = defineAsyncComponent(() => import('./RenegeModal'))
 
 const props = defineProps({
   id: {
@@ -337,6 +351,7 @@ const outcomeType = ref(null)
 const showEditModal = ref(false)
 const showShareModal = ref(false)
 const showPromiseModal = ref(false)
+const showRenegeModal = ref(false)
 const bump = ref(0)
 
 // Computed
@@ -501,6 +516,10 @@ const promisedToName = computed(() => {
   return ''
 })
 
+const promisedToUsers = computed(() => {
+  return promisedTo.value.map((p) => userStore?.byId(p.id)).filter((u) => u)
+})
+
 const isPromised = computed(() => {
   return message.value?.promised && !message.value?.outcomes?.length
 })
@@ -555,6 +574,14 @@ const share = (e) => {
     e.stopPropagation()
   }
   showShareModal.value = true
+}
+
+const unpromise = (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+  showRenegeModal.value = true
 }
 
 const edit = async (e) => {
@@ -788,7 +815,27 @@ onMounted(() => {
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.promised-banner-text {
+  display: flex;
+  align-items: center;
+}
+
+.unpromise-btn {
+  background: $color-orange--dark;
+  border: none;
+  color: white;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: darken($color-orange--dark, 10%);
+  }
 }
 
 .photo-actions {
