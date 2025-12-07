@@ -3,6 +3,12 @@
     v-if="message"
     :id="'msg-' + id"
     ref="msg"
+    v-observe-visibility="{
+      callback: visibilityChanged,
+      options: {
+        observeFullElement: true,
+      },
+    }"
     class="position-relative"
     itemscope
     itemtype="http://schema.org/Product"
@@ -27,11 +33,7 @@
     </div>
     <div v-else>
       <!-- Modern card summary for all breakpoints -->
-      <MessageSummaryMobile
-        :id="message.id"
-        :preload="preload"
-        @expand="expand"
-      />
+      <MessageSummary :id="message.id" :preload="preload" @expand="expand" />
       <MessageModal
         v-if="expanded"
         :id="message.id"
@@ -48,7 +50,7 @@
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        is-modal
+        fullscreen-overlay
         @close="closeMobileExpanded"
       />
     </div>
@@ -65,8 +67,8 @@ import { useMiscStore } from '~/stores/misc'
 const MessageExpanded = defineAsyncComponent(() =>
   import('~/components/MessageExpanded')
 )
-const MessageSummaryMobile = defineAsyncComponent(() =>
-  import('~/components/MessageSummaryMobile')
+const MessageSummary = defineAsyncComponent(() =>
+  import('~/components/MessageSummary')
 )
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')
@@ -188,6 +190,12 @@ async function view() {
     }
 
     emit('view')
+  }
+}
+
+function visibilityChanged(isVisible) {
+  if (isVisible) {
+    view()
   }
 }
 

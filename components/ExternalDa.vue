@@ -108,9 +108,10 @@
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
-import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
+const { me, recentDonor } = useMe()
 
 const props = defineProps({
   adUnitPath: {
@@ -204,12 +205,7 @@ function visibilityChanged(visible) {
     ) {
       // App without cookies - show fallback donation ad unless recent donor (but not for video ads)
       console.log('Running in app with no cookies - using fallback ad')
-      const me = useAuthStore().user
-      const recentDonor =
-        me &&
-        me.donated &&
-        new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-      if (recentDonor) {
+      if (recentDonor.value) {
         console.log('Ads disabled in app as recent donor')
         emit('rendered', false)
       } else {
@@ -322,16 +318,8 @@ async function checkStillVisible() {
     // Check if we are showing ads.
     const configStore = useConfigStore()
     const showingAds = await configStore.fetch('ads_enabled')
-    const me = useAuthStore().user
 
-    // Add grace period for donations - technically we want it to be 31 days, but for people who have a direct
-    // debit set up we might not have manually processed those donations for a while.
-    const recentDonor =
-      me &&
-      me.donated &&
-      new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-
-    const myEmail = me?.email
+    const myEmail = me.value?.email
 
     const runtimeConfig = useRuntimeConfig()
     const userSite = runtimeConfig.public.USER_SITE
@@ -344,7 +332,7 @@ async function checkStillVisible() {
     ) {
       console.log('Ads disabled as system account')
       emit('rendered', false)
-    } else if (recentDonor) {
+    } else if (recentDonor.value) {
       console.log('Ads disabled as recent donor')
       emit('rendered', false)
     } else if (showingAds?.length && parseInt(showingAds[0].value)) {

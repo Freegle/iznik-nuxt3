@@ -9,7 +9,7 @@
           class="scroll-item"
           @click="goToMessage(item.id)"
         >
-          <MessageSummaryMobile
+          <MessageSummary
             :id="item.id"
             :show-freegled="false"
             :show-promised="false"
@@ -33,7 +33,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
-import MessageSummaryMobile from '~/components/MessageSummaryMobile'
+import MessageSummary from '~/components/MessageSummary'
 
 const router = useRouter()
 const messageStore = useMessageStore()

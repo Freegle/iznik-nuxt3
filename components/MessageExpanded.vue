@@ -2,7 +2,7 @@
   <div
     v-if="message"
     class="message-expanded-wrapper"
-    :class="{ 'in-modal': inModal }"
+    :class="{ 'in-modal': inModal, 'fullscreen-overlay': fullscreenOverlay }"
   >
     <div
       ref="containerRef"
@@ -14,224 +14,239 @@
         <div class="hidden-navbar" />
       </Teleport>
 
+      <!-- Close button for two-column layout (positioned at modal top-right) -->
+      <button class="close-button" @click.stop="goBack">
+        <v-icon icon="times" />
+      </button>
+
       <!-- Two-column layout wrapper for short wide screens -->
       <div class="two-column-wrapper">
         <!-- Photo Area with Ken Burns animation -->
         <div class="photo-area" @click="showPhotosModal">
-        <!-- Back button on photo -->
-        <button class="back-button" @click.stop="goBack">
-          <v-icon icon="arrow-left" />
-        </button>
+          <!-- Back button on photo (hidden in two-column) -->
+          <button class="back-button" @click.stop="goBack">
+            <v-icon icon="arrow-left" />
+          </button>
 
-        <!-- Status overlay images -->
-        <b-img
-          v-if="message.successful"
-          lazy
-          src="/freegled.jpg"
-          class="status-overlay-image"
-          :alt="successfulText"
-        />
-        <b-img
-          v-else-if="message.promised"
-          lazy
-          src="/promised.jpg"
-          class="status-overlay-image"
-          alt="Promised"
-        />
-        <!-- Thumbnail carousel for multiple photos -->
-        <div
-          v-if="attachmentCount > 1"
-          ref="thumbnailsRef"
-          class="thumbnail-carousel"
-          @touchstart="onThumbnailTouchStart"
-          @touchmove="onThumbnailTouchMove"
-          @touchend="onThumbnailTouchEnd"
-        >
+          <!-- Status overlay images -->
+          <b-img
+            v-if="message.successful"
+            lazy
+            src="/freegled.jpg"
+            class="status-overlay-image"
+            :alt="successfulText"
+          />
+          <b-img
+            v-else-if="message.promised"
+            lazy
+            src="/promised.jpg"
+            class="status-overlay-image"
+            alt="Promised"
+          />
+          <!-- Thumbnail carousel for multiple photos -->
           <div
-            v-for="(attachment, index) in message.attachments"
-            :key="attachment.id || index"
-            class="thumbnail-item"
-            :class="{ active: index === currentPhotoIndex }"
-            @click.stop="handleThumbnailClick(index)"
+            v-if="attachmentCount > 1"
+            ref="thumbnailsRef"
+            class="thumbnail-carousel"
+            @touchstart="onThumbnailTouchStart"
+            @touchmove="onThumbnailTouchMove"
+            @touchend="onThumbnailTouchEnd"
+          >
+            <div
+              v-for="(attachment, index) in message.attachments"
+              :key="attachment.id || index"
+              class="thumbnail-item"
+              :class="{ active: index === currentPhotoIndex }"
+              @click.stop="handleThumbnailClick(index)"
+            >
+              <OurUploadedImage
+                v-if="attachment.ouruid"
+                :src="attachment.ouruid"
+                :modifiers="attachment.externalmods"
+                alt="Thumbnail"
+                class="thumbnail-image"
+                :width="80"
+                :height="80"
+              />
+              <NuxtPicture
+                v-else-if="attachment.externaluid"
+                format="webp"
+                provider="uploadcare"
+                :src="attachment.externaluid"
+                :modifiers="attachment.externalmods"
+                alt="Thumbnail"
+                class="thumbnail-image"
+                :width="80"
+                :height="80"
+              />
+              <ProxyImage
+                v-else-if="attachment.path"
+                class-name="thumbnail-image"
+                alt="Thumbnail"
+                :src="attachment.path"
+                :width="80"
+                :height="80"
+                fit="cover"
+              />
+            </div>
+          </div>
+
+          <!-- Actual photo or placeholder -->
+          <div
+            v-if="gotAttachments"
+            class="photo-container"
+            :class="{ 'ken-burns': showKenBurns }"
           >
             <OurUploadedImage
-              v-if="attachment.ouruid"
-              :src="attachment.ouruid"
-              :modifiers="attachment.externalmods"
-              alt="Thumbnail"
-              class="thumbnail-image"
-              :width="80"
-              :height="80"
+              v-if="currentAttachment?.ouruid"
+              :src="currentAttachment.ouruid"
+              :modifiers="currentAttachment.externalmods"
+              alt="Item Photo"
+              class="photo-image"
+              :width="640"
+              :height="480"
             />
             <NuxtPicture
-              v-else-if="attachment.externaluid"
+              v-else-if="currentAttachment?.externaluid"
               format="webp"
               provider="uploadcare"
-              :src="attachment.externaluid"
-              :modifiers="attachment.externalmods"
-              alt="Thumbnail"
-              class="thumbnail-image"
-              :width="80"
-              :height="80"
+              :src="currentAttachment.externaluid"
+              :modifiers="currentAttachment.externalmods"
+              alt="Item Photo"
+              class="photo-image"
+              :width="640"
+              :height="480"
             />
             <ProxyImage
-              v-else-if="attachment.path"
-              class-name="thumbnail-image"
-              alt="Thumbnail"
-              :src="attachment.path"
-              :width="80"
-              :height="80"
+              v-else-if="currentAttachment?.path"
+              class-name="photo-image"
+              alt="Item picture"
+              :src="currentAttachment.path"
+              :width="640"
+              :height="480"
               fit="cover"
             />
           </div>
-        </div>
 
-        <!-- Actual photo or placeholder -->
-        <div
-          v-if="gotAttachments"
-          class="photo-container"
-          :class="{ 'ken-burns': showKenBurns }"
-        >
-          <OurUploadedImage
-            v-if="currentAttachment?.ouruid"
-            :src="currentAttachment.ouruid"
-            :modifiers="currentAttachment.externalmods"
-            alt="Item Photo"
-            class="photo-image"
-            :width="640"
-            :height="480"
-          />
-          <NuxtPicture
-            v-else-if="currentAttachment?.externaluid"
-            format="webp"
-            provider="uploadcare"
-            :src="currentAttachment.externaluid"
-            :modifiers="currentAttachment.externalmods"
-            alt="Item Photo"
-            class="photo-image"
-            :width="640"
-            :height="480"
-          />
-          <ProxyImage
-            v-else-if="currentAttachment?.path"
-            class-name="photo-image"
-            alt="Item picture"
-            :src="currentAttachment.path"
-            :width="640"
-            :height="480"
-            fit="cover"
-          />
-        </div>
-
-        <!-- No photo - show placeholder -->
-        <div v-else class="photo-container">
-          <MessagePhotoPlaceholder
-            :placeholder-class="placeholderClass"
-            :icon="categoryIcon"
-          />
-        </div>
-
-        <!-- Poster overlay on photo (shown on shorter screens) -->
-        <NuxtLink
-          v-if="poster"
-          :to="posterProfileUrl"
-          class="poster-overlay"
-          :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
-          @click.stop
-        >
-          <div class="poster-overlay-avatar-wrapper">
-            <ProfileImage
-              :image="poster.profile?.paththumb"
-              :externaluid="poster.profile?.externaluid"
-              :ouruid="poster.profile?.ouruid"
-              :externalmods="poster.profile?.externalmods"
-              :name="poster.displayname"
-              class="poster-overlay-avatar"
-              is-thumbnail
-              size="sm"
+          <!-- No photo - show placeholder -->
+          <div v-else class="photo-container">
+            <MessagePhotoPlaceholder
+              :placeholder-class="placeholderClass"
+              :icon="categoryIcon"
             />
-            <div v-if="poster.supporter" class="supporter-badge-small">
-              <v-icon icon="trophy" />
-            </div>
           </div>
-          <div class="poster-overlay-info">
-            <span class="poster-overlay-name">{{ poster.displayname }}</span>
-            <div class="poster-overlay-stats">
-              <span v-if="poster.info?.offers" class="poster-overlay-stat">
-                <v-icon icon="gift" />{{ poster.info.offers }}
-              </span>
-              <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
-                <v-icon icon="search" />{{ poster.info.wanteds }}
-              </span>
-            </div>
-          </div>
-          <v-icon icon="chevron-right" class="poster-overlay-chevron" />
-        </NuxtLink>
 
-        <!-- Title overlay at bottom of photo - matches summary layout -->
-        <div class="title-overlay">
-          <div class="info-row">
-            <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
-            <div class="info-icons">
-              <span
-                v-if="distanceText"
-                class="location"
-                @click.stop="showMapModal = true"
-              >
-                <v-icon icon="map-marker-alt" />{{ distanceText }}
-              </span>
-              <span
-                v-b-tooltip.click.blur="{
-                  title: fullTimeAgo,
-                  customClass: 'mobile-tooltip',
-                }"
-                class="time"
-                @click.stop
-              >
-                <v-icon icon="clock" />{{ timeAgo }}
-              </span>
-              <span
-                v-b-tooltip.click.blur="{
-                  title: replyTooltip,
-                  customClass: 'mobile-tooltip',
-                }"
-                class="replies"
-                @click.stop
-              >
-                <v-icon icon="comments" />{{ replyCount }}
-              </span>
-              <span
-                v-if="message.deliverypossible && isOffer"
-                v-b-tooltip.click.blur="{
-                  title: `Delivery may be possible - you can ask, but don't assume it will be`,
-                  customClass: 'mobile-tooltip',
-                }"
-                class="delivery"
-                @click.stop
-              >
-                <v-icon icon="truck" />?
-              </span>
-              <span
-                v-if="message.deadline"
-                v-b-tooltip.click.blur="{
-                  title: deadlineTooltip,
-                  customClass: 'mobile-tooltip',
-                }"
-                class="deadline"
-                @click.stop
-              >
-                <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
-              </span>
+          <!-- Poster overlay on photo (shown on shorter screens) -->
+          <client-only>
+            <NuxtLink
+              v-if="poster"
+              :to="posterProfileUrl"
+              class="poster-overlay"
+              :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
+              @click.stop
+            >
+              <div class="poster-overlay-avatar-wrapper">
+                <ProfileImage
+                  :image="poster.profile?.paththumb"
+                  :externaluid="poster.profile?.externaluid"
+                  :ouruid="poster.profile?.ouruid"
+                  :externalmods="poster.profile?.externalmods"
+                  :name="poster.displayname"
+                  class="poster-overlay-avatar"
+                  is-thumbnail
+                  size="sm"
+                />
+                <div v-if="poster.supporter" class="supporter-badge-small">
+                  <v-icon icon="trophy" />
+                </div>
+              </div>
+              <div class="poster-overlay-info">
+                <span class="poster-overlay-name">{{
+                  poster.displayname
+                }}</span>
+                <div class="poster-overlay-stats">
+                  <span v-if="poster.info?.offers" class="poster-overlay-stat">
+                    <v-icon icon="gift" />{{ poster.info.offers }}
+                  </span>
+                  <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
+                    <v-icon icon="search" />{{ poster.info.wanteds }}
+                  </span>
+                </div>
+              </div>
+              <v-icon icon="chevron-right" class="poster-overlay-chevron" />
+            </NuxtLink>
+          </client-only>
+
+          <!-- Title overlay at bottom of photo - matches summary layout -->
+          <div class="title-overlay">
+            <div class="info-row">
+              <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
+              <div class="info-icons">
+                <client-only>
+                  <span
+                    v-if="distanceText"
+                    v-b-tooltip.hover.click.blur="{
+                      title: 'Show on map',
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="location"
+                    @click.stop="showMapModal = true"
+                  >
+                    <v-icon icon="map-marker-alt" />{{ distanceText }}
+                  </span>
+                  <span
+                    v-b-tooltip.hover.click.blur="{
+                      title: fullTimeAgo,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="time"
+                    @click.stop
+                  >
+                    <v-icon icon="clock" />{{ timeAgo }}
+                  </span>
+                  <span
+                    v-b-tooltip.hover.click.blur="{
+                      title: replyTooltip,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="replies"
+                    @click.stop
+                  >
+                    <v-icon icon="comments" />{{ replyCount }}
+                  </span>
+                  <span
+                    v-if="message.deliverypossible && isOffer"
+                    v-b-tooltip.hover.click.blur="{
+                      title: `Delivery may be possible - you can ask, but don't assume it will be`,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="delivery"
+                    @click.stop
+                  >
+                    <v-icon icon="truck" />?
+                  </span>
+                  <span
+                    v-if="message.deadline"
+                    v-b-tooltip.hover.click.blur="{
+                      title: deadlineTooltip,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="deadline"
+                    @click.stop
+                  >
+                    <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
+                  </span>
+                </client-only>
+              </div>
             </div>
-          </div>
-          <div class="title-row">
-            <span class="title-subject">{{ subjectItemName }}</span>
-          </div>
-          <div v-if="subjectLocation" class="title-location">
-            {{ subjectLocation }}
+            <div class="title-row">
+              <span class="title-subject">{{ subjectItemName }}</span>
+            </div>
+            <div v-if="subjectLocation" class="title-location">
+              {{ subjectLocation }}
+            </div>
           </div>
         </div>
-      </div>
 
         <!-- Right column: Info + Reply (for two-column layout) -->
         <div class="right-column">
@@ -255,63 +270,69 @@
             </div>
 
             <!-- Posted by divider and section (shown on taller screens, after description) -->
-            <div v-if="poster" class="section-header section-header--poster">
-              <span class="section-header-text">POSTED BY</span>
-              <NuxtLink :to="posterProfileUrl" class="section-id-link" @click.stop>
-                #{{ poster.id }}
-              </NuxtLink>
-            </div>
-            <NuxtLink
-              v-if="poster"
-              :to="posterProfileUrl"
-              class="poster-section-wrapper"
-              @click.stop
-            >
-              <div class="poster-avatar-wrapper">
-                <ProfileImage
-                  :image="poster.profile?.paththumb"
-                  :externaluid="poster.profile?.externaluid"
-                  :ouruid="poster.profile?.ouruid"
-                  :externalmods="poster.profile?.externalmods"
-                  :name="poster.displayname"
-                  class="poster-avatar"
-                  is-thumbnail
-                  size="lg"
+            <client-only>
+              <div v-if="poster" class="section-header section-header--poster">
+                <span class="section-header-text">POSTED BY</span>
+                <NuxtLink
+                  :to="posterProfileUrl"
+                  class="section-id-link"
+                  @click.stop
+                >
+                  #{{ poster.id }}
+                </NuxtLink>
+              </div>
+              <NuxtLink
+                v-if="poster"
+                :to="posterProfileUrl"
+                class="poster-section-wrapper"
+                @click.stop
+              >
+                <div class="poster-avatar-wrapper">
+                  <ProfileImage
+                    :image="poster.profile?.paththumb"
+                    :externaluid="poster.profile?.externaluid"
+                    :ouruid="poster.profile?.ouruid"
+                    :externalmods="poster.profile?.externalmods"
+                    :name="poster.displayname"
+                    class="poster-avatar"
+                    is-thumbnail
+                    size="lg"
+                  />
+                  <div v-if="poster.supporter" class="supporter-badge">
+                    <v-icon icon="trophy" />
+                  </div>
+                </div>
+                <div class="poster-details">
+                  <span class="poster-name">{{ poster.displayname }}</span>
+                  <div class="poster-stats">
+                    <span v-if="poster.info?.offers" class="poster-stat">
+                      <v-icon icon="gift" />{{ poster.info.offers
+                      }}<span class="poster-stat-label">OFFERs</span>
+                    </span>
+                    <span v-if="poster.info?.wanteds" class="poster-stat">
+                      <v-icon icon="search" />{{ poster.info.wanteds
+                      }}<span class="poster-stat-label">WANTEDs</span>
+                    </span>
+                    <span v-if="poster.info?.replies" class="poster-stat">
+                      <v-icon icon="reply" />{{ poster.info.replies
+                      }}<span class="poster-stat-label">replies</span>
+                    </span>
+                  </div>
+                  <div v-if="posterAboutMe" class="poster-aboutme">
+                    {{ posterAboutMe }}
+                  </div>
+                </div>
+                <UserRatings
+                  v-if="poster.id"
+                  :id="poster.id"
+                  size="md"
+                  :disabled="fromme"
+                  class="poster-ratings"
+                  @click.stop.prevent
                 />
-                <div v-if="poster.supporter" class="supporter-badge">
-                  <v-icon icon="trophy" />
-                </div>
-              </div>
-              <div class="poster-details">
-                <span class="poster-name">{{ poster.displayname }}</span>
-                <div class="poster-stats">
-                  <span v-if="poster.info?.offers" class="poster-stat">
-                    <v-icon icon="gift" />{{ poster.info.offers
-                    }}<span class="poster-stat-label">OFFERs</span>
-                  </span>
-                  <span v-if="poster.info?.wanteds" class="poster-stat">
-                    <v-icon icon="search" />{{ poster.info.wanteds
-                    }}<span class="poster-stat-label">WANTEDs</span>
-                  </span>
-                  <span v-if="poster.info?.replies" class="poster-stat">
-                    <v-icon icon="envelope" />{{ poster.info.replies
-                    }}<span class="poster-stat-label">replies</span>
-                  </span>
-                </div>
-                <div v-if="posterAboutMe" class="poster-aboutme">
-                  {{ posterAboutMe }}
-                </div>
-              </div>
-              <UserRatings
-                v-if="poster.id"
-                :id="poster.id"
-                size="md"
-                :disabled="fromme"
-                class="poster-ratings"
-                @click.stop.prevent
-              />
-              <v-icon icon="chevron-right" class="poster-chevron" />
-            </NuxtLink>
+                <v-icon icon="chevron-right" class="poster-chevron" />
+              </NuxtLink>
+            </client-only>
           </div>
 
           <!-- Inline reply section for two-column layout -->
@@ -319,17 +340,25 @@
             <div v-if="!replyExpanded">
               <!-- Promised notice -->
               <div
-                v-if="message.promised && !message.successful && replyable && !fromme"
+                v-if="
+                  message.promised &&
+                  !message.successful &&
+                  replyable &&
+                  !fromme
+                "
                 class="promised-notice mb-2"
               >
                 <v-icon icon="handshake" />
-                {{ message.promisedtome ? 'Promised to you' : 'Already promised' }}
+                {{
+                  message.promisedtome ? 'Promised to you' : 'Already promised'
+                }}
               </div>
               <div
                 v-if="replyable && !replied && !message.successful"
                 class="footer-buttons"
               >
                 <b-button
+                  v-if="inModal || fullscreenOverlay"
                   variant="secondary"
                   size="lg"
                   class="cancel-button"
@@ -353,7 +382,8 @@
                 :model-value="true"
                 class="mb-0"
               >
-                Message sent! Check your <nuxt-link to="/chats">Chats</nuxt-link>.
+                Message sent! Check your
+                <nuxt-link to="/chats">Chats</nuxt-link>.
               </b-alert>
             </div>
 
@@ -399,6 +429,7 @@
           class="footer-buttons"
         >
           <b-button
+            v-if="inModal || fullscreenOverlay"
             variant="secondary"
             size="lg"
             class="cancel-button"
@@ -482,7 +513,6 @@ import {
   onMounted,
   onUnmounted,
 } from 'vue'
-import { useRouter } from 'vue-router'
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
@@ -516,11 +546,11 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  isModal: {
+  inModal: {
     type: Boolean,
     default: false,
   },
-  inModal: {
+  fullscreenOverlay: {
     type: Boolean,
     default: false,
   },
@@ -528,7 +558,6 @@ const props = defineProps({
 
 const emit = defineEmits(['zoom', 'close'])
 
-const router = useRouter()
 const miscStore = useMiscStore()
 const { me } = useMe()
 
@@ -602,14 +631,16 @@ const navbarMobileExists = computed(() => {
   return !!document.getElementById('navbar-mobile')
 })
 
-// Detect two-column layout (width >= lg breakpoint AND height <= 800px)
+// Detect two-column layout (width >= xl breakpoint AND height <= 700px)
 // Only evaluate after mount to avoid SSR hydration mismatch
 const windowHeight = ref(0)
 const isTwoColumnLayout = computed(() => {
   if (!isMounted.value) return false
-  // Use miscStore breakpoint for width (lg = 992px+)
-  const isWideEnough = ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
-  const isShortEnough = windowHeight.value <= 800
+  // Only use 2-column layout in modal or overlay - standalone pages use single column
+  if (!props.inModal && !props.fullscreenOverlay) return false
+  // Use miscStore breakpoint for width (xl = 1200px+)
+  const isWideEnough = ['xl', 'xxl'].includes(miscStore.breakpoint)
+  const isShortEnough = windowHeight.value <= 700
   return isWideEnough && isShortEnough
 })
 
@@ -621,13 +652,7 @@ const posterAboutMe = computed(() => {
 
 // Methods
 function goBack() {
-  if (props.isModal) {
-    // When used as a modal overlay, emit close to parent
-    emit('close')
-  } else {
-    // When used as a standalone page, navigate back
-    router.back()
-  }
+  emit('close')
 }
 
 function showPhotosModal() {
@@ -741,16 +766,14 @@ function expandReply() {
 function sent() {
   replyExpanded.value = false
   replied.value = true
-  // When used as modal, close after a brief delay so user sees confirmation
-  if (props.isModal) {
-    setTimeout(() => {
-      emit('close')
-    }, 1500)
-  }
+  // Close after a brief delay so user sees confirmation
+  setTimeout(() => {
+    emit('close')
+  }, 1500)
 }
 
-// Handle browser back button/swipe when used as modal
-useModalHistory(`message-${props.id}`, () => emit('close'), props.isModal)
+// Handle browser back button/swipe
+useModalHistory(`message-${props.id}`, () => emit('close'), true)
 
 function updateWindowHeight() {
   windowHeight.value = window.innerHeight
@@ -782,124 +805,314 @@ onUnmounted(() => {
 @import 'assets/css/_color-vars.scss';
 @import 'assets/css/navbar.scss';
 
-.message-expanded-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
+/*
+ * LAYOUT PLAN
+ * ===========
+ *
+ * Two wrapper modes controlled by props:
+ *   - fullscreenOverlay: position: fixed (mobile expand from browse page)
+ *   - inModal: position: relative (b-modal handles positioning)
+ *
+ * Flexbox layout inside both modes:
+ *   - photo-area: flex: 1 1 0 (grows to fill available space)
+ *   - info-section: flex: 0 0 auto (sizes to content, max 50% height, scrolls)
+ *   - app-footer: flex-shrink: 0 (fixed height at bottom)
+ *
+ * DIAGRAM A: Single Column Mode
+ * =============================
+ *
+ *    ┌──────────────────────────┐
+ *    │ [←] Photo Area           │  ← Back button (fullscreen) or [×] (modal)
+ *    │     (flex: 1 1 0)        │
+ *    │                          │
+ *    │  ┌─────────────────────┐ │
+ *    │  │ Title overlay       │ │  ← At bottom of photo
+ *    │  │ OFFER · 2mi · 3h    │ │
+ *    │  └─────────────────────┘ │
+ *    ├──────────────────────────┤
+ *    │ DESCRIPTION              │  ← Scrollable, max 50% height
+ *    │ Description text...      │    (flex: 0 0 auto)
+ *    │                          │
+ *    │ POSTED BY                │  ← Hidden on short screens (≤700px height)
+ *    │ [Avatar] Name            │    (poster-overlay shown on photo instead)
+ *    ├──────────────────────────┤
+ *    │ [Cancel]     [Reply]     │  ← Fixed footer (flex-shrink: 0)
+ *    └──────────────────────────┘
+ *
+ * DIAGRAM B: Two-Column Mode
+ * ==========================
+ *
+ *    ┌─────────────────────────────────────┐
+ *    │                                 [×] │  ← Close button, no back button
+ *    ├──────────────────┬──────────────────┤
+ *    │                  │ Description      │  ← Right column: grid 1fr + auto
+ *    │   Photo          │ (scrolls if      │
+ *    │   (50% width,    │  needed)         │
+ *    │    full height)  │                  │
+ *    │                  │ Posted by...     │  ← Always in section (not overlay)
+ *    │                  ├──────────────────┤
+ *    │                  │ [Cancel] [Reply] │  ← inline-reply-section (grid auto row)
+ *    └──────────────────┴──────────────────┘
+ *
+ *    - app-footer hidden (uses inline-reply-section instead)
+ *    - CSS: grid-template-columns: 1fr 1fr at @media (min-width: 1200px) and (max-height: 700px)
+ *
+ * RESPONSIVE LAYOUT TABLE
+ * =======================
+ *
+ * Breakpoints: xs(<576) sm(576-767) md(768-991) lg(992-1199) xl(1200+)
+ * Height: Short(≤700px) Tall(>700px)
+ *
+ * ┌─────────┬────────┬─────────┬─────────┬────────┬────────┬──────────┬────────────┐
+ * │ Width   │ Height │ Columns │ Back [←]│Close[×]│ Poster │ Aboutme  │ Ratings    │
+ * │         │        │ (→ dia.)│(overlay)│(modal) │ where  │ visible  │ visible    │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xs      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ xs      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ sm      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗        │ ✗          │
+ * │ sm      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✗        │ ✗          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ md      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ md      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ lg      │ Short  │ 1 (A)   │ ✓       │ (modal)│ overlay│ ✗*       │ ✗*         │
+ * │ lg      │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * ├─────────┼────────┼─────────┼─────────┼────────┼────────┼──────────┼────────────┤
+ * │ xl+     │ Short  │ 2 (B)   │ ✗       │ ✓      │ section│ ✓        │ ✓          │
+ * │ xl+     │ Tall   │ 1 (A)   │ ✓       │ (modal)│ section│ ✓        │ ✓          │
+ * └─────────┴────────┴─────────┴─────────┴────────┴────────┴──────────┴────────────┘
+ *
+ * Legend:
+ * - Columns: 1 (A) → see Diagram A above; 2 (B) → see Diagram B above
+ * - "overlay" = poster-overlay on photo; "section" = poster-section-wrapper below description
+ * - ✗* = Aboutme/Ratings are md+ features but hidden when poster-section is hidden (short)
+ * - Back [←] shown in fullscreen-overlay mode; Close [×] shown in in-modal mode
+ * - Footer (Cancel/Reply): fixed at bottom in 1-col, inline in right column for 2-col
+ *
+ * STANDALONE PAGE CONTEXT
+ * =======================
+ * When used on standalone message pages (e.g., /message/123456):
+ * - Always uses 1-column layout regardless of viewport size
+ * - No 2-column layout even at xl-short viewports
+ * - Cancel button is hidden (no modal to cancel back to)
+ * - Reply button only (no Cancel) in footer
+ * - Page scrolls naturally to show all content
+ * - info-section height unconstrained (no internal scrollbars when room)
+ *
+ * Standalone detection: neither `inModal` nor `fullscreenOverlay` props are true
+ *
+ * TEST VIEWPORTS
+ * ==============
+ * Viewport sizes to test all layout variations, whitespace, and scrollbar behavior:
+ *
+ * Layout breakpoint tests:
+ * │ Viewport      │ Width │ Height│ Breakpoint │ Expected Layout                    │
+ * ├───────────────┼───────┼───────┼────────────┼────────────────────────────────────┤
+ * │ 375 × 600     │ xs    │ Short │ xs-short   │ 1-col, poster overlay on photo     │
+ * │ 375 × 800     │ xs    │ Tall  │ xs-tall    │ 1-col, poster in section           │
+ * │ 576 × 600     │ sm    │ Short │ sm-short   │ 1-col, poster overlay on photo     │
+ * │ 576 × 800     │ sm    │ Tall  │ sm-tall    │ 1-col, poster in section           │
+ * │ 768 × 600     │ md    │ Short │ md-short   │ 1-col, poster overlay, no aboutme  │
+ * │ 768 × 800     │ md    │ Tall  │ md-tall    │ 1-col, poster section + aboutme    │
+ * │ 992 × 600     │ lg    │ Short │ lg-short   │ 1-col, poster overlay, no aboutme  │
+ * │ 992 × 800     │ lg    │ Tall  │ lg-tall    │ 1-col, poster section + aboutme    │
+ * │ 1200 × 600    │ xl    │ Short │ xl-short   │ 2-col side-by-side, close button   │
+ * │ 1200 × 800    │ xl    │ Tall  │ xl-tall    │ 1-col, poster section + aboutme    │
+ *
+ * Whitespace and scrollbar edge cases:
+ * │ Viewport      │ Purpose                                                        │
+ * ├───────────────┼────────────────────────────────────────────────────────────────┤
+ * │ 375 × 700     │ Height breakpoint edge - verify no layout jump at boundary     │
+ * │ 375 × 701     │ Just above threshold - poster section should appear            │
+ * │ 768 × 500     │ Very short - info-section should scroll, photo fills space     │
+ * │ 768 × 900     │ Extra tall - verify no excess whitespace below footer          │
+ * │ 1200 × 700    │ xl at height boundary - verify 2-col triggers correctly        │
+ * │ 1200 × 701    │ xl just above threshold - should switch to 1-col               │
+ * │ 1400 × 600    │ Wide 2-col - verify photo doesn't stretch, no horizontal gap   │
+ * │ 1400 × 900    │ Wide tall - verify content fills space without whitespace      │
+ * │ 320 × 568     │ iPhone SE - smallest common device, check no overflow          │
+ * │ 414 × 896     │ iPhone 11 - common device, verify proper spacing               │
+ *
+ * Scrollbar presence tests (use with long description text):
+ * - 1-col short: info-section scrolls internally, page doesn't scroll
+ * - 1-col tall: info-section may scroll if content exceeds 50% height
+ * - 2-col: right column scrolls, left photo column doesn't
+ *
+ * BROKEN LAYOUT INDICATORS
+ * ========================
+ * A layout is broken if ANY of these conditions exist:
+ *
+ * 1. UNUSED WHITESPACE
+ *    - Large gaps between content sections (description vs buttons)
+ *    - Empty space in columns that should contain content
+ *    - Right column in 2-col mode showing only description when poster section should appear
+ *
+ * 2. SCROLLBAR PRESENT BUT SPACE UNUSED
+ *    - Scrollbar visible on right column but whitespace exists above buttons
+ *    - Content scrolls when viewport has room to display it all
+ *    - Indicates content is hidden/collapsed that should be visible
+ *
+ * 3. CSS SPECIFICITY CONFLICTS
+ *    - Parent context selector (`.in-modal &`) overrides media query
+ *    - Fix: Nest media query INSIDE the parent context for equal specificity
+ *    - Symptom: Layout doesn't change at breakpoint despite correct media query
+ *
+ * 4. DISPLAY MODE CONFLICTS
+ *    - `display: flex` on parent prevents `grid-template-columns` from working
+ *    - Must set `display: grid` at same specificity level as the flex rule
+ *    - Symptom: 2-column grid doesn't trigger even at correct viewport
+ *
+ * 5. VISIBILITY CONFLICTS
+ *    - Element hidden by one media query not re-shown by more specific query
+ *    - Example: `@media (max-height: 700px) { display: none }` hides in ALL short
+ *    - Must add: `@media (min-width: 1200px) and (max-height: 700px) { display: flex }`
+ *    - to show element specifically in 2-column mode
+ *
+ * 6. CONTENT SECTIONS MISSING
+ *    - In 2-col mode: poster section should appear in right column below description
+ *    - In 1-col tall: poster section should appear below photo
+ *    - In 1-col short: poster overlay should appear on photo
+ *    - If poster is nowhere visible = broken
+ *
+ * 7. MODAL/OVERLAY CONTEXT AWARENESS
+ *    - Rules for `.in-modal` and `.fullscreen-overlay` must be consistent
+ *    - Both contexts need identical 2-column breakpoint behavior
+ *
+ * 8. MAX-HEIGHT CONSTRAINTS HIDING CONTENT
+ *    - `max-height: 50%` on scrollable section may hide content below the fold
+ *    - Scrollbar present but whitespace visible = content hidden that should fit
+ *    - Fix: In 2-column mode, set `max-height: 100%` to use full available space
+ *    - Must be nested inside parent context selector for proper specificity
+ *    - Note: In 1-column tall mode (xl-tall), poster section may be below fold
+ *      and require scrolling - this is acceptable tradeoff to show more photo
+ *
+ * 9. FLEX CONTAINER WRAPPER ISSUES (Modal context)
+ *    - Bootstrap Vue modal-body uses `display: flex` but slot creates intermediate div
+ *    - Intermediate div has default `flex: 0 1 auto` so doesn't grow to fill parent
+ *    - Symptom: Content wrapper has smaller height than modal-body (e.g. 597px vs 928px)
+ *    - Debug: Walk DOM from wrapper to modal-body, check each element's flex/height
+ *    - Fix: Add wrapper class with `flex: 1; display: flex; flex-direction: column; min-height: 0`
+ *    - See MessageModal.vue `.message-content-wrapper` class
+ *
+ * Chrome DevTools MCP: mcp__chrome-devtools__resize_page(width, height)
+ */
 
-  /* When inside a b-modal, disable fixed positioning */
+/* Main wrapper - handles both modal and page contexts */
+.message-expanded-wrapper {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: $color-white;
+  position: relative;
+
+  /* When used inside a b-modal - let modal handle positioning */
   &.in-modal {
     position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    z-index: auto;
+    width: 100%;
+    height: 100%;
+    flex: 1; /* Fill the flex container (modal-body uses display: flex) */
+    min-height: 0; /* Allow flex shrinking */
+  }
+
+  /* When used as fullscreen overlay (mobile expand) */
+  &.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
+    overflow: hidden;
+    overflow-x: hidden;
   }
 }
 
+/* Main content area - single column by default */
 .message-expanded-mobile {
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 80px;
-  background: $color-white;
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 1000;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  &.stickyAdRendered {
-    bottom: calc(80px + $sticky-banner-height-mobile);
-
-    @media (min-height: $mobile-tall) {
-      bottom: calc(80px + $sticky-banner-height-mobile-tall);
-    }
-  }
-
-  /* Two-column layout for short wide screens */
-  @media (min-width: 992px) and (max-height: 800px) {
-    bottom: 0;
-  }
-
-  /* When inside a b-modal, disable fixed positioning */
-  .in-modal & {
-    position: relative;
-    top: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    z-index: auto;
-    max-height: 70vh;
-
-    &.stickyAdRendered {
-      bottom: auto;
-    }
-  }
+  display: contents;
 }
 
 /* Two-column layout wrapper */
 .two-column-wrapper {
-  display: contents;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
 
-  /* On short wide screens, use CSS Grid for side-by-side layout */
-  @media (min-width: 992px) and (max-height: 800px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    height: 100%;
+  /* Two-column layout only in modal/overlay contexts */
+  .in-modal &,
+  .fullscreen-overlay & {
+    /* Use flexbox for priority-based sizing: photo grows, info sizes to content */
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+
+    /* Two-column on xl+ screens with short height (≤700px) */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      align-items: stretch;
+      height: 100%;
+    }
   }
 }
 
-/* Right column for two-column layout */
+/* Right column for two-column layout - only active in modal/overlay */
 .right-column {
   display: contents;
 
-  @media (min-width: 992px) and (max-height: 800px) {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    min-width: 0;
-    overflow-y: auto;
-    background: $color-white;
+  /* Two-column mode: use grid for precise control - only in modal/overlay */
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-width: 0;
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
   }
 }
 
-/* Inline reply section - hidden by default, shown in two-column layout */
+/* Inline reply section - hidden by default, shown in two-column layout (modal/overlay only) */
 .inline-reply-section {
   display: none;
 
-  @media (min-width: 992px) and (max-height: 800px) {
-    display: block;
-    padding: 1rem;
-    border-top: 1px solid $color-gray-3;
-    background: $color-white;
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: block;
+      flex-shrink: 0;
+      padding: 1rem;
+      border-top: 1px solid $color-gray-3;
+      background: $color-white;
+    }
   }
 }
 
-// Photo Area - fixed height, scrollable with content
+/* Photo Area - flexible height, fills available space */
 .photo-area {
   position: relative;
   width: 100%;
-  flex: 0 0 auto;
-  height: 50vh;
-  min-height: 200px;
+  min-height: 150px;
+  max-height: 50vh;
   overflow: hidden;
   background: $color-gray--lighter;
   cursor: pointer;
 
-  /* Two-column layout: photo fills left grid cell */
-  @media (min-width: 992px) and (max-height: 800px) {
+  /* In modal/fullscreen: grow to fill available space, shrink if needed */
+  .in-modal &,
+  .fullscreen-overlay & {
+    flex: 1 1 0;
+    max-height: none;
+    min-height: 100px;
+  }
+
+  /* Two-column layout: photo fills full height of left column */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    max-height: none;
     height: 100%;
   }
 }
@@ -985,22 +1198,18 @@ onUnmounted(() => {
 // Thumbnail carousel at top of photo area
 .thumbnail-carousel {
   position: absolute;
-  top: 1rem; // Same as back button
-  transform: translateY(
-    calc((40px - 50px) / 2)
-  ); // Center 50px thumbnails with 40px button
-  left: 50px; // Closer to back button, fade handles overlap
-  right: 1rem;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 11;
   display: flex;
+  justify-content: center;
   gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding: 4px;
-  padding-left: 15px;
-  mask-image: linear-gradient(to right, transparent 0%, black 15px);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 15px);
+  max-width: calc(100% - 120px);
 
   &::-webkit-scrollbar {
     display: none;
@@ -1033,7 +1242,7 @@ onUnmounted(() => {
   object-fit: cover;
 }
 
-// Back button on photo
+// Back button on photo - only shown in fullscreen mode (not in modal)
 .back-button {
   position: absolute;
   top: 1rem;
@@ -1053,6 +1262,40 @@ onUnmounted(() => {
 
   &:hover {
     background: $color-black-opacity-70;
+  }
+
+  // Hide when inside a modal (use X close button instead)
+  .in-modal & {
+    display: none;
+  }
+}
+
+// Close button for modal (positioned at modal top-right)
+.close-button {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: $color-gray--darker;
+  border: 2px solid $color-white;
+  color: $color-white;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px $color-black-opacity-30;
+
+  &:hover {
+    background: $color-gray--dark;
+  }
+
+  // Show when inside a modal
+  .in-modal & {
+    display: flex;
   }
 }
 
@@ -1172,22 +1415,67 @@ onUnmounted(() => {
   z-index: 11;
 }
 
-// Info Section - natural height, scrolls with main container
+/* Info Section - scrollable with visible scrollbar */
 .info-section {
-  flex: 0 0 auto;
+  min-height: 0;
   padding: 1rem;
 
-  /* Two-column layout: add top padding to clear navbar */
-  @media (min-width: 992px) and (max-height: 800px) {
-    padding-top: $navbar-height;
+  /* Visible scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: $color-gray--light $color-gray-3;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-gray-3;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gray--light;
+    border-radius: 4px;
+
+    &:hover {
+      background: $color-gray--base;
+    }
+  }
+
+  /* In modal/fullscreen: constrain height and scroll if needed */
+  .in-modal &,
+  .fullscreen-overlay & {
+    flex: 0 0 auto;
+    max-height: 50%;
+    min-height: 0;
+    overflow-y: auto;
+
+    /* Two-column layout: fill available space, scroll if needed - needs same specificity */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      min-height: 0;
+      max-height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  }
+
+  /* Two-column layout on standalone pages: scroll if needed */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* In modal: make room for close button */
+  .in-modal & {
+    padding-top: 2.5rem;
   }
 }
 
-// Poster overlay on photo (shown on shorter screens)
+// Poster overlay on photo (shown on shorter screens, but NOT in 2-column mode)
+// Positioned above the title overlay (badges row)
 .poster-overlay {
   display: none;
   position: absolute;
-  top: 1rem;
+  bottom: 7rem; // Above title-overlay which has ~6rem height
   right: 1rem;
   background: $color-white-opacity-95;
   backdrop-filter: blur(8px);
@@ -1207,12 +1495,14 @@ onUnmounted(() => {
     text-decoration: none;
   }
 
-  &--below-carousel {
-    top: 75px;
-  }
-
+  /* Show on short screens (1-column only) */
   @media (max-height: 700px) {
     display: flex;
+  }
+
+  /* Hide in 2-column mode - poster goes in section instead */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    display: none;
   }
 }
 
@@ -1288,10 +1578,20 @@ onUnmounted(() => {
   border-bottom: 1px solid $color-gray-3;
   padding-bottom: 0.25rem;
 
-  /* POSTED BY header hides on short screens where overlay is shown */
+  /* In modal: add right padding to avoid close button overlap */
+  .in-modal & {
+    padding-right: 3rem;
+  }
+
+  /* POSTED BY header hides on short screens where overlay is shown (1-column only) */
   &--poster {
     @media (max-height: 700px) {
       display: none;
+    }
+
+    /* Show in 2-column mode - poster section is always visible there */
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: flex;
     }
   }
 }
@@ -1325,18 +1625,24 @@ onUnmounted(() => {
   margin-top: 0.5rem;
   text-decoration: none;
   color: inherit;
-  background: $colour-info-bg;
+  background: $color-white;
+  border: 1px solid $color-gray--light;
   border-left: 3px solid $colour-info-fg;
 
   &:hover {
     text-decoration: none;
     color: inherit;
-    background: darken($colour-info-bg, 3%);
+    background: $color-gray-3;
   }
 
-  /* Hide on short screens where overlay is shown */
+  /* Hide on short screens where overlay is shown (1-column only) */
   @media (max-height: 700px) {
     display: none;
+  }
+
+  /* Show in 2-column mode - poster section is always visible there */
+  @media (min-width: 1200px) and (max-height: 700px) {
+    display: flex;
   }
 
   /* Very narrow screens: stack vertically */
@@ -1467,48 +1773,41 @@ onUnmounted(() => {
 }
 
 .description-content {
-  background: $color-gray-3;
+  background: $color-white;
+  border: 1px solid $color-gray--light;
   border-left: 3px solid $color-green--darker;
   padding: 1rem;
-  border-radius: 0 8px 8px 0;
   font-size: 1rem;
   line-height: 1.7;
   color: $color-gray--darker;
+
+  /* Ensure at least 2 lines visible */
+  min-height: 3.4em;
 }
 
 .app-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   padding: 1rem;
   border-top: 1px solid $color-gray-3;
   background: $color-white;
-  z-index: 1100;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 
-  &.stickyAdRendered {
-    bottom: $sticky-banner-height-mobile;
-
-    @media (min-height: $mobile-tall) {
-      bottom: $sticky-banner-height-mobile-tall;
+  /* Hide footer in two-column layout (modal/overlay only - reply is inline there) */
+  .in-modal &,
+  .fullscreen-overlay & {
+    @media (min-width: 1200px) and (max-height: 700px) {
+      display: none;
     }
   }
 
-  /* Hide fixed footer in two-column layout (reply is inline) */
-  @media (min-width: 992px) and (max-height: 800px) {
-    display: none;
-  }
+  /* Sticky ad adjustment - add bottom padding instead of positioning */
+  &.stickyAdRendered {
+    padding-bottom: calc(1rem + $sticky-banner-height-mobile);
 
-  /* When inside a b-modal, disable fixed positioning */
-  .in-modal & {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    z-index: auto;
-
-    &.stickyAdRendered {
-      bottom: auto;
+    @media (min-height: $mobile-tall) {
+      padding-bottom: calc(1rem + $sticky-banner-height-mobile-tall);
     }
   }
 }

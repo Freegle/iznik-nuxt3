@@ -298,6 +298,12 @@ export const useMessageStore = defineStore({
           )
           if (index !== -1) {
             this.byUserList[userUid][index] = message
+
+            // If this was an Outcome action, set hasoutcome flag so the post
+            // moves from active to old posts list immediately
+            if (params.action === 'Outcome') {
+              this.byUserList[userUid][index].hasoutcome = true
+            }
           }
         }
       }

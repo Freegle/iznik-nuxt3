@@ -24,8 +24,23 @@
           {{ signUp ? 'Join the Reuse Revolution!' : 'Welcome back' }}
         </span>
         <span class="signin-switch">
-          <a v-if="signUp" href="#" @click.prevent="clickShowSignIn">Log in</a
-          ><a v-else href="#" @click.prevent="clickShowSignUp">Join</a>
+          <b-button
+            v-if="signUp"
+            variant="secondary"
+            size="sm"
+            class="test-already-a-freegler"
+            @click.prevent="clickShowSignIn"
+          >
+            Log in
+          </b-button>
+          <b-button
+            v-else
+            variant="secondary"
+            size="sm"
+            @click.prevent="clickShowSignUp"
+          >
+            Join
+          </b-button>
         </span>
       </div>
     </template>
@@ -989,10 +1004,13 @@ $color-apple: #000000;
   width: 100%;
 }
 
-.signin-logo-wrap,
-.signin-switch {
+.signin-logo-wrap {
   flex: 0 0 3rem;
   min-width: 3rem;
+}
+
+.signin-switch {
+  flex: 0 0 auto;
 }
 
 .signin-logo {
@@ -1016,11 +1034,6 @@ $color-apple: #000000;
   font-size: 0.875rem;
   font-weight: normal;
   text-align: right;
-  color: $color-gray--dark;
-
-  a {
-    color: $color-blue--base;
-  }
 }
 
 .signin-container {
@@ -1073,8 +1086,9 @@ $color-apple: #000000;
 }
 
 .social-button--facebook {
-  border: 1px solid $color-facebook;
-  background-color: $color-facebook;
+  border: 1px solid $color-facebook !important;
+  background-color: $color-facebook !important;
+  color: $color-white !important;
 }
 
 .social-button--apple {

@@ -134,13 +134,7 @@ const formattedActivePostsCount = computed(() => {
 })
 
 const activePosts = computed(() => {
-  const result = posts.value.filter((post) => !post.hasoutcome)
-  console.log('DEBUG: activePosts computed', {
-    allPostsLength: posts.value.length,
-    activePostsLength: result.length,
-    oldPostsLength: posts.value.filter((post) => post.hasoutcome).length,
-  })
-  return result
+  return posts.value.filter((post) => !post.hasoutcome)
 })
 
 watch(activePosts, (newVal) => {

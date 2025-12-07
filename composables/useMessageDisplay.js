@@ -6,6 +6,7 @@ import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
 import {
   timeagoShort,
+  timeagoMedium,
   dateshortNoYear,
   timeago,
 } from '~/composables/useTimeFormat'
@@ -132,6 +133,16 @@ export function useMessageDisplay(messageId) {
     return `Posted ${timeago(timestamp)}`
   })
 
+  const timeAgoExpanded = computed(() => {
+    // Medium time format for lg+ screens: "2 hours", "3 days"
+    const timestamp =
+      message.value?.groups?.[0]?.arrival ||
+      message.value?.arrival ||
+      message.value?.date
+    if (!timestamp) return ''
+    return timeagoMedium(timestamp)
+  })
+
   const distanceText = computed(() => {
     if (!me.value?.lat || !message.value?.lat) {
       return message.value?.area || null
@@ -143,9 +154,26 @@ export function useMessageDisplay(messageId) {
       message.value.lng
     )
     if (miles < 1) {
-      return '< 1 mi'
+      return '<1mi'
     }
-    return `${Math.round(miles)} mi`
+    return `${Math.round(miles)}mi`
+  })
+
+  const distanceTextExpanded = computed(() => {
+    if (!me.value?.lat || !message.value?.lat) {
+      return message.value?.area || null
+    }
+    const miles = milesAway(
+      me.value.lat,
+      me.value.lng,
+      message.value.lat,
+      message.value.lng
+    )
+    if (miles < 1) {
+      return 'less than 1 mile'
+    }
+    const rounded = Math.round(miles)
+    return rounded === 1 ? '1 mile' : `${rounded} miles`
   })
 
   const replyCount = computed(() => {
@@ -206,8 +234,10 @@ export function useMessageDisplay(messageId) {
     sampleImage,
     attachmentCount,
     timeAgo,
+    timeAgoExpanded,
     fullTimeAgo,
     distanceText,
+    distanceTextExpanded,
     replyCount,
     replyTooltip,
     isOffer,

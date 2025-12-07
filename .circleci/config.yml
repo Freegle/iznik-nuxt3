@@ -840,6 +840,7 @@ jobs:
           name: Install Fastlane
           command: |
             gem install bundler
+            bundle config set --local path 'vendor/bundle'
             bundle update fastlane
             bundle install
 
@@ -906,6 +907,7 @@ jobs:
           name: Install Fastlane
           command: |
             gem install bundler
+            bundle config set --local path 'vendor/bundle'
             bundle update fastlane
             bundle install
 

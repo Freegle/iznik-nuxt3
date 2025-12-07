@@ -81,6 +81,7 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 import NoticeMessage from '~/components/NoticeMessage'
 import GlobalMessage from '~/components/GlobalMessage'
 import { ref, computed, useRouter } from '#imports'
@@ -96,6 +97,7 @@ const runtimeConfig = useRuntimeConfig()
 const communityEventStore = useCommunityEventStore()
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
+const { me } = useMe()
 
 const route = useRoute()
 const groupid = ref(parseInt(route.params.groupid))
@@ -147,9 +149,7 @@ watch(
     if (newVal?.length && !groupid.value) {
       const max = newVal.reduce((a, b) => Math.max(a, b), -Infinity)
 
-      const authStore = useAuthStore()
-      const me = useAuthStore().user
-      const settings = me?.settings || {}
+      const settings = me.value?.settings || {}
 
       settings.lastCommunityEvent = max
       authStore.saveAndGet({
@@ -166,8 +166,6 @@ const changeGroup = function (newval) {
 }
 
 const showEventModal = ref(false)
-
-const me = computed(() => authStore.user)
 
 function openEventModal() {
   showEventModal.value = true
