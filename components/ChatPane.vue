@@ -42,7 +42,10 @@
             <div class="profile-header-info">
               <div class="profile-header-name">
                 <span class="clickme" @click="showInfo">{{ chat.name }}</span>
-                <SupporterInfo v-if="otheruser.supporter" class="supporter-badge" />
+                <SupporterInfo
+                  v-if="otheruser.supporter"
+                  class="supporter-badge"
+                />
               </div>
               <div class="profile-header-stats">
                 <UserRatings
@@ -64,9 +67,59 @@
                 </span>
               </div>
             </div>
+            <div class="profile-header-actions">
+              <b-button
+                v-if="chat.chattype === 'User2User'"
+                variant="white"
+                class="action-btn"
+                @click="chat.status === 'Blocked' ? unhide() : showblock()"
+              >
+                {{ chat.status === 'Blocked' ? 'Unblock' : 'Block' }}
+              </b-button>
+              <b-button
+                variant="white"
+                class="action-btn"
+                @click="chat.status === 'Closed' ? unhide() : showhide()"
+              >
+                {{ chat.status === 'Closed' ? 'Unhide' : 'Hide' }}
+              </b-button>
+              <b-button
+                v-if="chat.chattype === 'User2User'"
+                variant="white"
+                class="action-btn"
+                @click="showreport()"
+              >
+                Report
+              </b-button>
+            </div>
           </div>
         </div>
       </VisibleWhen>
+      <ChatBlockModal
+        v-if="showChatBlock && chat?.chattype === 'User2User'"
+        :id="id"
+        :user="otheruser"
+        @confirm="block"
+        @hidden="showChatBlock = false"
+      />
+      <ChatHideModal
+        v-if="
+          showChatHide &&
+          (chat?.chattype === 'User2User' || chat?.chattype === 'User2Mod')
+        "
+        :id="id"
+        :user="otheruser"
+        @confirm="hide"
+        @hidden="showChatHide = false"
+      />
+      <ChatReportModal
+        v-if="showChatReport && chat?.chattype === 'User2User'"
+        :id="'report-' + id"
+        :user="otheruser"
+        :chatid="chat?.id"
+        @confirm="hide"
+        @hidden="showChatReport = false"
+      />
       <ProfileModal
         v-if="showProfileModal"
         :id="otheruser?.id"
@@ -142,6 +195,15 @@ import { useAuthStore } from '~/stores/auth'
 const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
+const ChatBlockModal = defineAsyncComponent(() =>
+  import('~/components/ChatBlockModal')
+)
+const ChatHideModal = defineAsyncComponent(() =>
+  import('~/components/ChatHideModal')
+)
+const ChatReportModal = defineAsyncComponent(() =>
+  import('~/components/ChatReportModal')
+)
 
 const chatStore = useChatStore()
 const userStore = useUserStore()
@@ -200,9 +262,40 @@ const replytimeFull = computed(() => {
 })
 
 const showProfileModal = ref(false)
+const showChatBlock = ref(false)
+const showChatHide = ref(false)
+const showChatReport = ref(false)
+
+const router = useRouter()
 
 function showInfo() {
   showProfileModal.value = true
+}
+
+function showblock() {
+  showChatBlock.value = true
+}
+
+function showhide() {
+  showChatHide.value = true
+}
+
+function showreport() {
+  showChatReport.value = true
+}
+
+async function hide() {
+  await chatStore.hide(props.id)
+  router.push('/chats')
+}
+
+async function block() {
+  await chatStore.block(props.id)
+  router.push('/chats')
+}
+
+async function unhide() {
+  await chatStore.unhide(props.id)
 }
 
 if (props.id) {
@@ -558,5 +651,17 @@ function typing() {
 
 .supporter-badge {
   font-size: 0.8rem;
+}
+
+.profile-header-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  font-size: 0.7rem;
+  padding: 2px 8px;
 }
 </style>
