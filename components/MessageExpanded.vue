@@ -2,7 +2,7 @@
   <div
     v-if="message"
     class="message-expanded-wrapper"
-    :class="{ 'in-modal': inModal }"
+    :class="{ 'in-modal': inModal, 'fullscreen-overlay': fullscreenOverlay }"
   >
     <div
       ref="containerRef"
@@ -137,96 +137,102 @@
           </div>
 
           <!-- Poster overlay on photo (shown on shorter screens) -->
-          <NuxtLink
-            v-if="poster"
-            :to="posterProfileUrl"
-            class="poster-overlay"
-            :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
-            @click.stop
-          >
-            <div class="poster-overlay-avatar-wrapper">
-              <ProfileImage
-                :image="poster.profile?.paththumb"
-                :externaluid="poster.profile?.externaluid"
-                :ouruid="poster.profile?.ouruid"
-                :externalmods="poster.profile?.externalmods"
-                :name="poster.displayname"
-                class="poster-overlay-avatar"
-                is-thumbnail
-                size="sm"
-              />
-              <div v-if="poster.supporter" class="supporter-badge-small">
-                <v-icon icon="trophy" />
+          <client-only>
+            <NuxtLink
+              v-if="poster"
+              :to="posterProfileUrl"
+              class="poster-overlay"
+              :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
+              @click.stop
+            >
+              <div class="poster-overlay-avatar-wrapper">
+                <ProfileImage
+                  :image="poster.profile?.paththumb"
+                  :externaluid="poster.profile?.externaluid"
+                  :ouruid="poster.profile?.ouruid"
+                  :externalmods="poster.profile?.externalmods"
+                  :name="poster.displayname"
+                  class="poster-overlay-avatar"
+                  is-thumbnail
+                  size="sm"
+                />
+                <div v-if="poster.supporter" class="supporter-badge-small">
+                  <v-icon icon="trophy" />
+                </div>
               </div>
-            </div>
-            <div class="poster-overlay-info">
-              <span class="poster-overlay-name">{{ poster.displayname }}</span>
-              <div class="poster-overlay-stats">
-                <span v-if="poster.info?.offers" class="poster-overlay-stat">
-                  <v-icon icon="gift" />{{ poster.info.offers }}
-                </span>
-                <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
-                  <v-icon icon="search" />{{ poster.info.wanteds }}
-                </span>
+              <div class="poster-overlay-info">
+                <span class="poster-overlay-name">{{
+                  poster.displayname
+                }}</span>
+                <div class="poster-overlay-stats">
+                  <span v-if="poster.info?.offers" class="poster-overlay-stat">
+                    <v-icon icon="gift" />{{ poster.info.offers }}
+                  </span>
+                  <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
+                    <v-icon icon="search" />{{ poster.info.wanteds }}
+                  </span>
+                </div>
               </div>
-            </div>
-            <v-icon icon="chevron-right" class="poster-overlay-chevron" />
-          </NuxtLink>
+              <v-icon icon="chevron-right" class="poster-overlay-chevron" />
+            </NuxtLink>
+          </client-only>
 
           <!-- Title overlay at bottom of photo - matches summary layout -->
           <div class="title-overlay">
             <div class="info-row">
               <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
               <div class="info-icons">
-                <span
-                  v-if="distanceText"
-                  class="location"
-                  @click.stop="showMapModal = true"
-                >
-                  <v-icon icon="map-marker-alt" />{{ distanceText }}
-                </span>
-                <span
-                  v-b-tooltip.click.blur="{
-                    title: fullTimeAgo,
-                    customClass: 'mobile-tooltip',
-                  }"
-                  class="time"
-                  @click.stop
-                >
-                  <v-icon icon="clock" />{{ timeAgo }}
-                </span>
-                <span
-                  v-b-tooltip.click.blur="{
-                    title: replyTooltip,
-                    customClass: 'mobile-tooltip',
-                  }"
-                  class="replies"
-                  @click.stop
-                >
-                  <v-icon icon="comments" />{{ replyCount }}
-                </span>
-                <span
-                  v-if="message.deliverypossible && isOffer"
-                  v-b-tooltip.click.blur="{
-                    title: `Delivery may be possible - you can ask, but don't assume it will be`,
-                    customClass: 'mobile-tooltip',
-                  }"
-                  class="delivery"
-                  @click.stop
-                >
-                  <v-icon icon="truck" />?
-                </span>
-                <span
-                  v-if="message.deadline"
-                  v-b-tooltip.click.blur="{
-                    title: deadlineTooltip,
-                    customClass: 'mobile-tooltip',
-                  }"
-                  class="deadline"
-                  @click.stop
-                >
-                  <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
-                </span>
+                <client-only>
+                  <span
+                    v-if="distanceText"
+                    class="location"
+                    @click.stop="showMapModal = true"
+                  >
+                    <v-icon icon="map-marker-alt" />{{ distanceText }}
+                  </span>
+                  <span
+                    v-b-tooltip.click.blur="{
+                      title: fullTimeAgo,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="time"
+                    @click.stop
+                  >
+                    <v-icon icon="clock" />{{ timeAgo }}
+                  </span>
+                  <span
+                    v-b-tooltip.click.blur="{
+                      title: replyTooltip,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="replies"
+                    @click.stop
+                  >
+                    <v-icon icon="comments" />{{ replyCount }}
+                  </span>
+                  <span
+                    v-if="message.deliverypossible && isOffer"
+                    v-b-tooltip.click.blur="{
+                      title: `Delivery may be possible - you can ask, but don't assume it will be`,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="delivery"
+                    @click.stop
+                  >
+                    <v-icon icon="truck" />?
+                  </span>
+                  <span
+                    v-if="message.deadline"
+                    v-b-tooltip.click.blur="{
+                      title: deadlineTooltip,
+                      customClass: 'mobile-tooltip',
+                    }"
+                    class="deadline"
+                    @click.stop
+                  >
+                    <v-icon icon="hourglass-end" />Ends {{ formattedDeadline }}
+                  </span>
+                </client-only>
               </div>
             </div>
             <div class="title-row">
@@ -260,67 +266,69 @@
             </div>
 
             <!-- Posted by divider and section (shown on taller screens, after description) -->
-            <div v-if="poster" class="section-header section-header--poster">
-              <span class="section-header-text">POSTED BY</span>
+            <client-only>
+              <div v-if="poster" class="section-header section-header--poster">
+                <span class="section-header-text">POSTED BY</span>
+                <NuxtLink
+                  :to="posterProfileUrl"
+                  class="section-id-link"
+                  @click.stop
+                >
+                  #{{ poster.id }}
+                </NuxtLink>
+              </div>
               <NuxtLink
+                v-if="poster"
                 :to="posterProfileUrl"
-                class="section-id-link"
+                class="poster-section-wrapper"
                 @click.stop
               >
-                #{{ poster.id }}
-              </NuxtLink>
-            </div>
-            <NuxtLink
-              v-if="poster"
-              :to="posterProfileUrl"
-              class="poster-section-wrapper"
-              @click.stop
-            >
-              <div class="poster-avatar-wrapper">
-                <ProfileImage
-                  :image="poster.profile?.paththumb"
-                  :externaluid="poster.profile?.externaluid"
-                  :ouruid="poster.profile?.ouruid"
-                  :externalmods="poster.profile?.externalmods"
-                  :name="poster.displayname"
-                  class="poster-avatar"
-                  is-thumbnail
-                  size="lg"
+                <div class="poster-avatar-wrapper">
+                  <ProfileImage
+                    :image="poster.profile?.paththumb"
+                    :externaluid="poster.profile?.externaluid"
+                    :ouruid="poster.profile?.ouruid"
+                    :externalmods="poster.profile?.externalmods"
+                    :name="poster.displayname"
+                    class="poster-avatar"
+                    is-thumbnail
+                    size="lg"
+                  />
+                  <div v-if="poster.supporter" class="supporter-badge">
+                    <v-icon icon="trophy" />
+                  </div>
+                </div>
+                <div class="poster-details">
+                  <span class="poster-name">{{ poster.displayname }}</span>
+                  <div class="poster-stats">
+                    <span v-if="poster.info?.offers" class="poster-stat">
+                      <v-icon icon="gift" />{{ poster.info.offers
+                      }}<span class="poster-stat-label">OFFERs</span>
+                    </span>
+                    <span v-if="poster.info?.wanteds" class="poster-stat">
+                      <v-icon icon="search" />{{ poster.info.wanteds
+                      }}<span class="poster-stat-label">WANTEDs</span>
+                    </span>
+                    <span v-if="poster.info?.replies" class="poster-stat">
+                      <v-icon icon="reply" />{{ poster.info.replies
+                      }}<span class="poster-stat-label">replies</span>
+                    </span>
+                  </div>
+                  <div v-if="posterAboutMe" class="poster-aboutme">
+                    {{ posterAboutMe }}
+                  </div>
+                </div>
+                <UserRatings
+                  v-if="poster.id"
+                  :id="poster.id"
+                  size="md"
+                  :disabled="fromme"
+                  class="poster-ratings"
+                  @click.stop.prevent
                 />
-                <div v-if="poster.supporter" class="supporter-badge">
-                  <v-icon icon="trophy" />
-                </div>
-              </div>
-              <div class="poster-details">
-                <span class="poster-name">{{ poster.displayname }}</span>
-                <div class="poster-stats">
-                  <span v-if="poster.info?.offers" class="poster-stat">
-                    <v-icon icon="gift" />{{ poster.info.offers
-                    }}<span class="poster-stat-label">OFFERs</span>
-                  </span>
-                  <span v-if="poster.info?.wanteds" class="poster-stat">
-                    <v-icon icon="search" />{{ poster.info.wanteds
-                    }}<span class="poster-stat-label">WANTEDs</span>
-                  </span>
-                  <span v-if="poster.info?.replies" class="poster-stat">
-                    <v-icon icon="reply" />{{ poster.info.replies
-                    }}<span class="poster-stat-label">replies</span>
-                  </span>
-                </div>
-                <div v-if="posterAboutMe" class="poster-aboutme">
-                  {{ posterAboutMe }}
-                </div>
-              </div>
-              <UserRatings
-                v-if="poster.id"
-                :id="poster.id"
-                size="md"
-                :disabled="fromme"
-                class="poster-ratings"
-                @click.stop.prevent
-              />
-              <v-icon icon="chevron-right" class="poster-chevron" />
-            </NuxtLink>
+                <v-icon icon="chevron-right" class="poster-chevron" />
+              </NuxtLink>
+            </client-only>
           </div>
 
           <!-- Inline reply section for two-column layout -->
@@ -533,6 +541,10 @@ const props = defineProps({
     default: true,
   },
   inModal: {
+    type: Boolean,
+    default: false,
+  },
+  fullscreenOverlay: {
     type: Boolean,
     default: false,
   },
@@ -835,9 +847,21 @@ onUnmounted(() => {
   background: $color-white;
   position: relative;
 
-  /* When inside b-modal, fill modal height */
+  /* When used inside a b-modal - let modal handle positioning */
   &.in-modal {
+    position: relative;
+    width: 100%;
     height: 100%;
+  }
+
+  /* When used as fullscreen overlay (mobile expand) */
+  &.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
     overflow: hidden;
     overflow-x: hidden;
   }
@@ -855,7 +879,8 @@ onUnmounted(() => {
   grid-template-rows: auto 1fr;
   min-height: 0;
 
-  .in-modal & {
+  .in-modal &,
+  .fullscreen-overlay & {
     /* Use flexbox for priority-based sizing: photo grows, info sizes to content */
     display: flex;
     flex-direction: column;
@@ -907,8 +932,9 @@ onUnmounted(() => {
   background: $color-gray--lighter;
   cursor: pointer;
 
-  /* In modal: grow to fill available space, shrink if needed */
-  .in-modal & {
+  /* In modal/fullscreen: grow to fill available space, shrink if needed */
+  .in-modal &,
+  .fullscreen-overlay & {
     flex: 1 1 0;
     max-height: none;
     min-height: 100px;
@@ -1247,13 +1273,18 @@ onUnmounted(() => {
     }
   }
 
-  /* In modal: size to content, don't grow, scroll if exceeds 50% */
-  .in-modal & {
+  /* In modal/fullscreen: size to content, don't grow, scroll if exceeds 50% */
+  .in-modal &,
+  .fullscreen-overlay & {
     flex: 0 0 auto;
     max-height: 50%;
     min-height: 0;
     overflow-y: auto;
-    padding-top: 2.5rem; /* Make room for close button */
+  }
+
+  /* In modal: make room for close button */
+  .in-modal & {
+    padding-top: 2.5rem;
   }
 
   /* Two-column layout: constrained by grid 1fr row, scrolls if content overflows */

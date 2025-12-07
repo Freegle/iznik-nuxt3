@@ -44,7 +44,7 @@
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        is-modal
+        fullscreen-overlay
         @close="closeMobileExpanded"
       />
     </div>
