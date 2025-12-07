@@ -894,12 +894,11 @@ async function loginViaHomepage(
     console.log(`Modal debug error: ${debugError.message}`)
   }
 
+  // Selectors must be scoped to #loginModal to avoid clicking navbar buttons
   const submitSelectors = [
-    'button:has-text("Log in to Freegle"):not([disabled]):not([disable]):not(.disabled)',
-    'button:has-text("Join Freegle"):not([disabled]):not([disable]):not(.disabled)',
-    'button:has-text("Sign up"):not([disabled]):not([disable]):not(.disabled)',
-    'button:has-text("Join"):not([disabled]):not([disable]):not(.disabled)',
-    'button[type="submit"]:not([disabled]):not([disable]):not(.disabled)',
+    '#loginModal button:has-text("Log in"):not([disabled]):not([disable]):not(.disabled)',
+    '#loginModal button:has-text("Join Freegle!"):not([disabled]):not([disable]):not(.disabled)',
+    '#loginModal button[type="submit"]:not([disabled]):not([disable]):not(.disabled)',
   ]
 
   let submitButton = null
