@@ -434,11 +434,17 @@ function expand(e) {
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    border: 1px solid $color-gray--light;
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   @include media-breakpoint-up(lg) {
     padding: 1rem 1.5rem;
     justify-content: center;
+    border: none;
+    border-left: 1px solid $color-gray--light;
+    box-shadow: none;
   }
 }
 
