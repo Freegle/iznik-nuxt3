@@ -67,7 +67,10 @@
     </b-navbar>
 
     <div :key="'nuxt2-' + bump" class="d-flex">
-      <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
+      <div
+        v-if="showMenu && loggedIn"
+        class="leftmenu text--medium-large-spaced"
+      >
         <ModMenuItemLeft
           link="/"
           name="Dashboard"
@@ -416,9 +419,10 @@ onMounted(async () => {
     await authStore.fetchUser()
   }
 
-  // If not logged in then show loginModal
+  // If not logged in then show loginModal and force it to stay open
   const me = authStore.user
   if (!me || !me.id) {
+    authStore.forceLogin = true
     loginModal.value.show()
     return
   }
