@@ -69,6 +69,15 @@
             </div>
             <div class="profile-header-actions">
               <b-button
+                v-if="unseen"
+                variant="white"
+                class="action-btn action-btn--mark-read"
+                @click="markRead"
+              >
+                Mark read
+                <b-badge variant="danger" class="ms-1">{{ unseen }}</b-badge>
+              </b-button>
+              <b-button
                 v-if="chat.chattype === 'User2User'"
                 variant="white"
                 class="action-btn"
@@ -226,7 +235,7 @@ const ChatNotVisible = defineAsyncComponent(() =>
   import('~/components/ChatNotVisible.vue')
 )
 
-const { chat, otheruser, milesaway } = await setupChat(props.id)
+const { chat, otheruser, milesaway, unseen } = await setupChat(props.id)
 
 const otheraccessFull = computed(() => {
   if (!otheruser.value?.lastaccess) return null
@@ -296,6 +305,10 @@ async function block() {
 
 async function unhide() {
   await chatStore.unhide(props.id)
+}
+
+async function markRead() {
+  await chatStore.markRead(props.id)
 }
 
 if (props.id) {
@@ -663,5 +676,10 @@ function typing() {
 .action-btn {
   font-size: 0.7rem;
   padding: 2px 8px;
+}
+
+.action-btn--mark-read {
+  border: 1px solid #dc3545 !important;
+  color: #dc3545 !important;
 }
 </style>

@@ -1,7 +1,6 @@
 <template>
   <div
     v-if="message"
-    :id="'msg-' + id"
     class="message-summary-mobile"
     :class="{
       offer: isOffer,

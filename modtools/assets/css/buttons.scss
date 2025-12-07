@@ -29,12 +29,22 @@ button {
 }
 
 .btn-secondary {
-  &:hover {
-    border-color: $color-black !important;
+  color: $color-green--darker !important;
+  border: 1px solid $color-green--darker !important;
+  background: transparent !important;
+  transition: all 0.15s ease-in-out !important;
+
+  &:hover,
+  &:focus {
+    color: $color-white !important;
+    border-color: $color-green--darker !important;
+    background: $color-green--darker !important;
   }
 
   &:disabled {
-    border: none !important;
+    opacity: 0.5 !important;
+    color: $color-green--darker !important;
+    background: transparent !important;
   }
 }
 

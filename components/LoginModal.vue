@@ -26,16 +26,17 @@
         <span class="signin-switch">
           <b-button
             v-if="signUp"
-            variant="link"
-            class="signin-switch-btn test-already-a-freegler"
+            variant="secondary"
+            size="sm"
+            class="test-already-a-freegler"
             @click.prevent="clickShowSignIn"
           >
             Log in
           </b-button>
           <b-button
             v-else
-            variant="link"
-            class="signin-switch-btn"
+            variant="secondary"
+            size="sm"
             @click.prevent="clickShowSignUp"
           >
             Join
@@ -1035,25 +1036,6 @@ $color-apple: #000000;
   text-align: right;
 }
 
-.signin-switch-btn {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: $color-green--darker;
-  text-decoration: none;
-  border: 1px solid $color-green--darker;
-  background: transparent;
-  transition: all 0.15s ease-in-out;
-
-  &:hover,
-  &:focus {
-    color: $color-white;
-    border-color: $color-green--darker;
-    background: $color-green--darker;
-    text-decoration: none;
-  }
-}
-
 .signin-container {
   display: flex;
   flex-direction: column;
@@ -1104,8 +1086,9 @@ $color-apple: #000000;
 }
 
 .social-button--facebook {
-  border: 1px solid $color-facebook;
-  background-color: $color-facebook;
+  border: 1px solid $color-facebook !important;
+  background-color: $color-facebook !important;
+  color: $color-white !important;
 }
 
 .social-button--apple {
