@@ -30,6 +30,16 @@
           {{ chat.name }}
         </h1>
       </div>
+      <button
+        v-if="unseen && !profileCardExpanded"
+        class="navbar-mark-read"
+        @click.stop="markRead"
+      >
+        <v-icon icon="check" class="navbar-mark-read-icon" />
+        <b-badge variant="danger" class="navbar-mark-read-badge">{{
+          unseen
+        }}</b-badge>
+      </button>
       <b-dropdown no-caret variant="primary" class="userOptions">
         <template #button-content>
           <ProfileImage
@@ -121,9 +131,16 @@
       </div>
       <!-- Action buttons -->
       <div class="profile-card-actions">
-        <button v-if="unseen" class="action-btn" @click="markRead">
+        <button
+          v-if="unseen"
+          class="action-btn action-btn--mark-read"
+          @click="markRead"
+        >
           <v-icon icon="check" class="action-icon" />
           <span>Mark read</span>
+          <b-badge variant="danger" class="mark-read-badge">{{
+            unseen
+          }}</b-badge>
         </button>
         <button
           v-if="otheruser && otheruser.info && !otheruser?.deleted"
@@ -434,6 +451,37 @@ onBeforeUnmount(() => {
   font-size: 0.65rem;
 }
 
+.navbar-mark-read {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #dc3545;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.navbar-mark-read-icon {
+  color: #dc3545;
+  font-size: 1rem;
+}
+
+.navbar-mark-read-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.6rem;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  line-height: 18px;
+}
+
 .navbar-avatar {
   transition: transform 0.3s ease;
 }
@@ -686,6 +734,28 @@ onBeforeUnmount(() => {
   &--danger {
     color: #c62828;
   }
+
+  &--mark-read {
+    position: relative;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+
+    .action-icon {
+      color: #dc3545;
+    }
+  }
+}
+
+.mark-read-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.6rem;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  line-height: 16px;
 }
 
 .action-icon {

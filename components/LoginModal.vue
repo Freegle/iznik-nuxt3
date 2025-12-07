@@ -1086,8 +1086,9 @@ $color-apple: #000000;
 }
 
 .social-button--facebook {
-  border: 1px solid $color-facebook;
-  background-color: $color-facebook;
+  border: 1px solid $color-facebook !important;
+  background-color: $color-facebook !important;
+  color: $color-white !important;
 }
 
 .social-button--apple {

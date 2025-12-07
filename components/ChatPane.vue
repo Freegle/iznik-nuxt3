@@ -71,10 +71,11 @@
               <b-button
                 v-if="unseen"
                 variant="white"
-                class="action-btn"
+                class="action-btn action-btn--mark-read"
                 @click="markRead"
               >
                 Mark read
+                <b-badge variant="danger" class="ms-1">{{ unseen }}</b-badge>
               </b-button>
               <b-button
                 v-if="chat.chattype === 'User2User'"
@@ -675,5 +676,10 @@ function typing() {
 .action-btn {
   font-size: 0.7rem;
   padding: 2px 8px;
+}
+
+.action-btn--mark-read {
+  border: 1px solid #dc3545 !important;
+  color: #dc3545 !important;
 }
 </style>
