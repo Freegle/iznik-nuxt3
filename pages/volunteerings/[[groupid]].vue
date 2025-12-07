@@ -85,6 +85,7 @@ import { buildHead } from '~/composables/useBuildHead'
 import { useVolunteeringStore } from '~/stores/volunteering'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 import GlobalMessage from '~/components/GlobalMessage'
 import NoticeMessage from '~/components/NoticeMessage'
 import { ref, computed, useRoute, useRouter } from '#imports'
@@ -99,6 +100,7 @@ const runtimeConfig = useRuntimeConfig()
 const volunteeringStore = useVolunteeringStore()
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
+const { me } = useMe()
 
 const route = useRoute()
 const groupid = ref(parseInt(route.params.groupid))
@@ -152,9 +154,7 @@ watch(
       // Save the max op we have seen.
       const max = newVal.reduce((a, b) => Math.max(a, b), -Infinity)
 
-      const authStore = useAuthStore()
-      const me = useAuthStore().user
-      const settings = me?.settings || {}
+      const settings = me.value?.settings || {}
 
       settings.lastVolunteerOpportunity = max
       authStore.saveAndGet({
@@ -171,8 +171,6 @@ const changeGroup = function (newval) {
 }
 
 const showVolunteerModal = ref(false)
-
-const me = computed(() => authStore.user)
 
 function openVolunteerModal() {
   showVolunteerModal.value = true

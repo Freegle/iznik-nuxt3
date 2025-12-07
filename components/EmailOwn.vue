@@ -11,7 +11,9 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/stores/auth'
-const me = useAuthStore().user
+import { useMe } from '~/composables/useMe'
+
+const { me } = useMe()
 
 const props = defineProps({
   email: {

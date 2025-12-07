@@ -115,6 +115,7 @@ import { useMessageStore } from '~/stores/message'
 import { ref, watch } from '#imports'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   selectedGroup: {
@@ -173,6 +174,9 @@ watch(
   }
 )
 
+// User
+const { me } = useMe()
+
 // Isochrones
 const showAddIsochrone = ref(false)
 
@@ -206,9 +210,7 @@ watch(search, (newVal, oldVal) => {
 })
 
 // Selected group.  We have a special case for the 'nearby' group, which is -1.
-const browseView = computed(
-  () => useAuthStore().user?.settings?.browseView || 'nearby'
-)
+const browseView = computed(() => me.value?.settings?.browseView || 'nearby')
 const group = ref(browseView.value === 'nearby' ? -1 : 0)
 
 watch(
@@ -220,8 +222,7 @@ watch(
 
 watch(group, async (newVal) => {
   const authStore = useAuthStore()
-  const me = useAuthStore().user
-  const settings = me?.settings
+  const settings = me.value?.settings
   const messageStore = useMessageStore()
 
   if (newVal === -1) {
@@ -234,22 +235,22 @@ watch(group, async (newVal) => {
 
     emit('update:selectedGroup', 0)
 
-    if (me) {
+    if (me.value) {
       // We do this so that UpToDate doesn't show an old count.
-      messageStore.fetchCount(me.settings?.browseView, false)
+      messageStore.fetchCount(me.value.settings?.browseView, false)
     }
   } else if (newVal === 0) {
     // Special case for all my groups.
-    const settings = useAuthStore().user?.settings
+    const settings = me.value?.settings
     settings.browseView = 'mygroups'
 
     await authStore.saveAndGet({
       settings,
     })
 
-    if (me) {
+    if (me.value) {
       // We do this so that UpToDate doesn't show an old count.
-      messageStore.fetchCount(me.settings?.browseView, false)
+      messageStore.fetchCount(me.value.settings?.browseView, false)
     }
 
     emit('update:selectedGroup', 0)
@@ -305,10 +306,10 @@ const sortOptions = [
 const authStore = useAuthStore()
 const sort = computed({
   get() {
-    return authStore.user?.settings?.browseSort || 'Unseen'
+    return me.value?.settings?.browseSort || 'Unseen'
   },
   async set(val) {
-    const settings = useAuthStore().user?.settings
+    const settings = me.value?.settings
     settings.browseSort = val
 
     await authStore.saveAndGet({

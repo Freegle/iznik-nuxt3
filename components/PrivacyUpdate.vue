@@ -14,9 +14,10 @@
 <script setup>
 import dayjs from 'dayjs'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const authStore = useAuthStore()
-const me = ref(useAuthStore().user)
+const { me } = useMe()
 const lastUpdate = dayjs('2025-02-26')
 
 if (me.value && !me.value?.settings?.lastPrivacySeen) {
