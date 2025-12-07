@@ -3,8 +3,8 @@
     <slot name="header" />
 
     <div v-if="items?.length" class="scroll-grid">
-      <!-- Mobile/tablet/laptop: 2-column grid (up to xl) -->
-      <VisibleWhen :at="['xs', 'sm', 'md', 'lg', 'xl']">
+      <!-- Mobile/tablet: 2-column grid -->
+      <VisibleWhen :at="['xs', 'sm', 'md']">
         <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
           <div v-if="ix % 2 === 0">
             <!-- Full-width slot before this row -->
@@ -31,49 +31,12 @@
         </div>
       </VisibleWhen>
 
-      <!-- Large desktop: 3-column grid (xl+) -->
-      <VisibleWhen :at="['xl', 'xxl']">
+      <!-- Desktop: 1-column layout with full-width items -->
+      <VisibleWhen :not="['xs', 'sm', 'md']">
         <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
-          <div v-if="ix % 3 === 0">
-            <!-- Full-width slots before this row -->
-            <slot name="before-row" :item="item" :index="ix" />
-            <slot
-              v-if="ix + 1 < visibleItems.length"
-              name="before-row"
-              :item="visibleItems[ix + 1]"
-              :index="ix + 1"
-            />
-            <slot
-              v-if="ix + 2 < visibleItems.length"
-              name="before-row"
-              :item="visibleItems[ix + 2]"
-              :index="ix + 2"
-            />
-            <div class="threecolumn">
-              <div class="threecolumn__item">
-                <slot name="item" :item="item" :index="ix" />
-              </div>
-              <div
-                v-if="ix + 1 < visibleItems.length"
-                class="threecolumn__item"
-              >
-                <slot
-                  name="item"
-                  :item="visibleItems[ix + 1]"
-                  :index="ix + 1"
-                />
-              </div>
-              <div
-                v-if="ix + 2 < visibleItems.length"
-                class="threecolumn__item"
-              >
-                <slot
-                  name="item"
-                  :item="visibleItems[ix + 2]"
-                  :index="ix + 2"
-                />
-              </div>
-            </div>
+          <slot name="before-row" :item="item" :index="ix" />
+          <div class="singlecolumn">
+            <slot name="item" :item="item" :index="ix" />
           </div>
         </div>
       </VisibleWhen>
@@ -176,43 +139,8 @@ function loadMore($state) {
   margin-bottom: 0.5rem;
 }
 
-.threecolumn {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-column-gap: 0.5rem;
-  grid-row-gap: 0.5rem;
-  align-items: stretch;
+.singlecolumn {
   margin-bottom: 0.5rem;
-}
-
-.threecolumn__item {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-
-  :deep(> *) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  :deep(> * > *) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  :deep(> * > * > *) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  :deep(> * > * > * > *) {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
 }
 
 .twocolumn {

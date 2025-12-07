@@ -116,7 +116,7 @@
           <v-icon icon="map-marker-alt" />{{ locationText }}
         </span>
         <span class="meta-time">
-          <v-icon icon="clock" />{{ timeAgo || '...' }}
+          <v-icon icon="clock" />{{ displayTimeAgo || '...' }}
         </span>
       </div>
     </div>
@@ -126,6 +126,7 @@
 <script setup>
 import { computed, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { useMiscStore } from '~/stores/misc'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -159,7 +160,9 @@ const {
   gotAttachments,
   attachmentCount,
   timeAgo,
+  timeAgoExpanded,
   distanceText,
+  distanceTextExpanded,
   isOffer,
   isWanted,
   successfulText,
@@ -167,10 +170,17 @@ const {
   categoryIcon,
 } = useMessageDisplay(idRef)
 
+const miscStore = useMiscStore()
+const isLgPlus = computed(() => {
+  return ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
+})
+
 // Truncated description for tablet/desktop view
 const descriptionText = computed(() => {
   const text = message.value?.textbody
   if (!text || text === 'null') return null
+  // On lg+ let CSS line-clamp handle truncation for cleaner display
+  if (isLgPlus.value) return text
   const maxLen = 120
   if (text.length <= maxLen) return text
   return text.substring(0, maxLen).trim() + '...'
@@ -181,7 +191,11 @@ const locationText = computed(() => {
   if (message.value?.area) {
     return message.value.area
   }
-  return distanceText.value
+  return isLgPlus.value ? distanceTextExpanded.value : distanceText.value
+})
+
+const displayTimeAgo = computed(() => {
+  return isLgPlus.value ? timeAgoExpanded.value : timeAgo.value
 })
 
 const hasLocation = computed(() => {
@@ -223,6 +237,13 @@ function expand(e) {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+
+  @include media-breakpoint-up(lg) {
+    flex-direction: row;
+    align-items: stretch;
+    border: 1px solid $color-gray--light;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .photo-area {
@@ -243,6 +264,15 @@ function expand(e) {
   @include media-breakpoint-up(md) {
     padding-bottom: 75%;
   }
+
+  /* Horizontal layout on lg+ - photo takes ~1/6 width */
+  @include media-breakpoint-up(lg) {
+    width: 16%;
+    height: auto;
+    padding-bottom: 0;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
 }
 
 .photo-container {
@@ -252,6 +282,12 @@ function expand(e) {
   right: 0;
   bottom: 0;
   background: $color-gray--light;
+
+  @include media-breakpoint-up(lg) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 :deep(.photo-image),
@@ -399,6 +435,11 @@ function expand(e) {
     flex: 1;
     min-height: 0;
   }
+
+  @include media-breakpoint-up(lg) {
+    padding: 1rem 1.5rem;
+    justify-content: center;
+  }
 }
 
 .content-header {
@@ -458,6 +499,7 @@ function expand(e) {
 
 .content-description {
   font-size: 0.8rem;
+  font-weight: 500;
   color: $color-gray--dark;
   line-height: 1.35;
   flex: 1;
