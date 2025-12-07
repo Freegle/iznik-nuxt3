@@ -16,8 +16,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  margin: 4px 0;
+  padding: 8px 16px;
+  margin: 0;
   background: $color-white;
 }
 

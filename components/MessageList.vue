@@ -20,7 +20,81 @@
       />
     </div>
 
+    <!-- Split view: unseen messages, divider, seen messages -->
+    <template
+      v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
+    >
+      <!-- Unseen messages grid -->
+      <ScrollGrid
+        v-if="unseenMessages.length"
+        :items="unseenMessages"
+        key-field="id"
+        :loading="loading"
+        :distance="distance"
+        :initial-count="MIN_TO_SHOW"
+        @load-more="handleLoadMore"
+      >
+        <template #item="{ item: m, index: ix }">
+          <div
+            :id="'messagewrapper-' + m.id"
+            :ref="'messagewrapper-' + m.id"
+            class="messagewrapper"
+          >
+            <Suspense>
+              <OurMessage
+                :id="m.id"
+                :matchedon="m.matchedon"
+                :preload="ix < 6"
+                record-view
+                @not-found="messageNotFound(m.id)"
+              />
+              <template #fallback>
+                <MessageSkeleton />
+              </template>
+            </Suspense>
+          </div>
+        </template>
+      </ScrollGrid>
+
+      <!-- Divider between unseen and seen -->
+      <MessageListUpToDate v-if="seenMessages.length" />
+
+      <!-- Seen messages grid -->
+      <ScrollGrid
+        v-if="seenMessages.length"
+        :items="seenMessages"
+        key-field="id"
+        :loading="loading"
+        :distance="distance"
+        :initial-count="MIN_TO_SHOW"
+        @load-more="handleLoadMore"
+      >
+        <template #item="{ item: m, index: ix }">
+          <div
+            :id="'messagewrapper-' + m.id"
+            :ref="'messagewrapper-' + m.id"
+            class="messagewrapper"
+          >
+            <Suspense>
+              <OurMessage
+                :id="m.id"
+                :matchedon="m.matchedon"
+                :preload="ix < 6"
+                record-view
+                @not-found="messageNotFound(m.id)"
+              />
+              <template #fallback>
+                <MessageSkeleton />
+              </template>
+            </Suspense>
+          </div>
+        </template>
+      </ScrollGrid>
+    </template>
+
+    <!-- Standard single grid view (not in Unseen sort mode) -->
     <ScrollGrid
+      v-else
       :items="deDuplicatedMessages"
       key-field="id"
       :loading="loading"
@@ -28,16 +102,6 @@
       :initial-count="MIN_TO_SHOW"
       @load-more="handleLoadMore"
     >
-      <template #before-row="{ item: m }">
-        <MessageListUpToDate
-          v-if="
-            !loading &&
-            selectedSort === 'Unseen' &&
-            showCountsUnseen &&
-            m.id === firstSeenMessage
-          "
-        />
-      </template>
       <template #item="{ item: m, index: ix }">
         <div
           :id="'messagewrapper-' + m.id"
@@ -313,6 +377,14 @@ const deDuplicatedMessages = computed(() => {
     })
 
   return ret
+})
+
+const unseenMessages = computed(() => {
+  return deDuplicatedMessages.value.filter((m) => m.unseen)
+})
+
+const seenMessages = computed(() => {
+  return deDuplicatedMessages.value.filter((m) => !m.unseen)
 })
 
 const duplicates = computed(() => {

@@ -27,11 +27,7 @@
     </div>
     <div v-else>
       <!-- Modern card summary for all breakpoints -->
-      <MessageSummaryMobile
-        :id="message.id"
-        :preload="preload"
-        @expand="expand"
-      />
+      <MessageSummary :id="message.id" :preload="preload" @expand="expand" />
       <MessageModal
         v-if="expanded"
         :id="message.id"
@@ -65,8 +61,8 @@ import { useMiscStore } from '~/stores/misc'
 const MessageExpanded = defineAsyncComponent(() =>
   import('~/components/MessageExpanded')
 )
-const MessageSummaryMobile = defineAsyncComponent(() =>
-  import('~/components/MessageSummaryMobile')
+const MessageSummary = defineAsyncComponent(() =>
+  import('~/components/MessageSummary')
 )
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')

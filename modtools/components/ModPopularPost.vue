@@ -25,7 +25,11 @@
         Hop over to &lt;shortlink will be automatically inserted here&gt; to see
         what else is being given away, or to ask for stuff you'd like.
       </p>
-      <MessageSummary :id="message.id" :replyable="false" :message="message" />
+      <ModMessageSummary
+        :id="message.id"
+        :replyable="false"
+        :message="message"
+      />
     </b-card-body>
     <b-card-footer>
       <SpinButton
