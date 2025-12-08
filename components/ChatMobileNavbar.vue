@@ -107,6 +107,7 @@
                 :id="chat.otheruid"
                 :key="'otheruser-' + chat.otheruid"
                 size="sm"
+                @modal-opening="profileCardExpanded = false"
               />
             </div>
             <div class="profile-card-stats">
