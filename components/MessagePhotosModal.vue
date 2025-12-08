@@ -81,6 +81,10 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  initialIndex: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits(['hidden'])
@@ -94,8 +98,8 @@ const message = computed(() => messageStore?.byId(props.id))
 
 const attachmentCount = computed(() => message.value?.attachments?.length || 0)
 
-// Current image index
-const currentIndex = ref(0)
+// Current image index - start at initialIndex prop
+const currentIndex = ref(props.initialIndex)
 
 // Ready flag - wait for modal to be fully rendered before showing PinchMe
 const isReady = ref(false)
