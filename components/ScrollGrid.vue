@@ -3,33 +3,44 @@
     <slot name="header" />
 
     <div v-if="items?.length" class="scroll-grid">
-      <!-- Mobile/tablet: 2-column grid -->
+      <!-- Mobile/tablet portrait: 2-column grid -->
       <VisibleWhen :at="['xs', 'sm', 'md']">
-        <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
-          <div v-if="ix % 2 === 0">
-            <!-- Full-width slot before this row (only for first item in row) -->
-            <slot name="before-row" :item="item" :index="ix" />
-            <div class="twocolumn">
-              <div class="onecolumn">
-                <slot name="item" :item="item" :index="ix" />
+        <template v-if="!isLandscape">
+          <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
+            <div v-if="ix % 2 === 0">
+              <!-- Full-width slot before this row (only for first item in row) -->
+              <slot name="before-row" :item="item" :index="ix" />
+              <div class="twocolumn">
+                <div class="onecolumn">
+                  <slot name="item" :item="item" :index="ix" />
+                </div>
+                <div v-if="ix + 1 < visibleItems.length" class="onecolumn">
+                  <slot
+                    name="item"
+                    :item="visibleItems[ix + 1]"
+                    :index="ix + 1"
+                  />
+                </div>
               </div>
-              <div v-if="ix + 1 < visibleItems.length" class="onecolumn">
-                <slot
-                  name="item"
-                  :item="visibleItems[ix + 1]"
-                  :index="ix + 1"
-                />
-              </div>
+              <!-- Before-row for second column item renders AFTER this row, before next row -->
+              <slot
+                v-if="ix + 1 < visibleItems.length"
+                name="before-row"
+                :item="visibleItems[ix + 1]"
+                :index="ix + 1"
+              />
             </div>
-            <!-- Before-row for second column item renders AFTER this row, before next row -->
-            <slot
-              v-if="ix + 1 < visibleItems.length"
-              name="before-row"
-              :item="visibleItems[ix + 1]"
-              :index="ix + 1"
-            />
           </div>
-        </div>
+        </template>
+        <!-- Mobile/tablet landscape: 1-column layout (list view) -->
+        <template v-else>
+          <div v-for="(item, ix) in visibleItems" :key="itemKey(item, ix)">
+            <slot name="before-row" :item="item" :index="ix" />
+            <div class="singlecolumn">
+              <slot name="item" :item="item" :index="ix" />
+            </div>
+          </div>
+        </template>
       </VisibleWhen>
 
       <!-- Desktop: 1-column layout with full-width items -->
@@ -72,6 +83,9 @@
 import { ref, computed } from 'vue'
 import VisibleWhen from '~/components/VisibleWhen'
 import InfiniteLoading from '~/components/InfiniteLoading'
+import { useOrientation } from '~/composables/useOrientation'
+
+const { isLandscape } = useOrientation()
 
 const props = defineProps({
   items: {

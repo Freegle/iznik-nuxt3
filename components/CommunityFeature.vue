@@ -1,42 +1,33 @@
 <template>
-  <div class="bg-white">
-    <div class="d-flex align-items-start justify-content-between mb-1">
-      <h2 class="header--size4 pl-2">
-        <nuxt-link :to="link" class="title__link" no-prefetch>
-          <v-icon :icon="iconName" scale="2" /> {{ title }}
-        </nuxt-link>
-      </h2>
-      <b-button
-        variant="secondary"
-        :aria-label="addButtonLabel"
-        class="mr-1 towardstop"
-        @click="showModal"
-      >
-        <v-icon icon="plus" /> Add
-      </b-button>
+  <div class="feature-container">
+    <div class="feature-header">
+      <nuxt-link :to="link" class="header-link" no-prefetch>
+        <v-icon :icon="iconName" class="header-icon" />
+        <span class="header-title">{{ title }}</span>
+      </nuxt-link>
+      <button :aria-label="addButtonLabel" class="add-btn" @click="showModal">
+        <v-icon icon="plus" />
+        <span>Add</span>
+      </button>
     </div>
-    <b-card variant="white" no-body class="pt-2">
-      <b-card-body class="p-0">
-        <div class="p-1">
-          <div v-if="items.length">
-            <p class="text-center small text-muted">
-              {{ itemDescription }}
-            </p>
-            <div v-for="id in items" :key="itemKey + id" class="">
-              <CommunityEvent
-                v-if="featureComponent === 'CommunityEvent'"
-                :id="id"
-                :summary="true"
-              />
-              <VolunteerOpportunity v-else :id="id" :summary="true" />
-            </div>
-          </div>
-          <p v-else class="text-center p-1">
-            {{ noItemsMessage }}
-          </p>
+    <div class="feature-content">
+      <div v-if="items.length">
+        <p class="feature-description">
+          {{ itemDescription }}
+        </p>
+        <div v-for="id in items" :key="itemKey + id">
+          <CommunityEvent
+            v-if="featureComponent === 'CommunityEvent'"
+            :id="id"
+            :summary="true"
+          />
+          <VolunteerOpportunity v-else :id="id" :summary="true" />
         </div>
-      </b-card-body>
-    </b-card>
+      </div>
+      <p v-else class="feature-empty">
+        {{ noItemsMessage }}
+      </p>
+    </div>
 
     <template v-if="featureComponent === 'CommunityEvent'">
       <CommunityEventModal
@@ -118,15 +109,79 @@ function showModal() {
 }
 </script>
 <style scoped lang="scss">
-.title__link {
-  color: $colour-header;
+@import 'assets/css/_color-vars.scss';
+
+.feature-container {
+  background: white;
+}
+
+.feature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.header-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.header-icon {
+  color: $colour-success;
+  font-size: 1.1rem;
+}
+
+.header-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: $colour-success;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: $colour-success;
+  color: white;
+  border: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: darken($colour-success, 8%);
+  }
+}
+
+.feature-content {
+  padding: 0.75rem;
+}
+
+.feature-description {
+  text-align: center;
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+}
+
+.feature-empty {
+  text-align: center;
+  padding: 0.5rem;
+  margin: 0;
+  color: $color-gray--dark;
 }
 
 :deep(a) {
   text-decoration: none;
-}
-
-.towardstop {
-  z-index: 1000;
 }
 </style>

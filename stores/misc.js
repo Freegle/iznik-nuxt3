@@ -10,6 +10,7 @@ export const useMiscStore = defineStore({
   state: () => ({
     time: null,
     breakpoint: null,
+    isLandscape: false,
     vals: {},
     somethingWentWrong: false,
     errorDetails: null,
@@ -39,6 +40,9 @@ export const useMiscStore = defineStore({
     },
     setBreakpoint(val) {
       this.breakpoint = val
+    },
+    setLandscape(val) {
+      this.isLandscape = val
     },
     setSource(val) {
       this.source = val

@@ -2,7 +2,7 @@
   <div class="app-find-photos" :class="{ 'has-sticky-ad': stickyAdRendered }">
     <!-- Main content -->
     <div class="app-content">
-      <AppPhotoUploader
+      <PhotoUploader
         v-model="attachments"
         type="Message"
         :recognise="attachments.length === 0"
@@ -105,6 +105,10 @@ function goNext() {
     @media (min-height: $mobile-tall) {
       padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
     }
+
+    @media (min-height: $desktop-tall) {
+      padding-bottom: calc(80px + $sticky-banner-height-desktop-tall);
+    }
   }
 }
 
@@ -128,6 +132,10 @@ function goNext() {
 
     @media (min-height: $mobile-tall) {
       bottom: $sticky-banner-height-mobile-tall;
+    }
+
+    @media (min-height: $desktop-tall) {
+      bottom: $sticky-banner-height-desktop-tall;
     }
   }
 }

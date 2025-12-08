@@ -5,7 +5,7 @@
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip.bottom="uptitle"
+        v-b-tooltip.bottom="showDown || showRemove ? '' : uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -18,7 +18,7 @@
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
       <b-button
-        v-b-tooltip.bottom="downtitle"
+        v-b-tooltip.bottom="showDown || showRemove ? '' : downtitle"
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -69,6 +69,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const emit = defineEmits(['modal-opening'])
 
 const userStore = useUserStore()
 // Use myid computed property from useMe composable for consistency
@@ -127,6 +129,7 @@ const rate = async (rating, reason, text) => {
 const up = async () => {
   showDown.value = false
   if (user.value?.info?.ratings?.Mine === 'Up') {
+    emit('modal-opening')
     showRemove.value = true
   } else {
     await rate('Up')
@@ -137,8 +140,10 @@ const down = () => {
   showDown.value = false
 
   if (user.value?.info?.ratings?.Mine === 'Down') {
+    emit('modal-opening')
     showRemove.value = true
   } else {
+    emit('modal-opening')
     showDown.value = true
   }
 }
@@ -158,9 +163,5 @@ const down = () => {
 .btn-white:hover {
   background-color: white;
   color: black;
-}
-
-.user-ratings {
-  z-index: 1049;
 }
 </style>
