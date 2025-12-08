@@ -270,8 +270,12 @@ function rendered(id) {
     border-left-color: rgba($colour-success, 0.25);
   }
 
-  &.depth-3 {
-    border-left-color: rgba($colour-success, 0.15);
+  /* After depth 2, stop indenting further to prevent narrow columns.
+     The @mentions in replies show who is replying to whom. */
+  &[class*='depth-']:not(.depth-1):not(.depth-2) {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
   }
 }
 
