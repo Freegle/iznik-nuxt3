@@ -500,6 +500,7 @@
     <MessagePhotosModal
       v-if="showMessagePhotosModal && attachmentCount"
       :id="message.id"
+      :initial-index="currentPhotoIndex"
       @hidden="showMessagePhotosModal = false"
     />
   </div>
