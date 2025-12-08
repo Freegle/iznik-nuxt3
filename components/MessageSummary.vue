@@ -7,6 +7,7 @@
       wanted: isWanted,
       freegled: message.successful && showFreegled,
       promisedfade: showPromised && message.promised && !message.promisedtome,
+      'mobile-landscape': isMobileLandscape,
     }"
     @click="expand"
   >
@@ -126,6 +127,7 @@
 import { computed, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
 import { useMiscStore } from '~/stores/misc'
+import { useOrientation } from '~/composables/useOrientation'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -170,8 +172,14 @@ const {
 } = useMessageDisplay(idRef)
 
 const miscStore = useMiscStore()
+const { isLandscape } = useOrientation()
+
 const isLgPlus = computed(() => {
   return ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
+})
+
+const isMobileLandscape = computed(() => {
+  return isLandscape.value && ['xs', 'sm', 'md'].includes(miscStore.breakpoint)
 })
 
 // Truncated description for tablet/desktop view
@@ -243,6 +251,14 @@ function expand(e) {
     border: 1px solid $color-gray--light;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  /* Mobile landscape: use list view layout */
+  &.mobile-landscape {
+    flex-direction: row;
+    align-items: stretch;
+    border: 1px solid $color-gray--light;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .photo-area {
@@ -272,6 +288,15 @@ function expand(e) {
     aspect-ratio: 1;
     flex-shrink: 0;
   }
+
+  /* Mobile landscape: small thumbnail on left */
+  .mobile-landscape & {
+    width: 20%;
+    height: auto;
+    padding-bottom: 0;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
 }
 
 .photo-container {
@@ -283,6 +308,12 @@ function expand(e) {
   background: $color-gray--light;
 
   @include media-breakpoint-up(lg) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-landscape & {
     position: relative;
     width: 100%;
     height: 100%;
@@ -327,7 +358,7 @@ function expand(e) {
   height: auto;
 }
 
-/* Mobile overlay - hidden on tablet+ */
+/* Mobile overlay - hidden on tablet+ and mobile landscape */
 .title-overlay-mobile {
   position: absolute;
   bottom: 0;
@@ -356,6 +387,10 @@ function expand(e) {
   overflow: hidden;
 
   @include media-breakpoint-up(md) {
+    display: none;
+  }
+
+  .mobile-landscape & {
     display: none;
   }
 }
@@ -422,7 +457,7 @@ function expand(e) {
   height: auto;
 }
 
-/* Content section - hidden on mobile, visible on tablet+ */
+/* Content section - hidden on mobile portrait, visible on tablet+ and mobile landscape */
 .content-section {
   display: none;
   padding: 0.75rem;
@@ -440,6 +475,18 @@ function expand(e) {
 
   @include media-breakpoint-up(lg) {
     padding: 1rem 1.5rem;
+    justify-content: center;
+    border: none;
+    border-left: 1px solid $color-gray--light;
+    box-shadow: none;
+  }
+
+  .mobile-landscape & {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 0.75rem 1rem;
     justify-content: center;
     border: none;
     border-left: 1px solid $color-gray--light;
