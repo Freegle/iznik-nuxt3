@@ -345,10 +345,11 @@ platform :ios do
     )
 
     # Upload to TestFlight
+    # Note: Do NOT set changelog here - it forces pilot to wait for the build to appear
+    # in Apple's system, which can timeout. Set changelog manually in App Store Connect.
     pilot(
       skip_waiting_for_build_processing: true,
       distribute_external: false,
-      changelog: "Version #{version} - Bug fixes and improvements",
       app_identifier: "org.ilovefreegle.iphone"
     )
 
