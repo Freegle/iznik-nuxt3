@@ -96,6 +96,7 @@
         <div ref="desktopTallDetector" class="desktop-tall-detector" />
       </div>
       <BreakpointFettler />
+      <OrientationFettler />
       <div id="here" />
       <SomethingWentWrong />
       <div id="videoda">
@@ -145,6 +146,9 @@ const BouncingEmail = defineAsyncComponent(() =>
 )
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
+)
+const OrientationFettler = defineAsyncComponent(() =>
+  import('~/components/OrientationFettler')
 )
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
