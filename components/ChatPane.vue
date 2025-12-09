@@ -618,6 +618,11 @@ function typing() {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+
+  @include media-breakpoint-only(md) {
+    gap: 8px;
+  }
 }
 
 .profile-header-avatar {
@@ -668,9 +673,16 @@ function typing() {
 
 .profile-header-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin-left: auto;
-  flex-shrink: 0;
+
+  @include media-breakpoint-only(md) {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
 }
 
 .action-btn {
