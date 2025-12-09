@@ -17,8 +17,10 @@ test.describe('ModTools login tests', () => {
     })
 
     // Wait for redirect to login page (client-side redirect after initial page load)
+    // Use waitUntil: 'commit' since Nuxt client-side navigation doesn't trigger full load
     await page.waitForURL('**/login**', {
       timeout: timeouts.navigation.initial,
+      waitUntil: 'commit',
     })
 
     // Check that we were redirected to the login page with return parameter
