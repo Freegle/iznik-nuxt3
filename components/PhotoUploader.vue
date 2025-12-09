@@ -154,6 +154,7 @@
 <script setup>
 import {
   ref,
+  shallowRef,
   watch,
   defineAsyncComponent,
   reactive,
@@ -219,10 +220,11 @@ const imageStore = useImageStore()
 const mobileStore = useMobileStore()
 
 // Detect if running in app vs web browser
-const isApp = ref(mobileStore.isApp)
+// Use computed to stay reactive to store changes (store may initialize after component)
+const isApp = computed(() => mobileStore.isApp)
 
-// Uppy instance for web browsers
-let uppy = null
+// Uppy instance for web browsers - use shallowRef so template reactivity works
+const uppy = shallowRef(null)
 const uppyModalOpen = ref(false)
 
 // Local state
@@ -535,14 +537,14 @@ function retakePhoto() {
 
 // Handle drag enter - open Uppy for web browsers
 function onDragEnter() {
-  if (!isApp.value && uppy) {
+  if (!isApp.value && uppy.value) {
     openUppyModal()
   }
 }
 
 // Open Uppy modal for web browsers
 function openUppyModal() {
-  if (!isApp.value && uppy) {
+  if (!isApp.value && uppy.value) {
     uppyModalOpen.value = true
   }
 }
@@ -602,14 +604,14 @@ async function handleUppySuccess(result) {
   }
 
   closeUppyModal()
-  uppy.clear()
+  uppy.value.clear()
 }
 
 // Initialize Uppy for web browsers
 onMounted(() => {
   if (isApp.value) return
 
-  uppy = new Uppy({
+  uppy.value = new Uppy({
     autoProceed: true,
     closeAfterFinish: true,
     hidePauseResumeButton: true,
@@ -631,17 +633,17 @@ onMounted(() => {
     })
     .use(Compressor)
 
-  uppy.on('complete', handleUppySuccess)
-  uppy.on('error', (error) => {
+  uppy.value.on('complete', handleUppySuccess)
+  uppy.value.on('error', (error) => {
     console.error('Upload error, retry', error)
-    uppy.retryAll()
+    uppy.value.retryAll()
   })
 })
 
 onBeforeUnmount(() => {
-  if (uppy && typeof uppy.close === 'function') {
-    uppy.close()
-    uppy = null
+  if (uppy.value && typeof uppy.value.close === 'function') {
+    uppy.value.close()
+    uppy.value = null
   }
 })
 </script>
