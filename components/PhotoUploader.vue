@@ -1,5 +1,5 @@
 <template>
-  <div class="app-photo-uploader">
+  <div class="app-photo-uploader" @dragenter="onDragEnter">
     <!-- Featured photo - always shows first photo (the primary one for post) -->
     <Transition name="fade">
       <div v-if="selectedPhoto" class="featured-photo">
@@ -135,17 +135,43 @@
         </div>
       </template>
     </b-modal>
+
+    <!-- Uppy Dashboard Modal for web browsers -->
+    <DashboardModal
+      v-if="!isApp && uppy"
+      :uppy="uppy"
+      :open="uppyModalOpen"
+      :props="{
+        onRequestCloseModal: closeUppyModal,
+        waitForThumbnailsBeforeUpload: true,
+        closeAfterFinish: true,
+        showNativePhotoCameraButton: true,
+      }"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, watch, defineAsyncComponent, reactive, computed } from 'vue'
+import {
+  ref,
+  watch,
+  defineAsyncComponent,
+  reactive,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
+import Uppy from '@uppy/core'
+import { DashboardModal } from '@uppy/vue'
+import Tus from '@uppy/tus'
+import Compressor from '@uppy/compressor'
 import PhotoCard from './PhotoCard.vue'
 import OurUploadedImage from '~/components/OurUploadedImage.vue'
 import { useRuntimeConfig } from '#app'
 import { useImageStore } from '~/stores/image'
+import { useMobileStore } from '~/stores/mobile'
 import {
   analyzePhotoQuality,
   getQualityMessage,
@@ -190,6 +216,14 @@ const emit = defineEmits(['update:modelValue', 'photoProcessed', 'skip'])
 
 const runtimeConfig = useRuntimeConfig()
 const imageStore = useImageStore()
+const mobileStore = useMobileStore()
+
+// Detect if running in app vs web browser
+const isApp = ref(mobileStore.isApp)
+
+// Uppy instance for web browsers
+let uppy = null
+const uppyModalOpen = ref(false)
 
 // Local state
 const photos = ref([...props.modelValue])
@@ -247,7 +281,13 @@ watch(
 
 // Open photo source selection
 function openPhotoOptions() {
-  showSourceModal.value = true
+  if (isApp.value) {
+    // App: show native camera/gallery modal
+    showSourceModal.value = true
+  } else {
+    // Web: open Uppy modal
+    openUppyModal()
+  }
 }
 
 // Take photo with camera
@@ -492,6 +532,118 @@ function retakePhoto() {
   // Re-open photo options
   openPhotoOptions()
 }
+
+// Handle drag enter - open Uppy for web browsers
+function onDragEnter() {
+  if (!isApp.value && uppy) {
+    openUppyModal()
+  }
+}
+
+// Open Uppy modal for web browsers
+function openUppyModal() {
+  if (!isApp.value && uppy) {
+    uppyModalOpen.value = true
+  }
+}
+
+// Close Uppy modal
+function closeUppyModal() {
+  uppyModalOpen.value = false
+}
+
+// Handle Uppy upload success
+async function handleUppySuccess(result) {
+  if (!result.successful) return
+
+  for (const r of result.successful) {
+    let uid = r.tus?.uploadUrl
+
+    if (uid) {
+      uid = 'freegletusd-' + uid.substring(uid.lastIndexOf('/') + 1)
+
+      const tempId = `temp-${++tempIdCounter}`
+      const photo = reactive({
+        tempId,
+        preview: r.preview || null,
+        uploading: true,
+        progress: 100,
+        qualityWarning: null,
+        error: false,
+      })
+
+      photos.value.push(photo)
+
+      try {
+        const att = {
+          imgtype: props.type,
+          externaluid: uid,
+          externalmods: {},
+          recognise: props.recognise && photos.value.indexOf(photo) === 0,
+        }
+
+        const ret = await imageStore.post(att)
+
+        photo.id = ret.id
+        photo.path = ret.url
+        photo.paththumb = ret.url
+        photo.ouruid = ret.uid
+        photo.info = ret.info
+        photo.uploading = false
+        delete photo.tempId
+
+        emit('photoProcessed', ret.id)
+      } catch (e) {
+        console.error('Image post failed:', e)
+        photo.error = true
+        photo.uploading = false
+      }
+    }
+  }
+
+  closeUppyModal()
+  uppy.clear()
+}
+
+// Initialize Uppy for web browsers
+onMounted(() => {
+  if (isApp.value) return
+
+  uppy = new Uppy({
+    autoProceed: true,
+    closeAfterFinish: true,
+    hidePauseResumeButton: true,
+    hideProgressAfterFinish: true,
+    locale: {
+      strings: {
+        dropPasteImportFiles: '%{browseFiles} or drag and drop',
+        browseFiles: 'Browse files',
+      },
+    },
+    restrictions: {
+      allowedFileTypes: ['image/*', '.jpg', '.jpeg', '.png', '.gif', '.heic'],
+      maxNumberOfFiles: props.maxPhotos,
+    },
+  })
+    .use(Tus, {
+      endpoint: runtimeConfig.public.TUS_UPLOADER,
+      uploadDataDuringCreation: true,
+    })
+    .use(Compressor)
+
+  uppy.on('complete', handleUppySuccess)
+  uppy.on('error', (error) => {
+    console.error('Upload error, retry', error)
+    uppy.retryAll()
+  })
+})
+
+onBeforeUnmount(() => {
+  if (uppy) {
+    uppy.close()
+    uppy = null
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -839,4 +991,10 @@ function retakePhoto() {
 .ghost {
   opacity: 0.4;
 }
+</style>
+
+<style lang="scss">
+@import '@uppy/core/dist/style.css';
+@import '@uppy/webcam/dist/style.css';
+@import 'assets/css/uploader.scss';
 </style>
