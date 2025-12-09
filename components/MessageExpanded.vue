@@ -1929,27 +1929,21 @@ onUnmounted(() => {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-/* Ken Burns effect - slow pan and zoom, mobile/tablet only */
+/* Ken Burns effect - slow pan and zoom for ~10s then stop centered, mobile/tablet only */
 @keyframes kenburns {
   0% {
-    transform: scale(1.15) translate(0%, 3%);
-  }
-  25% {
-    transform: scale(1.15) translate(-3%, 0%);
+    transform: scale(1.15) translate(3%, 3%);
   }
   50% {
-    transform: scale(1.15) translate(0%, -3%);
-  }
-  75% {
-    transform: scale(1.15) translate(3%, 0%);
+    transform: scale(1.15) translate(-3%, -3%);
   }
   100% {
-    transform: scale(1.15) translate(0%, 3%);
+    transform: scale(1) translate(0%, 0%);
   }
 }
 
 .photo-container.ken-burns img {
-  animation: kenburns 20s ease-in-out infinite;
+  animation: kenburns 10s ease-in-out forwards;
   will-change: transform;
   transform-origin: center center;
 
