@@ -138,12 +138,11 @@
 
           <!-- Poster overlay on photo (shown on shorter screens) -->
           <client-only>
-            <NuxtLink
+            <div
               v-if="poster"
-              :to="posterProfileUrl"
               class="poster-overlay"
               :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
-              @click.stop
+              @click.stop="showProfileModal = true"
             >
               <div class="poster-overlay-avatar-wrapper">
                 <ProfileImage
@@ -174,7 +173,7 @@
                 </div>
               </div>
               <v-icon icon="chevron-right" class="poster-overlay-chevron" />
-            </NuxtLink>
+            </div>
           </client-only>
 
           <!-- Title overlay at bottom of photo - matches summary layout -->
@@ -283,19 +282,17 @@
             <client-only>
               <div v-if="poster" class="section-header section-header--poster">
                 <span class="section-header-text">POSTED BY</span>
-                <NuxtLink
-                  :to="posterProfileUrl"
+                <span
                   class="section-id-link"
-                  @click.stop
+                  @click.stop="showProfileModal = true"
                 >
                   #{{ poster.id }}
-                </NuxtLink>
+                </span>
               </div>
-              <NuxtLink
+              <div
                 v-if="poster"
-                :to="posterProfileUrl"
                 class="poster-section-wrapper"
-                @click.stop
+                @click.stop="showProfileModal = true"
               >
                 <div class="poster-avatar-wrapper">
                   <ProfileImage
@@ -341,7 +338,7 @@
                   @click.stop.prevent
                 />
                 <v-icon icon="chevron-right" class="poster-chevron" />
-              </NuxtLink>
+              </div>
             </client-only>
           </div>
 
@@ -520,6 +517,13 @@
       :id="message.id"
       @hidden="showShareModal = false"
     />
+
+    <!-- Profile Modal -->
+    <ProfileModal
+      v-if="showProfileModal && poster?.id"
+      :id="poster.id"
+      @hidden="showProfileModal = false"
+    />
   </div>
 </template>
 
@@ -548,6 +552,9 @@ const MessagePhotosModal = defineAsyncComponent(() =>
 )
 const MessageShareModal = defineAsyncComponent(() =>
   import('~/components/MessageShareModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
 )
 
 const props = defineProps({
@@ -602,7 +609,6 @@ const {
   placeholderClass,
   categoryIcon,
   poster,
-  posterProfileUrl,
 } = useMessageDisplay(props.id)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
@@ -612,6 +618,7 @@ const replied = ref(false)
 const replyExpanded = ref(false)
 const showMapModal = ref(false)
 const showShareModal = ref(false)
+const showProfileModal = ref(false)
 const showMessagePhotosModal = ref(false)
 const currentPhotoIndex = ref(0)
 const containerRef = ref(null)
@@ -1534,7 +1541,7 @@ onUnmounted(() => {
 .poster-overlay {
   display: none;
   position: absolute;
-  bottom: 7rem; // Above title-overlay which has ~6rem height
+  bottom: 7rem; /* Above title-overlay which has ~6rem height */
   right: 1rem;
   background: $color-white-opacity-95;
   backdrop-filter: blur(8px);
@@ -1547,6 +1554,7 @@ onUnmounted(() => {
   gap: 0.5rem;
   box-shadow: 0 2px 8px $color-black-opacity-15;
   border: 1px solid $color-gray-3;
+  cursor: pointer;
 
   &:hover {
     background: $color-white;
@@ -1674,7 +1682,7 @@ onUnmounted(() => {
   }
 }
 
-/* Poster section wrapper - now a link for tablet layout with ratings */
+/* Poster section wrapper - clickable to open profile modal */
 .poster-section-wrapper {
   display: flex;
   align-items: flex-start;
@@ -1687,6 +1695,7 @@ onUnmounted(() => {
   background: $color-white;
   border: 1px solid $color-gray--light;
   border-left: 3px solid $colour-info-fg;
+  cursor: pointer;
 
   &:hover {
     text-decoration: none;
