@@ -560,6 +560,13 @@ function expand(e) {
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: 0.35rem;
+
+  /* In list layout (lg+), remove line clamp and let it fill available space */
+  @include media-breakpoint-up(lg) {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+  }
 }
 
 .content-meta {
