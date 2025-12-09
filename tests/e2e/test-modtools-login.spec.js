@@ -16,30 +16,12 @@ test.describe('ModTools login tests', () => {
       timeout: timeouts.navigation.initial,
     })
 
-    try {
-      await waitForNuxtPageLoad({ timeout: 30000 })
-    } catch (error) {
-      const currentTitle = await page.title()
-      const bodyText = await page
-        .textContent('body')
-        .catch(() => 'Could not get body text')
-      const isStillLoading = bodyText?.includes('Loading... Stuck here')
+    // Wait for redirect to login page (client-side redirect after initial page load)
+    await page.waitForURL('**/login**', {
+      timeout: timeouts.navigation.initial,
+    })
 
-      console.log(
-        `Page failed to load properly. Current title: "${currentTitle}"`
-      )
-      console.log(`Is still loading: ${isStillLoading}`)
-
-      if (isStillLoading) {
-        console.log(
-          'Page appears to be stuck loading JavaScript, but continuing with test...'
-        )
-      } else {
-        throw error
-      }
-    }
-
-    // Check that we were redirected to the login page
+    // Check that we were redirected to the login page with return parameter
     const currentUrl = page.url()
     expect(currentUrl).toContain('/login')
     expect(currentUrl).toContain('return=/')
