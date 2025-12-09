@@ -242,8 +242,18 @@
             <div class="title-row">
               <span class="title-subject">{{ subjectItemName }}</span>
             </div>
-            <div v-if="subjectLocation" class="title-location">
-              {{ subjectLocation }}
+            <div class="location-row">
+              <div v-if="subjectLocation" class="title-location">
+                {{ subjectLocation }}
+              </div>
+              <div class="photo-actions">
+                <button
+                  class="photo-action-btn"
+                  @click.stop="showShareModal = true"
+                >
+                  <v-icon icon="share-alt" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -503,6 +513,13 @@
       :initial-index="currentPhotoIndex"
       @hidden="showMessagePhotosModal = false"
     />
+
+    <!-- Share Modal -->
+    <MessageShareModal
+      v-if="showShareModal"
+      :id="message.id"
+      @hidden="showShareModal = false"
+    />
   </div>
 </template>
 
@@ -528,6 +545,9 @@ import { useModalHistory } from '~/composables/useModalHistory'
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
 const MessagePhotosModal = defineAsyncComponent(() =>
   import('~/components/MessagePhotosModal')
+)
+const MessageShareModal = defineAsyncComponent(() =>
+  import('~/components/MessageShareModal')
 )
 
 const props = defineProps({
@@ -591,6 +611,7 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 const replied = ref(false)
 const replyExpanded = ref(false)
 const showMapModal = ref(false)
+const showShareModal = ref(false)
 const showMessagePhotosModal = ref(false)
 const currentPhotoIndex = ref(0)
 const containerRef = ref(null)
@@ -1369,6 +1390,43 @@ onUnmounted(() => {
 .title-row {
   width: 100%;
   min-width: 0;
+}
+
+.location-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.photo-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: $color-white-opacity-25;
+  color: $color-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-white-opacity-50;
+  }
+
+  svg {
+    font-size: 0.75rem;
+  }
 }
 
 .title-tag {
