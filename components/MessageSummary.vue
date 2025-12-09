@@ -11,7 +11,7 @@
     }"
     @click="expand"
   >
-    <!-- Status overlay images - outside photo-area to stack above everything -->
+    <!-- Status overlay images - outside photo-area to avoid fade filter -->
     <b-img
       v-if="message.successful"
       lazy
@@ -246,8 +246,10 @@ function expand(e) {
   min-height: 0;
 
   @include media-breakpoint-up(lg) {
+    display: flex;
     flex-direction: row;
     align-items: stretch;
+    max-height: 200px;
     border: 1px solid $color-gray--light;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -280,12 +282,11 @@ function expand(e) {
     padding-bottom: 75%;
   }
 
-  /* Horizontal layout on lg+ - photo takes ~1/6 width */
+  /* Horizontal layout on lg+ - fixed square photo */
   @include media-breakpoint-up(lg) {
-    width: 16%;
-    height: auto;
+    width: 200px;
+    height: 200px;
     padding-bottom: 0;
-    aspect-ratio: 1;
     flex-shrink: 0;
   }
 
@@ -347,15 +348,28 @@ function expand(e) {
 .status-overlay-image {
   position: absolute;
   z-index: 20;
-  transform: rotate(15deg);
-  top: 50%;
+  transform: rotate(15deg) translate(-50%, -50%);
+  top: 45%;
   left: 50%;
   width: 50%;
-  max-width: 100px;
-  margin-left: -25%;
-  margin-top: -15%;
+  max-width: 120px;
   pointer-events: none;
   height: auto;
+
+  /* In list view (lg+), photo is 200px wide on left - position badge within that area */
+  @include media-breakpoint-up(lg) {
+    left: 100px; /* Center of 200px photo area */
+    top: 100px; /* Center of 200px photo area */
+    width: 120px;
+    max-width: 120px;
+  }
+
+  /* Mobile landscape: photo is 20% width */
+  .mobile-landscape & {
+    left: 10%; /* Center of 20% photo area */
+    width: 15%;
+    max-width: none;
+  }
 }
 
 /* Mobile overlay - hidden on tablet+ and mobile landscape */
@@ -475,10 +489,12 @@ function expand(e) {
 
   @include media-breakpoint-up(lg) {
     padding: 1rem 1.5rem;
-    justify-content: center;
     border: none;
     border-left: 1px solid $color-gray--light;
     box-shadow: none;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
   }
 
   .mobile-landscape & {
@@ -560,6 +576,26 @@ function expand(e) {
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: 0.35rem;
+
+  /* In list layout (lg+), fill available space with fade-out overflow */
+  @include media-breakpoint-up(lg) {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
+    position: relative;
+    min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.5em;
+      background: linear-gradient(transparent, $color-white);
+      pointer-events: none;
+    }
+  }
 }
 
 .content-meta {

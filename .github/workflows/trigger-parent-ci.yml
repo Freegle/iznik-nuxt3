@@ -51,9 +51,13 @@ jobs:
 
           # Commit and push
           git add "$REPO_NAME"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          # Sanitize commit message - take first line only, remove quotes
-          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"')
+          # Get first line of commit message, properly escaped
+          COMMIT_MSG=$(cat <<'COMMIT_MSG_EOF'
+          ${{ github.event.head_commit.message }}
+          COMMIT_MSG_EOF
+          )
+          # Take first line only and sanitize
+          COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"' | sed 's/^[[:space:]]*//')
           git commit -m "Update $REPO_NAME submodule - $COMMIT_MSG"
 
           echo "Pushing to FreegleDocker..."

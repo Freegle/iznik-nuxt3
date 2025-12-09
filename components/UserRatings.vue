@@ -13,7 +13,7 @@
           mine: user.info.ratings.Mine === 'Up',
           'mr-1': true,
         }"
-        @click="up"
+        @click.stop="up"
       >
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
@@ -26,7 +26,7 @@
           mine: user.info.ratings.Mine === 'Down',
           'ml-1': true,
         }"
-        @click="down"
+        @click.stop="down"
       >
         <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
       </b-button>
