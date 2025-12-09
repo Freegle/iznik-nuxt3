@@ -58,3 +58,9 @@ export const TYPING_TIME_INVERVAL = 10000
 
 // The 37 miles figure comes from research from someone we shall call Clement.
 export const FAR_AWAY = 37
+
+// Job ad icon background colours - keep in sync with _color-vars.scss
+export const JOB_ICON_COLOURS = {
+  'dark green': '#2d5016',
+  'soft sage green': '#7a9a6d',
+}

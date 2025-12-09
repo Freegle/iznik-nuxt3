@@ -20,6 +20,7 @@
           :id="job.id"
           :key="'job-' + job.job_reference"
           :summary="true"
+          bg-colour="soft sage green"
           :class="{ 'd-none d-md-block': index > 1 }"
         />
       </div>

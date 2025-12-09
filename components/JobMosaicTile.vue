@@ -8,15 +8,16 @@
       </div>
       <div class="mosaic-image" :style="imageStyle">
         <img
+          v-if="imageUrl"
           v-show="imageLoaded"
-          :src="pollinationsUrl"
+          :src="imageUrl"
           alt=""
           class="mosaic-img"
           loading="lazy"
           @load="imageLoaded = true"
           @error="imageLoaded = false"
         />
-        <div v-show="!imageLoaded" class="mosaic-placeholder">
+        <div v-show="!imageUrl || !imageLoaded" class="mosaic-placeholder">
           <v-icon icon="briefcase" />
         </div>
       </div>
@@ -65,28 +66,9 @@ const location = computed(() => {
   return job.value?.location || ''
 })
 
-const runtimeConfig = useRuntimeConfig()
-
-const pollinationsUrl = computed(() => {
-  if (!title.value) {
-    return ''
-  }
-
-  const bgHex =
-    JOB_ICON_COLOURS[props.bgColour] || JOB_ICON_COLOURS['dark green']
-  const prompt = encodeURIComponent(
-    `simple cute cartoon ${title.value} white line drawing on ${bgHex} background, minimalist icon style, absolutely no text, no words, no letters, no numbers, no labels, no writing, no captions, no signs, no speech bubbles, no border, filling the entire frame`
-  )
-  const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=200&height=200&nologo=true&seed=1`
-
-  const deliveryProxy = runtimeConfig.public.IMAGE_DELIVERY
-  if (deliveryProxy) {
-    return `${deliveryProxy}?url=${encodeURIComponent(
-      imageUrl
-    )}&trim=10&w=100&h=100&fit=cover`
-  }
-
-  return imageUrl
+// Use server-provided image URL if available
+const imageUrl = computed(() => {
+  return job.value?.image || null
 })
 
 const imageStyle = computed(() => {
