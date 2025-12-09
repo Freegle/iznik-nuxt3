@@ -348,6 +348,11 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  replyData: {
+    type: Object,
+    required: false,
+    default: null,
+  },
   threadhead: {
     type: Number,
     required: true,
@@ -410,7 +415,8 @@ const userid = computed(() => {
 })
 
 const reply = computed(() => {
-  return newsfeedStore?.byId(props.id)
+  /* Use passed replyData (for combined replies) or fall back to store lookup */
+  return props.replyData || newsfeedStore?.byId(props.id)
 })
 
 const replyaddedago = computed(() => {

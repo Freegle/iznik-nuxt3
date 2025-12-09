@@ -36,6 +36,7 @@
         v-else
         :id="reply.id"
         :key="'reply-' + reply.id"
+        :reply-data="reply"
         :threadhead="threadhead"
         :scroll-to="scrollTo"
         class="reply-content"
@@ -128,42 +129,67 @@ const visiblereplies = computed(() => {
 })
 
 const combinedReplies = computed(() => {
-  const TEN_MINUTES = 10 * 60 * 1000 // 10 minutes in milliseconds
+  const TEN_MINUTES = 10 * 60 * 1000
   const combined = []
 
   for (let i = 0; i < filteredReplies.value.length; i++) {
     const currentReply = filteredReplies.value[i]
     const currentTime = new Date(currentReply.added).getTime()
-
-    // Check if we can combine with the last reply in our combined array
     const lastCombined = combined[combined.length - 1]
 
-    if (
+    const canCombine =
       lastCombined &&
       lastCombined.userid === currentReply.userid &&
-      !currentReply.image && // Don't combine replies with images
+      !currentReply.image &&
       !lastCombined.image &&
+      !currentReply.replies?.length &&
+      !lastCombined.replies?.length &&
       currentTime -
         new Date(lastCombined.originalAdded || lastCombined.added).getTime() <=
         TEN_MINUTES
-    ) {
-      // Combine the replies
-      const combinedReply = {
-        ...lastCombined,
-        message: lastCombined.message + '\n\n' + currentReply.message,
-        added: currentReply.added, // Use the latest timestamp
-        originalAdded: lastCombined.originalAdded || lastCombined.added, // Keep track of original timestamp
-        isCombined: true,
-        combinedMessages: lastCombined.combinedMessages
-          ? [...lastCombined.combinedMessages, currentReply.message]
-          : [lastCombined.message, currentReply.message],
-      }
 
-      // Replace the last combined reply with the new combined one
-      combined[combined.length - 1] = combinedReply
+    if (canCombine) {
+      /* Create a fresh object to avoid mutating store data */
+      combined[combined.length - 1] = {
+        id: lastCombined.id,
+        userid: lastCombined.userid,
+        displayname: lastCombined.displayname,
+        profile: lastCombined.profile,
+        added: currentReply.added,
+        originalAdded: lastCombined.originalAdded || lastCombined.added,
+        message: lastCombined.message + '\n\n' + currentReply.message,
+        isCombined: true,
+        image: null,
+        replies: [],
+        deleted: lastCombined.deleted,
+        hidden: lastCombined.hidden,
+        loves: lastCombined.loves,
+        loved: lastCombined.loved,
+        type: lastCombined.type,
+        replyto: lastCombined.replyto,
+        threadhead: lastCombined.threadhead,
+        previews: lastCombined.previews,
+      }
     } else {
-      // Add as a separate reply
-      combined.push(currentReply)
+      /* Deep clone to avoid reactivity issues with store objects */
+      combined.push({
+        id: currentReply.id,
+        userid: currentReply.userid,
+        displayname: currentReply.displayname,
+        profile: currentReply.profile,
+        added: currentReply.added,
+        message: currentReply.message,
+        image: currentReply.image,
+        replies: currentReply.replies,
+        deleted: currentReply.deleted,
+        hidden: currentReply.hidden,
+        loves: currentReply.loves,
+        loved: currentReply.loved,
+        type: currentReply.type,
+        replyto: currentReply.replyto,
+        threadhead: currentReply.threadhead,
+        previews: currentReply.previews,
+      })
     }
   }
 
