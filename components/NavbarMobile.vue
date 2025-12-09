@@ -175,6 +175,7 @@ import {
   setNavBarHidden,
   useNavbar,
   navBarHidden,
+  updateScrollTime,
 } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
@@ -258,6 +259,9 @@ function refresh() {
 function handleScroll() {
   const scrollY = window.scrollY
   const scrollDelta = scrollY - lastScrollY.value
+
+  // Track that we're actively scrolling
+  updateScrollTime()
 
   if (notificationsShown.value) {
     if (navBarHidden.value) {
@@ -511,5 +515,4 @@ const me = computed(() => useAuthStore().user)
   transform: translateY(0px);
   transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 }
-
 </style>

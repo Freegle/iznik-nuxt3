@@ -1,7 +1,7 @@
 <template>
   <b-modal ref="modal" scrollable title="Share a post" size="lg">
     <template #default>
-      <div v-if="message">
+      <div v-if="message" class="text-body">
         <h3>
           {{ message.subject }}
         </h3>
@@ -15,7 +15,7 @@
             freegling too!
           </p>
         </NoticeMessage>
-        <p class="mt-1">You can share using these buttons:</p>
+        <p class="mt-1 text-body">You can share using these buttons:</p>
         <b-button
           v-if="isApp"
           variant="primary"
@@ -184,22 +184,22 @@ async function shareApp() {
 <style scoped lang="scss">
 :deep(.facebook) {
   background-color: $color-facebook !important;
-  color: white;
+  color: white !important;
 }
 
 :deep(.twitter) {
   background-color: $color-twitter !important;
-  color: white;
+  color: white !important;
 }
 
 :deep(.whatsapp) {
   background-color: $color-whatsapp !important;
-  color: white;
+  color: white !important;
 }
 
 :deep(.gmail) {
   background-color: $color-gmail !important;
-  color: white;
+  color: white !important;
 }
 
 :deep(.buttons button) {

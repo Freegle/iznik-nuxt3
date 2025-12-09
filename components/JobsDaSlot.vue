@@ -21,12 +21,16 @@
           See all <v-icon icon="chevron-right" />
         </nuxt-link>
       </div>
-      <div class="jobs-slot-list">
+      <div
+        class="jobs-slot-list"
+        :class="{ 'jobs-slot-list--horizontal': !listOnly }"
+      >
         <JobOne
-          v-for="job in list"
+          v-for="job in listOnly ? list.slice(0, 10) : list.slice(0, 20)"
           :id="job.id"
           :key="'job-' + job.job_reference"
           :summary="true"
+          bg-colour="dark green"
         />
       </div>
     </div>
@@ -62,6 +66,10 @@ defineProps({
     default: null,
   },
   hideHeader: {
+    type: Boolean,
+    default: false,
+  },
+  listOnly: {
     type: Boolean,
     default: false,
   },
@@ -171,21 +179,20 @@ const list = computed(() => {
     margin-bottom: 0;
   }
 
-  :deep(.job-summary) {
-    padding: 0.5rem 0.6rem;
-  }
+  &--horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-x: auto;
 
-  :deep(.job-icon) {
-    width: 2rem;
-    height: 2rem;
-  }
+    :deep(.job-item) {
+      width: 280px;
+      flex-shrink: 0;
+    }
 
-  :deep(.job-title) {
-    font-size: 0.85rem;
-  }
-
-  :deep(.job-location) {
-    font-size: 0.7rem;
+    :deep(.job-summary) {
+      border-bottom: none;
+      border-right: 1px solid $gray-200;
+    }
   }
 }
 </style>

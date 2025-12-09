@@ -6,6 +6,7 @@
       max-height="600px"
       :div-id="adDivId"
       class="mt-2 w-100"
+      list-only
       @rendered="onAdRendered"
     />
     <CommunityEventSidebar
