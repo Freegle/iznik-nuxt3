@@ -246,8 +246,10 @@ function expand(e) {
   min-height: 0;
 
   @include media-breakpoint-up(lg) {
+    display: flex;
     flex-direction: row;
     align-items: stretch;
+    max-height: 200px;
     border: 1px solid $color-gray--light;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -280,12 +282,11 @@ function expand(e) {
     padding-bottom: 75%;
   }
 
-  /* Horizontal layout on lg+ - photo takes ~1/6 width but at least 200px */
+  /* Horizontal layout on lg+ - fixed square photo */
   @include media-breakpoint-up(lg) {
-    width: max(16%, 200px);
-    height: auto;
+    width: 200px;
+    height: 200px;
     padding-bottom: 0;
-    aspect-ratio: 1;
     flex-shrink: 0;
   }
 
@@ -475,10 +476,12 @@ function expand(e) {
 
   @include media-breakpoint-up(lg) {
     padding: 1rem 1.5rem;
-    justify-content: center;
     border: none;
     border-left: 1px solid $color-gray--light;
     box-shadow: none;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
   }
 
   .mobile-landscape & {
@@ -561,11 +564,24 @@ function expand(e) {
   overflow: hidden;
   margin-bottom: 0.35rem;
 
-  /* In list layout (lg+), remove line clamp and let it fill available space */
+  /* In list layout (lg+), fill available space with fade-out overflow */
   @include media-breakpoint-up(lg) {
     display: block;
     -webkit-line-clamp: unset;
     -webkit-box-orient: unset;
+    position: relative;
+    min-height: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.5em;
+      background: linear-gradient(transparent, $color-white);
+      pointer-events: none;
+    }
   }
 }
 
