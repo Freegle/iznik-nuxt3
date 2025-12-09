@@ -280,9 +280,9 @@ function expand(e) {
     padding-bottom: 75%;
   }
 
-  /* Horizontal layout on lg+ - photo takes ~1/6 width */
+  /* Horizontal layout on lg+ - photo takes ~1/6 width but at least 200px */
   @include media-breakpoint-up(lg) {
-    width: 16%;
+    width: max(16%, 200px);
     height: auto;
     padding-bottom: 0;
     aspect-ratio: 1;
