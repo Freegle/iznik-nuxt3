@@ -17,6 +17,7 @@ import { useMobileStore } from '~/stores/mobile'
 export const navBarHidden = ref(false)
 
 let navBarTimeout = null
+let lastScrollTime = 0
 
 export function clearNavBarTimeout() {
   if (navBarTimeout) {
@@ -26,9 +27,12 @@ export function clearNavBarTimeout() {
 }
 
 export function setNavBarHidden(hideRequest) {
-  // Hide the navbar when typing.
+  // Hide the navbar when scrolling down or typing.
   //
-  // Start a timer to show the navbars again after a delay.
+  // Start a timer to show the navbars again after a delay of inactivity.
+  // The timer should only reset when transitioning from shown->hidden,
+  // not when continuously scrolling while already hidden.
+
   if (navBarHidden.value !== hideRequest) {
     function maybeHide(hidden) {
       clearNavBarTimeout()
@@ -37,19 +41,23 @@ export function setNavBarHidden(hideRequest) {
         // If we've been typing recently then we don't want to show the navbar.  This stops it sliding up
         // and obscuring the chat box.
         const lastTyping = useMiscStore().lastTyping
-        if (
-          lastTyping &&
-          new Date().getTime() - lastTyping < TYPING_TIME_INVERVAL
-        ) {
+        const now = Date.now()
+
+        if (lastTyping && now - lastTyping < TYPING_TIME_INVERVAL) {
           // We're still typing.  Keep the navbar hidden and check whether to show it again later.
           console.log('Still typing - hide navbar')
           navBarHidden.value = true
           navBarTimeout = setTimeout(maybeHide, 5000, false)
+        } else if (now - lastScrollTime < 300) {
+          // We scrolled recently.  Keep the navbar hidden and check whether to show it again later.
+          console.log('Still scrolling - hide navbar')
+          navBarHidden.value = true
+          navBarTimeout = setTimeout(maybeHide, 5000, false)
         } else {
-          // We're not still typing.  We can show the navbar.
+          // We're not still typing or scrolling.  We can show the navbar.
           console.log(
-            'Not still typing - show',
-            new Date().getTime(),
+            'Not still typing or scrolling - show',
+            now,
             useMiscStore().lastTyping
           )
 
@@ -66,6 +74,10 @@ export function setNavBarHidden(hideRequest) {
 
     maybeHide(hideRequest)
   }
+}
+
+export function updateScrollTime() {
+  lastScrollTime = Date.now()
 }
 
 export function useNavbar() {
