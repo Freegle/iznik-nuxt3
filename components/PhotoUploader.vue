@@ -639,7 +639,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (uppy) {
+  if (uppy && typeof uppy.close === 'function') {
     uppy.close()
     uppy = null
   }
