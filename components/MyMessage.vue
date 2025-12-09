@@ -92,13 +92,6 @@
                   <span class="title-time">{{ timeAgo }}</span>
                 </div>
                 <div class="photo-actions">
-                  <button
-                    v-if="!message.outcomes?.length"
-                    class="photo-action-btn"
-                    @click.stop="edit"
-                  >
-                    <v-icon icon="pen" />
-                  </button>
                   <button class="photo-action-btn" @click.stop="share">
                     <v-icon icon="share-alt" />
                   </button>
@@ -117,48 +110,60 @@
 
         <!-- Action buttons - compact row -->
         <div v-if="!rejected" class="action-buttons">
-          <button
-            v-if="message.type === 'Offer' && !taken && !withdrawn"
-            class="action-btn action-btn--primary"
-            @click="outcome('Taken', $event)"
-          >
-            <v-icon icon="check" />
-            <span>TAKEN</span>
-          </button>
-          <button
-            v-if="message.type === 'Wanted' && !received && !withdrawn"
-            class="action-btn action-btn--primary"
-            @click="outcome('Received', $event)"
-          >
-            <v-icon icon="check" />
-            <span>RECEIVED</span>
-          </button>
-          <button
-            v-if="
-              message.type === 'Offer' && !taken && !withdrawn && !isPromised
-            "
-            class="action-btn action-btn--secondary"
-            @click="showPromiseModal = true"
-          >
-            <v-icon icon="handshake" />
-            <span>Promise</span>
-          </button>
-          <button
-            v-if="!taken && !received && !withdrawn"
-            class="action-btn action-btn--light"
-            @click="outcome('Withdrawn', $event)"
-          >
-            <v-icon icon="trash-alt" />
-            <span>Withdraw</span>
-          </button>
-          <button
-            v-if="message.canrepost && message.location && message.item"
-            class="action-btn action-btn--light"
-            @click="repost"
-          >
-            <v-icon icon="sync" />
-            <span>Repost</span>
-          </button>
+          <div class="action-buttons-left">
+            <button
+              v-if="message.type === 'Offer' && !taken && !withdrawn"
+              class="action-btn action-btn--primary"
+              @click="outcome('Taken', $event)"
+            >
+              <v-icon icon="check" />
+              <span>TAKEN</span>
+            </button>
+            <button
+              v-if="message.type === 'Wanted' && !received && !withdrawn"
+              class="action-btn action-btn--primary"
+              @click="outcome('Received', $event)"
+            >
+              <v-icon icon="check" />
+              <span>RECEIVED</span>
+            </button>
+            <button
+              v-if="
+                message.type === 'Offer' && !taken && !withdrawn && !isPromised
+              "
+              class="action-btn action-btn--secondary"
+              @click="showPromiseModal = true"
+            >
+              <v-icon icon="handshake" />
+              <span>Promise</span>
+            </button>
+            <button
+              v-if="!taken && !received && !withdrawn"
+              class="action-btn action-btn--light"
+              @click="outcome('Withdrawn', $event)"
+            >
+              <v-icon icon="trash-alt" />
+              <span>Withdraw</span>
+            </button>
+            <button
+              v-if="message.canrepost && message.location && message.item"
+              class="action-btn action-btn--light"
+              @click="repost"
+            >
+              <v-icon icon="sync" />
+              <span>Repost</span>
+            </button>
+          </div>
+          <div class="action-buttons-right">
+            <button
+              v-if="!message.outcomes?.length"
+              class="action-btn action-btn--light"
+              @click="edit"
+            >
+              <v-icon icon="pen" />
+              <span>Edit</span>
+            </button>
+          </div>
         </div>
 
         <!-- Rejected actions -->
@@ -930,10 +935,24 @@ onMounted(() => {
 
 .action-buttons {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
   gap: 6px;
   padding: 10px 12px;
   border-bottom: 1px solid $color-gray--lighter;
+}
+
+.action-buttons-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.action-buttons-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .action-btn {
