@@ -17,9 +17,10 @@ test.describe('ModTools login tests', () => {
     })
 
     // Wait for redirect to login page (client-side redirect after initial page load)
-    await page.waitForURL('**/login**', {
-      timeout: timeouts.navigation.initial,
-    })
+    // Poll URL until it contains /login to avoid issues with logger proxy
+    await expect
+      .poll(() => page.url(), { timeout: timeouts.navigation.initial })
+      .toContain('/login')
 
     // Check that we were redirected to the login page with return parameter
     const currentUrl = page.url()
