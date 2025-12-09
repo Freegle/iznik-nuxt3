@@ -11,7 +11,7 @@
     }"
     @click="expand"
   >
-    <!-- Status overlay images - outside photo-area to stack above everything -->
+    <!-- Status overlay images - outside photo-area to avoid fade filter -->
     <b-img
       v-if="message.successful"
       lazy
@@ -348,15 +348,28 @@ function expand(e) {
 .status-overlay-image {
   position: absolute;
   z-index: 20;
-  transform: rotate(15deg);
-  top: 50%;
+  transform: rotate(15deg) translate(-50%, -50%);
+  top: 45%;
   left: 50%;
   width: 50%;
-  max-width: 100px;
-  margin-left: -25%;
-  margin-top: -15%;
+  max-width: 120px;
   pointer-events: none;
   height: auto;
+
+  /* In list view (lg+), photo is 200px wide on left - position badge within that area */
+  @include media-breakpoint-up(lg) {
+    left: 100px; /* Center of 200px photo area */
+    top: 100px; /* Center of 200px photo area */
+    width: 120px;
+    max-width: 120px;
+  }
+
+  /* Mobile landscape: photo is 20% width */
+  .mobile-landscape & {
+    left: 10%; /* Center of 20% photo area */
+    width: 15%;
+    max-width: none;
+  }
 }
 
 /* Mobile overlay - hidden on tablet+ and mobile landscape */
