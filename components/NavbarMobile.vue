@@ -264,9 +264,10 @@ function handleScroll() {
       setNavBarHidden(false)
     }
   } else if (scrollY < 60) {
-    // Always show at top of page
+    // Always show at top of page - immediately, bypassing typing delay
     if (navBarHidden.value) {
-      setNavBarHidden(false)
+      clearNavBarTimeout()
+      navBarHidden.value = false
     }
   } else if (scrollDelta > scrollThreshold && !navBarHidden.value) {
     // Scrolling down - hide
@@ -511,5 +512,4 @@ const me = computed(() => useAuthStore().user)
   transform: translateY(0px);
   transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 }
-
 </style>
