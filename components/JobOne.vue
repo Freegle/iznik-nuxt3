@@ -2,8 +2,18 @@
   <div v-if="job" class="job-item" @click="clicked">
     <ExternalLink :href="job.url" class="job-link">
       <div v-if="summary" class="job-summary">
-        <div class="job-icon">
-          <v-icon icon="briefcase" />
+        <div class="job-icon" :style="iconStyle">
+          <img
+            v-if="imageUrl"
+            v-show="imageLoaded"
+            :src="imageUrl"
+            alt=""
+            class="job-ai-image"
+            loading="lazy"
+            @load="imageLoaded = true"
+            @error="imageLoaded = false"
+          />
+          <v-icon v-show="!imageUrl || !imageLoaded" icon="briefcase" />
         </div>
         <div class="job-content">
           <div class="job-title-row">
@@ -21,31 +31,40 @@
         class="job-card"
         :class="{ 'job-card--highlight': highlight }"
       >
-        <div class="job-card-header">
-          <div class="job-icon job-icon--large">
+        <div class="job-card-image" :style="cardImageStyle">
+          <img
+            v-if="imageUrl"
+            v-show="imageLoaded"
+            :src="imageUrl"
+            alt=""
+            class="job-card-img"
+            loading="lazy"
+            @load="imageLoaded = true"
+            @error="imageLoaded = false"
+          />
+          <div v-show="!imageUrl || !imageLoaded" class="job-card-placeholder">
             <v-icon icon="briefcase" />
           </div>
-          <div class="job-card-info">
-            <h4 class="job-card-title">{{ title }}</h4>
-            <span v-if="job.location" class="job-location">
-              <v-icon icon="map-marker-alt" class="location-icon" />
-              {{ location }}
-            </span>
-          </div>
         </div>
-        <p v-if="body" class="job-description">{{ body }}</p>
-        <div class="job-card-footer">
-          <span class="job-cta"> View Job <v-icon icon="arrow-right" /> </span>
+        <div class="job-card-body">
+          <h4 class="job-card-title">{{ title }}</h4>
+          <span v-if="job.location" class="job-location">
+            <v-icon icon="map-marker-alt" class="location-icon" />
+            {{ location }}
+          </span>
         </div>
       </div>
     </ExternalLink>
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJobStore } from '~/stores/job'
 import ExternalLink from '~/components/ExternalLink'
+import { JOB_ICON_COLOURS } from '~/constants'
+
+const imageLoaded = ref(false)
 
 const props = defineProps({
   id: {
@@ -72,6 +91,11 @@ const props = defineProps({
     required: false,
     default: '',
   },
+  bgColour: {
+    type: String,
+    required: false,
+    default: 'dark green',
+  },
 })
 
 const router = useRouter()
@@ -89,6 +113,11 @@ const title = computed(() => {
   return filterNonsense(job.value.title)
 })
 
+// Use server-provided image URL if available
+const imageUrl = computed(() => {
+  return job.value?.image || null
+})
+
 const location = computed(() => {
   if (
     job.value &&
@@ -101,12 +130,14 @@ const location = computed(() => {
   }
 })
 
-const body = computed(() => {
-  if (!job.value || !job.value.body) {
-    return ''
-  }
+const iconStyle = computed(() => {
+  const bg = JOB_ICON_COLOURS[props.bgColour] || JOB_ICON_COLOURS['dark green']
+  return { background: bg, color: 'rgba(255, 255, 255, 0.6)' }
+})
 
-  return filterNonsense(job.value.body)
+const cardImageStyle = computed(() => {
+  const bg = JOB_ICON_COLOURS[props.bgColour] || JOB_ICON_COLOURS['dark green']
+  return { background: bg }
 })
 
 function clicked() {
@@ -152,11 +183,16 @@ function filterNonsense(val) {
 .job-summary {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background: $white;
   border-bottom: 1px solid $gray-200;
   transition: background-color 0.15s ease;
+
+  @include media-breakpoint-up(sm) {
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+  }
 
   &:hover {
     background: $gray-100;
@@ -176,11 +212,23 @@ function filterNonsense(val) {
   background: $gray-100;
   color: $gray-500;
   flex-shrink: 0;
+  font-size: 1rem;
 
-  &--large {
+  @include media-breakpoint-up(sm) {
     width: 3rem;
     height: 3rem;
     font-size: 1.25rem;
+  }
+}
+
+.job-ai-image {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+
+  @include media-breakpoint-up(sm) {
+    width: 3rem;
+    height: 3rem;
   }
 }
 
@@ -196,44 +244,68 @@ function filterNonsense(val) {
 }
 
 .job-title {
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: $gray-800;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.3;
+  min-height: calc(2 * 1.3 * 0.75rem);
+
+  @include media-breakpoint-up(sm) {
+    font-size: 0.85rem;
+    min-height: calc(2 * 1.3 * 0.85rem);
+  }
 
   @include media-breakpoint-up(md) {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    min-height: calc(2 * 1.3 * 0.95rem);
   }
 }
 
 .job-location {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
+  gap: 0.2rem;
+  font-size: 0.65rem;
   color: $gray-600;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 0.75rem;
+    gap: 0.25rem;
+  }
 
   .location-icon {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: $gray-500;
+
+    @include media-breakpoint-up(sm) {
+      font-size: 0.7rem;
+    }
   }
 }
 
 .job-chevron {
+  display: none;
   color: $gray-400;
   flex-shrink: 0;
+
+  @include media-breakpoint-up(sm) {
+    display: block;
+  }
 }
 
-/* Card mode - full display */
+/* Card mode - mosaic display */
 .job-card {
   background: $white;
   border: 1px solid $gray-200;
-  padding: 1rem;
+  overflow: hidden;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     border-color: #61ae24;
@@ -242,23 +314,42 @@ function filterNonsense(val) {
 
   &--highlight {
     border-left: 3px solid #61ae24;
-    background: linear-gradient(to right, rgba(97, 174, 36, 0.05), transparent);
   }
 }
 
-.job-card-header {
+.job-card-image {
+  aspect-ratio: 1;
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.job-card-info {
+.job-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.job-card-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 3rem;
+}
+
+.job-card-body {
+  padding: 0.75rem;
   flex: 1;
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .job-card-title {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: $gray-800;
   margin: 0 0 0.25rem 0;
@@ -266,41 +357,6 @@ function filterNonsense(val) {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-
-  @include media-breakpoint-up(md) {
-    font-size: 1.2rem;
-  }
-}
-
-.job-description {
-  font-size: 0.9rem;
-  color: $gray-600;
-  margin: 0 0 0.75rem 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.4;
-}
-
-.job-card-footer {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.job-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #61ae24;
-  padding: 0.5rem 1rem;
-  background: rgba(97, 174, 36, 0.1);
-  transition: background-color 0.15s ease;
-
-  &:hover {
-    background: rgba(97, 174, 36, 0.2);
-  }
+  line-height: 1.3;
 }
 </style>
