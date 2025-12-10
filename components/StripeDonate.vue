@@ -321,14 +321,32 @@ onMounted(async () => {
         emit('error')
       } else if (!props.monthly) {
         // Create the PaymentIntent and obtain clientSecret
-        console.log('One-off', event)
-        const res = await donationStore.stripeIntent(
+        console.log(
+          'One-off payment, price:',
           props.price,
+          'type:',
           event.expressPaymentType
         )
-        console.log('Intent', res)
+        console.log('donationStore:', donationStore)
+        console.log('donationStore.config:', donationStore.config)
+
+        let res
+        try {
+          console.log('Calling stripeIntent...')
+          res = await donationStore.stripeIntent({
+            amount: props.price,
+            paymenttype: event.expressPaymentType,
+          })
+          console.log('stripeIntent returned:', res)
+        } catch (e) {
+          console.error('stripeIntent exception:', e)
+          console.error('Exception message:', e.message)
+          console.error('Exception stack:', e.stack)
+          throw e
+        }
 
         const clientSecret = res.client_secret
+        console.log('clientSecret:', clientSecret)
 
         const { error } = await stripe.confirmPayment({
           // `elements` instance used to create the Express Checkout Element

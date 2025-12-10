@@ -183,11 +183,16 @@ function filterNonsense(val) {
 .job-summary {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background: $white;
   border-bottom: 1px solid $gray-200;
   transition: background-color 0.15s ease;
+
+  @include media-breakpoint-up(sm) {
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+  }
 
   &:hover {
     background: $gray-100;
@@ -202,18 +207,29 @@ function filterNonsense(val) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   background: $gray-100;
   color: $gray-500;
   flex-shrink: 0;
-  font-size: 1.5rem;
+  font-size: 1rem;
+
+  @include media-breakpoint-up(sm) {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
 }
 
 .job-ai-image {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   object-fit: cover;
+
+  @include media-breakpoint-up(sm) {
+    width: 3rem;
+    height: 3rem;
+  }
 }
 
 .job-content {
@@ -228,7 +244,7 @@ function filterNonsense(val) {
 }
 
 .job-title {
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: $gray-800;
   display: -webkit-box;
@@ -236,31 +252,50 @@ function filterNonsense(val) {
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.3;
-  min-height: calc(2 * 1.3 * 0.95rem);
+  min-height: calc(2 * 1.3 * 0.75rem);
+
+  @include media-breakpoint-up(sm) {
+    font-size: 0.85rem;
+    min-height: calc(2 * 1.3 * 0.85rem);
+  }
 
   @include media-breakpoint-up(md) {
-    font-size: 1rem;
-    min-height: calc(2 * 1.3 * 1rem);
+    font-size: 0.95rem;
+    min-height: calc(2 * 1.3 * 0.95rem);
   }
 }
 
 .job-location {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
+  gap: 0.2rem;
+  font-size: 0.65rem;
   color: $gray-600;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 0.75rem;
+    gap: 0.25rem;
+  }
 
   .location-icon {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     color: $gray-500;
+
+    @include media-breakpoint-up(sm) {
+      font-size: 0.7rem;
+    }
   }
 }
 
 .job-chevron {
+  display: none;
   color: $gray-400;
   flex-shrink: 0;
+
+  @include media-breakpoint-up(sm) {
+    display: block;
+  }
 }
 
 /* Card mode - mosaic display */

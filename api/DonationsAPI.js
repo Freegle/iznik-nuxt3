@@ -15,6 +15,8 @@ export default class DonationsAPI extends BaseAPI {
   }
 
   stripeIntent(params) {
+    console.log('DonationsAPI.stripeIntent called with:', params)
+    console.log('this.config:', this.config)
     return this.$post('/stripecreateintent', params)
   }
 

@@ -180,17 +180,24 @@ const list = computed(() => {
   }
 
   &--horizontal {
-    display: flex;
-    flex-wrap: wrap;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
 
-    :deep(.job-item) {
-      width: 280px;
-      flex-shrink: 0;
+    @media (min-width: 480px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(5, 1fr);
     }
 
     :deep(.job-summary) {
-      border-bottom: none;
+      border-bottom: 1px solid $gray-200;
       border-right: 1px solid $gray-200;
     }
   }
