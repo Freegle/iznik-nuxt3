@@ -1877,6 +1877,10 @@ onUnmounted(() => {
     @media (min-height: $mobile-tall) {
       padding-bottom: calc(1rem + $sticky-banner-height-mobile-tall);
     }
+
+    @media (min-height: $desktop-tall) {
+      padding-bottom: calc(1rem + $sticky-banner-height-desktop-tall);
+    }
   }
 }
 
