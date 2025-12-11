@@ -89,7 +89,6 @@
                     class="title-tag"
                   />
                   <span class="title-subject">{{ strippedSubject }}</span>
-                  <span class="title-time">{{ timeAgo }}</span>
                 </div>
                 <div class="photo-actions">
                   <button class="photo-action-btn" @click.stop="share">
@@ -103,6 +102,18 @@
                     message.area
                   }}
                 </span>
+              </div>
+              <div class="group-row">
+                <nuxt-link
+                  v-if="messageGroup"
+                  :to="'/explore/' + messageGroup.nameshort"
+                  class="group-link"
+                  @click.stop
+                >
+                  {{ messageGroup.namedisplay }}
+                </nuxt-link>
+                <span v-if="messageGroup && timeAgoExpanded" class="group-time-separator">·</span>
+                <span v-if="timeAgoExpanded" class="group-time">{{ timeAgoExpanded }} ago</span>
               </div>
             </div>
           </div>
@@ -285,6 +296,7 @@ import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
 import { useTrystStore } from '~/stores/tryst'
 import { useLocationStore } from '~/stores/location'
+import { useGroupStore } from '~/stores/group'
 import { timeago } from '~/composables/useTimeFormat'
 import { milesAway } from '~/composables/useDistance'
 import { onMounted, ref, computed, watch, useRouter, toRef } from '#imports'
@@ -334,6 +346,7 @@ const userStore = useUserStore()
 const trystStore = useTrystStore()
 const composeStore = useComposeStore()
 const locationStore = useLocationStore()
+const groupStore = useGroupStore()
 const router = useRouter()
 const { me } = useMe()
 
@@ -343,7 +356,7 @@ const {
   message,
   strippedSubject,
   gotAttachments: hasPhoto,
-  timeAgo,
+  timeAgoExpanded,
   placeholderClass,
   categoryIcon,
 } = useMessageDisplay(idRef)
@@ -540,6 +553,14 @@ const canrepostatago = computed(() => {
   return message.value?.canrepostat ? timeago(message.value.canrepostat) : null
 })
 
+const messageGroup = computed(() => {
+  if (message.value?.groups?.length) {
+    const groupId = message.value.groups[0].groupid
+    return groupStore?.get(groupId)
+  }
+  return null
+})
+
 // Methods
 function getUserProfile(userid) {
   return userStore?.byId(userid)?.profile
@@ -559,8 +580,13 @@ function goToPost() {
 
 const visibilityChanged = async (isVisible) => {
   if (isVisible) {
-    await messageStore.fetch(props.id)
+    const msg = await messageStore.fetch(props.id)
     visible.value = isVisible
+
+    // Fetch group info for display
+    if (msg?.groups?.length) {
+      groupStore.fetch(msg.groups[0].groupid)
+    }
   }
 }
 
@@ -877,11 +903,11 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1.5rem 0.75rem 0.5rem;
+  padding: 2rem 0.75rem 0.5rem;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.6) 70%,
     transparent 100%
   );
   color: white;
@@ -918,19 +944,37 @@ onMounted(() => {
   line-height: 1.2;
 }
 
-.title-time {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  flex-shrink: 0;
-  margin-left: 6px;
-  align-self: center;
-}
-
 .info-row {
   display: flex;
   justify-content: space-between;
   font-size: 0.7rem;
   opacity: 0.9;
+}
+
+.group-row {
+  font-size: 0.65rem;
+  opacity: 0.85;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.group-link {
+  color: white;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.group-time-separator {
+  opacity: 0.6;
+}
+
+.group-time {
+  opacity: 0.7;
 }
 
 .action-buttons {
