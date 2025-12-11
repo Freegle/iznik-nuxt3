@@ -205,6 +205,10 @@ function validateAndNext() {
     @media (min-height: $mobile-tall) {
       padding-bottom: calc(80px + $sticky-banner-height-mobile-tall);
     }
+
+    @media (min-height: $desktop-tall) {
+      padding-bottom: calc(80px + $sticky-banner-height-desktop-tall);
+    }
   }
 }
 
@@ -312,6 +316,10 @@ function validateAndNext() {
 
     @media (min-height: $mobile-tall) {
       bottom: $sticky-banner-height-mobile-tall;
+    }
+
+    @media (min-height: $desktop-tall) {
+      bottom: $sticky-banner-height-desktop-tall;
     }
   }
 }

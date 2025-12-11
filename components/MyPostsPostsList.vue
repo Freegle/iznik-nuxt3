@@ -1,13 +1,13 @@
 <template>
   <div class="my-posts-list">
     <!-- Active posts count header -->
-    <div v-if="activePosts.length > 0" class="active-posts-header">
+    <div v-if="!loading && activePosts.length > 0" class="active-posts-header">
       <v-icon icon="gift" class="me-2" />
       {{ formattedActivePostsCount }}
     </div>
 
     <!-- Old posts toggle button -->
-    <div v-if="oldPosts.length > 0" class="old-posts-toggle">
+    <div v-if="!loading && oldPosts.length > 0" class="old-posts-toggle">
       <button class="toggle-btn" @click="toggleShowOldPosts">
         <v-icon :icon="showOldPosts ? 'eye-slash' : 'eye'" class="me-2" />
         {{ showOldPosts ? 'Hide' : 'Show' }} {{ formattedOldPostsCount }}
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Upcoming collections -->
-    <div v-if="upcomingTrysts.length > 0" class="collections-card">
+    <div v-if="!loading && upcomingTrysts.length > 0" class="collections-card">
       <h3 class="collections-title">
         <v-icon icon="calendar-check" class="me-2" />Your upcoming collections
       </h3>
@@ -34,8 +34,13 @@
       </div>
     </div>
 
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-state">
+      <b-img lazy src="/loader.gif" alt="Loading..." width="60px" />
+    </div>
+
     <!-- Posts list -->
-    <div v-if="visiblePosts.length > 0" class="posts-container">
+    <div v-else-if="visiblePosts.length > 0" class="posts-container">
       <div v-for="post in visiblePosts" :key="'post-' + post.id">
         <Suspense>
           <MyMessage
@@ -49,9 +54,6 @@
             </div>
           </template>
         </Suspense>
-      </div>
-      <div v-if="loading" class="loading-more">
-        <b-img lazy src="/loader.gif" alt="Loading..." width="60px" />
       </div>
       <InfiniteLoading
         :distance="scrollboxHeight"
@@ -222,13 +224,32 @@ const upcomingTrysts = computed(() => {
   padding: 0;
 }
 
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  animation: fadeIn 0.2s ease-in forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
 .active-posts-header {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   padding: 10px 16px;
-  margin: 0 12px 12px 12px;
+  margin-bottom: 12px;
   background: white;
   border: 1px solid $color-gray--light;
   color: $colour-success;
@@ -238,7 +259,6 @@ const upcomingTrysts = computed(() => {
 }
 
 .old-posts-toggle {
-  padding: 8px 12px;
   margin-bottom: 12px;
 }
 
@@ -250,7 +270,6 @@ const upcomingTrysts = computed(() => {
   padding: 10px 16px;
   background: white;
   border: 1px solid $color-gray--light;
-  border-radius: 8px;
   color: $color-gray--dark;
   font-weight: 500;
   font-size: 0.9rem;
@@ -324,13 +343,17 @@ const upcomingTrysts = computed(() => {
 }
 
 .loading-placeholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
   background: white;
-  border-radius: 12px;
   margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-placeholder::before {
+  content: '';
+  display: block;
+  width: 100%;
+  padding-bottom: 50%;
+  background: $color-gray--light;
 }
 
 .loading-more {

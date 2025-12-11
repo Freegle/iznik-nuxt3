@@ -102,6 +102,7 @@ const tagForGroup = computed(() => {
   text-transform: uppercase;
   max-width: calc(100% - 20px);
   z-index: 5;
+  padding: 2px 8px;
 
   &--wanted {
     background-color: $color-blue--light;
