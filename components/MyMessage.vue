@@ -31,7 +31,7 @@
             >
               <div class="promised-banner-text">
                 <v-icon icon="handshake" class="me-2" />
-                Promised to{{ ' ' }}<strong>{{ promisedToName }}</strong>
+                Promised to&nbsp;<strong>{{ promisedToName }}</strong>
               </div>
               <button class="unpromise-btn" @click.stop="unpromise">
                 Unpromise
