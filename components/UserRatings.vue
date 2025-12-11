@@ -5,7 +5,7 @@
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip.bottom="showDown || showRemove ? '' : uptitle"
+        v-b-tooltip.bottom="noTooltips || showDown || showRemove ? '' : uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -18,7 +18,9 @@
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
       <b-button
-        v-b-tooltip.bottom="showDown || showRemove ? '' : downtitle"
+        v-b-tooltip.bottom="
+          noTooltips || showDown || showRemove ? '' : downtitle
+        "
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -31,8 +33,8 @@
         <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
       </b-button>
     </span>
-    <UserRatingsDownModal v-if="showDown" :id="id" />
-    <UserRatingsRemoveModal v-if="showRemove" :id="id" />
+    <UserRatingsDownModal v-if="showDown && !externalModals" :id="id" />
+    <UserRatingsRemoveModal v-if="showRemove && !externalModals" :id="id" />
   </span>
 </template>
 <script setup>
@@ -68,9 +70,23 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  noTooltips: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  externalModals: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['modal-opening'])
+const emit = defineEmits([
+  'modal-opening',
+  'show-down-modal',
+  'show-remove-modal',
+])
 
 const userStore = useUserStore()
 // Use myid computed property from useMe composable for consistency
@@ -130,7 +146,11 @@ const up = async () => {
   showDown.value = false
   if (user.value?.info?.ratings?.Mine === 'Up') {
     emit('modal-opening')
-    showRemove.value = true
+    if (props.externalModals) {
+      emit('show-remove-modal', props.id)
+    } else {
+      showRemove.value = true
+    }
   } else {
     await rate('Up')
   }
@@ -141,10 +161,18 @@ const down = () => {
 
   if (user.value?.info?.ratings?.Mine === 'Down') {
     emit('modal-opening')
-    showRemove.value = true
+    if (props.externalModals) {
+      emit('show-remove-modal', props.id)
+    } else {
+      showRemove.value = true
+    }
   } else {
     emit('modal-opening')
-    showDown.value = true
+    if (props.externalModals) {
+      emit('show-down-modal', props.id)
+    } else {
+      showDown.value = true
+    }
   }
 }
 </script>

@@ -347,6 +347,11 @@ const complete = ref(false)
 const bump = ref(1)
 const distance = ref(1000)
 const selectedChatId = ref(null)
+
+// If no chats were found initially, mark as complete so "Show older chats" button appears.
+if (chatStore.list.length === 0) {
+  complete.value = true
+}
 const showClosed = computed(() => chatStore.showClosed)
 
 // Watch for external changes to showClosed (e.g., from store's unhide function)

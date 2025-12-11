@@ -107,7 +107,10 @@
                 :id="chat.otheruid"
                 :key="'otheruser-' + chat.otheruid"
                 size="sm"
-                @modal-opening="profileCardExpanded = false"
+                no-tooltips
+                external-modals
+                @show-down-modal="handleShowDownModal"
+                @show-remove-modal="handleShowRemoveModal"
               />
             </div>
             <div class="profile-card-stats">
@@ -216,10 +219,22 @@
       close-on-message
       @hidden="showProfileModal = false"
     />
+
+    <UserRatingsDownModal
+      v-if="showRatingsDownModal && ratingsUserId"
+      :id="ratingsUserId"
+      @hidden="showRatingsDownModal = false"
+    />
+    <UserRatingsRemoveModal
+      v-if="showRatingsRemoveModal && ratingsUserId"
+      :id="ratingsUserId"
+      @hidden="showRatingsRemoveModal = false"
+    />
   </div>
 </template>
 <script setup>
 import { useRouter } from 'vue-router'
+import { nextTick } from 'vue'
 import {
   clearNavBarTimeout,
   setNavBarHidden,
@@ -241,6 +256,12 @@ const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
 const ChatReportModal = defineAsyncComponent(() =>
   import('~/components/ChatReportModal')
 )
+const UserRatingsDownModal = defineAsyncComponent(() =>
+  import('~/components/UserRatingsDownModal')
+)
+const UserRatingsRemoveModal = defineAsyncComponent(() =>
+  import('~/components/UserRatingsRemoveModal')
+)
 
 const props = defineProps({
   id: {
@@ -260,6 +281,9 @@ const { otheruser, milesaway, unseen } = await setupChat(props.id)
 const showChatBlock = ref(false)
 const showChatHide = ref(false)
 const showChatReport = ref(false)
+const showRatingsDownModal = ref(false)
+const showRatingsRemoveModal = ref(false)
+const ratingsUserId = ref(null)
 
 const otheraccessFull = computed(() => {
   if (!otheruser.value?.lastaccess) return null
@@ -311,8 +335,24 @@ const shouldShowHint = computed(() => {
   return dismissed < sevenDaysAgo
 })
 
-function showInfo() {
+async function showInfo() {
+  profileCardExpanded.value = false
+  await nextTick()
   showProfileModal.value = true
+}
+
+async function handleShowDownModal(userId) {
+  profileCardExpanded.value = false
+  ratingsUserId.value = userId
+  await nextTick()
+  showRatingsDownModal.value = true
+}
+
+async function handleShowRemoveModal(userId) {
+  profileCardExpanded.value = false
+  ratingsUserId.value = userId
+  await nextTick()
+  showRatingsRemoveModal.value = true
 }
 
 function toggleProfileCard() {
