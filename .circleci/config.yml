@@ -34,6 +34,8 @@ commands:
             sudo apt-get update
             sudo apt-get install -y ruby-full
             sudo gem install bundler
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
       - run:
           name: Install Fastlane
           command: |
@@ -41,6 +43,8 @@ commands:
             # Update Fastlane to latest version
             bundle update fastlane
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
       - run:
           name: Decode Google Play JSON Key
           command: |
@@ -129,6 +133,8 @@ jobs:
           command: |
             curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - run:
           name: Verify Node.js and npm versions
@@ -149,6 +155,8 @@ jobs:
             npm ci
             # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
             npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
@@ -223,10 +231,14 @@ jobs:
 
       # Convert app icons to greyscale for dev app (after cap sync)
       - run:
+          name: Install ImageMagick
+          command: sudo apt-get update && sudo apt-get install -y imagemagick
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+      - run:
           name: Create Greyscale Icons (Dev)
           command: |
             echo "🎨 Converting app icons to greyscale..."
-            sudo apt-get update && sudo apt-get install -y imagemagick
 
             # Convert all launcher icons to greyscale
             find android/app/src/main/res -name "ic_launcher*.png" -type f | while read icon; do
@@ -390,6 +402,8 @@ jobs:
           command: |
             curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - run:
           name: Verify Node.js and npm versions
@@ -409,6 +423,8 @@ jobs:
           command: |
             npm ci
             npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
@@ -507,6 +523,8 @@ jobs:
             # Download and install Node.js 22
             curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Verify Node.js version
       - run:
@@ -525,6 +543,8 @@ jobs:
       - run:
           name: Install Node.js Dependencies
           command: npm ci
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
@@ -834,6 +854,8 @@ jobs:
             nvm alias default 22
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Install Ruby and Fastlane dependencies
       - run:
@@ -844,6 +866,8 @@ jobs:
             gem install bundler
             bundle config set --local path 'vendor/bundle'
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Auto-submit latest TestFlight build to App Store review after 24 hours
       - run:
@@ -902,6 +926,8 @@ jobs:
             nvm alias default 22
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Install Ruby and Fastlane dependencies
       - run:
@@ -912,6 +938,8 @@ jobs:
             gem install bundler
             bundle config set --local path 'vendor/bundle'
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Auto-release approved apps from Pending Developer Release state
       - run:
@@ -979,6 +1007,8 @@ jobs:
             # Add to bash profile for subsequent steps
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Verify versions
       - run:
@@ -991,6 +1021,8 @@ jobs:
       - run:
           name: Install Node.js Dependencies
           command: npm ci
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Update MOBILE_VERSION in config.js before build
       - run:
@@ -1072,6 +1104,8 @@ jobs:
             bundle config set --local path 'vendor/bundle'
             bundle update fastlane
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Setup iOS Certificates and Provisioning Profiles
       - run:
@@ -1174,6 +1208,8 @@ jobs:
             nvm alias default 22
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - run:
           name: Verify Node.js and npm versions
@@ -1188,6 +1224,8 @@ jobs:
             npm ci
             # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
             npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Generate version number using same incrementing scheme as production
       - run:
@@ -1257,6 +1295,8 @@ jobs:
             bundle config set --local path 'vendor/bundle'
             bundle update fastlane
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - run:
           name: Setup iOS Certificates
