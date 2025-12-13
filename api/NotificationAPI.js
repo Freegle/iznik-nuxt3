@@ -12,10 +12,10 @@ export default class NotificationAPI extends BaseAPI {
   }
 
   seen(id) {
-    return this.$post('/notification', { id, action: 'Seen' })
+    return this.$postv2('/notification/seen', { id })
   }
 
   allSeen() {
-    return this.$post('/notification', { action: 'AllSeen' })
+    return this.$postv2('/notification/allseen', {})
   }
 }
