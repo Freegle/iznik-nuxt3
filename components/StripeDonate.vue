@@ -6,7 +6,7 @@
     >
       Loading donation methods...
     </div>
-    <div v-if="isApp" class="d-flex justify-content-between flex-wrap">
+    <div v-if="isApp" class="d-flex flex-column gap-3">
       <b-button
         v-if="isGooglePayAvailable"
         variant="primary"

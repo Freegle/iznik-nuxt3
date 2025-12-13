@@ -318,15 +318,18 @@ onMounted(async () => {
 }
 
 .stripe-container {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   text-align: center;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 
   // Force centering of child elements
-  :deep(> div),
-  :deep(> *) {
-    display: inline-block;
-    margin: 0 auto;
+  :deep(> div) {
+    width: 100%;
+    max-width: 400px;
   }
 }
 
