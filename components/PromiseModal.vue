@@ -8,6 +8,7 @@
     size="lg"
     no-stacking
     @shown="onShow"
+    @hidden="emit('hidden')"
   >
     <template #default>
       <div class="promise-content">
@@ -185,6 +186,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const emit = defineEmits(['hide', 'hidden'])
 
 const trystStore = useTrystStore()
 const messageStore = useMessageStore()
@@ -367,6 +370,7 @@ async function promise(callback) {
       })
     }
 
+    emit('hide')
     hide()
   }
 
