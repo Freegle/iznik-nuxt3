@@ -9,6 +9,7 @@ import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import { suppressException } from '~/composables/useSuppressException'
+import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
@@ -100,7 +101,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           // Suppress Vue unmountComponent errors during navigation.
           if (
             hint?.originalException?.stack?.includes('unmountComponent') &&
-            hint?.originalException?.message?.includes("'bum' of 'instance' as it is null")
+            hint?.originalException?.message?.includes(
+              "'bum' of 'instance' as it is null"
+            )
           ) {
             return null
           }
@@ -318,6 +321,16 @@ export default defineNuxtPlugin((nuxtApp) => {
         trackComponents: true,
         timeout: 2000,
         hooks: ['activate', 'mount', 'update'],
+      })
+
+      // Set initial trace tags for correlation with Loki logs.
+      Sentry.setTag('trace_id', getTraceId())
+      Sentry.setTag('session_id', getSessionId())
+
+      // Register callback to update trace tags when trace changes.
+      onTraceChange((traceId, sessionId) => {
+        Sentry.setTag('trace_id', traceId)
+        Sentry.setTag('session_id', sessionId)
       })
     }
   }
