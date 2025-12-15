@@ -31,15 +31,16 @@
     <div class="photo-area">
       <!-- Actual photo -->
       <div v-if="gotAttachments" class="photo-container">
-        <!-- Use 640x480 to match expanded view size for faster modal loading -->
+        <!-- Responsive image sizes: 200px display (400px for 2x retina), 100px landscape (200px retina) -->
         <OurUploadedImage
           v-if="message.attachments[0]?.ouruid"
           :src="message.attachments[0].ouruid"
           :modifiers="message.attachments[0].externalmods"
           alt="Item Photo"
           class="photo-image"
-          :width="640"
-          :height="480"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
           :preload="preload"
         />
         <NuxtPicture
@@ -50,8 +51,9 @@
           :modifiers="message.attachments[0].externalmods"
           alt="Item Photo"
           class="photo-image"
-          :width="640"
-          :height="480"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
           :preload="preload"
         />
         <ProxyImage
@@ -59,9 +61,9 @@
           class-name="photo-image"
           alt="Item picture"
           :src="message.attachments[0].path"
-          :width="640"
-          :height="480"
-          fit="cover"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
           :preload="preload"
         />
         <!-- Multi-photo indicator -->
