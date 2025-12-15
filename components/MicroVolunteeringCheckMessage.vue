@@ -51,7 +51,7 @@
             </div>
             <!-- Zoom hint -->
             <div class="zoom-hint">
-              <v-icon icon="search-plus" /> Tap to zoom
+              <v-icon icon="magnifying-glass-plus" /> Tap to zoom
             </div>
           </div>
           <!-- No photo placeholder -->
