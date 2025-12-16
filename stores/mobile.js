@@ -478,6 +478,30 @@ export const useMobileStore = defineStore({
         console.log('handleNotification badgeCount', data.count)
         this.setBadgeCount(data.count, Badge)
 
+        // When a push notification is received while the app is in the foreground,
+        // immediately refresh chats to update unread counts and trigger message fetching.
+        // This ensures new messages appear without waiting for the 30-second poll.
+        if (foreground) {
+          console.log('Foreground push received - refreshing chats')
+          dbg()?.info('Foreground push - triggering chat refresh')
+          const chatStore = useChatStore()
+          chatStore.fetchChats(null, false)
+
+          // If the notification includes a specific chat ID, also fetch messages for that chat directly.
+          // This is faster than waiting for the unseen watcher in ChatHeader.
+          if (data.chatids) {
+            const chatId = parseInt(data.chatids)
+            if (chatId) {
+              console.log(
+                'Foreground push - fetching messages for chat',
+                chatId
+              )
+              dbg()?.info('Foreground push - fetching messages', { chatId })
+              chatStore.fetchMessages(chatId)
+            }
+          }
+        }
+
         if (!this.isiOS && 'inlineReply' in data) {
           const inlineReply = data.inlineReply.trim()
           console.log('======== inlineReply', inlineReply)
