@@ -1,15 +1,14 @@
 import * as Sentry from '@sentry/vue'
+import { fetchRetry } from '~/composables/useFetchRetry'
+import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
+import { useMiscStore } from '~/stores/misc'
 import {
   APIError,
   MaintenanceError,
   LoginError,
   SignUpError,
 } from './APIErrors'
-import { fetchRetry } from '~/composables/useFetchRetry'
-import { useAuthStore } from '~/stores/auth'
-import { useMobileStore } from '~/stores/mobile'
-import { useMiscStore } from '~/stores/misc'
-import { getTraceHeaders } from '~/composables/useTrace'
 
 // Re-export the error classes for backward compatibility
 export { APIError, MaintenanceError, LoginError, SignUpError }
@@ -37,10 +36,6 @@ export default class BaseAPI {
 
       const authStore = useAuthStore()
       const mobileStore = useMobileStore()
-
-      // Add trace headers for distributed tracing.
-      const traceHeaders = getTraceHeaders()
-      Object.assign(headers, traceHeaders)
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -285,10 +280,6 @@ export default class BaseAPI {
     let status = null
     let data = null
     const headers = config.headers ? config.headers : {}
-
-    // Add trace headers for distributed tracing.
-    const traceHeaders = getTraceHeaders()
-    Object.assign(headers, traceHeaders)
 
     try {
       const authStore = useAuthStore()
