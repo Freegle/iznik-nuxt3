@@ -1,8 +1,8 @@
 <template>
   <div class="bg-white">
     <ScrollToTop />
-    <b-tabs content-class="mt-3" card>
-      <b-tab active @click="clear('messages', true)">
+    <b-tabs v-model="activeTab" content-class="mt-3" card>
+      <b-tab @click="clear('messages', true)">
         <template #title>
           <h2 class="ml-2 mr-2">Messages</h2>
         </template>
@@ -42,9 +42,16 @@
           </b-input-group>
         </div>
       </b-tab>
+      <b-tab @click="showSystemLogs">
+        <template #title>
+          <h2 class="ml-2 mr-2">System Logs (WIP)</h2>
+        </template>
+      </b-tab>
     </b-tabs>
+
+    <!-- Standard Mod Logs for Messages/Members tabs -->
     <ModLogs
-      v-if="groupid"
+      v-if="groupid && activeTab !== 2"
       ref="logs"
       :key="'modlogs-' + bump"
       class="bg-white"
@@ -52,11 +59,25 @@
       @busy="busy = true"
       @idle="busy = false"
     />
+
+    <!-- System Logs from Loki -->
+    <ModSystemLogs
+      v-if="activeTab === 2"
+      :key="'systemlogs-' + bump"
+      class="bg-white p-3"
+      :groupid="systemLogsGroupid"
+    />
   </div>
 </template>
 <script>
 import { useLogsStore } from '~/stores/logs'
+import { useModGroupStore } from '~/stores/modgroup'
+import ModSystemLogs from '~/modtools/components/ModSystemLogs.vue'
+
 export default {
+  components: {
+    ModSystemLogs,
+  },
   setup() {
     const logsStore = useLogsStore()
     return { logsStore }
@@ -68,14 +89,20 @@ export default {
       type: 'messages',
       term: null,
       busy: false,
+      activeTab: 0,
+      systemLogsGroupid: null,
     }
   },
   watch: {
     groupid() {
-      this.clear(this.type)
+      if (this.activeTab !== 2) {
+        this.clear(this.type)
+      }
     },
   },
   mounted() {
+    const modGroupStore = useModGroupStore()
+    modGroupStore.getModGroups()
     this.clear(this.type)
   },
   methods: {
@@ -96,6 +123,10 @@ export default {
     },
     search() {
       this.clear(this.type)
+    },
+    showSystemLogs() {
+      this.activeTab = 2
+      this.bump = Date.now()
     },
   },
 }

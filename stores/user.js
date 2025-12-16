@@ -57,31 +57,40 @@ export const useUserStore = defineStore({
         console.trace()
         return
       }
+
+      // Check if already cached (unless force refresh)
+      if (!force && this.list[id]) {
+        return this.list[id]
+      }
+
+      // Check if already fetching - deduplicate concurrent requests
+      if (this.fetching[id]) {
+        await this.fetching[id]
+        await nextTick()
+        return this.list[id]
+      }
+
       const miscStore = useMiscStore()
       if (miscStore.modtools) {
-        await this.fetchMT({
+        // Store the promise so concurrent calls can await it
+        this.fetching[id] = this.fetchMT({
           id,
           info: true,
           emailhistory: true,
         })
+        await this.fetching[id]
+        this.fetching[id] = null
         return this.list[id]
       }
 
-      if (force || !this.list[id]) {
-        if (this.fetching[id]) {
-          await this.fetching[id]
-          await nextTick()
-        } else {
-          this.fetching[id] = api(this.config).user.fetch(id)
-          const user = await this.fetching[id]
+      this.fetching[id] = api(this.config).user.fetch(id)
+      const user = await this.fetching[id]
 
-          if (user) {
-            this.list[id] = user
-          }
-
-          this.fetching[id] = null
-        }
+      if (user) {
+        this.list[id] = user
       }
+
+      this.fetching[id] = null
 
       return this.list[id]
     },

@@ -1,0 +1,1057 @@
+<template>
+  <div class="log-entry" :class="entryClass">
+    <!-- Main row using flex for consistent alignment -->
+    <div class="log-row">
+      <!-- Timestamp column -->
+      <div class="log-col log-col-time">
+        <span class="timestamp font-monospace">{{ formattedTime }}</span>
+        <!-- Count badge inline with time when collapsed -->
+        <span
+          v-if="count > 1"
+          class="count-badge"
+          role="button"
+          :title="`${count} similar entries from ${firstTime} to ${lastTime}. Click to expand.`"
+          @click="toggleExpanded"
+        >
+          <v-icon :icon="isExpanded ? 'minus' : 'plus'" scale="0.6" />
+          {{ count }}x
+        </span>
+      </div>
+
+      <!-- Source column -->
+      <div class="log-col log-col-source">
+        <b-badge :variant="sourceVariant" class="source-badge">
+          {{ sourceLabel }}
+        </b-badge>
+      </div>
+
+      <!-- User column (hidden when filtering by user) -->
+      <div v-if="!hideUserColumn" class="log-col log-col-user">
+        <div v-if="displayUser" class="user-display">
+          <ProfileImage
+            v-if="displayUser.profile?.url"
+            :image="displayUser.profile.url"
+            class="user-avatar"
+            size="sm"
+            is-thumbnail
+          />
+          <v-icon v-else icon="user" class="user-avatar-placeholder" />
+          <div class="user-info-stacked">
+            <ExternalLink
+              :href="'https://www.ilovefreegle.org/profile/' + displayUser.id"
+              class="user-link"
+              :title="'View on Freegle: ' + (displayUser.displayname || 'User')"
+            >
+              {{ displayUser.displayname || 'User' }}
+            </ExternalLink>
+            <span class="user-id text-muted">#{{ displayUser.id }}</span>
+          </div>
+        </div>
+        <span v-else-if="log.user_id" class="text-muted user-placeholder">
+          <v-icon icon="user" class="text-faded" />
+          #{{ log.user_id }}
+          <span
+            v-if="userLoading"
+            class="spinner-border spinner-border-sm ms-1"
+          />
+        </span>
+        <span v-else-if="log.source === 'api'" class="text-muted small">
+          Not logged in
+        </span>
+      </div>
+
+      <!-- Action column -->
+      <div class="log-col log-col-action" :class="levelClass">
+        <div class="action-content">
+          <div class="action-main">
+            <span class="action-text">{{ actionTextClean }}</span>
+            <!-- Group display -->
+            <span v-if="displayGroup" class="entity-tag group-tag">
+              <ProfileImage
+                v-if="displayGroup.profile"
+                :image="displayGroup.profile"
+                class="entity-avatar"
+                is-thumbnail
+              />
+              <ExternalLink
+                :href="
+                  'https://www.ilovefreegle.org/explore/' +
+                  displayGroup.nameshort
+                "
+                :title="'View group on Freegle: ' + displayGroup.nameshort"
+              >
+                {{ displayGroup.nameshort || displayGroup.namedisplay }}
+              </ExternalLink>
+            </span>
+            <span
+              v-else-if="log.group_id"
+              class="entity-tag group-tag text-muted"
+            >
+              group #{{ log.group_id }}
+            </span>
+            <!-- Message display -->
+            <span v-if="log.message_id" class="entity-tag message-tag">
+              <v-icon icon="envelope" scale="0.8" />
+              <ExternalLink
+                :href="'https://www.ilovefreegle.org/message/' + log.message_id"
+                :title="'View message on Freegle'"
+              >
+                {{ messageSubject || `#${log.message_id}` }}
+              </ExternalLink>
+            </span>
+          </div>
+          <div v-if="rawApiCall || ipAddress" class="api-details text-muted">
+            <span v-if="rawApiCall">{{ rawApiCall }}</span>
+            <span v-if="duration">{{ duration }}</span>
+            <span
+              v-if="ipAddress"
+              class="ip-address"
+              role="button"
+              @click="filterByIp"
+            >
+              {{ ipAddress }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details button -->
+      <div class="log-col log-col-expand">
+        <button
+          class="details-btn"
+          title="View details"
+          @click="showModal = true"
+        >
+          <v-icon icon="info-circle" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Expanded individual entries when count badge is clicked -->
+    <div v-if="count > 1 && isExpanded" class="expanded-entries">
+      <div
+        v-for="(entry, idx) in entries"
+        :key="entry.id || idx"
+        class="expanded-entry-row"
+      >
+        <span class="expanded-time font-monospace text-muted">
+          {{ formatEntryTime(entry.timestamp) }}
+        </span>
+        <span class="expanded-action text-muted">
+          {{ formatEntryText(entry) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Details Modal -->
+    <b-modal
+      v-model="showModal"
+      title="Log Details"
+      size="lg"
+      hide-footer
+      scrollable
+    >
+      <div class="log-details-modal">
+        <!-- Header summary -->
+        <div class="detail-header mb-3">
+          <b-badge :variant="sourceVariant" class="me-2">{{
+            sourceLabel
+          }}</b-badge>
+          <span class="text-muted">{{ fullTimestamp }}</span>
+        </div>
+
+        <!-- Action summary -->
+        <div class="detail-section">
+          <h6>Action</h6>
+          <p class="mb-0">{{ actionText }}</p>
+        </div>
+
+        <!-- User info -->
+        <div v-if="log.user_id" class="detail-section">
+          <h6>User</h6>
+          <div class="user-display-block">
+            <ProfileImage
+              v-if="displayUser?.profile?.url"
+              :image="displayUser.profile.url"
+              class="user-avatar me-2"
+              size="sm"
+              is-thumbnail
+            />
+            <v-icon v-else icon="user" class="me-2" />
+            <div v-if="displayUser" class="user-info-block">
+              <ExternalLink
+                :href="'https://www.ilovefreegle.org/profile/' + displayUser.id"
+              >
+                {{ displayUser.displayname }}
+              </ExternalLink>
+              <div class="text-muted small">#{{ displayUser.id }}</div>
+            </div>
+            <span v-else>#{{ log.user_id }}</span>
+          </div>
+        </div>
+
+        <!-- By user (if different) -->
+        <div
+          v-if="log.byuser_id && log.byuser_id !== log.user_id"
+          class="detail-section"
+        >
+          <h6>Action By</h6>
+          <div class="user-display-block">
+            <ProfileImage
+              v-if="byUser?.profile?.url"
+              :image="byUser.profile.url"
+              class="user-avatar me-2"
+              size="sm"
+              is-thumbnail
+            />
+            <v-icon v-else icon="user" class="me-2" />
+            <div v-if="byUser" class="user-info-block">
+              <ExternalLink
+                :href="'https://www.ilovefreegle.org/profile/' + byUser.id"
+              >
+                {{ byUser.displayname }}
+              </ExternalLink>
+              <div class="text-muted small">#{{ byUser.id }}</div>
+            </div>
+            <span v-else>#{{ log.byuser_id }}</span>
+          </div>
+        </div>
+
+        <!-- Group -->
+        <div v-if="log.group_id" class="detail-section">
+          <h6>Group</h6>
+          <div v-if="displayGroup">
+            <ProfileImage
+              v-if="displayGroup.profile"
+              :image="displayGroup.profile"
+              class="entity-avatar me-2"
+              is-thumbnail
+            />
+            <ExternalLink
+              :href="
+                'https://www.ilovefreegle.org/explore/' + displayGroup.nameshort
+              "
+            >
+              {{ displayGroup.namedisplay || displayGroup.nameshort }}
+            </ExternalLink>
+            <span class="text-muted ms-1">(#{{ log.group_id }})</span>
+          </div>
+          <span v-else>#{{ log.group_id }}</span>
+        </div>
+
+        <!-- Message -->
+        <div v-if="log.message_id" class="detail-section">
+          <h6>Message</h6>
+          <v-icon icon="envelope" class="me-1" />
+          <ExternalLink
+            :href="'https://www.ilovefreegle.org/message/' + log.message_id"
+          >
+            {{ messageSubject || `Message #${log.message_id}` }}
+          </ExternalLink>
+          <span class="text-muted ms-1">(#{{ log.message_id }})</span>
+        </div>
+
+        <!-- Log text -->
+        <div v-if="log.text" class="detail-section">
+          <h6>Log Text</h6>
+          <p class="mb-0">{{ log.text }}</p>
+        </div>
+
+        <!-- API call details -->
+        <div v-if="rawApiCall" class="detail-section">
+          <h6>API Call</h6>
+          <code>{{ rawApiCall }}</code>
+          <span v-if="duration" class="text-muted ms-2">{{ duration }}</span>
+        </div>
+
+        <!-- Query Parameters -->
+        <div
+          v-if="queryParams && Object.keys(queryParams).length > 0"
+          class="detail-section"
+        >
+          <h6>Query Parameters</h6>
+          <pre class="raw-json small-json">{{ formatJson(queryParams) }}</pre>
+        </div>
+
+        <!-- Request Body -->
+        <div
+          v-if="requestBody && Object.keys(requestBody).length > 0"
+          class="detail-section"
+        >
+          <h6>Request Body</h6>
+          <pre class="raw-json small-json">{{ formatJson(requestBody) }}</pre>
+        </div>
+
+        <!-- Response Body -->
+        <div
+          v-if="responseBody && Object.keys(responseBody).length > 0"
+          class="detail-section"
+        >
+          <h6>Response</h6>
+          <pre class="raw-json small-json">{{ formatJson(responseBody) }}</pre>
+        </div>
+
+        <!-- Trace ID -->
+        <div v-if="log.trace_id" class="detail-section">
+          <h6>Trace ID</h6>
+          <code class="me-2">{{ log.trace_id }}</code>
+          <b-button
+            size="sm"
+            variant="outline-secondary"
+            @click="filterByTraceAndClose"
+          >
+            <v-icon icon="filter" scale="0.8" /> Filter by trace
+          </b-button>
+        </div>
+
+        <!-- Session ID -->
+        <div v-if="log.session_id" class="detail-section">
+          <h6>Session ID</h6>
+          <code class="me-2">{{ log.session_id }}</code>
+          <b-button
+            size="sm"
+            variant="outline-secondary"
+            @click="filterBySessionAndClose"
+          >
+            <v-icon icon="filter" scale="0.8" /> Filter by session
+          </b-button>
+        </div>
+
+        <!-- IP Address -->
+        <div v-if="ipAddress" class="detail-section">
+          <h6>IP Address</h6>
+          <code class="me-2">{{ ipAddress }}</code>
+          <b-button
+            size="sm"
+            variant="outline-secondary"
+            @click="filterByIpAndClose"
+          >
+            <v-icon icon="filter" scale="0.8" /> Filter by IP
+          </b-button>
+        </div>
+
+        <!-- Raw JSON -->
+        <div class="detail-section">
+          <h6>Raw Data</h6>
+          <pre class="raw-json">{{ formattedRaw }}</pre>
+        </div>
+      </div>
+    </b-modal>
+  </div>
+</template>
+
+<script>
+import { useSystemLogsStore } from '../stores/systemlogs'
+import {
+  formatLogText,
+  getLogLevelClass,
+  getLogSourceVariant,
+  formatLogTimestamp,
+} from '../composables/useSystemLogFormatter'
+import { useUserStore } from '~/stores/user'
+import { useGroupStore } from '~/stores/group'
+
+export default {
+  props: {
+    log: {
+      type: Object,
+      required: true,
+    },
+    count: {
+      type: Number,
+      default: 1,
+    },
+    firstTimestamp: {
+      type: String,
+      default: null,
+    },
+    lastTimestamp: {
+      type: String,
+      default: null,
+    },
+    entries: {
+      type: Array,
+      default: () => [],
+    },
+    hideUserColumn: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ['filter-trace', 'filter-session', 'filter-ip'],
+  setup() {
+    const userStore = useUserStore()
+    const groupStore = useGroupStore()
+    const systemLogsStore = useSystemLogsStore()
+    return { userStore, groupStore, systemLogsStore }
+  },
+  data() {
+    return {
+      userLoading: false,
+      groupLoading: false,
+      isExpanded: false,
+      showModal: false,
+    }
+  },
+  computed: {
+    formattedTime() {
+      return formatLogTimestamp(this.log.timestamp, 'short')
+    },
+    fullTimestamp() {
+      return formatLogTimestamp(this.log.timestamp, 'full')
+    },
+    firstTime() {
+      return formatLogTimestamp(
+        this.firstTimestamp || this.log.timestamp,
+        'short'
+      )
+    },
+    lastTime() {
+      return formatLogTimestamp(
+        this.lastTimestamp || this.log.timestamp,
+        'short'
+      )
+    },
+    sourceLabel() {
+      const labels = {
+        api: 'API',
+        logs_table: 'Mod',
+        client: 'User',
+        email: 'Email',
+        batch: 'Batch',
+      }
+      return labels[this.log.source] || this.log.source
+    },
+    sourceVariant() {
+      return getLogSourceVariant(this.log.source)
+    },
+    levelClass() {
+      return getLogLevelClass(this.log)
+    },
+    actionText() {
+      return formatLogText(this.log)
+    },
+    actionTextClean() {
+      // Remove duration from action text (we display it separately)
+      let text = this.actionText.replace(/\s*\(\d+ms\)\s*$/, '').trim()
+
+      // Enrich with actual entity names where we have them
+      // Replace user #ID with username
+      if (this.displayUser?.displayname) {
+        text = text.replace(
+          new RegExp(`user #${this.log.user_id}\\b`, 'gi'),
+          this.displayUser.displayname
+        )
+      }
+
+      // Replace group #ID with group name
+      if (this.displayGroup?.nameshort) {
+        text = text.replace(
+          new RegExp(`group #${this.log.group_id}\\b`, 'gi'),
+          this.displayGroup.nameshort
+        )
+      }
+
+      return text
+    },
+    duration() {
+      // Extract duration from action text or raw data
+      const match = this.actionText.match(/\((\d+ms)\)/)
+      if (match) return match[1]
+      const raw = this.log.raw || {}
+      if (raw.duration_ms) return `${Math.round(raw.duration_ms)}ms`
+      return null
+    },
+    rawApiCall() {
+      // Show raw API call for API source logs
+      if (this.log.source !== 'api') return null
+      const raw = this.log.raw || {}
+      const method = raw.method || 'GET'
+      const endpoint = raw.endpoint || raw.path
+      if (!endpoint) return null
+      return `${method} ${endpoint}`
+    },
+    entryClass() {
+      const classes = []
+      if (this.log.level === 'error') {
+        classes.push('log-error')
+      } else if (this.log.level === 'warn') {
+        classes.push('log-warn')
+      }
+      return classes
+    },
+    displayUser() {
+      if (this.log.user_id) {
+        return this.userStore.list[this.log.user_id]
+      }
+      return null
+    },
+    byUser() {
+      if (this.log.byuser_id) {
+        return this.userStore.list[this.log.byuser_id]
+      }
+      return null
+    },
+    displayGroup() {
+      if (this.log.group_id) {
+        return this.groupStore.list[this.log.group_id]
+      }
+      return null
+    },
+    messageSubject() {
+      // Try to get subject from raw data
+      const raw = this.log.raw || {}
+      return raw.message?.subject || raw.subject || null
+    },
+    formattedRaw() {
+      return JSON.stringify(this.log.raw || {}, null, 2)
+    },
+    ipAddress() {
+      const raw = this.log.raw || {}
+      return raw.ip || raw.ip_address || raw.client_ip || null
+    },
+    queryParams() {
+      const raw = this.log.raw || {}
+      return raw.query_params || null
+    },
+    requestBody() {
+      const raw = this.log.raw || {}
+      return raw.request_body || null
+    },
+    responseBody() {
+      const raw = this.log.raw || {}
+      return raw.response_body || null
+    },
+  },
+  watch: {
+    'log.user_id': {
+      immediate: true,
+      handler(id) {
+        if (id && !this.userStore.list[id]) {
+          this.fetchUser(id)
+        }
+      },
+    },
+    'log.byuser_id': {
+      immediate: true,
+      handler(id) {
+        if (id && !this.userStore.list[id]) {
+          this.fetchUser(id)
+        }
+      },
+    },
+    'log.group_id': {
+      immediate: true,
+      handler(id) {
+        if (id && !this.groupStore.list[id]) {
+          this.fetchGroup(id)
+        }
+      },
+    },
+  },
+  methods: {
+    async fetchUser(id) {
+      if (!id) return
+      this.userLoading = true
+      try {
+        await this.userStore.fetch(id)
+      } catch (e) {
+        console.error('Failed to fetch user', id, e)
+      } finally {
+        this.userLoading = false
+      }
+    },
+    async fetchGroup(id) {
+      if (!id) return
+      this.groupLoading = true
+      try {
+        await this.groupStore.fetch(id)
+      } catch (e) {
+        console.error('Failed to fetch group', id, e)
+      } finally {
+        this.groupLoading = false
+      }
+    },
+    formatEntryTime(timestamp) {
+      return formatLogTimestamp(timestamp, 'short')
+    },
+    formatEntryText(entry) {
+      return formatLogText(entry)
+    },
+    formatJson(data) {
+      return JSON.stringify(data, null, 2)
+    },
+    toggleExpanded() {
+      this.isExpanded = !this.isExpanded
+    },
+    filterByTrace() {
+      this.$emit('filter-trace', this.log.trace_id)
+    },
+    filterBySession() {
+      this.$emit('filter-session', this.log.session_id)
+    },
+    filterByIp() {
+      this.$emit('filter-ip', this.ipAddress)
+    },
+    filterByTraceAndClose() {
+      this.showModal = false
+      this.$emit('filter-trace', this.log.trace_id)
+    },
+    filterBySessionAndClose() {
+      this.showModal = false
+      this.$emit('filter-session', this.log.session_id)
+    },
+    filterByIpAndClose() {
+      this.showModal = false
+      this.$emit('filter-ip', this.ipAddress)
+    },
+  },
+}
+</script>
+
+<style scoped>
+.log-entry {
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.log-entry:hover {
+  background: #f8f9fa;
+}
+
+.log-entry.log-error {
+  background: #fff5f5;
+  border-left: 3px solid #dc3545;
+}
+
+.log-entry.log-warn {
+  background: #fffbf0;
+  border-left: 3px solid #ffc107;
+}
+
+/* Main row layout */
+.log-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  min-height: 36px;
+}
+
+.log-col {
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-col-time {
+  flex: 0 0 160px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.log-col-source {
+  flex: 0 0 70px;
+}
+
+.log-col-user {
+  flex: 0 0 180px;
+  position: relative;
+}
+
+.log-col-action {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.log-col-expand {
+  flex: 0 0 30px;
+  text-align: center;
+}
+
+/* Timestamp */
+.timestamp {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+/* Count badge - distinct from source badges */
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.count-badge:hover {
+  background: #dee2e6;
+  border-color: #adb5bd;
+}
+
+/* Source badge */
+.source-badge {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 2px 6px;
+}
+
+/* User display */
+.user-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+:deep(.user-avatar img),
+:deep(.user-avatar .b-avatar),
+.user-avatar :deep(img) {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  color: #adb5bd;
+}
+
+.user-avatar-sm {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.user-info {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.user-info-stacked {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-link {
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #212529;
+}
+
+.user-link:hover {
+  text-decoration: underline;
+}
+
+.user-id {
+  font-size: 0.7rem;
+}
+
+.user-placeholder {
+  font-size: 0.8rem;
+}
+
+/* User continuation indicator - continuous vertical line on entry */
+.log-entry.has-user-continuation::after {
+  content: '';
+  position: absolute;
+  /* Position at user column: row-padding(12) + time(160) + source(70) + 12px into user col */
+  left: 254px;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  background: #dee2e6;
+  z-index: 2;
+}
+
+.user-same-indicator {
+  display: none;
+}
+
+.user-continuation {
+  /* Keep column layout but hide content */
+}
+
+/* Action text */
+.action-text {
+  font-size: 0.85rem;
+}
+
+/* Duration */
+.duration {
+  font-size: 0.7rem;
+}
+
+/* API details */
+.api-details {
+  font-size: 0.7rem;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* IP address */
+.ip-address {
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.ip-address:hover {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+/* Entity tags */
+.entity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  font-size: 0.8rem;
+}
+
+.entity-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.group-tag {
+  background: #e7f3ff;
+  color: #0056b3;
+}
+
+.group-tag a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.group-tag a:hover {
+  text-decoration: underline;
+}
+
+.message-tag {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.message-tag a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.message-tag a:hover {
+  text-decoration: underline;
+}
+
+/* Trace/session badges */
+.trace-badge,
+.session-badge {
+  background: #6c757d;
+  color: white;
+  padding: 1px 5px;
+  font-size: 0.65rem;
+  font-family: monospace;
+}
+
+.trace-badge.clickable,
+.session-badge.clickable {
+  cursor: pointer;
+}
+
+.trace-badge.clickable:hover,
+.session-badge.clickable:hover {
+  background: #5a6268;
+}
+
+/* Details button */
+.details-btn {
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  color: #adb5bd;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.details-btn:hover {
+  color: #0d6efd;
+}
+
+/* Expanded entries when count badge clicked */
+.expanded-entries {
+  margin-left: 172px;
+  padding: 4px 12px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.expanded-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+  font-size: 0.8rem;
+}
+
+.expanded-time {
+  flex: 0 0 100px;
+  font-size: 0.75rem;
+}
+
+.expanded-action {
+  flex: 1;
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .log-col-time {
+    flex: 0 0 140px;
+  }
+
+  .log-col-user {
+    flex: 0 0 140px;
+  }
+
+  .time-range-expanded {
+    padding-left: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .log-row {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+
+  .log-col-time {
+    flex: 0 0 50%;
+    order: 1;
+  }
+
+  .log-col-source {
+    flex: 0 0 auto;
+    order: 2;
+  }
+
+  .log-col-expand {
+    flex: 0 0 auto;
+    order: 3;
+    margin-left: auto;
+  }
+
+  .log-col-user {
+    flex: 0 0 100%;
+    order: 4;
+    padding-top: 4px;
+  }
+
+  .log-col-action {
+    flex: 0 0 100%;
+    order: 5;
+    padding-top: 4px;
+  }
+
+  .time-range-expanded {
+    margin-left: 0;
+    padding-left: 8px;
+  }
+}
+
+/* Modal styling */
+.log-details-modal {
+  padding: 0;
+}
+
+.detail-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.detail-section {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+}
+
+.detail-section h6 {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6c757d;
+  margin-bottom: 6px;
+}
+
+.detail-section p,
+.detail-section code {
+  font-size: 0.9rem;
+}
+
+.detail-section code {
+  background: #f8f9fa;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+
+.user-display-block {
+  display: flex;
+  align-items: flex-start;
+}
+
+.user-info-block {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.log-details-modal .raw-json {
+  font-size: 0.75rem;
+  max-height: 300px;
+  overflow: auto;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.log-details-modal .small-json {
+  max-height: 150px;
+  font-size: 0.7rem;
+}
+</style>
