@@ -8,6 +8,7 @@ import {
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import { suppressException } from '~/composables/useSuppressException'
 import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
 import { useClientLog } from '~/composables/useClientLog'
@@ -19,6 +20,9 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
   // Initialize client logging - must be called to set runtimeConfig before using sessionStart.
   const clientLog = useClientLog()
+
+  // Set auth store for user_id tracking in logs.
+  clientLog.setAuthStore(useAuthStore())
 
   // Start client logging immediately - runs independently of Sentry.
   // Include Capacitor device info if running in the app.

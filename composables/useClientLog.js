@@ -28,6 +28,20 @@ function getCurrentUserId() {
   return null
 }
 
+/**
+ * Check if auth store is ready (login state has been determined).
+ * The store is considered ready once loginStateKnown is true,
+ * which happens after fetchUser completes (whether logged in or not).
+ */
+function isAuthStoreReady() {
+  try {
+    return authStore?.loginStateKnown === true
+  } catch {
+    // Store not available.
+  }
+  return false
+}
+
 // Queue for batching logs.
 const logQueue = []
 let flushTimeout = null
@@ -74,10 +88,17 @@ function sendLogs(logs) {
   }
 }
 
+// Max time to wait for auth store before sending logs anyway.
+const MAX_AUTH_WAIT_MS = 10000
+let authWaitStartTime = null
+
 /**
  * Flush queued logs to the backend.
+ * Waits for auth store to be ready (up to 10s) so user_id can be included.
+ *
+ * @param {boolean} force - If true, send immediately without waiting for auth store.
  */
-function flushLogs() {
+function flushLogs(force = false) {
   if (flushTimeout) {
     clearTimeout(flushTimeout)
     flushTimeout = null
@@ -87,8 +108,35 @@ function flushLogs() {
     return
   }
 
-  // Take all logs from queue and send.
+  // Wait for auth store to be ready, but not forever (unless force=true).
+  if (!force && !isAuthStoreReady()) {
+    if (!authWaitStartTime) {
+      authWaitStartTime = Date.now()
+    }
+    const waitedMs = Date.now() - authWaitStartTime
+    if (waitedMs < MAX_AUTH_WAIT_MS) {
+      // Retry in 500ms.
+      flushTimeout = setTimeout(flushLogs, 500)
+      return
+    }
+    // Waited too long - send anyway without user_id.
+  }
+
+  authWaitStartTime = null
+
+  // Take all logs from queue.
   const logsToSend = logQueue.splice(0, logQueue.length)
+
+  // Add user_id to all logs now that auth store is ready.
+  const currentUserId = getCurrentUserId()
+  if (currentUserId) {
+    for (const log of logsToSend) {
+      if (!log.user_id) {
+        log.user_id = currentUserId
+      }
+    }
+  }
+
   sendLogs(logsToSend)
 }
 
@@ -217,6 +265,10 @@ function getEnvironmentInfo() {
  * Log session start with environment info.
  * Should be called once when the app initializes.
  *
+ * The log is queued immediately but won't be sent until the auth store
+ * is ready (loginStateKnown is true). This ensures user_id is included
+ * if the user is logged in, even though we don't know that at queue time.
+ *
  * @param {Object} context - Additional context to include
  * @param {Object} appDeviceInfo - Optional Capacitor device info from mobile store
  */
@@ -243,12 +295,19 @@ function sessionStart(context = {}, appDeviceInfo = null) {
 /**
  * Log a Sentry error for correlation.
  * Called when Sentry captures an exception.
+ * Includes viewport dimensions so we know the device at time of crash.
  */
 function sentryError(errorMessage, sentryEventId, context = {}) {
+  // Include basic environment info so crash logs show device details.
+  const envInfo = getEnvironmentInfo()
+
   queueLog(LogLevel.ERROR, `Sentry: ${errorMessage}`, {
     event_type: 'sentry_error',
     sentry_event_id: sentryEventId,
     error_message: errorMessage,
+    viewport_width: envInfo.viewport_width,
+    viewport_height: envInfo.viewport_height,
+    user_agent: envInfo.user_agent,
     ...context,
   })
 }
@@ -361,10 +420,21 @@ function flush() {
 }
 
 /**
+ * Set the auth store reference for user_id tracking.
+ * Call this once during app initialization.
+ *
+ * @param {Object} store - The auth store instance
+ */
+function setAuthStore(store) {
+  authStore = store
+}
+
+/**
  * Client logging composable.
  *
  * Usage:
- *   const { log, info, error, pageView, action } = useClientLog()
+ *   const { log, info, error, pageView, action, setAuthStore } = useClientLog()
+ *   setAuthStore(useAuthStore()) // Call once during init
  *   info('User clicked button', { button: 'submit' })
  */
 export function useClientLog() {
@@ -374,17 +444,6 @@ export function useClientLog() {
       runtimeConfig = useRuntimeConfig()
     } catch {
       // Not in Nuxt context - will be set later.
-    }
-  }
-
-  // Get auth store if not already set (for user_id tracking).
-  if (!authStore) {
-    try {
-      // Dynamic import to avoid circular dependencies.
-      const { useAuthStore } = require('~/stores/auth')
-      authStore = useAuthStore()
-    } catch {
-      // Store not available yet - will be set on next call.
     }
   }
 
@@ -399,6 +458,7 @@ export function useClientLog() {
     sessionStart,
     sentryError,
     flush,
+    setAuthStore,
     LogLevel,
   }
 }
@@ -406,13 +466,15 @@ export function useClientLog() {
 // Set up page unload handler to flush remaining logs.
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
-    flushLogs()
+    // Force flush on unload - don't wait for auth store since page is closing.
+    flushLogs(true)
   })
 
   // Also flush on visibility change (mobile tab switch).
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
-      flushLogs()
+      // Force flush when tab is hidden - user may close browser.
+      flushLogs(true)
     }
   })
 
@@ -482,4 +544,5 @@ export {
   sessionStart,
   sentryError,
   flush,
+  setAuthStore,
 }
