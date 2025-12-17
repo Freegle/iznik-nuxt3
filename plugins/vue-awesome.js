@@ -111,10 +111,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
+  faChrome,
+  faEdge,
   faFacebook,
-  faTwitter,
-  faInstagram,
+  faFirefoxBrowser,
   faGithub,
+  faInstagram,
+  faSafari,
+  faTwitter,
   faWhatsapp,
 } from '@fortawesome/free-brands-svg-icons'
 
@@ -225,10 +229,14 @@ library.add(
   faUser,
   faUsers,
   faWalking,
+  faChrome,
+  faEdge,
   faFacebook,
-  faTwitter,
-  faInstagram,
+  faFirefoxBrowser,
   faGithub,
+  faInstagram,
+  faSafari,
+  faTwitter,
   faWhatsapp
 )
 
