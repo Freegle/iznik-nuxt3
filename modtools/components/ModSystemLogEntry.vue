@@ -331,6 +331,34 @@
           <span v-if="duration" class="text-muted ms-2">{{ duration }}</span>
         </div>
 
+        <!-- API Headers (fetched separately) -->
+        <div v-if="isApiLog" class="detail-section">
+          <h6>Request Headers</h6>
+          <div v-if="headersLoading" class="text-muted">
+            <span class="spinner-border spinner-border-sm me-2" />
+            Loading headers...
+          </div>
+          <div v-else-if="headersError" class="text-danger small">
+            {{ headersError }}
+          </div>
+          <div v-else-if="apiHeaders?.request_headers">
+            <pre class="raw-json small-json">{{
+              formatJson(apiHeaders.request_headers)
+            }}</pre>
+          </div>
+          <div v-else class="text-muted small">No headers available</div>
+        </div>
+
+        <div
+          v-if="isApiLog && apiHeaders?.response_headers"
+          class="detail-section"
+        >
+          <h6>Response Headers</h6>
+          <pre class="raw-json small-json">{{
+            formatJson(apiHeaders.response_headers)
+          }}</pre>
+        </div>
+
         <!-- Query Parameters -->
         <div
           v-if="queryParams && Object.keys(queryParams).length > 0"
@@ -471,6 +499,7 @@ import {
 } from '../composables/useSystemLogFormatter'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
+import api from '~/api'
 
 export default {
   props: {
@@ -512,6 +541,10 @@ export default {
       groupLoading: false,
       isExpanded: false,
       showModal: false,
+      // API headers (fetched on demand for v1 API logs)
+      apiHeaders: null,
+      headersLoading: false,
+      headersError: null,
     }
   },
   computed: {
@@ -606,8 +639,14 @@ export default {
       if (this.log.source !== 'api') return null
       const raw = this.log.raw || {}
       const method = raw.method || 'GET'
-      const endpoint = raw.endpoint || raw.path
+      // v2 uses 'path' (e.g., "/apiv2/messages"), v1 uses 'call' (e.g., "messages")
+      let endpoint = raw.endpoint || raw.path || raw.call
       if (!endpoint) return null
+      // Ensure endpoint starts with a slash and has proper prefix
+      if (!endpoint.startsWith('/')) {
+        // v1 API - add /api/ prefix
+        endpoint = '/api/' + endpoint
+      }
       return `${method} ${endpoint}`
     },
     entryClass() {
@@ -693,6 +732,15 @@ export default {
     responseBody() {
       const raw = this.log.raw || {}
       return raw.response_body || null
+    },
+    // Check if this is an API log (headers are logged separately for both v1 and v2)
+    isApiLog() {
+      return this.log.source === 'api'
+    },
+    // Get the request_id for correlation with headers
+    requestId() {
+      const raw = this.log.raw || {}
+      return raw.request_id || null
     },
     /* Device info parsing for session_start and client logs */
     deviceInfo() {
@@ -805,6 +853,12 @@ export default {
         }
       },
     },
+    showModal(newVal) {
+      // Fetch headers when modal opens for API logs
+      if (newVal && this.isApiLog && !this.apiHeaders && !this.headersLoading) {
+        this.fetchApiHeaders()
+      }
+    },
   },
   methods: {
     async fetchUser(id) {
@@ -861,6 +915,47 @@ export default {
     filterByIpAndClose() {
       this.showModal = false
       this.$emit('filter-ip', this.ipAddress)
+    },
+    async fetchApiHeaders() {
+      if (!this.isApiLog) return
+
+      this.headersLoading = true
+      this.headersError = null
+
+      try {
+        const config = useRuntimeConfig()
+
+        let response
+        if (this.requestId) {
+          // Use request_id for precise correlation
+          response = await api(config).systemlogs.fetchHeadersByRequestId(
+            this.requestId
+          )
+        } else {
+          // Fallback to timestamp-based matching for older logs
+          const raw = this.log.raw || {}
+          response = await api(config).systemlogs.fetchHeadersByTimestamp(
+            this.log.timestamp,
+            raw.endpoint || raw.call,
+            this.log.user_id
+          )
+        }
+
+        if (response.logs && response.logs.length > 0) {
+          // Find the best match (by request_id if available)
+          const match = this.requestId
+            ? response.logs.find((l) => l.raw?.request_id === this.requestId)
+            : response.logs[0]
+          if (match) {
+            this.apiHeaders = match.raw || {}
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch API headers', e)
+        this.headersError = e.message || 'Failed to fetch headers'
+      } finally {
+        this.headersLoading = false
+      }
     },
   },
 }
