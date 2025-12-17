@@ -173,7 +173,7 @@
           <v-icon icon="times" scale="0.7" />
         </b-badge>
         <b-badge
-          v-if="groupid"
+          v-if="groupid > 0"
           variant="info"
           class="me-1 filter-badge"
           @click="clearGroupFilter"
