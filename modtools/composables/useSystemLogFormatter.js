@@ -31,10 +31,11 @@ function fetchSwaggerDocs() {
       let swaggerUrl
       if (apiBase.startsWith('http')) {
         const url = new URL(apiBase)
-        url.pathname = '/swagger/doc.json'
+        url.pathname = '/swagger/swagger.json'
         swaggerUrl = url.toString()
       } else {
-        swaggerUrl = apiBase.replace(/\/apiv?\d*$/, '') + '/swagger/doc.json'
+        swaggerUrl =
+          apiBase.replace(/\/apiv?\d*$/, '') + '/swagger/swagger.json'
       }
 
       const response = await fetch(swaggerUrl)
