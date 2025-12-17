@@ -112,6 +112,36 @@
               {{ ipAddress }}
             </span>
           </div>
+          <!-- Device info summary for client logs -->
+          <div v-if="hasDeviceInfo" class="device-info-summary">
+            <span class="device-chip" :title="deviceInfo.type">
+              <v-icon :icon="deviceInfo.typeIcon" scale="0.8" />
+            </span>
+            <span class="device-chip browser-chip" :title="deviceInfo.browser">
+              {{ deviceInfo.browser }}
+            </span>
+            <span
+              v-if="deviceInfo.screenSize"
+              class="device-chip screen-chip"
+              :title="'Viewport: ' + deviceInfo.screenSize"
+            >
+              {{ deviceInfo.screenSize }}
+            </span>
+            <span
+              v-if="deviceInfo.isApp"
+              class="device-chip app-chip"
+              :title="
+                deviceInfo.appManufacturer +
+                ' ' +
+                deviceInfo.appModel +
+                ' (' +
+                deviceInfo.appPlatform +
+                ')'
+              "
+            >
+              App
+            </span>
+          </div>
         </div>
       </div>
 
@@ -330,6 +360,42 @@
           </b-button>
         </div>
 
+        <!-- Device Info -->
+        <div v-if="hasDeviceInfo" class="detail-section">
+          <h6>Device Info</h6>
+          <div class="device-info-detail">
+            <div class="device-info-row">
+              <v-icon :icon="deviceInfo.typeIcon" class="me-2" />
+              <span class="device-label">Type:</span>
+              <span>{{ deviceInfo.type }}</span>
+            </div>
+            <div class="device-info-row">
+              <v-icon icon="globe" class="me-2" />
+              <span class="device-label">Browser:</span>
+              <span>{{ deviceInfo.browser }}</span>
+            </div>
+            <div class="device-info-row">
+              <v-icon icon="laptop" class="me-2" />
+              <span class="device-label">OS:</span>
+              <span>{{ deviceInfo.os }}</span>
+            </div>
+            <div v-if="deviceInfo.screenSize" class="device-info-row">
+              <v-icon icon="expand" class="me-2" />
+              <span class="device-label">Viewport:</span>
+              <span>{{ deviceInfo.screenSize }}</span>
+            </div>
+            <div v-if="deviceInfo.isApp" class="device-info-row">
+              <v-icon icon="mobile-alt" class="me-2" />
+              <span class="device-label">App Device:</span>
+              <span
+                >{{ deviceInfo.appManufacturer }} {{ deviceInfo.appModel }} ({{
+                  deviceInfo.appPlatform
+                }})</span
+              >
+            </div>
+          </div>
+        </div>
+
         <!-- Raw JSON -->
         <div class="detail-section">
           <h6>Raw Data</h6>
@@ -532,6 +598,79 @@ export default {
     responseBody() {
       const raw = this.log.raw || {}
       return raw.response_body || null
+    },
+    /* Device info parsing for session_start and client logs */
+    deviceInfo() {
+      const raw = this.log.raw || {}
+      const ua = raw.user_agent || this.log.user_agent || ''
+      if (!ua) return null
+
+      const info = {
+        type: 'desktop',
+        typeIcon: 'desktop',
+        browser: 'unknown',
+        browserIcon: 'globe',
+        os: 'unknown',
+        screenSize: null,
+      }
+
+      // Detect device type
+      if (/mobile|android.*mobile|iphone|ipod/i.test(ua)) {
+        info.type = 'mobile'
+        info.typeIcon = 'mobile-alt'
+      } else if (/tablet|ipad|android(?!.*mobile)/i.test(ua)) {
+        info.type = 'tablet'
+        info.typeIcon = 'tablet-alt'
+      }
+
+      // Detect browser
+      if (/edg/i.test(ua)) {
+        info.browser = 'Edge'
+        info.browserIcon = 'edge'
+      } else if (/chrome/i.test(ua) && !/edg/i.test(ua)) {
+        info.browser = 'Chrome'
+        info.browserIcon = 'chrome'
+      } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
+        info.browser = 'Safari'
+        info.browserIcon = 'safari'
+      } else if (/firefox/i.test(ua)) {
+        info.browser = 'Firefox'
+        info.browserIcon = 'firefox'
+      }
+
+      // Detect OS
+      if (/windows/i.test(ua)) {
+        info.os = 'Windows'
+      } else if (/macintosh|mac os/i.test(ua)) {
+        info.os = 'macOS'
+      } else if (/iphone|ipad|ipod/i.test(ua)) {
+        info.os = 'iOS'
+      } else if (/android/i.test(ua)) {
+        info.os = 'Android'
+      } else if (/linux/i.test(ua)) {
+        info.os = 'Linux'
+      }
+
+      // Get screen size from raw data (session_start logs)
+      if (raw.viewport_width && raw.viewport_height) {
+        info.screenSize = `${raw.viewport_width}×${raw.viewport_height}`
+      }
+
+      // Get app-specific info
+      if (raw.app_platform) {
+        info.isApp = true
+        info.appPlatform = raw.app_platform
+        info.appModel = raw.app_model
+        info.appManufacturer = raw.app_manufacturer
+      }
+
+      return info
+    },
+    hasDeviceInfo() {
+      return (
+        this.deviceInfo &&
+        (this.deviceInfo.browser !== 'unknown' || this.deviceInfo.screenSize)
+      )
     },
   },
   watch: {
@@ -1064,5 +1203,63 @@ export default {
 .log-details-modal .small-json {
   max-height: 150px;
   font-size: 0.7rem;
+}
+
+/* Device info summary (inline in log row) */
+.device-info-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.device-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  font-size: 0.65rem;
+  background: #f1f3f5;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.device-chip.browser-chip {
+  background: #e7f3ff;
+  border-color: #b3d9ff;
+  color: #0056b3;
+}
+
+.device-chip.screen-chip {
+  background: #f8f9fa;
+  border-color: #ced4da;
+  color: #6c757d;
+  font-family: monospace;
+}
+
+.device-chip.app-chip {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+  color: #2e7d32;
+}
+
+/* Device info detail (in modal) */
+.device-info-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.device-info-row {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.device-info-row .device-label {
+  font-weight: 500;
+  color: #6c757d;
+  width: 80px;
+  margin-right: 8px;
 }
 </style>
