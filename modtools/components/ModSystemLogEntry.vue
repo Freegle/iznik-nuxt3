@@ -65,6 +65,15 @@
         <div class="action-content">
           <div class="action-main">
             <span class="action-text">{{ actionTextClean }}</span>
+            <!-- Crash indicator -->
+            <ExternalLink
+              v-if="sentryEventId"
+              :href="sentryUrl"
+              class="sentry-indicator"
+              title="View crash details"
+            >
+              <v-icon icon="exclamation-triangle" scale="0.8" />
+            </ExternalLink>
             <!-- Group display -->
             <span v-if="displayGroup" class="entity-tag group-tag">
               <ProfileImage
@@ -376,6 +385,16 @@
           >
             <v-icon icon="filter" scale="0.8" /> Filter by IP
           </b-button>
+        </div>
+
+        <!-- Crash Link -->
+        <div v-if="sentryEventId" class="detail-section">
+          <h6>Crash</h6>
+          <ExternalLink :href="sentryUrl" class="sentry-link">
+            <v-icon icon="exclamation-triangle" class="me-1" />
+            View crash details
+          </ExternalLink>
+          <code class="ms-2 small text-muted">{{ sentryEventId }}</code>
         </div>
 
         <!-- Device Info -->
@@ -739,6 +758,17 @@ export default {
         (this.deviceInfo.browser !== 'unknown' || this.deviceInfo.screenSize)
       )
     },
+    sentryEventId() {
+      // Get Sentry event ID from raw data for error logs.
+      const raw = this.log.raw || {}
+      return raw.sentry_event_id || null
+    },
+    sentryUrl() {
+      // Generate Sentry URL for the event.
+      if (!this.sentryEventId) return null
+      // Freegle Sentry organization and project.
+      return `https://freegle.sentry.io/issues/?query=${this.sentryEventId}`
+    },
   },
   watch: {
     'log.user_id': {
@@ -1047,6 +1077,36 @@ export default {
 .ip-address:hover {
   color: #0d6efd;
   text-decoration: underline;
+}
+
+/* Crash indicator */
+.sentry-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: #dc3545;
+  transition: color 0.15s;
+}
+
+.sentry-indicator:hover {
+  color: #b02a37;
+}
+
+/* Crash link button in details modal */
+.sentry-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sentry-link:hover {
+  background-color: #b02a37;
+  color: white;
+  text-decoration: none;
 }
 
 /* Session URL */

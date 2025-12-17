@@ -326,6 +326,17 @@ export default {
       const routes = []
       let currentRoute = null
 
+      // Helper to extract route from any log that has it.
+      const getRouteFromLog = (log) => {
+        const raw = log.raw || {}
+        // Check for route in various fields.
+        const routeName = raw.page_name || raw.url || raw.route || null
+        if (routeName) {
+          return routeName.startsWith('/') ? routeName : `/${routeName}`
+        }
+        return null
+      }
+
       for (const item of allLogs) {
         const log = item.log
         const isPageView =
@@ -337,10 +348,8 @@ export default {
         const isClientEvent = log.source === 'client' && !isPageView
 
         if (isPageView) {
-          // Start a new route
-          const rawName = log.raw?.page_name || log.raw?.url || 'Unknown'
-          // Ensure leading slash for consistency
-          const pageName = rawName.startsWith('/') ? rawName : `/${rawName}`
+          // Start a new route.
+          const pageName = getRouteFromLog(log) || '/Unknown'
           currentRoute = {
             type: 'route',
             log,
@@ -350,12 +359,12 @@ export default {
           }
           routes.push(currentRoute)
         } else if (isApiCall) {
-          // API call - add to current route or create orphan route
+          // API call - add to current route or create orphan route.
           if (!currentRoute) {
             currentRoute = {
               type: 'route',
               log: null,
-              pageName: '(No route)',
+              pageName: '(API calls)',
               apiCalls: [],
               otherLogs: [],
             }
@@ -367,7 +376,7 @@ export default {
             serverLogs: [],
           })
         } else if (isServerLog) {
-          // Server log - attach to most recent API call
+          // Server log - attach to most recent API call.
           if (currentRoute && currentRoute.apiCalls.length > 0) {
             const lastApi =
               currentRoute.apiCalls[currentRoute.apiCalls.length - 1]
@@ -375,27 +384,34 @@ export default {
           } else if (currentRoute) {
             currentRoute.otherLogs.push(item)
           } else {
-            // Orphan server log
+            // Orphan server log.
             currentRoute = {
               type: 'route',
               log: null,
-              pageName: '(No route)',
+              pageName: '(Background)',
               apiCalls: [],
               otherLogs: [item],
             }
             routes.push(currentRoute)
           }
         } else if (isClientEvent) {
-          // Other client events - add to current route's other logs
+          // Other client events - check if they have route info.
+          const eventRoute = getRouteFromLog(log)
+
           if (!currentRoute) {
+            // Create a new route using the event's route if available.
             currentRoute = {
               type: 'route',
-              log: null,
-              pageName: '(No route)',
+              log: eventRoute ? log : null,
+              pageName: eventRoute || '(Events)',
               apiCalls: [],
               otherLogs: [],
             }
             routes.push(currentRoute)
+          } else if (eventRoute && currentRoute.pageName.startsWith('(')) {
+            // Update the route name if we have one and current is a placeholder.
+            currentRoute.pageName = eventRoute
+            currentRoute.log = log
           }
           currentRoute.otherLogs.push(item)
         }
