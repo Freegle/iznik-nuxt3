@@ -10,12 +10,15 @@ import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import { suppressException } from '~/composables/useSuppressException'
 import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
-import { sessionStart, sentryError } from '~/composables/useClientLog'
+import { useClientLog } from '~/composables/useClientLog'
 
 export default defineNuxtPlugin(async (nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
+
+  // Initialize client logging - must be called to set runtimeConfig before using sessionStart.
+  const clientLog = useClientLog()
 
   // Start client logging immediately - runs independently of Sentry.
   // Include Capacitor device info if running in the app.
@@ -23,16 +26,16 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const { useMobileStore } = await import('~/stores/mobile')
     const mobileStore = useMobileStore()
     if (mobileStore.isApp && mobileStore.deviceinfo) {
-      sessionStart(
+      clientLog.sessionStart(
         { app_version: mobileStore.mobileVersion },
         mobileStore.deviceinfo
       )
     } else {
-      sessionStart()
+      clientLog.sessionStart()
     }
   } catch {
     // Not in app context or store not available.
-    sessionStart()
+    clientLog.sessionStart()
   }
 
   /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
@@ -328,7 +331,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
               hint?.originalException?.message ||
               hint?.originalException?.toString() ||
               'Unknown error'
-            sentryError(errorMessage, event.event_id, {
+            clientLog.sentryError(errorMessage, event.event_id, {
               exception_name: hint?.originalException?.name,
             })
           }
