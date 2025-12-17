@@ -8,12 +8,39 @@ import {
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import { suppressException } from '~/composables/useSuppressException'
+import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
+import { useClientLog } from '~/composables/useClientLog'
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
+
+  // Initialize client logging - must be called to set runtimeConfig before using sessionStart.
+  const clientLog = useClientLog()
+
+  // Set auth store for user_id tracking in logs.
+  clientLog.setAuthStore(useAuthStore())
+
+  // Start client logging immediately - runs independently of Sentry.
+  // Include Capacitor device info if running in the app.
+  try {
+    const { useMobileStore } = await import('~/stores/mobile')
+    const mobileStore = useMobileStore()
+    if (mobileStore.isApp && mobileStore.deviceinfo) {
+      clientLog.sessionStart(
+        { app_version: mobileStore.mobileVersion },
+        mobileStore.deviceinfo
+      )
+    } else {
+      clientLog.sessionStart()
+    }
+  } catch {
+    // Not in app context or store not available.
+    clientLog.sessionStart()
+  }
 
   /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
     console.log('Window unloading...')
@@ -100,7 +127,9 @@ export default defineNuxtPlugin((nuxtApp) => {
           // Suppress Vue unmountComponent errors during navigation.
           if (
             hint?.originalException?.stack?.includes('unmountComponent') &&
-            hint?.originalException?.message?.includes("'bum' of 'instance' as it is null")
+            hint?.originalException?.message?.includes(
+              "'bum' of 'instance' as it is null"
+            )
           ) {
             return null
           }
@@ -300,6 +329,17 @@ export default defineNuxtPlugin((nuxtApp) => {
             }
           }
 
+          // Log to Loki for correlation with Sentry.
+          if (event.event_id) {
+            const errorMessage =
+              hint?.originalException?.message ||
+              hint?.originalException?.toString() ||
+              'Unknown error'
+            clientLog.sentryError(errorMessage, event.event_id, {
+              exception_name: hint?.originalException?.name,
+            })
+          }
+
           // Continue sending to Sentry
           return event
         },
@@ -318,6 +358,16 @@ export default defineNuxtPlugin((nuxtApp) => {
         trackComponents: true,
         timeout: 2000,
         hooks: ['activate', 'mount', 'update'],
+      })
+
+      // Set initial trace tags for correlation with Loki logs.
+      Sentry.setTag('trace_id', getTraceId())
+      Sentry.setTag('session_id', getSessionId())
+
+      // Register callback to update trace tags when trace changes.
+      onTraceChange((traceId, sessionId) => {
+        Sentry.setTag('trace_id', traceId)
+        Sentry.setTag('session_id', sessionId)
       })
     }
   }
