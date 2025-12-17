@@ -68,6 +68,8 @@
             {{ ipAddress }}
           </span>
         </span>
+        <!-- Empty placeholder to maintain column width when no user info -->
+        <span v-else class="user-empty-placeholder">&nbsp;</span>
       </div>
 
       <!-- Action column -->
@@ -142,7 +144,11 @@
             <span class="device-chip" :title="deviceInfo.type">
               <v-icon :icon="deviceInfo.typeIcon" scale="0.8" />
             </span>
-            <span class="device-chip browser-chip" :title="deviceInfo.browser">
+            <span
+              class="device-chip browser-chip"
+              :class="'browser-' + deviceInfo.browser.toLowerCase()"
+              :title="deviceInfo.browser"
+            >
               <v-icon :icon="deviceInfo.browserIcon" scale="0.8" />
             </span>
             <span
@@ -445,7 +451,11 @@
               <span class="device-value">{{ deviceInfo.type }}</span>
             </div>
             <div class="device-info-row">
-              <v-icon :icon="deviceInfo.browserIcon" class="device-icon" />
+              <v-icon
+                :icon="deviceInfo.browserIcon"
+                class="device-icon"
+                :class="'browser-icon-' + deviceInfo.browser.toLowerCase()"
+              />
               <span class="device-label">Browser:</span>
               <span class="device-value">{{ deviceInfo.browser }}</span>
             </div>
@@ -995,7 +1005,7 @@ export default {
 }
 
 .log-col-time {
-  flex: 0 0 160px;
+  flex: 0 0 200px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1007,7 +1017,13 @@ export default {
 
 .log-col-user {
   flex: 0 0 180px;
+  min-width: 180px;
   position: relative;
+}
+
+.user-empty-placeholder {
+  display: block;
+  width: 100%;
 }
 
 .log-col-action {
@@ -1142,8 +1158,8 @@ export default {
 .log-entry.has-user-continuation::after {
   content: '';
   position: absolute;
-  /* Position at user column: row-padding(12) + time(160) + source(70) + 12px into user col */
-  left: 254px;
+  /* Position at user column: row-padding(12) + time(200) + source(70) + 12px into user col */
+  left: 294px;
   top: -1px;
   bottom: -1px;
   width: 2px;
@@ -1309,7 +1325,7 @@ export default {
 
 /* Expanded entries when count badge clicked */
 .expanded-entries {
-  margin-left: 172px;
+  margin-left: 212px;
   padding: 4px 12px;
   background: #f8f9fa;
   border-top: 1px solid #e9ecef;
@@ -1336,11 +1352,12 @@ export default {
 /* Responsive adjustments */
 @media (max-width: 992px) {
   .log-col-time {
-    flex: 0 0 140px;
+    flex: 0 0 180px;
   }
 
   .log-col-user {
     flex: 0 0 140px;
+    min-width: 140px;
   }
 
   .time-range-expanded {
@@ -1473,9 +1490,25 @@ export default {
 }
 
 .device-chip.browser-chip {
-  background: #e7f3ff;
-  border-color: #b3d9ff;
-  color: #0056b3;
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+/* Branded browser colors */
+.device-chip.browser-chip.browser-chrome {
+  color: #4285f4;
+}
+
+.device-chip.browser-chip.browser-firefox {
+  color: #ff7139;
+}
+
+.device-chip.browser-chip.browser-safari {
+  color: #007aff;
+}
+
+.device-chip.browser-chip.browser-edge {
+  color: #0078d7;
 }
 
 .device-chip.screen-chip {
@@ -1510,6 +1543,23 @@ export default {
   flex-shrink: 0;
   text-align: center;
   margin-right: 8px;
+}
+
+/* Branded browser icon colors in modal */
+.device-info-row .browser-icon-chrome {
+  color: #4285f4;
+}
+
+.device-info-row .browser-icon-firefox {
+  color: #ff7139;
+}
+
+.device-info-row .browser-icon-safari {
+  color: #007aff;
+}
+
+.device-info-row .browser-icon-edge {
+  color: #0078d7;
 }
 
 .device-info-row .device-label {

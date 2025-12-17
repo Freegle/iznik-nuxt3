@@ -757,7 +757,7 @@ export default {
   display: flex;
   align-items: stretch;
   /* Add consistent left padding so entries without expand buttons align with those that have them */
-  padding-left: 48px;
+  padding-left: 60px;
 }
 
 .tree-row:has(.tree-toggle-area) {
@@ -767,7 +767,7 @@ export default {
 
 /* Fixed width toggle area for consistent alignment */
 .tree-toggle-area {
-  flex: 0 0 48px;
+  flex: 0 0 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -837,7 +837,7 @@ export default {
 }
 
 .breadcrumb-col-time {
-  flex: 0 0 160px;
+  flex: 0 0 200px;
 }
 
 .breadcrumb-col-source {

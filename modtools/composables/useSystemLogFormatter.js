@@ -829,11 +829,21 @@ export function getLogLevelClass(log) {
 
   // For API logs, only show error/warning styling for actual errors:
   // - HTTP 5xx status codes = error
-  // - v1 API responses where ret.status != 0 = error
+  // - v1 API responses where ret.status != 0 = error (with exceptions)
   // Normal 401/403 responses are NOT errors - they're expected for unauthenticated requests.
   if (log.source === 'api') {
     const retStatus = raw.response_body?.ret ?? raw.ret
-    if (statusCode >= 500 || (retStatus !== undefined && retStatus !== 0)) {
+    const endpoint = raw.endpoint || raw.path || raw.call || ''
+
+    // Session/user endpoints returning ret=1 just means "not logged in" - that's normal.
+    const isAuthCheckEndpoint =
+      endpoint.includes('/session') || endpoint === '/api/user'
+    const isNormalAuthResponse = isAuthCheckEndpoint && retStatus === 1
+
+    if (
+      statusCode >= 500 ||
+      (retStatus !== undefined && retStatus !== 0 && !isNormalAuthResponse)
+    ) {
       return 'text-danger'
     }
     // Don't show warning for 4xx - these are normal

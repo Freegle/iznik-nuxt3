@@ -435,7 +435,7 @@ export default {
 }
 
 .log-col-time {
-  flex: 0 0 160px;
+  flex: 0 0 200px;
 }
 
 .log-col-source {
@@ -461,7 +461,7 @@ export default {
   }
 
   .log-col-time {
-    flex: 0 0 100px;
+    flex: 0 0 140px;
   }
 
   .log-col-source {
