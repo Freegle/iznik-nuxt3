@@ -54,7 +54,7 @@
           <b-form-input
             v-model="ipInput"
             type="text"
-            placeholder="0.0.0.0"
+            placeholder="Filter by IP"
             @keyup.enter="doSearch"
           />
         </b-input-group>
