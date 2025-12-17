@@ -12,10 +12,28 @@ import { suppressException } from '~/composables/useSuppressException'
 import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
 import { sessionStart, sentryError } from '~/composables/useClientLog'
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
+
+  // Start client logging immediately - runs independently of Sentry.
+  // Include Capacitor device info if running in the app.
+  try {
+    const { useMobileStore } = await import('~/stores/mobile')
+    const mobileStore = useMobileStore()
+    if (mobileStore.isApp && mobileStore.deviceinfo) {
+      sessionStart(
+        { app_version: mobileStore.mobileVersion },
+        mobileStore.deviceinfo
+      )
+    } else {
+      sessionStart()
+    }
+  } catch {
+    // Not in app context or store not available.
+    sessionStart()
+  }
 
   /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
     console.log('Window unloading...')
@@ -24,7 +42,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // If we initialise Sentry before CookieYes then it seems to attach a click handler which blocks clicking on the
   // CookieYes banner.
-  async function checkCMPComplete() {
+  function checkCMPComplete() {
     const runTimeConfig = useRuntimeConfig()
 
     // Skip Sentry initialization if DSN is empty (disabled)
@@ -344,24 +362,6 @@ export default defineNuxtPlugin((nuxtApp) => {
         Sentry.setTag('trace_id', traceId)
         Sentry.setTag('session_id', sessionId)
       })
-
-      // Log session start to Loki with environment info for support debugging.
-      // Include Capacitor device info if running in the app.
-      try {
-        const { useMobileStore } = await import('~/stores/mobile')
-        const mobileStore = useMobileStore()
-        if (mobileStore.isApp && mobileStore.deviceinfo) {
-          sessionStart(
-            { app_version: mobileStore.mobileVersion },
-            mobileStore.deviceinfo
-          )
-        } else {
-          sessionStart()
-        }
-      } catch {
-        // Not in app context or store not available.
-        sessionStart()
-      }
     }
   }
 
