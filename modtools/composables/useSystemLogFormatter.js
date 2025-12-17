@@ -25,7 +25,17 @@ function fetchSwaggerDocs() {
       const runtimeConfig =
         typeof useRuntimeConfig !== 'undefined' ? useRuntimeConfig() : {}
       const apiBase = runtimeConfig?.public?.APIv2 || '/apiv2'
-      const swaggerUrl = apiBase.replace(/\/api.*$/, '') + '/swagger/doc.json'
+
+      // Build swagger URL by replacing only the path portion /api or /apiv2.
+      // Use URL parsing to avoid matching /api in the hostname.
+      let swaggerUrl
+      if (apiBase.startsWith('http')) {
+        const url = new URL(apiBase)
+        url.pathname = '/swagger/doc.json'
+        swaggerUrl = url.toString()
+      } else {
+        swaggerUrl = apiBase.replace(/\/apiv?\d*$/, '') + '/swagger/doc.json'
+      }
 
       const response = await fetch(swaggerUrl)
       if (!response.ok) {
