@@ -651,15 +651,13 @@ export default {
     },
     entryClass() {
       const classes = []
-      // For API logs, only show error styling for actual errors:
-      // - HTTP 5xx status codes
-      // - v1 API responses where ret.status != 0
-      // Normal 401/403 responses are NOT errors.
+      // For API logs, only show error styling for actual server errors:
+      // - HTTP 5xx status codes only
+      // Normal responses like "not logged in" (ret=1) are NOT errors.
       if (this.log.source === 'api') {
         const raw = this.log.raw || {}
         const statusCode = raw.status_code || raw.status || 200
-        const retStatus = raw.response_body?.ret || raw.ret
-        if (statusCode >= 500 || (retStatus !== undefined && retStatus !== 0)) {
+        if (statusCode >= 500) {
           classes.push('log-error')
         }
       } else if (this.log.level === 'error') {
