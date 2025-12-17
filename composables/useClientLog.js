@@ -197,9 +197,23 @@ function getEnvironmentInfo() {
 /**
  * Log session start with environment info.
  * Should be called once when the app initializes.
+ *
+ * @param {Object} context - Additional context to include
+ * @param {Object} appDeviceInfo - Optional Capacitor device info from mobile store
  */
-function sessionStart(context = {}) {
+function sessionStart(context = {}, appDeviceInfo = null) {
   const envInfo = getEnvironmentInfo()
+
+  // Add app-specific device info if provided (from Capacitor Device plugin).
+  if (appDeviceInfo) {
+    envInfo.app_manufacturer = appDeviceInfo.manufacturer
+    envInfo.app_model = appDeviceInfo.model
+    envInfo.app_platform = appDeviceInfo.platform
+    envInfo.app_os_version = appDeviceInfo.osVersion
+    envInfo.app_webview_version = appDeviceInfo.webViewVersion
+    envInfo.app_is_virtual = appDeviceInfo.isVirtual
+  }
+
   queueLog(LogLevel.INFO, 'Session started', {
     event_type: 'session_start',
     ...envInfo,

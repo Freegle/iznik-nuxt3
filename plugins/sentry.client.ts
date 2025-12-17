@@ -24,7 +24,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // If we initialise Sentry before CookieYes then it seems to attach a click handler which blocks clicking on the
   // CookieYes banner.
-  function checkCMPComplete() {
+  async function checkCMPComplete() {
     const runTimeConfig = useRuntimeConfig()
 
     // Skip Sentry initialization if DSN is empty (disabled)
@@ -346,7 +346,22 @@ export default defineNuxtPlugin((nuxtApp) => {
       })
 
       // Log session start to Loki with environment info for support debugging.
-      sessionStart()
+      // Include Capacitor device info if running in the app.
+      try {
+        const { useMobileStore } = await import('~/stores/mobile')
+        const mobileStore = useMobileStore()
+        if (mobileStore.isApp && mobileStore.deviceinfo) {
+          sessionStart(
+            { app_version: mobileStore.mobileVersion },
+            mobileStore.deviceinfo
+          )
+        } else {
+          sessionStart()
+        }
+      } catch {
+        // Not in app context or store not available.
+        sessionStart()
+      }
     }
   }
 
