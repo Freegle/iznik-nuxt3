@@ -96,9 +96,8 @@
               for technical details.
             </NoticeMessage>
             <ModSystemLogs
-              v-if="systemLogsGroupid"
+              v-if="showSystemLogs"
               :key="'systemlogs-' + systemLogsBump"
-              :groupid="systemLogsGroupid"
             />
           </b-tab>
         </b-tabs>
@@ -129,7 +128,7 @@ export default {
       error: false,
       messageTerm: null,
       id: 0,
-      systemLogsGroupid: null,
+      showSystemLogs: false,
       systemLogsBump: 0,
     }
   },
@@ -215,9 +214,9 @@ export default {
     },
 
     onSystemLogsTab() {
-      // Initialize system logs with a special groupid to show all logs
+      // Initialize system logs when tab is clicked.
       this.systemLogsBump = Date.now()
-      this.systemLogsGroupid = -2
+      this.showSystemLogs = true
       this.systemLogsStore.clear()
     },
   },
