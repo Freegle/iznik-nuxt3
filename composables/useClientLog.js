@@ -385,6 +385,45 @@ if (typeof window !== 'undefined') {
     // Fallback for older browsers.
     window.addEventListener('orientationchange', handleOrientationChange)
   }
+
+  // Track Bootstrap modal open/close events globally.
+  // Bootstrap 5 fires native DOM events that bubble up to document.
+  function getModalIdentifier(modalElement) {
+    // Try various sources for a meaningful identifier.
+    if (modalElement?.id) {
+      return modalElement.id
+    }
+    // Try aria-labelledby which points to the title element.
+    const labelledBy = modalElement?.getAttribute('aria-labelledby')
+    if (labelledBy) {
+      const titleEl = document.getElementById(labelledBy)
+      if (titleEl?.textContent) {
+        return titleEl.textContent.trim().substring(0, 50)
+      }
+    }
+    // Try to find a title in the modal header.
+    const titleEl = modalElement?.querySelector('.modal-title')
+    if (titleEl?.textContent) {
+      return titleEl.textContent.trim().substring(0, 50)
+    }
+    return 'unknown'
+  }
+
+  document.addEventListener('show.bs.modal', (event) => {
+    const modalId = getModalIdentifier(event.target)
+    queueLog(LogLevel.INFO, `Modal opened: ${modalId}`, {
+      event_type: 'modal_open',
+      modal_id: modalId,
+    })
+  })
+
+  document.addEventListener('hidden.bs.modal', (event) => {
+    const modalId = getModalIdentifier(event.target)
+    queueLog(LogLevel.INFO, `Modal closed: ${modalId}`, {
+      event_type: 'modal_close',
+      modal_id: modalId,
+    })
+  })
 }
 
 // Export individual functions for use outside composable context.
