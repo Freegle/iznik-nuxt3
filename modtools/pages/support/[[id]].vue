@@ -83,8 +83,10 @@
             </template>
             <NoticeMessage variant="warning" class="mb-2">
               <b>Work in Progress:</b> We're part way through a slow migration
-              from our own logging infrastructure to third-party solutions.
-              Please report bugs or usability issues to
+              from our own logging infrastructure to third-party solutions. This
+              will include more detailed information to help diagnose problems -
+              such as device type, screen size, browser, and a detailed trace of
+              user actions. Please report bugs or usability issues to
               <ExternalLink href="mailto:geeks@ilovefreegle.org">
                 geeks@ilovefreegle.org </ExternalLink
               >. See
