@@ -644,6 +644,8 @@ export default {
 .email-spinner {
   position: absolute;
   right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #6c757d;
 }
 

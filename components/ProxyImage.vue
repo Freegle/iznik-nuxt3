@@ -8,6 +8,7 @@
       :width="width"
       :height="height"
       :placeholder="placeholder"
+      @error="brokenImage"
   /></span>
   <!--NuxtPicture
     :format="format"
@@ -123,7 +124,6 @@ const fullSrc = computed(() => {
 
 const emit = defineEmits(['error'])
 
-// eslint-disable-next-line no-unused-vars
 function brokenImage(e) {
   console.log(
     '===',

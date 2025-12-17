@@ -77,6 +77,16 @@
             </template>
             <ModSupportSpamKeywords ref="spamKeywordsComponent" />
           </b-tab>
+          <b-tab @click="onSystemLogsTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">System Logs</h2>
+            </template>
+            <ModSystemLogs
+              v-if="systemLogsGroupid"
+              :key="'systemlogs-' + systemLogsBump"
+              :groupid="systemLogsGroupid"
+            />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -89,20 +99,24 @@
 import { useRoute } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useMessageStore } from '~/stores/message'
+import { useSystemLogsStore } from '~/stores/systemlogs'
 import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const chatStore = useChatStore()
     const messageStore = useMessageStore()
+    const systemLogsStore = useSystemLogsStore()
     const { supportOrAdmin } = useMe()
-    return { chatStore, messageStore, supportOrAdmin }
+    return { chatStore, messageStore, systemLogsStore, supportOrAdmin }
   },
   data() {
     return {
       error: false,
       messageTerm: null,
       id: 0,
+      systemLogsGroupid: null,
+      systemLogsBump: 0,
     }
   },
   computed: {
@@ -184,6 +198,13 @@ export default {
       if (this.$refs.listGroupsComponent) {
         await this.$refs.listGroupsComponent.fetchCommunities()
       }
+    },
+
+    onSystemLogsTab() {
+      // Initialize system logs with a special groupid to show all logs
+      this.systemLogsBump = Date.now()
+      this.systemLogsGroupid = -2
+      this.systemLogsStore.clear()
     },
   },
 }

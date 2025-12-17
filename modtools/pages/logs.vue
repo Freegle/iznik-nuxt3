@@ -42,16 +42,11 @@
           </b-input-group>
         </div>
       </b-tab>
-      <b-tab @click="showSystemLogs">
-        <template #title>
-          <h2 class="ml-2 mr-2">System Logs (WIP)</h2>
-        </template>
-      </b-tab>
     </b-tabs>
 
     <!-- Standard Mod Logs for Messages/Members tabs -->
     <ModLogs
-      v-if="groupid && activeTab !== 2"
+      v-if="groupid"
       ref="logs"
       :key="'modlogs-' + bump"
       class="bg-white"
@@ -59,25 +54,13 @@
       @busy="busy = true"
       @idle="busy = false"
     />
-
-    <!-- System Logs from Loki -->
-    <ModSystemLogs
-      v-if="activeTab === 2"
-      :key="'systemlogs-' + bump"
-      class="bg-white p-3"
-      :groupid="systemLogsGroupid"
-    />
   </div>
 </template>
 <script>
 import { useLogsStore } from '~/stores/logs'
 import { useModGroupStore } from '~/stores/modgroup'
-import ModSystemLogs from '~/modtools/components/ModSystemLogs.vue'
 
 export default {
-  components: {
-    ModSystemLogs,
-  },
   setup() {
     const logsStore = useLogsStore()
     return { logsStore }
@@ -90,14 +73,11 @@ export default {
       term: null,
       busy: false,
       activeTab: 0,
-      systemLogsGroupid: null,
     }
   },
   watch: {
     groupid() {
-      if (this.activeTab !== 2) {
-        this.clear(this.type)
-      }
+      this.clear(this.type)
     },
   },
   mounted() {
@@ -123,10 +103,6 @@ export default {
     },
     search() {
       this.clear(this.type)
-    },
-    showSystemLogs() {
-      this.activeTab = 2
-      this.bump = Date.now()
     },
   },
 }
