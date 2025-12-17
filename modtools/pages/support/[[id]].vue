@@ -81,6 +81,20 @@
             <template #title>
               <h2 class="ml-2 mr-2">System Logs</h2>
             </template>
+            <NoticeMessage variant="warning" class="mb-2">
+              <b>Work in Progress:</b> We're part way through a slow migration
+              from our own logging infrastructure to third-party solutions.
+              Please report bugs or usability issues to
+              <ExternalLink href="mailto:geeks@ilovefreegle.org">
+                geeks@ilovefreegle.org </ExternalLink
+              >. See
+              <ExternalLink
+                href="https://github.com/Freegle/FreegleDocker/blob/master/Logging.md"
+              >
+                Logging.md
+              </ExternalLink>
+              for technical details.
+            </NoticeMessage>
             <ModSystemLogs
               v-if="systemLogsGroupid"
               :key="'systemlogs-' + systemLogsBump"
