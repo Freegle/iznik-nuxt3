@@ -58,7 +58,7 @@
           />
         </span>
         <span v-else-if="log.source === 'api'" class="text-muted small">
-          Not logged in
+          Anon
           <span
             v-if="ipAddress"
             class="ip-address ms-1"
