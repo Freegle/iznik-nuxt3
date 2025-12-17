@@ -431,7 +431,7 @@ export default {
 }
 
 .log-col-toggle {
-  flex: 0 0 24px;
+  flex: 0 0 48px;
 }
 
 .log-col-time {

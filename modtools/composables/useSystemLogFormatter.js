@@ -510,15 +510,108 @@ const API_DESCRIPTIONS = {
   'GET /api/spammers': () => 'Get spammer list',
   'POST /api/spammers': () => 'Add spammer',
 
-  // v2 API endpoints
-  'GET /apiv2/user': () => 'Get current user (v2)',
-  'GET /apiv2/user/(\\d+)': (match) => `Get user #${match[1]} (v2)`,
-  'GET /apiv2/message/(\\d+)': (match) => `Get message #${match[1]} (v2)`,
-  'GET /apiv2/messages': () => 'Search messages (v2)',
-  'GET /apiv2/group/(\\d+)': (match) => `Get group #${match[1]} (v2)`,
-  'GET /apiv2/chat/rooms': () => 'List chats for logged in user (v2)',
-  'GET /apiv2/notification/count': () => 'Get notification count (v2)',
-  'GET /apiv2/systemlogs': () => 'Get system logs (v2)',
+  // v2 API endpoints - User
+  'GET /apiv2/user': () => 'Get current user',
+  'GET /apiv2/user/(\\d+)': (match) => `Get user #${match[1]}`,
+  'GET /apiv2/user/byemail/(.+)': () => 'Get user by email',
+  'GET /apiv2/user/(\\d+)/publiclocation': (match) =>
+    `Get public location for user #${match[1]}`,
+  'GET /apiv2/user/(\\d+)/message': (match) =>
+    `Get messages for user #${match[1]}`,
+  'GET /apiv2/user/(\\d+)/search': (match) =>
+    `Get searches for user #${match[1]}`,
+
+  // v2 API endpoints - Messages
+  'GET /apiv2/message/count': () => 'Get message count',
+  'GET /apiv2/message/inbounds': () => 'Get message bounds',
+  'GET /apiv2/message/mygroups': () => 'Get messages from my groups',
+  'GET /apiv2/message/mygroups/(\\d+)': (match) =>
+    `Get messages from my groups #${match[1]}`,
+  'GET /apiv2/message/search/(.+)': (match) => `Search messages: ${match[1]}`,
+  'GET /apiv2/message/(\\d+)': (match) => `Get message #${match[1]}`,
+
+  // v2 API endpoints - Groups
+  'GET /apiv2/group': () => 'List groups',
+  'GET /apiv2/group/(\\d+)': (match) => `Get group #${match[1]}`,
+  'GET /apiv2/group/(\\d+)/message': (match) =>
+    `Get messages for group #${match[1]}`,
+
+  // v2 API endpoints - Chat
+  'GET /apiv2/chat': () => 'List chats',
+  'GET /apiv2/chat/(\\d+)': (match) => `Get chat #${match[1]}`,
+  'GET /apiv2/chat/(\\d+)/message': (match) =>
+    `Get messages in chat #${match[1]}`,
+  'POST /apiv2/chat/(\\d+)/message': (match) =>
+    `Send message to chat #${match[1]}`,
+  'POST /apiv2/chat/lovejunk': () => 'Create LoveJunk chat message',
+
+  // v2 API endpoints - Notifications
+  'GET /apiv2/notification': () => 'List notifications',
+  'GET /apiv2/notification/count': () => 'Get notification count',
+  'POST /apiv2/notification/seen': () => 'Mark notification seen',
+  'POST /apiv2/notification/allseen': () => 'Mark all notifications seen',
+
+  // v2 API endpoints - Newsfeed
+  'GET /apiv2/newsfeed': () => 'List newsfeed',
+  'GET /apiv2/newsfeed/(\\d+)': (match) => `Get newsfeed item #${match[1]}`,
+  'GET /apiv2/newsfeedcount': () => 'Get newsfeed count',
+
+  // v2 API endpoints - Community events & Volunteering
+  'GET /apiv2/communityevent': () => 'List community events',
+  'GET /apiv2/communityevent/(\\d+)': (match) =>
+    `Get community event #${match[1]}`,
+  'GET /apiv2/communityevent/group/(\\d+)': (match) =>
+    `List community events for group #${match[1]}`,
+  'GET /apiv2/volunteering': () => 'List volunteering opportunities',
+  'GET /apiv2/volunteering/(\\d+)': (match) =>
+    `Get volunteering opportunity #${match[1]}`,
+  'GET /apiv2/volunteering/group/(\\d+)': (match) =>
+    `List volunteering for group #${match[1]}`,
+
+  // v2 API endpoints - Stories
+  'GET /apiv2/story': () => 'List stories',
+  'GET /apiv2/story/(\\d+)': (match) => `Get story #${match[1]}`,
+  'GET /apiv2/story/group/(\\d+)': (match) =>
+    `List stories for group #${match[1]}`,
+
+  // v2 API endpoints - Location
+  'GET /apiv2/location/latlng': () => 'Get location by coordinates',
+  'GET /apiv2/location/typeahead': () => 'Search locations',
+  'GET /apiv2/location/(\\d+)': (match) => `Get location #${match[1]}`,
+  'GET /apiv2/location/(\\d+)/addresses': (match) =>
+    `Get addresses for location #${match[1]}`,
+
+  // v2 API endpoints - Address
+  'GET /apiv2/address': () => 'List addresses',
+  'GET /apiv2/address/(\\d+)': (match) => `Get address #${match[1]}`,
+
+  // v2 API endpoints - Jobs
+  'GET /apiv2/job': () => 'List jobs',
+  'GET /apiv2/job/(\\d+)': (match) => `Get job #${match[1]}`,
+  'POST /apiv2/job': () => 'Record job click',
+
+  // v2 API endpoints - Misc/Status
+  'GET /apiv2/online': () => 'Check online status',
+  'GET /apiv2/latestmessage': () => 'Get latest message',
+  'GET /apiv2/activity': () => 'Get recent activity',
+  'GET /apiv2/logo': () => 'Get logo',
+  'GET /apiv2/donations': () => 'Get donations',
+  'GET /apiv2/giftaid': () => 'Get Gift Aid status',
+  'GET /apiv2/microvolunteering': () => 'Get microvolunteering challenge',
+  'GET /apiv2/config/(.+)': (match) => `Get config: ${match[1]}`,
+
+  // v2 API endpoints - Isochrone
+  'GET /apiv2/isochrone': () => 'List isochrones',
+  'GET /apiv2/isochrone/message': () => 'Get isochrone messages',
+
+  // v2 API endpoints - Authority
+  'GET /apiv2/authority/(\\d+)/message': (match) =>
+    `Get messages for authority #${match[1]}`,
+
+  // v2 API endpoints - Logging
+  'POST /apiv2/clientlog': () => 'Submit client logs',
+  'POST /apiv2/src': () => 'Record traffic source',
+  'GET /apiv2/systemlogs': () => 'Get system logs',
 }
 
 /**
@@ -576,7 +669,12 @@ function generateHumanReadableEndpoint(method, endpoint) {
     return `${verb} ${humanResource} ${action}`
   }
   if (id) {
-    return `${verb} ${humanResource} #${id}`
+    // Only use #id format for numeric IDs (actual entity IDs)
+    // Non-numeric paths like 'count' should be treated as actions
+    if (/^\d+$/.test(id)) {
+      return `${verb} ${humanResource} #${id}`
+    }
+    return `${verb} ${humanResource} ${id}`
   }
   return `${verb} ${humanResource}`
 }
@@ -718,10 +816,24 @@ export function getLogLevelClass(log) {
   const raw = log.raw || {}
   const statusCode = raw.status_code || raw.status || 200
 
-  if (level === 'error' || statusCode >= 500) {
+  // For API logs, only show error/warning styling for actual errors:
+  // - HTTP 5xx status codes = error
+  // - v1 API responses where ret.status != 0 = error
+  // Normal 401/403 responses are NOT errors - they're expected for unauthenticated requests.
+  if (log.source === 'api') {
+    const retStatus = raw.response_body?.ret ?? raw.ret
+    if (statusCode >= 500 || (retStatus !== undefined && retStatus !== 0)) {
+      return 'text-danger'
+    }
+    // Don't show warning for 4xx - these are normal
+    return ''
+  }
+
+  // For non-API logs, use the level field
+  if (level === 'error') {
     return 'text-danger'
   }
-  if (level === 'warn' || (statusCode >= 400 && statusCode < 500)) {
+  if (level === 'warn') {
     return 'text-warning'
   }
   if (level === 'debug') {
