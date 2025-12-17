@@ -219,7 +219,35 @@
         </b-button>
       </div>
 
-      <!-- Right side: Source Filters -->
+      <!-- Right side: App source, Polling checkbox and Source Filters -->
+      <div class="app-source-filter me-3">
+        <b-button-group size="sm">
+          <b-button
+            :variant="appSource === 'fd' ? 'primary' : 'outline-secondary'"
+            @click="appSource = 'fd'"
+          >
+            FD
+          </b-button>
+          <b-button
+            :variant="appSource === 'mt' ? 'primary' : 'outline-secondary'"
+            @click="appSource = 'mt'"
+          >
+            MT
+          </b-button>
+          <b-button
+            :variant="appSource === 'both' ? 'primary' : 'outline-secondary'"
+            @click="appSource = 'both'"
+          >
+            Both
+          </b-button>
+        </b-button-group>
+      </div>
+
+      <label class="polling-checkbox me-3 small">
+        <input v-model="showPolling" type="checkbox" class="me-1" />
+        Show polling
+      </label>
+
       <b-dropdown
         variant="outline-secondary"
         size="sm"
@@ -356,6 +384,22 @@ export default {
       },
       set(value) {
         this.systemLogsStore.setSortDirection(value)
+      },
+    },
+    showPolling: {
+      get() {
+        return this.systemLogsStore.showPolling
+      },
+      set(value) {
+        this.systemLogsStore.setShowPolling(value)
+      },
+    },
+    appSource: {
+      get() {
+        return this.systemLogsStore.appSource
+      },
+      set(value) {
+        this.systemLogsStore.setAppSource(value)
       },
     },
     traceId() {
@@ -692,6 +736,52 @@ export default {
 
 .filters-row .search-btn {
   flex-shrink: 0;
+}
+
+/* App source filter */
+.app-source-filter {
+  flex-shrink: 0;
+}
+
+.app-source-filter .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.app-source-filter .btn.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+.app-source-filter .btn.btn-outline-secondary {
+  background-color: transparent;
+  border-color: #6c757d;
+  color: #6c757d;
+}
+
+.app-source-filter .btn.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+/* Polling checkbox */
+.polling-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #6c757d;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.polling-checkbox:hover {
+  color: #495057;
+}
+
+.polling-checkbox input {
+  cursor: pointer;
+  accent-color: #0d6efd;
 }
 
 /* Responsive adjustments */

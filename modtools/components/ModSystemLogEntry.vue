@@ -16,6 +16,8 @@
           <v-icon :icon="isExpanded ? 'minus' : 'plus'" scale="0.6" />
           {{ count }}x
         </span>
+        <!-- Placeholder to maintain column alignment when no count badge -->
+        <span v-else class="count-badge-placeholder" />
       </div>
 
       <!-- Source column -->
@@ -57,6 +59,14 @@
         </span>
         <span v-else-if="log.source === 'api'" class="text-muted small">
           Not logged in
+          <span
+            v-if="ipAddress"
+            class="ip-address ms-1"
+            role="button"
+            @click="filterByIp"
+          >
+            {{ ipAddress }}
+          </span>
         </span>
       </div>
 
@@ -402,24 +412,24 @@
           <h6>Device Info</h6>
           <div class="device-info-detail">
             <div class="device-info-row">
-              <v-icon :icon="deviceInfo.typeIcon" class="me-2" />
+              <v-icon :icon="deviceInfo.typeIcon" class="device-icon" />
               <span class="device-label">Type:</span>
-              <span>{{ deviceInfo.type }}</span>
+              <span class="device-value">{{ deviceInfo.type }}</span>
             </div>
             <div class="device-info-row">
-              <v-icon :icon="deviceInfo.browserIcon" class="me-2" />
+              <v-icon :icon="deviceInfo.browserIcon" class="device-icon" />
               <span class="device-label">Browser:</span>
-              <span>{{ deviceInfo.browser }}</span>
+              <span class="device-value">{{ deviceInfo.browser }}</span>
             </div>
             <div class="device-info-row">
-              <v-icon icon="laptop" class="me-2" />
+              <v-icon icon="laptop" class="device-icon" />
               <span class="device-label">OS:</span>
-              <span>{{ deviceInfo.os }}</span>
+              <span class="device-value">{{ deviceInfo.os }}</span>
             </div>
             <div v-if="deviceInfo.screenSize" class="device-info-row">
-              <v-icon icon="expand" class="me-2" />
+              <v-icon icon="expand" class="device-icon" />
               <span class="device-label">Viewport:</span>
-              <span>{{ deviceInfo.screenSize }}</span>
+              <span class="device-value">{{ deviceInfo.screenSize }}</span>
             </div>
             <div v-if="deviceInfo.isApp" class="device-info-row">
               <v-icon
@@ -428,10 +438,10 @@
                     ? ['fab', 'apple']
                     : ['fab', 'android']
                 "
-                class="me-2"
+                class="device-icon"
               />
               <span class="device-label">App:</span>
-              <span>
+              <span class="device-value">
                 {{ deviceInfo.appManufacturer }} {{ deviceInfo.appModel }}
                 <span v-if="deviceInfo.appVersion"
                   >(v{{ deviceInfo.appVersion }})</span
@@ -931,6 +941,7 @@ export default {
 .count-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 2px;
   background: #e9ecef;
   color: #495057;
@@ -940,11 +951,19 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  min-width: 40px;
 }
 
 .count-badge:hover {
   background: #dee2e6;
   border-color: #adb5bd;
+}
+
+/* Placeholder to maintain alignment when no count badge */
+.count-badge-placeholder {
+  display: inline-block;
+  min-width: 40px;
+  height: 1em;
 }
 
 /* Source badge */
@@ -1392,10 +1411,23 @@ export default {
   font-size: 0.85rem;
 }
 
+.device-info-row .device-icon {
+  width: 24px;
+  min-width: 24px;
+  flex-shrink: 0;
+  text-align: center;
+  margin-right: 8px;
+}
+
 .device-info-row .device-label {
   font-weight: 500;
   color: #6c757d;
-  width: 80px;
-  margin-right: 8px;
+  min-width: 70px;
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.device-info-row .device-value {
+  flex: 1;
 }
 </style>

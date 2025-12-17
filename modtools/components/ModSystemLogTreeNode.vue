@@ -1,227 +1,282 @@
 <template>
   <div class="tree-node" :class="{ 'has-children': hasChildren }">
-    <!-- Parent row with expand/collapse toggle -->
-    <div class="tree-row" :class="{ expanded: isExpanded }">
-      <!-- Expand/collapse toggle area (only shown for nodes with children) -->
-      <div v-if="hasChildren" class="tree-toggle-area">
-        <button
-          class="tree-toggle-btn"
-          :class="{ 'btn-loading': isLoading }"
-          :disabled="isLoading"
-          :title="
-            isLoading
-              ? 'Loading...'
-              : isExpanded
-              ? 'Collapse'
-              : 'Expand ' + childCount + ' related logs'
-          "
-          @click="toggleExpand"
-        >
-          <v-icon
-            v-if="isLoading"
-            icon="spinner"
-            class="tree-expand-icon fa-spin"
-          />
-          <v-icon
-            v-else
-            :icon="isExpanded ? 'minus' : 'plus'"
-            class="tree-expand-icon"
-          />
-        </button>
-        <span class="child-count">{{ childCount }}</span>
-      </div>
-
-      <!-- Breadcrumb summary when collapsed - matches column layout -->
-      <div v-if="showBreadcrumbSummary" class="breadcrumb-summary tree-entry">
-        <!-- Time column -->
-        <div class="breadcrumb-col breadcrumb-col-time">
-          <span v-if="timestampRange" class="timestamp-range">
-            {{ timestampRange }}
-          </span>
-        </div>
-        <!-- Source column (empty for breadcrumb) -->
-        <div class="breadcrumb-col breadcrumb-col-source" />
-        <!-- Action column - breadcrumb routes -->
-        <div class="breadcrumb-col breadcrumb-col-action">
-          <span class="breadcrumb-routes">
-            <template v-for="(segment, idx) in breadcrumbSegments" :key="idx">
-              <span class="breadcrumb-route">{{ segment }}</span>
-              <v-icon
-                v-if="idx < breadcrumbSegments.length - 1"
-                icon="angle-right"
-                class="breadcrumb-separator"
-              />
-            </template>
-            <template v-if="isTruncated">
-              <v-icon icon="angle-right" class="breadcrumb-separator" />
-              <span class="breadcrumb-ellipsis">...</span>
-            </template>
-          </span>
-        </div>
-      </div>
-
-      <!-- The log entry (show when expanded or no breadcrumbs) -->
-      <ModSystemLogEntry
-        v-else
-        :log="parentLog"
-        :hide-user-column="hideUserColumn"
-        class="tree-entry"
-        @filter-trace="$emit('filter-trace', $event)"
-        @filter-session="$emit('filter-session', $event)"
-        @filter-ip="$emit('filter-ip', $event)"
-      />
-    </div>
-
-    <!-- Children (when expanded) - hierarchical tree -->
-    <div v-if="hasChildren && isExpanded" class="tree-children">
-      <!-- Loading indicator -->
-      <div v-if="isLoading" class="tree-loading">
-        <span class="tree-connector" />
-        <div class="loading-indicator">
-          <v-icon icon="spinner" class="fa-spin me-2" />
-          Loading logs...
-        </div>
-      </div>
-
-      <!-- Route level -->
-      <div
-        v-for="(route, routeIdx) in visibleChildren"
-        :key="'route-' + routeIdx"
-        class="tree-route"
-      >
-        <div
-          class="tree-child route-header"
-          :class="{ 'route-expandable': hasRouteChildren(route) }"
-          @click="hasRouteChildren(route) && toggleRoute(routeIdx)"
-        >
-          <span class="tree-connector" />
-          <div v-if="hasRouteChildren(route)" class="route-toggle-btn">
-            <v-icon
-              :icon="isRouteVisible(routeIdx, route) ? 'minus' : 'plus'"
-              class="route-expand-icon"
-            />
-          </div>
-          <div v-else class="route-toggle-placeholder" />
-          <div class="route-name">
-            {{ route.pageName }}
-            <span
-              v-if="hasRouteChildren(route)"
-              class="route-counts text-muted"
+    <!-- Page Load Group (special grouping node) -->
+    <template v-if="isPageLoadGroup">
+      <div class="page-load-group">
+        <div class="page-load-header" @click="togglePageLoadExpand">
+          <div class="tree-toggle-area">
+            <button
+              class="tree-toggle-btn page-load-toggle"
+              :title="
+                isPageLoadExpanded ? 'Collapse' : 'Expand page load group'
+              "
             >
-              (<template v-if="route.otherLogs.length > 0"
-                >{{ route.otherLogs.length }} user action{{
-                  route.otherLogs.length !== 1 ? 's' : ''
-                }}</template
-              ><template
-                v-if="route.otherLogs.length > 0 && route.apiCalls.length > 0"
-                >, </template
-              ><template v-if="route.apiCalls.length > 0"
-                >{{ route.apiCalls.length }} API call{{
-                  route.apiCalls.length !== 1 ? 's' : ''
-                }}</template
-              >)
+              <v-icon
+                :icon="isPageLoadExpanded ? 'minus' : 'plus'"
+                class="tree-expand-icon"
+              />
+            </button>
+            <span class="child-count">{{ pageLoadChildCount }}</span>
+          </div>
+          <div class="page-load-summary tree-entry">
+            <div class="breadcrumb-col breadcrumb-col-time">
+              <span class="timestamp-range">{{ pageLoadTimestampRange }}</span>
+            </div>
+            <div class="breadcrumb-col breadcrumb-col-source">
+              <b-badge variant="info" class="page-load-badge"
+                >Page Load</b-badge
+              >
+            </div>
+            <div class="breadcrumb-col breadcrumb-col-action">
+              <span class="page-load-info">
+                {{ pageLoadChildCount }} API call{{
+                  pageLoadChildCount !== 1 ? 's' : ''
+                }}
+                during page load
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- Page load children (when expanded) -->
+        <div v-if="isPageLoadExpanded" class="page-load-children">
+          <ModSystemLogTreeNode
+            v-for="(childNode, idx) in node.children"
+            :key="childNode.trace_id || childNode.log?.id || idx"
+            :node="childNode"
+            :hide-user-column="hideUserColumn"
+            @filter-trace="$emit('filter-trace', $event)"
+            @filter-session="$emit('filter-session', $event)"
+            @filter-ip="$emit('filter-ip', $event)"
+          />
+        </div>
+      </div>
+    </template>
+
+    <!-- Normal tree node (trace-group or standalone) -->
+    <template v-else>
+      <!-- Parent row with expand/collapse toggle -->
+      <div class="tree-row" :class="{ expanded: isExpanded }">
+        <!-- Expand/collapse toggle area (only shown for nodes with children) -->
+        <div v-if="hasChildren" class="tree-toggle-area">
+          <button
+            class="tree-toggle-btn"
+            :class="{ 'btn-loading': isLoading }"
+            :disabled="isLoading"
+            :title="
+              isLoading
+                ? 'Loading...'
+                : isExpanded
+                ? 'Collapse'
+                : 'Expand ' + childCount + ' related logs'
+            "
+            @click="toggleExpand"
+          >
+            <v-icon
+              v-if="isLoading"
+              icon="spinner"
+              class="tree-expand-icon fa-spin"
+            />
+            <v-icon
+              v-else
+              :icon="isExpanded ? 'minus' : 'plus'"
+              class="tree-expand-icon"
+            />
+          </button>
+          <span class="child-count">{{ childCount }}</span>
+        </div>
+
+        <!-- Breadcrumb summary when collapsed - matches column layout -->
+        <div v-if="showBreadcrumbSummary" class="breadcrumb-summary tree-entry">
+          <!-- Time column -->
+          <div class="breadcrumb-col breadcrumb-col-time">
+            <span v-if="timestampRange" class="timestamp-range">
+              {{ timestampRange }}
+            </span>
+          </div>
+          <!-- Source column (empty for breadcrumb) -->
+          <div class="breadcrumb-col breadcrumb-col-source" />
+          <!-- Action column - breadcrumb routes -->
+          <div class="breadcrumb-col breadcrumb-col-action">
+            <span class="breadcrumb-routes">
+              <template v-for="(segment, idx) in breadcrumbSegments" :key="idx">
+                <span class="breadcrumb-route">{{ segment }}</span>
+                <v-icon
+                  v-if="idx < breadcrumbSegments.length - 1"
+                  icon="angle-right"
+                  class="breadcrumb-separator"
+                />
+              </template>
+              <template v-if="isTruncated">
+                <v-icon icon="angle-right" class="breadcrumb-separator" />
+                <span class="breadcrumb-ellipsis">...</span>
+              </template>
             </span>
           </div>
         </div>
 
-        <!-- Route children (when expanded or auto-expand if not explicitly toggled) -->
+        <!-- The log entry (show when expanded or no breadcrumbs) -->
+        <ModSystemLogEntry
+          v-else
+          :log="parentLog"
+          :hide-user-column="hideUserColumn"
+          class="tree-entry"
+          @filter-trace="$emit('filter-trace', $event)"
+          @filter-session="$emit('filter-session', $event)"
+          @filter-ip="$emit('filter-ip', $event)"
+        />
+      </div>
+
+      <!-- Children (when expanded) - hierarchical tree -->
+      <div v-if="hasChildren && isExpanded" class="tree-children">
+        <!-- Loading indicator -->
+        <div v-if="isLoading" class="tree-loading">
+          <span class="tree-connector" />
+          <div class="loading-indicator">
+            <v-icon icon="spinner" class="fa-spin me-2" />
+            Loading logs...
+          </div>
+        </div>
+
+        <!-- Route level -->
         <div
-          v-if="
-            isRouteExpanded(routeIdx) ||
-            (!toggledRoutes[routeIdx] && shouldAutoExpand(route))
-          "
-          class="route-children"
+          v-for="(route, routeIdx) in visibleChildren"
+          :key="'route-' + routeIdx"
+          class="tree-route"
         >
-          <!-- Client events for this route -->
           <div
-            v-for="clientLog in route.otherLogs"
-            :key="clientLog.log.id"
-            class="tree-child"
+            class="tree-child route-header"
+            :class="{ 'route-expandable': hasRouteChildren(route) }"
+            @click="hasRouteChildren(route) && toggleRoute(routeIdx)"
           >
             <span class="tree-connector" />
-            <ModSystemLogEntry
-              :log="clientLog.log"
-              :hide-user-column="hideUserColumn"
-              class="tree-entry child-entry"
-              @filter-trace="$emit('filter-trace', $event)"
-              @filter-session="$emit('filter-session', $event)"
-              @filter-ip="$emit('filter-ip', $event)"
-            />
+            <div v-if="hasRouteChildren(route)" class="route-toggle-btn">
+              <v-icon
+                :icon="isRouteVisible(routeIdx, route) ? 'minus' : 'plus'"
+                class="route-expand-icon"
+              />
+            </div>
+            <div v-else class="route-toggle-placeholder" />
+            <div class="route-name">
+              {{ route.pageName }}
+              <span
+                v-if="hasRouteChildren(route)"
+                class="route-counts text-muted"
+              >
+                (<template v-if="route.otherLogs.length > 0"
+                  >{{ route.otherLogs.length }} user action{{
+                    route.otherLogs.length !== 1 ? 's' : ''
+                  }}</template
+                ><template
+                  v-if="route.otherLogs.length > 0 && route.apiCalls.length > 0"
+                  >, </template
+                ><template v-if="route.apiCalls.length > 0"
+                  >{{ route.apiCalls.length }} API call{{
+                    route.apiCalls.length !== 1 ? 's' : ''
+                  }}</template
+                >)
+              </span>
+            </div>
           </div>
 
-          <!-- API calls for this route -->
+          <!-- Route children (when expanded or auto-expand if not explicitly toggled) -->
           <div
-            v-for="(api, apiIdx) in route.apiCalls"
-            :key="'api-' + routeIdx + '-' + apiIdx"
-            class="tree-api"
+            v-if="
+              isRouteExpanded(routeIdx) ||
+              (!toggledRoutes[routeIdx] && shouldAutoExpand(route))
+            "
+            class="route-children"
           >
+            <!-- Client events for this route -->
             <div
-              class="tree-child api-header"
-              @click="toggleApi(routeIdx, apiIdx)"
+              v-for="clientLog in route.otherLogs"
+              :key="clientLog.log.id"
+              class="tree-child"
             >
               <span class="tree-connector" />
-              <div v-if="api.serverLogs.length > 0" class="api-toggle">
-                <v-icon
-                  :icon="
-                    isApiExpanded(routeIdx, apiIdx)
-                      ? 'chevron-down'
-                      : 'chevron-right'
-                  "
-                  class="api-chevron"
-                />
-              </div>
               <ModSystemLogEntry
-                :log="api.log"
+                :log="clientLog.log"
                 :hide-user-column="hideUserColumn"
-                class="tree-entry child-entry flex-grow-1"
+                class="tree-entry child-entry"
                 @filter-trace="$emit('filter-trace', $event)"
                 @filter-session="$emit('filter-session', $event)"
                 @filter-ip="$emit('filter-ip', $event)"
               />
             </div>
 
-            <!-- Server logs for this API (when expanded or auto-expand if single) -->
+            <!-- API calls for this route -->
             <div
-              v-if="
-                (isApiExpanded(routeIdx, apiIdx) ||
-                  api.serverLogs.length === 1) &&
-                api.serverLogs.length > 0
-              "
-              class="api-children"
+              v-for="(api, apiIdx) in route.apiCalls"
+              :key="'api-' + routeIdx + '-' + apiIdx"
+              class="tree-api"
             >
               <div
-                v-for="serverLog in api.serverLogs"
-                :key="serverLog.log.id"
-                class="tree-child"
+                class="tree-child api-header"
+                @click="toggleApi(routeIdx, apiIdx)"
               >
                 <span class="tree-connector" />
+                <div v-if="api.serverLogs.length > 0" class="api-toggle">
+                  <v-icon
+                    :icon="
+                      isApiExpanded(routeIdx, apiIdx)
+                        ? 'chevron-down'
+                        : 'chevron-right'
+                    "
+                    class="api-chevron"
+                  />
+                </div>
                 <ModSystemLogEntry
-                  :log="serverLog.log"
+                  :log="api.log"
                   :hide-user-column="hideUserColumn"
-                  class="tree-entry child-entry server-entry"
+                  class="tree-entry child-entry flex-grow-1"
                   @filter-trace="$emit('filter-trace', $event)"
                   @filter-session="$emit('filter-session', $event)"
                   @filter-ip="$emit('filter-ip', $event)"
                 />
               </div>
+
+              <!-- Server logs for this API (when expanded or auto-expand if single) -->
+              <div
+                v-if="
+                  (isApiExpanded(routeIdx, apiIdx) ||
+                    api.serverLogs.length === 1) &&
+                  api.serverLogs.length > 0
+                "
+                class="api-children"
+              >
+                <div
+                  v-for="serverLog in api.serverLogs"
+                  :key="serverLog.log.id"
+                  class="tree-child"
+                >
+                  <span class="tree-connector" />
+                  <ModSystemLogEntry
+                    :log="serverLog.log"
+                    :hide-user-column="hideUserColumn"
+                    class="tree-entry child-entry server-entry"
+                    @filter-trace="$emit('filter-trace', $event)"
+                    @filter-session="$emit('filter-session', $event)"
+                    @filter-ip="$emit('filter-ip', $event)"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Load more sentinel -->
-      <div
-        v-if="hasMoreChildren"
-        ref="loadMoreSentinel"
-        class="load-more-sentinel"
-      >
-        <span class="tree-connector" />
-        <div class="load-more-indicator" @click="loadMoreChildren">
-          <v-icon icon="ellipsis-h" class="me-1" />
-          Show {{ remainingChildCount }} more...
+        <!-- Load more sentinel -->
+        <div
+          v-if="hasMoreChildren"
+          ref="loadMoreSentinel"
+          class="load-more-sentinel"
+        >
+          <span class="tree-connector" />
+          <div class="load-more-indicator" @click="loadMoreChildren">
+            <v-icon icon="ellipsis-h" class="me-1" />
+            Show {{ remainingChildCount }} more...
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -232,6 +287,7 @@ import ModSystemLogEntry from './ModSystemLogEntry.vue'
 const BATCH_SIZE = 50
 
 export default {
+  name: 'ModSystemLogTreeNode',
   components: {
     ModSystemLogEntry,
   },
@@ -260,6 +316,32 @@ export default {
     }
   },
   computed: {
+    isPageLoadGroup() {
+      return this.node.type === 'page-load-group'
+    },
+    isPageLoadExpanded() {
+      if (!this.isPageLoadGroup) return false
+      return this.systemLogsStore.isGroupExpanded(this.node.groupKey)
+    },
+    pageLoadChildCount() {
+      if (!this.isPageLoadGroup) return 0
+      return this.node.children?.length || 0
+    },
+    pageLoadTimestampRange() {
+      if (!this.isPageLoadGroup) return ''
+      const formatTime = (ts) => {
+        const d = new Date(ts)
+        return d.toLocaleTimeString('en-GB', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })
+      }
+      const first = formatTime(this.node.firstTimestamp)
+      const last = formatTime(this.node.lastTimestamp)
+      if (first === last) return first
+      return `${first} - ${last}`
+    },
     isTraceGroup() {
       return this.node.type === 'trace-group'
     },
@@ -581,6 +663,11 @@ export default {
     this.cleanupObserver()
   },
   methods: {
+    togglePageLoadExpand() {
+      if (this.isPageLoadGroup) {
+        this.systemLogsStore.toggleGroupExpanded(this.node.groupKey)
+      }
+    },
     async toggleExpand() {
       if (this.isTraceGroup) {
         const wasExpanded = this.isExpanded
@@ -669,6 +756,13 @@ export default {
 .tree-row {
   display: flex;
   align-items: stretch;
+  /* Add consistent left padding so entries without expand buttons align with those that have them */
+  padding-left: 48px;
+}
+
+.tree-row:has(.tree-toggle-area) {
+  /* Remove padding when toggle area is present */
+  padding-left: 0;
 }
 
 /* Fixed width toggle area for consistent alignment */
@@ -967,6 +1061,58 @@ export default {
   font-size: 0.85rem;
   display: flex;
   align-items: center;
+}
+
+/* Page Load Group styles */
+.page-load-group {
+  border: 1px solid #bee5eb;
+  background: #d1ecf1;
+  margin-bottom: 4px;
+}
+
+.page-load-header {
+  display: flex;
+  align-items: stretch;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.page-load-header:hover {
+  background: #c3e6ec;
+}
+
+.page-load-toggle {
+  background: #17a2b8;
+}
+
+.page-load-toggle:hover {
+  background: #138496;
+}
+
+.page-load-summary {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: 40px;
+  padding: 6px 0;
+}
+
+.page-load-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.page-load-info {
+  font-size: 0.85rem;
+  color: #0c5460;
+}
+
+.page-load-children {
+  margin-left: 24px;
+  padding: 4px 0;
+  background: #fff;
+  border-left: 2px solid #17a2b8;
 }
 
 /* Responsive */

@@ -457,15 +457,15 @@ const API_DESCRIPTIONS = {
   'GET /api/memberships/(\\d+)': (match) =>
     `Get memberships for user #${match[1]}`,
 
-  // Message endpoints
-  'GET /api/message': () => 'Get messages',
-  'GET /api/message/(\\d+)': (match) => `Get message #${match[1]}`,
-  'PUT /api/message/(\\d+)': (match) => `Update message #${match[1]}`,
-  'POST /api/message': () => 'Create message',
-  'DELETE /api/message/(\\d+)': (match) => `Delete message #${match[1]}`,
+  // Message endpoints (posts - offers/wanteds)
+  'GET /api/message': () => 'List posts',
+  'GET /api/message/(\\d+)': (match) => `Get post #${match[1]}`,
+  'PUT /api/message/(\\d+)': (match) => `Update post #${match[1]}`,
+  'POST /api/message': () => 'Create post',
+  'DELETE /api/message/(\\d+)': (match) => `Delete post #${match[1]}`,
   'POST /api/message/(\\d+)/outcome': (match) =>
-    `Mark outcome for message #${match[1]}`,
-  'GET /api/messages': () => 'Search messages',
+    `Mark outcome for post #${match[1]}`,
+  'GET /api/messages': () => 'Search posts',
 
   // Chat endpoints
   'GET /api/chat/rooms': () => 'List chats for logged in user',
@@ -528,24 +528,24 @@ const API_DESCRIPTIONS = {
   'GET /apiv2/user/(\\d+)/publiclocation': (match) =>
     `Get public location for user #${match[1]}`,
   'GET /apiv2/user/(\\d+)/message': (match) =>
-    `Get messages for user #${match[1]}`,
+    `Get posts for user #${match[1]}`,
   'GET /apiv2/user/(\\d+)/search': (match) =>
     `Get searches for user #${match[1]}`,
 
-  // v2 API endpoints - Messages
-  'GET /apiv2/message/count': () => 'Get message count',
-  'GET /apiv2/message/inbounds': () => 'Get message bounds',
-  'GET /apiv2/message/mygroups': () => 'Get messages from my groups',
+  // v2 API endpoints - Posts (messages = posts in Freegle terminology)
+  'GET /apiv2/message/count': () => 'Get post count',
+  'GET /apiv2/message/inbounds': () => 'Get post bounds',
+  'GET /apiv2/message/mygroups': () => 'Get posts from my groups',
   'GET /apiv2/message/mygroups/(\\d+)': (match) =>
-    `Get messages from my groups #${match[1]}`,
-  'GET /apiv2/message/search/(.+)': (match) => `Search messages: ${match[1]}`,
-  'GET /apiv2/message/(\\d+)': (match) => `Get message #${match[1]}`,
+    `Get posts from my groups #${match[1]}`,
+  'GET /apiv2/message/search/(.+)': (match) => `Search posts: ${match[1]}`,
+  'GET /apiv2/message/(\\d+)': (match) => `Get post #${match[1]}`,
 
   // v2 API endpoints - Groups
   'GET /apiv2/group': () => 'List groups',
   'GET /apiv2/group/(\\d+)': (match) => `Get group #${match[1]}`,
   'GET /apiv2/group/(\\d+)/message': (match) =>
-    `Get messages for group #${match[1]}`,
+    `Get posts for group #${match[1]}`,
 
   // v2 API endpoints - Chat
   'GET /apiv2/chat': () => 'List chats',
@@ -613,11 +613,11 @@ const API_DESCRIPTIONS = {
 
   // v2 API endpoints - Isochrone
   'GET /apiv2/isochrone': () => 'List isochrones',
-  'GET /apiv2/isochrone/message': () => 'Get isochrone messages',
+  'GET /apiv2/isochrone/message': () => 'Get isochrone posts',
 
   // v2 API endpoints - Authority
   'GET /apiv2/authority/(\\d+)/message': (match) =>
-    `Get messages for authority #${match[1]}`,
+    `Get posts for authority #${match[1]}`,
 
   // v2 API endpoints - Logging
   'POST /apiv2/clientlog': () => 'Submit client logs',
@@ -651,8 +651,8 @@ function generateHumanReadableEndpoint(method, endpoint) {
   const resourceMap = {
     user: 'user',
     users: 'users',
-    message: 'message',
-    messages: 'messages',
+    message: 'post',
+    messages: 'posts',
     group: 'group',
     groups: 'groups',
     chat: 'chat',
