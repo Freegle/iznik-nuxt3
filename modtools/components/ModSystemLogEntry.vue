@@ -100,7 +100,10 @@
               </ExternalLink>
             </span>
           </div>
-          <div v-if="rawApiCall || ipAddress" class="api-details text-muted">
+          <div
+            v-if="rawApiCall || ipAddress || sessionUrl"
+            class="api-details text-muted"
+          >
             <span v-if="rawApiCall">{{ rawApiCall }}</span>
             <span v-if="duration">{{ duration }}</span>
             <span
@@ -111,6 +114,9 @@
             >
               {{ ipAddress }}
             </span>
+            <span v-if="sessionUrl" class="session-url" :title="sessionUrl">
+              {{ sessionUrlDisplay }}
+            </span>
           </div>
           <!-- Device info summary for client logs -->
           <div v-if="hasDeviceInfo" class="device-info-summary">
@@ -118,7 +124,7 @@
               <v-icon :icon="deviceInfo.typeIcon" scale="0.8" />
             </span>
             <span class="device-chip browser-chip" :title="deviceInfo.browser">
-              {{ deviceInfo.browser }}
+              <v-icon :icon="deviceInfo.browserIcon" scale="0.8" />
             </span>
             <span
               v-if="deviceInfo.screenSize"
@@ -136,10 +142,22 @@
                 deviceInfo.appModel +
                 ' (' +
                 deviceInfo.appPlatform +
-                ')'
+                ')' +
+                (deviceInfo.appVersion ? ' v' + deviceInfo.appVersion : '')
               "
             >
-              App
+              <v-icon
+                :icon="
+                  deviceInfo.appPlatform === 'ios'
+                    ? ['fab', 'apple']
+                    : ['fab', 'android']
+                "
+                scale="0.8"
+              />
+              <span v-if="deviceInfo.appVersion"
+                >v{{ deviceInfo.appVersion }}</span
+              >
+              <span v-else>App</span>
             </span>
           </div>
         </div>
@@ -370,7 +388,7 @@
               <span>{{ deviceInfo.type }}</span>
             </div>
             <div class="device-info-row">
-              <v-icon icon="globe" class="me-2" />
+              <v-icon :icon="deviceInfo.browserIcon" class="me-2" />
               <span class="device-label">Browser:</span>
               <span>{{ deviceInfo.browser }}</span>
             </div>
@@ -385,13 +403,21 @@
               <span>{{ deviceInfo.screenSize }}</span>
             </div>
             <div v-if="deviceInfo.isApp" class="device-info-row">
-              <v-icon icon="mobile-alt" class="me-2" />
-              <span class="device-label">App Device:</span>
-              <span
-                >{{ deviceInfo.appManufacturer }} {{ deviceInfo.appModel }} ({{
-                  deviceInfo.appPlatform
-                }})</span
-              >
+              <v-icon
+                :icon="
+                  deviceInfo.appPlatform === 'ios'
+                    ? ['fab', 'apple']
+                    : ['fab', 'android']
+                "
+                class="me-2"
+              />
+              <span class="device-label">App:</span>
+              <span>
+                {{ deviceInfo.appManufacturer }} {{ deviceInfo.appModel }}
+                <span v-if="deviceInfo.appVersion"
+                  >(v{{ deviceInfo.appVersion }})</span
+                >
+              </span>
             </div>
           </div>
         </div>
@@ -479,9 +505,19 @@ export default {
       )
     },
     sourceLabel() {
+      // For logs_table, determine if this is a user action or a mod action.
+      // User actions: User type logs where byuser_id equals user_id or is null.
+      // Mod actions: Logs where byuser_id differs from user_id (mod acting on user).
+      if (this.log.source === 'logs_table') {
+        const isModAction =
+          this.log.byuser_id &&
+          this.log.user_id &&
+          this.log.byuser_id !== this.log.user_id
+        return isModAction ? 'Mod' : 'User'
+      }
+
       const labels = {
         api: 'API',
-        logs_table: 'Mod',
         client: 'User',
         email: 'Email',
         batch: 'Batch',
@@ -489,6 +525,14 @@ export default {
       return labels[this.log.source] || this.log.source
     },
     sourceVariant() {
+      // For logs_table, use primary (blue) for user actions, secondary (gray) for mod actions.
+      if (this.log.source === 'logs_table') {
+        const isModAction =
+          this.log.byuser_id &&
+          this.log.user_id &&
+          this.log.byuser_id !== this.log.user_id
+        return isModAction ? 'secondary' : 'primary'
+      }
       return getLogSourceVariant(this.log.source)
     },
     levelClass() {
@@ -585,7 +629,29 @@ export default {
     },
     ipAddress() {
       const raw = this.log.raw || {}
-      return raw.ip || raw.ip_address || raw.client_ip || null
+      const ip = raw.ip || raw.ip_address || raw.client_ip || null
+      // Filter out placeholder addresses that aren't useful.
+      if (ip === '0.0.0.0' || ip === '::') {
+        return null
+      }
+      return ip
+    },
+    sessionUrl() {
+      // Get the page URL from client logs.
+      const raw = this.log.raw || {}
+      return raw.url || null
+    },
+    sessionUrlDisplay() {
+      // Show a shortened version of the URL (pathname only).
+      if (!this.sessionUrl) return null
+      try {
+        const url = new URL(this.sessionUrl)
+        // Show pathname, truncated if long.
+        const path = url.pathname + url.search
+        return path.length > 50 ? path.substring(0, 47) + '...' : path
+      } catch {
+        return this.sessionUrl.substring(0, 50)
+      }
     },
     queryParams() {
       const raw = this.log.raw || {}
@@ -609,7 +675,7 @@ export default {
         type: 'desktop',
         typeIcon: 'desktop',
         browser: 'unknown',
-        browserIcon: 'globe',
+        browserIcon: 'globe-europe',
         os: 'unknown',
         screenSize: null,
       }
@@ -623,19 +689,19 @@ export default {
         info.typeIcon = 'tablet-alt'
       }
 
-      // Detect browser
+      // Detect browser - use FontAwesome brand icons.
       if (/edg/i.test(ua)) {
         info.browser = 'Edge'
-        info.browserIcon = 'edge'
+        info.browserIcon = ['fab', 'edge']
       } else if (/chrome/i.test(ua) && !/edg/i.test(ua)) {
         info.browser = 'Chrome'
-        info.browserIcon = 'chrome'
+        info.browserIcon = ['fab', 'chrome']
       } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
         info.browser = 'Safari'
-        info.browserIcon = 'safari'
+        info.browserIcon = ['fab', 'safari']
       } else if (/firefox/i.test(ua)) {
         info.browser = 'Firefox'
-        info.browserIcon = 'firefox'
+        info.browserIcon = ['fab', 'firefox-browser']
       }
 
       // Detect OS
@@ -662,6 +728,7 @@ export default {
         info.appPlatform = raw.app_platform
         info.appModel = raw.app_model
         info.appManufacturer = raw.app_manufacturer
+        info.appVersion = raw.app_version || null
       }
 
       return info
@@ -980,6 +1047,15 @@ export default {
 .ip-address:hover {
   color: #0d6efd;
   text-decoration: underline;
+}
+
+/* Session URL */
+.session-url {
+  color: #6c757d;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Entity tags */

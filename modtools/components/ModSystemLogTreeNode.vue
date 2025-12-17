@@ -6,12 +6,24 @@
       <div v-if="hasChildren" class="tree-toggle-area">
         <button
           class="tree-toggle-btn"
+          :class="{ 'btn-loading': isLoading }"
+          :disabled="isLoading"
           :title="
-            isExpanded ? 'Collapse' : 'Expand ' + childCount + ' related logs'
+            isLoading
+              ? 'Loading...'
+              : isExpanded
+              ? 'Collapse'
+              : 'Expand ' + childCount + ' related logs'
           "
           @click="toggleExpand"
         >
           <v-icon
+            v-if="isLoading"
+            icon="spinner"
+            class="tree-expand-icon fa-spin"
+          />
+          <v-icon
+            v-else
             :icon="isExpanded ? 'minus' : 'plus'"
             class="tree-expand-icon"
           />
@@ -282,17 +294,12 @@ export default {
       // Check if children have been fetched.
       return this.node.children && this.node.children.length > 0
     },
-    // Get all logs in chronological order
+    // Get all logs in chronological order.
+    // Note: parent log is NOT included here - it's shown separately at the top level.
     allLogsChronological() {
       if (!this.isTraceGroup) return []
 
       const allLogs = []
-      if (this.node.parent) {
-        allLogs.push({
-          type: this.node.parent.source + '-node',
-          log: this.node.parent,
-        })
-      }
       if (this.node.children) {
         for (const child of this.node.children) {
           allLogs.push(child)
@@ -670,8 +677,17 @@ export default {
   margin-right: 6px;
 }
 
-.tree-toggle-btn:hover {
+.tree-toggle-btn:hover:not(:disabled) {
   background: #1976d2;
+}
+
+.tree-toggle-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.tree-toggle-btn.btn-loading {
+  background: #6c757d;
 }
 
 .tree-expand-icon {
