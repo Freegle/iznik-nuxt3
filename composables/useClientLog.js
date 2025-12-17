@@ -10,6 +10,24 @@ import { getTraceHeaders, getTraceId, getSessionId } from './useTrace'
 // Runtime config reference - will be set when useClientLog is called.
 let runtimeConfig = null
 
+// Auth store reference - will be set when useClientLog is called.
+let authStore = null
+
+/**
+ * Get the current user ID if logged in.
+ * Returns null if not logged in or store not available.
+ */
+function getCurrentUserId() {
+  try {
+    if (authStore?.user?.id) {
+      return authStore.user.id
+    }
+  } catch {
+    // Store not available yet.
+  }
+  return null
+}
+
 // Queue for batching logs.
 const logQueue = []
 let flushTimeout = null
@@ -93,6 +111,7 @@ function queueLog(level, message, context = {}) {
     message,
     trace_id: getTraceId(),
     session_id: getSessionId(),
+    user_id: getCurrentUserId(),
     url: typeof window !== 'undefined' ? window.location.href : null,
     user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
     ...context,
@@ -355,6 +374,17 @@ export function useClientLog() {
       runtimeConfig = useRuntimeConfig()
     } catch {
       // Not in Nuxt context - will be set later.
+    }
+  }
+
+  // Get auth store if not already set (for user_id tracking).
+  if (!authStore) {
+    try {
+      // Dynamic import to avoid circular dependencies.
+      const { useAuthStore } = require('~/stores/auth')
+      authStore = useAuthStore()
+    } catch {
+      // Store not available yet - will be set on next call.
     }
   }
 
