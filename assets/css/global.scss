@@ -37,6 +37,12 @@
 
 html {
   scroll-behavior: smooth;
+
+  // Prevent layout thrashing from scrollbar appearing/disappearing at breakpoint boundaries.
+  // Only on desktop - mobile uses overlay scrollbars that don't affect layout.
+  @include media-breakpoint-up(md) {
+    scrollbar-gutter: stable;
+  }
 }
 
 .strike {

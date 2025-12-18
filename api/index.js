@@ -43,6 +43,7 @@ import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
 import StatusAPI from './StatusAPI.js'
 import StoriesAPI from './StoriesAPI.js'
+import SystemLogsAPI from './SystemLogsAPI.js'
 import TeamAPI from './TeamAPI.js'
 import TrystAPI from './TrystAPI.js'
 import UserAPI from './UserAPI.js'
@@ -88,6 +89,7 @@ export default (config) => {
     spammers: new SpammersAPI(options),
     status: new StatusAPI(options),
     stories: new StoriesAPI(options),
+    systemlogs: new SystemLogsAPI(options),
     team: new TeamAPI(options),
     tryst: new TrystAPI(options),
     user: new UserAPI(options),

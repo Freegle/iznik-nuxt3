@@ -45,6 +45,7 @@ import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
 import StatusAPI from './StatusAPI.js'
 import StoriesAPI from './StoriesAPI.js'
+import SystemLogsAPI from './SystemLogsAPI.js'
 import TeamAPI from './TeamAPI.js'
 import TrystAPI from './TrystAPI.js'
 import UserAPI from './UserAPI.js'
@@ -88,6 +89,7 @@ interface API {
   spammers: SpammersAPI;
   status: StatusAPI;
   stories: StoriesAPI;
+  systemlogs: SystemLogsAPI;
   team: TeamAPI;
   tryst: TrystAPI;
   user: UserAPI;
