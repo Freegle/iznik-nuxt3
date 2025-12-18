@@ -2,8 +2,8 @@
   <div>
     <div v-if="supportOrAdmin">
       <div>
-        <b-tabs content-class="mt-3" card>
-          <b-tab active>
+        <b-tabs v-model="activeTab" content-class="mt-3" card>
+          <b-tab>
             <template #title>
               <h2 class="ml-2 mr-2">Find User</h2>
             </template>
@@ -79,7 +79,15 @@
           </b-tab>
           <b-tab @click="onSystemLogsTab">
             <template #title>
-              <h2 class="ml-2 mr-2">System Logs</h2>
+              <h2 class="ml-2 mr-2">
+                System Logs
+                <b-badge
+                  variant="danger"
+                  class="ml-1"
+                  style="font-size: 0.4em; vertical-align: super"
+                  >WIP</b-badge
+                >
+              </h2>
             </template>
             <NoticeMessage variant="warning" class="mb-2">
               <b>Work in Progress:</b> We're part way through a slow migration
@@ -100,6 +108,23 @@
             <ModSystemLogs
               v-if="showSystemLogs"
               :key="'systemlogs-' + systemLogsBump"
+            />
+          </b-tab>
+          <b-tab @click="onAIAssistantTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">
+                AI Support Helper
+                <b-badge
+                  variant="danger"
+                  class="ml-1"
+                  style="font-size: 0.4em; vertical-align: super"
+                  >WIP</b-badge
+                >
+              </h2>
+            </template>
+            <ModSupportAIAssistant
+              v-if="showAIAssistant"
+              :key="'aiassistant-' + aiAssistantBump"
             />
           </b-tab>
         </b-tabs>
@@ -132,6 +157,9 @@ export default {
       id: 0,
       showSystemLogs: false,
       systemLogsBump: 0,
+      showAIAssistant: false,
+      aiAssistantBump: 0,
+      activeTab: 0,
     }
   },
   computed: {
@@ -144,6 +172,31 @@ export default {
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     this.chatStore.list = [] // this.chatStore.clear()
     this.messageStore.clear()
+
+    // Handle tab query parameter.
+    const tabMap = {
+      user: 0,
+      community: 1,
+      message: 2,
+      list: 3,
+      contact: 4,
+      add: 5,
+      volunteers: 6,
+      worry: 7,
+      spam: 8,
+      logs: 9,
+      ai: 10,
+    }
+    const tabParam = route.query.tab
+    if (tabParam && tabMap[tabParam] !== undefined) {
+      this.activeTab = tabMap[tabParam]
+      // Initialize the tab content if needed.
+      if (tabParam === 'logs') {
+        this.onSystemLogsTab()
+      } else if (tabParam === 'ai') {
+        this.onAIAssistantTab()
+      }
+    }
   },
   methods: {
     changedMessageTerm(term) {
@@ -220,6 +273,12 @@ export default {
       this.systemLogsBump = Date.now()
       this.showSystemLogs = true
       this.systemLogsStore.clear()
+    },
+
+    onAIAssistantTab() {
+      // Initialize AI assistant when tab is clicked.
+      this.aiAssistantBump = Date.now()
+      this.showAIAssistant = true
     },
   },
 }
