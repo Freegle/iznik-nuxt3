@@ -26,11 +26,14 @@
         :class="{ 'jobs-slot-list--horizontal': !listOnly }"
       >
         <JobOne
-          v-for="job in listOnly ? list.slice(0, 10) : list.slice(0, 20)"
+          v-for="(job, index) in displayedJobs"
           :id="job.id"
           :key="'job-' + job.job_reference"
           :summary="true"
           bg-colour="dark green"
+          :position="index"
+          :list-length="displayedJobs.length"
+          context="daslot"
         />
       </div>
     </div>
@@ -44,7 +47,7 @@ const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))
 
-defineProps({
+const props = defineProps({
   minWidth: {
     type: String,
     required: false,
@@ -128,6 +131,10 @@ const list = computed(() => {
   }
 
   return list
+})
+
+const displayedJobs = computed(() => {
+  return props.listOnly ? list.value.slice(0, 10) : list.value.slice(0, 20)
 })
 </script>
 <style scoped lang="scss">

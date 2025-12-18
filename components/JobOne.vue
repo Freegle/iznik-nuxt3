@@ -97,6 +97,21 @@ const props = defineProps({
     required: false,
     default: 'dark green',
   },
+  position: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  listLength: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  context: {
+    type: String,
+    required: false,
+    default: null,
+  },
 })
 
 const router = useRouter()
@@ -149,6 +164,9 @@ onMounted(() => {
       job_reference: job.value.job_reference,
       job_category: job.value.category,
       cpc: job.value.cpc,
+      position: props.position,
+      list_length: props.listLength,
+      context: props.context,
     })
   }
 })
@@ -165,6 +183,9 @@ function clicked() {
     job_reference: job.value.job_reference,
     job_category: job.value.category,
     cpc: job.value.cpc,
+    position: props.position,
+    list_length: props.listLength,
+    context: props.context,
   })
 
   // Route to jobs page to encourage viewing of more jobs.

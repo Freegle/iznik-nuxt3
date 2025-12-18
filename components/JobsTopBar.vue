@@ -21,6 +21,9 @@
           :key="'job-' + job.job_reference"
           :summary="true"
           :class="{ 'd-none d-md-block': index > 1 }"
+          :position="index"
+          :list-length="list.length"
+          context="topbar"
         />
       </div>
       <p class="jobs-info">
