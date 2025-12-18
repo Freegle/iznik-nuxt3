@@ -96,12 +96,10 @@ const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
 let uniqueId = null
 let stripe = null
-if (isApp.value) {
-  console.log('Stripe.initialize', runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
-  Stripe.initialize({
-    publishableKey: runtimeConfig.public.STRIPE_PUBLISHABLE_KEY,
-  })
-} else {
+let stripeInitialized = false
+
+// App Stripe initialization is deferred to onMounted to ensure runtimeConfig is available
+if (!isApp.value) {
   uniqueId = uid('stripe-donate-')
   try {
     stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
@@ -157,6 +155,29 @@ const error = ref(null)
 
 onMounted(async () => {
   if (isApp.value) {
+    // Initialize Stripe inside onMounted to ensure runtimeConfig is fully available.
+    // This fixes a race condition where some users see "you must provide publishableKey"
+    // error because the config wasn't hydrated yet at script setup time.
+    const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
+
+    if (!stripeKey) {
+      console.error('Stripe publishableKey not available at mount')
+      Sentry.captureMessage('Stripe publishableKey missing at mount', {
+        extra: { runtimeConfigPublic: runtimeConfig.public },
+      })
+      emit('error')
+      loading.value = false
+      return
+    }
+
+    if (!stripeInitialized) {
+      console.log('Stripe.initialize', stripeKey)
+      Stripe.initialize({
+        publishableKey: stripeKey,
+      })
+      stripeInitialized = true
+    }
+
     try {
       console.log('Stripe props.price', props.price)
       if (mobileStore.isApp && !mobileStore.isiOS) {
