@@ -85,8 +85,8 @@
           <span class="child-count">{{ childCount }}</span>
         </div>
 
-        <!-- Breadcrumb summary when collapsed - matches column layout -->
-        <div v-if="showBreadcrumbSummary" class="breadcrumb-summary tree-entry">
+        <!-- Summary row for groups with children -->
+        <div v-if="hasChildren" class="breadcrumb-summary tree-entry">
           <!-- Time column -->
           <div class="breadcrumb-col breadcrumb-col-time">
             <span v-if="timestampRange" class="timestamp-range">
@@ -95,9 +95,9 @@
           </div>
           <!-- Source column (empty for breadcrumb) -->
           <div class="breadcrumb-col breadcrumb-col-source" />
-          <!-- Action column - breadcrumb routes -->
+          <!-- Action column - breadcrumb routes or fallback summary -->
           <div class="breadcrumb-col breadcrumb-col-action">
-            <span class="breadcrumb-routes">
+            <span v-if="formattedBreadcrumbs" class="breadcrumb-routes">
               <template v-for="(segment, idx) in breadcrumbSegments" :key="idx">
                 <span class="breadcrumb-route">{{ segment }}</span>
                 <v-icon
@@ -111,10 +111,13 @@
                 <span class="breadcrumb-ellipsis">...</span>
               </template>
             </span>
+            <span v-else class="summary-fallback">
+              {{ summaryDescription }}
+            </span>
           </div>
         </div>
 
-        <!-- The log entry (show when expanded or no breadcrumbs) -->
+        <!-- The log entry (show for standalone nodes without children) -->
         <ModSystemLogEntry
           v-else
           :log="parentLog"
@@ -602,6 +605,33 @@ export default {
     showBreadcrumbSummary() {
       return this.hasChildren && this.formattedBreadcrumbs
     },
+    // Generate a fallback description when no route breadcrumbs available
+    summaryDescription() {
+      const parts = []
+
+      // Count user actions and API calls from the node
+      if (this.node.childCount) {
+        parts.push(
+          `${this.node.childCount} log${this.node.childCount !== 1 ? 's' : ''}`
+        )
+      }
+
+      // Add source info if available
+      if (this.node.sources && this.node.sources.length > 0) {
+        const sourceList = this.node.sources.join(', ')
+        parts.push(`(${sourceList})`)
+      }
+
+      // Fallback to parentLog info if available
+      if (parts.length === 0 && this.parentLog) {
+        const raw = this.parentLog.raw || {}
+        if (raw.page_name || raw.url) {
+          return raw.page_name || raw.url
+        }
+      }
+
+      return parts.length > 0 ? parts.join(' ') : 'Session activity'
+    },
     // Get first timestamp for collapsed summary.
     // Uses node summary data if available.
     firstTimestamp() {
@@ -867,6 +897,11 @@ export default {
 
 .breadcrumb-route {
   color: #0d6efd;
+}
+
+.summary-fallback {
+  font-size: 0.85rem;
+  color: #6c757d;
 }
 
 .breadcrumb-separator {
