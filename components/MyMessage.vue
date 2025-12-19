@@ -112,8 +112,14 @@
                 >
                   {{ messageGroup.namedisplay }}
                 </nuxt-link>
-                <span v-if="messageGroup && timeAgoExpanded" class="group-time-separator">·</span>
-                <span v-if="timeAgoExpanded" class="group-time">{{ timeAgoExpanded }} ago</span>
+                <span
+                  v-if="messageGroup && timeAgoExpanded"
+                  class="group-time-separator"
+                  >·</span
+                >
+                <span v-if="timeAgoExpanded" class="group-time"
+                  >{{ timeAgoExpanded }} ago</span
+                >
               </div>
             </div>
           </div>
@@ -143,7 +149,7 @@
                 message.type === 'Offer' && !taken && !withdrawn && !isPromised
               "
               class="action-btn action-btn--secondary"
-              @click="showPromiseModal = true"
+              @click="openPromiseModal"
             >
               <v-icon icon="handshake" />
               <span>Promise</span>
@@ -417,6 +423,7 @@ const replyuserids = computed(() => {
   const ret = []
   const seen = {}
 
+  // First add users who sent "Interested" replies to this post
   if (message.value?.replies) {
     for (const reply of message.value.replies) {
       if (!seen[reply.userid]) {
@@ -426,12 +433,22 @@ const replyuserids = computed(() => {
     }
   }
 
+  // Then add users who are already promised
   if (message.value?.promises) {
     for (const promise of message.value.promises) {
       if (!seen[promise.userid]) {
         ret.push(promise.userid)
         seen[promise.userid] = true
       }
+    }
+  }
+
+  // Finally add all users from all chats (so we can promise to anyone we've chatted with)
+  const chatsList = chatStore?.list || []
+  for (const chat of chatsList) {
+    if (chat.otheruid && !seen[chat.otheruid]) {
+      ret.push(chat.otheruid)
+      seen[chat.otheruid] = true
     }
   }
 
@@ -605,6 +622,16 @@ const share = (e) => {
     e.stopPropagation()
   }
   showShareModal.value = true
+}
+
+const openPromiseModal = (e) => {
+  if (e) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+  // Fetch chats so we can show users with active chats
+  chatStore.fetchChats()
+  showPromiseModal.value = true
 }
 
 const unpromise = (e) => {
