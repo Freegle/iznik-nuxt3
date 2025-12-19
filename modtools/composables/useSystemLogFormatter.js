@@ -383,6 +383,15 @@ const LOG_FORMATTERS = {
       if (message.startsWith('Action: ')) {
         return message.slice(8)
       }
+
+      // Rename specific messages for clarity.
+      const messageLabels = {
+        'Ad impression': 'Job Ad impression',
+      }
+      if (message && messageLabels[message]) {
+        return messageLabels[message]
+      }
+
       return message || 'User action'
     },
     click: (log) => {

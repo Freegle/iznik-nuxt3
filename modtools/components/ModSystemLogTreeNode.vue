@@ -574,22 +574,11 @@ export default {
 
       return result
     },
-    // Split routes into path segments for breadcrumb display.
-    // E.g. ['/find/myposts', '/browse'] becomes ['/find', '/myposts', '/browse']
+    // Return routes as breadcrumb segments (each route is shown as-is).
     breadcrumbSegments() {
       const routes = this.truncatedBreadcrumbs
       if (!routes || routes.length === 0) return []
-
-      const segments = []
-      for (const route of routes) {
-        // Split by '/' and filter out empty strings, then add leading slash back
-        const parts = route.split('/').filter((p) => p.length > 0)
-        for (const part of parts) {
-          segments.push(`/${part}`)
-        }
-      }
-
-      return segments
+      return routes
     },
     // Check if breadcrumbs were truncated
     isTruncated() {
