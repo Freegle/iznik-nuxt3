@@ -21,6 +21,7 @@
           :position="index"
           :list-length="visibleJobs.length"
           context="sidebar"
+          bg-colour="soft sage green"
         />
       </div>
       <infinite-loading key="infinitejobs" @infinite="loadMore">
