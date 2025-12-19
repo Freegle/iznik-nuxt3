@@ -42,6 +42,15 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     clientLog.sessionStart()
   }
 
+  // Log page views on route changes.
+  // This creates "user" parent nodes for subsequent API calls.
+  router.afterEach((to) => {
+    clientLog.pageView(to.path, {
+      route_name: to.name?.toString() || null,
+      query_params: Object.keys(to.query).length > 0 ? to.query : null,
+    })
+  })
+
   /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
     console.log('Window unloading...')
     useMiscStore().unloading = true

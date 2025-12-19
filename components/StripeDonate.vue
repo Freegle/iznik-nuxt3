@@ -101,14 +101,17 @@ let stripeInitialized = false
 // App Stripe initialization is deferred to onMounted to ensure runtimeConfig is available
 if (!isApp.value) {
   uniqueId = uid('stripe-donate-')
-  try {
-    stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
-  } catch (e) {
-    console.error('Stripe load error', e)
-    Sentry.captureMessage('Stripe load error', {
-      extra: e,
-    })
-    emit('error')
+  const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
+  if (stripeKey) {
+    try {
+      stripe = await loadStripe(stripeKey)
+    } catch (e) {
+      console.error('Stripe load error', e)
+      Sentry.captureMessage('Stripe load error', {
+        extra: e,
+      })
+      emit('error')
+    }
   }
 }
 

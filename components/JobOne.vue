@@ -58,9 +58,10 @@
   </div>
 </template>
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJobStore } from '~/stores/job'
+import { action } from '~/composables/useClientLog'
 import ExternalLink from '~/components/ExternalLink'
 import { JOB_ICON_COLOURS } from '~/constants'
 
@@ -95,6 +96,21 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'dark green',
+  },
+  position: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  listLength: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  context: {
+    type: String,
+    required: false,
+    default: null,
   },
 })
 
@@ -140,9 +156,36 @@ const cardImageStyle = computed(() => {
   return { background: bg }
 })
 
+// Log ad impression when job is rendered (client-side only).
+onMounted(() => {
+  if (job.value) {
+    action('ad_impression', {
+      job_id: job.value.id,
+      job_reference: job.value.job_reference,
+      job_category: job.value.category,
+      cpc: job.value.cpc,
+      position: props.position,
+      list_length: props.listLength,
+      context: props.context,
+    })
+  }
+})
+
 function clicked() {
+  // Log to server for revenue tracking.
   jobStore.log({
     id: job.value.id,
+  })
+
+  // Log click to client log for analytics.
+  action('ad_click', {
+    job_id: job.value.id,
+    job_reference: job.value.job_reference,
+    job_category: job.value.category,
+    cpc: job.value.cpc,
+    position: props.position,
+    list_length: props.listLength,
+    context: props.context,
   })
 
   // Route to jobs page to encourage viewing of more jobs.

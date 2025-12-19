@@ -27,9 +27,12 @@
         <div v-else class="jobs-results">
           <div v-if="list?.length" class="jobs-grid">
             <JobOne
-              v-for="job in list"
+              v-for="(job, index) in list"
               :id="job.id"
               :key="'job-' + job.job_reference"
+              :position="index"
+              :list-length="list.length"
+              context="jobspage"
             />
           </div>
           <NoticeMessage v-else-if="blocked" variant="warning">

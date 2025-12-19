@@ -337,7 +337,7 @@ function showEventModal() {
   gap: 1rem;
   flex: 1;
 
-  @include media-breakpoint-up(sm) {
+  @include media-breakpoint-up(md) {
     flex-direction: row;
   }
 }

@@ -103,7 +103,7 @@
                   </button>
                 </div>
                 <p class="composer-hint">
-                  <v-icon icon="globe" class="hint-icon" />
+                  <v-icon icon="globe-europe" class="hint-icon" />
                   Public · Be kind, we may moderate
                 </p>
               </div>

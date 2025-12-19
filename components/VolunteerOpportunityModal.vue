@@ -135,7 +135,7 @@
               </ExternalLink>
             </div>
             <div v-if="volunteering.contacturl" class="contact-item">
-              <v-icon icon="globe" class="contact-icon" />
+              <v-icon icon="globe-europe" class="contact-icon" />
               <ExternalLink :href="volunteering.contacturl" class="text-break">
                 {{ volunteering.contacturl }}
               </ExternalLink>

@@ -119,7 +119,7 @@
               </ExternalLink>
             </div>
             <div v-if="event.contacturl" class="contact-item">
-              <v-icon icon="globe" class="contact-icon" />
+              <v-icon icon="globe-europe" class="contact-icon" />
               <ExternalLink :href="event.contacturl" class="text-break">
                 {{ event.contacturl }}
               </ExternalLink>

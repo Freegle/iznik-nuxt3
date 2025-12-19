@@ -1,7 +1,5 @@
-import dayjs from 'dayjs'
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '~/stores/auth'
-import { OWN_POSTS_AGE } from '~/constants'
 
 // Simple throttle.  When we get more than a certain number of outstanding fetches, wait until they are all
 // finished.  This stops the infinite scroll going beserk.
@@ -43,17 +41,12 @@ export async function fetchOurOffers() {
   // Truncate to 100
   ours = ours.slice(0, 100)
 
-  // Fetch all the offers
+  // Fetch all the offers - no age filter, if the post is still active it can be promised
   const promises = []
-  const now = dayjs()
 
   ours.forEach((msg) => {
     if (!msg.successful && msg.type === 'Offer') {
-      const daysago = now.diff(dayjs(msg.arrival), 'days')
-
-      if (daysago <= OWN_POSTS_AGE) {
-        promises.push(messageStore.fetch(msg.id))
-      }
+      promises.push(messageStore.fetch(msg.id))
     }
   })
 
@@ -68,6 +61,13 @@ export async function fetchOurOffers() {
         fulloffers.push(m)
       }
     }
+  })
+
+  // Sort by arrival time, most recent first
+  fulloffers.sort((a, b) => {
+    const dateA = new Date(a.arrival || 0)
+    const dateB = new Date(b.arrival || 0)
+    return dateB - dateA
   })
 
   return fulloffers
