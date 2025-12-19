@@ -361,6 +361,7 @@ import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import SpinButton from './SpinButton'
 import { setupChat } from '~/composables/useChat'
 import { useMiscStore } from '~/stores/misc'
+import { useMessageStore } from '~/stores/message'
 import { fetchOurOffers } from '~/composables/useThrottle'
 import { useAuthStore } from '~/stores/auth'
 import { useAddressStore } from '~/stores/address'
@@ -700,6 +701,50 @@ const promise = (date, maybe) => {
     // so it should be the default.
     likelymsg.value = 0
 
+    // Collect refmsgids from chat messages and ensure they're in the offers list
+    const messageStore = useMessageStore()
+    const refMsgIds = new Set()
+
+    for (const msg of chatmessages.value) {
+      if (msg.type === 'Interested' && msg.refmsgid) {
+        refMsgIds.add(msg.refmsgid)
+      }
+    }
+
+    // Fetch and add any referenced messages not already in ouroffers
+    const referencedOffers = []
+    for (const refmsgid of refMsgIds) {
+      const existingIndex = ouroffers.value.findIndex((o) => o.id === refmsgid)
+      if (existingIndex !== -1) {
+        // Already in list - remove it so we can add it to the top
+        referencedOffers.push(ouroffers.value.splice(existingIndex, 1)[0])
+      } else {
+        // Not in list - fetch it
+        const refMsg = await messageStore.fetch(refmsgid)
+        if (
+          refMsg &&
+          refMsg.type === 'Offer' &&
+          refMsg.fromuser === myid.value &&
+          !refMsg.successful
+        ) {
+          referencedOffers.push(refMsg)
+        }
+      }
+    }
+
+    // Sort referenced messages by most recent first
+    referencedOffers.sort((a, b) => {
+      const dateA = new Date(a.arrival || 0)
+      const dateB = new Date(b.arrival || 0)
+      return dateB - dateA
+    })
+
+    // Put referenced messages at the top, deduplicate by id
+    const seen = new Set(referencedOffers.map((o) => o.id))
+    const otherOffers = ouroffers.value.filter((o) => !seen.has(o.id))
+    ouroffers.value = [...referencedOffers, ...otherOffers]
+
+    // Now find the most likely message to pre-select
     for (const msg of chatmessages.value) {
       if (msg.type === 'Interested' && msg.refmsgid) {
         // Check that it's still in our list of messages
