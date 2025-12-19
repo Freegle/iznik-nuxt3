@@ -13,6 +13,7 @@
       @update:userid="updateUserid"
       @update:groupid="updateGroupid"
       @update:msgid="updateMsgid"
+      @expand-all="expandAllNodes"
     />
 
     <!-- Error Message -->
@@ -40,36 +41,9 @@
 
     <!-- Log List -->
     <div v-else class="log-list">
-      <!-- View Options -->
-      <div
-        class="view-options d-flex justify-content-between align-items-center p-2 border-bottom"
-      >
-        <div class="view-mode-toggle">
-          <b-button-group size="sm">
-            <b-button
-              :variant="viewMode === 'tree' ? 'primary' : 'outline-secondary'"
-              @click="systemLogsStore.setViewMode('tree')"
-            >
-              <v-icon icon="sitemap" /> Tree
-            </b-button>
-            <b-button
-              :variant="viewMode === 'flat' ? 'primary' : 'outline-secondary'"
-              @click="systemLogsStore.setViewMode('flat')"
-            >
-              <v-icon icon="list" /> Flat
-            </b-button>
-          </b-button-group>
-        </div>
-        <div v-if="viewMode === 'flat'" class="collapse-option">
-          <b-form-checkbox v-model="localCollapseDuplicates" class="small">
-            Collapse duplicates
-          </b-form-checkbox>
-        </div>
-      </div>
-
       <!-- Header -->
       <div class="log-header">
-        <div v-if="viewMode === 'tree'" class="log-col log-col-toggle" />
+        <div class="log-col log-col-toggle" />
         <div class="log-col log-col-time">Time</div>
         <div class="log-col log-col-source">Source</div>
         <div v-if="!isFilteringByUser" class="log-col log-col-user">User</div>
@@ -78,47 +52,16 @@
       </div>
 
       <!-- Tree View -->
-      <template v-if="viewMode === 'tree'">
-        <ModSystemLogTreeNode
-          v-for="node in logsAsTree"
-          :key="node.trace_id || node.log?.id"
-          :node="node"
-          :hide-user-column="isFilteringByUser"
-          @filter-trace="filterByTrace"
-          @filter-session="filterBySession"
-          @filter-ip="filterByIp"
-        />
-      </template>
-
-      <!-- Flat View (collapsed) -->
-      <template v-else-if="collapseDuplicates">
-        <ModSystemLogEntry
-          v-for="entry in collapsedLogs"
-          :key="entry.log.id"
-          :log="entry.log"
-          :count="entry.count"
-          :entries="entry.entries"
-          :first-timestamp="entry.firstTimestamp"
-          :last-timestamp="entry.lastTimestamp"
-          :hide-user-column="isFilteringByUser"
-          @filter-trace="filterByTrace"
-          @filter-session="filterBySession"
-          @filter-ip="filterByIp"
-        />
-      </template>
-
-      <!-- Flat View (full) -->
-      <template v-else>
-        <ModSystemLogEntry
-          v-for="log in logs"
-          :key="log.id"
-          :log="log"
-          :hide-user-column="isFilteringByUser"
-          @filter-trace="filterByTrace"
-          @filter-session="filterBySession"
-          @filter-ip="filterByIp"
-        />
-      </template>
+      <ModSystemLogTreeNode
+        v-for="node in logsAsTree"
+        :key="node.trace_id || node.log?.id"
+        ref="treeNodes"
+        :node="node"
+        :hide-user-column="isFilteringByUser"
+        @filter-trace="filterByTrace"
+        @filter-session="filterBySession"
+        @filter-ip="filterByIp"
+      />
 
       <!-- Load More -->
       <infinite-loading :distance="distance" @infinite="loadMore">
@@ -139,7 +82,6 @@
 
 <script>
 import { useSystemLogsStore } from '../stores/systemlogs'
-import ModSystemLogEntry from './ModSystemLogEntry.vue'
 import ModSystemLogSearch from './ModSystemLogSearch.vue'
 import ModSystemLogTreeNode from './ModSystemLogTreeNode.vue'
 import { useGroupStore } from '~/stores/group'
@@ -147,7 +89,6 @@ import { useUserStore } from '~/stores/user'
 
 export default {
   components: {
-    ModSystemLogEntry,
     ModSystemLogSearch,
     ModSystemLogTreeNode,
   },
@@ -181,28 +122,8 @@ export default {
     }
   },
   computed: {
-    logs() {
-      return this.systemLogsStore.list
-    },
     logsAsTree() {
       return this.systemLogsStore.logsAsTree
-    },
-    collapsedLogs() {
-      return this.systemLogsStore.collapsedLogs
-    },
-    collapseDuplicates() {
-      return this.systemLogsStore.collapseDuplicates
-    },
-    localCollapseDuplicates: {
-      get() {
-        return this.systemLogsStore.collapseDuplicates
-      },
-      set(value) {
-        this.systemLogsStore.collapseDuplicates = value
-      },
-    },
-    viewMode() {
-      return this.systemLogsStore.viewMode
     },
     loading() {
       return this.systemLogsStore.loading
@@ -217,17 +138,7 @@ export default {
       return !!this.localUserid
     },
     hasLogs() {
-      // In tree view, check logsAsTree; in flat view, check logs.
-      if (this.viewMode === 'tree') {
-        return this.logsAsTree.length > 0
-      }
-      return this.logs.length > 0
-    },
-    hasTraceGroups() {
-      // Check if there are any trace groups in the tree view
-      return this.logsAsTree.some(
-        (node) => node.type === 'trace-group' && node.children?.length > 0
-      )
+      return this.logsAsTree.length > 0
     },
   },
   watch: {
@@ -252,12 +163,6 @@ export default {
         this.systemLogsStore.setMsgFilter(val)
       },
     },
-    viewMode(newMode, oldMode) {
-      // Refetch when switching between tree and flat view.
-      if (newMode !== oldMode) {
-        this.fetchLogs()
-      }
-    },
   },
   mounted() {
     const config = useRuntimeConfig()
@@ -267,15 +172,7 @@ export default {
   methods: {
     async fetchLogs() {
       this.systemLogsStore.clear()
-
-      // Use summary mode for tree view (lazy loading).
-      if (this.viewMode === 'tree') {
-        await this.systemLogsStore.fetchSummaries()
-      } else {
-        await this.systemLogsStore.fetch()
-      }
-
-      // Batch fetch entities to avoid N+1 API calls in child components.
+      await this.systemLogsStore.fetchSummaries()
       await this.batchFetchEntities()
     },
     async batchFetchEntities() {
@@ -312,28 +209,29 @@ export default {
         return
       }
 
-      if (this.viewMode === 'tree') {
-        const currentCount = this.systemLogsStore.summaries.length
-        await this.systemLogsStore.fetchSummaries({
-          append: true,
-          end: this.systemLogsStore.lastTimestamp,
-        })
-        if (this.systemLogsStore.summaries.length === currentCount) {
-          $state.complete()
-        } else {
-          await this.batchFetchEntities()
-          $state.loaded()
-        }
+      const currentCount = this.systemLogsStore.summaries.length
+      await this.systemLogsStore.fetchSummaries({
+        append: true,
+        end: this.systemLogsStore.lastTimestamp,
+      })
+      if (this.systemLogsStore.summaries.length === currentCount) {
+        $state.complete()
       } else {
-        const currentCount = this.logs.length
-        await this.systemLogsStore.loadMore()
-
-        if (this.logs.length === currentCount) {
-          $state.complete()
-        } else {
-          await this.batchFetchEntities()
-          $state.loaded()
-        }
+        await this.batchFetchEntities()
+        $state.loaded()
+      }
+    },
+    expandAllNodes() {
+      // Expand all tree nodes via refs.
+      if (this.$refs.treeNodes) {
+        const nodes = Array.isArray(this.$refs.treeNodes)
+          ? this.$refs.treeNodes
+          : [this.$refs.treeNodes]
+        nodes.forEach((node) => {
+          if (node.expand) {
+            node.expand()
+          }
+        })
       }
     },
     clearError() {
@@ -401,14 +299,6 @@ export default {
 .log-list {
   border: 1px solid #e9ecef;
   background: #fff;
-}
-
-.view-options {
-  background: #f8f9fa;
-}
-
-.collapse-option {
-  font-size: 0.8rem;
 }
 
 .log-header {
