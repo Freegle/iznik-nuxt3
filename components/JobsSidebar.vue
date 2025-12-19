@@ -14,10 +14,13 @@
       <p class="jobs-sidebar-info">Freegle gets a small amount if you click</p>
       <div class="jobs-sidebar-list">
         <JobOne
-          v-for="job in visibleJobs"
+          v-for="(job, index) in visibleJobs"
           :id="job.id"
           :key="'job-' + job.job_reference"
           :summary="true"
+          :position="index"
+          :list-length="visibleJobs.length"
+          context="sidebar"
           bg-colour="soft sage green"
         />
       </div>

@@ -22,6 +22,9 @@
           :summary="true"
           bg-colour="soft sage green"
           :class="{ 'd-none d-md-block': index > 1 }"
+          :position="index"
+          :list-length="list.length"
+          context="topbar"
         />
       </div>
       <p class="jobs-info">
