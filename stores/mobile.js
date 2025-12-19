@@ -47,9 +47,7 @@ export const useMobileStore = defineStore({
     pushed: false,
     route: false,
     apprequiredversion: false,
-    applatestversion: false,
     appupdaterequired: false,
-    appupdateavailable: false,
   }),
   actions: {
     init(config) {
@@ -630,9 +628,6 @@ export const useMobileStore = defineStore({
       const requiredKey = this.isiOS
         ? 'app_fd_version_ios_required'
         : 'app_fd_version_android_required'
-      const latestKey = this.isiOS
-        ? 'app_fd_version_ios_latest'
-        : 'app_fd_version_android_latest'
 
       const reqdValues = await api(this.config).config.fetchv2(requiredKey)
       if (reqdValues && reqdValues.length === 1) {
@@ -642,17 +637,6 @@ export const useMobileStore = defineStore({
           if (this.versionOutOfDate(requiredVersion)) {
             this.appupdaterequired = true
             console.log('==========appupdate required!')
-          }
-        }
-      }
-
-      const latestValues = await api(this.config).config.fetchv2(latestKey)
-      if (latestValues && latestValues.length === 1) {
-        const latestVersion = latestValues[0].value
-        if (latestVersion) {
-          this.applatestversion = latestVersion
-          if (this.versionOutOfDate(latestVersion)) {
-            this.appupdateavailable = true
           }
         }
       }
