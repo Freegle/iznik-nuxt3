@@ -9,6 +9,7 @@ import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
+import { useLoggingContextStore } from '~/stores/loggingContext'
 import { getTraceHeaders } from '~/composables/useTrace'
 
 // Re-export the error classes for backward compatibility
@@ -41,6 +42,15 @@ export default class BaseAPI {
       // Add trace headers for distributed tracing.
       const traceHeaders = getTraceHeaders()
       Object.assign(headers, traceHeaders)
+
+      // Add logging context headers.
+      try {
+        const loggingCtx = useLoggingContextStore()
+        const loggingHeaders = loggingCtx.getHeaders()
+        Object.assign(headers, loggingHeaders)
+      } catch (e) {
+        // Store may not be initialized on server-side.
+      }
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -292,6 +302,15 @@ export default class BaseAPI {
     // Add trace headers for distributed tracing.
     const traceHeaders = getTraceHeaders()
     Object.assign(headers, traceHeaders)
+
+    // Add logging context headers.
+    try {
+      const loggingCtx = useLoggingContextStore()
+      const loggingHeaders = loggingCtx.getHeaders()
+      Object.assign(headers, loggingHeaders)
+    } catch (e) {
+      // Store may not be initialized on server-side.
+    }
 
     try {
       const authStore = useAuthStore()
