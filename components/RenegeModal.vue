@@ -162,7 +162,7 @@ const userOptions = computed(() => {
     if (props.users.length > 1) {
       options.push({
         value: 0,
-        text: '-- Please choose a user --',
+        text: '-- Please choose a freegler --',
         selected: props.selectedUser === 0,
       })
     }
