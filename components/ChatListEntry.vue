@@ -110,6 +110,9 @@ onMounted(() => {
 </script>
 <style scoped lang="scss">
 @import 'assets/css/_color-vars.scss';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 
 .chat-entry {
   display: flex;
@@ -227,6 +230,10 @@ onMounted(() => {
   line-height: 1.3;
   flex: 1;
   min-width: 0;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 1rem;
+  }
 
   &.empty {
     color: #999;

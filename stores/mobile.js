@@ -486,7 +486,7 @@ export const useMobileStore = defineStore({
           chatStore.fetchChats(null, false)
 
           // If the notification includes a specific chat ID, also fetch messages for that chat directly.
-          // This is faster than waiting for the unseen watcher in ChatHeader.
+          // This is faster than waiting for the unseen watcher in ChatPane.
           if (data.chatids) {
             const chatId = parseInt(data.chatids)
             if (chatId) {

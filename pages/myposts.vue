@@ -89,7 +89,7 @@ import NewUserInfo from '~/components/NewUserInfo.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
 import { useRuntimeConfig } from '#app'
-import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 
 console.log('My Posts page setup')
 const DonationAskModal = defineAsyncComponent(() =>
@@ -106,7 +106,6 @@ const router = useRouter()
 const { me, myid } = useMe()
 
 const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
 const ids = ref([])
 const type = ref(null)
 const newUserPassword = ref(null)
@@ -190,10 +189,7 @@ onMounted(() => {
     }, 5000)
 
     if (type.value === 'Offer' && myid) {
-      api.bandit.shown({
-        uid: 'donation',
-        variant: 'mypostoffer',
-      })
+      action('Myposts viewed after Offer', { messageIds: ids.value })
     }
   }
 
@@ -204,11 +200,7 @@ onMounted(() => {
 })
 
 function donationMade() {
-  api.bandit.chosen({
-    uid: 'donation',
-    variant: 'mypostoffer',
-  })
-
+  action('Donation made from myposts', { messageIds: ids.value })
   donated.value = true
 }
 </script>

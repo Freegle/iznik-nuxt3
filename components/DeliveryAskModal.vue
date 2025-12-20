@@ -16,8 +16,16 @@
     </template>
     <template #footer>
       <div class="d-flex justify-content-between w-100">
-        <b-button variant="primary" @click="maybe"> Maybe </b-button>
-        <b-button variant="primary" @click="no"> Collection only </b-button>
+        <b-button variant="primary" data-label="Delivery: Maybe" @click="maybe">
+          Maybe
+        </b-button>
+        <b-button
+          variant="primary"
+          data-label="Delivery: Collection only"
+          @click="no"
+        >
+          Collection only
+        </b-button>
       </div>
     </template>
   </b-modal>
@@ -25,11 +33,6 @@
 <script setup>
 import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '~/stores/message'
-import Api from '~/api'
-import { useRuntimeConfig } from '#app'
-
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
 
 const props = defineProps({
   ids: {
@@ -43,13 +46,6 @@ const emit = defineEmits(['hide'])
 
 async function maybe() {
   const promises = []
-
-  promises.push(
-    api.bandit.chosen({
-      uid: 'delivery',
-      variant: 'maybe',
-    })
-  )
 
   props.ids.forEach((id) => {
     promises.push(
@@ -65,25 +61,10 @@ async function maybe() {
   hide()
 }
 
-async function no() {
-  await api.bandit.chosen({
-    uid: 'delivery',
-    variant: 'no',
-  })
-
+function no() {
   emit('hide')
   hide()
 }
-
-api.bandit.shown({
-  uid: 'delivery',
-  variant: 'maybe',
-})
-
-api.bandit.shown({
-  uid: 'delivery',
-  variant: 'no',
-})
 
 const { modal, hide } = useOurModal()
 </script>

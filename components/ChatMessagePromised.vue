@@ -302,10 +302,15 @@ async function outcome(type) {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
 .chat-message-promised {
   max-width: 100%;
+
+  @include media-breakpoint-up(lg) {
+    max-width: 400px;
+  }
 }
 
 .promised-message {

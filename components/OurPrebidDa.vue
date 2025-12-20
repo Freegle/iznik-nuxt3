@@ -5,7 +5,7 @@
 // TODO Needs reworking for responsive ads a la OurGoogleDa
 import { ref, onBeforeUnmount } from '#imports'
 import { useMiscStore } from '~/stores/misc'
-import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 
 const miscStore = useMiscStore()
 const unmounted = ref(false)
@@ -78,14 +78,8 @@ function refreshAd() {
           timeout: PREBID_TIMEOUT,
           adUnitCodes: [props.adUnitPath],
           bidsBackHandler: function (bids, timedOut, auctionId) {
-            const runtimeConfig = useRuntimeConfig()
-            const api = Api(runtimeConfig)
-
             if (timedOut) {
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'timeout',
-              })
+              action('Prebid timeout', { adUnitPath: props.adUnitPath })
             } else if (bids?.length) {
               console.log(
                 'Got bids back',
@@ -95,9 +89,9 @@ function refreshAd() {
                 auctionId
               )
 
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'bids',
+              action('Prebid bids received', {
+                adUnitPath: props.adUnitPath,
+                bidCount: bids.length,
               })
             } else {
               console.log(
@@ -108,10 +102,7 @@ function refreshAd() {
                 auctionId
               )
 
-              api.bandit.chosen({
-                uid: 'prebid',
-                variant: 'nobids',
-              })
+              action('Prebid no bids', { adUnitPath: props.adUnitPath })
             }
 
             window.pbjs.setTargetingForGPTAsync([props.adUnitPath])

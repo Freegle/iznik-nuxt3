@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="chat-message-summary">
     <div v-if="!message" class="text-muted small">
       This chat message refers to a post (<v-icon
         icon="hashtag"
@@ -105,3 +105,14 @@ const promisedToThem = computed(() => {
   return ret
 })
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.chat-message-summary {
+  @include media-breakpoint-up(lg) {
+    max-width: 400px;
+  }
+}
+</style>

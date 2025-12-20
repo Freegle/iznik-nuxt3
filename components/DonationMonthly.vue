@@ -1,5 +1,5 @@
 <template>
-  <div class="clickme" @click="submit">
+  <div ref="donationElement" class="clickme" @click="submit">
     <b-img
       lazy
       src="/donate_per_month.jpg"
@@ -30,8 +30,8 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useNuxtApp } from '#app'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { action } from '~/composables/useClientLog'
 
 const props = defineProps({
   variant: {
@@ -40,19 +40,52 @@ const props = defineProps({
   },
 })
 
-const { $api } = useNuxtApp()
 const donateform = ref(null)
+const donationElement = ref(null)
+const hasBeenVisible = ref(false)
+let visibilityObserver = null
 
 onMounted(() => {
-  $api.bandit.shown({
-    uid: 'donationmonthy',
-    variant: props.variant,
-  })
+  try {
+    action('donation_monthly_rendered', {
+      variant: props.variant,
+    })
+
+    // Track visibility with Intersection Observer.
+    if (donationElement.value && 'IntersectionObserver' in window) {
+      visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          try {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && !hasBeenVisible.value) {
+                hasBeenVisible.value = true
+                action('donation_monthly_visible', {
+                  variant: props.variant,
+                })
+              }
+            })
+          } catch (e) {
+            console.log('Error in donation visibility observer callback', e)
+          }
+        },
+        { threshold: 0.5 }
+      )
+      visibilityObserver.observe(donationElement.value)
+    }
+  } catch (e) {
+    console.log('Error setting up donation tracking', e)
+  }
 })
 
-async function submit() {
-  await $api.bandit.chosen({
-    uid: 'donationmonthy',
+onBeforeUnmount(() => {
+  if (visibilityObserver) {
+    visibilityObserver.disconnect()
+    visibilityObserver = null
+  }
+})
+
+function submit() {
+  action('donation_monthly_click', {
     variant: props.variant,
   })
 

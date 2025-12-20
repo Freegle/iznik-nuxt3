@@ -84,9 +84,8 @@
   </client-only>
 </template>
 <script setup>
-import { ref, onMounted, useRuntimeConfig } from '#imports'
+import { ref } from '#imports'
 import { useAuthStore } from '~/stores/auth'
-import Api from '~/api'
 import DonationButton from '~/components/DonationButton.vue'
 import DonationThermometer from '~/components/DonationThermometer.vue'
 import DonationThank from '~/components/DonationThank.vue'
@@ -99,30 +98,12 @@ const amount = ref(3)
 const success = ref(false)
 const payPalFallback = ref(false)
 
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
-
-onMounted(async () => {
-  await api.bandit.shown({
-    uid: 'adsoff',
-    variant: 'page',
-  })
-})
-
 function succeeded() {
   success.value = true
-  score()
 }
 
 function noMethods() {
   payPalFallback.value = true
-}
-
-function score() {
-  api.bandit.chosen({
-    uid: 'adsoff',
-    variant: 'page',
-  })
 }
 </script>
 <style scoped lang="scss">
