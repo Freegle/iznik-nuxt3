@@ -196,6 +196,13 @@
               class="tree-child"
             >
               <span class="tree-connector" />
+              <span
+                v-if="clientLog.count > 1"
+                class="duplicate-count"
+                :title="clientLog.count + ' identical events'"
+              >
+                {{ clientLog.count }}×
+              </span>
               <ModSystemLogEntry
                 :log="clientLog.log"
                 :hide-user-column="hideUserColumn"
@@ -694,7 +701,18 @@ export default {
 
         // If expanding and children not yet loaded, fetch them.
         if (!wasExpanded && !this.childrenLoaded && this.node.trace_id) {
-          await this.systemLogsStore.fetchTraceChildren(this.node.trace_id)
+          // Pass time bounds from the summary for a more efficient query.
+          const timeBounds =
+            this.node.firstTimestamp && this.node.lastTimestamp
+              ? {
+                  start: this.node.firstTimestamp,
+                  end: this.node.lastTimestamp,
+                }
+              : null
+          await this.systemLogsStore.fetchTraceChildren(
+            this.node.trace_id,
+            timeBounds
+          )
         }
       }
     },
@@ -835,6 +853,22 @@ export default {
   color: white;
   background: #6c757d;
   border-radius: 10px;
+}
+
+.duplicate-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 18px;
+  padding: 0 6px;
+  margin-right: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  background: #17a2b8;
+  border-radius: 9px;
+  flex-shrink: 0;
 }
 
 .tree-entry {

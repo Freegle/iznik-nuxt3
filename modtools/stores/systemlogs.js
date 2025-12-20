@@ -5,11 +5,10 @@ import api from '~/api'
 export const useSystemLogsStore = defineStore({
   id: 'systemlogs',
   state: () => ({
-    list: [], // Used for flat view
     loading: false,
     error: null,
 
-    // Lazy loading for tree view
+    // Tree view data
     summaries: [], // TraceSummary objects from summary mode
     traceChildren: {}, // Map of trace_id → logs (loaded on demand)
     loadingTraces: {}, // Map of trace_id → boolean (loading state)
@@ -37,9 +36,7 @@ export const useSystemLogsStore = defineStore({
     // App source filter - fd (Freegle), mt (ModTools), or both
     appSource: 'fd',
 
-    // View mode and grouping
-    viewMode: 'tree', // tree or flat
-    groupBy: 'none', // none, session, trace, day
+    // Grouping
     collapseDuplicates: true,
     expandedGroups: {},
     expandedDetails: {},
@@ -59,7 +56,6 @@ export const useSystemLogsStore = defineStore({
     },
 
     clear() {
-      this.list = []
       this.summaries = []
       this.traceChildren = {}
       this.loadingTraces = {}
@@ -113,7 +109,8 @@ export const useSystemLogsStore = defineStore({
     },
 
     // Fetch children for a specific trace (on-demand when user expands).
-    async fetchTraceChildren(traceId) {
+    // timeBounds: { start, end } - ISO timestamps to constrain the query.
+    async fetchTraceChildren(traceId, timeBounds = null) {
       if (
         !traceId ||
         this.traceChildren[traceId] ||
@@ -126,9 +123,16 @@ export const useSystemLogsStore = defineStore({
       try {
         const queryParams = {
           sources: this.sources.join(','),
-          start: this.timeRange,
           trace_id: traceId,
           limit: 500, // Get all logs for this trace
+        }
+
+        // Use precise time bounds if available, otherwise fall back to general timeRange.
+        if (timeBounds && timeBounds.start && timeBounds.end) {
+          queryParams.start = timeBounds.start
+          queryParams.end = timeBounds.end
+        } else {
+          queryParams.start = this.timeRange
         }
 
         const response = await api(this.config).systemlogs.fetch(queryParams)
@@ -173,54 +177,6 @@ export const useSystemLogsStore = defineStore({
       if (this.ipAddress) {
         queryParams.ip = this.ipAddress
       }
-    },
-
-    // Fetch logs for flat view (full data, not summary).
-    async fetch(params = {}) {
-      this.loading = true
-      this.error = null
-
-      try {
-        const queryParams = {
-          sources: this.sources.join(','),
-          start: this.timeRange,
-          limit: 500,
-          direction: this.sortDirection,
-          ...params,
-        }
-
-        // Add optional filters.
-        this.addFiltersToParams(queryParams)
-
-        const response = await api(this.config).systemlogs.fetch(queryParams)
-
-        if (params.append) {
-          this.list.push(...response.logs)
-        } else {
-          this.list = response.logs
-        }
-
-        this.stats = response.stats
-        this.hasMore = response.logs && response.logs.length >= 500
-
-        if (response.logs && response.logs.length > 0) {
-          this.lastTimestamp = response.logs[response.logs.length - 1].timestamp
-        }
-      } catch (e) {
-        this.error = e.message || 'Failed to fetch logs'
-        console.error('SystemLogs fetch error:', e)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async loadMore() {
-      if (!this.hasMore || this.loading) return
-
-      await this.fetch({
-        append: true,
-        end: this.lastTimestamp,
-      })
     },
 
     setSources(sources) {
@@ -298,10 +254,6 @@ export const useSystemLogsStore = defineStore({
       // Don't clear - just re-render with filter applied
     },
 
-    setViewMode(mode) {
-      this.viewMode = mode
-    },
-
     toggleGroupExpanded(groupKey) {
       this.expandedGroups[groupKey] = !this.expandedGroups[groupKey]
     },
@@ -319,22 +271,13 @@ export const useSystemLogsStore = defineStore({
     },
   },
   getters: {
-    // Collect all entity IDs in a single pass for efficient batch fetching
-    // This avoids multiple iterations over the log list
+    // Collect all entity IDs in a single pass for efficient batch fetching.
     entityIds: (state) => {
       const userIds = new Set()
       const groupIds = new Set()
       const messageIds = new Set()
 
-      // Collect from flat list.
-      for (const log of state.list) {
-        if (log.user_id) userIds.add(log.user_id)
-        if (log.byuser_id) userIds.add(log.byuser_id)
-        if (log.group_id) groupIds.add(log.group_id)
-        if (log.message_id) messageIds.add(log.message_id)
-      }
-
-      // Also collect from summaries (tree view mode).
+      // Collect from summaries.
       for (const summary of state.summaries) {
         const log = summary.first_log
         if (log) {
@@ -362,63 +305,9 @@ export const useSystemLogsStore = defineStore({
       }
     },
 
-    // Legacy getters that use the combined entityIds for backwards compatibility
-    userIds: (state) => {
-      const ids = new Set()
-      for (const log of state.list) {
-        if (log.user_id) ids.add(log.user_id)
-        if (log.byuser_id) ids.add(log.byuser_id)
-      }
-      return Array.from(ids)
-    },
-
-    groupIds: (state) => {
-      const ids = new Set()
-      for (const log of state.list) {
-        if (log.group_id) ids.add(log.group_id)
-      }
-      return Array.from(ids)
-    },
-
-    messageIds: (state) => {
-      const ids = new Set()
-      for (const log of state.list) {
-        if (log.message_id) ids.add(log.message_id)
-      }
-      return Array.from(ids)
-    },
-
-    // Group logs by session ID
-    logsBySession: (state) => {
-      const groups = {}
-      for (const log of state.list) {
-        const key = log.session_id || 'no-session'
-        if (!groups[key]) {
-          groups[key] = []
-        }
-        groups[key].push(log)
-      }
-      return groups
-    },
-
-    // Group logs by trace ID (simple grouping)
-    logsByTrace: (state) => {
-      const groups = {}
-      for (const log of state.list) {
-        const key = log.trace_id || 'no-trace'
-        if (!groups[key]) {
-          groups[key] = []
-        }
-        groups[key].push(log)
-      }
-      return groups
-    },
-
     // Tree structure from summaries (lazy loading mode).
     // Uses summaries for collapsed view, traceChildren for expanded view.
     logsAsTree: (state) => {
-      const result = []
-
       // Helper to check if a log should be shown based on filters
       const shouldShowLog = (log) => {
         // Check polling filter
@@ -504,11 +393,40 @@ export const useSystemLogsStore = defineStore({
               children: [],
             }
 
-            // If expanded and children loaded, add them.
+            // If expanded and children loaded, add them with duplicate collapsing.
             if (isExpanded && children && children.length > 0) {
-              // Filter out the parent log and add rest as children.
-              for (const childLog of children) {
-                if (childLog.id !== summary.first_log.id) {
+              // Filter out the parent log.
+              const filteredChildren = children.filter(
+                (childLog) => childLog.id !== summary.first_log.id
+              )
+
+              // Collapse consecutive duplicates.
+              if (state.collapseDuplicates && filteredChildren.length > 0) {
+                let currentGroup = null
+                for (const childLog of filteredChildren) {
+                  const key = getDuplicateKey(childLog)
+                  if (currentGroup && currentGroup.key === key) {
+                    currentGroup.count++
+                    currentGroup.entries.push(childLog)
+                  } else {
+                    if (currentGroup) {
+                      node.children.push(currentGroup)
+                    }
+                    currentGroup = {
+                      type: childLog.source + '-node',
+                      log: childLog,
+                      key,
+                      count: 1,
+                      entries: [childLog],
+                    }
+                  }
+                }
+                if (currentGroup) {
+                  node.children.push(currentGroup)
+                }
+              } else {
+                // No collapsing - add children directly.
+                for (const childLog of filteredChildren) {
                   node.children.push({
                     type: childLog.source + '-node',
                     log: childLog,
@@ -570,122 +488,8 @@ export const useSystemLogsStore = defineStore({
         return nodes
       }
 
-      // Fallback: build from list (flat view or legacy mode).
-      const traceGroups = {}
-
-      const getSourcePriority = (source) => {
-        if (source === 'client') return 0
-        if (source === 'api') return 1
-        return 2
-      }
-
-      for (const log of state.list) {
-        if (log.trace_id) {
-          if (!traceGroups[log.trace_id]) {
-            traceGroups[log.trace_id] = []
-          }
-          traceGroups[log.trace_id].push(log)
-        } else {
-          result.push({
-            type: 'standalone',
-            log,
-          })
-        }
-      }
-
-      for (const [traceId, logs] of Object.entries(traceGroups)) {
-        logs.sort((a, b) => {
-          const priorityDiff =
-            getSourcePriority(a.source) - getSourcePriority(b.source)
-          if (priorityDiff !== 0) return priorityDiff
-          return new Date(a.timestamp) - new Date(b.timestamp)
-        })
-
-        const clientLog = logs.find((l) => l.source === 'client')
-        const parentLog = clientLog || logs[0]
-        const childLogs = logs.filter((l) => l !== parentLog)
-
-        const treeNode = {
-          type: 'trace-group',
-          trace_id: traceId,
-          parent: parentLog,
-          childCount: logs.length,
-          children: [],
-          expanded: !!state.expandedGroups[traceId],
-        }
-
-        for (const childLog of childLogs) {
-          treeNode.children.push({
-            type: childLog.source + '-node',
-            log: childLog,
-          })
-        }
-
-        if (parentLog) {
-          result.push(treeNode)
-        }
-      }
-
-      return result
-    },
-
-    // Collapse consecutive duplicate logs
-    collapsedLogs: (state) => {
-      // Filter logs based on polling and app source filters
-      const filteredList = state.list.filter((log) => {
-        // Check polling filter
-        if (!state.showPolling && isPollingLog(log)) {
-          return false
-        }
-
-        // Check app source filter
-        if (state.appSource !== 'both') {
-          const isMT = isModToolsLog(log)
-          if (state.appSource === 'fd' && isMT) {
-            return false
-          }
-          if (state.appSource === 'mt' && !isMT) {
-            return false
-          }
-        }
-
-        return true
-      })
-
-      if (!state.collapseDuplicates) {
-        return filteredList.map((log) => ({ log, count: 1, entries: [log] }))
-      }
-
-      const result = []
-      let currentGroup = null
-
-      for (const log of filteredList) {
-        const key = getDuplicateKey(log)
-
-        if (currentGroup && currentGroup.key === key) {
-          currentGroup.count++
-          currentGroup.lastTimestamp = log.timestamp
-          currentGroup.entries.push(log)
-        } else {
-          if (currentGroup) {
-            result.push(currentGroup)
-          }
-          currentGroup = {
-            key,
-            log,
-            count: 1,
-            firstTimestamp: log.timestamp,
-            lastTimestamp: log.timestamp,
-            entries: [log],
-          }
-        }
-      }
-
-      if (currentGroup) {
-        result.push(currentGroup)
-      }
-
-      return result
+      // No summaries loaded yet.
+      return []
     },
   },
 })
@@ -824,6 +628,21 @@ function getDuplicateKey(log) {
   }
   if (log.source === 'logs_table') {
     return `log:${userId}:${log.type}:${log.subtype}`
+  }
+  if (log.source === 'client') {
+    const raw = log.raw || {}
+    // Use event_type for client logs (e.g., 'Ad impression', 'Interaction')
+    const eventType = raw.event_type || 'unknown'
+
+    // For noisy events like Ad impressions, group just by event type (not URL).
+    // This collapses all ad impressions on a page into one group.
+    if (eventType === 'Ad impression' || eventType === 'Interaction') {
+      return `client:${userId}:${eventType}`
+    }
+
+    // For other client events, include URL to group similar events on the same page.
+    const url = raw.url || ''
+    return `client:${userId}:${eventType}:${url}`
   }
   return `${log.source}:${userId}:${log.level || 'info'}:${(
     log.text || ''

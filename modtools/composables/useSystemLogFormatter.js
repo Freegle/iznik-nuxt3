@@ -394,6 +394,35 @@ const LOG_FORMATTERS = {
 
       return message || 'User action'
     },
+    interaction: (log) => {
+      const raw = log.raw || {}
+      const interactionType = raw.interaction_type || 'action'
+      const label = raw.action_name?.replace(/^[^:]+:\s*/, '') || ''
+
+      // Format based on interaction type.
+      switch (interactionType) {
+        case 'click':
+          return label ? `Click: ${label}` : 'Click'
+        case 'dblclick':
+          return label ? `Double-click: ${label}` : 'Double-click'
+        case 'rightclick':
+          return label ? `Right-click: ${label}` : 'Right-click'
+        case 'scroll': {
+          const percent = raw.scroll_percent
+          return percent !== undefined ? `Scroll: ${percent}%` : 'Scroll'
+        }
+        case 'swipe': {
+          const dir = raw.direction || ''
+          return dir ? `Swipe ${dir}` : 'Swipe'
+        }
+        case 'change':
+          return label ? `Change: ${label}` : 'Form change'
+        case 'submit':
+          return label ? `Submit: ${label}` : 'Form submit'
+        default:
+          return label || interactionType
+      }
+    },
     click: (log) => {
       const raw = log.raw || {}
       const target = raw.action_name || raw.element || 'button'

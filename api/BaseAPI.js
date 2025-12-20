@@ -335,6 +335,9 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
+        // Add modtools param to identify this as a ModTools request.
+        config.params.modtools = miscStore.modtools
+
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
 

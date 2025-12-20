@@ -20,7 +20,7 @@
                 @keyup.enter="doSearch"
               />
             </b-input-group>
-            <b-input-group size="sm" class="flex-grow-1">
+            <b-input-group size="sm" class="flex-grow-1 email-input-group">
               <b-form-input
                 v-model="emailInput"
                 type="email"
@@ -429,7 +429,7 @@ export default {
 }
 
 .filter-group-inputs .id-input {
-  width: 60px;
+  width: 90px;
   flex-shrink: 0;
 }
 
@@ -483,13 +483,18 @@ export default {
   box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.15);
 }
 
-/* Email spinner */
+/* Email input with spinner */
+.email-input-group {
+  position: relative;
+}
+
 .email-spinner {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: #6c757d;
+  z-index: 5;
 }
 
 /* Filters bar */
