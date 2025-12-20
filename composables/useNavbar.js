@@ -18,6 +18,7 @@ export const navBarHidden = ref(false)
 
 let navBarTimeout = null
 let lastScrollTime = 0
+let countsInitialized = false
 
 export function clearNavBarTimeout() {
   if (navBarTimeout) {
@@ -210,7 +211,11 @@ export function useNavbar() {
       }
     }, 500000)
 
-    getCounts()
+    // Only fetch counts once, even if multiple components use useNavbar().
+    if (!countsInitialized) {
+      countsInitialized = true
+      getCounts()
+    }
   })
 
   const requestLogin = () => {
@@ -355,6 +360,9 @@ export function useNavbar() {
       }
 
       getCounts()
+    } else if (!newVal && oldVal) {
+      // Logged out - reset the flag so counts fetch again on next login.
+      countsInitialized = false
     }
   })
 

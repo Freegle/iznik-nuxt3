@@ -142,6 +142,7 @@ function goToMessage() {
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
 .chat-message-card {
@@ -151,6 +152,10 @@ function goToMessage() {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   background: $color-white;
+
+  @include media-breakpoint-up(lg) {
+    max-width: 400px;
+  }
 
   &.freegled {
     filter: contrast(70%);
@@ -292,6 +297,10 @@ function goToMessage() {
   margin-top: -15%;
   pointer-events: none;
   height: auto;
+
+  @include media-breakpoint-up(lg) {
+    max-width: 100px;
+  }
 }
 
 .title-overlay {
@@ -315,8 +324,8 @@ function goToMessage() {
 .title-row {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.4rem;
   margin-bottom: 0.15rem;
   height: auto;
 }
@@ -325,8 +334,10 @@ function goToMessage() {
   flex-shrink: 0;
   font-size: 0.55rem;
   height: auto;
-  align-self: flex-start;
-  margin-top: 0.1rem;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 0.65rem;
+  }
 }
 
 :deep(.title-tag .tagbadge) {
@@ -334,6 +345,10 @@ function goToMessage() {
   left: auto;
   top: auto;
   font-size: 0.55rem;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 0.65rem;
+  }
 }
 
 .title-subject {
@@ -345,6 +360,10 @@ function goToMessage() {
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: auto;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9rem;
+  }
 }
 
 .info-row {
@@ -354,6 +373,10 @@ function goToMessage() {
   font-size: 0.6rem;
   opacity: 0.9;
   height: auto;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 0.7rem;
+  }
 }
 
 .location {

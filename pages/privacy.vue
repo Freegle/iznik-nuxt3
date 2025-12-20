@@ -19,7 +19,7 @@
           and posts from other freeglers. You can change the emails you receive
           or turn them off from
           <!-- eslint-disable-next-line-->
-          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
           <!-- eslint-disable-next-line-->
           We won't show your email address to any organisation outside Freegle,
           and other freeglers won't see it (unless your community leaves Freegle
@@ -30,7 +30,7 @@
           freeglers to make the site more engaging and show that freeglers are
           real people. If you don't want that, you can change it in
           <!-- eslint-disable-next-line-->
-          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
         </p>
         <p>
           We try to protect you from spammers and fraudsters. Sometimes our
@@ -66,7 +66,10 @@
             post. That's like the "shopping cart" example in the Information
             Commissioner's
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://ico.org.uk/for-organisations/guide-to-pecr/cookies-and-similar-technologies/">advice</ExternalLink>
+            <ExternalLink
+              href="https://ico.org.uk/for-organisations/guide-to-pecr/cookies-and-similar-technologies/"
+              >advice</ExternalLink
+            >
             and does not require consent.
           </li>
           <li>
@@ -81,6 +84,11 @@
             to Google Analytics, but more privacy-safe. We have configured this
             not to use any cookies.
           </li>
+          <li>
+            We record information about your browser/device and how you use the
+            site. This helps diagnose problems and make the site easier to use.
+            We don't pass anything identifying you to other people.
+          </li>
         </ul>
         <h3>3.2 Optional function</h3>
         <p>We store some other things which help make the site better.</p>
@@ -89,10 +97,14 @@
             When something goes wrong on the website, we log it to a third party
             site called
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://sentry.io">Sentry</ExternalLink>.  They help organise the logs and make it easier for us to identify
+            <ExternalLink href="https://sentry.io">Sentry</ExternalLink>. They
+            help organise the logs and make it easier for us to identify
             problems. This
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://docs.sentry.io/data-management/sensitive-data/">should not include</ExternalLink>
+            <ExternalLink
+              href="https://docs.sentry.io/data-management/sensitive-data/"
+              >should not include</ExternalLink
+            >
             any of your personal data. You can read their privacy policy
             <!-- eslint-disable-next-line -->
             <ExternalLink href="https://sentry.io/privacy/">here</ExternalLink>.
@@ -141,7 +153,7 @@
           We'll delete your data automatically if you're inactive for six
           months. If you want to leave Freegle, please go
           <!-- eslint-disable-next-line -->
-        <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
+          <nuxt-link no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
         <p>
           Once you leave, this will delete all your personal data within 14
@@ -174,6 +186,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            20/12/2025: Add mention of recording more information for diagnosing
+            problems and optimising the site.
+          </li>
           <li>26/02/2025: Add Playwire information for advertising.</li>
           <li>
             19/11/2024: Update after Facebook request to clarify what data we

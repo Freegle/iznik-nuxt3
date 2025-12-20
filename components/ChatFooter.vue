@@ -367,7 +367,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useAddressStore } from '~/stores/address'
 import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
-import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 import { useMe } from '~/composables/useMe'
 import { useTypewriter } from '~/composables/useTypewriter'
 import JumpingDots from '~/components/JumpingDots.vue'
@@ -872,18 +872,10 @@ watch(
   { immediate: true }
 )
 
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
-
 watch(showSuggested, (newVal) => {
   if (newVal) {
-    api.bandit.shown({
-      uid: 'SuggestedAddress',
-      variant: 'chosen',
-    })
-    api.bandit.shown({
-      uid: 'SuggestedAddress',
-      variant: 'cancel',
+    action('SuggestedAddress shown', {
+      address: suggestedAddress.value?.address?.singleline,
     })
   }
 })
