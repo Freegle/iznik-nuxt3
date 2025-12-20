@@ -297,6 +297,10 @@ function goToMessage() {
   margin-top: -15%;
   pointer-events: none;
   height: auto;
+
+  @include media-breakpoint-up(lg) {
+    max-width: 100px;
+  }
 }
 
 .title-overlay {

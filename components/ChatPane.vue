@@ -237,6 +237,14 @@ const ChatNotVisible = defineAsyncComponent(() =>
 
 const { chat, otheruser, milesaway, unseen } = await setupChat(props.id)
 
+// Watch for changes in unseen messages count - when a new message comes in via background poll,
+// the chat's unseen count changes and we need to fetch the new messages to display them.
+watch(unseen, () => {
+  if (props.id) {
+    chatStore.fetchMessages(props.id)
+  }
+})
+
 const otheraccessFull = computed(() => {
   if (!otheruser.value?.lastaccess) return null
   const full = timeago(otheruser.value.lastaccess)
