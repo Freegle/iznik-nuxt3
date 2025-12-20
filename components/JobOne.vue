@@ -1,5 +1,11 @@
 <template>
-  <div v-if="job" class="job-item" @click="clicked">
+  <div
+    v-if="job"
+    ref="jobElement"
+    class="job-item"
+    @click="clicked"
+    @mouseenter="handleMouseEnter"
+  >
     <ExternalLink :href="job.url" class="job-link">
       <div v-if="summary" class="job-summary">
         <div class="job-icon" :style="iconStyle">
@@ -58,7 +64,7 @@
   </div>
 </template>
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJobStore } from '~/stores/job'
 import { action } from '~/composables/useClientLog'
@@ -66,6 +72,10 @@ import ExternalLink from '~/components/ExternalLink'
 import { JOB_ICON_COLOURS } from '~/constants'
 
 const imageLoaded = ref(false)
+const jobElement = ref(null)
+const hasBeenVisible = ref(false)
+const hasBeenHovered = ref(false)
+let observer = null
 
 const props = defineProps({
   id: {
@@ -158,8 +168,64 @@ const cardImageStyle = computed(() => {
 
 // Log ad impression when job is rendered (client-side only).
 onMounted(() => {
-  if (job.value) {
-    action('ad_impression', {
+  try {
+    if (job.value) {
+      action('job_ad_rendered', {
+        job_id: job.value.id,
+        job_reference: job.value.job_reference,
+        job_category: job.value.category,
+        cpc: job.value.cpc,
+        position: props.position,
+        list_length: props.listLength,
+        context: props.context,
+      })
+
+      // Set up Intersection Observer to detect when ad becomes visible in viewport.
+      if (jobElement.value && 'IntersectionObserver' in window) {
+        observer = new IntersectionObserver(
+          (entries) => {
+            try {
+              entries.forEach((entry) => {
+                // Log once when ad becomes 50% visible.
+                if (entry.isIntersecting && !hasBeenVisible.value) {
+                  hasBeenVisible.value = true
+                  action('job_ad_visible', {
+                    job_id: job.value?.id,
+                    job_reference: job.value?.job_reference,
+                    job_category: job.value?.category,
+                    cpc: job.value?.cpc,
+                    position: props.position,
+                    list_length: props.listLength,
+                    context: props.context,
+                  })
+                }
+              })
+            } catch (e) {
+              console.log('Error in visibility observer callback', e)
+            }
+          },
+          { threshold: 0.5 }
+        )
+        observer.observe(jobElement.value)
+      }
+    }
+  } catch (e) {
+    console.log('Error setting up job ad tracking', e)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+})
+
+function handleMouseEnter() {
+  // Log mouseover once per ad instance.
+  if (!hasBeenHovered.value && job.value) {
+    hasBeenHovered.value = true
+    action('job_ad_hover', {
       job_id: job.value.id,
       job_reference: job.value.job_reference,
       job_category: job.value.category,
@@ -169,7 +235,7 @@ onMounted(() => {
       context: props.context,
     })
   }
-})
+}
 
 function clicked() {
   // Log to server for revenue tracking.
@@ -178,7 +244,7 @@ function clicked() {
   })
 
   // Log click to client log for analytics.
-  action('ad_click', {
+  action('job_ad_click', {
     job_id: job.value.id,
     job_reference: job.value.job_reference,
     job_category: job.value.category,
