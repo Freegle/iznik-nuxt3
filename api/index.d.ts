@@ -22,6 +22,7 @@ import ConfigAPI from './ConfigAPI.js'
 import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
+import EmailTrackingAPI from './EmailTrackingAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
@@ -41,10 +42,12 @@ import NoticeboardAPI from './NoticeboardAPI.js'
 import NotificationAPI from './NotificationAPI.js'
 import SessionAPI from './SessionAPI.js'
 import ShortlinksAPI from './ShortlinksAPI.js'
+import SimulationAPI from './SimulationAPI.js'
 import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
 import StatusAPI from './StatusAPI.js'
 import StoriesAPI from './StoriesAPI.js'
+import SystemLogsAPI from './SystemLogsAPI.js'
 import TeamAPI from './TeamAPI.js'
 import TrystAPI from './TrystAPI.js'
 import UserAPI from './UserAPI.js'
@@ -65,6 +68,7 @@ interface API {
   dashboard: DashboardAPI;
   domain: DomainAPI;
   donations: DonationsAPI;
+  emailtracking: EmailTrackingAPI;
   giftaid: GiftAidAPI;
   group: GroupAPI;
   image: ImageAPI;
@@ -84,10 +88,12 @@ interface API {
   notification: NotificationAPI;
   session: SessionAPI;
   shortlinks: ShortlinksAPI;
+  simulation: SimulationAPI;
   socialactions: SocialActionsAPI;
   spammers: SpammersAPI;
   status: StatusAPI;
   stories: StoriesAPI;
+  systemlogs: SystemLogsAPI;
   team: TeamAPI;
   tryst: TrystAPI;
   user: UserAPI;

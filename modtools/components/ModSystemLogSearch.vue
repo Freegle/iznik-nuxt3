@@ -129,7 +129,7 @@
       </b-button>
 
       <!-- Expand All Button -->
-      <b-button variant="outline-secondary" @click="$emit('expand-all')">
+      <b-button variant="primary" @click="$emit('expand-all')">
         <v-icon icon="expand" />
         Expand All
       </b-button>

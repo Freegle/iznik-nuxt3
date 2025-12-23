@@ -781,6 +781,15 @@ export default {
       // Route has expandable children if it has API calls or other logs
       return route.apiCalls.length > 0 || route.otherLogs.length > 0
     },
+    async expand() {
+      // Expand this node if it's not already expanded (called by parent via ref).
+      if (this.isTraceGroup && !this.isExpanded) {
+        await this.toggleExpand()
+      }
+      if (this.isPageLoadGroup && !this.isPageLoadExpanded) {
+        this.togglePageLoadExpand()
+      }
+    },
   },
 }
 </script>
