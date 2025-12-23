@@ -82,6 +82,7 @@ export function updateScrollTime() {
 }
 
 export function useNavbar() {
+  console.log('[STARTUP] useNavbar function called', performance.now())
   const authStore = useAuthStore()
   const miscStore = useMiscStore()
   const newsfeedStore = useNewsfeedStore()
@@ -93,6 +94,10 @@ export function useNavbar() {
   const volunteeringStore = useVolunteeringStore()
   const route = useRoute()
   const router = useRouter()
+  console.log(
+    '[STARTUP] useNavbar stores and router obtained',
+    performance.now()
+  )
 
   const online = computed(() => miscStore.online)
   const myid = computed(() => authStore.user?.id)

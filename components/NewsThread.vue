@@ -25,6 +25,12 @@
                 <v-icon icon="ellipsis-h" class="text-muted" />
               </template>
               <b-dropdown-item
+                v-if="duplicateCount > 1"
+                @click="expandDuplicates"
+              >
+                Show {{ duplicateCount }} combined posts separately
+              </b-dropdown-item>
+              <b-dropdown-item
                 :href="'/chitchat/' + newsfeed?.id"
                 target="_blank"
               >
@@ -305,9 +311,14 @@ const props = defineProps({
     required: false,
     default: '',
   },
+  duplicateCount: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
 })
 
-const emit = defineEmits(['rendered'])
+const emit = defineEmits(['rendered', 'expand-duplicates'])
 
 const NewsReportModal = defineAsyncComponent(() => import('./NewsReportModal'))
 const ConfirmModal = defineAsyncComponent(() =>
@@ -537,6 +548,10 @@ function newlineComment() {
 
 function show() {
   showEditModal.value = true
+}
+
+function expandDuplicates() {
+  emit('expand-duplicates', props.id)
 }
 
 function deleteIt() {

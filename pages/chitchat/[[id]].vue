@@ -137,9 +137,8 @@
               Sorry, this thread isn't around any more.
             </NoticeMessage>
             <div v-else>
-              <NewsThread
-                v-for="entry in newsfeedToShow"
-                :id="entry?.id"
+              <template
+                v-for="(entry, index) in newsfeedToShow"
                 :key="
                   'newsfeed-' +
                   entry?.id +
@@ -148,9 +147,19 @@
                   '-' +
                   infiniteId
                 "
-                :scroll-to="id"
-                @rendered="rendered"
-              />
+              >
+                <NewsThread
+                  :id="entry?.id"
+                  :scroll-to="id"
+                  :duplicate-count="getDuplicateCount(entry?.id)"
+                  @rendered="rendered"
+                  @expand-duplicates="expandDuplicates"
+                />
+                <MessageListUpToDate
+                  v-if="index === upToDateDividerIndex"
+                  class="up-to-date-card"
+                />
+              </template>
               <infinite-loading
                 v-if="newsfeed.length"
                 :identifier="infiniteId"
@@ -189,6 +198,7 @@ import NoticeMessage from '~/components/NoticeMessage'
 import AutoHeightTextarea from '~/components/AutoHeightTextarea'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import NewsThread from '~/components/NewsThread.vue'
+import MessageListUpToDate from '~/components/MessageListUpToDate.vue'
 import { untwem } from '~/composables/useTwem'
 import {
   ref,
@@ -318,24 +328,76 @@ const selectedArea = computed({
   },
 })
 
-const newsfeed = computed(() => {
-  let ret = Object.values(newsfeedStore?.feed || {})
+// Track which items have been expanded to show duplicates
+const expandedItems = ref(new Set())
 
-  // Suppress duplicate posts.
-  ret = ret.filter((item, index) => {
+// Compute duplicate groups - items that are consecutive duplicates from same user
+const duplicateGroups = computed(() => {
+  const feed = Object.values(newsfeedStore?.feed || {})
+  const groups = {} // Map from first item id to array of duplicate item ids
+
+  let currentGroup = null
+  let currentGroupItems = []
+
+  feed.forEach((item, index) => {
     if (index === 0) {
-      return true
+      currentGroup = item.id
+      currentGroupItems = [item.id]
+      return
     }
 
-    return (
-      item.userid === 0 ||
-      item.userid !== ret[index - 1].userid ||
-      item.message !== ret[index - 1].message
-    )
+    const prev = feed[index - 1]
+    const isDuplicate =
+      item.userid !== 0 &&
+      item.userid === prev.userid &&
+      item.message === prev.message
+
+    if (isDuplicate) {
+      currentGroupItems.push(item.id)
+    } else {
+      // Save the previous group if it had duplicates
+      if (currentGroupItems.length > 1) {
+        groups[currentGroup] = currentGroupItems
+      }
+      // Start a new group
+      currentGroup = item.id
+      currentGroupItems = [item.id]
+    }
   })
 
-  return ret
+  // Don't forget the last group
+  if (currentGroupItems.length > 1) {
+    groups[currentGroup] = currentGroupItems
+  }
+
+  return groups
 })
+
+const newsfeed = computed(() => {
+  const feed = Object.values(newsfeedStore?.feed || {})
+  const groups = duplicateGroups.value
+  const expanded = expandedItems.value
+
+  // Build a set of all duplicate item IDs (excluding the first in each group)
+  const hiddenDuplicates = new Set()
+  Object.entries(groups).forEach(([firstId, itemIds]) => {
+    if (!expanded.has(parseInt(firstId))) {
+      // This group is not expanded, hide all but the first
+      itemIds.slice(1).forEach((id) => hiddenDuplicates.add(id))
+    }
+  })
+
+  return feed.filter((item) => !hiddenDuplicates.has(item.id))
+})
+
+function expandDuplicates(itemId) {
+  expandedItems.value = new Set([...expandedItems.value, itemId])
+}
+
+function getDuplicateCount(itemId) {
+  const groups = duplicateGroups.value
+  return groups[itemId]?.length || 0
+}
 
 const newsfeedToShow = computed(() => {
   if (newsfeedStore) {
@@ -355,6 +417,34 @@ const newsfeedToShow = computed(() => {
   }
 
   return []
+})
+
+// Track snapshot of what was seen before visiting this page.
+// This is used to show the "you're up to date" divider.
+const seenBeforeVisit = computed(() => newsfeedStore.seenBeforeVisit)
+
+// Find the index in newsfeedToShow where we should show the divider.
+// The divider goes after the last "new" item (items with id > seenBeforeVisit).
+const upToDateDividerIndex = computed(() => {
+  if (!seenBeforeVisit.value || id) {
+    return -1
+  }
+
+  const items = newsfeedToShow.value
+  let lastNewIndex = -1
+
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].id > seenBeforeVisit.value) {
+      lastNewIndex = i
+    }
+  }
+
+  // Only show divider if there are both new and old items visible.
+  if (lastNewIndex >= 0 && lastNewIndex < items.length - 1) {
+    return lastNewIndex
+  }
+
+  return -1
 })
 
 // Watchers
@@ -393,6 +483,11 @@ function loadMore($state) {
   } else {
     console.log('News complete')
     $state.complete()
+
+    // User has scrolled to the bottom - mark all as seen immediately.
+    if (newsfeedStore.delayedSeenMode) {
+      newsfeedStore.markAllSeen()
+    }
   }
 }
 
@@ -520,11 +615,28 @@ const initializeLocation = async () => {
 onMounted(() => {
   runCheck()
   initializeLocation()
+
+  // For feed view (not thread view), set up delayed seen marking.
+  if (!id) {
+    // Snapshot what was seen before visiting.
+    newsfeedStore.snapshotSeenBeforeVisit()
+
+    // Start 30s timer to mark as seen.
+    newsfeedStore.startDelayedSeen(30000)
+  }
 })
 
 onBeforeUnmount(() => {
   // Stop timers which would otherwise kill garbage collection.
   runChecks.value = false
+
+  // Cancel the delayed seen timer if still running.
+  // Note: we don't clear seenBeforeVisit here so the divider stays visible.
+  if (newsfeedStore.delayedSeenTimer) {
+    clearTimeout(newsfeedStore.delayedSeenTimer)
+    newsfeedStore.delayedSeenTimer = null
+  }
+  newsfeedStore.delayedSeenMode = false
 })
 
 // Initial data loading
@@ -850,5 +962,11 @@ if (me.value) {
 
 .image__uploaded {
   width: 100px;
+}
+
+.up-to-date-card {
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 </style>

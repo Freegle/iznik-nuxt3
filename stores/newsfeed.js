@@ -19,6 +19,15 @@ export const useNewsfeedStore = defineStore({
 
     // Most recently used distance.
     lastDistance: 0,
+
+    // Track what was seen before visiting ChitChat page (for "you're up to date" divider).
+    seenBeforeVisit: null,
+
+    // Whether we're in delayed seen mode (don't auto-mark as seen).
+    delayedSeenMode: false,
+
+    // Timer ID for delayed seen marking.
+    delayedSeenTimer: null,
   }),
   actions: {
     init(config) {
@@ -70,13 +79,57 @@ export const useNewsfeedStore = defineStore({
         }
       })
 
-      if (this.maxSeen > prevMax) {
+      // Only auto-mark as seen if not in delayed mode.
+      if (this.maxSeen > prevMax && !this.delayedSeenMode) {
         api(this.config)
           .news.seen(this.maxSeen)
           .then(() => {
             this.fetchCount(this.lastDistance, false)
           })
       }
+    },
+    snapshotSeenBeforeVisit() {
+      // Capture what was seen before visiting the page.
+      // This is used to show the "you're up to date" divider.
+      this.seenBeforeVisit = this.maxSeen
+      this.delayedSeenMode = true
+    },
+    startDelayedSeen(delayMs = 30000) {
+      // Start a timer to mark items as seen after delay.
+      if (this.delayedSeenTimer) {
+        clearTimeout(this.delayedSeenTimer)
+      }
+
+      this.delayedSeenTimer = setTimeout(() => {
+        this.markAllSeen()
+      }, delayMs)
+    },
+    markAllSeen() {
+      // Mark all items as seen and update the count.
+      if (this.delayedSeenTimer) {
+        clearTimeout(this.delayedSeenTimer)
+        this.delayedSeenTimer = null
+      }
+
+      this.delayedSeenMode = false
+
+      if (this.maxSeen > 0) {
+        api(this.config)
+          .news.seen(this.maxSeen)
+          .then(() => {
+            this.fetchCount(this.lastDistance, false)
+          })
+      }
+    },
+    cancelDelayedSeen() {
+      // Cancel the delayed seen timer (e.g., when leaving the page).
+      if (this.delayedSeenTimer) {
+        clearTimeout(this.delayedSeenTimer)
+        this.delayedSeenTimer = null
+      }
+
+      this.delayedSeenMode = false
+      this.seenBeforeVisit = null
     },
     async fetchFeed(distance) {
       this.lastDistance = distance
