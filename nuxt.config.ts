@@ -419,6 +419,18 @@ export default defineNuxtConfig({
               org: 'freegle',
               project: 'capacitor',
               authToken: config.SENTRY_AUTH_TOKEN,
+              // For debug builds, log Sentry errors but continue the build.
+              // For live/production builds, fail on Sentry errors to ensure proper error tracking.
+              ...(config.APP_DEBUG
+                ? {
+                    errorHandler: (err) => {
+                      console.warn(
+                        '[Sentry] Warning: Sentry operation failed (continuing debug build):',
+                        err.message
+                      )
+                    },
+                  }
+                : {}),
             }),
           ]
         : config.ISAPP
