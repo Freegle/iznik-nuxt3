@@ -142,6 +142,8 @@ let ready = false
 // Starting with around Nuxt 3.4.1, when we first access the config (here) it has public as we'd expect, but
 // if we store that and access it later, we are just looking at the contents of public.  I don't understand why
 // this is, but we don't expect the config to change, so we take a copy here.
+console.log('[STARTUP] app.vue script setup start', performance.now())
+
 const runtimeConfig = JSON.parse(
   JSON.stringify({
     public: useRuntimeConfig().public,
@@ -214,6 +216,7 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
+console.log('[STARTUP] app.vue all stores initialized', performance.now())
 
 const loginCount = computed(() => {
   return authStore.loginCount
@@ -235,9 +238,17 @@ const shouldShowNavbar = computed(() => {
 //   }
 // })
 
+console.log(
+  '[STARTUP] app.vue checking impersonation query params',
+  performance.now()
+)
 try {
   if (route.query.u && route.query.k) {
     // We are impersonating.
+    console.log(
+      '[STARTUP] app.vue impersonation detected, logging in',
+      performance.now()
+    )
     try {
       // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
       // an incognito tab while impersonating.
@@ -248,6 +259,10 @@ try {
         u: route.query.u,
         k: route.query.k,
       })
+      console.log(
+        '[STARTUP] app.vue impersonation login complete',
+        performance.now()
+      )
     } catch (e) {
       // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
       console.log('Login failed', e)
@@ -256,6 +271,7 @@ try {
 } catch (e) {
   console.error('Error fetching user', e)
 }
+console.log('[STARTUP] app.vue impersonation check done', performance.now())
 
 if (process.client) {
   if (typeof window !== 'undefined') {
@@ -332,6 +348,7 @@ if (process.client) {
     },
   })
 }
+console.log('[STARTUP] app.vue ready=true', performance.now())
 ready = true
 </script>
 <style lang="scss">

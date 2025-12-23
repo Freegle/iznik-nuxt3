@@ -178,8 +178,10 @@ import {
 } from '~/composables/useNavbar'
 import { useMiscStore } from '~/stores/misc'
 import { useAuthStore } from '~/stores/auth'
-import { useMobileStore } from '~/stores/mobile' // APP
+import { useMobileStore } from '~/stores/mobile'
+console.log('[STARTUP] NavbarMobile script setup start', performance.now()) // APP
 const mobileStore = useMobileStore()
+console.log('[STARTUP] NavbarMobile useNavbar starting', performance.now())
 
 const {
   online,
