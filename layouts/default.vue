@@ -143,4 +143,6 @@ function googleLoggedIn() {
   // OneTap has logged us in.  Re-render the page as logged in.
   bump.value++
 }
+
+console.log('[STARTUP] default.vue script setup COMPLETE', performance.now())
 </script>

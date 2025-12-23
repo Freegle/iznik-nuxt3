@@ -134,7 +134,8 @@ import DeletedRestore from '~/components/DeletedRestore.vue'
 import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
-import { useMobileStore } from '@/stores/mobile' // APP
+import { useMobileStore } from '@/stores/mobile'
+console.log('[STARTUP] LayoutCommon script setup START', performance.now()) // APP
 
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
