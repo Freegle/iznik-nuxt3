@@ -416,6 +416,8 @@ export default defineNuxtConfig({
     plugins:
       config.ISAPP && production
         ? [
+            // App builds with Sentry: include chunk splitting for better loading
+            splitVendorChunkPlugin(),
             sentryVitePlugin({
               org: 'freegle',
               project: 'capacitor',
@@ -423,7 +425,10 @@ export default defineNuxtConfig({
             }),
           ]
         : config.ISAPP
-        ? []
+        ? [
+            // App builds without Sentry: still need chunk splitting
+            splitVendorChunkPlugin(),
+          ]
         : [
             splitVendorChunkPlugin(),
             VitePWA({
