@@ -399,7 +399,8 @@ export default defineNuxtConfig({
       ],
     },
     build: {
-      minify: false,
+      // Enable minification for production builds to reduce bundle size
+      minify: production ? 'esbuild' : false,
     },
     css: {
       preprocessorOptions: {
