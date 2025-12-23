@@ -413,7 +413,7 @@ export default defineNuxtConfig({
       },
     },
     plugins:
-      config.ISAPP && production
+      config.ISAPP && production && config.SENTRY_AUTH_TOKEN
         ? [
             sentryVitePlugin({
               org: 'freegle',
