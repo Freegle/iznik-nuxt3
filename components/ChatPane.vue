@@ -77,6 +77,9 @@
                 Mark read
                 <b-badge variant="danger" class="ms-1">{{ unseen }}</b-badge>
               </b-button>
+              <b-button variant="white" class="action-btn" @click="showInfo">
+                Profile
+              </b-button>
               <b-button
                 v-if="chat.chattype === 'User2User'"
                 variant="white"

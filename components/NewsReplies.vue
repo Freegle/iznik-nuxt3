@@ -42,6 +42,7 @@
         class="reply-content"
         :depth="depth"
         @rendered="rendered"
+        @expand-combined="expandCombined"
       />
     </div>
   </div>
@@ -89,6 +90,7 @@ const emit = defineEmits(['rendered'])
 const newsfeedStore = useNewsfeedStore()
 const authStore = useAuthStore()
 const showAllReplies = ref(false)
+const expandedCombinedIds = ref(new Set())
 
 // We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
 //
@@ -137,7 +139,16 @@ const combinedReplies = computed(() => {
     const currentTime = new Date(currentReply.added).getTime()
     const lastCombined = combined[combined.length - 1]
 
+    /* Check if this reply or the last combined group has been expanded */
+    const isExpanded =
+      expandedCombinedIds.value.has(currentReply.id) ||
+      (lastCombined?.combinedIds &&
+        lastCombined.combinedIds.some((id) =>
+          expandedCombinedIds.value.has(id)
+        ))
+
     const canCombine =
+      !isExpanded &&
       lastCombined &&
       lastCombined.userid === currentReply.userid &&
       !currentReply.image &&
@@ -159,6 +170,10 @@ const combinedReplies = computed(() => {
         originalAdded: lastCombined.originalAdded || lastCombined.added,
         message: lastCombined.message + '\n\n' + currentReply.message,
         isCombined: true,
+        combinedIds: [
+          ...(lastCombined.combinedIds || [lastCombined.id]),
+          currentReply.id,
+        ],
         image: null,
         replies: [],
         deleted: lastCombined.deleted,
@@ -273,6 +288,11 @@ const numberOfRepliesNotShown = computed(() => {
 
 function rendered(id) {
   emit('rendered', id)
+}
+
+function expandCombined(combinedIds) {
+  /* Add all IDs from this combined group to the expanded set */
+  combinedIds.forEach((id) => expandedCombinedIds.value.add(id))
 }
 </script>
 <style lang="scss">

@@ -19,10 +19,12 @@ executors:
     docker:
       - image: cimg/android:2025.10-node
     resource_class: large
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=6144"
 
   macos-executor:
     macos:
-      xcode: 16.2.0
+      xcode: 16.4.0
     resource_class: macos.m1.medium.gen1
 
 commands:

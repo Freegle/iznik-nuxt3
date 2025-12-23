@@ -108,8 +108,17 @@
             />
           </template>
           <!-- More actions dropdown -->
+          <!-- For combined posts, show expand button instead of dropdown -->
+          <button
+            v-if="hasMoreActions && reply.isCombined"
+            class="reply-action expand-combined-btn"
+            title="Click to expand combined posts"
+            @click="expandCombinedPosts"
+          >
+            <v-icon icon="ellipsis-h" class="text-muted" />
+          </button>
           <b-dropdown
-            v-if="hasMoreActions"
+            v-else-if="hasMoreActions"
             variant="link"
             no-caret
             right
@@ -368,7 +377,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['rendered'])
+const emit = defineEmits(['rendered', 'expand-combined'])
 
 // Stores
 const newsfeedStore = useNewsfeedStore()
@@ -626,6 +635,13 @@ function showEdit() {
   showEditModal.value = true
 }
 
+function expandCombinedPosts() {
+  /* Emit the combined IDs so parent can expand this group */
+  if (props.replyData?.combinedIds) {
+    emit('expand-combined', props.replyData.combinedIds)
+  }
+}
+
 function showLove() {
   showLoveModal.value = true
 }
@@ -771,6 +787,15 @@ function showReplyPhotoModal() {
   }
   :deep(.d-sm-none) {
     display: none !important;
+  }
+}
+
+.expand-combined-btn {
+  padding: 0.25rem 0.375rem;
+  line-height: 1;
+
+  &:hover {
+    background: $color-gray--lighter;
   }
 }
 
