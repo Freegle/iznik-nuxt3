@@ -18,7 +18,9 @@ executors:
   android-executor:
     docker:
       - image: cimg/android:2025.10-node
-    resource_class: xlarge
+    resource_class: large
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=6144"
 
   macos-executor:
     macos:
