@@ -14,6 +14,7 @@ import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
 import { useClientLog } from '~/composables/useClientLog'
 
 export default defineNuxtPlugin(async (nuxtApp) => {
+  console.log('[STARTUP] sentry.client.ts plugin start', performance.now())
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
@@ -68,9 +69,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
 
     if (runTimeConfig.public.COOKIEYES && !window.cookieYesComplete) {
+      console.log('[STARTUP] sentry waiting for CookieYes', performance.now())
       setTimeout(checkCMPComplete, 100)
     } else {
-      console.log('Init Sentry')
+      console.log('[STARTUP] sentry Init Sentry', performance.now())
       Sentry.init({
         app: [vueApp],
         dsn: config.public.SENTRY_DSN,

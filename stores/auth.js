@@ -42,7 +42,7 @@ export const useAuthStore = defineStore({
       // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
-      console.log('Saving jwt and persistent')
+      console.log('[STARTUP] auth.setAuth called', performance.now())
       this.auth.jwt = jwt
       this.auth.persistent = persistent
     },
@@ -314,11 +314,16 @@ export const useAuthStore = defineStore({
       this.loginCount++
     },
     async fetchUser() {
+      console.log('[STARTUP] auth.fetchUser start', performance.now())
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
 
       if (this.auth.jwt || this.auth.persistent) {
+        console.log(
+          '[STARTUP] auth.fetchUser has auth, calling fetchv2',
+          performance.now()
+        )
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2(
@@ -326,6 +331,10 @@ export const useAuthStore = defineStore({
               webversion: this.config.public.BUILD_DATE,
             },
             false
+          )
+          console.log(
+            '[STARTUP] auth.fetchUser fetchv2 returned',
+            performance.now()
           )
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
@@ -467,6 +476,7 @@ export const useAuthStore = defineStore({
       }
 
       this.loginStateKnown = true
+      console.log('[STARTUP] auth.fetchUser complete', performance.now())
 
       return this.user
     },
@@ -563,6 +573,7 @@ export const useAuthStore = defineStore({
       return this.user
     },
     async savePushId() {
+      console.log('[STARTUP] savePushId start', performance.now())
       const mobileStore = useMobileStore()
       if (mobileStore.mobilePushId === null)
         console.log('******************* mobileStore.mobilePushId===null')
@@ -573,7 +584,10 @@ export const useAuthStore = defineStore({
         mobileStore.mobilePushId.length > 0
       ) {
         if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
-          console.log('sending mobilePushId', mobileStore.mobilePushId)
+          console.log(
+            '[STARTUP] savePushId sending mobilePushId',
+            performance.now()
+          )
           const params = {
             notifications: {
               push: {
