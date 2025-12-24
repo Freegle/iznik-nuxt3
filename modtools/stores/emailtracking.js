@@ -43,8 +43,9 @@ export const useEmailTrackingStore = defineStore({
       end: '',
     },
 
-    // Current user ID being viewed.
+    // Current user ID or email being viewed.
     currentUserId: null,
+    currentEmail: null,
 
     // Pagination for user emails.
     limit: 50,
@@ -71,6 +72,7 @@ export const useEmailTrackingStore = defineStore({
       this.userEmailsTotal = 0
       this.userEmailsError = null
       this.currentUserId = null
+      this.currentEmail = null
       this.offset = 0
     },
 
@@ -83,6 +85,8 @@ export const useEmailTrackingStore = defineStore({
       this.userEmails = []
       this.userEmailsTotal = 0
       this.userEmailsError = null
+      this.currentUserId = null
+      this.currentEmail = null
       this.offset = 0
     },
 
@@ -218,6 +222,8 @@ export const useEmailTrackingStore = defineStore({
       if (!append) {
         this.offset = 0
         this.userEmails = []
+        this.currentUserId = null
+        this.currentEmail = null
       }
 
       try {
@@ -229,11 +235,21 @@ export const useEmailTrackingStore = defineStore({
           }
         )
 
-        // Store the resolved user ID from the response.
+        // Store the resolved user ID or email from the response.
         if (response.userid) {
           this.currentUserId = response.userid
+          this.currentEmail = null
+        } else if (response.email) {
+          // Response was from searching by recipient_email
+          this.currentEmail = response.email
+          this.currentUserId = null
         } else if (typeof userIdOrEmail === 'number') {
           this.currentUserId = userIdOrEmail
+        } else if (
+          typeof userIdOrEmail === 'string' &&
+          userIdOrEmail.includes('@')
+        ) {
+          this.currentEmail = userIdOrEmail
         }
 
         if (append) {
@@ -242,8 +258,22 @@ export const useEmailTrackingStore = defineStore({
           this.userEmails = response.emails || []
         }
         this.userEmailsTotal = response.total || 0
+
+        // If no emails found, set a friendly message rather than leaving it empty
+        if (this.userEmails.length === 0 && this.userEmailsTotal === 0) {
+          const searchTerm =
+            typeof userIdOrEmail === 'string' && userIdOrEmail.includes('@')
+              ? userIdOrEmail
+              : `user #${userIdOrEmail}`
+          this.userEmailsError = `No email history found for ${searchTerm}.`
+        }
       } catch (e) {
-        this.userEmailsError = e.message || 'Failed to fetch user emails'
+        // Provide a user-friendly error message
+        const searchTerm =
+          typeof userIdOrEmail === 'string' && userIdOrEmail.includes('@')
+            ? userIdOrEmail
+            : `user #${userIdOrEmail}`
+        this.userEmailsError = `No email history found for ${searchTerm}.`
         console.error('User emails fetch error:', e)
       } finally {
         this.userEmailsLoading = false
@@ -254,7 +284,9 @@ export const useEmailTrackingStore = defineStore({
       if (this.userEmailsLoading || !this.hasMoreUserEmails) return
 
       this.offset += this.limit
-      await this.fetchUserEmails(this.currentUserId, true)
+      // Use whichever identifier we have (userId or email)
+      const identifier = this.currentUserId || this.currentEmail
+      await this.fetchUserEmails(identifier, true)
     },
 
     setUserFilter(userId) {

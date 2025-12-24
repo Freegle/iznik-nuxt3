@@ -452,9 +452,13 @@
     <div v-if="emailTrackingStore.hasUserEmails">
       <p class="text-muted small mb-2">
         Showing {{ emailTrackingStore.userEmails.length }} of
-        {{ emailTrackingStore.userEmailsTotal }} emails for user #{{
-          emailTrackingStore.currentUserId
-        }}
+        {{ emailTrackingStore.userEmailsTotal }} emails for
+        <span v-if="emailTrackingStore.currentUserId">
+          user #{{ emailTrackingStore.currentUserId }}
+        </span>
+        <span v-else-if="emailTrackingStore.currentEmail">
+          {{ emailTrackingStore.currentEmail }}
+        </span>
       </p>
       <b-table
         :items="emailTrackingStore.userEmails"
