@@ -148,52 +148,62 @@ export const useMessageStore = defineStore({
       })
 
       if (left.length) {
-        this.fetchingCount++
+        // Split into chunks of 19 (API limit is < 20)
+        const BATCH_SIZE = 19
+        const chunks = []
+        for (let i = 0; i < left.length; i += BATCH_SIZE) {
+          chunks.push(left.slice(i, i + BATCH_SIZE))
+        }
 
-        // Create a shared promise for the batch fetch. Individual fetch() calls
-        // will await this promise instead of making duplicate API requests.
-        const batchPromise = api(this.config).message.fetch(
-          left.join(','),
-          false
-        )
+        // Process each chunk
+        for (const chunk of chunks) {
+          this.fetchingCount++
 
-        // Set the fetching flag for each ID to the shared batch promise.
-        left.forEach((id) => {
-          this.fetching[id] = batchPromise
-        })
+          // Create a shared promise for the batch fetch. Individual fetch() calls
+          // will await this promise instead of making duplicate API requests.
+          const batchPromise = api(this.config).message.fetch(
+            chunk.join(','),
+            false
+          )
 
-        try {
-          const msgs = await batchPromise
-
-          if (msgs && msgs.forEach) {
-            msgs.forEach((msg) => {
-              this.list[msg.id] = msg
-              if (this.list[msg.id]) {
-                this.list[msg.id].addedToCache = Math.round(Date.now() / 1000)
-              }
-            })
-          } else if (typeof msgs === 'object') {
-            this.list[msgs.id] = msgs
-            if (this.list[msgs.id]) {
-              this.list[msgs.id].addedToCache = Math.round(Date.now() / 1000)
-            }
-          } else {
-            console.error('Failed to fetch', msgs)
-          }
-
-          this.fetchingCount--
-        } catch (e) {
-          console.log('Failed to fetch messages', e)
-          if (e instanceof APIError && e.response.status === 404) {
-            console.log('Ignore 404 error')
-          } else {
-            throw e
-          }
-        } finally {
-          // Clear the fetching flags for all IDs in this batch.
-          left.forEach((id) => {
-            this.fetching[id] = null
+          // Set the fetching flag for each ID to the shared batch promise.
+          chunk.forEach((id) => {
+            this.fetching[id] = batchPromise
           })
+
+          try {
+            const msgs = await batchPromise
+
+            if (msgs && msgs.forEach) {
+              msgs.forEach((msg) => {
+                this.list[msg.id] = msg
+                if (this.list[msg.id]) {
+                  this.list[msg.id].addedToCache = Math.round(Date.now() / 1000)
+                }
+              })
+            } else if (typeof msgs === 'object') {
+              this.list[msgs.id] = msgs
+              if (this.list[msgs.id]) {
+                this.list[msgs.id].addedToCache = Math.round(Date.now() / 1000)
+              }
+            } else {
+              console.error('Failed to fetch', msgs)
+            }
+
+            this.fetchingCount--
+          } catch (e) {
+            console.log('Failed to fetch messages', e)
+            if (e instanceof APIError && e.response.status === 404) {
+              console.log('Ignore 404 error')
+            } else {
+              throw e
+            }
+          } finally {
+            // Clear the fetching flags for all IDs in this batch.
+            chunk.forEach((id) => {
+              this.fetching[id] = null
+            })
+          }
         }
       }
     },
