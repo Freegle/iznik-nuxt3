@@ -151,7 +151,7 @@
           {{ formattedStats.openRate }}%
         </div>
         <div class="stat-label">
-          Opens*
+          Opens
           <small class="text-muted d-block">
             {{ formattedStats.opened.toLocaleString() }}
           </small>
@@ -182,7 +182,7 @@
           {{ formattedStats.clickToOpenRate }}%
         </div>
         <div class="stat-label">
-          Click/Open*
+          Click/Open
           <small class="text-muted d-block"> of opens </small>
         </div>
       </div>
@@ -298,10 +298,23 @@
 
       <!-- Top Clicked Links Section -->
       <div class="mt-4">
-        <h6>Most Clicked Links</h6>
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0">Most Clicked Links</h6>
+          <b-form-checkbox
+            :checked="emailTrackingStore.aggregateClickedLinks"
+            switch
+            size="sm"
+            @change="emailTrackingStore.toggleAggregateClickedLinks()"
+          >
+            Group similar URLs
+          </b-form-checkbox>
+        </div>
         <p class="text-muted small mb-2">
-          Links are normalized to aggregate similar URLs (e.g., /message/123 and
-          /message/456 are grouped together).
+          <span v-if="emailTrackingStore.aggregateClickedLinks">
+            Similar URLs are grouped together (e.g., /message/123 and
+            /message/456 are aggregated).
+          </span>
+          <span v-else> Showing individual URLs with click counts. </span>
         </p>
 
         <div
@@ -320,7 +333,7 @@
         <div v-else-if="emailTrackingStore.hasClickedLinks">
           <b-table
             :items="emailTrackingStore.clickedLinks"
-            :fields="clickedLinksFields"
+            :fields="clickedLinksFieldsComputed"
             striped
             hover
             responsive
@@ -329,6 +342,14 @@
           >
             <template #cell(normalized_url)="data">
               <code class="small">{{ data.value }}</code>
+            </template>
+            <template #cell(url)="data">
+              <code
+                class="small text-truncate d-block"
+                style="max-width: 400px"
+                :title="data.value"
+                >{{ data.value }}</code
+              >
             </template>
             <template #cell(click_count)="data">
               <b-badge variant="info">{{ data.value }}</b-badge>
@@ -373,7 +394,12 @@
             </b-button>
             <span class="text-muted small">
               Showing {{ emailTrackingStore.clickedLinks.length }} of
-              {{ emailTrackingStore.clickedLinksTotal }} unique link patterns.
+              {{ emailTrackingStore.clickedLinksTotal }}
+              {{
+                emailTrackingStore.aggregateClickedLinks
+                  ? 'link patterns'
+                  : 'links'
+              }}.
             </span>
           </div>
         </div>
@@ -534,11 +560,6 @@ export default {
         { key: 'bounced_at', label: 'Bounced', sortable: true },
         { key: 'unsubscribed_at', label: 'Unsubscribed', sortable: true },
       ],
-      clickedLinksFields: [
-        { key: 'normalized_url', label: 'Link Pattern', sortable: false },
-        { key: 'click_count', label: 'Clicks', sortable: true },
-        { key: 'example_urls', label: 'Example URLs', sortable: false },
-      ],
     }
   },
   computed: {
@@ -555,6 +576,20 @@ export default {
         clickRate: stats.clickRate,
         clickToOpenRate: stats.clickToOpenRate,
         bounceRate: stats.bounceRate,
+      }
+    },
+    clickedLinksFieldsComputed() {
+      if (this.emailTrackingStore.aggregateClickedLinks) {
+        return [
+          { key: 'normalized_url', label: 'Link Pattern', sortable: false },
+          { key: 'click_count', label: 'Clicks', sortable: true },
+          { key: 'example_urls', label: 'Example URLs', sortable: false },
+        ]
+      } else {
+        return [
+          { key: 'url', label: 'URL', sortable: false },
+          { key: 'click_count', label: 'Clicks', sortable: true },
+        ]
       }
     },
   },

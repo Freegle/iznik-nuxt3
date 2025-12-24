@@ -25,6 +25,7 @@ export const useEmailTrackingStore = defineStore({
     clickedLinksLoading: false,
     clickedLinksError: null,
     showAllClickedLinks: false,
+    aggregateClickedLinks: true,
 
     // User email history.
     userEmails: [],
@@ -65,6 +66,7 @@ export const useEmailTrackingStore = defineStore({
       this.clickedLinksTotal = 0
       this.clickedLinksError = null
       this.showAllClickedLinks = false
+      this.aggregateClickedLinks = true
       this.userEmails = []
       this.userEmailsTotal = 0
       this.userEmailsError = null
@@ -176,6 +178,7 @@ export const useEmailTrackingStore = defineStore({
       try {
         const params = {
           limit: showAll ? 0 : 5,
+          aggregate: this.aggregateClickedLinks ? 'true' : 'false',
         }
         if (this.filters.start) {
           params.start = this.filters.start
@@ -199,6 +202,11 @@ export const useEmailTrackingStore = defineStore({
 
     toggleShowAllClickedLinks() {
       this.fetchClickedLinks(!this.showAllClickedLinks)
+    },
+
+    toggleAggregateClickedLinks() {
+      this.aggregateClickedLinks = !this.aggregateClickedLinks
+      this.fetchClickedLinks(this.showAllClickedLinks)
     },
 
     async fetchUserEmails(userIdOrEmail, append = false) {

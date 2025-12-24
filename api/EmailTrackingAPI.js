@@ -64,6 +64,7 @@ export default class EmailTrackingAPI extends BaseAPI {
    * @param {string} [params.start] - Start date (YYYY-MM-DD)
    * @param {string} [params.end] - End date (YYYY-MM-DD)
    * @param {number} [params.limit] - Number of links to return (default 5, 0 for all)
+   * @param {boolean} [params.aggregate] - Whether to aggregate by normalized URL (default true)
    */
   async fetchTopClickedLinks(params = {}) {
     return await this.$getv2('/email/stats/clicks', params)
