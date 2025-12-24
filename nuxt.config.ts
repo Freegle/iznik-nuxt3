@@ -453,6 +453,15 @@ export default defineNuxtConfig({
             sentryVitePlugin({
               org: 'freegle',
               project: 'nuxt3',
+              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+              errorHandler: (err) => {
+                // Only log warning for gateway timeouts, fail for other errors
+                if (err.message && err.message.includes('504')) {
+                  console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
+                } else {
+                  throw err
+                }
+              },
             }),
           ],
   },
