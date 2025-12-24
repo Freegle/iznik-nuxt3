@@ -143,7 +143,7 @@
       scrollable
       ok-only
       ok-title="Close and Continue"
-      @hide="sendReply(null)"
+      @ok="handleNewUserModalOk"
     >
       <template #title>
         <h2>Welcome to Freegle!</h2>
@@ -457,6 +457,19 @@ async function sendReply(callback) {
   if (!called && callback) {
     callback()
   }
+}
+
+async function handleNewUserModalOk(bvModalEvent) {
+  // Prevent the modal from closing until the reply is actually sent.
+  // This fixes a race condition where the modal would close before
+  // the async sendReply completed, causing the chat to never be created.
+  bvModalEvent.preventDefault()
+
+  // Send the reply and wait for it to complete
+  await sendReply(null)
+
+  // Now close the modal
+  showNewUser.value = false
 }
 
 function close() {

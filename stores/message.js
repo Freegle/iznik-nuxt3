@@ -189,8 +189,6 @@ export const useMessageStore = defineStore({
             } else {
               console.error('Failed to fetch', msgs)
             }
-
-            this.fetchingCount--
           } catch (e) {
             console.log('Failed to fetch messages', e)
             if (e instanceof APIError && e.response.status === 404) {
@@ -199,6 +197,7 @@ export const useMessageStore = defineStore({
               throw e
             }
           } finally {
+            this.fetchingCount--
             // Clear the fetching flags for all IDs in this batch.
             chunk.forEach((id) => {
               this.fetching[id] = null
