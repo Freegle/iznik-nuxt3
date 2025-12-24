@@ -19,6 +19,13 @@ export const useEmailTrackingStore = defineStore({
     statsByTypeLoading: false,
     statsByTypeError: null,
 
+    // Top clicked links.
+    clickedLinks: [],
+    clickedLinksTotal: 0,
+    clickedLinksLoading: false,
+    clickedLinksError: null,
+    showAllClickedLinks: false,
+
     // User email history.
     userEmails: [],
     userEmailsTotal: 0,
@@ -54,6 +61,10 @@ export const useEmailTrackingStore = defineStore({
       this.timeSeriesError = null
       this.statsByType = []
       this.statsByTypeError = null
+      this.clickedLinks = []
+      this.clickedLinksTotal = 0
+      this.clickedLinksError = null
+      this.showAllClickedLinks = false
       this.userEmails = []
       this.userEmailsTotal = 0
       this.userEmailsError = null
@@ -157,6 +168,39 @@ export const useEmailTrackingStore = defineStore({
       }
     },
 
+    async fetchClickedLinks(showAll = false) {
+      this.clickedLinksLoading = true
+      this.clickedLinksError = null
+      this.showAllClickedLinks = showAll
+
+      try {
+        const params = {
+          limit: showAll ? 0 : 5,
+        }
+        if (this.filters.start) {
+          params.start = this.filters.start
+        }
+        if (this.filters.end) {
+          params.end = this.filters.end
+        }
+
+        const response = await api(
+          this.config
+        ).emailtracking.fetchTopClickedLinks(params)
+        this.clickedLinks = response.data || []
+        this.clickedLinksTotal = response.total || 0
+      } catch (e) {
+        this.clickedLinksError = e.message || 'Failed to fetch clicked links'
+        console.error('Clicked links fetch error:', e)
+      } finally {
+        this.clickedLinksLoading = false
+      }
+    },
+
+    toggleShowAllClickedLinks() {
+      this.fetchClickedLinks(!this.showAllClickedLinks)
+    },
+
     async fetchUserEmails(userIdOrEmail, append = false) {
       if (!userIdOrEmail) return
 
@@ -218,6 +262,11 @@ export const useEmailTrackingStore = defineStore({
     hasTimeSeries: (state) => state.timeSeries.length > 0,
 
     hasStatsByType: (state) => state.statsByType.length > 0,
+
+    hasClickedLinks: (state) => state.clickedLinks.length > 0,
+
+    hasMoreClickedLinks: (state) =>
+      !state.showAllClickedLinks && state.clickedLinksTotal > 5,
 
     hasUserEmails: (state) => state.userEmails.length > 0,
 

@@ -57,4 +57,15 @@ export default class EmailTrackingAPI extends BaseAPI {
   async fetchStatsByType(params = {}) {
     return await this.$getv2('/email/stats/bytype', params)
   }
+
+  /**
+   * Fetch top clicked links from emails.
+   * @param {Object} params - Query parameters
+   * @param {string} [params.start] - Start date (YYYY-MM-DD)
+   * @param {string} [params.end] - End date (YYYY-MM-DD)
+   * @param {number} [params.limit] - Number of links to return (default 5, 0 for all)
+   */
+  async fetchTopClickedLinks(params = {}) {
+    return await this.$getv2('/email/stats/clicks', params)
+  }
 }

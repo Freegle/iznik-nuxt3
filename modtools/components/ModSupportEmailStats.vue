@@ -295,6 +295,90 @@
           </p>
         </b-collapse>
       </div>
+
+      <!-- Top Clicked Links Section -->
+      <div class="mt-4">
+        <h6>Most Clicked Links</h6>
+        <p class="text-muted small mb-2">
+          Links are normalized to aggregate similar URLs (e.g., /message/123 and
+          /message/456 are grouped together).
+        </p>
+
+        <div
+          v-if="emailTrackingStore.clickedLinksLoading"
+          class="text-center py-3"
+        >
+          <b-spinner small class="mr-2" />
+          Loading clicked links...
+        </div>
+        <div
+          v-else-if="emailTrackingStore.clickedLinksError"
+          class="text-danger"
+        >
+          {{ emailTrackingStore.clickedLinksError }}
+        </div>
+        <div v-else-if="emailTrackingStore.hasClickedLinks">
+          <b-table
+            :items="emailTrackingStore.clickedLinks"
+            :fields="clickedLinksFields"
+            striped
+            hover
+            responsive
+            small
+            class="clicked-links-table"
+          >
+            <template #cell(normalized_url)="data">
+              <code class="small">{{ data.value }}</code>
+            </template>
+            <template #cell(click_count)="data">
+              <b-badge variant="info">{{ data.value }}</b-badge>
+            </template>
+            <template #cell(example_urls)="data">
+              <div v-if="data.value && data.value.length > 0">
+                <div
+                  v-for="(url, idx) in data.value.slice(0, 2)"
+                  :key="idx"
+                  class="small text-muted text-truncate"
+                  style="max-width: 300px"
+                  :title="url"
+                >
+                  {{ url }}
+                </div>
+                <span v-if="data.value.length > 2" class="small text-muted">
+                  +{{ data.value.length - 2 }} more
+                </span>
+              </div>
+            </template>
+          </b-table>
+
+          <div class="d-flex align-items-center gap-2">
+            <b-button
+              v-if="emailTrackingStore.hasMoreClickedLinks"
+              variant="outline-primary"
+              size="sm"
+              @click="emailTrackingStore.toggleShowAllClickedLinks()"
+            >
+              Show all {{ emailTrackingStore.clickedLinksTotal }} links
+            </b-button>
+            <b-button
+              v-else-if="
+                emailTrackingStore.showAllClickedLinks &&
+                emailTrackingStore.clickedLinksTotal > 5
+              "
+              variant="outline-secondary"
+              size="sm"
+              @click="emailTrackingStore.toggleShowAllClickedLinks()"
+            >
+              Show top 5 only
+            </b-button>
+            <span class="text-muted small">
+              Showing {{ emailTrackingStore.clickedLinks.length }} of
+              {{ emailTrackingStore.clickedLinksTotal }} unique link patterns.
+            </span>
+          </div>
+        </div>
+        <div v-else class="text-muted">No clicked links data available.</div>
+      </div>
     </div>
 
     <!-- User Email History Section -->
@@ -450,6 +534,11 @@ export default {
         { key: 'bounced_at', label: 'Bounced', sortable: true },
         { key: 'unsubscribed_at', label: 'Unsubscribed', sortable: true },
       ],
+      clickedLinksFields: [
+        { key: 'normalized_url', label: 'Link Pattern', sortable: false },
+        { key: 'click_count', label: 'Clicks', sortable: true },
+        { key: 'example_urls', label: 'Example URLs', sortable: false },
+      ],
     }
   },
   computed: {
@@ -485,6 +574,7 @@ export default {
         this.emailTrackingStore.fetchStats(),
         this.emailTrackingStore.fetchTimeSeries(),
         this.emailTrackingStore.fetchStatsByType(),
+        this.emailTrackingStore.fetchClickedLinks(),
       ])
     },
 
@@ -754,5 +844,16 @@ export default {
   vertical-align: baseline;
   font-size: inherit;
   line-height: inherit;
+}
+
+/* Clicked links table */
+.clicked-links-table code {
+  background: #f8f9fa;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.8rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 </style>
