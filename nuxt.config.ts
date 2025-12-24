@@ -422,6 +422,16 @@ export default defineNuxtConfig({
               org: 'freegle',
               project: 'capacitor',
               authToken: config.SENTRY_AUTH_TOKEN,
+              // For non-strict mode (debug builds), log errors but don't fail the build
+              errorHandler: config.SENTRY_STRICT
+                ? undefined // Use default (throw on error)
+                : (err) => {
+                    console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
+                  },
+              // Disable release management for non-strict mode to avoid API timeouts
+              release: config.SENTRY_STRICT
+                ? undefined // Use default release management
+                : { create: false, finalize: false },
             }),
           ]
         : config.ISAPP

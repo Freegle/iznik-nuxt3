@@ -433,16 +433,19 @@ jobs:
           paths:
             - node_modules
 
-      # Build Nuxt app for production
+      # Build Nuxt app for production (debug build - Sentry errors non-fatal)
       - run:
           name: Build Nuxt App
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=false  # Debug build - allow Sentry failures
+            export SENTRY_HTTP_TIMEOUT=120  # Increase timeout for Sentry API calls
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
               echo "✅ Using app-specific Sentry DSN"
             fi
+            echo "ℹ️ SENTRY_STRICT=false - Sentry errors will not fail the build"
             npm run generate
 
       # Setup Firebase
@@ -586,12 +589,14 @@ jobs:
               exit 1
             fi
 
-      # Build Nuxt app for production
+      # Build Nuxt app for production (with Sentry - must succeed)
       - run:
           name: Build Nuxt App
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # Increase timeout for Sentry API calls (default 30s)
             # Set Sentry DSN from app-specific environment variable
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
@@ -600,6 +605,8 @@ jobs:
               echo "⚠️  SENTRY_DSN_APP_FD not set - app will use default Sentry DSN"
             fi
             npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
 
       # Decode and place google-services.json for Firebase
       - run:
@@ -1059,12 +1066,14 @@ jobs:
               exit 1
             fi
 
-      # Build Nuxt app for production
+      # Build Nuxt app for production (with Sentry - must succeed)
       - run:
           name: Build Nuxt App
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # 2 minute timeout for Sentry API calls
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
               echo "✅ Using app-specific Sentry DSN for error tracking"
@@ -1072,6 +1081,8 @@ jobs:
               echo "⚠️  SENTRY_DSN_APP_FD not set - app will use default Sentry DSN"
             fi
             npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
 
       # Sync Capacitor to iOS
       - run:
@@ -1270,11 +1281,15 @@ jobs:
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # 2 minute timeout for Sentry API calls
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
               echo "✅ Using app-specific Sentry DSN"
             fi
             npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
 
       - run:
           name: Sync Capacitor to iOS
