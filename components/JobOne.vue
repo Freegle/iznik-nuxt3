@@ -38,24 +38,31 @@
         :class="{ 'job-card--highlight': highlight }"
       >
         <div class="job-card-image" :style="cardImageStyle">
+          <div class="job-card-placeholder">
+            <v-icon icon="briefcase" />
+          </div>
           <img
             v-if="imageUrl"
-            v-show="imageLoaded"
             :src="imageUrl"
             alt=""
             class="job-card-img"
             loading="lazy"
-            @load="imageLoaded = true"
-            @error="imageLoaded = false"
           />
-          <div v-show="!imageUrl || !imageLoaded" class="job-card-placeholder">
-            <v-icon icon="briefcase" />
-          </div>
         </div>
         <div class="job-card-body">
+          <div class="job-card-header">
+            <span v-if="job.category" class="job-category">{{
+              categoryDisplay
+            }}</span>
+            <span v-if="distanceText" class="job-distance">
+              <v-icon icon="map-marker-alt" />{{ distanceText }}
+            </span>
+          </div>
           <h4 class="job-card-title">{{ title }}</h4>
-          <span v-if="job.location" class="job-location">
-            <v-icon icon="map-marker-alt" class="location-icon" />
+          <p v-if="description" class="job-card-description">
+            {{ description }}
+          </p>
+          <span v-if="job.location" class="job-card-location">
             {{ location }}
           </span>
         </div>
@@ -164,6 +171,39 @@ const iconStyle = computed(() => {
 const cardImageStyle = computed(() => {
   const bg = JOB_ICON_COLOURS[props.bgColour] || JOB_ICON_COLOURS['dark green']
   return { background: bg }
+})
+
+// Format category for display - take first category if multiple, clean up
+const categoryDisplay = computed(() => {
+  if (!job.value?.category) return null
+  // Categories can be semicolon-separated, take first one
+  const first = job.value.category.split(';')[0].trim()
+  return first
+})
+
+// Format distance for display
+const distanceText = computed(() => {
+  if (!job.value?.dist) return null
+  const km = job.value.dist
+  const miles = km * 0.621371
+  if (miles < 1) {
+    return 'Nearby'
+  } else if (miles < 10) {
+    return `${miles.toFixed(1)} mi`
+  } else {
+    return `${Math.round(miles)} mi`
+  }
+})
+
+// Truncated description
+const description = computed(() => {
+  if (!job.value?.body) return null
+  const text = filterNonsense(job.value.body)
+  if (!text || text === 'null') return null
+  // Truncate to reasonable length
+  const maxLen = 150
+  if (text.length <= maxLen) return text
+  return text.substring(0, maxLen).trim() + '...'
 })
 
 // Log ad impression when job is rendered (client-side only).
@@ -280,6 +320,7 @@ function filterNonsense(val) {
 }
 
 .job-link {
+  display: block;
   text-decoration: none;
   color: inherit;
 
@@ -407,14 +448,20 @@ function filterNonsense(val) {
   }
 }
 
-/* Card mode - mosaic display */
+/* Card mode - list display */
 .job-card {
   background: $white;
   border: 1px solid $gray-200;
   overflow: hidden;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
+  max-height: 120px;
+
+  @include media-breakpoint-up(md) {
+    max-height: 150px;
+  }
 
   &:hover {
     border-color: #61ae24;
@@ -427,38 +474,98 @@ function filterNonsense(val) {
 }
 
 .job-card-image {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
   overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    width: 150px;
+    height: 150px;
+  }
 }
 
 .job-card-img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  z-index: 1;
 }
 
 .job-card-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
   color: rgba(255, 255, 255, 0.5);
-  font-size: 3rem;
+  font-size: 2.5rem;
+  z-index: 0;
+
+  @include media-breakpoint-up(md) {
+    font-size: 3rem;
+  }
 }
 
 .job-card-body {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    padding: 1rem 1.25rem;
+  }
+}
+
+.job-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+
+  @include media-breakpoint-up(md) {
+    font-size: 0.75rem;
+  }
+}
+
+.job-category {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: #61ae24;
+  color: $white;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+
+  @include media-breakpoint-up(md) {
+    max-width: 200px;
+  }
+}
+
+.job-distance {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: $gray-600;
+  white-space: nowrap;
 }
 
 .job-card-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: $gray-800;
   margin: 0 0 0.25rem 0;
@@ -467,5 +574,37 @@ function filterNonsense(val) {
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.3;
+
+  @include media-breakpoint-up(md) {
+    font-size: 1rem;
+  }
+}
+
+.job-card-description {
+  font-size: 0.75rem;
+  color: $gray-600;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  @include media-breakpoint-up(md) {
+    font-size: 0.8rem;
+  }
+}
+
+.job-card-location {
+  font-size: 0.7rem;
+  color: $gray-500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: auto;
+
+  @include media-breakpoint-up(md) {
+    font-size: 0.75rem;
+  }
 }
 </style>
