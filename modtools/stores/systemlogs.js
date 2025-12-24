@@ -26,6 +26,7 @@ export const useSystemLogsStore = defineStore({
     traceId: null,
     sessionId: null,
     ipAddress: null,
+    email: null,
 
     // Sorting
     sortDirection: 'backward', // backward (newest first) or forward (oldest first)
@@ -177,6 +178,9 @@ export const useSystemLogsStore = defineStore({
       if (this.ipAddress) {
         queryParams.ip = this.ipAddress
       }
+      if (this.email) {
+        queryParams.email = this.email
+      }
     },
 
     setSources(sources) {
@@ -241,6 +245,11 @@ export const useSystemLogsStore = defineStore({
 
     setIpFilter(ip) {
       this.ipAddress = ip
+      this.clear()
+    },
+
+    setEmailFilter(email) {
+      this.email = email
       this.clear()
     },
 

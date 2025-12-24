@@ -272,14 +272,10 @@ export default {
   },
   methods: {
     async doSearch() {
-      // If email is entered, look it up first
+      // If email is entered, look it up first to get user ID
       if (this.emailInput.trim()) {
         await this.lookupEmail()
-        // lookupEmail will set userIdInput if found, then we continue
-        if (!this.userIdInput) {
-          // Email lookup failed, don't search
-          return
-        }
+        // Even if user not found, we still search by email address
       }
 
       // Apply ID filters before searching
@@ -302,6 +298,12 @@ export default {
         this.systemLogsStore.setIpFilter(this.ipInput.trim())
       } else {
         this.systemLogsStore.setIpFilter(null)
+      }
+      // Set email filter to search by email address in logs (in addition to user ID)
+      if (this.emailInput.trim()) {
+        this.systemLogsStore.setEmailFilter(this.emailInput.trim())
+      } else {
+        this.systemLogsStore.setEmailFilter(null)
       }
       this.$emit('search')
     },
@@ -344,6 +346,7 @@ export default {
       this.systemLogsStore.setTraceFilter(null)
       this.systemLogsStore.setSessionFilter(null)
       this.systemLogsStore.setIpFilter(null)
+      this.systemLogsStore.setEmailFilter(null)
       this.$emit('clear-user')
       this.$emit('clear-group')
       this.$emit('clear-msg')
@@ -367,13 +370,14 @@ export default {
 
         const users = Object.values(this.userStore.list)
         if (users.length === 0) {
-          this.emailLookupError = 'No user found for this email.'
+          this.emailLookupError =
+            'No user found for this email - searching by email only.'
         } else if (users.length === 1) {
           this.userIdInput = users[0].id.toString()
-          this.emailInput = ''
+          // Keep email in field - we'll search by BOTH user ID and email
         } else {
           this.userIdInput = users[0].id.toString()
-          this.emailInput = ''
+          // Keep email in field - we'll search by BOTH user ID and email
           this.emailLookupError = `Found ${users.length} users, using first: #${users[0].id}`
         }
       } catch (e) {
