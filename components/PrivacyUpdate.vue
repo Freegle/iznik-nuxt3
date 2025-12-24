@@ -1,5 +1,5 @@
 <template>
-  <NoticeMessage v-if="showIt" variant="info">
+  <NoticeMessage v-if="showIt" variant="info" class="mb-2">
     <div class="d-flex justify-content-between align-items-center">
       <span>
         We've updated our

@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import api from '~/api'
 
+// Debounce delay for batching user fetches (ms)
+const BATCH_DELAY = 50
+
 export const useUserStore = defineStore({
   id: 'user',
   state: () => ({
@@ -13,6 +16,9 @@ export const useUserStore = defineStore({
       this.config = config
       this.fetching = {}
       this.fetchingLocation = {}
+      this.pendingFetches = []
+      this.batchTimer = null
+      this.batchPromise = null
     },
     clear() {
       // ModTools
@@ -49,23 +55,108 @@ export const useUserStore = defineStore({
         return
       }
 
-      if (force || !this.list[id]) {
-        if (this.fetching[id]) {
-          await this.fetching[id]
-          await nextTick()
-        } else {
-          this.fetching[id] = api(this.config).user.fetch(id)
-          const user = await this.fetching[id]
+      // If already cached and not forcing, return immediately
+      if (!force && this.list[id]) {
+        return this.list[id]
+      }
 
-          if (user) {
-            this.list[id] = user
+      // If already fetching this ID, wait for the existing fetch
+      if (this.fetching[id]) {
+        await this.fetching[id]
+        await nextTick()
+        return this.list[id]
+      }
+
+      // Add to pending batch and wait for the batch to complete
+      return new Promise((resolve) => {
+        this.pendingFetches.push({ id, resolve, force })
+
+        // Clear existing timer and set a new one
+        if (this.batchTimer) {
+          clearTimeout(this.batchTimer)
+        }
+
+        this.batchTimer = setTimeout(() => {
+          this.processBatch()
+        }, BATCH_DELAY)
+      })
+    },
+    async processBatch() {
+      if (!this.pendingFetches.length) {
+        return
+      }
+
+      // Collect all pending fetches
+      const pending = [...this.pendingFetches]
+      this.pendingFetches = []
+      this.batchTimer = null
+
+      // Filter out IDs that are already cached (unless force)
+      const idsToFetch = []
+      const resolvers = {}
+
+      for (const { id, resolve, force } of pending) {
+        if (!resolvers[id]) {
+          resolvers[id] = []
+        }
+        resolvers[id].push(resolve)
+
+        if ((force || !this.list[id]) && !this.fetching[id]) {
+          if (!idsToFetch.includes(id)) {
+            idsToFetch.push(id)
           }
-
-          this.fetching[id] = null
         }
       }
 
-      return this.list[id]
+      if (idsToFetch.length > 0) {
+        await this.fetchMultiple(idsToFetch)
+      }
+
+      // Resolve all promises with the cached data
+      for (const { id, resolve } of pending) {
+        resolve(this.list[id])
+      }
+    },
+    async fetchMultiple(ids) {
+      const left = []
+
+      ids.forEach((id) => {
+        id = parseInt(id)
+
+        if (!this.list[id] && !this.fetching[id]) {
+          left.push(id)
+        }
+      })
+
+      if (left.length) {
+        // Create a shared promise for the batch request
+        const batchPromise = api(this.config).user.fetchMultiple(left)
+
+        // Set the same promise for each ID so concurrent fetches wait for the same request
+        left.forEach((id) => {
+          this.fetching[id] = batchPromise
+        })
+
+        try {
+          const users = await batchPromise
+
+          // Handle both array response (multiple users) and single user response
+          if (Array.isArray(users)) {
+            users.forEach((user) => {
+              if (user) {
+                this.list[user.id] = user
+              }
+            })
+          } else if (users) {
+            this.list[users.id] = users
+          }
+        } finally {
+          // Clear fetching flags
+          left.forEach((id) => {
+            this.fetching[id] = null
+          })
+        }
+      }
     },
     async fetchPublicLocation(id, force) {
       id = parseInt(id)

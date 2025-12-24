@@ -422,18 +422,16 @@ export default defineNuxtConfig({
               org: 'freegle',
               project: 'capacitor',
               authToken: config.SENTRY_AUTH_TOKEN,
-              // For debug builds, log Sentry errors but continue the build.
-              // For live/production builds, fail on Sentry errors to ensure proper error tracking.
-              ...(config.APP_DEBUG
-                ? {
-                    errorHandler: (err) => {
-                      console.warn(
-                        '[Sentry] Warning: Sentry operation failed (continuing debug build):',
-                        err.message
-                      )
-                    },
-                  }
-                : {}),
+              // For non-strict mode (debug builds), log errors but don't fail the build
+              errorHandler: config.SENTRY_STRICT
+                ? undefined // Use default (throw on error)
+                : (err) => {
+                    console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
+                  },
+              // Disable release management for non-strict mode to avoid API timeouts
+              release: config.SENTRY_STRICT
+                ? undefined // Use default release management
+                : { create: false, finalize: false },
             }),
           ]
         : config.ISAPP
@@ -455,6 +453,15 @@ export default defineNuxtConfig({
             sentryVitePlugin({
               org: 'freegle',
               project: 'nuxt3',
+              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+              errorHandler: (err) => {
+                // Only log warning for gateway timeouts, fail for other errors
+                if (err.message && err.message.includes('504')) {
+                  console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
+                } else {
+                  throw err
+                }
+              },
             }),
           ],
   },

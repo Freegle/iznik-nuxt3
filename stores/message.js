@@ -8,6 +8,9 @@ import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
 import { useIsochroneStore } from '~/stores/isochrone'
 
+// Debounce delay for batching message fetches (ms)
+const BATCH_DELAY = 50
+
 export const useMessageStore = defineStore({
   id: 'message',
   state: () => ({
@@ -28,6 +31,9 @@ export const useMessageStore = defineStore({
       this.fetching = {}
       this.fetchingCount = 0
       this.fetchingMyGroups = null
+      // Debounced batching state
+      this.pendingFetches = []
+      this.batchTimer = null
     },
     async fetchCount(browseView, log = true) {
       const ret = await api(this.config).message.count(browseView, log)
@@ -43,72 +49,92 @@ export const useMessageStore = defineStore({
         ? now - this.list[id].addedToCache > 600
         : false
 
-      if (force || !this.list[id] || expired) {
-        if (this.fetching[id]) {
-          // Already fetching
-          try {
-            await this.fetching[id]
-            await nextTick()
-          } catch (e) {
-            console.log('Failed to fetch message', e)
-            if (e instanceof APIError && e.response.status === 404) {
-              // This can validly happen if a message is deleted under our feet.
-              console.log('Message deleted, removing from store')
+      // If already cached and not forcing/expired, return immediately
+      if (!force && this.list[id] && !expired) {
+        return this.list[id]
+      }
 
-              // Remove from the main list
-              delete this.list[id]
+      // If already fetching this ID, wait for the existing fetch
+      if (this.fetching[id]) {
+        try {
+          await this.fetching[id]
+          await nextTick()
+        } catch (e) {
+          this.handleFetchError(id, e)
+        }
+        return this.list[id]
+      }
 
-              // Remove from user's list if present
-              const authStore = useAuthStore()
-              const userUid = authStore.user?.id
-              if (userUid && this.byUserList[userUid]) {
-                this.byUserList[userUid] = this.byUserList[userUid].filter(
-                  (message) => message.id !== id
-                )
-              }
-            } else {
-              throw e
-            }
-          }
-        } else {
-          try {
-            this.fetchingCount++
-            this.fetching[id] = api(this.config).message.fetch(id, false)
-            this.fetchingCount--
+      // Add to pending batch and wait for the batch to complete
+      return new Promise((resolve, reject) => {
+        this.pendingFetches.push({ id, resolve, reject, force })
 
-            this.list[id] = await this.fetching[id]
-            this.fetching[id] = null
+        // Clear existing timer and set a new one
+        if (this.batchTimer) {
+          clearTimeout(this.batchTimer)
+        }
 
-            if (this.list[id]) {
-              this.list[id].addedToCache = Math.round(Date.now() / 1000)
-            }
-          } catch (e) {
-            console.log('Failed to fetch message', e)
-            this.fetching[id] = null
+        this.batchTimer = setTimeout(() => {
+          this.processMessageBatch()
+        }, BATCH_DELAY)
+      })
+    },
+    handleFetchError(id, e) {
+      console.log('Failed to fetch message', e)
+      if (e instanceof APIError && e.response.status === 404) {
+        console.log('Message deleted, removing from store')
+        delete this.list[id]
 
-            if (e instanceof APIError && e.response.status === 404) {
-              // This can validly happen if a message is deleted under our feet.
-              console.log('Message deleted, removing from store')
+        const authStore = useAuthStore()
+        const userUid = authStore.user?.id
+        if (userUid && this.byUserList[userUid]) {
+          this.byUserList[userUid] = this.byUserList[userUid].filter(
+            (message) => message.id !== id
+          )
+        }
+      } else {
+        throw e
+      }
+    },
+    async processMessageBatch() {
+      if (!this.pendingFetches.length) {
+        return
+      }
 
-              // Remove from the main list
-              delete this.list[id]
+      // Collect all pending fetches
+      const pending = [...this.pendingFetches]
+      this.pendingFetches = []
+      this.batchTimer = null
 
-              // Remove from user's list if present
-              const authStore = useAuthStore()
-              const userUid = authStore.user?.id
-              if (userUid && this.byUserList[userUid]) {
-                this.byUserList[userUid] = this.byUserList[userUid].filter(
-                  (message) => message.id !== id
-                )
-              }
-            } else {
-              throw e
-            }
+      // Filter out IDs that are already cached (unless force/expired)
+      const idsToFetch = []
+      const now = Math.round(Date.now() / 1000)
+
+      for (const { id, force } of pending) {
+        const expired = this.list[id]?.addedToCache
+          ? now - this.list[id].addedToCache > 600
+          : false
+
+        if ((force || !this.list[id] || expired) && !this.fetching[id]) {
+          if (!idsToFetch.includes(id)) {
+            idsToFetch.push(id)
           }
         }
       }
 
-      return this.list[id]
+      if (idsToFetch.length > 0) {
+        try {
+          await this.fetchMultiple(idsToFetch)
+        } catch (e) {
+          // Errors are handled per-message in fetchMultiple
+          console.log('Batch fetch error', e)
+        }
+      }
+
+      // Resolve all promises with the cached data
+      for (const { id, resolve } of pending) {
+        resolve(this.list[id])
+      }
     },
     async fetchMultiple(ids, force) {
       const left = []

@@ -57,6 +57,7 @@ const CONFIG = {
     'https://54fb66c60a53a6fc6de5c20e35295304@o118493.ingest.sentry.io/4506643536609280', // Capacitor
 
   SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+  SENTRY_STRICT: process.env.SENTRY_STRICT !== 'false', // Default true, set to 'false' for debug builds
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
