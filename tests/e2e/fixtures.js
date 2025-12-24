@@ -1994,20 +1994,25 @@ const testWithFixtures = test.extend({
         })
 
         console.log(
-          'Clicking Close and Continue button and waiting for navigation'
+          'Clicking Close and Continue button and waiting for reply to complete'
         )
 
-        // Use Promise.all to handle the click and navigation simultaneously
+        // Click the button first - the modal will stay open while sendReply runs
+        await closeButton.click()
+        console.log('Clicked Close and Continue, waiting for network idle')
+
+        // Wait for network to become idle - this ensures the reply API call completes
+        await freshPage.waitForLoadState('networkidle', {
+          timeout: timeouts.navigation.default,
+        })
+        console.log('Network idle, waiting for navigation to chats')
+
+        // Now wait for navigation to chats page
         try {
-          await Promise.all([
-            freshPage.waitForURL('**/chats/**', {
-              timeout: timeouts.navigation.default,
-            }),
-            closeButton.click(),
-          ])
-          console.log(
-            'Successfully clicked Close and Continue and redirected to chats page'
-          )
+          await freshPage.waitForURL('**/chats/**', {
+            timeout: timeouts.navigation.default,
+          })
+          console.log('Successfully redirected to chats page')
         } catch (error) {
           console.log('Navigation after close button click:', error.message)
           // Check if we're on the chats page anyway
