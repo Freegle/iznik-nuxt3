@@ -98,8 +98,16 @@
           <!-- Action column - breadcrumb routes or fallback summary -->
           <div class="breadcrumb-col breadcrumb-col-action">
             <span v-if="formattedBreadcrumbs" class="breadcrumb-routes">
+              <v-icon
+                v-if="isMobileApp"
+                icon="mobile-alt"
+                class="mobile-indicator me-1"
+                title="Mobile app"
+              />
               <template v-for="(segment, idx) in breadcrumbSegments" :key="idx">
-                <span class="breadcrumb-route">{{ segment }}</span>
+                <span class="breadcrumb-route">{{
+                  formatBreadcrumbSegment(segment)
+                }}</span>
                 <v-icon
                   v-if="idx < breadcrumbSegments.length - 1"
                   icon="angle-right"
@@ -175,6 +183,16 @@
                 ><template v-if="route.apiCalls.length > 0"
                   >{{ route.apiCalls.length }} API call{{
                     route.apiCalls.length !== 1 ? 's' : ''
+                  }}</template
+                ><template
+                  v-if="
+                    route.emailLogs?.length > 0 &&
+                    (route.otherLogs.length > 0 || route.apiCalls.length > 0)
+                  "
+                  >, </template
+                ><template v-if="route.emailLogs?.length > 0"
+                  >{{ route.emailLogs.length }} email{{
+                    route.emailLogs.length !== 1 ? 's' : ''
                   }}</template
                 >)
               </span>
@@ -269,6 +287,23 @@
                   />
                 </div>
               </div>
+            </div>
+
+            <!-- Email logs for this route -->
+            <div
+              v-for="emailLog in route.emailLogs"
+              :key="'email-' + emailLog.log.id"
+              class="tree-child"
+            >
+              <span class="tree-connector" />
+              <ModSystemLogEntry
+                :log="emailLog.log"
+                :hide-user-column="hideUserColumn"
+                class="tree-entry child-entry email-entry"
+                @filter-trace="$emit('filter-trace', $event)"
+                @filter-session="$emit('filter-session', $event)"
+                @filter-ip="$emit('filter-ip', $event)"
+              />
             </div>
           </div>
         </div>
@@ -434,9 +469,17 @@ export default {
         const isPageView =
           log.source === 'client' && log.raw?.event_type === 'page_view'
         const isApiCall = log.source === 'api'
-        const isServerLog = ['logs_table', 'batch', 'email'].includes(
-          log.source
-        )
+        // Email logs include laravel-batch and email sources, or batch logs about emails
+        const isEmailLog =
+          log.source === 'laravel-batch' ||
+          log.source === 'email' ||
+          (log.source === 'batch' &&
+            (log.text?.toLowerCase().includes('email') ||
+              log.text?.toLowerCase().includes('mail')))
+        const isServerLog =
+          ['logs_table', 'batch', 'email', 'laravel-batch'].includes(
+            log.source
+          ) && !isEmailLog
         const isClientEvent = log.source === 'client' && !isPageView
 
         if (isPageView) {
@@ -448,8 +491,23 @@ export default {
             pageName,
             apiCalls: [],
             otherLogs: [],
+            emailLogs: [],
           }
           routes.push(currentRoute)
+        } else if (isEmailLog) {
+          // Email log - add to current route's emailLogs
+          if (!currentRoute) {
+            currentRoute = {
+              type: 'route',
+              log: null,
+              pageName: '(Emails)',
+              apiCalls: [],
+              otherLogs: [],
+              emailLogs: [],
+            }
+            routes.push(currentRoute)
+          }
+          currentRoute.emailLogs.push(item)
         } else if (isApiCall) {
           // API call - add to current route or create orphan route.
           if (!currentRoute) {
@@ -459,6 +517,7 @@ export default {
               pageName: '(API calls)',
               apiCalls: [],
               otherLogs: [],
+              emailLogs: [],
             }
             routes.push(currentRoute)
           }
@@ -483,6 +542,7 @@ export default {
               pageName: '(Background)',
               apiCalls: [],
               otherLogs: [item],
+              emailLogs: [],
             }
             routes.push(currentRoute)
           }
@@ -498,6 +558,7 @@ export default {
               pageName: eventRoute || '(Events)',
               apiCalls: [],
               otherLogs: [],
+              emailLogs: [],
             }
             routes.push(currentRoute)
           } else if (eventRoute && currentRoute.pageName.startsWith('(')) {
@@ -592,6 +653,14 @@ export default {
       const routes = this.routeBreadcrumbs
       if (!routes) return false
       return this.truncatedBreadcrumbs.length < routes.length
+    },
+    // Check if any breadcrumb indicates mobile app (capacitor://)
+    isMobileApp() {
+      const routes = this.routeBreadcrumbs
+      if (!routes) return false
+      return routes.some(
+        (r) => r.startsWith('capacitor://') || r.includes('capacitor://')
+      )
     },
     // Keep formattedBreadcrumbs for showBreadcrumbSummary check
     formattedBreadcrumbs() {
@@ -689,6 +758,16 @@ export default {
     this.cleanupObserver()
   },
   methods: {
+    // Format breadcrumb segment - strip capacitor://localhost prefix
+    formatBreadcrumbSegment(segment) {
+      if (segment.startsWith('capacitor://localhost')) {
+        return segment.replace('capacitor://localhost', '')
+      }
+      if (segment.startsWith('/capacitor://localhost')) {
+        return segment.replace('/capacitor://localhost', '')
+      }
+      return segment
+    },
     togglePageLoadExpand() {
       if (this.isPageLoadGroup) {
         this.systemLogsStore.toggleGroupExpanded(this.node.groupKey)
@@ -778,8 +857,12 @@ export default {
       return route.apiCalls.length <= 1
     },
     hasRouteChildren(route) {
-      // Route has expandable children if it has API calls or other logs
-      return route.apiCalls.length > 0 || route.otherLogs.length > 0
+      // Route has expandable children if it has API calls, other logs, or email logs
+      return (
+        route.apiCalls.length > 0 ||
+        route.otherLogs.length > 0 ||
+        (route.emailLogs?.length || 0) > 0
+      )
     },
     async expand() {
       // Expand this node if it's not already expanded (called by parent via ref).
@@ -788,6 +871,35 @@ export default {
       }
       if (this.isPageLoadGroup && !this.isPageLoadExpanded) {
         this.togglePageLoadExpand()
+      }
+
+      // After children are loaded, expand all routes and APIs within this node
+      if (this.isExpanded || this.isPageLoadExpanded) {
+        // Wait for next tick to ensure children are rendered
+        await this.$nextTick()
+        this.expandAllInternal()
+      }
+    },
+    expandAllInternal() {
+      // Expand all routes within this node
+      const routes = this.hierarchicalTree || []
+      for (let routeIdx = 0; routeIdx < routes.length; routeIdx++) {
+        const route = routes[routeIdx]
+        if (this.hasRouteChildren(route) && !this.isRouteExpanded(routeIdx)) {
+          this.toggledRoutes[routeIdx] = true
+          this.expandedRoutes[routeIdx] = true
+        }
+        // Also expand all APIs within this route
+        for (let apiIdx = 0; apiIdx < route.apiCalls.length; apiIdx++) {
+          const api = route.apiCalls[apiIdx]
+          if (
+            api.serverLogs.length > 0 &&
+            !this.isApiExpanded(routeIdx, apiIdx)
+          ) {
+            const key = `${routeIdx}-${apiIdx}`
+            this.expandedApis[key] = true
+          }
+        }
       }
     },
   },
@@ -945,6 +1057,11 @@ export default {
 
 .breadcrumb-ellipsis {
   color: #6c757d;
+}
+
+.mobile-indicator {
+  color: #6f42c1;
+  font-size: 0.9rem;
 }
 
 /* Children container */
@@ -1111,6 +1228,11 @@ export default {
 .server-entry {
   background: #fefefe;
   font-size: 0.8rem;
+}
+
+.email-entry {
+  background: #f0fff0;
+  border-left: 2px solid #28a745;
 }
 
 /* Loading indicator */

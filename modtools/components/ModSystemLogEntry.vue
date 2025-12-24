@@ -76,6 +76,14 @@
       <div class="log-col log-col-action" :class="levelClass">
         <div class="action-content">
           <div class="action-main">
+            <!-- Laravel log level badge -->
+            <b-badge
+              v-if="laravelLevel"
+              :variant="laravelLevel.variant"
+              class="level-badge me-1"
+            >
+              {{ laravelLevel.level }}
+            </b-badge>
             <span class="action-text">{{ actionTextClean }}</span>
             <!-- Crash indicator -->
             <ExternalLink
@@ -506,6 +514,7 @@ import {
   getLogLevelClass,
   getLogSourceVariant,
   formatLogTimestamp,
+  parseLaravelLogLevel,
 } from '../composables/useSystemLogFormatter'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
@@ -588,8 +597,14 @@ export default {
         return isModAction ? 'Mod' : 'User'
       }
 
+      // Laravel batch logs - show as "Email" since they're mostly email-related
+      if (this.log.source === 'laravel-batch') {
+        return 'Email'
+      }
+
       const labels = {
         api: 'API',
+        api_headers: 'Hdrs',
         client: 'User',
         email: 'Email',
         batch: 'Batch',
@@ -604,6 +619,10 @@ export default {
           this.log.user_id &&
           this.log.byuser_id !== this.log.user_id
         return isModAction ? 'secondary' : 'primary'
+      }
+      // Laravel batch logs are email-related, use success (green)
+      if (this.log.source === 'laravel-batch') {
+        return 'success'
       }
       return getLogSourceVariant(this.log.source)
     },
@@ -834,6 +853,9 @@ export default {
       if (!this.sentryEventId) return null
       // Freegle Sentry organization and project.
       return `https://freegle.sentry.io/issues/?query=${this.sentryEventId}`
+    },
+    laravelLevel() {
+      return parseLaravelLogLevel(this.log)
     },
   },
   watch: {
@@ -1081,6 +1103,15 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   padding: 2px 6px;
+}
+
+/* Level badge (for Laravel logs) */
+.level-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 1px 4px;
+  font-weight: 600;
 }
 
 /* User display */

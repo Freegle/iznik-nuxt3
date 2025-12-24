@@ -14,7 +14,7 @@ export const useSystemLogsStore = defineStore({
     loadingTraces: {}, // Map of trace_id → boolean (loading state)
 
     // Filters
-    sources: ['client', 'api', 'logs_table', 'email', 'batch'],
+    sources: [], // Empty = show all sources
     types: [],
     subtypes: [],
     levels: [],
@@ -74,12 +74,16 @@ export const useSystemLogsStore = defineStore({
 
       try {
         const queryParams = {
-          sources: this.sources.join(','),
           start: this.timeRange,
           limit: 100, // Number of trace groups to show
           direction: this.sortDirection,
           summary: 'true', // Enable summary mode
           ...params,
+        }
+
+        // Only add sources filter if explicitly set
+        if (this.sources.length > 0) {
+          queryParams.sources = this.sources.join(',')
         }
 
         // Add optional filters.
@@ -123,9 +127,13 @@ export const useSystemLogsStore = defineStore({
 
       try {
         const queryParams = {
-          sources: this.sources.join(','),
           trace_id: traceId,
           limit: 500, // Get all logs for this trace
+        }
+
+        // Only add sources filter if explicitly set
+        if (this.sources.length > 0) {
+          queryParams.sources = this.sources.join(',')
         }
 
         // Use precise time bounds if available, otherwise fall back to general timeRange.
@@ -319,6 +327,11 @@ export const useSystemLogsStore = defineStore({
     logsAsTree: (state) => {
       // Helper to check if a log should be shown based on filters
       const shouldShowLog = (log) => {
+        // Filter out api_headers logs - they're supplementary data fetched on demand.
+        if (log.source === 'api_headers') {
+          return false
+        }
+
         // Check polling filter
         if (!state.showPolling && isPollingLog(log)) {
           return false

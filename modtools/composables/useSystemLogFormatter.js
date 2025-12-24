@@ -477,6 +477,44 @@ const LOG_FORMATTERS = {
       return raw.message || log.text || 'Batch event'
     },
   },
+
+  // API headers source (supplementary data for API logs)
+  api_headers: {
+    default: (log) => {
+      const raw = log.raw || {}
+      const method = raw.method || 'GET'
+      const endpoint = raw.endpoint || raw.path || ''
+      if (endpoint) {
+        return `Headers for ${method} ${endpoint}`
+      }
+      return 'API request headers'
+    },
+  },
+
+  // Laravel batch source (logs from Laravel batch jobs)
+  'laravel-batch': {
+    default: (log) => {
+      const raw = log.raw || {}
+      let message = raw.message || log.text || ''
+
+      // Parse Laravel log format: [TIMESTAMP] CHANNEL.LEVEL: MESSAGE {JSON}
+      // Example: [2025-12-24 09:04:03] production.INFO: Welcome mail sent {"user_id":...}
+      const laravelMatch = message.match(
+        /^\[[\d-]+\s[\d:]+\]\s*\w+\.(\w+):\s*(.+)$/s
+      )
+      if (laravelMatch) {
+        message = laravelMatch[2].trim()
+      }
+
+      // If message has JSON at the end, strip it (we'll show it in details)
+      const jsonStartIndex = message.indexOf(' {')
+      if (jsonStartIndex > 0) {
+        message = message.substring(0, jsonStartIndex).trim()
+      }
+
+      return message || 'Batch job'
+    },
+  },
 }
 
 /**
@@ -888,6 +926,31 @@ export function getLogLevelClass(log) {
     return ''
   }
 
+  // For Laravel batch logs, parse the level from the log message
+  if (log.source === 'laravel-batch') {
+    const message = raw.message || log.text || ''
+    // Parse: [2025-12-24 09:04:03] production.INFO: ...
+    const laravelMatch = message.match(/^\[[\d-]+\s[\d:]+\]\s*\w+\.(\w+):/)
+    if (laravelMatch) {
+      const laravelLevel = laravelMatch[1].toUpperCase()
+      if (
+        laravelLevel === 'ERROR' ||
+        laravelLevel === 'CRITICAL' ||
+        laravelLevel === 'ALERT' ||
+        laravelLevel === 'EMERGENCY'
+      ) {
+        return 'text-danger'
+      }
+      if (laravelLevel === 'WARNING') {
+        return 'text-warning'
+      }
+      if (laravelLevel === 'DEBUG') {
+        return 'text-muted'
+      }
+    }
+    return ''
+  }
+
   // For non-API logs, use the level field
   if (level === 'error') {
     return 'text-danger'
@@ -922,13 +985,47 @@ export function getLogSourceIcon(source) {
 export function getLogSourceVariant(source) {
   const variants = {
     api: 'info',
+    api_headers: 'light',
     logs_table: 'secondary',
     client: 'primary',
     email: 'success',
     batch: 'dark',
     batch_event: 'warning',
+    'laravel-batch': 'success',
   }
   return variants[source] || 'light'
+}
+
+/**
+ * Parse Laravel log level from message.
+ * Returns { level: string, variant: string } or null if not a Laravel log.
+ */
+export function parseLaravelLogLevel(log) {
+  if (log.source !== 'laravel-batch') return null
+
+  const raw = log.raw || {}
+  const message = raw.message || log.text || ''
+
+  // Parse: [2025-12-24 09:04:03] production.INFO: ...
+  const laravelMatch = message.match(/^\[[\d-]+\s[\d:]+\]\s*\w+\.(\w+):/)
+  if (!laravelMatch) return null
+
+  const level = laravelMatch[1].toUpperCase()
+  const levelVariants = {
+    DEBUG: 'secondary',
+    INFO: 'info',
+    NOTICE: 'info',
+    WARNING: 'warning',
+    ERROR: 'danger',
+    CRITICAL: 'danger',
+    ALERT: 'danger',
+    EMERGENCY: 'danger',
+  }
+
+  return {
+    level,
+    variant: levelVariants[level] || 'secondary',
+  }
 }
 
 /**
