@@ -114,6 +114,7 @@ import { useMessageStore } from '~/stores/message'
 import { useReplyStore } from '~/stores/reply'
 import { useMe } from '~/composables/useMe'
 import { useReplyToPost } from '~/composables/useReplyToPost'
+import { action } from '~/composables/useClientLog'
 
 // State enum
 export const ReplyState = {
@@ -186,17 +187,40 @@ function log(message, data = null) {
   }
 }
 
-function logTransition(fromState, event, toState, context = {}) {
+function logTransition(
+  fromState,
+  event,
+  toState,
+  context = {},
+  messageId = null
+) {
   log(`${fromState} + ${event} → ${toState}`)
   if (Object.keys(context).length > 0) {
     log('  Context:', context)
   }
+
+  // Log to Loki for analytics.
+  action('reply_state_transition', {
+    from_state: fromState,
+    to_state: toState,
+    event,
+    message_id: messageId,
+    ...context,
+  })
 }
 
-function logError(message, error, state) {
+function logError(message, err, state, messageId = null) {
   console.error(`[ReplyStateMachine] ERROR: ${message}`)
-  console.error(`[ReplyStateMachine]   Error:`, error?.message || error)
+  console.error(`[ReplyStateMachine]   Error:`, err?.message || err)
   console.error(`[ReplyStateMachine]   State before error: ${state}`)
+
+  // Log errors to Loki for analytics and debugging.
+  action('reply_error', {
+    error_message: message,
+    error_detail: err?.message || String(err),
+    state_before_error: state,
+    message_id: messageId,
+  })
 }
 
 export function useReplyStateMachine(messageId) {
@@ -213,6 +237,9 @@ export function useReplyStateMachine(messageId) {
   const previousState = ref(null)
   const initialized = ref(false)
   let processingTimer = null
+
+  // Reply source for analytics (set by component).
+  const replySource = ref(null)
 
   // Form data
   const replyText = ref('')
@@ -514,7 +541,8 @@ export function useReplyStateMachine(messageId) {
       previousState.value,
       context.event || 'DIRECT',
       newState,
-      context
+      context,
+      messageId
     )
 
     // Manage processing timeout
@@ -544,6 +572,15 @@ export function useReplyStateMachine(messageId) {
       isLoggedIn: !!me.value,
     })
 
+    // Log the submit attempt to Loki.
+    action('reply_submit', {
+      message_id: messageId,
+      is_logged_in: !!me.value,
+      has_email: !!email.value,
+      reply_length: replyText.value?.length || 0,
+      reply_source: replySource.value,
+    })
+
     if (!canSend.value) {
       log('Cannot send in current state:', state.value)
       callback?.()
@@ -554,7 +591,7 @@ export function useReplyStateMachine(messageId) {
 
     // Validate form
     if (!formRef.value) {
-      logError('Form ref not set', null, state.value)
+      logError('Form ref not set', null, state.value, messageId)
       // Don't go to ERROR - just go back to COMPOSING so user can retry
       fallbackToComposing('form_ref_missing')
       callback?.()
@@ -712,7 +749,7 @@ export function useReplyStateMachine(messageId) {
       log('Message fetched:', { id: msg?.id, groups: msg?.groups?.length })
 
       if (!msg?.groups || msg.groups.length === 0) {
-        logError('No groups on message', null, state.value)
+        logError('No groups on message', null, state.value, messageId)
         transitionTo(ReplyState.ERROR, { event: ReplyEvent.ERROR_OCCURRED })
         error.value = 'Message has no groups'
         callback?.()
@@ -749,7 +786,7 @@ export function useReplyStateMachine(messageId) {
 
       await handleCreateChat(callback)
     } catch (e) {
-      logError('Failed to join group', e, state.value)
+      logError('Failed to join group', e, state.value, messageId)
 
       if (isAuthError(e)) {
         handleAuthError()
@@ -770,7 +807,7 @@ export function useReplyStateMachine(messageId) {
     await nextTick()
 
     if (!chatButtonRef.value) {
-      logError('Chat button ref not available', null, state.value)
+      logError('Chat button ref not available', null, state.value, messageId)
       // Don't go to ERROR - fallback to COMPOSING so user can retry
       fallbackToComposing('chat_button_missing')
       callback?.()
@@ -788,12 +825,24 @@ export function useReplyStateMachine(messageId) {
         // Check if new user - show welcome modal first
         if (isNewUser.value) {
           log('New user - showing welcome modal')
+          action('reply_sent', {
+            message_id: messageId,
+            user_type: 'new',
+            is_new_user: true,
+            reply_source: replySource.value,
+          })
           transitionTo(ReplyState.SHOWING_WELCOME, {
             event: ReplyEvent.CHAT_CREATED,
           })
           callback?.()
         } else {
           log('Existing user - reply complete')
+          action('reply_sent', {
+            message_id: messageId,
+            user_type: 'existing',
+            is_new_user: false,
+            reply_source: replySource.value,
+          })
           transitionTo(ReplyState.COMPLETED, { event: ReplyEvent.MESSAGE_SENT })
           callback?.()
         }
@@ -805,7 +854,7 @@ export function useReplyStateMachine(messageId) {
         callback?.()
       }
     } catch (e) {
-      logError('Failed to create chat', e, state.value)
+      logError('Failed to create chat', e, state.value, messageId)
 
       if (isAuthError(e)) {
         handleAuthError()
@@ -874,6 +923,12 @@ export function useReplyStateMachine(messageId) {
     }
   }
 
+  // Set the reply source for analytics (called by component).
+  function setReplySource(source) {
+    replySource.value = source
+    log('Reply source set:', source)
+  }
+
   // Get debug info for logging
   function getDebugInfo() {
     return {
@@ -923,6 +978,7 @@ export function useReplyStateMachine(messageId) {
     reset,
     retry,
     startTyping,
+    setReplySource,
     getDebugInfo,
     initialize,
     fallbackToComposing,

@@ -173,6 +173,7 @@ import {
   nextTick,
   onMounted,
 } from 'vue'
+import { useRoute } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
 import { milesAway } from '~/composables/useDistance'
 import { useMe } from '~/composables/useMe'
@@ -180,6 +181,7 @@ import {
   useReplyStateMachine,
   ReplyState,
 } from '~/composables/useReplyStateMachine'
+import { action } from '~/composables/useClientLog'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
@@ -187,6 +189,8 @@ import SpinButton from '~/components/SpinButton.vue'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageDeadline from '~/components/MessageDeadline'
 import { FAR_AWAY } from '~/constants'
+
+const route = useRoute()
 
 const NewFreegler = defineAsyncComponent(() =>
   import('~/components/NewFreegler')
@@ -292,6 +296,39 @@ watch(form, (newVal) => {
   }
 })
 
+// Determine reply source from route for analytics.
+function getReplySource() {
+  const path = route.path
+  const query = route.query || {}
+
+  // Check for email digest/newsletter links.
+  if (query.src === 'digest' || query.utm_source === 'digest') {
+    return 'email_digest'
+  }
+  if (query.src === 'newsletter' || query.utm_source === 'newsletter') {
+    return 'email_newsletter'
+  }
+  if (query.src || query.utm_source) {
+    return `email_${query.src || query.utm_source}`
+  }
+
+  // Determine from route path.
+  if (path.startsWith('/browse')) {
+    return 'browse_page'
+  }
+  if (path.startsWith('/explore')) {
+    return 'explore_page'
+  }
+  if (path.match(/^\/message\/\d+/)) {
+    return 'message_page'
+  }
+  if (path.startsWith('/find')) {
+    return 'find_page'
+  }
+
+  return 'unknown'
+}
+
 // Set refs on mount
 onMounted(() => {
   console.log('[MessageReplySection] Component mounted, setting refs')
@@ -299,6 +336,18 @@ onMounted(() => {
     form: form.value,
     chatButton: replyToPostChatButton.value,
     emailValidator: emailValidatorRef.value,
+  })
+
+  // Set and log the reply source for analytics.
+  const replySource = getReplySource()
+  stateMachine.setReplySource(replySource)
+  action('reply_section_viewed', {
+    message_id: props.id,
+    reply_source: replySource,
+    message_type: message.value?.type,
+    is_logged_in: !!me.value,
+    route_path: route.path,
+    route_query: JSON.stringify(route.query || {}),
   })
 })
 
