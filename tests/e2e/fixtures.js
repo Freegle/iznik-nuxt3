@@ -242,6 +242,8 @@ const test = base.test.extend({
       /Provider's accounts list is empty/, // Google Pay related error - can happen in test.
       /The given origin is not allowed for the given client ID/, // Not available in test.
       /Failed to load resource: the server responded with a status of 404.*api\/message\/\d+/, // Message API 404 errors can happen during normal operation.
+      /Failed to load resource: the server responded with a status of 404.*api\/user\/\d+/, // User API 404 errors can happen during cleanup.
+      /Failed to load resource: the server responded with a status of 404.*api\/session/, // Session API 404 can happen when trying to logout when not logged in.
       /Failed to load resource: the server responded with a status of 404.*delivery\.localhost/, // Delivery service 404 errors for missing images can happen during normal operation.
       /FedCM get\(\) rejects with/, // Not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
@@ -1824,7 +1826,7 @@ const testWithFixtures = test.extend({
       // Use explicit viewport to avoid two-column layout (triggered at width >= 992px AND height <= 800px)
       const browser = page.context().browser()
       const freshContext = await browser.newContext({
-        viewport: { width: 1280, height: 900 }
+        viewport: { width: 1280, height: 900 },
       })
       const freshPage = await freshContext.newPage()
 
@@ -1859,7 +1861,9 @@ const testWithFixtures = test.extend({
 
       // Wait for the Reply button in the app-footer and click it to expand the reply section
       // With viewport height 900px, we avoid the two-column layout so only app-footer button is visible
-      const replyButton = freshPage.locator('.app-footer .reply-button:has-text("Reply")')
+      const replyButton = freshPage.locator(
+        '.app-footer .reply-button:has-text("Reply")'
+      )
       await replyButton.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
