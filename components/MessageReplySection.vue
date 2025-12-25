@@ -340,17 +340,18 @@ async function registerOrSend(callback) {
 
         await fetchMe(true)
 
-        // Show the new user modal.
+        // Create the chat FIRST, before showing the modal.
+        // This ensures the chat exists regardless of modal interaction.
+        await sendReply(null)
+
+        // Now show the new user modal (chat already created).
         newUserPassword.value = ret.password
         showNewUser.value = true
 
         await nextTick()
         callback()
 
-        // Now that we are logged in, we can reply.
         newUserModal.value?.show()
-
-        // Once the modal is closed, we will send the reply.
       } else {
         // If anything else happens, then we call sendReply which will force us to log in. Then the watch will
         // spot that we're logged in and trigger the send, so we don't need to do that here.
@@ -459,16 +460,9 @@ async function sendReply(callback) {
   }
 }
 
-async function handleNewUserModalOk(bvModalEvent) {
-  // Prevent the modal from closing until the reply is actually sent.
-  // This fixes a race condition where the modal would close before
-  // the async sendReply completed, causing the chat to never be created.
-  bvModalEvent.preventDefault()
-
-  // Send the reply and wait for it to complete
-  await sendReply(null)
-
-  // Now close the modal
+function handleNewUserModalOk() {
+  // Chat was already created in registerOrSend before showing this modal.
+  // Just close the modal.
   showNewUser.value = false
 }
 
