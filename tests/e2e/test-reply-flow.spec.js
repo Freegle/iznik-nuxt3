@@ -280,10 +280,26 @@ async function fillReplyForm(
  * Helper: Click the Reply button to expand reply section
  */
 async function clickReplyButton(page) {
+  // Wait for page to be stable before trying to interact
+  // This prevents "Execution context was destroyed" errors after navigation
+  await page.waitForLoadState('domcontentloaded')
+
   // Try footer reply button first (mobile/single column), then inline
   let replyButton = page.locator('.app-footer .reply-button:has-text("Reply")')
-  if ((await replyButton.count()) === 0 || !(await replyButton.isVisible())) {
-    replyButton = page.locator('.reply-button:has-text("Reply")').first()
+
+  // Use a safer approach - wait for any reply button to exist first
+  const anyReplyButton = page.locator('.reply-button:has-text("Reply")').first()
+  await anyReplyButton.waitFor({
+    state: 'attached',
+    timeout: timeouts.ui.appearance,
+  })
+
+  // Now check which button to use
+  const footerButtonCount = await replyButton.count()
+  const footerButtonVisible =
+    footerButtonCount > 0 && (await replyButton.isVisible())
+  if (!footerButtonVisible) {
+    replyButton = anyReplyButton
   }
 
   await replyButton.waitFor({
@@ -1081,6 +1097,13 @@ test.describe('Reply Flow - Edge Cases', () => {
       await page.reload()
       console.log('[Test] Page refreshed')
 
+      // Wait for page to stabilize after refresh before interacting
+      await page.waitForLoadState('domcontentloaded')
+      await page.waitForSelector('.message-header, .message-expanded-wrapper', {
+        timeout: timeouts.ui.appearance,
+      })
+      console.log('[Test] Page stabilized after refresh')
+
       // Wait for the reply section to be available
       await clickReplyButton(page)
 
@@ -1145,6 +1168,13 @@ test.describe('Reply Flow - Edge Cases', () => {
       // Go back
       await page.goBack()
       console.log('[Test] Pressed browser back')
+
+      // Wait for page to stabilize after goBack before interacting
+      await page.waitForLoadState('domcontentloaded')
+      await page.waitForSelector('.message-header, .message-expanded-wrapper', {
+        timeout: timeouts.ui.appearance,
+      })
+      console.log('[Test] Page stabilized after goBack')
 
       // Wait for the reply section
       await clickReplyButton(page)
