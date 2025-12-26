@@ -278,10 +278,10 @@ test.describe('Homepage tests', () => {
     await takeTimestampedScreenshot(`homepage-${bp.name}`)
     console.log(`[DEBUG] Screenshot completed for ${bp.name}`)
 
-    // Close the page and context to clean up resources.  Don't await, though, in case it hangs.
+    // Close the page and context to clean up resources properly for parallel execution.
     console.log(`[DEBUG] Cleaning up page and context for ${bp.name}`)
-    page.close()
-    context.close()
+    await page.close()
+    await context.close()
     console.log(`[DEBUG] Test completed for ${bp.name} breakpoint`)
   }
 

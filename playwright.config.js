@@ -31,7 +31,7 @@ module.exports = defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  workers: 1,
+  workers: 1, // Single worker for now while investigating parallel execution issues
   maxFailures: 0,
   reporter: [
     ['list'],
