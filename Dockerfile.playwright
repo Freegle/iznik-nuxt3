@@ -4,15 +4,13 @@ FROM ghcr.io/freegle/freegle-base:latest
 WORKDIR /app
 
 # Install Playwright system dependencies
-# Use BuildKit cache mounts to cache apt packages across builds
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb dbus libglib2.0-0 libnss3 libnspr4 libatk1.0-0 \
     libatk-bridge2.0-0 libcups2 libxkbcommon0 libatspi2.0-0 \
     libxcomposite1 libxdamage1 libgbm1 libpango-1.0-0 \
     libcairo2 libasound2 \
-    && mkdir -p /var/run/dbus
+    && mkdir -p /var/run/dbus \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Playwright and related packages
 # Version should match iznik-nuxt3/package.json
