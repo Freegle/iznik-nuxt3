@@ -500,110 +500,133 @@ const test = base.test.extend({
 
     page.gotoAndVerify = async (path, options = {}) => {
       const timeout = options.timeout || timeouts.navigation.default
+      const maxRetries = options.maxRetries || 3
 
-      try {
-        console.log(`Navigating to ${path} with timeout ${timeout}ms`)
-
-        // Navigate with timeout
-        await page.goto(path, { timeout })
-
-        // Wait for initial load
-        await page.waitForLoadState('domcontentloaded', { timeout })
-
-        // Wait for network to settle (helps with slow JavaScript loading)
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          await page.waitForLoadState('networkidle', {
-            timeout: Math.min(timeout, 30000),
-          })
-        } catch (networkError) {
           console.log(
-            `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
+            `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
-        }
 
-        // Verify page content is visible
-        const body = page.locator('body')
-        await body.waitFor({
-          state: 'visible',
-          timeout: Math.min(timeout, 10000),
-        })
+          // Navigate with timeout
+          await page.goto(path, { timeout })
 
-        // Check if page contains error messages
-        const errorTextContent = await page.textContent('body')
+          // Wait for initial load
+          await page.waitForLoadState('domcontentloaded', { timeout })
 
-        // Check for general error message
-        if (errorTextContent.includes('Something went wrong')) {
-          // Take a screenshot of the error page
-          await page.screenshot({
-            path: getScreenshotPath(`error-page-${Date.now()}.png`),
-            fullPage: true,
-          })
-
-          // Extract the "Error was" text if present
-          let errorDetails = ''
-          const errorWasMatch = errorTextContent.match(
-            /Error was[:\s]*(.*?)(?=\n|$)/i
-          )
-          if (errorWasMatch) {
-            errorDetails = ` - Error was: ${errorWasMatch[1].trim()}`
-            console.log(`Error details extracted: ${errorWasMatch[1].trim()}`)
+          // Wait for network to settle (helps with slow JavaScript loading)
+          try {
+            await page.waitForLoadState('networkidle', {
+              timeout: Math.min(timeout, 30000),
+            })
+          } catch (networkError) {
+            console.log(
+              `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
+            )
           }
 
-          throw new Error(
-            `Page loaded with 'Something went wrong' error message at ${path}${errorDetails}`
-          )
-        }
-
-        // Check for 404 error message
-        if (
-          errorTextContent.includes("Oh no! That page doesn't seem to exist")
-        ) {
-          // Take a screenshot of the 404 page
-          await page.screenshot({
-            path: getScreenshotPath(`404-error-${Date.now()}.png`),
-            fullPage: true,
+          // Verify page content is visible
+          const body = page.locator('body')
+          await body.waitFor({
+            state: 'visible',
+            timeout: Math.min(timeout, 10000),
           })
-          throw new Error(
-            `Page loaded with '404 page not found' error message at ${path}`
-          )
-        }
-      } catch (error) {
-        // Take a screenshot if navigation fails
-        try {
-          await page.screenshot({
-            path: getScreenshotPath(`navigation-error-${Date.now()}.png`),
-            fullPage: true,
-          })
-        } catch (screenshotError) {
-          console.warn(
-            `Could not take navigation error screenshot: ${screenshotError.message}`
-          )
-        }
 
-        // Log current page state for debugging
-        try {
-          const currentUrl = page.url()
-          const currentTitle = await page.title()
-          console.log(
-            `Navigation failed. Current URL: ${currentUrl}, Title: "${currentTitle}"`
-          )
-        } catch (debugError) {
-          console.warn(
-            `Could not get page state for debugging: ${debugError.message}`
-          )
-        }
+          // Check if page contains error messages
+          const errorTextContent = await page.textContent('body')
 
-        // Check if it's a connection refused error (dev server not running)
-        if (error.message.includes('ERR_CONNECTION_REFUSED')) {
-          throw new Error(
-            `Cannot connect to dev server at ${path}. Make sure the dev server is running`
-          )
-        }
+          // Check for general error message
+          if (errorTextContent.includes('Something went wrong')) {
+            // Take a screenshot of the error page
+            await page.screenshot({
+              path: getScreenshotPath(`error-page-${Date.now()}.png`),
+              fullPage: true,
+            })
 
-        // Re-throw with more context
-        throw new Error(`Failed to navigate to ${path}: ${error.message}`)
+            // Extract the "Error was" text if present
+            let errorDetails = ''
+            const errorWasMatch = errorTextContent.match(
+              /Error was[:\s]*(.*?)(?=\n|$)/i
+            )
+            if (errorWasMatch) {
+              errorDetails = ` - Error was: ${errorWasMatch[1].trim()}`
+              console.log(`Error details extracted: ${errorWasMatch[1].trim()}`)
+            }
+
+            throw new Error(
+              `Page loaded with 'Something went wrong' error message at ${path}${errorDetails}`
+            )
+          }
+
+          // Check for 404 error message
+          if (
+            errorTextContent.includes("Oh no! That page doesn't seem to exist")
+          ) {
+            // Take a screenshot of the 404 page
+            await page.screenshot({
+              path: getScreenshotPath(`404-error-${Date.now()}.png`),
+              fullPage: true,
+            })
+            throw new Error(
+              `Page loaded with '404 page not found' error message at ${path}`
+            )
+          }
+        } catch (error) {
+          // Take a screenshot if navigation fails
+          try {
+            await page.screenshot({
+              path: getScreenshotPath(`navigation-error-${Date.now()}.png`),
+              fullPage: true,
+            })
+          } catch (screenshotError) {
+            console.warn(
+              `Could not take navigation error screenshot: ${screenshotError.message}`
+            )
+          }
+
+          // Log current page state for debugging
+          try {
+            const currentUrl = page.url()
+            const currentTitle = await page.title()
+            console.log(
+              `Navigation failed. Current URL: ${currentUrl}, Title: "${currentTitle}"`
+            )
+          } catch (debugError) {
+            console.warn(
+              `Could not get page state for debugging: ${debugError.message}`
+            )
+          }
+
+          // Check if it's a connection refused error (dev server not running)
+          if (error.message.includes('ERR_CONNECTION_REFUSED')) {
+            throw new Error(
+              `Cannot connect to dev server at ${path}. Make sure the dev server is running`
+            )
+          }
+
+          // Check if it's a retryable connection error
+          const isRetryable =
+            error.message.includes('ERR_CONNECTION_RESET') ||
+            error.message.includes('ERR_SOCKET_NOT_CONNECTED') ||
+            error.message.includes('ERR_NETWORK_CHANGED') ||
+            error.message.includes('net::ERR_')
+
+          if (isRetryable && attempt < maxRetries) {
+            console.log(
+              `Retryable connection error on attempt ${attempt}, waiting before retry...`
+            )
+            await new Promise((resolve) =>
+              setTimeout(resolve, 1000 * Math.pow(2, attempt - 1))
+            )
+            continue
+          }
+
+          // Re-throw with more context
+          throw new Error(`Failed to navigate to ${path}: ${error.message}`)
+        }
       }
 
+      // If we get here, navigation succeeded - return the page
       return page
     }
 
