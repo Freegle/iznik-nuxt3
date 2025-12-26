@@ -33,6 +33,11 @@ console.log('config.APP_ENV', config.APP_ENV)
 console.log('config.USE_COOKIES', config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
+// Detect if we're on Netlify (need legacy builds for old browser support)
+// vs CI/Docker (skip legacy for faster builds - users have modern browsers)
+const isNetlify = !!process.env.NETLIFY || !!process.env.DEPLOY_URL
+console.log('isNetlify:', isNetlify)
+
 
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
@@ -467,17 +472,21 @@ export default defineNuxtConfig({
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
-  legacy: {
-    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
-    modernPolyfills: [
-      'es.global-this',
-      'es.object.from-entries',
-      'es.array.flat-map',
-      'es.array.flat',
-      'es.string.replace-all',
-      'es.promise.any',
-    ],
-  },
+  // Only enable legacy builds on Netlify where we need old browser support.
+  // Skip in CI/Docker for faster builds (40-50% improvement).
+  legacy: isNetlify
+    ? {
+        targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+        modernPolyfills: [
+          'es.global-this',
+          'es.object.from-entries',
+          'es.array.flat-map',
+          'es.array.flat',
+          'es.string.replace-all',
+          'es.promise.any',
+        ],
+      }
+    : false,
 
   // Sentry needs sourcemaps.
   sourcemap: {
