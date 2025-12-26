@@ -108,6 +108,7 @@ export const useMessageStore = defineStore({
 
       // Filter out IDs that are already cached (unless force/expired)
       const idsToFetch = []
+      const forcedIds = new Set()
       const now = Math.round(Date.now() / 1000)
 
       for (const { id, force } of pending) {
@@ -119,12 +120,16 @@ export const useMessageStore = defineStore({
           if (!idsToFetch.includes(id)) {
             idsToFetch.push(id)
           }
+          if (force) {
+            forcedIds.add(id)
+          }
         }
       }
 
       if (idsToFetch.length > 0) {
         try {
-          await this.fetchMultiple(idsToFetch)
+          // Pass force=true if any of the IDs were force-requested
+          await this.fetchMultiple(idsToFetch, forcedIds.size > 0)
         } catch (e) {
           // Errors are handled per-message in fetchMultiple
           console.log('Batch fetch error', e)

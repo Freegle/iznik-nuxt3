@@ -17,6 +17,23 @@ async function logoutIfLoggedIn(page) {
   console.log('Clearing all session data to simulate fresh browser state')
 
   try {
+    // First, call the logout API to clear server-side session
+    // The API uses X-HTTP-Method-Override header for DELETE
+    await page.evaluate(async () => {
+      try {
+        await fetch('/api/session', {
+          method: 'POST',
+          headers: {
+            'X-HTTP-Method-Override': 'DELETE',
+            'Content-Type': 'application/json',
+          },
+        })
+      } catch {
+        // Ignore errors - user might not be logged in
+      }
+    })
+    console.log('Logged out existing user before login')
+
     // Clear all browser storage and cache data
     await page.evaluate(() => {
       // Clear localStorage
