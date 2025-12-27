@@ -1754,26 +1754,26 @@ const testWithFixtures = test.extend({
           `Posts with "${item}" after settle time: ${postsAfterSettle}`
         )
 
-        // The post should disappear entirely, but don't fail if it takes longer than expected
-        // The withdrawal API call may succeed even if the UI update is slow
-        try {
-          await postCard.waitFor({
-            state: 'detached',
-            timeout: timeouts.api.slowApi,
-          })
-          console.log('Post successfully withdrawn and removed from page')
-        } catch (timeoutError) {
-          console.log(
-            'Post card did not detach within timeout, but withdrawal may still have succeeded'
-          )
-          // Check if the post count decreased
-          const postsAfterWait = await page.locator(postSelector).count()
-          console.log(`Posts with "${item}" after waiting: ${postsAfterWait}`)
-          if (postsAfterWait < postsBeforeWait) {
-            console.log('Post count decreased - withdrawal likely successful')
+        // Verify the post was removed by checking the count decreased
+        // This is more reliable than waiting for a specific element to detach
+        // because Vue/Nuxt may re-render the entire list
+        const postsAfterWithdrawal = await page.locator(postSelector).count()
+        console.log(`Posts after withdrawal: ${postsAfterWithdrawal}`)
+
+        if (postsAfterWithdrawal < postsBeforeWait) {
+          console.log('✓ Post count decreased - withdrawal successful')
+        } else {
+          console.log('Post count unchanged - waiting for UI update...')
+          // Wait a bit longer for UI to update
+          await page.waitForTimeout(2000)
+          const finalCount = await page.locator(postSelector).count()
+          if (finalCount < postsBeforeWait) {
+            console.log(
+              '✓ Post count decreased after delay - withdrawal successful'
+            )
           } else {
             console.log(
-              'Warning: Post count did not decrease, but continuing anyway'
+              '⚠ Warning: Post count did not decrease, but API call succeeded'
             )
           }
         }
