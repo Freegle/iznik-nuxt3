@@ -400,17 +400,6 @@ test.describe('Reply Flow - Test Matrix', () => {
    * ROW 1: Logged In User (Tests 1.1, 1.2, 1.3)
    * -------------------------------------------------------------------------- */
   test.describe('Logged In User', () => {
-    test.beforeEach(async ({ page, testEmail }) => {
-      // Sign up (creates new user and logs in) before each test
-      // We use signUp rather than login because testEmail is a unique
-      // freshly-generated email that doesn't exist in the database yet
-      const signupSuccess = await signUpViaHomepage(page, testEmail)
-      if (!signupSuccess) {
-        throw new Error('Failed to sign up for test')
-      }
-      console.log('[Setup] Signed up and logged in as test user')
-    })
-
     test('1.1 can reply from Message Page', async ({
       page,
       postMessage,
@@ -418,9 +407,6 @@ test.describe('Reply Flow - Test Matrix', () => {
       getTestEmail,
       withdrawPost,
     }) => {
-      // Log out from beforeEach signup so we can post as a different user
-      await logoutIfLoggedIn(page)
-
       // Post a message first (as posterEmail)
       const posterEmail = getTestEmail('poster')
       const uniqueItem = `test-logged-in-msg-${Date.now()}`
@@ -474,9 +460,6 @@ test.describe('Reply Flow - Test Matrix', () => {
       getTestEmail,
       withdrawPost,
     }) => {
-      // Log out from beforeEach signup so we can post as a different user
-      await logoutIfLoggedIn(page)
-
       // Post a message first (as posterEmail)
       const posterEmail = getTestEmail('poster-browse')
       const uniqueItem = `test-logged-in-browse-${Date.now()}`
@@ -533,9 +516,6 @@ test.describe('Reply Flow - Test Matrix', () => {
       getTestEmail,
       withdrawPost,
     }) => {
-      // Log out from beforeEach signup so we can post as a different user
-      await logoutIfLoggedIn(page)
-
       // Post a message first (as posterEmail)
       const posterEmail = getTestEmail('poster-explore')
       const uniqueItem = `test-logged-in-explore-${Date.now()}`

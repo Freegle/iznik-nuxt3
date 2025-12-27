@@ -9,82 +9,85 @@ const { SCREENSHOTS_DIR } = require('../config')
 const { waitForModal } = require('./ui')
 
 /**
- * Clears all session data from the current page to simulate logout
+ * Clears all session data from the current page WITHOUT navigating.
+ * This is a fast operation that just clears storage and cookies.
  * @param {import('@playwright/test').Page} page - Current Playwright page object
+ * @returns {Promise<void>}
+ */
+async function clearSessionData(page) {
+  // First, call the logout API to clear server-side session
+  await page.evaluate(async () => {
+    try {
+      await fetch('/api/session', {
+        method: 'POST',
+        headers: {
+          'X-HTTP-Method-Override': 'DELETE',
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch {
+      // Ignore errors - user might not be logged in
+    }
+  })
+
+  // Clear all browser storage
+  await page.evaluate(() => {
+    try {
+      localStorage.clear()
+    } catch {
+      // Ignore
+    }
+    try {
+      sessionStorage.clear()
+    } catch {
+      // Ignore
+    }
+
+    // Clear indexedDB
+    if (window.indexedDB && window.indexedDB.databases) {
+      window.indexedDB
+        .databases()
+        .then((databases) => {
+          databases.forEach((db) => {
+            window.indexedDB.deleteDatabase(db.name)
+          })
+        })
+        .catch(() => {})
+    }
+
+    // Clear Pinia stores if they exist
+    if (window.$nuxt && window.$nuxt.$pinia) {
+      for (const store of window.$nuxt.$pinia._s.values()) {
+        if (store.$reset) {
+          store.$reset()
+        }
+      }
+    }
+  })
+
+  // Clear all cookies
+  const context = page.context()
+  await context.clearCookies()
+}
+
+/**
+ * Clears all session data from the current page to simulate logout.
+ * @param {import('@playwright/test').Page} page - Current Playwright page object
+ * @param {boolean} [navigateToHome=true] - Whether to navigate to homepage after clearing (slower but ensures fresh state)
  * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object with cleared session
  */
-async function logoutIfLoggedIn(page) {
+async function logoutIfLoggedIn(page, navigateToHome = true) {
   console.log('Clearing all session data to simulate fresh browser state')
 
   try {
-    // First, call the logout API to clear server-side session
-    // The API uses X-HTTP-Method-Override header for DELETE
-    await page.evaluate(async () => {
-      try {
-        await fetch('/api/session', {
-          method: 'POST',
-          headers: {
-            'X-HTTP-Method-Override': 'DELETE',
-            'Content-Type': 'application/json',
-          },
-        })
-      } catch {
-        // Ignore errors - user might not be logged in
-      }
-    })
-    console.log('Logged out existing user before login')
+    await clearSessionData(page)
+    console.log('Cleared session data')
 
-    // Clear all browser storage and cache data
-    await page.evaluate(() => {
-      // Clear localStorage
-      try {
-        localStorage.clear()
-      } catch (error) {
-        console.log('Could not clear localStorage:', error.message)
-      }
-
-      // Clear sessionStorage
-      try {
-        sessionStorage.clear()
-      } catch (error) {
-        console.log('Could not clear sessionStorage:', error.message)
-      }
-
-      // Clear indexedDB
-      if (window.indexedDB && window.indexedDB.databases) {
-        window.indexedDB
-          .databases()
-          .then((databases) => {
-            databases.forEach((db) => {
-              window.indexedDB.deleteDatabase(db.name)
-            })
-          })
-          .catch(() => {
-            // Ignore errors
-          })
-      }
-
-      // Clear any Pinia/Vuex stores if they exist
-      if (window.$nuxt && window.$nuxt.$pinia) {
-        // Reset all Pinia stores
-        for (const store of window.$nuxt.$pinia._s.values()) {
-          if (store.$reset) {
-            store.$reset()
-          }
-        }
-      }
-    })
-
-    // Clear all cookies
-    const context = page.context()
-    await context.clearCookies()
-
-    // Clear any cached data by reloading
-    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-
-    console.log(
-      'Successfully cleared all session data - page is now in fresh state'
-    )
+    // Only navigate if explicitly requested (for backwards compatibility)
+    if (navigateToHome) {
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+      console.log('Navigated to homepage')
+    }
 
     return page
   } catch (error) {
@@ -100,6 +103,8 @@ async function logoutIfLoggedIn(page) {
  * @param {string} [displayName] - Optional display name (generates one if not provided)
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Optional password (uses default if not provided)
  * @param {boolean} [marketingConsent=null] - Optional marketing consent value (null means don't change default)
+ * @param {Object} [options={}] - Additional options
+ * @param {boolean} [options.skipLogout=false] - Skip logout if caller already handled it
  * @returns {Promise<boolean>} - Returns true if sign up was successful
  */
 async function signUpViaHomepage(
@@ -107,24 +112,22 @@ async function signUpViaHomepage(
   email,
   displayName,
   password = DEFAULT_TEST_PASSWORD,
-  marketingConsent = null
+  marketingConsent = null,
+  options = {}
 ) {
+  const { skipLogout = false } = options
   console.log(`Starting signup process for email: ${email}`)
 
-  // Using maximized browser window instead of setting viewport size
+  // Clear session data if not skipped (fast, no navigation)
+  if (!skipLogout) {
+    await clearSessionData(page)
+    console.log('Cleared session data before signup')
+  }
 
-  // Check if already logged in and logout if needed
-  const wasLoggedIn = await logoutIfLoggedIn(page)
-  if (wasLoggedIn) {
-    console.log('Logged out existing user before signup')
-    // After logout, we should already be on the homepage, but just to be sure:
+  // Navigate to homepage if we're not already there
+  const currentUrl = page.url()
+  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
     await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-  } else {
-    // Navigate to homepage if we're not already there
-    const currentUrl = page.url()
-    if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
-      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-    }
   }
 
   // Wait for page to be fully loaded with JavaScript
@@ -393,36 +396,31 @@ async function signUpViaHomepage(
  * @param {string} email - Email address to use for login
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Password to use for login
  * @param {boolean} [expectedMarketingConsent=null] - Optional expected marketing consent value to verify (null means don't verify)
+ * @param {Object} [options={}] - Additional options
+ * @param {boolean} [options.skipLogout=false] - Skip logout if caller already handled it
  * @returns {Promise<boolean>} - Returns true if login was successful
  */
 async function loginViaHomepage(
   page,
   email,
   password = DEFAULT_TEST_PASSWORD,
-  expectedMarketingConsent = null
+  expectedMarketingConsent = null,
+  options = {}
 ) {
+  const { skipLogout = false } = options
   console.log(`Starting login process for email: ${email}`)
 
-  // Check if already logged in and logout if needed
-  const wasLoggedIn = await logoutIfLoggedIn(page)
-  if (wasLoggedIn) {
-    console.log('Logged out existing user before login')
-    // After logout, we should already be on the homepage, but just to be sure:
-    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-  } else {
-    // Navigate to homepage if we're not already there
-    const currentUrl = page.url()
-    console.log('Current URL:', currentUrl)
-    if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
-      console.log('Navigating to homepage')
-      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-      console.log('Navigated to homepage')
-    }
+  // Clear session data if not skipped (fast, no navigation)
+  if (!skipLogout) {
+    await clearSessionData(page)
+    console.log('Cleared session data before login')
   }
 
-  // Wait for 1s for page to settle.
-  console.log('Waiting for page to settle')
-  await page.waitForTimeout(1000)
+  // Navigate to homepage if we're not already there
+  const currentUrl = page.url()
+  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
+    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+  }
 
   // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
@@ -568,15 +566,12 @@ async function loginViaHomepage(
     if (loginLinkVisible) {
       console.log('Found visible login link, clicking to switch to login mode')
       await loginLink.click()
-      await page.waitForTimeout(1000)
 
-      // Check if it worked
-      const fullnameStillVisible = await fullnameField
-        .isVisible()
-        .catch(() => true)
-      if (!fullnameStillVisible) {
+      // Wait for fullname field to disappear (indicates mode switch)
+      try {
+        await fullnameField.waitFor({ state: 'hidden', timeout: 3000 })
         console.log('Successfully switched to login mode!')
-      } else {
+      } catch {
         console.log('Mode switch failed, continuing with signup mode approach')
       }
     } else {
@@ -709,9 +704,6 @@ async function loginViaHomepage(
   await emailInput.type(email)
   console.log('Email typed successfully')
 
-  // Wait for email validation to complete
-  await page.waitForTimeout(timeouts.ui.settleTime)
-
   // Fill in fullname field if we're in signup mode
   if (inSignupMode && finalFullnameVisible) {
     console.log('Filling fullname field for signup mode')
@@ -721,9 +713,6 @@ async function loginViaHomepage(
     })
     // Use a generic name for existing user login attempts
     await fullnameField.type('Test User')
-
-    // Wait for fullname validation to complete
-    await page.waitForTimeout(timeouts.ui.settleTime)
   }
 
   // Fill in the password field
@@ -735,9 +724,6 @@ async function loginViaHomepage(
   console.log(`About to type password: [REDACTED ${password.length} chars]`)
   await passwordInput.type(password)
   console.log('Password typed successfully')
-
-  // Wait for password validation to complete
-  await page.waitForTimeout(timeouts.ui.settleTime)
 
   // DEBUG: Check form state after filling all fields
   console.log('=== FORM STATE AFTER FILLING ===')
@@ -1065,39 +1051,6 @@ async function loginViaHomepage(
       .catch(() => false)
     if (!loginModalVisible) {
       console.log('Login appears successful - modal closed')
-
-      // Additional verification - wait a moment and check for login state
-      await page.waitForTimeout(2000)
-
-      // Try to verify login by checking user state
-      try {
-        console.log('Verifying login state after modal close...')
-        const currentUrl = page.url()
-        console.log(`Current URL after login: ${currentUrl}`)
-
-        // Take a screenshot to see current state
-        await page.screenshot({
-          path: `playwright-screenshots/after-login-verification-${Date.now()}.png`,
-          fullPage: true,
-        })
-
-        // Check if we can find any logged-in user elements
-        const userElements = await page
-          .locator(
-            '.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")'
-          )
-          .count()
-        console.log(`Found ${userElements} logged-in user elements`)
-
-        if (userElements > 0) {
-          console.log('Login verification successful - found user elements')
-        } else {
-          console.log('Warning: Login modal closed but no user elements found')
-        }
-      } catch (verificationError) {
-        console.log(`Login verification warning: ${verificationError.message}`)
-      }
-
       return true
     }
 
@@ -1261,4 +1214,5 @@ module.exports = {
   unsubscribeManually,
   logoutIfLoggedIn,
   getMyGroups,
+  clearSessionData,
 }
