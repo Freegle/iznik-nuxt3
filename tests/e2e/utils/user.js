@@ -396,25 +396,19 @@ async function signUpViaHomepage(
  * @param {string} email - Email address to use for login
  * @param {string} [password=DEFAULT_TEST_PASSWORD] - Password to use for login
  * @param {boolean} [expectedMarketingConsent=null] - Optional expected marketing consent value to verify (null means don't verify)
- * @param {Object} [options={}] - Additional options
- * @param {boolean} [options.skipLogout=false] - Skip logout if caller already handled it
  * @returns {Promise<boolean>} - Returns true if login was successful
  */
 async function loginViaHomepage(
   page,
   email,
   password = DEFAULT_TEST_PASSWORD,
-  expectedMarketingConsent = null,
-  options = {}
+  expectedMarketingConsent = null
 ) {
-  const { skipLogout = false } = options
   console.log(`Starting login process for email: ${email}`)
 
-  // Clear session data if not skipped (fast, no navigation)
-  if (!skipLogout) {
-    await clearSessionData(page)
-    console.log('Cleared session data before login')
-  }
+  // Clear session data before login (fast, no navigation)
+  await clearSessionData(page)
+  console.log('Cleared session data before login')
 
   // Navigate to homepage if we're not already there
   const currentUrl = page.url()
