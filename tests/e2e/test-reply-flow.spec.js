@@ -425,7 +425,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as testEmail FIRST (before navigating to message page)
       // This ensures the message loads with auth, which includes groups data
-      await loginViaHomepage(page, testEmail)
+      // Use skipLogout since we already called logoutIfLoggedIn above
+      await loginViaHomepage(page, testEmail, undefined, null, {
+        skipLogout: true,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as testEmail')
 
@@ -477,7 +480,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as testEmail FIRST (before navigating)
       // This ensures message data loads with auth → includes groups
-      await loginViaHomepage(page, testEmail)
+      // Use skipLogout since we already called logoutIfLoggedIn above
+      await loginViaHomepage(page, testEmail, undefined, null, {
+        skipLogout: true,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as testEmail')
 
@@ -533,7 +539,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as testEmail FIRST (before navigating)
       // This ensures message data loads with auth → includes groups
-      await loginViaHomepage(page, testEmail)
+      // Use skipLogout since we already called logoutIfLoggedIn above
+      await loginViaHomepage(page, testEmail, undefined, null, {
+        skipLogout: true,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as testEmail')
 
