@@ -43,8 +43,9 @@ commands:
           command: |
             bundle config set --local path 'vendor/bundle'
             # Install from Gemfile.lock without resolving dependencies
-            # --frozen ensures we use exact versions from Gemfile.lock
-            bundle install --frozen
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
       - run:
@@ -888,8 +889,9 @@ jobs:
             gem install bundler
             bundle config set --local path 'vendor/bundle'
             # Install from Gemfile.lock without resolving dependencies
-            # --frozen ensures we use exact versions from Gemfile.lock
-            bundle install --frozen
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -962,8 +964,9 @@ jobs:
             gem install bundler
             bundle config set --local path 'vendor/bundle'
             # Install from Gemfile.lock without resolving dependencies
-            # --frozen ensures we use exact versions from Gemfile.lock
-            bundle install --frozen
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1133,8 +1136,9 @@ jobs:
           command: |
             bundle config set --local path 'vendor/bundle'
             # Install from Gemfile.lock without resolving dependencies
-            # --frozen ensures we use exact versions from Gemfile.lock
-            bundle install --frozen
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1329,8 +1333,9 @@ jobs:
           command: |
             bundle config set --local path 'vendor/bundle'
             # Install from Gemfile.lock without resolving dependencies
-            # --frozen ensures we use exact versions from Gemfile.lock
-            bundle install --frozen
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
