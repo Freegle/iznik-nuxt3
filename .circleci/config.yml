@@ -42,8 +42,7 @@ commands:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            # Update Fastlane to latest version
-            bundle update fastlane
+            # Install from Gemfile.lock (don't update - causes cache invalidation)
             bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
@@ -652,14 +651,14 @@ jobs:
       # Restore Fastlane bundle cache
       - restore_cache:
           keys:
-            - bundle-v1-{{ checksum "Gemfile.lock" }}
-            - bundle-v1-
+            - bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2-
 
       # Setup Fastlane
       - setup-android-fastlane
 
       - save_cache:
-          key: bundle-v1-{{ checksum "Gemfile.lock" }}
+          key: bundle-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
@@ -786,8 +785,8 @@ jobs:
       # Restore Fastlane bundle cache
       - restore_cache:
           keys:
-            - bundle-v1-{{ checksum "Gemfile.lock" }}
-            - bundle-v1-
+            - bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2-
 
       # Setup Fastlane
       - setup-android-fastlane
@@ -1115,7 +1114,7 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            bundle update fastlane
+            # Install from Gemfile.lock (don't update - use committed versions)
             bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
@@ -1310,7 +1309,7 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            bundle update fastlane
+            # Install from Gemfile.lock (don't update - use committed versions)
             bundle install
           max_auto_reruns: 3
           auto_rerun_delay: 10s
