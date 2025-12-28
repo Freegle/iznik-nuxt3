@@ -9,6 +9,37 @@ const { SCREENSHOTS_DIR } = require('../config')
 const { waitForModal } = require('./ui')
 
 /**
+ * Waits for auth to be persisted to localStorage after login.
+ * This ensures the auth token is available before navigating away.
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @returns {Promise<void>}
+ */
+async function waitForAuthPersistence(page) {
+  console.log('Waiting for auth to be persisted to localStorage...')
+  try {
+    await page.waitForFunction(
+      () => {
+        try {
+          const authData = localStorage.getItem('auth')
+          if (!authData) return false
+          const parsed = JSON.parse(authData)
+          // Check the nested auth object for jwt or persistent token
+          const tokens = parsed?.auth
+          return !!(tokens?.jwt || tokens?.persistent)
+        } catch (e) {
+          return false
+        }
+      },
+      { timeout: timeouts.ui.appearance }
+    )
+    console.log('Auth persisted to localStorage')
+  } catch (error) {
+    console.log(`Warning: Auth persistence check timed out: ${error.message}`)
+    // Don't throw - the login may still have succeeded but persistence is slow
+  }
+}
+
+/**
  * Clears all session data from the current page WITHOUT navigating.
  * This is a fast operation that just clears storage and cookies.
  * @param {import('@playwright/test').Page} page - Current Playwright page object
@@ -1034,6 +1065,8 @@ async function loginViaHomepage(
           .catch(() => false)
       ) {
         console.log('Login successful - found logged in indicator')
+        // Wait for auth to be persisted to localStorage before returning
+        await waitForAuthPersistence(page)
         return true
       }
     }
@@ -1045,6 +1078,8 @@ async function loginViaHomepage(
       .catch(() => false)
     if (!loginModalVisible) {
       console.log('Login appears successful - modal closed')
+      // Wait for auth to be persisted to localStorage before returning
+      await waitForAuthPersistence(page)
       return true
     }
 
