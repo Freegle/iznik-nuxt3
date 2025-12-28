@@ -52,15 +52,23 @@ commands:
           name: Validate Fastlane Version
           command: |
             # Verify we got fastlane 2.x (not 1.x which has incompatible dependencies)
-            echo "Checking fastlane version..."
-            bundle exec fastlane --version || { echo "❌ Failed to run fastlane"; exit 1; }
+            echo "Checking installed fastlane version..."
 
-            VERSION=$(bundle exec fastlane --version 2>&1 | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            # Check what bundler installed
+            INSTALLED=$(bundle list | grep "fastlane " || echo "")
+            echo "Bundler reports: $INSTALLED"
+
+            if [ -z "$INSTALLED" ]; then
+              echo "❌ ERROR: Fastlane not found in bundle"
+              bundle list | grep fast
+              exit 1
+            fi
+
+            # Extract version from "  * fastlane (2.230.0)" format
+            VERSION=$(echo "$INSTALLED" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 
             if [ -z "$VERSION" ]; then
-              echo "❌ ERROR: Could not detect fastlane version"
-              echo "Full output:"
-              bundle exec fastlane --version
+              echo "❌ ERROR: Could not parse fastlane version from: $INSTALLED"
               exit 1
             fi
 
@@ -69,10 +77,11 @@ commands:
 
             if [ "$MAJOR" != "2" ]; then
               echo "❌ ERROR: Wrong fastlane version installed: $VERSION"
-              echo "Expected: 2.x (fastlane 2.230.0)"
+              echo "Expected: 2.x"
               echo "Got: $VERSION (major version $MAJOR)"
               exit 1
             fi
+
             echo "✅ Fastlane version OK: $VERSION"
       - run:
           name: Decode Google Play JSON Key
