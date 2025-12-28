@@ -9,6 +9,7 @@ COPY package*.json setup-hooks.* ./
 COPY patches/ ./patches/
 RUN npm ci --legacy-peer-deps && npm rebuild --legacy-peer-deps
 
+# Copy source code (includes .nuxt cache if restored by CircleCI)
 COPY . .
 
 EXPOSE 3003
