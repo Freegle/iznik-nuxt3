@@ -1,19 +1,37 @@
+# syntax=docker/dockerfile:1
 FROM ghcr.io/freegle/freegle-base:latest
 
 WORKDIR /app
 
+# API endpoints (not secrets - safe to cache)
 ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
 
+# Copy dependency files first for better layer caching
 COPY package*.json setup-hooks.* ./
 COPY patches/ ./patches/
-RUN npm ci --legacy-peer-deps && npm rebuild --legacy-peer-deps
 
+# Install dependencies with npm cache mount
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --legacy-peer-deps && \
+    npm rebuild --legacy-peer-deps
+
+# Copy source code
 COPY . .
+
+# Build in RUN step (cacheable by Docker layers!)
+# Skip if .output already exists (from CircleCI save_cache)
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    if [ ! -d .output ]; then \
+      echo "🔨 Building Nuxt production bundle..." && \
+      export NODE_OPTIONS=--max-old-space-size=8192 && \
+      rm -rf /tmp/nitro/worker-* && \
+      npm run build; \
+    else \
+      echo "✅ Using cached build from .output directory"; \
+    fi
 
 EXPOSE 3003
 
-# Production build - always build and start, set PORT to 3003
-CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
-    rm -rf /tmp/nitro/worker-* && \
-    npm run build && export HOST=0 PORT=3003 && npm run start
+# Just start the server (build already done in RUN step)
+CMD export HOST=0 PORT=3003 && npm run start
