@@ -403,7 +403,7 @@ test.describe('Reply Flow - Test Matrix', () => {
     test('1.1 can reply from Message Page', async ({
       page,
       postMessage,
-      testEmail,
+      existingTestEmail,
       getTestEmail,
       withdrawPost,
     }) => {
@@ -423,11 +423,11 @@ test.describe('Reply Flow - Test Matrix', () => {
       // Log out from poster
       await logoutIfLoggedIn(page)
 
-      // Login as testEmail FIRST (before navigating to message page)
-      // This ensures the message loads with auth, which includes groups data
-      await loginViaHomepage(page, testEmail)
+      // Login as existingTestEmail FIRST (before navigating to message page)
+      // This uses a pre-registered test user to ensure login succeeds
+      await loginViaHomepage(page, existingTestEmail)
       await waitForAuthInLocalStorage(page)
-      console.log('[Test] Logged in as testEmail')
+      console.log('[Test] Logged in as existingTestEmail')
 
       // NOW navigate to message page (message will load with auth → has groups)
       await page.gotoAndVerify(`/message/${result.id}`)
@@ -456,7 +456,7 @@ test.describe('Reply Flow - Test Matrix', () => {
     test('1.2 can reply from Browse Page', async ({
       page,
       postMessage,
-      testEmail,
+      existingTestEmail,
       getTestEmail,
       withdrawPost,
     }) => {
@@ -475,11 +475,11 @@ test.describe('Reply Flow - Test Matrix', () => {
       // Log out from poster
       await logoutIfLoggedIn(page)
 
-      // Login as testEmail FIRST (before navigating)
-      // This ensures message data loads with auth → includes groups
-      await loginViaHomepage(page, testEmail)
+      // Login as existingTestEmail FIRST (before navigating)
+      // This uses a pre-registered test user to ensure login succeeds
+      await loginViaHomepage(page, existingTestEmail)
       await waitForAuthInLocalStorage(page)
-      console.log('[Test] Logged in as testEmail')
+      console.log('[Test] Logged in as existingTestEmail')
 
       // NOW navigate via browse page (while logged in)
       // Browse based on location might have no messages, so use the specific group's browse
@@ -512,7 +512,7 @@ test.describe('Reply Flow - Test Matrix', () => {
     test('1.3 can reply from Explore Page', async ({
       page,
       postMessage,
-      testEmail,
+      existingTestEmail,
       getTestEmail,
       withdrawPost,
     }) => {
@@ -531,11 +531,11 @@ test.describe('Reply Flow - Test Matrix', () => {
       // Log out from poster
       await logoutIfLoggedIn(page)
 
-      // Login as testEmail FIRST (before navigating)
-      // This ensures message data loads with auth → includes groups
-      await loginViaHomepage(page, testEmail)
+      // Login as existingTestEmail FIRST (before navigating)
+      // This uses a pre-registered test user to ensure login succeeds
+      await loginViaHomepage(page, existingTestEmail)
       await waitForAuthInLocalStorage(page)
-      console.log('[Test] Logged in as testEmail')
+      console.log('[Test] Logged in as existingTestEmail')
 
       // NOW navigate via explore page (while logged in)
       // The postcode EH3 6SS is in Edinburgh, so use a known Edinburgh group

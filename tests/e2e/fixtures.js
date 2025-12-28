@@ -161,6 +161,14 @@ const test = base.test.extend({
     await use(email)
   },
 
+  // Add existingTestEmail fixture - returns a pre-existing registered user email
+  // Use this for tests that need to log in as an already-registered user
+  existingTestEmail: async ({ browser }, use) => {
+    const email = environment.unmodded_email
+    console.log(`Using existing test email: ${email}`)
+    await use(email)
+  },
+
   // Function to generate custom test emails with specific prefixes
   getTestEmail: async ({ browser }, use) => {
     // Return a function that generates test emails with custom prefixes
