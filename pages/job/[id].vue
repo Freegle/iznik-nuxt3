@@ -25,6 +25,7 @@
 import { useRoute } from 'vue-router'
 import { ref, onMounted, definePageMeta } from '#imports'
 import { useJobStore } from '~/stores/job'
+import { useClientLog } from '~/composables/useClientLog'
 import NoticeMessage from '~/components/NoticeMessage'
 
 definePageMeta({
@@ -32,10 +33,19 @@ definePageMeta({
 })
 
 const jobStore = useJobStore()
+const { action } = useClientLog()
 const route = useRoute()
 const id = ref(parseInt(route.params.id))
 const invalid = ref(false)
 const appshown = ref(false)
+
+// Read tracking params from URL (added by email links).
+const source = route.query.source || 'direct'
+const campaign = route.query.campaign || null
+const position = route.query.position ? parseInt(route.query.position) : null
+const listLength = route.query.list_length
+  ? parseInt(route.query.list_length)
+  : null
 
 const job = ref(await jobStore.fetchOne(id.value))
 
@@ -44,6 +54,19 @@ onMounted(async () => {
   if (id.value && job.value?.id === id.value) {
     await jobStore.log({
       link: job.value.url,
+    })
+
+    // Log to Loki for analytics.
+    action('job_ad_click', {
+      job_id: job.value.id,
+      job_reference: job.value.reference,
+      job_category: job.value.category,
+      cpc: job.value.cpc,
+      source,
+      campaign,
+      position,
+      list_length: listLength,
+      context: 'email_redirect',
     })
 
     window.location = job.value.url

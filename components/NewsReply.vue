@@ -4,6 +4,47 @@
     :class="{ 'bg-info': scrollToThis }"
   >
     <div v-if="mod || myid === reply.userid || !reply.hidden" class="reply">
+      <!-- More actions dropdown - positioned at top right of reply -->
+      <button
+        v-if="hasMoreActions && reply.isCombined"
+        class="reply-menu expand-combined-btn"
+        title="Click to expand combined posts"
+        @click="expandCombinedPosts"
+      >
+        <v-icon icon="ellipsis-h" class="text-muted" />
+      </button>
+      <b-dropdown
+        v-else-if="hasMoreActions"
+        variant="link"
+        no-caret
+        right
+        class="reply-menu"
+      >
+        <template #button-content>
+          <v-icon icon="ellipsis-h" class="text-muted" />
+        </template>
+        <b-dropdown-item
+          v-if="parseInt(me.id) === parseInt(userid) || admin"
+          @click="showEdit"
+        >
+          <v-icon icon="pen" class="me-2" />Edit
+        </b-dropdown-item>
+        <b-dropdown-item
+          v-if="parseInt(me.id) === parseInt(userid) || mod"
+          @click="deleteReply"
+        >
+          <v-icon icon="trash" class="me-2" />Delete
+        </b-dropdown-item>
+        <b-dropdown-item v-if="chitChatMod && !reply.hidden" @click="hideReply">
+          <v-icon icon="eye-slash" class="me-2" />Hide
+        </b-dropdown-item>
+        <b-dropdown-item
+          v-if="chitChatMod && reply.hidden"
+          @click="unHideReply"
+        >
+          <v-icon icon="eye" class="me-2" />Unhide
+        </b-dropdown-item>
+      </b-dropdown>
       <div
         class="clickme align-top"
         title="Click to see their profile"
@@ -17,7 +58,7 @@
           :lazy="false"
         />
       </div>
-      <div class="align-top">
+      <div class="align-top reply-content">
         <span
           class="text-success font-weight-bold clickme"
           title="Click to see their profile"
@@ -97,61 +138,15 @@
           </template>
           <template v-if="parseInt(me.id) !== parseInt(userid)">
             <ChatButton
-              class="reply-action"
               :userid="userid"
               title="Message"
               variant="link"
               size="sm"
               :show-icon="true"
-              btn-class="p-0 chat-btn"
+              btn-class="chat-btn-styled"
               title-class="ms-1"
             />
           </template>
-          <!-- More actions dropdown -->
-          <!-- For combined posts, show expand button instead of dropdown -->
-          <button
-            v-if="hasMoreActions && reply.isCombined"
-            class="reply-action expand-combined-btn"
-            title="Click to expand combined posts"
-            @click="expandCombinedPosts"
-          >
-            <v-icon icon="ellipsis-h" class="text-muted" />
-          </button>
-          <b-dropdown
-            v-else-if="hasMoreActions"
-            variant="link"
-            no-caret
-            right
-            class="more-actions-dropdown"
-          >
-            <template #button-content>
-              <v-icon icon="ellipsis-h" class="text-muted" />
-            </template>
-            <b-dropdown-item
-              v-if="parseInt(me.id) === parseInt(userid) || admin"
-              @click="showEdit"
-            >
-              <v-icon icon="pen" class="me-2" />Edit
-            </b-dropdown-item>
-            <b-dropdown-item
-              v-if="parseInt(me.id) === parseInt(userid) || mod"
-              @click="deleteReply"
-            >
-              <v-icon icon="trash" class="me-2" />Delete
-            </b-dropdown-item>
-            <b-dropdown-item
-              v-if="chitChatMod && !reply.hidden"
-              @click="hideReply"
-            >
-              <v-icon icon="eye-slash" class="me-2" />Hide
-            </b-dropdown-item>
-            <b-dropdown-item
-              v-if="chitChatMod && reply.hidden"
-              @click="unHideReply"
-            >
-              <v-icon icon="eye" class="me-2" />Unhide
-            </b-dropdown-item>
-          </b-dropdown>
         </div>
         <NewsPreviews
           v-if="reply.previews?.length"
@@ -706,100 +701,22 @@ function showReplyPhotoModal() {
 
 .reply {
   display: flex;
+  position: relative;
+  width: 100%;
 }
 
-.replyphoto {
-  width: 150px;
+.reply-content {
+  flex: 1;
+  min-width: 0;
 }
 
-.image__uploaded {
-  width: 100px;
-}
+/* Three dots menu - positioned at top right of the reply */
+.reply-menu {
+  position: absolute;
+  top: -0.25rem;
+  right: -1rem; /* Align with edge of card padding */
+  z-index: 1;
 
-// Modern reply actions
-.reply-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.25rem;
-  flex-wrap: wrap;
-}
-
-.reply-action {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  background: transparent;
-  border: none;
-  color: $color-blue--base;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: $color-gray--lighter;
-    color: darken($color-blue--base, 10%);
-  }
-
-  .action-icon {
-    font-size: 0.75rem;
-  }
-
-  &.loved {
-    color: $color-blue--base;
-  }
-
-  &.love-count {
-    padding: 0.25rem 0.375rem;
-    font-size: 0.75rem;
-  }
-
-  /* ChatButton wrapper - remove padding since button has its own */
-  &:has(.chat-btn) {
-    padding: 0;
-  }
-
-  :deep(.chat-btn) {
-    color: $color-blue--base !important;
-    font-size: 0.85rem !important;
-    font-weight: 400 !important;
-    text-decoration: none !important;
-    padding: 0.25rem 0.5rem !important;
-    line-height: 1 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-
-    &:hover {
-      color: darken($color-blue--base, 10%) !important;
-      background: $color-gray--lighter !important;
-    }
-
-    span {
-      font-weight: 400 !important;
-    }
-  }
-
-  /* Show Message button on all screen sizes */
-  :deep(.d-none) {
-    display: inline-flex !important;
-  }
-  :deep(.d-sm-none) {
-    display: none !important;
-  }
-}
-
-.expand-combined-btn {
-  padding: 0.25rem 0.375rem;
-  line-height: 1;
-
-  &:hover {
-    background: $color-gray--lighter;
-  }
-}
-
-.more-actions-dropdown {
   :deep(.btn) {
     padding: 0.25rem 0.375rem;
     line-height: 1;
@@ -816,6 +733,129 @@ function showReplyPhotoModal() {
 
   :deep(.dropdown-item) {
     padding: 0.5rem 0.75rem;
+  }
+
+  &.expand-combined-btn {
+    padding: 0.25rem 0.375rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      background: $color-gray--lighter;
+    }
+  }
+}
+
+.replyphoto {
+  width: 150px;
+}
+
+.image__uploaded {
+  width: 100px;
+}
+
+/* Modern reply actions */
+.reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+
+  @include media-breakpoint-down(xs) {
+    gap: 0.125rem;
+  }
+}
+
+.reply-action {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  min-height: 1.75rem;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: $color-blue--base;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  /* Smaller on xs screens */
+  @include media-breakpoint-down(xs) {
+    padding: 0.2rem 0.375rem;
+    font-size: 0.8rem;
+    gap: 0.2rem;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.2);
+    color: darken($color-blue--base, 10%);
+  }
+
+  .action-icon {
+    font-size: 0.75rem;
+  }
+
+  &.loved {
+    color: $color-blue--base;
+  }
+
+  &.love-count {
+    padding: 0.25rem 0.375rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ChatButton styled to match reply-action buttons */
+.reply-actions :deep(.chat-btn-styled) {
+  align-items: center !important;
+  gap: 0.25rem !important;
+  padding: 0.25rem 0.5rem !important;
+  min-height: 1.75rem !important;
+  background: transparent !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: $color-blue--base !important;
+  font-size: 0.85rem !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  /* Respect Bootstrap display classes but use flexbox when visible */
+  &.d-sm-inline {
+    display: none !important;
+
+    @include media-breakpoint-up(sm) {
+      display: inline-flex !important;
+    }
+  }
+
+  &.d-sm-none {
+    display: inline-flex !important;
+
+    @include media-breakpoint-up(sm) {
+      display: none !important;
+    }
+  }
+
+  @include media-breakpoint-down(xs) {
+    padding: 0.2rem 0.375rem !important;
+    font-size: 0.8rem !important;
+    gap: 0.2rem !important;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    color: darken($color-blue--base, 10%) !important;
+  }
+
+  span {
+    font-weight: 400 !important;
   }
 }
 

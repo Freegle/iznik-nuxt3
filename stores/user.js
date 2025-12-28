@@ -129,32 +129,42 @@ export const useUserStore = defineStore({
       })
 
       if (left.length) {
-        // Create a shared promise for the batch request
-        const batchPromise = api(this.config).user.fetchMultiple(left)
+        // Split into chunks of 20 (API limit)
+        const BATCH_SIZE = 20
+        const chunks = []
+        for (let i = 0; i < left.length; i += BATCH_SIZE) {
+          chunks.push(left.slice(i, i + BATCH_SIZE))
+        }
 
-        // Set the same promise for each ID so concurrent fetches wait for the same request
-        left.forEach((id) => {
-          this.fetching[id] = batchPromise
-        })
+        // Process each chunk
+        for (const chunk of chunks) {
+          // Create a shared promise for the batch request
+          const batchPromise = api(this.config).user.fetchMultiple(chunk)
 
-        try {
-          const users = await batchPromise
-
-          // Handle both array response (multiple users) and single user response
-          if (Array.isArray(users)) {
-            users.forEach((user) => {
-              if (user) {
-                this.list[user.id] = user
-              }
-            })
-          } else if (users) {
-            this.list[users.id] = users
-          }
-        } finally {
-          // Clear fetching flags
-          left.forEach((id) => {
-            this.fetching[id] = null
+          // Set the same promise for each ID so concurrent fetches wait for the same request
+          chunk.forEach((id) => {
+            this.fetching[id] = batchPromise
           })
+
+          try {
+            const users = await batchPromise
+
+            // Handle both array response (multiple users) and single user response
+            if (Array.isArray(users)) {
+              users.forEach((user) => {
+                if (user) {
+                  this.list[user.id] = user
+                }
+              })
+            } else if (users) {
+              this.list[users.id] = users
+            }
+          } finally {
+            // Clear fetching flags
+            chunk.forEach((id) => {
+              this.fetching[id] = null
+            })
+          }
         }
       }
     },

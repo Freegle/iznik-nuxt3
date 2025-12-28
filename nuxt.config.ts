@@ -33,6 +33,16 @@ console.log('config.APP_ENV', config.APP_ENV)
 console.log('config.USE_COOKIES', config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
+// Detect if we're on Netlify (need legacy builds for old browser support)
+// vs CI/Docker (skip legacy for faster builds - users have modern browsers)
+const isNetlify = !!process.env.NETLIFY || !!process.env.DEPLOY_URL
+console.log('isNetlify:', isNetlify)
+
+// Detect if prerendering should be disabled (for CI/Docker builds)
+// This is set in docker-compose.yml to avoid prerender failures during container builds
+const prerenderRoutes = process.env.NUXT_NITRO_PRERENDER_ROUTES !== 'false'
+console.log('prerenderRoutes:', prerenderRoutes)
+
 
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
@@ -128,20 +138,27 @@ export default defineNuxtConfig({
     // There are potential issues where a deployment happens while a page is partway through loading assets, or
     // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
     // it detects a failed chunk load.
-    '/': { prerender: true },
-    '/explore': { prerender: true },
-    '/unsubscribe**': { prerender: true },
-    '/about': { prerender: true },
-    '/disclaimer': { prerender: true },
-    '/donate': { prerender: true },
-    '/find': { prerender: true },
-    '/forgot': { prerender: true },
-    '/give': { prerender: true },
-    '/help': { prerender: true },
-    '/maintenance': { prerender: true },
-    '/mobile': { prerender: true },
-    '/privacy': { prerender: true },
-    '/unsubscribe': { prerender: true },
+    //
+    // In CI/Docker, prerenderRoutes is set to false via NUXT_NITRO_PRERENDER_ROUTES=false to avoid
+    // prerender failures during container builds (API may not be accessible).
+    ...(prerenderRoutes
+      ? {
+          '/': { prerender: true },
+          '/explore': { prerender: true },
+          '/unsubscribe**': { prerender: true },
+          '/about': { prerender: true },
+          '/disclaimer': { prerender: true },
+          '/donate': { prerender: true },
+          '/find': { prerender: true },
+          '/forgot': { prerender: true },
+          '/give': { prerender: true },
+          '/help': { prerender: true },
+          '/maintenance': { prerender: true },
+          '/mobile': { prerender: true },
+          '/privacy': { prerender: true },
+          '/unsubscribe': { prerender: true },
+        }
+      : {}),
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
     '/birthday/**': { ssr: false },
@@ -191,18 +208,24 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    prerender: {
-      routes: ['/404.html', '/sitemap.xml'],
+    prerender: prerenderRoutes
+      ? {
+          routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many.
-      // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
-      ignore: [
-        '/message/',
-        '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
-        '/netlify/**', // CDN URLs for Netlify permanent links
-      ],
-      crawlLinks: true,
-    },
+          // Don't prerender the messages - too many.
+          // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
+          ignore: [
+            '/message/',
+            '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
+            '/netlify/**', // CDN URLs for Netlify permanent links
+          ],
+          crawlLinks: true,
+        }
+      : {
+          // In CI/Docker, disable all prerendering to avoid failures when API is not accessible
+          routes: [],
+          crawlLinks: false,
+        },
 
     // Disable HTTPS enforcement for development
     httpsRedirect: false,
@@ -467,17 +490,21 @@ export default defineNuxtConfig({
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
-  legacy: {
-    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
-    modernPolyfills: [
-      'es.global-this',
-      'es.object.from-entries',
-      'es.array.flat-map',
-      'es.array.flat',
-      'es.string.replace-all',
-      'es.promise.any',
-    ],
-  },
+  // Only enable legacy builds on Netlify where we need old browser support.
+  // Skip in CI/Docker for faster builds (40-50% improvement).
+  legacy: isNetlify
+    ? {
+        targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+        modernPolyfills: [
+          'es.global-this',
+          'es.object.from-entries',
+          'es.array.flat-map',
+          'es.array.flat',
+          'es.string.replace-all',
+          'es.promise.any',
+        ],
+      }
+    : false,
 
   // Sentry needs sourcemaps.
   sourcemap: {
