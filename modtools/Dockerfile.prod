@@ -1,25 +1,40 @@
+# syntax=docker/dockerfile:1
 FROM ghcr.io/freegle/freegle-base:latest
 
 WORKDIR /app
 
+# API endpoints (not secrets - safe to cache)
 ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
 
 # Copy the source code (context is already iznik-nuxt3-modtools)
 COPY . .
 
-# Install dependencies in parent directory and generate .nuxt
-RUN npm install --legacy-peer-deps && npx nuxi prepare
+# Install dependencies in parent directory with npm cache mount
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm install --legacy-peer-deps && \
+    npx nuxi prepare
 
 # Change to modtools directory
 WORKDIR /app/modtools
 
 # Install modtools specific dependencies
-RUN npm install --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm install --legacy-peer-deps
+
+# Build in RUN step (cacheable by Docker layers!)
+# Skip if .output already exists (from CircleCI save_cache)
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    if [ ! -d .output ]; then \
+      echo "🔨 Building ModTools production bundle..." && \
+      export NODE_OPTIONS=--max-old-space-size=8192 && \
+      rm -rf /tmp/nitro/worker-* && \
+      npm run build; \
+    else \
+      echo "✅ Using cached build from .output directory"; \
+    fi
 
 EXPOSE 3001
 
-# Production build - always build and start, set PORT to 3001
-CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
-    rm -rf /tmp/nitro/worker-* && \
-    npm run build && export HOST=0 PORT=3001 && node .output/server/index.mjs
+# Just start the server (build already done in RUN step)
+CMD export HOST=0 PORT=3001 && node .output/server/index.mjs
