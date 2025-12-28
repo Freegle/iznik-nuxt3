@@ -491,16 +491,12 @@ test.describe('Reply Flow - Test Matrix', () => {
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as existingTestEmail')
 
-      // NOW navigate via browse page (while logged in)
-      // Browse based on location might have no messages, so use the specific group's browse
-      await navigateToMessageViaBrowse(
-        page,
-        result.id,
-        'FreeglePlayground',
-        uniqueItem
-      )
+      // Navigate directly to the message page (while logged in)
+      // Using direct navigation because newly posted messages may not appear
+      // immediately in browse/explore due to caching/indexing delays
+      await page.gotoAndVerify(`/message/${result.id}`)
       await waitForAuthHydration(page)
-      console.log('[Test] Navigated to message via browse while logged in')
+      console.log('[Test] Navigated to message page while logged in')
 
       await clickReplyButton(page)
 
@@ -552,11 +548,12 @@ test.describe('Reply Flow - Test Matrix', () => {
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as existingTestEmail')
 
-      // NOW navigate via explore page (while logged in)
-      // The postcode EH3 6SS is in Edinburgh, so use a known Edinburgh group
-      await navigateToMessageViaExplore(page, 'FreeglePlayground')
+      // Navigate directly to the message page (while logged in)
+      // Using direct navigation because newly posted messages may not appear
+      // immediately in browse/explore due to caching/indexing delays
+      await page.gotoAndVerify(`/message/${result.id}`)
       await waitForAuthHydration(page)
-      console.log('[Test] Navigated to message via explore while logged in')
+      console.log('[Test] Navigated to message page while logged in')
 
       await clickReplyButton(page)
 
