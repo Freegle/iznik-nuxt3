@@ -425,7 +425,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as existingTestEmail FIRST (before navigating to message page)
       // This uses a pre-registered test user to ensure login succeeds
-      await loginViaHomepage(page, existingTestEmail)
+      // Must pass the correct password for the pre-registered test user
+      await loginViaHomepage(page, existingTestEmail, {
+        password: environment.unmodded_password,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as existingTestEmail')
 
@@ -477,7 +480,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as existingTestEmail FIRST (before navigating)
       // This uses a pre-registered test user to ensure login succeeds
-      await loginViaHomepage(page, existingTestEmail)
+      // Must pass the correct password for the pre-registered test user
+      await loginViaHomepage(page, existingTestEmail, {
+        password: environment.unmodded_password,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as existingTestEmail')
 
@@ -533,7 +539,10 @@ test.describe('Reply Flow - Test Matrix', () => {
 
       // Login as existingTestEmail FIRST (before navigating)
       // This uses a pre-registered test user to ensure login succeeds
-      await loginViaHomepage(page, existingTestEmail)
+      // Must pass the correct password for the pre-registered test user
+      await loginViaHomepage(page, existingTestEmail, {
+        password: environment.unmodded_password,
+      })
       await waitForAuthInLocalStorage(page)
       console.log('[Test] Logged in as existingTestEmail')
 
