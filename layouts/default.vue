@@ -132,7 +132,12 @@ if (!loginStateKnown.value) {
     '[STARTUP] default.vue BEFORE second fetchUser await',
     performance.now()
   )
-  await authStore.fetchUser()
+  try {
+    await authStore.fetchUser()
+  } catch (e) {
+    // Can fail during SSR if API is not accessible - don't fail the page
+    console.log('Error in second fetchUser', e?.message)
+  }
   console.log(
     '[STARTUP] default.vue AFTER second fetchUser await',
     performance.now()

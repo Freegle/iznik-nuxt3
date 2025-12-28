@@ -29,7 +29,7 @@
       size="sm"
       @click="focusComment"
     >
-      <v-icon icon="comment" /><span class="">&nbsp;Reply</span>
+      <v-icon icon="reply" /><span class="">&nbsp;Reply</span>
     </b-button>
     <b-button
       v-if="newsfeed.loves"

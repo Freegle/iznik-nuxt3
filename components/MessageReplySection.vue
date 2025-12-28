@@ -3,8 +3,9 @@
     <div v-if="!fromme" class="grey p-2">
       <EmailValidator
         v-if="!me"
-        v-model:email="email"
-        v-model:valid="emailValid"
+        ref="emailValidatorRef"
+        v-model:email="stateMachine.email.value"
+        v-model:valid="stateMachine.emailValid.value"
         size="lg"
         label="Your email address:"
         class="test-email-reply-validator"
@@ -48,24 +49,26 @@
             <Field
               v-if="message.type == 'Offer'"
               :id="'replytomessage-' + message.id"
-              v-model="reply"
+              v-model="stateMachine.replyText.value"
               name="reply"
               :rules="validateReply"
               as="textarea"
               rows="3"
               max-rows="8"
               class="border border-success w-100"
+              @input="stateMachine.startTyping"
             />
             <Field
               v-if="message.type == 'Wanted'"
               :id="'replytomessage-' + message.id"
-              v-model="reply"
+              v-model="stateMachine.replyText.value"
               name="reply"
               :rules="validateReply"
               as="textarea"
               rows="3"
               max-rows="8"
               class="flex-grow-1 w-100"
+              @input="stateMachine.startTyping"
             />
           </b-form-group>
           <ErrorMessage name="reply" class="text-danger font-weight-bold" />
@@ -78,7 +81,7 @@
           >
             <Field
               :id="'replytomessage2-' + message.id"
-              v-model="collect"
+              v-model="stateMachine.collectText.value"
               name="collect"
               :rules="validateCollect"
               class="border border-success w-100"
@@ -98,6 +101,21 @@
       <div v-if="!me">
         <NewFreegler class="mt-2" />
       </div>
+      <NoticeMessage
+        v-if="stateMachine.error.value"
+        variant="danger"
+        class="mt-2"
+      >
+        {{ stateMachine.error.value }}
+        <b-button
+          variant="link"
+          size="sm"
+          class="p-0 ml-2"
+          @click="stateMachine.retry"
+        >
+          Try again
+        </b-button>
+      </NoticeMessage>
     </div>
     <hr />
     <div class="d-flex justify-content-between">
@@ -111,44 +129,33 @@
         class="pl-2 w-50 justify-content-end d-flex"
       >
         <SpinButton
-          v-if="!me"
           variant="primary"
           size="lg"
           done-icon=""
           icon-name="angle-double-right"
-          :disabled="disableSend"
+          :disabled="
+            !stateMachine.canSend.value || stateMachine.isProcessing.value
+          "
           iconlast
-          @handle="registerOrSend"
-        >
-          Send <span class="d-none d-md-inline">your</span> reply
-        </SpinButton>
-        <SpinButton
-          v-else
-          variant="primary"
-          size="lg"
-          done-icon=""
-          icon-name="angle-double-right"
-          :disabled="disableSend"
-          iconlast
-          @handle="sendReply"
+          @handle="handleSend"
         >
           Send <span class="d-none d-md-inline">your</span> reply
         </SpinButton>
       </div>
     </div>
     <b-modal
-      v-if="showNewUser"
+      v-if="stateMachine.showWelcomeModal.value"
       id="newUserModal"
       ref="newUserModal"
       scrollable
       ok-only
       ok-title="Close and Continue"
-      @hide="sendReply(null)"
+      @ok="handleNewUserModalOk"
     >
       <template #title>
         <h2>Welcome to Freegle!</h2>
       </template>
-      <NewUserInfo :password="newUserPassword" />
+      <NewUserInfo :password="stateMachine.newUserPassword.value" />
     </b-modal>
     <span ref="breakpoint" class="d-inline d-sm-none" />
     <div class="d-none">
@@ -164,15 +171,17 @@ import {
   computed,
   watch,
   nextTick,
-  getCurrentInstance,
+  onMounted,
 } from 'vue'
-import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 import { useMessageStore } from '~/stores/message'
-import { useAuthStore } from '~/stores/auth'
-import { useReplyStore } from '~/stores/reply'
 import { milesAway } from '~/composables/useDistance'
 import { useMe } from '~/composables/useMe'
-import { useReplyToPost } from '~/composables/useReplyToPost'
+import {
+  useReplyStateMachine,
+  ReplyState,
+} from '~/composables/useReplyStateMachine'
+import { action } from '~/composables/useClientLog'
 import EmailValidator from '~/components/EmailValidator'
 import NewUserInfo from '~/components/NewUserInfo'
 import ChatButton from '~/components/ChatButton'
@@ -180,6 +189,8 @@ import SpinButton from '~/components/SpinButton.vue'
 import NoticeMessage from '~/components/NoticeMessage'
 import MessageDeadline from '~/components/MessageDeadline'
 import { FAR_AWAY } from '~/constants'
+
+const route = useRoute()
 
 const NewFreegler = defineAsyncComponent(() =>
   import('~/components/NewFreegler')
@@ -202,42 +213,27 @@ const emit = defineEmits(['close', 'sent'])
 const faraway = FAR_AWAY
 
 const messageStore = useMessageStore()
-const authStore = useAuthStore()
-const replyStore = useReplyStore()
-const { me, myid, myGroups, fetchMe } = useMe()
-const { loggedInEver, forceLogin } = storeToRefs(authStore)
-const instance = getCurrentInstance()
+const { me, myid, myGroups } = useMe()
+
+// Initialize state machine
+const stateMachine = useReplyStateMachine(props.id)
 
 // References
-const email = ref(null)
-const emailValid = ref(false)
 const form = ref(null)
 const newUserModal = ref(null)
 const replyToPostChatButton = ref(null)
 const breakpoint = ref(null)
-
-// Data
-const reply = ref(null)
-const collect = ref(null)
-const replying = ref(false)
-const showNewUser = ref(false)
-const newUserPassword = ref(null)
-const pendingReply = ref(false)
+const emailValidatorRef = ref(null)
 
 // Fetch the message data
 await messageStore.fetch(props.id)
 
-// Use the replyToPost composable
 const message = computed(() => {
   return messageStore?.byId(props.id)
 })
 
 const milesaway = computed(() => {
   return milesAway(me?.lat, me?.lng, message.value?.lat, message.value?.lng)
-})
-
-const disableSend = computed(() => {
-  return replying.value
 })
 
 const fromme = computed(() => {
@@ -266,29 +262,117 @@ const replyToUser = computed(() => {
   return message.value?.fromuser
 })
 
-// Watch for changes in login state
+// Watch for login state changes to resume authentication flow
 watch(me, (newVal, oldVal) => {
-  console.log('Login change', newVal, oldVal)
-  if (!oldVal && newVal && reply.value) {
-    // We have now logged in - resume our send.
-    console.log('Resume send')
-    sendReply()
+  console.log('[MessageReplySection] Login state changed', {
+    newVal: !!newVal,
+    oldVal: !!oldVal,
+  })
+  if (
+    !oldVal &&
+    newVal &&
+    stateMachine.state.value === ReplyState.AUTHENTICATING
+  ) {
+    console.log(
+      '[MessageReplySection] User logged in during authentication - resuming'
+    )
+    stateMachine.onLoginSuccess()
   }
 })
 
-// Watch for chat button ref to become available when we have a pending reply
-watch(replyToPostChatButton, async (newVal) => {
-  if (newVal && pendingReply.value) {
-    console.log('Chat button ref now available, executing pending reply')
-    pendingReply.value = false
+// Watch for chat button ref becoming available
+watch(replyToPostChatButton, (newVal) => {
+  if (newVal) {
+    console.log('[MessageReplySection] Chat button ref now available')
+    stateMachine.setRefs({ chatButton: newVal })
+  }
+})
 
-    const { replyToPost: composableReplyToPost } = useReplyToPost()
-    const replySent = await composableReplyToPost(newVal)
-    if (replySent) {
+// Watch for form ref
+watch(form, (newVal) => {
+  if (newVal) {
+    console.log('[MessageReplySection] Form ref now available')
+    stateMachine.setRefs({ form: newVal })
+  }
+})
+
+// Determine reply source from route for analytics.
+function getReplySource() {
+  const path = route.path
+  const query = route.query || {}
+
+  // Check for email digest/newsletter links.
+  if (query.src === 'digest' || query.utm_source === 'digest') {
+    return 'email_digest'
+  }
+  if (query.src === 'newsletter' || query.utm_source === 'newsletter') {
+    return 'email_newsletter'
+  }
+  if (query.src || query.utm_source) {
+    return `email_${query.src || query.utm_source}`
+  }
+
+  // Determine from route path.
+  if (path.startsWith('/browse')) {
+    return 'browse_page'
+  }
+  if (path.startsWith('/explore')) {
+    return 'explore_page'
+  }
+  if (path.match(/^\/message\/\d+/)) {
+    return 'message_page'
+  }
+  if (path.startsWith('/find')) {
+    return 'find_page'
+  }
+
+  return 'unknown'
+}
+
+// Set refs on mount
+onMounted(() => {
+  console.log('[MessageReplySection] Component mounted, setting refs')
+  stateMachine.setRefs({
+    form: form.value,
+    chatButton: replyToPostChatButton.value,
+    emailValidator: emailValidatorRef.value,
+  })
+
+  // Set and log the reply source for analytics.
+  const replySource = getReplySource()
+  stateMachine.setReplySource(replySource)
+  action('reply_section_viewed', {
+    message_id: props.id,
+    reply_source: replySource,
+    message_type: message.value?.type,
+    is_logged_in: !!me.value,
+    route_path: route.path,
+    route_query: JSON.stringify(route.query || {}),
+  })
+})
+
+// Watch for state machine completion
+watch(
+  () => stateMachine.isComplete.value,
+  (isComplete) => {
+    if (isComplete) {
+      console.log('[MessageReplySection] Reply flow completed')
       sent()
     }
   }
-})
+)
+
+// Watch for welcome modal state to show it
+watch(
+  () => stateMachine.showWelcomeModal.value,
+  async (showModal) => {
+    if (showModal) {
+      console.log('[MessageReplySection] Showing welcome modal')
+      await nextTick()
+      newUserModal.value?.show()
+    }
+  }
+)
 
 function validateCollect(value) {
   if (value && value.trim()) {
@@ -317,146 +401,20 @@ function validateReply(value) {
   return true
 }
 
-async function registerOrSend(callback) {
-  if (!me && !emailValid.value) {
-    email.value?.focus()
-  }
-
-  // We've got a reply and an email address. Maybe the email address is a registered user, maybe it's new. If
-  // it's a registered user then we want to force them to log in.
-  //
-  // We attempt to register the user. If the user already exists, then we'll be told about that as an error.
-  console.log('Register or send', email.value)
-  const validate = await form.value.validate()
-
-  if (validate.valid) {
-    try {
-      const ret = await instance.proxy.$api.user.add(email.value, false)
-
-      console.log('Returned', ret)
-      if (ret.ret === 0 && ret.password) {
-        // We registered a new user and logged in.
-        loggedInEver.value = true
-
-        await fetchMe(true)
-
-        // Show the new user modal.
-        newUserPassword.value = ret.password
-        showNewUser.value = true
-
-        await nextTick()
-        callback()
-
-        // Now that we are logged in, we can reply.
-        newUserModal.value?.show()
-
-        // Once the modal is closed, we will send the reply.
-      } else {
-        // If anything else happens, then we call sendReply which will force us to log in. Then the watch will
-        // spot that we're logged in and trigger the send, so we don't need to do that here.
-        console.log('Failed to register - force login', ret)
-        callback()
-        forceLogin.value = true
-      }
-    } catch (e) {
-      // Probably an existing user. Force ourselves to log in as above.
-      console.log('Register exception, force login', e.message)
-      callback()
-      forceLogin.value = true
-    }
-  } else {
-    callback()
-  }
+async function handleSend(callback) {
+  console.log('[MessageReplySection] handleSend called')
+  // Ensure refs are set before submitting
+  stateMachine.setRefs({
+    form: form.value,
+    chatButton: replyToPostChatButton.value,
+    emailValidator: emailValidatorRef.value,
+  })
+  await stateMachine.submit(callback)
 }
 
-async function sendReply(callback) {
-  console.log('sendReply', reply.value)
-  const validate = await form.value.validate()
-  let called = false
-
-  if (validate.valid) {
-    if (reply.value) {
-      // Save the reply
-      replyStore.replyMsgId = props.id
-      replyStore.replyMessage = reply.value
-
-      if (collect.value) {
-        replyStore.replyMessage +=
-          '\r\n\r\nPossible collection times: ' + collect.value
-      }
-
-      replyStore.replyingAt = Date.now()
-      console.log(
-        'State',
-        replyStore.replyMsgId,
-        replyStore.replyMessage,
-        replyStore.replyingAt
-      )
-
-      if (myid.value) {
-        // We have several things to do:
-        // - join a group if need be (doesn't matter which)
-        // - post our reply
-        // - show/go to the open the popup chat so they see what happened
-        replying.value = true
-        let found = false
-        let tojoin = null
-
-        // We shouldn't need to fetch, but we've seen a Sentry issue where the message groups are not valid.
-        const msg = await messageStore.fetch(props.id, true)
-
-        if (msg?.groups) {
-          for (const messageGroup of msg.groups) {
-            tojoin = messageGroup.groupid
-            Object.keys(myGroups.value).forEach((key) => {
-              const group = myGroups.value[key]
-
-              if (messageGroup.groupid === group.id) {
-                found = true
-              }
-            })
-          }
-
-          if (!found) {
-            // Not currently a member.
-            await authStore.joinGroup(myid.value, tojoin, false)
-          }
-
-          // Now we can send the reply via chat.
-          await nextTick()
-          if (callback) {
-            callback()
-            called = true
-          }
-
-          // Check if chat button ref is available, if not set pending flag for watch to handle
-          if (replyToPostChatButton.value) {
-            const { replyToPost: composableReplyToPost } = useReplyToPost()
-            const replySent = await composableReplyToPost(
-              replyToPostChatButton.value
-            )
-            if (replySent) {
-              sent()
-            }
-          } else {
-            console.log(
-              'Chat button ref not available yet, setting pending flag'
-            )
-            pendingReply.value = true
-          }
-        }
-      } else {
-        // We're not logged in yet. We need to force a log in. Once that completes then either the watch in here
-        // or default.vue will spot we have a reply to send and make it happen.
-        console.log('Force login')
-        forceLogin.value = true
-      }
-    }
-  }
-
-  if (!called && callback) {
-    callback()
-  }
+function handleNewUserModalOk() {
+  console.log('[MessageReplySection] New user modal closed')
+  stateMachine.closeWelcomeModal()
 }
 
 function close() {

@@ -44,7 +44,11 @@
           v-model="description"
           placeholder="Size, colour, any specific requirements..."
           rows="4"
+          :state="descriptionState"
         />
+        <div v-if="descriptionState === false" class="invalid-feedback d-block">
+          Please add a description to help people understand what you need.
+        </div>
       </div>
     </div>
 
@@ -95,6 +99,7 @@ function getMessageId() {
 
 const messageId = ref(getMessageId())
 const showItemError = ref(false)
+const showDescriptionError = ref(false)
 
 // Redirect if no message found
 onMounted(() => {
@@ -109,6 +114,17 @@ const itemState = computed(() => {
     return false
   }
   return item.value ? true : null
+})
+
+// Description validation state
+const descriptionState = computed(() => {
+  if (
+    showDescriptionError.value &&
+    (!description.value || !description.value.trim())
+  ) {
+    return false
+  }
+  return null
 })
 
 // Get attachments
@@ -160,7 +176,23 @@ function validateAndNext() {
     })
     return
   }
-  // Continue to app whereami flow for location
+
+  // Check that we have either a description or a photo.
+  const hasDescription = description.value && description.value.trim()
+  const hasPhotos = attachments.value && attachments.value.length > 0
+
+  if (!hasDescription && !hasPhotos) {
+    showDescriptionError.value = true
+    nextTick(() => {
+      const textarea = document.getElementById('description')
+      if (textarea) {
+        textarea.focus()
+      }
+    })
+    return
+  }
+
+  // Continue to app whereami flow for location.
   router.push('/find/mobile/whereami')
 }
 </script>

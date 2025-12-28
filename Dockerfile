@@ -6,6 +6,7 @@ ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
     IZNIK_API_V2=http://freegle-apiv2:8192/api
 
 COPY package*.json setup-hooks.* ./
+COPY patches/ ./patches/
 RUN npm install --legacy-peer-deps
 
 COPY . .
