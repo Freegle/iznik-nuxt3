@@ -42,10 +42,24 @@ commands:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            # Install from Gemfile.lock (don't update - causes cache invalidation)
-            bundle install
+            # Install from Gemfile.lock without resolving dependencies
+            # --frozen ensures we use exact versions from Gemfile.lock
+            bundle install --frozen
           max_auto_reruns: 3
           auto_rerun_delay: 10s
+      - run:
+          name: Validate Fastlane Version
+          command: |
+            # Verify we got fastlane 2.x (not 1.x which has incompatible dependencies)
+            VERSION=$(bundle exec fastlane --version | head -1 | grep -oP '\d+\.\d+\.\d+')
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            if [ "$MAJOR" != "2" ]; then
+              echo "❌ ERROR: Wrong fastlane version installed: $VERSION"
+              echo "Expected: 2.x (fastlane 2.230.0)"
+              echo "Got: $VERSION (major version $MAJOR)"
+              exit 1
+            fi
+            echo "✅ Fastlane version OK: $VERSION"
       - run:
           name: Decode Google Play JSON Key
           command: |
@@ -873,7 +887,9 @@ jobs:
             rm -rf vendor/bundle
             gem install bundler
             bundle config set --local path 'vendor/bundle'
-            bundle install
+            # Install from Gemfile.lock without resolving dependencies
+            # --frozen ensures we use exact versions from Gemfile.lock
+            bundle install --frozen
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -945,7 +961,9 @@ jobs:
             rm -rf vendor/bundle
             gem install bundler
             bundle config set --local path 'vendor/bundle'
-            bundle install
+            # Install from Gemfile.lock without resolving dependencies
+            # --frozen ensures we use exact versions from Gemfile.lock
+            bundle install --frozen
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1114,8 +1132,9 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            # Install from Gemfile.lock (don't update - use committed versions)
-            bundle install
+            # Install from Gemfile.lock without resolving dependencies
+            # --frozen ensures we use exact versions from Gemfile.lock
+            bundle install --frozen
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1309,8 +1328,9 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            # Install from Gemfile.lock (don't update - use committed versions)
-            bundle install
+            # Install from Gemfile.lock without resolving dependencies
+            # --frozen ensures we use exact versions from Gemfile.lock
+            bundle install --frozen
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 

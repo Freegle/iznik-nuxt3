@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "fastlane"
+gem "fastlane", "~> 2.230.0"  # Pin version to prevent downgrade to 1.x
 gem "abbrev"  # Required for Ruby 3.4+ compatibility
 gem "nkf"     # Required for Ruby 3.4+ compatibility (provides kconv module)
 gem "net-ftp" # Required for Ruby 3.0+ compatibility with older gems (nokogiri, mini_portile2)
