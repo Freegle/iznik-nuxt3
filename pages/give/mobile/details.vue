@@ -45,7 +45,12 @@
           v-model="description"
           placeholder="Condition, size, why you're giving it away..."
           rows="4"
+          :state="descriptionState"
         />
+        <div v-if="descriptionState === false" class="invalid-feedback d-block">
+          Please add a description to help people understand what you're
+          offering.
+        </div>
       </div>
 
       <!-- Quantity -->
@@ -109,6 +114,7 @@ function getMessageId() {
 const messageId = ref(getMessageId())
 const itemInput = ref(null)
 const showItemError = ref(false)
+const showDescriptionError = ref(false)
 
 // Redirect if no message found
 onMounted(() => {
@@ -123,6 +129,17 @@ const itemState = computed(() => {
     return false
   }
   return item.value ? true : null
+})
+
+// Description validation state
+const descriptionState = computed(() => {
+  if (
+    showDescriptionError.value &&
+    (!description.value || !description.value.trim())
+  ) {
+    return false
+  }
+  return null
 })
 
 // Get attachments
@@ -185,6 +202,22 @@ function validateAndNext() {
     })
     return
   }
+
+  // Check that we have either a description or a photo.
+  const hasDescription = description.value && description.value.trim()
+  const hasPhotos = attachments.value && attachments.value.length > 0
+
+  if (!hasDescription && !hasPhotos) {
+    showDescriptionError.value = true
+    nextTick(() => {
+      const textarea = document.getElementById('description')
+      if (textarea) {
+        textarea.focus()
+      }
+    })
+    return
+  }
+
   router.push('/give/mobile/options')
 }
 </script>
