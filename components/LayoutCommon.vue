@@ -239,7 +239,6 @@ function updateWindowHeight() {
 }
 
 onMounted(async () => {
-  console.log('[STARTUP] LayoutCommon onMounted', performance.now())
   if (process.client) {
     // Start our timer. Holding the time in the store allows us to update the time regularly and have reactivity
     // cause displayed fromNow() values to change, rather than starting a timer for each of them.
