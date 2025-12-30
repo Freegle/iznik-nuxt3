@@ -20,7 +20,5 @@ RUN npm install --legacy-peer-deps
 
 EXPOSE 3001
 
-# Production build - always build and start, set PORT to 3001
-CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
-    rm -rf /tmp/nitro/worker-* && \
-    npm run build && export HOST=0 PORT=3001 && node .output/server/index.mjs
+# Use nginx caching proxy for better throughput
+CMD ["/app/modtools/start-with-nginx.sh"]
