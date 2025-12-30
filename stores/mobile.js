@@ -72,7 +72,6 @@ export const useMobileStore = defineStore({
     },
 
     async initApp() {
-      console.log('[STARTUP] initApp start', performance.now())
       // Only run app-specific initialization
       // Import app-specific modules dynamically to avoid issues in web build
       const { Device } = await import('@capacitor/device')
@@ -111,27 +110,16 @@ export const useMobileStore = defineStore({
         }
       }
 
-      console.log('[STARTUP] initApp imports done', performance.now())
       await this.getDeviceInfo(Device)
-      console.log('[STARTUP] initApp getDeviceInfo done', performance.now())
       this.fixWindowOpen(AppLauncher)
       this.initDeepLinks(App)
-      console.log('[STARTUP] initApp deepLinks done', performance.now())
       await this.initPushNotifications(PushNotifications, Badge)
-      console.log('[STARTUP] initApp pushNotifications done', performance.now())
       await this.checkForAppUpdate()
-      console.log('[STARTUP] initApp checkForAppUpdate done', performance.now())
       this.initWakeUpActions(App)
-      console.log('[STARTUP] initApp complete', performance.now())
     },
 
     async getDeviceInfo(Device) {
-      console.log('[STARTUP] getDeviceInfo start', performance.now())
       const deviceinfo = await Device.getInfo()
-      console.log(
-        '[STARTUP] getDeviceInfo Device.getInfo done',
-        performance.now()
-      )
       this.deviceinfo = deviceinfo
 
       // Build device info string - avoid duplicates (platform/operatingSystem are often same)
@@ -152,15 +140,7 @@ export const useMobileStore = defineStore({
       console.log('deviceuserinfo', this.deviceuserinfo)
       this.isiOS = deviceinfo.platform === 'ios'
       this.osVersion = deviceinfo.osVersion
-      console.log(
-        '[STARTUP] getDeviceInfo before Device.getId',
-        performance.now()
-      )
       const deviceid = await Device.getId()
-      console.log(
-        '[STARTUP] getDeviceInfo Device.getId done',
-        performance.now()
-      )
       this.devicePersistentId = deviceid.identifier
     },
 
@@ -262,7 +242,6 @@ export const useMobileStore = defineStore({
     },
 
     async initPushNotifications(PushNotifications, Badge) {
-      console.log('[STARTUP] initPushNotifications start', performance.now())
       dbg()?.info('initPushNotifications started', { isiOS: this.isiOS })
 
       if (!this.isiOS) {
@@ -333,10 +312,6 @@ export const useMobileStore = defineStore({
           vibration: false,
         })
 
-        console.log(
-          '[STARTUP] initPushNotifications Android channels created',
-          performance.now()
-        )
         dbg()?.info('Android notification channels created')
       } else {
         // iOS: Register notification action categories
@@ -351,15 +326,7 @@ export const useMobileStore = defineStore({
         }
       }
 
-      console.log(
-        '[STARTUP] initPushNotifications before checkPermissions',
-        performance.now()
-      )
       let permStatus = await PushNotifications.checkPermissions()
-      console.log(
-        '[STARTUP] initPushNotifications checkPermissions done',
-        performance.now()
-      )
       dbg()?.info('Push permission status', permStatus)
 
       await PushNotifications.addListener('registration', (token) => {
@@ -428,26 +395,10 @@ export const useMobileStore = defineStore({
       )
       console.log('addListener pushNotificationActionPerformed done')
 
-      console.log(
-        '[STARTUP] initPushNotifications before requestPermissions',
-        performance.now()
-      )
       permStatus = await PushNotifications.requestPermissions()
-      console.log(
-        '[STARTUP] initPushNotifications requestPermissions done',
-        performance.now()
-      )
       dbg()?.info('Push requestPermissions result', permStatus)
       if (permStatus.receive === 'granted') {
-        console.log(
-          '[STARTUP] initPushNotifications before register',
-          performance.now()
-        )
         await PushNotifications.register()
-        console.log(
-          '[STARTUP] initPushNotifications register done',
-          performance.now()
-        )
         dbg()?.info('Push register() called successfully')
       } else {
         console.log('Error on request: ', permStatus)
@@ -455,7 +406,6 @@ export const useMobileStore = defineStore({
       }
 
       this.setBadgeCount(0, Badge)
-      console.log('[STARTUP] initPushNotifications complete', performance.now())
       dbg()?.info('initPushNotifications completed')
     },
 
@@ -668,16 +618,11 @@ export const useMobileStore = defineStore({
     },
 
     async checkForAppUpdate() {
-      console.log('[STARTUP] checkForAppUpdate start', performance.now())
       const requiredKey = this.isiOS
         ? 'app_fd_version_ios_required'
         : 'app_fd_version_android_required'
 
       const reqdValues = await api(this.config).config.fetchv2(requiredKey)
-      console.log(
-        '[STARTUP] checkForAppUpdate API call done',
-        performance.now()
-      )
       if (reqdValues && reqdValues.length === 1) {
         const requiredVersion = reqdValues[0].value
         if (requiredVersion) {

@@ -14,7 +14,5 @@ COPY . .
 
 EXPOSE 3003
 
-# Production build - always build and start, set PORT to 3003
-CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
-    rm -rf /tmp/nitro/worker-* && \
-    npm run build && export HOST=0 PORT=3003 && npm run start
+# Use nginx caching proxy for better throughput
+CMD ["/app/start-with-nginx.sh"]
