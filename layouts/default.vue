@@ -20,24 +20,15 @@ const GoogleOneTap = defineAsyncComponent(() =>
 )
 const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
-console.log('[STARTUP] default.vue layout script start', performance.now())
 const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const proxy = runtimeConfig.public.IMAGE_DELIVERY
 const mobileStore = useMobileStore()
-console.log(
-  '[STARTUP] default.vue got runtimeConfig and mobileStore',
-  performance.now()
-)
 
 let ready = false
 const oneTap = ref(false)
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
-console.log(
-  '[STARTUP] default.vue got authStore and miscStore',
-  performance.now()
-)
 
 if (process.client) {
   // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
@@ -83,13 +74,6 @@ watch(
 // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
 const jwt = authStore.auth.jwt
 const persistent = authStore.auth.persistent
-console.log(
-  '[STARTUP] default.vue checking jwt/persistent, jwt=' +
-    !!jwt +
-    ', persistent=' +
-    !!persistent,
-  performance.now()
-)
 
 if (jwt || persistent) {
   // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
@@ -97,19 +81,11 @@ if (jwt || persistent) {
   // whether or not we can log in that way.
   let user = null
 
-  console.log(
-    '[STARTUP] default.vue BEFORE first fetchUser await',
-    performance.now()
-  )
   try {
     user = await authStore.fetchUser()
   } catch (e) {
     console.log('Error fetching user', e)
   }
-  console.log(
-    '[STARTUP] default.vue AFTER first fetchUser await, user=' + !!user,
-    performance.now()
-  )
 
   if (user) {
     ready = true
@@ -119,29 +95,16 @@ if (jwt || persistent) {
 if (!ready && !mobileStore.isApp) {
   // APP
   // We don't have a valid JWT.  See if OneTap can sign us in.
-  console.log('[STARTUP] default.vue enabling OneTap', performance.now())
   oneTap.value = true
 }
 
-console.log(
-  '[STARTUP] default.vue checking loginStateKnown=' + loginStateKnown.value,
-  performance.now()
-)
 if (!loginStateKnown.value) {
-  console.log(
-    '[STARTUP] default.vue BEFORE second fetchUser await',
-    performance.now()
-  )
   try {
     await authStore.fetchUser()
   } catch (e) {
     // Can fail during SSR if API is not accessible - don't fail the page
     console.log('Error in second fetchUser', e?.message)
   }
-  console.log(
-    '[STARTUP] default.vue AFTER second fetchUser await',
-    performance.now()
-  )
 }
 
 function googleLoggedIn() {

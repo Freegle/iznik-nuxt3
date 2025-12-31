@@ -95,15 +95,14 @@
             <p>
               This is an estimate of the weight of items we have diverted from
               the waste stream. People don't always tell us when things have
-              worked, so it's likely to be an underestimate. Benefit and CO2 are
+              worked, so it's likely to be an underestimate. Benefit is
               calculated using a
-              <a
+              <ExternalLink
                 href="https://www.wrap.ngo/resources/tool/environmental-and-economic-benefits-re-use"
-                target="_blank"
-                rel="noopener noreferrer"
-                >tool from WRAP</a
-              >. Figures are only available since September 2016 and may change
-              as we improve our estimates.
+                >tool from WRAP</ExternalLink
+              >, adjusted for inflation using the UK Consumer Price Index. CO2
+              impact is based on WRAP figures. Figures are only available since
+              September 2016 and may change as we improve our estimates.
             </p>
             <GChart
               type="ColumnChart"
@@ -150,6 +149,10 @@ import ActivityGraph from '~/components/ActivityGraph.vue'
 import { buildHead } from '~/composables/useBuildHead'
 import { useGroupStore } from '~/stores/group'
 import { useStatsStore } from '~/stores/stats'
+import {
+  getBenefitPerTonne,
+  CO2_PER_TONNE,
+} from '~/composables/useReuseBenefit'
 
 const GroupHeader = defineAsyncComponent(() =>
   import('~/components/GroupHeader.vue')
@@ -299,14 +302,15 @@ const totalWeight = computed(() => {
   return total / 1000
 })
 
-// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
+// Benefit of reuse per tonne and CO2 impact based on WRAP figures.
 // https://wrap.org.uk/resources/tool/benefits-reuse-tool
+// The benefit value is inflation-adjusted to current year prices.
 const totalBenefit = computed(() => {
-  return totalWeight.value * 711
+  return totalWeight.value * getBenefitPerTonne()
 })
 
 const totalCO2 = computed(() => {
-  return totalWeight.value * 0.51
+  return totalWeight.value * CO2_PER_TONNE
 })
 
 const balanceData = computed(() => {

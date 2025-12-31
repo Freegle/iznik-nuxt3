@@ -9,8 +9,11 @@
       class="message-expanded-mobile"
       :class="{ stickyAdRendered }"
     >
-      <!-- Hide the default navbar by teleporting an empty replacement (only when target exists) -->
-      <Teleport v-if="navbarMobileExists" to="#navbar-mobile">
+      <!-- Hide the default navbar by teleporting an empty replacement (only in fullscreen overlay mode) -->
+      <Teleport
+        v-if="navbarMobileExists && fullscreenOverlay"
+        to="#navbar-mobile"
+      >
         <div class="hidden-navbar" />
       </Teleport>
 

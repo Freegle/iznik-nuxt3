@@ -248,6 +248,8 @@ const replyTimeText = computed(() => {
 .profile-mobile {
   min-height: 100vh;
   background: $color-white;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 // Hero Section

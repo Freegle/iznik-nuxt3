@@ -30,6 +30,10 @@
 <script>
 import dayjs from 'dayjs'
 import ModDashboardBase from '~/components/ModDashboardBase'
+import {
+  getBenefitPerTonne,
+  CO2_PER_TONNE,
+} from '~/composables/useReuseBenefit'
 
 export default {
   extends: ModDashboardBase,
@@ -65,13 +69,14 @@ export default {
 
       return total / 1000
     },
-    // Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
+    // Benefit of reuse per tonne and CO2 impact based on WRAP figures.
     // https://wrap.org.uk/resources/tool/benefits-reuse-tool
+    // The benefit value is inflation-adjusted to current year prices.
     totalBenefit() {
-      return this.totalWeight * 711
+      return this.totalWeight * getBenefitPerTonne()
     },
     totalCO2() {
-      return this.totalWeight * 0.51
+      return this.totalWeight * CO2_PER_TONNE
     },
   },
 }
