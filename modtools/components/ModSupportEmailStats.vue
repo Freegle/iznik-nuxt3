@@ -182,8 +182,8 @@
           {{ formattedStats.clickToOpenRate }}%
         </div>
         <div class="stat-label">
-          Click/Open
-          <small class="text-muted d-block"> of opens </small>
+          Clicked
+          <small class="text-muted d-block"> once opened </small>
         </div>
       </div>
     </div>
