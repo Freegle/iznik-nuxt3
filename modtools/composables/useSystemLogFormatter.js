@@ -458,7 +458,12 @@ const LOG_FORMATTERS = {
   email: {
     default: (log) => {
       const raw = log.raw || {}
-      return `Sent ${raw.email_type || 'email'}: ${raw.subject || ''}`
+      const emailType = raw.email_type || 'email'
+      const subject = raw.subject || ''
+      // Include user ID if available (for linking in summary).
+      const userId = log.user_id || raw.user_id || raw.to_user
+      const userPart = userId ? ` to user #${userId}` : ''
+      return `Sent ${emailType}${userPart}: ${subject}`
     },
   },
 
