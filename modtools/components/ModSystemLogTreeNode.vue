@@ -168,7 +168,12 @@
             </div>
             <div v-else class="route-toggle-placeholder" />
             <div class="route-name">
-              {{ route.pageName }}
+              <v-icon
+                v-if="isRouteFromMobile(route)"
+                icon="mobile-alt"
+                class="mobile-indicator me-1"
+                title="Mobile app"
+              />{{ formatBreadcrumbSegment(route.pageName) }}
               <span
                 v-if="hasRouteChildren(route)"
                 class="route-counts text-muted"
@@ -767,6 +772,14 @@ export default {
         return segment.replace('/capacitor://localhost', '')
       }
       return segment
+    },
+    // Check if a specific route is from mobile app (capacitor://)
+    isRouteFromMobile(route) {
+      if (!route || !route.pageName) return false
+      return (
+        route.pageName.includes('capacitor://') ||
+        route.pageName.startsWith('/capacitor://')
+      )
     },
     togglePageLoadExpand() {
       if (this.isPageLoadGroup) {

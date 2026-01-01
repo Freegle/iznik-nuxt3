@@ -272,8 +272,9 @@ export default {
   },
   methods: {
     async doSearch() {
-      // If email is entered, look it up first to get user ID
+      // If email is entered, clear user ID first then look up to get the correct user ID
       if (this.emailInput.trim()) {
+        this.userIdInput = ''
         await this.lookupEmail()
         // Even if user not found, we still search by email address
       }
@@ -502,6 +503,7 @@ export default {
   color: #6c757d;
   z-index: 5;
   pointer-events: none;
+  font-size: 0.8rem;
 }
 
 /* Filters bar */
