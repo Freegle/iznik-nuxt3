@@ -8,14 +8,37 @@
           v-for="(photo, index) in attachments.slice(0, 4)"
           :key="photo.id || index"
           class="photo-thumb"
-          :class="{ 'photo-thumb-primary': index === 0 }"
+          :class="{
+            'photo-thumb-primary': index === 0,
+            'photo-thumb-ai': photo.externalmods && photo.externalmods.ai,
+          }"
         >
-          <img :src="photo.path || photo.preview || photo.paththumb" alt="" />
+          <OurUploadedImage
+            v-if="photo.ouruid"
+            :src="photo.ouruid"
+            :modifiers="photo.externalmods"
+            alt=""
+            :width="50"
+            :height="50"
+          />
+          <img
+            v-else
+            :src="photo.path || photo.preview || photo.paththumb"
+            alt=""
+          />
         </div>
         <div v-if="attachments.length > 4" class="photo-more">
           +{{ attachments.length - 4 }}
         </div>
-        <button class="edit-photos-btn" @click="editPhotos">
+        <!-- Show delete for AI illustration, edit for real photos -->
+        <button
+          v-if="hasOnlyAiIllustration"
+          class="delete-ai-btn"
+          @click="removeAiIllustration"
+        >
+          <v-icon icon="times" />
+        </button>
+        <button v-else class="edit-photos-btn" @click="editPhotos">
           <v-icon icon="pencil" />
         </button>
       </div>
@@ -31,6 +54,7 @@
           placeholder="e.g. Kids bike for 8 year old"
           size="lg"
           :state="itemState"
+          @blur="onItemBlur"
         />
       </div>
 
@@ -67,13 +91,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useRuntimeConfig } from '#app'
 import { useComposeStore } from '~/stores/compose'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
+import OurUploadedImage from '~/components/OurUploadedImage'
+import api from '~/api'
 
 const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
+const $api = api(runtimeConfig)
 const composeStore = useComposeStore()
 const authStore = useAuthStore()
 const miscStore = useMiscStore()
@@ -133,6 +162,25 @@ const attachments = computed(() => {
   return composeStore.attachments(messageId.value) || []
 })
 
+// Check if we only have AI illustrations (no real photos)
+const hasOnlyAiIllustration = computed(() => {
+  const atts = attachments.value
+  if (atts.length === 0) return false
+
+  const realPhotos = atts.filter(
+    (a) => !a.externalmods || a.externalmods.ai !== true
+  )
+  return realPhotos.length === 0 && atts.length > 0
+})
+
+// Remove AI illustration
+function removeAiIllustration() {
+  const filteredAtts = attachments.value.filter(
+    (a) => !a.externalmods || a.externalmods.ai !== true
+  )
+  composeStore.setAttachmentsForMessage(messageId.value, filteredAtts)
+}
+
 // Item name
 const item = computed({
   get() {
@@ -163,6 +211,88 @@ const description = computed({
 
 function editPhotos() {
   router.push('/find/mobile/photos')
+}
+
+// AI Illustration support
+const fetchingIllustration = ref(false)
+const lastFetchedItem = ref(null)
+
+async function fetchAiIllustration(itemName) {
+  if (!itemName || !itemName.trim()) return
+
+  const trimmedItem = itemName.trim()
+
+  const realPhotos = attachments.value.filter(
+    (a) => !a.externalmods || a.externalmods.ai !== true
+  )
+
+  if (
+    realPhotos.length > 0 ||
+    fetchingIllustration.value ||
+    lastFetchedItem.value === trimmedItem
+  ) {
+    return
+  }
+
+  fetchingIllustration.value = true
+  lastFetchedItem.value = trimmedItem
+
+  try {
+    const illustration = await $api.message.getIllustration(trimmedItem)
+
+    if (illustration && illustration.externaluid) {
+      const currentRealPhotos = attachments.value.filter(
+        (a) => !a.externalmods || a.externalmods.ai !== true
+      )
+
+      if (currentRealPhotos.length === 0) {
+        const filteredAtts = attachments.value.filter(
+          (a) => !a.externalmods || a.externalmods.ai !== true
+        )
+
+        composeStore.setAttachmentsForMessage(messageId.value, [
+          ...filteredAtts,
+          {
+            id: 'ai-' + Date.now(),
+            path: illustration.url,
+            paththumb: illustration.url,
+            ouruid: illustration.externaluid,
+            externalmods: { ai: true },
+            isAiIllustration: true,
+          },
+        ])
+      }
+    }
+  } catch (e) {
+    console.log('Failed to fetch AI illustration:', e.message)
+  } finally {
+    fetchingIllustration.value = false
+  }
+}
+
+watch(
+  () => composeStore.attachments(messageId.value),
+  (newVal, oldVal) => {
+    if (!oldVal || !Array.isArray(oldVal)) return
+
+    const hadAi = oldVal.some(
+      (a) => a.externalmods && a.externalmods.ai === true
+    )
+    const hasAi = newVal.some(
+      (a) => a.externalmods && a.externalmods.ai === true
+    )
+
+    if (hadAi && !hasAi) {
+      composeStore.setAiDeclined(messageId.value, true)
+    }
+  },
+  { deep: true }
+)
+
+function onItemBlur() {
+  if (item.value && item.value.trim()) {
+    fetchAiIllustration(item.value)
+  }
 }
 
 function validateAndNext() {
@@ -256,6 +386,11 @@ function validateAndNext() {
   border-width: 3px;
 }
 
+.photo-thumb-ai {
+  border-color: #6c757d;
+  border-style: dashed;
+}
+
 .photo-more {
   width: 50px;
   height: 50px;
@@ -286,6 +421,25 @@ function validateAndNext() {
 
 .edit-photos-btn:active {
   background: #e9ecef;
+}
+
+.delete-ai-btn {
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dc3545;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-ai-btn:active {
+  background: #f8d7da;
 }
 
 .form-section {

@@ -1,4 +1,8 @@
 export function suppressException(err) {
+  if (!err) {
+    return false
+  }
+
   if (
     err.message?.includes('leaflet') ||
     err.message?.includes('LatLng') ||

@@ -95,8 +95,9 @@ const { myid } = useMe()
 const showDown = ref(false)
 const showRemove = ref(false)
 
-// Fetch user data
+// Fetch user data - show cached immediately, then refresh in background.
 userStore.fetch(props.id)
+userStore.fetch(props.id, true)
 
 const user = computed(() => {
   let ret = null

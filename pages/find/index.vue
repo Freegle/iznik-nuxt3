@@ -56,12 +56,12 @@
 </template>
 
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import WizardProgressCompact from '~/components/WizardProgressCompact'
 import { setup, deleteItem } from '~/composables/useCompose'
-import { onMounted, computed, watch } from '#imports'
+import { onMounted, computed, watch, nextTick } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
 const PostMessageTablet = defineAsyncComponent(() =>
@@ -70,7 +70,6 @@ const PostMessageTablet = defineAsyncComponent(() =>
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
-const router = useRouter()
 const miscStore = useMiscStore()
 
 const breakpointReady = computed(() => miscStore.breakpoint !== null)
@@ -86,14 +85,28 @@ const showDesktopLayout = computed(
   () => breakpointReady.value && !isMobile.value
 )
 
+// Helper function to perform the mobile redirect.
+async function redirectToMobileIfNeeded() {
+  if (breakpointReady.value && isMobile.value && process.client) {
+    await navigateTo('/find/mobile/photos', { replace: true })
+  }
+}
+
+// Use onMounted with nextTick for initial check to ensure BreakpointFettler has run.
+// This prevents race conditions where the redirect happens before breakpoint is correctly detected.
+onMounted(async () => {
+  await nextTick()
+  await redirectToMobileIfNeeded()
+})
+
+// Watch for subsequent breakpoint changes (e.g., window resize).
 watch(
   () => ({ ready: breakpointReady.value, mobile: isMobile.value }),
-  ({ ready, mobile }) => {
+  async ({ ready, mobile }) => {
     if (ready && mobile && process.client) {
-      router.replace('/find/mobile/photos')
+      await navigateTo('/find/mobile/photos', { replace: true })
     }
-  },
-  { immediate: true }
+  }
 )
 
 useHead(

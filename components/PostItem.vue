@@ -9,6 +9,7 @@
         maxlength="60"
         spellcheck="true"
         size="lg"
+        @blur="onBlur"
       />
     </div>
     <div>
@@ -54,7 +55,7 @@ import { useMessageStore } from '~/stores/message'
 import { computed } from '#imports'
 import { useMe } from '~/composables/useMe'
 
-const emit = defineEmits(['update:edititem'])
+const emit = defineEmits(['update:edititem', 'blur'])
 
 const props = defineProps({
   id: {
@@ -308,5 +309,12 @@ const duplicate = computed(() => {
 // Methods
 const $id = (type) => {
   return uid(type)
+}
+
+const onBlur = () => {
+  // Emit blur event with the current item name for AI illustration fetching
+  if (item.value && item.value.trim()) {
+    emit('blur', item.value.trim())
+  }
 }
 </script>
