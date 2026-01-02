@@ -85,20 +85,17 @@ const showDesktopLayout = computed(
   () => breakpointReady.value && !isMobile.value
 )
 
-// Handle mobile redirect before any async operations.
+// Watch for breakpoint changes and redirect to mobile layout when appropriate.
 // Use navigateTo with replace for proper Nuxt navigation that works during client-side routing.
-if (process.client && breakpointReady.value && isMobile.value) {
-  await navigateTo('/give/mobile/photos', { replace: true })
-}
-
-// Watch for breakpoint changes after initial load (e.g., if breakpoint wasn't ready initially).
+// The { immediate: true } ensures this fires once the breakpoint is detected on initial load.
 watch(
   () => ({ ready: breakpointReady.value, mobile: isMobile.value }),
   async ({ ready, mobile }) => {
     if (ready && mobile && process.client) {
       await navigateTo('/give/mobile/photos', { replace: true })
     }
-  }
+  },
+  { immediate: true }
 )
 
 useHead(
