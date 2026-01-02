@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import WizardProgressCompact from '~/components/WizardProgressCompact'
@@ -70,7 +70,6 @@ const PostMessageTablet = defineAsyncComponent(() =>
 
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
-const router = useRouter()
 const miscStore = useMiscStore()
 
 const breakpointReady = computed(() => miscStore.breakpoint !== null)
@@ -86,14 +85,20 @@ const showDesktopLayout = computed(
   () => breakpointReady.value && !isMobile.value
 )
 
+// Handle mobile redirect before any async operations.
+// Use navigateTo with replace for proper Nuxt navigation that works during client-side routing.
+if (process.client && breakpointReady.value && isMobile.value) {
+  await navigateTo('/give/mobile/photos', { replace: true })
+}
+
+// Watch for breakpoint changes after initial load (e.g., if breakpoint wasn't ready initially).
 watch(
   () => ({ ready: breakpointReady.value, mobile: isMobile.value }),
-  ({ ready, mobile }) => {
+  async ({ ready, mobile }) => {
     if (ready && mobile && process.client) {
-      router.replace('/give/mobile/photos')
+      await navigateTo('/give/mobile/photos', { replace: true })
     }
-  },
-  { immediate: true }
+  }
 )
 
 useHead(
