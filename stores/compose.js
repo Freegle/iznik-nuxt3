@@ -75,9 +75,17 @@ export const useComposeStore = defineStore({
       const attids = []
 
       // Extract the server attachment id from message.attachments.
+      // Filter out AI illustrations - they have externalmods.ai = true
       if (message.attachments) {
         for (const attachment of message.attachments) {
-          attids.push(attachment.id)
+          // Skip AI illustrations - they're just for display
+          if (attachment.externalmods && attachment.externalmods.ai) {
+            continue
+          }
+          // Only include attachments with numeric IDs (server-side attachments)
+          if (attachment.id && typeof attachment.id === 'number') {
+            attids.push(attachment.id)
+          }
         }
       }
 
@@ -250,6 +258,11 @@ export const useComposeStore = defineStore({
       this.messages[id].deadline = deadline
       this.messages[id].savedAt = Date.now()
     },
+    setAiDeclined(id, declined) {
+      this.ensureMessage(id)
+      this.messages[id].aiDeclined = declined
+      this.messages[id].savedAt = Date.now()
+    },
     setDescription(params) {
       const id = params.id
       this.ensureMessage(id)
@@ -322,13 +335,16 @@ export const useComposeStore = defineStore({
 
           let result
 
-          // Build options for submitDraft with deadline/delivery if set
+          // Build options for submitDraft with deadline/delivery/aiDeclined if set
           const submitOptions = {}
           if (message.deadline) {
             submitOptions.deadline = new Date(message.deadline).toISOString()
           }
           if (message.deliveryPossible !== undefined) {
             submitOptions.deliverypossible = message.deliveryPossible
+          }
+          if (message.aiDeclined) {
+            submitOptions.ai_declined = true
           }
 
           if (!message.repostof) {

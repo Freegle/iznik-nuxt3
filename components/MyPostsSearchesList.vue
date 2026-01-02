@@ -60,7 +60,7 @@ const searches = computed(() => {
   display: flex;
   align-items: center;
   margin-bottom: 12px;
-  color: $color-blue--bright;
+  color: $colour-secondary;
 }
 
 .searches-title {
@@ -88,14 +88,14 @@ const searches = computed(() => {
   display: inline-flex;
   align-items: center;
   padding: 10px 20px;
-  background: $color-blue--bright;
+  background: $colour-secondary;
   color: white;
   border-radius: 25px;
   text-decoration: none;
   font-weight: 500;
 
   &:hover {
-    background: darken($color-blue--bright, 10%);
+    background: darken($colour-secondary, 10%);
     color: white;
   }
 }

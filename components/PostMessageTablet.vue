@@ -24,7 +24,13 @@
                 : 'What are you looking for?'
             }}
           </label>
-          <PostItem :id="id" ref="item" :type="type" class="detail-input" />
+          <PostItem
+            :id="id"
+            ref="item"
+            :type="type"
+            class="detail-input"
+            @blur="onItemBlur"
+          />
         </div>
 
         <!-- Description - grows to fill available space -->
@@ -67,8 +73,13 @@ import PhotoUploader from './PhotoUploader.vue'
 import { uid } from '~/composables/useId'
 import { useComposeStore } from '~/stores/compose'
 import { ref, watch, computed } from '#imports'
+import { useRuntimeConfig } from '#app'
+import api from '~/api'
 
 const PostItem = defineAsyncComponent(() => import('~/components/PostItem'))
+
+const runtimeConfig = useRuntimeConfig()
+const $api = api(runtimeConfig)
 
 const props = defineProps({
   id: {
@@ -105,6 +116,85 @@ watch(
 )
 
 currentAtts.value = JSON.parse(JSON.stringify(ret || []))
+
+// Track AI illustration state
+const fetchingIllustration = ref(false)
+const lastFetchedItem = ref(null)
+
+// Handle item field blur - fetch AI illustration if no photos
+async function onItemBlur(itemName) {
+  // Only fetch if:
+  // 1. There are no real photos (excluding AI illustrations)
+  // 2. We haven't already fetched for this item name
+  // 3. We're not currently fetching
+  const realPhotos = currentAtts.value.filter(
+    (a) => !a.externalmods || a.externalmods.ai !== true
+  )
+
+  if (
+    realPhotos.length > 0 ||
+    fetchingIllustration.value ||
+    lastFetchedItem.value === itemName
+  ) {
+    return
+  }
+
+  fetchingIllustration.value = true
+  lastFetchedItem.value = itemName
+
+  try {
+    const illustration = await $api.message.getIllustration(itemName)
+
+    if (illustration && illustration.externaluid) {
+      // Check again that no real photos were added while we were fetching
+      const currentRealPhotos = currentAtts.value.filter(
+        (a) => !a.externalmods || a.externalmods.ai !== true
+      )
+
+      if (currentRealPhotos.length === 0) {
+        // Remove any existing AI illustration first
+        currentAtts.value = currentAtts.value.filter(
+          (a) => !a.externalmods || a.externalmods.ai !== true
+        )
+
+        // Add the AI illustration as a special attachment
+        currentAtts.value.push({
+          id: 'ai-' + Date.now(),
+          path: illustration.url,
+          paththumb: illustration.url,
+          ouruid: illustration.externaluid,
+          externalmods: { ai: true },
+          isAiIllustration: true,
+        })
+      }
+    }
+  } catch (e) {
+    console.log('Failed to fetch AI illustration:', e.message)
+  } finally {
+    fetchingIllustration.value = false
+  }
+}
+
+// Watch for removal of AI illustration to track declined state
+watch(
+  currentAtts,
+  (newVal, oldVal) => {
+    if (!oldVal) return
+
+    const hadAi = oldVal.some(
+      (a) => a.externalmods && a.externalmods.ai === true
+    )
+    const hasAi = newVal.some(
+      (a) => a.externalmods && a.externalmods.ai === true
+    )
+
+    if (hadAi && !hasAi) {
+      // User removed the AI illustration - mark as declined
+      composeStore.setAiDeclined(props.id, true)
+    }
+  },
+  { deep: true }
+)
 
 const availablenow = computed({
   get() {
