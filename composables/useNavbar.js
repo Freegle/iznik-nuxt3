@@ -232,12 +232,20 @@ export function useNavbar() {
   }
 
   const backButton = () => {
-    if (router?.currentRoute?.value?.path?.includes('/chats/')) {
+    const currentPath = router?.currentRoute?.value?.path
+    if (currentPath?.includes('/chats/')) {
       // From a single chat we should always go back to the chat list.  This can happen if we've clicked on an
       // email notification and then clicked back.
       router.push('/chats')
-    } else if (router?.currentRoute?.value?.path === '/chats') {
+    } else if (currentPath === '/chats') {
       // From the chat list we should go home since there's no home button on mobile.
+      router.push('/')
+    } else if (
+      currentPath === '/give/mobile/photos' ||
+      currentPath === '/find/mobile/photos'
+    ) {
+      // From mobile photos page, go to home to avoid redirect loop.
+      // The /give and /find pages redirect to mobile/photos on mobile, so router.back() would loop.
       router.push('/')
     } else {
       try {
