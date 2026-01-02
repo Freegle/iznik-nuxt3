@@ -9,6 +9,24 @@ const { timeouts } = require('./config')
 const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
 /**
+ * Helper to add gotoAndVerify to a manually created page
+ * This is needed when using browser.newContext() to create a fresh context
+ */
+function addGotoAndVerify(page) {
+  page.gotoAndVerify = async (path, options = {}) => {
+    const baseUrl =
+      process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
+    const fullUrl = path.startsWith('http') ? path : `${baseUrl}${path}`
+    await page.goto(fullUrl, {
+      waitUntil: 'networkidle',
+      timeout: options.timeout || 60000,
+    })
+    return page
+  }
+  return page
+}
+
+/**
  * Helper to navigate to the details page in the mobile flow.
  * Handles the photos -> details transition.
  */
@@ -317,7 +335,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
       viewport: { width: 1200, height: 900 },
       ignoreHTTPSErrors: true,
     })
-    const page = await desktopContext.newPage()
+    const page = addGotoAndVerify(await desktopContext.newPage())
     console.log(
       'Created fresh browser context with desktop viewport (1200x900)'
     )
@@ -408,7 +426,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
       viewport: { width: 1200, height: 900 },
       ignoreHTTPSErrors: true,
     })
-    const page = await desktopContext.newPage()
+    const page = addGotoAndVerify(await desktopContext.newPage())
     console.log(
       'Created fresh browser context with desktop viewport (1200x900)'
     )
@@ -482,7 +500,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
       viewport: { width: 1200, height: 900 },
       ignoreHTTPSErrors: true,
     })
-    const page = await desktopContext.newPage()
+    const page = addGotoAndVerify(await desktopContext.newPage())
     console.log(
       'Created fresh browser context with desktop viewport (1200x900)'
     )
@@ -573,7 +591,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
       viewport: { width: 1200, height: 900 },
       ignoreHTTPSErrors: true,
     })
-    const page = await desktopContext.newPage()
+    const page = addGotoAndVerify(await desktopContext.newPage())
     console.log(
       'Created fresh browser context with desktop viewport (1200x900)'
     )
