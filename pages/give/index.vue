@@ -61,7 +61,7 @@ import { buildHead } from '~/composables/useBuildHead'
 import NoticeMessage from '~/components/NoticeMessage'
 import WizardProgressCompact from '~/components/WizardProgressCompact'
 import { setup, deleteItem } from '~/composables/useCompose'
-import { onMounted, computed, watch } from '#imports'
+import { onMounted, computed, watch, nextTick } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 
 const PostMessageTablet = defineAsyncComponent(() =>
@@ -85,17 +85,28 @@ const showDesktopLayout = computed(
   () => breakpointReady.value && !isMobile.value
 )
 
-// Watch for breakpoint changes and redirect to mobile layout when appropriate.
-// Use navigateTo with replace for proper Nuxt navigation that works during client-side routing.
-// The { immediate: true } ensures this fires once the breakpoint is detected on initial load.
+// Helper function to perform the mobile redirect.
+async function redirectToMobileIfNeeded() {
+  if (breakpointReady.value && isMobile.value && process.client) {
+    await navigateTo('/give/mobile/photos', { replace: true })
+  }
+}
+
+// Use onMounted with nextTick for initial check to ensure BreakpointFettler has run.
+// This prevents race conditions where the redirect happens before breakpoint is correctly detected.
+onMounted(async () => {
+  await nextTick()
+  await redirectToMobileIfNeeded()
+})
+
+// Watch for subsequent breakpoint changes (e.g., window resize).
 watch(
   () => ({ ready: breakpointReady.value, mobile: isMobile.value }),
   async ({ ready, mobile }) => {
     if (ready && mobile && process.client) {
       await navigateTo('/give/mobile/photos', { replace: true })
     }
-  },
-  { immediate: true }
+  }
 )
 
 useHead(
