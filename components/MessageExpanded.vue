@@ -259,13 +259,34 @@
             <div class="description-section">
               <div class="section-header">
                 <span class="section-header-text">DESCRIPTION</span>
-                <NuxtLink
-                  :to="'/message/' + id"
-                  class="section-id-link"
-                  @click.stop
-                >
-                  #{{ id }}
-                </NuxtLink>
+                <div class="section-header-actions">
+                  <button
+                    class="action-button"
+                    title="Share this post"
+                    @click.stop="showShare"
+                  >
+                    <v-icon icon="share-alt" />
+                    <span class="action-button-text">Share</span>
+                  </button>
+                  <client-only>
+                    <button
+                      v-if="loggedIn && message.groups?.length"
+                      class="action-button action-button--report"
+                      title="Report this post"
+                      @click.stop="showReport"
+                    >
+                      <v-icon icon="flag" />
+                      <span class="action-button-text">Report</span>
+                    </button>
+                  </client-only>
+                  <NuxtLink
+                    :to="'/message/' + id"
+                    class="section-id-link"
+                    @click.stop
+                  >
+                    #{{ id }}
+                  </NuxtLink>
+                </div>
               </div>
               <div class="description-content">
                 <MessageTextBody :id="id" />
@@ -506,6 +527,20 @@
       :initial-index="currentPhotoIndex"
       @hidden="showMessagePhotosModal = false"
     />
+
+    <!-- Share Modal -->
+    <MessageShareModal
+      v-if="showShareModal && message.url"
+      :id="message.id"
+      @hidden="showShareModal = false"
+    />
+
+    <!-- Report Modal -->
+    <MessageReportModal
+      v-if="showReportModal"
+      :id="id"
+      @hidden="showReportModal = false"
+    />
   </div>
 </template>
 
@@ -531,6 +566,12 @@ import { useModalHistory } from '~/composables/useModalHistory'
 const MessageMap = defineAsyncComponent(() => import('~/components/MessageMap'))
 const MessagePhotosModal = defineAsyncComponent(() =>
   import('~/components/MessagePhotosModal')
+)
+const MessageShareModal = defineAsyncComponent(() =>
+  import('~/components/MessageShareModal')
+)
+const MessageReportModal = defineAsyncComponent(() =>
+  import('~/components/MessageReportModal')
 )
 
 const props = defineProps({
@@ -563,7 +604,7 @@ const props = defineProps({
 const emit = defineEmits(['zoom', 'close'])
 
 const miscStore = useMiscStore()
-const { me } = useMe()
+const { me, loggedIn } = useMe()
 
 // Use shared composable for common message display logic
 const {
@@ -595,6 +636,8 @@ const replied = ref(false)
 const replyExpanded = ref(false)
 const showMapModal = ref(false)
 const showMessagePhotosModal = ref(false)
+const showShareModal = ref(false)
+const showReportModal = ref(false)
 const currentPhotoIndex = ref(0)
 const containerRef = ref(null)
 const thumbnailsRef = ref(null)
@@ -664,6 +707,14 @@ function showPhotosModal() {
     showMessagePhotosModal.value = true
     emit('zoom')
   }
+}
+
+function showShare() {
+  showShareModal.value = true
+}
+
+function showReport() {
+  showReportModal.value = true
 }
 
 function selectPhoto(index) {
@@ -1605,6 +1656,50 @@ onUnmounted(() => {
   font-weight: 600;
   color: $color-gray--base;
   letter-spacing: 0.1em;
+}
+
+.section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid $color-gray--light;
+  background: $color-white;
+  color: $color-gray--dark;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $color-gray-3;
+    border-color: $color-gray--base;
+    color: $color-gray--darker;
+  }
+
+  &--report {
+    color: $color-red--dark;
+    border-color: $color-red--light;
+
+    &:hover {
+      background: $color-red--lighter;
+      border-color: $color-red--dark;
+    }
+  }
+}
+
+.action-button-text {
+  display: none;
+
+  @include media-breakpoint-up(md) {
+    display: inline;
+  }
 }
 
 .section-id-link {
