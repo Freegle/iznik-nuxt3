@@ -334,14 +334,17 @@ export const useEmailTrackingStore = defineStore({
     timeSeriesChartData: (state) => {
       if (!state.timeSeries.length) return null
 
-      // Header row for the chart - focus on engagement rates, not raw counts.
-      const data = [['Date', 'Click Rate (%)', 'Bounce Rate (%)']]
+      // Header row for the chart - show opens, clicks and bounces.
+      const data = [
+        ['Date', 'Open Rate (%)', 'Click Rate (%)', 'Bounce Rate (%)'],
+      ]
 
       state.timeSeries.forEach((day) => {
         const date = new Date(day.date)
+        const openRate = day.sent > 0 ? (day.opened / day.sent) * 100 : 0
         const clickRate = day.sent > 0 ? (day.clicked / day.sent) * 100 : 0
         const bounceRate = day.sent > 0 ? (day.bounced / day.sent) * 100 : 0
-        data.push([date, clickRate, bounceRate])
+        data.push([date, openRate, clickRate, bounceRate])
       })
 
       return data
@@ -351,14 +354,21 @@ export const useEmailTrackingStore = defineStore({
     typeComparisonChartData: (state) => {
       if (!state.statsByType.length) return null
 
-      // Focus on engagement rates by email type.
-      const data = [['Email Type', 'Click Rate (%)', 'Bounce Rate (%)']]
+      // Show opens, clicks and bounces by email type.
+      const data = [
+        ['Email Type', 'Open Rate (%)', 'Click Rate (%)', 'Bounce Rate (%)'],
+      ]
 
       state.statsByType.forEach((type) => {
         // Capitalize first letter for display.
         const displayName =
           type.email_type.charAt(0).toUpperCase() + type.email_type.slice(1)
-        data.push([displayName, type.click_rate || 0, type.bounce_rate || 0])
+        data.push([
+          displayName,
+          type.open_rate || 0,
+          type.click_rate || 0,
+          type.bounce_rate || 0,
+        ])
       })
 
       return data

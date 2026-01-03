@@ -201,11 +201,11 @@
 
     <!-- Charts Section -->
     <div v-if="emailTrackingStore.hasStats" class="charts-section mt-4">
-      <h5 class="mb-3">Engagement Analysis</h5>
+      <h5 class="mb-3">Opens, Clicks and Bounces</h5>
       <p class="text-muted small mb-3">
-        These charts show email engagement rates - how well our emails perform.
-        Click Rate and Bounce Rate are reliable metrics. Higher click rates and
-        lower bounce rates indicate better email quality.
+        These charts show open rates, click rates and bounce rates. Open rates
+        are underestimated due to tracking being blocked by some email clients.
+        Click rates and bounce rates are reliable metrics.
       </p>
 
       <div class="charts-grid">
@@ -647,7 +647,7 @@ export default {
     // Chart options for Google Charts.
     getEngagementChartOptions() {
       return {
-        title: 'Engagement Rates Over Time',
+        title: 'Opens, Clicks and Bounces Over Time',
         curveType: 'function',
         legend: { position: 'bottom' },
         chartArea: { width: '85%', height: '70%' },
@@ -661,8 +661,9 @@ export default {
           format: 'dd MMM',
         },
         series: {
-          0: { color: '#17a2b8' }, // Click rate - blue
-          1: { color: '#dc3545' }, // Bounce rate - red
+          0: { color: '#28a745' }, // Open rate - green
+          1: { color: '#17a2b8' }, // Click rate - blue
+          2: { color: '#dc3545' }, // Bounce rate - red
         },
         animation: {
           startup: true,
@@ -674,7 +675,7 @@ export default {
 
     getTypeComparisonOptions() {
       return {
-        title: 'Engagement by Email Type',
+        title: 'Opens, Clicks and Bounces by Email Type',
         legend: { position: 'bottom' },
         chartArea: { width: '85%', height: '65%' },
         vAxis: {
@@ -686,8 +687,9 @@ export default {
           title: 'Email Type',
         },
         series: {
-          0: { color: '#17a2b8' }, // Click rate - blue
-          1: { color: '#dc3545' }, // Bounce rate - red
+          0: { color: '#28a745' }, // Open rate - green
+          1: { color: '#17a2b8' }, // Click rate - blue
+          2: { color: '#dc3545' }, // Bounce rate - red
         },
         bar: { groupWidth: '70%' },
         animation: {
