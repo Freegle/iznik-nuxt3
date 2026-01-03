@@ -277,8 +277,9 @@ function handleScroll() {
     // Scrolling down - hide
     setNavBarHidden(true)
   } else if (scrollDelta < -scrollThreshold && navBarHidden.value) {
-    // Scrolling up - show
-    setNavBarHidden(false)
+    // Scrolling up - show immediately, bypassing typing delay
+    clearNavBarTimeout()
+    navBarHidden.value = false
   }
 
   lastScrollY.value = scrollY

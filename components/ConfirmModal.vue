@@ -1,5 +1,10 @@
 <template>
-  <b-modal ref="modal" scrollable :title="props.title">
+  <b-modal
+    ref="modal"
+    scrollable
+    :title="props.title"
+    modal-class="confirm-modal"
+  >
     <template #default>
       <slot name="default">
         <!-- eslint-disable-next-line -->

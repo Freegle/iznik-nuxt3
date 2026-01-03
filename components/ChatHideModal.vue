@@ -1,5 +1,11 @@
 <template>
-  <b-modal ref="modal" scrollable :title="title" no-stacking>
+  <b-modal
+    ref="modal"
+    scrollable
+    :title="title"
+    no-stacking
+    modal-class="confirm-modal"
+  >
     <template #default>
       <b-row>
         <b-col>

@@ -30,6 +30,21 @@
               </b-input-group>
             </div>
 
+            <div v-if="!payPalFallback" class="frequency-toggle">
+              <button
+                :class="['freq-btn', { active: !monthly }]"
+                @click="monthly = false"
+              >
+                One-off
+              </button>
+              <button
+                :class="['freq-btn', { active: monthly }]"
+                @click="monthly = true"
+              >
+                Monthly
+              </button>
+            </div>
+
             <div v-if="parseFloat(amount)" class="payment-section">
               <DonationButton
                 v-if="payPalFallback"
@@ -39,7 +54,7 @@
               />
               <StripeDonate
                 v-else
-                :key="amount + '-stripe'"
+                :key="amount + '-' + monthly + '-stripe'"
                 :price="amount"
                 :monthly="monthly"
                 @success="succeeded"
@@ -259,6 +274,40 @@ useHead(
   .amount-field {
     font-size: 1.25rem;
     text-align: center;
+  }
+}
+
+.frequency-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 1.5rem;
+}
+
+.freq-btn {
+  padding: 0.5rem 1.5rem;
+  border: 2px solid $color-green-background;
+  background: white;
+  color: $color-green-background;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:first-child {
+    border-right: 1px solid $color-green-background;
+  }
+
+  &:last-child {
+    border-left: 1px solid $color-green-background;
+  }
+
+  &.active {
+    background: $color-green-background;
+    color: white;
+  }
+
+  &:hover:not(.active) {
+    background: rgba($color-green-background, 0.1);
   }
 }
 
