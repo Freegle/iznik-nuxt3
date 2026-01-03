@@ -4,6 +4,7 @@
     scrollable
     :title="'Block ' + props.user.displayname"
     no-stacking
+    modal-class="confirm-modal"
   >
     <template #default>
       <b-row>

@@ -1,5 +1,8 @@
 <template>
-  <div :class="selected ? 'selected' : ''" @click="selectMe">
+  <div
+    :class="{ selected: selected, deleted: isMessageDeleted }"
+    @click="selectMe"
+  >
     <div v-if="chatmessage?.type === 'Default'">
       <chat-message-text
         :id="id"
@@ -198,9 +201,9 @@ const { chat, otheruser, chatmessage } = await setupChat(props.chatid, props.id)
 const phoneNumber = computed(() => {
   let ret = false
 
-  if (chatmessage?.message) {
+  if (chatmessage.value?.message) {
     const re = /\+(\d\d)[^:]/gm
-    const matches = re.exec(chatmessage.message)
+    const matches = re.exec(chatmessage.value.message)
 
     if (matches && matches.length > 1) {
       const country = matches[1]
@@ -215,17 +218,14 @@ const phoneNumber = computed(() => {
 })
 
 const isMessageDeleted = computed(() => {
-  // there should ideally be a flag on the message object indicating whether it's deleted or not, but for now we're
-  // instead checking the message contents. If it's "(Message deleted)", then we treat the message as deleted.
-  // Though that's obviously not ideal since a user can manually send a message with the same contents and it'd be
-  // still considered deleted
-  return chatmessage.message === '(Message deleted)'
+  return chatmessage.value?.deleted
 })
 
 // Methods
 const selectMe = () => {
   // don't allow to select deleted messages and messages consisting of a single image
-  if (!isMessageDeleted.value && !chatmessage.imageid) selected.value = true
+  if (!isMessageDeleted.value && !chatmessage.value?.imageid)
+    selected.value = true
 }
 
 const markUnread = async () => {
@@ -263,6 +263,11 @@ const deleteMessage = async () => {
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.deleted {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
 :deep(.card) {
