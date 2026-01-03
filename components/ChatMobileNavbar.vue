@@ -390,14 +390,17 @@ const markRead = async () => {
 }
 
 const showhide = () => {
+  profileCardExpanded.value = false
   showChatHide.value = true
 }
 
 const showblock = () => {
+  profileCardExpanded.value = false
   showChatBlock.value = true
 }
 
 const report = () => {
+  profileCardExpanded.value = false
   showChatReport.value = true
 }
 
