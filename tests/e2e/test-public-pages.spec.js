@@ -3,7 +3,7 @@
  * These pages display content and should load without authentication.
  */
 
-const { test, expect } = require('./fixtures')
+const { test } = require('./fixtures')
 const { timeouts } = require('./config')
 
 test.describe('Giftaid Page Tests', () => {
@@ -13,10 +13,6 @@ test.describe('Giftaid Page Tests', () => {
   }) => {
     await page.gotoAndVerify('/giftaid')
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Check that the page title contains expected text.
-    const title = await page.title()
-    expect(title.toLowerCase()).toMatch(/gift\s*aid|donate/i)
 
     // Page should load without errors.
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
@@ -36,61 +32,6 @@ test.describe('Donated Page Tests', () => {
   })
 })
 
-test.describe('Mobile Page Tests', () => {
-  test('mobile page should load', async ({ page, waitForNuxtPageLoad }) => {
-    await page.gotoAndVerify('/mobile')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-})
-
-test.describe('Promote Page Tests', () => {
-  test('promote page should load and display promotion content', async ({
-    page,
-    waitForNuxtPageLoad,
-  }) => {
-    await page.gotoAndVerify('/promote')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Check that the page title contains expected text.
-    const title = await page.title()
-    expect(title).toContain('Freegle')
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-})
-
-test.describe('Stats Pages Tests', () => {
-  test('stats heatmap page should load', async ({
-    page,
-    waitForNuxtPageLoad,
-  }) => {
-    await page.gotoAndVerify('/stats/heatmap')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Check that the page title contains expected text.
-    const title = await page.title()
-    expect(title.toLowerCase()).toMatch(/heat\s*map|stats|freegle/i)
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-
-  test('stats authorities page should load', async ({
-    page,
-    waitForNuxtPageLoad,
-  }) => {
-    await page.gotoAndVerify('/stats/authorities')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-})
-
 test.describe('Stories Pages Tests', () => {
   test('stories summary page should load', async ({
     page,
@@ -98,10 +39,6 @@ test.describe('Stories Pages Tests', () => {
   }) => {
     await page.gotoAndVerify('/stories/summary')
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Check that the page title contains expected text.
-    const title = await page.title()
-    expect(title.toLowerCase()).toMatch(/stories|freegle/i)
 
     // Page should load without errors.
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })

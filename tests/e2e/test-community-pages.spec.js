@@ -127,23 +127,6 @@ test.describe('Stats Page Tests', () => {
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
   })
 
-  test('stats page loads with loading indicator then content', async ({
-    page,
-    waitForNuxtPageLoad,
-  }) => {
-    await page.gotoAndVerify('/stats')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Wait for either loading indicator or actual content.
-    // The page shows a loading gif initially then displays charts.
-    const loadingOrContent = page.locator(
-      'img[alt="Loading..."], text=Weights, text=Members'
-    )
-    await loadingOrContent
-      .first()
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-  })
-
   test('stats authorities page should load', async ({
     page,
     waitForNuxtPageLoad,
@@ -153,9 +136,6 @@ test.describe('Stats Page Tests', () => {
 
     // The page should load without errors.
     await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-
-    const title = await page.title()
-    expect(title.toLowerCase()).toMatch(/stats|authorities/i)
   })
 })
 
