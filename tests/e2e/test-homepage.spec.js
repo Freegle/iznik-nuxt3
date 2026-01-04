@@ -7,6 +7,9 @@ const { test, expect } = require('./fixtures')
 const { timeouts, environment, selectors, breakpoints } = require('./config')
 
 test.describe('Homepage tests', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   // Test from the original home.spec.js
   test('homepage should load without console errors', async ({
     page,

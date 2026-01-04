@@ -134,6 +134,9 @@ async function testLoginWithMarketingConsent(
 }
 
 test.describe('Marketing Consent', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   test.beforeEach(async ({ page }) => {
     setupNavigationHelpers(page)
     await logoutIfLoggedIn(page)

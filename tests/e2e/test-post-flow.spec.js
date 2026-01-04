@@ -7,6 +7,9 @@ const { environment, timeouts } = require('./config')
 const { loginViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
 test.describe('Post flow tests', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   test('Logged out, new user, basic OFFER post, no attachment', async ({
     page,
     testEmail,

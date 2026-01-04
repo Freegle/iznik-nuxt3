@@ -120,6 +120,9 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 }
 
 test.describe('Settings Page - Email Level Settings', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   test.skip('Email level "Off" saves correctly and persists after page reload', async ({
     page,
     testEmail,

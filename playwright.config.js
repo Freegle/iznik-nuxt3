@@ -28,7 +28,7 @@ if (fs.existsSync(orderedTestsFile)) {
 module.exports = defineConfig({
   testDir: './tests/e2e',
   testMatch,
-  fullyParallel: false,
+  fullyParallel: true, // Enable parallel execution - individual files use serial mode if needed
   forbidOnly: !!process.env.CI,
   retries: 1,
   workers: 11, // Parallel workers - testing 11 to improve CI performance

@@ -18,6 +18,8 @@ const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
 
 test.describe('Registration and unsubscription flow', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
   test('should register a test email and verify unsubscribe fails for non-existent user', async ({
     page,
   }) => {
@@ -42,9 +44,7 @@ test.describe('Registration and unsubscription flow', () => {
 
     // This should succeed since we've modified unsubscribeManually to return true
     // when "We don't recognise that email address" message is shown
-    expect(unsubscribeResult).toBe(
-      true,
-    )
+    expect(unsubscribeResult).toBe(true)
 
     // Take a screenshot of the failure
     await unsubscribePage.screenshot({

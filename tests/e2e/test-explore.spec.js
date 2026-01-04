@@ -8,6 +8,9 @@ const { environment, timeouts } = require('./config')
 const { signUpViaHomepage } = require('./utils/user')
 
 test.describe('Explore Page Tests', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   test('Navigate to explore page and test join button', async ({
     page,
     testEmail,

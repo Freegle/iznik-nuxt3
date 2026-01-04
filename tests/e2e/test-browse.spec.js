@@ -12,6 +12,9 @@ const {
 } = require('./utils/user')
 
 test.describe('Browse Page Tests', () => {
+  // Run tests serially until parallelization is verified safe
+  test.describe.configure({ mode: 'serial' })
+
   // TODO: Fix this test - it's failing because the postcode validation doesn't complete properly
   // The test gets stuck waiting for the postcode input to disappear after entering the postcode
   // Need to investigate the postcode validation flow and fix the test
