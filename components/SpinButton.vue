@@ -27,6 +27,7 @@
 <script setup>
 import { useMiscStore } from '~/stores/misc'
 import { ref, defineAsyncComponent, onBeforeUnmount } from '#imports'
+import { action } from '~/composables/useClientLog'
 const { $sentryCaptureException } = useNuxtApp()
 
 const ConfirmModal = defineAsyncComponent(() => import('./ConfirmModal'))
@@ -157,6 +158,11 @@ const forgottenCallback = () => {
   // Callbacks validly won't fire if we're offline, as the AJAX request won't complete.
   if (useMiscStore().online) {
     finishSpinner()
+    action('spinbutton_callback_forgotten', {
+      variant: props.variant,
+      label: props.label,
+      icon_name: props.iconName,
+    })
     $sentryCaptureException(
       'SpinButton - callback not called, ' +
         props.variant +
