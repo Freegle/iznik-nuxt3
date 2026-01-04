@@ -4,6 +4,11 @@
  * These tests cover the reply flow state machine with comprehensive coverage
  * of all user states and entry points, plus edge cases.
  *
+ * PARALLELIZATION STRATEGY
+ * ========================
+ * - Tests using existingTestEmail (1.1, 1.2, 1.3): Run SERIAL (shared pre-registered user)
+ * - Tests creating unique users (2.x, 3.x, edge cases): Run PARALLEL
+ *
  * TEST MATRIX
  * ===========
  *
@@ -398,8 +403,12 @@ async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
 test.describe('Reply Flow - Test Matrix', () => {
   /* --------------------------------------------------------------------------
    * ROW 1: Logged In User (Tests 1.1, 1.2, 1.3)
+   * These tests MUST run serially because they share existingTestEmail
    * -------------------------------------------------------------------------- */
   test.describe('Logged In User', () => {
+    // Tests 1.x use existingTestEmail (shared pre-registered user) - must be serial
+    test.describe.configure({ mode: 'serial' })
+
     test('1.1 can reply from Message Page', async ({
       page,
       postMessage,
@@ -575,8 +584,12 @@ test.describe('Reply Flow - Test Matrix', () => {
 
   /* --------------------------------------------------------------------------
    * ROW 2: New User (Registration Flow) (Tests 2.1, 2.2, 2.3)
+   * Each test creates unique users - can run in PARALLEL
    * -------------------------------------------------------------------------- */
   test.describe('New User Registration', () => {
+    // Tests 2.x create unique users - can run in parallel
+    test.describe.configure({ mode: 'parallel' })
+
     test('2.1 can register and reply from Message Page', async ({
       page,
       postMessage,
@@ -709,8 +722,12 @@ test.describe('Reply Flow - Test Matrix', () => {
 
   /* --------------------------------------------------------------------------
    * ROW 3: Existing User (Forced Login Flow) (Tests 3.1, 3.2, 3.3)
+   * Each test creates unique users - can run in PARALLEL
    * -------------------------------------------------------------------------- */
   test.describe('Existing User Forced Login', () => {
+    // Tests 3.x create unique users - can run in parallel
+    test.describe.configure({ mode: 'parallel' })
+
     test('3.1 can login and reply from Message Page', async ({
       page,
       postMessage,
@@ -1047,9 +1064,13 @@ test.describe('Reply Flow - Test Matrix', () => {
 
 /* ============================================================================
  * EDGE CASES: State Machine Robustness
+ * Each edge case test creates unique users - can run in PARALLEL
  * ============================================================================ */
 
 test.describe('Reply Flow - Edge Cases', () => {
+  // Edge case tests create unique users - can run in parallel
+  test.describe.configure({ mode: 'parallel' })
+
   /* --------------------------------------------------------------------------
    * State Persistence Tests
    * -------------------------------------------------------------------------- */
@@ -1513,6 +1534,9 @@ test.describe('Reply Flow - Edge Cases', () => {
  * ============================================================================ */
 
 test.describe('Reply Flow - Social Login Simulation', () => {
+  // Social login tests create unique users - can run in parallel
+  test.describe.configure({ mode: 'parallel' })
+
   /**
    * This test simulates what happens when a user completes social login
    * (Google, Facebook, Apple) while composing a reply. The key mechanism is:
@@ -1715,6 +1739,9 @@ test.describe('Reply Flow - Social Login Simulation', () => {
  * ============================================================================ */
 
 test.describe('Reply Flow - State Machine Logging', () => {
+  // State machine logging tests create unique users - can run in parallel
+  test.describe.configure({ mode: 'parallel' })
+
   test('logs state transitions during successful reply', async ({
     page,
     postMessage,
