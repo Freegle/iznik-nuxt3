@@ -118,6 +118,40 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
     if (navigateToHome) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
+
+      // Wait for network to settle after navigation
+      await page.waitForLoadState('networkidle', {
+        timeout: timeouts.navigation.default,
+      })
+
+      // Verify logged-out state by checking localStorage auth is cleared
+      const isLoggedOut = await page.evaluate(() => {
+        try {
+          const authData = localStorage.getItem('auth')
+          if (!authData) return true
+          const parsed = JSON.parse(authData)
+          const tokens = parsed?.auth
+          // Check if there are any valid tokens remaining
+          return !(tokens?.jwt || tokens?.persistent)
+        } catch (e) {
+          return true // If we can't parse, assume logged out
+        }
+      })
+
+      if (!isLoggedOut) {
+        console.log(
+          'Warning: Auth data still present after logout, clearing again'
+        )
+        // Try clearing again
+        await clearSessionData(page)
+        // Reload to ensure fresh state
+        await page.reload({ timeout: timeouts.navigation.initial })
+        await page.waitForLoadState('networkidle', {
+          timeout: timeouts.navigation.default,
+        })
+      }
+
+      console.log('Verified logged-out state')
     }
 
     return page

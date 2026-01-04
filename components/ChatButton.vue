@@ -32,6 +32,7 @@ import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useRouter } from '#imports'
 import { useMe } from '~/composables/useMe'
+import { action } from '~/composables/useClientLog'
 
 const props = defineProps({
   size: {
@@ -112,17 +113,40 @@ const openChat = async (event, firstmessage, firstmsgid) => {
 
     router.push('/chats/' + chatid)
   } else if (props.userid > 0) {
-    const chatid = await chatStore.openChatToUser({
-      userid: props.userid,
-      chattype: props.chattype,
-    })
+    let chatid = null
+    try {
+      chatid = await chatStore.openChatToUser({
+        userid: props.userid,
+        chattype: props.chattype,
+      })
+    } catch (e) {
+      action('chat_open_failed', {
+        error: e.message,
+        userid: props.userid,
+        message_id: firstmsgid,
+      })
+      throw e
+    }
 
     if (chatid) {
       if (firstmessage) {
         console.log('First message to send', firstmessage)
-        await chatStore.send(chatid, firstmessage, null, null, firstmsgid)
+        try {
+          await chatStore.send(chatid, firstmessage, null, null, firstmsgid)
+          console.log('Sent')
 
-        console.log('Sent')
+          action('chat_message_sent', {
+            chat_id: chatid,
+            message_id: firstmsgid,
+          })
+        } catch (e) {
+          action('chat_send_failed', {
+            error: e.message,
+            chat_id: chatid,
+            message_id: firstmsgid,
+          })
+          throw e
+        }
 
         if (firstmsgid) {
           // Update the message so that the reply count is updated. No need to wait.
@@ -150,6 +174,12 @@ const openChat = async (event, firstmessage, firstmsgid) => {
         params: {
           id: chatid,
         },
+      })
+    } else {
+      // chatid is null/undefined - log this as it means openChatToUser failed silently
+      action('chat_open_no_chatid', {
+        userid: props.userid,
+        message_id: firstmsgid,
       })
     }
   }
