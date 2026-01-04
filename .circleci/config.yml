@@ -957,6 +957,48 @@ jobs:
               echo "ℹ️  No submission occurred (already in review or no new build found)"
             fi
 
+  # Check if commit is a hotfix and trigger immediate promotion
+  check-hotfix-promote:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Check for Hotfix Commit
+          command: |
+            # Get the commit message
+            COMMIT_MSG=$(git log -1 --format=%s)
+            echo "Commit message: $COMMIT_MSG"
+
+            # Check for hotfix: prefix (case-insensitive)
+            if echo "$COMMIT_MSG" | grep -qi "^hotfix:"; then
+              echo "🚨 HOTFIX DETECTED: $COMMIT_MSG"
+              echo "Triggering immediate production promotion..."
+
+              # Trigger the promotion workflow via CircleCI API
+              curl -X POST \
+                -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d '{"branch":"production","parameters":{"run_manual_promote":true}}' \
+                "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/pipeline"
+
+              echo "✅ Promotion workflow triggered"
+              echo ""
+              echo "📧 Sending notification..."
+
+              # Log notification (actual email would be sent by the promotion workflow)
+              echo "Subject: 🚨 Hotfix Release Triggered: $COMMIT_MSG"
+              echo ""
+              echo "A hotfix commit was detected and immediate promotion has been triggered."
+              echo ""
+              echo "Commit: ${CIRCLE_SHA1:0:8}"
+              echo "Message: $COMMIT_MSG"
+              echo "Build: ${CIRCLE_BUILD_URL}"
+            else
+              echo "📦 Normal commit (no hotfix: prefix)"
+              echo "Beta builds deployed. Production promotion will happen on Wednesday night."
+            fi
+
   auto-release-ios:
     executor: macos-executor
     steps:
@@ -1487,11 +1529,24 @@ workflows:
               only:
                 - production
 
-  auto-promote-schedule:
+      # After beta builds complete, check for hotfix: prefix
+      # If detected, triggers immediate promotion workflow
+      - check-hotfix-promote:
+          requires:
+            - build-android
+            - build-ios
+          filters:
+            branches:
+              only:
+                - production
+
+  # Weekly promotion schedule - Wednesdays at 10pm UTC
+  # Hotfix commits trigger immediate promotion via check-hotfix-promote job
+  weekly-promote-schedule:
     triggers:
       - schedule:
-          # Run at midnight UTC every day (24 hours after the 11pm merge)
-          cron: "0 0 * * *"
+          # Wednesday at 10pm UTC (22:00)
+          cron: "0 22 * * 3"
           filters:
             branches:
               only:
