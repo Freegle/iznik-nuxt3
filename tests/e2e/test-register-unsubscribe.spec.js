@@ -42,9 +42,7 @@ test.describe('Registration and unsubscription flow', () => {
 
     // This should succeed since we've modified unsubscribeManually to return true
     // when "We don't recognise that email address" message is shown
-    expect(unsubscribeResult).toBe(
-      true,
-    )
+    expect(unsubscribeResult).toBe(true)
 
     // Take a screenshot of the failure
     await unsubscribePage.screenshot({
