@@ -401,6 +401,10 @@ async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
  * ============================================================================ */
 
 test.describe('Reply Flow - Test Matrix', () => {
+  // Enable parallel execution between nested describe blocks
+  // Each inner describe controls its own internal parallelization
+  test.describe.configure({ mode: 'parallel' })
+
   /* --------------------------------------------------------------------------
    * ROW 1: Logged In User (Tests 1.1, 1.2, 1.3)
    * These tests MUST run serially because they share existingTestEmail
