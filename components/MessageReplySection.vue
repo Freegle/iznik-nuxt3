@@ -348,6 +348,13 @@ onMounted(() => {
     is_logged_in: !!me.value,
     route_path: route.path,
     route_query: JSON.stringify(route.query || {}),
+    // Additional diagnostics to verify render completed.
+    has_message_data: !!message.value,
+    from_me: fromme.value,
+    has_form_ref: !!form.value,
+    has_chat_button_ref: !!replyToPostChatButton.value,
+    can_send: stateMachine.canSend.value,
+    state_machine_state: stateMachine.state.value,
   })
 })
 
@@ -403,6 +410,21 @@ function validateReply(value) {
 
 async function handleSend(callback) {
   console.log('[MessageReplySection] handleSend called')
+
+  // Log that the Send button was clicked with state info for debugging.
+  action('reply_send_clicked', {
+    message_id: props.id,
+    has_form_ref: !!form.value,
+    has_chat_button_ref: !!replyToPostChatButton.value,
+    has_email_validator_ref: !!emailValidatorRef.value,
+    is_logged_in: !!me.value,
+    state_machine_state: stateMachine.state.value,
+    can_send: stateMachine.canSend.value,
+    is_processing: stateMachine.isProcessing.value,
+    has_reply_text: !!stateMachine.replyText.value?.trim(),
+    has_collect_text: !!stateMachine.collectText.value?.trim(),
+  })
+
   // Ensure refs are set before submitting
   stateMachine.setRefs({
     form: form.value,

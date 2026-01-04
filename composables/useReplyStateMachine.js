@@ -583,6 +583,11 @@ export function useReplyStateMachine(messageId) {
 
     if (!canSend.value) {
       log('Cannot send in current state:', state.value)
+      action('reply_submit_blocked', {
+        message_id: messageId,
+        current_state: state.value,
+        reason: 'canSend_false',
+      })
       callback?.()
       return
     }
