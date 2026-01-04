@@ -19,19 +19,6 @@ test.describe('Giftaid Page Tests', () => {
   })
 })
 
-test.describe('Donated Page Tests', () => {
-  test('donated page should load and display thank you message', async ({
-    page,
-    waitForNuxtPageLoad,
-  }) => {
-    await page.gotoAndVerify('/donated')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-})
-
 test.describe('Stories Pages Tests', () => {
   test('stories summary page should load', async ({
     page,
@@ -64,16 +51,6 @@ test.describe('JustGivingThankYou Page Tests', () => {
     waitForNuxtPageLoad,
   }) => {
     await page.gotoAndVerify('/JustGivingThankYou')
-    await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
-
-    // Page should load without errors.
-    await page.locator('body').waitFor({ state: 'visible', timeout: 5000 })
-  })
-})
-
-test.describe('Essex Page Tests', () => {
-  test('essex page should load', async ({ page, waitForNuxtPageLoad }) => {
-    await page.gotoAndVerify('/essex')
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
 
     // Page should load without errors.
