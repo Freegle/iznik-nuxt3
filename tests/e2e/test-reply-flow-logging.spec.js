@@ -20,9 +20,6 @@ const {
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - State Machine Logging', () => {
-  // Run tests serially - this file has only one test but follows pattern
-  test.describe.configure({ mode: 'serial' })
-
   test('logs state transitions during successful reply', async ({
     page,
     postMessage,

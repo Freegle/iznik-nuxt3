@@ -13,9 +13,6 @@ const publicPages = [
 ]
 
 test.describe('Public pages tests', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   for (const page of publicPages) {
     test(`${page.path} should load without console errors`, async ({
       page: pageObj,

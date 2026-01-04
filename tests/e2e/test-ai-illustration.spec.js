@@ -92,9 +92,6 @@ async function checkForAiIllustration(page) {
 }
 
 test.describe('AI Illustration Tests - Give Flow', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('Give Mobile: should trigger AI illustration on item blur', async ({
     page,
     testEmail,
@@ -211,9 +208,6 @@ test.describe('AI Illustration Tests - Give Flow', () => {
 })
 
 test.describe('AI Illustration Tests - Find Flow', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('Find Mobile: should trigger AI illustration on item blur', async ({
     page,
     testEmail,
@@ -330,9 +324,6 @@ test.describe('AI Illustration Tests - Find Flow', () => {
 })
 
 test.describe('AI Illustration Tests - Give Desktop Flow', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('Give Desktop: should trigger AI illustration on item blur', async ({
     browser,
     testEmail,
@@ -498,9 +489,6 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
 })
 
 test.describe('AI Illustration Tests - Find Desktop Flow', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('Find Desktop: should trigger AI illustration on item blur', async ({
     browser,
     testEmail,
@@ -666,9 +654,6 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
 })
 
 test.describe('AI Illustration Tests - Page Load Verification', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('Give page should load without errors', async ({
     page,
     testEmail,

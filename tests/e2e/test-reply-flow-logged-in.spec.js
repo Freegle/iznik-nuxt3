@@ -17,9 +17,6 @@ const {
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Logged In User', () => {
-  // Tests 1.x use existingTestEmail (shared pre-registered user) - must be serial
-  test.describe.configure({ mode: 'serial' })
-
   test('1.1 can reply from Message Page', async ({
     page,
     postMessage,

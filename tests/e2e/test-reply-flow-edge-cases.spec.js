@@ -23,9 +23,6 @@ const {
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Edge Cases', () => {
-  // Run tests serially within this file; cross-file parallelization handles overall speed
-  test.describe.configure({ mode: 'serial' })
-
   /* --------------------------------------------------------------------------
    * State Persistence Tests
    * -------------------------------------------------------------------------- */

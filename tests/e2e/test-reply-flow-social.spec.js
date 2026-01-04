@@ -17,9 +17,6 @@ const {
 const { clickReplyButton, clickSendAndWait } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Social Login Simulation', () => {
-  // Run tests serially - this file has only one test but follows pattern
-  test.describe.configure({ mode: 'serial' })
-
   /**
    * This test simulates what happens when a user completes social login
    * (Google, Facebook, Apple) while composing a reply. The key mechanism is:

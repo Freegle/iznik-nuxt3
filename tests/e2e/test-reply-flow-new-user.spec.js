@@ -17,9 +17,6 @@ const {
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - New User Registration', () => {
-  // Run tests serially within this file; cross-file parallelization handles overall speed
-  test.describe.configure({ mode: 'serial' })
-
   test('2.1 can register and reply from Message Page', async ({
     page,
     postMessage,

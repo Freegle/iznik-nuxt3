@@ -7,9 +7,6 @@ const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
 
 test.describe('ModTools login tests', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
-
   test('root path should redirect to login page for unauthenticated users', async ({
     page,
     waitForNuxtPageLoad,

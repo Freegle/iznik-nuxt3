@@ -18,8 +18,6 @@ const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
 const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
 
 test.describe('Registration and unsubscription flow', () => {
-  // Run tests serially until parallelization is verified safe
-  test.describe.configure({ mode: 'serial' })
   test('should register a test email and verify unsubscribe fails for non-existent user', async ({
     page,
   }) => {

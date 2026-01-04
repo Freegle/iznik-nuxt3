@@ -20,9 +20,6 @@ const {
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Existing User Forced Login', () => {
-  // Run tests serially within this file; cross-file parallelization handles overall speed
-  test.describe.configure({ mode: 'serial' })
-
   test('3.1 can login and reply from Message Page', async ({
     page,
     postMessage,
