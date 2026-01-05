@@ -30,9 +30,13 @@ export function fetchRetry(fetch) {
     }
 
     // Some browsers don't return much info from fetch(), deliberately, and just say "Load failed".  So retry those.
+    // When fetch() throws (e.g. network failure), the message is in error.message, not response.statusText.
     // https://stackoverflow.com/questions/71280168/javascript-typeerror-load-failed-error-when-calling-fetch-on-ios
     const blandErrors = ['load failed', 'failed to fetch']
-    if (blandErrors.includes(response?.statusText.toLowerCase())) {
+    if (
+      blandErrors.includes(response?.statusText?.toLowerCase()) ||
+      blandErrors.includes(error?.message?.toLowerCase())
+    ) {
       console.log('Load failed - retry')
       return [true, false]
     }
