@@ -35,7 +35,7 @@ module.exports = defineConfig({
   maxFailures: 0,
   reporter: [
     ['list'],
-    ['html', { open: 'always', host: '0.0.0.0' }],
+    ['html', { open: 'never', host: '0.0.0.0' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     // Only include monocart reporter when explicitly enabled via env var
     ...(process.env.ENABLE_MONOCART_REPORTER === 'true'
