@@ -182,6 +182,11 @@ test.describe('AI Illustration Tests - Give Flow', () => {
       timeout: timeouts.ui.appearance,
     })
 
+    // Clear any existing content first (prevents issues with leftover content
+    // from previous tests or store state), then click to ensure focus
+    await itemInput.first().fill('')
+    await itemInput.first().click()
+
     // Type an item name with prefix (this should be stripped by the backend)
     const testItemName = 'OFFER: Blue Chair'
     await itemInput.first().type(testItemName, { delay: 100 })
@@ -297,6 +302,11 @@ test.describe('AI Illustration Tests - Find Flow', () => {
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
+
+    // Clear any existing content first (prevents issues with leftover content
+    // from previous tests or store state), then click to ensure focus
+    await itemInput.first().fill('')
+    await itemInput.first().click()
 
     // Type an item name with prefix (this should be stripped by the backend)
     const testItemName = 'WANTED: Red Bicycle'
@@ -457,6 +467,11 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
+
+      // Clear any existing content first (prevents issues with leftover content
+      // from previous tests or store state), then click to ensure focus
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().click()
 
       // Type an item name with prefix (this should be stripped by the backend)
       const testItemName = 'OFFER: Dining Table'
@@ -622,6 +637,11 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
+
+      // Clear any existing content first (prevents issues with leftover content
+      // from previous tests or store state), then click to ensure focus
+      await desktopItemInput.first().fill('')
+      await desktopItemInput.first().click()
 
       // Type an item name with prefix (this should be stripped by the backend)
       const testItemName = 'WANTED: Office Chair'
