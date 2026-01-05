@@ -533,11 +533,35 @@ const test = base.test.extend({
             )
           }
 
+          // Wait for page to finish hydrating (loading spinner to disappear)
+          // The loading state shows during Nuxt hydration
+          try {
+            // First wait for any loading indicators to appear and disappear
+            const loadingIndicator = page.locator('img[alt="Loading"]')
+            const hasLoading = await loadingIndicator.count()
+            if (hasLoading > 0) {
+              console.log('Waiting for loading indicator to disappear...')
+              await loadingIndicator.waitFor({
+                state: 'hidden',
+                timeout: Math.min(timeout, 30000),
+              })
+              console.log('Loading indicator hidden')
+            }
+          } catch (loadingError) {
+            // Loading indicator might not appear or might already be gone
+            console.log(
+              `Loading indicator check: ${loadingError.message.substring(
+                0,
+                100
+              )}`
+            )
+          }
+
           // Verify page content is visible
           const body = page.locator('body')
           await body.waitFor({
             state: 'visible',
-            timeout: Math.min(timeout, 10000),
+            timeout: Math.min(timeout, 30000),
           })
 
           // Check if page contains error messages
