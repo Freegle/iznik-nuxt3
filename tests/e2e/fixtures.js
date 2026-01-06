@@ -534,26 +534,46 @@ const test = base.test.extend({
           }
 
           // Wait for page to finish hydrating (loading spinner to disappear)
-          // The loading state shows during Nuxt hydration
+          // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
+          // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
           try {
-            // First wait for any loading indicators to appear and disappear
-            const loadingIndicator = page.locator('img[alt="Loading"]')
-            const hasLoading = await loadingIndicator.count()
-            if (hasLoading > 0) {
-              console.log('Waiting for loading indicator to disappear...')
-              await loadingIndicator.waitFor({
-                state: 'hidden',
-                timeout: Math.min(timeout, 30000),
+            const loadingIndicator = page.locator('.loading-indicator')
+            const isVisible = await loadingIndicator
+              .evaluate((el) => {
+                const style = window.getComputedStyle(el)
+                return parseFloat(style.opacity) > 0
               })
+              .catch(() => false)
+
+            if (isVisible) {
+              console.log(
+                'Loading indicator visible, waiting for it to hide...'
+              )
+              // Wait for opacity to become 0
+              await loadingIndicator.evaluate(
+                (el) => {
+                  return new Promise((resolve) => {
+                    const check = () => {
+                      const style = window.getComputedStyle(el)
+                      if (parseFloat(style.opacity) === 0) {
+                        resolve()
+                      } else {
+                        requestAnimationFrame(check)
+                      }
+                    }
+                    check()
+                  })
+                },
+                { timeout: 5000 }
+              )
               console.log('Loading indicator hidden')
             }
           } catch (loadingError) {
-            // Loading indicator might not appear or might already be gone
+            // Loading indicator check failed or timed out - continue anyway
             console.log(
-              `Loading indicator check: ${loadingError.message.substring(
-                0,
-                100
-              )}`
+              `Loading indicator check (continuing anyway): ${
+                loadingError.message?.substring(0, 100) || 'unknown error'
+              }`
             )
           }
 
