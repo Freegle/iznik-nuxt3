@@ -36,7 +36,12 @@
           class="type mr-1"
           size="lg"
         />
-        <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
+        <b-form-input
+          v-model="message.item.name"
+          maxlength="60"
+          size="lg"
+          class="mr-1"
+        />
         <b-input-group>
           <PostCode
             :value="message.location.name"
