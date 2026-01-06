@@ -170,6 +170,11 @@
                   <span v-if="poster.info?.offers" class="poster-overlay-stat">
                     <v-icon icon="gift" />{{ poster.info.offers }}
                   </span>
+                  <span
+                    v-if="poster.info?.offers && poster.info?.wanteds"
+                    class="poster-overlay-separator"
+                    >•</span
+                  >
                   <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
                     <v-icon icon="search" />{{ poster.info.wanteds }}
                   </span>
@@ -214,7 +219,7 @@
                     class="replies"
                     @click.stop
                   >
-                    <v-icon icon="comments" />{{ replyCount }}
+                    <v-icon icon="reply" />{{ replyCount }}
                   </span>
                   <span
                     v-if="message.deliverypossible && isOffer"
@@ -340,13 +345,14 @@
                       <v-icon icon="gift" />{{ poster.info.offers
                       }}<span class="poster-stat-label">OFFERs</span>
                     </span>
+                    <span
+                      v-if="poster.info?.offers && poster.info?.wanteds"
+                      class="poster-stat-separator"
+                      >•</span
+                    >
                     <span v-if="poster.info?.wanteds" class="poster-stat">
                       <v-icon icon="search" />{{ poster.info.wanteds
                       }}<span class="poster-stat-label">WANTEDs</span>
-                    </span>
-                    <span v-if="poster.info?.replies" class="poster-stat">
-                      <v-icon icon="reply" />{{ poster.info.replies
-                      }}<span class="poster-stat-label">replies</span>
                     </span>
                   </div>
                   <div v-if="posterAboutMe" class="poster-aboutme">
@@ -1671,6 +1677,10 @@ onUnmounted(() => {
   gap: 0.15rem;
 }
 
+.poster-overlay-separator {
+  color: $color-gray--base;
+}
+
 .poster-overlay-chevron {
   flex-shrink: 0;
   color: $color-gray--dark;
@@ -1911,6 +1921,10 @@ onUnmounted(() => {
   @include media-breakpoint-up(md) {
     display: inline;
   }
+}
+
+.poster-stat-separator {
+  color: $color-gray--base;
 }
 
 .poster-chevron {

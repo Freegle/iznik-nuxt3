@@ -415,6 +415,11 @@ async function signUpViaHomepage(
     } else if (currentUrl.includes('/myposts')) {
       console.log('Redirected to myposts page - registration successful')
     }
+
+    // Wait for auth to be persisted to localStorage before returning
+    // This ensures navigation to other pages preserves the logged-in state
+    await waitForAuthPersistence(page)
+
     return true
   } catch (error) {
     // If we're not redirected to explore, look for other success indicators
@@ -449,6 +454,11 @@ async function signUpViaHomepage(
       } catch (error) {
         // Continue to the next indicator
       }
+    }
+
+    // If registration was successful via indicators, also wait for auth persistence
+    if (registrationSuccessful) {
+      await waitForAuthPersistence(page)
     }
 
     return registrationSuccessful

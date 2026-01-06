@@ -80,13 +80,27 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     console.log('[Test] Login modal appeared for existing user')
 
     // Complete login - need to fill both email and password
+    // Wait for email input to be fully rendered and interactive
     const emailInput = loginModal.locator('input[type="email"]')
-    await emailInput.fill(existingEmail)
+    await emailInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    // Clear any pre-filled value and use type() for more realistic input
+    await emailInput.clear()
+    await emailInput.type(existingEmail, { delay: 10 })
     console.log(`[Test] Filled login email: ${existingEmail}`)
 
     const passwordInput = loginModal.locator('input[type="password"]')
+    await passwordInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await passwordInput.fill(DEFAULT_TEST_PASSWORD)
     console.log('[Test] Filled login password')
+
+    // Small delay to let VeeForm validation settle
+    await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Press Enter to submit the form (more reliable than clicking button)
     await passwordInput.press('Enter')
@@ -196,13 +210,27 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     console.log('[Test] Login modal appeared')
 
     // Complete login - need to fill both email and password
+    // Wait for email input to be fully rendered and interactive
     const emailInput = loginModal.locator('input[type="email"]')
-    await emailInput.fill(existingEmail)
+    await emailInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    // Clear any pre-filled value and use type() for more realistic input
+    await emailInput.clear()
+    await emailInput.type(existingEmail, { delay: 10 })
     console.log(`[Test] Filled login email: ${existingEmail}`)
 
     const passwordInput = loginModal.locator('input[type="password"]')
+    await passwordInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await passwordInput.fill(DEFAULT_TEST_PASSWORD)
     console.log('[Test] Filled login password')
+
+    // Small delay to let VeeForm validation settle
+    await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Press Enter to submit the form
     await passwordInput.press('Enter')
@@ -300,13 +328,27 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     console.log('[Test] Login modal appeared')
 
     // Complete login - need to fill both email and password
+    // Wait for email input to be fully rendered and interactive
     const emailInput = loginModal.locator('input[type="email"]')
-    await emailInput.fill(existingEmail)
+    await emailInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    // Clear any pre-filled value and use type() for more realistic input
+    await emailInput.clear()
+    await emailInput.type(existingEmail, { delay: 10 })
     console.log(`[Test] Filled login email: ${existingEmail}`)
 
     const passwordInput = loginModal.locator('input[type="password"]')
+    await passwordInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await passwordInput.fill(DEFAULT_TEST_PASSWORD)
     console.log('[Test] Filled login password')
+
+    // Small delay to let VeeForm validation settle
+    await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Press Enter to submit the form
     await passwordInput.press('Enter')
