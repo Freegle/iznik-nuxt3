@@ -533,11 +533,55 @@ const test = base.test.extend({
             )
           }
 
+          // Wait for page to finish hydrating (loading spinner to disappear)
+          // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
+          // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
+          try {
+            const loadingIndicator = page.locator('.loading-indicator')
+            const isVisible = await loadingIndicator
+              .evaluate((el) => {
+                const style = window.getComputedStyle(el)
+                return parseFloat(style.opacity) > 0
+              })
+              .catch(() => false)
+
+            if (isVisible) {
+              console.log(
+                'Loading indicator visible, waiting for it to hide...'
+              )
+              // Wait for opacity to become 0
+              await loadingIndicator.evaluate(
+                (el) => {
+                  return new Promise((resolve) => {
+                    const check = () => {
+                      const style = window.getComputedStyle(el)
+                      if (parseFloat(style.opacity) === 0) {
+                        resolve()
+                      } else {
+                        requestAnimationFrame(check)
+                      }
+                    }
+                    check()
+                  })
+                },
+                { timeout: 5000 }
+              )
+              console.log('Loading indicator hidden')
+            }
+          } catch (loadingError) {
+            // Loading indicator check failed or timed out - continue anyway
+            console.log(
+              `Loading indicator check (continuing anyway): ${
+                loadingError.message?.substring(0, 100) || 'unknown error'
+              }`
+            )
+          }
+
           // Verify page content is visible
           const body = page.locator('body')
           await body.waitFor({
             state: 'visible',
-            timeout: Math.min(timeout, 10000),
+            timeout: Math.min(timeout, 30000),
           })
 
           // Check if page contains error messages

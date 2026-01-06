@@ -103,11 +103,26 @@ test.describe('Reply Flow - Social Login Simulation', () => {
       timeout: timeouts.ui.appearance,
     })
 
+    // Wait for email input to be fully rendered and interactive
     const modalEmailInput = loginModal.locator('input[type="email"]')
-    const passwordInput = loginModal.locator('input[type="password"]')
+    await modalEmailInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    // Clear any pre-filled value and use type() for more realistic input
+    await modalEmailInput.clear()
+    await modalEmailInput.type(loginEmail, { delay: 10 })
 
-    await modalEmailInput.fill(loginEmail)
+    const passwordInput = loginModal.locator('input[type="password"]')
+    await passwordInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     await passwordInput.fill(DEFAULT_TEST_PASSWORD)
+
+    // Small delay to let VeeForm validation settle
+    await page.waitForTimeout(timeouts.ui.settleTime)
+
     // Press Enter to submit the form (more reliable than clicking button)
     await passwordInput.press('Enter')
     console.log('[Test] Completed login (this triggers loginCount++)')

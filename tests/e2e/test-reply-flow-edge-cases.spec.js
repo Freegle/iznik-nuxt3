@@ -404,11 +404,26 @@ test.describe('Reply Flow - Edge Cases', () => {
         timeout: timeouts.ui.appearance,
       })
 
+      // Wait for email input to be fully rendered and interactive
       const emailInput = loginModal.locator('input[type="email"]')
-      const passwordInput = loginModal.locator('input[type="password"]')
+      await emailInput.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
+      // Clear any pre-filled value and use type() for more realistic input
+      await emailInput.clear()
+      await emailInput.type(loginEmail, { delay: 10 })
 
-      await emailInput.fill(loginEmail)
+      const passwordInput = loginModal.locator('input[type="password"]')
+      await passwordInput.waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.appearance,
+      })
       await passwordInput.fill(DEFAULT_TEST_PASSWORD)
+
+      // Small delay to let VeeForm validation settle
+      await page.waitForTimeout(timeouts.ui.settleTime)
+
       // Press Enter to submit the form (more reliable than clicking button)
       await passwordInput.press('Enter')
       console.log('[Test] Completed navbar login')
