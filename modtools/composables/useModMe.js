@@ -4,6 +4,17 @@ import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 
+async function makebeep() {
+  const sound = new Audio('/alert.wav')
+  try {
+    // Some browsers prevent us using play unless in response to a
+    // user gesture, so catch any exception.
+    await sound.play()
+  } catch (e) {
+    console.log('Failed to play beep', e.message)
+  }
+}
+
 export function useModMe() {
   function hasPermission(perm) {
     const { me } = useMe()
@@ -76,6 +87,9 @@ export function useModMe() {
       //  'groupStore.list',Object.keys(groupStore.list).length,
       //  'modGroupStore.list', Object.keys(modGroupStore.list).length)
 
+      let currentTotal = 0
+      if (authStore.work) currentTotal += authStore.work.total
+      if (chatStore) currentTotal += Math.min(99, chatStore.unreadCount)
       const { fetchMe } = useMe()
       await fetchMe(true, ['work'])
       await modGroupStore.getModGroups()
@@ -83,6 +97,17 @@ export function useModMe() {
       const chatcount = chatStore ? Math.min(99, chatStore.unreadCount) : 0
       const work = authStore.work
       const totalCount = work?.total + chatcount
+      if (
+        work &&
+        totalCount > currentTotal &&
+        authStore.user &&
+        (!authStore.user.settings ||
+          !Object.keys(authStore.user.settings).includes('playbeep') ||
+          authStore.user.settings.playbeep)
+      ) {
+        console.log('Beep as new work', currentTotal, totalCount)
+        makebeep()
+      }
       const title = totalCount > 0 ? `(${totalCount}) ModTools` : 'ModTools'
       document.title = title
     }
