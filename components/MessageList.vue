@@ -252,7 +252,8 @@ const distance = ref(2000)
 const prefetched = ref(0)
 const emitted = ref(false)
 let markSeenTimer = null
-const markUnseenTries = ref(10)
+let pollCount = 0
+const MAX_POLL_COUNT = 30 // Poll for up to 30 seconds
 
 // Computed properties
 // Use the same count as the navbar - from the API via messageStore
@@ -428,6 +429,7 @@ function visibilityChanged(visible) {
 }
 
 function markSeen() {
+  // Collect all unseen message IDs
   const ids = []
 
   props.messagesForList.forEach((m) => {
@@ -437,21 +439,29 @@ function markSeen() {
   })
 
   if (ids.length) {
+    // Send markSeen once
     messageStore.markSeen(ids)
+
+    // Start polling the count - the server processes this in the background
+    pollCount = 0
+    pollUntilZero()
+  }
+}
+
+function pollUntilZero() {
+  if (markSeenTimer) {
+    clearTimeout(markSeenTimer)
   }
 
   markSeenTimer = setTimeout(async () => {
     const count = await messageStore.fetchCount(me?.settings?.browseView, false)
+    pollCount++
 
-    markUnseenTries.value--
-    console.log('Mark unseen', count, markUnseenTries.value)
-
-    if (markUnseenTries.value && count) {
-      markSeen()
-    } else {
-      markUnseenTries.value = 10
+    if (count > 0 && pollCount < MAX_POLL_COUNT) {
+      // Keep polling until count reaches 0 or we hit the limit
+      pollUntilZero()
     }
-  }, 100)
+  }, 1000) // Poll once per second
 }
 
 async function handleLoadMore(currentIndex) {

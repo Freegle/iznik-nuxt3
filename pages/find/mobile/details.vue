@@ -52,6 +52,7 @@
           id="item-name"
           v-model="item"
           placeholder="e.g. Kids bike for 8 year old"
+          maxlength="60"
           size="lg"
           :state="itemState"
           @blur="onItemBlur"

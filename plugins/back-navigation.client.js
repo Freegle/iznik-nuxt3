@@ -1,3 +1,5 @@
+import { action } from '~/composables/useClientLog'
+
 export default defineNuxtPlugin(() => {
   const router = useRouter()
   const HISTORY_KEY = 'freegle_nav_history'
@@ -39,6 +41,16 @@ export default defineNuxtPlugin(() => {
   window.addEventListener('popstate', () => {
     const currentPath = window.location.pathname
     const history = getHistory()
+
+    // Log for debugging mobile navigation issues.
+    const willNavigateHome = !sameOrigin && history.length <= 1
+    action('back_nav_popstate', {
+      current_path: currentPath,
+      history_length: history.length,
+      same_origin: sameOrigin,
+      is_message_page: isMessagePage(currentPath),
+      will_navigate_home: willNavigateHome,
+    })
 
     // Sync history with browser back - remove entries we've passed
     while (history.length > 1 && history[history.length - 1] !== currentPath) {
