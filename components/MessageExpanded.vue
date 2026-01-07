@@ -575,6 +575,7 @@ import {
 import { useMiscStore } from '~/stores/misc'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { action } from '~/composables/useClientLog'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -656,6 +657,7 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 // State
 const replied = ref(false)
 const replyExpanded = ref(false)
+const mountTime = ref(null)
 const showMapModal = ref(false)
 const showShareModal = ref(false)
 const showProfileModal = ref(false)
@@ -858,6 +860,16 @@ function updateWindowHeight() {
 }
 
 onMounted(() => {
+  mountTime.value = Date.now()
+
+  // Log mount for debugging mobile navigation issues.
+  action('message_expanded_mount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    in_modal: props.inModal,
+    breakpoint: miscStore.breakpoint,
+  })
+
   // Enable ken-burns animation now that hydration is complete
   isMounted.value = true
 
@@ -870,6 +882,14 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  const timeOpenMs = mountTime.value ? Date.now() - mountTime.value : null
+
+  action('message_expanded_unmount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    time_open_ms: timeOpenMs,
+  })
+
   stopThumbnailAutoScroll()
   window.removeEventListener('resize', updateWindowHeight)
 })
