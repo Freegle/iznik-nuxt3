@@ -209,31 +209,35 @@ test.describe('User ratings tests', () => {
     // Use force:true to ensure click goes through even if tooltip is showing
     console.log('About to click thumbs up button...')
 
-    // Set up promise to wait for the rating API call
-    const ratingRequestPromise = page
-      .waitForRequest(
-        (req) =>
-          req.url().includes('apiv1') &&
-          req.method() === 'POST' &&
-          req.postData()?.includes('Rate'),
-        { timeout: 10000 }
+    // Set up promise to wait for the rating API response (not just request).
+    // This ensures the database write is complete before we check the UI.
+    const ratingResponsePromise = page
+      .waitForResponse(
+        (res) =>
+          res.url().includes('apiv1') &&
+          res.request().method() === 'POST' &&
+          res.request().postData()?.includes('Rate'),
+        { timeout: timeouts.background }
       )
-      .catch(() => null)
+      .catch((e) => {
+        console.log('Rating response wait error:', e.message)
+        return null
+      })
 
     await thumbsUpButton.click({ force: true })
     console.log('Clicked thumbs up button with force:true')
 
-    // Check if the rating request was made
-    const ratingRequest = await ratingRequestPromise
-    if (ratingRequest) {
-      console.log('Rating POST request was made:', ratingRequest.url())
-      console.log('Post data:', ratingRequest.postData())
+    // Wait for the rating API response to complete (event-driven, no hardcoded delay)
+    const ratingResponse = await ratingResponsePromise
+    if (ratingResponse) {
+      console.log(
+        'Rating POST response received:',
+        ratingResponse.status(),
+        ratingResponse.url()
+      )
     } else {
-      console.log('WARNING: No rating POST request detected within 10s')
+      console.log('WARNING: No rating POST response received')
     }
-
-    // Wait a moment for the API response to be processed
-    await page.waitForTimeout(3000)
 
     // Check if any errors occurred during the click
     const buttonInfoAfter = await page.evaluate(() => {

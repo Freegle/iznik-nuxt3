@@ -10,6 +10,9 @@ export const useUserStore = defineStore({
   state: () => ({
     list: {},
     locationList: {},
+    // Track when rate() updated each user to prevent stale batch fetches from overwriting.
+    // Key is user ID, value is timestamp when rate() set fresh data.
+    rateUpdateTimes: {},
   }),
   actions: {
     init(config) {
@@ -128,6 +131,10 @@ export const useUserStore = defineStore({
         .filter((id) => !this.fetching[id])
 
       if (left.length) {
+        // Record when this batch fetch started - used to prevent overwriting
+        // data that was updated by rate() after this fetch began.
+        const fetchStartTime = Date.now()
+
         // Split into chunks of 20 (API limit)
         const BATCH_SIZE = 20
         const chunks = []
@@ -152,11 +159,20 @@ export const useUserStore = defineStore({
             if (Array.isArray(users)) {
               users.forEach((user) => {
                 if (user) {
-                  this.list[user.id] = user
+                  // Only update if rate() hasn't set fresher data since this fetch started.
+                  // This prevents the race condition where a batch fetch that began before
+                  // a rating was written returns stale data and overwrites the fresh post-rating data.
+                  const rateTime = this.rateUpdateTimes[user.id]
+                  if (!rateTime || rateTime < fetchStartTime) {
+                    this.list[user.id] = user
+                  }
                 }
               })
             } else if (users) {
-              this.list[users.id] = users
+              const rateTime = this.rateUpdateTimes[users.id]
+              if (!rateTime || rateTime < fetchStartTime) {
+                this.list[users.id] = users
+              }
             }
           } finally {
             // Clear fetching flags
@@ -197,6 +213,9 @@ export const useUserStore = defineStore({
       const user = await api(this.config).user.fetch(id)
       if (user) {
         this.list[id] = user
+        // Record timestamp so batch fetches that started before this
+        // won't overwrite with stale data. See fetchMultiple().
+        this.rateUpdateTimes[id] = Date.now()
       }
     },
     async engaged(engageid) {
