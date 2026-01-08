@@ -7,34 +7,42 @@
       <b-button
         v-b-tooltip.bottom="noTooltips || showDown || showRemove ? '' : uptitle"
         :size="size"
-        :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
+        :variant="displayUpCount > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
         :class="{
-          mine: user.info.ratings.Mine === 'Up',
+          mine: displayMine === 'Up',
           'mr-1': true,
         }"
         @click.stop="up"
       >
-        <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
+        <v-icon icon="thumbs-up" />&nbsp;{{ displayUpCount }}
       </b-button>
       <b-button
         v-b-tooltip.bottom="
           noTooltips || showDown || showRemove ? '' : downtitle
         "
         :size="size"
-        :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
+        :variant="displayDownCount > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
         :class="{
-          mine: user.info.ratings.Mine === 'Down',
+          mine: displayMine === 'Down',
           'ml-1': true,
         }"
         @click.stop="down"
       >
-        <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
+        <v-icon icon="thumbs-down" />&nbsp;{{ displayDownCount }}
       </b-button>
     </span>
-    <UserRatingsDownModal v-if="showDown && !externalModals" :id="id" />
-    <UserRatingsRemoveModal v-if="showRemove && !externalModals" :id="id" />
+    <UserRatingsDownModal
+      v-if="showDown && !externalModals"
+      :id="id"
+      @rated="onModalRated"
+    />
+    <UserRatingsRemoveModal
+      v-if="showRemove && !externalModals"
+      :id="id"
+      @rated="onModalRated"
+    />
   </span>
 </template>
 <script setup>
@@ -95,9 +103,16 @@ const { myid } = useMe()
 const showDown = ref(false)
 const showRemove = ref(false)
 
-// Fetch user data - show cached immediately, then refresh in background.
+// Track the last rating we clicked locally. This ensures the UI updates
+// immediately after a click, regardless of store timing/race conditions.
+// null means we haven't clicked anything yet; 'Up', 'Down', or 'None' means we have.
+const clickedRating = ref(null)
+// Store the counts at the time of click so we can compute correct display values.
+const clickedUpCount = ref(null)
+const clickedDownCount = ref(null)
+
+// Fetch user data
 userStore.fetch(props.id)
-userStore.fetch(props.id, true)
 
 const user = computed(() => {
   let ret = null
@@ -113,31 +128,82 @@ const user = computed(() => {
   return ret
 })
 
+// Display values that prefer local click state over store state
+const displayMine = computed(() => {
+  if (clickedRating.value !== null) {
+    return clickedRating.value === 'None' ? null : clickedRating.value
+  }
+  return user.value?.info?.ratings?.Mine
+})
+
+const displayUpCount = computed(() => {
+  if (clickedRating.value !== null) {
+    return clickedUpCount.value
+  }
+  return user.value?.info?.ratings?.Up ?? 0
+})
+
+const displayDownCount = computed(() => {
+  if (clickedRating.value !== null) {
+    return clickedDownCount.value
+  }
+  return user.value?.info?.ratings?.Down ?? 0
+})
+
 const uptitle = computed(() => {
-  if (user.value?.info?.ratings?.Mine === 'Up') {
+  if (displayMine.value === 'Up') {
     return 'You gave them a thumbs up.  Click to undo.'
   } else {
     return (
-      user.value?.info?.ratings?.Up +
+      displayUpCount.value +
       ' freegler' +
-      (user.value?.info?.ratings?.Up !== 1 ? 's' : '') +
+      (displayUpCount.value !== 1 ? 's' : '') +
       '  gave them a thumbs up.  Click to rate, click again to undo.'
     )
   }
 })
 
 const downtitle = computed(() => {
-  if (user.value?.info?.ratings?.Mine === 'Down') {
+  if (displayMine.value === 'Down') {
     return 'You gave them a thumbs down.  Click to undo.'
   } else {
     return (
-      user.value?.info?.ratings?.Down +
+      displayDownCount.value +
       ' freegler' +
-      (user.value?.info?.ratings?.Down !== 1 ? 's' : '') +
+      (displayDownCount.value !== 1 ? 's' : '') +
       '  gave them a thumbs down.  Click to rate, click again to undo.'
     )
   }
 })
+
+const setClickedState = (newRating) => {
+  // Get current counts from display values (which may already be from a previous click)
+  const currentUp = displayUpCount.value
+  const currentDown = displayDownCount.value
+  const currentMine = displayMine.value
+
+  // Calculate the new counts based on what we're changing to
+  let newUp = currentUp
+  let newDown = currentDown
+
+  // If we had a previous rating, remove its count
+  if (currentMine === 'Up') {
+    newUp--
+  } else if (currentMine === 'Down') {
+    newDown--
+  }
+
+  // Add count for the new rating (unless it's 'None' meaning we're removing)
+  if (newRating === 'Up') {
+    newUp++
+  } else if (newRating === 'Down') {
+    newDown++
+  }
+
+  clickedRating.value = newRating
+  clickedUpCount.value = newUp
+  clickedDownCount.value = newDown
+}
 
 const rate = async (rating, reason, text) => {
   await userStore.rate(props.id, rating, reason, text)
@@ -145,7 +211,8 @@ const rate = async (rating, reason, text) => {
 
 const up = async () => {
   showDown.value = false
-  if (user.value?.info?.ratings?.Mine === 'Up') {
+  if (displayMine.value === 'Up') {
+    // Already rated up - show modal to confirm removal
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-remove-modal', props.id)
@@ -153,6 +220,8 @@ const up = async () => {
       showRemove.value = true
     }
   } else {
+    // Set local state immediately so UI updates
+    setClickedState('Up')
     await rate('Up')
   }
 }
@@ -160,7 +229,8 @@ const up = async () => {
 const down = () => {
   showDown.value = false
 
-  if (user.value?.info?.ratings?.Mine === 'Down') {
+  if (displayMine.value === 'Down') {
+    // Already rated down - show modal to confirm removal
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-remove-modal', props.id)
@@ -168,6 +238,7 @@ const down = () => {
       showRemove.value = true
     }
   } else {
+    // Show down modal to collect reason
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-down-modal', props.id)
@@ -175,6 +246,11 @@ const down = () => {
       showDown.value = true
     }
   }
+}
+
+const onModalRated = (rating) => {
+  // Modal completed a rating action - update local state
+  setClickedState(rating)
 }
 </script>
 <style scoped lang="scss">

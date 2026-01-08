@@ -10,9 +10,6 @@ export const useUserStore = defineStore({
   state: () => ({
     list: {},
     locationList: {},
-    // Track when rate() updated each user to prevent stale batch fetches from overwriting.
-    // Key is user ID, value is timestamp when rate() set fresh data.
-    rateUpdateTimes: {},
   }),
   actions: {
     init(config) {
@@ -67,11 +64,7 @@ export const useUserStore = defineStore({
       if (this.fetching[id]) {
         await this.fetching[id]
         await nextTick()
-        // If not forcing, return the result now
-        if (!force) {
-          return this.list[id]
-        }
-        // Otherwise, continue to queue a force refresh
+        return this.list[id]
       }
 
       // Add to pending batch and wait for the batch to complete
@@ -125,16 +118,17 @@ export const useUserStore = defineStore({
       }
     },
     async fetchMultiple(ids) {
-      // Filter out IDs that are already being fetched
-      const left = ids
-        .map((id) => parseInt(id))
-        .filter((id) => !this.fetching[id])
+      const left = []
+
+      ids.forEach((id) => {
+        id = parseInt(id)
+
+        if (!this.list[id] && !this.fetching[id]) {
+          left.push(id)
+        }
+      })
 
       if (left.length) {
-        // Record when this batch fetch started - used to prevent overwriting
-        // data that was updated by rate() after this fetch began.
-        const fetchStartTime = Date.now()
-
         // Split into chunks of 20 (API limit)
         const BATCH_SIZE = 20
         const chunks = []
@@ -159,20 +153,11 @@ export const useUserStore = defineStore({
             if (Array.isArray(users)) {
               users.forEach((user) => {
                 if (user) {
-                  // Only update if rate() hasn't set fresher data since this fetch started.
-                  // This prevents the race condition where a batch fetch that began before
-                  // a rating was written returns stale data and overwrites the fresh post-rating data.
-                  const rateTime = this.rateUpdateTimes[user.id]
-                  if (!rateTime || rateTime < fetchStartTime) {
-                    this.list[user.id] = user
-                  }
+                  this.list[user.id] = user
                 }
               })
             } else if (users) {
-              const rateTime = this.rateUpdateTimes[users.id]
-              if (!rateTime || rateTime < fetchStartTime) {
-                this.list[users.id] = users
-              }
+              this.list[users.id] = users
             }
           } finally {
             // Clear fetching flags
@@ -208,15 +193,7 @@ export const useUserStore = defineStore({
     },
     async rate(id, rating, reason, text) {
       await api(this.config).user.rate(id, rating, reason, text)
-      // Directly fetch the user to ensure UI updates immediately.
-      // Don't use the batched fetch which can have race conditions.
-      const user = await api(this.config).user.fetch(id)
-      if (user) {
-        this.list[id] = user
-        // Record timestamp so batch fetches that started before this
-        // won't overwrite with stale data. See fetchMultiple().
-        this.rateUpdateTimes[id] = Date.now()
-      }
+      await this.fetch(id, true)
     },
     async engaged(engageid) {
       await api(this.config).user.engaged(engageid)
