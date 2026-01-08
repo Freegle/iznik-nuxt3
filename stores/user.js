@@ -192,7 +192,12 @@ export const useUserStore = defineStore({
     },
     async rate(id, rating, reason, text) {
       await api(this.config).user.rate(id, rating, reason, text)
-      await this.fetch(id, true)
+      // Directly fetch the user to ensure UI updates immediately.
+      // Don't use the batched fetch which can have race conditions.
+      const user = await api(this.config).user.fetch(id)
+      if (user) {
+        this.list[id] = user
+      }
     },
     async engaged(engageid) {
       await api(this.config).user.engaged(engageid)
