@@ -150,18 +150,34 @@ test.describe('User ratings tests', () => {
     await page.waitForLoadState('networkidle', { timeout: 30000 })
     console.log('Network idle - Vue hydration should be complete')
 
-    // Additional wait for async component to fully load and attach event handlers
-    // The UserRatings component is loaded via defineAsyncComponent
-    await page.waitForTimeout(timeouts.ui.transition)
-
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
 
-    // Wait for the button to be enabled and stable before clicking
+    // Wait for the button to be visible and have a Vue event handler attached.
+    // The UserRatings component is loaded via defineAsyncComponent which means the button
+    // may be visible before Vue has attached the click handler.
+    // We wait for the button to have Vue's internal properties set, indicating hydration is complete.
     await thumbsUpButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
+
+    // Wait for Vue to fully hydrate the async component.
+    // In slow CI environments, the async component load can take several seconds.
+    // We poll until the button has content (indicating the user data has loaded).
+    await page.waitForFunction(
+      () => {
+        const btn = document.querySelector('.user-ratings button')
+        if (!btn) return false
+        // The button shows the rating count when user data is loaded.
+        // Check that the button has content and is not disabled.
+        const hasContent = btn.textContent && btn.textContent.trim().length > 0
+        const notDisabled = !btn.disabled
+        return hasContent && notDisabled
+      },
+      { timeout: timeouts.ui.appearance }
+    )
+    console.log('UserRatings component loaded with user data')
 
     // Debug: Check if button is disabled
     const isDisabled = await thumbsUpButton.isDisabled()
@@ -206,37 +222,58 @@ test.describe('User ratings tests', () => {
     console.log('Button info before click:', JSON.stringify(buttonInfo))
 
     // Click thumbs up to rate the user
-    // Use force:true to ensure click goes through even if tooltip is showing
+    // Use a retry mechanism because Vue async component hydration timing can vary.
+    // The click event handler may not be attached immediately even when the button is visible.
     console.log('About to click thumbs up button...')
 
-    // Set up promise to wait for the rating API response (not just request).
-    // This ensures the database write is complete before we check the UI.
-    const ratingResponsePromise = page
-      .waitForResponse(
-        (res) =>
-          res.url().includes('apiv1') &&
-          res.request().method() === 'POST' &&
-          res.request().postData()?.includes('Rate'),
-        { timeout: timeouts.background }
-      )
-      .catch((e) => {
-        console.log('Rating response wait error:', e.message)
-        return null
-      })
+    let ratingResponse = null
+    const maxRetries = 3
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      console.log(`Click attempt ${attempt} of ${maxRetries}`)
 
-    await thumbsUpButton.click({ force: true })
-    console.log('Clicked thumbs up button with force:true')
+      // Set up promise to wait for the rating API response (not just request).
+      // This ensures the database write is complete before we check the UI.
+      const ratingResponsePromise = page
+        .waitForResponse(
+          (res) =>
+            res.url().includes('apiv1') &&
+            res.request().method() === 'POST' &&
+            res.request().postData()?.includes('Rate'),
+          { timeout: 10000 } // Short timeout per attempt
+        )
+        .catch((e) => {
+          console.log(
+            `Attempt ${attempt}: Rating response wait error:`,
+            e.message
+          )
+          return null
+        })
 
-    // Wait for the rating API response to complete (event-driven, no hardcoded delay)
-    const ratingResponse = await ratingResponsePromise
-    if (ratingResponse) {
+      await thumbsUpButton.click({ force: true })
       console.log(
-        'Rating POST response received:',
-        ratingResponse.status(),
-        ratingResponse.url()
+        `Attempt ${attempt}: Clicked thumbs up button with force:true`
       )
-    } else {
-      console.log('WARNING: No rating POST response received')
+
+      // Wait for the rating API response
+      ratingResponse = await ratingResponsePromise
+      if (ratingResponse) {
+        console.log(
+          `Attempt ${attempt}: Rating POST response received:`,
+          ratingResponse.status(),
+          ratingResponse.url()
+        )
+        break // Success, exit retry loop
+      } else {
+        console.log(
+          `Attempt ${attempt}: No rating API response, waiting before retry...`
+        )
+        // Wait a bit for Vue hydration to complete before retry
+        await page.waitForTimeout(1000)
+      }
+    }
+
+    if (!ratingResponse) {
+      console.log('WARNING: No rating POST response received after all retries')
     }
 
     // Check if any errors occurred during the click
