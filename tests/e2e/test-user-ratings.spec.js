@@ -137,6 +137,30 @@ test.describe('User ratings tests', () => {
     await chatEntry.click()
     await page.waitForTimeout(timeouts.ui.transition)
 
+    // Dismiss the "Contact details" modal if it appears.
+    // This modal asks for postcode when the user doesn't have mylocation set.
+    const contactDetailsModal = page.locator(
+      '.modal-content:has-text("Contact details")'
+    )
+    try {
+      await contactDetailsModal.waitFor({
+        state: 'visible',
+        timeout: 5000,
+      })
+      console.log('Contact details modal appeared - dismissing it')
+      // Click Cancel to dismiss the modal
+      const cancelButton = contactDetailsModal.locator(
+        'button:has-text("Cancel")'
+      )
+      await cancelButton.click()
+      // Wait for modal to close
+      await contactDetailsModal.waitFor({ state: 'hidden', timeout: 5000 })
+      console.log('Contact details modal dismissed')
+    } catch (e) {
+      // Modal didn't appear within 5 seconds - that's fine, continue
+      console.log('Contact details modal did not appear - continuing')
+    }
+
     // Wait for the chat header to load with user info (desktop view)
     // The user-ratings container has two buttons: thumbs-up (first), thumbs-down (second)
     const userRatings = page.locator('.user-ratings')
