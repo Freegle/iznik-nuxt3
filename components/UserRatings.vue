@@ -5,7 +5,6 @@
         {{ user.displayname }}
       </span>
       <b-button
-        :key="`up-${displayMine}-${displayUpCount}`"
         v-b-tooltip.bottom="noTooltips || showDown || showRemove ? '' : uptitle"
         :size="size"
         :variant="displayUpCount > 0 ? 'primary' : 'white'"
@@ -19,7 +18,6 @@
         <v-icon icon="thumbs-up" />&nbsp;{{ displayUpCount }}
       </b-button>
       <b-button
-        :key="`down-${displayMine}-${displayDownCount}`"
         v-b-tooltip.bottom="
           noTooltips || showDown || showRemove ? '' : downtitle
         "
