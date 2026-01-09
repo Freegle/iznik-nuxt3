@@ -227,9 +227,30 @@ test.describe('User ratings tests', () => {
     console.log('About to click thumbs up button...')
 
     let ratingResponse = null
-    const maxRetries = 3
+    const maxRetries = 5
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       console.log(`Click attempt ${attempt} of ${maxRetries}`)
+
+      // Wait a bit before each attempt to allow Vue hydration to settle.
+      // The delay increases with each attempt to handle slow environments.
+      const preClickDelay = 1000 + attempt * 500
+      console.log(
+        `Attempt ${attempt}: Waiting ${preClickDelay}ms before click for Vue hydration...`
+      )
+      await page.waitForTimeout(preClickDelay)
+
+      // Get button state before click for debugging
+      const btnState = await page.evaluate(() => {
+        const btn = document.querySelector('.user-ratings button')
+        return btn
+          ? {
+              text: btn.textContent?.trim(),
+              disabled: btn.disabled,
+              hasVue: !!btn.closest('.user-ratings')?.__vueParentComponent,
+            }
+          : null
+      })
+      console.log(`Button state before click: ${JSON.stringify(btnState)}`)
 
       // Set up promise to wait for the rating API response (not just request).
       // This ensures the database write is complete before we check the UI.
@@ -239,7 +260,7 @@ test.describe('User ratings tests', () => {
             res.url().includes('apiv1') &&
             res.request().method() === 'POST' &&
             res.request().postData()?.includes('Rate'),
-          { timeout: 10000 } // Short timeout per attempt
+          { timeout: 15000 } // 15 seconds per attempt for slow CI
         )
         .catch((e) => {
           console.log(
@@ -249,10 +270,10 @@ test.describe('User ratings tests', () => {
           return null
         })
 
-      await thumbsUpButton.click({ force: true })
-      console.log(
-        `Attempt ${attempt}: Clicked thumbs up button with force:true`
-      )
+      // Use normal click (no force:true) to let Playwright's actionability checks help.
+      // Playwright will wait for the element to be stable before clicking.
+      await thumbsUpButton.click()
+      console.log(`Attempt ${attempt}: Clicked thumbs up button`)
 
       // Wait for the rating API response
       ratingResponse = await ratingResponsePromise
@@ -262,18 +283,46 @@ test.describe('User ratings tests', () => {
           ratingResponse.status(),
           ratingResponse.url()
         )
-        break // Success, exit retry loop
-      } else {
+
+        // Verify the click actually worked by checking for the 'mine' class.
+        // The button should get 'mine' class immediately when setClickedState('Up') is called,
+        // which happens synchronously BEFORE the API call. If we got an API response but
+        // no 'mine' class, the response might be a false positive from another request.
+        const hasMineClass = await page.evaluate(() => {
+          const btn = document.querySelector('.user-ratings button')
+          return btn && btn.classList.contains('mine')
+        })
+
+        if (hasMineClass) {
+          console.log(
+            `Attempt ${attempt}: Button has mine class - click succeeded`
+          )
+          break // Success, exit retry loop
+        } else {
+          console.log(
+            `Attempt ${attempt}: API response received but button doesn't have mine class - click may not have worked, will retry`
+          )
+          ratingResponse = null // Reset so we retry
+        }
+      }
+
+      if (!ratingResponse) {
         console.log(
           `Attempt ${attempt}: No rating API response, waiting before retry...`
         )
-        // Wait a bit for Vue hydration to complete before retry
-        await page.waitForTimeout(1000)
+        // Wait for Vue hydration to potentially complete before retry
+        // Increase wait time with each attempt
+        await page.waitForTimeout(2000 + attempt * 1000)
       }
     }
 
     if (!ratingResponse) {
       console.log('WARNING: No rating POST response received after all retries')
+      // Take a screenshot to help debug
+      await page.screenshot({
+        path: 'test-results/rating-failed-debug.png',
+        fullPage: true,
+      })
     }
 
     // Check if any errors occurred during the click
