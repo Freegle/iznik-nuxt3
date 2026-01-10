@@ -16,6 +16,7 @@
           :error="selectedPhoto.error"
           :quality-warning="selectedPhoto.qualityWarning"
           :show-rotate="!!selectedPhoto.id"
+          :externalmods="selectedPhoto.externalmods"
           @remove="removePhoto(selectedPhoto)"
           @rotate="rotatePhoto(selectedPhoto, 90)"
           @retry="retryUpload(selectedPhoto)"
