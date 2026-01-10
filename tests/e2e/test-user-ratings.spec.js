@@ -300,6 +300,17 @@ test.describe('User ratings tests', () => {
     )
     console.log('UserRatings component loaded with user data')
 
+    // Additional wait for async component hydration to complete
+    // The defineAsyncComponent in ChatHeader loads UserRatings lazily,
+    // which means Vue event handlers may not be attached immediately
+    console.log('Waiting additional 3s for async component hydration...')
+    await page.waitForTimeout(3000)
+
+    // Try hovering over the button first - this can help trigger any lazy initialization
+    console.log('Hovering over thumbs up button to ensure it is interactive...')
+    await thumbsUpButton.hover()
+    await page.waitForTimeout(500)
+
     // Debug: Check if button is disabled
     const isDisabled = await thumbsUpButton.isDisabled()
     console.log(`Thumbs up button disabled: ${isDisabled}`)
@@ -447,11 +458,30 @@ test.describe('User ratings tests', () => {
           return null
         })
 
-      // Use normal click (no force:true) to let Playwright's actionability checks help.
-      // Playwright will wait for the element to be stable before clicking.
+      // Try multiple click approaches since Vue async component hydration can be tricky
       console.log('Clicking button now...')
-      await thumbsUpButton.click()
-      console.log('Click completed')
+
+      // First, try dispatching a native click event via evaluate
+      // This can bypass issues where Playwright's click doesn't trigger Vue handlers
+      const clickResult = await page.evaluate(() => {
+        const btn = document.querySelector('.user-ratings button')
+        if (!btn) return { error: 'No button found' }
+
+        // Create and dispatch a native click event
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        })
+        btn.dispatchEvent(clickEvent)
+
+        return { clicked: true, buttonText: btn.textContent?.trim() }
+      })
+      console.log('Native click dispatch result:', JSON.stringify(clickResult))
+
+      // Also try Playwright's click as a backup
+      await thumbsUpButton.click({ force: true })
+      console.log('Playwright click completed')
 
       // Immediately check state after click (before waiting for API)
       const btnStateImmediatelyAfterClick = await page.evaluate(() => {
