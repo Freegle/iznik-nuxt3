@@ -161,6 +161,67 @@ test.describe('User ratings tests', () => {
       console.log('Contact details modal did not appear - continuing')
     }
 
+    // ========== EXTENSIVE DEBUG: Check DOM structure ==========
+    console.log('\n========== DOM STRUCTURE DEBUG ==========')
+    const domDebug = await page.evaluate(() => {
+      // Count all .user-ratings elements
+      const allUserRatings = document.querySelectorAll('.user-ratings')
+      const userRatingsInfo = []
+
+      allUserRatings.forEach((el, idx) => {
+        const buttons = el.querySelectorAll('button')
+        const parent = el.parentElement
+        const grandparent = parent?.parentElement
+
+        // Check visibility
+        const rect = el.getBoundingClientRect()
+        const style = window.getComputedStyle(el)
+        const parentStyle = parent ? window.getComputedStyle(parent) : null
+
+        userRatingsInfo.push({
+          index: idx,
+          buttonCount: buttons.length,
+          firstButtonText: buttons[0]?.textContent?.trim(),
+          firstButtonClasses: buttons[0]?.className,
+          isVisible: rect.width > 0 && rect.height > 0,
+          display: style.display,
+          visibility: style.visibility,
+          parentClass: parent?.className,
+          parentDisplay: parentStyle?.display,
+          parentVisibility: parentStyle?.visibility,
+          grandparentClass: grandparent?.className,
+          rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height }
+        })
+      })
+
+      // Check collapsed state - look for chatinfoheader in localStorage or Pinia store
+      let collapsedState = 'unknown'
+      try {
+        // Try to find the collapsed state from Vue/Pinia
+        const miscStore = window.__PINIA__?.state?.value?.misc
+        if (miscStore) {
+          collapsedState = miscStore.chatinfoheader ? 'collapsed' : 'expanded'
+        }
+      } catch (e) {
+        collapsedState = 'error: ' + e.message
+      }
+
+      return {
+        totalUserRatingsElements: allUserRatings.length,
+        userRatingsInfo,
+        collapsedState,
+        pageUrl: window.location.href
+      }
+    })
+
+    console.log('Total .user-ratings elements:', domDebug.totalUserRatingsElements)
+    console.log('Collapsed state:', domDebug.collapsedState)
+    console.log('Page URL:', domDebug.pageUrl)
+    for (const info of domDebug.userRatingsInfo) {
+      console.log(`  UserRatings[${info.index}]:`, JSON.stringify(info))
+    }
+    console.log('========================================\n')
+
     // Wait for the chat header to load with user info (desktop view)
     // The user-ratings container has two buttons: thumbs-up (first), thumbs-down (second)
     const userRatings = page.locator('.user-ratings')
@@ -173,6 +234,42 @@ test.describe('User ratings tests', () => {
     // This is critical because SSR renders the HTML but event handlers aren't attached until hydration
     await page.waitForLoadState('networkidle', { timeout: 30000 })
     console.log('Network idle - Vue hydration should be complete')
+
+    // ========== DEBUG: Check for multiple visible UserRatings after network idle ==========
+    const postNetworkDebug = await page.evaluate(() => {
+      const allUserRatings = document.querySelectorAll('.user-ratings')
+      const visibleRatings = []
+
+      allUserRatings.forEach((el, idx) => {
+        const rect = el.getBoundingClientRect()
+        const style = window.getComputedStyle(el)
+        const isVisible = rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden'
+
+        if (isVisible) {
+          const buttons = el.querySelectorAll('button')
+          visibleRatings.push({
+            index: idx,
+            buttonCount: buttons.length,
+            firstButtonText: buttons[0]?.textContent?.trim(),
+            outerHTML: el.outerHTML.substring(0, 200)
+          })
+        }
+      })
+
+      return {
+        totalElements: allUserRatings.length,
+        visibleCount: visibleRatings.length,
+        visibleRatings
+      }
+    })
+
+    console.log('\n========== POST-NETWORK-IDLE DEBUG ==========')
+    console.log('Total .user-ratings elements:', postNetworkDebug.totalElements)
+    console.log('Visible .user-ratings elements:', postNetworkDebug.visibleCount)
+    for (const info of postNetworkDebug.visibleRatings) {
+      console.log(`  Visible[${info.index}]:`, JSON.stringify(info))
+    }
+    console.log('==============================================\n')
 
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
@@ -216,34 +313,72 @@ test.describe('User ratings tests', () => {
     const classesBeforeClick = await thumbsUpButton.getAttribute('class')
     console.log(`Button classes before click: ${classesBeforeClick}`)
 
-    // Debug: Get information about the button and Vue state before click
-    const buttonInfo = await page.evaluate(() => {
-      const buttons = document.querySelectorAll('.user-ratings button')
-      if (buttons.length >= 1) {
-        const btn = buttons[0]
-        // Check for Vue component instance
-        let vueInfo = null
+    // ========== DEBUG: Comprehensive button and Vue state before click ==========
+    const preClickDebug = await page.evaluate(() => {
+      const allButtons = document.querySelectorAll('.user-ratings button')
+      const buttonDetails = []
+
+      allButtons.forEach((btn, idx) => {
+        const rect = btn.getBoundingClientRect()
+        const parent = btn.closest('.user-ratings')
+        const parentRect = parent?.getBoundingClientRect()
+
+        // Try to find Vue component instance
+        let vueData = null
         try {
-          // Try to get Vue component data
-          const component = btn.closest('.user-ratings')?.__vueParentComponent
-          if (component) {
-            const props = component.props || {}
-            vueInfo = { props: JSON.stringify(props) }
+          // Walk up to find Vue component
+          let el = btn
+          while (el && !el.__vueParentComponent) {
+            el = el.parentElement
+          }
+          if (el?.__vueParentComponent) {
+            const component = el.__vueParentComponent
+            const setupState = component.setupState || {}
+            vueData = {
+              componentName: component.type?.name || component.type?.__name || 'unknown',
+              hasClickedRating: 'clickedRating' in setupState,
+              clickedRatingValue: setupState.clickedRating?.value,
+              displayMineValue: setupState.displayMine?.value,
+              displayUpCountValue: setupState.displayUpCount?.value,
+              userId: component.props?.id
+            }
           }
         } catch (e) {
-          vueInfo = { error: e.message }
+          vueData = { error: e.message }
         }
-        return {
-          disabled: btn.disabled,
+
+        // Check for event listeners
+        const hasClickListener = btn.onclick !== null ||
+          (typeof getEventListeners !== 'undefined' ? getEventListeners(btn).click?.length > 0 : 'unknown')
+
+        buttonDetails.push({
+          buttonIndex: idx,
+          text: btn.textContent?.trim(),
           className: btn.className,
-          textContent: btn.textContent.trim(),
-          ariaDisabled: btn.getAttribute('aria-disabled'),
-          vueInfo,
-        }
+          disabled: btn.disabled,
+          isThumbsUp: btn.querySelector('[class*="thumbs-up"]') !== null || btn.innerHTML.includes('thumbs-up'),
+          rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+          parentRect: parentRect ? { top: parentRect.top, left: parentRect.left, width: parentRect.width, height: parentRect.height } : null,
+          vueData,
+          hasClickListener
+        })
+      })
+
+      return {
+        totalButtons: allButtons.length,
+        buttonDetails,
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight
       }
-      return null
     })
-    console.log('Button info before click:', JSON.stringify(buttonInfo))
+
+    console.log('\n========== PRE-CLICK DEBUG ==========')
+    console.log('Total buttons:', preClickDebug.totalButtons)
+    console.log('Viewport:', preClickDebug.viewportWidth, 'x', preClickDebug.viewportHeight)
+    for (const btn of preClickDebug.buttonDetails) {
+      console.log(`  Button[${btn.buttonIndex}]:`, JSON.stringify(btn))
+    }
+    console.log('======================================\n')
 
     // Click thumbs up to rate the user
     // Use a retry mechanism because Vue async component hydration timing can vary.
@@ -253,28 +388,49 @@ test.describe('User ratings tests', () => {
     let ratingResponse = null
     const maxRetries = 5
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      console.log(`Click attempt ${attempt} of ${maxRetries}`)
+      console.log(`\n========== CLICK ATTEMPT ${attempt} of ${maxRetries} ==========`)
 
       // Wait a bit before each attempt to allow Vue hydration to settle.
       // The delay increases with each attempt to handle slow environments.
       const preClickDelay = 1000 + attempt * 500
-      console.log(
-        `Attempt ${attempt}: Waiting ${preClickDelay}ms before click for Vue hydration...`
-      )
+      console.log(`Waiting ${preClickDelay}ms before click...`)
       await page.waitForTimeout(preClickDelay)
 
       // Get button state before click for debugging
-      const btnState = await page.evaluate(() => {
-        const btn = document.querySelector('.user-ratings button')
-        return btn
-          ? {
-              text: btn.textContent?.trim(),
-              disabled: btn.disabled,
-              hasVue: !!btn.closest('.user-ratings')?.__vueParentComponent,
+      const btnStateBeforeClick = await page.evaluate(() => {
+        const allBtns = document.querySelectorAll('.user-ratings button')
+        const firstBtn = allBtns[0]
+        if (!firstBtn) return { error: 'No button found' }
+
+        // Find Vue component
+        let vueState = null
+        try {
+          let el = firstBtn
+          while (el && !el.__vueParentComponent) {
+            el = el.parentElement
+          }
+          if (el?.__vueParentComponent) {
+            const ss = el.__vueParentComponent.setupState || {}
+            vueState = {
+              clickedRating: ss.clickedRating?.value,
+              displayMine: ss.displayMine?.value,
+              displayUpCount: ss.displayUpCount?.value
             }
-          : null
+          }
+        } catch (e) {
+          vueState = { error: e.message }
+        }
+
+        return {
+          text: firstBtn.textContent?.trim(),
+          className: firstBtn.className,
+          disabled: firstBtn.disabled,
+          hasMineClass: firstBtn.classList.contains('mine'),
+          vueState,
+          totalButtons: allBtns.length
+        }
       })
-      console.log(`Button state before click: ${JSON.stringify(btnState)}`)
+      console.log('Button state BEFORE click:', JSON.stringify(btnStateBeforeClick))
 
       // Set up promise to wait for the rating API response (not just request).
       // This ensures the database write is complete before we check the UI.
@@ -287,26 +443,91 @@ test.describe('User ratings tests', () => {
           { timeout: 15000 } // 15 seconds per attempt for slow CI
         )
         .catch((e) => {
-          console.log(
-            `Attempt ${attempt}: Rating response wait error:`,
-            e.message
-          )
+          console.log(`Rating response wait error: ${e.message}`)
           return null
         })
 
       // Use normal click (no force:true) to let Playwright's actionability checks help.
       // Playwright will wait for the element to be stable before clicking.
+      console.log('Clicking button now...')
       await thumbsUpButton.click()
-      console.log(`Attempt ${attempt}: Clicked thumbs up button`)
+      console.log('Click completed')
+
+      // Immediately check state after click (before waiting for API)
+      const btnStateImmediatelyAfterClick = await page.evaluate(() => {
+        const allBtns = document.querySelectorAll('.user-ratings button')
+        const firstBtn = allBtns[0]
+        if (!firstBtn) return { error: 'No button found' }
+
+        // Find Vue component
+        let vueState = null
+        try {
+          let el = firstBtn
+          while (el && !el.__vueParentComponent) {
+            el = el.parentElement
+          }
+          if (el?.__vueParentComponent) {
+            const ss = el.__vueParentComponent.setupState || {}
+            vueState = {
+              clickedRating: ss.clickedRating?.value,
+              displayMine: ss.displayMine?.value,
+              displayUpCount: ss.displayUpCount?.value
+            }
+          }
+        } catch (e) {
+          vueState = { error: e.message }
+        }
+
+        return {
+          text: firstBtn.textContent?.trim(),
+          className: firstBtn.className,
+          hasMineClass: firstBtn.classList.contains('mine'),
+          vueState,
+          totalButtons: allBtns.length
+        }
+      })
+      console.log('Button state IMMEDIATELY after click:', JSON.stringify(btnStateImmediatelyAfterClick))
 
       // Wait for the rating API response
       ratingResponse = await ratingResponsePromise
+
+      // Check state after API response
+      const btnStateAfterApi = await page.evaluate(() => {
+        const allBtns = document.querySelectorAll('.user-ratings button')
+        const firstBtn = allBtns[0]
+        if (!firstBtn) return { error: 'No button found' }
+
+        // Find Vue component
+        let vueState = null
+        try {
+          let el = firstBtn
+          while (el && !el.__vueParentComponent) {
+            el = el.parentElement
+          }
+          if (el?.__vueParentComponent) {
+            const ss = el.__vueParentComponent.setupState || {}
+            vueState = {
+              clickedRating: ss.clickedRating?.value,
+              displayMine: ss.displayMine?.value,
+              displayUpCount: ss.displayUpCount?.value
+            }
+          }
+        } catch (e) {
+          vueState = { error: e.message }
+        }
+
+        return {
+          text: firstBtn.textContent?.trim(),
+          className: firstBtn.className,
+          hasMineClass: firstBtn.classList.contains('mine'),
+          vueState,
+          totalButtons: allBtns.length
+        }
+      })
+      console.log('Button state AFTER API wait:', JSON.stringify(btnStateAfterApi))
+
       if (ratingResponse) {
-        console.log(
-          `Attempt ${attempt}: Rating POST response received:`,
-          ratingResponse.status(),
-          ratingResponse.url()
-        )
+        console.log(`Rating POST response received: ${ratingResponse.status()} ${ratingResponse.url()}`)
 
         // Verify the click actually worked by checking for the 'mine' class.
         // The button should get 'mine' class immediately when setClickedState('Up') is called,
@@ -318,51 +539,86 @@ test.describe('User ratings tests', () => {
         })
 
         if (hasMineClass) {
-          console.log(
-            `Attempt ${attempt}: Button has mine class - click succeeded`
-          )
+          console.log('SUCCESS: Button has mine class - click succeeded')
           break // Success, exit retry loop
         } else {
-          console.log(
-            `Attempt ${attempt}: API response received but button doesn't have mine class - click may not have worked, will retry`
-          )
+          console.log('PROBLEM: API response received but button doesn\'t have mine class')
           ratingResponse = null // Reset so we retry
         }
+      } else {
+        console.log('No rating API response received')
       }
 
-      if (!ratingResponse) {
-        console.log(
-          `Attempt ${attempt}: No rating API response, waiting before retry...`
-        )
+      console.log(`========== END ATTEMPT ${attempt} ==========\n`)
+
+      if (!ratingResponse && attempt < maxRetries) {
         // Wait for Vue hydration to potentially complete before retry
         // Increase wait time with each attempt
-        await page.waitForTimeout(2000 + attempt * 1000)
+        const retryDelay = 2000 + attempt * 1000
+        console.log(`Waiting ${retryDelay}ms before retry...`)
+        await page.waitForTimeout(retryDelay)
       }
     }
 
     if (!ratingResponse) {
+      console.log('\n========== FAILURE DEBUG ==========')
       console.log('WARNING: No rating POST response received after all retries')
+
       // Take a screenshot to help debug
       await page.screenshot({
         path: 'test-results/rating-failed-debug.png',
         fullPage: true,
       })
-    }
 
-    // Check if any errors occurred during the click
-    const buttonInfoAfter = await page.evaluate(() => {
-      const buttons = document.querySelectorAll('.user-ratings button')
-      if (buttons.length >= 1) {
-        const btn = buttons[0]
+      // Capture final DOM state
+      const finalDomState = await page.evaluate(() => {
+        const allUserRatings = document.querySelectorAll('.user-ratings')
+        const details = []
+
+        allUserRatings.forEach((el, idx) => {
+          const buttons = el.querySelectorAll('button')
+          const rect = el.getBoundingClientRect()
+
+          buttons.forEach((btn, btnIdx) => {
+            let vueState = null
+            try {
+              let parent = btn
+              while (parent && !parent.__vueParentComponent) {
+                parent = parent.parentElement
+              }
+              if (parent?.__vueParentComponent) {
+                const ss = parent.__vueParentComponent.setupState || {}
+                vueState = {
+                  clickedRating: ss.clickedRating?.value,
+                  displayMine: ss.displayMine?.value,
+                  displayUpCount: ss.displayUpCount?.value
+                }
+              }
+            } catch (e) {
+              vueState = { error: e.message }
+            }
+
+            details.push({
+              userRatingsIdx: idx,
+              buttonIdx: btnIdx,
+              text: btn.textContent?.trim(),
+              className: btn.className,
+              hasMineClass: btn.classList.contains('mine'),
+              vueState,
+              isVisible: rect.width > 0 && rect.height > 0
+            })
+          })
+        })
+
         return {
-          disabled: btn.disabled,
-          className: btn.className,
-          textContent: btn.textContent.trim(),
+          totalUserRatings: allUserRatings.length,
+          details
         }
-      }
-      return null
-    })
-    console.log('Button info after click:', JSON.stringify(buttonInfoAfter))
+      })
+
+      console.log('Final DOM state:', JSON.stringify(finalDomState, null, 2))
+      console.log('====================================\n')
+    }
 
     // Log all captured API requests and responses
     console.log('\n=== API Requests after click ===')
