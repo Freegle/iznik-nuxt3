@@ -67,7 +67,6 @@ test.describe('User ratings tests', () => {
     await page.waitForTimeout(timeouts.ui.transition)
 
     // Dismiss the "Contact details" modal if it appears.
-    // This modal asks for postcode when the user doesn't have mylocation set.
     const contactDetailsModal = page.locator(
       '.modal-content:has-text("Contact details")'
     )
@@ -84,22 +83,21 @@ test.describe('User ratings tests', () => {
       await contactDetailsModal.waitFor({ state: 'hidden', timeout: 5000 })
       console.log('Contact details modal dismissed')
     } catch (e) {
-      // Modal didn't appear - that's fine
       console.log('Contact details modal did not appear - continuing')
     }
 
-    // Wait for the UserRatings component to be fully hydrated.
-    // The component adds a 'hydrated' class once Vue has mounted it on the client,
-    // which ensures event handlers are attached and ready.
-    const hydratedRatings = page.locator('.user-ratings.hydrated')
-    await hydratedRatings.waitFor({
+    // Wait for the UserRatings component to be visible
+    const userRatings = page.locator('.user-ratings')
+    await userRatings.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log('UserRatings component hydrated and ready')
+
+    // Wait for network to be idle
+    await page.waitForLoadState('networkidle', { timeout: 30000 })
 
     // First button is thumbs-up
-    const thumbsUpButton = hydratedRatings.locator('button').first()
+    const thumbsUpButton = userRatings.locator('button').first()
     await thumbsUpButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
@@ -110,15 +108,78 @@ test.describe('User ratings tests', () => {
     const initialCount = parseInt(initialUpCount.replace(/\D/g, '')) || 0
     console.log(`Initial thumbs up count: ${initialCount}`)
 
-    // Click thumbs up to rate the user
-    console.log('Clicking thumbs up button...')
-    await thumbsUpButton.click()
+    // Click thumbs up using retry with dispatchEvent
+    // The async component may take time to attach event handlers
+    console.log('Clicking thumbs up button with retry mechanism...')
+
+    const maxRetries = 8
+    let clickSucceeded = false
+
+    for (let attempt = 1; attempt <= maxRetries && !clickSucceeded; attempt++) {
+      // Wait before each attempt (increasing delay)
+      const delay = 1000 + attempt * 500
+      console.log(`Attempt ${attempt}/${maxRetries}: waiting ${delay}ms...`)
+      await page.waitForTimeout(delay)
+
+      // Use dispatchEvent via evaluate to trigger the click
+      const clickResult = await page.evaluate(() => {
+        const btn = document.querySelector('.user-ratings button')
+        if (!btn) return { error: 'No button found' }
+
+        const beforeText = btn.textContent?.trim()
+
+        // Dispatch a native click event
+        const event = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        })
+        btn.dispatchEvent(event)
+
+        return { clicked: true, beforeText }
+      })
+
+      console.log(`Click result: ${JSON.stringify(clickResult)}`)
+
+      // Wait a moment for Vue to process the click
+      await page.waitForTimeout(500)
+
+      // Check if the click had any effect (button should get 'mine' class)
+      const hasMineClass = await page.evaluate(() => {
+        const btn = document.querySelector('.user-ratings button')
+        return btn?.classList.contains('mine') || false
+      })
+
+      if (hasMineClass) {
+        console.log('Click succeeded - button has mine class')
+        clickSucceeded = true
+      } else {
+        // Also check if count changed
+        const currentText = await thumbsUpButton.textContent()
+        const currentCount = parseInt(currentText.replace(/\D/g, '')) || 0
+        if (currentCount === initialCount + 1) {
+          console.log('Click succeeded - count increased')
+          clickSucceeded = true
+        } else {
+          console.log(`Click may not have worked - count is ${currentCount}`)
+        }
+      }
+    }
+
+    if (!clickSucceeded) {
+      // Take debug screenshot
+      await page.screenshot({
+        path: 'test-results/rating-failed-debug.png',
+        fullPage: true,
+      })
+      throw new Error('Failed to click rating button after all retries')
+    }
 
     // Wait for the count to update
     const expectedCount = initialCount + 1
     await page.waitForFunction(
       (expected) => {
-        const btn = document.querySelector('.user-ratings.hydrated button')
+        const btn = document.querySelector('.user-ratings button')
         if (!btn) return false
         const text = btn.textContent || ''
         const count = parseInt(text.replace(/\D/g, '')) || 0
@@ -161,7 +222,7 @@ test.describe('User ratings tests', () => {
     // Wait for the count to go back to original
     await page.waitForFunction(
       (expected) => {
-        const btn = document.querySelector('.user-ratings.hydrated button')
+        const btn = document.querySelector('.user-ratings button')
         if (!btn) return false
         const text = btn.textContent || ''
         const count = parseInt(text.replace(/\D/g, '')) || 0

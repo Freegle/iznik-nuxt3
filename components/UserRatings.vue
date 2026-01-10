@@ -1,5 +1,5 @@
 <template>
-  <span class="d-inline user-ratings" :class="{ hydrated: isHydrated }">
+  <span class="d-inline user-ratings">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
@@ -46,7 +46,6 @@
   </span>
 </template>
 <script setup>
-import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
@@ -103,13 +102,6 @@ const { myid } = useMe()
 
 const showDown = ref(false)
 const showRemove = ref(false)
-
-// Track when the component is hydrated (mounted on client-side)
-// This allows Playwright tests to wait for Vue event handlers to be attached
-const isHydrated = ref(false)
-onMounted(() => {
-  isHydrated.value = true
-})
 
 // Track the last rating we clicked locally. This ensures the UI updates
 // immediately after a click, regardless of store timing/race conditions.
