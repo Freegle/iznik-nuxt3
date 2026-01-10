@@ -46,6 +46,7 @@
   </span>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
