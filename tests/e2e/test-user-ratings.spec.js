@@ -93,7 +93,7 @@ test.describe('User ratings tests', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Wait for network to be idle
+    // Wait for network to be idle to ensure hydration is complete
     await page.waitForLoadState('networkidle', { timeout: 30000 })
 
     // First button is thumbs-up
@@ -108,72 +108,9 @@ test.describe('User ratings tests', () => {
     const initialCount = parseInt(initialUpCount.replace(/\D/g, '')) || 0
     console.log(`Initial thumbs up count: ${initialCount}`)
 
-    // Click thumbs up using retry with dispatchEvent
-    // The async component may take time to attach event handlers
-    console.log('Clicking thumbs up button with retry mechanism...')
-
-    const maxRetries = 8
-    let clickSucceeded = false
-
-    for (let attempt = 1; attempt <= maxRetries && !clickSucceeded; attempt++) {
-      // Wait before each attempt (increasing delay)
-      const delay = 1000 + attempt * 500
-      console.log(`Attempt ${attempt}/${maxRetries}: waiting ${delay}ms...`)
-      await page.waitForTimeout(delay)
-
-      // Use dispatchEvent via evaluate to trigger the click
-      const clickResult = await page.evaluate(() => {
-        const btn = document.querySelector('.user-ratings button')
-        if (!btn) return { error: 'No button found' }
-
-        const beforeText = btn.textContent?.trim()
-
-        // Dispatch a native click event
-        const event = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-        })
-        btn.dispatchEvent(event)
-
-        return { clicked: true, beforeText }
-      })
-
-      console.log(`Click result: ${JSON.stringify(clickResult)}`)
-
-      // Wait a moment for Vue to process the click
-      await page.waitForTimeout(500)
-
-      // Check if the click had any effect (button should get 'mine' class)
-      const hasMineClass = await page.evaluate(() => {
-        const btn = document.querySelector('.user-ratings button')
-        return btn?.classList.contains('mine') || false
-      })
-
-      if (hasMineClass) {
-        console.log('Click succeeded - button has mine class')
-        clickSucceeded = true
-      } else {
-        // Also check if count changed
-        const currentText = await thumbsUpButton.textContent()
-        const currentCount = parseInt(currentText.replace(/\D/g, '')) || 0
-        if (currentCount === initialCount + 1) {
-          console.log('Click succeeded - count increased')
-          clickSucceeded = true
-        } else {
-          console.log(`Click may not have worked - count is ${currentCount}`)
-        }
-      }
-    }
-
-    if (!clickSucceeded) {
-      // Take debug screenshot
-      await page.screenshot({
-        path: 'test-results/rating-failed-debug.png',
-        fullPage: true,
-      })
-      throw new Error('Failed to click rating button after all retries')
-    }
+    // Click thumbs up to rate the user
+    console.log('Clicking thumbs up button...')
+    await thumbsUpButton.click()
 
     // Wait for the count to update
     const expectedCount = initialCount + 1

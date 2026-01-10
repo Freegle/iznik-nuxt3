@@ -326,6 +326,7 @@
 </template>
 <script setup>
 import ProfileImage from './ProfileImage'
+import UserRatings from '~/components/UserRatings'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
 import { twem, useRouter } from '#imports'
@@ -335,9 +336,6 @@ import { timeago } from '~/composables/useTimeFormat'
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
-const UserRatings = defineAsyncComponent(() =>
-  import('~/components/UserRatings')
-)
 const ChatReportModal = defineAsyncComponent(() =>
   import('~/components/ChatReportModal')
 )
