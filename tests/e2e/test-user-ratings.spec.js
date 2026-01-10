@@ -96,6 +96,16 @@ test.describe('User ratings tests', () => {
     // Wait for network to be idle to ensure hydration is complete
     await page.waitForLoadState('networkidle', { timeout: 30000 })
 
+    // Capture browser console messages to debug UserRatings
+    const consoleLogs = []
+    page.on('console', (msg) => {
+      const text = msg.text()
+      if (text.includes('UserRatings')) {
+        consoleLogs.push(text)
+        console.log('BROWSER CONSOLE:', text)
+      }
+    })
+
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
     await thumbsUpButton.waitFor({
@@ -108,9 +118,25 @@ test.describe('User ratings tests', () => {
     const initialCount = parseInt(initialUpCount.replace(/\D/g, '')) || 0
     console.log(`Initial thumbs up count: ${initialCount}`)
 
+    // Check if button is disabled
+    const isDisabled = await thumbsUpButton.isDisabled()
+    console.log(`Button disabled: ${isDisabled}`)
+
+    // Get button HTML for debugging
+    const buttonHtml = await thumbsUpButton.evaluate((el) => el.outerHTML)
+    console.log(`Button HTML: ${buttonHtml}`)
+
+    // Wait a bit to see if any mounting logs appear
+    await page.waitForTimeout(500)
+    console.log(`UserRatings console logs so far: ${consoleLogs.length}`)
+
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
     await thumbsUpButton.click()
+
+    // Wait a bit and check console logs
+    await page.waitForTimeout(1000)
+    console.log(`Console logs after click: ${consoleLogs.join(' | ')}`)
 
     // Wait for the count to update
     const expectedCount = initialCount + 1

@@ -46,6 +46,7 @@
   </span>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
@@ -99,6 +100,10 @@ const emit = defineEmits([
 const userStore = useUserStore()
 // Use myid computed property from useMe composable for consistency
 const { myid } = useMe()
+
+onMounted(() => {
+  console.log('UserRatings MOUNTED - id:', props.id, 'myid:', myid.value)
+})
 
 const showDown = ref(false)
 const showRemove = ref(false)
@@ -210,6 +215,7 @@ const rate = async (rating, reason, text) => {
 }
 
 const up = async () => {
+  console.log('UserRatings up() called - displayMine:', displayMine.value, 'userId:', props.id)
   showDown.value = false
   if (displayMine.value === 'Up') {
     // Already rated up - show modal to confirm removal
