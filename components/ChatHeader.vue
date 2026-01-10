@@ -38,12 +38,12 @@
           {{ chat.name }}
         </div>
         <div
-          v-if="otheruser && otheruser.info && !otheruser?.deleted"
+          v-if="collapsed && otheruser && otheruser.info && !otheruser?.deleted"
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
+            :key="'collapsed-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
