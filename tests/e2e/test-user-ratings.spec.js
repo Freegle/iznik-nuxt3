@@ -54,6 +54,17 @@ test.describe('User ratings tests', () => {
     }
     console.log('Logged in as User A')
 
+    // Set up console listener BEFORE navigating - must capture hydration logs
+    const consoleLogs = []
+    page.on('console', (msg) => {
+      const text = msg.text()
+      // Capture all UserRatings logs and also hydration warnings
+      if (text.includes('UserRatings') || text.includes('hydration') || text.includes('Hydration')) {
+        consoleLogs.push(text)
+        console.log('BROWSER CONSOLE:', text)
+      }
+    })
+
     // Navigate to /chats
     await page.gotoAndVerify('/chats')
 
@@ -96,17 +107,6 @@ test.describe('User ratings tests', () => {
 
     // Wait for network to be idle to ensure hydration is complete
     await page.waitForLoadState('networkidle', { timeout: 30000 })
-
-    // Capture browser console messages to debug UserRatings
-    const consoleLogs = []
-    page.on('console', (msg) => {
-      const text = msg.text()
-      // Capture all UserRatings logs and also hydration warnings
-      if (text.includes('UserRatings') || text.includes('hydration') || text.includes('Hydration')) {
-        consoleLogs.push(text)
-        console.log('BROWSER CONSOLE:', text)
-      }
-    })
 
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
