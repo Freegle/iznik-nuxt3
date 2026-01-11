@@ -26,14 +26,12 @@
           "
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
-          <ClientOnly>
-            <UserRatings
-              :id="chat.otheruid"
-              :key="'otheruser-' + chat.otheruid"
-              class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
-              size="sm"
-            />
-          </ClientOnly>
+          <UserRatings
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">
@@ -43,14 +41,12 @@
           v-if="collapsed && otheruser && otheruser.info && !otheruser?.deleted"
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
-          <ClientOnly>
-            <UserRatings
-              :id="chat.otheruid"
-              :key="'collapsed-' + chat.otheruid"
-              class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
-              size="sm"
-            />
-          </ClientOnly>
+          <UserRatings
+            :id="chat.otheruid"
+            :key="'collapsed-' + chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
         <span
