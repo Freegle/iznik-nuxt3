@@ -1,5 +1,5 @@
 <template>
-  <span class="d-inline user-ratings">
+  <span class="d-inline user-ratings" :data-debug-id="id" :data-debug-myid="myid" :data-debug-mounted="mounted">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
@@ -50,7 +50,8 @@ import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 
-console.log('UserRatings: Script setup executing')
+// Use console.warn for debugging - console.log is stripped in production builds
+console.warn('UserRatings: Script setup executing')
 
 const UserRatingsDownModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsDownModal')
@@ -104,8 +105,9 @@ const { myid } = useMe()
 
 const showDown = ref(false)
 const showRemove = ref(false)
+const mounted = ref(false)
 
-console.log('UserRatings: Fetching user data for id:', props.id)
+console.warn('UserRatings: Fetching user data for id:', props.id)
 
 // Fetch user data - show cached immediately, then refresh in background.
 // These are fire-and-forget - the computed will reactively update when store changes.
@@ -113,7 +115,8 @@ userStore.fetch(props.id)
 userStore.fetch(props.id, true)
 
 onMounted(() => {
-  console.log('UserRatings: onMounted called, id:', props.id, 'myid:', myid.value)
+  mounted.value = true
+  console.warn('UserRatings: onMounted called, id:', props.id, 'myid:', myid.value)
 })
 
 const user = computed(() => {
@@ -157,19 +160,19 @@ const downtitle = computed(() => {
 })
 
 const rate = async (rating, reason, text) => {
-  console.log('UserRatings: rate() called with:', rating, 'for user:', props.id)
+  console.warn('UserRatings: rate() called with:', rating, 'for user:', props.id)
   await userStore.rate(props.id, rating, reason, text)
-  console.log('UserRatings: rate() completed, refreshing user data')
+  console.warn('UserRatings: rate() completed, refreshing user data')
   // Explicitly refresh user data after rating to ensure UI updates
   await userStore.fetch(props.id, true)
-  console.log('UserRatings: User data refreshed')
+  console.warn('UserRatings: User data refreshed')
 }
 
 const up = async () => {
-  console.log('UserRatings: up() clicked, current Mine:', user.value?.info?.ratings?.Mine)
+  console.warn('UserRatings: up() clicked, current Mine:', user.value?.info?.ratings?.Mine)
   showDown.value = false
   if (user.value?.info?.ratings?.Mine === 'Up') {
-    console.log('UserRatings: Already rated up, showing remove modal')
+    console.warn('UserRatings: Already rated up, showing remove modal')
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-remove-modal', props.id)
@@ -177,17 +180,17 @@ const up = async () => {
       showRemove.value = true
     }
   } else {
-    console.log('UserRatings: Rating up')
+    console.warn('UserRatings: Rating up')
     await rate('Up')
   }
 }
 
 const down = () => {
-  console.log('UserRatings: down() clicked, current Mine:', user.value?.info?.ratings?.Mine)
+  console.warn('UserRatings: down() clicked, current Mine:', user.value?.info?.ratings?.Mine)
   showDown.value = false
 
   if (user.value?.info?.ratings?.Mine === 'Down') {
-    console.log('UserRatings: Already rated down, showing remove modal')
+    console.warn('UserRatings: Already rated down, showing remove modal')
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-remove-modal', props.id)
@@ -195,7 +198,7 @@ const down = () => {
       showRemove.value = true
     }
   } else {
-    console.log('UserRatings: Showing down modal')
+    console.warn('UserRatings: Showing down modal')
     emit('modal-opening')
     if (props.externalModals) {
       emit('show-down-modal', props.id)
@@ -206,7 +209,7 @@ const down = () => {
 }
 
 const onModalRated = () => {
-  console.log('UserRatings: onModalRated called, refreshing user data')
+  console.warn('UserRatings: onModalRated called, refreshing user data')
   userStore.fetch(props.id, true)
 }
 </script>

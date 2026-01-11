@@ -17,13 +17,30 @@ test.describe('User ratings tests', () => {
     withdrawPost,
     replyToMessageWithSignup,
   }) => {
-    // Capture browser console logs for debugging
+    // Capture browser console logs for debugging (including warn since production strips console.log)
     const browserLogs = []
     page.on('console', (msg) => {
       const text = msg.text()
+      const type = msg.type()
       if (text.includes('UserRatings') || text.includes('ChatHeader')) {
-        browserLogs.push(text)
-        console.log('BROWSER:', text)
+        browserLogs.push(`[${type}] ${text}`)
+        console.log(`BROWSER [${type}]:`, text)
+      }
+    })
+
+    // Track API calls to see if rating request is made
+    const apiCalls = []
+    page.on('request', (request) => {
+      const url = request.url()
+      if (url.includes('/api/') && url.includes('rating')) {
+        apiCalls.push({ method: request.method(), url })
+        console.log(`API REQUEST: ${request.method()} ${url}`)
+      }
+    })
+    page.on('response', (response) => {
+      const url = response.url()
+      if (url.includes('/api/') && url.includes('rating')) {
+        console.log(`API RESPONSE: ${response.status()} ${url}`)
       }
     })
 
@@ -109,6 +126,14 @@ test.describe('User ratings tests', () => {
     console.log(`Browser logs so far: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
 
+    // Check debug data attributes
+    const debugId = await userRatings.getAttribute('data-debug-id')
+    const debugMyid = await userRatings.getAttribute('data-debug-myid')
+    const debugMounted = await userRatings.getAttribute('data-debug-mounted')
+    console.log(
+      `UserRatings debug attrs: id=${debugId}, myid=${debugMyid}, mounted=${debugMounted}`
+    )
+
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
     await thumbsUpButton.waitFor({
@@ -121,14 +146,20 @@ test.describe('User ratings tests', () => {
     const initialCount = parseInt(initialUpCount.replace(/\D/g, '')) || 0
     console.log(`Initial thumbs up count: ${initialCount}`)
 
+    // Check if button is disabled (would explain click not working)
+    const isDisabled = await thumbsUpButton.isDisabled()
+    console.log(`Thumbs up button disabled: ${isDisabled}`)
+
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
     await thumbsUpButton.click()
 
-    // Give time for console logs to appear
-    await page.waitForTimeout(500)
+    // Give time for console logs and API calls to appear
+    await page.waitForTimeout(2000)
     console.log(`Browser logs after click: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
+    console.log(`API calls after click: ${apiCalls.length}`)
+    apiCalls.forEach((call) => console.log('  ', call.method, call.url))
 
     // Wait for the count to update
     const expectedCount = initialCount + 1
