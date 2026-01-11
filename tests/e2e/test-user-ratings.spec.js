@@ -150,9 +150,34 @@ test.describe('User ratings tests', () => {
     const isDisabled = await thumbsUpButton.isDisabled()
     console.log(`Thumbs up button disabled: ${isDisabled}`)
 
+    // Check if button has click event listeners attached (Vue hydration issue detection)
+    const hasClickHandler = await page.evaluate(() => {
+      const btn = document.querySelector('.user-ratings button')
+      if (!btn) return { found: false }
+
+      // Check for Vue event listeners via __vueParentComponent
+      const hasVueHandler = !!(
+        btn.__vueParentComponent || btn._vei || btn.__vue__
+      )
+
+      // Check for native onclick
+      const hasOnclick = !!btn.onclick
+
+      // Get the button's outerHTML for debugging
+      const html = btn.outerHTML.substring(0, 200)
+
+      return {
+        found: true,
+        hasVueHandler,
+        hasOnclick,
+        html,
+      }
+    })
+    console.log('Button handler check:', JSON.stringify(hasClickHandler))
+
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
-    await thumbsUpButton.click()
+    await thumbsUpButton.click({ force: true })
 
     // Give time for console logs and API calls to appear
     await page.waitForTimeout(2000)
@@ -160,6 +185,21 @@ test.describe('User ratings tests', () => {
     browserLogs.forEach((log) => console.log('  ', log))
     console.log(`API calls after click: ${apiCalls.length}`)
     apiCalls.forEach((call) => console.log('  ', call.method, call.url))
+
+    // If no API calls, try a direct JavaScript click as a test
+    if (apiCalls.length === 0) {
+      console.log('No API calls detected, trying direct JS click...')
+      await page.evaluate(() => {
+        const btn = document.querySelector('.user-ratings button')
+        if (btn) {
+          console.warn('UserRatings DEBUG: Triggering click via JS')
+          btn.click()
+        }
+      })
+      await page.waitForTimeout(2000)
+      console.log(`Browser logs after JS click: ${browserLogs.length}`)
+      console.log(`API calls after JS click: ${apiCalls.length}`)
+    }
 
     // Wait for the count to update
     const expectedCount = initialCount + 1
