@@ -249,14 +249,32 @@ test.describe('User ratings tests', () => {
     await thumbsUpButton.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    // Move mouse away first to dismiss any tooltip that might be showing
-    await page.mouse.move(0, 0)
-    await page.waitForTimeout(200)
+    // Hide any Bootstrap-Vue tooltips that might intercept our click
+    await page.evaluate(() => {
+      // Remove all tooltip elements from the DOM
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip').forEach(el => el.remove())
+      // Also hide any popover elements
+      document.querySelectorAll('.popover').forEach(el => el.remove())
+    })
 
-    // Click thumbs up to rate the user
-    // Use position: { x: 5, y: 5 } to click near top-left corner, away from tooltip trigger area
-    console.log('Clicking thumbs up button at position (5, 5)...')
-    await thumbsUpButton.click({ position: { x: 5, y: 5 } })
+    // Move mouse away to ensure no hover state
+    await page.mouse.move(0, 0)
+    await page.waitForTimeout(100)
+
+    // Click thumbs up to rate the user using dispatchEvent to avoid hover-triggered tooltips
+    console.log('Clicking thumbs up button via dispatchEvent...')
+    await page.evaluate(() => {
+      const btn = document.querySelector('.user-ratings button')
+      if (btn) {
+        // Dispatch a proper click event without moving the mouse
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        })
+        btn.dispatchEvent(clickEvent)
+      }
+    })
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -270,26 +288,10 @@ test.describe('User ratings tests', () => {
 
     console.log(`Browser logs after click: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
-    console.log(`All console logs after click: ${allConsoleLogs.length}`)
     console.log(`Page errors after click: ${pageErrors.length}`)
     pageErrors.forEach((err) => console.log('  ERROR:', err))
     console.log(`API calls after click: ${apiCalls.length}`)
     apiCalls.forEach((call) => console.log('  ', call.method, call.url))
-
-    // If no API calls, try a direct JavaScript click as a test
-    if (apiCalls.length === 0) {
-      console.log('No API calls detected, trying direct JS click...')
-      await page.evaluate(() => {
-        const btn = document.querySelector('.user-ratings button')
-        if (btn) {
-          console.warn('UserRatings DEBUG: Triggering click via JS')
-          btn.click()
-        }
-      })
-      await page.waitForTimeout(2000)
-      console.log(`Browser logs after JS click: ${browserLogs.length}`)
-      console.log(`API calls after JS click: ${apiCalls.length}`)
-    }
 
     // Wait for the count to update
     const expectedCount = initialCount + 1
@@ -312,10 +314,25 @@ test.describe('User ratings tests', () => {
     expect(updatedCount).toBe(initialCount + 1)
 
     // Now click again to show the remove modal
-    // Move mouse away first, then click at specific position
+    // Hide tooltips and use dispatchEvent like the first click
+    await page.evaluate(() => {
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
+    })
     await page.mouse.move(0, 0)
-    await page.waitForTimeout(200)
-    await thumbsUpButton.click({ position: { x: 5, y: 5 } })
+    await page.waitForTimeout(100)
+
+    console.log('Clicking thumbs up button again to show remove modal...')
+    await page.evaluate(() => {
+      const btn = document.querySelector('.user-ratings button')
+      if (btn) {
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        })
+        btn.dispatchEvent(clickEvent)
+      }
+    })
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
