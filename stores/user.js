@@ -82,7 +82,7 @@ export const useUserStore = defineStore({
       })
     },
     async processBatch() {
-      console.warn('userStore: processBatch called, pendingFetches:', this.pendingFetches?.length)
+      console.error('userStore: processBatch called, pendingFetches:', this.pendingFetches?.length)
       if (!this.pendingFetches.length) {
         return
       }
@@ -103,7 +103,7 @@ export const useUserStore = defineStore({
         resolvers[id].push(resolve)
 
         const shouldFetch = (force || !this.list[id]) && !this.fetching[id]
-        console.warn('userStore: processBatch checking id:', id, 'force:', force, 'inList:', !!this.list[id], 'fetching:', !!this.fetching[id], 'shouldFetch:', shouldFetch)
+        console.error('userStore: processBatch checking id:', id, 'force:', force, 'inList:', !!this.list[id], 'fetching:', !!this.fetching[id], 'shouldFetch:', shouldFetch)
         if (shouldFetch) {
           if (!idsToFetch.includes(id)) {
             idsToFetch.push(id)
@@ -111,7 +111,7 @@ export const useUserStore = defineStore({
         }
       }
 
-      console.warn('userStore: idsToFetch:', idsToFetch)
+      console.error('userStore: idsToFetch:', idsToFetch)
       if (idsToFetch.length > 0) {
         await this.fetchMultiple(idsToFetch)
       }
@@ -122,14 +122,14 @@ export const useUserStore = defineStore({
       }
     },
     async fetchMultiple(ids) {
-      console.warn('userStore: fetchMultiple called with ids:', ids)
+      console.error('userStore: fetchMultiple called with ids:', ids)
       // Filter out IDs that are currently being fetched (to avoid duplicate requests)
       // Note: We don't filter by this.list[id] because processBatch() already decided
       // these IDs need fetching (including force-refresh cases)
       const left = ids
         .map((id) => parseInt(id))
         .filter((id) => !this.fetching[id])
-      console.warn('userStore: fetchMultiple after filter, left:', left)
+      console.error('userStore: fetchMultiple after filter, left:', left)
 
       if (left.length) {
         // Split into chunks of 20 (API limit)
