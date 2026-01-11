@@ -27,6 +27,7 @@
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
+            v-if="isMounted"
             :id="chat.otheruid"
             :key="'otheruser-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
@@ -42,6 +43,7 @@
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
+            v-if="isMounted"
             :id="chat.otheruid"
             :key="'collapsed-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
@@ -329,7 +331,7 @@ import ProfileImage from './ProfileImage'
 import UserRatings from '~/components/UserRatings'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
-import { twem, useRouter } from '#imports'
+import { twem, useRouter, onMounted } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 import { timeago } from '~/composables/useTimeFormat'
@@ -354,6 +356,11 @@ const showProfileModal = ref(false)
 const showChatHide = ref(false)
 const showChatBlock = ref(false)
 const showChatReport = ref(false)
+// Track when component is mounted to ensure UserRatings only renders after hydration
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 
 const chatStore = useChatStore()
 const miscStore = useMiscStore()
