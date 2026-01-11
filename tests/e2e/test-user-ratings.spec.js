@@ -101,7 +101,8 @@ test.describe('User ratings tests', () => {
     const consoleLogs = []
     page.on('console', (msg) => {
       const text = msg.text()
-      if (text.includes('UserRatings')) {
+      // Capture all UserRatings logs and also hydration warnings
+      if (text.includes('UserRatings') || text.includes('hydration') || text.includes('Hydration')) {
         consoleLogs.push(text)
         console.log('BROWSER CONSOLE:', text)
       }

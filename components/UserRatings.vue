@@ -4,32 +4,36 @@
       <span v-if="showName">
         {{ user.displayname }}
       </span>
-      <b-button
+      <button
+        type="button"
         :title="noTooltips || showDown || showRemove ? '' : uptitle"
-        :size="size"
-        :variant="displayUpCount > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
-        :class="{
-          mine: displayMine === 'Up',
-          'mr-1': true,
-        }"
+        :class="[
+          'btn',
+          size === 'sm' ? 'btn-sm' : '',
+          displayUpCount > 0 ? 'btn-primary' : 'btn-white',
+          displayMine === 'Up' ? 'mine' : '',
+          'mr-1',
+        ]"
         @click="up"
       >
         <v-icon icon="thumbs-up" />&nbsp;{{ displayUpCount }}
-      </b-button>
-      <b-button
+      </button>
+      <button
+        type="button"
         :title="noTooltips || showDown || showRemove ? '' : downtitle"
-        :size="size"
-        :variant="displayDownCount > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
-        :class="{
-          mine: displayMine === 'Down',
-          'ml-1': true,
-        }"
+        :class="[
+          'btn',
+          size === 'sm' ? 'btn-sm' : '',
+          displayDownCount > 0 ? 'btn-warning' : 'btn-white',
+          displayMine === 'Down' ? 'mine' : '',
+          'ml-1',
+        ]"
         @click="down"
       >
         <v-icon icon="thumbs-down" />&nbsp;{{ displayDownCount }}
-      </b-button>
+      </button>
     </span>
     <UserRatingsDownModal
       v-if="showDown && !externalModals"
@@ -47,6 +51,9 @@
 import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
+
+// Log immediately when script is evaluated (not waiting for mount)
+console.log('UserRatings SCRIPT EVALUATED - this should appear if component is loaded')
 
 const UserRatingsDownModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsDownModal')
