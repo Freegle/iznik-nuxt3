@@ -270,17 +270,12 @@ test.describe('User ratings tests', () => {
     // Wait for CSS to take effect
     await page.waitForTimeout(100)
 
-    // Click using JavaScript directly - Playwright's click may not trigger Vue event handlers correctly
-    console.log('Clicking thumbs up button via JavaScript native click...')
-    await page.evaluate(() => {
-      const userRatings = document.querySelector('.user-ratings')
-      const btn = userRatings?.querySelector('button')
-      if (btn) {
-        console.log('Found button, triggering native click')
-        btn.click() // Native DOM click() method
-      } else {
-        console.log('Button not found!')
-      }
+    // Click using locator.evaluate to ensure we click the CORRECT button
+    // (page.evaluate with querySelector would find the first element, not necessarily the visible one)
+    console.log('Clicking thumbs up button via locator.evaluate...')
+    await thumbsUpButton.evaluate((btn) => {
+      console.log('Triggering native click on button:', btn.outerHTML.substring(0, 100))
+      btn.click()
     })
 
     // Wait for potential API response
@@ -327,11 +322,7 @@ test.describe('User ratings tests', () => {
     })
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await page.evaluate(() => {
-      const userRatings = document.querySelector('.user-ratings')
-      const btn = userRatings?.querySelector('button')
-      if (btn) btn.click()
-    })
+    await thumbsUpButton.evaluate((btn) => btn.click())
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
