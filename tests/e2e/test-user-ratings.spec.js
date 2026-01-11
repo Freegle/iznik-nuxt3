@@ -204,16 +204,35 @@ test.describe('User ratings tests', () => {
     const buttonBox = await thumbsUpButton.boundingBox()
     console.log('Button bounding box:', JSON.stringify(buttonBox))
 
+    // Take debug screenshot before click - this will be captured as artifact
+    await page.screenshot({
+      path: 'test-results/user-ratings-before-click.png',
+      fullPage: false,
+    })
+    console.log('Saved debug screenshot: test-results/user-ratings-before-click.png')
+
     // Get full HTML of UserRatings element
     const userRatingsHTML = await userRatings.innerHTML()
     console.log('UserRatings innerHTML:', userRatingsHTML.substring(0, 500))
 
-    // Click thumbs up to rate the user
-    console.log('Clicking thumbs up button...')
-    await thumbsUpButton.click({ force: true })
+    // Try scrolling the button into view first
+    await thumbsUpButton.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
 
-    // Give time for console logs and API calls to appear
-    await page.waitForTimeout(2000)
+    // Click thumbs up to rate the user - use normal click without force
+    console.log('Clicking thumbs up button...')
+    await thumbsUpButton.click()
+
+    // Wait for potential API response
+    await page.waitForTimeout(3000)
+
+    // Take screenshot after click
+    await page.screenshot({
+      path: 'test-results/user-ratings-after-click.png',
+      fullPage: false,
+    })
+    console.log('Saved debug screenshot: test-results/user-ratings-after-click.png')
+
     console.log(`Browser logs after click: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
     console.log(`All console logs after click: ${allConsoleLogs.length}`)
