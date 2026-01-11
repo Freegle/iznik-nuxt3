@@ -134,6 +134,19 @@ test.describe('User ratings tests', () => {
       `UserRatings debug attrs: id=${debugId}, myid=${debugMyid}, mounted=${debugMounted}`
     )
 
+    // Wait for Vue hydration to complete (mounted=true means event handlers are attached)
+    if (debugMounted !== 'true') {
+      console.log('Waiting for Vue hydration (mounted=true)...')
+      await page.waitForFunction(
+        () => {
+          const el = document.querySelector('.user-ratings')
+          return el && el.getAttribute('data-debug-mounted') === 'true'
+        },
+        { timeout: 30000 }
+      )
+      console.log('Vue hydration complete')
+    }
+
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
     await thumbsUpButton.waitFor({
