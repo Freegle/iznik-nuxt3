@@ -1,5 +1,5 @@
 <template>
-  <span class="d-inline user-ratings" :data-debug-id="id" :data-debug-myid="myid" :data-debug-mounted="mounted">
+  <span class="d-inline user-ratings" data-test-static="hello" :data-debug-id="id" :data-debug-myid="myid" :data-debug-mounted="mounted">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}

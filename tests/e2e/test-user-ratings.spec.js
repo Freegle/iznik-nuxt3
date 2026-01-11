@@ -162,6 +162,13 @@ test.describe('User ratings tests', () => {
     pageErrors.forEach((err) => console.log('  ERROR:', err))
 
     // Check debug data attributes
+    // First check static attribute to verify we're using the latest build
+    const testStatic = await userRatings.getAttribute('data-test-static')
+    console.log(`UserRatings static test attr: ${testStatic}`)
+    if (testStatic !== 'hello') {
+      console.log('WARNING: Static test attribute missing or incorrect - may be using cached/old build!')
+    }
+
     const debugId = await userRatings.getAttribute('data-debug-id')
     const debugMyid = await userRatings.getAttribute('data-debug-myid')
     const debugMounted = await userRatings.getAttribute('data-debug-mounted')
