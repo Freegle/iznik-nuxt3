@@ -17,15 +17,24 @@ test.describe('User ratings tests', () => {
     withdrawPost,
     replyToMessageWithSignup,
   }) => {
-    // Capture browser console logs for debugging (including warn since production strips console.log)
+    // Capture ALL browser console logs for debugging
     const browserLogs = []
+    const allConsoleLogs = []
     page.on('console', (msg) => {
       const text = msg.text()
       const type = msg.type()
+      allConsoleLogs.push(`[${type}] ${text.substring(0, 200)}`)
       if (text.includes('UserRatings') || text.includes('ChatHeader')) {
         browserLogs.push(`[${type}] ${text}`)
         console.log(`BROWSER [${type}]:`, text)
       }
+    })
+
+    // Capture page errors
+    const pageErrors = []
+    page.on('pageerror', (error) => {
+      pageErrors.push(error.message)
+      console.log(`PAGE ERROR: ${error.message}`)
     })
 
     // Track API calls to see if rating request is made
@@ -125,6 +134,9 @@ test.describe('User ratings tests', () => {
     // Log what browser console messages we've seen so far
     console.log(`Browser logs so far: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
+    console.log(`All console logs: ${allConsoleLogs.length}`)
+    console.log(`Page errors: ${pageErrors.length}`)
+    pageErrors.forEach((err) => console.log('  ERROR:', err))
 
     // Check debug data attributes
     const debugId = await userRatings.getAttribute('data-debug-id')
@@ -188,6 +200,14 @@ test.describe('User ratings tests', () => {
     })
     console.log('Button handler check:', JSON.stringify(hasClickHandler))
 
+    // Get button bounding box to verify it's clickable
+    const buttonBox = await thumbsUpButton.boundingBox()
+    console.log('Button bounding box:', JSON.stringify(buttonBox))
+
+    // Get full HTML of UserRatings element
+    const userRatingsHTML = await userRatings.innerHTML()
+    console.log('UserRatings innerHTML:', userRatingsHTML.substring(0, 500))
+
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
     await thumbsUpButton.click({ force: true })
@@ -196,6 +216,9 @@ test.describe('User ratings tests', () => {
     await page.waitForTimeout(2000)
     console.log(`Browser logs after click: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
+    console.log(`All console logs after click: ${allConsoleLogs.length}`)
+    console.log(`Page errors after click: ${pageErrors.length}`)
+    pageErrors.forEach((err) => console.log('  ERROR:', err))
     console.log(`API calls after click: ${apiCalls.length}`)
     apiCalls.forEach((call) => console.log('  ', call.method, call.url))
 
