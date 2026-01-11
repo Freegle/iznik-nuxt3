@@ -41,14 +41,15 @@ test.describe('User ratings tests', () => {
     const apiCalls = []
     page.on('request', (request) => {
       const url = request.url()
-      if (url.includes('/api/') && url.includes('rating')) {
+      // Track rating calls and user fetch calls
+      if (url.includes('/api/') && (url.includes('rating') || url.includes('user'))) {
         apiCalls.push({ method: request.method(), url })
         console.log(`API REQUEST: ${request.method()} ${url}`)
       }
     })
-    page.on('response', (response) => {
+    page.on('response', async (response) => {
       const url = response.url()
-      if (url.includes('/api/') && url.includes('rating')) {
+      if (url.includes('/api/') && (url.includes('rating') || url.includes('user'))) {
         console.log(`API RESPONSE: ${response.status()} ${url}`)
       }
     })
@@ -303,14 +304,27 @@ test.describe('User ratings tests', () => {
     apiCalls.forEach((call) => console.log('  ', call.method, call.url))
 
     // Wait for the count to update
+    // IMPORTANT: Must check the VISIBLE UserRatings element, not just the first one
+    // There can be multiple UserRatings (collapsed/non-collapsed views)
     const expectedCount = initialCount + 1
     await page.waitForFunction(
       (expected) => {
-        const btn = document.querySelector('.user-ratings button')
-        if (!btn) return false
-        const text = btn.textContent || ''
-        const count = parseInt(text.replace(/\D/g, '')) || 0
-        return count === expected
+        // Find all user-ratings elements and check the visible one
+        const allRatings = document.querySelectorAll('.user-ratings')
+        for (const rating of allRatings) {
+          // Check if visible (offsetParent is null for hidden elements)
+          if (rating.offsetParent !== null) {
+            const btn = rating.querySelector('button')
+            if (btn) {
+              const text = btn.textContent || ''
+              const count = parseInt(text.replace(/\D/g, '')) || 0
+              if (count === expected) {
+                return true
+              }
+            }
+          }
+        }
+        return false
       },
       expectedCount,
       { timeout: timeouts.background }
@@ -360,13 +374,23 @@ test.describe('User ratings tests', () => {
     await page.waitForTimeout(timeouts.ui.transition)
 
     // Wait for the count to go back to original
+    // IMPORTANT: Must check the VISIBLE UserRatings element, not just the first one
     await page.waitForFunction(
       (expected) => {
-        const btn = document.querySelector('.user-ratings button')
-        if (!btn) return false
-        const text = btn.textContent || ''
-        const count = parseInt(text.replace(/\D/g, '')) || 0
-        return count === expected
+        const allRatings = document.querySelectorAll('.user-ratings')
+        for (const rating of allRatings) {
+          if (rating.offsetParent !== null) {
+            const btn = rating.querySelector('button')
+            if (btn) {
+              const text = btn.textContent || ''
+              const count = parseInt(text.replace(/\D/g, '')) || 0
+              if (count === expected) {
+                return true
+              }
+            }
+          }
+        }
+        return false
       },
       initialCount,
       { timeout: timeouts.background }
