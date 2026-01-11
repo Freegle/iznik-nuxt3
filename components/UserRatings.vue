@@ -5,7 +5,7 @@
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip.bottom="noTooltips || showDown || showRemove ? '' : uptitle"
+        :title="noTooltips || showDown || showRemove ? '' : uptitle"
         :size="size"
         :variant="displayUpCount > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -13,14 +13,12 @@
           mine: displayMine === 'Up',
           'mr-1': true,
         }"
-        @click.stop="up"
+        @click="up"
       >
         <v-icon icon="thumbs-up" />&nbsp;{{ displayUpCount }}
       </b-button>
       <b-button
-        v-b-tooltip.bottom="
-          noTooltips || showDown || showRemove ? '' : downtitle
-        "
+        :title="noTooltips || showDown || showRemove ? '' : downtitle"
         :size="size"
         :variant="displayDownCount > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -28,7 +26,7 @@
           mine: displayMine === 'Down',
           'ml-1': true,
         }"
-        @click.stop="down"
+        @click="down"
       >
         <v-icon icon="thumbs-down" />&nbsp;{{ displayDownCount }}
       </b-button>
