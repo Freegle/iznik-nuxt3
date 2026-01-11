@@ -122,11 +122,34 @@ test.describe('User ratings tests', () => {
     }
 
     // Wait for the UserRatings component to be visible
-    const userRatings = page.locator('.user-ratings')
+    // Note: There can be multiple UserRatings (collapsed/non-collapsed) - we need the VISIBLE one
+    // Use filter with isVisible to find specifically the visible one
+    const allUserRatings = page.locator('.user-ratings')
+    const count = await allUserRatings.count()
+    console.log(`Found ${count} UserRatings elements on page`)
+
+    // Find the visible one
+    let userRatings = null
+    for (let i = 0; i < count; i++) {
+      const elem = allUserRatings.nth(i)
+      if (await elem.isVisible()) {
+        userRatings = elem
+        console.log(`UserRatings element ${i} is visible - using this one`)
+        break
+      } else {
+        console.log(`UserRatings element ${i} is NOT visible - skipping`)
+      }
+    }
+
+    if (!userRatings) {
+      throw new Error('No visible UserRatings element found')
+    }
+
     await userRatings.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
+    console.log('Confirmed UserRatings component is visible')
 
     // Wait for network to be idle to ensure data is loaded
     await page.waitForLoadState('networkidle', { timeout: 30000 })
