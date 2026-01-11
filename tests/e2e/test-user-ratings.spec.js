@@ -249,25 +249,30 @@ test.describe('User ratings tests', () => {
     await thumbsUpButton.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    // Remove any visible tooltips and disable the tooltip directive on the button
+    // Add CSS to completely disable tooltips - they intercept clicks
     await page.evaluate(() => {
-      // Remove all tooltip elements from the DOM
-      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
+      const style = document.createElement('style')
+      style.id = 'disable-tooltips-for-test'
+      style.textContent = `
+        .tooltip, .popover, [role="tooltip"], .b-tooltip, .bs-tooltip-bottom, .bs-tooltip-top {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+      `
+      document.head.appendChild(style)
 
-      // Find the thumbs up button and disable its tooltip by removing the directive binding
-      const btn = document.querySelector('.user-ratings button')
-      if (btn) {
-        // Remove Vue's tooltip directive data
-        btn.removeAttribute('data-bs-toggle')
-        btn.removeAttribute('data-bs-original-title')
-        btn.removeAttribute('title')
-        btn.removeAttribute('aria-describedby')
-      }
+      // Also remove any existing tooltips
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
     })
 
-    // Use force: true to click through any overlays
-    console.log('Clicking thumbs up button with force: true...')
-    await thumbsUpButton.click({ force: true })
+    // Wait for CSS to take effect
+    await page.waitForTimeout(100)
+
+    // Click using standard Playwright click - tooltips should now be hidden
+    console.log('Clicking thumbs up button (tooltips disabled via CSS)...')
+    await thumbsUpButton.click()
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -307,20 +312,13 @@ test.describe('User ratings tests', () => {
     expect(updatedCount).toBe(initialCount + 1)
 
     // Now click again to show the remove modal
-    // Remove tooltips and click with force
+    // CSS already disables tooltips, just remove any that appeared
     await page.evaluate(() => {
       document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
-      const btn = document.querySelector('.user-ratings button')
-      if (btn) {
-        btn.removeAttribute('data-bs-toggle')
-        btn.removeAttribute('data-bs-original-title')
-        btn.removeAttribute('title')
-        btn.removeAttribute('aria-describedby')
-      }
     })
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await thumbsUpButton.click({ force: true })
+    await thumbsUpButton.click()
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
