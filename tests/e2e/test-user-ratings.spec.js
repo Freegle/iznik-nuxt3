@@ -249,9 +249,14 @@ test.describe('User ratings tests', () => {
     await thumbsUpButton.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    // Click thumbs up to rate the user - use normal click without force
-    console.log('Clicking thumbs up button...')
-    await thumbsUpButton.click()
+    // Move mouse away first to dismiss any tooltip that might be showing
+    await page.mouse.move(0, 0)
+    await page.waitForTimeout(200)
+
+    // Click thumbs up to rate the user
+    // Use position: { x: 5, y: 5 } to click near top-left corner, away from tooltip trigger area
+    console.log('Clicking thumbs up button at position (5, 5)...')
+    await thumbsUpButton.click({ position: { x: 5, y: 5 } })
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -307,7 +312,10 @@ test.describe('User ratings tests', () => {
     expect(updatedCount).toBe(initialCount + 1)
 
     // Now click again to show the remove modal
-    await thumbsUpButton.click()
+    // Move mouse away first, then click at specific position
+    await page.mouse.move(0, 0)
+    await page.waitForTimeout(200)
+    await thumbsUpButton.click({ position: { x: 5, y: 5 } })
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
