@@ -261,20 +261,9 @@ test.describe('User ratings tests', () => {
     await page.mouse.move(0, 0)
     await page.waitForTimeout(100)
 
-    // Click thumbs up to rate the user using dispatchEvent to avoid hover-triggered tooltips
-    console.log('Clicking thumbs up button via dispatchEvent...')
-    await page.evaluate(() => {
-      const btn = document.querySelector('.user-ratings button')
-      if (btn) {
-        // Dispatch a proper click event without moving the mouse
-        const clickEvent = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        })
-        btn.dispatchEvent(clickEvent)
-      }
-    })
+    // Click using Playwright's dispatchEvent which works with Vue's event binding
+    console.log('Clicking thumbs up button via Playwright dispatchEvent...')
+    await thumbsUpButton.dispatchEvent('click')
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -322,17 +311,7 @@ test.describe('User ratings tests', () => {
     await page.waitForTimeout(100)
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await page.evaluate(() => {
-      const btn = document.querySelector('.user-ratings button')
-      if (btn) {
-        const clickEvent = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        })
-        btn.dispatchEvent(clickEvent)
-      }
-    })
+    await thumbsUpButton.dispatchEvent('click')
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
