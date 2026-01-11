@@ -54,15 +54,23 @@ test.describe('User ratings tests', () => {
     }
     console.log('Logged in as User A')
 
-    // Set up console listener BEFORE navigating - must capture hydration logs
+    // Set up console listener BEFORE navigating - must capture all logs for debugging
     const consoleLogs = []
+    const allLogs = []
     page.on('console', (msg) => {
       const text = msg.text()
+      const type = msg.type()
+      allLogs.push(`[${type}] ${text}`)
       // Capture all UserRatings logs and also hydration warnings
       if (text.includes('UserRatings') || text.includes('hydration') || text.includes('Hydration')) {
         consoleLogs.push(text)
         console.log('BROWSER CONSOLE:', text)
       }
+    })
+    // Also capture page errors (uncaught exceptions)
+    page.on('pageerror', (error) => {
+      console.log('PAGE ERROR:', error.message)
+      allLogs.push(`[pageerror] ${error.message}`)
     })
 
     // Navigate to /chats
@@ -131,6 +139,9 @@ test.describe('User ratings tests', () => {
     // Wait a bit to see if any mounting logs appear
     await page.waitForTimeout(500)
     console.log(`UserRatings console logs so far: ${consoleLogs.length}`)
+    // Print all logs to help debug why UserRatings script never runs
+    console.log(`All console logs (${allLogs.length} total):`)
+    allLogs.forEach((log, i) => console.log(`  ${i}: ${log.substring(0, 200)}`))
 
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
