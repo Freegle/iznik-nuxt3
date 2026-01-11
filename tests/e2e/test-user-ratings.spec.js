@@ -270,12 +270,19 @@ test.describe('User ratings tests', () => {
     // Wait for CSS to take effect
     await page.waitForTimeout(100)
 
-    // Click using locator.evaluate to ensure we click the CORRECT button
-    // (page.evaluate with querySelector would find the first element, not necessarily the visible one)
-    console.log('Clicking thumbs up button via locator.evaluate...')
+    // Click using locator.evaluate with a proper MouseEvent
+    // Native btn.click() may not trigger Vue event handlers in production builds
+    console.log('Clicking thumbs up button via MouseEvent dispatch...')
     await thumbsUpButton.evaluate((btn) => {
-      console.log('Triggering native click on button:', btn.outerHTML.substring(0, 100))
-      btn.click()
+      console.log('Dispatching MouseEvent on button:', btn.outerHTML.substring(0, 100))
+      const event = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 1,
+      })
+      btn.dispatchEvent(event)
     })
 
     // Wait for potential API response
@@ -322,7 +329,16 @@ test.describe('User ratings tests', () => {
     })
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await thumbsUpButton.evaluate((btn) => btn.click())
+    await thumbsUpButton.evaluate((btn) => {
+      const event = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        buttons: 1,
+      })
+      btn.dispatchEvent(event)
+    })
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
