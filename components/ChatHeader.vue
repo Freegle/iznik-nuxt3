@@ -26,14 +26,11 @@
           "
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
-          <ClientOnly>
-            <UserRatings
-              :id="chat.otheruid"
-              :key="'otheruser-' + chat.otheruid"
-              class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
-              size="sm"
-            />
-          </ClientOnly>
+          <UserRatings
+            :id="chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">
@@ -43,14 +40,11 @@
           v-if="collapsed && otheruser && otheruser.info && !otheruser?.deleted"
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
-          <ClientOnly>
-            <UserRatings
-              :id="chat.otheruid"
-              :key="'collapsed-' + chat.otheruid"
-              class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
-              size="sm"
-            />
-          </ClientOnly>
+          <UserRatings
+            :id="chat.otheruid"
+            class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
+            size="sm"
+          />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
         <span
@@ -329,8 +323,8 @@
   </div>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import ProfileImage from './ProfileImage'
-import UserRatings from '~/components/UserRatings'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
 import { twem, useRouter } from '#imports'
@@ -338,8 +332,13 @@ import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 import { timeago } from '~/composables/useTimeFormat'
 
+console.log('ChatHeader: Script setup executing')
+
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
+const UserRatings = defineAsyncComponent(() =>
+  import('~/components/UserRatings')
+)
 const ChatReportModal = defineAsyncComponent(() =>
   import('~/components/ChatReportModal')
 )
@@ -366,6 +365,7 @@ const router = useRouter()
 const collapsed = computed({
   get: () => miscStore?.get('chatinfoheader'),
   set: (newVal) => {
+    console.log('ChatHeader: collapsed changing to', newVal)
     miscStore.set({
       key: 'chatinfoheader',
       value: newVal,
@@ -374,6 +374,7 @@ const collapsed = computed({
 })
 
 function collapse(val) {
+  console.log('ChatHeader: collapse() called with', val)
   collapsed.value = val
 }
 
@@ -385,6 +386,10 @@ defineExpose({
 const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
   props.id
 )
+
+onMounted(() => {
+  console.log('ChatHeader: onMounted, collapsed:', collapsed.value, 'otheruser:', !!otheruser?.value)
+})
 
 // Set initial collapsed state
 miscStore.set({

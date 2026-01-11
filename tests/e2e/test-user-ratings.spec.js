@@ -2,7 +2,6 @@
  * Tests for user ratings functionality
  * - Give thumbs up to a user
  * - Remove a rating (click again to show remove modal)
- * Updated: 2026-01-11 - Removed ClientOnly wrapper, using native buttons
  */
 
 const { test, expect } = require('./fixtures')
@@ -18,6 +17,16 @@ test.describe('User ratings tests', () => {
     withdrawPost,
     replyToMessageWithSignup,
   }) => {
+    // Capture browser console logs for debugging
+    const browserLogs = []
+    page.on('console', (msg) => {
+      const text = msg.text()
+      if (text.includes('UserRatings') || text.includes('ChatHeader')) {
+        browserLogs.push(text)
+        console.log('BROWSER:', text)
+      }
+    })
+
     // User A posts a message
     const uniqueItem = `test-rating-${Date.now()}-${Math.random()
       .toString(36)
@@ -54,25 +63,6 @@ test.describe('User ratings tests', () => {
     }
     console.log('Logged in as User A')
 
-    // Set up console listener BEFORE navigating - must capture all logs for debugging
-    const consoleLogs = []
-    const allLogs = []
-    page.on('console', (msg) => {
-      const text = msg.text()
-      const type = msg.type()
-      allLogs.push(`[${type}] ${text}`)
-      // Capture all UserRatings logs and also hydration warnings
-      if (text.includes('UserRatings') || text.includes('hydration') || text.includes('Hydration')) {
-        consoleLogs.push(text)
-        console.log('BROWSER CONSOLE:', text)
-      }
-    })
-    // Also capture page errors (uncaught exceptions)
-    page.on('pageerror', (error) => {
-      console.log('PAGE ERROR:', error.message)
-      allLogs.push(`[pageerror] ${error.message}`)
-    })
-
     // Navigate to /chats
     await page.gotoAndVerify('/chats')
 
@@ -101,9 +91,8 @@ test.describe('User ratings tests', () => {
       )
       await cancelButton.click()
       await contactDetailsModal.waitFor({ state: 'hidden', timeout: 5000 })
-      console.log('Contact details modal dismissed')
     } catch (e) {
-      console.log('Contact details modal did not appear - continuing')
+      // Modal didn't appear, continue
     }
 
     // Wait for the UserRatings component to be visible
@@ -113,8 +102,12 @@ test.describe('User ratings tests', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Wait for network to be idle to ensure hydration is complete
+    // Wait for network to be idle to ensure data is loaded
     await page.waitForLoadState('networkidle', { timeout: 30000 })
+
+    // Log what browser console messages we've seen so far
+    console.log(`Browser logs so far: ${browserLogs.length}`)
+    browserLogs.forEach((log) => console.log('  ', log))
 
     // First button is thumbs-up
     const thumbsUpButton = userRatings.locator('button').first()
@@ -128,28 +121,14 @@ test.describe('User ratings tests', () => {
     const initialCount = parseInt(initialUpCount.replace(/\D/g, '')) || 0
     console.log(`Initial thumbs up count: ${initialCount}`)
 
-    // Check if button is disabled
-    const isDisabled = await thumbsUpButton.isDisabled()
-    console.log(`Button disabled: ${isDisabled}`)
-
-    // Get button HTML for debugging
-    const buttonHtml = await thumbsUpButton.evaluate((el) => el.outerHTML)
-    console.log(`Button HTML: ${buttonHtml}`)
-
-    // Wait a bit to see if any mounting logs appear
-    await page.waitForTimeout(500)
-    console.log(`UserRatings console logs so far: ${consoleLogs.length}`)
-    // Print all logs to help debug why UserRatings script never runs
-    console.log(`All console logs (${allLogs.length} total):`)
-    allLogs.forEach((log, i) => console.log(`  ${i}: ${log.substring(0, 200)}`))
-
     // Click thumbs up to rate the user
     console.log('Clicking thumbs up button...')
     await thumbsUpButton.click()
 
-    // Wait a bit and check console logs
-    await page.waitForTimeout(1000)
-    console.log(`Console logs after click: ${consoleLogs.join(' | ')}`)
+    // Give time for console logs to appear
+    await page.waitForTimeout(500)
+    console.log(`Browser logs after click: ${browserLogs.length}`)
+    browserLogs.forEach((log) => console.log('  ', log))
 
     // Wait for the count to update
     const expectedCount = initialCount + 1
@@ -173,7 +152,6 @@ test.describe('User ratings tests', () => {
 
     // Now click again to show the remove modal
     await thumbsUpButton.click()
-    console.log('Clicked thumbs up button again to show remove modal')
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
@@ -190,7 +168,6 @@ test.describe('User ratings tests', () => {
       hasText: 'Remove rating',
     })
     await removeButton.click()
-    console.log('Clicked Remove rating button')
 
     // Wait for the modal to close and rating to be removed
     await page.waitForTimeout(timeouts.ui.transition)
@@ -221,5 +198,3 @@ test.describe('User ratings tests', () => {
     console.log('Test completed - post withdrawn')
   })
 })
-// Trigger rebuild 20260111042927
-// Build 1768109740
