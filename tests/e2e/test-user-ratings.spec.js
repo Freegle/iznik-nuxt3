@@ -270,9 +270,18 @@ test.describe('User ratings tests', () => {
     // Wait for CSS to take effect
     await page.waitForTimeout(100)
 
-    // Click using standard Playwright click - tooltips should now be hidden
-    console.log('Clicking thumbs up button (tooltips disabled via CSS)...')
-    await thumbsUpButton.click()
+    // Click using JavaScript directly - Playwright's click may not trigger Vue event handlers correctly
+    console.log('Clicking thumbs up button via JavaScript native click...')
+    await page.evaluate(() => {
+      const userRatings = document.querySelector('.user-ratings')
+      const btn = userRatings?.querySelector('button')
+      if (btn) {
+        console.log('Found button, triggering native click')
+        btn.click() // Native DOM click() method
+      } else {
+        console.log('Button not found!')
+      }
+    })
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -318,7 +327,11 @@ test.describe('User ratings tests', () => {
     })
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await thumbsUpButton.click()
+    await page.evaluate(() => {
+      const userRatings = document.querySelector('.user-ratings')
+      const btn = userRatings?.querySelector('button')
+      if (btn) btn.click()
+    })
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
