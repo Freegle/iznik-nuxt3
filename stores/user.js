@@ -64,7 +64,10 @@ export const useUserStore = defineStore({
       if (this.fetching[id]) {
         await this.fetching[id]
         await nextTick()
-        return this.list[id]
+        // Only return early if not forcing - otherwise continue to queue refresh
+        if (!force) {
+          return this.list[id]
+        }
       }
 
       // Add to pending batch and wait for the batch to complete
