@@ -2,7 +2,7 @@
  * Tests for user ratings functionality
  * - Give thumbs up to a user
  * - Remove a rating (click again to show remove modal)
- * Updated: 2026-01-11 - Debug click handler
+ * Updated: 2026-01-11 - Removed ClientOnly wrapper, using native buttons
  */
 
 const { test, expect } = require('./fixtures')
