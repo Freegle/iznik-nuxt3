@@ -249,21 +249,25 @@ test.describe('User ratings tests', () => {
     await thumbsUpButton.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    // Hide any Bootstrap-Vue tooltips that might intercept our click
+    // Remove any visible tooltips and disable the tooltip directive on the button
     await page.evaluate(() => {
       // Remove all tooltip elements from the DOM
-      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip').forEach(el => el.remove())
-      // Also hide any popover elements
-      document.querySelectorAll('.popover').forEach(el => el.remove())
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
+
+      // Find the thumbs up button and disable its tooltip by removing the directive binding
+      const btn = document.querySelector('.user-ratings button')
+      if (btn) {
+        // Remove Vue's tooltip directive data
+        btn.removeAttribute('data-bs-toggle')
+        btn.removeAttribute('data-bs-original-title')
+        btn.removeAttribute('title')
+        btn.removeAttribute('aria-describedby')
+      }
     })
 
-    // Move mouse away to ensure no hover state
-    await page.mouse.move(0, 0)
-    await page.waitForTimeout(100)
-
-    // Click using Playwright's dispatchEvent which works with Vue's event binding
-    console.log('Clicking thumbs up button via Playwright dispatchEvent...')
-    await thumbsUpButton.dispatchEvent('click')
+    // Use force: true to click through any overlays
+    console.log('Clicking thumbs up button with force: true...')
+    await thumbsUpButton.click({ force: true })
 
     // Wait for potential API response
     await page.waitForTimeout(3000)
@@ -303,15 +307,20 @@ test.describe('User ratings tests', () => {
     expect(updatedCount).toBe(initialCount + 1)
 
     // Now click again to show the remove modal
-    // Hide tooltips and use dispatchEvent like the first click
+    // Remove tooltips and click with force
     await page.evaluate(() => {
       document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
+      const btn = document.querySelector('.user-ratings button')
+      if (btn) {
+        btn.removeAttribute('data-bs-toggle')
+        btn.removeAttribute('data-bs-original-title')
+        btn.removeAttribute('title')
+        btn.removeAttribute('aria-describedby')
+      }
     })
-    await page.mouse.move(0, 0)
-    await page.waitForTimeout(100)
 
     console.log('Clicking thumbs up button again to show remove modal...')
-    await thumbsUpButton.dispatchEvent('click')
+    await thumbsUpButton.click({ force: true })
 
     // Wait for the remove rating modal to appear
     const removeModal = page.locator('.modal-dialog').filter({
