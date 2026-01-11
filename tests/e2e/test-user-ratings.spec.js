@@ -24,7 +24,7 @@ test.describe('User ratings tests', () => {
       const text = msg.text()
       const type = msg.type()
       allConsoleLogs.push(`[${type}] ${text.substring(0, 200)}`)
-      if (text.includes('UserRatings') || text.includes('ChatHeader')) {
+      if (text.includes('UserRatings') || text.includes('ChatHeader') || text.includes('userStore:')) {
         browserLogs.push(`[${type}] ${text}`)
         console.log(`BROWSER [${type}]:`, text)
       }
