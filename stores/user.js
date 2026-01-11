@@ -118,15 +118,12 @@ export const useUserStore = defineStore({
       }
     },
     async fetchMultiple(ids) {
-      const left = []
-
-      ids.forEach((id) => {
-        id = parseInt(id)
-
-        if (!this.list[id] && !this.fetching[id]) {
-          left.push(id)
-        }
-      })
+      // Filter out IDs that are currently being fetched (to avoid duplicate requests)
+      // Note: We don't filter by this.list[id] because processBatch() already decided
+      // these IDs need fetching (including force-refresh cases)
+      const left = ids
+        .map((id) => parseInt(id))
+        .filter((id) => !this.fetching[id])
 
       if (left.length) {
         // Split into chunks of 20 (API limit)
