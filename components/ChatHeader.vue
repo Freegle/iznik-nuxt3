@@ -28,7 +28,6 @@
         >
           <UserRatings
             :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
@@ -38,12 +37,11 @@
           {{ chat.name }}
         </div>
         <div
-          v-if="otheruser && otheruser.info && !otheruser?.deleted"
+          v-if="collapsed && otheruser && otheruser.info && !otheruser?.deleted"
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
@@ -325,6 +323,7 @@
   </div>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import ProfileImage from './ProfileImage'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
@@ -332,6 +331,8 @@ import { twem, useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 import { timeago } from '~/composables/useTimeFormat'
+
+console.log('ChatHeader: Script setup executing')
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -364,6 +365,7 @@ const router = useRouter()
 const collapsed = computed({
   get: () => miscStore?.get('chatinfoheader'),
   set: (newVal) => {
+    console.log('ChatHeader: collapsed changing to', newVal)
     miscStore.set({
       key: 'chatinfoheader',
       value: newVal,
@@ -372,6 +374,7 @@ const collapsed = computed({
 })
 
 function collapse(val) {
+  console.log('ChatHeader: collapse() called with', val)
   collapsed.value = val
 }
 
@@ -383,6 +386,10 @@ defineExpose({
 const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
   props.id
 )
+
+onMounted(() => {
+  console.log('ChatHeader: onMounted, collapsed:', collapsed.value, 'otheruser:', !!otheruser?.value)
+})
 
 // Set initial collapsed state
 miscStore.set({

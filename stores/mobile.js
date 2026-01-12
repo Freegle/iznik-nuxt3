@@ -147,15 +147,28 @@ export const useMobileStore = defineStore({
     fixWindowOpen(AppLauncher) {
       // External links should be opened with ExternalLink but catch calls to window.open here
       // Internal links are handled internally and external links use AppLauncher
-      window.open = (url) => {
-        console.log('App window.open', url)
+      window.open = (url, target) => {
+        dbg()?.info('window.open called', { url, target })
+        console.log('App window.open', url, target)
         if (url.substring(0, 4) !== 'http') {
+          dbg()?.info('window.open routing internally', { url })
           const router = useRouter()
           router.push(url)
         } else {
+          dbg()?.info('window.open calling AppLauncher.openUrl', { url })
           AppLauncher.openUrl({ url })
+            .then((result) => {
+              dbg()?.info('AppLauncher.openUrl success', { url, result })
+            })
+            .catch((error) => {
+              dbg()?.error('AppLauncher.openUrl failed', {
+                url,
+                error: error?.message || error,
+              })
+            })
         }
       }
+      dbg()?.info('window.open override installed')
     },
 
     extractQueryStringParams(url) {
