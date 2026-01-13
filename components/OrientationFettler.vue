@@ -12,6 +12,9 @@ let orientationListener = null
 let mediaQueryList = null
 
 function updateOrientation(isLandscape) {
+  // Don't update orientation while fullscreen modal is open - keyboard opening
+  // changes viewport dimensions which would incorrectly trigger landscape mode.
+  if (miscStore.fullscreenModalOpen) return
   if (miscStore.isLandscape !== isLandscape) {
     miscStore.setLandscape(isLandscape)
   }

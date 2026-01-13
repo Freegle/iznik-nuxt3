@@ -559,6 +559,7 @@ import {
   onUnmounted,
 } from 'vue'
 import { useMiscStore } from '~/stores/misc'
+import { useMobileStore } from '~/stores/mobile'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
 import { action } from '~/composables/useClientLog'
@@ -611,6 +612,7 @@ const props = defineProps({
 const emit = defineEmits(['zoom', 'close'])
 
 const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
 const { me, loggedIn } = useMe()
 
 // Use shared composable for common message display logic
@@ -853,6 +855,13 @@ onMounted(() => {
     breakpoint: miscStore.breakpoint,
   })
 
+  // Prevent orientation changes while fullscreen overlay is open - keyboard opening
+  // changes viewport dimensions which would incorrectly trigger landscape mode and
+  // cause ScrollGrid to unmount/remount components, losing the modal state.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(true)
+  }
+
   // Enable ken-burns animation now that hydration is complete
   isMounted.value = true
 
@@ -872,6 +881,37 @@ onUnmounted(() => {
     fullscreen_overlay: props.fullscreenOverlay,
     time_open_ms: timeOpenMs,
   })
+
+  // Clear the fullscreen modal flag so orientation detection resumes.
+  // Re-check orientation since it may have changed while blocked.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(false)
+    // Use same detection method as OrientationFettler: Capacitor for app, matchMedia for web.
+    if (mobileStore.isApp) {
+      // In app, use Capacitor ScreenOrientation plugin.
+      import('@capacitor/screen-orientation')
+        .then(({ ScreenOrientation }) => {
+          ScreenOrientation.orientation().then((orientation) => {
+            const isLandscape =
+              orientation.type === 'landscape-primary' ||
+              orientation.type === 'landscape-secondary'
+            miscStore.setLandscape(isLandscape)
+          })
+        })
+        .catch(() => {
+          // Fallback to matchMedia if plugin unavailable.
+          if (typeof window !== 'undefined') {
+            miscStore.setLandscape(
+              window.matchMedia('(orientation: landscape)').matches
+            )
+          }
+        })
+    } else if (typeof window !== 'undefined') {
+      miscStore.setLandscape(
+        window.matchMedia('(orientation: landscape)').matches
+      )
+    }
+  }
 
   stopThumbnailAutoScroll()
   window.removeEventListener('resize', updateWindowHeight)
