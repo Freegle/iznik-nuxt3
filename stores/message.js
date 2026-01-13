@@ -415,6 +415,15 @@ export const useMessageStore = defineStore({
       const isochroneStore = useIsochroneStore()
       isochroneStore.markSeen(ids)
 
+      // Also update local cache to prevent watcher loop in MessageList.vue
+      const idSet = new Set(ids)
+      Object.keys(this.list).forEach((key) => {
+        const id = parseInt(key)
+        if (idSet.has(id) && this.list[id]) {
+          this.list[id].unseen = false
+        }
+      })
+
       await this.fetchCount()
     },
   },
