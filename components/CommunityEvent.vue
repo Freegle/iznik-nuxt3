@@ -323,11 +323,13 @@ function showEventModal() {
   margin-bottom: 1rem;
   flex: 1;
 
-  :deep(.read-more-text) {
+  :deep(p) {
     display: -webkit-box;
     -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
 
