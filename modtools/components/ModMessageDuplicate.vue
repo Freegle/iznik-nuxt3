@@ -39,8 +39,13 @@ export default {
     },
     duplicateLink() {
       if (this.isPending) {
-        // Link to pending messages page for pending duplicates.
-        return '/messages/pending'
+        // Link to pending messages page with group and message to highlight.
+        return (
+          '/messages/pending?groupid=' +
+          this.groupid +
+          '&msgid=' +
+          this.message.id
+        )
       }
       // Link to approved messages with search term for approved duplicates.
       return '/messages/approved/' + this.groupid + '/' + this.message.id

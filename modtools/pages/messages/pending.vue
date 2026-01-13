@@ -62,6 +62,7 @@
 
 <script>
 import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
 import { setupModMessages } from '~/composables/useModMessages'
 import { useAuthStore } from '@/stores/auth'
 import { useMessageStore } from '@/stores/message'
@@ -99,6 +100,7 @@ export default {
       affiliationGroup: null,
       shownRulePopup: false,
       bump: 0,
+      highlightMsgId: null,
     }
   },
   computed: {
@@ -161,8 +163,35 @@ export default {
         this.bump++
       },
     },
+    visibleMessages: {
+      handler(newVal) {
+        // Scroll to highlighted message when it appears in the list.
+        if (this.highlightMsgId && newVal?.length) {
+          const found = newVal.find((m) => m.id === this.highlightMsgId)
+          if (found) {
+            this.$nextTick(() => {
+              const el = document.getElementById('msg-' + this.highlightMsgId)
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                // Clear highlight so we don't scroll again on future updates.
+                this.highlightMsgId = null
+              }
+            })
+          }
+        }
+      },
+    },
   },
   async mounted() {
+    // Check for query params from duplicate message link.
+    const route = useRoute()
+    if (route.query.groupid) {
+      this.groupid = parseInt(route.query.groupid)
+    }
+    if (route.query.msgid) {
+      this.highlightMsgId = parseInt(route.query.msgid)
+    }
+
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
     const now = new Date().getTime()

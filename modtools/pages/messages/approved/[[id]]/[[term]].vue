@@ -117,10 +117,14 @@ export default {
     this.messageTerm = ''
     if ('term' in route.params && route.params.term)
       this.messageTerm = route.params.term
-    // const currentCount = Object.keys(this.messageStore.list).length
-    // console.log('messages [[term]]', this.id, this.messageTerm, currentCount)
     if (this.messageTerm) {
-      this.searchedMessage(this.messageTerm)
+      // Clear existing messages and reset state for fresh search.
+      // Without this, the store may have old messages that get shown
+      // instead of searching for the specific message from the URL.
+      this.show = 0
+      this.context = null
+      this.messageStore.clear()
+      this.bump++
     }
   },
   methods: {

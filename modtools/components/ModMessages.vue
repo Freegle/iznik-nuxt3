@@ -2,6 +2,7 @@
   <div>
     <div
       v-for="(message, ix) in visibleMessages"
+      :id="'msg-' + message.id"
       :key="'messagelist-' + message.id"
       class="p-0 mt-2"
     >
