@@ -585,10 +585,7 @@ export default {
           )
         }
 
-        text = text.replace(
-          /\$membermail/g,
-          this.message ? this.message.fromaddr : this.member.email
-        )
+        text = text.replace(/\$membermail/g, this.toEmail)
         let from
 
         if (this.message) {
