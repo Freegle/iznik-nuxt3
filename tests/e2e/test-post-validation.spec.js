@@ -269,11 +269,27 @@ test.describe('Post validation tests', () => {
       })
 
       // Type a date in the past (e.g., yesterday)
+      // Note: The date input has min="today" but we force a past value via JavaScript
+      // to test application-level validation (not browser validation)
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
         .toISOString()
         .substring(0, 10)
-      await deadlinePicker.fill(yesterday)
+
+      // Use evaluate to force the value past browser min constraint
+      // This triggers Vue's v-model update and allows testing app validation
+      await deadlinePicker.evaluate((el, value) => {
+        el.value = value
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+        el.dispatchEvent(new Event('change', { bubbles: true }))
+      }, yesterday)
       console.log(`Set deadline to past date: ${yesterday}`)
+
+      // Wait for Vue reactivity to process the change
+      await page.waitForTimeout(timeouts.ui.transition)
+
+      // Verify the value was actually set before clicking Next
+      const pickerValue = await deadlinePicker.inputValue()
+      console.log(`Picker value after fill: ${pickerValue}`)
 
       // Click the Next button in the footer
       const footerNextButton = page.locator('.app-footer button').filter({
