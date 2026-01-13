@@ -1057,6 +1057,8 @@ onMounted(() => {
 :deep(textarea) {
   transition: height 1s;
   height: v-bind(height) !important;
+  max-height: calc(50vh - 120px);
+  overflow-y: auto !important;
   border: 1px solid $color-gray--light;
   border-radius: 0;
   padding: 10px 12px;
