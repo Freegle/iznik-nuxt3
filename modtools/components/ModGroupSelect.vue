@@ -275,7 +275,12 @@ export default {
       },
     },
     groupsloaded(newval) {
-      // In some cases, need to set selected group now
+      // Only restore remembered group if no explicit value was set from URL.
+      // If modelValue is already non-zero, it was set from route params and
+      // should not be overridden by the remembered value.
+      if (this.modelValue) {
+        return
+      }
       const val = this.miscStore.get('groupselect-' + this.remember)
       if (val && val !== this.modelValue) {
         this.$emit('update:modelValue', val)
