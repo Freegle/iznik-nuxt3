@@ -1,0 +1,219 @@
+iff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+index 8229c4f..520c4bd 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.esm.js
+@@ -200,13 +200,13 @@ const setup$1 = (props, leafletRef, context) => {
+       leafletRef.value.bindTooltip(leafletObject);
+     },
+     unbindTooltip() {
+-      const tooltip = leafletRef.value ? leafletRef.value.getTooltip() : null;
++      const tooltip = leafletRef.value && typeof leafletRef.value.getTooltip === 'function' ? leafletRef.value.getTooltip() : null;
+       if (tooltip) {
+         tooltip.unbindTooltip();
+       }
+     },
+     unbindPopup() {
+-      const popup = leafletRef.value ? leafletRef.value.getPopup() : null;
++      const popup = leafletRef.value && typeof leafletRef.value.getPopup === 'function' ? leafletRef.value.getPopup() : null;
+       if (popup) {
+         popup.unbindPopup();
+       }
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
+index acbf69b..3c409c7 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/dist/vue-leaflet.umd.js
+@@ -204,13 +204,13 @@
+         leafletRef.value.bindTooltip(leafletObject);
+       },
+       unbindTooltip() {
+-        const tooltip = leafletRef.value ? leafletRef.value.getTooltip() : null;
++        const tooltip = leafletRef.value && typeof leafletRef.value.getTooltip === 'function' ? leafletRef.value.getTooltip() : null;
+         if (tooltip) {
+           tooltip.unbindTooltip();
+         }
+       },
+       unbindPopup() {
+-        const popup = leafletRef.value ? leafletRef.value.getPopup() : null;
++        const popup = leafletRef.value && typeof leafletRef.value.getPopup === 'function' ? leafletRef.value.getPopup() : null;
+         if (popup) {
+           popup.unbindPopup();
+         }
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
+index bbf34b7..4c14a18 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LIcon.vue
+@@ -107,14 +107,19 @@ export default {
+ 
+       propsBinder(methods, {}, props);
+ 
+-      const observer = new MutationObserver(scheduleHtmlSwap);
+-      observer.observe(root.value, {
+-        attributes: true,
+-        childList: true,
+-        characterData: true,
+-        subtree: true,
+-      });
+-      scheduleCreateIcon();
++      try {
++        const observer = new MutationObserver(scheduleHtmlSwap);
++        observer.observe(root.value, {
++          attributes: true,
++          childList: true,
++          characterData: true,
++          subtree: true,
++        });
++        scheduleCreateIcon();
++      } catch (e) {
++        // This can happen if leaflet is removed from the DOM
++        console.log('Ignore leaflet error', e)
++      }
+     });
+ 
+     return { root };
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
+index 15de45d..eb4a90b 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMap.vue
+@@ -190,22 +190,27 @@ export default {
+ 
+     const eventHandlers = {
+       moveEndHandler() {
+-        /**
+-         * Triggers when zoom is updated
+-         * @type {number,string}
+-         */
+-        context.emit("update:zoom", blueprint.leafletRef.getZoom());
+-        /**
+-         * Triggers when center is updated
+-         * @type {object,array}
+-         */
+-        context.emit("update:center", blueprint.leafletRef.getCenter());
++        try {
++          /**
++           * Triggers when zoom is updated
++           * @type {number,string}
++           */
++          context.emit("update:zoom", blueprint.leafletRef.getZoom());
++          /**
++           * Triggers when center is updated
++           * @type {object,array}
++           */
++          context.emit("update:center", blueprint.leafletRef.getCenter());
+ 
+-        /**
+-         * Triggers when bounds are updated
+-         * @type {object}
+-         */
+-        context.emit("update:bounds", blueprint.leafletRef.getBounds());
++          /**
++           * Triggers when bounds are updated
++           * @type {object}
++           */
++          context.emit("update:bounds", blueprint.leafletRef.getBounds());
++        } catch (e) {
++          // This happens if the Vue component has been removed from the DOM - ignore.
++          console.log('Ignore leaflet error', e)
++        }
+       },
+       overlayAddHandler(e) {
+         const layer = blueprint.layersInControl.find((l) => l.name === e.name);
+@@ -375,23 +380,28 @@ export default {
+       updateLeafletWrapper(registerControl, methods.registerControl);
+       updateLeafletWrapper(registerLayerControl, methods.registerLayerControl);
+ 
+-      blueprint.leafletRef = map(root.value, options);
++      try {
++        blueprint.leafletRef = map(root.value, options);
+ 
+-      propsBinder(methods, blueprint.leafletRef, props);
+-      const listeners = remapEvents(context.attrs);
++        propsBinder(methods, blueprint.leafletRef, props);
++        const listeners = remapEvents(context.attrs);
+ 
+-      blueprint.leafletRef.on(
+-        "moveend",
+-        debounce(eventHandlers.moveEndHandler, 100)
+-      );
+-      blueprint.leafletRef.on("overlayadd", eventHandlers.overlayAddHandler);
+-      blueprint.leafletRef.on(
+-        "overlayremove",
+-        eventHandlers.overlayRemoveHandler
+-      );
+-      DomEvent.on(blueprint.leafletRef, listeners);
+-      blueprint.ready = true;
+-      nextTick(() => context.emit("ready", blueprint.leafletRef));
++        blueprint.leafletRef.on(
++            "moveend",
++            debounce(eventHandlers.moveEndHandler, 100)
++        );
++        blueprint.leafletRef.on("overlayadd", eventHandlers.overlayAddHandler);
++        blueprint.leafletRef.on(
++            "overlayremove",
++            eventHandlers.overlayRemoveHandler
++        );
++        DomEvent.on(blueprint.leafletRef, listeners);
++        blueprint.ready = true;
++        nextTick(() => context.emit("ready", blueprint.leafletRef));
++      } catch (e) {
++        // This happens if the Vue component has been removed from the DOM - ignore.
++        console.log('Ignore leaflet error', e)
++      }
+     });
+ 
+     onBeforeUnmount(() => {
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+index b5fdbc7..ae8c69c 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/components/LMarker.vue
+@@ -41,9 +41,30 @@ export default {
+     }
+ 
+     onMounted(async () => {
+-      const { marker, DomEvent } = useGlobalLeaflet
++      const { marker, DomEvent, divIcon } = useGlobalLeaflet
+         ? WINDOW_OR_GLOBAL.L
+         : await import("leaflet/dist/leaflet-src.esm");
++
++      // If an icon is not specified in the options, then either the content of the LMarker's
++      // slot should be displayed if present, or the default Leaflet icon should be used if not.
++      // Either way, the `undefined` property needs to be modified.
++      if (options.icon === undefined) {
++        if (context.slots.default) {
++          // If there is slot content to be displayed, then the initial state of the icon should be
++          // invisible until it is replaced by any calls to `setIcon` or `setParentHtml` from within
++          // the default slot.
++          // Creating an empty div with no classes accomplishes this, avoiding the issue discussed in
++          // https://github.com/vue-leaflet/vue-leaflet/issues/170.
++          options.icon = divIcon({ className: "" });
++        } else {
++          // If the options object has a property named 'icon' when passed to `marker`, then Leaflet
++          // will overwrite the default icon with that value for the marker, _even if it is undefined_.
++          // This leads to the issue discussed in https://github.com/vue-leaflet/vue-leaflet/issues/130,
++          // and is avoided by simply removing that property.
++          delete options.icon;
++        }
++      }
++
+       leafletRef.value = marker(props.latLng, options);
+ 
+       const listeners = remapEvents(context.attrs);
+diff --git a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
+index 236ffb8..ad374b6 100644
+--- a/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
++++ b/node_modules/@vue-leaflet/vue-leaflet/src/functions/layer.js
+@@ -80,13 +80,13 @@ export const setup = (props, leafletRef, context) => {
+       leafletRef.value.bindTooltip(leafletObject);
+     },
+     unbindTooltip() {
+-      const tooltip = leafletRef.value ? leafletRef.value.getTooltip() : null;
++      const tooltip = leafletRef.value && typeof leafletRef.value.getTooltip === 'function' ? leafletRef.value.getTooltip() : null;
+       if (tooltip) {
+         tooltip.unbindTooltip();
+       }
+     },
+     unbindPopup() {
+-      const popup = leafletRef.value ? leafletRef.value.getPopup() : null;
++      const popup = leafletRef.value && typeof leafletRef.value.getPopup === 'function' ? leafletRef.value.getPopup() : null;
+       if (popup) {
+         popup.unbindPopup();
+       }
