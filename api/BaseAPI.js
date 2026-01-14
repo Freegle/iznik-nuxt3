@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/browser'
+import * as Sentry from '@sentry/vue'
 import {
   APIError,
   MaintenanceError,
@@ -7,7 +7,10 @@ import {
 } from './APIErrors'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
+import { useLoggingContextStore } from '~/stores/loggingContext'
+import { getTraceHeaders } from '~/composables/useTrace'
 
 // Re-export the error classes for backward compatibility
 export { APIError, MaintenanceError, LoginError, SignUpError }
@@ -34,7 +37,21 @@ export default class BaseAPI {
       const headers = config.headers ? config.headers : {}
 
       const authStore = useAuthStore()
+      const mobileStore = useMobileStore()
       const miscStore = useMiscStore()
+
+      // Add trace headers for distributed tracing.
+      const traceHeaders = getTraceHeaders()
+      Object.assign(headers, traceHeaders)
+
+      // Add logging context headers.
+      try {
+        const loggingCtx = useLoggingContextStore()
+        const loggingHeaders = loggingCtx.getHeaders()
+        Object.assign(headers, loggingHeaders)
+      } catch (e) {
+        // Store may not be initialized on server-side.
+      }
 
       if (authStore.auth.persistent) {
         // Use the persistent token (a kind of JWT) to authenticate the request.
@@ -57,29 +74,11 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params - unless MT needs to send a zero
-        if (!config?.params.dontzapfalsey) {
-          config.params = Object.fromEntries(
-            Object.entries(config.params).filter(([_, v]) => v)
-          )
-        }
-        config.params.modtools = miscStore.modtools
+        // Remove falsey values from the params.
+        config.params = Object.fromEntries(
+          Object.entries(config.params).filter(([_, v]) => v)
+        )
 
-        // MT cope with arrays and objects eg components: ['me','work'] or context: { "Added": 12345678, "id": 12345 }
-        Object.keys(config.params).forEach((c) => {
-          const v = config.params[c]
-          if (Array.isArray(v)) {
-            delete config.params[c]
-            for (let ix = 0; ix < v.length; ix++) {
-              config.params[c + '[' + ix + ']'] = v[ix]
-            }
-          } else if (typeof v === 'object' && v !== null) {
-            delete config.params[c]
-            Object.keys(v).forEach((cp) => {
-              config.params[c + '[' + cp + ']'] = v[cp]
-            })
-          }
-        })
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
 
@@ -92,7 +91,8 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = miscStore.modtools // MT
+        config.params.modtools = miscStore.modtools
+        config.params.app = mobileStore.isApp
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -102,7 +102,8 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = miscStore.modtools // MT
+        config.data.modtools = miscStore.modtools
+        config.data.app = mobileStore.isApp
         body = JSON.stringify(config.data)
       }
 
@@ -115,13 +116,7 @@ export default class BaseAPI {
         headers,
       })
 
-      if (
-        data.jwt &&
-        data.jwt !== authStore.auth.jwt &&
-        data.persistent &&
-        path.substring(0, 5) !== '/user'
-      ) {
-        // Stop MT add user from switching identity
+      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
         // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
         // we renew the JWT.
         authStore.setAuth(data.jwt, data.persistent)
@@ -177,16 +172,19 @@ export default class BaseAPI {
           log &&
           (status !== null || retstr !== 'Unknown' || statusstr !== 'Unknown')
         ) {
-          Sentry.captureMessage(
-            'API request failed ' +
-              path +
-              ' returned HTTP ' +
-              status +
-              ' ret ' +
-              retstr +
-              ' status ' +
-              statusstr
-          )
+          // Sentry is only initialized on the client, so check before calling
+          if (typeof Sentry?.captureMessage === 'function') {
+            Sentry.captureMessage(
+              'API request failed ' +
+                path +
+                ' returned HTTP ' +
+                status +
+                ' ret ' +
+                retstr +
+                ' status ' +
+                statusstr
+            )
+          }
         }
 
         const message = [
@@ -301,6 +299,19 @@ export default class BaseAPI {
     let data = null
     const headers = config.headers ? config.headers : {}
 
+    // Add trace headers for distributed tracing.
+    const traceHeaders = getTraceHeaders()
+    Object.assign(headers, traceHeaders)
+
+    // Add logging context headers.
+    try {
+      const loggingCtx = useLoggingContextStore()
+      const loggingHeaders = loggingCtx.getHeaders()
+      Object.assign(headers, loggingHeaders)
+    } catch (e) {
+      // Store may not be initialized on server-side.
+    }
+
     try {
       const authStore = useAuthStore()
       const miscStore = useMiscStore()
@@ -335,9 +346,6 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // Add modtools param to identify this as a ModTools request.
-        config.params.modtools = miscStore.modtools
-
         // URL encode the parameters if any
         const urlParams = new URLSearchParams(config.params).toString()
 
@@ -350,7 +358,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = miscStore.modtools // MT
+        config.params.modtools = miscStore.modtools
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -360,18 +368,7 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        if (!config.params) {
-          config.params = {}
-        }
-
-        console.log(
-          'Seet MT in config.params',
-          config,
-          config.params,
-          miscStore.modtools
-        )
-
-        config.params.modtools = miscStore.modtools
+        config.data.modtools = miscStore.modtools
         body = JSON.stringify(config.data)
       }
 
@@ -443,16 +440,19 @@ export default class BaseAPI {
       const log = typeof logError === 'function' ? logError(data) : logError
 
       if (log && (status !== null || statusstr !== 'Unknown')) {
-        Sentry.captureMessage(
-          'API2 request failed ' +
-            path +
-            ' returned HTTP ' +
-            status +
-            ' status ' +
-            statusstr +
-            ' data length ' +
-            (data ? data.length : 0)
-        )
+        // Sentry is only initialized on the client, so check before calling
+        if (typeof Sentry?.captureMessage === 'function') {
+          Sentry.captureMessage(
+            'API2 request failed ' +
+              path +
+              ' returned HTTP ' +
+              status +
+              ' status ' +
+              statusstr +
+              ' data length ' +
+              (data ? data.length : 0)
+          )
+        }
       }
 
       const message = [

@@ -1,15 +1,17 @@
 <template>
   <div class="d-flex mt-1 justify-content-between">
     <div class="flex-grow-1">
-      <b-button
-        v-if="loggedIn && message.groups && message.groups.length"
-        variant="link"
-        class="grey p-0 mr-4"
-        size="sm"
-        @click="report"
-      >
-        Report this post
-      </b-button>
+      <client-only>
+        <b-button
+          v-if="loggedIn && message.groups && message.groups.length"
+          variant="link"
+          class="grey p-0 mr-4"
+          size="sm"
+          @click="report"
+        >
+          Report this post
+        </b-button>
+      </client-only>
       <b-button
         variant="link"
         class="p-0 grey"

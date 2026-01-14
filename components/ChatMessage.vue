@@ -255,6 +255,7 @@ const deleteMessage = async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .selected {
   border: 1px solid $color-blue--bright;
@@ -274,26 +275,52 @@ const deleteMessage = async () => {
 }
 
 :deep(.chatMessage) {
-  border: 1px solid $color-gray--light;
-  border-radius: 10px;
-  padding: 2px 4px 2px 4px;
   word-wrap: break-word;
-  line-height: 1.5;
+  line-height: 1.4;
+  font-size: 0.95rem;
 
-  @include media-breakpoint-up(md) {
-    padding: 4px 8px 4px 8px;
+  // Only apply bubble styling to simple messages without cards
+  &:not(:has(.messagecard)) {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 14px;
+    max-width: 85%;
+
+    @include media-breakpoint-up(md) {
+      padding: 10px 16px;
+      max-width: 70%;
+    }
+  }
+
+  // Messages with cards get simpler styling
+  &:has(.messagecard) {
+    border: 1px solid $color-gray--light;
+    border-radius: 10px;
+    padding: 8px;
+    max-width: 100%;
   }
 }
 
 :deep(.chatMessage__owner) {
-  background-color: $color-white;
-  order: 2;
+  background-color: #ffffff;
+  color: #000000;
+
+  // Only add border/shadow to simple messages
+  &:not(:has(.messagecard)) {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
 }
 
 :deep(.myChatMessage) {
-  .chatMessage__owner {
-    background-color: $color-green--light;
-    order: 0;
+  /* Use light green for sent messages - distinct from navbar but not overpowering */
+  .chatMessage.chatMessage__owner:not(:has(button)):not(:has(hr)):not(
+      :has(.messagecard)
+    ) {
+    background: $color-green--light;
+    color: $color-gray--darker;
+    border: 1px solid $color-green--medium;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   }
 
   .chatMessage {
@@ -301,29 +328,56 @@ const deleteMessage = async () => {
   }
 
   .chatMessageProfilePic {
-    left: 0;
+    display: none;
   }
 }
 
 :deep(.chatMessageProfilePic) {
-  min-width: 25px;
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
   position: relative;
-  top: 3px;
-  left: 3px;
-  margin-right: 5px;
+  top: 0;
+  left: 0;
+  margin-right: 8px;
+  flex-shrink: 0;
+
+  img,
+  .ProfileImage__container,
+  .generated-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
 
   @include media-breakpoint-up(md) {
-    min-width: 35px;
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+
+    img,
+    .ProfileImage__container,
+    .generated-avatar {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+    }
   }
 }
 
 :deep(.chatMessageWrapper) {
   display: flex;
-  padding-right: 20%;
+  align-items: flex-start;
+  padding-right: 15%;
+  margin-bottom: 4px;
+  gap: 4px;
 
   &.myChatMessage {
-    padding-left: 20%;
+    padding-left: 15%;
     padding-right: 0;
+    justify-content: flex-end;
   }
 }
 

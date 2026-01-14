@@ -37,6 +37,12 @@
 
 html {
   scroll-behavior: smooth;
+
+  // Prevent layout thrashing from scrollbar appearing/disappearing at breakpoint boundaries.
+  // Only on desktop - mobile uses overlay scrollbars that don't affect layout.
+  @include media-breakpoint-up(md) {
+    scrollbar-gutter: stable;
+  }
 }
 
 .strike {
@@ -324,6 +330,11 @@ form {
 // Most tooltips aren't inside modals so move them down.
 .tooltip {
   z-index: 1030;
+
+  .tooltip-inner {
+    max-width: 250px;
+    min-width: 150px;
+  }
 }
 
 .modal.hide-footer {
@@ -526,6 +537,24 @@ label {
 
 .verytop {
   z-index: 10000;
+}
+
+/*
+ * confirm-modal needs to appear above all other z-index values in the site.
+ * Current highest values:
+ *   - JustGiving checkout: 100000
+ *   - PostMapAndList: 20000
+ *   - Various modals: 10000
+ * Using 200000 to ensure confirm modals are always on top.
+ * The backdrop needs to be just below (199999) so it covers other elements too.
+ */
+.confirm-modal {
+  z-index: 200000 !important;
+}
+
+.confirm-modal + .modal-backdrop,
+.confirm-modal ~ .modal-backdrop {
+  z-index: 199999 !important;
 }
 
 .error__wrapper {

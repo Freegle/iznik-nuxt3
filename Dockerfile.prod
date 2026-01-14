@@ -1,0 +1,18 @@
+FROM ghcr.io/freegle/freegle-base:latest
+
+WORKDIR /app
+
+ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
+    IZNIK_API_V2=http://freegle-apiv2:8192/api
+
+COPY package*.json setup-hooks.* ./
+COPY patches/ ./patches/
+RUN npm ci --legacy-peer-deps && npm rebuild --legacy-peer-deps
+
+# Copy source code (includes .nuxt cache if restored by CircleCI)
+COPY . .
+
+EXPOSE 3003
+
+# Use nginx caching proxy for better throughput
+CMD ["/app/start-with-nginx.sh"]

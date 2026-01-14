@@ -1,110 +1,92 @@
 <template>
-  <b-card
-    class="mt-2"
-    border-variant="info"
-    header="info"
-    header-bg-variant="info"
-    header-text-variant="white"
-    no-body
-  >
-    <template #header>
-      <div class="d-flex justify-content-between">
-        <span v-if="oldPosts.length > 0">
-          <span v-if="!showOldPosts">
-            <b-button variant="secondary" @click="toggleShowOldPosts">
-              Show {{ formattedOldPostsCount }}
-            </b-button>
-          </span>
-          <span v-else>
-            <b-button variant="secondary" @click="toggleShowOldPosts">
-              Hide {{ formattedOldPostsCount }}
-            </b-button>
-          </span>
-        </span>
-      </div>
-    </template>
+  <div class="my-posts-list">
+    <!-- Active posts count header -->
+    <div v-if="!loading && activePosts.length > 0" class="active-posts-header">
+      <v-icon icon="gift" class="me-2" />
+      {{ formattedActivePostsCount }}
+    </div>
 
-    <b-card-body class="p-1 p-lg-3">
-      <b-card-text class="text-center">
-        <div
-          v-if="upcomingTrysts.length > 0"
-          class="mt-2 mb-3 border border-info p-2"
-        >
-          <h3 class="header--size4 text-start">Your upcoming collections:</h3>
-          <div
-            v-for="tryst in upcomingTrysts"
-            :key="'tryst-' + tryst.id"
-            variant="info"
-            class="text-start"
-          >
-            <v-icon icon="calendar-alt" class="pt-1" />&nbsp;
-            <span class="font-weight-bold">{{ tryst.trystdate }}</span>
-            &nbsp;{{ tryst.name }} collecting&nbsp;<em>{{ tryst.subject }}</em>
-          </div>
+    <!-- Old posts toggle button -->
+    <div v-if="!loading && oldPosts.length > 0" class="old-posts-toggle">
+      <button class="toggle-btn" @click="toggleShowOldPosts">
+        <v-icon :icon="showOldPosts ? 'eye-slash' : 'eye'" class="me-2" />
+        {{ showOldPosts ? 'Hide' : 'Show' }} {{ formattedOldPostsCount }}
+      </button>
+    </div>
+
+    <!-- Upcoming collections -->
+    <div v-if="!loading && upcomingTrysts.length > 0" class="collections-card">
+      <h3 class="collections-title">
+        <v-icon icon="calendar-check" class="me-2" />Your upcoming collections
+      </h3>
+      <div
+        v-for="tryst in upcomingTrysts"
+        :key="'tryst-' + tryst.id"
+        class="collection-item"
+      >
+        <v-icon icon="calendar-alt" class="collection-icon" />
+        <div class="collection-info">
+          <span class="collection-date">{{ tryst.trystdate }}</span>
+          <span class="collection-details">
+            {{ tryst.name }} collecting <em>{{ tryst.subject }}</em>
+          </span>
         </div>
-        <div v-if="visiblePosts.length > 0">
-          <div
-            v-for="post in visiblePosts"
-            :key="'post-' + post.id"
-            class="p-0 text-start mt-1"
-          >
-            <Suspense>
-              <MyMessage
-                :id="post.id"
-                :show-old="showOldPosts"
-                :expand="defaultExpanded"
-                class="minheight"
-              />
-              <template #fallback>
-                <div class="w-100 d-flex justify-content-center text-center">
-                  <client-only>
-                    <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
-                  </client-only>
-                </div>
-              </template>
-            </Suspense>
-          </div>
-          <b-img
-            v-if="loading"
-            lazy
-            src="/loader.gif"
-            alt="Loading..."
-            width="100px"
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-state">
+      <b-img lazy src="/loader.gif" alt="Loading..." width="60px" />
+    </div>
+
+    <!-- Posts list -->
+    <div v-else-if="visiblePosts.length > 0" class="posts-container">
+      <div v-for="post in visiblePosts" :key="'post-' + post.id">
+        <Suspense>
+          <MyMessage
+            :id="post.id"
+            :show-old="showOldPosts"
+            :expand="defaultExpanded"
           />
-          <InfiniteLoading
-            :distance="scrollboxHeight"
-            @infinite="
-              (event) => {
-                console.log('DEBUG: InfiniteLoading triggered', event)
-                emit('load-more', event)
-              }
-            "
-          />
-        </div>
-        <div v-else>
-          <b-row>
-            <b-col>
-              <p>You have no active posts.</p>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col class="text-center">
-              <template v-if="props.type === 'Offer'">
-                <b-button to="/give" class="mt-1" size="lg" variant="primary">
-                  <v-icon icon="gift" />&nbsp;OFFER something
-                </b-button>
-              </template>
-              <template v-else-if="props.type === 'Wanted'">
-                <b-button to="/find" class="mt-1" size="lg" variant="primary">
-                  <v-icon icon="shopping-cart" />&nbsp;Ask for something
-                </b-button>
-              </template>
-            </b-col>
-          </b-row>
-        </div>
-      </b-card-text>
-    </b-card-body>
-  </b-card>
+          <template #fallback>
+            <div class="loading-placeholder">
+              <b-img lazy src="/loader.gif" alt="Loading" width="80px" />
+            </div>
+          </template>
+        </Suspense>
+      </div>
+      <InfiniteLoading
+        :distance="scrollboxHeight"
+        @infinite="(event) => emit('load-more', event)"
+      />
+    </div>
+
+    <!-- Empty state -->
+    <div v-else class="empty-state">
+      <v-icon icon="folder-open" class="empty-icon" />
+      <p class="empty-text">You have no active posts.</p>
+      <div class="empty-actions">
+        <template v-if="props.type === 'Offer'">
+          <nuxt-link to="/give" class="mobile-btn mobile-btn--give">
+            <v-icon icon="gift" class="me-2" />Give stuff
+          </nuxt-link>
+        </template>
+        <template v-else-if="props.type === 'Wanted'">
+          <nuxt-link to="/find" class="mobile-btn mobile-btn--find">
+            <v-icon icon="search" class="me-2" />Find stuff
+          </nuxt-link>
+        </template>
+        <template v-else>
+          <nuxt-link to="/give" class="mobile-btn mobile-btn--give">
+            <v-icon icon="gift" class="me-2" />Give stuff
+          </nuxt-link>
+          <nuxt-link to="/find" class="mobile-btn mobile-btn--find">
+            <v-icon icon="search" class="me-2" />Find stuff
+          </nuxt-link>
+        </template>
+      </div>
+    </div>
+  </div>
 </template>
 <script setup>
 import pluralize from 'pluralize'
@@ -150,14 +132,12 @@ const formattedOldPostsCount = computed(() => {
   return pluralize(`old post`, oldPosts.value.length, true)
 })
 
+const formattedActivePostsCount = computed(() => {
+  return pluralize(`active post`, activePosts.value.length, true)
+})
+
 const activePosts = computed(() => {
-  const result = posts.value.filter((post) => !post.hasoutcome)
-  console.log('DEBUG: activePosts computed', {
-    allPostsLength: posts.value.length,
-    activePostsLength: result.length,
-    oldPostsLength: posts.value.filter((post) => post.hasoutcome).length,
-  })
-  return result
+  return posts.value.filter((post) => !post.hasoutcome)
 })
 
 const postIds = computed(() => {
@@ -208,14 +188,6 @@ const visiblePosts = computed(() => {
     })
     .slice(0, props.show)
 
-  console.log('DEBUG: visiblePosts computed', {
-    showOldPosts: showOldPosts.value,
-    visibleLength: result.length,
-    activePostsLength: activePosts.value.length,
-    totalPostsLength: posts.value.length,
-    showLimit: props.show,
-  })
-
   return result
 })
 
@@ -262,7 +234,215 @@ const upcomingTrysts = computed(() => {
   })
 })
 </script>
-<style scoped>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.my-posts-list {
+  padding: 0;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  animation: fadeIn 0.2s ease-in forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.active-posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid $color-gray--light;
+  color: $colour-success;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.old-posts-toggle {
+  margin-bottom: 12px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid $color-gray--light;
+  color: $color-gray--dark;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    background: $color-gray--lighter;
+    border-color: $color-gray--base;
+  }
+}
+
+.collections-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid $color-blue--bright;
+}
+
+.collections-title {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  margin: 0 0 12px 0;
+}
+
+.collection-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid $color-gray--lighter;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.collection-icon {
+  color: $color-blue--bright;
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+.collection-info {
+  flex: 1;
+}
+
+.collection-date {
+  display: block;
+  font-weight: 600;
+  color: $color-black;
+  margin-bottom: 2px;
+}
+
+.collection-details {
+  font-size: 0.9rem;
+  color: $color-gray--dark;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.loading-placeholder {
+  background: white;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.loading-placeholder::before {
+  content: '';
+  display: block;
+  width: 100%;
+  padding-bottom: 50%;
+  background: $color-gray--light;
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: $color-gray--base;
+  margin-bottom: 16px;
+}
+
+.empty-text {
+  font-size: 1.1rem;
+  color: $color-gray--dark;
+  margin-bottom: 20px;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mobile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &--give {
+    background: $colour-success;
+    color: $color-white;
+
+    &:hover {
+      background: darken($colour-success, 5%);
+      color: $color-white;
+    }
+  }
+
+  &--find {
+    background: $colour-secondary;
+    color: $color-white;
+
+    &:hover {
+      background: darken($colour-secondary, 5%);
+      color: $color-white;
+    }
+  }
+}
+
 .minheight {
   min-height: 200px;
 }

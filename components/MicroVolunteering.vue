@@ -115,9 +115,15 @@
                   @next="considerNext"
                 />
               </div>
-              <div v-else-if="task.type === 'SearchTerm'">
+              <div
+                v-else-if="
+                  task.type === 'SearchTerm' &&
+                  task.terms &&
+                  task.terms.length > 0
+                "
+              >
                 <MicroVolunteeringSimilarTerms
-                  :term="task.terms"
+                  :terms="task.terms"
                   @next="considerNext"
                 />
               </div>
@@ -306,7 +312,9 @@ async function getTask() {
 
     if (
       task.value.type === 'CheckMessage' ||
-      task.value.type === 'SearchTerm' ||
+      (task.value.type === 'SearchTerm' &&
+        task.value.terms &&
+        task.value.terms.length > 0) ||
       task.value.type === 'Facebook' ||
       task.value.type === 'PhotoRotate' ||
       task.value.type === 'Survey2' ||
@@ -314,7 +322,7 @@ async function getTask() {
     ) {
       showTask.value = true
     } else {
-      doneForNow()
+      considerNext()
     }
 
     console.log('Show?', showTask.value)
@@ -402,7 +410,33 @@ onMounted(async () => {
 })
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
 :deep(label) {
   font-weight: bold;
+}
+
+:deep(.modal-header) {
+  background: $colour-success;
+  color: $color-white;
+
+  h1 {
+    color: $color-white;
+    font-size: 1.25rem;
+    margin: 0;
+  }
+}
+
+:deep(.modal-footer) {
+  background: $color-gray--lighter;
+}
+
+/* Heart icons styling */
+.text-faded {
+  opacity: 0.3;
+}
+
+.text-danger {
+  color: #dc3545;
 }
 </style>

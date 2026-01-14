@@ -12,10 +12,12 @@ import { useRuntimeConfig } from '#app'
 import { TYPING_TIME_INVERVAL } from '~/constants'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useVolunteeringStore } from '~/stores/volunteering'
+import { useMobileStore } from '~/stores/mobile'
 
 export const navBarHidden = ref(false)
 
 let navBarTimeout = null
+let countsInitialized = false
 
 export function clearNavBarTimeout() {
   if (navBarTimeout) {
@@ -86,7 +88,14 @@ export function useNavbar() {
   const logo = ref('/icon.png')
   const logoFormat = ref('webp')
   const unreadNotificationCount = ref(0)
-  const chatCount = computed(() => chatStore.unreadCount)
+  const mobileStore = useMobileStore()
+  const chatCount = computed(() => {
+    const count = Math.min(99, chatStore.unreadCount)
+    if (mobileStore.isApp) {
+      mobileStore.setBadgeCount(count)
+    }
+    return count
+  })
   const activePostsCount = computed(() => messageStore.activePostsCounter)
   const showAboutMeModal = ref(false)
   const countTimer = ref(null)
@@ -190,7 +199,11 @@ export function useNavbar() {
       }
     }, 500000)
 
-    getCounts()
+    // Only fetch counts once, even if multiple components use useNavbar().
+    if (!countsInitialized) {
+      countsInitialized = true
+      getCounts()
+    }
   })
 
   const requestLogin = () => {
@@ -219,10 +232,21 @@ export function useNavbar() {
   }
 
   const backButton = () => {
-    if (router?.currentRoute?.value?.path?.includes('/chats/')) {
+    const currentPath = router?.currentRoute?.value?.path
+    if (currentPath?.includes('/chats/')) {
       // From a single chat we should always go back to the chat list.  This can happen if we've clicked on an
       // email notification and then clicked back.
       router.push('/chats')
+    } else if (currentPath === '/chats') {
+      // From the chat list we should go home since there's no home button on mobile.
+      router.push('/')
+    } else if (
+      currentPath === '/give/mobile/photos' ||
+      currentPath === '/find/mobile/photos'
+    ) {
+      // From mobile photos page, go to home to avoid redirect loop.
+      // The /give and /find pages redirect to mobile/photos on mobile, so router.back() would loop.
+      router.push('/')
     } else {
       try {
         router.back()
@@ -332,6 +356,9 @@ export function useNavbar() {
       }
 
       getCounts()
+    } else if (!newVal && oldVal) {
+      // Logged out - reset the flag so counts fetch again on next login.
+      countsInitialized = false
     }
   })
 

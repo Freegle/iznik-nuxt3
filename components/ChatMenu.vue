@@ -39,6 +39,7 @@ const chatType = computed(() => {
 
 const chatCount = computed(() => {
   // Don't show so many that the layout breaks.
+  // Note: Phone badge is synced from checkWork() in modme.js with total work count
   return Math.min(99, chatStore?.unreadCount)
 })
 

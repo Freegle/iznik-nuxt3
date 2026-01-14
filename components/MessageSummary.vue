@@ -1,188 +1,225 @@
 <template>
   <div
     v-if="message"
-    :id="'msg-' + id"
-    v-observe-visibility="{
-      callback: view,
-      options: {
-        observeFullElement: true,
-      },
+    class="message-summary-mobile"
+    :class="{
+      offer: isOffer,
+      wanted: isWanted,
+      freegled: message.successful && showFreegled,
+      promisedfade: showPromised && message.promised && !message.promisedtome,
+      'mobile-landscape': isMobileLandscape,
     }"
-    class="position-relative"
+    @click="expand"
   >
-    <template v-if="message.successful && showFreegled">
-      <MessageFreegled :id="id" summary />
-    </template>
-    <template v-else-if="message.promised && showPromised">
-      <MessagePromised
-        :id="id"
-        summary
-        class="clickme"
-        :to-me="message.promisedtome"
-        @click="expand"
-      />
-    </template>
-    <div :class="classes" :data-id="id" @click="expand">
-      <MessageItemLocation
-        :id="id"
-        :matchedon="matchedon"
-        class="header-title"
-        :expanded="false"
-        :show-location="showLocation"
-      />
-      <MessageHistory :id="id" summary class="mb-1 header-history" />
-      <div
-        class="mb-1 header-description"
-        :class="{
-          noAttachments: !message?.attachments?.length,
-        }"
-      >
-        <MessageDescription
-          :id="id"
-          :matchedon="matchedon"
-          class="d-none d-md-block description"
-        />
-      </div>
-      <div
-        v-if="!message.successful && replyable"
-        class="header-expand mt-2 mt-sm-0 d-none d-md-block"
-      >
-        <client-only>
-          <b-button variant="primary" class="mt-2 mb-2" @click="expand">
-            {{ expandButtonText }}
-          </b-button>
-        </client-only>
-      </div>
-      <div
-        class="image-wrapper d-flex justify-content-around mb-2 mb-md-3"
-        @click="expandAndAttachments"
-      >
-        <MessageAttachments
-          :id="id"
-          :attachments="message.attachments"
-          :disabled="message.successful"
-          thumbnail
+    <!-- Status overlay images - outside photo-area to avoid fade filter -->
+    <b-img
+      v-if="message.successful"
+      lazy
+      src="/freegled.jpg"
+      class="status-overlay-image"
+      :alt="successfulText"
+    />
+    <b-img
+      v-else-if="message.promised && showPromised"
+      lazy
+      src="/promised.jpg"
+      class="status-overlay-image"
+      alt="Promised"
+    />
+
+    <!-- Photo area with overlay -->
+    <div class="photo-area">
+      <!-- Actual photo -->
+      <div v-if="gotAttachments" class="photo-container">
+        <!-- Responsive image sizes: 200px display (400px for 2x retina), 100px landscape (200px retina) -->
+        <OurUploadedImage
+          v-if="message.attachments[0]?.ouruid"
+          :src="message.attachments[0].ouruid"
+          :modifiers="message.attachments[0].externalmods"
+          alt="Item Photo"
+          class="photo-image"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
           :preload="preload"
         />
+        <NuxtPicture
+          v-else-if="message.attachments[0]?.externaluid"
+          format="webp"
+          provider="uploadcare"
+          :src="message.attachments[0].externaluid"
+          :modifiers="message.attachments[0].externalmods"
+          alt="Item Photo"
+          class="photo-image"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
+          :preload="preload"
+        />
+        <ProxyImage
+          v-else-if="message.attachments[0]?.path"
+          class-name="photo-image"
+          alt="Item picture"
+          :src="message.attachments[0].path"
+          :width="400"
+          fit="inside"
+          sizes="(orientation: landscape) and (max-width: 991px) 100px, 200px"
+          :preload="preload"
+        />
+        <!-- Multi-photo indicator -->
+        <div v-if="attachmentCount > 1" class="photo-count">
+          {{ attachmentCount }} <v-icon icon="camera" />
+        </div>
+      </div>
+
+      <!-- No photo - show placeholder -->
+      <div v-else class="photo-container">
+        <MessagePhotoPlaceholder
+          :placeholder-class="placeholderClass"
+          :icon="categoryIcon"
+        />
+      </div>
+
+      <!-- Title/info overlay at bottom of photo (mobile only) -->
+      <div class="title-overlay title-overlay-mobile">
+        <div class="info-row">
+          <MessageTag :id="id" :inline="true" class="title-tag ps-1 pe-1" />
+          <div class="info-icons">
+            <span v-if="hasLocation" class="location">
+              <v-icon icon="map-marker-alt" />{{ locationText }}
+            </span>
+            <span class="time"
+              ><v-icon icon="clock" />{{ timeAgo || '...' }}</span
+            >
+          </div>
+        </div>
+        <div class="title-row">
+          <span class="title-subject">{{ strippedSubject }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content section for tablet/desktop - shows below photo -->
+    <div class="content-section">
+      <div class="content-header">
+        <MessageTag :id="id" :inline="true" class="content-tag" />
+        <div class="content-title-location">
+          <span class="content-subject">{{ subjectItemName }}</span>
+          <span v-if="subjectLocation" class="content-location">
+            {{ subjectLocation }}
+          </span>
+        </div>
+      </div>
+      <div class="content-description">
+        {{ descriptionText || 'Click to see more details.' }}
+      </div>
+      <div class="content-meta">
+        <span v-if="hasLocation" class="meta-location">
+          <v-icon icon="map-marker-alt" />{{ locationText }}
+        </span>
+        <span class="meta-time">
+          <v-icon icon="clock" />{{ displayTimeAgo || '...' }}
+        </span>
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
-import { computed } from '#imports'
-import { useMessageStore } from '~/stores/message'
-import { useAuthStore } from '~/stores/auth'
-import MessageItemLocation from '~/components/MessageItemLocation.vue'
-
-const MessageFreegled = defineAsyncComponent(() =>
-  import('~/components/MessageFreegled')
-)
-const MessagePromised = defineAsyncComponent(() =>
-  import('~/components/MessagePromised')
-)
-
-const emit = defineEmits(['expand', 'attachments'])
+import { computed, toRef } from 'vue'
+import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { useMiscStore } from '~/stores/misc'
+import { useOrientation } from '~/composables/useOrientation'
+import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
   id: {
     type: Number,
     required: true,
   },
-  matchedon: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  expandButtonText: {
-    type: String,
-    required: false,
-    default: 'See details and reply',
-  },
-  replyable: {
-    type: Boolean,
-    required: false,
-    default: true,
-  },
-  bgClass: {
-    type: String,
-    required: false,
-    default: null,
-  },
   showFreegled: {
     type: Boolean,
-    required: false,
     default: true,
   },
   showPromised: {
     type: Boolean,
-    required: false,
-    default: true,
-  },
-  showLocation: {
-    type: Boolean,
-    required: false,
     default: true,
   },
   preload: {
     type: Boolean,
-    required: false,
     default: false,
   },
 })
 
-const messageStore = useMessageStore()
-const me = useAuthStore().user
+const emit = defineEmits(['expand'])
 
-const message = computed(() => messageStore?.byId(props.id))
+// Use shared composable
+const idRef = toRef(props, 'id')
+const {
+  message,
+  strippedSubject,
+  subjectItemName,
+  subjectLocation,
+  gotAttachments,
+  attachmentCount,
+  timeAgo,
+  timeAgoExpanded,
+  distanceText,
+  distanceTextExpanded,
+  isOffer,
+  isWanted,
+  successfulText,
+  placeholderClass,
+  categoryIcon,
+} = useMessageDisplay(idRef)
 
-const classes = computed(() => {
-  const ret = {
-    messagecard: true,
-    'test-message-card': true,
-    'pb-0': true,
-    freegled: message.value?.successful && props.showFreegled,
-    offer: message.value?.type === 'Offer',
-    wanted: message.value?.type === 'Wanted',
-    clickme: !message.value?.successful,
-    promisedfade:
-      props.showPromised &&
-      message.value?.promised &&
-      props.replyable &&
-      !message.value?.promisedtome &&
-      !message.value?.successful,
-    noAttachments: !message.value?.attachments?.length,
-  }
+const miscStore = useMiscStore()
+const { isLandscape } = useOrientation()
 
-  if (props.bgClass) {
-    ret[props.bgClass] = true
-  }
-
-  return ret
+const isLgPlus = computed(() => {
+  return ['lg', 'xl', 'xxl'].includes(miscStore.breakpoint)
 })
 
-const view = async () => {
-  if (me && message.value?.unseen) {
-    await messageStore.view(props.id)
+const isMobileLandscape = computed(() => {
+  return isLandscape.value && ['xs', 'sm', 'md'].includes(miscStore.breakpoint)
+})
+
+// Truncated description for tablet/desktop view
+const descriptionText = computed(() => {
+  const text = message.value?.textbody
+  if (!text || text === 'null') return null
+  // On lg+ let CSS line-clamp handle truncation for cleaner display
+  if (isLgPlus.value) return text
+  const maxLen = 120
+  if (text.length <= maxLen) return text
+  return text.substring(0, maxLen).trim() + '...'
+})
+
+const locationText = computed(() => {
+  // Show area name if available, otherwise distance
+  if (message.value?.area) {
+    return message.value.area
   }
-}
+  return isLgPlus.value ? distanceTextExpanded.value : distanceText.value
+})
 
-const expand = (e) => {
-  if (message.value) {
+const displayTimeAgo = computed(() => {
+  return isLgPlus.value ? timeAgoExpanded.value : timeAgo.value
+})
+
+const hasLocation = computed(() => {
+  const loc = locationText.value
+  // Hide if empty, unknown, or just whitespace
+  if (!loc) return false
+  const lower = loc.toLowerCase().trim()
+  if (!lower) return false
+  if (lower === 'unknown' || lower === 'unknown location') return false
+  return true
+})
+
+function expand(e) {
+  if (!message.value?.successful) {
     emit('expand')
-
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-  }
-}
-
-const expandAndAttachments = (e) => {
-  // This is a slightly different case because on My Posts we want to trigger an image zoom (there is no expand
-  // on My Posts).
-  if (message.value) {
-    emit('expand')
-    emit('attachments')
 
     if (e) {
       e.preventDefault()
@@ -191,102 +228,391 @@ const expandAndAttachments = (e) => {
   }
 }
 </script>
+
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
-@import 'assets/css/message-images.scss';
+@import 'assets/css/_color-vars.scss';
 
-.card-body {
-  padding: 0px;
+/* Use very specific selectors to override MessageList.vue's deep selectors */
+.message-summary-mobile {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px $color-black-opacity-12;
+  cursor: pointer;
+  background: $color-white;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    max-height: 200px;
+    border: 1px solid $color-gray--light;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mobile landscape: use list view layout */
+  &.mobile-landscape {
+    flex-direction: row;
+    align-items: stretch;
+    border: 1px solid $color-gray--light;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.promisedfade {
-  filter: contrast(50%);
+.photo-area {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 115%;
+  background: $color-gray--light;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .freegled &,
+  .promisedfade & {
+    filter: contrast(50%);
+  }
+
+  /* Smaller photo on tablet/desktop to make room for text */
+  @include media-breakpoint-up(md) {
+    padding-bottom: 75%;
+  }
+
+  /* Horizontal layout on lg+ - fixed square photo */
+  @include media-breakpoint-up(lg) {
+    width: 200px;
+    height: 200px;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  /* Mobile landscape: small thumbnail on left */
+  .mobile-landscape & {
+    width: 20%;
+    height: auto;
+    padding-bottom: 0;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
 }
 
-.messagecard {
-  padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
-  border: solid 1px $color-gray--light;
+.photo-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-gray--light;
 
-  display: grid;
-  align-items: start;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 1fr min-content;
+  @include media-breakpoint-up(lg) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-landscape & {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:deep(.photo-image),
+:deep(picture),
+:deep(picture img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.photo-count {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: $color-black-opacity-60;
+  color: $color-white;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  z-index: 5;
+  height: auto;
+}
+
+.status-overlay-image {
+  position: absolute;
+  z-index: 20;
+  transform: rotate(15deg) translate(-50%, -50%);
+  top: 45%;
+  left: 50%;
+  width: 50%;
+  max-width: 120px;
+  pointer-events: none;
+  height: auto;
+
+  /* In list view (lg+), photo is 200px wide on left - position badge within that area */
+  @include media-breakpoint-up(lg) {
+    left: 100px; /* Center of 200px photo area */
+    top: 100px; /* Center of 200px photo area */
+    width: 120px;
+    max-width: 120px;
+  }
+
+  /* Mobile landscape: photo is 20% width */
+  .mobile-landscape & {
+    left: 10%; /* Center of 20% photo area */
+    width: 15%;
+    max-width: none;
+  }
+}
+
+/* Mobile overlay - hidden on tablet+ and mobile landscape */
+.title-overlay-mobile {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: auto;
+  padding: 2rem 0.5rem 0.5rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.88) 8%,
+    rgba(0, 0, 0, 0.84) 16%,
+    rgba(0, 0, 0, 0.78) 24%,
+    rgba(0, 0, 0, 0.68) 32%,
+    rgba(0, 0, 0, 0.55) 42%,
+    rgba(0, 0, 0, 0.4) 52%,
+    rgba(0, 0, 0, 0.26) 62%,
+    rgba(0, 0, 0, 0.15) 72%,
+    rgba(0, 0, 0, 0.08) 82%,
+    rgba(0, 0, 0, 0.03) 92%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  color: white;
+  z-index: 3;
+  overflow: hidden;
 
   @include media-breakpoint-up(md) {
-    padding: 16px;
-    grid-template-columns: $thumbnail-size-md 1fr;
-    grid-column-gap: 1rem;
-    grid-template-rows: max-content max-content max-content auto auto auto;
+    display: none;
   }
 
-  &.offer {
-    background-color: $color-white;
+  .mobile-landscape & {
+    display: none;
+  }
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  height: auto;
+}
+
+.title-tag {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  height: auto;
+}
+
+:deep(.title-tag .tagbadge) {
+  position: relative;
+  left: auto;
+  top: auto;
+  font-size: 0.8rem;
+}
+
+.info-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: auto;
+}
+
+.time {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: auto;
+}
+
+.title-row {
+  height: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.title-subject {
+  display: block;
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: auto;
+}
+
+/* Content section - hidden on mobile portrait, visible on tablet+ and mobile landscape */
+.content-section {
+  display: none;
+  padding: 0.75rem;
+  background: $color-white;
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border: 1px solid $color-gray--light;
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  &.wanted {
-    background-color: $color-green--light;
+  @include media-breakpoint-up(lg) {
+    padding: 1rem 1.5rem;
+    border: none;
+    border-left: 1px solid $color-gray--light;
+    box-shadow: none;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
   }
 
-  .header-title {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-
-    @include media-breakpoint-up(md) {
-      grid-column: 2 / 3;
-    }
+  .mobile-landscape & {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 0.75rem 1rem;
+    justify-content: center;
+    border: none;
+    border-left: 1px solid $color-gray--light;
+    box-shadow: none;
   }
+}
 
-  .header-history {
-    grid-column: 1 / 2;
-    grid-row: 3 / 4;
+.content-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  align-items: center;
+}
 
-    @include media-breakpoint-up(md) {
-      grid-column: 2 / 3;
-      grid-row: 2 / 3;
-    }
-  }
+.content-tag {
+  align-self: center;
+  white-space: nowrap;
+}
 
-  .header-description {
-    grid-column: 1 / 2;
-    grid-row: 4 / 5;
+:deep(.content-tag) {
+  position: static !important;
+  display: inline-flex !important;
+  white-space: nowrap !important;
+}
 
-    @include media-breakpoint-up(md) {
-      grid-column: 2 / 3;
-      grid-row: 3 / 4;
-    }
-  }
+:deep(.content-tag .tagbadge),
+:deep(.content-tag.tagbadge) {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+  white-space: nowrap !important;
+  max-width: none !important;
+  text-wrap: nowrap !important;
+}
 
-  .image-wrapper {
+.content-title-location {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content-subject {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content-location {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $color-gray--darker;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content-description {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: $color-gray--dark;
+  line-height: 1.35;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+
+  /* In list layout (lg+), fill available space with fade-out overflow */
+  @include media-breakpoint-up(lg) {
+    display: block;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: unset;
     position: relative;
+    min-height: 0;
 
-    grid-column: 1 / 2;
-    grid-row: 5 / 6;
-
-    @include media-breakpoint-up(md) {
-      grid-column: 1 / 2;
-      grid-row: 1 / 5;
-      width: unset;
-    }
-  }
-
-  .header-expand {
-    grid-column: 1 / 2;
-    grid-row: 6 / 7;
-    align-self: end;
-    justify-self: end;
-
-    @include media-breakpoint-up(md) {
-      grid-column: 2 / 3;
-      grid-row: 4 / 5;
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.5em;
+      background: linear-gradient(transparent, $color-white);
+      pointer-events: none;
     }
   }
 }
 
-.freegled {
-  filter: contrast(50%);
+.content-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.7rem;
+  color: $color-gray--dark;
+  margin-top: auto;
+}
+
+.meta-location,
+.meta-time {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
 }
 </style>

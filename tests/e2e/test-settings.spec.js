@@ -23,8 +23,8 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
     timeout: timeouts.ui.appearance,
   })
 
-  // Get the email level select element - look for the select near the "Choose your email level" text
-  let emailLevelSelect = page.locator('.simpleEmailSelect')
+  // Get the email level select element - look for the select near the "Email level" text
+  let emailLevelSelect = page.locator('.email-select')
 
   // Wait for page to be fully loaded before screenshot
   await page.waitForLoadState('domcontentloaded')
@@ -53,7 +53,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
     timeout: timeouts.ui.appearance,
   })
 
-  emailLevelSelect = page.locator('.simpleEmailSelect')
+  emailLevelSelect = page.locator('.email-select')
 
   // Wait for the select element to be ready
   await emailLevelSelect.waitFor({ state: 'visible' })
@@ -70,11 +70,9 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 
   // If not 'None', check for advanced settings functionality
   if (level.value !== 'None') {
-    // Look for the "Click to show advanced email settings" button
+    // Look for the "Show advanced settings" button
     console.log('Checking advanced settings...')
-    const advancedButton = page.locator(
-      'text=Click to show advanced email settings'
-    )
+    const advancedButton = page.locator('text=Show advanced settings')
 
     // Click to show advanced settings
     await advancedButton.click()
@@ -168,11 +166,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     })
 
     // Ensure we're not on 'None' setting (advanced settings not available for 'None')
-    const emailLevelSelect = page
-      .locator('text=Choose your email level:')
-      .locator('..')
-      .locator('select')
-      .first()
+    const emailLevelSelect = page.locator('.email-select')
     await emailLevelSelect.selectOption('Full')
 
     // Wait for network requests to complete (settings save)
@@ -181,17 +175,13 @@ test.describe('Settings Page - Email Level Settings', () => {
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Check if advanced settings button is visible
-    const advancedButton = page.locator(
-      'text=Click to show advanced email settings'
-    )
+    const advancedButton = page.locator('text=Show advanced settings')
 
     if (await advancedButton.isVisible()) {
       console.log('Testing advanced settings toggle...')
 
       // Initially, advanced settings should be hidden
-      const advancedSection = page.locator(
-        'text=Mail me replies from other freeglers'
-      )
+      const advancedSection = page.locator('text=Email me replies to my posts')
       await advancedSection.waitFor({
         state: 'hidden',
         timeout: timeouts.ui.appearance,
@@ -217,12 +207,12 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Verify key advanced settings are present
       const expectedAdvancedSettings = [
-        'Mail me replies from other freeglers',
-        'email you a copy of your own Chat messages',
-        'email you about ChitChat',
-        'email you about specific OFFERs/WANTEDs',
-        'send occasional newsletters',
-        'send occasional mails to encourage',
+        'Email me replies to my posts',
+        'Copy of my sent messages',
+        'ChitChat & notifications',
+        'Suggested posts for you',
+        'Newsletters & stories',
+        'Encouragement emails',
       ]
 
       for (const settingText of expectedAdvancedSettings) {
@@ -258,11 +248,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     })
 
     // Test that appropriate warnings appear for 'None' setting
-    const emailLevelSelect = page
-      .locator('text=Choose your email level:')
-      .locator('..')
-      .locator('select')
-      .first()
+    const emailLevelSelect = page.locator('.email-select')
 
     // Take screenshot before setting to 'None'
     await takeScreenshot('Validation Before None Setting')
@@ -276,7 +262,7 @@ test.describe('Settings Page - Email Level Settings', () => {
 
     // Check for warning message about not getting emails
     const warningMessage = page.locator(
-      '*:has-text("If people message you, you won\'t get any emails")'
+      '*:has-text("You won\'t get email notifications")'
     )
     await warningMessage
       .first()

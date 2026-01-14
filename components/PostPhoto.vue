@@ -173,47 +173,74 @@ function rotateRight(e) {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-.bottomright {
-  bottom: 12px;
-  right: 0px;
-  position: absolute;
-}
-
-.topleft {
-  top: 12px;
-  left: 10px;
-  position: absolute;
-}
-
-.topright {
-  top: 12px;
-  right: 0px;
-  position: absolute;
-}
-
 .container {
   position: relative;
 
   :deep(img) {
-    box-shadow: 0px 0px 3px 2px $color-gray--light;
-    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   }
 
   &.primary {
     :deep(img) {
-      box-shadow: 0px 0px 3px 2px $colour-success;
+      box-shadow: 0 0 0 3px $colour-success;
     }
+  }
+}
+
+/* Control button positioning - relative to container frame */
+.topleft,
+.topright,
+.bottomright {
+  position: absolute;
+  z-index: 10;
+}
+
+.topleft {
+  top: 4px;
+  left: 4px;
+}
+
+.topright {
+  top: 4px;
+  right: 4px;
+}
+
+.bottomright {
+  bottom: 4px;
+  right: 4px;
+}
+
+/* Control button styling */
+.clickme {
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* Hide the circle background icon */
+  :deep(.fa-circle) {
+    display: none;
   }
 }
 
 .image__icon {
   color: $color-white;
-  transform: translate(-1.5em, -0.5em);
-  width: 1rem !important;
-  height: 1rem !important;
+  transform: none !important;
+  width: 14px !important;
+  height: 14px !important;
+  position: static !important;
 
   &.fa-flip-horizontal {
-    transform: translate(-1.5em, -0.5em) scaleX(-1);
+    transform: scaleX(-1) !important;
   }
 }
 

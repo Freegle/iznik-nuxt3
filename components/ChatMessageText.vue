@@ -1,16 +1,20 @@
 <template>
-  <!-- DO NOT COPY INTO MASTER -->
   <div
     class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
+    <div class="chatMessageProfilePic">
+      <ProfileImage
+        :image="chatMessageProfileImage"
+        :name="chatMessageProfileName"
+        class="inline"
+        is-thumbnail
+        size="sm"
+      />
+    </div>
     <div class="chatMessage forcebreak chatMessage__owner">
       <div>
-        <span v-if="isMT && emessageMThasTNlinks">
-          <!-- eslint-disable-next-line-->
-          <span v-html="emessageMTTN" class="preline forcebreak"></span>
-        </span>
-        <span v-else-if="!highlightEmails">
+        <span v-if="!highlightEmails">
           <span v-if="messageIsNew" class="prewrap font-weight-bold">{{
             emessage
           }}</span>
@@ -27,7 +31,7 @@
           <span v-if="messageIsNew" class="font-weight-bold">
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmailMT]"
+              :search-words="[regexEmail]"
               highlight-class-name="highlight"
               class="prewrap"
             />
@@ -35,7 +39,7 @@
           <span v-else>
             <Highlighter
               :text-to-highlight="emessage"
-              :search-words="[regexEmailMT]"
+              :search-words="[regexEmail]"
               highlight-class-name="highlight"
               class="preline forcebreak"
             />
@@ -65,14 +69,6 @@
         </div>
       </div>
     </div>
-    <div class="chatMessageProfilePic">
-      <ProfileImage
-        :image="chatMessageProfileImage"
-        class="ml-1 mb-1 mt-1 inline"
-        is-thumbnail
-        size="sm"
-      />
-    </div>
   </div>
 </template>
 <script setup>
@@ -83,7 +79,6 @@ import ProfileImage from '~/components/ProfileImage'
 import { MAX_MAP_ZOOM, POSTCODE_REGEX } from '~/constants'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useLocationStore } from '~/stores/location'
-import { useMiscStore } from '~/stores/misc' // MT
 
 const props = defineProps({
   chatid: {
@@ -113,41 +108,15 @@ const {
   emessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
-  regexEmailMT, // MT
+  chatMessageProfileName,
+  regexEmail,
 } = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Data properties
 const lat = ref(null)
 const lng = ref(null)
-const miscStore = useMiscStore() // MT
-const isMT = ref(miscStore.modtools) // MT
 
 // Computed properties
-const emessageMThasTNlinks = computed(() => {
-  return emessage.value?.includes('https://trashnothing.com/fd/')
-})
-const emessageMTTN = computed(() => {
-  let ret = emessage.value
-  ret = ret
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-  let tnpos = -1
-  while (true) {
-    tnpos = ret.indexOf('https://trashnothing.com/fd/', tnpos + 1)
-    if (tnpos === -1) break
-    const endtn = ret.indexOf('\n', tnpos)
-    if (endtn === -1) break
-    const tnurl = ret.substring(tnpos, endtn)
-    const tnlink = '<a href=' + tnurl + ' target="_blank">' + tnurl + '</a>'
-    ret = ret.substring(0, tnpos) + tnlink + ret.substring(endtn)
-    tnpos += tnlink.length
-  }
-  return ret
-})
-
 const maxZoom = computed(() => MAX_MAP_ZOOM)
 
 const messageIsNew = computed(() => {
@@ -160,9 +129,7 @@ const messageIsNew = computed(() => {
 const postcode = computed(() => {
   let ret = null
 
-  const postcodeMatch = chatmessage.value?.message
-    ?.toString()
-    .match(POSTCODE_REGEX)
+  const postcodeMatch = chatmessage.value?.message.match(POSTCODE_REGEX)
 
   if (postcodeMatch?.length) {
     if (!postcodeMatch[0].includes(' ')) {

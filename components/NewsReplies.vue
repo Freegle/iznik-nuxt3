@@ -1,6 +1,6 @@
 <template>
-  <div :class="{ 'pl-1': depth === 1 }">
-    <div v-if="showEarlierRepliesOption">
+  <div class="replies-container" :class="'depth-' + depth">
+    <div v-if="showEarlierRepliesOption" class="show-earlier">
       <b-button
         v-if="!showAllReplies"
         variant="link"
@@ -23,31 +23,27 @@
     <div
       v-for="reply in repliestoshow"
       :key="'newsfeed-' + reply"
-      class="lines"
+      class="reply-thread"
     >
       <NewsRefer
         v-if="reply.type.indexOf('ReferTo') === 0"
         :id="reply.id"
         :type="reply.type"
         :threadhead="threadhead"
-        class="content pt-1 pb-1"
+        class="reply-content"
       />
       <NewsReply
         v-else
         :id="reply.id"
         :key="'reply-' + reply.id"
+        :reply-data="reply"
         :threadhead="threadhead"
         :scroll-to="scrollTo"
-        :class="{
-          content: true,
-          'pt-1': true,
-          'pb-1': true,
-          'pl-4': depth === 2,
-        }"
+        class="reply-content"
         :depth="depth"
         @rendered="rendered"
+        @expand-combined="expandCombined"
       />
-      <div v-if="depth === 1" class="line" />
     </div>
   </div>
 </template>
@@ -94,6 +90,7 @@ const emit = defineEmits(['rendered'])
 const newsfeedStore = useNewsfeedStore()
 const authStore = useAuthStore()
 const showAllReplies = ref(false)
+const expandedCombinedIds = ref(new Set())
 
 // We do a lot of things in setup() in this component rather than computed properties via the legacy options API.
 //
@@ -134,42 +131,80 @@ const visiblereplies = computed(() => {
 })
 
 const combinedReplies = computed(() => {
-  const TEN_MINUTES = 10 * 60 * 1000 // 10 minutes in milliseconds
+  const TEN_MINUTES = 10 * 60 * 1000
   const combined = []
 
   for (let i = 0; i < filteredReplies.value.length; i++) {
     const currentReply = filteredReplies.value[i]
     const currentTime = new Date(currentReply.added).getTime()
-
-    // Check if we can combine with the last reply in our combined array
     const lastCombined = combined[combined.length - 1]
 
-    if (
+    /* Check if this reply or the last combined group has been expanded */
+    const isExpanded =
+      expandedCombinedIds.value.has(currentReply.id) ||
+      (lastCombined?.combinedIds &&
+        lastCombined.combinedIds.some((id) =>
+          expandedCombinedIds.value.has(id)
+        ))
+
+    const canCombine =
+      !isExpanded &&
       lastCombined &&
       lastCombined.userid === currentReply.userid &&
-      !currentReply.image && // Don't combine replies with images
+      !currentReply.image &&
       !lastCombined.image &&
+      !currentReply.replies?.length &&
+      !lastCombined.replies?.length &&
       currentTime -
         new Date(lastCombined.originalAdded || lastCombined.added).getTime() <=
         TEN_MINUTES
-    ) {
-      // Combine the replies
-      const combinedReply = {
-        ...lastCombined,
-        message: lastCombined.message + '\n\n' + currentReply.message,
-        added: currentReply.added, // Use the latest timestamp
-        originalAdded: lastCombined.originalAdded || lastCombined.added, // Keep track of original timestamp
-        isCombined: true,
-        combinedMessages: lastCombined.combinedMessages
-          ? [...lastCombined.combinedMessages, currentReply.message]
-          : [lastCombined.message, currentReply.message],
-      }
 
-      // Replace the last combined reply with the new combined one
-      combined[combined.length - 1] = combinedReply
+    if (canCombine) {
+      /* Create a fresh object to avoid mutating store data */
+      combined[combined.length - 1] = {
+        id: lastCombined.id,
+        userid: lastCombined.userid,
+        displayname: lastCombined.displayname,
+        profile: lastCombined.profile,
+        added: currentReply.added,
+        originalAdded: lastCombined.originalAdded || lastCombined.added,
+        message: lastCombined.message + '\n\n' + currentReply.message,
+        isCombined: true,
+        combinedIds: [
+          ...(lastCombined.combinedIds || [lastCombined.id]),
+          currentReply.id,
+        ],
+        image: null,
+        replies: [],
+        deleted: lastCombined.deleted,
+        hidden: lastCombined.hidden,
+        loves: lastCombined.loves,
+        loved: lastCombined.loved,
+        type: lastCombined.type,
+        replyto: lastCombined.replyto,
+        threadhead: lastCombined.threadhead,
+        previews: lastCombined.previews,
+      }
     } else {
-      // Add as a separate reply
-      combined.push(currentReply)
+      /* Deep clone to avoid reactivity issues with store objects */
+      combined.push({
+        id: currentReply.id,
+        userid: currentReply.userid,
+        displayname: currentReply.displayname,
+        profile: currentReply.profile,
+        added: currentReply.added,
+        message: currentReply.message,
+        image: currentReply.image,
+        replies: currentReply.replies,
+        deleted: currentReply.deleted,
+        hidden: currentReply.hidden,
+        loves: currentReply.loves,
+        loved: currentReply.loved,
+        type: currentReply.type,
+        replyto: currentReply.replyto,
+        threadhead: currentReply.threadhead,
+        previews: currentReply.previews,
+      })
     }
   }
 
@@ -254,25 +289,55 @@ const numberOfRepliesNotShown = computed(() => {
 function rendered(id) {
   emit('rendered', id)
 }
+
+function expandCombined(combinedIds) {
+  /* Add all IDs from this combined group to the expanded set */
+  combinedIds.forEach((id) => expandedCombinedIds.value.add(id))
+}
 </script>
 <style lang="scss">
-.lines {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-  .content {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    z-index: 1001;
+.replies-container {
+  margin-left: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba($colour-success, 0.4);
+
+  @include media-breakpoint-up(md) {
+    margin-left: 1rem;
+    padding-left: 1rem;
   }
 
-  .line {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    border-left: 1px solid #e0e0e0;
-    margin-left: 21px;
-    z-index: 1000;
+  /* Nested replies get lighter borders */
+  &.depth-2 {
+    border-left-color: rgba($colour-success, 0.25);
   }
+
+  /* After depth 2, stop indenting further to prevent narrow columns.
+     The @mentions in replies show who is replying to whom. */
+  &[class*='depth-']:not(.depth-1):not(.depth-2) {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+.show-earlier {
+  margin-bottom: 0.5rem;
+}
+
+.reply-thread {
+  padding: 0.5rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+.reply-content {
+  /* Content styling handled by NewsReply */
 }
 </style>

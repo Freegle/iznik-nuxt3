@@ -2,12 +2,12 @@
 
 This repository uses CircleCI for **two distinct purposes**:
 
-1. **Mobile App Builds** (`.circleci/config.yml` in `app-ci-fd` branch) - Automated iOS and Android app releases
+1. **Mobile App Builds** (`.circleci/config.yml` in `production` branch) - Automated iOS and Android app releases
 2. **Integration Testing** (via [FreegleDocker repository](https://github.com/Freegle/FreegleDocker)) - End-to-end testing
 
-## Mobile App CI/CD (`app-ci-fd` branch)
+## Mobile App CI/CD (`production` branch)
 
-The `app-ci-fd` branch contains a `.circleci/config.yml` that automates mobile app builds and deployments:
+The `production` branch contains a `.circleci/config.yml` that automates mobile app builds and deployments:
 
 ### What It Does
 ✅ **iOS & Android builds** - Parallel builds with shared version numbers
@@ -34,10 +34,10 @@ See [README-APP.md](README-APP.md) for complete mobile app CI/CD documentation.
 - **Resource Efficiency**: One comprehensive test environment vs. multiple isolated ones
 
 ### What This Means
-❌ **No web testing CI in master** - Master branch has no `.circleci/config.yml`
+✅ **Mobile app builds in production** - `.circleci/config.yml` triggers iOS/Android builds when production branch updates
 ❌ **No Playwright runs here** - All E2E testing happens in FreegleDocker
-✅ **Development tools only** - ESLint, development server, build tools (master branch)
-✅ **Mobile app builds** - iOS/Android automation in `app-ci-fd` branch
+✅ **Development in master** - ESLint, development server, build tools
+✅ **Apps deploy after tests pass** - Master → tests → production → CircleCI builds apps
 ✅ **Integration testing** - Full system testing via FreegleDocker
 
 ## Integration Testing

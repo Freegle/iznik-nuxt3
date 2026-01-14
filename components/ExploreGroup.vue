@@ -1,5 +1,11 @@
 <template>
   <div class="mb-2 mt-2">
+    <GroupHeader
+      v-if="group"
+      :group="group"
+      show-join
+      :show-give-find="showGiveFind"
+    />
     <OurMessage v-if="msgid" :id="msgid" record-view class="mt-3" />
     <MessageList
       :messages-for-list="messagesToShow"
@@ -7,6 +13,7 @@
       :bump="bump"
       :exclude="msgid"
       :show-give-find="showGiveFind"
+      :show-group-header="false"
     />
   </div>
 </template>
@@ -14,6 +21,7 @@
 import { ref, computed, watch } from 'vue'
 import MessageList from './MessageList'
 import OurMessage from './OurMessage'
+import GroupHeader from './GroupHeader'
 import { useGroupStore } from '~/stores/group'
 
 const props = defineProps({
@@ -34,6 +42,10 @@ const props = defineProps({
 })
 
 const groupStore = useGroupStore()
+
+const group = computed(() => {
+  return groupStore?.get(props.id)
+})
 
 // Methods
 function loadMore($state) {

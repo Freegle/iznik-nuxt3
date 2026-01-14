@@ -113,6 +113,7 @@ import { useTeamStore } from './stores/team'
 import { useDonationStore } from './stores/donations'
 import { useGiftAidStore } from './stores/giftaid'
 import { useAuthorityStore } from './stores/authority'
+import { useMobileStore } from './stores/mobile'
 import { useStatsStore } from './stores/stats'
 import { useMicroVolunteeringStore } from './stores/microvolunteering'
 import { useImageStore } from './stores/image'
@@ -141,6 +142,7 @@ let ready = false
 // Starting with around Nuxt 3.4.1, when we first access the config (here) it has public as we'd expect, but
 // if we store that and access it later, we are just looking at the contents of public.  I don't understand why
 // this is, but we don't expect the config to change, so we take a copy here.
+
 const runtimeConfig = JSON.parse(
   JSON.stringify({
     public: useRuntimeConfig().public,
@@ -172,6 +174,7 @@ const donationStore = useDonationStore()
 const giftAidStore = useGiftAidStore()
 const authorityStore = useAuthorityStore()
 const noticeboardStore = useNoticeboardStore()
+const mobileStore = useMobileStore()
 const statsStore = useStatsStore()
 const microVolunteeringStore = useMicroVolunteeringStore()
 const imageStore = useImageStore()
@@ -204,6 +207,7 @@ donationStore.init(runtimeConfig)
 giftAidStore.init(runtimeConfig)
 authorityStore.init(runtimeConfig)
 noticeboardStore.init(runtimeConfig)
+mobileStore.init(runtimeConfig)
 statsStore.init(runtimeConfig)
 microVolunteeringStore.init(runtimeConfig)
 imageStore.init(runtimeConfig)
@@ -232,9 +236,11 @@ const shouldShowNavbar = computed(() => {
 //   }
 // })
 
+console.log(performance.now())
 try {
   if (route.query.u && route.query.k) {
     // We are impersonating.
+    console.log(performance.now())
     try {
       // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
       // an incognito tab while impersonating.
@@ -245,6 +251,7 @@ try {
         u: route.query.u,
         k: route.query.k,
       })
+      console.log(performance.now())
     } catch (e) {
       // Login failed.  Usually this is because they're logged in as someone else. Ignore it.
       console.log('Login failed', e)

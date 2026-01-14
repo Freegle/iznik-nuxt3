@@ -12,23 +12,35 @@ This document describes the mobile app version of Freegle, which is built using 
 
 ## Overview
 
-The mobile app is managed in the `app-ci-fd` branch (based on the original `app` branch) and contains extensive modifications to support native mobile functionality. The app shares most of the Vue components and business logic with the web version but uses a different build configuration and includes native platform code.
+The mobile app is built from the `production` branch (same as the web app) and includes native Android and iOS platform code. The app shares all Vue components and business logic with the web version but uses a different build configuration controlled by the `ISAPP` environment variable.
+
+Understanding the differences between mobile and web builds helps when debugging platform-specific issues.
 
 <details>
-<summary><h2>App Branch vs Master Branch</h2></summary>
+<summary><h2>Mobile App vs Web App</h2></summary>
 
-The `app-ci-fd` branch (based on the `app` branch) is a **parallel mobile app version** that differs from `master` in several key ways:
+The mobile and web apps are built from the **same codebase** (`production` branch) with build-time differences:
 
 ### Build Configuration Differences
 
-- **SSR Disabled**: Uses Static Site Generation instead of Server-Side Rendering
-- **Build Target**: `static` instead of `server`
+- **SSR Disabled**: Mobile uses Static Site Generation instead of Server-Side Rendering
+- **Build Target**: `static` (mobile) instead of `server` (web)
 - **Environment Flag**: `ISAPP=true` to detect mobile app context
-- **No Docker**: Mobile apps don't use the Docker-based infrastructure
+- **Build Pipeline**: CircleCI (mobile) vs Netlify (web)
+- **Deploy Trigger**: Both deploy from `production` branch after tests pass on `master`
+
+### Unified Codebase Benefits
+
+- **Single Source of Truth**: All code in one place, no branch divergence
+- **Automatic Sync**: Fixes automatically apply to both platforms
+- **Consistent Testing**: Same tests validate both web and mobile code
+- **Simplified Maintenance**: No need to manually sync branches
 
 </details>
 
 ---
+
+The app uses Capacitor to bridge web code with native device features. This section covers the core configuration and project structure.
 
 <details>
 <summary><h2>Core Mobile Infrastructure</h2></summary>
@@ -69,6 +81,8 @@ Located in `ios/` directory:
 </details>
 
 ---
+
+These features use native device capabilities not available in web browsers.
 
 <details>
 <summary><h2>Mobile-Specific Features</h2></summary>
@@ -169,6 +183,8 @@ Mobile-specific Stripe implementation:
 
 ---
 
+All mobile-specific state and functionality is managed through a dedicated Pinia store.
+
 <details>
 <summary><h2>Mobile Store (stores/mobile.js)</h2></summary>
 
@@ -200,6 +216,8 @@ A dedicated Pinia store handles all mobile-specific state and functionality:
 </details>
 
 ---
+
+Several components have mobile-specific behavior to optimize for touch screens and native capabilities.
 
 <details>
 <summary><h2>UI/UX Adjustments</h2></summary>
@@ -243,6 +261,8 @@ Several components have mobile-specific behavior:
 </details>
 
 ---
+
+The mobile app requires specific Capacitor plugins and dependencies for native functionality.
 
 <details>
 <summary><h2>Dependencies</h2></summary>
@@ -299,6 +319,8 @@ Several components have mobile-specific behavior:
 </details>
 
 ---
+
+Version numbers are managed automatically by CircleCI to ensure consistency across platforms.
 
 <details>
 <summary><h2>Version Management</h2></summary>
@@ -389,6 +411,8 @@ This ensures the version shown in the app's Help page matches the actual build v
 </details>
 
 ---
+
+CircleCI builds require various environment variables for signing, store APIs, and service integrations.
 
 <details>
 <summary><h2>Environment Variables</h2></summary>
@@ -519,7 +543,7 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - ✅ Valid JSON structure
 - 📧 Service account email (for debugging)
 
-**Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
+**Verification**: Check recent CircleCI builds at https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production
 - Look for "✅ Google Play API key file validated" in decode step
 - Look for "📱 Current version from CircleCI: X.Y.Z" in deploy step
 - Look for "📱 Auto-incremented version name: X.Y.Z → X.Y.(Z+1)" in deploy step
@@ -532,12 +556,14 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 
 ---
 
+Production builds are fully automated via CircleCI. Local builds are useful for testing.
+
 <details>
 <summary><h2>Build Process</h2></summary>
 
 ### CircleCI Automated Builds (Both Platforms)
 
-**Triggered on**: Pushes to `app-ci-fd` branch
+**Triggered on**: Pushes to `production` branch (after tests pass on `master`)
 
 **Jobs Workflow**:
 
@@ -581,7 +607,7 @@ The `GOOGLE_PLAY_JSON_KEY` environment variable is **CRITICAL** for:
 - **Android**: `android-bundle/app-release.aab`, `android-apk/app-release.apk`
 - **iOS**: IPA file in artifacts
 
-**Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd
+**Download artifacts**: https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production
 
 ### Local Development
 
@@ -621,6 +647,156 @@ xcodebuild -workspace App.xcworkspace -scheme App -configuration Release
 
 ---
 
+A separate development app allows rapid iteration by loading code from your local dev server instead of bundled assets.
+
+<details>
+<summary><h2>Freegle Dev App (Live Reload)</h2></summary>
+
+### Overview
+
+The "Freegle Dev" app is a separate Android app that:
+- Has a different package ID (`org.ilovefreegle.dev`) so it can coexist with the production app
+- Connects to `freegle-app-dev.local` via mDNS (no IP address needed)
+- Supports hot module reloading (HMR) for instant code updates
+- Only needs rebuilding when Capacitor plugins change
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Phone                                                      │
+│  ┌───────────────────┐  ┌───────────────────┐              │
+│  │ Freegle           │  │ Freegle Dev       │              │
+│  │ (Production)      │  │ (Development)     │              │
+│  │                   │  │                   │              │
+│  │ Bundled assets    │  │ Connects via      │              │
+│  │ Works offline     │  │ mDNS hostname     │              │
+│  └───────────────────┘  └─────────┬─────────┘              │
+└───────────────────────────────────┼─────────────────────────┘
+                                    │ HTTP (WiFi) + WebSocket (HMR)
+                                    │ freegle-app-dev.local:3004
+                                    │ freegle-app-dev.local:24678
+                                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Developer Machine                                          │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ freegle-dev-live container                           │   │
+│  │ Port 3004: Nuxt app server                          │   │
+│  │ Port 24678: Vite HMR WebSocket                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  mDNS broadcast: freegle-app-dev.local                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Setup
+
+1. **Build the dev APK** (one-time or when Capacitor plugins change):
+   - Trigger the `build-dev-app` job in CircleCI
+   - Download `freegle-dev.apk` from artifacts
+   - Install on your Android device (enable "Install from unknown sources")
+
+2. **Start the dev-live container**:
+   - Go to `http://status.localhost`
+   - Click "Start" on the freegle-dev-live container (requires confirmation as it uses live APIs)
+
+3. **Connect phone to dev server** - choose ONE of these methods:
+
+   **Option A: ADB Reverse (Recommended - simpler)**
+
+   If you have ADB connected (USB or wireless ADB):
+   ```cmd
+   REM Run in Windows CMD/PowerShell
+   adb reverse tcp:3004 tcp:3004
+   adb reverse tcp:24678 tcp:24678
+   ```
+   This makes `localhost:3004` on the phone forward to your PC's port 3004.
+
+   For WSL users, also set up port forwarding (one-time, run as Admin):
+   ```powershell
+   netsh interface portproxy add v4tov4 listenport=3004 listenaddress=0.0.0.0 connectport=3004 connectaddress=127.0.0.1
+   netsh interface portproxy add v4tov4 listenport=24678 listenaddress=0.0.0.0 connectport=24678 connectaddress=127.0.0.1
+   ```
+
+   **Option B: mDNS (WiFi without ADB)**
+
+   If not using ADB, set up mDNS hostname broadcast (Windows with Bonjour):
+   ```cmd
+   dns-sd -P "Freegle App Dev" _http._tcp local 3004 freegle-app-dev.local YOUR_IP
+   ```
+   Replace `YOUR_IP` with your LAN IP (e.g., `192.168.1.50`). Keep this window open.
+
+   For WSL users, also add firewall rules (one-time, run as Admin):
+   ```powershell
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev App" -Direction Inbound -LocalPort 3004 -Protocol TCP -Action Allow
+   New-NetFirewallRule -DisplayName "WSL Freegle Dev HMR" -Direction Inbound -LocalPort 24678 -Protocol TCP -Action Allow
+   ```
+
+4. **Connect the app**:
+   - Open Freegle Dev on your phone
+   - App connects to `freegle-app-dev.local:3004` (works with both ADB reverse and mDNS)
+   - If connection fails, check your chosen setup method
+
+5. **Develop**:
+   - Make code changes → app hot reloads via HMR
+   - No rebuild needed for Vue/JS/CSS changes
+   - Only rebuild APK when Capacitor plugins change
+
+### App Comparison
+
+| Aspect | Freegle (Production) | Freegle Dev |
+|--------|---------------------|-------------|
+| **Package ID** | `org.ilovefreegle.direct` | `org.ilovefreegle.dev` |
+| **App Name** | Freegle | Freegle Dev |
+| **Icon** | Normal | Orange tint |
+| **Assets** | Bundled | From dev server |
+| **Connection** | N/A | mDNS auto-connect |
+| **APIs** | Production | Production (live data!) |
+| **Play Store** | Published | Never published |
+
+### Network Requirements
+
+**With ADB Reverse (recommended):**
+- ADB connected (USB or wireless)
+- For WSL: netsh port forwarding configured
+
+**With mDNS:**
+- Phone and dev machine on same WiFi network
+- mDNS broadcast running (`dns-sd` command)
+- Port 3004 (app) and 24678 (HMR) accessible
+- For WSL: port forwarding and firewall rules configured
+
+### Troubleshooting
+
+**ADB reverse not working:**
+- Check ADB is connected: `adb devices`
+- Re-run `adb reverse` commands after reconnecting
+- For WSL: ensure netsh port forwarding is set up
+
+**Cannot resolve freegle-app-dev.local (mDNS):**
+- Ensure Bonjour is installed and `dns-sd` command is running
+- Check phone is on same WiFi as dev machine
+- Some corporate networks block mDNS - try ADB reverse instead
+
+**App loads but HMR not working:**
+- Check port 24678 is forwarded: `adb reverse tcp:24678 tcp:24678`
+- Check firewall allows port 24678
+- Check container logs for HMR errors
+
+**Cannot connect to dev server:**
+- Ensure freegle-dev-live container is running
+- For ADB: verify with `adb reverse --list`
+- For mDNS: check broadcast is running
+
+**Changes not appearing:**
+- Nuxt dev server should auto-reload
+- Try refreshing the app or reconnecting
+
+</details>
+
+---
+
+Testing the mobile app requires checking native features that cannot be tested via browser automation.
+
 <details>
 <summary><h2>Testing</h2></summary>
 
@@ -656,6 +832,8 @@ showDonationAskModal.value = true
 
 ---
 
+Some features are excluded from the mobile build to reduce app size and complexity.
+
 <details>
 <summary><h2>Removed/Disabled for Mobile</h2></summary>
 
@@ -671,6 +849,8 @@ To reduce app size and complexity:
 </details>
 
 ---
+
+Common issues encountered during development and their solutions.
 
 <details>
 <summary><h2>Known Issues & Workarounds</h2></summary>
@@ -698,6 +878,8 @@ Some packages require specific versions for compatibility. Check `package.json` 
 
 ---
 
+Production releases are fully automated with scheduled promotions to app stores.
+
 <details>
 <summary><h2>Deployment</h2></summary>
 
@@ -721,11 +903,20 @@ Both iOS and Android are built and deployed in parallel with shared version numb
    - Both build and upload to beta/testing tracks
    - **Artifacts stored** for both platforms
 
-**Automated Daily Workflow**:
+**Deployment Workflow**:
 
-1. **11:00 PM UTC - Trigger**:
-   - Push to `app-ci-fd` branch triggers build
-   - OR GitHub Actions can auto-merge `master` → `app-ci-fd` (optional)
+1. **Development**:
+   - Code committed to `master` branch
+   - Tests run automatically (Playwright, PHPUnit, Go tests)
+
+2. **Production Merge**:
+   - When tests pass, `master` is auto-merged to `production` branch
+   - Only tested code reaches production
+
+3. **Deployment Triggers** (from `production` branch):
+   - **Web**: Netlify deploys web application
+   - **Mobile**: CircleCI builds and deploys iOS/Android apps
+   - Both platforms deploy from same tested code
 
 2. **Build and Deploy (11:00-11:30 PM UTC)**:
    - **Android**: Uploads to Google Play Beta (Open Testing)
@@ -778,7 +969,10 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 - **One submission per day is safe** - well within Apple's limits
 - TestFlight has no daily submission issues
 - App Store review typically takes 24 hours (90% of submissions)
-- Auto-submit only submits if not already in review/approved
+- Auto-submit checks for blocking versions before submission
+- Auto-submit will skip if another version is in review/approved
+- If submission fails, check App Store Connect for versions blocking submission
+- The auto_submit lane provides detailed error messages for troubleshooting
 
 **Artifacts**:
 - IPA file stored in CircleCI artifacts
@@ -786,22 +980,25 @@ Both iOS and Android are built and deployed in parallel with shared version numb
 ### Manual Triggers
 
 **Build Workflow:**
-- Push to `app-ci-fd` branch: triggers full build workflow
+- Push to `production` branch: triggers full build workflow
 - Rerun CircleCI workflow: rebuilds current commit
 
 **Manual Promotion/Submission (via CircleCI):**
 To manually trigger promotion/submission before the scheduled time:
 
-1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=app-ci-fd)
+1. Go to [CircleCI Pipelines](https://app.circleci.com/pipelines/github/Freegle/iznik-nuxt3?branch=production)
 2. Click "Trigger Pipeline" (top right)
-3. Select branch: `app-ci-fd`
-4. Click "Trigger Pipeline"
-5. In the triggered workflow list, find `manual-promote-submit`
-6. Click on the workflow
-7. Click **"Approve"** on the `hold-for-approval` job
+3. Select branch: `production`
+4. Click "Add Parameters" (expand the parameters section)
+5. Add parameter:
+   - Name: `run_manual_promote`
+   - Type: `boolean`
+   - Value: `true`
+6. Click "Trigger Pipeline"
+7. The `manual-promote-submit` workflow will start immediately
 8. Both `auto-promote-production` (Android) and `auto-submit-ios` will run in parallel
 
-This allows you to promote/submit releases early without waiting for the midnight scheduled run.
+This allows you to promote/submit releases early without waiting for the midnight scheduled run, and without consuming CircleCI concurrency slots while waiting for approval.
 
 **Alternative - Direct Fastlane:**
 - Android: `bundle exec fastlane android auto_promote`
@@ -811,7 +1008,7 @@ This allows you to promote/submit releases early without waiting for the midnigh
 ### Timeline
 
 ```
-Day 1, 11:00 PM: Build triggered (master merge or manual push)
+Day 1, 11:00 PM: Build triggered (production merge or manual push)
 Day 1, 11:30 PM: Builds complete
                  → Android uploaded to Beta (Open Testing)
                  → iOS uploaded to TestFlight
@@ -856,19 +1053,23 @@ bundle exec fastlane ios auto_submit
 
 ---
 
+Guidelines for keeping the mobile app codebase up to date.
+
 <details>
 <summary><h2>Maintenance</h2></summary>
 
-### Keeping Up with Master
+### Development Workflow
 
-The app-ci-fd branch should periodically merge from master to get new features:
+The production branch receives tested code automatically from master after tests pass. Manual merges are rarely needed, but if required:
 
 ```bash
-git checkout app-ci-fd
-git merge master
+git checkout production
+git merge master  # Only merge after tests pass on master
 # Resolve conflicts, test thoroughly
-git push origin app-ci-fd
+git push origin production
 ```
+
+**Note**: The mobile app now builds from the same `production` branch as the web app. There is no longer a separate `app-ci-fd` branch.
 
 ### Capacitor Updates
 
@@ -884,6 +1085,8 @@ When updating Capacitor major versions:
 
 ---
 
+Useful links for mobile app development.
+
 <details>
 <summary><h2>Resources</h2></summary>
 
@@ -896,6 +1099,8 @@ When updating Capacitor major versions:
 </details>
 
 ---
+
+Steps for debugging mobile app issues.
 
 <details>
 <summary><h2>Support</h2></summary>
@@ -912,7 +1117,7 @@ For mobile app specific issues:
 
 ---
 
-**Last Updated**: 2025-10-26
-**Current Version**: 3.2.x (app-ci-fd branch)
+**Last Updated**: 2025-11-29
+**Current Version**: 3.2.x (production branch)
 **Capacitor Version**: 7.x
 **CI/CD**: CircleCI with Fastlane (iOS and Android fully automated)

@@ -1,11 +1,11 @@
 <template>
   <span>
-    <span ref="xs" className="d-block d-sm-none" />
-    <span ref="sm" className="d-none d-sm-block d-md-none" />
-    <span ref="md" className="d-none d-md-block d-lg-none" />
-    <span ref="lg" className="d-none d-lg-block d-xl-none" />
-    <span ref="xl" className="d-none d-xl-block" />
-    <span ref="xxl" className="d-none d-xxl-block" />
+    <span ref="xs" class="d-block d-sm-none" />
+    <span ref="sm" class="d-none d-sm-block d-md-none" />
+    <span ref="md" class="d-none d-md-block d-lg-none" />
+    <span ref="lg" class="d-none d-lg-block d-xl-none" />
+    <span ref="xl" class="d-none d-xl-block d-xxl-none" />
+    <span ref="xxl" class="d-none d-xxl-block" />
   </span>
 </template>
 <script setup>

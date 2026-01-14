@@ -1,78 +1,41 @@
 <template>
   <div
-    v-if="location"
-    class="jobbox bg-light overflow-hidden forcewrap"
+    v-if="location && list.length"
+    class="jobs-slot"
     :style="{
       maxHeight: maxHeight,
       minHeight: minHeight,
       maxWidth: maxWidth,
       minWidth: minWidth,
-      overflowY: 'scroll',
-      overflowX: 'wrap',
     }"
   >
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
-      <h2 class="header--size3 d-none d-md-block">
-        Please help keep Freegle running
-      </h2>
-      <p class="d-none d-md-block">
-        We normally show job ads here. It looks like you may have an AdBlocker
-        or security software which is blocking those. We're not mad on ads
-        either, but please consider donating to help us keep going:
-      </p>
-      <p class="d-block d-md-none">
-        It looks like you're blocking job ads. Please consider donating:
-      </p>
+      <p>It looks like you're blocking job ads. Please consider donating:</p>
       <donation-button />
     </NoticeMessage>
-    <div v-else-if="list.length" style="font-size: 10px">
-      <h2 class="visually-hidden">Jobs</h2>
-      <b-button
-        v-if="minWidth === '100vw'"
-        to="/jobs"
-        variant="link"
-        class="seemore p-0"
-      >
-        See more jobs <v-icon icon="angle-double-right" />
-      </b-button>
-      <div
-        :class="{
-          'card-columns': minWidth === '100vw',
-        }"
-        :style="{
-          maxHeight: maxHeight,
-          minHeight: minHeight,
-          maxWidth: maxWidth,
-          minWidth: minWidth,
-        }"
-      >
-        <b-card
-          v-for="job in list"
-          :key="'job-' + job.job_reference"
-          no-body
-          class="mb-0"
-          :class="{
-            'w-100': minWidth !== '100vw',
-          }"
-        >
-          <b-card-body class="p-0">
-            <JobOne
-              :id="job.id"
-              :summary="true"
-              :show-body="false"
-              class-name="header--size5 mb-0"
-            />
-          </b-card-body>
-        </b-card>
+    <div v-else>
+      <div v-if="!hideHeader" class="jobs-slot-header">
+        <v-icon icon="briefcase" class="jobs-slot-icon" />
+        <span>Jobs near you</span>
+        <nuxt-link to="/jobs" class="jobs-slot-more">
+          See all <v-icon icon="chevron-right" />
+        </nuxt-link>
       </div>
-      <b-button
-        v-if="minWidth !== '100vw'"
-        to="/jobs"
-        variant="link"
-        class="seemore p-0"
+      <div
+        class="jobs-slot-list"
+        :class="{ 'jobs-slot-list--horizontal': !listOnly }"
       >
-        See more jobs <v-icon icon="angle-double-right" />
-      </b-button>
+        <JobOne
+          v-for="(job, index) in displayedJobs"
+          :id="job.id"
+          :key="'job-' + job.job_reference"
+          :summary="true"
+          bg-colour="dark green"
+          :position="index"
+          :list-length="displayedJobs.length"
+          context="daslot"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -84,7 +47,7 @@ const JobOne = defineAsyncComponent(() => import('./JobOne'))
 const NoticeMessage = defineAsyncComponent(() => import('./NoticeMessage'))
 const DonationButton = defineAsyncComponent(() => import('./DonationButton'))
 
-defineProps({
+const props = defineProps({
   minWidth: {
     type: String,
     required: false,
@@ -104,6 +67,14 @@ defineProps({
     type: String,
     required: false,
     default: null,
+  },
+  hideHeader: {
+    type: Boolean,
+    default: false,
+  },
+  listOnly: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -161,29 +132,81 @@ const list = computed(() => {
 
   return list
 })
+
+const displayedJobs = computed(() => {
+  return props.listOnly ? list.value.slice(0, 10) : list.value.slice(0, 20)
+})
 </script>
 <style scoped lang="scss">
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins/_breakpoints';
 
-:deep(a) {
-  text-decoration: none;
+.jobs-slot {
+  width: 100%;
+  background: $white;
+  border: 1px solid $gray-200;
+  overflow-y: auto;
 }
 
-:deep(.seemore) {
-  font-size: 0.6rem !important;
+.jobs-slot-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: $gray-100;
+  color: $gray-700;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-bottom: 1px solid $gray-200;
+}
 
-  @include media-breakpoint-up(md) {
-    font-size: 0.8rem !important;
+.jobs-slot-icon {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.jobs-slot-more {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  color: $gray-600;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-decoration: none;
+
+  &:hover {
+    color: $gray-800;
+    text-decoration: none;
   }
 }
 
-:deep(.header--size5) {
-  font-size: 0.8rem;
+.jobs-slot-list {
+  :deep(.job-item) {
+    margin-bottom: 0;
+  }
 
-  @include media-breakpoint-up(md) {
-    font-size: 1.25rem;
+  &--horizontal {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+
+    @media (min-width: 480px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    :deep(.job-summary) {
+      border-bottom: 1px solid $gray-200;
+      border-right: 1px solid $gray-200;
+    }
   }
 }
 </style>

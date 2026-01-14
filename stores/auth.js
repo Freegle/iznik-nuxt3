@@ -1,8 +1,9 @@
-// DO NOT COPY INTO MASTER
 import { defineStore } from 'pinia'
-import { LoginError, SignUpError } from '~/api/APIErrors'
+import { SocialLogin } from '@capgo/capacitor-social-login'
+import { LoginError, SignUpError } from '~/api/BaseAPI'
 import { useComposeStore } from '~/stores/compose'
 import api from '~/api'
+import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 
 export const useAuthStore = defineStore({
@@ -30,8 +31,6 @@ export const useAuthStore = defineStore({
     userlist: [],
     loginType: null,
     loginCount: 0,
-    work: {}, // MT
-    discourse: {}, // MT
   }),
   actions: {
     init(config) {
@@ -132,10 +131,47 @@ export const useAuthStore = defineStore({
       }
     },
     async logout() {
+      const mobileStore = useMobileStore()
+
       await this.$api.session.logout()
 
-      this.disableGoogleAutoselect()
+      if (!mobileStore.isApp) {
+        this.disableGoogleAutoselect()
+      }
 
+      if (mobileStore.isApp) {
+        try {
+          console.log('Try Facebook logout')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            facebook: {
+              appId: runtimeConfig.public.FACEBOOK_APPID,
+              clientToken: runtimeConfig.public.FACEBOOK_CLIENTID,
+            },
+          })
+          await SocialLogin.logout({ provider: 'facebook' })
+          console.log('Facebook logout OK')
+        } catch (e) {
+          console.log('Ignore Facebook logout error', e)
+        }
+
+        try {
+          console.log('Try Google logout')
+          const runtimeConfig = useRuntimeConfig()
+          await SocialLogin.initialize({
+            google: {
+              webClientId: runtimeConfig.public.GOOGLE_CLIENT_ID, // the web client id for Android and Web
+              iOSClientId: runtimeConfig.public.GOOGLE_IOS_CLIENT_ID, // for iOS
+            },
+          })
+          await SocialLogin.logout({ provider: 'google' })
+          console.log('Google logout OK')
+        } catch (e) {
+          console.log('Ignore Google logout error', e)
+        }
+
+        this.logoutPushId()
+      }
       // We are going to reset the store, but there are a few things we want to preserve.
       const loginCount = this.loginCount
       const config = this.config
@@ -276,17 +312,12 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser(components) {
-      // MT components added (not force)
+    async fetchUser() {
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
-      if (typeof components === 'boolean') components = [] // MT as force boolean incorrectly used
-      if (!components) components = [] // MT
-      components = ['me', ...components] // MT
 
-      const miscStore = useMiscStore() // Do not use fetchv2 as groups.configid not returned
-      if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
+      if (this.auth.jwt || this.auth.persistent) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2(
@@ -310,7 +341,7 @@ export const useAuthStore = defineStore({
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
-                components,
+                components: ['me'],
               })
               .then((ret) => {
                 let persistent = null
@@ -319,14 +350,9 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
-                    if (me.permissions && this.user) {
-                      this.user.permissions = me.permissions
-                    }
                     if (!this.auth.jwt) {
                       this.setAuth(jwt, persistent)
                     }
-                    this.work = ret.work // MT
-                    this.discourse = ret.discourse // MT
                   } else {
                     // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
                     // which will then force a login when required and sort this out.
@@ -345,27 +371,20 @@ export const useAuthStore = defineStore({
         }
       }
 
-      // Start again if not logged in. ModTools always does this.
       if (!me) {
-        // Try the older API which will authenticate via the persistent token and PHP session. Used by MT for now
+        // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components,
+          components: ['me'],
         })
 
         let persistent = null
         let jwt = null
 
         if (ret) {
-          ;({ me, groups, persistent, jwt } = ret)
-          let permissions = null
-          const v1groups = ret.groups
-
-          this.work = ret.work // MT
-          this.discourse = ret.discourse // MT
+          ;({ me, persistent, jwt } = ret)
 
           if (me) {
-            permissions = me.permissions
             this.setAuth(jwt, persistent)
           }
 
@@ -380,17 +399,7 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
-              me.permissions = permissions
               groups = me.memberships
-              if (v1groups && groups) {
-                // Set each group configid
-                for (const g of groups) {
-                  const group = v1groups.find((v1g) => v1g.id === g.groupid)
-                  if (group) {
-                    g.configid = group.configid
-                  }
-                }
-              }
               delete me.memberships
             }
           }
@@ -408,6 +417,8 @@ export const useAuthStore = defineStore({
         // Set the user, which will trigger various re-rendering if we were required to be logged in.
         this.setUser(me)
 
+        await this.savePushId() // Tell server our mobile push notification id, if available
+
         const composeStore = useComposeStore()
         const email = composeStore.email
 
@@ -423,12 +434,12 @@ export const useAuthStore = defineStore({
 
           if (miscStore.marketingConsent !== undefined) {
             const localConsent = !!miscStore.marketingConsent
-            // console.log(
-            //  'Local marketing consent',
-            //  localConsent,
-            //  'User marketing consent',
-            //  me.marketingconsent
-            // )
+            console.log(
+              'Local marketing consent',
+              localConsent,
+              'User marketing consent',
+              me.marketingconsent
+            )
 
             if (me.marketingconsent !== localConsent) {
               try {
@@ -437,15 +448,15 @@ export const useAuthStore = defineStore({
                 })
 
                 me.marketingconsent = localConsent
-                // console.log("Sync'd marketing consent")
+                console.log("Sync'd marketing consent")
               } catch (e) {
-                // console.log('Failed to sync marketing consent', e)
+                console.log('Failed to sync marketing consent', e)
               }
             } else {
-              // console.log("Marketing consent already sync'd")
+              console.log("Marketing consent already sync'd")
             }
           } else {
-            // console.log('No local marketing consent to sync')
+            console.log('No local marketing consent to sync')
           }
         }
       } else {
@@ -507,9 +518,6 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0
     },
-    async unbounceMT(id) {
-      await this.$api.user.unbounce(id)
-    },
     async saveAndGet(params) {
       console.log('Save and get', params)
       await this.$api.session.save(params, function (data) {
@@ -553,27 +561,57 @@ export const useAuthStore = defineStore({
       await this.fetchUser()
       return this.user
     },
+    async savePushId() {
+      const mobileStore = useMobileStore()
+      if (mobileStore.mobilePushId === null)
+        console.log('******************* mobileStore.mobilePushId===null')
+      // Tell server our push notification id if logged in
+      if (
+        this.user !== null &&
+        typeof mobileStore.mobilePushId === 'string' &&
+        mobileStore.mobilePushId.length > 0
+      ) {
+        if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
+          const params = {
+            notifications: {
+              push: {
+                type: mobileStore.isiOS ? 'FCMIOS' : 'FCMAndroid',
+                subscription: mobileStore.mobilePushId,
+                deviceuserinfo: mobileStore.deviceuserinfo,
+              },
+            },
+          }
+          const data = await this.$api.session.save(params)
+          if (data.ret === 0) {
+            mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
+            console.log('savePushId: saved OK')
+          } else {
+            // 1 === Not logged in
+            console.log(
+              'savePushId: Not logged in: OK will try again when signed in'
+            )
+          }
+        }
+      }
+    },
+    // Remember that we've logged out
+    // It could tell the server to invalidate pushid
+    // However we simply zap acceptedMobilePushId so it is sent when logged in
+    logoutPushId() {
+      // TODO
+      const mobileStore = useMobileStore()
+      mobileStore.acceptedMobilePushId = false
+      console.log('logoutPushId')
+    },
     async makeEmailPrimary(email) {
       await api(this.config).user.addEmail(this.user?.id, email, true)
       return await this.fetchUser()
-    },
-    async yahooCodeLogin(code) {
-      return await this.$api.session.yahooCodeLogin(code)
     },
     async removeEmail(email) {
       if (this.user) {
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
-    },
-    async merge(params) {
-      await api(this.config).user.merge(
-        params.email1,
-        params.email2,
-        params.id1,
-        params.id2,
-        params.reason
-      )
     },
   },
   getters: {

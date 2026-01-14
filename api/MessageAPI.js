@@ -54,12 +54,25 @@ export default class MessageAPI extends BaseAPI {
     return this.$patch('/message', event)
   }
 
-  joinAndPost(id, email, logError = true) {
-    return this.$post(
-      '/message',
-      { id, email, action: 'JoinAndPost' },
-      logError
-    )
+  joinAndPost(id, email, options = {}, logError = true) {
+    const params = { id, email, action: 'JoinAndPost' }
+
+    // Add optional deadline and deliverypossible params from options
+    if (options.deadline) {
+      params.deadline = options.deadline
+    }
+    if (options.deliverypossible !== undefined) {
+      params.deliverypossible = options.deliverypossible
+    }
+    if (options.ai_declined) {
+      params.ai_declined = true
+    }
+
+    // If options.logError is provided, use it; otherwise use the logError param
+    const logErrorFn =
+      options.logError !== undefined ? options.logError : logError
+
+    return this.$post('/message', params, logErrorFn)
   }
 
   del(id) {
@@ -83,6 +96,37 @@ export default class MessageAPI extends BaseAPI {
       action: 'View',
       id,
     })
+  }
+
+  async getIllustration(item) {
+    // Try Go API first (fast, cache-only), fall back to PHP API (can generate)
+    try {
+      const result = await this.$getv2(
+        '/illustration',
+        { item },
+        false // Don't log errors - ret=3 is expected for cache miss
+      )
+
+      if (result.ret === 0 && result.illustration) {
+        return result.illustration
+      }
+    } catch (e) {
+      // Go API returned error or cache miss - fall back to PHP
+    }
+
+    // Fall back to PHP API which can generate new illustrations
+    try {
+      const result = await this.$get('/illustration', { item }, false)
+
+      if (result.ret === 0 && result.illustration) {
+        return result.illustration
+      }
+    } catch (e) {
+      // PHP API also failed
+      console.log('Illustration fetch failed:', e.message)
+    }
+
+    return null
   }
 
   approve(id, groupid, subject = null, stdmsgid = null, body = null) {

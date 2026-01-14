@@ -8,7 +8,7 @@
           rootMargin: '0px 0px ' + distance + 'px 0px',
         },
       }"
-      class="infinite-loader pb-4"
+      class="infinite-loader"
     >
       <slot v-if="state == 'loading'" name="spinner"></slot>
       <slot v-if="state == 'complete'" name="complete"></slot>

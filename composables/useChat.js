@@ -1,6 +1,5 @@
 import pluralize from 'pluralize'
 import { milesAway } from '~/composables/useDistance'
-import { useMiscStore } from '~/stores/misc' // MT..
 import { computed } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
@@ -8,7 +7,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
-import { MT_EMAIL_REGEX } from '~/constants' // MT
 
 export function chatCollate(msgs) {
   const ret = []
@@ -58,22 +56,7 @@ function useChatShared(chatId) {
   })
 
   const otheruser = computed(() => {
-    // return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null // MT commented out
-    // MT.. Cope with MT chats
-    let otheruid = chat?.value?.otheruid
-    let user = null
-
-    if (!otheruid) {
-      otheruid = chat.value.user1id || chat.value.user1?.id
-    }
-    if (otheruid) {
-      user = userStore.byId(otheruid)
-    }
-    if (!user && chat?.value?.user1) {
-      user = chat?.value?.user1
-    }
-
-    return user
+    return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null
   })
 
   return {
@@ -108,19 +91,6 @@ export function setupChat(selectedChatId, chatMessageId) {
     return last
   })
 
-  /* // MT const milesaway = computed(() => {
-    if (authStore.user?.lat && otheruser?.value?.lat) {
-      return milesAway(
-        authStore.user?.lat,
-        authStore.user?.lng,
-        otheruser?.value?.lat,
-        otheruser?.value?.lng
-      )
-    }
-    if (otheruser?.value?.info?.milesaway)
-      return otheruser?.value?.info?.milesaway
-    return null
-  }) */
   const milesaway = computed(() =>
     milesAway(
       authStore.user?.lat,
@@ -170,7 +140,6 @@ export async function fetchReferencedMessage(chatid, id) {
   const chatStore = useChatStore()
   const chatmessage = chatStore.messageById(id)
 
-  // MT chatmessage.refmsg may already be set and chatmessage.refmsgid not set
   if (chatmessage?.refmsgid) {
     const messageStore = useMessageStore()
 
@@ -183,17 +152,15 @@ export async function fetchReferencedMessage(chatid, id) {
 }
 
 export function useChatMessageBase(chatId, messageId, pov = null) {
-  const { chatStore, authStore, chat, otheruser } = useChatShared(chatId) // Do not inherit myid
+  const { chatStore, authStore, myid, chat, otheruser } = useChatShared(chatId)
   const messageStore = useMessageStore()
-  const miscStore = useMiscStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
 
   const emessage = computed(() => {
-    let m = chatmessage.value?.message
+    const m = chatmessage.value?.message
 
     if (m) {
-      m = m.toString()
       const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
 
       try {
@@ -205,39 +172,24 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
       return ret
     } else {
-      return ''
+      return null
     }
   })
 
   const messageIsFromCurrentUser = computed(() => {
-    // console.log('messageIsFromCurrentUser',chat.value?.chattype, pov,chat.value.user1id,chatmessage.value?.userid,myid.value)
-    if (miscStore.modtools) {
-      // MT..
-      if (chat.value?.chattype === 'User2User') {
-        if (pov === chat.value.user1id) {
-          return chat.value.user1id === chatmessage.value?.userid
-        } else {
-          return chat.value.user1id !== chatmessage.value?.userid
-        }
-      }
-      // else 'User2Mod'
-      return chat.value.user1id !== chatmessage.value?.userid
-    }
     if (chat.value?.chattype === 'User2Mod') {
       // For User2Mod chats we want it on the right hand side we sent it.
-      return chatmessage.value?.userid === myid.value
+      return chatmessage.value?.userid === myid
     } else {
-      return chatmessage.value?.userid === myid.value
+      return chatmessage.value?.userid === myid
     }
   })
 
   const refmsgid = computed(() => {
-    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg.id // MT
     return chatmessage.value?.refmsgid
   })
 
   const refmsg = computed(() => {
-    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg // MT
     return refmsgid.value ? messageStore?.byId(refmsgid.value) : null
   })
 
@@ -258,29 +210,20 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     }
   })
 
-  const myid = computed(() => {
-    return me.value?.id
-  })
-
   const chatMessageProfileImage = computed(() => {
-    if (miscStore.modtools) {
-      // MT..
-      return chat.value.user1id !== chatmessage.value?.userid
-        ? me.value?.profile?.paththumb
-        : chat.value?.icon
-    }
-    return chatmessage.value?.userid === myid.value
+    return chatmessage.value?.userid === myid
       ? me.value?.profile?.paththumb
       : chat.value?.icon
   })
 
-  const regexEmail = computed(() => {
-    return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
+  const chatMessageProfileName = computed(() => {
+    return chatmessage.value?.userid === myid
+      ? me.value?.displayname
+      : otheruser.value?.displayname
   })
 
-  const regexEmailMT = computed(() => {
-    // MT
-    return MT_EMAIL_REGEX.toString()
+  const regexEmail = computed(() => {
+    return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
   })
 
   function brokenImage(event) {
@@ -322,8 +265,8 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     emessage,
     messageIsFromCurrentUser,
     chatMessageProfileImage,
+    chatMessageProfileName,
     regexEmail,
-    regexEmailMT, // MT
     refmsgid,
     refmsg,
     me,

@@ -1,39 +1,34 @@
 <template>
-  <div v-if="location" class="mb-2 jobbox bg-light overflow-hidden forcewrap">
+  <div v-if="location && list.length" class="jobs-topbar">
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
-      <h2 class="header--size3 d-none d-md-block">
-        Please help keep Freegle running
-      </h2>
-      <p class="d-none d-md-block">
-        We normally show job ads here. It looks like you may have an AdBlocker
-        or security software which is blocking those. We're not mad on ads
-        either, but please consider donating to help us keep going:
-      </p>
-      <p class="d-block d-md-none">
-        It looks like you're blocking job ads. Please consider donating:
-      </p>
+      <p>It looks like you're blocking job ads. Please consider donating:</p>
       <donation-button />
     </NoticeMessage>
-    <div v-else-if="list.length">
-      <h2 class="visually-hidden">Jobs</h2>
-      <div class="mb-1 text-center small text-muted">
-        Jobs near you. Freegle gets a
-        <span class="d-none d-md-inline"
-          >small amount if you are interested and click</span
-        ><span class="d-inline d-md-none">little if you click</span
-        ><span class="d-none d-md-inline">, which helps keep us going</span>.
-        <!-- eslint-disable-next-line -->
-        <nuxt-link no-prefetch to="/jobs">See more<span class="d-none d-md-inline"> jobs</span></nuxt-link>.
+    <div v-else>
+      <div class="jobs-header">
+        <div class="jobs-header-title">
+          <v-icon icon="briefcase" class="jobs-header-icon" />
+          <span>Jobs near you</span>
+        </div>
+        <nuxt-link no-prefetch to="/jobs" class="jobs-see-more">
+          See all <v-icon icon="chevron-right" />
+        </nuxt-link>
       </div>
-      <ul class="list-unstyled">
-        <li v-for="(job, index) in list" :key="'job-' + job.job_reference">
-          <JobOne
-            :id="job.id"
-            :summary="true"
-            :class="index > 1 ? 'd-none d-md-block' : ''"
-          />
-        </li>
-      </ul>
+      <div class="jobs-list">
+        <JobOne
+          v-for="(job, index) in list"
+          :id="job.id"
+          :key="'job-' + job.job_reference"
+          :summary="true"
+          :class="{ 'd-none d-md-block': index > 1 }"
+          :position="index"
+          :list-length="list.length"
+          context="topbar"
+        />
+      </div>
+      <p class="jobs-info">
+        Freegle gets a small amount if you click, helping keep us running.
+      </p>
     </div>
   </div>
 </template>
@@ -71,7 +66,71 @@ const list = computed(() => {
 })
 </script>
 <style scoped lang="scss">
-:deep(a) {
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.jobs-topbar {
+  background: $white;
+  border: 1px solid $gray-200;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.jobs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  color: $white;
+}
+
+.jobs-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.jobs-header-icon {
+  font-size: 1rem;
+}
+
+.jobs-see-more {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: $white;
+  font-size: 0.85rem;
   text-decoration: none;
+  opacity: 0.9;
+
+  &:hover {
+    opacity: 1;
+    text-decoration: none;
+    color: $white;
+  }
+}
+
+.jobs-list {
+  :deep(.job-item) {
+    margin-bottom: 0;
+  }
+
+  :deep(.job-summary) {
+    padding: 0.6rem 0.75rem;
+  }
+}
+
+.jobs-info {
+  font-size: 0.75rem;
+  color: $gray-500;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  background: $gray-100;
+  border-top: 1px solid $gray-200;
 }
 </style>

@@ -21,12 +21,6 @@ status = 404
 force = true
 
 [[redirects]]
-from = "/robots.txt"
-to = "/"
-status = 404
-force = true
-
-[[redirects]]
 from = "/gimg*"
 to = "/"
 status = 404

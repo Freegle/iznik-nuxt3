@@ -100,7 +100,7 @@ const props = defineProps({
 // eslint-disable-next-line no-unused-vars
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
-if (props.src.includes('gimg_0.jpg')) {
+if (process.client && props.src.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)
 }
 

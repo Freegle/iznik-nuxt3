@@ -51,7 +51,7 @@
       <div
         v-for="group in message.groups"
         :key="'message-' + message.id + '-' + group.id"
-        class="d-flex flex-wrap"
+        class="d-flex flex-wrap align-items-center"
       >
         <nuxt-link
           v-if="group.groupid in groups"
@@ -60,7 +60,7 @@
             '/explore/' + groups[group.groupid].exploreLink + '?noguard=true'
           "
           :title="'Click to view ' + groups[group.groupid].namedisplay"
-          class="font-weight-bold text-success nodecor mr-1"
+          class="small font-weight-bold text-success nodecor mr-1"
         >
           {{ groups[group.groupid].namedisplay }}
         </nuxt-link>
@@ -163,7 +163,23 @@ const groups = computed(() => {
 })
 
 // Methods
-function showProfileModal() {
+function showProfileModal(e) {
+  // If either modifier key is held when clicking, open the profile accordingly
+  if (e.shiftKey || e.ctrlKey) {
+    e.preventDefault()
+    e.stopPropagation()
+    // Handle the ctrl key (new tab)
+    if (e.ctrlKey) {
+      window.open('/profile/' + currentMessage.fromuser, '_BLANK')
+      return
+    }
+    // Handle the shift key (new window)
+    if (e.shiftKey) {
+      window.open('/profile/' + currentMessage.fromuser, '_NEW')
+      return
+    }
+  }
+
   showProfile.value = true
 }
 

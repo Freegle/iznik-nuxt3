@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showAd">
+  <div v-if="showAd" ref="adContainer" @mouseenter="handleMouseEnter">
     <div
       :id="divId"
       ref="daDiv"
@@ -11,10 +11,25 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, nextTick, onBeforeRouteLeave } from '#imports'
-import Api from '~/api'
+import {
+  ref,
+  computed,
+  nextTick,
+  onBeforeRouteLeave,
+  onMounted,
+  onBeforeUnmount,
+} from '#imports'
+import { action } from '~/composables/useClientLog'
 
 const emit = defineEmits(['rendered'])
+
+// Tracking state - log each event only once per ad instance.
+const hasBeenVisible = ref(false)
+const hasBeenHovered = ref(false)
+const hasDetectedClick = ref(false)
+const adContainer = ref(null)
+let visibilityObserver = null
+let hadFocusBefore = false
 
 const props = defineProps({
   adUnitPath: {
@@ -58,6 +73,8 @@ const props = defineProps({
 const daDiv = ref(null)
 let addAdTimer = null
 let queueAdTimer = null
+let queueRetryCount = 0
+const MAX_QUEUE_RETRIES = 100 // 5 seconds at 50ms intervals
 
 const showAd = ref(false)
 
@@ -65,28 +82,17 @@ const showAd = ref(false)
 
 const theType = ref(null)
 
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
-
-api.bandit.shown({
-  uid: 'playwire',
-  variant: 'loaded',
-})
+action('Playwire loaded', { adUnitPath: props.adUnitPath })
 
 watch(
   () => props.renderAd,
   (newVal) => {
     if (newVal) {
       console.log('Render ad', props.adUnitPath)
-      api.bandit.shown({
-        uid: 'playwire',
-        variant: 'askedToRender',
-      })
+      action('Playwire render requested', { adUnitPath: props.adUnitPath })
 
       showAd.value = true
-
-      // Playwire ads will always show something - we have house ads as a fallback.
-      emit('rendered', true)
+      queueRetryCount = 0
 
       // Let the div get created and then ensure we've loaded the Playwire code.
       nextTick(() => {
@@ -157,9 +163,9 @@ watch(
               })
             }
 
-            api.bandit.shown({
-              uid: 'playwire',
-              variant: 'added',
+            action('Playwire added', {
+              adUnitPath: props.adUnitPath,
+              type: theType.value,
             })
           } catch (e) {
             console.log('Failed to inject ad', e)
@@ -168,10 +174,18 @@ watch(
 
         function doQueueAd() {
           queueAdTimer = null
+          queueRetryCount++
 
           if (window.playwireScriptLoaded) {
             window.ramp.que.push(addAd)
             console.log('Queued ad count', window.ramp.que.length)
+            // Playwire ads will always show something - we have house ads as a fallback.
+            emit('rendered', true)
+          } else if (queueRetryCount >= MAX_QUEUE_RETRIES) {
+            console.log(
+              'Playwire script failed to load after max retries - giving up'
+            )
+            emit('rendered', false)
           } else {
             console.log('Playwire script not loaded yet, retrying in 50ms')
             queueAdTimer = setTimeout(doQueueAd, 50)
@@ -237,8 +251,97 @@ async function leaving() {
   }
 }
 
-onBeforeUnmount(leaving)
+onBeforeUnmount(() => {
+  leaving()
+  cleanupTracking()
+})
 
 // onBeforeUnmount doesn't always seem to get called.
 onBeforeRouteLeave(leaving)
+
+// Set up visibility tracking and iframe click detection.
+onMounted(() => {
+  try {
+    // Intersection Observer for visibility tracking.
+    if (adContainer.value && 'IntersectionObserver' in window) {
+      visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          try {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && !hasBeenVisible.value) {
+                hasBeenVisible.value = true
+                action('playwire_ad_visible', {
+                  adUnitPath: props.adUnitPath,
+                  type: theType.value,
+                })
+              }
+            })
+          } catch (e) {
+            console.log('Error in Playwire visibility observer callback', e)
+          }
+        },
+        { threshold: 0.5 }
+      )
+      visibilityObserver.observe(adContainer.value)
+    }
+
+    // Iframe click detection via blur technique.
+    // Caveats: May not work in Safari, only detects first click,
+    // may miss clicks that open new tabs in Firefox.
+    window.addEventListener('blur', handlePossibleAdClick)
+    hadFocusBefore = document.hasFocus?.() ?? false
+  } catch (e) {
+    console.log('Error setting up Playwire tracking', e)
+  }
+})
+
+function cleanupTracking() {
+  if (visibilityObserver) {
+    visibilityObserver.disconnect()
+    visibilityObserver = null
+  }
+  window.removeEventListener('blur', handlePossibleAdClick)
+}
+
+function handleMouseEnter() {
+  if (!hasBeenHovered.value) {
+    hasBeenHovered.value = true
+    action('playwire_ad_hover', {
+      adUnitPath: props.adUnitPath,
+      type: theType.value,
+    })
+  }
+}
+
+function handlePossibleAdClick() {
+  // Skip if we didn't have focus before (e.g. tab switch).
+  if (!hadFocusBefore) {
+    return
+  }
+
+  // Use setTimeout to let browser update activeElement.
+  setTimeout(() => {
+    const active = document.activeElement
+
+    // Check if an iframe inside our container got focus.
+    if (
+      active?.tagName === 'IFRAME' &&
+      adContainer.value?.contains(active) &&
+      !hasDetectedClick.value
+    ) {
+      hasDetectedClick.value = true
+      action('playwire_ad_click', {
+        adUnitPath: props.adUnitPath,
+        type: theType.value,
+        detection_method: 'blur',
+      })
+
+      // Re-enable detection by refocusing window (mitigates "only fires once" issue).
+      window.focus()
+    }
+
+    // Update focus state for next time.
+    hadFocusBefore = document.hasFocus()
+  }, 0)
+}
 </script>

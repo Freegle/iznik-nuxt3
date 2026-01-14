@@ -9,8 +9,8 @@
         </b-col>
       </b-row>
       <b-row v-else class="m-0">
-        <b-col cols="0" md="3" class="d-none d-md-block" />
-        <b-col cols="12" md="6" class="p-0">
+        <b-col cols="0" lg="3" class="d-none d-lg-block" />
+        <b-col cols="12" lg="6" class="p-0">
           <div class="bg-white p-4">
             <p>
               We love to hear why you freegle and what your experiences have
@@ -26,7 +26,7 @@
             View more stories
           </b-button>
         </b-col>
-        <b-col cols="0" md="3" class="d-none d-md-block" />
+        <b-col cols="0" lg="3" class="d-none d-lg-block" />
       </b-row>
       <StoryAddModal
         v-if="showStoryAddModal"

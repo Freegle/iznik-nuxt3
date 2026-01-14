@@ -1,124 +1,91 @@
 <template>
   <client-only v-if="me">
-    <b-container fluid class="p-0 p-xl-2">
-      <b-row class="m-0">
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pr-1" />
-        <b-col cols="12" lg="6" class="bg-white">
-          <h1>Gift Aid for Freegle</h1>
-          <p>
-            Your kind donation will go even further if we can claim Gift Aid on
-            it. Please fill out this form if you are able.
+    <div class="giftaid-page">
+      <div class="giftaid-page__content">
+        <p class="giftaid-intro">
+          Your kind donation will go even further if we can claim Gift Aid on
+          it. Please fill out this form if you are able.
+        </p>
+        <div class="giftaid-toggle-section">
+          <p v-if="oldoptions" class="giftaid-toggle-section__label">
+            I'd like Freegle to claim Gift Aid:
           </p>
-          <div v-if="oldoptions">
-            <label class="strong"> I'd like Freegle to claim Gift Aid: </label>
-            <br />
-            <OurToggle
-              v-model="giftAidAllowed"
-              :height="34"
-              :width="150"
-              :font-size="14"
-              :sync="true"
-              :labels="{ checked: 'Yes', unchecked: 'No' }"
-              color="#61AE24"
-              class="mt-3"
-              @change="changeGiftAidToggle"
-            />
-            <br />
-          </div>
-          <div v-else>
-            <label class="strong">
-              I'd like Freegle to claim Gift Aid on my donation, and any
-              donations I make in the future or have made in the past four
-              years:
+          <p v-else class="giftaid-toggle-section__label">
+            I'd like Freegle to claim Gift Aid on my donation, and any donations
+            I make in the future or have made in the past four years:
+          </p>
+          <OurToggle
+            v-model="giftAidAllowed"
+            :height="34"
+            :width="150"
+            :font-size="14"
+            :sync="true"
+            :labels="{ checked: 'Yes', unchecked: 'No' }"
+            color="#61AE24"
+            @change="changeGiftAidToggle"
+          />
+        </div>
+        <div v-if="giftAidAllowed" class="giftaid-form">
+          <div class="giftaid-form__section">
+            <label class="giftaid-form__label" for="fullname">
+              Your full (real) name
             </label>
-            <br />
-            <OurToggle
-              v-model="giftAidAllowed"
-              :height="34"
-              :width="150"
-              :font-size="14"
-              :sync="true"
-              :labels="{ checked: 'Yes', unchecked: 'No' }"
-              color="#61AE24"
-              class="mt-3"
-              @change="changeGiftAidToggle"
+            <b-button
+              v-if="
+                me &&
+                me.displayname &&
+                !fullname &&
+                me.displayname.indexOf(' ') !== -1
+              "
+              variant="secondary"
+              size="sm"
+              class="giftaid-form__autofill"
+              @click="fullname = me.displayname"
+            >
+              Use <strong>{{ me.displayname }}</strong>
+            </b-button>
+            <b-form-input
+              id="fullname"
+              v-model="fullname"
+              name="fullname"
+              autocomplete="given-name"
+              placeholder="Your full name"
+              :state="triedToSubmit ? !nameInvalid : null"
             />
-            <br />
           </div>
-          <div v-if="giftAidAllowed">
-            <b-form-group
-              id="fullnamelabel"
-              label="Your full (real) name"
-              label-for="fullname"
-              label-class="label"
-            >
-              <div
-                v-if="
-                  me &&
-                  me.displayname &&
-                  !fullname &&
-                  me.displayname.indexOf(' ') !== -1
-                "
+          <div class="giftaid-form__section">
+            <label class="giftaid-form__label" for="homeaddress">
+              Your home postal address
+            </label>
+            <div v-for="address in addresses" :key="'address-' + address.id">
+              <b-button
+                v-if="!homeaddress"
+                variant="secondary"
+                size="sm"
+                class="giftaid-form__autofill"
+                @click="homeaddress = address.multiline"
               >
-                <b-button
-                  variant="secondary"
-                  class="mb-2"
-                  @click="fullname = me.displayname"
-                >
-                  Click here to use <strong>{{ me.displayname }}</strong>
-                </b-button>
-              </div>
-              <b-form-input
-                id="fullname"
-                v-model="fullname"
-                name="fullname"
-                autocomplete="given-name"
-                placeholder="Your full name"
-                class="mb-3"
-                :state="triedToSubmit ? !nameInvalid : null"
-              />
-            </b-form-group>
-            <b-form-group
-              id="homeaddresslabel"
-              label="Your home postal address"
-              label-for="homeaddress"
-              label-class="label"
-            >
-              <div v-for="address in addresses" :key="'address-' + address.id">
-                <div v-if="!homeaddress">
-                  <b-button
-                    variant="secondary"
-                    class="mb-2"
-                    @click="homeaddress = address.multiline"
-                  >
-                    Click here to use
-                    <span class="font-weight-bold">{{
-                      address.singleline
-                    }}</span>
-                  </b-button>
-                </div>
-              </div>
-              <p><strong>Please make sure you include a postcode.</strong></p>
-              <p v-if="emailByMistake" class="text-danger">
-                This should be a postal address, not an email address.
-              </p>
-              <b-form-textarea
-                id="homeaddress"
-                v-model="homeaddress"
-                rows="4"
-                name="homeaddress"
-                placeholder="Your home address"
-                class="mb-3"
-                :state="triedToSubmit ? !addressInvalid : null"
-              />
-            </b-form-group>
-            <b-form-group
-              v-if="oldoptions"
-              id="periodlabel"
-              label="This declaration covers"
-              label-for="period"
-              label-class="label"
-            >
+                Use <strong>{{ address.singleline }}</strong>
+              </b-button>
+            </div>
+            <p class="giftaid-form__hint">
+              Please make sure you include a postcode.
+            </p>
+            <p v-if="emailByMistake" class="text-danger">
+              This should be a postal address, not an email address.
+            </p>
+            <b-form-textarea
+              id="homeaddress"
+              v-model="homeaddress"
+              rows="4"
+              name="homeaddress"
+              placeholder="Your home address"
+              :state="triedToSubmit ? !addressInvalid : null"
+            />
+          </div>
+          <div v-if="oldoptions" class="giftaid-form__section">
+            <label class="giftaid-form__label">This declaration covers</label>
+            <div class="giftaid-form__radios">
               <b-form-radio
                 v-model="period"
                 name="period"
@@ -136,65 +103,59 @@
               <b-form-radio v-model="period" name="period" value="Future">
                 This and all future donations
               </b-form-radio>
-            </b-form-group>
-            <b-form-checkbox v-model="marketingconsent" size="lg" class="mt-2">
+            </div>
+          </div>
+          <div class="giftaid-form__checkbox">
+            <b-form-checkbox v-model="marketingconsent">
               I'm happy for Freegle to keep in touch with me by email about the
               impact of my donation and other ways I can support Freegle in
-              future campaigns (please tick box).
+              future campaigns.
             </b-form-checkbox>
-            <NoticeMessage class="info">
-              By submitting this declaration I confirm that I am a UK taxpayer
-              and understand that if I pay less Income Tax and/or Capital Gains
-              Tax in the current tax year than the amount of Gift Aid claimed on
-              all my donations it is my responsibility to pay any difference.
-            </NoticeMessage>
           </div>
-          <b-form-checkbox
-            v-else
-            v-model="marketingconsent"
-            size="lg"
-            class="mt-2"
-          >
-            I'm happy for Freegle to keep in touch with me by email about ways I
-            can support Freegle in future campaigns (please tick box).
-          </b-form-checkbox>
-          <SpinButton
-            icon-name="save"
-            size="lg"
-            variant="primary"
-            label="Submit Gift Aid Declaration"
-            class="mt-4"
-            @handle="save"
-          />
-          <NoticeMessage v-if="saved" variant="primary" class="mt-2">
-            Thank you. We have saved your Gift Aid Declaration. It's very kind
-            of you to help keep Freegle going.
+          <NoticeMessage variant="info" class="giftaid-form__notice">
+            By submitting this declaration I confirm that I am a UK taxpayer and
+            understand that if I pay less Income Tax and/or Capital Gains Tax in
+            the current tax year than the amount of Gift Aid claimed on all my
+            donations it is my responsibility to pay any difference.
           </NoticeMessage>
-          <hr />
-          <div class="small mt-2">
-            <p>Please return to this page and amend your details if you:</p>
-            <ul>
-              <li>Want to cancel this declaration</li>
-              <li>Change your name or home address</li>
-              <li>
-                No longer pay sufficient tax on your income and/or capital
-                gains.
-              </li>
-            </ul>
-            <SpinButton
-              v-if="valid"
-              icon-name="trash-alt"
-              size="lg"
-              variant="white"
-              label="Remove Gift Aid Consent"
-              class="mt-2 mb-2"
-              @handle="remove"
-            />
-          </div>
-        </b-col>
-        <b-col cols="0" lg="3" class="d-none d-lg-block p-0 pl-1" />
-      </b-row>
-    </b-container>
+        </div>
+        <div v-else class="giftaid-form__checkbox">
+          <b-form-checkbox v-model="marketingconsent">
+            I'm happy for Freegle to keep in touch with me by email about ways I
+            can support Freegle in future campaigns.
+          </b-form-checkbox>
+        </div>
+        <SpinButton
+          icon-name="save"
+          size="lg"
+          variant="primary"
+          label="Submit Gift Aid Declaration"
+          class="mt-4"
+          @handle="save"
+        />
+        <NoticeMessage v-if="saved" variant="primary" class="mt-2">
+          Thank you. We have saved your Gift Aid Declaration. It's very kind of
+          you to help keep Freegle going.
+        </NoticeMessage>
+        <div class="giftaid-footer">
+          <p>Please return to this page and amend your details if you:</p>
+          <ul>
+            <li>Want to cancel this declaration</li>
+            <li>Change your name or home address</li>
+            <li>
+              No longer pay sufficient tax on your income and/or capital gains.
+            </li>
+          </ul>
+          <SpinButton
+            v-if="valid"
+            icon-name="trash-alt"
+            variant="white"
+            label="Remove Gift Aid Consent"
+            @handle="remove"
+          />
+        </div>
+      </div>
+    </div>
   </client-only>
 </template>
 <script setup>
@@ -211,6 +172,7 @@ import {
   ref,
   computed,
   watch,
+  onMounted,
   definePageMeta,
   useHead,
   useRuntimeConfig,
@@ -354,15 +316,19 @@ const fetchGiftAidData = async () => {
   }
 }
 
-watch(
-  me,
-  async (newVal, oldVal) => {
-    if (newVal && !oldVal) {
-      await fetchGiftAidData()
-    }
-  },
-  { immediate: true }
-)
+// Fetch gift aid data on mount (after auth has been validated by layout)
+onMounted(async () => {
+  if (me.value) {
+    await fetchGiftAidData()
+  }
+})
+
+// Watch for subsequent login events
+watch(me, async (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+    await fetchGiftAidData()
+  }
+})
 
 // Also watch auth tokens in case they're set after the user
 watch(
@@ -427,14 +393,115 @@ function changeGiftAidToggle(val) {
 }
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
-:deep(.label) {
-  font-weight: bold;
-  color: $color-green--darker;
+
+.giftaid-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding: 1rem;
+
+  @include media-breakpoint-up(md) {
+    padding: 1.5rem;
+  }
 }
 
-:deep(input[type='checkbox']) {
-  border: 2px solid $color-red;
-  border-radius: 4px;
+.giftaid-page__content {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.giftaid-intro {
+  font-size: 0.95rem;
+  color: $gray-700;
+  margin-bottom: 1.5rem;
+}
+
+.giftaid-toggle-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid $gray-200;
+
+  &__label {
+    font-weight: 600;
+    color: $gray-800;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.giftaid-form {
+  &__section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid $gray-200;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    display: block;
+    font-weight: 600;
+    color: $color-green--darker;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  &__autofill {
+    margin-bottom: 0.5rem;
+  }
+
+  &__hint {
+    font-size: 0.875rem;
+    color: $gray-600;
+    margin-bottom: 0.5rem;
+  }
+
+  &__radios {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__checkbox {
+    margin: 1rem 0;
+    font-size: 0.9rem;
+
+    :deep(.form-check-label) {
+      font-size: 0.9rem;
+      color: $gray-700;
+    }
+  }
+
+  &__notice {
+    margin-top: 1rem;
+  }
+}
+
+.giftaid-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid $gray-200;
+  font-size: 0.875rem;
+  color: $gray-600;
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+
+  ul {
+    margin-bottom: 1rem;
+    padding-left: 1.25rem;
+  }
+
+  li {
+    margin-bottom: 0.25rem;
+  }
 }
 </style>

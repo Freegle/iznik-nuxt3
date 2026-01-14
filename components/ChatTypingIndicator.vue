@@ -3,6 +3,7 @@
     <div class="chatMessageProfilePic">
       <ProfileImage
         :image="icon"
+        :name="name"
         class="ml-1 mb-1 mt-1 inline"
         is-thumbnail
         size="sm"
@@ -10,11 +11,7 @@
     </div>
     <div class="chatMessage forcebreak chatMessage__owner pt-2">
       <div class="d-flex">
-        <div class="jumping-dots">
-          <span class="dot-1"></span>
-          <span class="dot-2"></span>
-          <span class="dot-3"></span>
-        </div>
+        <JumpingDots size="lg" />
       </div>
     </div>
   </div>
@@ -25,6 +22,7 @@ import { TYPING_TIME_INVERVAL } from '../constants'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import ProfileImage from '~/components/ProfileImage'
+import JumpingDots from '~/components/JumpingDots.vue'
 
 const chatStore = useChatStore()
 const miscStore = useMiscStore()
@@ -37,6 +35,11 @@ const props = defineProps({
   icon: {
     type: String,
     required: true,
+  },
+  name: {
+    type: String,
+    required: false,
+    default: null,
   },
 })
 
@@ -112,52 +115,5 @@ onBeforeUnmount(() => {
 .chatMessageWrapper {
   display: flex;
   padding-right: 10px;
-}
-
-.jumping-dots span {
-  position: relative;
-  margin-left: auto;
-  margin-right: auto;
-  animation: jump 1s infinite;
-  display: inline-block;
-}
-
-.jumping-dots .dot-1 {
-  background-color: $color-gray--normal;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 3px;
-  animation-delay: 200ms;
-}
-
-.jumping-dots .dot-2 {
-  background-color: $color-gray--normal;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 3px;
-  animation-delay: 400ms;
-}
-
-.jumping-dots .dot-3 {
-  background-color: $color-gray--normal;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 3px;
-  animation-delay: 600ms;
-}
-
-@keyframes jump {
-  0% {
-    bottom: 0px;
-  }
-  20% {
-    bottom: 5px;
-  }
-  40% {
-    bottom: 0px;
-  }
 }
 </style>

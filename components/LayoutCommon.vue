@@ -34,7 +34,8 @@
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1699973618906-0"
-                  :jobs="false"
+                  :jobs="true"
+                  :hide-jobs-header="true"
                   @rendered="adRendered"
                   @failed="adFailed"
                 />
@@ -46,7 +47,8 @@
                   max-width="100vw"
                   min-width="100vw"
                   div-id="div-gpt-ad-1707999304775-0"
-                  :jobs="false"
+                  :jobs="true"
+                  :hide-jobs-header="true"
                   @rendered="adRendered"
                 />
               </VisibleWhen>
@@ -94,6 +96,7 @@
         <div ref="desktopTallDetector" class="desktop-tall-detector" />
       </div>
       <BreakpointFettler />
+      <OrientationFettler />
       <div id="here" />
       <SomethingWentWrong />
       <div id="videoda">
@@ -125,13 +128,13 @@ import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
 import ChatButton from '~/components/ChatButton'
-import { navBarHidden } from '~/composables/useNavbar'
 import VisibleWhen from '~/components/VisibleWhen.vue'
 import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
 import DeletedRestore from '~/components/DeletedRestore.vue'
 import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
+import { useMobileStore } from '@/stores/mobile' // APP
 
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
@@ -143,6 +146,9 @@ const BouncingEmail = defineAsyncComponent(() =>
 )
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler')
+)
+const OrientationFettler = defineAsyncComponent(() =>
+  import('~/components/OrientationFettler')
 )
 const ExternalDa = defineAsyncComponent(() => import('~/components/ExternalDa'))
 
@@ -169,7 +175,8 @@ const allowAd = computed(() => {
   // We don't want to show the ad on the landing page when logged out - looks tacky.
   return routePath.value !== '/' || loggedIn.value
 })
-const marginTop = computed(() => (navBarHidden.value ? '0px' : '60px'))
+// Keep constant margin - navbar is fixed position so content shouldn't shift when it hides/shows
+const marginTop = computed(() => '60px')
 
 // Methods
 function updateTime() {
@@ -260,10 +267,19 @@ onMounted(async () => {
     const nuxtApp = useNuxtApp()
     const { $sentrySetContext, $sentrySetUser } = nuxtApp
 
-    $sentrySetContext('builddate', {
+    const sentryParams = {
+      // APP
       buildDate: runtimeConfig.public.BUILD_DATE,
       deployId: runtimeConfig.public.DEPLOY_ID,
-    })
+    }
+    if (runtimeConfig.public.ISAPP) {
+      console.log('LAYOUT mobileVersion', runtimeConfig.public.MOBILE_VERSION)
+      sentryParams.mobileVersion = runtimeConfig.public.MOBILE_VERSION
+      const mobileStore = useMobileStore()
+      sentryParams.deviceuserinfo = mobileStore.deviceuserinfo
+    }
+
+    $sentrySetContext('builddate', sentryParams)
 
     if (me.value) {
       // Set the context for sentry so that we know which users are having errors.
@@ -382,8 +398,14 @@ body.modal-open {
   margin-top: v-bind(marginTop);
   transition: margin-top 1s;
 
+  /* md-lg: Mobile-style navbar is shown (66px tall) */
   @include media-breakpoint-up(md) {
-    margin-top: 75px;
+    margin-top: 66px;
+  }
+
+  /* xl+: Desktop navbar is shown (76px tall) */
+  @include media-breakpoint-up(xl) {
+    margin-top: 76px;
   }
 }
 

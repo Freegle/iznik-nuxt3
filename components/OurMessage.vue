@@ -3,6 +3,12 @@
     v-if="message"
     :id="'msg-' + id"
     ref="msg"
+    v-observe-visibility="{
+      callback: visibilityChanged,
+      options: {
+        observeFullElement: true,
+      },
+    }"
     class="position-relative"
     itemscope
     itemtype="http://schema.org/Product"
@@ -23,26 +29,11 @@
         :replyable="replyable"
         :hide-close="hideClose"
         :actions="actions"
-        :show-map="true"
-        class="bg-white p-2"
-        :ad-unit-path="adUnitPath"
-        :ad-id="adId"
-        @zoom="showPhotosModal"
-      />
-      <MessagePhotosModal
-        v-if="showMessagePhotosModal && message.attachments?.length"
-        :id="message.id"
-        @hidden="showMessagePhotosModal = false"
       />
     </div>
     <div v-else>
-      <MessageSummary
-        :id="message.id"
-        :expand-button-text="expandButtonText"
-        :replyable="replyable"
-        :matchedon="matchedon"
-        @expand="expand"
-      />
+      <!-- Modern card summary for all breakpoints -->
+      <MessageSummary :id="message.id" :preload="preload" @expand="expand" />
       <MessageModal
         v-if="expanded"
         :id="message.id"
@@ -51,6 +42,16 @@
         :hide-close="hideClose"
         :actions="actions"
         @hidden="expanded = false"
+      />
+      <!-- Mobile full-screen modal (only inserted when clicked) -->
+      <MessageExpanded
+        v-if="showMobileExpanded"
+        :id="message.id"
+        :replyable="replyable"
+        :hide-close="hideClose"
+        :actions="actions"
+        fullscreen-overlay
+        @close="closeMobileExpanded"
       />
     </div>
   </div>
@@ -61,14 +62,16 @@ import { ref, computed, defineAsyncComponent, nextTick, onMounted } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
-import MessageExpanded from '~/components/MessageExpanded'
-import MessageSummary from '~/components/MessageSummary'
+import { useMiscStore } from '~/stores/misc'
 
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
+)
+const MessageSummary = defineAsyncComponent(() =>
+  import('~/components/MessageSummary')
+)
 const MessageModal = defineAsyncComponent(() =>
   import('~/components/MessageModal')
-)
-const MessagePhotosModal = defineAsyncComponent(() =>
-  import('~/components/MessagePhotosModal')
 )
 
 const props = defineProps({
@@ -125,6 +128,11 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  preload: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['notFound', 'view', 'visible'])
@@ -133,13 +141,23 @@ const emit = defineEmits(['notFound', 'view', 'visible'])
 const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 const authStore = useAuthStore()
+const miscStore = useMiscStore()
 const me = computed(() => authStore.user)
+
+// Check if mobile/tablet breakpoint - use modern cards for xs/sm/md
+const isMobile = computed(() => {
+  return (
+    miscStore.breakpoint === 'xs' ||
+    miscStore.breakpoint === 'sm' ||
+    miscStore.breakpoint === 'md'
+  )
+})
 
 // Refs
 const msg = ref(null)
 const expanded = ref(false)
+const showMobileExpanded = ref(false)
 const showImages = ref(false)
-const showMessagePhotosModal = ref(false)
 
 // Computed properties
 const message = computed(() => {
@@ -149,13 +167,20 @@ const message = computed(() => {
 // Methods
 function expand() {
   if (!message.value?.successful) {
-    expanded.value = true
-    view()
+    if (isMobile.value) {
+      // Show full-screen modal overlay instead of navigating
+      // This preserves the browse page scroll position
+      showMobileExpanded.value = true
+      view()
+    } else {
+      expanded.value = true
+      view()
+    }
   }
 }
 
-function showPhotosModal() {
-  showMessagePhotosModal.value = true
+function closeMobileExpanded() {
+  showMobileExpanded.value = false
 }
 
 async function view() {
@@ -165,6 +190,12 @@ async function view() {
     }
 
     emit('view')
+  }
+}
+
+function visibilityChanged(isVisible) {
+  if (isVisible) {
+    view()
   }
 }
 

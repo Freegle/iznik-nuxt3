@@ -1,6 +1,3 @@
-// SEE WORK EXPLANATION IN useModMessages.js
-
-import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import { nextTick } from 'vue'
@@ -9,7 +6,10 @@ import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
 import { APIError } from '~/api/BaseAPI'
 import { useAuthStore } from '~/stores/auth'
-import { useMiscStore } from '@/stores/misc'
+import { useIsochroneStore } from '~/stores/isochrone'
+
+// Debounce delay for batching message fetches (ms)
+const BATCH_DELAY = 50
 
 export const useMessageStore = defineStore({
   id: 'message',
@@ -31,8 +31,9 @@ export const useMessageStore = defineStore({
       this.fetching = {}
       this.fetchingCount = 0
       this.fetchingMyGroups = null
-      // The context from the last fetch, used for fetchMore. // ModTools
-      this.context = null
+      // Debounced batching state
+      this.pendingFetches = []
+      this.batchTimer = null
     },
     async fetchCount(browseView, log = true) {
       const ret = await api(this.config).message.count(browseView, log)
@@ -48,72 +49,97 @@ export const useMessageStore = defineStore({
         ? now - this.list[id].addedToCache > 600
         : false
 
-      if (force || !this.list[id] || expired) {
-        if (this.fetching[id]) {
-          // Already fetching
-          try {
-            await this.fetching[id]
-            await nextTick()
-          } catch (e) {
-            console.log('Failed to fetch message', e)
-            if (e instanceof APIError && e.response.status === 404) {
-              // This can validly happen if a message is deleted under our feet.
-              console.log('Message deleted, removing from store')
+      // If already cached and not forcing/expired, return immediately
+      if (!force && this.list[id] && !expired) {
+        return this.list[id]
+      }
 
-              // Remove from the main list
-              delete this.list[id]
+      // If already fetching this ID, wait for the existing fetch
+      if (this.fetching[id]) {
+        try {
+          await this.fetching[id]
+          await nextTick()
+        } catch (e) {
+          this.handleFetchError(id, e)
+        }
+        return this.list[id]
+      }
 
-              // Remove from user's list if present
-              const authStore = useAuthStore()
-              const userUid = authStore.user?.id
-              if (userUid && this.byUserList[userUid]) {
-                this.byUserList[userUid] = this.byUserList[userUid].filter(
-                  (message) => message.id !== id
-                )
-              }
-            } else {
-              throw e
-            }
+      // Add to pending batch and wait for the batch to complete
+      return new Promise((resolve, reject) => {
+        this.pendingFetches.push({ id, resolve, reject, force })
+
+        // Clear existing timer and set a new one
+        if (this.batchTimer) {
+          clearTimeout(this.batchTimer)
+        }
+
+        this.batchTimer = setTimeout(() => {
+          this.processMessageBatch()
+        }, BATCH_DELAY)
+      })
+    },
+    handleFetchError(id, e) {
+      console.log('Failed to fetch message', e)
+      if (e instanceof APIError && e.response.status === 404) {
+        console.log('Message deleted, removing from store')
+        delete this.list[id]
+
+        const authStore = useAuthStore()
+        const userUid = authStore.user?.id
+        if (userUid && this.byUserList[userUid]) {
+          this.byUserList[userUid] = this.byUserList[userUid].filter(
+            (message) => message.id !== id
+          )
+        }
+      } else {
+        throw e
+      }
+    },
+    async processMessageBatch() {
+      if (!this.pendingFetches.length) {
+        return
+      }
+
+      // Collect all pending fetches
+      const pending = [...this.pendingFetches]
+      this.pendingFetches = []
+      this.batchTimer = null
+
+      // Filter out IDs that are already cached (unless force/expired)
+      const idsToFetch = []
+      const forcedIds = new Set()
+      const now = Math.round(Date.now() / 1000)
+
+      for (const { id, force } of pending) {
+        const expired = this.list[id]?.addedToCache
+          ? now - this.list[id].addedToCache > 600
+          : false
+
+        if ((force || !this.list[id] || expired) && !this.fetching[id]) {
+          if (!idsToFetch.includes(id)) {
+            idsToFetch.push(id)
           }
-        } else {
-          try {
-            this.fetchingCount++
-            this.fetching[id] = api(this.config).message.fetch(id, false)
-            this.fetchingCount--
-
-            this.list[id] = await this.fetching[id]
-            this.fetching[id] = null
-
-            if (this.list[id]) {
-              this.list[id].addedToCache = Math.round(Date.now() / 1000)
-            }
-          } catch (e) {
-            console.log('Failed to fetch message', e)
-            this.fetching[id] = null
-
-            if (e instanceof APIError && e.response.status === 404) {
-              // This can validly happen if a message is deleted under our feet.
-              console.log('Message deleted, removing from store')
-
-              // Remove from the main list
-              delete this.list[id]
-
-              // Remove from user's list if present
-              const authStore = useAuthStore()
-              const userUid = authStore.user?.id
-              if (userUid && this.byUserList[userUid]) {
-                this.byUserList[userUid] = this.byUserList[userUid].filter(
-                  (message) => message.id !== id
-                )
-              }
-            } else {
-              throw e
-            }
+          if (force) {
+            forcedIds.add(id)
           }
         }
       }
 
-      return this.list[id]
+      if (idsToFetch.length > 0) {
+        try {
+          // Pass force=true if any of the IDs were force-requested
+          await this.fetchMultiple(idsToFetch, forcedIds.size > 0)
+        } catch (e) {
+          // Errors are handled per-message in fetchMultiple
+          console.log('Batch fetch error', e)
+        }
+      }
+
+      // Resolve all promises with the cached data
+      for (const { id, resolve } of pending) {
+        resolve(this.list[id])
+      }
     },
     async fetchMultiple(ids, force) {
       const left = []
@@ -122,38 +148,65 @@ export const useMessageStore = defineStore({
         id = parseInt(id)
 
         if ((force || !this.list[id]) && !this.fetching[id]) {
-          // This is a message we need to fetch and aren't currently fetching.
           left.push(id)
         }
       })
 
       if (left.length) {
-        this.fetchingCount++
-        try {
-          const msgs = await api(this.config).message.fetch(
-            left.join(','),
+        // Split into chunks of 19 (API limit is < 20)
+        const BATCH_SIZE = 19
+        const chunks = []
+        for (let i = 0; i < left.length; i += BATCH_SIZE) {
+          chunks.push(left.slice(i, i + BATCH_SIZE))
+        }
+
+        // Process each chunk
+        for (const chunk of chunks) {
+          this.fetchingCount++
+
+          // Create a shared promise for the batch fetch. Individual fetch() calls
+          // will await this promise instead of making duplicate API requests.
+          const batchPromise = api(this.config).message.fetch(
+            chunk.join(','),
             false
           )
 
-          if (msgs && msgs.forEach) {
-            msgs.forEach((msg) => {
-              this.list[msg.id] = msg
-            })
+          // Set the fetching flag for each ID to the shared batch promise.
+          chunk.forEach((id) => {
+            this.fetching[id] = batchPromise
+          })
 
+          try {
+            const msgs = await batchPromise
+
+            if (msgs && msgs.forEach) {
+              msgs.forEach((msg) => {
+                this.list[msg.id] = msg
+                if (this.list[msg.id]) {
+                  this.list[msg.id].addedToCache = Math.round(Date.now() / 1000)
+                }
+              })
+            } else if (typeof msgs === 'object') {
+              this.list[msgs.id] = msgs
+              if (this.list[msgs.id]) {
+                this.list[msgs.id].addedToCache = Math.round(Date.now() / 1000)
+              }
+            } else {
+              console.error('Failed to fetch', msgs)
+            }
+          } catch (e) {
+            console.log('Failed to fetch messages', e)
+            if (e instanceof APIError && e.response.status === 404) {
+              console.log('Ignore 404 error')
+            } else {
+              throw e
+            }
+          } finally {
             this.fetchingCount--
-          } else if (typeof msgs === 'object') {
-            this.list[msgs.id] = msgs
-            this.fetchingCount--
-          } else {
-            console.error('Failed to fetch', msgs)
-          }
-        } catch (e) {
-          console.log('Failed to fetch messages', e)
-          if (e instanceof APIError && e.response.status === 404) {
-            // This can validly happen if a message is deleted under our feet.
-            console.log('Ignore 404 error')
-          } else {
-            throw e
+            // Clear the fetching flags for all IDs in this batch.
+            chunk.forEach((id) => {
+              this.fetching[id] = null
+            })
           }
         }
       }
@@ -185,18 +238,6 @@ export const useMessageStore = defineStore({
       await this.clear()
       const ret = await api(this.config).message.search(params)
       return ret
-    },
-    async searchMT(params) {
-      const { messages } = await api(this.config).message.fetchMessages({
-        subaction: 'searchall',
-        search: params.term,
-        exactonly: true,
-        groupid: params.groupid,
-      })
-      for (const message of messages) {
-        // console.log('GOT message',message.id, typeof message.fromuser)
-        this.list[message.id] = message
-      }
     },
     async fetchMyGroups(gid) {
       let ret = null
@@ -297,15 +338,17 @@ export const useMessageStore = defineStore({
           )
           if (index !== -1) {
             this.byUserList[userUid][index] = message
+
+            // If this was an Outcome action, set hasoutcome flag so the post
+            // moves from active to old posts list immediately
+            if (params.action === 'Outcome') {
+              this.byUserList[userUid][index].hasoutcome = true
+            }
           }
         }
       }
 
       return data
-    },
-    async updateMT(params) {
-      // Rely on refresh elsewhere
-      return await api(this.config).message.update(params)
     },
     async patch(params) {
       const data = await api(this.config).message.save(params)
@@ -315,18 +358,7 @@ export const useMessageStore = defineStore({
         id: params.id,
       })
 
-      const miscStore = useMiscStore()
-      if (miscStore.modtools) {
-        const message = await this.fetchMT({
-          id: params.id,
-          messagehistory: true,
-        })
-        if (message) {
-          this.list[message.id] = message
-        }
-      } else {
-        await this.fetch(params.id, true) // Gets message.fromuser as int not object
-      }
+      await this.fetch(params.id, true)
 
       return data
     },
@@ -335,7 +367,6 @@ export const useMessageStore = defineStore({
     },
     clear() {
       this.$reset()
-      this.clearContext() // ModTools
     },
     async promise(id, userid) {
       await api(this.config).message.update({
@@ -380,161 +411,11 @@ export const useMessageStore = defineStore({
     },
     async markSeen(ids) {
       await api(this.config).message.markSeen(ids)
+
+      const isochroneStore = useIsochroneStore()
+      isochroneStore.markSeen(ids)
+
       await this.fetchCount()
-    },
-    async delete(params) {
-      await api(this.config).message.delete(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
-
-      delete this.list[params.id]
-    },
-    clearContext() {
-      // Added for ModTools
-      this.context = null
-    },
-    async fetchMessagesMT(params) {
-      // Added for ModTools
-      // console.error("===useMessageStore fetchMessagesMT",params)
-
-      // if (!params.context) {
-      //  params.context = this.context
-      // }
-      if (params.context) {
-        // Ensure the context is a real object, in case it has been in the store.
-        params.context = cloneDeep(params.context)
-      }
-      if (!params.context) params.context = null
-      // console.log(">>> fetchMessMT params",params)
-
-      const data = await api(this.config).message.fetchMessages(params)
-      if (!data.messages) return
-      const messages = data.messages
-      const context = data.context // Can be undefined if search complete
-      // console.log("===fetchMessMT context",context)
-      // console.log("<<< fetchMessMT messages",messages.length)
-
-      if (params.collection !== 'Draft') {
-        // We don't use context for drafts - there aren't many.
-        this.context = context
-      }
-      for (const message of messages) {
-        // console.log('GOT message',message.id, typeof message.fromuser)
-        if (!message.subject) message.subject = ''
-        this.list[message.id] = message
-      }
-      // console.log('---fetchMessMT',this.context?.Date,this.context?.id, Object.values(this.list).length, messages.length)
-    },
-    async fetchMT(params) {
-      // Added for ModTools
-      const { message } = await api(this.config).message.fetchMT(params)
-      if (message && !message.subject) message.subject = ''
-      return message
-    },
-    async approveedits(params) {
-      await api(this.config).message.approveEdits(params.id)
-
-      this.remove({ id: params.id })
-    },
-    async revertedits(params) {
-      await api(this.config).message.revertEdits(params.id)
-
-      this.remove({ id: params.id })
-    },
-    async backToPending(id) {
-      await api(this.config).message.update({
-        id,
-        action: 'BackToPending',
-      })
-      this.remove({ id })
-    },
-    async approve(params) {
-      await api(this.config).message.approve(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
-
-      this.remove({ id: params.id })
-    },
-    async reject(params) {
-      await api(this.config).message.reject(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
-
-      this.remove({ id: params.id })
-    },
-    async reply(params) {
-      await api(this.config).message.reply(
-        params.id,
-        params.groupid,
-        params.subject,
-        params.stdmsgid,
-        params.body
-      )
-      // Do not remove from list
-    },
-    async hold(params) {
-      await api(this.config).message.hold(params.id)
-      const { message } = await api(this.config).message.fetchMT({
-        id: params.id,
-        messagehistory: true,
-      })
-      this.list[message.id] = message
-    },
-    async release(params) {
-      await api(this.config).message.release(params.id)
-      const { message } = await api(this.config).message.fetchMT({
-        id: params.id,
-        messagehistory: true,
-      })
-      this.list[message.id] = message
-    },
-    async spam(params) {
-      await api(this.config).message.spam(params.id, params.groupid)
-
-      this.remove({ id: params.id })
-    },
-    async move(params) {
-      await api(this.config).message.update({
-        id: params.id,
-        groupid: params.groupid,
-        action: 'Move',
-      })
-
-      await this.fetch(params.id, true)
-
-      /* dispatch(
-        'auth/fetchUser',
-        {
-          components: ['work'],
-          force: true
-        },
-        {
-          root: true
-        }
-      ) */
-    },
-    async searchMember(term, groupid) {
-      const { messages } = await api(this.config).message.fetchMessages({
-        subaction: 'searchmemb',
-        search: term,
-        groupid,
-      })
-      await this.clear()
-      for (const message of messages) {
-        this.list[message.id] = message
-      }
     },
   },
   getters: {
@@ -550,16 +431,6 @@ export const useMessageStore = defineStore({
     all: (state) => Object.values(state.list),
     byUser: (state) => (userid) => {
       return state.byUserList[userid] || []
-    },
-    getByGroup: (state) => (groupid) => {
-      // Added for ModTools
-      const ret = Object.values(state.list).filter((message) => {
-        return (
-          message.groups.length > 0 &&
-          parseInt(message.groups[0].groupid) === parseInt(groupid)
-        )
-      })
-      return ret
     },
   },
 })

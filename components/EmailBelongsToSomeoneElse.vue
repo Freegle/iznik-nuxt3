@@ -10,11 +10,14 @@
     </div>
     <div v-else>
       <p>
-        {{ theirs }} belongs to a different account from the one you're using
-        right now.
-        <span v-if="me?.email"> ({{ me.email }}) </span>
-        . But don't worry! You probably have two accounts, and we can merge them
-        together.
+        {{ theirs }} belongs to
+        <span v-if="me?.email">
+          a different account from the one you're using right now ({{
+            me.email
+          }})
+        </span>
+        <span v-else>an existing account</span>. But don't worry! You probably
+        have two accounts, and we can merge them together.
       </p>
       <p>
         Click this button and we'll send an email to {{ theirs }} to confirm
@@ -27,7 +30,7 @@
   </NoticeMessage>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import NoticeMessage from './NoticeMessage'
 import { useAuthStore } from '~/stores/auth'
 
@@ -39,6 +42,7 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
+const me = computed(() => authStore.user)
 const showConfirm = ref(false)
 
 async function requestMerge() {

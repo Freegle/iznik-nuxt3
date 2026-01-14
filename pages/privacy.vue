@@ -1,7 +1,7 @@
 <template>
-  <client-only>
-    <div class="d-flex justify-content-center">
-      <div class="privacy__container px-3 bg-white">
+  <div class="privacy-page">
+    <div class="privacy-page__content">
+      <client-only>
         <h2>1. What data we process</h2>
         <p>
           We process your email address, name, approximate location, and profile
@@ -19,7 +19,7 @@
           and posts from other freeglers. You can change the emails you receive
           or turn them off from
           <!-- eslint-disable-next-line-->
-          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
           <!-- eslint-disable-next-line-->
           We won't show your email address to any organisation outside Freegle,
           and other freeglers won't see it (unless your community leaves Freegle
@@ -30,7 +30,7 @@
           freeglers to make the site more engaging and show that freeglers are
           real people. If you don't want that, you can change it in
           <!-- eslint-disable-next-line-->
-          <nuxt-link  no-prefetch to="/settings">Settings</nuxt-link>.
+          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
         </p>
         <p>
           We try to protect you from spammers and fraudsters. Sometimes our
@@ -66,7 +66,10 @@
             post. That's like the "shopping cart" example in the Information
             Commissioner's
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://ico.org.uk/for-organisations/guide-to-pecr/cookies-and-similar-technologies/">advice</ExternalLink>
+            <ExternalLink
+              href="https://ico.org.uk/for-organisations/guide-to-pecr/cookies-and-similar-technologies/"
+              >advice</ExternalLink
+            >
             and does not require consent.
           </li>
           <li>
@@ -81,6 +84,11 @@
             to Google Analytics, but more privacy-safe. We have configured this
             not to use any cookies.
           </li>
+          <li>
+            We record information about your browser/device and how you use the
+            site. This helps diagnose problems and make the site easier to use.
+            We don't pass anything identifying you to other people.
+          </li>
         </ul>
         <h3>3.2 Optional function</h3>
         <p>We store some other things which help make the site better.</p>
@@ -89,10 +97,14 @@
             When something goes wrong on the website, we log it to a third party
             site called
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://sentry.io">Sentry</ExternalLink>.  They help organise the logs and make it easier for us to identify
+            <ExternalLink href="https://sentry.io">Sentry</ExternalLink>. They
+            help organise the logs and make it easier for us to identify
             problems. This
             <!-- eslint-disable-next-line -->
-            <ExternalLink href="https://docs.sentry.io/data-management/sensitive-data/">should not include</ExternalLink>
+            <ExternalLink
+              href="https://docs.sentry.io/data-management/sensitive-data/"
+              >should not include</ExternalLink
+            >
             any of your personal data. You can read their privacy policy
             <!-- eslint-disable-next-line -->
             <ExternalLink href="https://sentry.io/privacy/">here</ExternalLink>.
@@ -141,7 +153,7 @@
           We'll delete your data automatically if you're inactive for six
           months. If you want to leave Freegle, please go
           <!-- eslint-disable-next-line -->
-        <nuxt-link  no-prefetch to="/unsubscribe">here</nuxt-link>.
+          <nuxt-link no-prefetch to="/unsubscribe">here</nuxt-link>.
         </p>
         <p>
           Once you leave, this will delete all your personal data within 14
@@ -174,6 +186,10 @@
         <h3>Change History</h3>
         <p>Here are the changes to this page.</p>
         <ul class>
+          <li>
+            20/12/2025: Add mention of recording more information for diagnosing
+            problems and optimising the site.
+          </li>
           <li>26/02/2025: Add Playwire information for advertising.</li>
           <li>
             19/11/2024: Update after Facebook request to clarify what data we
@@ -214,9 +230,9 @@
           <li>31/12/2019: Explain why we don't have or need a cookie popup.</li>
           <li>29/12/2019: Add use of Sentry.</li>
         </ul>
-      </div>
+      </client-only>
     </div>
-  </client-only>
+  </div>
 </template>
 <script setup>
 import { useRoute } from 'vue-router'
@@ -240,12 +256,62 @@ useHead(
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-.privacy__container {
-  width: 100%;
+.privacy-page {
+  background: $color-gray--lighter;
+  min-height: 100vh;
+  padding: 1rem;
 
   @include media-breakpoint-up(md) {
-    width: 50%;
+    padding: 1.5rem;
+  }
+}
+
+.privacy-page__content {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-green--darker;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $gray-700;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: $gray-700;
+    margin-bottom: 0.75rem;
+  }
+
+  ul {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+
+    li {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: $gray-700;
+      margin-bottom: 0.5rem;
+    }
   }
 }
 </style>

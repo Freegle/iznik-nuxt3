@@ -270,27 +270,7 @@ export function postcodeSelect(pc) {
   }
 }
 
-export function addItem() {
-  const composeStore = useComposeStore()
-  const authStore = useAuthStore()
-
-  const id = composeStore.add()
-  const me = authStore.user
-
-  composeStore.setMessage(
-    id,
-    {
-      id,
-      item: null,
-      description: null,
-      type: postType.value,
-      availablenow: 1,
-    },
-    me
-  )
-}
-
-export async function freegleIt(type, router) {
+export async function freegleIt(type, router, options = {}) {
   const composeStore = useComposeStore()
   const messageStore = useMessageStore()
   const authStore = useAuthStore()
@@ -314,38 +294,40 @@ export async function freegleIt(type, router) {
       type,
     }
 
-    await results.forEach(async (res) => {
-      console.log('Consider result', res, type)
-      if (type === 'Offer' && res.id) {
-        params.ids.push(res.id)
-      }
-
-      if (res.newuser) {
-        params.newuser = res.newuser
-        params.newpassword = res.newpassword
-
-        // Make sure we're logged in, and so that we have permission to fetch messages
-        // below.
-        console.log('Login', composeStore.email)
-        await authStore.login({
-          email: composeStore.email,
-          password: params.newpassword,
-        })
-
-        // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
-        if (composeStore.postcode?.id) {
-          console.log(
-            'Saving postcode to new user settings',
-            composeStore.postcode
-          )
-          const settings = authStore.user?.settings || {}
-          settings.mylocation = composeStore.postcode
-          await authStore.saveAndGet({
-            settings,
-          })
+    await Promise.all(
+      results.map(async (res) => {
+        console.log('Consider result', res, type)
+        if (type === 'Offer' && res.id) {
+          params.ids.push(res.id)
         }
-      }
-    })
+
+        if (res.newuser) {
+          params.newuser = res.newuser
+          params.newpassword = res.newpassword
+
+          // Make sure we're logged in, and so that we have permission to fetch messages
+          // below.
+          console.log('Login', composeStore.email)
+          await authStore.login({
+            email: composeStore.email,
+            password: params.newpassword,
+          })
+
+          // Save the postcode to the new user's settings, just like it would be if they had set it from the Settings page
+          if (composeStore.postcode?.id) {
+            console.log(
+              'Saving postcode to new user settings',
+              composeStore.postcode
+            )
+            const settings = authStore.user?.settings || {}
+            settings.mylocation = composeStore.postcode
+            await authStore.saveAndGet({
+              settings,
+            })
+          }
+        }
+      })
+    )
 
     const promises = []
 
@@ -357,13 +339,25 @@ export async function freegleIt(type, router) {
       await Promise.all(promises)
     }
 
+    // Debug: log results count
+    console.log('Submit results:', results.length, 'messages submitted')
+
     // We pass the data in the history state to avoid it showing up in the URL.
     console.log('Navigate to myposts', params)
-    await router.push({
+    const navigationResult = await router.push({
       name: 'myposts',
       state: params,
     })
-    console.log('Navigated')
+
+    // Check for navigation failure (Vue Router 4 returns NavigationFailure on failure)
+    if (navigationResult) {
+      console.log('Navigation failed:', navigationResult)
+      // Navigation was prevented - this is unexpected
+      throw new Error(
+        `Navigation failed: ${navigationResult.type || 'unknown'}`
+      )
+    }
+    console.log('Navigated successfully')
   } catch (e) {
     console.log('Submit failed', e, e?.response?.data?.ret)
     submitting.value = false

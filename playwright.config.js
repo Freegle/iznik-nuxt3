@@ -30,12 +30,12 @@ module.exports = defineConfig({
   testMatch,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 2,
-  workers: 1,
+  retries: 1,
+  workers: 11, // Parallel workers - testing 11 to improve CI performance
   maxFailures: 0,
   reporter: [
     ['list'],
-    ['html', { open: 'always', host: '0.0.0.0' }],
+    ['html', { open: process.env.CI ? 'never' : 'always', host: '0.0.0.0' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     // Only include monocart reporter when explicitly enabled via env var
     ...(process.env.ENABLE_MONOCART_REPORTER === 'true'
@@ -97,12 +97,12 @@ module.exports = defineConfig({
   // Force video directory
   videoDir: 'test-results/videos',
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://freegle.localhost',
+    baseURL: process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     // viewport set at test level for better control
-    trace: 'on',
+    trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'on',
+    video: 'on-first-retry',
     // Video recording configuration
     contextOptions: {
       recordVideo: {
@@ -135,7 +135,7 @@ module.exports = defineConfig({
         ...devices['Desktop Chrome'],
         viewport: null, // Remove viewport constraints to use full screen
         deviceScaleFactor: undefined, // Remove device scale factor when viewport is null
-        video: 'on',
+        video: 'on-first-retry',
         // Use Playwright's downloaded Chromium browser with security flags for Docker
         launchOptions: {
           headless: true, // Run in headless mode for CI/Docker environments

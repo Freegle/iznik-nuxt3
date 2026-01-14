@@ -1,9 +1,17 @@
 <template>
-  <!-- DO NOT COPY INTO MASTER -->
   <div
     class="chatMessageWrapper"
     :class="{ myChatMessage: messageIsFromCurrentUser }"
   >
+    <div class="chatMessageProfilePic">
+      <ProfileImage
+        :image="chatMessageProfileImage"
+        :name="chatMessageProfileName"
+        class="inline"
+        is-thumbnail
+        size="sm"
+      />
+    </div>
     <div class="chatMessage forcebreak chatMessage__owner">
       <div v-if="chatmessage.userid != myid">
         <ChatMessageSummary
@@ -12,9 +20,6 @@
           :chatid="chatid"
           class="mt-1 mb-2"
         />
-        <div v-if="isMT && modtoolsLink">
-          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
-        </div>
         <div>
           <!-- eslint-disable-next-line -->
           <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
@@ -30,7 +35,6 @@
         </div>
         <div
           v-if="
-            !isMT &&
             refmsg &&
             refmsg.fromuser === myid &&
             refmsg.type === 'Offer' &&
@@ -92,9 +96,6 @@
       </div>
       <div v-else>
         <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
-        <div v-if="isMT && modtoolsLink">
-          <NuxtLink :to="modtoolsLink">View message on ModTools</NuxtLink>
-        </div>
         <div>
           <span v-if="!highlightEmails">
             <span
@@ -120,10 +121,9 @@
               "
               class="font-weight-bold"
             >
-              <!-- MT TODO FIX validator test in Highlighter -->
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmailMT]"
+                :search-words="[regexEmail]"
                 highlight-class-name="highlight"
                 class="prewrap"
               />
@@ -131,7 +131,7 @@
             <span v-else>
               <Highlighter
                 :text-to-highlight="emessage"
-                :search-words="[regexEmailMT]"
+                :search-words="[regexEmail]"
                 highlight-class-name="highlight"
                 class="preline forcebreak"
               />
@@ -147,14 +147,6 @@
         </div>
       </div>
     </div>
-    <div class="chatMessageProfilePic">
-      <ProfileImage
-        :image="chatMessageProfileImage"
-        class="ml-1 mb-1 mt-1 inline"
-        is-thumbnail
-        size="sm"
-      />
-    </div>
   </div>
 </template>
 <script setup>
@@ -164,13 +156,11 @@ import {
   useChatMessageBase,
 } from '~/composables/useChat'
 import { useMessageStore } from '~/stores/message'
-import { useMiscStore } from '~/stores/misc' // MT..
 import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
-const miscStore = useMiscStore()
-const isMT = ref(miscStore.modtools)
+import { useMe } from '~/composables/useMe'
 
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
@@ -202,6 +192,7 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const chatStore = useChatStore()
+const { myid } = useMe()
 
 // Data properties
 const showOutcome = ref(false)
@@ -215,36 +206,16 @@ const {
   emessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
-  regexEmailMT, // MT
-  myid, // MT
-  refmsgid, // MT
-  refmsg, // MT
+  chatMessageProfileName,
+  regexEmail,
   otheruser,
 } = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Computed properties
-const modtoolsLink = computed(() => {
-  if (refmsg.value && refmsg.value.groups && refmsg.value.groups.length > 0) {
-    return (
-      '/messages/approved/' +
-      refmsg.value.groups[0].groupid +
-      '/' +
-      refmsg.value.id +
-      '?noguard=true'
-    )
-  }
-  // As an alternative: could link to message ie within Messages+Approved. Need to switch to NuxtLink
-  if (chatmessage.value.group && refmsgid.value) {
-    return (
-      '/messages/approved/' +
-      chatmessage.value.group.id +
-      '/' +
-      refmsgid.value +
-      '?noguard=true'
-    )
-  }
-  return false
-})
+const refmsgid = computed(() => chatmessage.value?.refmsgid)
+const refmsg = computed(() =>
+  refmsgid.value ? messageStore.byId(refmsgid.value) : null
+)
 
 // Methods
 const fetchMessage = async () => {

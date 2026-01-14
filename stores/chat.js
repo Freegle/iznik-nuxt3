@@ -367,17 +367,30 @@ export const useChatStore = defineStore({
     async hide(id) {
       await api(this.config).chat.hideChat(id)
 
-      // Don't fetch chats.  We might be called in a loop and once we've completed the caller normally routes.
+      // Update local state immediately so UI reflects the change.
+      if (this.listByChatId[id]) {
+        this.listByChatId[id].status = 'Closed'
+      }
+
+      await this.fetchChats()
     },
     async unhide(id) {
       await api(this.config).chat.unHideChat(id)
+
+      // Update local state immediately so UI reflects the change.
+      if (this.listByChatId[id]) {
+        this.listByChatId[id].status = 'Online'
+      }
+
+      // Switch back to showing visible chats since this chat is now visible.
+      this.showClosed = false
+
       await this.fetchChat(id)
       await this.fetchChats(null, false, id)
     },
     async block(id) {
       await api(this.config).chat.blockChat(id)
-
-      // Don't fetch chats.  We might be called in a loop and once we've completed the caller normally routes.
+      await this.fetchChats()
     },
     async pollForChatUpdates() {
       const authStore = useAuthStore()

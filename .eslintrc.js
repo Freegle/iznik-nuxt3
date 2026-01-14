@@ -28,6 +28,7 @@ module.exports = {
     ],
     'vue/script-setup-uses-vars': 'error',
   },
+  ignorePatterns: ['android/*', 'ios/*', 'capacitor.config.ts'],
   overrides: [
     {
       files: [
@@ -70,6 +71,7 @@ module.exports = {
     onMounted: 'readonly',
     onBeforeUnmount: 'readonly',
     usePinia: 'readonly',
+    piniaPluginPersistedstate: 'readonly',
     navigateTo: 'readonly',
     sendRedirect: 'readonly',
     setResponseStatus: 'readonly',

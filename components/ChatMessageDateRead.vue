@@ -13,7 +13,7 @@
         class="chat__dateread--theirs"
         :title="datetimeshort(chatmessage?.date)"
       >
-        {{ timeadapt(chatmessage?.date) }}
+        {{ timeadaptChat(chatmessage?.date) }}
       </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
@@ -22,16 +22,6 @@
       >
         RSVP - reply expected
       </b-badge>
-      <span
-        v-if="mod && chatmessage?.bymailid"
-        class="btn btn-sm btn-white mb-2 ml-2 clickme"
-        :title="
-          'Received by email #' + chatmessage?.bymailid + ' click to view'
-        "
-        @click="showOriginal = true"
-      >
-        <v-icon icon="info-circle" /> View original email
-      </span>
     </div>
     <div v-else class="d-flex justify-content-end chat__dateread--mine">
       <span v-if="chatmessage?.seenbyall" title="This message has been read.">
@@ -79,18 +69,8 @@
         Pending review
       </span>
       <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
-        timeadapt(chatmessage?.date)
+        timeadaptChat(chatmessage?.date)
       }}</span>
-      <span
-        v-if="mod && chatmessage?.bymailid"
-        class="btn btn-sm btn-white mb-2 ml-2 clickme"
-        :title="
-          'Received by email #' + chatmessage?.bymailid + ' click to view'
-        "
-        @click="showOriginal = true"
-      >
-        <v-icon icon="info-circle" /> View original email
-      </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
@@ -99,17 +79,12 @@
         RSVP - reply requested
       </b-badge>
     </div>
-    <ModMessageEmailModal
-      v-if="showOriginal"
-      :id="chatmessage?.bymailid"
-      @hidden="showOriginal = false"
-    />
   </div>
 </template>
 <script setup>
 import { useUserStore } from '~/stores/user'
 import { useChatMessageBase } from '~/composables/useChat'
-import { datetimeshort, timeadapt } from '~/composables/useTimeFormat'
+import { datetimeshort, timeadaptChat } from '~/composables/useTimeFormat'
 import { ref, computed, onMounted } from '#imports'
 import { useMe } from '~/composables/useMe'
 
@@ -143,7 +118,6 @@ const { chat, otheruser, chatmessage, messageIsFromCurrentUser } =
 
 // Data properties
 const chatMessageUser = ref(null)
-const showOriginal = ref(false)
 
 // Computed properties
 const othermodname = computed(() => {
@@ -163,16 +137,22 @@ onMounted(async () => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 .chat__dateread--theirs {
-  padding-left: 40px;
-  margin-bottom: 5px;
+  padding-left: 48px;
+  margin-bottom: 4px;
+  margin-top: -2px;
+
+  @include media-breakpoint-up(md) {
+    padding-left: 52px;
+  }
 }
 
 .chat__dateread--mine {
-  padding-right: 40px;
-  padding-left: 10px;
-  margin-bottom: 5px;
+  padding-right: 8px;
+  margin-bottom: 4px;
+  margin-top: -2px;
 }
 
 .fontsize {

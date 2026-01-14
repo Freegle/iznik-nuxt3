@@ -4,8 +4,12 @@ const ADS_SQUARISH_SIZES = [[300, 250]]
 
 const CONFIG = {
   IS_MT: process.env.MT === 'true', // For MT set in modtools/nuxt.config.ts
+  APP_ENV: process.env.APP_ENV,
+  NODE_ENV: process.env.NODE_ENV,
+  USE_COOKIES: process.env.USE_COOKIES === 'True', // 'True' or 'False'
 
   // Legacy API, especially mod ops.
+  // APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',
   APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
 
   // New style API, for fast read ops.
@@ -23,8 +27,10 @@ const CONFIG = {
   IMAGE_SITE: 'https://images.ilovefreegle.org',
 
   // Very new.  Our own uploader, and delivery of those images via a cached use of wsrl.nl.
-  TUS_UPLOADER: process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
-  IMAGE_DELIVERY: process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
+  TUS_UPLOADER:
+    process.env.TUS_UPLOADER || 'https://uploads.ilovefreegle.org:8080',
+  IMAGE_DELIVERY:
+    process.env.IMAGE_DELIVERY || 'https://delivery.ilovefreegle.org',
 
   // OpenStreetMap Tile Server
   OSM_TILE:
@@ -39,20 +45,30 @@ const CONFIG = {
   GOOGLE_API_KEY: 'AIzaSyArVxoX781qdcbmQZi1PKHX-qa0bPbboH4',
   GOOGLE_CLIENT_ID:
     '423761283916-1rpa8120tpudgv4nf44cpmlf8slqbf4f.apps.googleusercontent.com',
+  GOOGLE_IOS_CLIENT_ID:
+    '423761283916-2kavl4pp132cmjormmifomo2r8hhta52.apps.googleusercontent.com',
 
   FACEBOOK_APPID: '134980666550322',
+  FACEBOOK_CLIENTID: 'eb343dff9d3f338007745bdd0c9a6cd5',
 
   YAHOO_CLIENTID:
     'dj0yJmk9N245WTRqaDd2dnA4JmQ9WVdrOWIzTlZNMU01TjJjbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWRh',
 
   SENTRY_DSN:
-    'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
+    process.env.SENTRY_DSN ||
+    // 'https://63f870e6c729477ebca4098a0b07fd3a@o118493.ingest.sentry.io/4504083802226688',
+    'https://54fb66c60a53a6fc6de5c20e35295304@o118493.ingest.sentry.io/4506643536609280', // Capacitor
+
+  SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+  SENTRY_STRICT: process.env.SENTRY_STRICT !== 'false', // Default true, set to 'false' for debug builds
 
   SENTRY_DSN_MT:
     'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.us.sentry.io/4506712427855872',
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,
+  ISAPP: process.env.IZNIK_NUXT3_IS_APP === 'true',
+  MOBILE_VERSION: '3.2.28',
 
   TRUSTPILOT_LINK: process.env.TRUSTPILOT_LINK || null,
 

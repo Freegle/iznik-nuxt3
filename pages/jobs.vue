@@ -1,51 +1,55 @@
 <template>
   <client-only>
-    <div>
-      <b-row class="m-0">
-        <b-col cols="0" md="3" class="d-none d-md-block" />
-        <b-col cols="12" md="6" class="mt-2 bg-white">
-          <h3>Jobs</h3>
-          <p>
-            Freegle will get a small amount if you are interested and click to
-            view any of them, which will help keep us going.
-          </p>
-          <p>
-            Some may ask you to sign up - sorry about that, it's not under our
-            control.
-          </p>
-          <div class="d-flex mb-2 flex-wrap justify-content-between">
-            <PlaceAutocomplete
-              :value="location"
-              class="mt-2"
-              labeltext="Where are you looking?  Use a postcode or town name."
-              @selected="search($event)"
+    <div class="jobs-page">
+      <div class="jobs-page-content">
+        <p class="jobs-page-intro">
+          Freegle gets a small amount if you click, helping keep us running.
+        </p>
+        <div class="jobs-filters">
+          <PlaceAutocomplete
+            :value="location"
+            class="jobs-location-input"
+            labeltext="Location (postcode or town)"
+            @selected="search($event)"
+          />
+          <b-form-select
+            v-model="category"
+            :options="categories"
+            class="jobs-category-select"
+          />
+        </div>
+
+        <div v-if="busy" class="jobs-loading">
+          <b-img lazy src="/loader.gif" alt="Loading" width="60px" />
+          <span>Finding jobs...</span>
+        </div>
+
+        <div v-else class="jobs-results">
+          <div v-if="list?.length" class="jobs-grid">
+            <JobOne
+              v-for="(job, index) in list"
+              :id="job.id"
+              :key="'job-' + job.job_reference"
+              :position="index"
+              :list-length="list.length"
+              context="jobspage"
             />
-            <div class="mt-2 d-flex flex-column justify-content-end">
-              <b-form-select
-                v-model="category"
-                :options="categories"
-                size="lg"
-                class="mt-md-4"
-              />
-            </div>
           </div>
-          <div v-if="busy" class="d-flex justify-content-around">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+          <NoticeMessage v-else-if="blocked" variant="warning">
+            It looks like you may have an AdBlocker or security software which
+            is blocking these job ads.
+          </NoticeMessage>
+          <div v-else-if="location" class="jobs-empty">
+            <v-icon icon="search" class="jobs-empty-icon" />
+            <p>No jobs found in this area</p>
+            <span>Try searching a different location</span>
           </div>
-          <div v-else>
-            <div v-for="job in list" :key="'job-' + job.job_reference">
-              <JobOne :id="job.id" class="mb-1" />
-            </div>
-            <NoticeMessage v-if="blocked" variant="warning">
-              It looks like you may have an AdBlocker or security software which
-              is blocking these job ads.
-            </NoticeMessage>
-            <NoticeMessage v-else-if="location && !list?.length" variant="info">
-              We didn't find any jobs here. Please search somewhere else.
-            </NoticeMessage>
-          </div>
-        </b-col>
-      </b-row>
+        </div>
+
+        <p class="jobs-disclaimer">
+          Some jobs may ask you to sign up - this is not under our control.
+        </p>
+      </div>
     </div>
   </client-only>
 </template>
@@ -167,3 +171,103 @@ onMounted(async () => {
   }
 })
 </script>
+<style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+
+.jobs-page {
+  min-height: 100vh;
+  background: $gray-100;
+}
+
+.jobs-page-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  @include media-breakpoint-up(md) {
+    padding: 1.5rem;
+  }
+}
+
+.jobs-page-intro {
+  font-size: 0.9rem;
+  color: $gray-600;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.jobs-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  background: $white;
+  padding: 1rem;
+  border: 1px solid $gray-200;
+
+  @include media-breakpoint-up(md) {
+    flex-direction: row;
+  }
+}
+
+.jobs-location-input {
+  flex: 1;
+}
+
+.jobs-category-select {
+  @include media-breakpoint-up(md) {
+    max-width: 250px;
+  }
+}
+
+.jobs-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  color: $gray-600;
+}
+
+.jobs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jobs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  background: $white;
+  border: 1px solid $gray-200;
+
+  p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $gray-700;
+    margin: 0.5rem 0 0.25rem 0;
+  }
+
+  span {
+    color: $gray-500;
+    font-size: 0.9rem;
+  }
+}
+
+.jobs-empty-icon {
+  font-size: 2.5rem;
+  color: $gray-400;
+}
+
+.jobs-disclaimer {
+  font-size: 0.8rem;
+  color: $gray-500;
+  text-align: center;
+  margin-top: 1.5rem;
+}
+</style>

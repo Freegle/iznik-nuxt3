@@ -25,112 +25,112 @@
         <donation-button />
       </div>
       <div v-else-if="event">
-        <div v-if="!editing">
-          <div v-if="event.image">
-            <notice-message class="mb-3">
-              Scroll down past the picture for more information!
-            </notice-message>
-            <b-row>
-              <b-col>
-                <OurUploadedImage
-                  v-if="event?.image?.ouruid"
-                  width="200"
-                  :src="event.image.ouruid"
-                  :modifiers="event.image.imagemods"
-                  alt="Community Event Photo"
-                  class="mb-2 w-100"
-                />
-                <NuxtPicture
-                  v-else-if="event?.image?.imageuid"
-                  format="webp"
-                  width="200"
-                  provider="uploadcare"
-                  :src="event.image.imageuid"
-                  :modifiers="event.image.imagemods"
-                  alt="Community Event Photo"
-                  class="mb-2 w-100"
-                />
-                <b-img
-                  v-else
-                  lazy
-                  fluid
-                  :src="event.image.path"
-                  class="mb-2 w-100"
-                />
-              </b-col>
-            </b-row>
+        <div v-if="!editing" class="view-mode">
+          <div v-if="event.image" class="image-section">
+            <OurUploadedImage
+              v-if="event?.image?.ouruid"
+              :src="event.image.ouruid"
+              :modifiers="event.image.imagemods"
+              alt="Community Event Photo"
+              class="modal-image"
+            />
+            <NuxtPicture
+              v-else-if="event?.image?.imageuid"
+              format="webp"
+              width="200"
+              provider="uploadcare"
+              :src="event.image.imageuid"
+              :modifiers="event.image.imagemods"
+              alt="Community Event Photo"
+              class="modal-image"
+            />
+            <b-img
+              v-else
+              lazy
+              fluid
+              :src="event.image.path"
+              class="modal-image"
+            />
           </div>
-          <b-row>
-            <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ event.description }}</b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> Where</b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              {{ event.location }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> When</b-col>
-            <b-col cols="8" md="9">
-              <div
-                v-for="date in event?.dates"
-                :key="
-                  'event-' +
-                  event?.id +
-                  '-' +
-                  (date.start ? date.start.toString() : '') +
-                  '-' +
-                  (date.end ? date.end.toString() : '')
-                "
-                :class="date && date.string && date.string.past ? 'inpast' : ''"
-              >
-                <span v-if="date && date.string">
-                  <span v-if="date.string.start">
-                    {{ date.string.start }}
-                  </span>
-                  <span v-if="date.string.start && date.string.end"> - </span>
-                  <span v-if="date.string.end">
-                    {{ date.string.end }}
-                  </span>
-                  <br />
-                </span>
+          <div class="description-section">
+            {{ event.description }}
+          </div>
+          <div class="details-section">
+            <div v-if="event.location" class="detail-item">
+              <v-icon icon="map-marker-alt" class="detail-icon" />
+              <div class="detail-content">
+                <span class="detail-label">Location</span>
+                <span class="detail-value">{{ event.location }}</span>
               </div>
-            </b-col>
-          </b-row>
-          <b-row v-if="event.contactname">
-            <b-col cols="4" md="3" class="field"> Contact name</b-col>
-            <b-col cols="8" md="9">
-              {{ event.contactname }}
-            </b-col>
-          </b-row>
-          <b-row v-if="event.contactemail">
-            <b-col cols="4" md="3" class="field"> Contact email</b-col>
-            <b-col cols="8" md="9">
-              <!-- eslint-disable-next-line -->
+            </div>
+            <div v-if="event?.dates?.length" class="detail-item">
+              <v-icon icon="calendar-alt" class="detail-icon" />
+              <div class="detail-content">
+                <span class="detail-label">When</span>
+                <div class="detail-value">
+                  <div
+                    v-for="date in event.dates"
+                    :key="
+                      'event-' +
+                      event?.id +
+                      '-' +
+                      (date.start ? date.start.toString() : '') +
+                      '-' +
+                      (date.end ? date.end.toString() : '')
+                    "
+                    :class="
+                      date && date.string && date.string.past ? 'inpast' : ''
+                    "
+                  >
+                    <span v-if="date && date.string">
+                      <span v-if="date.string.start">
+                        {{ date.string.start }}
+                      </span>
+                      <span v-if="date.string.start && date.string.end">
+                        -
+                      </span>
+                      <span v-if="date.string.end">
+                        {{ date.string.end }}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="
+              event.contactname ||
+              event.contactemail ||
+              event.contacturl ||
+              event.contactphone
+            "
+            class="contact-section"
+          >
+            <h6 class="contact-header">Contact Information</h6>
+            <div v-if="event.contactname" class="contact-item">
+              <v-icon icon="user" class="contact-icon" />
+              <span>{{ event.contactname }}</span>
+            </div>
+            <div v-if="event.contactemail" class="contact-item">
+              <v-icon icon="envelope" class="contact-icon" />
               <ExternalLink :href="'mailto:' + event.contactemail">
                 {{ event.contactemail }}
               </ExternalLink>
-            </b-col>
-          </b-row>
-          <b-row v-if="event.contacturl">
-            <b-col cols="4" md="3" class="field"> Website</b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              <ExternalLink :href="event.contacturl">
+            </div>
+            <div v-if="event.contacturl" class="contact-item">
+              <v-icon icon="globe-europe" class="contact-icon" />
+              <ExternalLink :href="event.contacturl" class="text-break">
                 {{ event.contacturl }}
               </ExternalLink>
-            </b-col>
-          </b-row>
-          <b-row v-if="event.contactphone">
-            <b-col cols="4" md="3" class="field"> Contact phone</b-col>
-            <b-col cols="8" md="9">
-              {{ event.contactphone }}
-            </b-col>
-          </b-row>
-          <br />
-          <p class="text-muted">
-            Posted
-            <span v-if="user?.id">by {{ user.displayname }} </span>
+            </div>
+            <div v-if="event.contactphone" class="contact-item">
+              <v-icon icon="phone" class="contact-icon" />
+              <span>{{ event.contactphone }}</span>
+            </div>
+          </div>
+          <p v-if="user?.id" class="posted-by">
+            Posted by {{ user.displayname }}
             <span v-for="(group, index) in groups" :key="index">
               <span v-if="index > 0">, </span><span v-else>&nbsp;on</span>
               {{ group.namedisplay }}
@@ -343,56 +343,54 @@
       </div>
     </template>
     <template #footer>
-      <div class="w-100 d-flex justify-content-between">
+      <div class="modal-actions">
         <template v-if="added">
-          <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
-            Close
-          </b-button>
+          <b-button variant="secondary" @click="hide"> Close </b-button>
         </template>
-        <template v-else>
-          <template v-if="canmodify">
-            <b-button
-              v-if="!editing"
-              variant="white"
-              :disabled="uploadingPhoto"
-              @click="editing = true"
-            >
-              <v-icon icon="pen" />
-              Edit
-            </b-button>
-            <b-button
-              variant="white"
-              :disabled="uploadingPhoto"
-              @click="deleteIt"
-            >
-              <v-icon icon="trash-alt" />
-              Delete
-            </b-button>
-          </template>
+        <template v-else-if="editing">
           <b-button
-            v-if="!editing"
-            variant="white"
-            :disabled="uploadingPhoto"
-            @click="hide"
-          >
-            Close
-          </b-button>
-          <b-button
-            v-if="editing"
-            variant="white"
+            variant="link"
+            class="text-muted"
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
             Cancel
           </b-button>
           <SpinButton
-            v-if="editing && enabled"
+            v-if="enabled"
             variant="primary"
             :disabled="uploadingPhoto"
             icon-name="save"
-            :label="event.id ? 'Save Changes' : 'Add Event'"
+            :label="event.id ? 'Save' : 'Add Event'"
             @handle="saveIt"
           />
+        </template>
+        <template v-else>
+          <div class="action-left">
+            <b-button
+              v-if="canmodify"
+              variant="link"
+              class="text-danger"
+              :disabled="uploadingPhoto"
+              @click="deleteIt"
+            >
+              <v-icon icon="trash-alt" /> Delete
+            </b-button>
+          </div>
+          <div class="action-right">
+            <b-button
+              v-if="canmodify"
+              variant="secondary"
+              size="sm"
+              :disabled="uploadingPhoto"
+              @click="editing = true"
+            >
+              <v-icon icon="pen" /> Edit
+            </b-button>
+            <b-button variant="primary" size="sm" @click="hide">
+              Close
+            </b-button>
+          </div>
         </template>
       </div>
     </template>
@@ -819,6 +817,140 @@ watch(
 )
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+/* View mode styles */
+.view-mode {
+  padding: 0;
+}
+
+.image-section {
+  margin-bottom: 1rem;
+
+  .modal-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+  }
+}
+
+.description-section {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $color-gray--darker;
+  margin-bottom: 1.25rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.details-section {
+  background: $color-gray--lighter;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .detail-icon {
+    color: $color-blue--base;
+    width: 1rem;
+    margin-top: 0.2em;
+    flex-shrink: 0;
+  }
+
+  .detail-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .detail-label {
+    display: block;
+    font-size: 0.75rem;
+    color: $color-gray--dark;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    color: $color-gray--darker;
+    word-break: break-word;
+  }
+}
+
+.contact-section {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  .contact-header {
+    font-size: 0.85rem;
+    color: $color-gray--dark;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0;
+    font-size: 0.9rem;
+
+    .contact-icon {
+      color: $color-gray--dark;
+      width: 1rem;
+    }
+
+    a {
+      color: $color-blue--base;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.posted-by {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0;
+}
+
+.inpast {
+  color: $color-gray--dark;
+  text-decoration: line-through;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+
+  .action-left {
+    flex: 1;
+  }
+
+  .action-right {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+/* Edit mode styles */
 .field {
   font-weight: bold;
   color: $color-green--darker;
@@ -826,6 +958,9 @@ watch(
 
 .container {
   position: relative;
+  display: grid;
+  grid-template-columns: 32px 250px 32px;
+  justify-content: end;
 }
 
 .rotate__icon {
@@ -834,12 +969,6 @@ watch(
 
 .modal-footer > div {
   width: 100%;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 32px 250px 32px;
-  justify-content: end;
 }
 
 .rotateleft {

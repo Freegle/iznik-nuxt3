@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <pattern id="household-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+      <rect width="200" height="200" fill="#f8f6f1"/>
+
+      <!-- Armchair with cushion detail - tilted -->
+      <g transform="translate(15, 15) rotate(-12, 22, 25)" opacity="0.10">
+        <path d="M8 40 L8 15 Q8 8 15 8 L30 8 Q37 8 37 15 L37 40" stroke="#9a8571" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M5 20 L5 38 Q5 42 8 42 L37 42 Q40 42 40 38 L40 20" stroke="#9a8571" stroke-width="2.5" fill="none"/>
+        <path d="M12 25 Q22 22 33 25" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+        <line x1="8" y1="42" x2="8" y2="48" stroke="#9a8571" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="37" y1="42" x2="37" y2="48" stroke="#9a8571" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- Stack of books with bookmark -->
+      <g transform="translate(70, 8) rotate(8, 18, 22)" opacity="0.10">
+        <rect x="0" y="25" width="36" height="8" rx="1" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <rect x="2" y="17" width="32" height="8" rx="1" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <rect x="4" y="9" width="28" height="8" rx="1" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <path d="M24 9 L24 2 L27 5 L30 2 L30 9" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- Table lamp with shade detail -->
+      <g transform="translate(130, 5) rotate(-8, 20, 25)" opacity="0.10">
+        <ellipse cx="20" cy="45" rx="12" ry="3" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <line x1="20" y1="42" x2="20" y2="22" stroke="#9a8571" stroke-width="2.5"/>
+        <path d="M8 22 L12 8 Q20 5 28 8 L32 22 Z" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <path d="M14 15 Q20 13 26 15" stroke="#9a8571" stroke-width="1" fill="none"/>
+      </g>
+
+      <!-- Vintage bicycle -->
+      <g transform="translate(150, 50) rotate(-15, 25, 22)" opacity="0.10">
+        <circle cx="10" cy="28" r="10" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <circle cx="40" cy="28" r="10" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <circle cx="10" cy="28" r="3" fill="none" stroke="#9a8571" stroke-width="1"/>
+        <circle cx="40" cy="28" r="3" fill="none" stroke="#9a8571" stroke-width="1"/>
+        <path d="M10 28 L22 12 L40 28" stroke="#9a8571" stroke-width="2" fill="none"/>
+        <path d="M22 12 L30 12 L38 18" stroke="#9a8571" stroke-width="2" fill="none"/>
+        <line x1="22" y1="12" x2="22" y2="6" stroke="#9a8571" stroke-width="2"/>
+        <line x1="20" y1="6" x2="24" y2="6" stroke="#9a8571" stroke-width="2"/>
+      </g>
+
+      <!-- Dress on hanger -->
+      <g transform="translate(5, 80) rotate(15, 22, 25)" opacity="0.10">
+        <path d="M22 5 L10 12 M22 5 L34 12" stroke="#9a8571" stroke-width="2" stroke-linecap="round"/>
+        <ellipse cx="22" cy="4" rx="3" ry="2" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <path d="M10 12 L8 18 L12 20 L12 45 Q22 50 32 45 L32 20 L36 18 L34 12" stroke="#9a8571" stroke-width="2" fill="none"/>
+        <path d="M15 28 Q22 32 29 28" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- Cozy sofa with pillows -->
+      <g transform="translate(50, 78) rotate(-3, 30, 20)" opacity="0.10">
+        <rect x="5" y="15" width="55" height="22" rx="4" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <rect x="0" y="10" width="12" height="30" rx="3" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <rect x="53" y="10" width="12" height="30" rx="3" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <ellipse cx="22" cy="22" rx="6" ry="5" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <ellipse cx="43" cy="22" rx="6" ry="5" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <line x1="8" y1="40" x2="8" y2="45" stroke="#9a8571" stroke-width="2.5"/>
+        <line x1="57" y1="40" x2="57" y2="45" stroke="#9a8571" stroke-width="2.5"/>
+      </g>
+
+      <!-- Teddy bear with bow -->
+      <g transform="translate(135, 110) rotate(20, 18, 20)" opacity="0.10">
+        <circle cx="18" cy="22" r="14" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <circle cx="6" cy="10" r="6" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <circle cx="30" cy="10" r="6" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <circle cx="12" cy="18" r="2.5" fill="#9a8571"/>
+        <circle cx="24" cy="18" r="2.5" fill="#9a8571"/>
+        <ellipse cx="18" cy="26" rx="4" ry="3" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <path d="M14 32 L18 36 L22 32" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- Potted plant with leaves -->
+      <g transform="translate(8, 140) rotate(-10, 22, 25)" opacity="0.10">
+        <path d="M12 30 L16 50 L28 50 L32 30" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <line x1="14" y1="38" x2="30" y2="38" stroke="#9a8571" stroke-width="1"/>
+        <path d="M22 30 Q12 20 18 10 M22 30 Q22 15 22 5 M22 30 Q32 20 26 10" stroke="#9a8571" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M18 15 Q14 12 16 8" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+        <path d="M26 15 Q30 12 28 8" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- Coffee mug with steam -->
+      <g transform="translate(68, 148) rotate(12, 18, 18)" opacity="0.10">
+        <rect x="8" y="10" width="22" height="26" rx="3" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <path d="M30 14 Q40 14 40 23 Q40 32 30 32" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <path d="M14 8 Q14 4 17 4 Q20 4 20 8" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+        <path d="M22 6 Q22 2 25 2 Q28 2 28 6" stroke="#9a8571" stroke-width="1.5" fill="none"/>
+      </g>
+
+      <!-- Moving box with tape -->
+      <g transform="translate(120, 155) rotate(-18, 18, 15)" opacity="0.10">
+        <rect x="0" y="5" width="36" height="28" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <path d="M0 5 L8 0 L44 0 L36 5" stroke="#9a8571" stroke-width="2" fill="none"/>
+        <line x1="36" y1="5" x2="44" y2="0" stroke="#9a8571" stroke-width="2"/>
+        <line x1="18" y1="0" x2="18" y2="12" stroke="#9a8571" stroke-width="3"/>
+        <line x1="12" y1="5" x2="24" y2="5" stroke="#9a8571" stroke-width="3"/>
+      </g>
+
+      <!-- Acoustic guitar -->
+      <g transform="translate(168, 120) rotate(40, 18, 35)" opacity="0.10">
+        <ellipse cx="18" cy="50" rx="14" ry="18" fill="none" stroke="#9a8571" stroke-width="2"/>
+        <ellipse cx="18" cy="50" rx="5" ry="6" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <path d="M18 32 L18 5" stroke="#9a8571" stroke-width="2.5"/>
+        <rect x="14" y="0" width="8" height="10" rx="1" fill="none" stroke="#9a8571" stroke-width="1.5"/>
+        <line x1="15" y1="3" x2="15" y2="8" stroke="#9a8571" stroke-width="1"/>
+        <line x1="18" y1="3" x2="18" y2="8" stroke="#9a8571" stroke-width="1"/>
+        <line x1="21" y1="3" x2="21" y2="8" stroke="#9a8571" stroke-width="1"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="200" height="200" fill="url(#household-pattern)"/>
+</svg>

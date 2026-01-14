@@ -2,40 +2,18 @@
   <b-modal
     ref="modal"
     scrollable
-    size="lg"
+    size="xl"
     no-trap
-    :fullscreen="showImagesProxy"
-    class="hide-footer"
-    body-class="p-0 p-md-3"
-    header-class="p-0"
+    hide-header
+    :fullscreen="showImagesProxy ? true : 'lg-down'"
+    class="hide-footer message-modal"
+    body-class="p-0"
+    dialog-class="message-modal-dialog"
+    content-class="message-modal-content"
     @shown="bumpMessage++"
   >
-    <template #header>
-      <div class="layout">
-        <div>
-          <VisibleWhen
-            v-if="bumpMessage > 0"
-            :at="['xs', 'sm']"
-            class="maybeAd"
-          >
-            <ExternalDa
-              ad-unit-path="/22794232631/freegle_modal_app"
-              max-height="50px"
-              div-id="div-gpt-ad-1711542403014-0"
-              in-modal
-            />
-          </VisibleWhen>
-        </div>
-        <div
-          class="closebutton mt-1 mb-1 d-flex justify-content-around"
-          @click="close"
-        >
-          <v-icon icon="times-circle" class="fa-2x" />
-        </div>
-      </div>
-    </template>
     <template #default>
-      <div v-if="message">
+      <div v-if="message" class="message-content-wrapper">
         <div v-if="showImagesProxy">
           <div>
             <b-button
@@ -75,14 +53,9 @@
           :replyable="replyable"
           :hide-close="hideClose"
           :actions="actions"
-          :show-map="true"
-          :show-ad="true"
-          ad-unit-path="/22794232631/freegle_product"
-          ad-id="div-gpt-ad-1691925699378-0"
           class="ml-md-2 mr-md-2 mt-md-2 ml-0 mr-0 mt-0"
           in-modal
           @close="hide"
-          @zoom="showImagesProxy = true"
         />
       </div>
       <div
@@ -95,11 +68,14 @@
   </b-modal>
 </template>
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, defineAsyncComponent } from 'vue'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import ImageCarousel from '~/components/ImageCarousel'
-import MessageExpanded from '~/components/MessageExpanded'
+
+const MessageExpanded = defineAsyncComponent(() =>
+  import('~/components/MessageExpanded')
+)
 
 const messageStore = useMessageStore()
 
@@ -150,14 +126,6 @@ const showImagesProxy = computed({
     emit('update:showImages', value)
   },
 })
-
-function close() {
-  if (showImagesProxy.value) {
-    showImagesProxy.value = false
-  } else {
-    hide()
-  }
-}
 </script>
 
 <style scoped lang="scss">
@@ -216,5 +184,41 @@ function close() {
     max-width: 5rem;
     align-content: end;
   }
+}
+</style>
+
+<style lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+/* Global styles for message modal - always near-full height */
+.message-modal-dialog {
+  height: 96vh;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+}
+
+.message-modal-content {
+  height: 100%;
+  overflow: hidden;
+  padding: 0.5rem;
+  background: $color-white;
+  position: relative;
+}
+
+/* Ensure body fills content */
+.message-modal .modal-body {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wrapper div for conditional content - fill flex parent */
+.message-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 </style>

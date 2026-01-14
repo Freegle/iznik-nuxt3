@@ -47,7 +47,6 @@ test.describe('Homepage tests', () => {
   async function testHomepageAtBreakpoint(
     breakpoint,
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot
   ) {
     const bp = breakpoint
@@ -59,10 +58,13 @@ test.describe('Homepage tests', () => {
     console.log(
       `[DEBUG] Creating browser context with viewport ${bp.width}x${bp.height}`
     )
+    const baseURL =
+      process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
     const context = await browser.newContext({
       ignoreHTTPSErrors: true,
       acceptDownloads: true,
       viewport: { width: bp.width, height: bp.height },
+      baseURL,
     })
 
     console.log(`[DEBUG] Creating new page`)
@@ -83,16 +85,19 @@ test.describe('Homepage tests', () => {
     await page.goto('/', { timeout: timeouts.navigation.initial })
     console.log(`[DEBUG] Navigation completed in ${Date.now() - startTime}ms`)
 
-    console.log(`[DEBUG] Starting waitForNuxtPageLoad with 30s timeout`)
+    // Wait for page to fully load - using the new page directly instead of fixture's waitForNuxtPageLoad
+    console.log(`[DEBUG] Waiting for page load state with 30s timeout`)
     const loadStartTime = Date.now()
     try {
-      await waitForNuxtPageLoad({ timeout: 30000 })
+      await page.waitForLoadState('domcontentloaded', { timeout: 30000 })
+      // Also wait for network to settle
+      await page.waitForLoadState('networkidle', { timeout: 30000 })
       console.log(
-        `[DEBUG] Nuxt page load completed in ${Date.now() - loadStartTime}ms`
+        `[DEBUG] Page load completed in ${Date.now() - loadStartTime}ms`
       )
     } catch (error) {
       console.log(
-        `[DEBUG] Nuxt page load failed after ${
+        `[DEBUG] Page load failed after ${
           Date.now() - loadStartTime
         }ms with error: ${error.message}`
       )
@@ -132,49 +137,56 @@ test.describe('Homepage tests', () => {
     // Check that essential elements that should always be visible are displayed
     console.log(`[DEBUG] Starting essential element checks`)
 
-    // 1. Main buttons should always be visible
+    // 1. Main buttons - unified layout uses .action-btn with "Give" and "Find" text at all breakpoints
     console.log(
-      `[DEBUG] Waiting for "Give Stuff" button with timeout ${timeouts.ui.appearance}ms`
+      `[DEBUG] Waiting for "Give" button with timeout ${timeouts.ui.appearance}ms`
     )
     const giveStuffStart = Date.now()
     await page
-      .locator('.btn:has-text("Give Stuff")')
+      .locator('.action-btn:has-text("Give")')
+      .filter({ visible: true })
+      .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
-      `[DEBUG] "Give Stuff" button found in ${Date.now() - giveStuffStart}ms`
+      `[DEBUG] "Give" button found in ${Date.now() - giveStuffStart}ms`
     )
 
     console.log(
-      `[DEBUG] Waiting for "Ask for Stuff" button with timeout ${timeouts.ui.appearance}ms`
+      `[DEBUG] Waiting for "Find" button with timeout ${timeouts.ui.appearance}ms`
     )
     const askStuffStart = Date.now()
     await page
-      .locator('.btn:has-text("Ask for Stuff")')
+      .locator('.action-btn:has-text("Find")')
+      .filter({ visible: true })
+      .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
-      `[DEBUG] "Ask for Stuff" button found in ${Date.now() - askStuffStart}ms`
+      `[DEBUG] "Find" button found in ${Date.now() - askStuffStart}ms`
     )
 
-    // 2. PlaceAutocomplete should always be visible
+    // 2. PlaceAutocomplete/location input should always be visible
     console.log(
-      `[DEBUG] Waiting for PlaceAutocomplete text with timeout ${timeouts.ui.appearance}ms`
+      `[DEBUG] Waiting for location input with timeout ${timeouts.ui.appearance}ms`
     )
     const placeStart = Date.now()
     await page
-      .locator("text=See what's being freegled near you")
+      .locator('input[placeholder="Type your location"]')
+      .filter({ visible: true })
+      .first()
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-    console.log(
-      `[DEBUG] PlaceAutocomplete text found in ${Date.now() - placeStart}ms`
-    )
+    console.log(`[DEBUG] Location input found in ${Date.now() - placeStart}ms`)
 
-    // 3. App download links should always be visible (wait for ProxyImage to load)
+    // 3. App download links - unified layout uses .app-section at all breakpoints
     console.log(
       `[DEBUG] Waiting for app download container with timeout ${timeouts.ui.appearance}ms`
     )
     const containerStart = Date.now()
-    await page
-      .locator('.app-download')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    const appDownload = page.locator('.app-section')
+    await appDownload.scrollIntoViewIfNeeded()
+    await appDownload.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     console.log(
       `[DEBUG] App download container found in ${Date.now() - containerStart}ms`
     )
@@ -184,7 +196,7 @@ test.describe('Homepage tests', () => {
     )
     const playStart = Date.now()
     await page
-      .locator('img[alt="Freegle Android app on Google Play"]')
+      .locator('img[alt="Get it on Google Play"]')
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
       `[DEBUG] Google Play image found in ${Date.now() - playStart}ms`
@@ -195,163 +207,70 @@ test.describe('Homepage tests', () => {
     )
     const appStoreStart = Date.now()
     await page
-      .locator('img[alt="Freegle app for iPhone, iPad, and iPod touch"]')
+      .locator('img[alt="Download on the App Store"]')
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
       `[DEBUG] App Store image found in ${Date.now() - appStoreStart}ms`
     )
 
     // 4. Footer should always be visible
+    // Filter for visible footer since both mobile and desktop layouts exist in DOM
     console.log(
       `[DEBUG] Waiting for footer container with timeout ${timeouts.ui.appearance}ms`
     )
     const footerStart = Date.now()
-    await page
-      .locator('.thefooter')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    const footer = page.locator('.thefooter').filter({ visible: true }).first()
+    await footer.scrollIntoViewIfNeeded()
+    await footer.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
       `[DEBUG] Footer container found in ${Date.now() - footerStart}ms`
     )
 
-    // Breakpoint-specific tests
+    // Breakpoint-specific tests - unified layout but different photo displays
+    // xs/sm: Single photo frame with .hero-line1 slogan
+    // md+: Carousel with .slogan-line1 slogan (inside carousel component)
+    const isMobilePhotoFrame = bp.name === 'xs' || bp.name === 'sm'
     console.log(`[DEBUG] Starting breakpoint-specific tests for ${bp.name}`)
-    if (bp.name === 'xs') {
-      console.log(`[DEBUG] Running mobile (xs) specific tests`)
 
-      // On mobile (xs) we should see:
-      // - Mobile header
-      console.log(`[DEBUG] Waiting for mobile header text`)
+    // Common elements at all breakpoints
+    console.log(`[DEBUG] Waiting for subtitle text`)
+    const subtitleStart = Date.now()
+    await page
+      .locator('text=Give and get stuff locally for free')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Subtitle found in ${Date.now() - subtitleStart}ms`)
+
+    // Sample grid should be visible at all breakpoints
+    console.log(`[DEBUG] Waiting for sample-grid component`)
+    const visualiseStart = Date.now()
+    await page
+      .locator('.sample-grid')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Sample grid found in ${Date.now() - visualiseStart}ms`)
+
+    if (isMobilePhotoFrame) {
+      console.log(`[DEBUG] Running mobile photo frame (${bp.name}) tests`)
+
+      // On xs/sm: Single photo frame with .hero-line1 slogan
+      console.log(`[DEBUG] Waiting for mobile slogan text (.hero-line1)`)
       const mobileHeaderStart = Date.now()
       await page
-        .locator('text=Freegle - online dating for stuff')
+        .locator('.hero-line1:has-text("Share the love")')
         .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       console.log(
-        `[DEBUG] Mobile header found in ${Date.now() - mobileHeaderStart}ms`
+        `[DEBUG] Mobile slogan found in ${Date.now() - mobileHeaderStart}ms`
       )
-
-      // - Mobile description
-      console.log(`[DEBUG] Waiting for mobile description text`)
-      const mobileDescStart = Date.now()
-      await page
-        .locator("text=Got things you don't need? Need stuff?")
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] Mobile description found in ${Date.now() - mobileDescStart}ms`
-      )
-
-      // - VisualiseList component should be visible on mobile
-      console.log(`[DEBUG] Waiting for VisualiseList component`)
-      const visualiseStart = Date.now()
-      await page
-        .locator(selectors.common.visualiseList)
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] VisualiseList component found in ${
-          Date.now() - visualiseStart
-        }ms`
-      )
-
-      // - FreeglerPhotos should NOT be visible
-      console.log(`[DEBUG] Checking that FreeglerPhotos is NOT visible`)
-      const freeglerPhotosVisible = await page
-        .locator(selectors.common.freeglerPhotos)
-        .isVisible()
-      console.log(`[DEBUG] FreeglerPhotos visible: ${freeglerPhotosVisible}`)
-      expect(freeglerPhotosVisible).toBe(false)
-
-      // - "Don't throw it away" tagline should NOT be visible
-      console.log(`[DEBUG] Checking that tagline is NOT visible`)
-      const taglineVisible = await page
-        .locator("text=Don't throw it away, give it away!")
-        .isVisible()
-      console.log(`[DEBUG] Tagline visible: ${taglineVisible}`)
-      expect(taglineVisible).toBe(false)
     } else {
-      console.log(`[DEBUG] Running desktop (${bp.name}) specific tests`)
+      console.log(`[DEBUG] Running carousel (${bp.name}) tests`)
 
-      // On larger screens (sm and up):
-      // - Desktop header
-      console.log(`[DEBUG] Waiting for desktop header text`)
-      const desktopHeaderStart = Date.now()
+      // On md+: Carousel with .slogan-line1 slogan
+      console.log(`[DEBUG] Waiting for carousel slogan text (.slogan-line1)`)
+      const carouselSloganStart = Date.now()
       await page
-        .locator('text=Freegle - like online dating for stuff')
+        .locator('.slogan-line1:has-text("Share the love")')
         .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
       console.log(
-        `[DEBUG] Desktop header found in ${Date.now() - desktopHeaderStart}ms`
-      )
-
-      // - Desktop description
-      console.log(`[DEBUG] Waiting for desktop description text (part 1)`)
-      const desktopDesc1Start = Date.now()
-      await page
-        .locator("text=Got stuff you don't need? Looking for something?")
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] Desktop description part 1 found in ${
-          Date.now() - desktopDesc1Start
-        }ms`
-      )
-
-      console.log(`[DEBUG] Waiting for desktop description text (part 2)`)
-      const desktopDesc2Start = Date.now()
-      await page
-        .locator(
-          "text=We'll match you with someone local. All completely free."
-        )
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] Desktop description part 2 found in ${
-          Date.now() - desktopDesc2Start
-        }ms`
-      )
-    }
-
-    // Specific checks for medium and larger screens
-    if (
-      bp.name === 'md' ||
-      bp.name === 'lg' ||
-      bp.name === 'xl' ||
-      bp.name === 'xxl'
-    ) {
-      console.log(`[DEBUG] Running medium+ screen tests for ${bp.name}`)
-
-      // "Don't throw it away" tagline should be visible on md screens and up
-      console.log(
-        `[DEBUG] Waiting for "Don't throw it away" tagline (should be visible on ${bp.name})`
-      )
-      const taglineStart = Date.now()
-      await page
-        .locator("text=Don't throw it away, give it away!")
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(`[DEBUG] Tagline found in ${Date.now() - taglineStart}ms`)
-
-      // "Just looking?" heading should be visible on md screens and up
-      console.log(`[DEBUG] Waiting for "Just looking?" heading`)
-      const justLookingStart = Date.now()
-      await page
-        .locator('text=Just looking?')
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] "Just looking?" heading found in ${
-          Date.now() - justLookingStart
-        }ms`
-      )
-    }
-
-    // Specific checks for large and larger screens
-    if (bp.name === 'lg' || bp.name === 'xl' || bp.name === 'xxl') {
-      console.log(`[DEBUG] Running large+ screen tests for ${bp.name}`)
-
-      // FreeglerPhotos should be visible on lg screens and up
-      console.log(
-        `[DEBUG] Waiting for FreeglerPhotos (should be visible on ${bp.name})`
-      )
-      const freeglerStart = Date.now()
-      await page
-        .locator(selectors.common.freeglerPhotos)
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] FreeglerPhotos found in ${Date.now() - freeglerStart}ms`
+        `[DEBUG] Carousel slogan found in ${Date.now() - carouselSloganStart}ms`
       )
     }
 
@@ -359,94 +278,82 @@ test.describe('Homepage tests', () => {
     await takeTimestampedScreenshot(`homepage-${bp.name}`)
     console.log(`[DEBUG] Screenshot completed for ${bp.name}`)
 
-    // Close the page and context to clean up resources.  Don't await, though, in case it hangs.
+    // Close the page and context to clean up resources properly for parallel execution.
     console.log(`[DEBUG] Cleaning up page and context for ${bp.name}`)
-    page.close()
-    context.close()
+    await page.close()
+    await context.close()
     console.log(`[DEBUG] Test completed for ${bp.name} breakpoint`)
   }
 
   // Individual breakpoint tests
   test('homepage should display correctly at xs breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const xsBreakpoint = breakpoints.find((bp) => bp.name === 'xs')
     await testHomepageAtBreakpoint(
       xsBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
 
   test('homepage should display correctly at sm breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const smBreakpoint = breakpoints.find((bp) => bp.name === 'sm')
     await testHomepageAtBreakpoint(
       smBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
 
   test('homepage should display correctly at md breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const mdBreakpoint = breakpoints.find((bp) => bp.name === 'md')
     await testHomepageAtBreakpoint(
       mdBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
 
   test('homepage should display correctly at lg breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const lgBreakpoint = breakpoints.find((bp) => bp.name === 'lg')
     await testHomepageAtBreakpoint(
       lgBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
 
   test('homepage should display correctly at xl breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const xlBreakpoint = breakpoints.find((bp) => bp.name === 'xl')
     await testHomepageAtBreakpoint(
       xlBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
 
   test('homepage should display correctly at xxl breakpoint', async ({
     browser,
-    waitForNuxtPageLoad,
     takeTimestampedScreenshot,
   }) => {
     const xxlBreakpoint = breakpoints.find((bp) => bp.name === 'xxl')
     await testHomepageAtBreakpoint(
       xxlBreakpoint,
       browser,
-      waitForNuxtPageLoad,
       takeTimestampedScreenshot
     )
   })
@@ -460,41 +367,41 @@ test.describe('Homepage tests', () => {
     await setupTestPage({ path: '/', viewport: { width: 1280, height: 800 } })
     await waitForNuxtPageLoad({ timeout: 30000 })
 
-    // Test 1: Clicking "Give Stuff" should navigate to /give
-    const giveStuffButton = page.locator('.btn:has-text("Give Stuff")')
-    await giveStuffButton.waitFor({
+    // Test 1: Clicking "Give" button should navigate to /give
+    const giveButton = page.locator('.action-btn:has-text("Give")')
+    await giveButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
     // Create a navigation promise before clicking
-    const giveStuffNavigation = page.waitForURL('/give', {
+    const giveNavigation = page.waitForURL('/give', {
       timeout: timeouts.navigation.default,
     })
-    await giveStuffButton.filter({ visible: true }).first().click()
+    await giveButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
-    await giveStuffNavigation
+    await giveNavigation
     expect(page.url()).toContain('/give')
 
     // Go back to homepage
     await page.gotoAndVerify('/')
 
-    // Test 2: Clicking "Ask for Stuff" should navigate to /find
-    const askStuffButton = page.locator('.btn:has-text("Ask for Stuff")')
-    await askStuffButton.waitFor({
+    // Test 2: Clicking "Find" button should navigate to /find
+    const findButton = page.locator('.action-btn:has-text("Find")')
+    await findButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
     // Create a navigation promise before clicking
-    const askStuffNavigation = page.waitForURL('/find', {
+    const findNavigation = page.waitForURL('/find', {
       timeout: timeouts.navigation.default,
     })
-    await askStuffButton.filter({ visible: true }).first().click()
+    await findButton.filter({ visible: true }).first().click()
 
     // Wait for navigation to complete
-    await askStuffNavigation
+    await findNavigation
     expect(page.url()).toContain('/find')
 
     // Go back to homepage again for testing PlaceAutocomplete
@@ -510,8 +417,11 @@ test.describe('Homepage tests', () => {
     await setupTestPage({ path: '/', viewport: { width: 1280, height: 800 } })
     await waitForNuxtPageLoad({ timeout: 30000 })
 
-    // Locate the PlaceAutocomplete input field
-    const placeInput = page.locator(selectors.placeAutocomplete.input)
+    // Locate the PlaceAutocomplete input field (filter for visible to handle mobile/desktop variants)
+    const placeInput = page
+      .locator(selectors.placeAutocomplete.input)
+      .filter({ visible: true })
+      .first()
     await placeInput.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
