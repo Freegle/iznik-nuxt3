@@ -520,6 +520,10 @@ export const useAuthStore = defineStore({
       await this.$api.user.unbounce(id)
       this.user.bouncing = 0
     },
+    async unbounceMT(id) {
+      // ModTools - unbounce for another user
+      await this.$api.user.unbounce(id)
+    },
     async saveAndGet(params) {
       console.log('Save and get', params)
       await this.$api.session.save(params, function (data) {
@@ -614,6 +618,20 @@ export const useAuthStore = defineStore({
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
+    },
+    async yahooCodeLogin(code) {
+      // ModTools
+      return await this.$api.session.yahooCodeLogin(code)
+    },
+    async merge(params) {
+      // ModTools - merge two user accounts
+      await api(this.config).user.merge(
+        params.email1,
+        params.email2,
+        params.id1,
+        params.id2,
+        params.reason
+      )
     },
   },
   getters: {

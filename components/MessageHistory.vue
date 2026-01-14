@@ -158,7 +158,15 @@ const approvedby = computed(() => {
   if (mod.value) {
     for (const group of message.value?.groups || []) {
       if (group.approvedby) {
-        result = group.approvedby.displayname
+        // Handle both Go API (numeric ID) and PHP API (object with displayname)
+        if (Number.isInteger(group.approvedby)) {
+          // Go API returns numeric ID - look up in userStore
+          const user = userStore.byId(group.approvedby)
+          result = user?.displayname || ''
+        } else {
+          // PHP API returns object with displayname
+          result = group.approvedby.displayname
+        }
       }
     }
   }
