@@ -79,3 +79,4 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/README.md
 fastlane/metadata/android/en-US/changelogs/
+.netlify/
