@@ -26,6 +26,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['rated'])
+
 const { modal, hide } = useOurModal()
 
 const userStore = useUserStore()
@@ -49,6 +51,7 @@ async function rate(rating, reason, text) {
 }
 
 async function removeRating() {
+  emit('rated', 'None')
   await rate(null)
   hide()
 }

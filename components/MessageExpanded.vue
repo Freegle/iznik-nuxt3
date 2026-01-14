@@ -559,8 +559,10 @@ import {
   onUnmounted,
 } from 'vue'
 import { useMiscStore } from '~/stores/misc'
+import { useMobileStore } from '~/stores/mobile'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { action } from '~/composables/useClientLog'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -610,6 +612,7 @@ const props = defineProps({
 const emit = defineEmits(['zoom', 'close'])
 
 const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
 const { me, loggedIn } = useMe()
 
 // Use shared composable for common message display logic
@@ -640,6 +643,7 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 // State
 const replied = ref(false)
 const replyExpanded = ref(false)
+const mountTime = ref(null)
 const showMapModal = ref(false)
 const showMessagePhotosModal = ref(false)
 const showShareModal = ref(false)
@@ -841,6 +845,23 @@ function updateWindowHeight() {
 }
 
 onMounted(() => {
+  mountTime.value = Date.now()
+
+  // Log mount for debugging mobile navigation issues.
+  action('message_expanded_mount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    in_modal: props.inModal,
+    breakpoint: miscStore.breakpoint,
+  })
+
+  // Prevent orientation changes while fullscreen overlay is open - keyboard opening
+  // changes viewport dimensions which would incorrectly trigger landscape mode and
+  // cause ScrollGrid to unmount/remount components, losing the modal state.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(true)
+  }
+
   // Enable ken-burns animation now that hydration is complete
   isMounted.value = true
 
@@ -853,6 +874,45 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  const timeOpenMs = mountTime.value ? Date.now() - mountTime.value : null
+
+  action('message_expanded_unmount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    time_open_ms: timeOpenMs,
+  })
+
+  // Clear the fullscreen modal flag so orientation detection resumes.
+  // Re-check orientation since it may have changed while blocked.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(false)
+    // Use same detection method as OrientationFettler: Capacitor for app, matchMedia for web.
+    if (mobileStore.isApp) {
+      // In app, use Capacitor ScreenOrientation plugin.
+      import('@capacitor/screen-orientation')
+        .then(({ ScreenOrientation }) => {
+          ScreenOrientation.orientation().then((orientation) => {
+            const isLandscape =
+              orientation.type === 'landscape-primary' ||
+              orientation.type === 'landscape-secondary'
+            miscStore.setLandscape(isLandscape)
+          })
+        })
+        .catch(() => {
+          // Fallback to matchMedia if plugin unavailable.
+          if (typeof window !== 'undefined') {
+            miscStore.setLandscape(
+              window.matchMedia('(orientation: landscape)').matches
+            )
+          }
+        })
+    } else if (typeof window !== 'undefined') {
+      miscStore.setLandscape(
+        window.matchMedia('(orientation: landscape)').matches
+      )
+    }
+  }
+
   stopThumbnailAutoScroll()
   window.removeEventListener('resize', updateWindowHeight)
 })

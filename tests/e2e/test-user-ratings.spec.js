@@ -25,11 +25,7 @@ test.describe('User ratings tests', () => {
       const text = msg.text()
       const type = msg.type()
       allConsoleLogs.push(`[${type}] ${text.substring(0, 200)}`)
-      if (
-        text.includes('UserRatings') ||
-        text.includes('ChatHeader') ||
-        text.includes('userStore:')
-      ) {
+      if (text.includes('UserRatings') || text.includes('ChatHeader') || text.includes('userStore:')) {
         browserLogs.push(`[${type}] ${text}`)
         console.log(`BROWSER [${type}]:`, text)
       }
@@ -47,20 +43,14 @@ test.describe('User ratings tests', () => {
     page.on('request', (request) => {
       const url = request.url()
       // Track rating calls and user fetch calls
-      if (
-        url.includes('/api/') &&
-        (url.includes('rating') || url.includes('user'))
-      ) {
+      if (url.includes('/api/') && (url.includes('rating') || url.includes('user'))) {
         apiCalls.push({ method: request.method(), url })
         console.log(`API REQUEST: ${request.method()} ${url}`)
       }
     })
-    page.on('response', (response) => {
+    page.on('response', async (response) => {
       const url = response.url()
-      if (
-        url.includes('/api/') &&
-        (url.includes('rating') || url.includes('user'))
-      ) {
+      if (url.includes('/api/') && (url.includes('rating') || url.includes('user'))) {
         console.log(`API RESPONSE: ${response.status()} ${url}`)
       }
     })
@@ -178,9 +168,7 @@ test.describe('User ratings tests', () => {
     const testStatic = await userRatings.getAttribute('data-test-static')
     console.log(`UserRatings static test attr: ${testStatic}`)
     if (testStatic !== 'hello') {
-      console.log(
-        'WARNING: Static test attribute missing or incorrect - may be using cached/old build!'
-      )
+      console.log('WARNING: Static test attribute missing or incorrect - may be using cached/old build!')
     }
 
     const debugId = await userRatings.getAttribute('data-debug-id')
@@ -226,9 +214,7 @@ test.describe('User ratings tests', () => {
 
       // Check for Vue event listeners via __vueParentComponent
       const hasVueHandler = !!(
-        btn.__vueParentComponent ||
-        btn._vei ||
-        btn.__vue__
+        btn.__vueParentComponent || btn._vei || btn.__vue__
       )
 
       // Check for native onclick
@@ -255,9 +241,7 @@ test.describe('User ratings tests', () => {
       path: 'test-results/user-ratings-before-click.png',
       fullPage: false,
     })
-    console.log(
-      'Saved debug screenshot: test-results/user-ratings-before-click.png'
-    )
+    console.log('Saved debug screenshot: test-results/user-ratings-before-click.png')
 
     // Get full HTML of UserRatings element
     const userRatingsHTML = await userRatings.innerHTML()
@@ -282,9 +266,7 @@ test.describe('User ratings tests', () => {
       document.head.appendChild(style)
 
       // Also remove any existing tooltips
-      document
-        .querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover')
-        .forEach((el) => el.remove())
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
     })
 
     // Wait for CSS to take effect
@@ -294,10 +276,7 @@ test.describe('User ratings tests', () => {
     // Native btn.click() may not trigger Vue event handlers in production builds
     console.log('Clicking thumbs up button via MouseEvent dispatch...')
     await thumbsUpButton.evaluate((btn) => {
-      console.log(
-        'Dispatching MouseEvent on button:',
-        btn.outerHTML.substring(0, 100)
-      )
+      console.log('Dispatching MouseEvent on button:', btn.outerHTML.substring(0, 100))
       const event = new MouseEvent('click', {
         view: window,
         bubbles: true,
@@ -316,9 +295,7 @@ test.describe('User ratings tests', () => {
       path: 'test-results/user-ratings-after-click.png',
       fullPage: false,
     })
-    console.log(
-      'Saved debug screenshot: test-results/user-ratings-after-click.png'
-    )
+    console.log('Saved debug screenshot: test-results/user-ratings-after-click.png')
 
     console.log(`Browser logs after click: ${browserLogs.length}`)
     browserLogs.forEach((log) => console.log('  ', log))
@@ -363,9 +340,7 @@ test.describe('User ratings tests', () => {
     // Now click again to show the remove modal
     // CSS already disables tooltips, just remove any that appeared
     await page.evaluate(() => {
-      document
-        .querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover')
-        .forEach((el) => el.remove())
+      document.querySelectorAll('.tooltip, [role="tooltip"], .b-tooltip, .popover').forEach(el => el.remove())
     })
 
     console.log('Clicking thumbs up button again to show remove modal...')

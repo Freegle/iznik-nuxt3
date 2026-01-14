@@ -130,6 +130,7 @@ import { computed, toRef } from 'vue'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
 import { useMiscStore } from '~/stores/misc'
 import { useOrientation } from '~/composables/useOrientation'
+import { action } from '~/composables/useClientLog'
 import MessageTag from '~/components/MessageTag'
 
 const props = defineProps({
@@ -218,6 +219,17 @@ const hasLocation = computed(() => {
 })
 
 function expand(e) {
+  // Log the click for debugging mobile navigation issues.
+  action('message_card_click', {
+    message_id: props.id,
+    is_successful: !!message.value?.successful,
+    breakpoint: miscStore.breakpoint,
+    click_x: e?.clientX,
+    click_y: e?.clientY,
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight,
+  })
+
   if (!message.value?.successful) {
     emit('expand')
 

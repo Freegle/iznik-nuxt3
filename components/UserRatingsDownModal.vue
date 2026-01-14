@@ -76,6 +76,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['rated'])
+
 const { modal, hide } = useOurModal()
 
 const showError = ref(false)
@@ -94,6 +96,7 @@ async function doSomeoneDown(e) {
   if (!reason.value || !text.value) {
     showError.value = true
   } else {
+    emit('rated', 'Down')
     await rate('Down', reason.value, text.value)
     hide()
   }

@@ -50,7 +50,12 @@
             size="lg"
             :min="today"
             :max="maxDeadline"
+            :class="{ 'is-invalid': deadlineError }"
+            @input="deadlineError = false"
           />
+          <div v-if="deadlineError" class="text-danger small mt-1">
+            The deadline must be today or in the future.
+          </div>
         </div>
       </div>
     </div>
@@ -85,6 +90,7 @@ const deliveryPossible = ref(false)
 const hasDeadline = ref(false)
 const deadline = ref('')
 const deadlineInput = ref(null)
+const deadlineError = ref(false)
 
 // Calculate date limits
 const today = computed(() => {
@@ -137,6 +143,16 @@ function setDeadlineAndShowPicker() {
 }
 
 function goNext() {
+  // Validate deadline is not in the past
+  if (hasDeadline.value && deadline.value && deadline.value < today.value) {
+    deadlineError.value = true
+    const input = deadlineInput.value?.element
+    if (input) {
+      input.focus()
+    }
+    return
+  }
+
   // Save delivery and deadline to compose store before navigating
   // Note: messageId can be 0 which is falsy but valid, so check for null explicitly
   if (messageId.value !== null) {
