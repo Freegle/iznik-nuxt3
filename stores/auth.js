@@ -31,6 +31,8 @@ export const useAuthStore = defineStore({
     userlist: [],
     loginType: null,
     loginCount: 0,
+    work: {}, // ModTools: moderator work counts
+    discourse: {}, // ModTools: Discourse integration
   }),
   actions: {
     init(config) {
