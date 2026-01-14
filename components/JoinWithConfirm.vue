@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <span class="d-inline-block">
     <b-button
       :size="size"
       :variant="variant"
@@ -15,7 +15,7 @@
       @confirm="confirmed"
       @hidden="showConfirm = false"
     />
-  </div>
+  </span>
 </template>
 <script setup>
 import { ref, defineAsyncComponent } from 'vue'

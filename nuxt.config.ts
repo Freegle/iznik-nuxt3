@@ -33,6 +33,17 @@ console.log('config.APP_ENV', config.APP_ENV)
 console.log('config.USE_COOKIES', config.USE_COOKIES)
 const production = config.APP_ENV ? config.APP_ENV === 'production' : true
 
+// Detect if we're on Netlify (need legacy builds for old browser support)
+// vs CI/Docker (skip legacy for faster builds - users have modern browsers)
+const isNetlify = !!process.env.NETLIFY || !!process.env.DEPLOY_URL
+console.log('isNetlify:', isNetlify)
+
+// Detect if prerendering should be disabled (for CI/Docker builds)
+// This is set in docker-compose.yml to avoid prerender failures during container builds
+const prerenderRoutes = process.env.NUXT_NITRO_PRERENDER_ROUTES !== 'false'
+console.log('prerenderRoutes:', prerenderRoutes)
+
+
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
@@ -52,8 +63,6 @@ const production = config.APP_ENV ? config.APP_ENV === 'production' : true
   }).on("error", (error) => { console.error(error.message) })
 } else { console.error('config.COOKIEYES not set') }
  */
-
-const isTest = process.env.NODE_ENV === 'test' || process.env.CI
 
 // @ts-ignore
 export default defineNuxtConfig({
@@ -129,20 +138,27 @@ export default defineNuxtConfig({
     // There are potential issues where a deployment happens while a page is partway through loading assets, or
     // later loads assets which are no longer present.  Nuxt3 now has a fallback of reloading the page when
     // it detects a failed chunk load.
-    '/': { prerender: true },
-    '/explore': { prerender: true },
-    '/unsubscribe**': { prerender: true },
-    '/about': { prerender: true },
-    '/disclaimer': { prerender: true },
-    '/donate': { prerender: true },
-    '/find': { prerender: true },
-    '/forgot': { prerender: true },
-    '/give': { prerender: true },
-    '/help': { prerender: true },
-    '/maintenance': { prerender: true },
-    '/mobile': { prerender: true },
-    '/privacy': { prerender: true },
-    '/unsubscribe': { prerender: true },
+    //
+    // In CI/Docker, prerenderRoutes is set to false via NUXT_NITRO_PRERENDER_ROUTES=false to avoid
+    // prerender failures during container builds (API may not be accessible).
+    ...(prerenderRoutes
+      ? {
+          '/': { prerender: true },
+          '/explore': { prerender: true },
+          '/unsubscribe**': { prerender: true },
+          '/about': { prerender: true },
+          '/disclaimer': { prerender: true },
+          '/donate': { prerender: true },
+          '/find': { prerender: true },
+          '/forgot': { prerender: true },
+          '/give': { prerender: true },
+          '/help': { prerender: true },
+          '/maintenance': { prerender: true },
+          '/mobile': { prerender: true },
+          '/privacy': { prerender: true },
+          '/unsubscribe': { prerender: true },
+        }
+      : {}),
 
     // These pages are for logged-in users, or aren't performance-critical enough to render on the server.
     '/birthday/**': { ssr: false },
@@ -192,18 +208,24 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    prerender: {
-      routes: ['/404.html', '/sitemap.xml'],
+    prerender: prerenderRoutes
+      ? {
+          routes: ['/404.html', '/sitemap.xml'],
 
-      // Don't prerender the messages - too many.
-      // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
-      ignore: [
-        '/message/',
-        '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
-        '/netlify/**', // CDN URLs for Netlify permanent links
-      ],
-      crawlLinks: true,
-    },
+          // Don't prerender the messages - too many.
+          // Also ignore asset paths and CDN URLs - these are built separately and don't need prerendering
+          ignore: [
+            '/message/',
+            '/_nuxt/**', // Nuxt assets (JS, CSS, etc)
+            '/netlify/**', // CDN URLs for Netlify permanent links
+          ],
+          crawlLinks: true,
+        }
+      : {
+          // In CI/Docker, disable all prerendering to avoid failures when API is not accessible
+          routes: [],
+          crawlLinks: false,
+        },
 
     // Disable HTTPS enforcement for development
     httpsRedirect: false,
@@ -308,6 +330,7 @@ export default defineNuxtConfig({
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
 
       CIRCLECI: process.env.CIRCLECI,
+      SITE: 'FD', // Freegle site identifier for logging context.
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
       PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
@@ -348,6 +371,18 @@ export default defineNuxtConfig({
         'add-to-calendar-button',
         'resize-observer-polyfill',
         'jwt-decode',
+        'leaflet',
+        'leaflet/dist/leaflet-src.esm',
+        'leaflet-gesture-handling',
+        'wicket/wicket-leaflet',
+        '@vue-leaflet/vue-leaflet',
+        'leaflet-control-geocoder/src/control',
+        'leaflet-control-geocoder/src/geocoders/photon',
+        'supercluster/dist/supercluster',
+        'dayjs/plugin/utc',
+        'dayjs/plugin/timezone',
+        '@vueuse/core',
+        'zoompinch',
         'bootstrap-vue-next/components/BAlert',
         'bootstrap-vue-next/components/BCard',
         'bootstrap-vue-next/components/BContainer',
@@ -387,7 +422,8 @@ export default defineNuxtConfig({
       ],
     },
     build: {
-      minify: false,
+      // Enable minification for production builds to reduce bundle size
+      minify: production ? 'esbuild' : false,
     },
     css: {
       preprocessorOptions: {
@@ -403,14 +439,29 @@ export default defineNuxtConfig({
     plugins:
       config.ISAPP && production
         ? [
+            // App builds with Sentry: include chunk splitting for better loading
+            splitVendorChunkPlugin(),
             sentryVitePlugin({
               org: 'freegle',
               project: 'capacitor',
               authToken: config.SENTRY_AUTH_TOKEN,
+              // For non-strict mode (debug builds), log errors but don't fail the build
+              errorHandler: config.SENTRY_STRICT
+                ? undefined // Use default (throw on error)
+                : (err) => {
+                    console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
+                  },
+              // Disable release management for non-strict mode to avoid API timeouts
+              release: config.SENTRY_STRICT
+                ? undefined // Use default release management
+                : { create: false, finalize: false },
             }),
           ]
         : config.ISAPP
-        ? []
+        ? [
+            // App builds without Sentry: still need chunk splitting
+            splitVendorChunkPlugin(),
+          ]
         : [
             splitVendorChunkPlugin(),
             VitePWA({
@@ -425,22 +476,35 @@ export default defineNuxtConfig({
             sentryVitePlugin({
               org: 'freegle',
               project: 'nuxt3',
+              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+              errorHandler: (err) => {
+                // Only log warning for gateway timeouts, fail for other errors
+                if (err.message && err.message.includes('504')) {
+                  console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
+                } else {
+                  throw err
+                }
+              },
             }),
           ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
-  legacy: {
-    targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
-    modernPolyfills: [
-      'es.global-this',
-      'es.object.from-entries',
-      'es.array.flat-map',
-      'es.array.flat',
-      'es.string.replace-all',
-      'es.promise.any',
-    ],
-  },
+  // Only enable legacy builds on Netlify where we need old browser support.
+  // Skip in CI/Docker for faster builds (40-50% improvement).
+  legacy: isNetlify
+    ? {
+        targets: ['chrome 49', 'since 2015', 'ios>=12', 'safari>=12'],
+        modernPolyfills: [
+          'es.global-this',
+          'es.object.from-entries',
+          'es.array.flat-map',
+          'es.array.flat',
+          'es.string.replace-all',
+          'es.promise.any',
+        ],
+      }
+    : false,
 
   // Sentry needs sourcemaps.
   sourcemap: {
@@ -784,14 +848,18 @@ export default defineNuxtConfig({
                 window.postCookieYes();
               }
             }
-
-            // We have to load GSI before we load the cookie banner, otherwise the Google Sign-in button doesn't
-            // render.
-            loadScript('https://accounts.google.com/gsi/client')
             ` +
-            (config.USE_COOKIES ? `setTimeout(postGSI, 100)` : ``) +
+            (config.ISAPP
+              ? `
+            // App builds: Don't load GSI client script (apps use Capacitor plugin for Google login)
+            // For Android apps with cookies, call postGSI directly to load CookieYes and ads
+            ` + (config.USE_COOKIES ? `postGSI()` : ``)
+              : `
+            // Web builds: Load GSI client script and set callback to initialize ads
+            window.onGoogleLibraryLoad = postGSI
+            loadScript('https://accounts.google.com/gsi/client')
+            `) +
             `
-            //}
           } catch (e) {
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,

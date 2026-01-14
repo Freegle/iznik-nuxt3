@@ -345,10 +345,11 @@ platform :ios do
     )
 
     # Upload to TestFlight
+    # Note: Do NOT set changelog here - it forces pilot to wait for the build to appear
+    # in Apple's system, which can timeout. Set changelog manually in App Store Connect.
     pilot(
       skip_waiting_for_build_processing: true,
       distribute_external: false,
-      changelog: "Version #{version} - Bug fixes and improvements",
       app_identifier: "org.ilovefreegle.iphone"
     )
 
@@ -658,5 +659,105 @@ platform :ios do
     end
 
     UI.success("✅ Auto-release process completed!")
+  end
+
+  desc "Expire test versions (99.x.x) from TestFlight and App Store"
+  lane :expire_test_versions do
+    require 'spaceship'
+
+    UI.message("🔍 Looking for test versions (99.x.x) to expire...")
+
+    # Set up App Store Connect API
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY']),
+      is_key_content_base64: false
+    )
+
+    # Connect to App Store Connect
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key: Base64.decode64(ENV['APP_STORE_CONNECT_API_KEY_KEY'])
+    )
+
+    app = Spaceship::ConnectAPI::App.find("org.ilovefreegle.iphone")
+    unless app
+      UI.user_error!("❌ Could not find app with identifier org.ilovefreegle.iphone")
+    end
+
+    # Get all TestFlight builds
+    UI.message("📦 Fetching TestFlight builds...")
+    builds = app.get_builds(
+      sort: "-uploadedDate",
+      limit: 100,
+      includes: "preReleaseVersion"
+    )
+
+    if builds.nil? || builds.empty?
+      UI.message("ℹ️  No TestFlight builds found")
+    else
+      # Find test builds (version starting with 99.)
+      test_builds = builds.select do |build|
+        version = nil
+        if build.respond_to?(:pre_release_version) && build.pre_release_version
+          version = build.pre_release_version.version
+        end
+        version && version.start_with?("99.")
+      end
+
+      if test_builds.empty?
+        UI.message("✅ No test builds (99.x.x) found in TestFlight")
+      else
+        UI.message("🗑️  Found #{test_builds.length} test build(s) to expire:")
+        test_builds.each do |build|
+          version = build.pre_release_version&.version || "unknown"
+          build_number = build.version
+          UI.message("   - Version #{version} (build #{build_number})")
+
+          begin
+            # Expire the build
+            build.expire!
+            UI.success("   ✅ Expired build #{build_number}")
+          rescue => e
+            UI.error("   ❌ Failed to expire build #{build_number}: #{e.message}")
+          end
+        end
+      end
+    end
+
+    # Check App Store versions
+    UI.message("📦 Checking App Store versions...")
+    all_versions = app.get_app_store_versions
+
+    test_versions = all_versions.select do |v|
+      v.version_string.start_with?("99.")
+    end
+
+    if test_versions.empty?
+      UI.message("✅ No test versions (99.x.x) found in App Store")
+    else
+      UI.message("🗑️  Found #{test_versions.length} test version(s) in App Store:")
+      test_versions.each do |v|
+        UI.message("   - Version #{v.version_string}: #{v.app_store_state}")
+
+        # Only delete if in editable state
+        deletable_states = ["PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED"]
+        if deletable_states.include?(v.app_store_state)
+          begin
+            v.delete!
+            UI.success("   ✅ Deleted version #{v.version_string}")
+          rescue => e
+            UI.error("   ❌ Failed to delete version #{v.version_string}: #{e.message}")
+          end
+        else
+          UI.message("   ⚠️  Cannot delete version #{v.version_string} (state: #{v.app_store_state})")
+          UI.message("   💡 You may need to manually handle this in App Store Connect")
+        end
+      end
+    end
+
+    UI.success("✅ Test version cleanup completed!")
   end
 end

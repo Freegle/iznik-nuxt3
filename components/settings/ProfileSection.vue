@@ -1,168 +1,124 @@
 <template>
-  <b-card
-    border-variant="info"
-    header-bg-variant="info"
-    header-text-variant="white"
-    class="mt-2"
-  >
-    <template #header>
-      <h2 class="bg-info header--size5 mb-0">
-        <v-icon icon="globe-europe" />
-        Your Public Profile
-      </h2>
-    </template>
-    <b-card-body class="p-0 pt-1">
-      <p class="text-muted">This is what other freeglers can see about you.</p>
-      <b-row>
-        <b-col cols="12">
-          <label> Your name (or a nickname): </label>
-          <b-input-group>
-            <b-form-input
-              id="myname"
-              v-model="displayName"
-              placeholder="Your name"
+  <div class="settings-section">
+    <div class="section-header">
+      <v-icon icon="globe-europe" class="section-icon" />
+      <h2>Your Profile</h2>
+      <span class="public-badge"><v-icon icon="eye" /> Public</span>
+    </div>
+
+    <div class="section-content">
+      <!-- Name -->
+      <div class="setting-row">
+        <label for="myname">Your name (or nickname):</label>
+        <b-input-group>
+          <b-form-input
+            id="myname"
+            v-model="displayName"
+            placeholder="Your name"
+          />
+          <template #append>
+            <b-button variant="primary" @click="saveName">
+              <v-icon icon="save" /> Save
+            </b-button>
+          </template>
+        </b-input-group>
+      </div>
+
+      <!-- Profile photo and about -->
+      <div class="profile-row">
+        <div class="profile-photo-section">
+          <div class="photo-container">
+            <ProfileImage
+              v-if="!me || !useProfile"
+              image="/defaultprofile.png"
+              is-thumbnail
+              size="xl"
+              alt-text="Default profile image"
             />
-            <slot name="append">
-              <b-button variant="white" @click="saveName">
-                <v-icon icon="save" />&nbsp;Save
-              </b-button>
-            </slot>
-          </b-input-group>
-        </b-col>
-      </b-row>
-      <b-row class="mt-2">
-        <b-col cols="12" xl="6">
-          <b-card>
-            <b-card-body class="text-center p-2">
-              <div :key="bump" class="d-flex justify-content-around">
-                <ProfileImage
-                  v-if="!me || !useProfile"
-                  image="/defaultprofile.png"
-                  class="mr-1 mb-1 mt-1 inline"
-                  is-thumbnail
-                  size="xl"
-                  alt-text="Default profile image"
-                />
-                <ProfileImage
-                  v-else-if="me?.profile?.externaluid"
-                  :externaluid="me.profile.externaluid"
-                  :externalmods="me.profile.externalmods"
-                  class="mr-1 mb-1 mt-1 inline"
-                  is-thumbnail
-                  size="xl"
-                  alt-text="My profile image"
-                />
-                <ProfileImage
-                  v-else
-                  :image="profileUrl + '?settings=' + myid + '-' + cacheBust"
-                  class="mr-1 mb-1 mt-1 inline"
-                  is-thumbnail
-                  size="xl"
-                  alt-text="My profile image"
-                />
-              </div>
-              <div class="d-flex justify-content-around mb-2">
-                <OurToggle
-                  v-model="useProfileLocal"
-                  class="mt-2"
-                  :labels="{ checked: 'Showing', unchecked: 'Hidden' }"
-                  @change="changeUseProfile"
-                />
-              </div>
-              <div class="d-flex justify-content-around align-items-center">
-                <div
-                  v-if="
-                    (me?.profile?.ours || me?.profile?.externaluid) &&
-                    useProfile &&
-                    !showProfileModal &&
-                    !uploading
-                  "
-                  class="clickme image__icon stacked mt-2"
-                  title="Rotate left"
-                  @click="rotateLeft"
-                >
-                  <v-icon icon="circle" size="2x" />
-                  <v-icon icon="reply" class="pl-2" />
-                </div>
-                <div
-                  v-if="uploading"
-                  class="bg-white d-flex justify-content-around"
-                >
-                  <OurUploader v-model="currentAtts" type="User" />
-                </div>
-                <b-button
-                  v-else
-                  variant="secondary"
-                  class="mt-2"
-                  @click="uploadProfile"
-                >
-                  <v-icon icon="camera" /> Upload photo
-                </b-button>
-                <div
-                  v-if="
-                    (me?.profile?.ours || me?.profile?.externaluid) &&
-                    useProfile &&
-                    !showProfileModal &&
-                    !uploading
-                  "
-                  class="clickme image__icon stacked mt-2"
-                  title="Rotate right"
-                  @click="rotateRight"
-                >
-                  <v-icon icon="circle" size="2x" />
-                  <v-icon icon="reply" flip="horizontal" class="pr-2" />
-                </div>
-              </div>
-              <div v-if="eligibleSupporter" class="mt-4">
-                <SupporterInfo size="lg" :hidden="!showSupporter" />
-                <b-button variant="link" size="sm" @click="toggleSupporter">
-                  <span v-if="showSupporter"> Click to hide from others </span>
-                  <span v-else> Click to show to others </span>
-                </b-button>
-                <p class="text-muted small mt-2">
-                  <span v-if="showSupporter">
-                    Other freeglers can see that you have kindly supported
-                    Freegle recently with time or funds.
-                  </span>
-                  <span v-else> Other freeglers can't see this. </span>
-                </p>
-              </div>
-            </b-card-body>
-          </b-card>
-        </b-col>
-        <b-col cols="12" xl="6">
-          <b-card no-body>
-            <b-card-body class="text-start p-0 p-sm-2">
-              <div v-if="aboutMe">
-                &quot;{{ aboutMe }}&quot;
-                <br />
-                <b-button variant="white" class="mt-2" @click="addAbout">
-                  <v-icon icon="pen" /> Edit
-                </b-button>
-              </div>
-              <div v-else>
-                <notice-message>
-                  Please write something to let other freeglers know a bit about
-                  you. It makes freegling more fun and helps get a better
-                  response when you're replying to OFFERs.
-                </notice-message>
-                <b-button variant="white" class="mt-2" @click="addAbout">
-                  <v-icon icon="pen" /> Introduce yourself
-                </b-button>
-              </div>
-            </b-card-body>
-          </b-card>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-button variant="white" class="mt-2" @click="viewProfile">
-            <v-icon icon="eye" /> View Your Profile
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+            <ProfileImage
+              v-else-if="me?.profile?.externaluid"
+              :externaluid="me.profile.externaluid"
+              :externalmods="me.profile.externalmods"
+              is-thumbnail
+              size="xl"
+              alt-text="My profile image"
+            />
+            <ProfileImage
+              v-else
+              :image="profileUrl + '?settings=' + myid + '-' + cacheBust"
+              is-thumbnail
+              size="xl"
+              alt-text="My profile image"
+            />
+          </div>
+
+          <OurToggle
+            v-model="useProfileLocal"
+            class="mt-2"
+            :labels="{ checked: 'Showing', unchecked: 'Hidden' }"
+            @change="changeUseProfile"
+          />
+
+          <div class="photo-actions">
+            <button
+              v-if="canRotate && !uploading"
+              class="rotate-btn"
+              title="Rotate left"
+              @click="rotateLeft"
+            >
+              <v-icon icon="reply" />
+            </button>
+            <div v-if="uploading" class="uploader-container">
+              <OurUploader v-model="currentAtts" type="User" />
+            </div>
+            <b-button
+              v-else
+              variant="secondary"
+              size="sm"
+              @click="uploadProfile"
+            >
+              <v-icon icon="camera" /> Upload
+            </b-button>
+            <button
+              v-if="canRotate && !uploading"
+              class="rotate-btn"
+              title="Rotate right"
+              @click="rotateRight"
+            >
+              <v-icon icon="reply" flip="horizontal" />
+            </button>
+          </div>
+
+          <div v-if="eligibleSupporter" class="supporter-section">
+            <SupporterInfo size="lg" :hidden="!showSupporter" />
+            <button class="link-btn" @click="toggleSupporter">
+              {{ showSupporter ? 'Hide from others' : 'Show to others' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <div v-if="aboutMe" class="about-content">
+            <p class="about-text">"{{ aboutMe }}"</p>
+            <button class="edit-btn" @click="addAbout">
+              <v-icon icon="pen" /> Edit
+            </button>
+          </div>
+          <div v-else class="about-empty">
+            <p class="empty-text">Add a short intro about yourself</p>
+            <p class="empty-hint">It helps when replying to OFFERs!</p>
+            <b-button variant="primary" size="sm" @click="addAbout">
+              <v-icon icon="pen" /> Introduce yourself
+            </b-button>
+          </div>
+        </div>
+      </div>
+
+      <b-button variant="link" class="view-profile-btn" @click="viewProfile">
+        <v-icon icon="eye" /> View your profile
+      </b-button>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -171,7 +127,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useImageStore } from '~/stores/image'
 import { useMe, fetchMe } from '~/composables/useMe'
 import ProfileImage from '~/components/ProfileImage'
-import NoticeMessage from '~/components/NoticeMessage'
 import OurUploader from '~/components/OurUploader'
 import OurToggle from '~/components/OurToggle'
 import SupporterInfo from '~/components/SupporterInfo'
@@ -190,7 +145,6 @@ const { me, myid } = useMe()
 const uploading = ref(false)
 const cacheBust = ref(Date.now())
 const currentAtts = ref([])
-const bump = ref(0)
 const useProfileLocal = ref(false)
 const displayName = ref('')
 
@@ -200,35 +154,23 @@ const showSupporter = computed(() => {
   return 'hidesupporter' in settings ? !settings.hidesupporter : true
 })
 
-// Check if user is eligible to be a supporter (regardless of hidesupporter setting)
-// This replicates the server-side logic for determining supporter eligibility
 const eligibleSupporter = computed(() => {
   if (!me.value) return false
-
-  // Check if they're a mod/admin (systemrole != 'User')
   const isMod = me.value.systemrole && me.value.systemrole !== 'User'
-
-  // Check if they've donated recently (within 360 days - SUPPORTER_PERIOD)
   const hasRecentDonation =
     me.value.donated &&
     new Date(me.value.donated) >
       new Date(Date.now() - 360 * 24 * 60 * 60 * 1000)
-
-  // For microactions, we can't easily check from the frontend, so we'll rely on
-  // the server having set supporter=true at some point, or the other conditions
-
   return isMod || hasRecentDonation || me.value.supporter
 })
 
 const useProfile = computed(() => {
   let ret = true
-
   if (me.value && me.value.settings) {
     if (Object.keys(me.value.settings).includes('useprofile')) {
       ret = me.value.settings.useprofile
     }
   }
-
   return ret
 })
 
@@ -242,17 +184,18 @@ const aboutMe = computed(() => {
   return me.value && me.value.aboutme ? me.value.aboutme.text : ''
 })
 
+const canRotate = computed(() => {
+  return (
+    (me.value?.profile?.ours || me.value?.profile?.externaluid) &&
+    useProfile.value
+  )
+})
+
 // Methods
 const toggleSupporter = async () => {
   const settings = me.value.settings
-  // If showSupporter is true, we want to hide it (set hidesupporter to true)
-  // If showSupporter is false, we want to show it (set hidesupporter to false)
   settings.hidesupporter = showSupporter.value
-
-  await authStore.saveAndGet({
-    settings,
-  })
-
+  await authStore.saveAndGet({ settings })
   emit('update')
 }
 
@@ -267,18 +210,12 @@ const viewProfile = () => {
 const changeUseProfile = async (value) => {
   const settings = me.value.settings
   settings.useprofile = value
-  await authStore.saveAndGet({
-    settings,
-  })
-
+  await authStore.saveAndGet({ settings })
   emit('update')
 }
 
 const saveName = async () => {
-  await authStore.saveAndGet({
-    displayname: displayName.value,
-  })
-
+  await authStore.saveAndGet({ displayname: displayName.value })
   emit('update')
 }
 
@@ -288,14 +225,10 @@ const uploadProfile = () => {
 
 const rotate = async (deg) => {
   let curr = 0
-
   if (me.value.profile.externaluid) {
     curr = me.value.profile.externalmods?.rotate || 0
   }
-
   curr += deg
-
-  // Ensure between 0 and 360
   curr = (curr + 360) % 360
 
   await imageStore.post({
@@ -305,22 +238,15 @@ const rotate = async (deg) => {
     user: true,
   })
 
-  // Refresh the user - which in turn should update the image displayed.
   await fetchMe(true)
-
   cacheBust.value = Date.now()
   emit('update')
 }
 
-const rotateLeft = () => {
-  rotate(-90)
-}
+const rotateLeft = () => rotate(-90)
+const rotateRight = () => rotate(90)
 
-const rotateRight = () => {
-  rotate(90)
-}
-
-// Update local refs when me changes
+// Watch for me changes
 watch(
   () => me.value,
   (newVal) => {
@@ -337,25 +263,16 @@ watch(
   currentAtts,
   async (newVal) => {
     uploading.value = false
-
     if (newVal?.length) {
-      // We want to replace our profile picture. The API for this is a bit odd - msgid will get used as the
-      // id of the user.
       const atts = {
         externaluid: newVal[0].ouruid,
         externalmods: newVal[0].externalmods,
         imgtype: 'User',
         msgid: me?.value.id,
       }
-
-      console.log('Post image', atts)
       await imageStore.post(atts)
     }
-
-    // Refresh the user - which in turn should update the image displayed.
     await fetchMe(true)
-
-    bump.value++
     emit('update')
   },
   { deep: true }
@@ -363,25 +280,182 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.image__icon {
-  color: $color-white;
+@import 'assets/css/_color-vars.scss';
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1rem;
+  overflow: hidden;
 }
 
-.stacked {
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $color-green-background;
+    flex: 1;
+  }
+
+  .section-icon {
+    color: $color-green-background;
+  }
+}
+
+.public-badge {
+  font-size: 0.75rem;
+  color: $color-blue--bright;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.section-content {
+  padding: 1rem 1.25rem;
+}
+
+.setting-row {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+  }
+}
+
+.profile-row {
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-photo-section {
+  text-align: center;
+  padding: 1rem;
+  background: $color-gray--lighter;
+  border-radius: 8px;
+}
+
+.photo-container {
+  margin-bottom: 0.5rem;
+}
+
+.photo-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.rotate-btn {
+  background: $color-gray--dark;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover {
+    background: $color-green-background;
+  }
+}
+
+.uploader-container {
+  background: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.supporter-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: $color-blue--bright;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.about-section {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f8fdf5 0%, #f0f9e8 100%);
+  border-radius: 8px;
+  border: 1px solid rgba($color-green-background, 0.15);
+}
+
+.about-content {
+  position: relative;
+}
+
+.about-text {
+  font-style: italic;
+  color: $color-gray--darker;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: $color-blue--bright;
+  font-size: 0.85rem;
+  padding: 0;
+  margin-top: 0.75rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.about-empty {
+  text-align: center;
+}
+
+.empty-text {
+  font-weight: 500;
+  color: $color-gray--darker;
+  margin-bottom: 0.25rem;
+}
+
+.empty-hint {
+  font-size: 0.85rem;
   color: $color-gray--dark;
+  margin-bottom: 1rem;
+}
 
-  svg {
-    grid-row: 1 / 2;
-    grid-column: 1 / 2;
-  }
-
-  svg:nth-child(2) {
-    z-index: 10000;
-    color: white;
-    padding-top: 7px;
-  }
+.view-profile-btn {
+  padding: 0;
+  margin-top: 0.5rem;
 }
 </style>

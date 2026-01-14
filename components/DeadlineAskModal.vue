@@ -16,12 +16,18 @@
         </label>
         <b-input
           id="deadline"
+          ref="deadlineInput"
           v-model="deadline"
           type="date"
           :min="today"
           :max="defaultDeadline"
+          :class="{ 'is-invalid': deadlineError }"
           placeholder="Click to enter a date"
+          @input="deadlineError = false"
         />
+        <div v-if="deadlineError" class="text-danger small mt-1">
+          The deadline must be today or in the future.
+        </div>
       </div>
       <p v-else class="font-weight-bold">Set a deadline?</p>
       <NoticeMessage v-if="deadline === today" variant="warning" class="mt-2">
@@ -50,6 +56,7 @@
   </b-modal>
 </template>
 <script setup>
+import { nextTick } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMessageStore } from '~/stores/message'
 import Api from '~/api'
@@ -75,6 +82,8 @@ const messageStore = useMessageStore()
 const emit = defineEmits(['hide'])
 
 const showInput = ref(props.set !== null)
+const deadlineError = ref(false)
+const deadlineInput = ref(null)
 
 // Set deadline to date of MESSAGE_EXPIRE_TIME days from now
 const defaultDeadline = new Date(
@@ -89,6 +98,15 @@ const today = computed(() => {
 })
 
 async function setDeadline() {
+  // Validate that deadline is not in the past
+  if (deadline.value && deadline.value < today.value) {
+    deadlineError.value = true
+    nextTick(() => {
+      deadlineInput.value?.$el?.focus()
+    })
+    return
+  }
+
   const promises = []
 
   promises.push(

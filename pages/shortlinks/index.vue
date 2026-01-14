@@ -1,8 +1,8 @@
 <template>
   <client-only>
     <b-row class="m-0">
-      <b-col cols="0" md="3" class="d-none d-md-block" />
-      <b-col cols="12" md="6" class="p-0">
+      <b-col cols="0" lg="3" class="d-none d-lg-block" />
+      <b-col cols="12" lg="6" class="p-0">
         <div>
           <h1>Shortlinks</h1>
           <h5>
@@ -55,7 +55,7 @@
         </b-row>
         <ShortLinks :shortlinks="sortedLinks" />
       </b-col>
-      <b-col cols="0" md="3" class="d-none d-md-block" />
+      <b-col cols="0" lg="3" class="d-none d-lg-block" />
     </b-row>
   </client-only>
 </template>

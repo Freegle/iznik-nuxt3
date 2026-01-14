@@ -1,11 +1,11 @@
 <template>
-  <span class="d-inline user-ratings">
+  <span class="d-inline user-ratings" data-test-static="hello" :data-debug-id="id" :data-debug-myid="myid" :data-debug-mounted="mounted">
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
       </span>
       <b-button
-        v-b-tooltip.bottom="uptitle"
+        v-b-tooltip.bottom="noTooltips || showDown || showRemove ? '' : uptitle"
         :size="size"
         :variant="user.info.ratings.Up > 0 ? 'primary' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -13,12 +13,14 @@
           mine: user.info.ratings.Mine === 'Up',
           'mr-1': true,
         }"
-        @click="up"
+        @click.stop="up"
       >
         <v-icon icon="thumbs-up" />&nbsp;{{ user.info.ratings.Up }}
       </b-button>
       <b-button
-        v-b-tooltip.bottom="downtitle"
+        v-b-tooltip.bottom="
+          noTooltips || showDown || showRemove ? '' : downtitle
+        "
         :size="size"
         :variant="user.info.ratings.Down > 0 ? 'warning' : 'white'"
         :disabled="disabled || user.id === myid"
@@ -26,18 +28,30 @@
           mine: user.info.ratings.Mine === 'Down',
           'ml-1': true,
         }"
-        @click="down"
+        @click.stop="down"
       >
         <v-icon icon="thumbs-down" />&nbsp;{{ user.info.ratings.Down }}
       </b-button>
     </span>
-    <UserRatingsDownModal v-if="showDown" :id="id" />
-    <UserRatingsRemoveModal v-if="showRemove" :id="id" />
+    <UserRatingsDownModal
+      v-if="showDown && !externalModals"
+      :id="id"
+      @rated="onModalRated"
+    />
+    <UserRatingsRemoveModal
+      v-if="showRemove && !externalModals"
+      :id="id"
+      @rated="onModalRated"
+    />
   </span>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
+
+// Use console.warn for debugging - console.log is stripped in production builds
+console.warn('UserRatings: Script setup executing')
 
 const UserRatingsDownModal = defineAsyncComponent(() =>
   import('~/components/UserRatingsDownModal')
@@ -68,26 +82,51 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  noTooltips: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  externalModals: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 })
 
+const emit = defineEmits([
+  'modal-opening',
+  'show-down-modal',
+  'show-remove-modal',
+])
+
 const userStore = useUserStore()
-// Use myid computed property from useMe composable for consistency
 const { myid } = useMe()
 
 const showDown = ref(false)
 const showRemove = ref(false)
+const mounted = ref(false)
 
-// Fetch user data
+console.warn('UserRatings: Fetching user data for id:', props.id)
+
+// Fetch user data - show cached immediately, then refresh in background.
+// These are fire-and-forget - the computed will reactively update when store changes.
 userStore.fetch(props.id)
+userStore.fetch(props.id, true)
+
+onMounted(() => {
+  mounted.value = true
+  console.warn('UserRatings: onMounted called, id:', props.id, 'myid:', myid.value)
+})
 
 const user = computed(() => {
   let ret = null
 
   if (props.id) {
-    const user = userStore?.byId(props.id)
+    const u = userStore?.byId(props.id)
 
-    if (user && user.info) {
-      ret = user
+    if (u && u.info) {
+      ret = u
     }
   }
 
@@ -121,26 +160,57 @@ const downtitle = computed(() => {
 })
 
 const rate = async (rating, reason, text) => {
+  console.warn('UserRatings: rate() called with:', rating, 'for user:', props.id)
   await userStore.rate(props.id, rating, reason, text)
+  console.warn('UserRatings: rate() completed, refreshing user data')
+  // Explicitly refresh user data after rating to ensure UI updates
+  await userStore.fetch(props.id, true)
+  console.warn('UserRatings: User data refreshed')
 }
 
 const up = async () => {
+  console.warn('UserRatings: up() clicked, current Mine:', user.value?.info?.ratings?.Mine)
   showDown.value = false
   if (user.value?.info?.ratings?.Mine === 'Up') {
-    showRemove.value = true
+    console.warn('UserRatings: Already rated up, showing remove modal')
+    emit('modal-opening')
+    if (props.externalModals) {
+      emit('show-remove-modal', props.id)
+    } else {
+      showRemove.value = true
+    }
   } else {
+    console.warn('UserRatings: Rating up')
     await rate('Up')
   }
 }
 
 const down = () => {
+  console.warn('UserRatings: down() clicked, current Mine:', user.value?.info?.ratings?.Mine)
   showDown.value = false
 
   if (user.value?.info?.ratings?.Mine === 'Down') {
-    showRemove.value = true
+    console.warn('UserRatings: Already rated down, showing remove modal')
+    emit('modal-opening')
+    if (props.externalModals) {
+      emit('show-remove-modal', props.id)
+    } else {
+      showRemove.value = true
+    }
   } else {
-    showDown.value = true
+    console.warn('UserRatings: Showing down modal')
+    emit('modal-opening')
+    if (props.externalModals) {
+      emit('show-down-modal', props.id)
+    } else {
+      showDown.value = true
+    }
   }
+}
+
+const onModalRated = () => {
+  console.warn('UserRatings: onModalRated called, refreshing user data')
+  userStore.fetch(props.id, true)
 }
 </script>
 <style scoped lang="scss">
@@ -158,9 +228,5 @@ const down = () => {
 .btn-white:hover {
   background-color: white;
   color: black;
-}
-
-.user-ratings {
-  z-index: 1049;
 }
 </style>

@@ -1,44 +1,43 @@
 <template>
-  <aside v-if="location">
+  <aside v-if="location && list.length" class="jobs-sidebar">
     <NoticeMessage v-if="blocked" variant="warning" class="d-none">
-      <h3>Please help keep Freegle running</h3>
-      <p>
-        We normally show job ads here. It looks like you may have an AdBlocker
-        or security software which is blocking those. We're not mad on ads
-        either, but please consider donating to help us keep going:
-      </p>
+      <p>It looks like you're blocking job ads. Please consider donating:</p>
       <donation-button />
     </NoticeMessage>
     <div v-else>
-      <b-card v-if="list.length" variant="white" no-body>
-        <b-card-body class="p-0">
-          <nuxt-link no-prefetch to="/jobs">
-            <h2 class="header--size4 pt-1 ml-3">
-              <v-icon icon="briefcase" scale="2" /> Jobs near you
-            </h2>
-          </nuxt-link>
-          <p class="text-center small">
-            Freegle gets a small amount if you are interested and click.
-          </p>
-          <div v-for="job in visibleJobs" :key="'job-' + job.job_reference">
-            <JobOne :id="job.id" :summary="true" />
-          </div>
-          <infinite-loading key="infinitejobs" @infinite="loadMore">
-            <template #no-results>
-              <notice-message v-if="!list?.length">
-                We can't find any jobs at the moment.
-              </notice-message>
-            </template>
-            <template #no-more />
-            <template #spinner />
-          </infinite-loading>
-          <div class="d-flex justify-content-around mt-2 mb-2">
-            <b-button variant="secondary" to="/jobs">
-              <v-icon icon="search" /> View more jobs
-            </b-button>
-          </div>
-        </b-card-body>
-      </b-card>
+      <div class="jobs-sidebar-header">
+        <nuxt-link no-prefetch to="/jobs" class="jobs-sidebar-title-link">
+          <v-icon icon="briefcase" class="jobs-sidebar-icon" />
+          <span class="jobs-sidebar-title">Jobs near you</span>
+        </nuxt-link>
+      </div>
+      <p class="jobs-sidebar-info">Freegle gets a small amount if you click</p>
+      <div class="jobs-sidebar-list">
+        <JobOne
+          v-for="(job, index) in visibleJobs"
+          :id="job.id"
+          :key="'job-' + job.job_reference"
+          :summary="true"
+          :position="index"
+          :list-length="visibleJobs.length"
+          context="sidebar"
+          bg-colour="soft sage green"
+        />
+      </div>
+      <infinite-loading key="infinitejobs" @infinite="loadMore">
+        <template #no-results>
+          <notice-message v-if="!list?.length">
+            We can't find any jobs at the moment.
+          </notice-message>
+        </template>
+        <template #no-more />
+        <template #spinner />
+      </infinite-loading>
+      <div class="jobs-sidebar-footer">
+        <nuxt-link to="/jobs" class="jobs-sidebar-more">
+          View all jobs <v-icon icon="arrow-right" />
+        </nuxt-link>
+      </div>
     </div>
   </aside>
 </template>
@@ -104,13 +103,86 @@ function loadMore($state) {
 }
 </script>
 <style scoped lang="scss">
-aside {
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+
+.jobs-sidebar {
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-gutter: stable;
+  background: $white;
+  border: 1px solid $gray-200;
 }
 
-:deep(a) {
+.jobs-sidebar-header {
+  background: linear-gradient(135deg, #61ae24 0%, #4a8f1c 100%);
+  padding: 0.75rem 1rem;
+}
+
+.jobs-sidebar-title-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $white;
   text-decoration: none;
+
+  &:hover {
+    color: $white;
+    text-decoration: none;
+  }
+}
+
+.jobs-sidebar-icon {
+  font-size: 1.1rem;
+}
+
+.jobs-sidebar-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.jobs-sidebar-info {
+  font-size: 0.75rem;
+  color: $gray-500;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  background: $gray-100;
+  border-bottom: 1px solid $gray-200;
+}
+
+.jobs-sidebar-list {
+  :deep(.job-item) {
+    margin-bottom: 0;
+  }
+
+  :deep(.job-summary) {
+    padding: 0.6rem 0.75rem;
+  }
+}
+
+.jobs-sidebar-footer {
+  padding: 0.75rem;
+  text-align: center;
+  border-top: 1px solid $gray-200;
+}
+
+.jobs-sidebar-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #61ae24;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  background: rgba(97, 174, 36, 0.1);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(97, 174, 36, 0.2);
+    text-decoration: none;
+    color: #61ae24;
+  }
 }
 </style>

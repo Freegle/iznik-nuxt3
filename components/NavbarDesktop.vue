@@ -297,12 +297,10 @@ const {
   maybeReload,
 } = useNavbar()
 
-console.log('NavbarDesktop mounted, start with signInDisabled')
 const signInDisabled = ref(true)
 
 onMounted(() => {
   // Keeping the button disabled until hygration has finished helps with Playwright tests.
-  console.log('NavbarDesktop mounted, setting signInDisabled to false')
   signInDisabled.value = false
 })
 

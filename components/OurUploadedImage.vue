@@ -91,7 +91,7 @@ const props = defineProps({
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
-if (props.src?.includes('gimg_0.jpg')) {
+if (process.client && props.src?.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)
 }
 
@@ -139,6 +139,8 @@ function brokenImage(e) {
   emit('error', e)
   show.value = false
 
-  Sentry.captureMessage('Failed to fetch image ' + props.src)
+  if (process.client) {
+    Sentry.captureMessage('Failed to fetch image ' + props.src)
+  }
 }
 </script>

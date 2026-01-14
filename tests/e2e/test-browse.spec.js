@@ -4,7 +4,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { timeouts, environment, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, environment } = require('./config')
 const {
   signUpViaHomepage,
   logoutIfLoggedIn,
@@ -117,10 +117,14 @@ test.describe('Browse Page Tests', () => {
       await joinButton.click()
 
       // Wait for confirmation of joining
-      await page.locator('.btn:has-text("Leave")').first().waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.interaction,
-      })
+      await page
+        .locator('.btn:has-text("Leave")')
+        .filter({ visible: true })
+        .first()
+        .waitFor({
+          state: 'visible',
+          timeout: timeouts.ui.interaction,
+        })
 
       // Now test browsing functionality
       console.log('Testing browse page with created message')
@@ -157,6 +161,7 @@ test.describe('Browse Page Tests', () => {
       // Check what validation elements exist and their state
       console.log('Checking validation elements...')
       const validationSelectors = [
+        '.validation-tick',
         '.text-success.fa-bh',
         '.fa-check-circle',
         '.v-icon[class*="check"]',
@@ -189,7 +194,8 @@ test.describe('Browse Page Tests', () => {
       })
 
       // Wait for the page to load and messages to appear
-      await page.waitForSelector('.messagecard, .card-body', {
+      // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
+      await page.waitForSelector('.message-summary-mobile, .messagecard', {
         timeout: timeouts.ui.appearance,
       })
 
@@ -203,7 +209,7 @@ test.describe('Browse Page Tests', () => {
       expect(title).toContain('Browse')
 
       // Look for messages
-      const messageCards = page.locator('.messagecard, .card-body')
+      const messageCards = page.locator('.message-summary-mobile, .messagecard')
       const messageCount = await messageCards.count()
       expect(messageCount).toBeGreaterThan(0)
 
@@ -277,16 +283,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test search with search term in URL
     console.log('Testing browse page with search term in URL')
@@ -322,16 +333,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Navigate to browse page
     await page.gotoAndVerify('/browse', {
@@ -365,16 +381,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test different viewport sizes
     const viewports = [
@@ -422,16 +443,21 @@ test.describe('Browse Page Tests', () => {
     })
     const joinButton = page
       .locator('.btn:has-text("Join this community")')
+      .filter({ visible: true })
       .first()
     await joinButton.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
     await joinButton.click()
-    await page.locator('.btn:has-text("Leave")').first().waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+    await page
+      .locator('.btn:has-text("Leave")')
+      .filter({ visible: true })
+      .first()
+      .waitFor({
+        state: 'visible',
+        timeout: timeouts.ui.interaction,
+      })
 
     // Test general browse page
     console.log('Testing general browse page')

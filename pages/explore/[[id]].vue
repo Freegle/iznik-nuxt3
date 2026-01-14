@@ -2,14 +2,14 @@
   <client-only>
     <div>
       <b-row v-if="id && !group" class="m-0">
-        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+        <b-col cols="12" md="6" lg="6" class="p-0" offset-md="3" offset-lg="3">
           <NoticeMessage variant="danger" class="mt-2">
             Sorry, we don't recognise that community name.
           </NoticeMessage>
         </b-col>
       </b-row>
       <b-row v-else class="m-0">
-        <b-col cols="12" lg="6" class="p-0" offset-lg="3">
+        <b-col cols="12" md="6" lg="6" class="p-0" offset-md="3" offset-lg="3">
           <ExploreGroup v-if="group?.id" :id="group.id" />
           <PostMapAndList
             v-else

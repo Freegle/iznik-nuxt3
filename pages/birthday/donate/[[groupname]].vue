@@ -61,7 +61,6 @@
 import BirthdayDonateHero from '~/components/BirthdayDonateHero'
 import { useRoute, definePageMeta } from '#imports'
 import { useBirthday } from '~/composables/useBirthday'
-import Api from '~/api'
 
 // Use empty layout
 definePageMeta({
@@ -69,8 +68,6 @@ definePageMeta({
 })
 
 const route = useRoute()
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
 
 // Use birthday composable
 const {
@@ -92,38 +89,15 @@ function onDonationClick(amount) {
   console.log('Donation clicked:', amount)
 }
 
-async function onDonationSuccess() {
+function onDonationSuccess() {
   console.log('Donation successful!')
   showThankYou.value = true
-
-  // Record abtest conversion for successful donation from email
-  try {
-    await api.bandit.chosen({
-      uid: 'birthdayappeal',
-      variant: 'fromemail',
-    })
-  } catch (err) {
-    console.error('Error recording donation conversion:', err)
-  }
 }
 
 // Set up page head with custom description
 await setupPageHead(
   `Celebrate ${groupName.value}'s ${groupAge.value}th birthday! Help us continue for another year with a donation.`
 )
-
-// Record abtest view as 'fromemail' and load data
-onMounted(async () => {
-  try {
-    // Record abtest view
-    await api.bandit.shown({
-      uid: 'birthdayappeal',
-      variant: 'fromemail',
-    })
-  } catch (err) {
-    console.error('Error loading birthday donation page:', err)
-  }
-})
 </script>
 
 <style scoped lang="scss">

@@ -15,26 +15,27 @@
         <DonationThank />
       </div>
       <div v-else>
-        <p v-if="donated">
-          You've already donated to Freegle (on {{ donated }}). Thank you.
-        </p>
-        <div v-else-if="variant === 'rateapp'">
+        <div v-if="variant === 'rateapp'">
           <RateAppAsk @hide="hide" />
         </div>
-        <DonationAskStripe
-          v-else
-          :groupid="groupId"
-          :groupname="groupName"
-          :target="target"
-          :raised="raised"
-          :target-met="targetMet"
-          :donated="donated"
-          :amounts="[1, 5, 10]"
-          :default="1"
-          @score="score"
-          @success="thankyou = true"
-          @cancel="hide"
-        />
+        <div v-else class="bg-white rounded p-3">
+          <p v-if="donated" class="mb-3">
+            You've already donated to Freegle (on {{ donated }}). Thank you.
+          </p>
+          <DonationAskStripe
+            :groupid="groupId"
+            :groupname="groupName"
+            :target="target"
+            :raised="raised"
+            :target-met="targetMet"
+            :donated="donated"
+            :amounts="[1, 5, 10]"
+            :default="1"
+            @score="score"
+            @success="thankyou = true"
+            @cancel="hide"
+          />
+        </div>
       </div>
     </template>
   </b-modal>

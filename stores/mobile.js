@@ -17,7 +17,17 @@ import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '~/stores/chat'
 import { useNotificationStore } from '~/stores/notification'
+import { useDebugStore } from '~/stores/debug'
 import api from '~/api'
+
+// Helper to get debug store safely (may not be initialized early)
+function dbg() {
+  try {
+    return useDebugStore()
+  } catch (e) {
+    return null
+  }
+}
 
 export const useMobileStore = defineStore({
   id: 'mobile',
@@ -37,9 +47,7 @@ export const useMobileStore = defineStore({
     pushed: false,
     route: false,
     apprequiredversion: false,
-    applatestversion: false,
     appupdaterequired: false,
-    appupdateavailable: false,
   }),
   actions: {
     init(config) {
@@ -74,6 +82,34 @@ export const useMobileStore = defineStore({
       const { AppLauncher } = await import('@capacitor/app-launcher')
       const { App } = await import('@capacitor/app')
 
+      // Log app and plugin versions for debugging
+      const runtimeConfig = useRuntimeConfig()
+      const appInfo = await App.getInfo()
+      dbg()?.info('=== APP STARTUP ===')
+      dbg()?.info('App version', runtimeConfig.public.MOBILE_VERSION)
+      dbg()?.info('App build', appInfo.build)
+      dbg()?.info('App bundle', appInfo.id)
+      dbg()?.info('Platform', Capacitor.getPlatform())
+      dbg()?.info('Capacitor native', Capacitor.isNativePlatform())
+
+      // On Android, check for background push log (from when app wasn't running)
+      if (Capacitor.getPlatform() === 'android') {
+        try {
+          const result = await PushNotifications.getBackgroundPushLog()
+          if (result?.log && result.log.trim()) {
+            dbg()?.info('=== BACKGROUND PUSH LOG ===')
+            dbg()?.info(result.log)
+            dbg()?.info('=== END BACKGROUND PUSH LOG ===')
+            // Clear the log after reading
+            await PushNotifications.clearBackgroundPushLog()
+          } else {
+            dbg()?.debug('No background push log entries')
+          }
+        } catch (e) {
+          dbg()?.warn('Failed to read background push log', e.message)
+        }
+      }
+
       await this.getDeviceInfo(Device)
       this.fixWindowOpen(AppLauncher)
       this.initDeepLinks(App)
@@ -83,41 +119,56 @@ export const useMobileStore = defineStore({
     },
 
     async getDeviceInfo(Device) {
-      console.log('--------------initapp--------------')
       const deviceinfo = await Device.getInfo()
-      console.log('deviceinfo', deviceinfo)
       this.deviceinfo = deviceinfo
-      this.deviceuserinfo = ''
-      if (deviceinfo.manufacturer)
-        this.deviceuserinfo += deviceinfo.manufacturer + ' '
-      if (deviceinfo.model) this.deviceuserinfo += deviceinfo.model + ' '
-      if (deviceinfo.platform) this.deviceuserinfo += deviceinfo.platform + ' '
-      if (deviceinfo.operatingSystem)
-        this.deviceuserinfo += deviceinfo.operatingSystem + ' '
-      if (deviceinfo.osVersion)
-        this.deviceuserinfo += deviceinfo.osVersion + ' '
-      if (deviceinfo.webViewVersion)
-        this.deviceuserinfo += deviceinfo.webViewVersion
+
+      // Build device info string - avoid duplicates (platform/operatingSystem are often same)
+      const parts = []
+      if (deviceinfo.manufacturer) parts.push(deviceinfo.manufacturer)
+      if (deviceinfo.model) parts.push(deviceinfo.model)
+      if (deviceinfo.platform) parts.push(deviceinfo.platform)
+      if (deviceinfo.osVersion) parts.push(deviceinfo.osVersion)
+      // Only add webViewVersion if different from osVersion
+      if (
+        deviceinfo.webViewVersion &&
+        deviceinfo.webViewVersion !== deviceinfo.osVersion
+      ) {
+        parts.push('WebView ' + deviceinfo.webViewVersion)
+      }
+      this.deviceuserinfo = parts.join(' ')
+
       console.log('deviceuserinfo', this.deviceuserinfo)
       this.isiOS = deviceinfo.platform === 'ios'
       this.osVersion = deviceinfo.osVersion
       const deviceid = await Device.getId()
-      console.log('deviceid', deviceid)
       this.devicePersistentId = deviceid.identifier
     },
 
     fixWindowOpen(AppLauncher) {
       // External links should be opened with ExternalLink but catch calls to window.open here
       // Internal links are handled internally and external links use AppLauncher
-      window.open = (url) => {
-        console.log('App window.open', url)
+      window.open = (url, target) => {
+        dbg()?.info('window.open called', { url, target })
+        console.log('App window.open', url, target)
         if (url.substring(0, 4) !== 'http') {
+          dbg()?.info('window.open routing internally', { url })
           const router = useRouter()
           router.push(url)
         } else {
+          dbg()?.info('window.open calling AppLauncher.openUrl', { url })
           AppLauncher.openUrl({ url })
+            .then((result) => {
+              dbg()?.info('AppLauncher.openUrl success', { url, result })
+            })
+            .catch((error) => {
+              dbg()?.error('AppLauncher.openUrl failed', {
+                url,
+                error: error?.message || error,
+              })
+            })
         }
       }
+      dbg()?.info('window.open override installed')
     },
 
     extractQueryStringParams(url) {
@@ -204,40 +255,99 @@ export const useMobileStore = defineStore({
     },
 
     async initPushNotifications(PushNotifications, Badge) {
+      dbg()?.info('initPushNotifications started', { isiOS: this.isiOS })
+
       if (!this.isiOS) {
+        // Delete old channels
         await PushNotifications.deleteChannel({ id: 'PushDefaultForeground' })
-        console.log('CHANNEL DELETED: PushDefaultForeground')
+        await PushNotifications.deleteChannel({ id: 'NewPosts' })
 
+        // Create notification channels matching server-side categories
+        // Channel IDs must match what the server sends in android.notification.channel_id
+
+        // Chat messages - HIGH importance for heads-up notifications
         await PushNotifications.createChannel({
-          id: 'PushDefaultForeground',
-          name: 'Freegle chats',
+          id: 'chat_messages',
+          name: 'Chat Messages',
           description: 'Direct messages with other Freeglers',
-          importance: 3,
+          importance: 4, // HIGH - shows as heads-up notification
           visibility: 1,
           lights: true,
           lightColor: '#5ECA24',
-          vibration: false,
+          vibration: true,
         })
-        console.log('CHANNEL CREATED: PushDefaultForeground')
 
+        // Social - DEFAULT importance for ChitChat comments, replies, loves
         await PushNotifications.createChannel({
-          id: 'NewPosts',
-          name: 'Freegle new posts',
-          description: 'New offer and wanted posts from other Freeglers',
-          importance: 3,
+          id: 'social',
+          name: 'ChitChat & Social',
+          description: 'Comments, replies, and likes on your posts',
+          importance: 3, // DEFAULT - sound and appears in tray
           visibility: 1,
           lights: true,
           lightColor: '#5ECA24',
           vibration: false,
         })
-        console.log('CHANNEL CREATED: NewPosts')
+
+        // Reminders - DEFAULT importance for post expiry, collection reminders
+        await PushNotifications.createChannel({
+          id: 'reminders',
+          name: 'Reminders',
+          description: 'Post expiry warnings and collection reminders',
+          importance: 3, // DEFAULT - sound and appears in tray
+          visibility: 1,
+          lights: true,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        // Tips - LOW importance for encouragement/engagement prompts
+        await PushNotifications.createChannel({
+          id: 'tips',
+          name: 'Tips & Suggestions',
+          description: 'Helpful tips and encouragement',
+          importance: 2, // LOW - no sound, appears in tray
+          visibility: 1,
+          lights: false,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        // New posts - LOW importance for digest/relevant/nearby posts
+        await PushNotifications.createChannel({
+          id: 'new_posts',
+          name: 'New Posts',
+          description: 'New offers and wanted posts nearby',
+          importance: 2, // LOW - no sound, appears in tray
+          visibility: 1,
+          lights: false,
+          lightColor: '#5ECA24',
+          vibration: false,
+        })
+
+        dbg()?.info('Android notification channels created')
+      } else {
+        // iOS: Register notification action categories
+        // This enables Reply, Mark Read, and View action buttons on chat notifications
+        try {
+          const result = await PushNotifications.registerActionCategories()
+          console.log('iOS notification categories registered:', result)
+          dbg()?.info('iOS notification categories registered', result)
+        } catch (e) {
+          console.log('iOS registerActionCategories not available:', e.message)
+          dbg()?.warn('iOS registerActionCategories not available', e.message)
+        }
       }
 
       let permStatus = await PushNotifications.checkPermissions()
-      console.log('checkPermissions:', permStatus)
+      dbg()?.info('Push permission status', permStatus)
 
       await PushNotifications.addListener('registration', (token) => {
         console.log('Push registration success, token: ', token.value)
+        dbg()?.info('Push registration success', {
+          tokenLength: token.value?.length,
+          tokenStart: token.value?.substring(0, 20) + '...',
+        })
         this.mobilePushId = token.value
         const authStore = useAuthStore()
         authStore.savePushId()
@@ -245,7 +355,7 @@ export const useMobileStore = defineStore({
         if (!this.isiOS) {
           PushNotifications.listChannels().then((result) => {
             for (const channel of result.channels) {
-              console.log('CHANNEL', channel)
+              dbg()?.debug('Channel registered', channel)
             }
           })
         }
@@ -254,6 +364,7 @@ export const useMobileStore = defineStore({
 
       await PushNotifications.addListener('registrationError', (error) => {
         console.log('Error on registration: ', error)
+        dbg()?.error('Push registration ERROR', error)
       })
       console.log('addListener registrationError done')
 
@@ -261,6 +372,7 @@ export const useMobileStore = defineStore({
         'pushNotificationReceived',
         (notification) => {
           console.log('============ Push received:', notification)
+          dbg()?.info('PUSH RECEIVED', notification)
           this.handleNotification(notification, PushNotifications, Badge)
         }
       )
@@ -268,8 +380,28 @@ export const useMobileStore = defineStore({
 
       await PushNotifications.addListener(
         'pushNotificationActionPerformed',
-        (n) => {
+        async (n) => {
           console.log('Push action performed:', n)
+          dbg()?.info('PUSH ACTION', {
+            actionId: n.actionId,
+            inputValue: n.inputValue,
+            notification: n.notification,
+          })
+          const actionId = n.actionId
+          const inputValue = n.inputValue
+
+          // Handle specific actions
+          if (actionId === 'reply' && inputValue && inputValue.trim()) {
+            dbg()?.info('Handling reply action')
+            await this.handleReplyAction(n.notification, inputValue.trim())
+            return
+          } else if (actionId === 'mark_read') {
+            dbg()?.info('Handling mark_read action')
+            await this.handleMarkReadAction(n.notification)
+            return
+          }
+
+          // Default behavior - navigate to the notification target
           if (n.notification) n.notification.okToMove = true
           this.handleNotification(n.notification, PushNotifications, Badge)
         }
@@ -277,15 +409,17 @@ export const useMobileStore = defineStore({
       console.log('addListener pushNotificationActionPerformed done')
 
       permStatus = await PushNotifications.requestPermissions()
-      console.log('requestPermissions:', permStatus)
+      dbg()?.info('Push requestPermissions result', permStatus)
       if (permStatus.receive === 'granted') {
         await PushNotifications.register()
-        console.log('PUSH REGISTER OK')
+        dbg()?.info('Push register() called successfully')
       } else {
         console.log('Error on request: ', permStatus)
+        dbg()?.error('Push permission NOT granted', permStatus)
       }
 
       this.setBadgeCount(0, Badge)
+      dbg()?.info('initPushNotifications completed')
     },
 
     async setBadgeCount(badgeCount, Badge) {
@@ -304,16 +438,28 @@ export const useMobileStore = defineStore({
     async handleNotification(notification, PushNotifications, Badge) {
       const router = useRouter()
       console.log('handleNotification A', notification)
+      dbg()?.info('handleNotification called', notification)
       if (!notification) {
         console.error('--- notification NOT SET')
+        dbg()?.error('handleNotification: notification NOT SET')
         return
       }
       try {
         const data = notification.data
         if (!data) {
           console.error('--- notification.data NOT SET')
+          dbg()?.error('handleNotification: notification.data NOT SET')
           return
         }
+
+        // Only process new-style notifications (with channel_id).
+        // Legacy notifications without channel_id are for older app versions.
+        if (!data.channel_id) {
+          console.log('--- Ignoring legacy notification without channel_id')
+          dbg()?.warn('Ignoring legacy notification without channel_id', data)
+          return
+        }
+
         let foreground = false
         if ('foreground' in data) {
           console.log('--- FOREGROUND', data.foreground)
@@ -335,6 +481,30 @@ export const useMobileStore = defineStore({
         }
         console.log('handleNotification badgeCount', data.count)
         this.setBadgeCount(data.count, Badge)
+
+        // When a push notification is received while the app is in the foreground,
+        // immediately refresh chats to update unread counts and trigger message fetching.
+        // This ensures new messages appear without waiting for the 30-second poll.
+        if (foreground) {
+          console.log('Foreground push received - refreshing chats')
+          dbg()?.info('Foreground push - triggering chat refresh')
+          const chatStore = useChatStore()
+          chatStore.fetchChats(null, false)
+
+          // If the notification includes a specific chat ID, also fetch messages for that chat directly.
+          // This is faster than waiting for the unseen watcher in ChatPane.
+          if (data.chatids) {
+            const chatId = parseInt(data.chatids)
+            if (chatId) {
+              console.log(
+                'Foreground push - fetching messages for chat',
+                chatId
+              )
+              dbg()?.info('Foreground push - fetching messages', { chatId })
+              chatStore.fetchMessages(chatId)
+            }
+          }
+        }
 
         if (!this.isiOS && 'inlineReply' in data) {
           const inlineReply = data.inlineReply.trim()
@@ -392,13 +562,78 @@ export const useMobileStore = defineStore({
       }
     },
 
+    async handleReplyAction(notification, replyText) {
+      // Send a reply message directly from the notification
+      console.log('handleReplyAction', replyText, notification)
+      try {
+        const data = notification?.data
+        if (!data) {
+          console.error('handleReplyAction: no notification data')
+          return
+        }
+
+        // Get chat ID from notification data
+        const chatId = parseInt(data.chatids)
+        if (!chatId) {
+          console.error('handleReplyAction: no chat ID in notification')
+          return
+        }
+
+        // Send the reply via API
+        await api(this.config).chat.send({
+          roomid: chatId,
+          message: replyText,
+        })
+        console.log('handleReplyAction: message sent successfully')
+      } catch (e) {
+        console.error('handleReplyAction error:', e.message)
+      }
+    },
+
+    async handleMarkReadAction(notification) {
+      // Mark the chat as read without opening the app
+      console.log('handleMarkReadAction', notification)
+      try {
+        const data = notification?.data
+        if (!data) {
+          console.error('handleMarkReadAction: no notification data')
+          return
+        }
+
+        // Get chat ID from notification data
+        const chatId = parseInt(data.chatid || data.chatids)
+        if (!chatId) {
+          console.error('handleMarkReadAction: no chat ID in notification')
+          return
+        }
+
+        // Get the message ID from the notification - use the actual message ID, not a magic number
+        const messageId = parseInt(data.messageid)
+        if (!messageId) {
+          console.error('handleMarkReadAction: no message ID in notification')
+          return
+        }
+
+        // Mark as read up to this specific message ID
+        await api(this.config).chat.markRead(chatId, messageId, false)
+        console.log(
+          'handleMarkReadAction: chat marked as read up to message',
+          messageId
+        )
+
+        // Update badge count
+        const { Badge } = await import('@capawesome/capacitor-badge')
+        const newCount = Math.max(0, (parseInt(data.badge) || 1) - 1)
+        this.setBadgeCount(newCount, Badge)
+      } catch (e) {
+        console.error('handleMarkReadAction error:', e.message)
+      }
+    },
+
     async checkForAppUpdate() {
       const requiredKey = this.isiOS
         ? 'app_fd_version_ios_required'
         : 'app_fd_version_android_required'
-      const latestKey = this.isiOS
-        ? 'app_fd_version_ios_latest'
-        : 'app_fd_version_android_latest'
 
       const reqdValues = await api(this.config).config.fetchv2(requiredKey)
       if (reqdValues && reqdValues.length === 1) {
@@ -408,17 +643,6 @@ export const useMobileStore = defineStore({
           if (this.versionOutOfDate(requiredVersion)) {
             this.appupdaterequired = true
             console.log('==========appupdate required!')
-          }
-        }
-      }
-
-      const latestValues = await api(this.config).config.fetchv2(latestKey)
-      if (latestValues && latestValues.length === 1) {
-        const latestVersion = latestValues[0].value
-        if (latestVersion) {
-          this.applatestversion = latestVersion
-          if (this.versionOutOfDate(latestVersion)) {
-            this.appupdateavailable = true
           }
         }
       }

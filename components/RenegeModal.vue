@@ -7,42 +7,77 @@
     @shown="onShow"
   >
     <template #default>
-      <notice-message class="mb-3">
-        Please only do this if there's a good reason, so as not to disappoint
-        people.
-      </notice-message>
-      <p>You're no longer promising:</p>
-      <b-form-select
-        v-model="message"
-        :options="messageOptions"
-        class="mb-2 font-weight-bold"
-        disabled=""
-      />
-      <p>...to:</p>
-      <b-form-select
-        v-model="user"
-        :options="userOptions"
-        class="mb-2 font-weight-bold"
-        disabled
-      />
-      <div v-if="tryst" class="d-flex flex-wrap">
-        <b-form-checkbox v-model="removeTryst" size="lg">
-          Cancel handover arranged for
-          <strong
-            ><DateFormatted :value="tryst.arrangedfor" format="weekdaytime"
-          /></strong>
-        </b-form-checkbox>
+      <div class="renege-content">
+        <notice-message class="mb-3" variant="warning">
+          Please only do this if there's a good reason, so as not to disappoint
+          people.
+        </notice-message>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="gift" class="section-icon" />
+            <span class="section-title">You're no longer promising:</span>
+          </div>
+          <b-form-select
+            v-model="message"
+            :options="messageOptions"
+            class="form-select-modern"
+            disabled
+          />
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="user" class="section-icon" />
+            <span class="section-title">...to:</span>
+          </div>
+          <b-form-select
+            v-model="user"
+            :options="userOptions"
+            class="form-select-modern"
+            disabled
+          />
+        </div>
+
+        <div v-if="tryst" class="form-section">
+          <div class="section-header">
+            <v-icon icon="calendar-alt" class="section-icon" />
+            <span class="section-title">Handover Arrangement</span>
+          </div>
+          <b-form-checkbox
+            v-model="removeTryst"
+            size="lg"
+            class="tryst-checkbox"
+          >
+            Cancel handover arranged for
+            <strong>
+              <DateFormatted :value="tryst.arrangedfor" format="weekdaytime" />
+            </strong>
+          </b-form-checkbox>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <v-icon icon="thumbs-up" class="section-icon" />
+            <span class="section-title">Rate this freegler</span>
+          </div>
+          <p class="section-description">
+            Please also give this freegler a thumbs up or down, depending on the
+            experience you had with them.
+          </p>
+          <UserRatings :id="selectedUser" size="lg" />
+        </div>
       </div>
-      <hr />
-      <p>
-        Please also give this freegler a thumbs up or down, depending on the
-        experience you had with them.
-      </p>
-      <UserRatings :id="selectedUser" class="mt-2" size="lg" />
     </template>
     <template #footer>
-      <b-button variant="white" @click="hide"> Cancel </b-button>
-      <b-button variant="warning" @click="renege"> Unpromise </b-button>
+      <div class="modal-actions">
+        <b-button variant="link" class="cancel-btn" @click="hide">
+          Cancel
+        </b-button>
+        <b-button variant="warning" @click="renege">
+          <v-icon icon="times" class="me-1" /> Unpromise
+        </b-button>
+      </div>
     </template>
   </b-modal>
 </template>
@@ -127,7 +162,7 @@ const userOptions = computed(() => {
     if (props.users.length > 1) {
       options.push({
         value: 0,
-        text: '-- Please choose a user --',
+        text: '-- Please choose a freegler --',
         selected: props.selectedUser === 0,
       })
     }
@@ -164,3 +199,68 @@ async function renege() {
   hide()
 }
 </script>
+<style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+.renege-content {
+  padding: 0;
+}
+
+.form-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid $color-gray--lighter;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.section-icon {
+  color: $colour-success;
+  font-size: 1rem;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: $color-gray--darker;
+}
+
+.section-description {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0.75rem;
+}
+
+.form-select-modern {
+  font-weight: 600;
+}
+
+.tryst-checkbox {
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.cancel-btn {
+  color: $color-gray--dark;
+}
+</style>

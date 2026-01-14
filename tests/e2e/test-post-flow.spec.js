@@ -39,13 +39,14 @@ test.describe('Post flow tests', () => {
     })
 
     // Wait for message cards and verify our specific item is visible
-    await page.waitForSelector('.messagecard, .card-body', {
+    // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
+    await page.waitForSelector('.message-summary-mobile, .messagecard', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards.
     const itemLocator = page
-      .locator('.messagecard, .card-body')
+      .locator('.message-summary-mobile, .messagecard')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
@@ -113,12 +114,12 @@ test.describe('Post flow tests', () => {
     await page.gotoAndVerify('/chats')
 
     // Wait for the chat list to load and look for a chat entry
-    await page.waitForSelector('.chatentry', {
+    await page.waitForSelector('.chat-entry', {
       timeout: timeouts.background,
     })
 
     // Check that there's one chat entry (the reply)
-    const chatEntries = page.locator('.chatentry').filter({ visible: true })
+    const chatEntries = page.locator('.chat-entry').filter({ visible: true })
     const chatCount = await chatEntries.count()
     expect(chatCount).toEqual(1)
     console.log(`Found ${chatCount} chat entries in /chats`)
@@ -181,26 +182,29 @@ test.describe('Post flow tests', () => {
     expect(result.id).not.toBe(null)
     console.log(`WANTED post created with ID: ${result.id}`)
 
-    // Navigate to /browse and verify a post is visible
-    console.log('Navigating to /browse to verify WANTED post visibility')
-    await page.gotoAndVerify('/browse', {
+    // Navigate to /myposts and verify the post is visible there
+    // (We use /myposts instead of /browse because /browse may have many posts
+    // and the newly created one might not be immediately visible without scrolling)
+    console.log('Navigating to /myposts to verify WANTED post visibility')
+    await page.gotoAndVerify('/myposts', {
       timeout: timeouts.navigation.default,
     })
 
     // Wait for message cards and verify our specific item is visible
-    await page.waitForSelector('.messagecard, .card-body', {
+    // Note: My Posts uses .message-card class (with hyphen)
+    await page.waitForSelector('.message-card, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
     // Look for our specific unique item in the message cards
     const itemLocator = page
-      .locator('.messagecard, .card-body')
+      .locator('.message-card, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log(`Found our test WANTED item "${uniqueItem}" on browse page`)
+    console.log(`Found our test WANTED item "${uniqueItem}" on myposts page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })
@@ -309,7 +313,7 @@ test.describe('Post flow tests', () => {
     // Scroll and click Next to go to location page
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await page.waitForTimeout(500)
-    await page.locator('.d-none.d-md-flex .btn:has-text("Next")').click()
+    await page.locator('.next-btn:has-text("Next")').click()
 
     // Fill in postcode
     await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
@@ -321,7 +325,7 @@ test.describe('Post flow tests', () => {
 
     // Wait for location confirmation
     const confirmationIcon = page.locator(
-      '.text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
+      '.validation-tick, .text-success.fa-bh, .fa-check-circle, .v-icon[icon="check-circle"]'
     )
     await confirmationIcon.waitFor({
       state: 'visible',
@@ -331,9 +335,7 @@ test.describe('Post flow tests', () => {
     // Scroll and click Next to go to email page
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await page.waitForTimeout(500)
-    await page
-      .locator('.d-none.d-md-flex.maxbutt .btn:has-text("Next")')
-      .click()
+    await page.locator('.next-btn:has-text("Next")').click()
 
     // Fill in the email that already belongs to someone else
     console.log(`Filling in email ${testEmail} that belongs to existing user`)
@@ -349,7 +351,7 @@ test.describe('Post flow tests', () => {
 
     // Wait for the "Freegle it!" button to appear (email passes basic validation)
     console.log('Waiting for Freegle it button to appear')
-    const freegleButton = page.locator('.maxbutt .btn:has-text("Freegle it!")')
+    const freegleButton = page.locator('button:has-text("Freegle it!")')
     await freegleButton.first().waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
@@ -368,7 +370,6 @@ test.describe('Post flow tests', () => {
     )
 
     // Verify the "Freegle it!" button is no longer visible after error
-    const buttonCount = await freegleButton.count()
     const isButtonVisible = await freegleButton
       .first()
       .isVisible()

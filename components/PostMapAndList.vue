@@ -36,17 +36,16 @@
         v-if="showClosestGroups && closestGroups?.length && !mapHidden"
         class="mb-1 border p-2 bg-white"
       >
-        <h2 class="visually-hidden">Nearby commmunities</h2>
-        <div class="d-flex flex-wrap justify-content-center">
-          <div v-for="g in closestGroups" :key="'group-' + g.id">
-            <JoinWithConfirm
-              :id="g.id"
-              :name="g.namedisplay"
-              size="md"
-              variant="primary"
-              class="m-1"
-            />
-          </div>
+        <h2 class="visually-hidden">Nearby communities</h2>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+          <JoinWithConfirm
+            v-for="g in closestGroups"
+            :id="g.id"
+            :key="'group-' + g.id"
+            :name="g.namedisplay"
+            size="sm"
+            variant="primary"
+          />
         </div>
       </div>
       <div v-if="showGroups" class="bg-white pt-3">
@@ -265,6 +264,11 @@ const updatedMessagesOnMap = ref(null)
 const firstSeenMessage = ref(null)
 const infiniteId = ref(+new Date())
 const noneFound = ref(false)
+const lastFilteredIds = ref(null)
+// Lock in the sort order once messages are loaded. This prevents the list from
+// jumping around as messages are marked as seen. Only re-sort when the actual
+// set of message IDs changes (new messages arrive or messages are removed).
+const lockedSortOrder = ref(null)
 
 // Computed properties
 const showIsochrones = computed(() => {
@@ -372,30 +376,46 @@ const filteredMessages = computed(() => {
   return ret
 })
 
-const sortedMessagesOnMap = computed(() => {
-  if (messagesOnMap.value) {
-    return messagesOnMap.value.slice().sort((a, b) => {
-      if (props.selectedSort === 'Unseen') {
-        // Unseen messages first, then by descending date/time.  But we don't want to treat successful posts as
-        // unseen otherwise they bob up to the top.
-        const aunseen = a.unseen && !a.successful
-        const bunseen = b.unseen && !b.successful
+// Helper function to sort messages
+function sortMessages(messages) {
+  return messages.slice().sort((a, b) => {
+    if (props.selectedSort === 'Unseen') {
+      // Unseen messages first, then by descending date/time. But we don't want to treat successful posts as
+      // unseen otherwise they bob up to the top.
+      const aunseen = a.unseen && !a.successful
+      const bunseen = b.unseen && !b.successful
 
-        if (aunseen && !bunseen) {
-          return -1
-        } else if (!aunseen && bunseen) {
-          return 1
-        } else {
-          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-        }
+      if (aunseen && !bunseen) {
+        return -1
+      } else if (!aunseen && bunseen) {
+        return 1
       } else {
-        // Descending date/time.
         return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
       }
-    })
-  } else {
+    } else {
+      // Descending date/time.
+      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+    }
+  })
+}
+
+const sortedMessagesOnMap = computed(() => {
+  if (!messagesOnMap.value) {
     return []
   }
+
+  const messages = messagesOnMap.value
+
+  // If we have a locked sort order, use it to maintain stable positions
+  if (lockedSortOrder.value) {
+    const messageMap = new Map(messages.map((m) => [m.id, m]))
+    return lockedSortOrder.value
+      .filter((id) => messageMap.has(id))
+      .map((id) => messageMap.get(id))
+  }
+
+  // No locked order yet - return freshly sorted messages
+  return sortMessages(messages)
 })
 
 const showRegions = computed(() => {
@@ -470,6 +490,55 @@ const closestGroups = computed(() => {
 })
 
 // Watchers
+// Update the locked sort order when the set of message IDs changes
+watch(
+  messagesOnMap,
+  (newMessages) => {
+    if (!newMessages?.length) {
+      lockedSortOrder.value = null
+      return
+    }
+
+    const currentIds = new Set(newMessages.map((m) => m.id))
+
+    // Check if we need to update the locked order: no locked order yet, or IDs have changed
+    const needsUpdate =
+      !lockedSortOrder.value ||
+      lockedSortOrder.value.length !== currentIds.size ||
+      !lockedSortOrder.value.every((id) => currentIds.has(id))
+
+    if (needsUpdate) {
+      // Sort and lock in the order
+      const sorted = sortMessages(newMessages)
+      lockedSortOrder.value = sorted.map((m) => m.id)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => isochroneStore.messageList,
+  (newList) => {
+    if (updatedMessagesOnMap.value && newList?.length) {
+      const unseenMap = new Map(newList.map((m) => [m.id, m.unseen]))
+      let changed = false
+
+      updatedMessagesOnMap.value.forEach((m) => {
+        const newUnseen = unseenMap.get(m.id)
+        if (newUnseen !== undefined && m.unseen !== newUnseen) {
+          m.unseen = newUnseen
+          changed = true
+        }
+      })
+
+      if (changed) {
+        updatedMessagesOnMap.value = [...updatedMessagesOnMap.value]
+      }
+    }
+  },
+  { deep: true }
+)
+
 watch(
   filteredMessages,
   (newVal) => {
@@ -485,9 +554,24 @@ watch(
       }
     }
 
-    infiniteId.value++
+    // Only reset the infinite scroll when the actual list of message IDs changes,
+    // not when other properties (like unseen status) change. This prevents the
+    // scroll position from being lost when messages are marked as seen.
+    const newIds = JSON.stringify(newVal.map((m) => m.id))
+    if (lastFilteredIds.value !== newIds) {
+      lastFilteredIds.value = newIds
+      infiniteId.value++
+    }
   },
   { immediate: true }
+)
+
+// Reset the locked sort order when the sort option changes
+watch(
+  () => props.selectedSort,
+  () => {
+    lockedSortOrder.value = null
+  }
 )
 
 // Methods

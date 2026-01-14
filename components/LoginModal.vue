@@ -14,41 +14,41 @@
     modal-class="verytop"
     scrollable
   >
-    <!-- This is required as the default bootstrap component makes the main title an h5 -->
     <template #title>
-      <h2>Let's get freegling!</h2>
+      <div class="signin-accent" />
+      <div class="signin-header">
+        <span class="signin-logo-wrap">
+          <img src="/icons/favicon-32x32.png" class="signin-logo" />
+        </span>
+        <span class="signin-title">
+          {{ signUp ? 'Join the Reuse Revolution!' : 'Welcome back' }}
+        </span>
+        <span class="signin-switch">
+          <b-button
+            v-if="signUp"
+            variant="secondary"
+            size="sm"
+            class="test-already-a-freegler"
+            @click.prevent="clickShowSignIn"
+          >
+            Log in
+          </b-button>
+          <b-button
+            v-else
+            variant="secondary"
+            size="sm"
+            @click.prevent="clickShowSignUp"
+          >
+            Join
+          </b-button>
+        </span>
+      </div>
     </template>
-    <div v-if="signUp" class="d-flex justify-content-around mb-2">
-      <b-button
-        variant="link"
-        class="font-weight-bold pl-1 py-0 border-0 align-top d-block d-md-none test-already-a-freegler"
-        @click="clickShowSignIn"
-      >
-        Already a freegler? Log in
-      </b-button>
-    </div>
-    <p v-if="signUp" class="text-center signup-info-text">
-      You'll get emails. Name, approximate location, and profile picture are
-      public - you can hide your real name and picture from Settings. Logging in
-      adds cookies and local storage. Read
-      <nuxt-link no-prefetch target="_blank" to="/terms"
-        >Terms of Use
-      </nuxt-link>
-      and
-      <nuxt-link no-prefetch target="_blank" to="/privacy">Privacy</nuxt-link>
-      for details. Ok? Now come on in...
+    <p v-if="loginType" class="text-center text-muted small mb-2">
+      You usually use {{ loginType }}
     </p>
-    <p v-if="loginType" class="text-center font-weight-bold">
-      You usually log in using {{ loginType }}.
-    </p>
-    <div
-      class="d-flex flex-column flex-lg-row justify-content-between p-0 p-md-3"
-    >
+    <div class="signin-container">
       <div class="signin__section--social">
-        <h3 class="header--size5 pb-1 pb-md-3">Log in with a social account</h3>
-        <p v-if="signUp" class="font-weight-bold d-none d-md-block">
-          Using one of these buttons is the easiest way to create an account:
-        </p>
         <b-button
           class="social-button social-button--facebook"
           :disabled="facebookDisabled"
@@ -95,142 +95,99 @@
           ref="googleLoginButton"
           class="social-button social-button--google clickme"
         />
-        <div class="yahoo-retirement-notice mb-3">
-          <p class="text-muted small mb-1">
-            Used to login with Yahoo? Use Lost Password
-            <v-icon
-              icon="question-circle"
-              class="ms-1"
-              style="cursor: pointer"
-              @click="toggleYahooDetails"
-              @mouseover="showYahooDetails = true"
-            />
-          </p>
-          <NoticeMessage v-if="showYahooDetails" variant="info">
-            We no longer support logging in with a Yahoo button, but you can log
-            in with your Yahoo email and a Freegle password. Please
-            <a href="#" @click.prevent="forgot">click here</a>
-            to get an email allowing you to log in and set a password.
-          </NoticeMessage>
-        </div>
-        <notice-message v-if="socialblocked" variant="warning">
-          Social log in blocked - check your privacy settings, including any ad
-          blockers such as Adblock Plus.
+        <notice-message v-if="socialblocked" variant="warning" class="mt-2">
+          Social sign in blocked - check your ad blocker settings.
         </notice-message>
-        <b-alert v-if="loginWaitMessage" variant="warning" :model-value="true">
-          <!-- APP -->
-          {{ loginWaitMessage }}
-        </b-alert>
         <b-alert v-if="socialLoginError" variant="danger" :model-value="true">
-          Login Failed: {{ socialLoginError }}
+          {{ socialLoginError }}
         </b-alert>
       </div>
       <div class="divider__wrapper">
-        <div class="divider" />
-        <div class="divider__text">OR</div>
-        <div class="divider" />
+        <span class="divider" />
+        <span class="divider__text">OR</span>
+        <span class="divider" />
       </div>
       <div class="signin__section--freegle">
-        <h3 class="header--size5 pb-0 freegle-account-header">
-          <span v-if="signUp"> Create an account on Freegle </span>
-          <template v-else>
-            <span class="d-none d-md-inline"
-              >Continue with your Freegle account</span
-            >
-            <span class="d-inline d-md-none">Use your Freegle account</span>
-          </template>
-        </h3>
-        <div v-if="signUp" class="d-flex justify-content-around">
-          <b-button
-            variant="link"
-            class="font-weight-bold pl-1 py-0 border-0 align-top d-none d-md-block test-already-a-freegler"
-            @click="clickShowSignIn"
-          >
-            Already a freegler? Log in
-          </b-button>
-        </div>
         <b-form
           id="loginform"
           ref="form"
           action="/"
           autocomplete="on"
           method="post"
-          class="mt-1"
           @submit="loginNative"
         >
-          <div v-if="signUp">
-            <b-form-group id="nameGroup" label="Your name" label-for="fullname">
-              <b-form-input
-                id="fullname"
-                v-model="fullname"
-                name="fullname"
-                :class="{
-                  'mb-3': true,
-                  'border-danger': fullNameError,
-                }"
-                autocomplete="name"
-                placeholder="Your full name"
-              />
-            </b-form-group>
-          </div>
+          <b-form-group
+            v-if="signUp"
+            label="Your name"
+            label-for="fullname"
+            class="mb-2"
+          >
+            <b-form-input
+              id="fullname"
+              v-model="fullname"
+              name="fullname"
+              :class="{ 'border-danger': fullNameError }"
+              autocomplete="name"
+              placeholder="Your name"
+            />
+          </b-form-group>
           <EmailValidator
             v-model:email="email"
             v-model:valid="emailValid"
             size="md"
-            label="Your email address"
             :input-class="emailError ? 'border-danger' : ''"
           />
-          <NoticeMessage v-if="referToGoogleButton">
-            Please use the <em>Continue with Google</em> button to log in. That
-            way you don't need to remember a password on this site.
+          <NoticeMessage v-if="referToGoogleButton" class="mb-2">
+            Tip: Use <em>Continue with Google</em> above instead.
           </NoticeMessage>
           <PasswordEntry
             v-model="password"
             :original-password="password"
             :error-border="passwordError"
-            :placeholder="signUp ? 'Choose password' : 'Your password'"
+            :placeholder="signUp ? 'Choose password' : 'Password'"
           />
           <b-button
-            block
-            size="lg"
             variant="primary"
-            class="mb-2 mt-2 w-100"
+            class="w-100 mt-2"
             type="submit"
             value="login"
           >
-            <span v-if="!signUp"> Log in to Freegle </span>
-            <span v-else> Register on Freegle </span>
+            {{ signUp ? 'Join Freegle!' : 'Log in' }}
           </b-button>
-          <b-alert v-if="nativeLoginError" variant="danger" :model-value="true">
+          <b-alert
+            v-if="nativeLoginError"
+            variant="danger"
+            :model-value="true"
+            class="mt-2 mb-0"
+          >
             {{ nativeLoginError }}
           </b-alert>
-          <div v-if="!signUp" class="text-center">
-            <nuxt-link no-prefetch to="/forgot" class="nodecor" @click="forgot">
-              I forgot my password
-            </nuxt-link>
-            <p class="mb-0 text-center">
-              <b-button
-                variant="link"
-                class="ps-1 pe-0 py-0 border-0 align-top test-new-freegler"
-                @click="clickShowSignUp"
-              >
-                New freegler? Register
-              </b-button>
-            </p>
-          </div>
         </b-form>
+        <div v-if="!signUp" class="text-center mt-2">
+          <a href="#" class="small text-muted" @click.prevent="forgot">
+            Forgot password?
+          </a>
+        </div>
       </div>
     </div>
-    <div class="marketing-consent-container pt-1 pb-3">
+    <div class="signin-footer">
       <b-form-checkbox
         id="marketingConsent"
         v-model="marketingConsent"
         name="marketingConsent"
-        class="marketing-consent-checkbox pt-1"
+        class="small"
       >
-        We'll also keep in touch by email about what's happening and other ways
-        you can support Freegle.
+        We'll keep in touch by email about what's happening and other ways to
+        support Freegle.
       </b-form-checkbox>
+      <p v-if="signUp" class="small text-muted mt-2 mb-0 text-center">
+        Signing up accepts our
+        <nuxt-link no-prefetch to="/terms" target="_blank">Terms</nuxt-link>
+        and
+        <nuxt-link no-prefetch to="/privacy" target="_blank"
+          >Privacy Policy</nuxt-link
+        >.
+      </p>
     </div>
   </b-modal>
 </template>
@@ -302,8 +259,6 @@ let bumpTimer = null
 const form = ref(null)
 const loginModal = ref(null)
 const googleLoginButton = ref(null)
-const loginWaitMessage = ref(null) // APP
-const showYahooDetails = ref(false)
 
 // Store refs
 const { loggedInEver } = storeToRefs(authStore)
@@ -365,13 +320,6 @@ const referToGoogleButton = computed(() => {
   )
 })
 
-const showYahooRetirementMessage = computed(() => {
-  // Show if user enters a Yahoo email address or if they usually log in with Yahoo
-  return (
-    email.value?.toLowerCase().includes('yahoo') || loginType.value === 'Yahoo'
-  )
-})
-
 const fullNameError = computed(() => {
   return nativeBump.value && buttonClicked.value && !fullname.value
 })
@@ -408,7 +356,6 @@ function tryLater(native) {
   } else {
     socialLoginError.value = 'Something went wrong; please try later.'
   }
-  loginWaitMessage.value = null
 }
 
 function bumpIt() {
@@ -428,7 +375,6 @@ function show() {
   pleaseShowModal.value = true
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
   buttonClicked.value = false
 
   setTimeout(() => {
@@ -463,7 +409,6 @@ function loginNative(e) {
 
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
   buttonClicked.value = true
   e.preventDefault()
   e.stopPropagation()
@@ -574,7 +519,6 @@ function loginNative(e) {
       })
   } else {
     // Login
-    loginWaitMessage.value = 'Please wait...'
     authStore
       .login({
         email: email.value,
@@ -613,7 +557,6 @@ function loginNative(e) {
         } else {
           throw e // let others bubble up
         }
-        loginWaitMessage.value = null
       })
   }
 }
@@ -630,7 +573,6 @@ async function loginFacebook() {
 
   nativeLoginError.value = null
   socialLoginError.value = null
-  loginWaitMessage.value = null
 
   // App: https://github.com/capacitor-community/facebook-login
 
@@ -662,7 +604,6 @@ async function loginFacebook() {
       if (accessToken) {
         // console.log("accessToken", accessToken)
         // Login successful.
-        loginWaitMessage.value = 'Please wait...'
         await authStore.login({
           fblogin: 1,
           fbaccesstoken: accessToken,
@@ -676,7 +617,6 @@ async function loginFacebook() {
     } catch (e) {
       socialLoginError.value = 'Facebook app login error: ' + e.message
     }
-    loginWaitMessage.value = null
     return
   }
 
@@ -721,7 +661,6 @@ function loginAppleApp() {
   }
   // https://github.com/capacitor-community/apple-sign-in
   socialLoginError.value = null
-  loginWaitMessage.value = null
   try {
     console.log('loginAppleApp')
     const options = { scopes: 'email name' }
@@ -731,7 +670,6 @@ function loginAppleApp() {
         // Sign in using token at server
         if (result.response.identityToken) {
           // identityToken, user, etc
-          loginWaitMessage.value = 'Please wait...'
           await authStore.login({
             applecredentials: result.response,
             applelogin: true,
@@ -740,7 +678,6 @@ function loginAppleApp() {
           self.pleaseShowModal = false
         } else {
           socialLoginError.value = 'No identityToken given'
-          loginWaitMessage.value = null
         }
       })
       .catch((e) => {
@@ -749,7 +686,6 @@ function loginAppleApp() {
         } else {
           socialLoginError.value = e.message
         }
-        loginWaitMessage.value = null
       })
   } catch (e) {
     console.log('Apple login error: ', e)
@@ -771,7 +707,6 @@ async function loginGoogleApp() {
     })
     // console.log(response)
     if (response.result && response.result.idToken) {
-      loginWaitMessage.value = 'Please wait...'
       await authStore.login({
         googlejwt: response.result.idToken,
         googlelogin: true,
@@ -782,12 +717,10 @@ async function loginGoogleApp() {
     } else {
       socialLoginError.value = 'Google: no result.idToken found'
     }
-    loginWaitMessage.value = null
   } catch (e) {
     console.log('Google login error: ', e)
     socialLoginError.value = 'Google login error: ' + e.message
   }
-  loginWaitMessage.value = null
 }
 
 async function handleGoogleCredentialsResponse(response) {
@@ -820,10 +753,6 @@ async function handleGoogleCredentialsResponse(response) {
   } else if (response?.error && response.error !== 'immediate_failed') {
     socialLoginError.value = 'Google login failed: ' + response.error
   }
-}
-
-function toggleYahooDetails() {
-  showYahooDetails.value = !showYahooDetails.value
 }
 
 function clickShowSignUp(e) {
@@ -864,15 +793,11 @@ function installGoogleSDK() {
       client_id: clientId.value,
       callback: handleGoogleCredentialsResponse,
     })
-    console.log(
-      'Render google button',
-      document.getElementById('googleLoginButton')
-    )
 
-    console.log('Found google button ref')
+    console.log('Render google button')
     window.google.accounts.id.renderButton(
       document.getElementById('googleLoginButton'),
-      { theme: 'outline', size: 'large', width: '300px' }
+      { theme: 'outline', size: 'large' }
     )
   } else {
     console.log('Google not yet fully loaded')
@@ -955,7 +880,6 @@ async function initializeAppSocialLogins() {
 watch(
   showModal,
   (newVal) => {
-    loginWaitMessage.value = null
     pleaseShowModal.value = newVal
 
     if (newVal) {
@@ -989,7 +913,6 @@ watch(
 watch(
   forceLogin,
   (newVal) => {
-    loginWaitMessage.value = null
     console.log('Force login changed to ' + newVal)
     showModal.value = pleaseShowModal.value || newVal
   },
@@ -1009,13 +932,6 @@ watch(formFields, () => {
   // reset form validation once any of the fields changes its value
   nativeLoginError.value = null
   buttonClicked.value = false
-})
-
-watch(showYahooRetirementMessage, (newVal) => {
-  // Auto-expand details if Yahoo email or Yahoo login type detected
-  if (newVal) {
-    showYahooDetails.value = true
-  }
 })
 
 watch(
@@ -1062,44 +978,101 @@ defineExpose({
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
 $color-facebook: #4267b2;
 $color-google: #4285f4;
 $color-apple: #000000;
 
-.signin__section--social {
-  flex: 0 1 auto;
+.signin-accent {
+  position: absolute;
+  top: -0.5rem;
+  left: -1rem;
+  right: -1rem;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    $color-green--darker,
+    $color-green-background
+  );
+}
 
-  @include media-breakpoint-up(lg) {
-    flex: 0 1 37%;
+.signin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.signin-logo-wrap {
+  flex: 0 0 3rem;
+  min-width: 3rem;
+}
+
+.signin-switch {
+  flex: 0 0 auto;
+}
+
+.signin-logo {
+  width: 24px;
+  height: 24px;
+}
+
+.signin-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 1.25rem;
   }
 }
 
-.signin__section--freegle {
-  flex: 0 1 auto;
+.signin-switch {
+  font-size: 0.875rem;
+  font-weight: normal;
+  text-align: right;
+}
 
+.signin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+
+  /* Only use side-by-side layout on large screens */
   @include media-breakpoint-up(lg) {
-    flex: 0 1 44%;
+    flex-direction: row;
+    padding: 0.5rem 0;
   }
+}
+
+.signin__section--social,
+.signin__section--freegle {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.signin__section--social {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .social-button {
   display: flex;
   align-items: center;
-  min-width: 280px;
-  max-width: 100%;
-  border-radius: 3px;
   padding: 0;
-  margin: 0 auto 20px;
+  margin-bottom: 0.5rem;
   color: $color-white;
-
-  @include media-breakpoint-up(md) {
-    min-width: 315px;
-  }
-
-  @include media-breakpoint-up(lg) {
-    margin: 0 0 20px;
-  }
 }
 
 .social-button:disabled {
@@ -1107,150 +1080,38 @@ $color-apple: #000000;
 }
 
 .social-button__image {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   background-color: $color-white;
 }
 
 .social-button--facebook {
-  border: 2px solid $color-facebook;
-  background-color: $color-facebook;
-  width: 100%;
+  border: 1px solid $color-facebook !important;
+  background-color: $color-facebook !important;
+  color: $color-white !important;
 }
 
 .social-button--apple {
-  border: 2px solid $color-apple;
+  border: 1px solid $color-apple;
   background-color: $color-apple;
-  width: 100%;
 }
+
 .social-button--apple .social-button__image {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   background-color: $color-black;
 }
 
 .social-button--google {
-  border: 2px solid $color-google;
+  border: 1px solid $color-gray--light;
   background-color: $color-white;
-  width: 100%;
-  min-height: 47px;
-}
-
-:deep(.social-button--google > div) {
-  width: 100%;
-}
-
-.divider__wrapper {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-
-  @include media-breakpoint-up(lg) {
-    flex-direction: column;
-    margin-bottom: 0;
-    flex-grow: 1;
-  }
-}
-
-.divider {
-  border-right: none;
-  border-bottom: 1px solid $color-gray--light;
-  width: 100%;
-
-  @include media-breakpoint-up(lg) {
-    border-right: 1px solid $color-gray--light;
-    border-bottom: none;
-    height: 100%;
-    width: auto;
-  }
-}
-
-.divider__text {
-  margin: 0 7px 0 7px;
-  color: $color-gray--base;
-  font-size: 0.8rem;
-
-  @include media-breakpoint-up(lg) {
-    margin: 7px 0 7px 0;
-  }
-}
-
-:deep(.link a) {
-  text-decoration: none !important;
-}
-
-:deep(.is-invalid label) {
-  color: unset;
-}
-
-$color-facebook: #4267b2;
-$color-google: #4285f4;
-
-.signin__section--social {
-  flex: 0 1 auto;
-
-  @include media-breakpoint-up(lg) {
-    flex: 0 1 37%;
-  }
-}
-
-.signin__section--freegle {
-  flex: 0 1 auto;
-
-  @include media-breakpoint-up(lg) {
-    flex: 0 1 44%;
-  }
-}
-
-.social-button {
-  display: flex;
-  align-items: center;
-  min-width: 280px;
-  max-width: 100%;
-  border-radius: 3px;
-  padding: 0;
-  margin: 0 auto 20px;
-  color: $color-white;
-
-  @include media-breakpoint-up(md) {
-    min-width: 315px;
-  }
-
-  @include media-breakpoint-up(lg) {
-    margin: 0 0 20px;
-  }
-}
-
-.social-button:disabled {
-  opacity: 0.2;
-}
-
-.social-button__image {
-  width: 46px;
-  height: 46px;
-  background-color: $color-white;
-}
-
-.social-button--facebook {
-  border: 2px solid $color-facebook;
-  background-color: $color-facebook;
-  width: 100%;
-}
-
-.social-button--google {
-  border: 2px solid $color-google;
-  background-color: $color-white;
-  width: 100%;
-  min-height: 47px;
+  min-height: 42px;
 }
 
 .social-button--google-app {
-  border: 2px solid $color-google;
+  border: 1px solid $color-gray--light;
   background-color: #fff;
   color: #3c4043;
-  width: 100%;
 }
 
 :deep(.social-button--google > div) {
@@ -1259,38 +1120,42 @@ $color-google: #4285f4;
 
 .divider__wrapper {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 0.5rem;
+  margin: 0;
 
+  /* Vertical divider only on large screens */
   @include media-breakpoint-up(lg) {
     flex-direction: column;
-    margin-bottom: 0;
-    flex-grow: 1;
+    margin: 0 0.5rem;
   }
 }
 
 .divider {
-  border-right: none;
-  border-bottom: 1px solid $color-gray--light;
-  width: 100%;
+  flex: 1;
+  height: 1px;
+  background: $color-gray--light;
 
+  /* Vertical divider only on large screens */
   @include media-breakpoint-up(lg) {
-    border-right: 1px solid $color-gray--light;
-    border-bottom: none;
-    height: 100%;
-    width: auto;
+    width: 1px;
+    height: auto;
+    flex: 1;
   }
 }
 
 .divider__text {
-  margin: 0 7px 0 7px;
   color: $color-gray--base;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+}
 
-  @include media-breakpoint-up(lg) {
-    margin: 7px 0 7px 0;
+.signin-footer {
+  border-top: 1px solid $color-gray--light;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+
+  :deep(label) {
+    font-weight: normal !important;
   }
 }
 
@@ -1300,56 +1165,21 @@ $color-google: #4285f4;
 
 :deep(.is-invalid label) {
   color: unset;
-}
-
-.marketing-consent-container {
-  border-top: 1px solid $color-gray--light;
-}
-
-.marketing-consent-checkbox :deep(label) {
-  font-size: 0.875rem;
-  font-weight: normal !important;
-  line-height: 1.4;
-  display: flex;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.marketing-consent-checkbox :deep(input[type='checkbox']) {
-  margin-top: 0.125rem;
-  margin-right: 0.5rem;
-  flex-shrink: 0;
-}
-
-/* Hide modal header on mobile */
-:deep(.modal-header) {
-  display: none !important;
-
-  @include media-breakpoint-up(md) {
-    display: flex;
-  }
-}
-
-.signup-info-text {
-  font-size: 0.813rem;
-
-  @include media-breakpoint-up(md) {
-    font-size: 1rem;
-  }
-}
-
-.freegle-account-header {
-  white-space: nowrap;
 }
 </style>
 
 <style lang="scss">
-// Unscoped styles for modal header visibility
-.verytop .modal-header {
-  display: none !important;
+.verytop .modal-content {
+  position: relative;
+  overflow-x: hidden;
+}
 
-  @media (min-width: 768px) {
-    display: flex !important;
-  }
+.verytop .modal-header {
+  padding: 0.5rem;
+  position: relative;
+}
+
+.verytop .modal-title {
+  width: 100%;
 }
 </style>

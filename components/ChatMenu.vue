@@ -20,7 +20,6 @@
 import { computed } from 'vue'
 import { useChatStore } from '~/stores/chat'
 import { useRouter } from '#app'
-import { useMobileStore } from '@/stores/mobile' // APP
 
 const props = defineProps({
   isListItem: {
@@ -32,7 +31,6 @@ const props = defineProps({
 
 const router = useRouter()
 const chatStore = useChatStore()
-const mobileStore = useMobileStore()
 
 const chatType = computed(() => {
   // A different component needs to be created depending on the context in which it's used
@@ -41,12 +39,8 @@ const chatType = computed(() => {
 
 const chatCount = computed(() => {
   // Don't show so many that the layout breaks.
-  const chatcount = Math.min(99, chatStore?.unreadCount)
-  if (mobileStore.isApp) {
-    // APP
-    mobileStore.setBadgeCount(chatcount)
-  }
-  return chatcount
+  // Note: Phone badge is synced from checkWork() in modme.js with total work count
+  return Math.min(99, chatStore?.unreadCount)
 })
 
 function toChats(e) {

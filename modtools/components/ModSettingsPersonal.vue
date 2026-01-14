@@ -67,21 +67,6 @@
         class="mb-2 font-weight-bold"
       />
     </b-form-group>
-    <b-form-group label="Play Beep">
-      <b-form-text class="mb-2">
-        Play beep when new ModTools work arrives.
-      </b-form-text>
-      <OurToggle
-        v-model="beep"
-        class="mt-2"
-        :height="30"
-        :width="150"
-        :font-size="14"
-        :sync="true"
-        :labels="{ checked: 'Play beep', unchecked: 'Stay quiet' }"
-        variant="modgreen"
-      />
-    </b-form-group>
     <b-form-group label="Show me as a volunteer?">
       <b-form-text class="mb-2">
         We can show members who the volunteers on a group are, to make it seem
@@ -175,16 +160,6 @@ export default {
     }
   },
   computed: {
-    beep: {
-      get() {
-        return Object.keys(this.me.settings).includes('playbeep')
-          ? Boolean(this.me.settings.playbeep)
-          : true
-      },
-      set(newval) {
-        this.saveSetting('playbeep', newval)
-      },
-    },
     showme: {
       get() {
         return Object.keys(this.me.settings).includes('showmod')

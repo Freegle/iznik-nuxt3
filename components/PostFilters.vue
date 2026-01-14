@@ -33,9 +33,9 @@
         </div>
         <div class="close d-flex justify-content-end">
           <b-button
-            variant="white"
+            variant="link"
             title="Hide map and post filters"
-            class="noborder close"
+            class="noborder close text-dark"
             @click="showFilters = false"
           >
             <v-icon icon="times" />
@@ -52,20 +52,9 @@
           @add="showAddIsochrone = true"
         />
         <IsoChrone v-if="showAddIsochrone" @added="added" @cancel="cancel" />
-        <p class="mt-2">
-          You'll see posts from near your postcode - see the area shaded on the
-          map below. The slider above controls how far away to include. Click
-          the <em>Near</em> and <em>Far</em> buttons, or drag the slider, to
-          change it.
-        </p>
-        <p>
-          You can set your postcode in
-          <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>, and you
-          can
-          <nuxt-link to="#" @click="showAddIsochrone = true"
-            >add a location</nuxt-link
-          >
-          to show posts near another postcode (e.g. work as well as home).
+        <p class="help-text d-none d-md-block">
+          Adjust the slider to show posts from nearer or further away.
+          <nuxt-link no-prefetch to="/settings">Change postcode</nuxt-link>
         </p>
       </div>
       <hr />
@@ -126,6 +115,7 @@ import { useMessageStore } from '~/stores/message'
 import { ref, watch } from '#imports'
 import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
   selectedGroup: {
@@ -153,27 +143,8 @@ const emit = defineEmits([
   'update:selectedSort',
 ])
 
-const breakpoint = computed(() => {
-  const miscStore = useMiscStore()
-  return miscStore.breakpoint
-})
-
-const showFilters = ref(true)
-
-watch(
-  breakpoint,
-  (newVal) => {
-    if (newVal === 'xs' || newVal === 'sm') {
-      // Hide filters on mobile.
-      showFilters.value = false
-    } else {
-      showFilters.value = true
-    }
-  },
-  {
-    immediate: true,
-  }
-)
+// Filters should always start closed - users can expand them if needed
+const showFilters = ref(false)
 
 watch(
   () => props.forceShowFilters,
@@ -202,6 +173,9 @@ watch(
     immediate: true,
   }
 )
+
+// User
+const { me } = useMe()
 
 // Isochrones
 const showAddIsochrone = ref(false)
@@ -236,9 +210,7 @@ watch(search, (newVal, oldVal) => {
 })
 
 // Selected group.  We have a special case for the 'nearby' group, which is -1.
-const browseView = computed(
-  () => useAuthStore().user?.settings?.browseView || 'nearby'
-)
+const browseView = computed(() => me.value?.settings?.browseView || 'nearby')
 const group = ref(browseView.value === 'nearby' ? -1 : 0)
 
 watch(
@@ -250,8 +222,7 @@ watch(
 
 watch(group, async (newVal) => {
   const authStore = useAuthStore()
-  const me = useAuthStore().user
-  const settings = me?.settings
+  const settings = me.value?.settings
   const messageStore = useMessageStore()
 
   if (newVal === -1) {
@@ -264,22 +235,22 @@ watch(group, async (newVal) => {
 
     emit('update:selectedGroup', 0)
 
-    if (me) {
+    if (me.value) {
       // We do this so that UpToDate doesn't show an old count.
-      messageStore.fetchCount(me.settings?.browseView, false)
+      messageStore.fetchCount(me.value.settings?.browseView, false)
     }
   } else if (newVal === 0) {
     // Special case for all my groups.
-    const settings = useAuthStore().user?.settings
+    const settings = me.value?.settings
     settings.browseView = 'mygroups'
 
     await authStore.saveAndGet({
       settings,
     })
 
-    if (me) {
+    if (me.value) {
       // We do this so that UpToDate doesn't show an old count.
-      messageStore.fetchCount(me.settings?.browseView, false)
+      messageStore.fetchCount(me.value.settings?.browseView, false)
     }
 
     emit('update:selectedGroup', 0)
@@ -335,10 +306,10 @@ const sortOptions = [
 const authStore = useAuthStore()
 const sort = computed({
   get() {
-    return authStore.user?.settings?.browseSort || 'Unseen'
+    return me.value?.settings?.browseSort || 'Unseen'
   },
   async set(val) {
-    const settings = useAuthStore().user?.settings
+    const settings = me.value?.settings
     settings.browseSort = val
 
     await authStore.saveAndGet({
@@ -362,6 +333,33 @@ const sort = computed({
 .noborder {
   border: none !important;
   border-color: $color-white !important;
+}
+
+// Remove curved corners from form controls
+:deep(.form-select),
+:deep(.form-control),
+:deep(select),
+:deep(input) {
+  border-radius: 0 !important;
+}
+
+:deep(.input-group) {
+  .form-control,
+  .btn {
+    border-radius: 0 !important;
+  }
+}
+
+:deep(.btn) {
+  border-radius: 0 !important;
+}
+
+// Compact labels for mobile
+.filters label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: $color-gray--darker;
 }
 
 .filters {
@@ -421,5 +419,13 @@ const sort = computed({
       grid-row: 3 / 4;
     }
   }
+}
+
+// Help text - hidden on mobile
+.help-text {
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 </style>

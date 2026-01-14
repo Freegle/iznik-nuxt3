@@ -4,15 +4,33 @@
       v-if="showContactDetailsAskModal"
       @hidden="showContactDetailsAskModal = false"
     />
-    <VisibleWhen :at="['xs', 'sm']">
-      <Teleport v-if="loggedIn && id && chat" to="#navbar-mobile">
-        <ChatMobileNavbar :id="id" />
-      </Teleport>
-    </VisibleWhen>
+    <!-- ChatMobileNavbar replaces the default navbar only at xs/sm (when chat list is hidden) -->
+    <Teleport v-if="loggedIn && id && showMobileNavbar" to="#navbar-mobile">
+      <ChatMobileNavbar v-if="chat" :id="id" />
+      <div v-else class="ourBack layout fixed-top pt-1 pb-1">
+        <div class="backbutton nav-back-btn">
+          <v-icon icon="arrow-left" class="back-icon" />
+        </div>
+        <div
+          class="name d-flex flex-column justify-content-around text-center"
+        >
+          <h1 class="text-white truncate text-center header--size5 m-0">
+            Loading...
+          </h1>
+        </div>
+      </div>
+    </Teleport>
     <div>
       <h1 class="visually-hidden">Chats</h1>
       <b-row class="m-0">
-        <b-col id="chatlist" cols="12" md="4" xl="3" class="p-0 bg-white">
+        <b-col
+          id="chatlist"
+          cols="12"
+          md="5"
+          lg="4"
+          xl="3"
+          class="p-0 bg-white"
+        >
           <VisibleWhen
             :at="
               selectedChatId
@@ -36,41 +54,43 @@
                     <nuxt-link no-prefetch to="/settings">Settings</nuxt-link>.
                   </div>
                 </div>
-                <div v-else class="mt-3"></div>
-                <div
-                  class="d-flex justify-content-between flex-wrap mb-2 border-bottom"
-                >
-                  <form
-                    role="search"
-                    class="mb-1 mr-1 ml-1 ml-md-0"
-                    @submit.prevent
-                  >
+                <div v-else class="mt-2"></div>
+                <div class="chat-toolbar">
+                  <form role="search" class="search-form" @submit.prevent>
                     <label for="search-bar" class="visually-hidden"
                       >Search chats</label
                     >
-                    <b-form-input
-                      id="search-bar"
-                      v-model="search"
-                      placeholder="Search chats"
-                      class="flex-shrink-1"
-                    />
+                    <div class="search-wrapper">
+                      <v-icon icon="search" class="search-icon" />
+                      <b-form-input
+                        id="search-bar"
+                        v-model="search"
+                        placeholder="Search chats"
+                        class="search-input"
+                      />
+                    </div>
                   </form>
-                  <b-button
-                    variant="primary"
-                    class="mb-1 ml-1 ml-md-0"
-                    @click="markAllRead"
-                  >
-                    <v-icon icon="check" />
-                    Mark all read
-                  </b-button>
+                  <button class="mark-read-btn" @click="markAllRead">
+                    <v-icon icon="check-double" />
+                    <span class="d-none d-sm-inline">Mark all read</span>
+                  </button>
                 </div>
-                <p
+                <div
                   v-if="!visibleChats?.length && !closedChats?.length"
-                  class="ml-2"
+                  class="empty-state"
                 >
-                  <span v-if="searching" class="pulsate"> Searching... </span>
-                  <span v-else> No chats to show. </span>
-                </p>
+                  <div v-if="searching" class="empty-state-content">
+                    <v-icon icon="spinner" class="empty-state-icon fa-spin" />
+                    <p class="empty-state-text">Searching...</p>
+                  </div>
+                  <div v-else class="empty-state-content">
+                    <v-icon icon="comments" class="empty-state-icon" />
+                    <p class="empty-state-text">No chats to show.</p>
+                    <p class="empty-state-hint">
+                      Start a conversation by replying to a post.
+                    </p>
+                  </div>
+                </div>
                 <div v-else>
                   <div
                     v-if="closedChats.length"
@@ -141,27 +161,25 @@
                     <template #spinner>&nbsp;</template>
                   </infinite-loading>
                 </div>
-                <div class="d-flex justify-content-around">
-                  <b-button
+                <div class="chat-actions">
+                  <button
                     v-if="
                       !search && mightBeOldChats && complete && !showingOlder
                     "
-                    variant="link"
-                    size="sm"
+                    class="chat-action-btn"
                     @click="fetchOlder"
                   >
-                    Show older chats
-                  </b-button>
-                </div>
-                <div class="d-flex justify-content-around mt-2">
-                  <b-button
+                    <v-icon icon="history" class="action-icon" />
+                    <span>Show older chats</span>
+                  </button>
+                  <button
                     v-if="complete && visibleChats && visibleChats.length"
-                    variant="link"
-                    size="sm"
+                    class="chat-action-btn"
                     @click="showHideAll"
                   >
-                    Hide all chats
-                  </b-button>
+                    <v-icon icon="eye-slash" class="action-icon" />
+                    <span>Hide all chats</span>
+                  </button>
                 </div>
               </div>
               <VisibleWhen
@@ -180,7 +198,7 @@
             </div>
           </VisibleWhen>
         </b-col>
-        <b-col cols="12" md="8" xl="6" class="chatback p-0">
+        <b-col cols="12" md="7" lg="8" xl="6" class="chatback p-0">
           <VisibleWhen
             :at="
               selectedChatId
@@ -254,6 +272,14 @@ const stickyAdRendered = computed(() => {
   return miscStore.stickyAdRendered
 })
 
+// Show mobile navbar only at xs/sm breakpoints (when chat list is hidden on mobile)
+const showMobileNavbar = computed(() => {
+  const bp = miscStore.breakpoint
+  return bp === 'xs' || bp === 'sm'
+})
+
+const loggedIn = computed(() => authStore.user !== null)
+
 definePageMeta({
   layout: 'login',
 })
@@ -321,7 +347,19 @@ const complete = ref(false)
 const bump = ref(1)
 const distance = ref(1000)
 const selectedChatId = ref(null)
+
+// If no chats were found initially, mark as complete so "Show older chats" button appears.
+if (chatStore.list.length === 0) {
+  complete.value = true
+}
 const showClosed = computed(() => chatStore.showClosed)
+
+// Watch for external changes to showClosed (e.g., from store's unhide function)
+// to trigger reactivity updates that normally happen in toggleShowClosed.
+watch(showClosed, () => {
+  showChats.value = 20
+  bump.value++
+})
 
 function toggleShowClosed() {
   chatStore.showClosed = !chatStore.showClosed
@@ -546,34 +584,171 @@ async function searchMore() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 @import 'assets/css/sticky-banner.scss';
 @import 'assets/css/sidebar-ads.scss';
+@import 'assets/css/navbar.scss';
 
 .chatback {
   background-color: $color-yellow--light;
 }
 
 .active {
-  background-color: $color-gray-4 !important;
+  background-color: rgba($color-green-background, 0.15) !important;
+  border-left: 3px solid $color-green-background;
 }
 
 .chat:hover {
-  background-color: $color-gray--lighter;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+// Modern chat toolbar
+.chat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.search-form {
+  flex: 1;
+}
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #999;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 32px !important;
+  border-radius: 20px !important;
+  border: 1px solid #e0e0e0 !important;
+  background: white !important;
+  font-size: 0.9rem !important;
+  height: 36px !important;
+
+  &:focus {
+    border-color: $color-green-background !important;
+    box-shadow: 0 0 0 2px rgba($color-green-background, 0.1) !important;
+  }
+}
+
+.mark-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: $color-green-background;
+    border-color: $color-green-background;
+    color: white;
+  }
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.empty-state-content {
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  color: $color-gray--light;
+  margin-bottom: 12px;
+}
+
+.empty-state-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $color-gray--dark;
+  margin-bottom: 4px;
+}
+
+.empty-state-hint {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin: 0;
+}
+
+/* Chat action buttons (Show older, Hide all) */
+.chat-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+}
+
+.chat-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .action-icon {
+    font-size: 0.85rem;
+    color: $color-green-background;
+  }
+
+  &:hover {
+    background: rgba($color-green-background, 0.08);
+    border-color: $color-green-background;
+    color: $color-green--dark;
+  }
 }
 
 .chatlist {
   // On mobile we substitute a different height navbar on this page.
-  height: calc(100vh - 58px);
+  height: calc(100vh - $navbar-mobile-chat-height);
 
   @include media-breakpoint-up(md) {
     height: calc(100vh - var(--header-navbar-height));
   }
 
   &.stickyAdRendered {
-    height: calc(100vh - 58px - $sticky-banner-height-mobile);
+    height: calc(
+      100vh - $navbar-mobile-chat-height - $sticky-banner-height-mobile
+    );
 
     @media (min-height: $mobile-tall) {
-      height: calc(100vh - 58px - $sticky-banner-height-mobile-tall);
+      height: calc(
+        100vh - $navbar-mobile-chat-height - $sticky-banner-height-mobile-tall
+      );
     }
 
     @include media-breakpoint-up(md) {
@@ -591,17 +766,22 @@ async function searchMore() {
   }
 
   @supports (height: 100dvh) {
-    height: calc(100dvh - 58px);
+    height: calc(100dvh - $navbar-mobile-chat-height);
 
     @include media-breakpoint-up(md) {
       height: calc(100dvh - var(--header-navbar-height));
     }
 
     &.stickyAdRendered {
-      height: calc(100dvh - 58px - $sticky-banner-height-mobile);
+      height: calc(
+        100dvh - $navbar-mobile-chat-height - $sticky-banner-height-mobile
+      );
 
       @media (min-height: $mobile-tall) {
-        height: calc(100dvh - 58px - $sticky-banner-height-mobile-tall);
+        height: calc(
+          100dvh - $navbar-mobile-chat-height -
+            $sticky-banner-height-mobile-tall
+        );
       }
 
       @include media-breakpoint-up(md) {
@@ -639,5 +819,38 @@ async function searchMore() {
 
 .closedCount {
   border-radius: 50%;
+}
+
+// Loading navbar (before chat data loads) - must match ChatMobileNavbar exactly
+// Total height should match $navbar-mobile-chat-height
+.layout {
+  display: grid;
+  grid-template-columns: 0.25em 40px 1fr 48px 0.25em;
+  grid-column-gap: 0.25em;
+  align-items: center;
+  min-height: 56px;
+
+  .backbutton {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+  }
+
+  .name {
+    grid-row: 1 / 2;
+    grid-column: 3 / 4;
+  }
+}
+
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.back-icon {
+  color: white;
+  font-size: 1.25rem;
 }
 </style>

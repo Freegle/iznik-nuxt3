@@ -10,8 +10,8 @@
     <div>
       <div v-if="tables">
         <b-row class="m-0">
-          <b-col cols="0" md="3" class="d-none d-md-block" />
-          <b-col v-if="authority" cols="12" md="6" class="p-0 bg-white">
+          <b-col cols="0" lg="3" class="d-none d-lg-block" />
+          <b-col v-if="authority" cols="12" lg="6" class="p-0 bg-white">
             <b-img
               thumbnail
               src="/icon.png"
@@ -234,8 +234,8 @@
       </div>
       <div v-else>
         <b-row class="m-0">
-          <b-col cols="0" md="3" class="d-none d-md-block" />
-          <b-col ref="mapcont" cols="12" md="6" class="p-0">
+          <b-col cols="0" lg="3" class="d-none d-lg-block" />
+          <b-col ref="mapcont" cols="12" lg="6" class="p-0">
             <div v-if="authority">
               <div class="title pl-2">
                 <b-img
@@ -412,15 +412,19 @@ import { MAX_MAP_ZOOM } from '~/constants'
 import StatsImpact from '~/components/StatsImpact.vue'
 import { buildHead } from '~/composables/useBuildHead'
 import { useStatsStore } from '~/stores/stats'
+import {
+  getBenefitPerTonne,
+  CO2_PER_TONNE,
+} from '~/composables/useReuseBenefit'
 
 const GroupMarker = defineAsyncComponent(() =>
   import('~/components/GroupMarker.vue')
 )
 
-// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
+// Benefit of reuse per tonne and CO2 impact based on WRAP figures.
 // https://wrap.org.uk/resources/tool/benefits-reuse-tool
-const BENEFIT_PER_TONNE = 711
-const CO2_PER_TONNE = 0.51
+// The benefit value is inflation-adjusted to current year prices.
+// CO2_PER_TONNE and getBenefitPerTonne() are imported from useReuseBenefit.
 
 // Setup stores and route
 const statsStore = useStatsStore()
@@ -530,10 +534,10 @@ const totalWeight = computed(() => {
   return Math.round(totalWeightUnRounded.value / 100) / 10
 })
 
-// Benefit of reuse per tonne is £711 and CO2 impact is -0.51tCO2eq based on WRAP figures.
-// https://wrap.org.uk/resources/tool/benefits-reuse-tool
+// Benefit of reuse per tonne and CO2 impact based on WRAP figures.
+// The benefit value is inflation-adjusted to current year prices.
 const totalBenefit = computed(() => {
-  return (totalWeightUnRounded.value * BENEFIT_PER_TONNE) / 1000
+  return (totalWeightUnRounded.value * getBenefitPerTonne()) / 1000
 })
 
 const totalCO2 = computed(() => {
@@ -809,10 +813,11 @@ const last3MonthsKgsTotal = computed(() => {
 })
 
 const last3MonthsBenefitTotal = computed(() => {
+  const benefitPerTonne = getBenefitPerTonne()
   return [
-    Math.round((last3MonthsKgsTotal.value[0] * BENEFIT_PER_TONNE) / 1000),
-    Math.round((last3MonthsKgsTotal.value[1] * BENEFIT_PER_TONNE) / 1000),
-    Math.round((last3MonthsKgsTotal.value[2] * BENEFIT_PER_TONNE) / 1000),
+    Math.round((last3MonthsKgsTotal.value[0] * benefitPerTonne) / 1000),
+    Math.round((last3MonthsKgsTotal.value[1] * benefitPerTonne) / 1000),
+    Math.round((last3MonthsKgsTotal.value[2] * benefitPerTonne) / 1000),
   ]
 })
 

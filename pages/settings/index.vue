@@ -1,25 +1,21 @@
 <template>
   <client-only v-if="me">
-    <div>
+    <div class="settings-page">
       <h1 class="visually-hidden">Settings</h1>
-      <b-row class="m-0">
-        <b-col cols="0" xl="3" />
-        <b-col cols="12" xl="6" class="p-0">
-          <ProfileSection
-            @update="updateMe"
-            @show-about-me-modal="showAboutMeModal = true"
-            @show-profile-modal="showProfileModal = true"
-          />
-          <AccountSection
-            @update="updateMe"
-            @show-email-confirm-modal="showEmailConfirmModal = true"
-          />
-          <AddressBookSection @show-address-modal="showAddressModal = true" />
-          <EmailSettingsSection @update="updateMe" />
-          <OtherSettingsSection @update="updateMe" />
-        </b-col>
-        <b-col cols="0" xl="3" />
-      </b-row>
+      <div class="settings-content">
+        <ProfileSection
+          @update="updateMe"
+          @show-about-me-modal="showAboutMeModal = true"
+          @show-profile-modal="showProfileModal = true"
+        />
+        <AccountSection
+          @update="updateMe"
+          @show-email-confirm-modal="showEmailConfirmModal = true"
+        />
+        <AddressBookSection @show-address-modal="showAddressModal = true" />
+        <EmailSettingsSection @update="updateMe" />
+        <OtherSettingsSection @update="updateMe" />
+      </div>
 
       <!-- Modals -->
       <AboutMeModal
@@ -125,3 +121,16 @@ const ProfileModal = defineAsyncComponent(() =>
   import('~/components/ProfileModal')
 )
 </script>
+
+<style scoped lang="scss">
+.settings-page {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.settings-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+</style>

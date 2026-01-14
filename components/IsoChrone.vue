@@ -29,96 +29,99 @@
       </div>
     </div>
     <template v-if="isochrone">
-      <div class="layout">
-        <label class="font-weight-bold sliderLabel mb-1">
-          <div v-if="id">
-            <div v-if="isochrone.nickname">
-              {{ isochrone.nickname }}:
-              <span class="text-faded">({{ location?.name }})</span>
-            </div>
-            <div v-else>
-              <span v-if="myLocation"> Posts near {{ myLocation }}: </span>
-              <span v-else> Nearby posts: </span>
-            </div>
-          </div>
-          <div v-else>Nearby posts:</div>
-          <div class="d-flex flex-column justify-content-around">
-            <b-button
-              v-if="addButton"
-              variant="link"
-              class="ml-2 p-0"
-              size="sm"
-              @click="$emit('add')"
+      <div class="isochrone-card">
+        <!-- Header row -->
+        <div class="isochrone-header">
+          <span class="location-name">
+            <template v-if="id">
+              <template v-if="isochrone.nickname">
+                {{ isochrone.nickname }}
+                <span v-if="location?.name" class="postcode-hint">
+                  ({{ location.name }})
+                </span>
+              </template>
+              <template v-else-if="myLocation">
+                {{ myLocation }}
+              </template>
+              <template v-else> Nearby </template>
+            </template>
+            <template v-else>Nearby</template>
+          </span>
+          <!-- Transport chips - inline with postcode on desktop -->
+          <div class="transport-chips transport-chips-desktop">
+            <button
+              :class="['transport-chip', { active: transport === 'Walk' }]"
+              @click="changeTransport('Walk')"
             >
-              Add location
-            </b-button>
+              <v-icon icon="walking" />
+            </button>
+            <button
+              :class="['transport-chip', { active: transport === 'Cycle' }]"
+              @click="changeTransport('Cycle')"
+            >
+              <v-icon icon="bicycle" />
+            </button>
+            <button
+              :class="['transport-chip', { active: transport === 'Drive' }]"
+              @click="changeTransport('Drive')"
+            >
+              <v-icon icon="car" />
+            </button>
+          </div>
+          <div class="header-actions">
+            <button v-if="addButton" class="link-btn" @click="$emit('add')">
+              + Add
+            </button>
             <SpinButton
               v-else-if="isochrone.nickname"
               variant="link"
-              button-class="ml-2 p-0 mb-1"
+              button-class="link-btn"
               confirm
               size="sm"
               label="Remove"
               @handle="deleteLocation"
             />
           </div>
-        </label>
-        <div class="slider">
-          <b-button
-            variant="white"
-            size="sm"
-            class="mr-2"
-            title="Show nearer posts"
-            @click="decrement"
-          >
+        </div>
+
+        <!-- Slider row -->
+        <div class="slider-row">
+          <button class="slider-btn" title="Nearer" @click="decrement">
             <v-icon icon="minus" />
-            <span class="d-none d-md-inline-block ml-1">Near</span>
-          </b-button>
-          <b-form-input
+          </button>
+          <input
             v-model="minutes"
             type="range"
             :min="minMinutes"
             :max="maxMinutes"
             :step="step"
-            class="pt-2"
+            class="range-slider"
           />
-          <b-button
-            variant="white"
-            size="sm"
-            class="ml-2"
-            title="Show further posts"
-            @click="increment"
-          >
-            <span class="d-none d-md-inline-block mr-1">Far</span>
+          <button class="slider-btn" title="Further" @click="increment">
             <v-icon icon="plus" />
-          </b-button>
+          </button>
         </div>
-        <label class="font-weight-bold travelLabel"> Travel by: </label>
-        <div class="travel">
-          <b-button
-            :variant="transport === 'Walk' ? 'primary' : 'white'"
+
+        <!-- Transport chips - mobile only -->
+        <div class="transport-chips transport-chips-mobile">
+          <button
+            :class="['transport-chip', { active: transport === 'Walk' }]"
             @click="changeTransport('Walk')"
           >
-            <v-icon icon="walking" /><span class="d-none d-md-inline-block"
-              >&nbsp;Walk</span
-            >
-          </b-button>
-          <b-button
-            :variant="transport === 'Cycle' ? 'primary' : 'white'"
+            <v-icon icon="walking" />
+          </button>
+          <button
+            :class="['transport-chip', { active: transport === 'Cycle' }]"
             @click="changeTransport('Cycle')"
           >
-            <v-icon icon="bicycle" /><span class="d-none d-md-inline-block"
-              >&nbsp;Cycle</span
-            >
-          </b-button>
-          <b-button
-            :variant="transport === 'Drive' ? 'primary' : 'white'"
+            <v-icon icon="bicycle" />
+          </button>
+          <button
+            :class="['transport-chip', { active: transport === 'Drive' }]"
             @click="changeTransport('Drive')"
           >
-            <v-icon icon="car" /><span class="d-none d-md-inline-block"
-              >&nbsp;Drive</span
-            >
-          </b-button>
+            <v-icon icon="car" />
+          </button>
         </div>
       </div>
       <div v-if="!id">
@@ -344,75 +347,157 @@ watch(minutes, (newVal) => {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-:deep(button) {
-  box-shadow: none !important;
+.isochrone-card {
+  background: $color-white;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-left: 3px solid $colour-success;
 }
 
-.layout {
-  display: grid;
+.isochrone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
 
-  grid-template-rows: auto auto auto auto;
-  grid-template-columns: auto auto;
+.location-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: $color-gray--darker;
+}
 
-  .sliderLabel {
-    grid-row: 1 / 2;
-    grid-column: 1 / 3;
-    display: flex;
-    justify-content: flex-start;
+.postcode-hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: $color-gray--dark;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: $colour-secondary;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.slider-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-gray--lighter;
+  border: 1px solid $color-gray-3;
+  color: $color-gray--darker;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: darken($color-gray--lighter, 5%);
   }
 
-  .slider {
-    grid-row: 2 / 3;
-    grid-column: 1 / 2;
-    display: flex;
+  &:active {
+    background: darken($color-gray--lighter, 10%);
+  }
+}
+
+.range-slider {
+  flex: 1;
+  height: 6px;
+  accent-color: $colour-success;
+  cursor: pointer;
+}
+
+.transport-chips {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Mobile: show bottom chips, hide header chips */
+.transport-chips-mobile {
+  display: flex;
+}
+
+.transport-chips-desktop {
+  display: none;
+}
+
+.transport-chip {
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-gray--lighter;
+  border: 1px solid $color-gray-3;
+  color: $color-gray--dark;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: darken($color-gray--lighter, 5%);
   }
 
-  .travelLabel {
-    grid-row: 3 / 4;
-    grid-column: 1 / 2;
+  &.active {
+    background: $colour-success;
+    border-color: $colour-success;
+    color: $color-white;
+  }
+}
+
+/* Desktop layout */
+@include media-breakpoint-up(md) {
+  .isochrone-card {
+    padding: 1rem;
+  }
+
+  .isochrone-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .slider-row {
+    margin-bottom: 0;
+  }
+
+  /* Desktop: show header chips, hide bottom chips */
+  .transport-chips-mobile {
     display: none;
   }
 
-  .travel {
-    grid-row: 2 / 3;
-    grid-column: 2 / 3;
+  .transport-chips-desktop {
     display: flex;
-    justify-content: flex-end;
-    margin-left: 1rem;
   }
 
-  @include media-breakpoint-up(md) {
-    grid-template-rows: auto auto;
-    grid-template-columns: 1fr 1fr;
-    grid-column-gap: 50px;
+  .header-actions {
+    margin-left: auto;
+  }
 
-    .sliderLabel {
-      grid-row: 1 / 2;
-      grid-column: 1 / 2;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .slider {
-      grid-row: 2 / 3;
-      grid-column: 1 / 2;
-      display: flex;
-    }
-
-    .travelLabel {
-      grid-row: 1 / 2;
-      grid-column: 2 / 3;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .travel {
-      grid-row: 2 / 3;
-      grid-column: 2 / 3;
-      display: flex;
-      justify-content: flex-end;
-    }
+  .transport-chip {
+    width: 36px;
+    height: 32px;
   }
 }
 </style>

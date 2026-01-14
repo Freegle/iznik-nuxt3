@@ -6,7 +6,7 @@
     >
       Loading donation methods...
     </div>
-    <div v-if="isApp" class="d-flex justify-content-between flex-wrap">
+    <div v-if="isApp" class="d-flex flex-column gap-3">
       <b-button
         v-if="isGooglePayAvailable"
         variant="primary"
@@ -96,21 +96,22 @@ const emit = defineEmits(['loaded', 'error', 'success', 'noPaymentMethods'])
 
 let uniqueId = null
 let stripe = null
-if (isApp.value) {
-  console.log('Stripe.initialize', runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
-  Stripe.initialize({
-    publishableKey: runtimeConfig.public.STRIPE_PUBLISHABLE_KEY,
-  })
-} else {
+let stripeInitialized = false
+
+// App Stripe initialization is deferred to onMounted to ensure runtimeConfig is available
+if (!isApp.value) {
   uniqueId = uid('stripe-donate-')
-  try {
-    stripe = await loadStripe(runtimeConfig.public.STRIPE_PUBLISHABLE_KEY)
-  } catch (e) {
-    console.error('Stripe load error', e)
-    Sentry.captureMessage('Stripe load error', {
-      extra: e,
-    })
-    emit('error')
+  const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
+  if (stripeKey) {
+    try {
+      stripe = await loadStripe(stripeKey)
+    } catch (e) {
+      console.error('Stripe load error', e)
+      Sentry.captureMessage('Stripe load error', {
+        extra: e,
+      })
+      emit('error')
+    }
   }
 }
 
@@ -157,10 +158,35 @@ const error = ref(null)
 
 onMounted(async () => {
   if (isApp.value) {
+    // Initialize Stripe inside onMounted to ensure runtimeConfig is fully available.
+    // This fixes a race condition where some users see "you must provide publishableKey"
+    // error because the config wasn't hydrated yet at script setup time.
+    const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
+
+    if (!stripeKey) {
+      console.error('Stripe publishableKey not available at mount')
+      Sentry.captureMessage('Stripe publishableKey missing at mount', {
+        extra: { runtimeConfigPublic: runtimeConfig.public },
+      })
+      emit('error')
+      loading.value = false
+      return
+    }
+
+    if (!stripeInitialized) {
+      console.log('Stripe.initialize', stripeKey)
+      Stripe.initialize({
+        publishableKey: stripeKey,
+      })
+      stripeInitialized = true
+    }
+
     try {
       console.log('Stripe props.price', props.price)
       if (mobileStore.isApp && !mobileStore.isiOS) {
-        // Disable on iOS for now
+        // Disable on iOS for now. Approval for use of Apple Pay is handled via Benevity.
+        // Freegle is registered with Benevity and we have submitted a request for Apple Pay
+        // verification. Once approved, remove the !mobileStore.isiOS condition to enable.
 
         Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
           console.log('Stripe PaymentSheetEventsEnum.Failed', e)
@@ -321,14 +347,32 @@ onMounted(async () => {
         emit('error')
       } else if (!props.monthly) {
         // Create the PaymentIntent and obtain clientSecret
-        console.log('One-off', event)
-        const res = await donationStore.stripeIntent(
+        console.log(
+          'One-off payment, price:',
           props.price,
+          'type:',
           event.expressPaymentType
         )
-        console.log('Intent', res)
+        console.log('donationStore:', donationStore)
+        console.log('donationStore.config:', donationStore.config)
+
+        let res
+        try {
+          console.log('Calling stripeIntent...')
+          res = await donationStore.stripeIntent({
+            amount: props.price,
+            paymenttype: event.expressPaymentType,
+          })
+          console.log('stripeIntent returned:', res)
+        } catch (e) {
+          console.error('stripeIntent exception:', e)
+          console.error('Exception message:', e.message)
+          console.error('Exception stack:', e.stack)
+          throw e
+        }
 
         const clientSecret = res.client_secret
+        console.log('clientSecret:', clientSecret)
 
         const { error } = await stripe.confirmPayment({
           // `elements` instance used to create the Express Checkout Element

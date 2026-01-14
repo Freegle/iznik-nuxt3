@@ -2,9 +2,12 @@
 .gitignore
 node_modules
 .nuxt
-.output
 dist
 .env
 .env.*
 logs
 *.log
+coverage
+monocart-report
+playwright-report
+test-results

@@ -42,7 +42,6 @@ export const useAuthStore = defineStore({
       // auth section which might lead to us being logged in as the wrong user.
     },
     setAuth(jwt, persistent) {
-      console.log('Saving jwt and persistent')
       this.auth.jwt = jwt
       this.auth.persistent = persistent
     },
@@ -573,7 +572,6 @@ export const useAuthStore = defineStore({
         mobileStore.mobilePushId.length > 0
       ) {
         if (mobileStore.acceptedMobilePushId !== mobileStore.mobilePushId) {
-          console.log('sending mobilePushId', mobileStore.mobilePushId)
           const params = {
             notifications: {
               push: {

@@ -4,8 +4,6 @@
       v-if="showDonationAskModal"
       @hidden="showDonationAskModal = false"
     />
-    <DeadlineAskModal v-if="askDeadline" :ids="ids" @hide="maybeAskDelivery" />
-    <DeliveryAskModal v-if="askDelivery" :ids="ids" />
 
     <b-container fluid class="p-0 p-xl-2">
       <h1 class="visually-hidden">My posts</h1>
@@ -19,7 +17,7 @@
           </VisibleWhen>
         </b-col>
         <b-col cols="12" lg="6" class="p-0">
-          <AppUpdateAvailable />
+          <AppUpdateAvailable v-if="mobileStore.isApp" />
           <ExpectedRepliesWarning
             v-if="me && me.expectedreplies"
             :count="me.expectedreplies"
@@ -49,7 +47,7 @@
           </div>
         </b-col>
         <b-col cols="0" lg="3" class="p-0 pl-1">
-          <VisibleWhen :at="['xl', 'xxl']">
+          <VisibleWhen :at="['lg', 'xl', 'xxl']">
             <SidebarRight
               :show-job-opportunities="false"
               ad-unit-path="/22794232631/freegle_myposts_desktop_right"
@@ -64,6 +62,7 @@
 </template>
 <script setup>
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import { useMessageStore } from '~/stores/message'
 import { useSearchStore } from '~/stores/search'
 import { useMe } from '~/composables/useMe'
@@ -87,12 +86,10 @@ import MyPostsPostsList from '~/components/MyPostsPostsList.vue'
 import MyPostsSearchesList from '~/components/MyPostsSearchesList.vue'
 import MyPostsDonationAsk from '~/components/MyPostsDonationAsk.vue'
 import NewUserInfo from '~/components/NewUserInfo.vue'
-import DeadlineAskModal from '~/components/DeadlineAskModal.vue'
-import DeliveryAskModal from '~/components/DeliveryAskModal.vue'
 import { useDonationAskModal } from '~/composables/useDonationAskModal'
 import { useTrystStore } from '~/stores/tryst'
 import { useRuntimeConfig } from '#app'
-import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 
 console.log('My Posts page setup')
 const DonationAskModal = defineAsyncComponent(() =>
@@ -100,6 +97,7 @@ const DonationAskModal = defineAsyncComponent(() =>
 )
 
 const authStore = useAuthStore()
+const mobileStore = useMobileStore()
 const messageStore = useMessageStore()
 const searchStore = useSearchStore()
 const trystStore = useTrystStore()
@@ -108,7 +106,6 @@ const router = useRouter()
 const { me, myid } = useMe()
 
 const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
 const ids = ref([])
 const type = ref(null)
 const newUserPassword = ref(null)
@@ -183,50 +180,27 @@ function forceLogin() {
 
 trystStore.fetch()
 
-// If we have just submitted some posts then we will have been passed ids.
-// In that case, we might want to ask if we can deliver.
-const askDelivery = ref(false)
-const askDeadline = ref(false)
-
-function maybeAskDelivery() {
-  if (type.value === 'Offer') {
-    askDelivery.value = true
-  }
-}
-
 onMounted(() => {
   type.value = window.history.state?.type || null
 
   if (type.value) {
-    askDeadline.value = true
-
     window.setTimeout(() => {
       window.history.replaceState({ ids: null, type: null }, null)
     }, 5000)
 
     if (type.value === 'Offer' && myid) {
-      api.bandit.shown({
-        uid: 'donation',
-        variant: 'mypostoffer',
-      })
+      action('Myposts viewed after Offer', { messageIds: ids.value })
     }
   }
 
   if (window.history.state?.ids?.length) {
-    // We have just submitted.  Grab the ids and clear it out so that we don't show the modal next time.
     ids.value = window.history.state.ids
     newUserPassword.value = window.history.state.newpassword
   }
-
-  // showDonationAskModal.value = true // debug: shows <DonationAskModal/> on My Posts
 })
 
 function donationMade() {
-  api.bandit.chosen({
-    uid: 'donation',
-    variant: 'mypostoffer',
-  })
-
+  action('Donation made from myposts', { messageIds: ids.value })
   donated.value = true
 }
 </script>

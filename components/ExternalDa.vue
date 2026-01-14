@@ -13,11 +13,25 @@
       }"
     >
       <div
-        v-if="fallbackAdVisible"
-        class="d-flex justify-content-md-around"
+        v-if="fallbackAdVisible && !video"
+        class="d-flex w-100 justify-content-md-around"
         :style="maxWidth ? `max-width: ${maxWidth}` : ''"
       >
-        <nuxt-link to="/adsoff" style="display: block; max-width: 100%">
+        <!-- Use job ads as fallback when main ads fail to load -->
+        <JobsDaSlot
+          v-if="jobs"
+          :min-width="minWidth"
+          :max-width="maxWidth"
+          :min-height="minHeight"
+          :max-height="maxHeight"
+          :hide-header="hideJobsHeader"
+          :class="{
+            'text-center': maxWidth === '100vw',
+          }"
+          @rendered="rippleRendered"
+        />
+        <!-- Final fallback: donate ad if job ads not enabled -->
+        <nuxt-link v-else to="/adsoff" style="display: block; max-width: 100%">
           <img
             src="/donate/SupportFreegle_970x250px_20May20215.png"
             alt="Please donate to help keep Freegle running"
@@ -40,6 +54,7 @@
               :max-width="maxWidth"
               :min-height="minHeight"
               :max-height="maxHeight"
+              :hide-header="hideJobsHeader"
               :class="{
                 'text-center': maxWidth === '100vw',
               }"
@@ -93,9 +108,10 @@
 import { ref, computed, onBeforeUnmount } from '#imports'
 import { useConfigStore } from '~/stores/config'
 import { useMiscStore } from '~/stores/misc'
-import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
+const { me, recentDonor } = useMe()
 
 const props = defineProps({
   adUnitPath: {
@@ -142,6 +158,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hideJobsHeader: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['rendered', 'disabled'])
@@ -178,15 +198,14 @@ function visibilityChanged(visible) {
   if (process.client) {
     const runtimeConfig = useRuntimeConfig()
 
-    if (runtimeConfig.public.ISAPP && !runtimeConfig.public.USE_COOKIES && !props.video) {
+    if (
+      runtimeConfig.public.ISAPP &&
+      !runtimeConfig.public.USE_COOKIES &&
+      !props.video
+    ) {
       // App without cookies - show fallback donation ad unless recent donor (but not for video ads)
       console.log('Running in app with no cookies - using fallback ad')
-      const me = useAuthStore().user
-      const recentDonor =
-        me &&
-        me.donated &&
-        new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-      if (recentDonor) {
+      if (recentDonor.value) {
         console.log('Ads disabled in app as recent donor')
         emit('rendered', false)
       } else {
@@ -231,10 +250,11 @@ function visibilityChanged(visible) {
               prebidRetry++
 
               if (prebidRetry > 20) {
-                // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-                // a fallback ad.
-                console.log('Give up on prebid load')
-                emit('rendered', false)
+                // Give up.  Probably blocked - show fallback donation ad.
+                console.log('Give up on prebid load - showing fallback')
+                fallbackAdVisible.value = true
+                adShown.value = true
+                emit('rendered', true)
               } else {
                 // Try again for prebid later.
                 visibleAndScriptsLoadedTimer = setTimeout(() => {
@@ -260,10 +280,11 @@ function visibilityChanged(visible) {
             tcDataRetry++
 
             if (tcDataRetry > 50) {
-              // Give up.  Probably blocked, so we should emit that we've not rendered an ad.  This may trigger
-              // a fallback ad.
-              console.log('Give up on TC data load')
-              emit('rendered', false)
+              // Give up.  Probably blocked - show fallback donation ad.
+              console.log('Give up on TC data load - showing fallback')
+              fallbackAdVisible.value = true
+              adShown.value = true
+              emit('rendered', true)
             } else {
               visibleAndScriptsLoadedTimer = window.setTimeout(() => {
                 visibilityChanged(visible)
@@ -297,16 +318,8 @@ async function checkStillVisible() {
     // Check if we are showing ads.
     const configStore = useConfigStore()
     const showingAds = await configStore.fetch('ads_enabled')
-    const me = useAuthStore().user
 
-    // Add grace period for donations - technically we want it to be 31 days, but for people who have a direct
-    // debit set up we might not have manually processed those donations for a while.
-    const recentDonor =
-      me &&
-      me.donated &&
-      new Date(me.donated) > new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
-
-    const myEmail = me?.email
+    const myEmail = me.value?.email
 
     const runtimeConfig = useRuntimeConfig()
     const userSite = runtimeConfig.public.USER_SITE
@@ -319,16 +332,21 @@ async function checkStillVisible() {
     ) {
       console.log('Ads disabled as system account')
       emit('rendered', false)
-    } else if (recentDonor) {
+    } else if (recentDonor.value) {
       console.log('Ads disabled as recent donor')
       emit('rendered', false)
     } else if (showingAds?.length && parseInt(showingAds[0].value)) {
       renderAd.value = true
     } else {
-      console.log('Ads disabled in server config', showingAds)
+      console.log(
+        'Ads disabled in server config - showing fallback',
+        showingAds
+      )
       useMiscStore().adsDisabled = true
-      emit('rendered', false)
-      emit('disabled')
+      // Show fallback donation ad instead of empty space
+      fallbackAdVisible.value = true
+      adShown.value = true
+      emit('rendered', true)
     }
   } else {
     emit('rendered', false)
@@ -336,8 +354,17 @@ async function checkStillVisible() {
 }
 
 function rippleRendered(rendered) {
-  adShown.value = rendered
-  emit('rendered', rendered)
+  if (rendered) {
+    adShown.value = true
+    emit('rendered', true)
+  } else {
+    // Ad failed to render - show fallback donation ad
+    console.log('Ad failed to render - showing fallback')
+    useMiscStore().adsDisabled = true
+    fallbackAdVisible.value = true
+    adShown.value = true
+    emit('rendered', true)
+  }
 }
 
 const passClicks = computed(() => {

@@ -8,12 +8,48 @@ import {
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 import { useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
+import { useAuthStore } from '~/stores/auth'
 import { suppressException } from '~/composables/useSuppressException'
+import { onTraceChange, getTraceId, getSessionId } from '~/composables/useTrace'
+import { useClientLog } from '~/composables/useClientLog'
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const config = useRuntimeConfig()
   const { vueApp } = nuxtApp
   const router = useRouter()
+
+  // Initialize client logging - must be called to set runtimeConfig before using sessionStart.
+  const clientLog = useClientLog()
+
+  // Set auth store for user_id tracking in logs.
+  clientLog.setAuthStore(useAuthStore())
+
+  // Start client logging immediately - runs independently of Sentry.
+  // Include Capacitor device info if running in the app.
+  try {
+    const { useMobileStore } = await import('~/stores/mobile')
+    const mobileStore = useMobileStore()
+    if (mobileStore.isApp && mobileStore.deviceinfo) {
+      clientLog.sessionStart(
+        { app_version: mobileStore.mobileVersion },
+        mobileStore.deviceinfo
+      )
+    } else {
+      clientLog.sessionStart()
+    }
+  } catch {
+    // Not in app context or store not available.
+    clientLog.sessionStart()
+  }
+
+  // Log page views on route changes.
+  // This creates "user" parent nodes for subsequent API calls.
+  router.afterEach((to) => {
+    clientLog.pageView(to.path, {
+      route_name: to.name?.toString() || null,
+      query_params: Object.keys(to.query).length > 0 ? to.query : null,
+    })
+  })
 
   /* window.onbeforeunload = function () { Remove for IS_APP as opening browser calls this
     console.log('Window unloading...')
@@ -34,7 +70,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (runTimeConfig.public.COOKIEYES && !window.cookieYesComplete) {
       setTimeout(checkCMPComplete, 100)
     } else {
-      console.log('Init Sentry')
       Sentry.init({
         app: [vueApp],
         dsn: config.public.SENTRY_DSN,
@@ -85,6 +120,25 @@ export default defineNuxtPlugin((nuxtApp) => {
 
           // HeadlessChrome triggers an error in Google sign-in.  It's not a real user.
           if (userAgent.includes('headlesschrome')) {
+            return null
+          }
+
+          // Suppress Nuxt/Vue internal DOM removal errors before logging to console.
+          // These occur during navigation when components are unmounted.
+          if (
+            hint?.originalException?.stack?.includes('performRemove') &&
+            hint?.originalException?.message?.includes("reading 'parentNode'")
+          ) {
+            return null
+          }
+
+          // Suppress Vue unmountComponent errors during navigation.
+          if (
+            hint?.originalException?.stack?.includes('unmountComponent') &&
+            hint?.originalException?.message?.includes(
+              "'bum' of 'instance' as it is null"
+            )
+          ) {
             return null
           }
 
@@ -283,6 +337,17 @@ export default defineNuxtPlugin((nuxtApp) => {
             }
           }
 
+          // Log to Loki for correlation with Sentry.
+          if (event.event_id) {
+            const errorMessage =
+              hint?.originalException?.message ||
+              hint?.originalException?.toString() ||
+              'Unknown error'
+            clientLog.sentryError(errorMessage, event.event_id, {
+              exception_name: hint?.originalException?.name,
+            })
+          }
+
           // Continue sending to Sentry
           return event
         },
@@ -301,6 +366,16 @@ export default defineNuxtPlugin((nuxtApp) => {
         trackComponents: true,
         timeout: 2000,
         hooks: ['activate', 'mount', 'update'],
+      })
+
+      // Set initial trace tags for correlation with Loki logs.
+      Sentry.setTag('trace_id', getTraceId())
+      Sentry.setTag('session_id', getSessionId())
+
+      // Register callback to update trace tags when trace changes.
+      onTraceChange((traceId, sessionId) => {
+        Sentry.setTag('trace_id', traceId)
+        Sentry.setTag('session_id', sessionId)
       })
     }
   }

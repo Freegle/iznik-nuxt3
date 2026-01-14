@@ -1,12 +1,12 @@
 <template>
-  <div class="sidebar__wrapper">
+  <div v-if="hasContent" class="sidebar__wrapper">
     <ExternalDa
       v-if="adUnitPath"
       :ad-unit-path="adUnitPath"
-      max-width="300px"
       max-height="600px"
       :div-id="adDivId"
-      class="mt-2"
+      class="mt-2 w-100"
+      @rendered="onAdRendered"
     />
     <CommunityEventSidebar
       v-if="me && showCommunityEvents"
@@ -17,11 +17,12 @@
       class="overflow-y-scroll border-top border-bottom"
     />
     <div class="sidebar__botleft align-content-end col-lg-3 col-0">
-      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper ml-2" />
+      <BotLeftBox v-if="showBotLeft" class="social-media__wrapper" />
     </div>
   </div>
 </template>
 <script setup>
+import { ref, computed } from 'vue'
 import BotLeftBox from './BotLeftBox'
 import { useMe } from '~/composables/useMe'
 const CommunityEventSidebar = defineAsyncComponent(() =>
@@ -31,9 +32,7 @@ const VolunteerOpportunitySidebar = defineAsyncComponent(() =>
   import('~/components/VolunteerOpportunitySidebar')
 )
 
-const { me } = useMe()
-
-defineProps({
+const props = defineProps({
   showCommunityEvents: {
     type: Boolean,
     required: false,
@@ -59,6 +58,24 @@ defineProps({
     required: false,
     default: null,
   },
+})
+
+const { me } = useMe()
+
+const adRendered = ref(null)
+
+function onAdRendered(rendered) {
+  adRendered.value = rendered
+}
+
+const hasContent = computed(() => {
+  if (props.showCommunityEvents || props.showVolunteerOpportunities) {
+    return true
+  }
+  if (adRendered.value === null) {
+    return true
+  }
+  return adRendered.value
 })
 </script>
 <style scoped lang="scss">

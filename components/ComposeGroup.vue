@@ -100,5 +100,11 @@ onMounted(async () => {
   console.log('Fetch user')
   await authStore.fetchUser()
   console.log('Fetched user', authStore.user, authStore.groups)
+
+  // If we have a postcode with groups but no group selected, auto-select the first one.
+  if (postcode.value?.groupsnear?.length && !composeStore.group) {
+    console.log('Auto-selecting first group:', postcode.value.groupsnear[0].id)
+    composeStore.group = postcode.value.groupsnear[0].id
+  }
 })
 </script>

@@ -5,19 +5,26 @@ parameters:
     type: boolean
     default: false
     description: "Set to true to manually trigger promotion/submission workflow"
+  build_testflight:
+    type: boolean
+    default: false
+    description: "Set to true to build iOS and upload to TestFlight from current branch"
 
 orbs:
   android: circleci/android@2.3.0
+  freegle: freegle/tests@1
 
 executors:
   android-executor:
     docker:
       - image: cimg/android:2025.10-node
     resource_class: large
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=6144"
 
   macos-executor:
     macos:
-      xcode: 16.2.0
+      xcode: 16.4.0
     resource_class: macos.m1.medium.gen1
 
 commands:
@@ -29,13 +36,53 @@ commands:
             sudo apt-get update
             sudo apt-get install -y ruby-full
             sudo gem install bundler
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
       - run:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            # Update Fastlane to latest version
-            bundle update fastlane
+            # Install from Gemfile.lock without resolving dependencies
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+      - run:
+          name: Validate Fastlane Version
+          command: |
+            # Verify we got fastlane 2.x (not 1.x which has incompatible dependencies)
+            echo "Checking installed fastlane version..."
+
+            # Check what bundler installed
+            INSTALLED=$(bundle list | grep "fastlane " || echo "")
+            echo "Bundler reports: $INSTALLED"
+
+            if [ -z "$INSTALLED" ]; then
+              echo "❌ ERROR: Fastlane not found in bundle"
+              bundle list | grep fast
+              exit 1
+            fi
+
+            # Extract version from "  * fastlane (2.230.0)" format
+            VERSION=$(echo "$INSTALLED" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+            if [ -z "$VERSION" ]; then
+              echo "❌ ERROR: Could not parse fastlane version from: $INSTALLED"
+              exit 1
+            fi
+
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            echo "Detected fastlane version: $VERSION (major: $MAJOR)"
+
+            if [ "$MAJOR" != "2" ]; then
+              echo "❌ ERROR: Wrong fastlane version installed: $VERSION"
+              echo "Expected: 2.x"
+              echo "Got: $VERSION (major version $MAJOR)"
+              exit 1
+            fi
+
+            echo "✅ Fastlane version OK: $VERSION"
       - run:
           name: Decode Google Play JSON Key
           command: |
@@ -86,7 +133,7 @@ jobs:
           name: Increment Version Number
           command: |
             # Get current version from environment variable
-            CURRENT_VERSION="${CURRENT_VERSION:-3.2.37}"
+            CURRENT_VERSION="${CURRENT_VERSION:-100.0.0}"
             echo "Current version: $CURRENT_VERSION"
 
             # Parse and increment patch version
@@ -95,6 +142,12 @@ jobs:
             patch=$(echo "$CURRENT_VERSION" | cut -d. -f3)
             NEW_PATCH=$((patch + 1))
             NEW_VERSION="$major.$minor.$NEW_PATCH"
+
+            # Enforce minimum version of 100.0.0 (due to errant 99.0.1066 upload to App Store)
+            if [ "$major" -lt 100 ]; then
+              NEW_VERSION="100.0.0"
+              echo "Version below minimum, jumping to 100.0.0"
+            fi
 
             echo "New version: $NEW_VERSION"
 
@@ -107,197 +160,7 @@ jobs:
           paths:
             - .new_version
 
-  build-ios-debug:
-    executor: macos-executor
-    steps:
-      - checkout
-
-      # Install Node.js 22
-      - run:
-          name: Install Node.js 22
-          command: |
-            # Install nvm
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            # Install Node 22
-            nvm install 22
-            nvm use 22
-            nvm alias default 22
-
-            # Add to bash profile for subsequent steps
-            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
-            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-
-      # Verify versions
-      - run:
-          name: Verify Node.js and npm versions
-          command: |
-            node --version
-            npm --version
-
-      # Install Node.js dependencies
-      - run:
-          name: Install Node.js Dependencies
-          command: npm ci
-
-      # Build Nuxt app for development
-      - run:
-          name: Build Nuxt App (Debug)
-          command: |
-            export ISAPP=true
-            export APP_ENV=development
-            echo "🔧 Building debug version for master branch"
-            npm run generate
-
-      # Sync Capacitor to iOS
-      - run:
-          name: Sync Capacitor to iOS
-          command: npx cap sync ios
-
-      # Decode and place GoogleService-Info.plist for Firebase
-      - run:
-          name: Setup Firebase Configuration for iOS
-          command: |
-            if [ -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
-              echo "Decoding GoogleService-Info.plist from environment variable"
-              echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/App/App/GoogleService-Info.plist
-
-              # Validate the decoded file
-              if [ -f ios/App/App/GoogleService-Info.plist ]; then
-                echo "✅ GoogleService-Info.plist successfully created"
-                ls -lh ios/App/App/GoogleService-Info.plist
-              else
-                echo "❌ Failed to create GoogleService-Info.plist"
-                exit 1
-              fi
-            else
-              echo "⚠️ GOOGLE_SERVICE_INFO_PLIST_BASE64 environment variable not set"
-            fi
-
-      # Install Fastlane
-      - run:
-          name: Install Fastlane
-          command: |
-            bundle config set --local path 'vendor/bundle'
-            bundle update fastlane
-            bundle install
-
-      # Setup iOS Certificates
-      - run:
-          name: Setup iOS Certificates
-          command: |
-            # Decode certificates and profiles from CircleCI environment variables
-            mkdir -p ~/certificates
-            echo "$IOS_DISTRIBUTION_CERT" | base64 --decode > ~/certificates/ios_distribution.p12
-            echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/certificates/ios_appstore.mobileprovision
-
-            # Create a temporary keychain for code signing
-            KEYCHAIN_PATH=~/Library/Keychains/temp.keychain-db
-            KEYCHAIN_PASSWORD=circleci
-
-            # Delete keychain if it exists
-            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
-
-            # Create temporary keychain
-            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-            # Set the keychain as default
-            security default-keychain -s "$KEYCHAIN_PATH"
-
-            # Unlock the keychain
-            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-            # Set keychain timeout to 1 hour
-            security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
-
-            # Set paths and keychain info for Fastlane to use
-            echo "export IOS_CERTIFICATE_PATH=~/certificates/ios_distribution.p12" >> $BASH_ENV
-            echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
-            echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
-            echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
-
-            # Import certificate into keychain
-            security import ~/certificates/ios_distribution.p12 \
-              -P "$IOS_CERTIFICATE_PASSWORD" \
-              -k "$KEYCHAIN_PATH" \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security
-
-            # Allow codesign to access the keychain
-            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-            echo "✅ Certificate imported successfully"
-
-      # Install xcpretty for prettier output
-      - run:
-          name: Install xcpretty
-          command: gem install xcpretty
-
-      # Build ad-hoc IPA for testing (no TestFlight upload)
-      # Note: Using Release configuration with ad-hoc export for easier installation
-      # Safari Web Inspector works on all iOS builds for debugging
-      - run:
-          name: Build Ad-Hoc IPA for Testing
-          command: |
-            # Install provisioning profile
-            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-            cp ~/certificates/ios_appstore.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-
-            cd ios/App
-
-            # Create build directory for logs
-            mkdir -p build
-
-            # Build with Release configuration (ad-hoc distribution requires release)
-            # Save full logs for debugging (don't use xcpretty which hides errors)
-            # Don't specify CODE_SIGN_IDENTITY - let Xcode handle signing automatically
-            set -o pipefail
-            xcodebuild \
-              -workspace App.xcworkspace \
-              -scheme Freegle \
-              -configuration Release \
-              -archivePath $PWD/build/Freegle.xcarchive \
-              archive \
-              2>&1 | tee build/xcodebuild-archive.log
-
-            # Export as ad-hoc IPA
-            xcodebuild \
-              -exportArchive \
-              -archivePath $PWD/build/Freegle.xcarchive \
-              -exportPath $PWD/build \
-              -exportOptionsPlist ../../fastlane/ExportOptionsDebug.plist \
-              2>&1 | tee build/xcodebuild-export.log
-
-            echo "✅ Ad-hoc IPA built successfully"
-            ls -lh build/*.ipa
-
-      # Store build logs as artifacts
-      - store_artifacts:
-          path: ios/App/build/xcodebuild-archive.log
-          destination: xcodebuild-archive.log
-          when: always
-
-      - store_artifacts:
-          path: ios/App/build/xcodebuild-export.log
-          destination: xcodebuild-export.log
-          when: always
-
-      # Store the ad-hoc IPA as artifact
-      - store_artifacts:
-          path: ios/App/build/Freegle.ipa
-          destination: freegle-adhoc.ipa
-
-      - run:
-          name: Build Complete
-          command: |
-            echo "🎉 iOS ad-hoc build complete!"
-            echo "📱 Download IPA from CircleCI artifacts tab"
-            echo "🔍 Install via Xcode or third-party tools for testing"
-            echo "📡 Safari Web Inspector available for debugging"
-
-  build-android-debug:
+  build-android-dev:
     executor: android-executor
     steps:
       - checkout
@@ -306,11 +169,11 @@ jobs:
       - run:
           name: Install Node.js 22
           command: |
-            # Download and install Node.js 22
             curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
-      # Verify Node.js version
       - run:
           name: Verify Node.js and npm versions
           command: |
@@ -326,68 +189,194 @@ jobs:
       # Install Node.js dependencies
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
 
-      # Build Nuxt app for debug (no version increment needed)
+      # Use minimal dev-app instead of full Nuxt build
+      # This avoids initialization issues and just shows a connection screen
       - run:
-          name: Build Nuxt App (Debug)
+          name: Setup Dev App Web Content
           command: |
-            export ISAPP=true
-            export APP_ENV=development
-            echo "🔧 Building debug version for master branch"
-            npm run generate
+            echo "🔧 Setting up minimal dev app (connection screen only)"
+            # The dev-app folder contains a simple HTML page for server connection
+            # No Nuxt build needed - the app redirects to dev server after connecting
 
-      # Decode and place google-services.json for Firebase
+            # Add build timestamp to the HTML
+            BUILD_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            sed -i "s|</body>|<p style=\"text-align:center;font-size:11px;color:#999;margin-top:20px;\">Build: ${BUILD_TIME}</p></body>|" dev-app/index.html
+
+            ls -la dev-app/
+            echo "✅ Dev app web content ready (using dev-app/ folder)"
+
+      # Sync Capacitor with dev config (must happen BEFORE any android/ modifications)
+      - run:
+          name: Sync Capacitor to Android (Dev)
+          command: |
+            # Remove the TypeScript config so our JS config is used
+            rm -f capacitor.config.ts
+
+            # Copy dev config as the main config
+            echo "Using capacitor.config.dev.js"
+            cp capacitor.config.dev.js capacitor.config.js
+
+            # Verify the dev-app directory exists
+            ls -la dev-app/
+
+            npx cap sync android
+
+      # Setup Firebase for dev app (after cap sync so it doesn't get overwritten)
       - run:
           name: Setup Firebase Configuration
           command: |
             if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
-              echo "Decoding google-services.json from environment variable"
+              echo "Decoding google-services.json"
               echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
-
-              # Validate the decoded file
-              if [ -f android/app/google-services.json ]; then
-                FILE_SIZE=$(wc -c < android/app/google-services.json)
-                echo "✅ File created: $FILE_SIZE bytes"
-
-                # Validate JSON syntax
-                if python3 -m json.tool android/app/google-services.json > /dev/null 2>&1; then
-                  echo "✅ Valid JSON structure"
-                  echo "📱 Project ID: $(python3 -c "import json; print(json.load(open('android/app/google-services.json'))['project_info']['project_id'])")"
-                else
-                  echo "❌ ERROR: Invalid JSON - Firebase will not work!"
-                  exit 1
-                fi
-              else
-                echo "❌ ERROR: File was not created!"
-                exit 1
-              fi
+              echo "✅ Firebase configured for dev app"
             else
               echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
             fi
 
-      # Sync Capacitor
+      # Update Android app ID and name for dev app (after cap sync)
       - run:
-          name: Sync Capacitor to Android
-          command: npx cap sync android
+          name: Configure Dev App Identity
+          command: |
+            echo "📱 Configuring Freegle Dev app..."
 
-      # Make gradlew executable
+            # Update build.gradle applicationId
+            sed -i 's/org\.ilovefreegle\.direct/org.ilovefreegle.dev/g' android/app/build.gradle
+
+            # Update app name in strings.xml (both app_name and title_activity_main)
+            sed -i 's/>Freegle</>Freegle Dev</g' android/app/src/main/res/values/strings.xml
+
+            # Update capacitor.config.json if it exists
+            if [ -f capacitor.config.json ]; then
+              sed -i 's/org\.ilovefreegle\.direct/org.ilovefreegle.dev/g' capacitor.config.json
+              sed -i 's/"appName": "Freegle"/"appName": "Freegle Dev"/g' capacitor.config.json
+            fi
+
+            echo "✅ Dev app identity configured"
+            echo "   Package ID: org.ilovefreegle.dev"
+            echo "   App Name: Freegle Dev"
+
+      # Convert app icons to greyscale for dev app (after cap sync)
+      - run:
+          name: Install ImageMagick
+          command: sudo apt-get update && sudo apt-get install -y imagemagick
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+      - run:
+          name: Create Greyscale Icons (Dev)
+          command: |
+            echo "🎨 Converting app icons to greyscale..."
+
+            # Convert all launcher icons to greyscale
+            find android/app/src/main/res -name "ic_launcher*.png" -type f | while read icon; do
+              echo "  Converting: $icon"
+              convert "$icon" -colorspace Gray "$icon"
+            done
+
+            echo "✅ Icons converted to greyscale"
+
+      # Allow cleartext HTTP for dev servers (after cap sync)
+      - run:
+          name: Enable HTTP for Dev Servers
+          command: |
+            echo "📡 Enabling cleartext HTTP for local dev server connections..."
+
+            # Add network security config for cleartext
+            mkdir -p android/app/src/main/res/xml
+            echo '<?xml version="1.0" encoding="utf-8"?>' > android/app/src/main/res/xml/network_security_config.xml
+            echo '<network-security-config>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '    <base-config cleartextTrafficPermitted="true">' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '        <trust-anchors>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '            <certificates src="system" />' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '        </trust-anchors>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '    </base-config>' >> android/app/src/main/res/xml/network_security_config.xml
+            echo '</network-security-config>' >> android/app/src/main/res/xml/network_security_config.xml
+
+            # Reference network config in AndroidManifest if not already present
+            if ! grep -q 'networkSecurityConfig' android/app/src/main/AndroidManifest.xml; then
+              sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/g' android/app/src/main/AndroidManifest.xml
+            fi
+
+            echo "✅ HTTP enabled for dev servers"
+
+      # Modify MainActivity to allow all WebView navigation (no external browser)
+      - run:
+          name: Configure WebView Navigation
+          command: |
+            echo "🔧 Configuring MainActivity to keep all navigation in WebView..."
+
+            MAIN_ACTIVITY="android/app/src/main/java/org/ilovefreegle/dev/MainActivity.java"
+
+            # Ensure the directory exists
+            mkdir -p "$(dirname "$MAIN_ACTIVITY")"
+
+            # Create the modified MainActivity using printf to avoid heredoc issues
+            printf '%s\n' \
+              'package org.ilovefreegle.dev;' \
+              '' \
+              'import android.os.Bundle;' \
+              'import android.util.Log;' \
+              'import android.webkit.WebView;' \
+              'import android.webkit.WebViewClient;' \
+              'import android.webkit.WebResourceRequest;' \
+              'import com.getcapacitor.BridgeActivity;' \
+              '' \
+              'public class MainActivity extends BridgeActivity {' \
+              '  private static final String TAG = "FreegleDev";' \
+              '' \
+              '  @Override' \
+              '  public void onCreate(Bundle savedInstanceState) {' \
+              '    super.onCreate(savedInstanceState);' \
+              '' \
+              '    // Enable WebView debugging for chrome://inspect' \
+              '    WebView.setWebContentsDebuggingEnabled(true);' \
+              '    Log.d(TAG, "WebView debugging enabled");' \
+              '' \
+              '    // Override WebViewClient to keep ALL navigation in the WebView' \
+              '    // This prevents window.location.href from opening external browser' \
+              '    getBridge().getWebView().setWebViewClient(new WebViewClient() {' \
+              '      @Override' \
+              '      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {' \
+              '        String url = request.getUrl().toString();' \
+              '        Log.d(TAG, "Navigation to: " + url);' \
+              '        // Return false = load in WebView, not external browser' \
+              '        return false;' \
+              '      }' \
+              '' \
+              '      @Override' \
+              '      public boolean shouldOverrideUrlLoading(WebView view, String url) {' \
+              '        Log.d(TAG, "Navigation to (legacy): " + url);' \
+              '        return false;' \
+              '      }' \
+              '    });' \
+              '' \
+              '    Log.d(TAG, "WebViewClient configured to keep navigation in WebView");' \
+              '  }' \
+              '}' > "$MAIN_ACTIVITY"
+
+            echo "✅ MainActivity configured for in-WebView navigation"
+
       - run:
           name: Make gradlew executable
           command: chmod +x android/gradlew
 
-      # Create debug keystore if it doesn't exist
+      # Create debug keystore
       - run:
           name: Create Debug Keystore
           command: |
             mkdir -p ~/.android
             if [ ! -f ~/.android/debug.keystore ]; then
-              echo "Creating debug keystore..."
               keytool -genkey -v \
                 -keystore ~/.android/debug.keystore \
                 -storepass android \
@@ -397,24 +386,149 @@ jobs:
                 -keysize 2048 \
                 -validity 10000 \
                 -dname "CN=Android Debug,O=Android,C=US"
-              echo "✅ Debug keystore created"
-            else
-              echo "✅ Debug keystore already exists"
             fi
 
-      # Build debug APK (enables WebView debugging automatically)
+      # Build debug APK
+      - run:
+          name: Build Dev App APK
+          command: |
+            cd android
+            ./gradlew assembleDebug --stacktrace
+            echo "✅ Freegle Dev APK built successfully"
+            ls -lh app/build/outputs/apk/debug/
+
+      # Store the dev APK as artifact
+      - store_artifacts:
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          destination: freegle-dev.apk
+
+      - run:
+          name: Build Complete
+          command: |
+            echo "🎉 Freegle Dev app build complete!"
+            echo ""
+            echo "📱 This is a development app that:"
+            echo "   - Has package ID: org.ilovefreegle.dev"
+            echo "   - Can coexist with production Freegle app"
+            echo "   - Connects to your local dev server via QR code"
+            echo "   - Has WebView debugging enabled (chrome://inspect)"
+            echo "   - Allows HTTP connections to local dev servers"
+            echo "   - Instant hot reload for Vue/JS/CSS changes"
+            echo ""
+            echo "📖 Setup instructions:"
+            echo "1. Download freegle-dev.apk from artifacts"
+            echo "2. Install on your Android device (enable 'Install from unknown sources')"
+            echo "3. Start your dev server: docker-compose up -d"
+            echo "4. Open http://status.localhost/dev-connect on your computer"
+            echo "5. Scan the QR code with the Freegle Dev app"
+            echo "6. Make code changes - they appear instantly!"
+            echo ""
+            echo "🔍 Debug via: chrome://inspect/#devices"
+            echo ""
+            echo "⚠️  Note: This APK uses a different package ID, so it won't"
+            echo "    conflict with the production Freegle app."
+
+  # Debug APK that works against production - for testers to try PR changes
+  build-android-debug:
+    executor: android-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+
+      - run:
+          name: Verify Node.js and npm versions
+          command: |
+            node --version
+            npm --version
+
+      # Restore npm cache
+      - restore_cache:
+          keys:
+            - npm-deps-v1-{{ checksum "package-lock.json" }}
+            - npm-deps-v1-
+
+      # Install Node.js dependencies
+      - run:
+          name: Install Node.js Dependencies
+          command: |
+            npm ci
+            npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+
+      - save_cache:
+          key: npm-deps-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+      # Build Nuxt app for production (debug build - Sentry errors non-fatal)
+      - run:
+          name: Build Nuxt App
+          command: |
+            export ISAPP=true
+            export APP_ENV=production
+            export SENTRY_STRICT=false  # Debug build - allow Sentry failures
+            export SENTRY_HTTP_TIMEOUT=120  # Increase timeout for Sentry API calls
+            if [ -n "$SENTRY_DSN_APP_FD" ]; then
+              export SENTRY_DSN="$SENTRY_DSN_APP_FD"
+              echo "✅ Using app-specific Sentry DSN"
+            fi
+            echo "ℹ️ SENTRY_STRICT=false - Sentry errors will not fail the build"
+            npm run generate
+
+      # Setup Firebase
+      - run:
+          name: Setup Firebase Configuration
+          command: |
+            if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+              echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > android/app/google-services.json
+              echo "✅ Firebase configured"
+            else
+              echo "⚠️  GOOGLE_SERVICES_JSON_BASE64 not set - Push notifications will not work"
+            fi
+
+      # Sync Capacitor
+      - run:
+          name: Sync Capacitor to Android
+          command: npx cap sync android
+
+      - run:
+          name: Make gradlew executable
+          command: chmod +x android/gradlew
+
+      # Create debug keystore
+      - run:
+          name: Create Debug Keystore
+          command: |
+            mkdir -p ~/.android
+            if [ ! -f ~/.android/debug.keystore ]; then
+              keytool -genkey -v \
+                -keystore ~/.android/debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+            fi
+
+      # Build debug APK
       - run:
           name: Build Debug APK
           command: |
             cd android
             ./gradlew assembleDebug --stacktrace
             echo "✅ Debug APK built successfully"
-            echo ""
-            echo "📋 APK Info:"
             ls -lh app/build/outputs/apk/debug/
-            echo ""
-            echo "📦 APK Contents (first 20 files):"
-            unzip -l app/build/outputs/apk/debug/app-debug.apk | head -20 || true
 
       # Store the debug APK as artifact
       - store_artifacts:
@@ -424,16 +538,15 @@ jobs:
       - run:
           name: Build Complete
           command: |
-            echo "🎉 Debug build complete!"
-            echo "📱 Download APK from CircleCI artifacts tab"
-            echo "🔍 This build has WebView debugging enabled for chrome://inspect"
+            echo "🎉 Debug APK build complete!"
             echo ""
-            echo "⚠️  IMPORTANT: Before installing debug APK:"
-            echo "1. Uninstall any existing Freegle app (different signature)"
-            echo "2. Check APK size is reasonable (should be 50-80MB)"
-            echo "3. Try installing via 'adb install' if direct install fails"
+            echo "📱 This debug APK:"
+            echo "   - Works against production servers"
+            echo "   - Includes the code from this PR/branch"
+            echo "   - Can be installed alongside the Play Store version"
+            echo "   - Has WebView debugging enabled (chrome://inspect)"
             echo ""
-            echo "Debug via: chrome://inspect/#devices"
+            echo "📥 Download freegle-debug.apk from the Artifacts tab"
 
   build-android:
     executor: android-executor
@@ -451,6 +564,8 @@ jobs:
             # Download and install Node.js 22
             curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
             sudo apt-get install -y nodejs
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Verify Node.js version
       - run:
@@ -469,6 +584,8 @@ jobs:
       - run:
           name: Install Node.js Dependencies
           command: npm ci
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       - save_cache:
           key: npm-deps-v1-{{ checksum "package-lock.json" }}
@@ -508,12 +625,14 @@ jobs:
               exit 1
             fi
 
-      # Build Nuxt app for production
+      # Build Nuxt app for production (with Sentry - must succeed)
       - run:
           name: Build Nuxt App
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # Increase timeout for Sentry API calls (default 30s)
             # Set Sentry DSN from app-specific environment variable
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
@@ -522,6 +641,8 @@ jobs:
               echo "⚠️  SENTRY_DSN_APP_FD not set - app will use default Sentry DSN"
             fi
             npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
 
       # Decode and place google-services.json for Firebase
       - run:
@@ -567,14 +688,14 @@ jobs:
       # Restore Fastlane bundle cache
       - restore_cache:
           keys:
-            - bundle-v1-{{ checksum "Gemfile.lock" }}
-            - bundle-v1-
+            - bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2-
 
       # Setup Fastlane
       - setup-android-fastlane
 
       - save_cache:
-          key: bundle-v1-{{ checksum "Gemfile.lock" }}
+          key: bundle-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
@@ -701,8 +822,8 @@ jobs:
       # Restore Fastlane bundle cache
       - restore_cache:
           keys:
-            - bundle-v1-{{ checksum "Gemfile.lock" }}
-            - bundle-v1-
+            - bundle-v2-{{ checksum "Gemfile.lock" }}
+            - bundle-v2-
 
       # Setup Fastlane
       - setup-android-fastlane
@@ -778,14 +899,23 @@ jobs:
             nvm alias default 22
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Install Ruby and Fastlane dependencies
       - run:
           name: Install Fastlane
           command: |
+            # Clean any stale bundle to ensure fresh install
+            rm -rf vendor/bundle
             gem install bundler
-            bundle update fastlane
+            bundle config set --local path 'vendor/bundle'
+            # Install from Gemfile.lock without resolving dependencies
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Auto-submit latest TestFlight build to App Store review after 24 hours
       - run:
@@ -827,6 +957,48 @@ jobs:
               echo "ℹ️  No submission occurred (already in review or no new build found)"
             fi
 
+  # Check if commit is a hotfix and trigger immediate promotion
+  check-hotfix-promote:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Check for Hotfix Commit
+          command: |
+            # Get the commit message
+            COMMIT_MSG=$(git log -1 --format=%s)
+            echo "Commit message: $COMMIT_MSG"
+
+            # Check for hotfix: prefix (case-insensitive)
+            if echo "$COMMIT_MSG" | grep -qi "^hotfix:"; then
+              echo "🚨 HOTFIX DETECTED: $COMMIT_MSG"
+              echo "Triggering immediate production promotion..."
+
+              # Trigger the promotion workflow via CircleCI API
+              curl -X POST \
+                -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d '{"branch":"production","parameters":{"run_manual_promote":true}}' \
+                "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/pipeline"
+
+              echo "✅ Promotion workflow triggered"
+              echo ""
+              echo "📧 Sending notification..."
+
+              # Log notification (actual email would be sent by the promotion workflow)
+              echo "Subject: 🚨 Hotfix Release Triggered: $COMMIT_MSG"
+              echo ""
+              echo "A hotfix commit was detected and immediate promotion has been triggered."
+              echo ""
+              echo "Commit: ${CIRCLE_SHA1:0:8}"
+              echo "Message: $COMMIT_MSG"
+              echo "Build: ${CIRCLE_BUILD_URL}"
+            else
+              echo "📦 Normal commit (no hotfix: prefix)"
+              echo "Beta builds deployed. Production promotion will happen on Wednesday night."
+            fi
+
   auto-release-ios:
     executor: macos-executor
     steps:
@@ -844,14 +1016,23 @@ jobs:
             nvm alias default 22
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Install Ruby and Fastlane dependencies
       - run:
           name: Install Fastlane
           command: |
+            # Clean any stale bundle to ensure fresh install
+            rm -rf vendor/bundle
             gem install bundler
-            bundle update fastlane
+            bundle config set --local path 'vendor/bundle'
+            # Install from Gemfile.lock without resolving dependencies
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Auto-release approved apps from Pending Developer Release state
       - run:
@@ -919,6 +1100,8 @@ jobs:
             # Add to bash profile for subsequent steps
             echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Verify versions
       - run:
@@ -931,6 +1114,8 @@ jobs:
       - run:
           name: Install Node.js Dependencies
           command: npm ci
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Update MOBILE_VERSION in config.js before build
       - run:
@@ -965,12 +1150,14 @@ jobs:
               exit 1
             fi
 
-      # Build Nuxt app for production
+      # Build Nuxt app for production (with Sentry - must succeed)
       - run:
           name: Build Nuxt App
           command: |
             export ISAPP=true
             export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # 2 minute timeout for Sentry API calls
             if [ -n "$SENTRY_DSN_APP_FD" ]; then
               export SENTRY_DSN="$SENTRY_DSN_APP_FD"
               echo "✅ Using app-specific Sentry DSN for error tracking"
@@ -978,6 +1165,8 @@ jobs:
               echo "⚠️  SENTRY_DSN_APP_FD not set - app will use default Sentry DSN"
             fi
             npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
 
       # Sync Capacitor to iOS
       - run:
@@ -1010,8 +1199,12 @@ jobs:
           name: Install Fastlane
           command: |
             bundle config set --local path 'vendor/bundle'
-            bundle update fastlane
+            # Install from Gemfile.lock without resolving dependencies
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
             bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
 
       # Setup iOS Certificates and Provisioning Profiles
       - run:
@@ -1046,6 +1239,13 @@ jobs:
             echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
             echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
             echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
+
+      # Expire any test versions (99.x.x) that might block the upload
+      - run:
+          name: Expire Test Versions
+          command: |
+            export TERM=xterm-256color
+            bundle exec fastlane ios expire_test_versions
 
       # Build and Deploy to TestFlight
       - run:
@@ -1088,21 +1288,220 @@ jobs:
           path: build/
           destination: ios-build
 
+  # Build iOS for TestFlight from any branch (for testing)
+  # Uses a test version number based on branch name hash
+  build-ios-testflight:
+    executor: macos-executor
+    steps:
+      - checkout
+
+      # Install Node.js 22
+      - run:
+          name: Install Node.js 22
+          command: |
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 22
+            nvm use 22
+            nvm alias default 22
+            echo 'export NVM_DIR="$HOME/.nvm"' >> $BASH_ENV
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+
+      - run:
+          name: Verify Node.js and npm versions
+          command: |
+            node --version
+            npm --version
+
+      - run:
+          name: Install Node.js Dependencies
+          command: |
+            # First install all dependencies
+            npm ci
+            # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
+            npm update @freegle/capacitor-push-notifications-cap7
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+
+      # Generate version number using same incrementing scheme as production
+      - run:
+          name: Generate Version Number
+          command: |
+            # Use same version incrementing as production builds
+            # This means TestFlight builds use real version numbers (gaps are fine)
+            CURRENT_VERSION="${CURRENT_VERSION:-100.0.0}"
+            echo "Current version: $CURRENT_VERSION"
+
+            # Parse and increment patch version
+            major=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+            minor=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+            patch=$(echo "$CURRENT_VERSION" | cut -d. -f3)
+            NEW_PATCH=$((patch + 1))
+            NEW_VERSION="$major.$minor.$NEW_PATCH"
+
+            # Enforce minimum version of 100.0.0
+            if [ "$major" -lt 100 ]; then
+              NEW_VERSION="100.0.0"
+              echo "Version below minimum, jumping to 100.0.0"
+            fi
+
+            echo "🧪 TestFlight version: $NEW_VERSION"
+            echo "$NEW_VERSION" > .new_version
+
+            # Update MOBILE_VERSION in config.js
+            sed -i '' "s/MOBILE_VERSION: '[0-9]*\.[0-9]*\.[0-9]*'/MOBILE_VERSION: '$NEW_VERSION'/" config.js
+
+            if grep -q "MOBILE_VERSION: '$NEW_VERSION'" config.js; then
+              echo "✅ Updated config.js with version $NEW_VERSION"
+              grep "MOBILE_VERSION:" config.js
+            else
+              echo "❌ ERROR: Failed to update config.js"
+              exit 1
+            fi
+
+      - run:
+          name: Build Nuxt App
+          command: |
+            export ISAPP=true
+            export APP_ENV=production
+            export SENTRY_STRICT=true  # Production build - Sentry must succeed
+            export SENTRY_HTTP_TIMEOUT=120  # 2 minute timeout for Sentry API calls
+            if [ -n "$SENTRY_DSN_APP_FD" ]; then
+              export SENTRY_DSN="$SENTRY_DSN_APP_FD"
+              echo "✅ Using app-specific Sentry DSN"
+            fi
+            npm run generate
+          max_auto_reruns: 2
+          auto_rerun_delay: 30s
+
+      - run:
+          name: Sync Capacitor to iOS
+          command: npx cap sync ios
+
+      - run:
+          name: Setup Firebase Configuration for iOS
+          command: |
+            if [ -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" ]; then
+              echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/App/App/GoogleService-Info.plist
+              echo "✅ GoogleService-Info.plist created"
+            else
+              echo "❌ GOOGLE_SERVICE_INFO_PLIST_BASE64 not set"
+              exit 1
+            fi
+
+      - run:
+          name: Install Fastlane
+          command: |
+            bundle config set --local path 'vendor/bundle'
+            # Install from Gemfile.lock without resolving dependencies
+            # frozen mode ensures we use exact versions from Gemfile.lock
+            bundle config set --local frozen true
+            bundle install
+          max_auto_reruns: 3
+          auto_rerun_delay: 10s
+
+      - run:
+          name: Setup iOS Certificates
+          command: |
+            mkdir -p ~/certificates
+            echo "$IOS_DISTRIBUTION_CERT" | base64 --decode > ~/certificates/ios_distribution.p12
+            echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > ~/certificates/ios_appstore.mobileprovision
+
+            KEYCHAIN_PATH=~/Library/Keychains/temp.keychain-db
+            KEYCHAIN_PASSWORD=circleci
+            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security default-keychain -s "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -t 3600 -u "$KEYCHAIN_PATH"
+
+            echo "export IOS_CERTIFICATE_PATH=~/certificates/ios_distribution.p12" >> $BASH_ENV
+            echo "export IOS_PROVISIONING_PROFILE_PATH=~/certificates/ios_appstore.mobileprovision" >> $BASH_ENV
+            echo "export KEYCHAIN_NAME=$KEYCHAIN_PATH" >> $BASH_ENV
+            echo "export KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> $BASH_ENV
+
+      - run:
+          name: Build and Deploy to TestFlight
+          command: |
+            export TERM=xterm-256color
+            echo "🧪 Building TestFlight test version from branch: ${CIRCLE_BRANCH}"
+            bundle exec fastlane ios beta
+          no_output_timeout: 30m
+
+      - run:
+          name: TestFlight Build Complete
+          command: |
+            TEST_VERSION=$(cat .new_version)
+            echo "🎉 TestFlight build complete!"
+            echo ""
+            echo "📱 Version: $TEST_VERSION"
+            echo "🌿 Branch: ${CIRCLE_BRANCH}"
+            echo "🔗 Commit: ${CIRCLE_SHA1:0:8}"
+            echo ""
+            echo "The build is now uploading to TestFlight."
+            echo "It will be available for testing in ~15-30 minutes."
+
+      # Update CircleCI CURRENT_VERSION so next build uses incremented version
+      - run:
+          name: Update CircleCI Version Variable
+          command: |
+            if [ ! -f .new_version ]; then
+              echo "⚠️  .new_version file not found - skipping version update"
+              exit 0
+            fi
+
+            NEW_VERSION=$(cat .new_version)
+            echo "📝 Updating CircleCI CURRENT_VERSION to: ${NEW_VERSION}"
+
+            # Update environment variable via CircleCI API
+            curl -X DELETE \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar/CURRENT_VERSION"
+
+            curl -X POST \
+              -H "Circle-Token: ${CIRCLECI_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"CURRENT_VERSION\",\"value\":\"${NEW_VERSION}\"}" \
+              "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/envvar"
+
+            echo "✅ Updated CURRENT_VERSION to ${NEW_VERSION}"
+
+      - store_artifacts:
+          path: build/
+          destination: ios-build
+
 workflows:
   version: 2
 
-  build-debug-apps:
+  # Build Android apps for all branches (except production/modtools)
+  build-android-apps:
     jobs:
+      - build-android-dev:
+          filters:
+            branches:
+              ignore:
+                - production
+                - modtools
       - build-android-debug:
           filters:
             branches:
-              only:
-                - master
-      - build-ios-debug:
+              ignore:
+                - production
+                - modtools
+
+  pr-tests:
+    jobs:
+      - freegle/playwright-tests:
           filters:
             branches:
-              only:
+              ignore:
                 - master
+                - main
+                - production
+                - modtools
 
   deploy-apps:
     jobs:
@@ -1130,11 +1529,24 @@ workflows:
               only:
                 - production
 
-  auto-promote-schedule:
+      # After beta builds complete, check for hotfix: prefix
+      # If detected, triggers immediate promotion workflow
+      - check-hotfix-promote:
+          requires:
+            - build-android
+            - build-ios
+          filters:
+            branches:
+              only:
+                - production
+
+  # Weekly promotion schedule - Wednesdays at 10pm UTC
+  # Hotfix commits trigger immediate promotion via check-hotfix-promote job
+  weekly-promote-schedule:
     triggers:
       - schedule:
-          # Run at midnight UTC every day (24 hours after the 11pm merge)
-          cron: "0 0 * * *"
+          # Wednesday at 10pm UTC (22:00)
+          cron: "0 22 * * 3"
           filters:
             branches:
               only:
@@ -1142,6 +1554,7 @@ workflows:
     jobs:
       - auto-promote-production
       - auto-submit-ios
+      - auto-release-ios
 
   manual-promote-submit:
     when: << pipeline.parameters.run_manual_promote >>
@@ -1161,3 +1574,10 @@ workflows:
             branches:
               only:
                 - production
+
+  # Build iOS for TestFlight from any branch
+  # Trigger with: build_testflight=true parameter
+  testflight-branch:
+    when: << pipeline.parameters.build_testflight >>
+    jobs:
+      - build-ios-testflight

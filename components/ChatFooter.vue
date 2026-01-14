@@ -1,72 +1,72 @@
 <template>
   <div class="cont bg-white">
     <div>
-      <notice-message v-if="otheruser?.deleted" variant="info" class="mb-2">
+      <ChatNotice v-if="otheruser?.deleted" variant="info">
         This freegler has deleted their account, so you can't chat to them.
-      </notice-message>
-      <div v-else-if="showNotices && noticesToShow" class="d-flex">
-        <div class="flex-grow-1">
-          <notice-message
-            v-if="badratings"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;This freegler has a
-              lot of thumbs down ratings. That might not be their fault, but
-              please make very clear arrangements. If you have a good experience
-              with them, give them a thumbs up.
-            </p>
-            <UserRatings
-              v-if="chat.otheruid"
-              :id="chat.otheruid"
-              :key="'otheruser-' + chat.otheruid"
-            />
-          </notice-message>
-          <notice-message
-            v-else-if="expectedreplies"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <v-icon icon="exclamation-triangle" />&nbsp;{{ expectedreplies }}
-            still waiting for them to reply on here.
-          </notice-message>
-          <notice-message v-if="otheruser?.spammer" variant="danger">
-            This person has been reported as a spammer or scammer. Please do not
-            talk to them and under no circumstances send them any money. Do not
-            arrange anything by courier.
-          </notice-message>
-          <notice-message
-            v-if="faraway"
-            variant="warning"
-            class="clickme"
-            @click="showInfo"
-          >
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;This freegler is
-              {{ milesstring }}
-              from you. If you are collecting from them, please make sure you
-              can get there. If they are collecting from you, please
-              double-check they have transport.
-            </p>
-          </notice-message>
-          <notice-message v-if="thumbsdown" variant="warning">
-            <p>
-              <v-icon icon="exclamation-triangle" />&nbsp;You previously gave
-              this freegler a thumbs down.
-            </p>
-          </notice-message>
-        </div>
-        <b-button
-          variant="warning"
-          class="float-end bg-warning"
-          title="Hide warnings"
-          @click="showNotices = false"
+      </ChatNotice>
+      <div v-else-if="showNotices && noticesToShow" class="notices-container">
+        <ChatNotice
+          v-if="otheruser?.spammer"
+          variant="danger"
+          title="Spammer Alert"
+          dismissible
+          @dismiss="showNotices = false"
         >
-          <v-icon icon="times-circle" scale="1.5" />
-        </b-button>
+          This person has been reported as a spammer or scammer. Please do not
+          talk to them and under no circumstances send them any money. Do not
+          arrange anything by courier.
+        </ChatNotice>
+        <ChatNotice
+          v-if="badratings && !otheruser?.spammer"
+          variant="warning"
+          title="Low Ratings"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          This freegler has a lot of thumbs down ratings. That might not be
+          their fault, but please make very clear arrangements. If you have a
+          good experience with them, give them a thumbs up.
+          <UserRatings
+            v-if="chat.otheruid"
+            :id="chat.otheruid"
+            :key="'otheruser-' + chat.otheruid"
+            class="mt-2"
+          />
+        </ChatNotice>
+        <ChatNotice
+          v-else-if="expectedreplies && !otheruser?.spammer"
+          variant="warning"
+          title="Slow Replies"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          {{ expectedreplies }} still waiting for them to reply on here.
+        </ChatNotice>
+        <ChatNotice
+          v-if="faraway && !otheruser?.spammer"
+          variant="warning"
+          title="Far Away"
+          icon="map-marker-alt"
+          dismissible
+          @click="showInfo"
+          @dismiss="showNotices = false"
+        >
+          This freegler is {{ milesstring }} from you. If you are collecting
+          from them, please make sure you can get there. If they are collecting
+          from you, please double-check they have transport.
+        </ChatNotice>
+        <ChatNotice
+          v-if="thumbsdown && !otheruser?.spammer"
+          variant="warning"
+          title="Previous Rating"
+          icon="thumbs-down"
+          dismissible
+          @dismiss="showNotices = false"
+        >
+          You previously gave this freegler a thumbs down.
+        </ChatNotice>
       </div>
       <div v-if="!otheruser?.deleted">
         <div v-if="uploading" class="bg-white">
@@ -78,33 +78,39 @@
           />
         </div>
         <label for="chatmessage" class="visually-hidden">Chat message</label>
-        <b-form-textarea
-          v-if="enterNewLine && !otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          class="h-100"
-          placeholder="Type here..."
-          enterkeyhint="enter"
-          @keydown="typing"
-          @focus="markRead"
-        />
-        <b-form-textarea
-          v-else-if="!otheruser?.spammer"
-          id="chatmessage"
-          ref="chatarea"
-          v-model="sendmessage"
-          class="h-100"
-          placeholder="Type here..."
-          enterkeyhint="send"
-          autocapitalize="none"
-          @keydown="typing"
-          @keydown.enter.exact.prevent
-          @keyup.enter.exact="sendOnEnter"
-          @keydown.enter.shift.exact.prevent="newline"
-          @keydown.alt.shift.enter.exact.prevent="newline"
-          @focus="markRead"
-        />
+        <div class="textarea-wrapper">
+          <div v-if="!sendmessage && !isFocused" class="textarea-placeholder">
+            <span class="placeholder-text">{{ displayedText }}</span>
+            <JumpingDots v-if="showDots" size="sm" class="placeholder-dots" />
+          </div>
+          <b-form-textarea
+            v-if="enterNewLine && !otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            class="h-100"
+            enterkeyhint="enter"
+            @keydown="typing"
+            @focus="onFocus"
+            @blur="onBlur"
+          />
+          <b-form-textarea
+            v-else-if="!otheruser?.spammer"
+            id="chatmessage"
+            ref="chatarea"
+            v-model="sendmessage"
+            class="h-100"
+            enterkeyhint="send"
+            autocapitalize="none"
+            @keydown="typing"
+            @keydown.enter.exact.prevent
+            @keyup.enter.exact="sendOnEnter"
+            @keydown.enter.shift.exact.prevent="newline"
+            @keydown.alt.shift.enter.exact.prevent="newline"
+            @focus="onFocus"
+            @blur="onBlur"
+          />
+        </div>
         <Dropdown
           v-if="showSuggested"
           placement="top"
@@ -137,65 +143,69 @@
       v-if="!otheruser?.spammer && !otheruser?.deleted"
       class="bg-white pt-1 pb-1"
     >
-      <div class="d-none d-lg-block">
-        <span v-if="chat && chat.chattype === 'User2User' && otheruser">
-          <b-button
+      <div class="d-none d-lg-flex action-bar">
+        <div
+          v-if="chat && chat.chattype === 'User2User' && otheruser"
+          class="action-buttons"
+        >
+          <button
             v-b-tooltip="'Promise an item to this freegler'"
-            variant="secondary"
-            class="ml-1 mr-2"
+            class="action-chip"
             @click="promise(null)"
           >
-            <v-icon icon="handshake" class="fa-fw" />&nbsp;Promise
-          </b-button>
-          <b-button
+            <v-icon icon="handshake" class="action-icon" />
+            <span>Promise</span>
+          </button>
+          <button
             v-b-tooltip="'Send your address'"
-            variant="secondary"
-            class="mr-2"
+            class="action-chip"
             @click="addressBook"
           >
-            <v-icon icon="address-book" class="fa-fw" />&nbsp;Address
-          </b-button>
-          <b-button
+            <v-icon icon="address-book" class="action-icon" />
+            <span>Address</span>
+          </button>
+          <button
             v-if="!tooSoonToNudge"
-            v-b-tooltip="'Waiting for a reply?  Nudge this freegler.'"
-            variant="secondary"
-            class="mr-2"
+            v-b-tooltip="'Waiting for a reply? Nudge this freegler.'"
+            class="action-chip"
             @click="nudge"
           >
-            <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
-          </b-button>
-          <div
+            <v-icon icon="bell" class="action-icon" />
+            <span>Nudge</span>
+          </button>
+          <button
             v-if="tooSoonToNudge"
             v-b-tooltip="
               'You need to wait a day since the last message before nudging.'
             "
-            class="d-inline"
+            class="action-chip disabled"
+            @click="nudgeTooSoon"
           >
-            <b-button variant="secondary" class="mr-2" @click="nudgeTooSoon">
-              <v-icon icon="bell" class="fa-fw" />&nbsp;Nudge
-            </b-button>
-          </div>
-        </span>
-        <SpinButton
-          size="md"
-          variant="primary"
-          class="float-end ml-2 mr-2"
-          :button-title="sending ? 'Sending...' : 'Send'"
-          label="Send"
-          icon-name="angle-double-right"
-          done-icon=""
-          iconlast
-          @handle="send"
-        />
-        <b-button
-          v-b-tooltip="'Upload a photo'"
-          variant="secondary"
-          class="float-end"
-          @click="photoAdd"
-        >
-          <v-icon icon="camera" />
-          Photo
-        </b-button>
+            <v-icon icon="bell" class="action-icon" />
+            <span>Nudge</span>
+          </button>
+        </div>
+        <div class="send-area">
+          <button
+            v-b-tooltip="'Upload a photo'"
+            class="action-chip"
+            @click="photoAdd"
+          >
+            <v-icon icon="camera" class="action-icon" />
+            <span>Photo</span>
+          </button>
+          <SpinButton
+            size="md"
+            variant="primary"
+            class="send-button"
+            :button-title="sending ? 'Sending...' : 'Send'"
+            label="Send"
+            icon-name="angle-double-right"
+            done-icon=""
+            iconlast
+            @handle="send"
+          />
+        </div>
       </div>
       <div class="d-flex d-lg-none justify-content-between align-middle">
         <div
@@ -351,13 +361,17 @@ import { FAR_AWAY, TYPING_TIME_INVERVAL } from '../constants'
 import SpinButton from './SpinButton'
 import { setupChat } from '~/composables/useChat'
 import { useMiscStore } from '~/stores/misc'
+import { useMessageStore } from '~/stores/message'
 import { fetchOurOffers } from '~/composables/useThrottle'
 import { useAuthStore } from '~/stores/auth'
 import { useAddressStore } from '~/stores/address'
 import { untwem } from '~/composables/useTwem'
 import 'floating-vue/dist/style.css'
-import Api from '~/api'
+import { action } from '~/composables/useClientLog'
 import { useMe } from '~/composables/useMe'
+import { useTypewriter } from '~/composables/useTypewriter'
+import JumpingDots from '~/components/JumpingDots.vue'
+import ChatNotice from '~/components/ChatNotice.vue'
 
 // Define props
 const props = defineProps({
@@ -382,9 +396,6 @@ const ProfileModal = defineAsyncComponent(() =>
 )
 const AddressModal = defineAsyncComponent(() =>
   import('~/components/AddressModal')
-)
-const NoticeMessage = defineAsyncComponent(() =>
-  import('~/components/NoticeMessage')
 )
 const ChatRSVPModal = defineAsyncComponent(() =>
   import('~/components/ChatRSVPModal')
@@ -440,6 +451,19 @@ const caretPosition = ref({ top: 0, left: 0 })
 const currentAtts = ref([])
 const chatarea = ref(null)
 const rsvp = ref(null)
+const isFocused = ref(false)
+
+// Typewriter animation for placeholder
+const {
+  displayedText,
+  showDots,
+  startAnimation: startTypewriterAnimation,
+} = useTypewriter('Type here', {
+  typingSpeed: 80,
+  dotsDisplayTime: 1500,
+  maxCycles: 3,
+  finalText: 'Type here.',
+})
 
 // Computed properties
 const shrink = computed(() => {
@@ -618,6 +642,15 @@ const markRead = async () => {
   _updateAfterSend()
 }
 
+const onFocus = () => {
+  isFocused.value = true
+  markRead()
+}
+
+const onBlur = () => {
+  isFocused.value = false
+}
+
 const doNudge = async () => {
   await chatStore.nudge(props.id)
   _updateAfterSend()
@@ -668,6 +701,50 @@ const promise = (date, maybe) => {
     // so it should be the default.
     likelymsg.value = 0
 
+    // Collect refmsgids from chat messages and ensure they're in the offers list
+    const messageStore = useMessageStore()
+    const refMsgIds = new Set()
+
+    for (const msg of chatmessages.value) {
+      if (msg.type === 'Interested' && msg.refmsgid) {
+        refMsgIds.add(msg.refmsgid)
+      }
+    }
+
+    // Fetch and add any referenced messages not already in ouroffers
+    const referencedOffers = []
+    for (const refmsgid of refMsgIds) {
+      const existingIndex = ouroffers.value.findIndex((o) => o.id === refmsgid)
+      if (existingIndex !== -1) {
+        // Already in list - remove it so we can add it to the top
+        referencedOffers.push(ouroffers.value.splice(existingIndex, 1)[0])
+      } else {
+        // Not in list - fetch it
+        const refMsg = await messageStore.fetch(refmsgid)
+        if (
+          refMsg &&
+          refMsg.type === 'Offer' &&
+          refMsg.fromuser === myid.value &&
+          !refMsg.successful
+        ) {
+          referencedOffers.push(refMsg)
+        }
+      }
+    }
+
+    // Sort referenced messages by most recent first
+    referencedOffers.sort((a, b) => {
+      const dateA = new Date(a.arrival || 0)
+      const dateB = new Date(b.arrival || 0)
+      return dateB - dateA
+    })
+
+    // Put referenced messages at the top, deduplicate by id
+    const seen = new Set(referencedOffers.map((o) => o.id))
+    const otherOffers = ouroffers.value.filter((o) => !seen.has(o.id))
+    ouroffers.value = [...referencedOffers, ...otherOffers]
+
+    // Now find the most likely message to pre-select
     for (const msg of chatmessages.value) {
       if (msg.type === 'Interested' && msg.refmsgid) {
         // Check that it's still in our list of messages
@@ -795,18 +872,10 @@ watch(
   { immediate: true }
 )
 
-const runtimeConfig = useRuntimeConfig()
-const api = Api(runtimeConfig)
-
 watch(showSuggested, (newVal) => {
   if (newVal) {
-    api.bandit.shown({
-      uid: 'SuggestedAddress',
-      variant: 'chosen',
-    })
-    api.bandit.shown({
-      uid: 'SuggestedAddress',
-      variant: 'cancel',
+    action('SuggestedAddress shown', {
+      address: suggestedAddress.value?.address?.singleline,
     })
   }
 })
@@ -842,16 +911,32 @@ onMounted(() => {
   setTimeout(() => {
     showNotices.value = false
   }, 30000)
+
+  // Delay typewriter animation to start after the profile card collapses
+  // Profile card: 800ms delay + 3000ms display + 500ms collapse animation = ~4300ms
+  setTimeout(() => {
+    startTypewriterAnimation()
+  }, 4500)
 })
 </script>
 <style scoped lang="scss">
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
+
 .mobtext {
   text-align: center !important;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: $color-gray--dark;
+  margin-top: 2px;
 }
 
 .fa-mob {
-  height: 2rem;
+  height: 1.25rem;
   width: 100%;
+  color: $colour-success;
 }
 
 .shrink {
@@ -866,6 +951,70 @@ onMounted(() => {
   display: grid;
   grid-template-columns: auto;
   grid-auto-rows: max-content;
+  border-top: 1px solid $color-gray--light;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.send-area {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: $color-gray--lighter;
+  border: 1px solid $color-gray--light;
+  color: $color-gray--darker;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: darken($color-gray--lighter, 5%);
+    border-color: $color-gray--normal;
+  }
+
+  &:active {
+    background-color: darken($color-gray--lighter, 10%);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .action-icon {
+    color: $colour-success;
+    font-size: 1rem;
+  }
+}
+
+.send-button {
+  padding: 6px 16px;
+}
+
+.notices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 4px;
 }
 
 .btn-warning {
@@ -878,9 +1027,75 @@ onMounted(() => {
   max-height: 33vh;
 }
 
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.textarea-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.placeholder-text {
+  color: $color-gray--normal;
+  font-size: 0.9rem;
+}
+
+.placeholder-dots {
+  margin-left: 2px;
+  margin-top: 4px;
+}
+
 :deep(textarea) {
   transition: height 1s;
-
   height: v-bind(height) !important;
+  max-height: calc(50vh - 120px);
+  overflow-y: auto !important;
+  border: 1px solid $color-gray--light;
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  resize: none;
+  background-color: #fafafa;
+
+  &:focus {
+    outline: none;
+    background-color: $color-white;
+    border-color: $color-gray--normal;
+  }
+
+  @include media-breakpoint-down(md) {
+    padding: 8px 10px;
+  }
+}
+
+// Mobile action bar styling
+.d-flex.d-lg-none {
+  padding: 4px 2px;
+  gap: 2px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    min-width: 44px;
+
+    &:active {
+      background-color: $color-gray--lighter;
+    }
+  }
 }
 </style>

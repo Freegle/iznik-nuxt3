@@ -1,83 +1,140 @@
 <template>
-  <div>
-    <b-card v-if="volunteering" no-body>
-      <b-card-title
-        class="bg-light px-2 mb-0 pt-2 pb-2 d-flex justify-content-between header--size4"
-        :title-tag="titleTag"
+  <div v-if="volunteering" class="volop-card">
+    <component :is="titleTag" class="volop-card__header">
+      <nuxt-link
+        :to="'/volunteering/' + volunteering.id"
+        class="volop-card__title"
+        no-prefetch
       >
-        <nuxt-link
-          :to="'/volunteering/' + volunteering.id"
-          class="volunteerop__link text-truncate"
-          no-prefetch
-        >
-          {{ volunteering.title }}
-        </nuxt-link>
-        <nuxt-link
-          v-if="!summary"
-          :to="'/volunteering/' + volunteering.id"
-          no-prefetch
-          class="volunteerop__link small text-muted"
-        >
-          #{{ volunteering.id }}
-        </nuxt-link>
-      </b-card-title>
-      <b-card-body class="p-1 pt-0">
-        <div v-if="mine && !renewed && !summary">
-          <notice-message v-if="warning" variant="warning" class="mb-1">
-            <span v-if="volunteering.expired">
-              We've stopped showing this opportunity, but you can reactivate it.
-            </span>
-            <span v-else>
-              We'll stop showing this opportunity soon unless you tell us it's
-              still active. Please click to let us know.
-            </span>
-          </notice-message>
-          <notice-message v-else class="mb-1">
-            <span v-if="volunteering.expired">
-              We've stopped showing this opportunity, but you can reactivate it.
-            </span>
-            <span v-else>
-              You created this opportunity. Please click to let us know if it's
-              still active.
-            </span>
-          </notice-message>
-          <b-button variant="primary" class="mr-2" @click="renew">
+        {{ volunteering.title }}
+      </nuxt-link>
+      <span v-if="!summary" class="volop-card__id">#{{ volunteering.id }}</span>
+    </component>
+
+    <div class="volop-card__body">
+      <div
+        v-if="mine && !renewed && !summary"
+        class="volop-card__owner-actions"
+      >
+        <notice-message v-if="warning" variant="warning">
+          <span v-if="volunteering.expired">
+            We've stopped showing this opportunity, but you can reactivate it.
+          </span>
+          <span v-else>
+            We'll stop showing this opportunity soon unless you tell us it's
+            still active. Please click to let us know.
+          </span>
+        </notice-message>
+        <notice-message v-else>
+          <span v-if="volunteering.expired">
+            We've stopped showing this opportunity, but you can reactivate it.
+          </span>
+          <span v-else>
+            You created this opportunity. Please click to let us know if it's
+            still active.
+          </span>
+        </notice-message>
+        <div class="volop-card__owner-buttons">
+          <b-button variant="primary" @click="renew">
             <v-icon icon="check" /> Yes, it's still active
           </b-button>
           <b-button variant="secondary" @click="expire">
             <v-icon icon="trash-alt" /> No, please remove it
           </b-button>
         </div>
-        <div v-if="summary" class="pt-1">
-          <div class="d-flex">
-            <p class="text-truncate mb-0">
-              <v-icon icon="info-circle" class="fa-fw" />
-              {{ description }}
-            </p>
+      </div>
+
+      <div v-if="summary" class="volop-card__summary">
+        <p v-if="description" class="volop-card__desc">
+          {{ description }}
+        </p>
+        <div class="volop-card__meta">
+          <div v-if="volunteering.earliestDate" class="volop-card__meta-item">
+            <v-icon icon="clock" />
+            <span
+              >{{ volunteering.earliestDate.string.start }} -
+              {{ volunteering.earliestDate.string.end }}</span
+            >
           </div>
-          <div v-if="volunteering.earliestDate">
-            <div class="d-flex">
-              <p class="text-truncate mb-0">
-                <v-icon icon="clock" class="fa-fw" />
-                {{ volunteering.earliestDate.string.start }} -
-                {{ volunteering.earliestDate.string.end }}
-              </p>
+          <div v-if="volunteering.location" class="volop-card__meta-item">
+            <v-icon icon="map-marker-alt" />
+            <span>{{ volunteering.location }}</span>
+          </div>
+        </div>
+        <div class="volop-card__actions">
+          <b-button
+            variant="secondary"
+            size="sm"
+            :aria-label="
+              'More info about ' +
+              volunteering.title +
+              ' volunteering opportunity'
+            "
+            @click="showOpportunityModal"
+          >
+            <v-icon icon="info-circle" /> More info
+          </b-button>
+        </div>
+        <div
+          v-if="volunteering.image"
+          class="volop-card__image volop-card__image--full"
+        >
+          <OurUploadedImage
+            v-if="volunteering?.image?.ouruid"
+            :src="volunteering.image.ouruid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+          />
+          <NuxtPicture
+            v-else-if="volunteering?.image?.externaluid"
+            fit="cover"
+            format="webp"
+            provider="uploadcare"
+            :src="volunteering.image.externaluid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+          />
+          <b-img v-else lazy :src="volunteering.image.path" />
+        </div>
+      </div>
+
+      <div v-else class="volop-card__detail">
+        <div class="volop-card__content">
+          <div class="volop-card__meta">
+            <div v-if="volunteering.earliestDate" class="volop-card__meta-item">
+              <v-icon icon="clock" />
+              <span
+                >{{ volunteering.earliestDate.string.start }} -
+                {{ volunteering.earliestDate.string.end }}</span
+              >
+            </div>
+            <div v-if="volunteering.location" class="volop-card__meta-item">
+              <v-icon icon="map-marker-alt" />
+              <span>{{ volunteering.location }}</span>
+            </div>
+            <div
+              v-if="volunteering.groups && volunteering.groups.length > 0"
+              class="volop-card__meta-item"
+            >
+              <v-icon icon="users" />
+              <span>
+                Posted on
+                <span v-for="(group, index) in groups" :key="index">
+                  <span v-if="index > 0">, </span>
+                  {{ group.namedisplay }}
+                </span>
+              </span>
             </div>
           </div>
-          <div v-if="volunteering.location">
-            <span class="d-flex">
-              <p class="text-truncate mb-0">
-                <v-icon icon="map-marker-alt" class="fa-fw" />
-                <span class="small ml-1">
-                  {{ volunteering.location }}
-                </span>
-              </p>
-            </span>
-          </div>
-          <div class="text-center mt-2 mb-2">
+          <read-more
+            v-if="description"
+            :text="description"
+            :max-chars="300"
+            class="volop-card__description"
+          />
+          <div class="volop-card__actions">
             <b-button
               variant="secondary"
-              size="sm"
               :aria-label="
                 'More info about ' +
                 volunteering.title +
@@ -88,106 +145,28 @@
               <v-icon icon="info-circle" /> More info
             </b-button>
           </div>
-          <div class="image-wrapper summary">
-            <OurUploadedImage
-              v-if="volunteering?.image?.ouruid"
-              :src="volunteering.image.ouruid"
-              :modifiers="volunteering.image.externalmods"
-              alt="Volunteering Opportunity Photo"
-              class="mb-2"
-            />
-            <NuxtPicture
-              v-else-if="volunteering?.image?.externaluid"
-              fit="cover"
-              format="webp"
-              provider="uploadcare"
-              :src="volunteering.image.externaluid"
-              :modifiers="volunteering.image.externalmods"
-              alt="Volunteering Opportunity Photo"
-              class="mb-2"
-            />
-            <b-img
-              v-else-if="volunteering.image"
-              lazy
-              :src="volunteering.image.path"
-            />
-          </div>
         </div>
-        <div v-else class="volunteerop">
-          <div class="volunteerop__body">
-            <div v-if="volunteering.earliestDate" class="d-flex flex-row mt-2">
-              <v-icon icon="clock" class="fa-fw mt-1" />
-              <div class="ml-2">
-                {{ volunteering.earliestDate.string.start }} -
-                {{ volunteering.earliestDate.string.end }}
-              </div>
-            </div>
-            <div v-if="volunteering.location" class="d-flex flex-row mt-2">
-              <v-icon icon="map-marker-alt" class="fa-fw mt-1" />
-              <div class="ml-2 small">
-                {{ volunteering.location }}
-              </div>
-            </div>
-            <div
-              v-if="volunteering.groups && volunteering.groups.length > 0"
-              class="d-flex flex-row mt-1"
-            >
-              <v-icon icon="users" class="fa-fw mt-1" />
-              <div class="ml-2 small">
-                Posted on
-                <span v-for="(group, index) in groups" :key="index">
-                  <span v-if="index > 0">, </span>
-                  {{ group.namedisplay }}
-                </span>
-              </div>
-            </div>
-            <read-more
-              v-if="description"
-              :text="description"
-              :max-chars="300"
-              class="ml-1 font-weight-bold preline forcebreak nopara mt-1"
-            />
-            <div class="mt-2 mb-2 ml-1">
-              <b-button
-                variant="secondary"
-                :aria-label="
-                  'More info about ' +
-                  volunteering.title +
-                  ' volunteering opportunity'
-                "
-                @click="showOpportunityModal"
-              >
-                <v-icon icon="info-circle" /> More info
-              </b-button>
-            </div>
-          </div>
-          <div class="image-wrapper">
-            <OurUploadedImage
-              v-if="volunteering?.image?.ouruid"
-              :src="volunteering.image.ouruid"
-              :modifiers="volunteering.image.externalmods"
-              alt="Volunteering Opportunity Photo"
-              class="mb-2"
-            />
-            <NuxtPicture
-              v-else-if="volunteering?.image?.externaluid"
-              fit="cover"
-              format="webp"
-              provider="uploadcare"
-              :src="volunteering.image.externaluid"
-              :modifiers="volunteering.image.externalmods"
-              alt="Volunteering Opportunity Photo"
-              class="mb-2"
-            />
-            <b-img
-              v-else-if="volunteering.image"
-              lazy
-              :src="volunteering.image.path"
-            />
-          </div>
+        <div v-if="volunteering.image" class="volop-card__image">
+          <OurUploadedImage
+            v-if="volunteering?.image?.ouruid"
+            :src="volunteering.image.ouruid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+          />
+          <NuxtPicture
+            v-else-if="volunteering?.image?.externaluid"
+            fit="cover"
+            format="webp"
+            provider="uploadcare"
+            :src="volunteering.image.externaluid"
+            :modifiers="volunteering.image.externalmods"
+            alt="Volunteering Opportunity Photo"
+          />
+          <b-img v-else lazy :src="volunteering.image.path" />
         </div>
-      </b-card-body>
-    </b-card>
+      </div>
+    </div>
+
     <VolunteerOpportunityModal
       v-if="showModal"
       :id="id"
@@ -330,35 +309,157 @@ function expire() {
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
+@import 'assets/css/_color-vars.scss';
 
-.image-wrapper {
-  :deep(img) {
-    object-fit: cover;
-    width: 200px;
-  }
-
-  &.summary {
-    :deep(img) {
-      width: 100%;
-      height: unset;
-    }
-  }
-}
-
-.volunteerop__link {
-  color: $color-blue--2;
-}
-
-.volunteerop {
+.volop-card {
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  height: 100%;
   display: flex;
   flex-direction: column;
+}
 
-  @include media-breakpoint-up(sm) {
+.volop-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin: 0;
+  border-bottom: 1px solid $gray-200;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.volop-card__title {
+  flex: 1;
+  min-width: 0;
+  color: $color-blue--base;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.volop-card__id {
+  color: $gray-500;
+  font-size: 0.85rem;
+  font-weight: normal;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.volop-card__body {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.volop-card__owner-actions {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $gray-200;
+}
+
+.volop-card__owner-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.volop-card__desc {
+  font-size: 0.9375rem;
+  color: $gray-700;
+  margin: 0 0 0.75rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.volop-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.volop-card__meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: $gray-600;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    color: $gray-500;
+  }
+}
+
+.volop-card__description {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: $gray-700;
+  margin-bottom: 1rem;
+  flex: 1;
+
+  :deep(.read-more-text) {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.volop-card__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+
+  @include media-breakpoint-up(md) {
     flex-direction: row;
   }
 }
 
-.volunteerop__body {
-  flex-grow: 1;
+.volop-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.volop-card__actions {
+  margin-top: auto;
+  margin-bottom: 0;
+  padding-top: 0.5rem;
+}
+
+.volop-card__image {
+  flex-shrink: 0;
+
+  :deep(img) {
+    object-fit: cover;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  &--full {
+    :deep(img) {
+      width: 100%;
+      max-width: none;
+    }
+  }
+}
+
+.volop-card__summary {
+  .volop-card__actions {
+    text-align: center;
+  }
 }
 </style>

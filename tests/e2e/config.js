@@ -53,7 +53,8 @@ const environment = {
   place: process.env.TEST_PLACE || 'Edinburgh',
   testgroup: process.env.TEST_GROUP || 'FreeglePlayground',
   modtoolsBaseUrl:
-    process.env.TEST_MODTOOLS_BASE_URL || 'http://modtools-prod.localhost',
+    process.env.TEST_MODTOOLS_BASE_URL ||
+    'http://modtools-prod-local.localhost',
 
   unmodded_email: process.env.TEST_EMAIL_UNMODDED || 'test@test.com',
   unmodded_password: process.env.TEST_EMAIL_UNMODDED_PASSWORD || 'freegle',

@@ -1,7 +1,7 @@
 <template>
   <client-only>
     <b-row class="text-center m-0">
-      <b-col cols="12" md="6" offset-md="3">
+      <b-col cols="12" lg="6" offset-lg="3">
         <h1>Freegling Heatmap</h1>
         <div v-if="!fetched" class="text-center">
           <h4>Crunching the numbers...</h4>

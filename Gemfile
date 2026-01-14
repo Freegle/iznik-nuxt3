@@ -1,6 +1,9 @@
 source "https://rubygems.org"
 
-gem "fastlane"
+gem "fastlane"  # Version locked to 2.230.0 in Gemfile.lock (frozen mode enforces this)
+gem "abbrev"  # Required for Ruby 3.4+ compatibility
+gem "nkf"     # Required for Ruby 3.4+ compatibility (provides kconv module)
+gem "net-ftp" # Required for Ruby 3.0+ compatibility with older gems (nokogiri, mini_portile2)
 
 plugins_path = File.join(File.dirname(__FILE__), 'fastlane', 'Pluginfile')
 eval_gemfile(plugins_path) if File.exist?(plugins_path)

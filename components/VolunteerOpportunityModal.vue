@@ -32,115 +32,120 @@
         <donation-button />
       </div>
       <div v-else-if="volunteering">
-        <div v-if="!editing">
-          <div v-if="volunteering.image">
-            <notice-message class="mb-3">
-              Scroll down past the picture for more information!
-            </notice-message>
-            <b-row>
-              <b-col>
-                <OurUploadedImage
-                  v-if="volunteering?.image?.ouruid"
-                  :src="volunteering.image.ouruid"
-                  :modifiers="volunteering.image.imagemods"
-                  alt="Volunteer Opportunity Photo"
-                  class="mb-2 w-100"
-                />
-                <NuxtPicture
-                  v-else-if="volunteering?.image?.imageuid"
-                  width="200"
-                  format="webp"
-                  provider="uploadcare"
-                  :src="volunteering.image.imageuid"
-                  :modifiers="volunteering.image.imagemods"
-                  alt="Volunteer Opportunity Photo"
-                  class="mb-2 w-100"
-                />
-                <b-img
-                  v-else
-                  lazy
-                  fluid
-                  :src="volunteering.image.path"
-                  class="mb-2 w-100"
-                />
-              </b-col>
-            </b-row>
+        <div v-if="!editing" class="view-mode">
+          <div v-if="volunteering.image" class="image-section">
+            <OurUploadedImage
+              v-if="volunteering?.image?.ouruid"
+              :src="volunteering.image.ouruid"
+              :modifiers="volunteering.image.imagemods"
+              alt="Volunteer Opportunity Photo"
+              class="modal-image"
+            />
+            <NuxtPicture
+              v-else-if="volunteering?.image?.imageuid"
+              width="200"
+              format="webp"
+              provider="uploadcare"
+              :src="volunteering.image.imageuid"
+              :modifiers="volunteering.image.imagemods"
+              alt="Volunteer Opportunity Photo"
+              class="modal-image"
+            />
+            <b-img
+              v-else
+              lazy
+              fluid
+              :src="volunteering.image.path"
+              class="modal-image"
+            />
           </div>
-          <b-row>
-            <!-- eslint-disable-next-line-->
-            <b-col class="mb-2 prewrap font-weight-bold forcebreak">{{ volunteering.description }}</b-col>
-          </b-row>
-          <b-row class="mt-2">
-            <b-col cols="4" md="3" class="field"> Time commitment</b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              {{ volunteering.timecommitment }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> Where</b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              {{ volunteering.location }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" md="3" class="field"> When</b-col>
-            <b-col cols="8" md="9">
-              <div
-                v-for="date in volunteering?.dates"
-                :key="
-                  'volunteering-' +
-                  volunteering?.id +
-                  '-' +
-                  (date.start ? date.start.toString() : '') +
-                  '-' +
-                  (date.end ? date.end.toString() : '')
-                "
-                :class="date && date.string && date.string.past ? 'inpast' : ''"
-              >
-                <span v-if="date && date.string">
-                  <span v-if="date.string.start">
-                    {{ date.string.start }}
-                  </span>
-                  <span v-if="date.string.start && date.string.end"> - </span>
-                  <span v-if="date.string.end">
-                    {{ date.string.end }}
-                  </span>
-                  <br />
-                </span>
+          <div class="description-section">
+            {{ volunteering.description }}
+          </div>
+          <div class="details-section">
+            <div v-if="volunteering.timecommitment" class="detail-item">
+              <v-icon icon="clock" class="detail-icon" />
+              <div class="detail-content">
+                <span class="detail-label">Time commitment</span>
+                <span class="detail-value">{{
+                  volunteering.timecommitment
+                }}</span>
               </div>
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contactname">
-            <b-col cols="4" md="3" class="field"> Contact name</b-col>
-            <b-col cols="8" md="9">
-              {{ volunteering.contactname }}
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contactemail">
-            <b-col cols="4" md="3" class="field"> Contact email</b-col>
-            <b-col cols="8" md="9">
-              <!-- eslint-disable-next-line -->
+            </div>
+            <div v-if="volunteering.location" class="detail-item">
+              <v-icon icon="map-marker-alt" class="detail-icon" />
+              <div class="detail-content">
+                <span class="detail-label">Location</span>
+                <span class="detail-value">{{ volunteering.location }}</span>
+              </div>
+            </div>
+            <div v-if="volunteering?.dates?.length" class="detail-item">
+              <v-icon icon="calendar-alt" class="detail-icon" />
+              <div class="detail-content">
+                <span class="detail-label">When</span>
+                <div class="detail-value">
+                  <div
+                    v-for="date in volunteering.dates"
+                    :key="
+                      'volunteering-' +
+                      volunteering?.id +
+                      '-' +
+                      (date.start ? date.start.toString() : '') +
+                      '-' +
+                      (date.end ? date.end.toString() : '')
+                    "
+                    :class="
+                      date && date.string && date.string.past ? 'inpast' : ''
+                    "
+                  >
+                    <span v-if="date && date.string">
+                      <span v-if="date.string.start">
+                        {{ date.string.start }}
+                      </span>
+                      <span v-if="date.string.start && date.string.end">
+                        -
+                      </span>
+                      <span v-if="date.string.end">
+                        {{ date.string.end }}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="
+              volunteering.contactname ||
+              volunteering.contactemail ||
+              volunteering.contacturl ||
+              volunteering.contactphone
+            "
+            class="contact-section"
+          >
+            <h6 class="contact-header">Contact Information</h6>
+            <div v-if="volunteering.contactname" class="contact-item">
+              <v-icon icon="user" class="contact-icon" />
+              <span>{{ volunteering.contactname }}</span>
+            </div>
+            <div v-if="volunteering.contactemail" class="contact-item">
+              <v-icon icon="envelope" class="contact-icon" />
               <ExternalLink :href="'mailto:' + volunteering.contactemail">
                 {{ volunteering.contactemail }}
               </ExternalLink>
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contacturl">
-            <b-col cols="4" md="3" class="field"> Website</b-col>
-            <b-col cols="8" md="9" class="forcebreak">
-              <ExternalLink :href="volunteering.contacturl">
+            </div>
+            <div v-if="volunteering.contacturl" class="contact-item">
+              <v-icon icon="globe-europe" class="contact-icon" />
+              <ExternalLink :href="volunteering.contacturl" class="text-break">
                 {{ volunteering.contacturl }}
               </ExternalLink>
-            </b-col>
-          </b-row>
-          <b-row v-if="volunteering.contactphone">
-            <b-col cols="4" md="3" class="field"> Contact phone</b-col>
-            <b-col cols="8" md="9">
-              {{ volunteering.contactphone }}
-            </b-col>
-          </b-row>
-          <br />
-          <p v-if="user" class="text-muted">
+            </div>
+            <div v-if="volunteering.contactphone" class="contact-item">
+              <v-icon icon="phone" class="contact-icon" />
+              <span>{{ volunteering.contactphone }}</span>
+            </div>
+          </div>
+          <p v-if="user" class="posted-by">
             Posted
             <span v-if="user.displayname">by {{ user.displayname }}</span>
             <span v-for="(group, index) in groups" :key="index">
@@ -278,7 +283,6 @@
                 spellcheck="true"
                 placeholder="Please let people know what the time commitment is that you're looking for, e.g. how many hours a week, what times of day."
                 class="mt-2 form-control"
-                :rules="validateTimeCommitment"
               />
               <ErrorMessage
                 name="timecommitment"
@@ -377,56 +381,54 @@
       </div>
     </template>
     <template #footer>
-      <div class="w-100 d-flex justify-content-between">
+      <div class="modal-actions">
         <template v-if="added">
-          <b-button variant="white" :disabled="uploadingPhoto" @click="hide">
-            Close
-          </b-button>
+          <b-button variant="secondary" @click="hide"> Close </b-button>
         </template>
-        <template v-else>
-          <template v-if="canmodify">
-            <b-button
-              v-if="!editing"
-              variant="white"
-              :disabled="uploadingPhoto"
-              @click="editing = true"
-            >
-              <v-icon icon="pen" />
-              Edit
-            </b-button>
-            <b-button
-              variant="white"
-              :disabled="uploadingPhoto"
-              @click="deleteIt"
-            >
-              <v-icon icon="trash-alt" />
-              Delete
-            </b-button>
-          </template>
+        <template v-else-if="editing">
           <b-button
-            v-if="!editing"
-            variant="white"
-            :disabled="uploadingPhoto"
-            @click="hide"
-          >
-            Close
-          </b-button>
-          <b-button
-            v-if="editing"
-            variant="white"
+            variant="link"
+            class="text-muted"
             :disabled="uploadingPhoto"
             @click="dontSave"
           >
             Cancel
           </b-button>
           <SpinButton
-            v-if="editing && enabled"
+            v-if="enabled"
             variant="primary"
             :disabled="uploadingPhoto"
             icon-name="save"
-            :label="volunteering.id ? 'Save Changes' : 'Add Opportunity'"
+            :label="volunteering.id ? 'Save' : 'Add Opportunity'"
             @handle="saveIt"
           />
+        </template>
+        <template v-else>
+          <div class="action-left">
+            <b-button
+              v-if="canmodify"
+              variant="link"
+              class="text-danger"
+              :disabled="uploadingPhoto"
+              @click="deleteIt"
+            >
+              <v-icon icon="trash-alt" /> Delete
+            </b-button>
+          </div>
+          <div class="action-right">
+            <b-button
+              v-if="canmodify"
+              variant="secondary"
+              size="sm"
+              :disabled="uploadingPhoto"
+              @click="editing = true"
+            >
+              <v-icon icon="pen" /> Edit
+            </b-button>
+            <b-button variant="primary" size="sm" @click="hide">
+              Close
+            </b-button>
+          </div>
         </template>
       </div>
     </template>
@@ -683,14 +685,6 @@ function validateDescription(value) {
   return true
 }
 
-function validateTimeCommitment(value) {
-  if (!value) {
-    return 'Please enter the time commitment.'
-  }
-
-  return true
-}
-
 function validateLocation(value) {
   if (!value) {
     return 'Please enter a location.'
@@ -834,6 +828,140 @@ function rotateRight() {
 }
 </script>
 <style scoped lang="scss">
+@import 'assets/css/_color-vars.scss';
+
+/* View mode styles */
+.view-mode {
+  padding: 0;
+}
+
+.image-section {
+  margin-bottom: 1rem;
+
+  .modal-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+  }
+}
+
+.description-section {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $color-gray--darker;
+  margin-bottom: 1.25rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.details-section {
+  background: $color-gray--lighter;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .detail-icon {
+    color: $colour-success;
+    width: 1rem;
+    margin-top: 0.2em;
+    flex-shrink: 0;
+  }
+
+  .detail-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .detail-label {
+    display: block;
+    font-size: 0.75rem;
+    color: $color-gray--dark;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    color: $color-gray--darker;
+    word-break: break-word;
+  }
+}
+
+.contact-section {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  .contact-header {
+    font-size: 0.85rem;
+    color: $color-gray--dark;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0;
+    font-size: 0.9rem;
+
+    .contact-icon {
+      color: $color-gray--dark;
+      width: 1rem;
+    }
+
+    a {
+      color: $color-blue--base;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.posted-by {
+  font-size: 0.85rem;
+  color: $color-gray--dark;
+  margin-bottom: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+
+  .action-left {
+    flex: 1;
+  }
+
+  .action-right {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.inpast {
+  color: $color-gray--dark;
+  text-decoration: line-through;
+}
+
+/* Edit mode styles */
 .field {
   font-weight: bold;
   color: $color-green--darker;
@@ -841,6 +969,9 @@ function rotateRight() {
 
 .container {
   position: relative;
+  display: grid;
+  grid-template-columns: 32px 250px 32px;
+  justify-content: end;
 }
 
 .rotate__icon {
@@ -849,12 +980,6 @@ function rotateRight() {
 
 .modal-footer > div {
   width: 100%;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 32px 250px 32px;
-  justify-content: end;
 }
 
 .rotateleft {
