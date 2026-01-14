@@ -2,8 +2,16 @@
   <b-card v-if="user" no-body class="container p-0 m-0">
     <b-card-header class="clickme p-1" @click="maybeExpand">
       <b-row>
-        <b-col cols="10" lg="4" class="order-1 truncate2" :title="user.email">
-          <div><v-icon icon="envelope" />&nbsp;{{ user.email }}</div>
+        <b-col
+          cols="10"
+          lg="4"
+          class="order-1 truncate2"
+          :title="preferredemail"
+        >
+          <div v-if="preferredemail">
+            <ModClipboard class="mr-1" :value="preferredemail" />
+            {{ preferredemail }}
+          </div>
           <div v-if="user.tnuserid" class="text-muted small">
             TN user id <v-icon icon="hashtag" scale="0.6" />{{ user.tnuserid }}
           </div>
@@ -86,6 +94,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
+      <ModDeletedOrForgotten v-if="user" :user="user" />
       <h3 class="mt-2">Trust Level</h3>
       <p>This controls whether someone is asked to do micromoderation tasks.</p>
       <p>
@@ -192,17 +201,16 @@
               <div v-if="user.privateposition.lat || user.privateposition.lng">
                 {{ Math.round(user.privateposition.lat * 100) / 100 }},
                 {{ Math.round(user.privateposition.lng * 100) / 100 }}
-                <a
+                <ExternalLink
                   :href="
                     'https://www.google.com/maps?q=' +
                     user.privateposition.lat +
                     ',' +
                     user.privateposition.lng
                   "
-                  target="_blank"
-                  rel="noopener"
-                  >Show on map</a
                 >
+                  Show on map
+                </ExternalLink>
               </div>
               <div v-else>Not known</div>
             </div>
@@ -506,22 +514,25 @@
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
-      v-if="addComment"
-      ref="addComment"
+      v-if="showAddCommentModal"
       :user="user"
       @added="updateComments"
-      @hidden="addComment = false"
+      @hidden="showAddCommentModal = false"
     />
   </b-card>
 </template>
 
 <script>
-import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
+import ExternalLink from '~/components/ExternalLink'
+import { useMemberStore } from '~/stores/member'
 
 const SHOW = 3
 
 export default {
+  components: {
+    ExternalLink,
+  },
   props: {
     id: {
       type: Number,
@@ -552,13 +563,21 @@ export default {
       newpassword: null,
       newemail: null,
       newEmailAs: 1,
-      addComment: false,
+      showAddCommentModal: false,
       emailAddError: null,
       showLogs: false,
       showProfile: false,
     }
   },
   computed: {
+    preferredemail() {
+      if (this.user.email) return this.user.email
+      if (!this.user.emails) return false
+      if (this.user.emails.length === 0) return false
+      const pref = this.user.emails.find((e) => e.preferred)
+      if (pref) return pref.email
+      return this.user.emails[0].email
+    },
     reportUser() {
       return {
         // Due to inconsistencies about userid vs id in objects.
@@ -682,7 +701,10 @@ export default {
   },
   async mounted() {
     this.expanded = this.expand
-    await this.fetchUser()
+    this.user = this.userStore.byId(this.id)
+    if (this.user) {
+      await this.fetchUser()
+    }
   },
   methods: {
     async fetchUser() {
@@ -758,15 +780,14 @@ export default {
       }
     },
     addAComment() {
-      this.addComment = true
-      this.$refs.addComment?.show()
+      this.showAddCommentModal = true
     },
     async updateComments() {
       const userid = this.user.userid ? this.user.userid : this.user.id
       console.log('updateComments', userid)
 
       await this.userStore.fetchMT({
-        search: userid,
+        id: userid,
         emailhistory: true,
       })
       await this.fetchUser()

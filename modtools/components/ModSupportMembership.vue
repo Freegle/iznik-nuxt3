@@ -54,10 +54,8 @@
         </b-row>
         <div class="d-flex flex-wrap pt-1">
           <b-form-group label="OFFER and WANTED posts:" class="mr-5">
-            <b-form-select
-              v-model="membership.emailfrequency"
-              @change="changeFrequency"
-            >
+            <!-- eslint-disable-next-line -->
+            <b-form-select v-model="membership.emailfrequency" @change="changeFrequency">
               <option value="-1">Immediately</option>
               <option value="1">Every Hour</option>
               <option value="2">Every 2 Hours</option>
@@ -68,10 +66,8 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Moderation status:" class="mr-5">
-            <b-form-select
-              v-model="membership.ourpostingstatus"
-              @change="changePostingStatus"
-            >
+            <!-- eslint-disable-next-line -->
+            <b-form-select v-model="membership.ourpostingstatus" @change="changePostingStatus">
               <option value="MODERATED">Moderated</option>
               <option value="DEFAULT">Group Settings</option>
               <option value="PROHIBITED">Can't Post</option>
@@ -110,8 +106,9 @@
 </template>
 <script>
 // membership.id is groupid and membership.membershipid is membershipid
-import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -128,7 +125,8 @@ export default {
   setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { memberStore, userStore }
+    const { checkWork } = useModMe()
+    return { memberStore, userStore, checkWork }
   },
   methods: {
     async changeEvents(newval) {

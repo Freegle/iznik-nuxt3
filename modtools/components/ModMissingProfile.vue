@@ -22,9 +22,13 @@
 </template>
 
 <script>
-import { pluralise } from '~/composables/usePluralise'
+import { useMe } from '~/composables/useMe'
 
 export default {
+  setup() {
+    const { myGroups } = useMe()
+    return { myGroups }
+  },
   data: function () {
     return {
       summary: true,

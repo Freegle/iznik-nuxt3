@@ -58,11 +58,13 @@
 </template>
 <script>
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const { modal, hide } = useOurModal()
-    return { modal, hide }
+    const { supportOrAdmin } = useMe()
+    return { modal, hide, supportOrAdmin }
   },
   data: function () {
     return {
@@ -109,12 +111,27 @@ export default {
   },
   methods: {
     async checkStatus() {
-      this.status = await this.$api.status.fetch()
+      try {
+        this.status = await this.$api.status.fetch()
 
-      this.tried = true
+        this.tried = true
 
-      if (this.status.ret === 0) {
-        this.updated = Date.now()
+        if (this.status.ret === 0) {
+          this.updated = Date.now()
+        }
+      } catch (error) {
+        console.warn('Status API error:', error)
+        this.tried = true
+        this.status = {
+          ret: 1,
+          warning: true,
+          info: {
+            'Status API': {
+              warning: true,
+              warningtext: 'Cannot access status file - system status unknown',
+            },
+          },
+        }
       }
 
       this.timer = setTimeout(this.checkStatus, 30000)

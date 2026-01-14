@@ -33,6 +33,9 @@
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
+        <div v-if="isMT" class="name font-weight-bold black d-block d-md-none">
+          {{ chat.name }}
+        </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">
           {{ chat.name }}
         </div>
@@ -361,6 +364,7 @@ const showChatReport = ref(false)
 const chatStore = useChatStore()
 const miscStore = useMiscStore()
 const router = useRouter()
+const isMT = ref(miscStore.modtools)
 
 const collapsed = computed({
   get: () => miscStore?.get('chatinfoheader'),
@@ -464,7 +468,12 @@ const showblock = () => {
 }
 
 const showInfo = () => {
-  showProfileModal.value = true
+  if (miscStore.modtools) {
+    // MT
+    navigateTo(
+      '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+    )
+  } else showProfileModal.value = true
 }
 
 const report = () => {

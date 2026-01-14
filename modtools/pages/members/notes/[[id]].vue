@@ -37,13 +37,15 @@
 </template>
 <script>
 import { useCommentStore } from '~/stores/comment'
-import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const commentStore = useCommentStore()
+    const { myid } = useMe()
     return {
       commentStore,
+      myid,
     }
   },
   data: function () {
@@ -84,8 +86,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.commentStore.clear()
   },
   methods: {

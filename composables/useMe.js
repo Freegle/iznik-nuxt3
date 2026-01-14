@@ -2,13 +2,13 @@ import { computed } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
-import { useMiscStore } from '@/stores/misc'
+// import { useMiscStore } from './stores/misc'
 import { useTeamStore } from '~/stores/team'
 
 let fetchingPromise = null
 
 export async function fetchMe(hitServer, components) {
-  // MT ADDED components
+  // MT components added
   const authStore = useAuthStore()
 
   // We can be called in several ways.
@@ -29,11 +29,11 @@ export async function fetchMe(hitServer, components) {
   // want to minimise the number of calls.  We have some fairly complex logic below to keep the number of parallel
   // calls down and return earlier if we happen to already be fetching what we need.
 
-  if (!components) components = [] // MT ADDED..
-  const miscStore = useMiscStore()
-  if (miscStore.modtools) {
-    components.push('expectedreplies')
-  }
+  if (!components) components = [] // MT
+  // const miscStore = useMiscStore()
+  // if (miscStore.modtools) { // TODO Why did I add this?
+  //  components.push('expectedreplies')
+  // }
 
   let needToFetch = false
 
@@ -58,7 +58,7 @@ export async function fetchMe(hitServer, components) {
   }
 
   if (needToFetch) {
-    fetchingPromise = authStore.fetchUser(components) // MT ADDED
+    fetchingPromise = authStore.fetchUser(components) // MT
 
     if (hitServer) {
       // We need to wait for the server before returning.

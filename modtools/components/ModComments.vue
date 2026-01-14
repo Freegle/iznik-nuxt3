@@ -21,6 +21,7 @@
 </template>
 <script>
 import pluralize from 'pluralize'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -33,6 +34,10 @@ export default {
       required: false,
       default: false,
     },
+  },
+  setup() {
+    const { oneOfMyGroups } = useMe()
+    return { oneOfMyGroups }
   },
   data: function () {
     return {

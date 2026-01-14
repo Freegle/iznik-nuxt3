@@ -17,8 +17,6 @@
       :distance="distance"
       @infinite="loadMore"
     >
-      <template #no-results />
-      <template #no-more />
       <template #spinner>
         <b-img lazy src="/loader.gif" alt="Loading" />
       </template>
@@ -29,7 +27,6 @@
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '@/stores/misc'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   setup() {
@@ -75,8 +72,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // We don't want to pick up any approved events.
     this.communityEventStore.clear()
   },

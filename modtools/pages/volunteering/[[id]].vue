@@ -10,29 +10,25 @@
         :volunteering="volunteering"
       />
     </div>
-    <NoticeMessage
-      v-if="!Object.keys(volunteerings).length && !busy"
-      class="mt-2"
-    >
-      There are no volunteer opportunities to review at the moment. This will
-      refresh automatically.
-    </NoticeMessage>
 
     <infinite-loading
       :distance="distance"
       :identifier="bump"
       @infinite="loadMore"
     >
-      <template #no-results> </template>
-      <template #no-more />
       <template #spinner />
+      <template #complete>
+        <notice-message v-if="!volunteerings?.length">
+          There are no volunteer opportunities to review at the moment. This
+          will refresh automatically.
+        </notice-message>
+      </template>
     </infinite-loading>
   </div>
 </template>
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useMiscStore } from '~/stores/misc'
-import { useModGroupStore } from '@/stores/modgroup'
 import { useVolunteeringStore } from '@/stores/volunteering'
 
 export default {
@@ -85,8 +81,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // We don't want to pick up any approved volunteerings.
     this.volunteeringStore.clear()
   },

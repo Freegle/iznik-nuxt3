@@ -37,7 +37,6 @@ export default {
   },
   computed: {
     alert() {
-      const a = this.alertStore.get(this.id)
       return this.alertStore.get(this.id)
     },
   },

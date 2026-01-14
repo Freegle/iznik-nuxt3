@@ -239,7 +239,8 @@ const mod = computed(() => {
   return me.value?.isModerator || me.value?.isAdmin
 })
 
-if (me.value) {
+if (me.value && !miscStore.modtools) {
+  // MT
   const now = dayjs()
   const daysago = now.diff(dayjs(me.value.added), 'days')
 

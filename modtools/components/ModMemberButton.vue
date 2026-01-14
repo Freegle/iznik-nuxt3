@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline">
-    <div class="position-relative d-inline">
+    <div class="position-relative d-inline-block">
       <SpinButton
         :variant="variant"
         :icon-name="icon"
@@ -38,6 +38,7 @@ import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useSpammerStore } from '~/stores/spammer'
 import { useStdmsgStore } from '~/stores/stdmsg'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -138,12 +139,14 @@ export default {
       default: null,
     },
   },
+  emits: ['pressed'],
   setup() {
     const memberStore = useMemberStore()
     const modConfigStore = useModConfigStore()
     const spammerStore = useSpammerStore()
     const stdmsgStore = useStdmsgStore()
-    return { memberStore, modConfigStore, spammerStore, stdmsgStore }
+    const { myid } = useMe()
+    return { memberStore, modConfigStore, spammerStore, stdmsgStore, myid }
   },
   data: function () {
     return {
@@ -209,12 +212,14 @@ export default {
         }
 
         this.showStdMsgModal = true
-        await this.$nextTick()
         this.$refs.stdmodal?.show()
+        await this.$nextTick()
+        this.$refs.stdmodal?.fillin()
       }
       if (callback) callback()
+      this.$emit('pressed')
     },
-    async approveIt() {
+    approveIt() {
       alert('MMB memberStore.approve NOT DEFINED')
       /* await this.memberStore.approve({
         id: this.member.userid,
@@ -270,13 +275,13 @@ export default {
     async reviewHoldIt() {
       await this.memberStore.reviewHold({
         membershipid: this.member.membershipid,
-        groupid: this.reviewgroupid,
+        groupid: this.reviewgroupid ?? this.member.id,
       })
     },
     async reviewReleaseIt() {
       await this.memberStore.reviewRelease({
         membershipid: this.member.membershipid,
-        groupid: this.reviewgroupid,
+        groupid: this.reviewgroupid ?? this.member.id,
       })
     },
     async releaseIt() {
@@ -289,11 +294,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';
-
 .autosend {
   right: 4px;
-  bottom: -20px;
+  bottom: 0px;
   position: absolute;
   color: $color-purple;
 }

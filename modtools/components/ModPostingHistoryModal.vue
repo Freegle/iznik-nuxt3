@@ -11,7 +11,7 @@
           There are no posts to show.
         </NoticeMessage>
         <ModGroupSelect v-model="groupid" modonly class="mb-2" />
-        <b-row v-for="message in messages">
+        <b-row v-for="message in messages" :key="message.id">
           <b-col cols="8" sm="3">
             <div>{{ datetimeshort(message.arrival) }}</div>
           </b-col>

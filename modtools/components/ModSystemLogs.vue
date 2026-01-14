@@ -36,7 +36,10 @@
     <!-- Empty State -->
     <div v-else-if="!loading && !hasLogs" class="empty-state text-center py-4">
       <v-icon icon="search" scale="2" class="text-muted mb-2" />
-      <p class="text-muted mb-0">No logs found for the selected filters.</p>
+      <p class="text-muted mb-1">No logs found for the selected filters.</p>
+      <p class="text-muted small mb-0">
+        {{ emptyStateHint }}
+      </p>
     </div>
 
     <!-- Log List -->
@@ -139,6 +142,40 @@ export default {
     },
     hasLogs() {
       return this.logsAsTree.length > 0
+    },
+    emptyStateHint() {
+      const filters = []
+      if (this.localUserid) {
+        filters.push(`user #${this.localUserid}`)
+      }
+      if (this.systemLogsStore.email) {
+        filters.push(`email "${this.systemLogsStore.email}"`)
+      }
+      if (this.localGroupid) {
+        filters.push(`group #${this.localGroupid}`)
+      }
+      if (this.localMsgid) {
+        filters.push(`message #${this.localMsgid}`)
+      }
+      if (this.systemLogsStore.ipAddress) {
+        filters.push(`IP ${this.systemLogsStore.ipAddress}`)
+      }
+
+      const timeRange = this.systemLogsStore.timeRange
+      const timeLabels = {
+        '1h': 'the last hour',
+        '24h': 'the last 24 hours',
+        '7d': 'the last 7 days',
+        '30d': 'the last 30 days',
+        '365d': 'the last year',
+        ever: 'all time',
+      }
+      const timeLabel = timeLabels[timeRange] || timeRange
+
+      if (filters.length > 0) {
+        return `Searched for ${filters.join(', ')} in ${timeLabel}.`
+      }
+      return `No activity recorded in ${timeLabel}. Try expanding the time range.`
     },
   },
   watch: {

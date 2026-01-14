@@ -26,12 +26,17 @@
 </template>
 <script>
 import { useAuthStore } from '~/stores/auth'
+import { useMe } from '~/composables/useMe'
 export default {
   props: {
     user: {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const { supportOrAdmin } = useMe()
+    return { supportOrAdmin }
   },
   data: function () {
     return {

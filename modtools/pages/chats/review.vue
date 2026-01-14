@@ -22,14 +22,13 @@
           :identifier="bump"
           @infinite="loadMore"
         >
-          <template #no-results>
-            <p class="p-2">
-              There are no chat messages to review at the moment.
-            </p>
-          </template>
-          <template #no-more></template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+          <template #complete>
+            <notice-message v-if="!visibleMessages?.length">
+              There are no chat messages to review at the moment.
+            </notice-message>
           </template>
         </infinite-loading>
       </div>
@@ -53,7 +52,6 @@
 <script>
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '~/stores/chat'
-import { useModGroupStore } from '@/stores/modgroup'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
 const REVIEWCHAT = null
@@ -119,8 +117,6 @@ export default {
     },
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     await this.clearAndLoad()
   },
   methods: {
@@ -132,7 +128,7 @@ export default {
         this.show++
         $state.loaded()
       } else {
-        const currentCount = this.messages.length
+        // const currentCount = this.messages.length
         $state.complete()
 
         /* this.$store

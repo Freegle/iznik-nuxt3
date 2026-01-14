@@ -18,7 +18,9 @@
 <script>
 import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
+import { useGroupStore } from '~/stores/group'
 import { useModGroupStore } from '~/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -123,9 +125,16 @@ export default {
   },
   setup() {
     const miscStore = useMiscStore()
+    const groupStore = useGroupStore()
     const modGroupStore = useModGroupStore()
+    const { me } = useMe()
 
-    return { miscStore, modGroupStore }
+    return { miscStore, groupStore, modGroupStore, me }
+  },
+  data: function () {
+    return {
+      remembered: false, // Needed to cope with delay on very first load obtaining modgroup list
+    }
   },
   computed: {
     selectedGroup: {
@@ -133,32 +142,27 @@ export default {
         return this.modelValue
       },
       set(val) {
-        this.$emit('update:modelValue', val)
+        if (this.modGroupStore.received) {
+          // Only update once all groups received
+          this.$emit('update:modelValue', val)
 
-        if (this.remember) {
-          this.miscStore.set({
-            key: 'groupselect-' + this.remember,
-            value: val,
-          })
+          if (this.remember) {
+            this.miscStore.set({
+              key: 'groupselect-' + this.remember,
+              value: val,
+            })
+          }
         }
       },
     },
     groups() {
       let ret = []
       if (this.listall) {
-        ret = Object.values(this.modGroupStore.list).filter((g) => {
-          // console.log('===GroupSelect groups A',g.id)
+        ret = Object.values(this.modGroupStore.allGroups).filter((g) => {
           return g.id
         })
       } else {
-        ret = this.myGroups
-        /* Used to be needed to get latest work but now not
-        for( const g of ret){
-          console.log('===GroupSelect group',g.work)
-          if( this.modGroupStore.list[g.id]){
-            g.work = this.modGroupStore.list[g.id].work
-          }
-        } */
+        ret = Object.values(this.modGroupStore.list)
       }
 
       ret = ret || []
@@ -170,7 +174,7 @@ export default {
       let groups = cloneDeep(this.groups)
       groups = groups.sort((a, b) => {
         if (!a.namedisplay) {
-          console.error('Bad group in GroupSelect', a, b, this.groups)
+          console.error('Bad group in ModGroupSelect', a, b, this.groups)
         }
         return a.namedisplay
           .toLowerCase()
@@ -180,7 +184,6 @@ export default {
       return groups
     },
     groupOptions() {
-      // console.log('MGS groupOptions')
       const groups = []
 
       if (this.customName) {
@@ -230,21 +233,17 @@ export default {
           group.role === 'Owner' ||
           group.role === 'Moderator'
         ) {
-          // console.log('MGS groupOptions group',group.namedisplay, group.work)
           let text = group.namedisplay
 
           if (this.work) {
             this.work.forEach((type) => {
               if (group.work && group.work[type]) {
-                text +=
-                  ' (' +
-                  group.work[type] +
-                  ')' +
-                  (group.mysettings && group.mysettings.active === 0
-                    ? ' - backup'
-                    : '')
+                text += ' (' + group.work[type] + ')'
               }
             })
+          }
+          if (group.mysettings && group.mysettings.active === 0) {
+            text += ' - backup'
           }
 
           groups.push({
@@ -264,6 +263,9 @@ export default {
         !this.groupOptions.some((option) => option.selected)
       )
     },
+    groupsloaded() {
+      return this.modGroupStore.received
+    },
   },
   watch: {
     invalidSelection: {
@@ -271,6 +273,18 @@ export default {
       handler(val) {
         if (val && this.restrict) this.selectedGroup = 0
       },
+    },
+    groupsloaded(newval) {
+      // Only restore remembered group if no explicit value was set from URL.
+      // If modelValue is already non-zero, it was set from route params and
+      // should not be overridden by the remembered value.
+      if (this.modelValue) {
+        return
+      }
+      const val = this.miscStore.get('groupselect-' + this.remember)
+      if (val && val !== this.modelValue) {
+        this.$emit('update:modelValue', val)
+      }
     },
     // groupOptions: {
     //   immediate: true,
@@ -291,25 +305,28 @@ export default {
     //   },
     // },
   },
-  async mounted() {
+  mounted() {
     // MT CHANGED
-    if (this.listall) {
+    /* if (this.listall) {
+      console.error('MGS listMT mounted listall')
+      console.trace()
       await this.modGroupStore.listMT({
-        grouptype: 'Freegle',
+        grouptype: 'Freegle'
       })
-    }
-    // console.log('ModGroupSelect', this.remember, this.modelValue)
+    } */
     if (this.remember && !this.modelValue) {
       let val = this.miscStore.get('groupselect-' + this.remember)
-      // console.log('ModGroupSelect val',this.modelValue,val)
 
       if (typeof val !== 'undefined') {
         val = parseInt(val)
+        // let found = false
         this.groups.forEach((g) => {
           if (g.id === val) {
+            // found = true
             this.selectedGroup = g.id
           }
         })
+        // if (!found) this.remembered = val
       }
     }
   },

@@ -49,7 +49,6 @@
 </template>
 <script>
 import { GChart } from 'vue-google-charts'
-import { pluralise } from '~/composables/usePluralise'
 import { useAlertStore } from '~/stores/alert'
 import { useOurModal } from '~/composables/useOurModal'
 

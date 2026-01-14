@@ -52,8 +52,18 @@ export const useMemberStore = defineStore({
         params.stdmsgid,
         params.body
       )
-
-      delete this.list[params.id]
+      let foundid = false
+      for (const membership of Object.values(this.list)) {
+        if (
+          membership.userid === params.id &&
+          membership.groupid === params.groupid
+        ) {
+          foundid = membership.id
+        }
+      }
+      if (foundid) {
+        delete this.list[foundid]
+      }
     },
     async fetchMembers(params) {
       // console.log('useMemberStore fetchMembers',params)
@@ -190,13 +200,15 @@ export const useMemberStore = defineStore({
         membershipid: params.membershipid,
       })
     },
-    async askMerge(params) {
+    async askMerge(id, params) {
+      console.log('useMemberStore askMerge', id, params)
       await api(this.config).merge.ask(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
-    async ignoreMerge(params) {
+    async ignoreMerge(id, params) {
+      console.log('useMemberStore ignoreMerge', id, params)
       await api(this.config).merge.ignore(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
   },
   getters: {

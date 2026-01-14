@@ -13,6 +13,52 @@
       Here's your dashboard, where you can see what your communities have been
       doing recently.
     </p>
+    <div v-if="appVersions">
+      <strong>Current app releases:</strong>
+      <ul>
+        <li>
+          Freegle iOS <strong>v{{ appVersions.fd.ios.version }}</strong> ({{
+            appVersions.fd.ios.date
+          }})
+        </li>
+        <li>
+          Freegle Android
+          <strong>v{{ appVersions.fd.android.version }}</strong> ({{
+            appVersions.fd.android.date
+          }})
+        </li>
+        <li>
+          ModTools iOS <strong>v{{ appVersions.mt.ios.version }}</strong> ({{
+            appVersions.mt.ios.date
+          }})
+        </li>
+        <li>
+          ModTools Android
+          <strong>v{{ appVersions.mt.android.version }}</strong> ({{
+            appVersions.mt.android.date
+          }})
+        </li>
+      </ul>
+    </div>
+    <div
+      v-if="
+        latestMessage &&
+        (me.systemrole === 'Admin' || me.systemrole === 'Support')
+      "
+      :class="{
+        'alert alert-danger': backupStatus === 'error',
+        'alert alert-warning': backupStatus === 'warning',
+      }"
+    >
+      <strong>System backed up on Yesterday up to:</strong>
+      {{ latestMessage }}
+      <span v-if="backupStatus === 'error'">
+        ❌ Backup is over 2 days old!</span
+      >
+      <span v-if="backupStatus === 'warning'">
+        ⚠️ Backup is currently restoring</span
+      >
+    </div>
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
@@ -36,7 +82,7 @@
           v-model="groupid"
           all
           modonly
-          :systemwide="admin"
+          :systemwide="me.systemrole === 'Admin'"
           active
         />
       </div>
@@ -151,25 +197,26 @@
 import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import { buildHead } from '~/composables/useMTBuildHead'
+import { useConfigStore } from '@/stores/config'
+// import { buildHead } from '~/composables/useMTBuildHead'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
+const configStore = useConfigStore()
 
-/* const version = computed(() => {
-  return runtimeConfig.public.VERSION
-})
-
-const buildDate = computed(() => {
-  return runtimeConfig.public.BUILD_DATE
-}) */
+// Use me and myid computed properties from useMe composable for consistency
+const { me } = useMe()
 
 const showVolunteersWeek = ref(false)
 const starti = ref(null)
 const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
-const dateFormat = ref(null)
+const appVersions = ref(null)
+const latestMessage = ref(null)
+const backupStatus = ref(null)
+// const dateFormat = ref(null)
 
 const groupid = computed({
   get: () => {
@@ -222,8 +269,6 @@ watch(showInfo, () => {
 })
 
 onMounted(async () => {
-  modGroupStore.getModGroups()
-
   // Volunteers' Week is between 1st and 7th June every year.
   if (
     dayjs().get('month') === 5 &&
@@ -235,6 +280,120 @@ onMounted(async () => {
     setTimeout(() => {
       showVolunteersWeek.value = false
     }, 30000)
+  }
+
+  // Fetch app version info
+  try {
+    const fdIosVersion = await configStore.fetch('app_fd_version_ios_latest')
+    const fdIosDate = await configStore.fetch('app_fd_version_ios_date')
+    const fdAndroidVersion = await configStore.fetch(
+      'app_fd_version_android_latest'
+    )
+    const fdAndroidDate = await configStore.fetch('app_fd_version_android_date')
+    const mtIosVersion = await configStore.fetch('app_mt_version_ios_latest')
+    const mtIosDate = await configStore.fetch('app_mt_version_ios_date')
+    const mtAndroidVersion = await configStore.fetch(
+      'app_mt_version_android_latest'
+    )
+    const mtAndroidDate = await configStore.fetch('app_mt_version_android_date')
+
+    if (
+      fdIosVersion?.length &&
+      fdAndroidVersion?.length &&
+      mtIosVersion?.length &&
+      mtAndroidVersion?.length
+    ) {
+      appVersions.value = {
+        fd: {
+          ios: {
+            version: fdIosVersion[0].value,
+            date: fdIosDate?.length
+              ? dayjs(fdIosDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+          android: {
+            version: fdAndroidVersion[0].value,
+            date: fdAndroidDate?.length
+              ? dayjs(fdAndroidDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+        },
+        mt: {
+          ios: {
+            version: mtIosVersion[0].value,
+            date: mtIosDate?.length
+              ? dayjs(mtIosDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+          android: {
+            version: mtAndroidVersion[0].value,
+            date: mtAndroidDate?.length
+              ? dayjs(mtAndroidDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+        },
+      }
+    }
+  } catch (e) {
+    console.log('Failed to fetch app versions', e)
+  }
+
+  // Fetch latest message time for Admin/Support users
+  if (me.value?.systemrole === 'Admin' || me.value?.systemrole === 'Support') {
+    const data = await miscStore.fetchLatestMessage()
+    if (data.ret === 0 && data.latestmessage) {
+      latestMessage.value = dayjs(data.latestmessage).format(
+        'D MMM YYYY HH:mm:ss'
+      )
+
+      // Check backup age and set status
+      const backupAge = dayjs().diff(dayjs(data.latestmessage), 'day')
+      if (backupAge > 2) {
+        backupStatus.value = 'error'
+      } else {
+        backupStatus.value = null
+      }
+    } else {
+      // Try to get restore status from Yesterday API
+      try {
+        const restoreResponse = await fetch(
+          'https://yesterday.ilovefreegle.org:8444/api/restore-status'
+        )
+        if (restoreResponse.ok) {
+          const restoreData = await restoreResponse.json()
+          if (restoreData.inProgress && restoreData.backupDate) {
+            const formattedDate = dayjs(
+              restoreData.backupDate,
+              'YYYYMMDD'
+            ).format('D MMM YYYY')
+            latestMessage.value = `Restoring backup from ${formattedDate}...`
+            backupStatus.value = 'warning'
+          } else if (
+            restoreData.status === 'completed' &&
+            restoreData.completedAt
+          ) {
+            const formattedDate = dayjs(restoreData.completedAt).format(
+              'D MMM YYYY HH:mm:ss'
+            )
+            latestMessage.value = formattedDate
+            backupStatus.value = null
+          } else if (restoreData.status === 'failed') {
+            latestMessage.value = 'Restore failed - check logs'
+            backupStatus.value = 'error'
+          } else {
+            latestMessage.value = 'Restoring...'
+            backupStatus.value = 'warning'
+          }
+        } else {
+          latestMessage.value = 'Restoring...'
+          backupStatus.value = 'warning'
+        }
+      } catch (e) {
+        // If Yesterday API is not accessible, just show generic message
+        latestMessage.value = 'Restoring...'
+        backupStatus.value = 'warning'
+      }
+    }
   }
 
   update()

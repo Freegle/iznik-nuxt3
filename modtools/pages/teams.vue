@@ -70,21 +70,21 @@
 </template>
 
 <script setup>
-import { useModGroupStore } from '@/stores/modgroup'
 import { useTeamStore } from '@/stores/team'
-const modGroupStore = useModGroupStore()
+import { useMe } from '~/composables/useMe'
+
 const teamStore = useTeamStore()
 
 const team = ref(null)
 const selected = ref(null)
 const memberToAdd = ref(null)
+const { supportOrAdmin } = useMe()
 
 const teams = computed(() => {
   return teamStore.all
 })
 
 onMounted(() => {
-  modGroupStore.getModGroups()
   teamStore.fetch()
 })
 

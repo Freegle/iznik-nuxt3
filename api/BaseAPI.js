@@ -38,6 +38,7 @@ export default class BaseAPI {
 
       const authStore = useAuthStore()
       const mobileStore = useMobileStore()
+      const miscStore = useMiscStore()
 
       // Add trace headers for distributed tracing.
       const traceHeaders = getTraceHeaders()
@@ -90,7 +91,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools
         config.params.app = mobileStore.isApp
 
         // JSON-encode these for to pass.
@@ -101,12 +102,11 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools
         config.data.app = mobileStore.isApp
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
@@ -314,6 +314,7 @@ export default class BaseAPI {
 
     try {
       const authStore = useAuthStore()
+      const miscStore = useMiscStore()
 
       if (authStore?.auth?.jwt) {
         // Use the JWT to authenticate the request if possible.
@@ -357,7 +358,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -367,11 +368,10 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {

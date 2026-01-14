@@ -1,0 +1,24 @@
+FROM ghcr.io/freegle/freegle-base:latest
+
+WORKDIR /app
+
+ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
+    IZNIK_API_V2=http://freegle-apiv2:8192/api
+
+# Copy the source code (context is already iznik-nuxt3-modtools)
+# Includes .nuxt cache if restored by CircleCI for incremental builds
+COPY . .
+
+# Install dependencies in parent directory and generate .nuxt
+RUN npm install --legacy-peer-deps && npx nuxi prepare
+
+# Change to modtools directory
+WORKDIR /app/modtools
+
+# Install modtools specific dependencies
+RUN npm install --legacy-peer-deps
+
+EXPOSE 3001
+
+# Use nginx caching proxy for better throughput
+CMD ["/app/modtools/start-with-nginx.sh"]

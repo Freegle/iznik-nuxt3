@@ -8,7 +8,7 @@
               :user="message.fromuser"
               class="mr-2"
               tag="From: "
-              :groupid="message.group.id"
+              :groupid="message.group ? message.group.id : 0"
               @reload="reload"
             />
             <v-icon
@@ -20,7 +20,7 @@
               :user="message.touser"
               class="ml-2"
               tag="To: "
-              :groupid="message.group.id"
+              :groupid="message.group ? message.group.id : 0"
               @reload="reload"
             />
           </div>
@@ -28,7 +28,8 @@
             v-if="message.bymailid"
             size="lg"
             variant="white"
-            @click="viewOriginal"
+            class="ml-2"
+            @click="showOriginal = true"
           >
             <v-icon icon="info-circle" /> View original email
           </b-button>
@@ -77,11 +78,11 @@
             <v-icon icon="info-circle" />
             <em>Quicker Chat Review</em>
           </span>
-          <span>
+          <span v-if="message.group">
             <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on
             {{ message.group.namedisplay }}
-            <span v-if="!message.widerchatreview"
-              >, which you mod.
+            <span v-if="!message.widerchatreview">
+              which you mod.
               <b-button
                 :to="
                   '/members/approved/' +
@@ -110,8 +111,8 @@
               <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
               <span>
                 <span v-if="message.groupfrom"
-                  >on {{ message.groupfrom.namedisplay }}, which you mod</span
-                ><span v-else>not on any groups which you actively mod.</span>
+                  >on {{ message.groupfrom.namedisplay }}, which you mod. </span
+                ><span v-else>not on any groups which you actively mod. </span>
                 <b-button
                   v-if="message.groupfrom"
                   :to="
@@ -218,20 +219,20 @@
     <ModMessageEmailModal
       v-if="showOriginal"
       :id="message.bymailid"
-      ref="original"
+      @hidden="showOriginal = false"
     />
   </div>
 </template>
 <script>
 import { useChatStore } from '~/stores/chat'
+import { useMe } from '~/composables/useMe'
 
 // We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
-const REVIEWCHAT = null
+// const REVIEWCHAT = null
 
 export default {
   props: {
     id: {
-      // Was in mixins/chat.js
       type: Number,
       required: true,
     },
@@ -241,10 +242,11 @@ export default {
     },
   },
   emits: ['reload'],
-  // mixins: [chat],
   setup() {
     const chatStore = useChatStore()
+    const { me } = useMe()
     return {
+      me,
       chatStore,
     }
   },
@@ -256,7 +258,6 @@ export default {
   },
   computed: {
     chatusers() {
-      // Was in mixins/chat.js
       // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
       // get it in each message we render.
       return this.chatStore.getUsers(this.id)
@@ -267,7 +268,7 @@ export default {
       if (this.message && this.message.reviewreason) {
         switch (this.message.reviewreason) {
           case 'Last': {
-            ret = 'Earlier message is held for review, so this one is too.'
+            ret = 'Earlier message was held for review, so this one is too.'
             break
           }
           case 'Force': {
@@ -285,7 +286,7 @@ export default {
           }
           case 'User': {
             ret =
-              'The member was been flagged for review, so this message was flagged too.  Please check the member logs for more info.'
+              'The member has been flagged for review, so this message was flagged too.  Please check the member logs for more info.'
             break
           }
           case 'UnknownMessage': {
@@ -375,6 +376,10 @@ export default {
               'Same image sent many times recently, which sometimes indicates spam.'
             break
           }
+          case 'DodgyImage': {
+            ret = 'Suspect text or email found in image, so needs checking.'
+            break
+          }
           default: {
             ret = this.message.reviewreason
           }
@@ -417,21 +422,14 @@ export default {
       this.$emit('reload')
       callback()
     },
-    async modnote(callback) {
+    modnote(callback) {
       this.showModChatNoteModal = true
-      await nextTick()
       this.$refs.modnote?.show()
       callback()
     },
     async redactEmails(callback) {
       await this.$api.chat.sendMT({ id: this.message.id, action: 'Redact' })
       this.$emit('reload')
-      callback()
-    },
-    async viewOriginal() {
-      this.showOriginal = true
-      await nextTick()
-      this.$refs.original?.show()
       callback()
     },
   },

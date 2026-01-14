@@ -1,8 +1,13 @@
+# ModTools Netlify configuration - builds from master branch
 [build.environment]
 NODE_VERSION = "22"
 NPM_FLAGS = "--legacy-peer-deps"
 
 # Return 404 for requests from old code.  This avoids the function call, which costs.
+[build]
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && npx nuxi prepare && cd modtools && npm i && npm run build"
+publish = "modtools/dist"
+
 [[redirects]]
 from = "/api/*"
 to = "/"

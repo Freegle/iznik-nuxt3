@@ -48,7 +48,6 @@
 </template>
 <script>
 import Wkt from 'wicket'
-import cloneDeep from 'lodash.clonedeep'
 import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useOurModal } from '~/composables/useOurModal'
@@ -85,7 +84,7 @@ export default {
       return this.userStore.byId(this.userid)
     },
   },
-  async mounted() {
+  mounted() {
     // console.log('mounted', cloneDeep(this.group))
     // TODO: Why: await this.modGroupStore.listMT({
     //  grouptype: 'Freegle'

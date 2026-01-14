@@ -44,8 +44,20 @@ npm run dev
 
 This will serve up the site at [127.0.0.1:3002](http://127.0.0.1:3002).  **If you use localhost instead of 127.0.0.1 you may find page load extremely slow.**
 
-It will watch for changes and do hot module reloading.  Occasionally you'll need to restart Vite when it doesn't 
+It will watch for changes and do hot module reloading.  Occasionally you'll need to restart Vite when it doesn't
 pick up a change.
+
+## Building for Production
+
+To build the project for production:
+```
+npm run build
+```
+
+This command runs `nuxi prepare` followed by `nuxi build`. The `nuxi prepare` step generates required TypeScript configuration files (like `.nuxt/tsconfig.json`) that are needed by the PWA plugin and other build tools. If you need to run prepare separately:
+```
+npx nuxi prepare
+```
 
 ## Git Hooks
 

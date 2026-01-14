@@ -26,11 +26,12 @@
         :expand="expand"
       />
       <infinite-loading :distance="200" @infinite="loadMoreUsers">
-        <template #no-results>
-          <p class="text-left">No users found.</p>
-        </template>
-        <template #no-more />
         <template #spinner />
+        <template #complete>
+          <notice-message v-if="!visible?.length">
+            No users found.
+          </notice-message>
+        </template>
       </infinite-loading>
     </div>
   </div>
@@ -71,13 +72,17 @@ export default {
     userStore.clear()
 
     if (this.id) {
+      console.log('mounted', this.id)
       this.searchuser = this.id
       this.usersearch()
     }
   },
   methods: {
     async usersearch() {
-      const val = this.searchuser.trim()
+      if (!this.searchuser) {
+        return
+      }
+      const val = this.searchuser.toString().trim()
 
       if (val) {
         this.searching = true

@@ -29,6 +29,11 @@ export default {
       type: Object,
       required: true,
     },
+    userid: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     size: {
       type: String,
       required: false,
@@ -46,8 +51,9 @@ export default {
       },
       async set(val) {
         const groupid = this.membership.groupid ?? this.membership.id
+        const userid = this.userid ? this.userid : this.user.id
         await this.userStore.edit({
-          id: this.user.id,
+          id: userid,
           groupid,
           ourPostingStatus: val,
         })
@@ -59,8 +65,9 @@ export default {
       },
       async set(val) {
         const groupid = this.membership.groupid ?? this.membership.id
+        const userid = this.userid ? this.userid : this.user.id
         await this.userStore.edit({
-          id: this.user.id,
+          id: userid,
           groupid,
           trustlevel: val,
         })

@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex mb-3">
+  <div class="d-flex mb-4">
     <b-form-group :label="label">
       <b-form-text v-if="description" class="mb-2">
         {{ description }}
@@ -8,51 +8,21 @@
         No answer given yet.
       </b-form-text>
       <b-input-group v-if="type === 'input'">
-        <b-input v-model="value" />
-        <slot name="append">
-          <SpinButton
-            variant="white"
-            icon-name="save"
-            label="Save"
-            :disabled="readonly"
-            @handle="save"
-          />
-        </slot>
+        <b-input v-model="bsetting" />
       </b-input-group>
       <b-input-group v-if="type === 'number'">
-        <b-input v-model="value" type="number" :step="step" />
-        <slot name="append">
-          <SpinButton
-            variant="white"
-            icon-name="save"
-            label="Save"
-            :disabled="readonly"
-            @handle="save"
-          />
-        </slot>
+        <b-input v-model="bsetting" type="number" :step="step" />
       </b-input-group>
       <div v-else-if="type === 'textarea'">
         <b-row>
           <b-col>
-            <b-form-textarea v-model="value" :rows="rows" />
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col>
-            <SpinButton
-              variant="white"
-              icon-name="save"
-              label="Save"
-              class="mt-2"
-              :disabled="readonly"
-              @handle="save"
-            />
+            <b-form-textarea v-model="bsetting" :rows="rows" />
           </b-col>
         </b-row>
       </div>
       <div v-else-if="type === 'toggle'">
         <OurToggle
-          v-model="value"
+          v-model="bsetting"
           class="mt-2"
           :height="30"
           :width="toggleWidth"
@@ -64,7 +34,6 @@
           }"
           variant="modgreen"
           :disabled="readonly"
-          @change="save"
         />
       </div>
     </b-form-group>
@@ -76,12 +45,12 @@ import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
   props: {
-    name: {
-      type: String,
+    setting: {
+      type: null,
       required: true,
     },
-    groupid: {
-      type: Number,
+    name: {
+      type: String,
       required: true,
     },
     label: {
@@ -128,6 +97,11 @@ export default {
       required: false,
       default: false,
     },
+    readonly: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   setup() {
     const modGroupStore = useModGroupStore()
@@ -139,57 +113,21 @@ export default {
     }
   },
   computed: {
-    readonly() {
-      return this.group.myrole !== 'Owner'
-    },
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
     haveValue() {
-      let rules = this.modGroupStore.get(this.groupid).rules || {}
-      rules = typeof rules === 'string' ? JSON.parse(rules) : rules
-      return this.name in rules
+      return this.setting != null
+    },
+    bsetting: {
+      get() {
+        const bs = this.setting
+        return bs
+      },
+      set(newval) {
+        this.$emit('change', newval)
+      },
     },
   },
-  watch: {
-    groupid(newval) {
-      this.getValueFromGroup()
-    },
-  },
-  mounted() {
-    this.getValueFromGroup()
-  },
-  methods: {
-    async tooglesave() {
-      this.value = !this.value
-      await this.save()
-    },
-    async save() {
-      let rules = this.modGroupStore.get(this.groupid).rules || {}
-      rules = typeof rules === 'string' ? JSON.parse(rules) : rules
-      rules[this.name] = this.value
-
-      await this.modGroupStore.updateMT({
-        id: this.groupid,
-        rules,
-      })
-    },
-    getValueFromGroup() {
-      let rules = this.modGroupStore.get(this.groupid).rules || {}
-      rules = typeof rules === 'string' ? JSON.parse(rules) : rules
-
-      const name = this.name
-
-      if (this.type === 'toggle') {
-        this.value =
-          typeof rules[name] === 'boolean'
-            ? rules[name]
-            : Boolean(parseInt(rules[name]))
-      } else {
-        this.value = rules[name]
-      }
-    },
-  },
+  mounted() {},
+  methods: {},
 }
 </script>
 <style scoped lang="scss">

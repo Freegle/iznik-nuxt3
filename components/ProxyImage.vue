@@ -1,5 +1,16 @@
 <template>
-  <NuxtPicture
+  <!-- TODO: Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
+  <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
+  <span :class="className"
+    ><img
+      :src="src"
+      :alt="alt"
+      :width="width"
+      :height="height"
+      :placeholder="placeholder"
+      @error="brokenImage"
+  /></span>
+  <!--NuxtPicture
     :format="format"
     :fit="fit"
     :preload="preload"
@@ -14,7 +25,7 @@
     :sizes="sizes"
     :placeholder="placeholder"
     @error="brokenImage"
-  />
+  /-->
 </template>
 <script setup>
 import * as Sentry from '@sentry/browser'
@@ -86,6 +97,7 @@ const props = defineProps({
   },
 })
 
+// eslint-disable-next-line no-unused-vars
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
 if (process.client && props.src.includes('gimg_0.jpg')) {
@@ -106,14 +118,32 @@ const fullSrc = computed(() => {
     const encodedQuery = encodeURIComponent(query)
     ret = base + '?' + encodedQuery
   }
-
+  if (props.src !== ret) console.log('fullSrc', ret)
   return ret
 })
 
 const emit = defineEmits(['error'])
 
 function brokenImage(e) {
-  console.log('Proxy image broken')
+  console.log(
+    '===',
+    props.src,
+    fullSrc.value,
+    props.src,
+    props.modifiers,
+    props.preload,
+    props.loading,
+    props.className,
+    props.fluid,
+    props.fit,
+    props.format,
+    props.alt,
+    props.width,
+    props.height,
+    props.sizes,
+    props.placeholder
+  )
+  console.log('Proxy image broken', e)
   emit('error', e)
 }
 </script>

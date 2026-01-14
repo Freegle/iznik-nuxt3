@@ -34,20 +34,21 @@ export const useCommunityEventStore = defineStore({
         items = data.communityevents
         this.context = data.context
       }
+      const done = [] // Seem to get lots of repeats so remove them
       for (let j = 0; j < items.length; j++) {
         const item = items[j]
+        if (done.includes(item.id)) continue
+        done.push(item.id)
+        item.earliestDate = earliestDate(item.dates)
+        item.earliestDateOfAll = earliestDate(item.dates, true)
+        addStrings(item, true)
         for (let i = 0; i < item.dates.length; i++) {
-          addStrings(item, true)
-          if (item.dates) {
-            item.earliestDate = earliestDate(item.dates)
-            item.earliestDateOfAll = earliestDate(item.dates, true)
-            item.dates.forEach((date, index) => {
-              item.dates[index].starttime = dayjs(date.start).format('HH:mm')
-              item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
-              item.dates[index].endtime = dayjs(date.end).format('HH:mm')
-              item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
-            })
-          }
+          const start = dayjs(item.dates[i].start)
+          const end = dayjs(item.dates[i].end)
+          item.dates[i].starttime = start.format('HH:mm')
+          item.dates[i].start = start.format('YYYY-MM-DD')
+          item.dates[i].endtime = end.format('HH:mm')
+          item.dates[i].end = end.format('YYYY-MM-DD')
         }
         // Fix up userid
         if (item.user) item.userid = item.user.id

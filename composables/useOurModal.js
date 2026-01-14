@@ -9,8 +9,12 @@ export function useOurModal() {
   })
 
   function show() {
-    modal.value.show()
-    isShown.value = true
+    if (!modal.value) {
+      console.error('useOurModal show problem')
+    } else {
+      modal.value.show()
+      isShown.value = true
+    }
   }
 
   function hide() {
@@ -19,7 +23,12 @@ export function useOurModal() {
   }
 
   const unregisterNavigationGuard = useRouter().beforeEach((to, from, next) => {
-    console.log('Guard', to?.query)
+    if (isShown.value) {
+      console.log('GUARD NAV STOPPED')
+    } else {
+      // console.log('GUARD OK OK OK')
+    }
+    // console.log('Guard', to?.query)
     if (to?.query?.noguard) {
       // This is a special query parameter we add to skip the guard.  This is used when we are navigating from
       // within a modal where the guard would otherwise suppress the navigation because it thinks we are trying

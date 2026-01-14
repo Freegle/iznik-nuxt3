@@ -1,4 +1,4 @@
-FROM node:22-slim
+FROM ghcr.io/freegle/freegle-base:latest
 
 WORKDIR /app
 
@@ -8,8 +8,8 @@ ENV IZNIK_API_V1=http://freegle-apiv1:80/api \
 # Copy the iznik-nuxt3-modtools directory from build context
 COPY iznik-nuxt3-modtools .
 
-# Install dependencies in parent directory
-RUN npm install --legacy-peer-deps
+# Install dependencies in parent directory and generate .nuxt
+RUN npm install --legacy-peer-deps && npx nuxi prepare
 
 # Change to modtools directory
 WORKDIR /app/modtools
@@ -20,6 +20,9 @@ RUN npm install --legacy-peer-deps
 EXPOSE 3000
 
 CMD export NODE_OPTIONS=--max-old-space-size=8192 && \
+    rm -rf /tmp/nitro/worker-* && \
+    echo "relayhost = [mailhog]:1025" >> /etc/postfix/main.cf && \
+    postfix start && \
     if [ "$NUXT_DEV_MODE" = "true" ]; then \
         export HOST=0 && npm run dev; \
     else \

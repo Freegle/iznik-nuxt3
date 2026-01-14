@@ -5,7 +5,7 @@
         <div v-if="chatmessage.userid != me?.id" class="media">
           <b-card border-variant="success">
             <b-card-title>
-              <h4>{{ otheruser.displayname }} sent an address:</h4>
+              <h4>{{ otheruser?.displayname }} sent an address:</h4>
             </b-card-title>
             <b-card-text>
               <b-row>

@@ -27,17 +27,33 @@
         <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
         <b-button variant="link" @click="loadAll"> Load all </b-button>
       </div>
-      <NoticeMessage v-if="!messages.length && !busy" class="mt-2">
+      <NoticeMessage
+        v-if="!messages.length && !busy && groupsreceived"
+        class="mt-2"
+      >
         There are no messages at the moment. This will refresh automatically.
       </NoticeMessage>
-      <ModMessages />
+      <div v-if="groupsreceived">
+        <ModMessages />
+        <infinite-loading
+          direction="top"
+          force-use-infinite-wrapper="true"
+          :identifier="bump"
+          @infinite="loadMore"
+        >
+          <template #spinner>
+            <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+        </infinite-loading>
+      </div>
+      <NoticeMessage v-else class="mt-2"> Please wait... </NoticeMessage>
 
       <ModAffiliationConfirmModal
         v-if="affiliationGroup"
         ref="affiliation"
         :groupid="affiliationGroup"
       />
-      <ModRulesModal v-if="rulesGroup" ref="rules" />
+      <!--ModRulesModal v-if="rulesGroup" ref="rules" /-->
 
       <div ref="end" />
     </client-only>
@@ -46,16 +62,18 @@
 
 <script>
 import dayjs from 'dayjs'
+import { useRoute } from 'vue-router'
 import { setupModMessages } from '~/composables/useModMessages'
 import { useAuthStore } from '@/stores/auth'
+import { useMessageStore } from '@/stores/message'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import me from '~/mixins/me.js'
+import { useMe } from '~/composables/useMe'
 
 export default {
-  mixins: [me],
-  async setup() {
+  setup() {
     const authStore = useAuthStore()
+    const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     const modGroupStore = useModGroupStore()
     const modMessages = setupModMessages(true)
@@ -64,10 +82,14 @@ export default {
     modMessages.collection.value = 'Pending' // Pending also gets PendingOther
     modMessages.workType.value = ['pending', 'pendingother']
     // modMessages.workType.value = 'pending'
+    const { me, myGroups } = useMe()
     return {
       authStore,
+      messageStore,
       miscStore,
       modGroupStore,
+      me,
+      myGroups,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
@@ -77,12 +99,17 @@ export default {
       showAimsModal: false,
       affiliationGroup: null,
       shownRulePopup: false,
+      bump: 0,
+      highlightMsgId: null,
     }
   },
   computed: {
     groups() {
       const ret = Object.values(this.modGroupStore.list)
       return ret
+    },
+    groupsreceived() {
+      return this.modGroupStore.received
     },
     rulesGroup() {
       if (!this.modGroupStore.received) return null
@@ -116,6 +143,7 @@ export default {
         }
       }
       if (ret && !this.shownRulePopup) {
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.shownRulePopup = true
         this.$refs.rules?.show()
       }
@@ -125,20 +153,44 @@ export default {
   watch: {
     groupid: {
       async handler(newVal, oldVal) {
+        // console.log('PENDING groupid changed', oldVal, newVal)
         this.context = null
 
         const modGroupStore = useModGroupStore()
         await modGroupStore.fetchIfNeedBeMT(newVal)
         this.group = modGroupStore.get(newVal)
-        await this.getMessages()
-
-        this.show = this.messages.length
+        this.show = 0
+        this.bump++
+      },
+    },
+    visibleMessages: {
+      handler(newVal) {
+        // Scroll to highlighted message when it appears in the list.
+        if (this.highlightMsgId && newVal?.length) {
+          const found = newVal.find((m) => m.id === this.highlightMsgId)
+          if (found) {
+            this.$nextTick(() => {
+              const el = document.getElementById('msg-' + this.highlightMsgId)
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                // Clear highlight so we don't scroll again on future updates.
+                this.highlightMsgId = null
+              }
+            })
+          }
+        }
       },
     },
   },
   async mounted() {
-    // Get groups with MT info
-    this.modGroupStore.getModGroups()
+    // Check for query params from duplicate message link.
+    const route = useRoute()
+    if (route.query.groupid) {
+      this.groupid = parseInt(route.query.groupid)
+    }
+    if (route.query.msgid) {
+      this.highlightMsgId = parseInt(route.query.msgid)
+    }
 
     // Consider affiliation ask.
     const lastask = this.miscStore.get('lastaffiliationask')
@@ -186,6 +238,12 @@ export default {
       this.showCakeModal = true
       this.miscStore.set({ key: 'cakeasked', value: true })
     }
+
+    const rememberedGroupId = this.miscStore.get('groupselect-pending')
+    // console.log('rememberedGroupId', rememberedGroupId)
+    if (typeof rememberedGroupId === 'number') {
+      this.groupid = rememberedGroupId
+    }
   },
   methods: {
     async loadAll() {
@@ -197,6 +255,45 @@ export default {
     },
     destroy(oldid, nextid) {
       this.nextAfterRemoved = nextid
+    },
+    async loadMore($state) {
+      this.busy = true
+      // console.log( 'Pending loadMore:', this.show, this.visibleMessages?.length, this.messages?.length, this.modGroupStore.received)
+      if (!this.me) {
+        console.log('Ignore load more on MT page with no session.')
+        $state.complete()
+      } else if (this.show < this.messages.length) {
+        // console.log('Pending loadMore inc')
+        // This means that we will gradually add the messages that we have fetched from the server into the DOM.
+        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+        // console.log('this.show++', this.show)
+        this.show++
+        $state.loaded()
+      } else {
+        // const currentCount = this.messages.length
+        const currentCount = Object.keys(this.messageStore.list).length // Use total messages found, not just this,messages as this stops too soon
+        // console.log('Actually loadMore', currentCount)
+
+        const params = {
+          groupid: this.groupid,
+          collection: this.collection,
+          modtools: true,
+          summary: false,
+          context: this.context,
+          limit: this.messages.length + this.distance,
+        }
+
+        await this.messageStore.fetchMessagesMT(params)
+        this.context = this.messageStore.context
+
+        if (currentCount === Object.keys(this.messageStore.list).length) {
+          $state.complete()
+        } else {
+          $state.loaded()
+          this.show++
+        }
+      }
+      this.busy = false
     },
   },
 }

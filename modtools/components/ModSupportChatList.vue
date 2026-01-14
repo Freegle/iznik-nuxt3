@@ -7,8 +7,8 @@
       :pov="pov"
     />
     <infinite-loading :distance="10" @infinite="loadMoreChats">
-      <template #no-results>
-        <p class="text-left">No chats.</p>
+      <template #complete>
+        <notice-message v-if="!chatsShown?.length"> No chats. </notice-message>
       </template>
     </infinite-loading>
   </div>

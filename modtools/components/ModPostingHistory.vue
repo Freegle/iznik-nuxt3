@@ -141,26 +141,23 @@ export default {
 
       return count
     },
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showLogs() {
+    showLogs() {
       console.log('showLogs')
       this.modmailsonly = false
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
-    async showModmails() {
+    showModmails() {
       this.modmailsonly = true
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
   },
 }

@@ -293,17 +293,16 @@ import {
   LCircleMarker,
   LFeatureGroup,
 } from '@vue-leaflet/vue-leaflet'
+
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
 import turfpolygon from 'turf-polygon'
 import turfintersect from 'turf-intersect'
-import turfarea from 'turf-area'
 import ClusterMarker from '~/components/ClusterMarker'
 import { attribution, osmtile } from '~/composables/useMap'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useLocationStore } from '~/stores/location'
-import { useAuthStore } from '@/stores/auth'
 import { POSTCODE_REGEX } from '~/constants'
 
 let Wkt = null
@@ -375,7 +374,7 @@ const editingcga = ref(null)
 const dpasjson = ref(null)
 const editingdpa = ref(null)
 
-watch(shade, async (newVal, oldVal) => {
+watch(shade, (newVal, oldVal) => {
   const allcgas = cgasjson.value
   if (allcgas) {
     const cgaoptions = cgaOptions.value
@@ -392,11 +391,14 @@ watch(shade, async (newVal, oldVal) => {
   }
 })
 
-const supportOrAdmin = computed(() => {
+/* const supportOrAdmin = computed(() => {
   const authStore = useAuthStore()
   const me = authStore.user
-  return me && (me.systemrole === 'Support' || me.systemrole === 'Admin')
-})
+  return (
+    me &&
+    (me.systemrole === 'Support' || me.systemrole === 'Admin')
+  )
+}) */
 
 const mapHeight = computed(() => {
   let height = 0
@@ -414,6 +416,9 @@ const allgroups = computed(() => {
   if (props.caretaker) {
     groups = groups.filter((g) => g.mentored)
   }
+
+  // Filter out groups with onmap = 0
+  groups = groups.filter((g) => g.onmap)
 
   return groups
 })
@@ -677,7 +682,20 @@ function selectLocation(l) {
 }
 
 function ready() {
-  // console.log('Map ready', mapObject.value)
+  if (
+    !mapObject.value ||
+    !mapObject.value ||
+    !mapObject.value.leafletObject ||
+    !mapObject.value.leafletObject.pm
+  ) {
+    console.log('Map not quite ready')
+    setTimeout(function () {
+      console.log('Map try ready again')
+      ready()
+    }, 2000)
+    return
+  }
+  console.log('Map ready')
   mapObject.value.leafletObject.pm.setLang('en_gb')
   mapObject.value.leafletObject.pm.setGlobalOptions({
     allowSelfIntersection: false,
@@ -938,7 +956,7 @@ async function search() {
         if (
           f0.geometry &&
           f0.geometry.coordinates &&
-          f0.geometry.coordinates.length == 2
+          f0.geometry.coordinates.length === 2
         ) {
           const latlng = new window.L.LatLng(
             f0.geometry.coordinates[1],

@@ -53,6 +53,10 @@ save
 /assets/monocart-coverage-app.js
 /playwright-screenshots/
 
+modtools/node_modules
+modtools/.nuxt
+modtools/dist
+
 # app
 android/*
 !android/app/
@@ -75,3 +79,4 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/README.md
 fastlane/metadata/android/en-US/changelogs/
+.netlify/

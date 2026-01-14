@@ -5,7 +5,7 @@
       type="text"
       placeholder="Search email/name/id"
       autocapitalize="none"
-      @keyup.native.enter="dosearch"
+      @keyup.enter="dosearch"
     />
     <slot name="append">
       <b-button variant="primary" @click="dosearch">

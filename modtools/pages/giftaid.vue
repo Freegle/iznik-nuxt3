@@ -170,13 +170,13 @@
 </template>
 <script>
 import Papa from 'papaparse'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 import dayjs from 'dayjs'
 import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  async setup() {
+  setup() {
     const donationStore = useDonationStore()
     const userStore = useUserStore()
     return {
@@ -202,9 +202,8 @@ export default {
     }
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // this.date = dayjs()
+    dayjs.extend(customParseFormat)
     await this.getGiftAid()
   },
   methods: {
@@ -239,11 +238,11 @@ export default {
     },
     recordDonation(callback) {
       if (this.userid && this.amount >= 0 && this.date) {
-        this.donationStore.add({
-          userid: this.userid,
-          amount: this.amount,
-          date: this.date,
-        })
+        this.donationStore.add(
+          this.userid,
+          this.amount,
+          this.date.toISOString()
+        )
       }
       callback()
     },
@@ -308,7 +307,7 @@ export default {
             'Expecting 8 columns. Found ' + row.length + ' on row ' + (i + 1)
           break
         }
-        const date = dayjs(row[0], 'DD/MM/YYYY', true)
+        const date = dayjs(row[0], 'DD/MM/YYYY')
         if (!date.isValid()) {
           this.csvError = 'Invalid date ' + row[0] + ' on row ' + (i + 1)
           break
@@ -326,9 +325,7 @@ export default {
         }
 
         // Check if the userid matches a valid user.
-        this.userStore.fetch({
-          id: userid,
-        })
+        await this.userStore.fetchMT({ id: userid })
 
         const user = this.userStore.byId(userid)
 
@@ -344,7 +341,7 @@ export default {
         // Check if email found in user's emails
         let emailFound = false
         const email = row[4]
-        for (let j = 0; j < user.emails.length; j++) {
+        for (let j = 0; j < user?.emails?.length; j++) {
           if (user.emails[j].email === email) {
             emailFound = true
             break
@@ -392,11 +389,11 @@ export default {
       for (let i = 0; i < this.csvDonations.length; i++) {
         const donation = this.csvDonations[i]
 
-        const id = await this.donationStore.add({
-          userid: donation.userid,
-          amount: donation.amount,
-          date: donation.date.format('YYYY-MM-DD'),
-        })
+        const id = await this.donationStore.add(
+          donation.userid,
+          donation.amount,
+          donation.date.format('YYYY-MM-DD')
+        )
 
         if (id) {
           this.csvTrace2 +=

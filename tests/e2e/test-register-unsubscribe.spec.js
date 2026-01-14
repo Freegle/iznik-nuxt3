@@ -6,16 +6,10 @@
  * 2. Attempts to unsubscribe the email (which should fail as it's not in the system yet)
  */
 
-const fs = require('fs')
-const path = require('path')
 const { test, expect } = require('@playwright/test')
 const { environment } = require('./config')
 const { unsubscribeManually } = require('./utils/user')
 const { setupNavigationHelpers } = require('./utils/navigation')
-const { unsubscribeTestEmails } = require('./unsubscribe-test-emails')
-
-// File path for storing test emails for later cleanup
-const TEST_EMAILS_LOG_FILE = path.join(process.cwd(), 'test-emails.json')
 
 test.describe('Registration and unsubscription flow', () => {
   test('should register a test email and verify unsubscribe fails for non-existent user', async ({

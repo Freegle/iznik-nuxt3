@@ -20,10 +20,9 @@
 import { setupModMessages } from '~/composables/useModMessages'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import ScrollToTop from '~/components/ScrollToTop'
 
 export default {
-  async setup() {
+  setup() {
     const miscStore = useMiscStore()
     const modMessages = setupModMessages(true)
     modMessages.collection.value = 'Edit'
@@ -49,10 +48,6 @@ export default {
         this.show = this.messages.length
       },
     },
-  },
-  mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
   },
 }
 </script>
