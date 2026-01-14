@@ -167,11 +167,33 @@ After successful deployment and verification:
    - This stops the old branch deploy from being updated
    - Keeps it available as emergency fallback
 
-2. **Update documentation**:
+2. **Remove iznik-nuxt3-modtools submodule from FreegleDocker**:
+   - Since both Freegle and ModTools now deploy from the same branch, the separate submodule is redundant
+   - Steps:
+     ```bash
+     cd /home/edward/FreegleDockerWSL
+
+     # Remove from .gitmodules
+     git submodule deinit -f iznik-nuxt3-modtools
+
+     # Remove from .git/modules
+     rm -rf .git/modules/iznik-nuxt3-modtools
+
+     # Remove the directory
+     git rm -f iznik-nuxt3-modtools
+
+     # Commit the change
+     git commit -m "Remove iznik-nuxt3-modtools submodule - now using single iznik-nuxt3 for both sites"
+     ```
+   - Update any scripts that reference `iznik-nuxt3-modtools` to use `iznik-nuxt3` instead
+   - Local ModTools development will use `iznik-nuxt3/modtools/` directory
+
+3. **Update documentation**:
    - Confirm all MD files are updated
    - Update any deployment scripts
+   - Update FreegleDocker CLAUDE.md to remove references to iznik-nuxt3-modtools
 
-3. **Monitor for issues**:
+4. **Monitor for issues**:
    - Watch error logs/Sentry for 24 hours
    - Be ready to rollback if issues emerge
 
