@@ -1,0 +1,36 @@
+# ModTools Netlify configuration
+# This file is used by the dedicated ModTools Netlify site
+# Both Freegle and ModTools deploy from the production branch
+
+[build.environment]
+NODE_VERSION = "22"
+NPM_FLAGS = "--legacy-peer-deps"
+
+[build]
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && npx nuxi prepare && cd modtools && npm i && npm run build"
+publish = "modtools/dist"
+
+# Return 404 for requests from old code. This avoids the function call, which costs.
+[[redirects]]
+from = "/api/*"
+to = "/"
+status = 404
+force = true
+
+[[redirects]]
+from = "/sw.js*"
+to = "/"
+status = 404
+force = true
+
+[[redirects]]
+from = "/gimg*"
+to = "/"
+status = 404
+force = true
+
+[[redirects]]
+from = "/uimg*"
+to = "/"
+status = 404
+force = true

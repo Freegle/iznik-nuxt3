@@ -1,10 +1,9 @@
 # iznik-nuxt3 modtools
 
-This `modtools` branch provides the user interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally, 
+ModTools provides the user interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally,
 running on separate website https://modtools.org/
 
-ModTools exists as a branch of the main/base `master` iznik-nuxt3 repository, with some modifications of the base code, with the bulk of the volunteer
-interface in an added /modtools directory.
+ModTools code lives in the `/modtools` directory of the main iznik-nuxt3 repository. Both Freegle and ModTools deploy from the `production` branch, with separate Netlify sites using different build commands.
 
 The ModTools code in /modtools uses the parent directory as a Nuxt3 layer, ie modtools extends or inherits from `..` ie the base nuxt3 code. 
 These files/directories are present in /modtools:
@@ -28,23 +27,15 @@ These files/directories are present in /modtools:
 
 ## Base alterations:
 
-TO DO: Multiple modifications to the base code have been done in the modtools branch. 
-Most - but not all - of these can be copied into master.
-Files which must stay diverged or have not been merged have text DO NOT COPY INTO MASTER.
-
-The base code usually uses `miscStore.modtools` to determine any MT-specific actions, often made available as ref `isMT`.
+The base code uses `miscStore.modtools` to determine any MT-specific actions, often made available as ref `isMT`.
 However `process.env.MT` and `config.IS_MT` are also available if need be.
 
-### ModTools crucial base alterations
+### ModTools-specific configuration
 
-These alterations to the base code should NOT be incorporated into the base code and should be marked DO NOT COPY INTO MASTER:
+These files have ModTools-specific configuration that differs from the Freegle build:
 
-* netlify.toml
-* nuxt.config.ts
-* components/ChatMessageInterested.vue
-* components/ChatMessageText.vue
-* stores/auth.js
-* and possibly others?
+* `modtools/nuxt.config.ts` - ModTools Nuxt configuration (extends base)
+* `modtools/netlify.toml` - ModTools-specific Netlify build settings (used by ModTools Netlify site)
 
 ## Usage:
 
@@ -62,30 +53,30 @@ You can then debug on http://127.0.0.1:3000/
 
 To debug it often helps to comment out the main content of `/plugins/something-went-wrong.client.js`
 
-## Merging
+## Development Workflow
 
-To catch up with master:
-```
-git checkout master
-git pull
-git checkout modtools
-git merge master
-```
+All development happens on `master` branch. Changes are tested via CircleCI and then merged to `production` for deployment.
 
 Any changes to `assets/css` must be copied through to `modtools/assets/css`.
 
 ## Release:
 
-When this branch is pushed to GitHub it is automatically built at netlify.
-If it succeeds it is available at https://modtools--golden-caramel-d2c3a7.netlify.app/
+Both Freegle and ModTools deploy from the `production` branch:
 
-The Freegle ha proxy hides this URL so you can use it at https://modtools.org/
+1. Changes are pushed to `master`
+2. CircleCI runs tests (Go API, PHPUnit, Playwright)
+3. If tests pass, `master` is auto-merged to `production`
+4. Netlify detects the push and builds both sites:
+   - **Freegle site** (`golden-caramel-d2c3a7`): builds from root with `npm run build`
+   - **ModTools site**: builds from `/modtools` with `cd modtools && npm run build`
+
+The Freegle HA proxy routes `modtools.org` to the ModTools Netlify site.
 There is no automatic mechanism to detect changes and reload automatically, so volunteers must reload as required to pick up a new release.
 
-The netlify instructions are in the modtools-branch-specific [netlify.toml](../netlify.toml):
+The ModTools netlify build settings use:
 
 ```
 [build]
-command = "export NODE_OPTIONS=--max_old_space_size=6000 && cd modtools && npm i && nuxt build"
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && npx nuxi prepare && cd modtools && npm i && npm run build"
 publish = "modtools/dist"
 ```
