@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
-import { LoginError, SignUpError } from '~/api/BaseAPI'
+import { LoginError, SignUpError } from '~/api/APIErrors'
 import { useComposeStore } from '~/stores/compose'
 import api from '~/api'
 import { useMobileStore } from '@/stores/mobile'

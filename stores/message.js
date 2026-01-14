@@ -4,7 +4,7 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
-import { APIError } from '~/api/BaseAPI'
+import { APIError } from '~/api/APIErrors'
 import { useAuthStore } from '~/stores/auth'
 import { useIsochroneStore } from '~/stores/isochrone'
 
