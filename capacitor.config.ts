@@ -63,6 +63,7 @@ const config: CapacitorConfig = {
       "@capacitor/camera", // C7 OK
       "@capacitor/share",
       "@capacitor/app",
+      "@capacitor/screen-orientation",
     ],
     buildOptions: { // new creds which are not used. unsigned version needs signed with FREEGLE_KEYSTORE and FREEGLE_KEYSTORE_PASSWORD
       "keystorePath": AndroidKeyStorePath,
@@ -92,7 +93,8 @@ const config: CapacitorConfig = {
       "@capacitor/camera",
       "@capacitor/share",
       "@capacitor/app",
-    ] 
+      "@capacitor/screen-orientation",
+    ]
   },
   plugins: {
     StatusBar: { 
