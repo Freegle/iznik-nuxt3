@@ -80,8 +80,9 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
   }
 
   console.log(`[DEBUG] Marketing consent verification completed successfully`)
-  // Return optionRow so clickToggle can find the .toggle-container inside it
-  return optionRow
+
+  // Return the toggle for other code to click
+  return toggleContainer
 }
 
 // Helper function for signup marketing consent tests
