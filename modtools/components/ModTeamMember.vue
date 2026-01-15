@@ -18,6 +18,7 @@
 </template>
 <script>
 import { useTeamStore } from '@/stores/team'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -29,6 +30,10 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const { supportOrAdmin } = useMe()
+    return { supportOrAdmin }
   },
   methods: {
     async remove() {

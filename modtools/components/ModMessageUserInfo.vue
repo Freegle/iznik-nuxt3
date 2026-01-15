@@ -18,12 +18,7 @@
             {{ user.displayname }}
           </span>
           <span v-if="milesaway" class="align-middle">
-            &bull;
-            <strong
-              >about
-              {{ milesaway | pluralize('mile', { includeNumber: true }) }}
-              away</strong
-            >
+            &bull; <strong>about {{ milesAwayPlural }} away</strong>
           </span>
           <br class="d-block d-sm-none" />
           <span
@@ -32,26 +27,16 @@
           >
             <span class="d-none d-sm-inline">&bull;</span>
             <span v-if="user.info.openoffers" class="text-success">
-              {{
-                user.info.openoffers
-                  | pluralize(['open OFFER', 'open OFFERs'], {
-                    includeNumber: true,
-                  })
-              }}
+              {{ openOffersPlural }}
             </span>
             <span v-if="user.info.openoffers && user.info.openwanteds">
               &bull;
             </span>
             <span v-if="user.info.openwanteds" class="text-success">
-              {{
-                user.info.openwanteds
-                  | pluralize(['open WANTED', 'open WANTEDs'], {
-                    includeNumber: true,
-                  })
-              }}
+              {{ openWantedsPlural }}
             </span>
           </span>
-          <Supporter v-if="user.supporter" class="d-inline" />
+          <ModSupporter v-if="user.supporter" class="d-inline" />
         </span>
       </span>
     </nuxt-link>
@@ -84,17 +69,18 @@
 </template>
 
 <script>
+import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import { useMiscStore } from '~/stores/misc'
 import ModPostingHistory from './ModPostingHistory'
 import ModMemberships from './ModMemberships'
-import Supporter from '~/components/Supporter'
+import { useMiscStore } from '~/stores/misc'
+import ModSupporter from '~/components/ModSupporter'
 import ProfileImage from '~/components/ProfileImage'
 const ModModeration = () => import('./ModModeration')
 
 export default {
   components: {
-    Supporter,
+    ModSupporter,
     ModMemberships,
     ModPostingHistory,
     ModModeration,
@@ -151,6 +137,7 @@ export default {
     },
     joinedAge() {
       if (this.membership) {
+        // eslint-disable-next-line new-cap
         return new dayjs().diff(new dayjs(this.membership.added), 'days')
       }
 
@@ -163,6 +150,25 @@ export default {
       } else {
         return '/profile/' + this.user.id
       }
+    },
+  },
+  methods: {
+    milesAwayPlural() {
+      return pluralize('mile', this.milesaway, true)
+    },
+    openOffersPlural() {
+      if (this.user?.info?.openoffers) {
+        pluralize.addIrregularRule('open OFFER', 'open OFFERs')
+        return pluralize('open OFFER', this.user.info.openoffers, true)
+      }
+      return ''
+    },
+    openWantedsPlural() {
+      if (this.user?.info?.openwanteds) {
+        pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
+        return pluralize('open WANTED', this.user.info.openwanteds, true)
+      }
+      return ''
     },
   },
 }

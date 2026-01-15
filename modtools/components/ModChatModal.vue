@@ -18,6 +18,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user2.id
               }}
+              <span v-if="user2.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.ljuserid
+                }}
+              </span>
+              <span v-else-if="user2.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="user1">
@@ -26,6 +38,18 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user1.id
               }}
+              <span v-if="user1.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.ljuserid
+                }}
+              </span>
+              <span v-else-if="user1.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
@@ -39,14 +63,38 @@
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user1.id
               }}
+              <span v-if="user1.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.ljuserid
+                }}
+              </span>
+              <span v-else-if="user1.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user1.tnuserid
+                }}
+              </span>
             </span>
           </div>
-          <div v-if="user2">
+          <div v-if="user1 && user2 && user1.id != user2.id">
             {{ user2.displayname }}
             <span class="text-muted small">
               <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
                 user2.id
               }}
+              <span v-if="user2.ljuserid">
+                &nbsp; LJ
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.ljuserid
+                }}
+              </span>
+              <span v-else-if="user2.tnuserid">
+                &nbsp; TN
+                <v-icon icon="hashtag" class="text-muted" scale="0.8" />{{
+                  user2.tnuserid
+                }}
+              </span>
             </span>
           </div>
           <div v-if="chat2 && chat2.group">
@@ -67,12 +115,11 @@
             :distance="10"
             @infinite="loadMore"
           >
-            <template #no-results />
-            <template #no-more />
             <template #spinner>
               <b-img lazy src="/loader.gif" alt="Loading" />
             </template>
           </infinite-loading>
+          <div v-if="chatmessages.length === 0">No messages</div>
           <ul
             v-for="chatmessage in chatmessages"
             :key="'chatmessage-' + chatmessage.id"
@@ -102,12 +149,8 @@
 <script>
 import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
-// import chatCollate from '@/mixins/chatCollate.js'
-// import chat from '@/mixins/chat.js'
-// const ChatMessage = () => import('~/components/ChatMessage')
 
 export default {
-  // mixins: [chatCollate, chat, modal],
   props: {
     id: {
       type: Number,
@@ -118,7 +161,6 @@ export default {
       required: true,
     },
   },
-  // components: { ChatMessage },
   async setup(props) {
     const { modal, hide } = useOurModal()
 

@@ -90,8 +90,6 @@
         :identifier="bump"
         @infinite="loadMore"
       >
-        <template #no-results> </template>
-        <template #no-more> </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>
@@ -102,25 +100,27 @@
 <script>
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
-import { useUserStore } from '~/stores/user'
 import { setupModMembers } from '~/composables/useModMembers'
+import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '@/stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: {
     GChart,
   },
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modMembers = setupModMembers(true)
     modMembers.collection.value = 'Happiness'
     modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
+    const { fetchMe } = useMe()
     return {
       memberStore,
       userStore,
       ...modMembers, // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
+      fetchMe,
     }
   },
   data: function () {
@@ -182,7 +182,7 @@ export default {
       this.memberStore.clear()
       this.bump++
     },
-    async groupid() {
+    groupid() {
       this.getHappiness()
       this.bump++
     },
@@ -192,8 +192,6 @@ export default {
     },
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.filter = 'Comments'
     await this.getHappiness()
   },

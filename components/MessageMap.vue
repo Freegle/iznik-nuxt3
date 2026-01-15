@@ -18,12 +18,17 @@
       :interactive="false"
       :icon="blurmarker"
     />
+    <l-geo-json v-if="boundary" :geojson="boundaryJSON" :options="cgaOptions" />
   </l-map>
 </template>
 <script setup>
 import { computed, ref } from 'vue'
+import Wkt from 'wicket' // MT..
+import { LGeoJson } from '@vue-leaflet/vue-leaflet'
 import HomeIcon from './HomeIcon'
 import { MAX_MAP_ZOOM } from '~/constants'
+import { useMiscStore } from '~/stores/misc'
+const miscStore = useMiscStore()
 
 const props = defineProps({
   home: {
@@ -74,13 +79,37 @@ const mapOptions = computed(() => {
   }
 })
 
+const AREA_FILL_COLOUR = 'darkblue' // MT..
+const CGA_BOUNDARY_COLOUR = 'darkblue'
+
+const cgaOptions = computed(() => ({
+  fillColor: AREA_FILL_COLOUR,
+  fillOpacity: 0,
+  color: CGA_BOUNDARY_COLOUR,
+}))
+
 const blurmarker = computed(() => {
+  // MT..
+  const modtools = miscStore.modtools
   return L
     ? new L.Icon({
-        iconUrl: '/blurmarker.png',
+        iconUrl: modtools ? '/bluering.png' : '/blurmarker.png',
         iconSize: [100, 100],
       })
     : null
+})
+
+const boundaryJSON = computed(() => {
+  // MT..
+  const wkt = new Wkt.Wkt()
+  try {
+    wkt.read(props.boundary)
+    return wkt.toJson()
+  } catch (e) {
+    console.log('WKT error', props.boundary, e)
+  }
+
+  return null
 })
 
 function idle(themap) {
@@ -110,7 +139,6 @@ function idle(themap) {
   }
 
   try {
-    console.log('Add map Zoom Control', map.value)
     const zoomControl = map.value.$el.querySelector('.leaflet-top.leaflet-left')
     if (zoomControl) {
       zoomControl.className = 'leaflet-top leaflet-right'

@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
+import { useMiscStore } from '~/stores/misc'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -15,11 +16,126 @@ export const useChatStore = defineStore({
     searchSince: null,
     showContactDetailsAskModal: false,
     showClosed: false,
+    currentChatMT: null,
+    lastSearchMT: null,
+    currentCountMT: 0,
   }),
   actions: {
+    clear() {
+      this.list = []
+      this.listByChatId = {}
+      this.listByChatMessageId = {}
+      this.messages = {}
+      this.searchSince = null
+      this.showContactDetailsAskModal = false
+      this.currentChatMT = null
+      this.lastSearchMT = null
+    },
     init(config) {
       this.config = config
       this.route = useRoute()
+    },
+    async listChatsMT(params, selectedChatId) {
+      params = params || {
+        chattypes: ['User2Mod', 'Mod2Mod'],
+        search: params && params.search ? params.search : null,
+      }
+      params.summary = true
+
+      this.lastSearchMT = params.search
+
+      try {
+        // let current = null
+
+        // We might have a current chat selected.  We want to make sure that we don't lose it.  This can happen if
+        // we search for an old chat that we wouldn't normally return.
+        // const chatid = parseInt(this.currentChatMT)
+        // current = chatid && this.list[chatid] ? this.list[chatid] : null
+
+        const { chatrooms } = await api(this.config).chat.listChatsMT(params)
+        this.list = chatrooms
+        chatrooms.forEach((c) => {
+          // If we already have the chat with this date then don't set it - this avoids reactivity causing a slew of
+          // component updates for no good reason.
+          if (
+            !this.listByChatId[c.id] ||
+            this.listByChatId[c.id].lastdate !== c.lastdate
+          ) {
+            this.listByChatId[c.id] = c
+          }
+        })
+
+        if (selectedChatId) {
+          const { chatroom } = await api(this.config).chat.fetchChatMT(
+            selectedChatId
+          )
+          if (chatroom) {
+            this.listByChatId[chatroom.id] = chatroom
+          } else {
+            console.error('listChatsMT selectedChatId NOTHING', selectedChatId)
+          }
+        }
+      } catch (e) {
+        // This happens a lot on mobile when the network is flaky.  It's not necessarily an end-user visible error,
+        // so there is no point letting it ripple up to Sentry.
+        if (!params.noerror) {
+          throw e
+        }
+      }
+    },
+    async fetchLatestChatsMT() {
+      // MT..
+      // const now = new Date()
+
+      const authStore = useAuthStore()
+      const me = authStore.user
+
+      if (me && me.id) {
+        const newCount = await api(this.config).chat.unseenCountMT()
+
+        if (newCount !== this.currentCountMT) {
+          if (!this.lastSearchMT) {
+            this.currentCountMT = newCount
+            this.listChatsMT({
+              chattypes: ['User2Mod', 'Mod2Mod'],
+              summary: true,
+              noerror: true,
+            })
+          }
+        }
+      }
+
+      // Continuously check for updated chats. Would be nice if this was event driven instead but requires server work.
+      // No need to clear the timeout
+      setTimeout(this.fetchLatestChatsMT, 30000)
+    },
+    async fetchReviewChatsMT(id, params) {
+      this.clear()
+      const { chatmessages } = await api(this.config).chat.fetchReviewChatsMT(
+        params
+      )
+      const messages = chatmessages
+      const deduped = [] // Chat review seems to have duplicate message id so only save last
+
+      const messageStore = useMessageStore()
+      messages.forEach((m) => {
+        const foundIndex = deduped.findIndex((m2) => m2.id === m.id)
+        if (foundIndex === -1) deduped.push(m)
+        else deduped[foundIndex] = m
+
+        if (m.refmsg) {
+          m.refmsgid = m.refmsg.id
+          messageStore.fetch(m.refmsg.id, true)
+        }
+        this.listByChatId[m.chatid] = m.chatroom
+        this.listByChatMessageId[m.id] = m
+      })
+      this.messages[id] = deduped
+    },
+    removeMessageMT(chatid, id) {
+      const foundix = this.messages[chatid].findIndex((m) => m.id === id)
+      console.log('removeMessageMT', foundix)
+      if (foundix !== -1) delete this.messages[chatid][foundix]
     },
     async fetchChats(search, logError, keepChat) {
       let since = null
@@ -28,12 +144,25 @@ export const useChatStore = defineStore({
         since = dayjs(this.searchSince).toISOString()
       }
 
-      const chats = await api(this.config).chat.listChats(
-        since,
-        search,
-        keepChat,
-        logError
-      )
+      // TODO Amend ChatAPI v2 to support chattypes
+      let chats = []
+      const miscStore = useMiscStore() // MT
+      if (miscStore.modtools) {
+        const { chatrooms } = await api(this.config).chat.listChatsMT({
+          // v1: /chat/rooms
+          chattypes: ['User2Mod', 'Mod2Mod'],
+        })
+        chats = chatrooms
+      } else {
+        chats = await api(this.config).chat.listChats(
+          // v2: /chat
+          since,
+          search,
+          keepChat,
+          logError
+        )
+      }
+      if (!chats) return
 
       this.list = chats
 
@@ -50,12 +179,36 @@ export const useChatStore = defineStore({
     },
     async fetchChat(id) {
       if (id > 0) {
-        const chat = await api(this.config).chat.fetchChat(id, false)
-        this.listByChatId[id] = chat
+        const miscStore = useMiscStore() // MT
+        if (miscStore.modtools) {
+          const { chatroom } = await api(this.config).chat.fetchChatMT(id)
+          if (chatroom) {
+            this.listByChatId[id] = chatroom
+          } else {
+            console.error('useChatStore fetchChat NOTHING', id)
+          }
+        } else {
+          const chat = await api(this.config).chat.fetchChat(id, false)
+          this.listByChatId[id] = chat
+        }
       }
     },
     async fetchMessages(id, force) {
-      const messages = await api(this.config).chat.fetchMessages(id)
+      let messages = []
+      const miscStore = useMiscStore() // MT
+      if (miscStore.modtools) {
+        const params = {
+          // limit: 10, // NO: so new messages are picked up
+          modtools: true,
+        }
+        const { chatmessages } = await api(this.config).chat.fetchMessagesMT(
+          id,
+          params
+        )
+        messages = chatmessages
+      } else {
+        messages = await api(this.config).chat.fetchMessages(id)
+      }
 
       const update = () => {
         this.messages[id] = messages
@@ -125,7 +278,12 @@ export const useChatStore = defineStore({
         data.refmsgid = refmsgid
       }
 
-      await api(this.config).chat.send(data)
+      const miscStore = useMiscStore() // MT
+      if (miscStore.modtools) {
+        await api(this.config).chat.sendMT(data)
+      } else {
+        await api(this.config).chat.send(data)
+      }
 
       // Get the latest messages back.
       this.fetchMessages(chatid)
@@ -181,10 +339,11 @@ export const useChatStore = defineStore({
 
       return id
     },
-    async openChatToMods(groupid) {
+    async openChatToMods(groupid, userid) {
       const id = await this.openChat({
         chattype: 'User2Mod',
         groupid,
+        userid,
       })
 
       return id
@@ -265,7 +424,13 @@ export const useChatStore = defineStore({
   },
   getters: {
     byChatId: (state) => {
-      return (id) => state.listByChatId[id]
+      return (id) => {
+        const chatroom = state.listByChatId[id]
+        if (chatroom && !chatroom.user1id && chatroom.user1) {
+          chatroom.user1id = chatroom.user1.id
+        }
+        return chatroom
+      }
     },
     messagesById: (state) => {
       return (id) => (state.messages[id] ? state.messages[id] : [])
@@ -274,12 +439,28 @@ export const useChatStore = defineStore({
       return (id) => state.listByChatMessageId[id]
     },
     unreadCount: (state) => {
+      const miscStore = useMiscStore() // MT
+      if (miscStore.modtools) {
+        return state.currentCountMT
+      }
       // count chats with unseen messages
       let ret = 0
+      const authStore = useAuthStore()
+      const myid = authStore.user?.id
 
       // Scan listBychatId adding chat.unseen
       Object.keys(state.listByChatId).forEach((key) => {
-        if (
+        if (miscStore.modtools) {
+          // TODO: Not now used, so remove
+          const chat = state.listByChatId[key]
+          // We count chats between mods, and chats between other members and mods.
+          if (chat.chattype === 'Mod2Mod') {
+            ret += chat.unseen
+          } else if (chat.chattype === 'User2Mod' && chat.user1 !== myid) {
+            ret += chat.unseen
+          }
+          // Otherwise we count chats between users, and our chats to mods.
+        } else if (
           state.listByChatId[key].status !== 'Closed' &&
           state.listByChatId[key].status !== 'Blocked'
         ) {

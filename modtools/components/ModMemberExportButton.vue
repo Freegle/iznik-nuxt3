@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-button
+      v-if="group"
       :disabled="!admin"
       variant="white"
       :title="
@@ -15,7 +16,7 @@
     <b-modal
       v-if="showExportModal"
       id="exportmodal"
-      ref="exportmodal"
+      ref="modal"
       title="Member Export"
       no-stacking
     >
@@ -40,9 +41,9 @@
 <script>
 import saveAs from 'save-file'
 import { createObjectCsvWriter } from 'csv-writer'
-import { useGroupStore } from '~/stores/group'
 import { useMemberStore } from '~/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
+import { useModGroupStore } from '~/stores/modgroup'
 
 export default {
   props: {
@@ -52,10 +53,10 @@ export default {
     },
   },
   setup() {
-    const groupStore = useGroupStore()
+    const modGroupStore = useModGroupStore()
     const memberStore = useMemberStore()
     const { modal, show, hide } = useOurModal()
-    return { groupStore, memberStore, modal, show, hide }
+    return { modGroupStore, memberStore, modal, show, hide }
   },
   data: function () {
     return {
@@ -70,7 +71,7 @@ export default {
   },
   computed: {
     group() {
-      return this.groupStore.get(this.groupid)
+      return this.modGroupStore.get(this.groupid)
     },
     progressValue() {
       return this.group && this.group.membercount
@@ -79,16 +80,17 @@ export default {
     },
   },
   methods: {
-    async download() {
+    download() {
       this.modalButtonLabel = 'Cancel'
       this.context = null
       this.cancelled = false
       this.exportList = []
       this.fetched = 0
       this.showExportModal = true
-      await nextTick()
-      this.$refs.exportmodal?.show()
-      this.exportChunk()
+      this.$nextTick(() => {
+        this.modal.show()
+        this.exportChunk()
+      })
     },
     cancelit() {
       this.cancelled = true
@@ -110,24 +112,6 @@ export default {
 
       const members = this.memberStore.getByGroup(this.groupid)
       this.fetched += members.length
-
-      const writer = createObjectCsvWriter({
-        path: 'members.csv',
-        header: [
-          { id: 'id', title: 'Id' },
-          { id: 'name', title: 'Name' },
-          { id: 'email', title: 'Email' },
-          { id: 'joined', title: 'Joined' },
-          { id: 'lastactive', title: 'Last Active' },
-          { id: 'role', title: 'Role' },
-          { id: 'otheremails', title: 'Other Emails' },
-          { id: 'settings', title: 'Settings' },
-          { id: 'postingstatus', title: 'Posting Status' },
-          { id: 'bouncing', title: 'Bouncing' },
-          { id: 'trustlevel', title: 'MicroVolunteering' },
-          { id: 'comments', title: 'Comments' },
-        ],
-      })
 
       members.forEach((member) => {
         const otheremails = []
@@ -173,25 +157,26 @@ export default {
             comments.push(comment.user11)
           }
         })
-
-        this.exportList.push({
-          id: member.userid,
-          name: member.displayname,
-          email: member.email,
-          joined: member.joined,
-          lastactive: member.lastaccess,
-          role: member.role,
-          otheremails: otheremails.join(', '),
-          settings: JSON.stringify(member.settings, null, 0),
-          postingstatus: member.ourpostingstatus,
-          bouncing: member.bouncing,
-          trustlevel: member.trustlevel,
-          comments: comments.join('; '),
-        })
+        // List seems to include some members already returned so ignore duplicates
+        if (!this.exportList.find((m) => m.id === member.userid)) {
+          this.exportList.push({
+            id: member.userid,
+            name: member.displayname,
+            email: member.email,
+            joined: member.joined,
+            lastactive: member.lastaccess,
+            role: member.role,
+            otheremails: otheremails.join(', '),
+            settings: JSON.stringify(member.settings, null, 0),
+            postingstatus: member.ourpostingstatus,
+            bouncing: member.bouncing,
+            trustlevel: member.trustlevel,
+            comments: comments.join('; '),
+          })
+        }
       })
 
       this.context = this.memberStore.context
-
       if (!this.cancelled && members.length) {
         // More to get
         this.$nextTick(() => {
@@ -199,6 +184,23 @@ export default {
         })
       } else {
         // Got them all.
+        const writer = createObjectCsvWriter({
+          path: 'members.csv',
+          header: [
+            { id: 'id', title: 'Id' },
+            { id: 'name', title: 'Name' },
+            { id: 'email', title: 'Email' },
+            { id: 'joined', title: 'Joined' },
+            { id: 'lastactive', title: 'Last Active' },
+            { id: 'role', title: 'Role' },
+            { id: 'otheremails', title: 'Other Emails' },
+            { id: 'settings', title: 'Settings' },
+            { id: 'postingstatus', title: 'Posting Status' },
+            { id: 'bouncing', title: 'Bouncing' },
+            { id: 'trustlevel', title: 'MicroVolunteering' },
+            { id: 'comments', title: 'Comments' },
+          ],
+        })
         const str =
           writer.csvStringifier.getHeaderString() +
           writer.csvStringifier.stringifyRecords(this.exportList)

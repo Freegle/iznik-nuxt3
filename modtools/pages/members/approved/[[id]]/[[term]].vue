@@ -47,9 +47,6 @@
         <p v-if="groupid && group" class="mt-1">
           This group has {{ pluralise('member', group.membercount, true) }}.
         </p>
-        <NoticeMessage v-if="!members.length" class="mt-2">
-          There are no members to show at the moment.
-        </NoticeMessage>
         <ModMembers />
         <infinite-loading
           direction="top"
@@ -58,14 +55,13 @@
           :identifier="bump"
           @infinite="loadMore"
         >
-          <template #no-results>
-            There are no members to show at the moment.
-          </template>
-          <template #no-more>
-            <p class="p-2">END OF LIST</p>
-          </template>
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
+          </template>
+          <template #complete>
+            <notice-message v-if="!members?.length">
+              There are no members to show at the moment.
+            </notice-message>
           </template>
         </infinite-loading>
       </div>
@@ -77,22 +73,32 @@
   </div>
 </template>
 <script>
+import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
-import { useModGroupStore } from '@/stores/modgroup'
 import { setupModMembers } from '@/composables/useModMembers'
-import { pluralise } from '@/composables/usePluralise'
+import { useMe } from '~/composables/useMe'
 
 export default {
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers(true)
     modMembers.context.value = null
     modMembers.collection.value = 'Approved'
+    // Need to init groupid and search now
+    const route = useRoute()
+    let gid = 0
+    if ('id' in route.params && route.params.id) gid = parseInt(route.params.id)
+    modMembers.groupid.value = gid
+    let term = ''
+    if ('term' in route.params && route.params.term) term = route.params.term
+    modMembers.search.value = term
+    const { myGroups } = useMe()
     return {
       memberStore,
       miscStore,
+      myGroups,
       ...modMembers, // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
     }
   },
@@ -105,9 +111,14 @@ export default {
   },
   computed: {
     id() {
-      const route = useRoute()
-      if ('id' in route.params && route.params.id)
-        return parseInt(route.params.id)
+      try {
+        // Weirdly we get inject error here when clicking the link to view profile of shown member eg to /profile/12345678
+        const route = useRoute()
+        if ('id' in route.params && route.params.id)
+          return parseInt(route.params.id)
+      } catch (e) {
+        console.error('members [[term]] id', e.message)
+      }
       return 0
     },
     term() {
@@ -125,11 +136,12 @@ export default {
   watch: {
     filter(newVal) {
       // console.log('[[term]] filter', newVal)
-      this.bump++
+      this.context = null
       this.memberStore.clear()
+      this.bump++
     },
     chosengroupid(newVal) {
-      // console.log('chosengroupid', newVal)
+      // console.log('chosengroupid', newVal, this.search.length)
       const router = useRouter()
       if (newVal !== this.id) {
         if (newVal === 0) {
@@ -137,7 +149,9 @@ export default {
           router.push('/members/approved/')
         } else {
           // console.log('chosengroupid GOTO',newVal)
-          router.push('/members/approved/' + newVal)
+          let path = '/members/approved/' + newVal
+          if (this.search.length > 0) path += '/' + this.search
+          router.push(path)
         }
       } else {
         // console.log('chosengroupid SAME')
@@ -156,10 +170,7 @@ export default {
     this.search = ''
     if ('term' in route.params && route.params.term)
       this.search = route.params.term
-    // console.log('members approved mounted', this.groupid, this.search)
-
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
+    // console.log('members approved mounted', this.groupid, '-', this.search, '-', Object.keys(this.memberStore.list).length)
 
     // reset infiniteLoading on return to page
     this.memberStore.clear()
@@ -191,7 +202,7 @@ export default {
     // this.bump++
   },
   methods: {
-    async addMember() {
+    addMember() {
       this.showAddMember = true
       this.$refs.addmodal?.show()
     },

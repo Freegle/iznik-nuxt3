@@ -56,6 +56,7 @@ export default {
       required: true,
     },
   },
+  emits: ['processed'],
   computed: {
     posted1() {
       return this.posted(this.user1)
@@ -170,6 +171,7 @@ export default {
       const removeDistinct = (s1, s2) =>
         s1
           .split('')
+          // eslint-disable-next-line array-callback-return
           .filter((c) => {
             ;(s2 + '').includes(c)
           })
@@ -244,7 +246,7 @@ export default {
     },
     async ask() {
       const memberStore = useMemberStore()
-      await memberStore.askMerge({
+      await memberStore.askMerge(this.member.id, {
         user1: this.user1.id,
         user2: this.user2.id,
       })
@@ -253,7 +255,7 @@ export default {
     },
     async ignore() {
       const memberStore = useMemberStore()
-      await memberStore.ignoreMerge({
+      await memberStore.ignoreMerge(this.member.id, {
         user1: this.user1.id,
         user2: this.user2.id,
       })
@@ -261,7 +263,8 @@ export default {
       this.updateWork()
     },
     updateWork() {
-      this.fetchMe(true, ['work'])
+      // this.fetchMe(true, ['work'])
+      this.$emit('processed')
     },
   },
 }

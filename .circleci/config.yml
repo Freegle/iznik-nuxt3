@@ -1113,7 +1113,11 @@ jobs:
       # Install Node.js dependencies (no cache on macOS - it's problematic)
       - run:
           name: Install Node.js Dependencies
-          command: npm ci
+          command: |
+            npm ci
+            # Fix npm bug with optional dependencies on macOS arm64
+            # https://github.com/npm/cli/issues/4828
+            npm install @rollup/rollup-darwin-arm64 @oxc-parser/binding-darwin-arm64 @oxc-transform/binding-darwin-arm64 @oxc-minify/binding-darwin-arm64 --prefer-offline || true
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1321,6 +1325,9 @@ jobs:
           command: |
             # First install all dependencies
             npm ci
+            # Fix npm bug with optional dependencies on macOS arm64
+            # https://github.com/npm/cli/issues/4828
+            npm install @rollup/rollup-darwin-arm64 @oxc-parser/binding-darwin-arm64 @oxc-transform/binding-darwin-arm64 @oxc-minify/binding-darwin-arm64 --prefer-offline || true
             # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
             npm update @freegle/capacitor-push-notifications-cap7
           max_auto_reruns: 3

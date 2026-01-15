@@ -38,6 +38,9 @@
                 >
                   thinks this message shouldn't be on Freegle
                 </span>
+                <span v-if="item.comments">
+                  <br /><span class="text-warning">with comment:</span>
+                </span>
               </span>
             </div>
             <div v-else-if="item.item1">marked as related</div>

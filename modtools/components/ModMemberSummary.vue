@@ -76,17 +76,14 @@
     <ModLogsModal
       v-if="showLogsModal"
       ref="logs"
-      :userid="member.id"
+      :userid="member.userid"
       modmailsonly
       @hidden="showLogsModal = false"
     />
   </div>
 </template>
 <script>
-import { pluralise } from '~/composables/usePluralise'
-
 import { useUserStore } from '~/stores/user'
-
 export default {
   props: {
     member: {
@@ -113,8 +110,10 @@ export default {
       return this.countType('Wanted')
     },
     userinfo() {
+      if (this.member.info) {
+        return this.member.info
+      }
       const user = this.userStore.byId(this.member.userid)
-
       if (user && user.info) {
         return user.info
       }
@@ -124,10 +123,13 @@ export default {
   },
   mounted() {
     if (this.member.id) {
-      this.userStore.fetchMT({
-        id: this.member.userid,
-        info: true,
-      })
+      if (!this.userStore.byId(this.member.id)) {
+        this.userStore.fetchMT({
+          id: this.member.id,
+          info: true,
+          emailhistory: true,
+        })
+      }
     }
   },
   methods: {
@@ -144,18 +146,16 @@ export default {
 
       return count
     },
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showModmails() {
+    showModmails() {
       this.modmailsonly = true
 
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
   },
 }

@@ -6,7 +6,7 @@
   >
     <b-badge
       variant="primary rounded supporter"
-      :class="'clickme ' + 'size-' + size"
+      :class="'ms-1 clickme ' + 'size-' + size"
       title="Kindly supports Freegle - click for more info?"
       @click="showModal"
     >

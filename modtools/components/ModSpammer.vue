@@ -31,6 +31,7 @@
             }}</ExternalLink
             >)
           </span>
+          <ModClipboard class="ml-1" :value="user.spammer.byuser.email" />
         </span>
         #{{ user.spammer.byuserid }} {{ timeago(user.spammer.added) }}
       </div>
@@ -57,7 +58,10 @@
   </div>
 </template>
 <script>
+import { useModMe } from '~/composables/useModMe'
+import ModClipboard from '~/modtools/components/ModClipboard'
 export default {
+  components: { ModClipboard },
   props: {
     user: {
       type: Object,
@@ -68,6 +72,10 @@ export default {
       required: false,
       default: null,
     },
+  },
+  setup() {
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { hasPermissionSpamAdmin }
   },
   computed: {
     variant() {

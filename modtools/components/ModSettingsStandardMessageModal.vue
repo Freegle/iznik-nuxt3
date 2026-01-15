@@ -82,6 +82,7 @@
 import { useModConfigStore } from '~/stores/modconfig'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -100,7 +101,8 @@ export default {
     const modConfigStore = useModConfigStore()
     const stdmsgStore = useStdmsgStore()
     const { modal, hide } = useOurModal()
-    return { modConfigStore, stdmsgStore, modal, hide }
+    const { myid } = useMe()
+    return { modConfigStore, stdmsgStore, modal, hide, myid }
   },
   data: function () {
     const ret = {

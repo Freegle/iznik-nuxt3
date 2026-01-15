@@ -13,11 +13,11 @@
       />
 
       <div
-        v-for="(member, ix) in visibleMembers"
+        v-for="member in visibleMembers"
         :key="'memberlist-' + member.id"
         class="p-0 mt-2"
       >
-        <ModRelatedMember :member="member" />
+        <ModRelatedMember :member="member" @processed="bump++" />
       </div>
 
       <infinite-loading
@@ -27,28 +27,26 @@
         :identifier="bump"
         @infinite="loadMore"
       >
-        <template #no-results>
-          <p class="p-2">There are no related members at the moment.</p>
-        </template>
-        <template #no-more>
-          <p class="p-2">There are no related members at the moment.</p>
-        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
+        </template>
+        <template #complete>
+          <notice-message v-if="!visibleMembers?.length">
+            There are no related members at the moment.
+          </notice-message>
         </template>
       </infinite-loading>
     </client-only>
   </div>
 </template>
 <script>
-import { useMemberStore } from '~/stores/member'
 import { setupModMembers } from '~/composables/useModMembers'
+import { useMemberStore } from '~/stores/member'
 import { useGroupStore } from '@/stores/group'
 import { useMiscStore } from '@/stores/misc'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  async setup() {
+  setup() {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
@@ -62,7 +60,6 @@ export default {
       groupid,
       bump,
       distance,
-      groupid,
       loadMore,
     }
   },
@@ -102,8 +99,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
   },

@@ -27,10 +27,6 @@
         :identifier="bump"
         @infinite="loadMore"
       >
-        <template #no-results />
-        <template #no-more>
-          <p class="p-2">END OF LIST</p>
-        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
         </template>
@@ -49,25 +45,25 @@
 //  - Email/name/id search doesn't change URL
 //  - Message id/subject search changes URL <term>
 
-import { captureConsoleIntegration } from '@sentry/integrations'
+import { useRoute } from 'vue-router'
 import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '@/stores/message'
-import { useModGroupStore } from '@/stores/modgroup'
-import me from '~/mixins/me.js'
 import { setupModMessages } from '@/composables/useModMessages'
+import { useMe } from '~/composables/useMe'
 
 export default {
-  mixins: [me],
-  async setup() {
+  setup() {
     const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     const modMessages = setupModMessages(true)
     modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
     modMessages.collection.value = 'Approved'
     // modMessages.workType.value = 'approved'
+    const { me } = useMe()
     return {
       messageStore,
       miscStore,
+      me,
       ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
     }
   },
@@ -104,7 +100,7 @@ export default {
             router.push('/messages/approved/')
           } else {
             // console.log('chosengroupid GOTO', newVal, typeof newVal)
-            this.groupid = newVal // Sometimes royte change does not work so save as groupid just in case
+            this.groupid = newVal // Sometimes route change does not work so save as groupid just in case
             router.push('/messages/approved/' + newVal)
           }
         })
@@ -114,8 +110,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     const route = useRoute()
     this.groupid = this.id
     this.chosengroupid = this.id
@@ -123,10 +117,14 @@ export default {
     this.messageTerm = ''
     if ('term' in route.params && route.params.term)
       this.messageTerm = route.params.term
-    // const currentCount = Object.keys(this.messageStore.list).length
-    // console.log('messages [[term]]', this.id, this.messageTerm, currentCount)
     if (this.messageTerm) {
-      this.searchedMessage(this.messageTerm)
+      // Clear existing messages and reset state for fresh search.
+      // Without this, the store may have old messages that get shown
+      // instead of searching for the specific message from the URL.
+      this.show = 0
+      this.context = null
+      this.messageStore.clear()
+      this.bump++
     }
   },
   methods: {

@@ -62,7 +62,8 @@
       @handle="add"
     />
     <NoticeMessage v-if="groupAdded" variant="primary" class="mt-2">
-      Group "{{ namefull }}" has been successfully created! Group ID: {{ groupAdded }}
+      Group "{{ namefull }}" has been successfully created! Group ID:
+      {{ groupAdded }}
     </NoticeMessage>
     <NoticeMessage v-if="errorMessage" variant="danger" class="mt-2">
       {{ errorMessage }}
@@ -158,14 +159,19 @@ export default {
           this.errorMessage = `Failed to create group "${this.nameshort}". Group creation was unsuccessful.`
         }
       } catch (error) {
-
         // Extract meaningful error message from API error
         if (error.message && error.message.includes('Create failed')) {
           this.errorMessage = `Failed to create group "${this.nameshort}". A group with this name already exists.`
-        } else if (error.response && error.response.data && error.response.data.status) {
+        } else if (
+          error.response &&
+          error.response.data &&
+          error.response.data.status
+        ) {
           this.errorMessage = `Error creating group: ${error.response.data.status}`
         } else {
-          this.errorMessage = `Error creating group: ${error.message || 'Unknown error occurred'}`
+          this.errorMessage = `Error creating group: ${
+            error.message || 'Unknown error occurred'
+          }`
         }
       } finally {
         this.creating = false

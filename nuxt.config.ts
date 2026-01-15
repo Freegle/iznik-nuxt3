@@ -313,8 +313,9 @@ export default defineNuxtConfig({
       GOOGLE_IOS_CLIENT_ID: config.GOOGLE_IOS_CLIENT_ID,
       USER_SITE: config.USER_SITE,
       USER_DOMAIN: config.USER_DOMAIN,
+      MODTOOLS_SITE: config.MODTOOLS_SITE,
       IMAGE_SITE: config.IMAGE_SITE,
-      SENTRY_DSN: config.SENTRY_DSN,
+      SENTRY_DSN: config.IS_MT ? config.SENTRY_DSN_MT : config.SENTRY_DSN,
       BUILD_DATE: new Date().toISOString(),
       ISAPP: config.ISAPP,
       MOBILE_VERSION: config.MOBILE_VERSION,
@@ -330,7 +331,7 @@ export default defineNuxtConfig({
       STRIPE_PUBLISHABLE_KEY: config.STRIPE_PUBLISHABLE_KEY,
 
       CIRCLECI: process.env.CIRCLECI,
-      SITE: 'FD', // Freegle site identifier for logging context.
+      SITE: 'FD', // Freegle site identifier for logging context. ModTools overrides to 'MT'.
       GOOGLE_ADSENSE_ID: config.GOOGLE_ADSENSE_ID,
       GOOGLE_ADSENSE_TEST_MODE: config.GOOGLE_ADSENSE_TEST_MODE,
       PLAYWIRE_PUB_ID: config.PLAYWIRE_PUB_ID,
@@ -384,25 +385,34 @@ export default defineNuxtConfig({
         '@vueuse/core',
         'zoompinch',
         'bootstrap-vue-next/components/BAlert',
+        'bootstrap-vue-next/components/BBadge',
+        'bootstrap-vue-next/components/BButton',
         'bootstrap-vue-next/components/BCard',
+        'bootstrap-vue-next/components/BCarousel',
+        'bootstrap-vue-next/components/BCollapse',
         'bootstrap-vue-next/components/BContainer',
         'bootstrap-vue-next/components/BForm',
         'bootstrap-vue-next/components/BFormCheckbox',
         'bootstrap-vue-next/components/BFormGroup',
         'bootstrap-vue-next/components/BFormInput',
         'bootstrap-vue-next/components/BFormSelect',
-        'bootstrap-vue-next/components/BProgress',
-        'bootstrap-vue-next/components/BPopover',
         'bootstrap-vue-next/components/BFormTextarea',
+        'bootstrap-vue-next/components/BImg',
         'bootstrap-vue-next/components/BInputGroup',
         'bootstrap-vue-next/components/BModal',
-        'bootstrap-vue-next/components/BCarousel',
-        'bootstrap-vue-next/components/BCollapse',
+        'bootstrap-vue-next/components/BNav',
+        'bootstrap-vue-next/components/BNavbar',
+        'bootstrap-vue-next/components/BPopover',
+        'bootstrap-vue-next/components/BProgress',
+        'bootstrap-vue-next/components/BTable',
+        'bootstrap-vue-next/components/BTabs',
         'vee-validate',
+        '@vee-validate/rules',
         'vue-plugin-load-script',
         '@stripe/stripe-js',
         'turf-distance',
         'turf-point',
+        'turf-buffer',
         '@vueform/toggle',
         'save-file',
         '@formatjs/intl-locale/should-polyfill',
@@ -419,6 +429,19 @@ export default defineNuxtConfig({
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
         'twemoji',
+        '@vue-leaflet/vue-leaflet',
+        'leaflet/dist/leaflet-src.esm',
+        'leaflet-gesture-handling',
+        'wicket/wicket-leaflet',
+        '@vueup/vue-quill',
+        'quill-html-edit-button',
+        'vue-datepicker-next',
+        'vue-google-charts',
+        'vue-letter',
+        'letterparser',
+        'csv-writer',
+        'pluralize',
+        'diff',
       ],
     },
     build: {
@@ -475,7 +498,8 @@ export default defineNuxtConfig({
             }),
             sentryVitePlugin({
               org: 'freegle',
-              project: 'nuxt3',
+              // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
+              project: config.IS_MT ? 'modtools' : 'nuxt3',
               // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
               errorHandler: (err) => {
                 // Only log warning for gateway timeouts, fail for other errors
@@ -515,10 +539,9 @@ export default defineNuxtConfig({
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {
     host: '0.0.0.0',
-    port: 3002,
+    port: 3000,
     https: false,
   },
-
   app: {
     head: {
       htmlAttrs: {
@@ -957,7 +980,6 @@ export default defineNuxtConfig({
       ],
     },
   },
-
   image: {
     uploadcare: {
       provider: 'uploadcare',

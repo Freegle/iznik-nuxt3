@@ -147,7 +147,11 @@
           toggle temporarily disables that so you can edit first.
         </div>
       </div>
-      <ModCommentAddModal v-if="addComment" ref="addComment" :user="member" />
+      <ModCommentAddModal
+        v-if="showAddCommentModal"
+        :user="member"
+        @hidden="showAddCommentModal = false"
+      />
     </client-only>
   </div>
 </template>
@@ -155,6 +159,7 @@
 import ModMemberButton from './ModMemberButton'
 import ModMemberActions from './ModMemberActions'
 import ModCommentAddModal from '~/components/ModCommentAddModal'
+import { useModMe } from '~/composables/useModMe'
 
 const OurToggle = () => import('~/components/OurToggle')
 
@@ -165,7 +170,6 @@ export default {
     ModMemberButton,
     OurToggle,
   },
-
   props: {
     member: {
       type: Object,
@@ -187,11 +191,15 @@ export default {
       default: false,
     },
   },
+  setup() {
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { hasPermissionSpamAdmin }
+  },
   data: function () {
     return {
       showRare: false,
       allowAutoSend: true,
-      addComment: false,
+      showAddCommentModal: false,
     }
   },
   computed: {
@@ -280,10 +288,7 @@ export default {
       return ret
     },
     addAComment() {
-      this.addComment = true
-      this.waitForRef('addComment', () => {
-        this.$refs.addComment.show()
-      })
+      this.showAddCommentModal = true
     },
   },
 }

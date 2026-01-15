@@ -35,6 +35,7 @@
         />
         <p v-if="!visibleChats || !visibleChats.length" class="ml-2">
           <span v-if="searching" class="pulsate"> Searching... </span>
+          <span v-else-if="loading" class="pulsate"> Loading... </span>
           <span v-else> No chats to show. </span>
         </p>
         <infinite-loading
@@ -83,15 +84,15 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { pluralise } from '~/composables/usePluralise'
+import { useRoute } from 'vue-router'
+// import { pluralise } from '~/composables/usePluralise'
 import { useAuthStore } from '~/stores/auth'
 import { useChatStore } from '~/stores/chat'
-import { useModGroupStore } from '@/stores/modgroup'
 // import { setupChat } from '~/composables/useChat'
 import { useRouter } from '#imports'
 
 export default {
-  async setup(props) {
+  setup() {
     const chatStore = useChatStore()
     const authStore = useAuthStore()
     /* const {
@@ -125,7 +126,8 @@ export default {
       search: null,
       searching: false,
       searchlast: null,
-      // complete: false,
+      loading: true,
+      complete: false,
       limit: 5,
       bump: 1,
       distance: 1000,
@@ -144,10 +146,10 @@ export default {
       this.authStore.user?.lng,
       otheruser?.value?.lat,
       otheruser?.value?.lng
-    ), */
+    ),
     milesstring() {
       return pluralise('mile', milesaway.value, true) + ' away'
-    },
+    }, */
     chats() {
       return this.chatStore?.list ? this.chatStore.list : []
     },
@@ -179,24 +181,9 @@ export default {
           : []
       return chats
     },
-    mightBeOldChats() {
-      const now = dayjs()
-
-      if (this.me) {
-        const daysago = now.diff(dayjs(this.me.added), 'days')
-
-        if (daysago > 31) {
-          // They've been on the platform log enough that there might be old chats
-          return true
-        }
-      }
-
-      return false
-    },
   },
   watch: {
     search(newVal, oldVal) {
-      console.log('search changed to', newVal)
       this.showChats = 0
       this.bump = Date.now()
 
@@ -209,7 +196,7 @@ export default {
       }
     },
   },
-  async created() {
+  created() {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
     if (isNaN(this.id)) this.id = 0
@@ -217,14 +204,13 @@ export default {
     console.log('[[id]] created', route.params.id, this.id)
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
-    this.chatStore.clear()
+    // Do not clear chat store - all chats are got but only updated if lastdate changed
+    // this.chatStore.clear()
     await this.listChats()
+    this.loading = false
   },
   methods: {
     async listChats(age, search) {
-      // console.log('chats [[id]] listChats', this.id)
       const params = {
         chattypes: ['User2Mod', 'Mod2Mod'],
       }
@@ -239,14 +225,15 @@ export default {
       this.bump++
     },
     scanChats(closed, chats) {
-      // console.log('scanChats', closed, chats.length,this.id)
       // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
       if (chats && this.search && this.searching) {
         const l = this.search.toLowerCase()
         chats = chats.filter((chat) => {
           if (
             chat.name.toLowerCase().includes(l) ||
-            (chat.snippet && chat.snippet.toLowerCase().includes(l))
+            (chat.snippet &&
+              typeof chat.snippet === 'string' &&
+              chat.snippet.toLowerCase().includes(l))
           ) {
             // Found in the name of the chat (which may include a user
             return true
@@ -288,14 +275,12 @@ export default {
         }
       })
 
-      // console.log('scanChats return', chats)
       return chats
     },
     loadMore($state) {
       // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
       // we render onscreen the faster vue is to do so.
       const chats = this.filteredChats
-      // console.log('loadMore', this.showChats, chats.length)
       this.showChats++
 
       if (this.showChats > chats.length) {
@@ -307,17 +292,21 @@ export default {
       }
     },
     async markAllRead() {
+      console.log('markAllRead A')
+      this.loading = true
       for (const chat of this.filteredChats) {
         if (chat.unseen) {
+          console.log('markAllRead B', chat.unseen, chat.lastmsg)
           await this.chatStore.markRead(chat.id)
         }
       }
+      console.log('markAllRead C')
 
       this.chatStore.clear()
       await this.listChats()
+      this.loading = false
     },
     gotoChat(id) {
-      console.log('gotoChat', id)
       const router = useRouter()
       router.push('/chats/' + id)
     },

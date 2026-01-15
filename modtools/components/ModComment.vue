@@ -77,10 +77,12 @@
 <script>
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import cloneDeep from 'lodash.clonedeep'
-import { useMemberStore } from '~/stores/member'
 import { setupModMembers } from '~/composables/useModMembers'
+import { useMemberStore } from '~/stores/member'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   components: { ReadMore },
@@ -106,7 +108,19 @@ export default {
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { bump, context } = setupModMembers()
-    return { bump, context, groupStore, memberStore, userStore }
+    const { myid, supportOrAdmin, myGroup } = useMe()
+    const { amAModOn } = useModMe()
+    return {
+      bump,
+      context,
+      groupStore,
+      memberStore,
+      userStore,
+      myid,
+      supportOrAdmin,
+      myGroup,
+      amAModOn,
+    }
   },
   data: function () {
     return {
@@ -144,11 +158,10 @@ export default {
   },
   methods: {
     async updateComments() {
-      console.log('MC updateComments')
       const userid = this.user.userid ? this.user.userid : this.user.id
 
       await this.userStore.fetchMT({
-        search: userid,
+        id: userid,
         emailhistory: true,
       })
 
@@ -174,7 +187,7 @@ export default {
       this.updateComments()
     },
 
-    async editIt() {
+    editIt() {
       this.showCommentEditModal = true
       this.$emit('editing')
     },

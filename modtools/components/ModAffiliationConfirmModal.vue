@@ -7,7 +7,7 @@
       size="lg"
       no-stacking
     >
-      <template #title class="w-100">
+      <template #title>
         Please confirm affiliation for {{ group.nameshort }}
       </template>
       <template #default>
@@ -48,6 +48,7 @@
 <script>
 import { useOurModal } from '~/composables/useOurModal'
 import { useGroupStore } from '@/stores/group'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -59,7 +60,8 @@ export default {
   setup() {
     const groupStore = useGroupStore()
     const { modal, hide } = useOurModal()
-    return { groupStore, modal, hide }
+    const { myGroup } = useMe()
+    return { groupStore, modal, hide, myGroup }
   },
   data: function () {
     return {}

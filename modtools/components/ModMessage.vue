@@ -22,35 +22,35 @@
                 />
               </b-input-group>
             </NoticeMessage>
-            <div v-if="editing" class="d-flex flex-wrap">
+            <div v-if="editing && editmessage" class="d-flex flex-wrap">
               <ModGroupSelect
                 v-model="editgroup"
                 modonly
                 class="mr-1"
                 size="lg"
                 :disabled-except-for="memberGroupIds"
-                :disabled="message.fromuser.tnuserid"
+                :disabled="editmessage.fromuser?.tnuserid"
               />
               <div
-                v-if="message.item && message.location"
+                v-if="editmessage.item && editmessage.location"
                 class="d-flex justify-content-start"
               >
                 <b-form-select
-                  v-model="message.type"
+                  v-model="editmessage.type"
                   :options="typeOptions"
                   class="type mr-1"
                   size="lg"
                 />
                 <b-form-input
-                  v-model="message.item.name"
+                  v-model="editmessage.item.name"
                   size="lg"
                   class="mr-1"
                 />
               </div>
-              <div v-if="message.item && message.location">
+              <div v-if="editmessage.item && editmessage.location">
                 <b-input-group>
                   <PostCode
-                    :value="message.location.name"
+                    :value="editmessage.location.name"
                     :find="false"
                     @selected="postcodeSelect"
                   />
@@ -61,17 +61,17 @@
                 class="flex-grow-1 pl-0 pl-md-2 pr-0 pr-md-2 fullsubject"
               >
                 <label class="mr-2">Subject:</label>
-                <b-form-input v-model="message.subject" size="lg" />
+                <b-form-input v-model="editmessage.subject" size="lg" />
                 <label class="mr-2">Post type:</label>
                 <b-form-select
-                  v-model="message.type"
+                  v-model="editmessage.type"
                   :options="typeOptions"
                   class="type mr-1"
                   size="lg"
                 />
               </div>
             </div>
-            <Diff
+            <ModDiff
               v-else-if="editreview && oldSubject && newSubject"
               :old="oldSubject"
               :new="newSubject"
@@ -170,7 +170,7 @@
                   v-if="message.source === 'Email'"
                   variant="white"
                   class="mt-2"
-                  @click="viewSource"
+                  @click="showEmailSourceModal = true"
                 >
                   <v-icon icon="book-open" /><span class="d-none d-sm-inline">
                     View Email Source</span
@@ -255,7 +255,7 @@
                 :user="message.fromuser"
               />
               <NoticeMessage
-                v-if="message.fromuser && message.fromuser.activedistance > 50"
+                v-if="message.fromuser.activedistance > 50"
                 variant="warning"
                 class="mb-2"
               >
@@ -309,15 +309,11 @@
             </div>
             <ModMessageWorry v-if="message.worry" :message="message" />
             <div v-if="expanded">
-              <b-form-textarea
-                v-if="editing"
-                v-model="message.textbody"
-                rows="8"
-                class="mb-3"
-              />
+              <!-- eslint-disable-next-line -->
+              <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
               <div v-else-if="editreview">
                 <h4>Differences:</h4>
-                <Diff
+                <ModDiff
                   class="mb-3 rounded border border-warning p-2 preline forcebreak font-weight-bold"
                   :old="oldBody"
                   :new="newBody"
@@ -350,7 +346,7 @@
                   {{ eBody }}
                 </span>
               </div>
-              <div v-if="attachments.length" class="w-100 d-flex flex-wrap">
+              <div v-if="attachments?.length" class="w-100 d-flex flex-wrap">
                 <div
                   v-for="attachment in attachments"
                   :key="'attachment-' + attachment.id"
@@ -393,7 +389,7 @@
             <div
               class="rounded border border-info p-2 d-flex justify-content-between flex-wrap"
             >
-              <MessageUserInfo
+              <ModMessageUserInfo
                 v-if="
                   message.fromuser && message.groups && message.groups.length
                 "
@@ -491,13 +487,15 @@
                 message.groups &&
                 message.groups.length
               "
-              v-model:emailfrequency="membership.emailfrequency"
-              v-model:volunteeringallowed-m-t="membership.volunteeringallowed"
-              v-model:eventsallowed-m-t="membership.eventsallowed"
+              :emailfrequency="membership.emailfrequency"
               :membership-m-t="membership"
               class="border border-info mt-2 p-1"
               :userid="message.fromuser.id"
-              @update="settingsChange"
+              @update:emailfrequency="settingsChange('emailfrequency', $event)"
+              @update:eventsallowed="settingsChange('eventsallowed', $event)"
+              @update:volunteeringallowed="
+                settingsChange('volunteeringallowed', $event)
+              "
             />
             <div v-if="showEmails">
               <div v-for="email in message.fromuser.emails" :key="email.id">
@@ -550,6 +548,19 @@
         >
           This message needs editing so that we know where it is.
         </NoticeMessage>
+        <div
+          v-if="
+            pending &&
+            (!message.heldby ||
+              (message.heldby && message.heldby.id === myid)) &&
+            !editing
+          "
+          class="text-end mb-1"
+        >
+          <b-button variant="danger" @click="spamReport">
+            <v-icon icon="ban" /> Report Spammer
+          </b-button>
+        </div>
         <ModMessageButtons
           v-if="
             (!message.heldby ||
@@ -583,8 +594,13 @@
     <ModMessageEmailModal
       v-if="showEmailSourceModal && message.source === 'Email'"
       :id="message.id"
-      ref="original"
       @hidden="showEmailSourceModal = false"
+    />
+    <ModSpammerReport
+      v-if="showSpamModal"
+      ref="spamConfirm"
+      :user="message.fromuser"
+      :safelist="false"
     />
     <div ref="bottom" />
   </div>
@@ -593,15 +609,17 @@
 <script>
 import Highlighter from 'vue-highlight-words'
 
-import { pluralise } from '~/composables/usePluralise'
 import { useLocationStore } from '~/stores/location'
-import { useModConfigStore } from '~/stores/modconfig'
-import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
 
 import { setupKeywords } from '~/composables/useKeywords'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
+import { useMiscStore } from '~/stores/misc'
 import { SUBJECT_REGEX } from '~/constants'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 import { useModGroupStore } from '@/stores/modgroup'
 
@@ -653,23 +671,36 @@ export default {
       default: null,
     },
   },
-  setup() {
-    const modGroupStore = useModGroupStore()
+  setup(props) {
+    // If viewing message within chat then fromuser is a number and so must be zapped
+    if (props.message.fromuser && typeof props.message.fromuser === 'number') {
+      // eslint-disable-next-line vue/no-mutating-props
+      props.message.fromuser = null
+    }
     const locationStore = useLocationStore()
-    const modconfigStore = useModConfigStore()
     const memberStore = useMemberStore()
     const messageStore = useMessageStore()
+    const miscStore = useMiscStore()
+    const modconfigStore = useModConfigStore()
+    const modGroupStore = useModGroupStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
+    const { me, myid } = useMe()
+    const { myModGroups, myModGroup } = useModMe()
 
     return {
-      modGroupStore,
       locationStore,
       memberStore,
       messageStore,
+      miscStore,
       modconfigStore,
+      modGroupStore,
       userStore,
       typeOptions,
+      me,
+      myid,
+      myModGroups,
+      myModGroup,
     }
   },
   data: function () {
@@ -677,6 +708,7 @@ export default {
       saving: false,
       saved: false,
       showEmailSourceModal: false,
+      showSpamModal: false,
       showMailSettings: false,
       showActions: false,
       showEmails: false,
@@ -688,6 +720,7 @@ export default {
       homegroup: null,
       homegroupontn: false,
       historyGroups: {},
+      editmessage: false,
     }
   },
   computed: {
@@ -788,6 +821,9 @@ export default {
 
       const configs = this.modconfigStore.configs
       ret = configs.find((config) => config.id === configid)
+      if (!ret) {
+        ret = configs.find((config) => config.default)
+      }
 
       return ret
     },
@@ -795,9 +831,11 @@ export default {
       let ret = 'text-success'
 
       if (this.modconfig && this.modconfig.coloursubj) {
-        ret = this.message.subject.match(this.modconfig.subjreg)
-          ? 'text-success'
-          : 'text-danger'
+        ret =
+          this.message.subject?.match &&
+          this.message.subject.match(this.modconfig.subjreg)
+            ? 'text-success'
+            : 'text-danger'
       }
 
       return ret
@@ -939,7 +977,7 @@ export default {
       },
     },
   },
-  async mounted() {
+  mounted() {
     this.expanded = !this.summary
     this.attachments = this.message.attachments
     this.findHomeGroup()
@@ -949,6 +987,7 @@ export default {
   },
   methods: {
     updateComments() {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.fromuser = this.userStore.byId(this.message.fromuser.id)
     },
     imageAdded(id) {
@@ -995,11 +1034,14 @@ export default {
       return ret
     },
     postcodeSelect(pc) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.location = pc
     },
     startEdit() {
+      this.editmessage = this.message
       this.editing = true
-      this.message.groups.forEach((group) => {
+      this.miscStore.modtoolsediting = true
+      this.editmessage.groups.forEach((group) => {
         this.editgroup = group.groupid
       })
     },
@@ -1012,30 +1054,30 @@ export default {
         attids.push(att.id)
       }
 
-      if (this.message.item && this.message.location) {
+      if (this.editmessage.item && this.editmessage.location) {
         // Well-structured message
         await this.messageStore.patch({
-          id: this.message.id,
-          msgtype: this.message.type,
-          item: this.message.item.name,
-          location: this.message.location.name,
+          id: this.editmessage.id,
+          msgtype: this.editmessage.type,
+          item: this.editmessage.item.name,
+          location: this.editmessage.location.name,
           attachments: attids,
-          textbody: this.message.textbody,
+          textbody: this.editmessage.textbody,
         })
       } else {
         // Not
         await this.messageStore.patch({
-          id: this.message.id,
-          msgtype: this.message.type,
-          subject: this.message.subject,
+          id: this.editmessage.id,
+          msgtype: this.editmessage.type,
+          subject: this.editmessage.subject,
           attachments: attids,
-          textbody: this.message.textbody,
+          textbody: this.editmessage.textbody,
         })
       }
 
       let alreadyon = false
 
-      this.message.groups.forEach((g) => {
+      this.editmessage.groups.forEach((g) => {
         if (g.groupid === this.editgroup) {
           alreadyon = true
         }
@@ -1043,20 +1085,21 @@ export default {
 
       if (!alreadyon) {
         await this.messageStore.move({
-          id: this.message.id,
+          id: this.editmessage.id,
           groupid: this.editgroup,
         })
       }
 
       this.saving = false
       this.editing = false
+      this.miscStore.modtoolsediting = false
     },
-    settingsChange(changes) {
+    settingsChange(param, val) {
       const params = {
         userid: this.message.fromuser.id,
         groupid: this.groupid,
       }
-      params[changes.param] = changes.val
+      params[param] = val
       this.memberStore.update(params)
     },
     update(e) {
@@ -1070,13 +1113,9 @@ export default {
         await this.userStore.fetch(this.message.fromuser.id)
       }
     },
-    async viewSource() {
-      this.showEmailSourceModal = true
-      await nextTick()
-      this.$refs.original.show()
-    },
     canonSubj(message) {
       let subj = message.subject
+      if (!subj) subj = ''
       const group = this.historyGroups[message.groupid]
 
       if (group && group.settings && group.settings.keywords) {
@@ -1089,20 +1128,23 @@ export default {
           subj = subj.replace(keyword, message.type.toUpperCase())
         }
       }
-      subj = subj.toLocaleLowerCase()
 
-      // Remove any group tag
-      subj = subj.replace(/^\[.*?\](.*)/, '$1')
+      if (subj.toLocaleLowerCase) {
+        subj = subj.toLocaleLowerCase()
 
-      // Remove duplicate spaces
-      subj = subj.replace(/\s+/g, ' ')
+        // Remove any group tag
+        subj = subj.replace(/^\[.*?\](.*)/, '$1')
 
-      subj = subj.trim()
+        // Remove duplicate spaces
+        subj = subj.replace(/\s+/g, ' ')
 
-      const matches = SUBJECT_REGEX.exec(subj)
-      if (matches?.length > 2) {
-        // Well-formed - remove the location.
-        subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
+        subj = subj.trim()
+
+        const matches = SUBJECT_REGEX.exec(subj)
+        if (matches?.length > 2) {
+          // Well-formed - remove the location.
+          subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
+        }
       }
 
       return subj
@@ -1177,6 +1219,7 @@ export default {
     },
     cancelEdit() {
       this.editing = false
+      this.miscStore.modtoolsediting = false
 
       // Fetch the message again to revert any changes.
       this.messageStore.fetch(this.message.id)
@@ -1184,6 +1227,10 @@ export default {
     async backToPending(callback) {
       await this.messageStore.backToPending(this.message.id)
       callback()
+    },
+    spamReport() {
+      this.showSpamModal = true
+      this.$refs.spamConfirm?.show()
     },
   },
 }

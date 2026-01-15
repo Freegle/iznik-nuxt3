@@ -10,18 +10,9 @@
       @keydown.down="onArrowDown"
       @keydown.up="onArrowUp"
       @keydown.enter="onEnter"
-    >
-    <ul
-      v-show="isOpen"
-      id="autocomplete-results"
-      class="autocomplete-results"
-    >
-      <li
-        v-if="isLoading"
-        class="loading"
-      >
-        Loading results...
-      </li>
+    />
+    <ul v-show="isOpen" id="autocomplete-results" class="autocomplete-results">
+      <li v-if="isLoading" class="loading">Loading results...</li>
       <li
         v-for="(result, i) in results"
         v-else
@@ -33,7 +24,6 @@
         {{ result }}
       </li>
     </ul>
-    </input>
   </div>
 </template>
 <script>
@@ -44,23 +34,23 @@ export default {
     items: {
       type: Array,
       required: false,
-      default: () => []
+      default: () => [],
     },
     isAsync: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     size: {
       type: String,
       required: false,
-      default: '20'
+      default: '20',
     },
     placeholder: {
       type: String,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
 
   data() {
@@ -69,17 +59,17 @@ export default {
       results: [],
       search: '',
       isLoading: false,
-      arrowCounter: 0
+      arrowCounter: 0,
     }
   },
   watch: {
-    items: function(val, oldValue) {
+    items: function (val, oldValue) {
       // actually compare them
       if (val.length !== oldValue.length) {
         this.results = val
         this.isLoading = false
       }
-    }
+    },
   },
   mounted() {
     document.addEventListener('click', this.handleClickOutside)
@@ -105,7 +95,7 @@ export default {
 
     filterResults() {
       // first uncapitalize all the things
-      this.results = this.items.filter(item => {
+      this.results = this.items.filter((item) => {
         return item.toLowerCase().includes(this.search.toLowerCase())
       })
     },
@@ -135,8 +125,8 @@ export default {
         this.isOpen = false
         this.arrowCounter = -1
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style scoped>

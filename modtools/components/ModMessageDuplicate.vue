@@ -2,7 +2,7 @@
   <div class="text-danger small">
     Duplicate of
     <v-icon icon="hashtag" class="text-muted" scale="0.5" /><nuxt-link
-      :to="'/messages/approved/' + message.groupid + '/' + message.id"
+      :to="duplicateLink"
     >
       {{ message.id }}
     </nuxt-link>
@@ -11,6 +11,7 @@
     {{ timeago(message.arrival) }}
     <span v-if="message.outcome">, now {{ message.outcome }}</span
     ><span v-else>, still open</span>
+    <span v-if="isPending" class="text-muted"> (pending)</span>
   </div>
 </template>
 <script>
@@ -19,6 +20,35 @@ export default {
     message: {
       type: Object,
       required: true,
+    },
+  },
+  computed: {
+    groupid() {
+      let ret = 0
+
+      if (this.message && this.message.groups && this.message.groups.length) {
+        ret = this.message.groups[0].groupid
+      }
+      return ret
+    },
+    isPending() {
+      return (
+        this.message.collection === 'Pending' ||
+        this.message.collection === 'PendingOther'
+      )
+    },
+    duplicateLink() {
+      if (this.isPending) {
+        // Link to pending messages page with group and message to highlight.
+        return (
+          '/messages/pending?groupid=' +
+          this.groupid +
+          '&msgid=' +
+          this.message.id
+        )
+      }
+      // Link to approved messages with search term for approved duplicates.
+      return '/messages/approved/' + this.groupid + '/' + this.message.id
     },
   },
 }

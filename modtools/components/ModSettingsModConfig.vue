@@ -101,6 +101,7 @@
               :configid="configid"
               name="name"
               label="Name"
+              :required="true"
               description="This is the name of this collection of standard messages.  It appears when you're choosing which collection to apply to your community."
               :disabled="locked"
             />
@@ -299,13 +300,14 @@
 <script>
 import { useModConfigStore } from '~/stores/modconfig'
 import { useMiscStore } from '@/stores/misc'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const miscStore = useMiscStore()
     const modConfigStore = useModConfigStore()
-
-    return { miscStore, modConfigStore }
+    const { myid } = useMe()
+    return { miscStore, modConfigStore, myid }
   },
   data: function () {
     return {

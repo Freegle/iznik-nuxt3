@@ -134,15 +134,18 @@
 <script>
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '@/stores/misc'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const authStore = useAuthStore()
     const miscStore = useMiscStore()
+    const { me } = useMe()
 
     return {
       authStore,
       miscStore,
+      me,
     }
   },
   data: function () {

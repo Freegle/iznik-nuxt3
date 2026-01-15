@@ -1,8 +1,8 @@
 <template>
   <div class="bg-white">
     <ScrollToTop />
-    <b-tabs content-class="mt-3" card>
-      <b-tab active @click="clear('messages', true)">
+    <b-tabs v-model="activeTab" content-class="mt-3" card>
+      <b-tab @click="clear('messages', true)">
         <template #title>
           <h2 class="ml-2 mr-2">Messages</h2>
         </template>
@@ -14,7 +14,7 @@
               type="text"
               placeholder="Search name/email/subject"
               autocapitalize="none"
-              @keyup.native.enter="search"
+              @keyup.enter="search"
             />
             <b-button variant="primary" :disabled="busy" @click="search">
               <v-icon icon="search" />
@@ -34,7 +34,7 @@
               type="text"
               placeholder="Search name/email/subject"
               autocapitalize="none"
-              @keyup.native.enter="search"
+              @keyup.enter="search"
             />
             <b-button variant="primary" @click="search">
               <v-icon icon="search" />
@@ -43,6 +43,8 @@
         </div>
       </b-tab>
     </b-tabs>
+
+    <!-- Standard Mod Logs for Messages/Members tabs -->
     <ModLogs
       v-if="groupid"
       ref="logs"
@@ -70,6 +72,7 @@ export default {
       type: 'messages',
       term: null,
       busy: false,
+      activeTab: 0,
     }
   },
   watch: {

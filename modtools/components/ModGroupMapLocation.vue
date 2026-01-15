@@ -31,7 +31,7 @@ if (process.client) {
 const AREA_FILL_COLOUR = 'lightgreen'
 const FILL_OPACITY = 0.5
 const AREA_BOUNDARY_COLOUR = 'darkblue'
-const SELECTED = '#990000'
+// const SELECTED = '#990000'
 
 const props = defineProps({
   location: {

@@ -14,7 +14,8 @@
               ? 'text-danger font-weight-bold'
               : 'text-muted')
           "
-          >joined {{ timeago(membership.added) }}</span
+        >
+          joined {{ timeago(membership.added) }}</span
         >
         <span v-if="membership.reviewreason" class="text-danger ml-1 mr-1">
           <span v-if="membership.reviewrequestedat" class="text-dark small"
@@ -66,8 +67,9 @@
           variant="warning"
           icon="pause"
           reviewhold
+          :reviewgroupid="groupid"
           label="Hold"
-          class="mr-2 mb-1"
+          class="mr-2"
         />
         <ModMemberButton
           v-else
@@ -75,8 +77,9 @@
           variant="warning"
           icon="play"
           reviewrelease
+          :reviewgroupid="groupid"
           label="Release"
-          class="mr-2 mb-1"
+          class="mr-2"
         />
         <b-button
           :to="'/members/approved/' + membership.id + '/' + member.userid"
@@ -100,7 +103,10 @@
 </template>
 <script>
 import dayjs from 'dayjs'
+import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -117,10 +123,18 @@ export default {
       required: true,
     },
   },
+  emits: ['forcerefresh'],
   setup() {
     const memberStore = useMemberStore()
+    const userStore = useUserStore()
+    const { me, myid } = useMe()
+    const { amAModOn } = useModMe()
     return {
       memberStore,
+      userStore,
+      me,
+      myid,
+      amAModOn,
     }
   },
   data: function () {
@@ -154,7 +168,7 @@ export default {
     },
   },
   methods: {
-    async remove(callback) {
+    remove(callback) {
       this.showConfirmModal = true
       this.$refs.removeConfirm?.show()
 
@@ -168,6 +182,7 @@ export default {
 
       setTimeout(() => {
         this.reviewed = true
+        this.forcerefresh(true)
       }, 2000)
     },
     async ignore(callback) {
@@ -179,10 +194,14 @@ export default {
       setTimeout(() => {
         this.reviewed = true
         callback()
+        this.forcerefresh(true)
       }, 2000)
     },
     daysago(d) {
       return dayjs().diff(dayjs(d), 'day')
+    },
+    forcerefresh() {
+      this.$emit('forcerefresh')
     },
   },
 }

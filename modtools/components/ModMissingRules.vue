@@ -48,6 +48,7 @@
         </p>
         <NuxtLink
           v-for="inv of invalid"
+          :key="inv.id"
           :to="'/settings/' + inv.id + '?noguard=true'"
           >Click to add rules for {{ inv.namedisplay }}<br
         /></NuxtLink>
@@ -57,6 +58,7 @@
 </template>
 <script>
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -67,8 +69,10 @@ export default {
   },
   setup() {
     const modGroupStore = useModGroupStore()
+    const { myGroups } = useMe()
     return {
       modGroupStore,
+      myGroups,
     }
   },
   data: function () {
@@ -111,24 +115,27 @@ export default {
           group.rules &&
           group.publish
         ) {
-          const rules = group.rules ? JSON.parse(group.rules) : null
+          const rules = group.rules ? JSON.parse(group.rules) : []
 
-          // Check if the rules object is missing any values from ['A', 'B', 'C']
-          const missingRules = group.rules
-            ? [
-                'limitgroups',
-                'wastecarrier',
-                'carboot',
-                'chineselanterns',
-                'carseats',
-                'pondlife',
-                'copyright',
-                'porn',
-              ].filter((rule) => !Object.keys(rules).includes(rule))
-            : null
-
+          // Check if the rules object is missing any values from ['A', 'B', 'C'] or if the values are null
+          const newRules = [
+            'limitgroups',
+            'wastecarrier',
+            'carboot',
+            'chineselanterns',
+            'carseats',
+            'pondlife',
+            'copyright',
+            'porn',
+          ]
+          const missingRules = []
+          for (const newrule of newRules) {
+            const rule = rules[newrule]
+            if (!(newrule in rules) || typeof rule !== 'boolean')
+              missingRules.push(newrule)
+          }
           if (missingRules.length > 0) {
-            // Take upto 3 missing rules, add an ellipsis if more, convert to a string
+            // Take up to 3 missing rules, add an ellipsis if more, convert to a string
             // and push to the ret array
             group.missing =
               missingRules.length > 3

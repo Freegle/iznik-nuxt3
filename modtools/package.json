@@ -1,17 +1,17 @@
 {
   "name": "iznik-modtools",
-  "version": "3.0.43",
+  "version": "3.2.14",
   "description": "Moderation tool for Freegle volunteers",
-  "author": "chriscant",
   "private": true,
   "xtype": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxi prepare && nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "clean": "nuxi cleanup"
+    "clean": "nuxi cleanup",
+    "lint": "eslint --fix --ext .js,.jsx,.ts,.vue ."
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.18.3",

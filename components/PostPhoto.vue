@@ -152,6 +152,7 @@ async function rotate(deg) {
     bust: Date.now(),
     type: 'Message',
   })
+  emit('updated') // MT
 }
 
 function rotateLeft(e) {

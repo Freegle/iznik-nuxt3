@@ -8,11 +8,17 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
+
 const path = computed(() => {
   const route = useRoute()
-  const folder = 'folder' in route.params ? route.params.folder : ''
-  const option = 'id' in route.params ? route.params.id : ''
-  const path = '/' + folder + (option === '' ? '' : '/' + option)
+  let path = ''
+  if (route && route.params) {
+    for (const p of route.params.slug) {
+      path += '/' + p
+    }
+  }
+  if (path.length === 0) path = '/'
   return path
 })
 

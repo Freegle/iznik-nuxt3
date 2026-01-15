@@ -76,6 +76,14 @@
         </NoticeMessage>
         <p class="text-muted">
           <span v-if="admin.parentid"> Suggested ADMIN </span>
+          <b-button
+            v-if="admin.complete"
+            variant="white"
+            class="float-end"
+            @click="copyIt"
+          >
+            <v-icon icon="copy" /> Copy
+          </b-button>
           <span v-else-if="admin.createdby">
             Created by
             {{ admin.createdby.displayname }}
@@ -183,6 +191,8 @@
 import { useAdminsStore } from '~/stores/admins'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -195,11 +205,14 @@ export default {
       required: false,
     },
   },
+  emits: ['copy'],
   setup() {
     const adminsStore = useAdminsStore()
     const groupStore = useGroupStore()
     const userStore = useUserStore()
-    return { adminsStore, groupStore, userStore }
+    const { myid } = useMe()
+    const { checkWork } = useModMe()
+    return { adminsStore, groupStore, userStore, myid, checkWork }
   },
   data: function () {
     return {
@@ -238,6 +251,9 @@ export default {
   methods: {
     deleteIt() {
       this.showConfirmModal = true
+    },
+    copyIt() {
+      this.$emit('copy', this.admin)
     },
     deleteConfirmed() {
       this.adminsStore.delete({ id: this.id })

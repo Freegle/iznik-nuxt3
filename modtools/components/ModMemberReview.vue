@@ -1,5 +1,5 @@
 <template>
-  <div v-if="member">
+  <div v-if="member && !reviewed">
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
@@ -16,7 +16,7 @@
             size="sm"
           />
           {{ member.displayname }}
-          <Supporter v-if="member.supporter" class="d-inline" />
+          <ModSupporter v-if="member.supporter" class="d-inline" />
         </div>
         <div v-if="member.joined">
           <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}
@@ -50,7 +50,7 @@
           <span :title="datetime(member.bandate)">{{
             timeago(member.bandate)
           }}</span>
-          <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check
+          <span v-if="member.bannedby"> by #{{ member.bannedby }}</span> - check
           logs for info.
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
@@ -74,6 +74,7 @@
             <MessageMap
               v-if="member.info && member.info.privateposition"
               :position="member.info.privateposition"
+              :boundary="firstgrouppolygon"
               class="mt-2"
             />
             <ModMemberLogins :member="member" />
@@ -123,6 +124,7 @@
           :membership="m"
           :member="member"
           class="p-1 mr-1"
+          @forcerefresh="forcerefresh"
         />
         <b-badge
           v-if="hiddenmemberofs"
@@ -151,8 +153,9 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { pluralise } from '~/composables/usePluralise'
 import { useUserStore } from '~/stores/user'
+import { useModGroupStore } from '~/stores/modgroup'
+import { useModMe } from '~/composables/useModMe'
 
 const MEMBERSHIPS_SHOW = 3
 
@@ -164,10 +167,15 @@ export default {
       required: true,
     },
   },
+  emits: ['forcerefresh'],
   setup() {
     const userStore = useUserStore()
+    const modGroupStore = useModGroupStore()
+    const { amAModOn } = useModMe()
     return {
       userStore,
+      amAModOn,
+      modGroupStore,
     }
   },
   data: function () {
@@ -180,6 +188,7 @@ export default {
       showSpamModal: false,
       showPostingHistoryModal: false,
       showLogsModal: false,
+      reviewed: false,
     }
   },
   computed: {
@@ -231,6 +240,14 @@ export default {
           return b.added.localeCompare(a.added)
         }
       })
+    },
+    firstgrouppolygon() {
+      if (this.sortedMemberOf.length > 0) {
+        const group = this.sortedMemberOf[0]
+        const modgroup = this.modGroupStore.get(group.id)
+        if (modgroup) return modgroup.polygon
+      }
+      return null
     },
     email() {
       // Depending on which context we're used it, we might or might not have an email returned.
@@ -305,7 +322,7 @@ export default {
       },
     },
   },
-  async mounted() {
+  mounted() {
     if (!this.member.info) {
       // Fetch with info so that we can display more.
       this.userStore.fetchMT({
@@ -315,17 +332,21 @@ export default {
     }
   },
   methods: {
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showLogs() {
+    showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
+    },
+    forcerefresh(hideMember = false) {
+      if (hideMember) {
+        this.reviewed = true
+      }
+      this.$emit('forcerefresh')
     },
   },
 }

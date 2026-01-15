@@ -12,9 +12,7 @@
   </div>
 </template>
 <script>
-import { icon, variant } from '~/composables/useStdMsgs'
-
-const stdMsgModal = ref()
+// import { icon, variant } from '~/composables/useStdMsgs'
 
 export default {
   props: {

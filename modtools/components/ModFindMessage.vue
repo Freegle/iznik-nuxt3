@@ -4,7 +4,7 @@
       <b-form-input
         v-model="term"
         placeholder="Message id/subject"
-        @keyup.native.enter="search"
+        @keyup.enter="search"
       />
       <slot name="append">
         <SpinButton
@@ -44,7 +44,7 @@ const term = computed({
   },
 })
 
-const search = async (callback) => {
+const search = (callback) => {
   const theterm = term.value?.trim()
   emit('searched', theterm)
   if (typeof callback === 'function') {

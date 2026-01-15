@@ -52,6 +52,7 @@ const config = {
       '@capacitor/camera',
       '@capacitor/share',
       '@capacitor/app',
+      '@capacitor/screen-orientation',
     ],
     // Debug build - no signing required
     buildOptions: {
@@ -77,6 +78,7 @@ const config = {
       '@capacitor/camera',
       '@capacitor/share',
       '@capacitor/app',
+      '@capacitor/screen-orientation',
     ],
   },
 

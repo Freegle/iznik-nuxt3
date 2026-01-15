@@ -34,9 +34,8 @@ export default {
     },
   },
   methods: {
-    async showModal() {
+    showModal() {
       this.showMicrovolunteeringModal = true
-      await nextTick()
       this.$refs.microvolunteering?.show()
     },
   },

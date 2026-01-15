@@ -16,12 +16,13 @@
             Some old logs are removed to save space: login/logout after 1 year,
             bounces over 90 days, logs about deleted messages, deleted users.
           </p>
-          {{ logs.length }}
           <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
         </div>
-        <infinite-loading :distance="200" @infinite="fetchChunk">
-          <template #no-results />
-          <template #no-more />
+        <infinite-loading
+          :distance="200"
+          :identifier="bump"
+          @infinite="fetchChunk"
+        >
           <template #spinner>
             <b-img src="/loader.gif" alt="Loading" width="100px" />
           </template>
@@ -36,8 +37,8 @@
 </template>
 
 <script>
-import { useLogsStore } from '~/stores/logs'
 import { useUserStore } from '~/stores/user'
+import { useLogsStore } from '~/stores/logs'
 import { useMemberStore } from '~/stores/member'
 import InfiniteLoading from '~/components/InfiniteLoading'
 import { useOurModal } from '~/composables/useOurModal'
@@ -59,13 +60,14 @@ export default {
     const userStore = useUserStore()
     const logsStore = useLogsStore()
     const memberStore = useMemberStore()
-    const { modal, hide } = useOurModal(227)
+    const { modal, hide } = useOurModal()
     return { logsStore, memberStore, userStore, modal, hide }
   },
   data: function () {
     return {
       busy: false,
       context: null,
+      bump: 0,
     }
   },
   computed: {
@@ -112,11 +114,13 @@ export default {
       // Clear the log context - otherwise if we open another modal for this user then it will get confused and
       // fetch from a previous context and show no logs.
       this.logsStore.clear()
+      this.bump++
       this.modal.show()
     },
     async fetchChunk($state) {
       this.busy = true
       const currentCount = this.logs.length
+      // console.log('MLM fetchChunk',currentCount,this.userid,this.context,this.modmailsonly)
 
       this.context = await this.logsStore.fetch({
         logtype: 'user',

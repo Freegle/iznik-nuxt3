@@ -3,7 +3,7 @@
     <div>
       <div>
         <ModHelpAdmins />
-        <b-tabs content-class="mt-3" card>
+        <b-tabs v-model="tabIndex" content-class="mt-3" card>
           <b-tab active>
             <template #title>
               <h2 class="ml-2 mr-2" @click="fetchPending">
@@ -187,6 +187,7 @@
                 :id="admin.id"
                 :key="'pendingadmin-' + admin.id"
                 :open="previous.length === 1"
+                @copy="copyAdmin($event)"
               />
             </div>
             <div v-else-if="groupidprevious > 0">No previous ADMINs.</div>
@@ -201,12 +202,13 @@ import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useAdminsStore } from '~/stores/admins'
 import { useModGroupStore } from '@/stores/modgroup'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 defineRule('required', required)
 defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
-
 
 export default {
   name: 'AdminsManagement',
@@ -218,10 +220,13 @@ export default {
   setup() {
     const adminsStore = useAdminsStore()
     const modGroupStore = useModGroupStore()
-    return { adminsStore, modGroupStore }
+    const { myGroups, supportOrAdmin } = useMe()
+    const { checkWork } = useModMe()
+    return { adminsStore, modGroupStore, myGroups, supportOrAdmin, checkWork }
   },
   data: function () {
     return {
+      tabIndex: 0,
       groupidshow: null,
       groupidcreate: null,
       groupidprevious: null,
@@ -279,8 +284,6 @@ export default {
     },
   },
   mounted() {
-    this.modGroupStore.getModGroups()
-
     this.fetch(this.groupidshow)
   },
   methods: {
@@ -340,6 +343,15 @@ export default {
         return 'Please add the message.'
       }
       return true
+    },
+    copyAdmin(admin) {
+      this.essential = admin.essential === 1
+      this.groupidcreate = admin.groupid
+      this.subject = admin.subject
+      this.body = admin.text
+      this.ctatext = admin.ctatext
+      this.ctalink = admin.ctalink
+      this.tabIndex = 1
     },
   },
 }

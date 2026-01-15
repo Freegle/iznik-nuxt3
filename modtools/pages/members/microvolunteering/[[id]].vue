@@ -83,8 +83,6 @@
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
-import { useModGroupStore } from '@/stores/modgroup'
-
 export default {
   components: {
     GChart,
@@ -179,13 +177,11 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     this.microVolunteeringStore.clear()
     this.fetch()
   },
   methods: {
-    async fetch() {
+    fetch() {
       this.busy = true
 
       if (this.groupid) {

@@ -91,23 +91,12 @@ div[variant="success"] .card-header {
   display: block;
 }
 
-.truncate2 {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-body.bodyMT{
-  background: #dff2d1;
 }
 
 // We have to go to some effort to style the resize grip.  We can't have it in a scoped style otherwise it won't
@@ -220,7 +209,7 @@ body.bodyMT{
 }
 
 .text-faded {
-  color: $color-gray--faded !important;
+  color: $color-gray--normal !important;
 }
 
 .nopara p {
@@ -618,6 +607,18 @@ label {
   --popper-theme-padding: 10px;
   --popper-theme-box-shadow: 0 6px 30px -6px rgba(0, 0, 0, 0.25);
   --header-navbar-height: 76px;
+}
+
+/* // MT */
+body.bodyMT{
+  background: #dff2d1;
+}
+
+.truncate2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 /* Small gap on left of #12345678 */

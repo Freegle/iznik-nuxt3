@@ -1,94 +1,82 @@
 # iznik-nuxt3 modtools
 
-This branch provides an interface for Freegle volunteers to moderate their group, running on separate website https://modtools.org/
+ModTools provides the user interface for Freegle local and national volunteers to moderate their community and operate Freegle nationally,
+running on separate website https://modtools.org/
 
-The app exists as a branch of the main nuxt3 app, with minimal modifications of the main codebase, with additions in a `modtools` directory.
+ModTools code lives in the `/modtools` directory of the main iznik-nuxt3 repository. Both Freegle and ModTools deploy from the `production` branch, with separate Netlify sites using different build commands.
 
-The modtools app in `modtools` has the parent directory as a layer, ie modtools extends or inherits from `..` ie the base nuxt3 app. 
-These files/directories are extended:
+The ModTools code in /modtools uses the parent directory as a Nuxt3 layer, ie modtools extends or inherits from `..` ie the base nuxt3 code. 
+These files/directories are present in /modtools:
 
-* components/* - Extend the default components
-* composables/* - Extend the default composables
-* layouts/* - Extend the default layouts
-* pages/* - Extend the default pages
-* plugins/* - Extend the default plugins
-* server/* - Extend the default server endpoints & middleware
-* utils/* - Extend the default utils
-* nuxt.config.ts- Extend the default nuxt config
-* app.config.ts - Extend the default app config
+* `app.vue`
+* `nuxt.config.ts`- Extend the base nuxt config `['../']`
+* `package.json` - only extra packages needed for ModTools
+* `package-lock.json`
+* assets/* - does NOT extend the base assets
+* components/* - Extend and add to the base components
+* composables/* - Extend and add to the base composables
+* layouts/* - ModTools layouts
+* middleware/* - `authuser.global.ts` provides user authentication for most routes
+* pages/* - Generally replaces the base pages
+* public/* - ModTools-specific icons and eg `alert.wav`
+* stores/* - Extend and add to the base stores
 
-A fairly minimal `package.json` is needed as `nuxt.config.ts` extends `../` and so brings in the required packages.
+## Versioning:
 
-## Not extended:
+`/modtools/package.json` contains `version` which is shown to the volunteer. Bump this for each release.
 
-* api/*
-* assets/* - ADDED and amended `assets/css/_color-vars.scss`
+## Base alterations:
 
-## Changes
+The base code uses `miscStore.modtools` to determine any MT-specific actions, often made available as ref `isMT`.
+However `process.env.MT` and `config.IS_MT` are also available if need be.
 
-* `app.vue` is a simplified copy of the root version
-* `modtools/layouts/default.vue` supersedes `./layouts/default.vue`
+### ModTools-specific configuration
 
-## Amended:
+These files have ModTools-specific configuration that differs from the Freegle build:
 
-* `modtools/assets/css/bootstrap-custom.scss` now has `~/../` at start twice
-* `api/BaseAPI.js` add config.params.modtools
-* `stores/group.js` has confirmAffiliation() added
-* `stores/auth.js` has work&discourse added; session.fetchv2
-* `stores/misc.js` add modtools
-* `config.js` has modtools SENTRY_DSN
+* `modtools/nuxt.config.ts` - ModTools Nuxt configuration (extends base)
+* `modtools/netlify.toml` - ModTools-specific Netlify build settings (used by ModTools Netlify site)
 
-## TODO
+## Usage:
 
-* Loads of TODOs to check inc some in base code
-* Cope on mobile ie left menu
+Best have in a separate directory to the main nuxt3 code so the node_modules directories are not confused.
 
-* components/ProxyImage.vue Fix up so that NuxtPicture works. Seems to go wrong in MT chats list -->
-  <!-- fullSrc comes from src and chat.icon which seems to be different from FD - but raw src seems OK -->
+Starting from root
+```
+npm i
+cd modtools
+npm i
+npm run dev
+```
 
-## Upgrade notes
+You can then debug on http://127.0.0.1:3000/
 
-* b-btn to b-button, b-select to b-form-select, date-picker to OurDatePicker, b-input to b-form-input, b-textarea to b-form-textarea
-  b-input-group-append -> <slot name="append">
-* b-modal <template #default> <template #footer> useOurModal, etc. Do not use v-if on b-modal
-  add @hidden="onHide" emits: ['hidden'] onHide() { this.$emit('hidden') }
-  add v-if and @hidden <ModLogsModal v-if="showLogsModal" @hidden="showLogsModal = false" />
-  and if needed, in modal add show() { this.modal.show() }
-* Use icon in <v-icon :icon="['fab', 'discourse']" scale="2" />
-* Add extra icons to root plugins/vue-awesome.js
-* Change `this.$store.getters['misc/time']` into `this.miscStore.time`
-* And... miscStore.get('dashboardShowInfo') and miscStore.set({ key: 'dashboardShowInfo', value: newValue })
-* SpinButton has changed params inc icon-name and :handler to @handle which has param callback that must be called when complete
-  To have inline use :flex="false"
-* const path = computed(() => { return 0 } and access as path.value
-* Change pluralize to added pluralise with number and includeNumber as extra params
-  import { pluralise } from '../composables/usePluralise'
-* For waitForRef refs use this.$refs.modal?.show() etc. Within modal component:
-    const { modal, show, hide } = useOurModal()
-    defineExpose({ show })
+To debug it often helps to comment out the main content of `/plugins/something-went-wrong.client.js`
 
-* b-img-lazy to b-img lazy
-* float-right to float-end
+## Development Workflow
 
-* npm i leaflet-draw-toolbar --force
+All development happens on `master` branch. Changes are tested via CircleCI and then merged to `production` for deployment.
 
-    delay(n) {
-      return new Promise(function (resolve) {
-        setTimeout(resolve, n * 1000);
-      })
-    },
+Any changes to `assets/css` must be copied through to `modtools/assets/css`.
 
-      await this.delay(5)
+## Release:
 
-CHECK ALL this.member.userid
+Both Freegle and ModTools deploy from the `production` branch:
 
-REMOVED to get it to build:
-    "@vitejs/plugin-legacy": "^5.2.0",
-    "nuxt-vite-legacy": "^1.2.0",
+1. Changes are pushed to `master`
+2. CircleCI runs tests (Go API, PHPUnit, Playwright)
+3. If tests pass, `master` is auto-merged to `production`
+4. Netlify detects the push and builds both sites:
+   - **Freegle site** (`golden-caramel-d2c3a7`): builds from root with `npm run build`
+   - **ModTools site**: builds from `/modtools` with `cd modtools && npm run build`
 
-this.checkWork(true)
-this.deferCheckWork()
-this.checkWorkDeferGetMessages()
-// SEE WORK EXPLANATION IN useModMessages.js
+The Freegle HA proxy routes `modtools.org` to the ModTools Netlify site.
+There is no automatic mechanism to detect changes and reload automatically, so volunteers must reload as required to pick up a new release.
 
-<b-form-select v-model="whatever" @change="change"> needs v-model and newval is invalid but this.whatever has been updated
+The ModTools netlify build settings use:
+
+```
+[build]
+command = "export NODE_OPTIONS=--max_old_space_size=6000 && npx nuxi prepare && cd modtools && npm i && npm run build"
+publish = "modtools/dist"
+```

@@ -51,6 +51,7 @@
 import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { untwem } from '~/composables/useTwem'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -63,7 +64,8 @@ export default {
   setup() {
     const chatStore = useChatStore()
     const { modal, hide } = useOurModal()
-    return { chatStore, modal, hide }
+    const { myGroup } = useMe()
+    return { chatStore, modal, hide, myGroup }
   },
   data: function () {
     return {
@@ -81,7 +83,7 @@ export default {
     },
   },
   methods: {
-    async show() {
+    show() {
       // Take a copy rather than use computed as it isn't ours and will vanish from the store.
       this.chat = this.chatStore.byChatId(this.chatid)
     },

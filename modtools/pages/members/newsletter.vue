@@ -15,8 +15,6 @@
 </template>
 <script>
 import { useStoryStore } from '~/stores/stories'
-import { useModGroupStore } from '@/stores/modgroup'
-
 export default {
   setup() {
     const storyStore = useStoryStore()
@@ -36,8 +34,6 @@ export default {
     },
   },
   async mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     console.log('newsletter mounted')
     await this.storyStore.fetchMT({
       newsletter: true,

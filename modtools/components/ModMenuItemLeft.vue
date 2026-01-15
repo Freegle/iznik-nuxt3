@@ -12,6 +12,7 @@
 </template>
 <script>
 import { useAuthStore } from '@/stores/auth'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -44,6 +45,11 @@ export default {
       default: false,
     },
   },
+  emits: ['mobilehidemenu'],
+  setup() {
+    const { checkWork } = useModMe()
+    return { checkWork }
+  },
   computed: {
     work() {
       const authStore = useAuthStore()
@@ -74,9 +80,9 @@ export default {
     click(e) {
       if (this.link && e.button === 0) {
         if (this.$route.fullPath === this.link) {
-          // Click on current route.  Reload.
+          // Click on current route.  Check for new work.
           e.stopPropagation()
-          this.$router.go()
+          this.checkWork(true)
         } else {
           this.$router.push(this.link)
         }

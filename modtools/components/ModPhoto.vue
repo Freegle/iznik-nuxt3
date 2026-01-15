@@ -5,7 +5,7 @@
       :externalmods="mods"
       @remove="removePhoto"
       @updated="updatedPhoto"
-      @clicked="showModal"
+      @click="showModal"
     />
     <ModPhotoModal
       v-if="zoom"
