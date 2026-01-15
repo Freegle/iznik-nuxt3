@@ -1117,7 +1117,7 @@ jobs:
             npm ci
             # Fix npm bug with optional dependencies on macOS arm64
             # https://github.com/npm/cli/issues/4828
-            npm install @rollup/rollup-darwin-arm64 --prefer-offline || true
+            npm install @rollup/rollup-darwin-arm64 @oxc-parser/binding-darwin-arm64 --prefer-offline || true
           max_auto_reruns: 3
           auto_rerun_delay: 10s
 
@@ -1327,7 +1327,7 @@ jobs:
             npm ci
             # Fix npm bug with optional dependencies on macOS arm64
             # https://github.com/npm/cli/issues/4828
-            npm install @rollup/rollup-darwin-arm64 --prefer-offline || true
+            npm install @rollup/rollup-darwin-arm64 @oxc-parser/binding-darwin-arm64 --prefer-offline || true
             # Force update GitHub-hosted packages to latest (bypasses package-lock.json pinning)
             npm update @freegle/capacitor-push-notifications-cap7
           max_auto_reruns: 3
