@@ -186,6 +186,17 @@
           <small class="text-muted d-block"> once opened </small>
         </div>
       </div>
+      <div v-if="formattedAMPStats" class="stat-card stat-card--amp">
+        <div class="stat-value text-purple">
+          {{ formattedAMPStats.ampPercentage }}%
+        </div>
+        <div class="stat-label">
+          AMP
+          <small class="text-muted d-block">
+            {{ formattedAMPStats.totalWithAMP.toLocaleString() }} emails
+          </small>
+        </div>
+      </div>
     </div>
 
     <!-- No Stats Message -->
@@ -260,6 +271,127 @@
           />
           <div v-else class="chart-empty text-muted">
             No email type data available.
+          </div>
+        </div>
+      </div>
+
+      <!-- AMP Comparison Section -->
+      <div
+        v-if="
+          emailTrackingStore.hasAMPStats &&
+          formattedAMPStats &&
+          formattedAMPStats.totalWithAMP > 0
+        "
+        class="mt-4"
+      >
+        <h5 class="mb-3">AMP vs Non-AMP Email Engagement</h5>
+        <p class="text-muted small mb-3">
+          Comparison of engagement rates between AMP-enabled emails and standard
+          HTML emails. AMP emails allow interactive content directly in the
+          email client.
+        </p>
+
+        <div class="charts-grid">
+          <!-- AMP Comparison Bar Chart -->
+          <div class="chart-container">
+            <GChart
+              v-if="emailTrackingStore.ampComparisonChartData"
+              type="ColumnChart"
+              :data="emailTrackingStore.ampComparisonChartData"
+              :options="getAMPComparisonOptions()"
+              class="chart"
+            />
+            <div v-else class="chart-empty text-muted">
+              No AMP comparison data available.
+            </div>
+          </div>
+
+          <!-- AMP Stats Summary -->
+          <div class="amp-stats-summary">
+            <div class="amp-stats-card amp-stats-card--highlight">
+              <h6>AMP Rendering</h6>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Sent with AMP:</span>
+                <span class="amp-stat-value">{{
+                  formattedAMPStats.totalWithAMP.toLocaleString()
+                }}</span>
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Actually rendered AMP:</span>
+                <span class="amp-stat-value text-purple">{{
+                  formattedAMPStats.ampRendered.toLocaleString()
+                }}</span>
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">AMP Render Rate:</span>
+                <span class="amp-stat-value text-purple font-weight-bold"
+                  >{{ formattedAMPStats.ampRenderRate }}%</span
+                >
+              </div>
+              <p class="small text-muted mt-2 mb-0">
+                Render rate shows how many AMP emails were opened in clients
+                that support AMP (Gmail, Yahoo).
+              </p>
+            </div>
+            <div class="amp-stats-card">
+              <h6>
+                AMP Emails ({{
+                  formattedAMPStats.totalWithAMP.toLocaleString()
+                }})
+              </h6>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Open Rate:</span>
+                <span class="amp-stat-value text-success"
+                  >{{ formattedAMPStats.ampOpenRate }}%</span
+                >
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Click Rate:</span>
+                <span class="amp-stat-value text-info"
+                  >{{ formattedAMPStats.ampClickRate }}%</span
+                >
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Bounce Rate:</span>
+                <span class="amp-stat-value text-danger"
+                  >{{ formattedAMPStats.ampBounceRate }}%</span
+                >
+              </div>
+              <div
+                v-if="formattedAMPStats.ampReplyRate > 0"
+                class="amp-stat-row"
+              >
+                <span class="amp-stat-label">Reply Rate:</span>
+                <span class="amp-stat-value text-purple"
+                  >{{ formattedAMPStats.ampReplyRate }}%</span
+                >
+              </div>
+            </div>
+            <div class="amp-stats-card">
+              <h6>
+                Non-AMP Emails ({{
+                  formattedAMPStats.totalWithoutAMP.toLocaleString()
+                }})
+              </h6>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Open Rate:</span>
+                <span class="amp-stat-value text-success"
+                  >{{ formattedAMPStats.nonAMPOpenRate }}%</span
+                >
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Click Rate:</span>
+                <span class="amp-stat-value text-info"
+                  >{{ formattedAMPStats.nonAMPClickRate }}%</span
+                >
+              </div>
+              <div class="amp-stat-row">
+                <span class="amp-stat-label">Bounce Rate:</span>
+                <span class="amp-stat-value text-danger"
+                  >{{ formattedAMPStats.nonAMPBounceRate }}%</span
+                >
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -582,6 +714,25 @@ export default {
         bounceRate: stats.bounceRate,
       }
     },
+    formattedAMPStats() {
+      const stats = this.emailTrackingStore.formattedAMPStats
+      if (!stats) return null
+
+      return {
+        totalWithAMP: parseInt(stats.totalWithAMP) || 0,
+        totalWithoutAMP: parseInt(stats.totalWithoutAMP) || 0,
+        ampPercentage: stats.ampPercentage,
+        ampRendered: parseInt(stats.ampRendered) || 0,
+        ampRenderRate: stats.ampRenderRate,
+        ampOpenRate: stats.ampOpenRate,
+        ampClickRate: stats.ampClickRate,
+        ampBounceRate: stats.ampBounceRate,
+        ampReplyRate: stats.ampReplyRate,
+        nonAMPOpenRate: stats.nonAMPOpenRate,
+        nonAMPClickRate: stats.nonAMPClickRate,
+        nonAMPBounceRate: stats.nonAMPBounceRate,
+      }
+    },
     clickedLinksFieldsComputed() {
       if (this.emailTrackingStore.aggregateClickedLinks) {
         return [
@@ -717,6 +868,32 @@ export default {
         series: {
           0: { color: '#28a745' }, // Green
         },
+        animation: {
+          startup: true,
+          duration: 500,
+          easing: 'out',
+        },
+      }
+    },
+
+    getAMPComparisonOptions() {
+      return {
+        title: 'AMP vs Non-AMP Engagement Rates',
+        legend: { position: 'bottom' },
+        chartArea: { width: '80%', height: '65%' },
+        vAxis: {
+          title: 'Rate (%)',
+          viewWindow: { min: 0 },
+          format: '#.#',
+        },
+        hAxis: {
+          title: '',
+        },
+        series: {
+          0: { color: '#6f42c1' }, // AMP - purple
+          1: { color: '#6c757d' }, // Non-AMP - gray
+        },
+        bar: { groupWidth: '60%' },
         animation: {
           startup: true,
           duration: 500,
@@ -896,5 +1073,55 @@ export default {
 
 .gap-2 {
   gap: 0.5rem;
+}
+
+/* AMP Statistics */
+.stat-card--amp {
+  border-left: 3px solid #6f42c1;
+}
+
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+.amp-stats-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.amp-stats-card {
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid #e9ecef;
+}
+
+.amp-stats-card--highlight {
+  border-left: 3px solid #6f42c1;
+  background: #f8f5ff;
+}
+
+.amp-stats-card h6 {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #495057;
+}
+
+.amp-stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.amp-stat-label {
+  color: #6c757d;
+}
+
+.amp-stat-value {
+  font-weight: 600;
 }
 </style>
