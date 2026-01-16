@@ -128,10 +128,17 @@ export default class BaseAPI {
         headers,
       })
 
-      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
-        // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
-        // we renew the JWT.
-        authStore.setAuth(data.jwt, data.persistent)
+      if (data.jwt && data.persistent) {
+        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
+        // in-flight API responses from restoring auth after an intentional logout.
+        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
+          console.log('JWT renewal: updating auth tokens from API response')
+          authStore.setAuth(data.jwt, data.persistent)
+        } else if (!authStore.auth.jwt) {
+          console.log(
+            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
+          )
+        }
       }
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
