@@ -79,11 +79,23 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
@@ -346,11 +358,23 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
