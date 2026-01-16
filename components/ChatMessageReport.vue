@@ -25,12 +25,14 @@
           </b-card-title>
           <b-card-text>
             {{ emessage }}
-            {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
-            <ModChatViewButton
-              :id="chatmessage.refchatid"
-              class="mt-2"
-              :pov="chatmessage.userid"
-            />
+            <template v-if="chatmessage">
+              {{ chatmessage.refchatid }} - {{ chatmessage.userid }}
+              <ModChatViewButton
+                :id="chatmessage.refchatid"
+                class="mt-2"
+                :pov="chatmessage.userid"
+              />
+            </template>
           </b-card-text>
         </b-card>
       </b-col>
@@ -70,8 +72,12 @@ const props = defineProps({
 const miscStore = useMiscStore()
 const modtools = computed(() => miscStore.modtools)
 
-// Use the chat base composable (even though we don't use any of its properties in this component)
-useChatMessageBase(props.chatid, props.id, props.pov)
+// Use the chat base composable to get chatmessage, emessage, and otheruser
+const { chatmessage, emessage, otheruser } = useChatMessageBase(
+  props.chatid,
+  props.id,
+  props.pov
+)
 </script>
 <style scoped lang="scss">
 .chatMessage {

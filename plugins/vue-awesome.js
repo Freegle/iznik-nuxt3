@@ -115,6 +115,7 @@ import {
 
 import {
   faChrome,
+  faDiscourse,
   faEdge,
   faFacebook,
   faFirefoxBrowser,
@@ -236,6 +237,7 @@ library.add(
   faExpand,
   faFilter,
   faChrome,
+  faDiscourse,
   faEdge,
   faFacebook,
   faFirefoxBrowser,
