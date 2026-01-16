@@ -93,20 +93,29 @@
     <!-- Date Range Filter -->
     <b-card class="mb-3 filter-card">
       <b-form class="filter-form" inline @submit.prevent="fetchStats">
-        <label class="filter-label">From:</label>
-        <b-form-input
-          v-model="startDate"
-          type="date"
+        <label class="filter-label">Period:</label>
+        <b-form-select
+          v-model="datePreset"
+          :options="datePresetOptions"
           size="sm"
-          style="width: 125px"
+          style="width: 130px"
         />
-        <label class="filter-label">To:</label>
-        <b-form-input
-          v-model="endDate"
-          type="date"
-          size="sm"
-          style="width: 125px"
-        />
+        <template v-if="datePreset === 'custom'">
+          <label class="filter-label">From:</label>
+          <b-form-input
+            v-model="startDate"
+            type="datetime-local"
+            size="sm"
+            style="width: 175px"
+          />
+          <label class="filter-label">To:</label>
+          <b-form-input
+            v-model="endDate"
+            type="datetime-local"
+            size="sm"
+            style="width: 175px"
+          />
+        </template>
         <label class="filter-label">Type:</label>
         <b-form-select
           v-model="emailType"
@@ -212,11 +221,11 @@
 
     <!-- Charts Section -->
     <div v-if="emailTrackingStore.hasStats" class="charts-section mt-4">
-      <h5 class="mb-3">Opens, Clicks and Bounces</h5>
+      <h5 class="mb-3">Opens and Clicks</h5>
       <p class="text-muted small mb-3">
-        These charts show open rates, click rates and bounce rates. Open rates
-        are underestimated due to tracking being blocked by some email clients.
-        Click rates and bounce rates are reliable metrics.
+        These charts show open rates and click rates. Open rates are
+        underestimated due to tracking being blocked by some email clients.
+        Click rates are reliable metrics.
       </p>
 
       <div class="charts-grid">
@@ -276,14 +285,7 @@
       </div>
 
       <!-- AMP Comparison Section -->
-      <div
-        v-if="
-          emailTrackingStore.hasAMPStats &&
-          formattedAMPStats &&
-          formattedAMPStats.totalWithAMP > 0
-        "
-        class="mt-4"
-      >
+      <div v-if="emailTrackingStore.hasAMPStats" class="mt-4">
         <h5 class="mb-3">AMP vs Non-AMP Email Engagement</h5>
         <p class="text-muted small mb-3">
           Comparison of engagement rates between AMP-enabled emails and standard
@@ -291,106 +293,141 @@
           email client.
         </p>
 
+        <!-- Show note when filtering by a type that has no AMP data -->
+        <div
+          v-if="!formattedAMPStats || formattedAMPStats.totalWithAMP === 0"
+          class="alert alert-info"
+        >
+          <span v-if="emailType">
+            No AMP data available for "{{ emailType }}" emails. AMP is currently
+            only enabled for ChatNotification emails. Select "All Types" or
+            "Chat Notification" to see AMP statistics.
+          </span>
+          <span v-else>
+            No AMP email data available for the selected period.
+          </span>
+        </div>
+
         <div class="charts-grid">
-          <!-- AMP Comparison Bar Chart -->
-          <div class="chart-container">
-            <GChart
-              v-if="emailTrackingStore.ampComparisonChartData"
-              type="ColumnChart"
-              :data="emailTrackingStore.ampComparisonChartData"
-              :options="getAMPComparisonOptions()"
-              class="chart"
-            />
-            <div v-else class="chart-empty text-muted">
-              No AMP comparison data available.
+          <!-- Left column: Pie chart + Bar chart -->
+          <div class="chart-column">
+            <!-- AMP/Non-AMP Proportion Pie Chart -->
+            <div class="chart-container chart-container--small mb-3">
+              <h6 class="chart-title">Email Distribution</h6>
+              <GChart
+                v-if="ampProportionChartData"
+                type="PieChart"
+                :data="ampProportionChartData"
+                :options="ampProportionChartOptions"
+                class="chart"
+              />
+            </div>
+            <!-- AMP Comparison Bar Chart -->
+            <div class="chart-container">
+              <GChart
+                v-if="emailTrackingStore.ampComparisonChartData"
+                type="ColumnChart"
+                :data="emailTrackingStore.ampComparisonChartData"
+                :options="getAMPComparisonOptions()"
+                class="chart"
+              />
+              <div v-else class="chart-empty text-muted">
+                No AMP comparison data available.
+              </div>
             </div>
           </div>
 
           <!-- AMP Stats Summary -->
           <div class="amp-stats-summary">
-            <div class="amp-stats-card amp-stats-card--highlight">
-              <h6>AMP Rendering</h6>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Sent with AMP:</span>
-                <span class="amp-stat-value">{{
-                  formattedAMPStats.totalWithAMP.toLocaleString()
-                }}</span>
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Actually rendered AMP:</span>
-                <span class="amp-stat-value text-purple">{{
-                  formattedAMPStats.ampRendered.toLocaleString()
-                }}</span>
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">AMP Render Rate:</span>
-                <span class="amp-stat-value text-purple font-weight-bold"
-                  >{{ formattedAMPStats.ampRenderRate }}%</span
-                >
-              </div>
-              <p class="small text-muted mt-2 mb-0">
-                Render rate shows how many AMP emails were opened in clients
-                that support AMP (Gmail, Yahoo).
+            <!-- Comparable Rates -->
+            <div class="amp-stats-card amp-stats-card--rates">
+              <h6>Comparable Rates</h6>
+              <table class="comparable-rates-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th class="text-purple">AMP Emails</th>
+                    <th class="text-dark">Non-AMP Emails</th>
+                    <th class="text-success">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Open Rate</td>
+                    <td class="text-purple font-weight-bold">
+                      {{ formattedAMPStats.ampOpenRate }}%
+                    </td>
+                    <td>{{ formattedAMPStats.nonAMPOpenRate }}%</td>
+                    <td class="text-success">
+                      {{ formattedAMPStats.totalOpenRate }}%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Click Rate</td>
+                    <td class="text-purple">
+                      {{ formattedAMPStats.ampClickRate }}%
+                    </td>
+                    <td>{{ formattedAMPStats.nonAMPClickRate }}%</td>
+                    <td class="text-success">
+                      {{ formattedAMPStats.totalClickRate }}%
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr class="text-muted small">
+                    <td>Emails sent</td>
+                    <td>
+                      {{ formattedAMPStats.totalWithAMP.toLocaleString() }}
+                    </td>
+                    <td>
+                      {{ formattedAMPStats.totalWithoutAMP.toLocaleString() }}
+                    </td>
+                    <td>
+                      {{ formattedAMPStats.totalEmails.toLocaleString() }}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+              <p class="small text-muted mt-3 mb-0">
+                <strong>Note:</strong> AMP emails can be opened in non-AMP
+                clients (e.g., Outlook, Apple Mail). In those cases, the HTML
+                fallback is displayed and tracking works the same as for non-AMP
+                emails. These rates are comparable.
               </p>
             </div>
+            <!-- AMP vs Non-AMP Metrics Comparison -->
             <div class="amp-stats-card">
-              <h6>
-                AMP Emails ({{
-                  formattedAMPStats.totalWithAMP.toLocaleString()
-                }})
-              </h6>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Open Rate:</span>
-                <span class="amp-stat-value text-success"
-                  >{{ formattedAMPStats.ampOpenRate }}%</span
-                >
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Click Rate:</span>
-                <span class="amp-stat-value text-info"
-                  >{{ formattedAMPStats.ampClickRate }}%</span
-                >
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Bounce Rate:</span>
-                <span class="amp-stat-value text-danger"
-                  >{{ formattedAMPStats.ampBounceRate }}%</span
-                >
-              </div>
-              <div
-                v-if="formattedAMPStats.ampReplyRate > 0"
-                class="amp-stat-row"
-              >
-                <span class="amp-stat-label">Reply Rate:</span>
-                <span class="amp-stat-value text-purple"
-                  >{{ formattedAMPStats.ampReplyRate }}%</span
-                >
-              </div>
-            </div>
-            <div class="amp-stats-card">
-              <h6>
-                Non-AMP Emails ({{
-                  formattedAMPStats.totalWithoutAMP.toLocaleString()
-                }})
-              </h6>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Open Rate:</span>
-                <span class="amp-stat-value text-success"
-                  >{{ formattedAMPStats.nonAMPOpenRate }}%</span
-                >
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Click Rate:</span>
-                <span class="amp-stat-value text-info"
-                  >{{ formattedAMPStats.nonAMPClickRate }}%</span
-                >
-              </div>
-              <div class="amp-stat-row">
-                <span class="amp-stat-label">Bounce Rate:</span>
-                <span class="amp-stat-value text-danger"
-                  >{{ formattedAMPStats.nonAMPBounceRate }}%</span
-                >
-              </div>
+              <h6>AMP Email Opens by Client Type</h6>
+              <table class="amp-comparison-table">
+                <thead>
+                  <tr>
+                    <th>Metric</th>
+                    <th class="text-purple">AMP Clients</th>
+                    <th class="text-dark">Non-AMP Clients</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Open Rate</td>
+                    <td class="text-purple font-weight-bold">
+                      {{ formattedAMPStats.ampRenderRate }}%
+                    </td>
+                    <td>{{ formattedAMPStats.ampNonAMPClientOpenRate }}%</td>
+                  </tr>
+                  <tr v-if="formattedAMPStats.ampReplyRate > 0">
+                    <td>Reply Rate (via AMP)</td>
+                    <td class="text-purple">
+                      {{ formattedAMPStats.ampReplyRate }}%
+                    </td>
+                    <td class="text-muted">-</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="small text-muted mt-2 mb-0">
+                <strong>AMP Clients</strong> = Gmail, Yahoo with AMP support
+                (reliable tracking). <strong>Non-AMP Clients</strong> = Outlook,
+                Apple Mail, etc. (HTML fallback displayed).
+              </p>
             </div>
           </div>
         </div>
@@ -668,24 +705,47 @@ export default {
     return { emailTrackingStore }
   },
   data() {
-    // Default to last 30 days.
+    // Default to last 7 days.
     const today = new Date()
-    const thirtyDaysAgo = new Date(today)
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const sevenDaysAgo = new Date(today)
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    // Format as local ISO datetime for datetime-local inputs (adjusts for timezone)
+    const toLocalISOString = (d) => {
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 19)
+    }
 
     return {
       showInfoModal: false,
-      startDate: thirtyDaysAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
+      datePreset: '7days',
+      startDate: toLocalISOString(sevenDaysAgo),
+      endDate: toLocalISOString(today),
       emailType: '',
       userIdOrEmail: '',
+      datePresetOptions: [
+        { text: 'Last hour', value: 'hour' },
+        { text: 'Last 24 hours', value: 'day' },
+        { text: 'Last 7 days', value: '7days' },
+        { text: 'Last 30 days', value: '30days' },
+        { text: 'Custom dates', value: 'custom' },
+      ],
       emailTypeOptions: [
         { text: 'All Types', value: '' },
-        { text: 'Welcome', value: 'welcome' },
-        { text: 'Digest', value: 'digest' },
-        { text: 'Notification', value: 'notification' },
-        { text: 'Chat', value: 'chat' },
-        { text: 'Newsletter', value: 'newsletter' },
+        { text: 'Chat Notification', value: 'ChatNotification' },
+        {
+          text: 'Chat Notification (User to Mod)',
+          value: 'ChatNotificationUser2Mod',
+        },
+        {
+          text: 'Chat Notification (Mod to Mod)',
+          value: 'ChatNotificationMod2Mod',
+        },
+        { text: 'Welcome', value: 'WelcomeMail' },
+        { text: 'Digest', value: 'UnifiedDigest' },
+        { text: 'Donation Thank You', value: 'DonationThank' },
+        { text: 'Donation Ask', value: 'DonationAsk' },
       ],
       emailFields: [
         { key: 'email_type', label: 'Type', sortable: true },
@@ -718,19 +778,76 @@ export default {
       const stats = this.emailTrackingStore.formattedAMPStats
       if (!stats) return null
 
+      const totalWithAMP = parseInt(stats.totalWithAMP) || 0
+      const totalWithoutAMP = parseInt(stats.totalWithoutAMP) || 0
+      const ampOpened = parseInt(stats.ampOpened) || 0
+      const nonAMPOpened = parseInt(stats.nonAMPOpened) || 0
+      const totalEmails = totalWithAMP + totalWithoutAMP
+      const totalOpened = ampOpened + nonAMPOpened
+      const totalOpenRate =
+        totalEmails > 0 ? ((totalOpened / totalEmails) * 100).toFixed(1) : '0.0'
+
+      // Calculate non-AMP client open rate for AMP emails
+      // This is AMP emails that were opened but NOT via AMP rendering (opened in non-AMP clients)
+      const ampRenderRateNum = parseFloat(stats.ampRenderRate) || 0
+      const ampOpenRateNum = parseFloat(stats.ampOpenRate) || 0
+      const ampNonAMPClientOpenRate = Math.max(
+        0,
+        ampOpenRateNum - ampRenderRateNum
+      ).toFixed(1)
+
+      // Calculate total click rate
+      const ampClicked = parseInt(stats.ampClicked) || 0
+      const nonAMPClicked = parseInt(stats.nonAMPClicked) || 0
+      const totalClicked = ampClicked + nonAMPClicked
+      const totalClickRate =
+        totalEmails > 0
+          ? ((totalClicked / totalEmails) * 100).toFixed(1)
+          : '0.0'
+
       return {
-        totalWithAMP: parseInt(stats.totalWithAMP) || 0,
-        totalWithoutAMP: parseInt(stats.totalWithoutAMP) || 0,
+        totalWithAMP,
+        totalWithoutAMP,
+        totalEmails,
         ampPercentage: stats.ampPercentage,
         ampRendered: parseInt(stats.ampRendered) || 0,
         ampRenderRate: stats.ampRenderRate,
+        ampNonAMPClientOpenRate,
+        ampOpened,
         ampOpenRate: stats.ampOpenRate,
         ampClickRate: stats.ampClickRate,
         ampBounceRate: stats.ampBounceRate,
         ampReplyRate: stats.ampReplyRate,
+        nonAMPOpened,
         nonAMPOpenRate: stats.nonAMPOpenRate,
         nonAMPClickRate: stats.nonAMPClickRate,
         nonAMPBounceRate: stats.nonAMPBounceRate,
+        totalOpened,
+        totalOpenRate,
+        totalClicked,
+        totalClickRate,
+      }
+    },
+    ampProportionChartData() {
+      if (!this.formattedAMPStats) return null
+      const { totalWithAMP, totalWithoutAMP } = this.formattedAMPStats
+      if (totalWithAMP === 0 && totalWithoutAMP === 0) return null
+
+      return [
+        ['Type', 'Count'],
+        ['AMP Emails', totalWithAMP],
+        ['Non-AMP Emails', totalWithoutAMP],
+      ]
+    },
+    ampProportionChartOptions() {
+      return {
+        pieHole: 0.4,
+        colors: ['#6f42c1', '#6c757d'],
+        legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+        chartArea: { width: '90%', height: '75%' },
+        pieSliceText: 'percentage',
+        pieSliceTextStyle: { fontSize: 11 },
+        tooltip: { text: 'both' },
       }
     },
     clickedLinksFieldsComputed() {
@@ -745,6 +862,25 @@ export default {
           { key: 'url', label: 'URL', sortable: false },
           { key: 'click_count', label: 'Clicks', sortable: true },
         ]
+      }
+    },
+  },
+  watch: {
+    datePreset(newPreset) {
+      // Handle period changes - set dates and fetch stats
+      this.onDatePresetChange(newPreset)
+    },
+    emailType() {
+      this.fetchStats()
+    },
+    startDate() {
+      if (this.datePreset === 'custom') {
+        this.fetchStats()
+      }
+    },
+    endDate() {
+      if (this.datePreset === 'custom') {
+        this.fetchStats()
       }
     },
   },
@@ -783,6 +919,70 @@ export default {
       await this.emailTrackingStore.loadMoreUserEmails()
     },
 
+    onDatePresetChange(preset) {
+      const now = new Date()
+
+      let startDate
+      const endDate = now
+
+      switch (preset) {
+        case 'hour':
+          startDate = new Date(now)
+          startDate.setHours(startDate.getHours() - 1)
+          // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
+          this.startDate = this.formatDateTimeForAPI(startDate)
+          this.endDate = this.formatDateTimeForAPI(endDate)
+          this.fetchStats()
+          return
+        case 'day':
+          startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - 1)
+          // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
+          this.startDate = this.formatDateTimeForAPI(startDate)
+          this.endDate = this.formatDateTimeForAPI(endDate)
+          this.fetchStats()
+          return
+        case '7days':
+          startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - 7)
+          break
+        case '30days':
+          startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - 30)
+          break
+        case 'custom':
+          // Keep current dates, user will set them manually.
+          return
+        default:
+          startDate = new Date(now)
+          startDate.setDate(startDate.getDate() - 7)
+      }
+
+      // For longer periods, just use date (YYYY-MM-DD)
+      this.startDate = startDate.toISOString().split('T')[0]
+      this.endDate = now.toISOString().split('T')[0]
+      this.fetchStats()
+    },
+
+    formatDateTimeForAPI(date) {
+      // Format as ISO 8601 local datetime (YYYY-MM-DDTHH:MM:SS)
+      // This format works with datetime-local inputs and the API
+      const pad = (n) => String(n).padStart(2, '0')
+      return (
+        date.getFullYear() +
+        '-' +
+        pad(date.getMonth() + 1) +
+        '-' +
+        pad(date.getDate()) +
+        'T' +
+        pad(date.getHours()) +
+        ':' +
+        pad(date.getMinutes()) +
+        ':' +
+        pad(date.getSeconds())
+      )
+    },
+
     formatDate(dateStr) {
       if (!dateStr) return '-'
       const date = new Date(dateStr)
@@ -798,7 +998,7 @@ export default {
     // Chart options for Google Charts.
     getEngagementChartOptions() {
       return {
-        title: 'Opens, Clicks and Bounces Over Time',
+        title: 'Opens and Clicks Over Time',
         curveType: 'function',
         legend: { position: 'bottom' },
         chartArea: { width: '85%', height: '70%' },
@@ -814,7 +1014,6 @@ export default {
         series: {
           0: { color: '#28a745' }, // Open rate - green
           1: { color: '#17a2b8' }, // Click rate - blue
-          2: { color: '#dc3545' }, // Bounce rate - red
         },
         animation: {
           startup: true,
@@ -826,7 +1025,7 @@ export default {
 
     getTypeComparisonOptions() {
       return {
-        title: 'Opens, Clicks and Bounces by Email Type',
+        title: 'Opens and Clicks by Email Type',
         legend: { position: 'bottom' },
         chartArea: { width: '85%', height: '65%' },
         vAxis: {
@@ -840,7 +1039,6 @@ export default {
         series: {
           0: { color: '#28a745' }, // Open rate - green
           1: { color: '#17a2b8' }, // Click rate - blue
-          2: { color: '#dc3545' }, // Bounce rate - red
         },
         bar: { groupWidth: '70%' },
         animation: {
@@ -1123,5 +1321,104 @@ export default {
 
 .amp-stat-value {
   font-weight: 600;
+}
+
+.amp-stat-pct {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-left: 0.25rem;
+}
+
+.amp-stats-card--chart {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.amp-pie-chart {
+  height: 140px;
+  margin-top: 0.25rem;
+}
+
+/* Chart column layout */
+.chart-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-title {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #495057;
+  text-align: center;
+}
+
+/* Comparable rates section */
+.amp-stats-card--rates {
+  border-left: 3px solid #28a745;
+}
+
+/* Comparable rates table */
+.comparable-rates-table {
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+}
+
+.comparable-rates-table th,
+.comparable-rates-table td {
+  padding: 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.comparable-rates-table th:first-child,
+.comparable-rates-table td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.comparable-rates-table thead th {
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.comparable-rates-table tbody td {
+  font-size: 1rem;
+}
+
+.comparable-rates-table tfoot td {
+  border-bottom: none;
+  font-size: 0.75rem;
+}
+
+/* AMP comparison table */
+.amp-comparison-table {
+  width: 100%;
+  font-size: 0.8125rem;
+  border-collapse: collapse;
+}
+
+.amp-comparison-table th,
+.amp-comparison-table td {
+  padding: 0.375rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.amp-comparison-table th {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.amp-comparison-table th:not(:first-child),
+.amp-comparison-table td:not(:first-child) {
+  text-align: right;
+}
+
+.amp-comparison-table tbody tr:last-child td {
+  border-bottom: none;
 }
 </style>

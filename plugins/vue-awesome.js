@@ -109,6 +109,8 @@ import {
   faUser,
   faUsers,
   faWalking,
+  faExpand,
+  faFilter,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -231,6 +233,8 @@ library.add(
   faUser,
   faUsers,
   faWalking,
+  faExpand,
+  faFilter,
   faChrome,
   faEdge,
   faFacebook,
