@@ -72,8 +72,10 @@ export const useMemberStore = defineStore({
       const instance = this.instance
 
       // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
-      if (params.context && params.context.id) {
-        params['context[id]'] = params.context.id
+      if (params.context && typeof params.context === 'object') {
+        for (const key of Object.keys(params.context)) {
+          params[`context[${key}]`] = params.context[key]
+        }
         delete params.context
       }
 
