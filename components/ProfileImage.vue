@@ -188,6 +188,11 @@ const brokenProfileImage = (e) => {
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
 
+  &.inline {
+    display: inline-grid;
+    vertical-align: middle;
+  }
+
   :deep(picture) {
     grid-row: 1 / 2;
     grid-column: 1 / 2;

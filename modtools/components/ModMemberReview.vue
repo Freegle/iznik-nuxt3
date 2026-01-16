@@ -11,6 +11,7 @@
         <div>
           <ProfileImage
             :image="member.profile.turl"
+            :name="member.displayname"
             class="ml-1 mb-1 inline"
             is-thumbnail
             size="sm"

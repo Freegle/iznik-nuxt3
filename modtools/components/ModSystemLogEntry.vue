@@ -33,6 +33,7 @@
           <ProfileImage
             v-if="displayUser.profile?.url"
             :image="displayUser.profile.url"
+            :name="displayUser.displayname"
             class="user-avatar"
             size="sm"
             is-thumbnail
@@ -99,6 +100,7 @@
               <ProfileImage
                 v-if="displayGroup.profile"
                 :image="displayGroup.profile"
+                :name="displayGroup.namedisplay || displayGroup.nameshort"
                 class="entity-avatar"
                 is-thumbnail
               />
@@ -254,6 +256,7 @@
             <ProfileImage
               v-if="displayUser?.profile?.url"
               :image="displayUser.profile.url"
+              :name="displayUser.displayname"
               class="user-avatar me-2"
               size="sm"
               is-thumbnail
@@ -281,6 +284,7 @@
             <ProfileImage
               v-if="byUser?.profile?.url"
               :image="byUser.profile.url"
+              :name="byUser.displayname"
               class="user-avatar me-2"
               size="sm"
               is-thumbnail
@@ -305,6 +309,7 @@
             <ProfileImage
               v-if="displayGroup.profile"
               :image="displayGroup.profile"
+              :name="displayGroup.namedisplay || displayGroup.nameshort"
               class="entity-avatar me-2"
               is-thumbnail
             />

@@ -6,6 +6,7 @@
           <span v-if="story.user">
             <ProfileImage
               :image="story.user.profile.turl"
+              :name="story.user.displayname || story.user.email"
               class="mr-1 ml-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail
               size="sm"
