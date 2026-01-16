@@ -6,6 +6,7 @@ export const useEmailTrackingStore = defineStore({
   state: () => ({
     // Aggregate statistics.
     stats: null,
+    ampStats: null,
     statsLoading: false,
     statsError: null,
 
@@ -58,6 +59,7 @@ export const useEmailTrackingStore = defineStore({
 
     clear() {
       this.stats = null
+      this.ampStats = null
       this.statsError = null
       this.timeSeries = []
       this.timeSeriesError = null
@@ -78,6 +80,7 @@ export const useEmailTrackingStore = defineStore({
 
     clearStats() {
       this.stats = null
+      this.ampStats = null
       this.statsError = null
     },
 
@@ -112,6 +115,7 @@ export const useEmailTrackingStore = defineStore({
 
         const response = await api(this.config).emailtracking.fetchStats(params)
         this.stats = response.stats
+        this.ampStats = response.amp_stats || null
       } catch (e) {
         this.statsError = e.message || 'Failed to fetch email statistics'
         console.error('Email stats fetch error:', e)
@@ -299,6 +303,8 @@ export const useEmailTrackingStore = defineStore({
   getters: {
     hasStats: (state) => state.stats !== null,
 
+    hasAMPStats: (state) => state.ampStats !== null,
+
     hasTimeSeries: (state) => state.timeSeries.length > 0,
 
     hasStatsByType: (state) => state.statsByType.length > 0,
@@ -328,6 +334,62 @@ export const useEmailTrackingStore = defineStore({
         clickToOpenRate: (state.stats.click_to_open_rate || 0).toFixed(1),
         bounceRate: (state.stats.bounce_rate || 0).toFixed(1),
       }
+    },
+
+    // Calculate AMP statistics.
+    formattedAMPStats: (state) => {
+      if (!state.ampStats) return null
+
+      return {
+        totalWithAMP: state.ampStats.total_with_amp || 0,
+        totalWithoutAMP: state.ampStats.total_without_amp || 0,
+        ampPercentage: (state.ampStats.amp_percentage || 0).toFixed(1),
+        // AMP rendering metrics
+        ampRendered: state.ampStats.amp_rendered || 0,
+        ampRenderRate: (state.ampStats.amp_render_rate || 0).toFixed(1),
+        // AMP engagement
+        ampOpened: state.ampStats.amp_opened || 0,
+        ampClicked: state.ampStats.amp_clicked || 0,
+        ampBounced: state.ampStats.amp_bounced || 0,
+        ampReplied: state.ampStats.amp_replied || 0,
+        ampOpenRate: (state.ampStats.amp_open_rate || 0).toFixed(1),
+        ampClickRate: (state.ampStats.amp_click_rate || 0).toFixed(1),
+        ampBounceRate: (state.ampStats.amp_bounce_rate || 0).toFixed(1),
+        ampReplyRate: (state.ampStats.amp_reply_rate || 0).toFixed(1),
+        // Non-AMP engagement (for comparison)
+        nonAMPOpened: state.ampStats.non_amp_opened || 0,
+        nonAMPClicked: state.ampStats.non_amp_clicked || 0,
+        nonAMPBounced: state.ampStats.non_amp_bounced || 0,
+        nonAMPOpenRate: (state.ampStats.non_amp_open_rate || 0).toFixed(1),
+        nonAMPClickRate: (state.ampStats.non_amp_click_rate || 0).toFixed(1),
+        nonAMPBounceRate: (state.ampStats.non_amp_bounce_rate || 0).toFixed(1),
+      }
+    },
+
+    // AMP vs non-AMP comparison chart data.
+    ampComparisonChartData: (state) => {
+      if (!state.ampStats) return null
+
+      const ampStats = state.ampStats
+
+      return [
+        ['Metric', 'AMP Emails', 'Non-AMP Emails'],
+        [
+          'Open Rate (%)',
+          ampStats.amp_open_rate || 0,
+          ampStats.non_amp_open_rate || 0,
+        ],
+        [
+          'Click Rate (%)',
+          ampStats.amp_click_rate || 0,
+          ampStats.non_amp_click_rate || 0,
+        ],
+        [
+          'Bounce Rate (%)',
+          ampStats.amp_bounce_rate || 0,
+          ampStats.non_amp_bounce_rate || 0,
+        ],
+      ]
     },
 
     // Time series data formatted for Google Charts (engagement rates focus).
