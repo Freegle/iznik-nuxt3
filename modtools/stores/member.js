@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
@@ -72,16 +71,11 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
 
-      // if (!params.context) {
-      //  params.context = this.context
-      // }
-      if (params.context) {
-        // Ensure the context is a real object, in case it has been in the store.
-        params.context = cloneDeep(params.context)
+      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
+      if (params.context && params.context.id) {
+        params['context[id]'] = params.context.id
+        delete params.context
       }
-      // if (params.context) {
-      //  console.log('fetchMembers params.context', params.context)
-      // }
 
       const { members, context, ratings } = await api(
         this.config

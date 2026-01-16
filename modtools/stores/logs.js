@@ -20,7 +20,8 @@ export const useLogsStore = defineStore({
       let ret = null
       delete params.context
       if (this.context) {
-        params.context = { id: this.context.id }
+        // Use context[id] format - URLSearchParams can't serialize objects
+        params['context[id]'] = this.context.id
       }
       const data = await api(this.config).logs.fetch(params)
 
