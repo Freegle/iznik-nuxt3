@@ -338,61 +338,83 @@ onMounted(async () => {
     console.log('Failed to fetch app versions', e)
   }
 
-  // Fetch latest message time for Admin/Support users
+  // Fetch Yesterday backup status for Admin/Support users
+  // IMPORTANT: We must check Yesterday's actual restore status, not the production database
   if (me.value?.systemrole === 'Admin' || me.value?.systemrole === 'Support') {
-    const data = await miscStore.fetchLatestMessage()
-    if (data.ret === 0 && data.latestmessage) {
-      latestMessage.value = dayjs(data.latestmessage).format(
-        'D MMM YYYY HH:mm:ss'
+    try {
+      // First check Yesterday's restore status - this tells us if backups are actually working
+      const restoreResponse = await fetch(
+        'https://yesterday.ilovefreegle.org:8444/api/restore-status'
       )
 
-      // Check backup age and set status
-      const backupAge = dayjs().diff(dayjs(data.latestmessage), 'day')
-      if (backupAge > 2) {
-        backupStatus.value = 'error'
-      } else {
-        backupStatus.value = null
-      }
-    } else {
-      // Try to get restore status from Yesterday API
-      try {
-        const restoreResponse = await fetch(
-          'https://yesterday.ilovefreegle.org:8444/api/restore-status'
-        )
-        if (restoreResponse.ok) {
-          const restoreData = await restoreResponse.json()
-          if (restoreData.inProgress && restoreData.backupDate) {
-            const formattedDate = dayjs(
-              restoreData.backupDate,
-              'YYYYMMDD'
-            ).format('D MMM YYYY')
-            latestMessage.value = `Restoring backup from ${formattedDate}...`
-            backupStatus.value = 'warning'
-          } else if (
-            restoreData.status === 'completed' &&
-            restoreData.completedAt
-          ) {
-            const formattedDate = dayjs(restoreData.completedAt).format(
-              'D MMM YYYY HH:mm:ss'
+      if (restoreResponse.ok) {
+        const restoreData = await restoreResponse.json()
+
+        if (restoreData.inProgress && restoreData.backupDate) {
+          // A restore is currently in progress
+          const formattedDate = dayjs(
+            restoreData.backupDate,
+            'YYYYMMDD'
+          ).format('D MMM YYYY')
+          latestMessage.value = `Restoring backup from ${formattedDate}...`
+          backupStatus.value = 'warning'
+        } else if (restoreData.status === 'failed') {
+          // Restore failed - this is critical, show error
+          const attemptedDate = restoreData.backupDate
+            ? dayjs(restoreData.backupDate, 'YYYYMMDD').format('D MMM YYYY')
+            : 'unknown'
+          latestMessage.value = `FAILED to restore ${attemptedDate} - check logs`
+          backupStatus.value = 'error'
+        } else if (restoreData.status === 'completed') {
+          // Restore succeeded - now get the actual backup date from Yesterday
+          try {
+            const currentBackupResponse = await fetch(
+              'https://yesterday.ilovefreegle.org:8444/api/current-backup'
             )
-            latestMessage.value = formattedDate
-            backupStatus.value = null
-          } else if (restoreData.status === 'failed') {
-            latestMessage.value = 'Restore failed - check logs'
-            backupStatus.value = 'error'
-          } else {
-            latestMessage.value = 'Restoring...'
+            if (currentBackupResponse.ok) {
+              const currentBackup = await currentBackupResponse.json()
+              if (currentBackup.date) {
+                const backupDate = dayjs(currentBackup.date, 'YYYYMMDD')
+                const formattedDate = backupDate.format('D MMM YYYY')
+                const loadedAt = currentBackup.loaded_at
+                  ? dayjs(currentBackup.loaded_at).format('HH:mm:ss')
+                  : ''
+                latestMessage.value = `${formattedDate}${
+                  loadedAt ? ' ' + loadedAt : ''
+                }`
+
+                // Check if backup is stale (more than 2 days old)
+                const backupAge = dayjs().diff(backupDate, 'day')
+                if (backupAge > 2) {
+                  backupStatus.value = 'error'
+                } else {
+                  backupStatus.value = null
+                }
+              } else {
+                latestMessage.value = 'Unknown backup date'
+                backupStatus.value = 'warning'
+              }
+            } else {
+              latestMessage.value = 'Could not fetch backup info'
+              backupStatus.value = 'warning'
+            }
+          } catch (e) {
+            latestMessage.value = 'Could not fetch backup info'
             backupStatus.value = 'warning'
           }
         } else {
-          latestMessage.value = 'Restoring...'
+          // Unknown status
+          latestMessage.value = 'Unknown backup status'
           backupStatus.value = 'warning'
         }
-      } catch (e) {
-        // If Yesterday API is not accessible, just show generic message
-        latestMessage.value = 'Restoring...'
+      } else {
+        latestMessage.value = 'Yesterday API unavailable'
         backupStatus.value = 'warning'
       }
+    } catch (e) {
+      // If Yesterday API is not accessible, show error - don't pretend things are fine
+      latestMessage.value = 'Cannot reach Yesterday server'
+      backupStatus.value = 'error'
     }
   }
 
