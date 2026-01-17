@@ -152,7 +152,8 @@ export async function fetchReferencedMessage(chatid, id) {
 }
 
 export function useChatMessageBase(chatId, messageId, pov = null) {
-  const { chatStore, authStore, myid, chat, otheruser } = useChatShared(chatId)
+  const { chatStore, userStore, authStore, myid, chat, otheruser } =
+    useChatShared(chatId)
   const messageStore = useMessageStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
@@ -192,11 +193,14 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     return chatmessage.value?.userid === myid
   })
 
+  // MT context may have refmsg object directly on chatmessage instead of/in addition to refmsgid
   const refmsgid = computed(() => {
+    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg.id
     return chatmessage.value?.refmsgid
   })
 
   const refmsg = computed(() => {
+    if (chatmessage.value?.refmsg) return chatmessage.value.refmsg
     return refmsgid.value ? messageStore?.byId(refmsgid.value) : null
   })
 
@@ -217,16 +221,37 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     }
   })
 
+  // myid should be derived from me so it respects pov
+  const myidComputed = computed(() => {
+    return me.value?.id
+  })
+
+  // otheruser needs to be pov-aware for User2User chats viewed by moderators
+  const otheruserComputed = computed(() => {
+    // For User2User chats with pov, determine the "other" user relative to pov
+    if (pov && chat.value?.chattype === 'User2User') {
+      if (pov === chat.value?.user1id || pov === chat.value?.user1?.id) {
+        // pov is user1, so other user is user2
+        return chat.value?.user2 || userStore.byId(chat.value?.user2id)
+      } else {
+        // pov is user2, so other user is user1
+        return chat.value?.user1 || userStore.byId(chat.value?.user1id)
+      }
+    }
+    // Default: use the shared otheruser
+    return otheruser.value
+  })
+
   const chatMessageProfileImage = computed(() => {
-    return chatmessage.value?.userid === myid
+    return chatmessage.value?.userid === myidComputed.value
       ? me.value?.profile?.paththumb
       : chat.value?.icon
   })
 
   const chatMessageProfileName = computed(() => {
-    return chatmessage.value?.userid === myid
+    return chatmessage.value?.userid === myidComputed.value
       ? me.value?.displayname
-      : otheruser.value?.displayname
+      : otheruserComputed.value?.displayname
   })
 
   const regexEmail = computed(() => {
@@ -277,8 +302,8 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     refmsgid,
     refmsg,
     me,
-    myid,
-    otheruser,
+    myid: myidComputed,
+    otheruser: otheruserComputed,
     brokenImage,
     refetch,
     fetchMessage,
