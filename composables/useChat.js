@@ -177,12 +177,19 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const messageIsFromCurrentUser = computed(() => {
-    if (chat.value?.chattype === 'User2Mod') {
-      // For User2Mod chats we want it on the right hand side we sent it.
-      return chatmessage.value?.userid === myid
-    } else {
-      return chatmessage.value?.userid === myid
+    // If pov is provided (support/moderator viewing a User2User chat),
+    // use pov to determine which side messages appear on
+    if (pov && chat.value?.chattype === 'User2User') {
+      // Messages from user1 appear on left when pov is user1, on right otherwise
+      if (pov === chat.value?.user1id) {
+        return chatmessage.value?.userid === chat.value?.user1id
+      } else {
+        return chatmessage.value?.userid !== chat.value?.user1id
+      }
     }
+
+    // Normal case: message is from current user if they sent it
+    return chatmessage.value?.userid === myid
   })
 
   const refmsgid = computed(() => {
