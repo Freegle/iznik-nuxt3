@@ -11,8 +11,8 @@
       <div v-else class="promised-wrapper">
         <div class="promised-header">
           <ProfileImage
-            :image="otheruser.profile.paththumb"
-            :name="otheruser.displayname"
+            :image="otheruser?.profile?.paththumb"
+            :name="otheruser?.displayname"
             class="mr-2 inline"
             is-thumbnail
             size="sm"
@@ -61,14 +61,14 @@
       <div v-else class="promised-wrapper">
         <div class="promised-header">
           <ProfileImage
-            :image="me.profile.path"
-            :name="me.displayname"
+            :image="me?.profile?.path"
+            :name="me?.displayname"
             class="mr-2 inline"
             is-thumbnail
             size="sm"
           />
           <span class="promised-label">
-            You promised <strong>{{ otheruser.displayname }}</strong
+            You promised <strong>{{ otheruser?.displayname }}</strong
             >:
           </span>
         </div>
