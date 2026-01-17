@@ -24,9 +24,15 @@
           v-if="loggedIn"
           id="menu-option-modtools-discourse2"
           class="text-center p-0 mr-4"
-          @click="discourse"
         >
-          <div id="discourseIcon" class="position-relative">
+          <div
+            id="discourseIcon"
+            class="position-relative clickable"
+            role="button"
+            tabindex="0"
+            @click="discourse"
+            @keydown.enter="discourse"
+          >
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">Us</div>
             <b-badge
@@ -574,6 +580,7 @@ nav .navbar-nav li a,
 
 #discourseIcon {
   color: $color-white !important;
+  cursor: pointer;
 }
 
 nav .navbar-nav li a.nuxt-link-active {
