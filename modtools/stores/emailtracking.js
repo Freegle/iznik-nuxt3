@@ -356,17 +356,23 @@ export const useEmailTrackingStore = defineStore({
         ampClickRate: (state.ampStats.amp_click_rate || 0).toFixed(1),
         ampBounceRate: (state.ampStats.amp_bounce_rate || 0).toFixed(1),
         ampReplyRate: (state.ampStats.amp_reply_rate || 0).toFixed(1),
+        // AMP action rate (clicks + replies) - the key comparable metric
+        ampActionRate: (state.ampStats.amp_action_rate || 0).toFixed(1),
         // Non-AMP engagement (for comparison)
         nonAMPOpened: state.ampStats.non_amp_opened || 0,
         nonAMPClicked: state.ampStats.non_amp_clicked || 0,
         nonAMPBounced: state.ampStats.non_amp_bounced || 0,
+        nonAMPReplied: state.ampStats.non_amp_replied || 0,
         nonAMPOpenRate: (state.ampStats.non_amp_open_rate || 0).toFixed(1),
         nonAMPClickRate: (state.ampStats.non_amp_click_rate || 0).toFixed(1),
         nonAMPBounceRate: (state.ampStats.non_amp_bounce_rate || 0).toFixed(1),
+        nonAMPReplyRate: (state.ampStats.non_amp_reply_rate || 0).toFixed(1),
+        // Non-AMP action rate (clicks + email replies) - the key comparable metric
+        nonAMPActionRate: (state.ampStats.non_amp_action_rate || 0).toFixed(1),
       }
     },
 
-    // AMP vs non-AMP comparison chart data.
+    // AMP vs non-AMP comparison chart data - focuses on action rate as the key metric.
     ampComparisonChartData: (state) => {
       if (!state.ampStats) return null
 
@@ -375,9 +381,9 @@ export const useEmailTrackingStore = defineStore({
       return [
         ['Metric', 'AMP Emails', 'Non-AMP Emails'],
         [
-          'Open Rate (%)',
-          ampStats.amp_open_rate || 0,
-          ampStats.non_amp_open_rate || 0,
+          'Action Rate (%)',
+          ampStats.amp_action_rate || 0,
+          ampStats.non_amp_action_rate || 0,
         ],
         [
           'Click Rate (%)',
@@ -385,9 +391,9 @@ export const useEmailTrackingStore = defineStore({
           ampStats.non_amp_click_rate || 0,
         ],
         [
-          'Bounce Rate (%)',
-          ampStats.amp_bounce_rate || 0,
-          ampStats.non_amp_bounce_rate || 0,
+          'Reply Rate (%)',
+          ampStats.amp_reply_rate || 0,
+          ampStats.non_amp_reply_rate || 0,
         ],
       ]
     },

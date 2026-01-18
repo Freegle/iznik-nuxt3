@@ -288,9 +288,11 @@
       <div v-if="emailTrackingStore.hasAMPStats" class="mt-4">
         <h5 class="mb-3">AMP vs Non-AMP Email Engagement</h5>
         <p class="text-muted small mb-3">
-          Comparison of engagement rates between AMP-enabled emails and standard
-          HTML emails. AMP emails allow interactive content directly in the
-          email client.
+          <strong>Action Rate</strong> is the key comparable metric between AMP
+          and non-AMP emails. It measures the percentage of recipients who took
+          a meaningful action (clicked a link or replied). Open rates are shown
+          separately as they are not directly comparable due to tracking
+          limitations.
         </p>
 
         <!-- Show note when filtering by a type that has no AMP data -->
@@ -339,38 +341,46 @@
 
           <!-- AMP Stats Summary -->
           <div class="amp-stats-summary">
-            <!-- Comparable Rates -->
-            <div class="amp-stats-card amp-stats-card--rates">
-              <h6>Comparable Rates</h6>
+            <!-- Action Rates (Comparable) -->
+            <div class="amp-stats-card amp-stats-card--action">
+              <h6>
+                <span class="action-rate-badge">Key Metric</span>
+                Action Rates (Comparable)
+              </h6>
               <table class="comparable-rates-table">
                 <thead>
                   <tr>
                     <th></th>
                     <th class="text-purple">AMP Emails</th>
                     <th class="text-dark">Non-AMP Emails</th>
-                    <th class="text-success">Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Open Rate</td>
-                    <td class="text-purple font-weight-bold">
-                      {{ formattedAMPStats.ampOpenRate }}%
+                  <tr class="action-rate-row">
+                    <td>
+                      <strong>Action Rate</strong>
+                      <small class="d-block text-muted">clicks + replies</small>
                     </td>
-                    <td>{{ formattedAMPStats.nonAMPOpenRate }}%</td>
-                    <td class="text-success">
-                      {{ formattedAMPStats.totalOpenRate }}%
+                    <td class="text-purple font-weight-bold action-rate-value">
+                      {{ formattedAMPStats.ampActionRate }}%
+                    </td>
+                    <td class="font-weight-bold action-rate-value">
+                      {{ formattedAMPStats.nonAMPActionRate }}%
                     </td>
                   </tr>
                   <tr>
-                    <td>Click Rate</td>
+                    <td class="text-muted small pl-3">- Click Rate</td>
                     <td class="text-purple">
                       {{ formattedAMPStats.ampClickRate }}%
                     </td>
                     <td>{{ formattedAMPStats.nonAMPClickRate }}%</td>
-                    <td class="text-success">
-                      {{ formattedAMPStats.totalClickRate }}%
+                  </tr>
+                  <tr>
+                    <td class="text-muted small pl-3">- Reply Rate</td>
+                    <td class="text-purple">
+                      {{ formattedAMPStats.ampReplyRate }}%
                     </td>
+                    <td>{{ formattedAMPStats.nonAMPReplyRate }}%</td>
                   </tr>
                 </tbody>
                 <tfoot>
@@ -382,17 +392,46 @@
                     <td>
                       {{ formattedAMPStats.totalWithoutAMP.toLocaleString() }}
                     </td>
-                    <td>
-                      {{ formattedAMPStats.totalEmails.toLocaleString() }}
-                    </td>
                   </tr>
                 </tfoot>
               </table>
               <p class="small text-muted mt-3 mb-0">
-                <strong>Note:</strong> AMP emails can be opened in non-AMP
-                clients (e.g., Outlook, Apple Mail). In those cases, the HTML
-                fallback is displayed and tracking works the same as for non-AMP
-                emails. These rates are comparable.
+                <strong>Action Rate</strong> measures users who clicked a link
+                or replied to the email. This is directly comparable between AMP
+                and non-AMP emails because both actions are reliably tracked.
+              </p>
+            </div>
+
+            <!-- Open Rates (Not Comparable) -->
+            <div class="amp-stats-card amp-stats-card--open-rates">
+              <h6>
+                <span class="open-rate-badge">Indicative Only</span>
+                Open Rates (Not Comparable)
+              </h6>
+              <table class="comparable-rates-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th class="text-purple">AMP Emails</th>
+                    <th class="text-dark">Non-AMP Emails</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Open Rate</td>
+                    <td class="text-purple">
+                      {{ formattedAMPStats.ampOpenRate }}%
+                    </td>
+                    <td>{{ formattedAMPStats.nonAMPOpenRate }}%</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="small text-muted mt-2 mb-0">
+                <strong>Why not comparable?</strong> Non-AMP open rates are
+                underestimated because many email clients block tracking pixels.
+                AMP open rates are reliable because the AMP content is fetched
+                from our servers. Use open rates for trends within the same
+                category, not for AMP vs non-AMP comparison.
               </p>
             </div>
             <!-- AMP vs Non-AMP Metrics Comparison -->
@@ -818,10 +857,13 @@ export default {
         ampClickRate: stats.ampClickRate,
         ampBounceRate: stats.ampBounceRate,
         ampReplyRate: stats.ampReplyRate,
+        ampActionRate: stats.ampActionRate,
         nonAMPOpened,
         nonAMPOpenRate: stats.nonAMPOpenRate,
         nonAMPClickRate: stats.nonAMPClickRate,
         nonAMPBounceRate: stats.nonAMPBounceRate,
+        nonAMPReplyRate: stats.nonAMPReplyRate,
+        nonAMPActionRate: stats.nonAMPActionRate,
         totalOpened,
         totalOpenRate,
         totalClicked,
@@ -1076,7 +1118,7 @@ export default {
 
     getAMPComparisonOptions() {
       return {
-        title: 'AMP vs Non-AMP Engagement Rates',
+        title: 'AMP vs Non-AMP Action Rates',
         legend: { position: 'bottom' },
         chartArea: { width: '80%', height: '65%' },
         vAxis: {
@@ -1420,5 +1462,63 @@ export default {
 
 .amp-comparison-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Action rates card (key metric) */
+.amp-stats-card--action {
+  border-left: 3px solid #28a745;
+  background: #f8fff8;
+}
+
+.amp-stats-card--action h6 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-rate-badge {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #28a745;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.action-rate-row {
+  background: #f0f9f0;
+}
+
+.action-rate-value {
+  font-size: 1.25rem;
+}
+
+/* Open rates card (indicative only) */
+.amp-stats-card--open-rates {
+  border-left: 3px solid #ffc107;
+  background: #fffef8;
+}
+
+.amp-stats-card--open-rates h6 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.open-rate-badge {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #ffc107;
+  color: #856404;
+  border-radius: 3px;
+}
+
+.pl-3 {
+  padding-left: 1rem;
 }
 </style>
