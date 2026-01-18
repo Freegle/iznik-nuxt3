@@ -249,16 +249,6 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
   })
 
   const chatMessageProfileImage = computed(() => {
-    // For User2Mod chats viewed in ModTools (with pov), always use chat.icon
-    // for the member's messages. The embedded user1.profile.paththumb may be
-    // stale or different from the current chat icon.
-    if (pov && chat.value?.chattype === 'User2Mod') {
-      // Member's messages show chat.icon, moderator messages show nothing (CSS hides)
-      return chatmessage.value?.userid === chat.value?.user1id
-        ? chat.value?.icon
-        : null
-    }
-
     return chatmessage.value?.userid === myidComputed.value
       ? me.value?.profile?.paththumb
       : chat.value?.icon
