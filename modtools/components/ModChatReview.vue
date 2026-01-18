@@ -61,6 +61,7 @@
           <ChatMessage
             :id="message.id"
             :chatid="message.chatid"
+            :pov="message.touser.id"
             last
             highlight-emails
             is-m-t
