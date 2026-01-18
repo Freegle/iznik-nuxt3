@@ -342,11 +342,11 @@
 
           <!-- AMP Stats Summary -->
           <div class="amp-stats-summary">
-            <!-- Response Rates (Comparable) -->
+            <!-- Action Rates (Comparable) -->
             <div class="amp-stats-card amp-stats-card--action">
               <h6>
                 <span class="action-rate-badge">Key Metric</span>
-                Response Rates (Comparable)
+                Action Rates (Comparable)
               </h6>
               <table class="comparable-rates-table">
                 <thead>
@@ -359,29 +359,29 @@
                 <tbody>
                   <tr class="action-rate-row">
                     <td>
-                      <strong>Response Rate</strong>
+                      <strong>Action Rate</strong>
                       <small class="d-block text-muted"
-                        >all reply methods</small
+                        >replies + reply-clicks</small
                       >
                     </td>
                     <td class="text-purple font-weight-bold action-rate-value">
-                      {{ formattedAMPStats.ampResponseRate }}%
+                      {{ ampResponseRateTotal }}%
                     </td>
                     <td class="font-weight-bold action-rate-value">
-                      {{ formattedAMPStats.nonAMPResponseRate }}%
+                      {{ nonAMPResponseRateTotal }}%
                     </td>
                   </tr>
                   <tr class="reply-breakdown">
                     <td class="text-muted smaller pl-4">via AMP form</td>
                     <td class="text-purple smaller">
-                      {{ formattedAMPStats.ampReplyViaAMPRate || '0.0' }}%
+                      {{ formattedAMPStats.ampReplyViaAMPRate }}%
                     </td>
-                    <td class="text-muted smaller">-</td>
+                    <td class="smaller text-muted">-</td>
                   </tr>
                   <tr class="reply-breakdown">
                     <td class="text-muted smaller pl-4">via email</td>
                     <td class="text-purple smaller">
-                      {{ formattedAMPStats.ampReplyViaEmailRate || '0.0' }}%
+                      {{ formattedAMPStats.ampReplyViaEmailRate }}%
                     </td>
                     <td class="smaller">
                       {{ formattedAMPStats.nonAMPReplyRate }}%
@@ -390,23 +390,19 @@
                   <tr class="reply-breakdown">
                     <td class="text-muted smaller pl-4">via web</td>
                     <td class="text-purple smaller">
-                      {{ formattedAMPStats.ampReplyClickRate || '0.0' }}%
+                      {{ formattedAMPStats.ampReplyClickRate }}%
                     </td>
                     <td class="smaller">
-                      {{ formattedAMPStats.nonAMPReplyClickRate || '0.0' }}%
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted small pl-3">Other Clicks</td>
-                    <td class="text-purple">
-                      {{ formattedAMPStats.ampOtherClickRate || '0.0' }}%
-                    </td>
-                    <td>
-                      {{ formattedAMPStats.nonAMPOtherClickRate || '0.0' }}%
+                      {{ formattedAMPStats.nonAMPReplyClickRate }}%
                     </td>
                   </tr>
                 </tbody>
                 <tfoot>
+                  <tr class="text-muted small">
+                    <td>Other Clicks</td>
+                    <td>{{ formattedAMPStats.ampOtherClickRate }}%</td>
+                    <td>{{ formattedAMPStats.nonAMPOtherClickRate }}%</td>
+                  </tr>
                   <tr class="text-muted small">
                     <td>Emails sent</td>
                     <td>
@@ -419,9 +415,9 @@
                 </tfoot>
               </table>
               <p class="small text-muted mt-3 mb-0">
-                <strong>Response Rate</strong> = users who responded via AMP
-                form, email reply, or clicking to reply on web. This is directly
-                comparable between AMP and non-AMP emails.
+                <strong>Action Rate</strong> = users who replied (via AMP form,
+                email, or web clicks). This is directly comparable between AMP
+                and non-AMP emails.
               </p>
             </div>
 
@@ -932,6 +928,21 @@ export default {
           { key: 'click_count', label: 'Clicks', sortable: true },
         ]
       }
+    },
+    ampResponseRateTotal() {
+      if (!this.formattedAMPStats) return '0.0'
+      const viaAMP = parseFloat(this.formattedAMPStats.ampReplyViaAMPRate) || 0
+      const viaEmail =
+        parseFloat(this.formattedAMPStats.ampReplyViaEmailRate) || 0
+      const viaWeb = parseFloat(this.formattedAMPStats.ampReplyClickRate) || 0
+      return (viaAMP + viaEmail + viaWeb).toFixed(1)
+    },
+    nonAMPResponseRateTotal() {
+      if (!this.formattedAMPStats) return '0.0'
+      const viaEmail = parseFloat(this.formattedAMPStats.nonAMPReplyRate) || 0
+      const viaWeb =
+        parseFloat(this.formattedAMPStats.nonAMPReplyClickRate) || 0
+      return (viaEmail + viaWeb).toFixed(1)
     },
   },
   watch: {
