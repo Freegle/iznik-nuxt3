@@ -436,7 +436,12 @@
             </div>
             <!-- AMP vs Non-AMP Metrics Comparison -->
             <div class="amp-stats-card">
-              <h6>AMP Email Opens by Client Type</h6>
+              <h6>AMP-Enabled Emails: Opens by Client Type</h6>
+              <p class="small text-muted mb-2">
+                For the
+                {{ formattedAMPStats.totalWithAMP.toLocaleString() }}
+                AMP-enabled emails sent:
+              </p>
               <table class="amp-comparison-table">
                 <thead>
                   <tr>
@@ -447,25 +452,32 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Open Rate</td>
+                    <td>
+                      Open Rate
+                      <small class="d-block text-muted">% of sent</small>
+                    </td>
                     <td class="text-purple font-weight-bold">
                       {{ formattedAMPStats.ampRenderRate }}%
                     </td>
                     <td>{{ formattedAMPStats.ampNonAMPClientOpenRate }}%</td>
                   </tr>
                   <tr v-if="formattedAMPStats.ampReplyRate > 0">
-                    <td>Reply Rate (via AMP)</td>
+                    <td>
+                      Reply Rate
+                      <small class="d-block text-muted">% of sent</small>
+                    </td>
                     <td class="text-purple">
                       {{ formattedAMPStats.ampReplyRate }}%
                     </td>
-                    <td class="text-muted">-</td>
+                    <td class="text-muted">n/a</td>
                   </tr>
                 </tbody>
               </table>
               <p class="small text-muted mt-2 mb-0">
                 <strong>AMP Clients</strong> = Gmail, Yahoo with AMP support
                 (reliable tracking). <strong>Non-AMP Clients</strong> = Outlook,
-                Apple Mail, etc. (HTML fallback displayed).
+                Apple Mail, etc. (HTML fallback displayed). Replies can only be
+                tracked via AMP.
               </p>
             </div>
           </div>

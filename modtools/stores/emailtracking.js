@@ -198,8 +198,18 @@ export const useEmailTrackingStore = defineStore({
         const response = await api(
           this.config
         ).emailtracking.fetchTopClickedLinks(params)
-        this.clickedLinks = response.data || []
-        this.clickedLinksTotal = response.total || 0
+        // Filter out internal amp:// tracking URLs (amp://render, amp://reply)
+        const links = (response.data || []).filter((link) => {
+          const url = link.url || link.normalized_url || ''
+          return !url.startsWith('amp://')
+        })
+        this.clickedLinks = links
+        // Adjust total to account for filtered items
+        const filteredCount = (response.data || []).length - links.length
+        this.clickedLinksTotal = Math.max(
+          0,
+          (response.total || 0) - filteredCount
+        )
       } catch (e) {
         this.clickedLinksError = e.message || 'Failed to fetch clicked links'
         console.error('Clicked links fetch error:', e)
