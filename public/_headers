@@ -1,3 +1,13 @@
 # Headers for Netlify.  csp.js seems to kick in during dev but not when deployed.
 # Disabled because we show ads which come in from a variety of domains.
 # Content-Security-Policy: worker-src blob:; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.facebook.net *.facebook.com matomo.ilovefreegle.org *.sentry.io *.google.com *.googletagservices.com *.gstatic.com accounts.google.com/gsi/client cdn.jsdelivr.net *.paypalobjects.com googleads.g.doubleclick.net *.gumgum.com *.adnxs.com securepubads.g.doubleclick.net *.googlesyndication.com *.netlify.app cdn-cookieyes.com api.rlcdn.com ads.pubmatic.com; report-uri https://fdapilive.ilovefreegle.org/csp.php
+
+# CORS headers are required because assets may be served from Netlify deploy preview URLs
+# (via cdnURL/DEPLOY_URL) while the page is served from the main domain.
+/_nuxt/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
+
+/netlify/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization
