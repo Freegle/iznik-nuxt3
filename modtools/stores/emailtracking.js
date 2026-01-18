@@ -366,7 +366,32 @@ export const useEmailTrackingStore = defineStore({
         ampClickRate: (state.ampStats.amp_click_rate || 0).toFixed(1),
         ampBounceRate: (state.ampStats.amp_bounce_rate || 0).toFixed(1),
         ampReplyRate: (state.ampStats.amp_reply_rate || 0).toFixed(1),
-        // AMP action rate (clicks + replies) - the key comparable metric
+        // Reply breakdown by method for AMP-enabled emails
+        ampRepliedViaAMP: state.ampStats.amp_replied_via_amp || 0,
+        ampRepliedViaEmail: state.ampStats.amp_replied_via_email || 0,
+        ampReplyViaAMPRate: (
+          state.ampStats.amp_reply_via_amp_rate || 0
+        ).toFixed(1),
+        ampReplyViaEmailRate: (
+          state.ampStats.amp_reply_via_email_rate || 0
+        ).toFixed(1),
+        // Click breakdown for AMP emails
+        ampReplyClicks: state.ampStats.amp_reply_clicks || 0,
+        ampOtherClicks: state.ampStats.amp_other_clicks || 0,
+        ampReplyClickRate: (state.ampStats.amp_reply_click_rate || 0).toFixed(
+          1
+        ),
+        ampOtherClickRate: (state.ampStats.amp_other_click_rate || 0).toFixed(
+          1
+        ),
+        // Response rate: all ways of responding (replies + reply-clicks)
+        // Falls back to action rate if response rate not yet available from API
+        ampResponseRate: (
+          state.ampStats.amp_response_rate ??
+          state.ampStats.amp_action_rate ??
+          0
+        ).toFixed(1),
+        // Legacy action rate (for backwards compatibility)
         ampActionRate: (state.ampStats.amp_action_rate || 0).toFixed(1),
         // Non-AMP engagement (for comparison)
         nonAMPOpened: state.ampStats.non_amp_opened || 0,
@@ -377,7 +402,23 @@ export const useEmailTrackingStore = defineStore({
         nonAMPClickRate: (state.ampStats.non_amp_click_rate || 0).toFixed(1),
         nonAMPBounceRate: (state.ampStats.non_amp_bounce_rate || 0).toFixed(1),
         nonAMPReplyRate: (state.ampStats.non_amp_reply_rate || 0).toFixed(1),
-        // Non-AMP action rate (clicks + email replies) - the key comparable metric
+        // Click breakdown for non-AMP emails
+        nonAMPReplyClicks: state.ampStats.non_amp_reply_clicks || 0,
+        nonAMPOtherClicks: state.ampStats.non_amp_other_clicks || 0,
+        nonAMPReplyClickRate: (
+          state.ampStats.non_amp_reply_click_rate || 0
+        ).toFixed(1),
+        nonAMPOtherClickRate: (
+          state.ampStats.non_amp_other_click_rate || 0
+        ).toFixed(1),
+        // Response rate: email replies + reply-clicks
+        // Falls back to action rate if response rate not yet available from API
+        nonAMPResponseRate: (
+          state.ampStats.non_amp_response_rate ??
+          state.ampStats.non_amp_action_rate ??
+          0
+        ).toFixed(1),
+        // Legacy action rate (for backwards compatibility)
         nonAMPActionRate: (state.ampStats.non_amp_action_rate || 0).toFixed(1),
       }
     },

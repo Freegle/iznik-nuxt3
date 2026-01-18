@@ -324,28 +324,29 @@
                 class="chart"
               />
             </div>
-            <!-- AMP Comparison Bar Chart -->
-            <div class="chart-container">
+            <!-- AMP Opens by Client Type Pie Chart -->
+            <div class="chart-container chart-container--small">
+              <h6 class="chart-title">AMP Email Opens by Client</h6>
               <GChart
-                v-if="emailTrackingStore.ampComparisonChartData"
-                type="ColumnChart"
-                :data="emailTrackingStore.ampComparisonChartData"
-                :options="getAMPComparisonOptions()"
+                v-if="ampClientOpenChartData"
+                type="PieChart"
+                :data="ampClientOpenChartData"
+                :options="ampClientOpenChartOptions"
                 class="chart"
               />
-              <div v-else class="chart-empty text-muted">
-                No AMP comparison data available.
+              <div v-else class="chart-empty text-muted small">
+                No AMP client open data available.
               </div>
             </div>
           </div>
 
           <!-- AMP Stats Summary -->
           <div class="amp-stats-summary">
-            <!-- Action Rates (Comparable) -->
+            <!-- Response Rates (Comparable) -->
             <div class="amp-stats-card amp-stats-card--action">
               <h6>
                 <span class="action-rate-badge">Key Metric</span>
-                Action Rates (Comparable)
+                Response Rates (Comparable)
               </h6>
               <table class="comparable-rates-table">
                 <thead>
@@ -358,29 +359,51 @@
                 <tbody>
                   <tr class="action-rate-row">
                     <td>
-                      <strong>Action Rate</strong>
-                      <small class="d-block text-muted">clicks + replies</small>
+                      <strong>Response Rate</strong>
+                      <small class="d-block text-muted"
+                        >all reply methods</small
+                      >
                     </td>
                     <td class="text-purple font-weight-bold action-rate-value">
-                      {{ formattedAMPStats.ampActionRate }}%
+                      {{ formattedAMPStats.ampResponseRate }}%
                     </td>
                     <td class="font-weight-bold action-rate-value">
-                      {{ formattedAMPStats.nonAMPActionRate }}%
+                      {{ formattedAMPStats.nonAMPResponseRate }}%
+                    </td>
+                  </tr>
+                  <tr class="reply-breakdown">
+                    <td class="text-muted smaller pl-4">via AMP form</td>
+                    <td class="text-purple smaller">
+                      {{ formattedAMPStats.ampReplyViaAMPRate || '0.0' }}%
+                    </td>
+                    <td class="text-muted smaller">-</td>
+                  </tr>
+                  <tr class="reply-breakdown">
+                    <td class="text-muted smaller pl-4">via email</td>
+                    <td class="text-purple smaller">
+                      {{ formattedAMPStats.ampReplyViaEmailRate || '0.0' }}%
+                    </td>
+                    <td class="smaller">
+                      {{ formattedAMPStats.nonAMPReplyRate }}%
+                    </td>
+                  </tr>
+                  <tr class="reply-breakdown">
+                    <td class="text-muted smaller pl-4">via web</td>
+                    <td class="text-purple smaller">
+                      {{ formattedAMPStats.ampReplyClickRate || '0.0' }}%
+                    </td>
+                    <td class="smaller">
+                      {{ formattedAMPStats.nonAMPReplyClickRate || '0.0' }}%
                     </td>
                   </tr>
                   <tr>
-                    <td class="text-muted small pl-3">- Click Rate</td>
+                    <td class="text-muted small pl-3">Other Clicks</td>
                     <td class="text-purple">
-                      {{ formattedAMPStats.ampClickRate }}%
+                      {{ formattedAMPStats.ampOtherClickRate || '0.0' }}%
                     </td>
-                    <td>{{ formattedAMPStats.nonAMPClickRate }}%</td>
-                  </tr>
-                  <tr>
-                    <td class="text-muted small pl-3">- Reply Rate</td>
-                    <td class="text-purple">
-                      {{ formattedAMPStats.ampReplyRate }}%
+                    <td>
+                      {{ formattedAMPStats.nonAMPOtherClickRate || '0.0' }}%
                     </td>
-                    <td>{{ formattedAMPStats.nonAMPReplyRate }}%</td>
                   </tr>
                 </tbody>
                 <tfoot>
@@ -396,9 +419,9 @@
                 </tfoot>
               </table>
               <p class="small text-muted mt-3 mb-0">
-                <strong>Action Rate</strong> measures users who clicked a link
-                or replied to the email. This is directly comparable between AMP
-                and non-AMP emails because both actions are reliably tracked.
+                <strong>Response Rate</strong> = users who responded via AMP
+                form, email reply, or clicking to reply on web. This is directly
+                comparable between AMP and non-AMP emails.
               </p>
             </div>
 
@@ -432,52 +455,6 @@
                 AMP open rates are reliable because the AMP content is fetched
                 from our servers. Use open rates for trends within the same
                 category, not for AMP vs non-AMP comparison.
-              </p>
-            </div>
-            <!-- AMP vs Non-AMP Metrics Comparison -->
-            <div class="amp-stats-card">
-              <h6>AMP-Enabled Emails: Opens by Client Type</h6>
-              <p class="small text-muted mb-2">
-                For the
-                {{ formattedAMPStats.totalWithAMP.toLocaleString() }}
-                AMP-enabled emails sent:
-              </p>
-              <table class="amp-comparison-table">
-                <thead>
-                  <tr>
-                    <th>Metric</th>
-                    <th class="text-purple">AMP Clients</th>
-                    <th class="text-dark">Non-AMP Clients</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      Open Rate
-                      <small class="d-block text-muted">% of sent</small>
-                    </td>
-                    <td class="text-purple font-weight-bold">
-                      {{ formattedAMPStats.ampRenderRate }}%
-                    </td>
-                    <td>{{ formattedAMPStats.ampNonAMPClientOpenRate }}%</td>
-                  </tr>
-                  <tr v-if="formattedAMPStats.ampReplyRate > 0">
-                    <td>
-                      Reply Rate
-                      <small class="d-block text-muted">% of sent</small>
-                    </td>
-                    <td class="text-purple">
-                      {{ formattedAMPStats.ampReplyRate }}%
-                    </td>
-                    <td class="text-muted">n/a</td>
-                  </tr>
-                </tbody>
-              </table>
-              <p class="small text-muted mt-2 mb-0">
-                <strong>AMP Clients</strong> = Gmail, Yahoo with AMP support
-                (reliable tracking). <strong>Non-AMP Clients</strong> = Outlook,
-                Apple Mail, etc. (HTML fallback displayed). Replies can only be
-                tracked via AMP.
               </p>
             </div>
           </div>
@@ -870,12 +847,22 @@ export default {
         ampBounceRate: stats.ampBounceRate,
         ampReplyRate: stats.ampReplyRate,
         ampActionRate: stats.ampActionRate,
+        // Response rate and breakdown
+        ampResponseRate: stats.ampResponseRate,
+        ampReplyViaAMPRate: stats.ampReplyViaAMPRate,
+        ampReplyViaEmailRate: stats.ampReplyViaEmailRate,
+        ampReplyClickRate: stats.ampReplyClickRate,
+        ampOtherClickRate: stats.ampOtherClickRate,
         nonAMPOpened,
         nonAMPOpenRate: stats.nonAMPOpenRate,
         nonAMPClickRate: stats.nonAMPClickRate,
         nonAMPBounceRate: stats.nonAMPBounceRate,
         nonAMPReplyRate: stats.nonAMPReplyRate,
         nonAMPActionRate: stats.nonAMPActionRate,
+        // Non-AMP response rate and breakdown
+        nonAMPResponseRate: stats.nonAMPResponseRate,
+        nonAMPReplyClickRate: stats.nonAMPReplyClickRate,
+        nonAMPOtherClickRate: stats.nonAMPOtherClickRate,
         totalOpened,
         totalOpenRate,
         totalClicked,
@@ -897,6 +884,34 @@ export default {
       return {
         pieHole: 0.4,
         colors: ['#6f42c1', '#6c757d'],
+        legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+        chartArea: { width: '90%', height: '75%' },
+        pieSliceText: 'percentage',
+        pieSliceTextStyle: { fontSize: 11 },
+        tooltip: { text: 'both' },
+      }
+    },
+    ampClientOpenChartData() {
+      if (!this.formattedAMPStats) return null
+      const { ampRendered, ampOpened } = this.formattedAMPStats
+      if (ampOpened === 0) return null
+
+      // AMP emails opened: how many were opened in AMP-enabled vs non-AMP clients
+      const ampClientOpens = ampRendered || 0
+      const nonAMPClientOpens = Math.max(0, ampOpened - ampClientOpens)
+
+      if (ampClientOpens === 0 && nonAMPClientOpens === 0) return null
+
+      return [
+        ['Client Type', 'Opens'],
+        ['AMP-enabled client', ampClientOpens],
+        ['Non-AMP client', nonAMPClientOpens],
+      ]
+    },
+    ampClientOpenChartOptions() {
+      return {
+        pieHole: 0.4,
+        colors: ['#6f42c1', '#adb5bd'],
         legend: { position: 'bottom', textStyle: { fontSize: 11 } },
         chartArea: { width: '90%', height: '75%' },
         pieSliceText: 'percentage',
@@ -1246,6 +1261,17 @@ export default {
   font-size: 0.75rem;
   color: #666;
   margin-top: 0.125rem;
+}
+
+.smaller {
+  font-size: 0.65rem !important;
+  opacity: 0.8;
+}
+
+.reply-breakdown td {
+  font-size: 0.65rem !important;
+  padding-top: 0.1rem !important;
+  padding-bottom: 0.1rem !important;
 }
 
 @media (max-width: 576px) {
