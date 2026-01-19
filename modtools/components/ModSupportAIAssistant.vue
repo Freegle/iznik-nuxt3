@@ -242,7 +242,7 @@
       </div>
 
       <div v-if="pendingDbQuery?.columns?.length > 0" class="mb-3">
-        <strong>Columns accessed:</strong>
+        <strong>Columns accessed: </strong>
         <small class="text-muted">{{
           pendingDbQuery?.columns?.join(', ')
         }}</small>
@@ -437,17 +437,8 @@
           <strong class="text-secondary">General Query</strong>
           <span class="text-muted ml-2">(no specific user selected)</span>
         </div>
-        <b-button
-          v-if="messages.length > 0"
-          variant="outline-primary"
-          size="sm"
-          class="mr-2"
-          @click="newChat"
-        >
+        <b-button variant="outline-primary" size="sm" @click="newChat">
           New Chat
-        </b-button>
-        <b-button variant="link" size="sm" @click="clearUser">
-          {{ selectedUser ? 'Change user' : 'Select user' }}
         </b-button>
       </div>
 
@@ -726,7 +717,8 @@ export default {
       })
     },
 
-    clearUser() {
+    newChat() {
+      // Start a fresh conversation - clears user and all state
       this.selectedUser = null
       this.skippedUserSelection = false
       this.messages = []
@@ -735,23 +727,17 @@ export default {
       this.claudeSessionId = null
       this.localMapping = {}
       this.debugLog = []
-    },
-
-    newChat() {
-      // Start a new conversation but keep the selected user
-      this.messages = []
-      this.query = ''
-      this.currentSessionId = null
-      this.claudeSessionId = null
-      this.localMapping = {}
-      this.debugLog = []
-      // Focus the query input
-      this.$nextTick(() => {
-        const textarea = this.$el.querySelector('textarea')
-        if (textarea) {
-          textarea.focus()
-        }
-      })
+      this.searchResults = []
+      this.userSearch = ''
+      // Clear any pending approval states
+      this.showMcpQueryApproval = false
+      this.showMcpResultsApproval = false
+      this.pendingMcpQuery = null
+      this.pendingMcpResults = null
+      this.showDbQueryApproval = false
+      this.showDbResultsApproval = false
+      this.pendingDbQuery = null
+      this.pendingDbResults = null
     },
 
     skipUserSelection() {
