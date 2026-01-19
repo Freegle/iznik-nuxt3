@@ -511,7 +511,7 @@
         </div>
 
         <!-- Chat messages -->
-        <div class="log-analysis-messages p-3">
+        <div ref="messagesContainer" class="log-analysis-messages p-3">
           <div
             v-for="(msg, idx) in messages"
             :key="idx"
@@ -740,6 +740,15 @@ export default {
       this.pendingDbResults = null
     },
 
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.messagesContainer
+        if (container) {
+          container.scrollTop = container.scrollHeight
+        }
+      })
+    },
+
     skipUserSelection() {
       this.skippedUserSelection = true
       this.searchResults = []
@@ -915,6 +924,7 @@ export default {
           content: `Error: ${error.message}`,
           rawContent: `Error: ${error.message}`,
         })
+        this.scrollToBottom()
       } finally {
         this.isProcessing = false
       }
@@ -935,6 +945,7 @@ export default {
           content: queryText,
           rawContent: queryText,
         })
+        this.scrollToBottom()
 
         this.processingStatus = 'Analyzing...'
 
@@ -959,6 +970,7 @@ export default {
           costUsd: logResult.costUsd,
           usage: logResult.usage,
         })
+        this.scrollToBottom()
 
         this.query = ''
       } catch (error) {
@@ -969,6 +981,7 @@ export default {
           content: `Error: ${error.message}`,
           rawContent: `Error: ${error.message}`,
         })
+        this.scrollToBottom()
       } finally {
         this.stopMcpPolling()
         this.isProcessing = false
