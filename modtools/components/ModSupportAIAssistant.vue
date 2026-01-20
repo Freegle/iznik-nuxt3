@@ -689,9 +689,17 @@ export default {
       this.processingStatus = 'Sanitizing query...'
 
       try {
-        // Step 1: Sanitize the query
+        // Add user context to query BEFORE sanitization
+        // This ensures Claude knows which user we're investigating, while the email
+        // gets pseudonymized (e.g., "testmod@test.com" -> "user_abc123@test.com")
+        let contextualQuery = queryText
+        if (this.selectedUser) {
+          contextualQuery = `Investigating Freegle user ${this.selectedUser.email} (ID: ${this.selectedUser.id}). Query: ${queryText}`
+        }
+
+        // Step 1: Sanitize the query (including user context)
         const sanitizePayload = {
-          query: queryText,
+          query: contextualQuery,
           knownPii: this.selectedUser
             ? {
                 email: this.selectedUser.email,
