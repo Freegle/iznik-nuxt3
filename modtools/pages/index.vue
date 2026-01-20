@@ -55,9 +55,7 @@
       <span v-if="backupStatus === 'error'">
         ❌ Backup is over 2 days old!</span
       >
-      <span v-if="backupStatus === 'warning'">
-        ⚠️ Backup is currently restoring</span
-      >
+      <span v-if="isRestoring"> ⚠️ Backup is currently restoring</span>
     </div>
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
@@ -216,6 +214,7 @@ const end = ref(null)
 const appVersions = ref(null)
 const latestMessage = ref(null)
 const backupStatus = ref(null)
+const isRestoring = ref(false)
 // const dateFormat = ref(null)
 
 const groupid = computed({
@@ -358,6 +357,7 @@ onMounted(async () => {
           ).format('D MMM YYYY')
           latestMessage.value = `Restoring backup from ${formattedDate}...`
           backupStatus.value = 'warning'
+          isRestoring.value = true
         } else if (restoreData.status === 'failed') {
           // Restore failed - this is critical, show error
           const attemptedDate = restoreData.backupDate
