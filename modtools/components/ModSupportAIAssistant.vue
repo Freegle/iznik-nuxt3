@@ -450,7 +450,6 @@
 
 <script>
 import { marked } from 'marked'
-import { useUserStore } from '~/stores/user'
 
 // Query sanitizer service - frontend talks to this for PII handling
 const SANITIZER_URL = 'http://mcp-sanitizer.localhost'
@@ -659,36 +658,23 @@ export default {
       try {
         let users = []
 
-        // Use custom API URL if configured (live mode)
-        if (this.serverEnvironment === 'live' && this.apiServerUrl) {
-          const response = await fetch(
-            `${this.apiServerUrl}/user?search=${encodeURIComponent(
-              this.userSearch.trim()
-            )}&emailhistory=true`,
-            {
-              method: 'GET',
-              credentials: 'include',
-            }
-          )
-
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status}`)
+        // Use MCP endpoint for user search (works for both dev and live)
+        // This goes directly to the database via the status server
+        const response = await fetch(
+          `http://status.localhost/api/mcp/user-search?search=${encodeURIComponent(
+            this.userSearch.trim()
+          )}&limit=10`,
+          {
+            method: 'GET',
           }
+        )
 
-          const data = await response.json()
-          users = data.users || []
-        } else {
-          // Use local store for development
-          const userStore = useUserStore()
-          userStore.clear()
-
-          await userStore.fetchMT({
-            search: this.userSearch.trim(),
-            emailhistory: true,
-          })
-
-          users = Object.values(userStore.list)
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`)
         }
+
+        const data = await response.json()
+        users = data.users || []
 
         // Sort by last access
         this.searchResults = users
