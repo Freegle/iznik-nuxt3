@@ -1,5 +1,30 @@
 <template>
   <div :key="'loginCount-' + loginCount">
+    <!-- SVG filter for AI image duotone effect - converts to consistent green/white palette -->
+    <svg
+      style="position: absolute; width: 0; height: 0; overflow: hidden"
+      aria-hidden="true"
+    >
+      <defs>
+        <filter id="ai-duotone-green" color-interpolation-filters="sRGB">
+          <!-- Convert to grayscale using luminance -->
+          <feColorMatrix
+            type="matrix"
+            values="0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0.299 0.587 0.114 0 0
+                    0     0     0     1 0"
+          />
+          <!-- Map grayscale to duotone: dark green (#0D3311) to white (#FFFFFF) -->
+          <!-- Using darker green so mid-grays still appear dark -->
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.05 1" />
+            <feFuncG type="table" tableValues="0.20 1" />
+            <feFuncB type="table" tableValues="0.07 1" />
+          </feComponentTransfer>
+        </filter>
+      </defs>
+    </svg>
     <client-only>
       <header v-if="shouldShowNavbar">
         <NavbarDesktop />
@@ -351,5 +376,11 @@ ready = true
 
 .pointer-none {
   pointer-events: none;
+}
+
+/* AI image duotone filter - applies consistent green/white color scheme */
+.ai-image-duotone,
+.ai-image-duotone img {
+  filter: url(#ai-duotone-green);
 }
 </style>
