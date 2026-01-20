@@ -124,6 +124,61 @@
       </div>
     </b-modal>
 
+    <!-- Settings Modal: Server Configuration -->
+    <b-modal
+      v-model="showSettingsModal"
+      title="Server Configuration"
+      size="md"
+      centered
+      ok-title="Save"
+      @ok="saveServerSettings"
+    >
+      <p class="text-muted small mb-3">
+        Configure connections to Loki (logs) and MySQL (database) servers. For
+        development, use SSH tunnels from Windows or WSL.
+      </p>
+
+      <b-form-group label="Loki Server" label-size="sm" class="mb-3">
+        <b-form-input
+          v-model="lokiServerUrl"
+          placeholder="http://localhost:3100 or http://192.168.1.166:3101"
+          size="sm"
+        />
+        <small class="text-muted">
+          Loki API endpoint for log queries (e.g., via SSH tunnel to live
+          server)
+        </small>
+      </b-form-group>
+
+      <b-form-group label="MySQL Server" label-size="sm" class="mb-3">
+        <b-form-input
+          v-model="sqlServerUrl"
+          placeholder="localhost:3306 or 192.168.1.166:3307"
+          size="sm"
+        />
+        <small class="text-muted">
+          MySQL host:port for database queries (e.g., via SSH tunnel to live
+          server)
+        </small>
+      </b-form-group>
+
+      <div class="alert alert-info small mb-0">
+        <strong>Tunnel Tips:</strong>
+        <ul class="mb-0 ps-3">
+          <li>
+            <strong>From Windows (MobaXterm):</strong> Bind to
+            <code>0.0.0.0</code> instead of <code>127.0.0.1</code>, then use
+            Windows IP (e.g., <code>192.168.1.166:port</code>)
+          </li>
+          <li>
+            <strong>From WSL:</strong> Use
+            <code>ssh -L 3100:localhost:3100 liveserver</code>, then use
+            <code>localhost:3100</code>
+          </li>
+        </ul>
+      </div>
+    </b-modal>
+
     <!-- Header -->
     <div class="log-analysis-header">
       <div class="d-flex align-items-center justify-content-between">
@@ -147,6 +202,14 @@
               showAnonymisedData ? 'Show PII' : 'Show Anonymised'
             }}</small>
           </b-form-checkbox>
+          <b-button
+            variant="outline-secondary"
+            size="sm"
+            class="mr-2"
+            @click="showSettingsModal = true"
+          >
+            <small>⚙ Settings</small>
+          </b-button>
           <b-button
             variant="outline-secondary"
             size="sm"
@@ -395,6 +458,11 @@ export default {
       // Conversation with raw data for debug
       messages: [],
       debugLog: [],
+
+      // Server configuration (for development tunnels)
+      showSettingsModal: false,
+      lokiServerUrl: localStorage.getItem('aiSupport_lokiUrl') || '',
+      sqlServerUrl: localStorage.getItem('aiSupport_sqlUrl') || '',
     }
   },
   computed: {
@@ -514,6 +582,17 @@ export default {
       } catch {
         this.sanitizerAvailable = false
       }
+    },
+
+    saveServerSettings() {
+      // Save to localStorage for persistence across sessions
+      localStorage.setItem('aiSupport_lokiUrl', this.lokiServerUrl)
+      localStorage.setItem('aiSupport_sqlUrl', this.sqlServerUrl)
+      // TODO: These values will be passed to the MCP servers when making queries
+      console.log('Server settings saved:', {
+        loki: this.lokiServerUrl,
+        sql: this.sqlServerUrl,
+      })
     },
 
     async searchUsers() {
