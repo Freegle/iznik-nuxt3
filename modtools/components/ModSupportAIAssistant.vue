@@ -60,256 +60,6 @@
       <p>Do you want to proceed?</p>
     </b-modal>
 
-    <!-- Privacy Review Modal (shown when privacyReviewMode is enabled) -->
-    <b-modal
-      v-model="showPrivacyReview"
-      title="Privacy Review"
-      size="lg"
-      centered
-      ok-title="Approve & Send to AI"
-      cancel-title="Cancel"
-      @ok="approvePrivacyReview"
-      @cancel="cancelPrivacyReview"
-    >
-      <p class="text-info">
-        <strong>Privacy Review Mode:</strong> Please verify that all personal
-        data has been properly pseudonymized before sending to the AI.
-      </p>
-
-      <div class="privacy-review-section mb-3">
-        <h6>Your Original Query:</h6>
-        <div class="privacy-review-box original">
-          {{ pendingPrivacyReview?.originalQuery }}
-        </div>
-      </div>
-
-      <div class="privacy-review-section mb-3">
-        <h6>Pseudonymized Query (what the AI will see):</h6>
-        <div class="privacy-review-box pseudonymized">
-          {{ pendingPrivacyReview?.pseudonymizedQuery }}
-        </div>
-      </div>
-
-      <div
-        v-if="
-          pendingPrivacyReview?.mapping &&
-          Object.keys(pendingPrivacyReview.mapping).length > 0
-        "
-        class="privacy-review-section mb-3"
-      >
-        <h6>Pseudonymized Values:</h6>
-        <table class="table table-sm table-bordered">
-          <thead>
-            <tr>
-              <th>Pseudonymized (sent to AI)</th>
-              <th>Real Value (kept private)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(value, token) in pendingPrivacyReview.mapping"
-              :key="token"
-            >
-              <td>
-                <code class="text-danger">{{ token }}</code>
-              </td>
-              <td>{{ value }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="alert alert-warning">
-        <strong>Check:</strong> Does the pseudonymized query contain any real
-        email addresses, names, phone numbers, or other personal data? If so,
-        click Cancel and report the issue.
-      </div>
-    </b-modal>
-
-    <!-- MCP Query Approval Modal -->
-    <b-modal
-      v-model="showMcpQueryApproval"
-      title="Log Query Approval"
-      size="lg"
-      centered
-      ok-title="Approve Query"
-      cancel-title="Reject"
-      @ok="approveMcpQuery"
-      @cancel="rejectMcpQuery"
-    >
-      <p class="text-info">
-        <strong>Privacy Review:</strong> The AI wants to query the log system.
-        Please review and approve the query before it executes.
-      </p>
-
-      <div class="privacy-review-section mb-3">
-        <h6>Log Query:</h6>
-        <div class="privacy-review-box pseudonymized">
-          <code>{{ pendingMcpQuery?.query }}</code>
-        </div>
-      </div>
-
-      <div class="d-flex gap-3 mb-3">
-        <div><strong>Time Range:</strong> {{ pendingMcpQuery?.timeRange }}</div>
-        <div><strong>Limit:</strong> {{ pendingMcpQuery?.limit }} results</div>
-      </div>
-
-      <div class="alert alert-info">
-        <strong>Note:</strong> All log results will be pseudonymized (emails,
-        IPs replaced with tokens). You will review the results before they are
-        sent to the AI.
-      </div>
-    </b-modal>
-
-    <!-- MCP Results Approval Modal -->
-    <b-modal
-      v-model="showMcpResultsApproval"
-      title="Log Results Approval"
-      size="xl"
-      centered
-      ok-title="Send to AI"
-      cancel-title="Reject"
-      @ok="approveMcpResults"
-      @cancel="rejectMcpResults"
-    >
-      <p class="text-info">
-        <strong>Privacy Review:</strong> Review the log results before they are
-        sent to the AI. Check that no unexpected personal data is visible.
-      </p>
-
-      <div class="mb-2">
-        <strong>Results:</strong> {{ pendingMcpResults?.resultCount }} log
-        entries from {{ pendingMcpResults?.streamCount }} streams
-      </div>
-
-      <div class="mcp-results-preview">
-        <div
-          v-for="(stream, idx) in pendingMcpResults?.results || []"
-          :key="idx"
-          class="result-stream mb-2"
-        >
-          <div class="stream-labels small text-muted">
-            {{ formatStreamLabels(stream.stream) }}
-          </div>
-          <div
-            v-for="(entry, entryIdx) in stream.values?.slice(0, 10) || []"
-            :key="entryIdx"
-            class="log-entry"
-          >
-            <span class="timestamp">{{ formatLogTimestamp(entry[0]) }}</span>
-            <span class="log-line">{{ entry[1] }}</span>
-          </div>
-          <div v-if="stream.values?.length > 10" class="text-muted small mt-1">
-            ... and {{ stream.values.length - 10 }} more entries
-          </div>
-        </div>
-      </div>
-
-      <div class="alert alert-warning mt-3">
-        <strong>Check:</strong> Do these results contain any unexpected personal
-        data that wasn't properly pseudonymized? If so, click Reject.
-      </div>
-    </b-modal>
-
-    <!-- DB Query Approval Modal -->
-    <b-modal
-      v-model="showDbQueryApproval"
-      title="Database Query Approval"
-      size="lg"
-      centered
-      ok-title="Approve Query"
-      cancel-title="Reject"
-      @ok="approveDbQuery"
-      @cancel="rejectDbQuery"
-    >
-      <p class="text-info">
-        <strong>Privacy Review:</strong> The AI wants to query the database.
-        Please review the SQL query before it executes.
-      </p>
-
-      <div class="privacy-review-section mb-3">
-        <h6>SQL Query:</h6>
-        <div class="privacy-review-box pseudonymized">
-          <code>{{ pendingDbQuery?.query }}</code>
-        </div>
-      </div>
-
-      <div class="d-flex gap-3 mb-3">
-        <div>
-          <strong>Tables:</strong> {{ pendingDbQuery?.tables?.join(', ') }}
-        </div>
-        <div><strong>Limit:</strong> {{ pendingDbQuery?.limit }} rows</div>
-      </div>
-
-      <div v-if="pendingDbQuery?.columns?.length > 0" class="mb-3">
-        <strong>Columns accessed: </strong>
-        <small class="text-muted">{{
-          pendingDbQuery?.columns?.join(', ')
-        }}</small>
-      </div>
-
-      <div class="alert alert-info">
-        <strong>Note:</strong> Sensitive columns (names, emails) will be
-        pseudonymized in the results. You will review the results before they
-        are sent to the AI.
-      </div>
-    </b-modal>
-
-    <!-- DB Results Approval Modal -->
-    <b-modal
-      v-model="showDbResultsApproval"
-      title="Database Results Approval"
-      size="xl"
-      centered
-      ok-title="Send to AI"
-      cancel-title="Reject"
-      @ok="approveDbResults"
-      @cancel="rejectDbResults"
-    >
-      <p class="text-info">
-        <strong>Privacy Review:</strong> Review the database results before they
-        are sent to the AI. Check that no unexpected personal data is visible.
-      </p>
-
-      <div class="mb-2">
-        <strong>Results:</strong> {{ pendingDbResults?.rowCount }} rows,
-        {{ pendingDbResults?.tokenCount }} values pseudonymized
-      </div>
-
-      <div class="db-results-preview">
-        <table class="table table-sm table-bordered">
-          <thead>
-            <tr>
-              <th v-for="col in pendingDbResults?.columns" :key="col">
-                {{ col }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(row, idx) in (pendingDbResults?.rows || []).slice(0, 20)"
-              :key="idx"
-            >
-              <td v-for="col in pendingDbResults?.columns" :key="col">
-                {{ row[col] }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div
-          v-if="(pendingDbResults?.rows || []).length > 20"
-          class="text-muted small"
-        >
-          ... and {{ pendingDbResults.rows.length - 20 }} more rows
-        </div>
-      </div>
-
-      <div class="alert alert-warning mt-3">
-        <strong>Check:</strong> Do these results contain any unexpected personal
-        data that wasn't properly pseudonymized? If so, click Reject.
-      </div>
-    </b-modal>
-
     <!-- Header -->
     <div class="log-analysis-header">
       <div class="d-flex align-items-center justify-content-between">
@@ -323,14 +73,6 @@
           </span>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <b-form-checkbox
-            v-model="privacyReviewMode"
-            switch
-            size="sm"
-            class="mr-3"
-          >
-            <small>Privacy Review</small>
-          </b-form-checkbox>
           <b-form-checkbox
             v-model="showAnonymisedData"
             switch
@@ -472,10 +214,10 @@
 
       <!-- Chat interface (after conversation starts) -->
       <template v-else>
-        <!-- Debug Panel -->
+        <!-- Debug Panel: AI Data Access Log -->
         <div v-if="debugMode && debugLog.length > 0" class="debug-panel p-3">
           <h6 class="d-flex align-items-center justify-content-between">
-            <span>Debug: Data Flow</span>
+            <span>AI Data Access Log</span>
             <b-button variant="link" size="sm" @click="debugLog = []"
               >Clear</b-button
             >
@@ -488,11 +230,19 @@
               :class="'debug-' + entry.type"
             >
               <div class="debug-header d-flex justify-content-between">
-                <strong>{{ entry.label }}</strong>
+                <strong>{{
+                  entry.type === 'request'
+                    ? '→ AI Requested'
+                    : entry.type === 'response'
+                    ? '← Data Sent to AI'
+                    : entry.label
+                }}</strong>
                 <small class="text-muted">{{ entry.timestamp }}</small>
               </div>
               <div v-if="entry.tokenMapping" class="token-mapping mt-1">
-                <small class="text-muted">Tokens created:</small>
+                <small class="text-muted"
+                  >PII tokens (real values hidden from AI):</small
+                >
                 <div
                   v-for="(value, token) in entry.tokenMapping"
                   :key="token"
@@ -595,12 +345,9 @@ export default {
       // UI state
       showPrivacyModal: false,
       showPiiWarning: false,
-      showPrivacyReview: false,
       sanitizerAvailable: true,
       showAnonymisedData: false,
       debugMode: false,
-      privacyReviewMode: true, // Default on for privacy verification
-      pendingPrivacyReview: null,
 
       // User search
       userSearch: '',
@@ -625,19 +372,6 @@ export default {
       // Conversation with raw data for debug
       messages: [],
       debugLog: [],
-
-      // MCP query approval state
-      showMcpQueryApproval: false,
-      showMcpResultsApproval: false,
-      pendingMcpQuery: null,
-      pendingMcpResults: null,
-      mcpPollInterval: null,
-
-      // DB query approval state
-      showDbQueryApproval: false,
-      showDbResultsApproval: false,
-      pendingDbQuery: null,
-      pendingDbResults: null,
     }
   },
   computed: {
@@ -649,9 +383,6 @@ export default {
   },
   async mounted() {
     await this.checkSanitizerAvailability()
-  },
-  beforeUnmount() {
-    this.stopMcpPolling()
   },
   methods: {
     async checkSanitizerAvailability() {
@@ -729,15 +460,6 @@ export default {
       this.debugLog = []
       this.searchResults = []
       this.userSearch = ''
-      // Clear any pending approval states
-      this.showMcpQueryApproval = false
-      this.showMcpResultsApproval = false
-      this.pendingMcpQuery = null
-      this.pendingMcpResults = null
-      this.showDbQueryApproval = false
-      this.showDbResultsApproval = false
-      this.pendingDbQuery = null
-      this.pendingDbResults = null
     },
 
     scrollToBottom() {
@@ -840,21 +562,6 @@ export default {
       this.showPiiWarning = false
     },
 
-    async approvePrivacyReview() {
-      if (this.pendingPrivacyReview) {
-        const { originalQuery, pseudonymizedQuery } = this.pendingPrivacyReview
-        this.pendingPrivacyReview = null
-        this.showPrivacyReview = false
-        await this.proceedWithQuery(originalQuery, pseudonymizedQuery)
-      }
-    },
-
-    cancelPrivacyReview() {
-      this.pendingPrivacyReview = null
-      this.showPrivacyReview = false
-      this.query = ''
-    },
-
     async executeQuery(queryText) {
       this.isProcessing = true
       this.processingStatus = 'Sanitizing query...'
@@ -901,20 +608,7 @@ export default {
         this.currentSessionId = sessionId
         this.localMapping = { ...this.localMapping, ...localMapping }
 
-        // If privacy review mode is enabled, show review modal and wait for approval
-        if (this.privacyReviewMode) {
-          this.pendingPrivacyReview = {
-            originalQuery: queryText,
-            pseudonymizedQuery,
-            mapping: localMapping,
-            sessionId,
-          }
-          this.isProcessing = false
-          this.showPrivacyReview = true
-          return
-        }
-
-        // Otherwise proceed directly
+        // Proceed with the query
         await this.proceedWithQuery(queryText, pseudonymizedQuery)
       } catch (error) {
         console.error('Query error:', error)
@@ -932,11 +626,6 @@ export default {
 
     async proceedWithQuery(queryText, pseudonymizedQuery) {
       this.isProcessing = true
-
-      // Start polling for MCP approval requests if privacy review mode is on
-      if (this.privacyReviewMode) {
-        this.startMcpPolling()
-      }
 
       try {
         // Add user message to conversation (store both raw and display versions)
@@ -983,7 +672,6 @@ export default {
         })
         this.scrollToBottom()
       } finally {
-        this.stopMcpPolling()
         this.isProcessing = false
       }
     },
@@ -1124,282 +812,6 @@ export default {
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
     },
 
-    // MCP Query Approval Methods
-    startMcpPolling() {
-      if (this.mcpPollInterval) return // Already polling
-
-      this.mcpPollInterval = setInterval(async () => {
-        await this.pollPendingMcpQueries()
-      }, 2000) // Poll every 2 seconds
-    },
-
-    stopMcpPolling() {
-      if (this.mcpPollInterval) {
-        clearInterval(this.mcpPollInterval)
-        this.mcpPollInterval = null
-      }
-    },
-
-    async pollPendingMcpQueries() {
-      if (!this.isProcessing || !this.privacyReviewMode) return
-
-      try {
-        const response = await fetch('http://status.localhost/api/mcp/pending')
-        if (!response.ok) return
-
-        const data = await response.json()
-        const queries = data.queries || []
-
-        // Check for pending log query approval
-        const pendingLogQuery = queries.find(
-          (q) => q.status === 'pending_query' && q.type === 'log'
-        )
-        if (pendingLogQuery && !this.showMcpQueryApproval) {
-          this.pendingMcpQuery = pendingLogQuery
-          this.showMcpQueryApproval = true
-        }
-
-        // Check for pending log results approval
-        const pendingLogResults = queries.find(
-          (q) => q.status === 'pending_results' && q.type === 'log'
-        )
-        if (pendingLogResults && !this.showMcpResultsApproval) {
-          this.pendingMcpResults = {
-            ...pendingLogResults,
-            resultCount:
-              pendingLogResults.results?.data?.result?.reduce(
-                (sum, s) => sum + (s.values?.length || 0),
-                0
-              ) || 0,
-            streamCount: pendingLogResults.results?.data?.result?.length || 0,
-            results: pendingLogResults.results?.data?.result || [],
-          }
-          this.showMcpResultsApproval = true
-        }
-
-        // Check for pending DB query approval
-        const pendingDbQuery = queries.find(
-          (q) => q.status === 'pending_query' && q.type === 'db'
-        )
-        if (pendingDbQuery && !this.showDbQueryApproval) {
-          this.pendingDbQuery = pendingDbQuery
-          this.showDbQueryApproval = true
-        }
-
-        // Check for pending DB results approval
-        const pendingDbResults = queries.find(
-          (q) => q.status === 'pending_results' && q.type === 'db'
-        )
-        if (pendingDbResults && !this.showDbResultsApproval) {
-          this.pendingDbResults = {
-            ...pendingDbResults,
-            rows: pendingDbResults.results?.rows || [],
-            columns: pendingDbResults.results?.columns || [],
-            rowCount: pendingDbResults.results?.rowCount || 0,
-            tokenCount: pendingDbResults.results?.tokenCount || 0,
-          }
-          this.showDbResultsApproval = true
-        }
-      } catch (error) {
-        console.error('MCP polling error:', error)
-      }
-    },
-
-    async approveMcpQuery() {
-      if (!this.pendingMcpQuery) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingMcpQuery.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'query' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve query')
-        }
-
-        this.addDebugEntry('response', 'MCP Query Approved', {
-          queryId: this.pendingMcpQuery.id,
-        })
-      } catch (error) {
-        console.error('Approve query error:', error)
-      } finally {
-        this.pendingMcpQuery = null
-        this.showMcpQueryApproval = false
-      }
-    },
-
-    async rejectMcpQuery() {
-      if (!this.pendingMcpQuery) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingMcpQuery.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'MCP Query Rejected', {
-          queryId: this.pendingMcpQuery.id,
-        })
-      } catch (error) {
-        console.error('Reject query error:', error)
-      } finally {
-        this.pendingMcpQuery = null
-        this.showMcpQueryApproval = false
-      }
-    },
-
-    async approveMcpResults() {
-      if (!this.pendingMcpResults) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingMcpResults.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'results' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve results')
-        }
-
-        this.addDebugEntry('response', 'MCP Results Approved', {
-          queryId: this.pendingMcpResults.id,
-          resultCount: this.pendingMcpResults.resultCount,
-        })
-      } catch (error) {
-        console.error('Approve results error:', error)
-      } finally {
-        this.pendingMcpResults = null
-        this.showMcpResultsApproval = false
-      }
-    },
-
-    async rejectMcpResults() {
-      if (!this.pendingMcpResults) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingMcpResults.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'MCP Results Rejected', {
-          queryId: this.pendingMcpResults.id,
-        })
-      } catch (error) {
-        console.error('Reject results error:', error)
-      } finally {
-        this.pendingMcpResults = null
-        this.showMcpResultsApproval = false
-      }
-    },
-
-    // DB Query Approval Methods
-    async approveDbQuery() {
-      if (!this.pendingDbQuery) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingDbQuery.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'query' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve DB query')
-        }
-
-        this.addDebugEntry('response', 'DB Query Approved', {
-          queryId: this.pendingDbQuery.id,
-        })
-      } catch (error) {
-        console.error('Approve DB query error:', error)
-      } finally {
-        this.pendingDbQuery = null
-        this.showDbQueryApproval = false
-      }
-    },
-
-    async rejectDbQuery() {
-      if (!this.pendingDbQuery) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingDbQuery.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'DB Query Rejected', {
-          queryId: this.pendingDbQuery.id,
-        })
-      } catch (error) {
-        console.error('Reject DB query error:', error)
-      } finally {
-        this.pendingDbQuery = null
-        this.showDbQueryApproval = false
-      }
-    },
-
-    async approveDbResults() {
-      if (!this.pendingDbResults) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingDbResults.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'results' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve DB results')
-        }
-
-        this.addDebugEntry('response', 'DB Results Approved', {
-          queryId: this.pendingDbResults.id,
-          rowCount: this.pendingDbResults.rowCount,
-        })
-      } catch (error) {
-        console.error('Approve DB results error:', error)
-      } finally {
-        this.pendingDbResults = null
-        this.showDbResultsApproval = false
-      }
-    },
-
-    async rejectDbResults() {
-      if (!this.pendingDbResults) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingDbResults.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'DB Results Rejected', {
-          queryId: this.pendingDbResults.id,
-        })
-      } catch (error) {
-        console.error('Reject DB results error:', error)
-      } finally {
-        this.pendingDbResults = null
-        this.showDbResultsApproval = false
-      }
-    },
-
     formatStreamLabels(stream) {
       if (!stream) return ''
       return Object.entries(stream)
@@ -1536,17 +948,18 @@ export default {
   }
 }
 
-/* Debug panel styles */
+/* Debug panel styles - light theme with outline borders */
 .debug-panel {
-  background: #263238;
-  color: #eceff1;
-  border-bottom: 1px solid #dee2e6;
+  background: #ffffff;
+  color: #212529;
+  border-top: 1px solid #dee2e6;
   max-height: 300px;
   overflow-y: auto;
 
   h6 {
-    color: #80cbc4;
+    color: #495057;
     margin-bottom: 0.5rem;
+    font-weight: 600;
   }
 }
 
@@ -1557,36 +970,36 @@ export default {
 
 .debug-entry {
   border-radius: 4px;
+  background: #ffffff;
 
   &.debug-request {
-    background: #1b5e20;
-    border-left: 3px solid #4caf50;
+    border: 1px solid #28a745;
   }
 
   &.debug-response {
-    background: #0d47a1;
-    border-left: 3px solid #2196f3;
+    border: 1px solid #007bff;
   }
 
   &.debug-error {
-    background: #b71c1c;
-    border-left: 3px solid #f44336;
+    border: 1px solid #dc3545;
   }
 }
 
 .debug-header {
   font-size: 0.9em;
+  color: #212529;
 }
 
 .debug-data {
-  background: rgba(0, 0, 0, 0.2);
+  background: #f8f9fa;
   padding: 0.5rem;
   border-radius: 3px;
+  border: 1px solid #dee2e6;
   white-space: pre-wrap;
   word-break: break-all;
   max-height: 150px;
   overflow-y: auto;
-  color: #b0bec5;
+  color: #495057;
 }
 
 .token-mapping {
@@ -1597,116 +1010,21 @@ export default {
     padding: 0.2rem 0;
 
     .token {
-      background: #ffcdd2;
-      color: #c62828;
+      background: #fff3cd;
+      color: #856404;
       padding: 0.1rem 0.4rem;
       border-radius: 3px;
+      border: 1px solid #ffc107;
     }
 
     .real-value {
-      color: #ffcc80;
+      color: #28a745;
+      font-weight: 500;
     }
   }
 }
 
 .gap-2 {
   gap: 0.5rem;
-}
-
-/* Privacy Review Modal styles */
-.privacy-review-box {
-  padding: 1rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9em;
-  white-space: pre-wrap;
-  word-break: break-word;
-
-  &.original {
-    background: #fff3e0;
-    border: 1px solid #ffcc80;
-  }
-
-  &.pseudonymized {
-    background: #e8f5e9;
-    border: 1px solid #81c784;
-  }
-}
-
-.privacy-review-section h6 {
-  margin-bottom: 0.5rem;
-  color: #616161;
-}
-
-/* MCP Results Preview styles */
-.mcp-results-preview {
-  max-height: 400px;
-  overflow-y: auto;
-  background: #263238;
-  border-radius: 4px;
-  padding: 0.75rem;
-  font-family: monospace;
-  font-size: 0.85em;
-}
-
-.result-stream {
-  border-bottom: 1px solid #37474f;
-  padding-bottom: 0.5rem;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.stream-labels {
-  color: #80cbc4;
-  margin-bottom: 0.25rem;
-}
-
-.log-entry {
-  color: #eceff1;
-  padding: 0.1rem 0;
-  display: flex;
-  gap: 0.5rem;
-
-  .timestamp {
-    color: #78909c;
-    flex-shrink: 0;
-  }
-
-  .log-line {
-    word-break: break-word;
-  }
-}
-
-.gap-3 {
-  gap: 1rem;
-}
-
-/* DB Results Preview styles */
-.db-results-preview {
-  max-height: 400px;
-  overflow: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-
-  .table {
-    margin-bottom: 0;
-    font-size: 0.85em;
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #f8f9fa;
-      z-index: 1;
-    }
-
-    td {
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
 }
 </style>
