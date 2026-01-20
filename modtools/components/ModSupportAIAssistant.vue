@@ -897,6 +897,14 @@ export default {
           requestBody.claudeSessionId = this.claudeSessionId
         }
 
+        // Include custom server URLs if configured (for SSH tunnels to live servers)
+        if (this.lokiServerUrl) {
+          requestBody.lokiUrl = this.lokiServerUrl
+        }
+        if (this.sqlServerUrl) {
+          requestBody.sqlUrl = this.sqlServerUrl
+        }
+
         this.addDebugEntry('request', 'Claude Code Request', requestBody)
 
         const response = await fetch(`${AI_SUPPORT_URL}/api/log-analysis`, {
