@@ -657,16 +657,41 @@ export default {
       this.noResults = false
 
       try {
-        const userStore = useUserStore()
-        userStore.clear()
+        let users = []
 
-        await userStore.fetchMT({
-          search: this.userSearch.trim(),
-          emailhistory: true,
-        })
+        // Use custom API URL if configured (live mode)
+        if (this.serverEnvironment === 'live' && this.apiServerUrl) {
+          const response = await fetch(
+            `${this.apiServerUrl}/user?search=${encodeURIComponent(
+              this.userSearch.trim()
+            )}&emailhistory=true`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
+          )
 
-        // Get results and sort by last access
-        this.searchResults = Object.values(userStore.list)
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status}`)
+          }
+
+          const data = await response.json()
+          users = data.users || []
+        } else {
+          // Use local store for development
+          const userStore = useUserStore()
+          userStore.clear()
+
+          await userStore.fetchMT({
+            search: this.userSearch.trim(),
+            emailhistory: true,
+          })
+
+          users = Object.values(userStore.list)
+        }
+
+        // Sort by last access
+        this.searchResults = users
           .sort((a, b) => {
             return (
               new Date(b.lastaccess).getTime() -
