@@ -47,8 +47,8 @@
           <div class="badge-info">
             <v-icon icon="award" class="badge-icon" />
             <span
-              >Supporters get a badge that shows you're a committed
-              freegler.</span
+              >Supporters get a badge for a year, and we'll turn off ads for a
+              month.</span
             >
           </div>
         </div>
