@@ -376,11 +376,10 @@ onMounted(async () => {
               if (currentBackup.date) {
                 const backupDate = dayjs(currentBackup.date, 'YYYYMMDD')
                 const formattedDate = backupDate.format('D MMM YYYY')
-                const loadedAt = currentBackup.loaded_at
-                  ? dayjs(currentBackup.loaded_at).format('HH:mm:ss')
-                  : ''
+                // Show backup creation time (from filename), not when it was loaded
+                const backupTime = currentBackup.backup_time || ''
                 latestMessage.value = `${formattedDate}${
-                  loadedAt ? ' ' + loadedAt : ''
+                  backupTime ? ' ' + backupTime : ''
                 }`
 
                 // Check if backup is stale (more than 2 days old)
