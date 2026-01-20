@@ -133,50 +133,84 @@
       ok-title="Save"
       @ok="saveServerSettings"
     >
-      <p class="text-muted small mb-3">
-        Configure connections to Loki (logs) and MySQL (database) servers. For
-        development, use SSH tunnels from Windows or WSL.
-      </p>
-
-      <b-form-group label="Loki Server" label-size="sm" class="mb-3">
-        <b-form-input
-          v-model="lokiServerUrl"
-          placeholder="http://localhost:3100 or http://192.168.1.166:3101"
+      <b-form-group label="Environment" label-size="sm" class="mb-3">
+        <b-form-select
+          v-model="serverEnvironment"
+          :options="[
+            { value: 'dev', text: 'Development (local containers)' },
+            { value: 'live', text: 'Live (via SSH tunnels)' },
+          ]"
           size="sm"
+          @change="onEnvironmentChange"
         />
-        <small class="text-muted">
-          Loki API endpoint for log queries (e.g., via SSH tunnel to live
-          server)
-        </small>
       </b-form-group>
 
-      <b-form-group label="MySQL Server" label-size="sm" class="mb-3">
-        <b-form-input
-          v-model="sqlServerUrl"
-          placeholder="localhost:3306 or 192.168.1.166:3307"
-          size="sm"
-        />
-        <small class="text-muted">
-          MySQL host:port for database queries (e.g., via SSH tunnel to live
-          server)
-        </small>
-      </b-form-group>
+      <template v-if="serverEnvironment === 'live'">
+        <div class="alert alert-warning small mb-3">
+          <strong>Live Mode:</strong> Configure SSH tunnels to connect to
+          production servers. See tips below for setup.
+        </div>
 
-      <div class="alert alert-info small mb-0">
-        <strong>Tunnel Tips:</strong>
-        <ul class="mb-0 ps-3">
-          <li>
-            <strong>From Windows (MobaXterm):</strong> Bind to
-            <code>0.0.0.0</code> instead of <code>127.0.0.1</code>, then use
-            Windows IP (e.g., <code>192.168.1.166:port</code>)
-          </li>
-          <li>
-            <strong>From WSL:</strong> Use
-            <code>ssh -L 3100:localhost:3100 liveserver</code>, then use
-            <code>localhost:3100</code>
-          </li>
-        </ul>
-      </div>
+        <b-form-group
+          label="API Server (for user search)"
+          label-size="sm"
+          class="mb-3"
+        >
+          <b-form-input
+            v-model="apiServerUrl"
+            placeholder="https://www.ilovefreegle.org/api"
+            size="sm"
+          />
+          <small class="text-muted">
+            Freegle API endpoint for user search
+          </small>
+        </b-form-group>
+
+        <b-form-group label="Loki Server" label-size="sm" class="mb-3">
+          <b-form-input
+            v-model="lokiServerUrl"
+            placeholder="http://localhost:3101"
+            size="sm"
+          />
+          <small class="text-muted">
+            Loki API for log queries (via SSH tunnel)
+          </small>
+        </b-form-group>
+
+        <b-form-group label="MySQL Server" label-size="sm" class="mb-3">
+          <b-form-input
+            v-model="sqlServerUrl"
+            placeholder="localhost:1234"
+            size="sm"
+          />
+          <small class="text-muted">
+            MySQL host:port for database queries (via SSH tunnel)
+          </small>
+        </b-form-group>
+
+        <div class="alert alert-info small mb-0">
+          <strong>SSH Tunnel Setup:</strong>
+          <ul class="mb-0 ps-3">
+            <li>
+              <strong>From Windows (MobaXterm):</strong> Bind to
+              <code>0.0.0.0</code> instead of <code>127.0.0.1</code>, then use
+              Windows IP (e.g., <code>192.168.1.166:port</code>)
+            </li>
+            <li>
+              <strong>From WSL:</strong> Use
+              <code>ssh -L 3101:localhost:3100 liveserver</code>, then use
+              <code>localhost:3101</code>
+            </li>
+          </ul>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="alert alert-success small mb-0">
+          <strong>Development Mode:</strong> Using local Docker containers. No
+          additional configuration needed.
+        </div>
+      </template>
     </b-modal>
 
     <!-- Header -->
@@ -203,20 +237,20 @@
             }}</small>
           </b-form-checkbox>
           <b-button
-            variant="outline-secondary"
+            variant="secondary"
             size="sm"
             class="mr-2"
             @click="showSettingsModal = true"
           >
-            <small>⚙ Settings</small>
+            Settings
           </b-button>
           <b-button
-            variant="outline-secondary"
+            variant="secondary"
             size="sm"
             class="mr-3"
             @click="showDebugModal = true"
           >
-            <small>Debug</small>
+            Debug
           </b-button>
           <b-button
             variant="link"
@@ -461,8 +495,10 @@ export default {
 
       // Server configuration (for development tunnels)
       showSettingsModal: false,
+      serverEnvironment: localStorage.getItem('aiSupport_environment') || 'dev',
       lokiServerUrl: localStorage.getItem('aiSupport_lokiUrl') || '',
       sqlServerUrl: localStorage.getItem('aiSupport_sqlUrl') || '',
+      apiServerUrl: localStorage.getItem('aiSupport_apiUrl') || '',
     }
   },
   computed: {
@@ -584,12 +620,30 @@ export default {
       }
     },
 
+    onEnvironmentChange(env) {
+      if (env === 'live') {
+        // Set default live values if not already set
+        if (!this.apiServerUrl) {
+          this.apiServerUrl = 'https://www.ilovefreegle.org/api'
+        }
+        if (!this.lokiServerUrl) {
+          this.lokiServerUrl = 'http://localhost:3101'
+        }
+        if (!this.sqlServerUrl) {
+          this.sqlServerUrl = 'localhost:1234'
+        }
+      }
+    },
+
     saveServerSettings() {
       // Save to localStorage for persistence across sessions
+      localStorage.setItem('aiSupport_environment', this.serverEnvironment)
       localStorage.setItem('aiSupport_lokiUrl', this.lokiServerUrl)
       localStorage.setItem('aiSupport_sqlUrl', this.sqlServerUrl)
-      // TODO: These values will be passed to the MCP servers when making queries
+      localStorage.setItem('aiSupport_apiUrl', this.apiServerUrl)
       console.log('Server settings saved:', {
+        environment: this.serverEnvironment,
+        api: this.apiServerUrl,
         loki: this.lokiServerUrl,
         sql: this.sqlServerUrl,
       })
