@@ -60,6 +60,70 @@
       <p>Do you want to proceed?</p>
     </b-modal>
 
+    <!-- Debug Modal: MCP Data Summary -->
+    <b-modal
+      v-model="showDebugModal"
+      title="MCP Data Sent to AI"
+      size="lg"
+      centered
+      ok-only
+      ok-title="Close"
+    >
+      <p class="text-muted small mb-3">
+        This shows all unique values from MCP tools (logs, database) that were
+        sent to Claude. User-typed queries are excluded.
+      </p>
+
+      <div
+        v-if="mcpDataSummary.length === 0"
+        class="text-center text-muted py-3"
+      >
+        No MCP data has been sent to AI yet.
+      </div>
+
+      <table v-else class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>Value Sent to AI</th>
+            <th v-if="showAnonymisedData">Real Value</th>
+            <th class="text-center" style="width: 80px">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in mcpDataSummary" :key="item.token">
+            <td>
+              <code class="text-primary">{{ item.token }}</code>
+              <span
+                v-if="item.isPseudonymized"
+                class="badge bg-success ms-2"
+                title="This value was pseudonymized"
+                >✓</span
+              >
+              <span
+                v-else-if="item.looksLikePii"
+                class="badge bg-danger ms-2"
+                title="This may contain PII"
+                >⚠</span
+              >
+            </td>
+            <td v-if="showAnonymisedData">
+              <span v-if="item.realValue" class="text-muted">{{
+                item.realValue
+              }}</span>
+              <span v-else class="text-muted">-</span>
+            </td>
+            <td class="text-center">{{ item.count }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mt-3 small text-muted">
+        <strong>Legend:</strong>
+        <span class="badge bg-success ms-2">✓</span> Pseudonymized (safe)
+        <span class="badge bg-danger ms-2">⚠</span> May contain PII (review)
+      </div>
+    </b-modal>
+
     <!-- Header -->
     <div class="log-analysis-header">
       <div class="d-flex align-items-center justify-content-between">
@@ -83,9 +147,14 @@
               showAnonymisedData ? 'Show PII' : 'Show Anonymised'
             }}</small>
           </b-form-checkbox>
-          <b-form-checkbox v-model="debugMode" switch size="sm" class="mr-3">
+          <b-button
+            variant="outline-secondary"
+            size="sm"
+            class="mr-3"
+            @click="showDebugModal = true"
+          >
             <small>Debug</small>
-          </b-form-checkbox>
+          </b-button>
           <b-button
             variant="link"
             size="sm"
@@ -214,52 +283,6 @@
 
       <!-- Chat interface (after conversation starts) -->
       <template v-else>
-        <!-- Debug Panel: AI Data Access Log -->
-        <div v-if="debugMode && debugLog.length > 0" class="debug-panel p-3">
-          <h6 class="d-flex align-items-center justify-content-between">
-            <span>AI Data Access Log</span>
-            <b-button variant="link" size="sm" @click="debugLog = []"
-              >Clear</b-button
-            >
-          </h6>
-          <div class="debug-entries">
-            <div
-              v-for="(entry, idx) in debugLog"
-              :key="idx"
-              class="debug-entry mb-2 p-2"
-              :class="'debug-' + entry.type"
-            >
-              <div class="debug-header d-flex justify-content-between">
-                <strong>{{
-                  entry.type === 'request'
-                    ? '→ AI Requested'
-                    : entry.type === 'response'
-                    ? '← Data Sent to AI'
-                    : entry.label
-                }}</strong>
-                <small class="text-muted">{{ entry.timestamp }}</small>
-              </div>
-              <div v-if="entry.tokenMapping" class="token-mapping mt-1">
-                <small class="text-muted"
-                  >PII tokens (real values hidden from AI):</small
-                >
-                <div
-                  v-for="(value, token) in entry.tokenMapping"
-                  :key="token"
-                  class="token-item"
-                >
-                  <code class="token">{{ token }}</code>
-                  <span class="mx-1">&rarr;</span>
-                  <span class="real-value">{{ value }}</span>
-                </div>
-              </div>
-              <pre v-if="entry.data" class="debug-data mt-1 mb-0">{{
-                formatDebugData(entry.data)
-              }}</pre>
-            </div>
-          </div>
-        </div>
-
         <!-- Chat messages -->
         <div ref="messagesContainer" class="log-analysis-messages p-3">
           <div
@@ -345,9 +368,9 @@ export default {
       // UI state
       showPrivacyModal: false,
       showPiiWarning: false,
+      showDebugModal: false,
       sanitizerAvailable: true,
       showAnonymisedData: false,
-      debugMode: false,
 
       // User search
       userSearch: '',
@@ -379,6 +402,105 @@ export default {
       return this.messages
         .filter((m) => m.role === 'assistant' && m.costUsd)
         .reduce((sum, m) => sum + m.costUsd, 0)
+    },
+    mcpDataSummary() {
+      // Build a map of unique strings sent to AI from MCP (not user queries)
+      const tokenCounts = new Map()
+
+      // localMapping contains token -> realValue pairs from pseudonymization
+      // These are the values that were replaced before sending to AI
+      for (const [token, realValue] of Object.entries(this.localMapping)) {
+        if (!tokenCounts.has(token)) {
+          tokenCounts.set(token, {
+            token,
+            realValue,
+            count: 1,
+            isPseudonymized: true,
+            looksLikePii: false,
+          })
+        } else {
+          tokenCounts.get(token).count++
+        }
+      }
+
+      // Also look through MCP response data for any values that weren't pseudonymized
+      // These would be in response entries from debug log
+      for (const entry of this.debugLog) {
+        if (
+          entry.type === 'response' &&
+          entry.label &&
+          entry.label.includes('MCP')
+        ) {
+          // Extract strings from response data that look like they might be PII
+          const dataStr =
+            typeof entry.data === 'string'
+              ? entry.data
+              : JSON.stringify(entry.data)
+
+          // Look for email-like patterns that weren't pseudonymized
+          const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+          const emails = dataStr.match(emailRegex) || []
+
+          for (const email of emails) {
+            // Skip if this is already a pseudonymized token (contains user_ or has our pattern)
+            if (email.includes('user_') || email.includes('_')) continue
+
+            // Check if it's in our mapping as a real value (meaning it was pseudonymized)
+            const isPseudonymized = Object.values(this.localMapping).includes(
+              email
+            )
+            if (isPseudonymized) continue // Already tracked via token
+
+            // This is a non-pseudonymized email found in MCP data
+            if (!tokenCounts.has(email)) {
+              tokenCounts.set(email, {
+                token: email,
+                realValue: null,
+                count: 1,
+                isPseudonymized: false,
+                looksLikePii: true,
+              })
+            } else {
+              tokenCounts.get(email).count++
+            }
+          }
+
+          // Look for IP addresses
+          const ipRegex = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g
+          const ips = dataStr.match(ipRegex) || []
+
+          for (const ip of ips) {
+            // Skip localhost and common internal IPs
+            if (
+              ip.startsWith('127.') ||
+              ip.startsWith('10.') ||
+              ip.startsWith('172.') ||
+              ip.startsWith('192.168.')
+            )
+              continue
+
+            const isPseudonymized = Object.values(this.localMapping).includes(
+              ip
+            )
+            if (isPseudonymized) continue
+
+            if (!tokenCounts.has(ip)) {
+              tokenCounts.set(ip, {
+                token: ip,
+                realValue: null,
+                count: 1,
+                isPseudonymized: false,
+                looksLikePii: true,
+              })
+            } else {
+              tokenCounts.get(ip).count++
+            }
+          }
+        }
+      }
+
+      // Convert to array and sort by count descending
+      return Array.from(tokenCounts.values()).sort((a, b) => b.count - a.count)
     },
   },
   async mounted() {
@@ -796,11 +918,6 @@ export default {
       return html
     },
 
-    formatDebugData(data) {
-      if (typeof data === 'string') return data
-      return JSON.stringify(data, null, 2)
-    },
-
     cancelQuery() {
       this.isProcessing = false
       this.processingStatus = ''
@@ -810,20 +927,6 @@ export default {
       if (!dateStr) return ''
       const date = new Date(dateStr)
       return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
-    },
-
-    formatStreamLabels(stream) {
-      if (!stream) return ''
-      return Object.entries(stream)
-        .map(([k, v]) => `${k}="${v}"`)
-        .join(', ')
-    },
-
-    formatLogTimestamp(ts) {
-      if (!ts) return ''
-      // Loki timestamps are in nanoseconds
-      const ms = parseInt(ts, 10) / 1000000
-      return new Date(ms).toLocaleTimeString()
     },
   },
 }
@@ -945,82 +1048,6 @@ export default {
     padding: 0.1rem 0.3rem;
     border-radius: 3px;
     border-bottom: 2px solid #ef5350;
-  }
-}
-
-/* Debug panel styles - light theme with outline borders */
-.debug-panel {
-  background: #ffffff;
-  color: #212529;
-  border-top: 1px solid #dee2e6;
-  max-height: 300px;
-  overflow-y: auto;
-
-  h6 {
-    color: #495057;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-  }
-}
-
-.debug-entries {
-  font-family: monospace;
-  font-size: 0.85em;
-}
-
-.debug-entry {
-  border-radius: 4px;
-  background: #ffffff;
-
-  &.debug-request {
-    border: 1px solid #28a745;
-  }
-
-  &.debug-response {
-    border: 1px solid #007bff;
-  }
-
-  &.debug-error {
-    border: 1px solid #dc3545;
-  }
-}
-
-.debug-header {
-  font-size: 0.9em;
-  color: #212529;
-}
-
-.debug-data {
-  background: #f8f9fa;
-  padding: 0.5rem;
-  border-radius: 3px;
-  border: 1px solid #dee2e6;
-  white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 150px;
-  overflow-y: auto;
-  color: #495057;
-}
-
-.token-mapping {
-  .token-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.2rem 0;
-
-    .token {
-      background: #fff3cd;
-      color: #856404;
-      padding: 0.1rem 0.4rem;
-      border-radius: 3px;
-      border: 1px solid #ffc107;
-    }
-
-    .real-value {
-      color: #28a745;
-      font-weight: 500;
-    }
   }
 }
 
