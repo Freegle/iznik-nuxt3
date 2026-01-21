@@ -2,7 +2,13 @@
   <client-only>
     <ScrollToTop :prepend="groupName" />
     <div class="d-flex justify-content-between flex-wrap">
-      <ModGroupSelect v-model="chosengroupid" all modonly remember="approved" />
+      <ModGroupSelect
+        v-model="chosengroupid"
+        all
+        modonly
+        remember="approved"
+        :url-override="urlOverride"
+      />
       <ModFindMessagesFromMember @searched="searchedMember" />
       <ModFindMessage
         v-if="groupid"
@@ -72,6 +78,7 @@ export default {
       chosengroupid: 0,
       error: false,
       bump: 0,
+      urlOverride: false,
     }
   },
   computed: {
@@ -115,6 +122,10 @@ export default {
     this.chosengroupid = this.id
     this.memberTerm = ''
     this.messageTerm = ''
+    // Mark that URL explicitly set the group (even if 0 for "All").
+    if ('id' in route.params && route.params.id !== undefined) {
+      this.urlOverride = true
+    }
     if ('term' in route.params && route.params.term)
       this.messageTerm = route.params.term
     if (this.messageTerm) {
