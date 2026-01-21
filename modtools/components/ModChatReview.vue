@@ -25,7 +25,7 @@
             />
           </div>
           <b-button
-            v-if="message.bymailid"
+            v-if="message.bymailid || message.msgid"
             size="lg"
             variant="white"
             class="ml-2"
@@ -219,7 +219,7 @@
     />
     <ModMessageEmailModal
       v-if="showOriginal"
-      :id="message.bymailid"
+      :id="message.bymailid || message.msgid"
       @hidden="showOriginal = false"
     />
   </div>
