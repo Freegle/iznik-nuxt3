@@ -25,6 +25,7 @@
           :min-height="minHeight"
           :max-height="maxHeight"
           :hide-header="hideJobsHeader"
+          :list-only="listOnly"
           :class="{
             'text-center': maxWidth === '100vw',
           }"
@@ -55,6 +56,7 @@
               :min-height="minHeight"
               :max-height="maxHeight"
               :hide-header="hideJobsHeader"
+              :list-only="listOnly"
               :class="{
                 'text-center': maxWidth === '100vw',
               }"
@@ -159,6 +161,10 @@ const props = defineProps({
     default: false,
   },
   hideJobsHeader: {
+    type: Boolean,
+    default: false,
+  },
+  listOnly: {
     type: Boolean,
     default: false,
   },

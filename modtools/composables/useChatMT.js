@@ -1,5 +1,4 @@
 import pluralize from 'pluralize'
-import { milesAway } from '~/composables/useDistance'
 import { computed } from '#imports'
 import { useChatStore } from '~/stores/chat'
 import { useUserStore } from '~/stores/user'
@@ -7,44 +6,11 @@ import { useAuthStore } from '~/stores/auth'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { twem } from '~/composables/useTwem'
+import { milesAway } from '~/composables/useDistance'
+import { MT_EMAIL_REGEX } from '~/constants'
 
-export function chatCollate(msgs) {
-  const ret = []
-  let last = ''
-
-  for (let i = 0; i < msgs.length; i++) {
-    if (
-      i + 1 < msgs.length &&
-      msgs[i].sameasnext &&
-      msgs[i].message &&
-      msgs[i].type === 'Default' &&
-      msgs[i + 1].type === 'Default' &&
-      !msgs[i].refmsg &&
-      !msgs[i + 1].refmsg &&
-      msgs[i + 1].message &&
-      (!msgs[i].replyexpected || msgs[i].replyreceived) &&
-      new Date(msgs[i + 1].date).getTime() - new Date(msgs[i].date).getTime() <
-        10 * 60 * 1000
-    ) {
-      // The next message is within from the same user, within ten minutes, and not expecting a reply (in which
-      // case we want to show that).   Collate.
-      last += '\n' + msgs[i].message
-    } else if (last) {
-      // We have collated text to pull in.  Need to avoid references.
-      const thisone = JSON.parse(JSON.stringify(msgs[i]))
-      thisone.message = last + '\n' + msgs[i].message
-      ret.push(thisone)
-      last = ''
-    } else {
-      ret.push(msgs[i])
-    }
-  }
-
-  return ret
-}
-
-// Shared base functionality for both setupChat and useChatBase
-function useChatShared(chatId) {
+// MT-specific shared base functionality
+function useChatSharedMT(chatId) {
   const chatStore = useChatStore()
   const userStore = useUserStore()
   const authStore = useAuthStore()
@@ -55,8 +21,26 @@ function useChatShared(chatId) {
     return chatId ? chatStore.byChatId(chatId) : null
   })
 
+  // MT: Handle otheruser for User2Mod chats where otheruid may not be set
   const otheruser = computed(() => {
-    return chat.value?.otheruid ? userStore.byId(chat.value.otheruid) : null
+    let otheruid = chat.value?.otheruid
+    let user = null
+
+    if (!otheruid) {
+      // MT: try user1id or user1.id
+      otheruid = chat.value?.user1id || chat.value?.user1?.id
+    }
+
+    if (otheruid) {
+      user = userStore.byId(otheruid)
+    }
+
+    // Final fallback: use user1 object directly if available
+    if (!user && chat.value?.user1) {
+      user = chat.value.user1
+    }
+
+    return user
   })
 
   return {
@@ -69,9 +53,10 @@ function useChatShared(chatId) {
   }
 }
 
-export function setupChat(selectedChatId, chatMessageId) {
+// MT-specific setup chat function
+export function setupChatMT(selectedChatId, chatMessageId) {
   const { chatStore, authStore, myid, chat, otheruser } =
-    useChatShared(selectedChatId)
+    useChatSharedMT(selectedChatId)
 
   const chatmessages = computed(() => {
     return chatStore.messagesById(selectedChatId)
@@ -91,6 +76,8 @@ export function setupChat(selectedChatId, chatMessageId) {
     return last
   })
 
+  const unseen = computed(() => chat?.value?.unseen)
+
   const milesaway = computed(() =>
     milesAway(
       authStore.user?.lat,
@@ -104,18 +91,12 @@ export function setupChat(selectedChatId, chatMessageId) {
     () => pluralize('mile', milesaway.value, true) + ' away'
   )
 
-  const unseen = computed(() => chat?.value?.unseen)
-
   let chatmessage = null
 
   if (chatMessageId) {
     chatmessage = computed(() => chatStore.messageById(chatMessageId))
   }
 
-  // We use the time when this was instantiated.  This is to avoid tooSoonToNudge getting recalculated and
-  // therefore forcing re-renders, which we've seen when doing perf analysis.
-  // It doesn't matter too much if we say that it's too soon to nudge until the next
-  // refresh.
   const now = new Date().getTime()
   const tooSoonToNudge = computed(() => {
     return lastfromme.value > 0 && now - lastfromme.value < 24 * 60 * 60 * 1000
@@ -136,10 +117,12 @@ export function setupChat(selectedChatId, chatMessageId) {
   }
 }
 
-export async function fetchReferencedMessage(chatid, id) {
+// MT-specific fetch referenced message
+export async function fetchReferencedMessageMT(chatid, id) {
   const chatStore = useChatStore()
   const chatmessage = chatStore.messageById(id)
 
+  // MT: chatmessage.refmsg may already be set and chatmessage.refmsgid not set
   if (chatmessage?.refmsgid) {
     const messageStore = useMessageStore()
 
@@ -151,9 +134,9 @@ export async function fetchReferencedMessage(chatid, id) {
   }
 }
 
-export function useChatMessageBase(chatId, messageId, pov = null) {
-  const { chatStore, userStore, authStore, myid, chat, otheruser } =
-    useChatShared(chatId)
+// MT-specific chat message base composable with pov support
+export function useChatMessageBaseMT(chatId, messageId, pov = null) {
+  const { chatStore, authStore, chat, otheruser } = useChatSharedMT(chatId)
   const messageStore = useMessageStore()
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
@@ -162,44 +145,37 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     const m = chatmessage.value?.message
 
     if (m) {
-      const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+      const trim = m
+        .toString()
+        .replace(/(\r\n|\r|\n){2,}/g, '$1\n')
+        .trim()
 
       try {
         twem(trim)
       } catch (e) {
         console.error(e, trim, m)
       }
-      const ret = twem(trim)
-
-      return ret
+      return twem(trim)
     } else {
-      return null
+      return ''
     }
   })
 
+  // MT: Determine message positioning based on pov for support chat viewing
   const messageIsFromCurrentUser = computed(() => {
-    // If pov is provided (support/moderator viewing chats),
-    // use pov to determine which side messages appear on
-    if (pov) {
-      if (chat.value?.chattype === 'User2User') {
-        // Messages from user1 appear on left when pov is user1, on right otherwise
-        if (pov === chat.value?.user1id) {
-          return chatmessage.value?.userid === chat.value?.user1id
-        } else {
-          return chatmessage.value?.userid !== chat.value?.user1id
-        }
-      } else if (chat.value?.chattype === 'User2Mod') {
-        // For User2Mod chats in ModTools context, messages from user1 (the member)
-        // appear on left, messages from any moderator appear on right
+    if (chat.value?.chattype === 'User2User') {
+      // For User2User chats viewed by support, use pov to determine perspective
+      if (pov === chat.value?.user1id) {
+        return chat.value?.user1id === chatmessage.value?.userid
+      } else {
         return chat.value?.user1id !== chatmessage.value?.userid
       }
     }
-
-    // Normal case: message is from current user if they sent it
-    return chatmessage.value?.userid === myid
+    // For User2Mod chats, messages from user1 (the member) appear on the left
+    return chat.value?.user1id !== chatmessage.value?.userid
   })
 
-  // MT context may have refmsg object directly on chatmessage instead of/in addition to refmsgid
+  // MT: refmsg may already be populated directly on the message
   const refmsgid = computed(() => {
     if (chatmessage.value?.refmsg) return chatmessage.value.refmsg.id
     return chatmessage.value?.refmsgid
@@ -210,11 +186,11 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     return refmsgid.value ? messageStore?.byId(refmsgid.value) : null
   })
 
-  // Real me is equivalent to authStore.user, which we already have as myid
   const realMe = computed(() => {
     return authStore.user
   })
 
+  // MT: me respects pov for viewing chats from different perspectives
   const me = computed(() => {
     if (!pov) {
       return realMe.value
@@ -227,41 +203,31 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     }
   })
 
-  // myid should be derived from me so it respects pov
-  const myidComputed = computed(() => {
+  const myid = computed(() => {
     return me.value?.id
   })
 
-  // otheruser needs to be pov-aware for User2User chats viewed by moderators
-  const otheruserComputed = computed(() => {
-    // For User2User chats with pov, determine the "other" user relative to pov
-    if (pov && chat.value?.chattype === 'User2User') {
-      if (pov === chat.value?.user1id || pov === chat.value?.user1?.id) {
-        // pov is user1, so other user is user2
-        return chat.value?.user2 || userStore.byId(chat.value?.user2id)
-      } else {
-        // pov is user2, so other user is user1
-        return chat.value?.user1 || userStore.byId(chat.value?.user1id)
-      }
-    }
-    // Default: use the shared otheruser
-    return otheruser.value
-  })
-
+  // MT: Profile image based on user1 (the member)
   const chatMessageProfileImage = computed(() => {
-    return chatmessage.value?.userid === myidComputed.value
+    return chat.value?.user1id !== chatmessage.value?.userid
       ? me.value?.profile?.paththumb
       : chat.value?.icon
   })
 
+  // MT: Profile name based on user1 (the member)
   const chatMessageProfileName = computed(() => {
-    return chatmessage.value?.userid === myidComputed.value
+    return chat.value?.user1id !== chatmessage.value?.userid
       ? me.value?.displayname
-      : otheruserComputed.value?.displayname
+      : otheruser.value?.displayname
   })
 
   const regexEmail = computed(() => {
     return /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
+  })
+
+  // MT: More specific email regex
+  const regexEmailMT = computed(() => {
+    return MT_EMAIL_REGEX.toString()
   })
 
   function brokenImage(event) {
@@ -280,7 +246,6 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     if (id) {
       const groupStore = useGroupStore()
 
-      // Fetch the message info.
       try {
         await messageStore.fetch(id)
 
@@ -305,12 +270,12 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     chatMessageProfileImage,
     chatMessageProfileName,
     regexEmail,
+    regexEmailMT,
     refmsgid,
     refmsg,
     me,
-    realMe,
-    myid: myidComputed,
-    otheruser: otheruserComputed,
+    myid,
+    otheruser,
     brokenImage,
     refetch,
     fetchMessage,

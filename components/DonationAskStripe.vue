@@ -17,7 +17,8 @@
           <!-- Minimal variant: Show simple message -->
           <p v-if="isMinimalVariant && !birthdayMode" class="donation-message">
             Freegle is volunteer-run and free to use. Donate to help us
-            continue?
+            continue? You'll get a supporter badge for a year and no ads for a
+            month.
           </p>
 
           <DonationBirthdayDisplay

@@ -22,6 +22,13 @@
         <v-icon icon="trash-alt" class="image__icon" />
       </div>
     </span>
+    <span
+      v-if="showAiBadge && mods.ai"
+      class="ai-badge"
+      title="AI-generated illustration"
+    >
+      AI
+    </span>
     <div class="image-wrapper">
       <OurUploadedImage
         v-if="ouruid"
@@ -108,6 +115,11 @@ const props = defineProps({
     type: Object,
     required: false,
     default: () => {},
+  },
+  showAiBadge: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 })
 
@@ -208,6 +220,20 @@ function rotateRight(e) {
 .bottomright {
   bottom: 4px;
   right: 4px;
+}
+
+.ai-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background-color: $colour-info-fg;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 3px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* Control button styling */

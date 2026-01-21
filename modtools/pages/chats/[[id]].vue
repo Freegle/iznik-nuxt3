@@ -70,7 +70,7 @@
           'chatback p-0 ' + (selectedChatId ? 'd-block' : 'd-none d-md-block')
         "
       >
-        <ChatPane
+        <ModChatPane
           v-if="selectedChatId"
           :id="selectedChatId"
           :key="'chatpane-' + selectedChatId"

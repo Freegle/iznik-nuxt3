@@ -48,6 +48,82 @@ let flushTimeout = null
 const FLUSH_INTERVAL = 5000 // 5 seconds
 const MAX_BATCH_SIZE = 10
 
+// Page load phase tracking.
+// Phases: 'loading' (during page navigation), 'interactive' (page rendered, data loading),
+// 'idle' (no recent API activity), 'user_action' (user triggered activity)
+let pageLoadPhase = 'idle'
+let pageLoadStartTime = null
+let idleTimeout = null
+const IDLE_TIMEOUT_MS = 2000 // Consider idle after 2 seconds of no API activity
+
+/**
+ * Set the current page load phase.
+ * Called by router middleware to track page navigation.
+ */
+function setPageLoadPhase(phase) {
+  pageLoadPhase = phase
+  if (phase === 'loading') {
+    pageLoadStartTime = Date.now()
+    if (idleTimeout) {
+      clearTimeout(idleTimeout)
+      idleTimeout = null
+    }
+  }
+}
+
+/**
+ * Get the current page load phase.
+ */
+function getPageLoadPhase() {
+  return pageLoadPhase
+}
+
+/**
+ * Reset idle timeout - called when API activity occurs.
+ * After 2 seconds of no activity, phase becomes 'idle'.
+ */
+function resetIdleTimeout() {
+  if (idleTimeout) {
+    clearTimeout(idleTimeout)
+  }
+  // Only reset to idle if we're in loading/interactive phase
+  if (pageLoadPhase === 'loading' || pageLoadPhase === 'interactive') {
+    idleTimeout = setTimeout(() => {
+      pageLoadPhase = 'idle'
+      idleTimeout = null
+    }, IDLE_TIMEOUT_MS)
+  }
+}
+
+/**
+ * Mark page as interactive (rendered but may still be loading data).
+ * Called when Nuxt page:finish event fires.
+ */
+function markPageInteractive() {
+  if (pageLoadPhase === 'loading') {
+    pageLoadPhase = 'interactive'
+    resetIdleTimeout()
+  }
+}
+
+/**
+ * Mark that a user action is starting (not page load).
+ * Call this before user-triggered API calls.
+ */
+function markUserAction() {
+  if (pageLoadPhase === 'idle') {
+    pageLoadPhase = 'user_action'
+    // User actions are short - reset to idle quickly
+    if (idleTimeout) {
+      clearTimeout(idleTimeout)
+    }
+    idleTimeout = setTimeout(() => {
+      pageLoadPhase = 'idle'
+      idleTimeout = null
+    }, 500)
+  }
+}
+
 /**
  * Log levels matching standard severity.
  */
@@ -336,15 +412,28 @@ function action(actionName, context = {}) {
 
 /**
  * Log an API request for timing/debugging.
+ * Includes the current page load phase to distinguish page load API calls from user actions.
  */
 function apiRequest(method, path, durationMs, status, context = {}) {
   const level = status >= 400 ? LogLevel.ERROR : LogLevel.INFO
+
+  // Capture page load context
+  const loadPhase = pageLoadPhase
+  const msSincePageLoad = pageLoadStartTime
+    ? Date.now() - pageLoadStartTime
+    : null
+
+  // Reset idle timeout since we had API activity
+  resetIdleTimeout()
+
   queueLog(level, `API ${method} ${path}`, {
     event_type: 'api_request',
     method,
     path,
     duration_ms: durationMs,
     status,
+    page_load_phase: loadPhase,
+    ms_since_page_load: msSincePageLoad,
     ...context,
   })
 }
@@ -361,11 +450,13 @@ function logViewportResize() {
   const width = window.innerWidth
   const height = window.innerHeight
 
-  // Skip if change is too small (less than 50px in either dimension).
+  // Skip if change is too small (less than 100px in either dimension).
+  // Using 100px threshold to filter out mobile browser address bar show/hide
+  // which typically causes ~50-60px height changes.
   if (
     lastViewportWidth !== null &&
-    Math.abs(width - lastViewportWidth) < 50 &&
-    Math.abs(height - lastViewportHeight) < 50
+    Math.abs(width - lastViewportWidth) < 100 &&
+    Math.abs(height - lastViewportHeight) < 100
   ) {
     return
   }
@@ -459,6 +550,10 @@ export function useClientLog() {
     sentryError,
     flush,
     setAuthStore,
+    setPageLoadPhase,
+    getPageLoadPhase,
+    markPageInteractive,
+    markUserAction,
     LogLevel,
   }
 }
@@ -545,4 +640,8 @@ export {
   sentryError,
   flush,
   setAuthStore,
+  setPageLoadPhase,
+  getPageLoadPhase,
+  markPageInteractive,
+  markUserAction,
 }

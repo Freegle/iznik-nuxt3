@@ -8,6 +8,7 @@
       <span class="text-muted small d-flex justify-content-between">
         <ProfileImage
           :image="user.profile.turl"
+          :name="user.displayname"
           class="ml-1 mb-1 inline"
           is-thumbnail
           size="sm"

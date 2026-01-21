@@ -183,6 +183,10 @@ export default defineNuxtPlugin(async (nuxtApp) => {
             } else if (originalExceptionStack?.includes('frame_ant')) {
               // Chrome extension giving errors.
               return null
+            } else if (originalExceptionStack?.includes('cdn.intergient.com')) {
+              // Intergient ad network errors are not our problem.
+              console.log('Intergient CDN - suppress exception')
+              return null
             } else if (originalExceptionStack?.includes('/gpt/')) {
               // Google ads are not our problem.
               console.log('Google ads - suppress exception')

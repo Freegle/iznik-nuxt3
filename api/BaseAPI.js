@@ -79,11 +79,23 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
@@ -116,10 +128,17 @@ export default class BaseAPI {
         headers,
       })
 
-      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
-        // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
-        // we renew the JWT.
-        authStore.setAuth(data.jwt, data.persistent)
+      if (data.jwt && data.persistent) {
+        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
+        // in-flight API responses from restoring auth after an intentional logout.
+        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
+          console.log('JWT renewal: updating auth tokens from API response')
+          authStore.setAuth(data.jwt, data.persistent)
+        } else if (!authStore.auth.jwt) {
+          console.log(
+            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
+          )
+        }
       }
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
@@ -346,11 +365,23 @@ export default class BaseAPI {
           Object.entries(config.params).filter(([_, v]) => v)
         )
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.

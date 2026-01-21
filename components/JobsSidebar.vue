@@ -152,12 +152,36 @@ function loadMore($state) {
 }
 
 .jobs-sidebar-list {
+  display: flex;
+  flex-direction: column;
+
   :deep(.job-item) {
     margin-bottom: 0;
+    flex: 1;
   }
 
   :deep(.job-summary) {
-    padding: 0.6rem 0.75rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 3.5rem;
+  }
+
+  :deep(.job-icon) {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  :deep(.job-ai-image) {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  :deep(.job-title) {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 1;
+  }
+
+  :deep(.job-location) {
+    font-size: 0.7rem;
   }
 }
 

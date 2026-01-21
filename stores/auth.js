@@ -314,12 +314,21 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser() {
+    async fetchUser(components) {
+      // ModTools passes components like ['work'] to fetch moderator work counts
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
 
-      if (this.auth.jwt || this.auth.persistent) {
+      // Handle backwards compatibility - components might be boolean from old callers
+      if (typeof components === 'boolean') components = []
+      if (!components) components = []
+      components = ['me', ...components]
+
+      const miscStore = useMiscStore()
+
+      // For non-ModTools, use the faster v2 API
+      if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
         // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
         try {
           me = await this.$api.session.fetchv2(
@@ -343,7 +352,7 @@ export const useAuthStore = defineStore({
             this.$api.session
               .fetch({
                 webversion: this.config.public.BUILD_DATE,
-                components: ['me'],
+                components,
               })
               .then((ret) => {
                 let persistent = null
@@ -352,9 +361,15 @@ export const useAuthStore = defineStore({
                 if (ret) {
                   ;({ me, persistent, jwt } = ret)
                   if (me) {
+                    if (me.permissions && this.user) {
+                      this.user.permissions = me.permissions
+                    }
                     if (!this.auth.jwt) {
                       this.setAuth(jwt, persistent)
                     }
+                    // ModTools: store work counts and discourse data
+                    if (ret.work) this.work = ret.work
+                    if (ret.discourse) this.discourse = ret.discourse
                   } else {
                     // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
                     // which will then force a login when required and sort this out.
@@ -373,20 +388,30 @@ export const useAuthStore = defineStore({
         }
       }
 
+      // ModTools always uses v1 API for work counts, permissions, configid etc.
+      // Also used as fallback if v2 API didn't work
       if (!me) {
         // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
-          components: ['me'],
+          components,
         })
 
         let persistent = null
         let jwt = null
 
         if (ret) {
-          ;({ me, persistent, jwt } = ret)
+          const v1groups = ret.groups
+          ;({ me, groups, persistent, jwt } = ret)
+
+          // ModTools: store work counts and discourse data
+          if (ret.work) this.work = ret.work
+          if (ret.discourse) this.discourse = ret.discourse
+
+          let permissions = null
 
           if (me) {
+            permissions = me.permissions
             this.setAuth(jwt, persistent)
           }
 
@@ -401,7 +426,17 @@ export const useAuthStore = defineStore({
             }
 
             if (me) {
+              me.permissions = permissions
               groups = me.memberships
+              // ModTools: merge configid from v1 groups into v2 memberships
+              if (v1groups && groups) {
+                for (const g of groups) {
+                  const group = v1groups.find((v1g) => v1g.id === g.groupid)
+                  if (group) {
+                    g.configid = group.configid
+                  }
+                }
+              }
               delete me.memberships
             }
           }

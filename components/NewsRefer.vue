@@ -59,7 +59,7 @@
 import { ref, computed, defineAsyncComponent } from 'vue'
 import NoticeMessage from './NoticeMessage'
 import { useNewsfeedStore } from '~/stores/newsfeed'
-import { useRuntimeConfig } from '#imports'
+import { useMe } from '~/composables/useMe'
 
 const ConfirmModal = defineAsyncComponent(() =>
   import('~/components/ConfirmModal.vue')
@@ -82,17 +82,10 @@ const props = defineProps({
 
 const newsfeedStore = useNewsfeedStore()
 const showDeleteModal = ref(false)
+const { supportOrAdmin } = useMe()
 
 const reply = computed(() => {
   return newsfeedStore?.byId(props.id)
-})
-
-const config = useRuntimeConfig()
-const supportOrAdmin = computed(() => {
-  return (
-    config.public.user?.systemrole === 'Support' ||
-    config.public.user?.systemrole === 'Admin'
-  )
 })
 
 function deleteWarning() {

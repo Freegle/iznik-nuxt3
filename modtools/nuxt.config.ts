@@ -12,6 +12,17 @@ export default defineNuxtConfig({
   ssr: false,
   extends: ['../'],
   compatibilityDate: '2024-11-26',
+
+  // Override parent's cdnURL to use same-origin proxy approach.
+  // This avoids CORS issues in strict browsers (Firefox with privacy settings).
+  // Assets are requested from /netlify/... which _redirects proxies to the deploy URL.
+  $production: {
+    app: {
+      cdnURL: process.env.DEPLOY_URL
+        ? '/netlify/' + process.env.DEPLOY_URL.replace('https://', '')
+        : '',
+    },
+  },
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',

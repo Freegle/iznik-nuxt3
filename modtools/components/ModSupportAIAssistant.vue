@@ -1,6 +1,6 @@
 <template>
-  <div class="ai-chat-container">
-    <!-- Privacy Info Modal -->
+  <div class="log-analysis-container">
+    <!-- Privacy Notice Modal -->
     <b-modal
       v-model="showPrivacyModal"
       title="Privacy Notice"
@@ -8,1787 +8,1705 @@
       ok-title="I Understand"
       centered
     >
-      <p>This assistant uses Claude AI to help investigate issues.</p>
       <p>
-        <strong>Privacy protection measures:</strong>
+        This tool uses AI to help investigate user issues by analyzing logs.
       </p>
+      <p><strong>Privacy protection measures:</strong></p>
       <ul>
         <li>
-          <strong>Email addresses</strong> are replaced with realistic fake
-          emails - Claude never sees real emails.
+          <strong>All PII is pseudonymized</strong> before reaching the AI
+          service.
         </li>
         <li>
-          <strong>Display names</strong> are replaced with realistic fake names.
+          <strong>Email addresses, IPs, phone numbers</strong> are replaced with
+          random tokens (e.g., user_abc123@gmail.com).
         </li>
         <li>
-          <strong>IP addresses</strong> are hashed to unrecoverable codes.
+          <strong>You see real values</strong> - tokens are replaced back to
+          real values in your browser only.
         </li>
         <li>
-          <strong>Chat messages, passwords, and phone numbers</strong> are never
-          shared.
-        </li>
-        <li>
-          <strong>Log content</strong> is scrubbed to remove auth tokens and
-          sensitive data.
-        </li>
-        <li>
-          <strong>Public info</strong> like group names and post subjects may be
-          shared.
-        </li>
-        <li>
-          <strong>Transparency:</strong> You can see all queries made and stop
-          at any time.
+          <strong>Claude/Anthropic never sees</strong> the real email, IP, or
+          other PII - only meaningless tokens.
         </li>
       </ul>
       <p class="small text-muted mt-2">
-        The fake name/email mapping is session-specific and cannot be reversed,
-        even if transcripts leak. Mappings are cleared when you close the page.
+        This system complies with ICO guidance on pseudonymization - the tokens
+        are meaningless without the key, which never leaves Freegle's servers.
       </p>
     </b-modal>
 
+    <!-- PII Warning Modal -->
+    <b-modal
+      v-model="showPiiWarning"
+      title="Personal Data Detected"
+      centered
+      @ok="confirmPiiQuery"
+      @cancel="cancelPiiQuery"
+    >
+      <p>The following personal data was detected in your query:</p>
+      <ul>
+        <li v-for="(pii, idx) in detectedPii" :key="idx">
+          <strong>{{ pii.type }}:</strong> {{ pii.value }}
+          <span v-if="pii.source === 'selected_user'" class="text-muted">
+            (selected user)
+          </span>
+        </li>
+      </ul>
+      <p>
+        This data will be <strong>pseudonymized</strong> before processing. The
+        AI service will only see random tokens, not the actual values.
+      </p>
+      <p>Do you want to proceed?</p>
+    </b-modal>
+
+    <!-- Privacy Review Modal (shown when privacyReviewMode is enabled) -->
+    <b-modal
+      v-model="showPrivacyReview"
+      title="Privacy Review"
+      size="lg"
+      centered
+      ok-title="Approve & Send to AI"
+      cancel-title="Cancel"
+      @ok="approvePrivacyReview"
+      @cancel="cancelPrivacyReview"
+    >
+      <p class="text-info">
+        <strong>Privacy Review Mode:</strong> Please verify that all personal
+        data has been properly pseudonymized before sending to the AI.
+      </p>
+
+      <div class="privacy-review-section mb-3">
+        <h6>Your Original Query:</h6>
+        <div class="privacy-review-box original">
+          {{ pendingPrivacyReview?.originalQuery }}
+        </div>
+      </div>
+
+      <div class="privacy-review-section mb-3">
+        <h6>Pseudonymized Query (what the AI will see):</h6>
+        <div class="privacy-review-box pseudonymized">
+          {{ pendingPrivacyReview?.pseudonymizedQuery }}
+        </div>
+      </div>
+
+      <div
+        v-if="
+          pendingPrivacyReview?.mapping &&
+          Object.keys(pendingPrivacyReview.mapping).length > 0
+        "
+        class="privacy-review-section mb-3"
+      >
+        <h6>Pseudonymized Values:</h6>
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>Pseudonymized (sent to AI)</th>
+              <th>Real Value (kept private)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(value, token) in pendingPrivacyReview.mapping"
+              :key="token"
+            >
+              <td>
+                <code class="text-danger">{{ token }}</code>
+              </td>
+              <td>{{ value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert alert-warning">
+        <strong>Check:</strong> Does the pseudonymized query contain any real
+        email addresses, names, phone numbers, or other personal data? If so,
+        click Cancel and report the issue.
+      </div>
+    </b-modal>
+
+    <!-- MCP Query Approval Modal -->
+    <b-modal
+      v-model="showMcpQueryApproval"
+      title="Log Query Approval"
+      size="lg"
+      centered
+      ok-title="Approve Query"
+      cancel-title="Reject"
+      @ok="approveMcpQuery"
+      @cancel="rejectMcpQuery"
+    >
+      <p class="text-info">
+        <strong>Privacy Review:</strong> The AI wants to query the log system.
+        Please review and approve the query before it executes.
+      </p>
+
+      <div class="privacy-review-section mb-3">
+        <h6>Log Query:</h6>
+        <div class="privacy-review-box pseudonymized">
+          <code>{{ pendingMcpQuery?.query }}</code>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-3">
+        <div><strong>Time Range:</strong> {{ pendingMcpQuery?.timeRange }}</div>
+        <div><strong>Limit:</strong> {{ pendingMcpQuery?.limit }} results</div>
+      </div>
+
+      <div class="alert alert-info">
+        <strong>Note:</strong> All log results will be pseudonymized (emails,
+        IPs replaced with tokens). You will review the results before they are
+        sent to the AI.
+      </div>
+    </b-modal>
+
+    <!-- MCP Results Approval Modal -->
+    <b-modal
+      v-model="showMcpResultsApproval"
+      title="Log Results Approval"
+      size="xl"
+      centered
+      ok-title="Send to AI"
+      cancel-title="Reject"
+      @ok="approveMcpResults"
+      @cancel="rejectMcpResults"
+    >
+      <p class="text-info">
+        <strong>Privacy Review:</strong> Review the log results before they are
+        sent to the AI. Check that no unexpected personal data is visible.
+      </p>
+
+      <div class="mb-2">
+        <strong>Results:</strong> {{ pendingMcpResults?.resultCount }} log
+        entries from {{ pendingMcpResults?.streamCount }} streams
+      </div>
+
+      <div class="mcp-results-preview">
+        <div
+          v-for="(stream, idx) in pendingMcpResults?.results || []"
+          :key="idx"
+          class="result-stream mb-2"
+        >
+          <div class="stream-labels small text-muted">
+            {{ formatStreamLabels(stream.stream) }}
+          </div>
+          <div
+            v-for="(entry, entryIdx) in stream.values?.slice(0, 10) || []"
+            :key="entryIdx"
+            class="log-entry"
+          >
+            <span class="timestamp">{{ formatLogTimestamp(entry[0]) }}</span>
+            <span class="log-line">{{ entry[1] }}</span>
+          </div>
+          <div v-if="stream.values?.length > 10" class="text-muted small mt-1">
+            ... and {{ stream.values.length - 10 }} more entries
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-3">
+        <strong>Check:</strong> Do these results contain any unexpected personal
+        data that wasn't properly pseudonymized? If so, click Reject.
+      </div>
+    </b-modal>
+
+    <!-- DB Query Approval Modal -->
+    <b-modal
+      v-model="showDbQueryApproval"
+      title="Database Query Approval"
+      size="lg"
+      centered
+      ok-title="Approve Query"
+      cancel-title="Reject"
+      @ok="approveDbQuery"
+      @cancel="rejectDbQuery"
+    >
+      <p class="text-info">
+        <strong>Privacy Review:</strong> The AI wants to query the database.
+        Please review the SQL query before it executes.
+      </p>
+
+      <div class="privacy-review-section mb-3">
+        <h6>SQL Query:</h6>
+        <div class="privacy-review-box pseudonymized">
+          <code>{{ pendingDbQuery?.query }}</code>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-3">
+        <div>
+          <strong>Tables:</strong> {{ pendingDbQuery?.tables?.join(', ') }}
+        </div>
+        <div><strong>Limit:</strong> {{ pendingDbQuery?.limit }} rows</div>
+      </div>
+
+      <div v-if="pendingDbQuery?.columns?.length > 0" class="mb-3">
+        <strong>Columns accessed: </strong>
+        <small class="text-muted">{{
+          pendingDbQuery?.columns?.join(', ')
+        }}</small>
+      </div>
+
+      <div class="alert alert-info">
+        <strong>Note:</strong> Sensitive columns (names, emails) will be
+        pseudonymized in the results. You will review the results before they
+        are sent to the AI.
+      </div>
+    </b-modal>
+
+    <!-- DB Results Approval Modal -->
+    <b-modal
+      v-model="showDbResultsApproval"
+      title="Database Results Approval"
+      size="xl"
+      centered
+      ok-title="Send to AI"
+      cancel-title="Reject"
+      @ok="approveDbResults"
+      @cancel="rejectDbResults"
+    >
+      <p class="text-info">
+        <strong>Privacy Review:</strong> Review the database results before they
+        are sent to the AI. Check that no unexpected personal data is visible.
+      </p>
+
+      <div class="mb-2">
+        <strong>Results:</strong> {{ pendingDbResults?.rowCount }} rows,
+        {{ pendingDbResults?.tokenCount }} values pseudonymized
+      </div>
+
+      <div class="db-results-preview">
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th v-for="col in pendingDbResults?.columns" :key="col">
+                {{ col }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(row, idx) in (pendingDbResults?.rows || []).slice(0, 20)"
+              :key="idx"
+            >
+              <td v-for="col in pendingDbResults?.columns" :key="col">
+                {{ row[col] }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          v-if="(pendingDbResults?.rows || []).length > 20"
+          class="text-muted small"
+        >
+          ... and {{ pendingDbResults.rows.length - 20 }} more rows
+        </div>
+      </div>
+
+      <div class="alert alert-warning mt-3">
+        <strong>Check:</strong> Do these results contain any unexpected personal
+        data that wasn't properly pseudonymized? If so, click Reject.
+      </div>
+    </b-modal>
+
     <!-- Header -->
-    <div class="ai-chat-header">
+    <div class="log-analysis-header">
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <strong>AI Support Helper</strong>
-          <span v-if="!connected && !connecting" class="text-danger ml-2">
-            (Disconnected)
+          <span v-if="!sanitizerAvailable" class="text-danger ml-2">
+            (Service unavailable)
+          </span>
+          <span v-if="totalCost > 0" class="session-cost ml-2">
+            Session: ${{ totalCost.toFixed(4) }}
           </span>
         </div>
-        <b-button
-          variant="link"
-          size="sm"
-          class="p-0"
-          @click="showPrivacyModal = true"
-        >
-          <span class="text-info">&#9432;</span> Privacy
-        </b-button>
-      </div>
-    </div>
-
-    <!-- Error messages -->
-    <NoticeMessage v-if="connectionError" variant="danger" class="m-2">
-      {{ connectionError }}
-    </NoticeMessage>
-
-    <NoticeMessage v-if="authExpired" variant="warning" class="m-2">
-      <strong>Claude authentication has expired.</strong><br />
-      Please ask an administrator to run 'claude' on the server to
-      re-authenticate.
-    </NoticeMessage>
-
-    <!-- Chat messages area -->
-    <div ref="chatContent" class="ai-chat-content">
-      <div class="ai-chat-messages">
-        <!-- Welcome message -->
-        <div v-if="messages.length === 0" class="ai-welcome-message">
-          <div class="ai-message ai-message--assistant">
-            <div class="ai-message-content">
-              Hello! I'm the AI Support Helper. I can answer questions about how
-              the Freegle website works or investigate specific problems for
-              freeglers. What would you like to know?
-            </div>
-          </div>
-        </div>
-
-        <!-- Message history -->
-        <div
-          v-for="(msg, idx) in messages"
-          v-show="msg.role !== 'assistant' || msg.content"
-          :key="idx"
-          class="ai-message"
-          :class="{
-            'ai-message--user': msg.role === 'user',
-            'ai-message--assistant': msg.role === 'assistant',
-            'ai-message--system': msg.role === 'system',
-          }"
-        >
-          <div class="ai-message-content">
-            <!-- User message -->
-            <template v-if="msg.role === 'user'">
-              {{ msg.content }}
-            </template>
-
-            <!-- Assistant message (hide if empty - placeholder before response arrives) -->
-            <template v-else-if="msg.role === 'assistant' && msg.content">
-              <div v-html="formatMarkdown(msg.content)" />
-            </template>
-
-            <!-- System/status message -->
-            <template v-else-if="msg.role === 'system'">
-              <div class="text-muted small">
-                <em>{{ msg.content }}</em>
-              </div>
-            </template>
-
-            <!-- Fact queries (transparency) -->
-            <template v-if="msg.queries && msg.queries.length > 0">
-              <div class="ai-queries mt-2">
-                <div
-                  class="ai-queries-header"
-                  @click="msg.showQueries = !msg.showQueries"
-                >
-                  <span>{{ msg.showQueries ? '▼' : '▶' }}</span>
-                  {{ msg.queries.length }} fact
-                  {{ msg.queries.length === 1 ? 'query' : 'queries' }} executed
-                </div>
-                <div v-if="msg.showQueries" class="ai-queries-list">
-                  <div
-                    v-for="(q, qIdx) in msg.queries"
-                    :key="qIdx"
-                    class="ai-query-item"
-                  >
-                    <code>{{ q.query }}({{ formatParams(q.params) }})</code>
-                    <span class="ml-2">→</span>
-                    <span
-                      class="ml-1"
-                      :class="{
-                        'text-success': q.status === 'complete',
-                        'text-danger': q.status === 'error',
-                      }"
-                    >
-                      {{
-                        q.status === 'error' ? q.error : formatAnswer(q.result)
-                      }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </template>
-
-            <!-- Suggested new queries -->
-            <template
-              v-if="msg.suggestedQueries && msg.suggestedQueries.length > 0"
-            >
-              <div class="ai-suggested-queries mt-2">
-                <strong>Suggested new fact queries:</strong>
-                <div
-                  v-for="(sq, sqIdx) in msg.suggestedQueries"
-                  :key="sqIdx"
-                  class="mt-1"
-                >
-                  <code>{{ sq.name }}({{ sq.params.join(', ') }})</code>
-                  <span class="text-muted ml-2">- {{ sq.description }}</span>
-                </div>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <!-- Typing/processing indicator -->
-        <div v-if="isProcessing" class="ai-message ai-message--assistant">
-          <div class="ai-message-content">
-            <div class="ai-typing">
-              <span class="ai-typing-dot"></span>
-              <span class="ai-typing-dot"></span>
-              <span class="ai-typing-dot"></span>
-              <span class="ml-2 text-muted small">{{ currentStep }}</span>
-            </div>
-            <b-button
-              variant="outline-danger"
-              size="sm"
-              class="mt-2"
-              @click="stopProcessing"
-            >
-              Stop
-            </b-button>
-          </div>
+        <div class="d-flex align-items-center gap-2">
+          <b-form-checkbox
+            v-model="privacyReviewMode"
+            switch
+            size="sm"
+            class="mr-3"
+          >
+            <small>Privacy Review</small>
+          </b-form-checkbox>
+          <b-form-checkbox
+            v-model="showAnonymisedData"
+            switch
+            size="sm"
+            class="mr-3"
+          >
+            <small>{{
+              showAnonymisedData ? 'Show PII' : 'Show Anonymised'
+            }}</small>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="debugMode" switch size="sm" class="mr-3">
+            <small>Debug</small>
+          </b-form-checkbox>
+          <b-button
+            variant="link"
+            size="sm"
+            class="p-0"
+            @click="showPrivacyModal = true"
+          >
+            <span class="text-info">&#9432;</span> Privacy
+          </b-button>
         </div>
       </div>
     </div>
 
-    <!-- Input area -->
-    <div class="ai-chat-footer">
-      <b-form class="ai-input-form" @submit.prevent="submitQuestion">
-        <b-form-textarea
-          v-model="question"
-          rows="2"
-          max-rows="4"
-          placeholder="Ask about a user or system issue..."
-          :disabled="isProcessing || !connected"
-          class="ai-input"
-          @keydown.enter.exact.prevent="submitQuestion"
+    <!-- Step 1: User Selection -->
+    <div
+      v-if="!selectedUser && !skippedUserSelection"
+      class="log-analysis-step p-3"
+    >
+      <h6>Step 1: Select a user to investigate</h6>
+      <p class="text-muted small mb-2">
+        Focus on a specific user for better results, or skip for general
+        queries.
+      </p>
+      <b-input-group class="mb-2">
+        <b-form-input
+          v-model="userSearch"
+          placeholder="Search by email, name, or user ID"
+          :disabled="searchingUser"
+          autocapitalize="none"
+          autocomplete="off"
+          @keyup.enter.exact="searchUsers"
         />
         <b-button
-          type="submit"
           variant="primary"
-          :disabled="!question.trim() || isProcessing || !connected"
-          class="ai-send-btn"
+          :disabled="searchingUser"
+          @click="searchUsers"
         >
-          <span v-if="isProcessing">
-            <b-spinner small />
-          </span>
-          <span v-else>Send</span>
+          <v-icon v-if="searchingUser" icon="sync" class="fa-spin" />
+          <v-icon v-else icon="search" /> Search
         </b-button>
-      </b-form>
+        <b-button
+          variant="secondary"
+          :disabled="searchingUser"
+          @click="skipUserSelection"
+        >
+          Skip
+        </b-button>
+      </b-input-group>
+
+      <div v-if="searchResults.length > 0" class="user-results mt-2">
+        <div
+          v-for="user in searchResults"
+          :key="user.id"
+          class="user-result-item p-2"
+          @click="selectUser(user)"
+        >
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <strong>{{ user.displayname || 'No name' }}</strong>
+              <span class="text-muted ml-2">{{ user.email }}</span>
+              <br />
+              <small class="text-muted">
+                ID: {{ user.id }}
+                <span v-if="user.lastaccess">
+                  | Last active: {{ formatDate(user.lastaccess) }}
+                </span>
+              </small>
+            </div>
+            <v-icon icon="chevron-right" />
+          </div>
+        </div>
+      </div>
+
+      <NoticeMessage v-if="noResults" class="mt-2">
+        No users found matching "{{ userSearch }}".
+      </NoticeMessage>
     </div>
+
+    <!-- User selected or skipped: show either initial query or chat -->
+    <template v-else>
+      <!-- User banner (always visible when user selected) -->
+      <div class="selected-user-banner p-2 bg-light d-flex align-items-center">
+        <div v-if="selectedUser" class="flex-grow-1">
+          <strong>{{ selectedUser.displayname || 'User' }}</strong>
+          <span class="text-muted ml-2">{{ selectedUser.email }}</span>
+          <small class="text-muted ml-2">(ID: {{ selectedUser.id }})</small>
+          <span v-if="selectedUser.lastaccess" class="text-muted ml-2">
+            | Last active: {{ formatDate(selectedUser.lastaccess) }}
+          </span>
+        </div>
+        <div v-else class="flex-grow-1">
+          <strong class="text-secondary">General Query</strong>
+          <span class="text-muted ml-2">(no specific user selected)</span>
+        </div>
+        <b-button variant="outline-primary" size="sm" @click="newChat">
+          New Chat
+        </b-button>
+      </div>
+
+      <!-- Initial query (before conversation starts) -->
+      <div v-if="messages.length === 0" class="log-analysis-step p-3">
+        <h6>What would you like to investigate?</h6>
+        <b-form @submit.prevent="submitQuery">
+          <b-form-textarea
+            v-model="query"
+            rows="3"
+            max-rows="6"
+            placeholder="e.g., 'Why are they getting errors?' or 'Show their recent login activity'"
+            :disabled="isProcessing"
+            @keydown.enter.exact.prevent="submitQuery"
+          />
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <small v-if="query" class="text-muted">
+              Press Enter to submit, Shift+Enter for new line
+            </small>
+            <b-button
+              type="submit"
+              variant="primary"
+              :disabled="!query.trim() || isProcessing"
+            >
+              <b-spinner v-if="isProcessing" small />
+              <span v-else>Analyze</span>
+            </b-button>
+          </div>
+        </b-form>
+      </div>
+
+      <!-- Chat interface (after conversation starts) -->
+      <template v-else>
+        <!-- Debug Panel -->
+        <div v-if="debugMode && debugLog.length > 0" class="debug-panel p-3">
+          <h6 class="d-flex align-items-center justify-content-between">
+            <span>Debug: Data Flow</span>
+            <b-button variant="link" size="sm" @click="debugLog = []"
+              >Clear</b-button
+            >
+          </h6>
+          <div class="debug-entries">
+            <div
+              v-for="(entry, idx) in debugLog"
+              :key="idx"
+              class="debug-entry mb-2 p-2"
+              :class="'debug-' + entry.type"
+            >
+              <div class="debug-header d-flex justify-content-between">
+                <strong>{{ entry.label }}</strong>
+                <small class="text-muted">{{ entry.timestamp }}</small>
+              </div>
+              <div v-if="entry.tokenMapping" class="token-mapping mt-1">
+                <small class="text-muted">Tokens created:</small>
+                <div
+                  v-for="(value, token) in entry.tokenMapping"
+                  :key="token"
+                  class="token-item"
+                >
+                  <code class="token">{{ token }}</code>
+                  <span class="mx-1">&rarr;</span>
+                  <span class="real-value">{{ value }}</span>
+                </div>
+              </div>
+              <pre v-if="entry.data" class="debug-data mt-1 mb-0">{{
+                formatDebugData(entry.data)
+              }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat messages -->
+        <div ref="messagesContainer" class="log-analysis-messages p-3">
+          <div
+            v-for="(msg, idx) in messages"
+            :key="idx"
+            class="message-item mb-3"
+            :class="{
+              'message-user': msg.role === 'user',
+              'message-assistant': msg.role === 'assistant',
+            }"
+          >
+            <div class="message-header small text-muted mb-1">
+              {{ msg.role === 'user' ? 'You' : 'AI Assistant' }}
+            </div>
+            <div class="message-content" v-html="formatMessageContent(msg)" />
+            <div
+              v-if="msg.role === 'assistant' && msg.costUsd"
+              class="message-cost"
+            >
+              Cost: ${{ msg.costUsd.toFixed(4) }}
+            </div>
+          </div>
+
+          <!-- Processing indicator -->
+          <div v-if="isProcessing" class="message-item message-assistant mb-3">
+            <div class="message-header small text-muted mb-1">AI Assistant</div>
+            <div class="message-content">
+              <div class="d-flex align-items-center">
+                <b-spinner small class="mr-2" />
+                <span>{{ processingStatus }}</span>
+              </div>
+              <b-button
+                variant="outline-danger"
+                size="sm"
+                class="mt-2"
+                @click="cancelQuery"
+              >
+                Cancel
+              </b-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Follow-up input -->
+        <div class="chat-input-area p-3">
+          <b-form class="d-flex gap-2" @submit.prevent="submitQuery">
+            <b-form-input
+              v-model="query"
+              placeholder="Ask a follow-up question..."
+              :disabled="isProcessing"
+              class="flex-grow-1"
+              @keydown.enter.exact.prevent="submitQuery"
+            />
+            <b-button
+              type="submit"
+              variant="primary"
+              :disabled="!query.trim() || isProcessing"
+            >
+              <b-spinner v-if="isProcessing" small />
+              <span v-else>Send</span>
+            </b-button>
+          </b-form>
+        </div>
+      </template>
+    </template>
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue'
 import { marked } from 'marked'
-import { faker } from '@faker-js/faker'
-import api from '~/api'
+import { useUserStore } from '~/stores/user'
 
-/**
- * PII Sanitizer - Session-scoped pseudonymization for privacy protection.
- *
- * Security design:
- * - Session secret is random, never stored or logged
- * - Pseudonyms are sequential (user1@, Person A) - can't reverse from value alone
- * - Even with code + transcript, attackers only see pseudonyms
- * - Map exists only in browser memory, cleared on page unload
- */
-class PiiSanitizer {
-  constructor() {
-    // Generate random session secret - never stored or logged
-    this.sessionSecret = crypto.randomUUID() + Date.now()
-    this.emailMap = new Map() // realEmail -> pseudonym
-    this.emailReverse = new Map() // pseudonym -> realEmail
-    this.nameMap = new Map() // realName -> pseudonym
-    this.nameReverse = new Map() // pseudonym -> realName
-    this.emailCounter = 0
-    this.nameCounter = 0
-  }
+// Query sanitizer service - frontend talks to this for PII handling
+const SANITIZER_URL = 'http://mcp-sanitizer.localhost'
 
-  pseudonymizeEmail(realEmail) {
-    if (!realEmail) return null
-    const normalized = realEmail.toLowerCase().trim()
-    if (this.emailMap.has(normalized)) return this.emailMap.get(normalized)
-
-    // Generate a realistic fake email using faker
-    // Seed with counter for consistency within session
-    faker.seed(this.emailCounter + 2000)
-    const pseudonym = faker.internet.email()
-    this.emailCounter++
-    this.emailMap.set(normalized, pseudonym)
-    this.emailReverse.set(pseudonym, normalized)
-    return pseudonym
-  }
-
-  depseudonymizeEmail(pseudoEmail) {
-    if (!pseudoEmail) return null
-    return this.emailReverse.get(pseudoEmail) || pseudoEmail
-  }
-
-  pseudonymizeName(realName) {
-    if (!realName) return null
-    const normalized = realName.trim()
-    if (this.nameMap.has(normalized)) return this.nameMap.get(normalized)
-
-    // Generate a realistic fake name using faker
-    // Seed with counter for consistency within session
-    faker.seed(this.nameCounter + 1000)
-    const pseudonym = faker.person.fullName()
-    this.nameCounter++
-    this.nameMap.set(normalized, pseudonym)
-    this.nameReverse.set(pseudonym, normalized)
-    return pseudonym
-  }
-
-  depseudonymizeName(pseudoName) {
-    if (!pseudoName) return null
-    return this.nameReverse.get(pseudoName) || pseudoName
-  }
-
-  /**
-   * Replace all pseudonyms in text with real values.
-   * Used to show real names/emails to the authorized user viewing responses.
-   */
-  depseudonymizeText(text) {
-    if (!text) return text
-    let result = text
-
-    // Replace pseudonymized names (Person A, Person B, etc.)
-    for (const [pseudonym, realName] of this.nameReverse) {
-      result = result.split(pseudonym).join(realName)
-    }
-
-    // Replace pseudonymized emails (user1@freegle.pseudo, etc.)
-    for (const [pseudonym, realEmail] of this.emailReverse) {
-      result = result.split(pseudonym).join(realEmail)
-    }
-
-    return result
-  }
-
-  hashIp(ip) {
-    if (!ip) return null
-    // One-way hash to 8-char prefix using session secret
-    // Can't reverse without session secret (which is never stored)
-    const combined = ip + this.sessionSecret
-    let hash = 0
-    for (let i = 0; i < combined.length; i++) {
-      hash = ((hash << 5) - hash + combined.charCodeAt(i)) | 0
-    }
-    return Math.abs(hash).toString(36).substring(0, 8).toUpperCase()
-  }
-
-  roundCoords(lat, lng) {
-    if (lat === null || lat === undefined) return null
-    if (lng === null || lng === undefined) return null
-    // Round to ~1km accuracy (2 decimal places)
-    return {
-      lat: Math.round(parseFloat(lat) * 100) / 100,
-      lng: Math.round(parseFloat(lng) * 100) / 100,
-    }
-  }
-
-  // Sanitize a user object, removing/pseudonymizing PII fields
-  sanitizeUser(user) {
-    if (!user) return null
-    return {
-      id: user.id,
-      role: user.systemrole || user.role || 'User',
-      added: user.added,
-      lastaccess: user.lastaccess,
-      engagement: user.engagement,
-      trustlevel: user.trustlevel,
-      displayname: user.displayname
-        ? this.pseudonymizeName(user.displayname)
-        : null,
-      // Exclude: email, firstname, lastname, fullname, phone, address
-    }
-  }
-
-  // Sanitize log text by scrubbing sensitive patterns
-  scrubLogText(text) {
-    if (!text) return null
-    let result = String(text)
-
-    // Auth tokens - MUST remove
-    result = result.replace(/Bearer\s+[A-Za-z0-9_\-.]+/gi, '[BEARER_REDACTED]')
-    result = result.replace(/eyJ[A-Za-z0-9_\-.]{10,}/g, '[JWT_REDACTED]')
-    result = result.replace(/sk-[a-zA-Z0-9]{20,}/g, '[KEY_REDACTED]')
-    result = result.replace(
-      /token["\s:=]+["']?[A-Za-z0-9_\-.]{20,}/gi,
-      'token:[REDACTED]'
-    )
-
-    // Passwords - MUST remove
-    result = result.replace(
-      /"password"\s*:\s*"[^"]+"/gi,
-      '"password":"[REDACTED]"'
-    )
-    result = result.replace(/password=[^&\s]+/gi, 'password=[REDACTED]')
-
-    // Phone numbers - remove entirely
-    result = result.replace(/(\+44|0)[\d\s\-()]{9,12}/g, '[PHONE]')
-
-    // UK postcodes - generalize
-    result = result.replace(
-      /\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/gi,
-      '[POSTCODE]'
-    )
-
-    // Credit cards - remove entirely
-    result = result.replace(
-      /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g,
-      '[CARD]'
-    )
-
-    // Emails - pseudonymize
-    result = result.replace(/[\w.-]+@[\w.-]+\.\w+/g, (match) =>
-      this.pseudonymizeEmail(match)
-    )
-
-    // IP addresses - hash
-    result = result.replace(
-      /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-      (match) => `[IP:${this.hashIp(match)}]`
-    )
-
-    return result
-  }
-
-  // Sanitize a log entry, removing dangerous fields
-  sanitizeLogEntry(entry) {
-    if (!entry) return null
-
-    // Fields to completely exclude
-    const EXCLUDED_FIELDS = [
-      'request_body',
-      'response_body',
-      'text',
-      'message',
-      'headers',
-      'query_params',
-    ]
-
-    const safe = {}
-    for (const [key, value] of Object.entries(entry)) {
-      if (EXCLUDED_FIELDS.includes(key)) continue
-
-      // Scrub any remaining string values
-      if (typeof value === 'string') {
-        safe[key] = this.scrubLogText(value)
-      } else {
-        safe[key] = value
-      }
-    }
-    return safe
-  }
-}
-
-// Singleton sanitizer instance - created fresh on component mount
-let sanitizer = null
-
-/**
- * Convert timerange strings to ISO date strings for API calls.
- * Supports: "today", "yesterday", "week", "month", "year", "all", or ISO date
- * Also supports shorthand like "7d", "30d", "1h", "2w", "3m"
- */
-function parseTimerange(timerange) {
-  if (!timerange || timerange === 'all') return null // No filter
-
-  const now = new Date()
-  let start
-
-  const lowerTimerange = timerange.toLowerCase()
-
-  // Check for shorthand format like "7d", "30d", "1h", "2w", "3m"
-  const shorthandMatch = lowerTimerange.match(/^(\d+)([hdwmy])$/)
-  if (shorthandMatch) {
-    const amount = parseInt(shorthandMatch[1])
-    const unit = shorthandMatch[2]
-    start = new Date(now)
-    switch (unit) {
-      case 'h':
-        start.setHours(start.getHours() - amount)
-        break
-      case 'd':
-        start.setDate(start.getDate() - amount)
-        break
-      case 'w':
-        start.setDate(start.getDate() - amount * 7)
-        break
-      case 'm':
-        start.setMonth(start.getMonth() - amount)
-        break
-      case 'y':
-        start.setFullYear(start.getFullYear() - amount)
-        break
-    }
-    return start.toISOString()
-  }
-
-  // Check for natural language format like "1 year", "2 months", "3 weeks", "5 days"
-  const naturalMatch = lowerTimerange.match(
-    /^(\d+)\s*(hours?|days?|weeks?|months?|years?)$/
-  )
-  if (naturalMatch) {
-    const amount = parseInt(naturalMatch[1])
-    const unit = naturalMatch[2]
-    start = new Date(now)
-    if (unit.startsWith('hour')) {
-      start.setHours(start.getHours() - amount)
-    } else if (unit.startsWith('day')) {
-      start.setDate(start.getDate() - amount)
-    } else if (unit.startsWith('week')) {
-      start.setDate(start.getDate() - amount * 7)
-    } else if (unit.startsWith('month')) {
-      start.setMonth(start.getMonth() - amount)
-    } else if (unit.startsWith('year')) {
-      start.setFullYear(start.getFullYear() - amount)
-    }
-    return start.toISOString()
-  }
-
-  switch (lowerTimerange) {
-    case 'today':
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      break
-    case 'yesterday':
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
-      break
-    case 'week':
-    case '7days':
-      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-      break
-    case 'month':
-    case '30days':
-      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      break
-    case 'year':
-    case '365days':
-      start = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
-      break
-    default:
-      // Assume it's already a date string
-      return timerange
-  }
-
-  return start.toISOString()
-}
-
-// Fact query types that can be executed in the browser.
-const QUERY_TYPES = {
-  // Counts - return numbers only.
-  count_api_calls: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'api',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        limit: 1,
-      })
-      return response?.stats?.total_returned || 0
-    },
-  },
-  count_errors: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'api',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        levels: 'error',
-        limit: 1,
-      })
-      return response?.stats?.total_returned || 0
-    },
-  },
-  count_logins: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'logs_table',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        types: 'User',
-        subtypes: 'Login',
-        limit: 1,
-      })
-      return response?.stats?.total_returned || 0
-    },
-  },
-
-  // Yes/No questions.
-  has_recent_activity: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'api,client,logs_table',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        limit: 1,
-      })
-      return (response?.stats?.total_returned || 0) > 0
-    },
-  },
-  has_errors: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'api,client',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        levels: 'error',
-        limit: 1,
-      })
-      return (response?.stats?.total_returned || 0) > 0
-    },
-  },
-
-  // Safe summaries (no PII).
-  get_error_summary: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      const response = await api(config).systemlogs.fetch({
-        sources: 'api',
-        userid: params.userid,
-        start: params.timerange || '365d',
-        levels: 'error',
-        limit: 100,
-      })
-      const summary = {}
-      for (const log of response?.logs || []) {
-        const status = log.raw?.status_code || 'unknown'
-        summary[status] = (summary[status] || 0) + 1
-      }
-      return Object.entries(summary).map(([statusCode, count]) => ({
-        statusCode,
-        count,
-      }))
-    },
-  },
-  get_user_role: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return user?.systemrole || 'User'
-      } catch {
-        return 'Unknown'
-      }
-    },
-  },
-  find_user_by_email: {
-    params: ['email'],
-    execute: async (params, config) => {
-      try {
-        // Depseudonymize email if it's a pseudonym (user1@freegle.pseudo)
-        const realEmail = sanitizer.depseudonymizeEmail(params.email)
-        // Try direct email lookup first (more reliable)
-        try {
-          const user = await api(config).user.fetchByEmail(
-            encodeURIComponent(realEmail),
-            false
-          )
-          if (user?.id) {
-            return {
-              id: user.id,
-              displayname: sanitizer.pseudonymizeName(user.displayname),
-              role: user.systemrole || 'User',
-              found: true,
-            }
-          }
-        } catch {
-          // Fall through to search method
-        }
-        // Fallback to search with emailhistory
-        const result = await api(config).user.fetchMT({
-          search: realEmail,
-          emailhistory: true,
-        })
-        if (result?.users?.length > 0) {
-          const user = result.users[0]
-          return {
-            id: user.id,
-            displayname: sanitizer.pseudonymizeName(user.displayname),
-            role: user.systemrole || 'User',
-            found: true,
-          }
-        }
-        if (result?.user) {
-          return {
-            id: result.user.id,
-            displayname: sanitizer.pseudonymizeName(result.user.displayname),
-            role: result.user.systemrole || 'User',
-            found: true,
-          }
-        }
-        return { found: false }
-      } catch {
-        return { found: false, error: 'Search failed' }
-      }
-    },
-  },
-  find_user_by_name: {
-    params: ['name'],
-    execute: async (params, config) => {
-      try {
-        // Depseudonymize name if it's a pseudonym (Person A)
-        const realName = sanitizer.depseudonymizeName(params.name)
-        // Use fetchMT which supports search parameter
-        const result = await api(config).user.fetchMT({
-          search: realName,
-        })
-        if (result?.users?.length > 0) {
-          return result.users.slice(0, 10).map((u) => ({
-            id: u.id,
-            displayname: sanitizer.pseudonymizeName(u.displayname),
-            role: u.systemrole || 'User',
-          }))
-        }
-        if (result?.user) {
-          return [
-            {
-              id: result.user.id,
-              displayname: sanitizer.pseudonymizeName(result.user.displayname),
-              role: result.user.systemrole || 'User',
-            },
-          ]
-        }
-        return []
-      } catch {
-        return []
-      }
-    },
-  },
-  check_team_membership: {
-    params: ['userid', 'teamname'],
-    execute: async (params, config) => {
-      try {
-        // Fetch team with members by name
-        const teamData = await api(config).team.fetch({ name: params.teamname })
-        const members =
-          teamData?.members || (Array.isArray(teamData) ? teamData : [])
-        return members.some(
-          (m) => (m.userid || m.id) === parseInt(params.userid)
-        )
-      } catch {
-        return false
-      }
-    },
-  },
-  get_user_teams: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const teams = await api(config).team.fetch()
-        const userTeams = []
-        for (const team of teams || []) {
-          // Fetch each team with members
-          const teamData = await api(config).team.fetch({ name: team.name })
-          const members =
-            teamData?.members || (Array.isArray(teamData) ? teamData : [])
-          if (
-            members.some((m) => (m.userid || m.id) === parseInt(params.userid))
-          ) {
-            userTeams.push(team.name)
-          }
-        }
-        return userTeams
-      } catch {
-        return []
-      }
-    },
-  },
-  get_last_login: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return user?.lastaccess || 'never'
-      } catch {
-        return 'unknown'
-      }
-    },
-  },
-  get_last_activity: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return user?.lastaccess || 'never'
-      } catch {
-        return 'unknown'
-      }
-    },
-  },
-
-  // PUBLIC DATA.
-  get_group_info: {
-    params: ['groupid'],
-    execute: async (params, config) => {
-      try {
-        const group = await api(config).group.fetchv2(params.groupid)
-        return {
-          id: group?.id,
-          name: group?.namedisplay || group?.nameshort,
-          region: group?.region,
-          membercount: group?.membercount,
-        }
-      } catch {
-        return null
-      }
-    },
-  },
-  search_groups: {
-    params: ['search'],
-    execute: async (params, config) => {
-      try {
-        // Use v1 API which returns all groups
-        const groups = await api(config).group.listMT({})
-        const searchLower = (params.search || '').toLowerCase()
-        return (groups || [])
-          .filter(
-            (g) =>
-              (g.namedisplay || '').toLowerCase().includes(searchLower) ||
-              (g.nameshort || '').toLowerCase().includes(searchLower)
-          )
-          .slice(0, 20)
-          .map((g) => ({
-            id: g.id,
-            name: g.namedisplay || g.nameshort,
-          }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // USER PROFILE QUERIES (with sanitization)
-  // ============================================
-
-  get_user_profile: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return sanitizer.sanitizeUser(user)
-      } catch {
-        return null
-      }
-    },
-  },
-
-  count_user_posts: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // fetchByUser returns array directly (not wrapped in {messages: []})
-        // Second param 'false' means include inactive/completed posts too
-        const messages =
-          (await api(config).message.fetchByUser(params.userid, false)) || []
-        // Filter by timerange if provided
-        const timerangeParsed = parseTimerange(params.timerange)
-        if (timerangeParsed) {
-          const cutoff = new Date(timerangeParsed)
-          return messages.filter((m) => new Date(m.arrival) >= cutoff).length
-        }
-        return messages.length
-      } catch {
-        return 0
-      }
-    },
-  },
-
-  get_user_messages: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // fetchByUser returns array directly
-        const messages =
-          (await api(config).message.fetchByUser(params.userid, false)) || []
-        // Filter by timerange if provided
-        const timerangeParsed = parseTimerange(params.timerange || '365d')
-        let filtered = messages
-        if (timerangeParsed) {
-          const cutoff = new Date(timerangeParsed)
-          filtered = messages.filter((m) => new Date(m.arrival) >= cutoff)
-        }
-        // Sort by arrival date descending (newest first)
-        filtered.sort((a, b) => new Date(b.arrival) - new Date(a.arrival))
-        // Return list of message IDs with basic info
-        return filtered.map((m) => ({
-          id: m.id,
-          type: m.type,
-          subject: m.subject?.substring(0, 50),
-          arrival: m.arrival,
-          hasoutcome: m.hasoutcome,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  get_user_post_replies: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // fetchByUser returns array directly
-        const messages =
-          (await api(config).message.fetchByUser(params.userid, false)) || []
-        // Filter by timerange if provided
-        const timerangeParsed = parseTimerange(params.timerange || '365d')
-        let filtered = messages
-        if (timerangeParsed) {
-          const cutoff = new Date(timerangeParsed)
-          filtered = messages.filter((m) => new Date(m.arrival) >= cutoff)
-        }
-        // Sum up replycount from all messages
-        const totalReplies = filtered.reduce(
-          (sum, m) => sum + (m.replycount || 0),
-          0
-        )
-        return totalReplies
-      } catch {
-        return 0
-      }
-    },
-  },
-
-  get_user_groups: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        // The memberships API returns {memberships: [...]} or {members: [...]}
-        const response = await api(config).memberships.fetch({
-          userid: params.userid,
-        })
-        const memberships = response?.memberships || response?.members || []
-        return (memberships || []).map((m) => ({
-          groupid: m.groupid,
-          groupname: m.namedisplay || m.nameshort,
-          role: m.role,
-          joined: m.added,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // TEAM/ADMIN QUERIES
-  // ============================================
-
-  list_teams: {
-    params: [],
-    execute: async (params, config) => {
-      try {
-        const teams = await api(config).team.fetch()
-        return (teams || []).map((t) => t.name)
-      } catch {
-        return []
-      }
-    },
-  },
-
-  list_team_members: {
-    params: ['teamname'],
-    execute: async (params, config) => {
-      try {
-        // Fetch team with members by name
-        const teamData = await api(config).team.fetch({ name: params.teamname })
-        const members =
-          teamData?.members || (Array.isArray(teamData) ? teamData : [])
-        return members.map((m) => ({
-          id: m.userid || m.id,
-          displayname: sanitizer.pseudonymizeName(
-            m.displayname || m.name || `User ${m.userid || m.id}`
-          ),
-          role: m.role || 'Member',
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // GROUP QUERIES (public data)
-  // ============================================
-
-  get_group_stats: {
-    params: ['groupid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // fetchMessages returns { messages: [...] }
-        const response = await api(config).message.fetchMessages({
-          groupid: params.groupid,
-          limit: 1000,
-        })
-        const messages = response?.messages || []
-        let posts = 0
-        let taken = 0
-        // Use parseTimerange for consistency
-        const timerangeParsed = parseTimerange(params.timerange || '365d')
-        const cutoff = timerangeParsed ? new Date(timerangeParsed) : new Date(0)
-        for (const msg of messages) {
-          if (new Date(msg.arrival) >= cutoff) {
-            posts++
-            if (
-              msg.outcomes?.some(
-                (o) => o.outcome === 'Taken' || o.outcome === 'Received'
-              )
-            ) {
-              taken++
-            }
-          }
-        }
-        return { posts, taken }
-      } catch {
-        return { posts: 0, taken: 0 }
-      }
-    },
-  },
-
-  get_group_mods: {
-    params: ['groupid'],
-    execute: async (params, config) => {
-      try {
-        const group = await api(config).group.fetch(params.groupid, true)
-        const mods = (group?.members || []).filter(
-          (m) => m.role === 'Moderator' || m.role === 'Owner'
-        )
-        return mods.map((m) => ({
-          id: m.userid,
-          displayname: sanitizer.pseudonymizeName(m.displayname),
-          role: m.role,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // MESSAGE QUERIES (with sanitization)
-  // ============================================
-
-  get_message_info: {
-    params: ['messageid'],
-    execute: async (params, config) => {
-      try {
-        const msg = await api(config).message.fetch(params.messageid)
-        return {
-          id: msg?.id,
-          type: msg?.type,
-          subject: msg?.subject ? msg.subject.substring(0, 50) : null, // Truncate
-          status: msg?.deleted ? 'Deleted' : msg?.heldby ? 'Held' : 'Active',
-          groupname: msg?.groups?.[0]?.namedisplay || null,
-          posted: msg?.arrival,
-          outcome: msg?.outcomes?.[0]?.outcome || null,
-          // Exclude: body content, fromaddr, fromname
-        }
-      } catch {
-        return null
-      }
-    },
-  },
-
-  get_message_history: {
-    params: ['messageid'],
-    execute: async (params, config) => {
-      try {
-        const response = await api(config).systemlogs.fetch({
-          sources: 'logs_table',
-          msgid: params.messageid,
-          limit: 50,
-        })
-        return (response?.logs || []).map((log) => ({
-          action: log.type + (log.subtype ? `:${log.subtype}` : ''),
-          timestamp: log.timestamp,
-          byuser: log.byuser
-            ? sanitizer.pseudonymizeName(`User ${log.byuser}`)
-            : null,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  search_messages: {
-    params: ['search', 'groupid'],
-    execute: async (params, config) => {
-      try {
-        const searchParams = { search: params.search, limit: 20 }
-        if (params.groupid) searchParams.groupid = params.groupid
-        // fetchMessages returns { messages: [...] }
-        const response = await api(config).message.fetchMessages(searchParams)
-        const messages = response?.messages || []
-        return messages.map((m) => ({
-          id: m.id,
-          type: m.type,
-          subject: m.subject ? m.subject.substring(0, 50) : null,
-          status: m.deleted ? 'Deleted' : m.heldby ? 'Held' : 'Active',
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  count_group_messages: {
-    params: ['groupid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // fetchMessages returns { messages: [...] }
-        const response = await api(config).message.fetchMessages({
-          groupid: params.groupid,
-          limit: 1000,
-        })
-        const messages = response?.messages || []
-        // Use parseTimerange for consistency
-        const timerangeParsed = parseTimerange(params.timerange || '365d')
-        const cutoff = timerangeParsed ? new Date(timerangeParsed) : new Date(0)
-        const filtered = messages.filter((m) => new Date(m.arrival) >= cutoff)
-        const offers = filtered.filter((m) => m.type === 'Offer').length
-        const wanteds = filtered.filter((m) => m.type === 'Wanted').length
-        const taken = filtered.filter((m) =>
-          m.outcomes?.some(
-            (o) => o.outcome === 'Taken' || o.outcome === 'Received'
-          )
-        ).length
-        return { offers, wanteds, taken }
-      } catch {
-        return { offers: 0, wanteds: 0, taken: 0 }
-      }
-    },
-  },
-
-  // ============================================
-  // ERROR/LOG QUERIES (heavily sanitized)
-  // ============================================
-
-  get_error_types: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        const response = await api(config).systemlogs.fetch({
-          sources: 'api',
-          userid: params.userid,
-          start: params.timerange || '365d',
-          levels: 'error',
-          limit: 100,
-        })
-        const summary = {}
-        for (const log of response?.logs || []) {
-          const key = `${log.raw?.method || 'UNKNOWN'} ${
-            log.raw?.endpoint || 'unknown'
-          }`
-          summary[key] = (summary[key] || 0) + 1
-        }
-        return Object.entries(summary).map(([endpoint, count]) => {
-          const [method, path] = endpoint.split(' ')
-          return { endpoint: path, method, count }
-        })
-      } catch {
-        return []
-      }
-    },
-  },
-
-  get_recent_errors: {
-    params: ['userid', 'limit'],
-    execute: async (params, config) => {
-      try {
-        const response = await api(config).systemlogs.fetch({
-          sources: 'api',
-          userid: params.userid,
-          levels: 'error',
-          limit: params.limit || 10,
-        })
-        // Return ONLY safe fields - no request/response bodies, no text
-        return (response?.logs || []).map((log) => ({
-          timestamp: log.timestamp,
-          statusCode: log.raw?.status_code || 'unknown',
-          endpoint: log.raw?.endpoint || 'unknown',
-          method: log.raw?.method || 'unknown',
-          // Excluded: request_body, response_body, text, headers
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // SYSTEM LOG QUERIES (sanitized)
-  // ============================================
-
-  get_user_actions: {
-    params: ['userid', 'timerange'],
-    execute: async (params, config) => {
-      try {
-        // Query all sources for user activity
-        const timeRange = params.timerange || '365d'
-        const response = await api(config).systemlogs.fetch({
-          sources: 'api,client,logs_table',
-          userid: params.userid,
-          start: timeRange,
-          limit: 50,
-        })
-        // Return structured fields based on source type
-        return (response?.logs || []).map((log) => ({
-          source: log.source,
-          type: log.type || log.raw?.method,
-          subtype: log.subtype || log.raw?.endpoint,
-          timestamp: log.timestamp,
-          groupid: log.group_id,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  get_login_history: {
-    params: ['userid', 'limit'],
-    execute: async (params, config) => {
-      try {
-        const response = await api(config).systemlogs.fetch({
-          sources: 'logs_table',
-          userid: params.userid,
-          types: 'User',
-          subtypes: 'Login',
-          limit: params.limit || 20,
-        })
-        return (response?.logs || []).map((log) => ({
-          timestamp: log.timestamp,
-          success: log.subtype === 'Login',
-          ip_hash: log.raw?.fromip ? sanitizer.hashIp(log.raw.fromip) : null,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  // ============================================
-  // MODERATION QUERIES
-  // ============================================
-
-  get_user_spam_score: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return {
-          score: user?.spamscore || 0,
-          reason_summary: user?.spamreason ? 'Flagged' : 'Clean',
-          // Don't expose detailed spam reason - may contain PII
-        }
-      } catch {
-        return { score: 0, reason_summary: 'Unknown' }
-      }
-    },
-  },
-
-  is_user_banned: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const user = await api(config).user.fetch(parseInt(params.userid))
-        return user?.banned === 1 || user?.deleted !== null
-      } catch {
-        return false
-      }
-    },
-  },
-
-  get_user_warnings: {
-    params: ['userid'],
-    execute: async (params, config) => {
-      try {
-        const response = await api(config).systemlogs.fetch({
-          sources: 'logs_table',
-          userid: params.userid,
-          types: 'User',
-          subtypes: 'Warning,Reported,Suspend',
-          limit: 20,
-        })
-        return (response?.logs || []).map((log) => ({
-          date: log.timestamp,
-          type: log.subtype,
-          groupid: log.groupid,
-          // Excluded: warning text/reason
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-
-  get_pending_messages: {
-    params: ['groupid'],
-    execute: async (params, config) => {
-      try {
-        // fetchMessages returns { messages: [...] }
-        const response = await api(config).message.fetchMessages({
-          groupid: params.groupid,
-          collection: 'Pending',
-          limit: 50,
-        })
-        const messages = response?.messages || []
-        return messages.map((m) => ({
-          id: m.id,
-          subject: m.subject ? m.subject.substring(0, 50) : null,
-          type: m.type,
-          pending_since: m.arrival,
-        }))
-      } catch {
-        return []
-      }
-    },
-  },
-}
-
-// API base URL for ai-support-helper service
-const AGENT_API_URL = 'http://ai-support-helper.localhost'
+// AI support helper for Claude integration (same as existing AI assistant)
+const AI_SUPPORT_URL = 'http://ai-support-helper.localhost'
 
 export default {
   name: 'ModSupportAIAssistant',
-  setup() {
-    const config = useRuntimeConfig()
-    return { config }
-  },
   data() {
     return {
-      connected: false,
-      connecting: true,
-      connectionError: null,
-      authExpired: false,
-      question: '',
-      messages: [], // Chat history
-      isProcessing: false,
-      currentStep: 'Thinking...',
-      currentSessionId: null,
-      pollInterval: null,
+      // UI state
       showPrivacyModal: false,
+      showPiiWarning: false,
+      showPrivacyReview: false,
+      sanitizerAvailable: true,
+      showAnonymisedData: false,
+      debugMode: false,
+      privacyReviewMode: true, // Default on for privacy verification
+      pendingPrivacyReview: null,
+
+      // User search
+      userSearch: '',
+      searchingUser: false,
+      searchResults: [],
+      noResults: false,
+      selectedUser: null,
+      skippedUserSelection: false,
+
+      // Query input
+      query: '',
+      detectedPii: [],
+      pendingQuery: null,
+
+      // Processing
+      isProcessing: false,
+      processingStatus: 'Analyzing...',
+      currentSessionId: null,
+      claudeSessionId: null, // For Claude Code conversation continuity
+      localMapping: {},
+
+      // Conversation with raw data for debug
+      messages: [],
+      debugLog: [],
+
+      // MCP query approval state
+      showMcpQueryApproval: false,
+      showMcpResultsApproval: false,
+      pendingMcpQuery: null,
+      pendingMcpResults: null,
+      mcpPollInterval: null,
+
+      // DB query approval state
+      showDbQueryApproval: false,
+      showDbResultsApproval: false,
+      pendingDbQuery: null,
+      pendingDbResults: null,
     }
   },
-  mounted() {
-    // Initialize fresh sanitizer for this session
-    sanitizer = new PiiSanitizer()
-    this.checkConnection()
+  computed: {
+    totalCost() {
+      return this.messages
+        .filter((m) => m.role === 'assistant' && m.costUsd)
+        .reduce((sum, m) => sum + m.costUsd, 0)
+    },
+  },
+  async mounted() {
+    await this.checkSanitizerAvailability()
   },
   beforeUnmount() {
-    this.stopPolling()
+    this.stopMcpPolling()
   },
   methods: {
-    async checkConnection() {
-      this.connecting = true
-      this.connectionError = null
-
+    async checkSanitizerAvailability() {
       try {
-        const response = await fetch(`${AGENT_API_URL}/health`)
-        if (response.ok) {
-          this.connected = true
-        } else {
-          throw new Error('Health check failed')
-        }
+        const response = await fetch(`${SANITIZER_URL}/health`)
+        this.sanitizerAvailable = response.ok
       } catch {
-        this.connected = false
-        this.connectionError =
-          'AI Support Helper is not available. Please check the server is running.'
-      } finally {
-        this.connecting = false
+        this.sanitizerAvailable = false
       }
     },
 
-    async submitQuestion() {
-      if (!this.question.trim() || this.isProcessing || !this.connected) return
+    async searchUsers() {
+      if (!this.userSearch.trim()) return
 
-      const userQuestion = this.question.trim()
-      this.question = ''
-
-      // Force Vue to process the clearing before continuing
-      await this.$nextTick()
-
-      // Add user message to chat
-      this.messages.push({
-        role: 'user',
-        content: userQuestion,
-      })
-      this.scrollToBottom()
-
-      // Add placeholder for assistant response
-      const assistantMessage = reactive({
-        role: 'assistant',
-        content: '',
-        queries: [],
-        suggestedQueries: [],
-        showQueries: false,
-      })
-      this.messages.push(assistantMessage)
-      this.scrollToBottom()
-
-      this.isProcessing = true
-      this.currentStep = 'Starting investigation...'
+      this.searchingUser = true
+      this.searchResults = []
+      this.noResults = false
 
       try {
-        // Start the question
-        const response = await fetch(`${AGENT_API_URL}/api/ask`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: userQuestion,
-            conversationHistory: this.getConversationHistory(),
-          }),
+        const userStore = useUserStore()
+        userStore.clear()
+
+        await userStore.fetchMT({
+          search: this.userSearch.trim(),
+          emailhistory: true,
         })
 
-        if (!response.ok) {
-          throw new Error('Failed to start question')
-        }
+        // Get results and sort by last access
+        this.searchResults = Object.values(userStore.list)
+          .sort((a, b) => {
+            return (
+              new Date(b.lastaccess).getTime() -
+              new Date(a.lastaccess).getTime()
+            )
+          })
+          .slice(0, 10) // Limit to 10 results
 
-        const { sessionId } = await response.json()
-        this.currentSessionId = sessionId
-
-        // Start polling for events
-        this.startPolling(assistantMessage)
-      } catch (error) {
-        this.isProcessing = false
-        assistantMessage.content = `Error: ${error.message}`
-        this.scrollToBottom()
-      }
-    },
-
-    startPolling(assistantMessage) {
-      this.pollInterval = setInterval(async () => {
-        if (!this.currentSessionId) {
-          this.stopPolling()
+        // Auto-select if only one result
+        if (this.searchResults.length === 1) {
+          this.selectUser(this.searchResults[0])
           return
         }
 
-        try {
-          const response = await fetch(
-            `${AGENT_API_URL}/api/poll/${this.currentSessionId}`
-          )
+        this.noResults = this.searchResults.length === 0
+      } catch (error) {
+        console.error('User search error:', error)
+        this.noResults = true
+      } finally {
+        this.searchingUser = false
+      }
+    },
 
-          if (!response.ok) {
-            if (response.status === 404) {
-              this.stopPolling()
-              assistantMessage.content =
-                assistantMessage.content ||
-                'Session expired. Please ask your question again.'
-              this.isProcessing = false
-            }
-            return
-          }
-
-          const { events, status, answer, suggestedQueries } =
-            await response.json()
-
-          // Process events
-          for (const event of events) {
-            await this.handleEvent(event, assistantMessage)
-          }
-
-          // Check if complete
-          if (
-            status === 'complete' ||
-            status === 'error' ||
-            status === 'interrupted'
-          ) {
-            this.stopPolling()
-            if (answer) {
-              // Depseudonymize for display to authorized user
-              assistantMessage.content = sanitizer.depseudonymizeText(answer)
-            }
-            if (suggestedQueries?.length > 0) {
-              assistantMessage.suggestedQueries = suggestedQueries
-            }
-            this.isProcessing = false
-            this.scrollToBottom()
-          }
-        } catch {
-          // Polling error - continue trying
+    selectUser(user) {
+      this.selectedUser = user
+      this.searchResults = []
+      this.userSearch = ''
+      // Focus the query input after Vue updates the DOM
+      this.$nextTick(() => {
+        const textarea = this.$el.querySelector('textarea')
+        if (textarea) {
+          textarea.focus()
         }
-      }, 500) // Poll every 500ms
-    },
-
-    stopPolling() {
-      if (this.pollInterval) {
-        clearInterval(this.pollInterval)
-        this.pollInterval = null
-      }
-      this.currentSessionId = null
-    },
-
-    async handleEvent(event, assistantMessage) {
-      switch (event.type) {
-        case 'thinking':
-          this.currentStep = event.content
-          this.scrollToBottom()
-          break
-
-        case 'fact_query':
-          await this.handleFactQuery(event, assistantMessage)
-          this.scrollToBottom()
-          break
-
-        case 'answer':
-          // Depseudonymize for display to authorized user
-          assistantMessage.content = sanitizer.depseudonymizeText(event.content)
-          this.scrollToBottom()
-          break
-
-        case 'error':
-          if (event.code === 'AUTH_EXPIRED') {
-            this.authExpired = true
-          }
-          assistantMessage.content = `Error: ${event.message}`
-          this.stopPolling()
-          this.isProcessing = false
-          this.scrollToBottom()
-          break
-
-        case 'stopped':
-          assistantMessage.content =
-            assistantMessage.content || '(Processing was interrupted)'
-          this.stopPolling()
-          this.isProcessing = false
-          this.scrollToBottom()
-          break
-      }
-    },
-
-    async handleFactQuery(event, assistantMessage) {
-      const { queryId, query, params } = event
-
-      // Add to queries list for transparency
-      const queryRecord = reactive({
-        query,
-        params,
-        status: 'pending',
-        result: null,
-        error: null,
       })
-      assistantMessage.queries.push(queryRecord)
-      this.currentStep = `Executing: ${query}...`
-
-      // Execute the query locally
-      let result = null
-      let error = null
-
-      try {
-        const queryDef = QUERY_TYPES[query]
-        if (!queryDef) {
-          queryRecord.status = 'error'
-          queryRecord.error = 'Unknown query type'
-          error = 'Unknown query type'
-        } else {
-          result = await queryDef.execute(params, this.config)
-          queryRecord.result = result
-          queryRecord.status = 'complete'
-        }
-      } catch (e) {
-        queryRecord.status = 'error'
-        queryRecord.error = e.message
-        error = e.message
-      }
-
-      // Send response back to container
-      try {
-        await fetch(
-          `${AGENT_API_URL}/api/fact-response/${this.currentSessionId}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ queryId, result, error }),
-          }
-        )
-      } catch {
-        // Response send failed
-      }
     },
 
-    async stopProcessing() {
-      if (this.currentSessionId) {
-        try {
-          await fetch(`${AGENT_API_URL}/api/stop/${this.currentSessionId}`, {
-            method: 'POST',
-          })
-        } catch {
-          // Stop request failed
-        }
-      }
-      this.stopPolling()
-      this.isProcessing = false
-    },
-
-    getConversationHistory() {
-      // Return previous Q&A pairs for context
-      return this.messages
-        .filter(
-          (m) => m.role === 'user' || (m.role === 'assistant' && m.content)
-        )
-        .map((m) => ({
-          role: m.role,
-          content: m.content,
-        }))
-        .slice(-10) // Last 10 messages
+    newChat() {
+      // Start a fresh conversation - clears user and all state
+      this.selectedUser = null
+      this.skippedUserSelection = false
+      this.messages = []
+      this.query = ''
+      this.currentSessionId = null
+      this.claudeSessionId = null
+      this.localMapping = {}
+      this.debugLog = []
+      this.searchResults = []
+      this.userSearch = ''
+      // Clear any pending approval states
+      this.showMcpQueryApproval = false
+      this.showMcpResultsApproval = false
+      this.pendingMcpQuery = null
+      this.pendingMcpResults = null
+      this.showDbQueryApproval = false
+      this.showDbResultsApproval = false
+      this.pendingDbQuery = null
+      this.pendingDbResults = null
     },
 
     scrollToBottom() {
       this.$nextTick(() => {
-        const chatContent = this.$refs.chatContent
-        if (chatContent) {
-          chatContent.scrollTop = chatContent.scrollHeight
+        const container = this.$refs.messagesContainer
+        if (container) {
+          container.scrollTop = container.scrollHeight
         }
       })
     },
 
-    formatParams(params) {
-      if (!params) return ''
-      return Object.entries(params)
-        .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
+    skipUserSelection() {
+      this.skippedUserSelection = true
+      this.searchResults = []
+      this.userSearch = ''
+      // Focus the query input after Vue updates the DOM
+      this.$nextTick(() => {
+        const textarea = this.$el.querySelector('textarea')
+        if (textarea) {
+          textarea.focus()
+        }
+      })
+    },
+
+    addDebugEntry(type, label, data, tokenMapping = null) {
+      if (this.debugMode) {
+        this.debugLog.push({
+          type,
+          label,
+          data,
+          tokenMapping,
+          timestamp: new Date().toLocaleTimeString(),
+        })
+      }
+    },
+
+    async submitQuery() {
+      if (!this.query.trim() || this.isProcessing) return
+      if (!this.selectedUser && !this.skippedUserSelection) return
+
+      // First, scan for PII
+      try {
+        const scanPayload = {
+          query: this.query,
+          knownPii: this.selectedUser
+            ? {
+                email: this.selectedUser.email,
+                displayname: this.selectedUser.displayname,
+                userid: this.selectedUser.id,
+              }
+            : {},
+        }
+
+        this.addDebugEntry('request', 'PII Scan Request', scanPayload)
+
+        const response = await fetch(`${SANITIZER_URL}/scan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(scanPayload),
+        })
+
+        if (response.ok) {
+          const scanResult = await response.json()
+          this.addDebugEntry('response', 'PII Scan Response', scanResult)
+
+          if (scanResult.containsEmailTrail) {
+            alert(
+              'Your query appears to contain copy-pasted email content. Please describe the issue in your own words to protect user privacy.'
+            )
+            return
+          }
+
+          if (scanResult.detectedPii && scanResult.detectedPii.length > 0) {
+            this.detectedPii = scanResult.detectedPii
+            this.pendingQuery = this.query
+            this.showPiiWarning = true
+            return
+          }
+        }
+      } catch (error) {
+        console.error('PII scan error:', error)
+        this.addDebugEntry('error', 'PII Scan Error', {
+          message: error.message,
+        })
+      }
+
+      await this.executeQuery(this.query)
+    },
+
+    confirmPiiQuery() {
+      if (this.pendingQuery) {
+        this.executeQuery(this.pendingQuery)
+        this.pendingQuery = null
+      }
+      this.showPiiWarning = false
+    },
+
+    cancelPiiQuery() {
+      this.pendingQuery = null
+      this.showPiiWarning = false
+    },
+
+    async approvePrivacyReview() {
+      if (this.pendingPrivacyReview) {
+        const { originalQuery, pseudonymizedQuery } = this.pendingPrivacyReview
+        this.pendingPrivacyReview = null
+        this.showPrivacyReview = false
+        await this.proceedWithQuery(originalQuery, pseudonymizedQuery)
+      }
+    },
+
+    cancelPrivacyReview() {
+      this.pendingPrivacyReview = null
+      this.showPrivacyReview = false
+      this.query = ''
+    },
+
+    async executeQuery(queryText) {
+      this.isProcessing = true
+      this.processingStatus = 'Sanitizing query...'
+
+      try {
+        // Step 1: Sanitize the query
+        const sanitizePayload = {
+          query: queryText,
+          knownPii: this.selectedUser
+            ? {
+                email: this.selectedUser.email,
+                displayname: this.selectedUser.displayname,
+                userid: this.selectedUser.id,
+                postcode: this.selectedUser.postcode,
+                location: this.selectedUser.location,
+              }
+            : {},
+          userId: this.selectedUser?.id || 0,
+        }
+
+        this.addDebugEntry('request', 'Sanitize Request', sanitizePayload)
+
+        const sanitizeResponse = await fetch(`${SANITIZER_URL}/sanitize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sanitizePayload),
+        })
+
+        if (!sanitizeResponse.ok) {
+          const error = await sanitizeResponse.json()
+          throw new Error(error.message || 'Failed to sanitize query')
+        }
+
+        const sanitizeResult = await sanitizeResponse.json()
+        const { pseudonymizedQuery, sessionId, localMapping } = sanitizeResult
+
+        this.addDebugEntry(
+          'response',
+          'Sanitize Response',
+          { pseudonymizedQuery, sessionId },
+          localMapping
+        )
+
+        this.currentSessionId = sessionId
+        this.localMapping = { ...this.localMapping, ...localMapping }
+
+        // If privacy review mode is enabled, show review modal and wait for approval
+        if (this.privacyReviewMode) {
+          this.pendingPrivacyReview = {
+            originalQuery: queryText,
+            pseudonymizedQuery,
+            mapping: localMapping,
+            sessionId,
+          }
+          this.isProcessing = false
+          this.showPrivacyReview = true
+          return
+        }
+
+        // Otherwise proceed directly
+        await this.proceedWithQuery(queryText, pseudonymizedQuery)
+      } catch (error) {
+        console.error('Query error:', error)
+        this.addDebugEntry('error', 'Query Error', { message: error.message })
+        this.messages.push({
+          role: 'assistant',
+          content: `Error: ${error.message}`,
+          rawContent: `Error: ${error.message}`,
+        })
+        this.scrollToBottom()
+      } finally {
+        this.isProcessing = false
+      }
+    },
+
+    async proceedWithQuery(queryText, pseudonymizedQuery) {
+      this.isProcessing = true
+
+      // Start polling for MCP approval requests if privacy review mode is on
+      if (this.privacyReviewMode) {
+        this.startMcpPolling()
+      }
+
+      try {
+        // Add user message to conversation (store both raw and display versions)
+        this.messages.push({
+          role: 'user',
+          content: queryText,
+          rawContent: queryText,
+        })
+        this.scrollToBottom()
+
+        this.processingStatus = 'Analyzing...'
+
+        // Send pseudonymized query to Claude Code for log analysis
+        const logResult = await this.queryLogsForUser(pseudonymizedQuery)
+
+        this.addDebugEntry('response', 'Log Analysis Response (raw)', {
+          analysis:
+            logResult.analysis.substring(0, 500) +
+            (logResult.analysis.length > 500 ? '...' : ''),
+          costUsd: logResult.costUsd,
+        })
+
+        // Step 3: Store both raw and de-tokenized versions with cost
+        const deTokenizedResponse = this.deTokenize(logResult.analysis)
+
+        this.messages.push({
+          role: 'assistant',
+          content: deTokenizedResponse,
+          rawContent: logResult.analysis,
+          mapping: { ...this.localMapping },
+          costUsd: logResult.costUsd,
+          usage: logResult.usage,
+        })
+        this.scrollToBottom()
+
+        this.query = ''
+      } catch (error) {
+        console.error('Query error:', error)
+        this.addDebugEntry('error', 'Query Error', { message: error.message })
+        this.messages.push({
+          role: 'assistant',
+          content: `Error: ${error.message}`,
+          rawContent: `Error: ${error.message}`,
+        })
+        this.scrollToBottom()
+      } finally {
+        this.stopMcpPolling()
+        this.isProcessing = false
+      }
+    },
+
+    async queryLogsForUser(userQuery) {
+      try {
+        const requestBody = {
+          query: userQuery,
+          userId: this.selectedUser?.id || 0,
+        }
+
+        // Include Claude session ID for conversation continuity
+        if (this.claudeSessionId) {
+          requestBody.claudeSessionId = this.claudeSessionId
+        }
+
+        this.addDebugEntry('request', 'Claude Code Request', requestBody)
+
+        const response = await fetch(`${AI_SUPPORT_URL}/api/log-analysis`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        })
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            return `**Log Analysis Service**\n\nThe AI-powered log analysis service is being set up.`
+          }
+          const errorData = await response.json().catch(() => ({}))
+          // Handle expired session gracefully - clear it and inform user
+          if (
+            response.status === 410 ||
+            errorData.error === 'SESSION_EXPIRED'
+          ) {
+            this.claudeSessionId = null
+            return {
+              analysis:
+                '**Session Expired**\n\nYour previous conversation has expired. Please ask your question again to start a new session.',
+              costUsd: null,
+            }
+          }
+          throw new Error(errorData.message || 'Failed to query logs')
+        }
+
+        const data = await response.json()
+
+        // Save Claude session ID for conversation continuity
+        if (data.claudeSessionId) {
+          this.claudeSessionId = data.claudeSessionId
+          this.addDebugEntry('response', 'Claude Code Response', {
+            claudeSessionId: data.claudeSessionId,
+            isNewSession: data.isNewSession,
+            analysisLength: data.analysis?.length || 0,
+            costUsd: data.costUsd,
+            usage: data.usage,
+          })
+        }
+
+        // Return analysis and cost info
+        return {
+          analysis: data.analysis || 'No analysis available.',
+          costUsd: data.costUsd,
+          usage: data.usage,
+        }
+      } catch (error) {
+        if (error.message.includes('fetch')) {
+          const userInfo = this.selectedUser
+            ? `\n\nUser ID for manual search: **${this.selectedUser.id}**`
+            : ''
+          return {
+            analysis: `**Log Analysis Service**\n\nThe AI log analysis service is not currently running.${userInfo}`,
+            costUsd: null,
+          }
+        }
+        return {
+          analysis: `Unable to query logs: ${error.message}`,
+          costUsd: null,
+        }
+      }
+    },
+
+    deTokenize(text) {
+      if (!text || !this.localMapping) return text
+
+      let result = text
+      for (const [token, realValue] of Object.entries(this.localMapping)) {
+        result = result.split(token).join(realValue)
+      }
+      return result
+    },
+
+    highlightPii(text, mapping, showTokens) {
+      if (!text || !mapping) return text
+
+      let result = text
+      for (const [token, realValue] of Object.entries(mapping)) {
+        // Always highlight PII in red - show either token or real value based on toggle
+        const displayValue = showTokens ? token : realValue
+        const highlightHtml = `<span class="pii-highlight" title="Anonymised: ${token} = ${realValue}">${displayValue}</span>`
+
+        // Replace both token and real value with highlighted version
+        result = result.split(token).join(highlightHtml)
+        if (!showTokens) {
+          // When showing real values, also replace any remaining tokens
+          result = result.split(realValue).join(highlightHtml)
+        }
+      }
+      return result
+    },
+
+    formatMessageContent(msg) {
+      if (!msg.content) return ''
+
+      // Start with the de-tokenized content, then re-highlight based on toggle
+      let html = marked(msg.content)
+
+      // Always highlight PII - toggle controls whether we show token or real value
+      if (msg.mapping && Object.keys(msg.mapping).length > 0) {
+        html = this.highlightPii(html, msg.mapping, this.showAnonymisedData)
+      }
+
+      return html
+    },
+
+    formatDebugData(data) {
+      if (typeof data === 'string') return data
+      return JSON.stringify(data, null, 2)
+    },
+
+    cancelQuery() {
+      this.isProcessing = false
+      this.processingStatus = ''
+    },
+
+    formatDate(dateStr) {
+      if (!dateStr) return ''
+      const date = new Date(dateStr)
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+    },
+
+    // MCP Query Approval Methods
+    startMcpPolling() {
+      if (this.mcpPollInterval) return // Already polling
+
+      this.mcpPollInterval = setInterval(async () => {
+        await this.pollPendingMcpQueries()
+      }, 2000) // Poll every 2 seconds
+    },
+
+    stopMcpPolling() {
+      if (this.mcpPollInterval) {
+        clearInterval(this.mcpPollInterval)
+        this.mcpPollInterval = null
+      }
+    },
+
+    async pollPendingMcpQueries() {
+      if (!this.isProcessing || !this.privacyReviewMode) return
+
+      try {
+        const response = await fetch('http://status.localhost/api/mcp/pending')
+        if (!response.ok) return
+
+        const data = await response.json()
+        const queries = data.queries || []
+
+        // Check for pending log query approval
+        const pendingLogQuery = queries.find(
+          (q) => q.status === 'pending_query' && q.type === 'log'
+        )
+        if (pendingLogQuery && !this.showMcpQueryApproval) {
+          this.pendingMcpQuery = pendingLogQuery
+          this.showMcpQueryApproval = true
+        }
+
+        // Check for pending log results approval
+        const pendingLogResults = queries.find(
+          (q) => q.status === 'pending_results' && q.type === 'log'
+        )
+        if (pendingLogResults && !this.showMcpResultsApproval) {
+          this.pendingMcpResults = {
+            ...pendingLogResults,
+            resultCount:
+              pendingLogResults.results?.data?.result?.reduce(
+                (sum, s) => sum + (s.values?.length || 0),
+                0
+              ) || 0,
+            streamCount: pendingLogResults.results?.data?.result?.length || 0,
+            results: pendingLogResults.results?.data?.result || [],
+          }
+          this.showMcpResultsApproval = true
+        }
+
+        // Check for pending DB query approval
+        const pendingDbQuery = queries.find(
+          (q) => q.status === 'pending_query' && q.type === 'db'
+        )
+        if (pendingDbQuery && !this.showDbQueryApproval) {
+          this.pendingDbQuery = pendingDbQuery
+          this.showDbQueryApproval = true
+        }
+
+        // Check for pending DB results approval
+        const pendingDbResults = queries.find(
+          (q) => q.status === 'pending_results' && q.type === 'db'
+        )
+        if (pendingDbResults && !this.showDbResultsApproval) {
+          this.pendingDbResults = {
+            ...pendingDbResults,
+            rows: pendingDbResults.results?.rows || [],
+            columns: pendingDbResults.results?.columns || [],
+            rowCount: pendingDbResults.results?.rowCount || 0,
+            tokenCount: pendingDbResults.results?.tokenCount || 0,
+          }
+          this.showDbResultsApproval = true
+        }
+      } catch (error) {
+        console.error('MCP polling error:', error)
+      }
+    },
+
+    async approveMcpQuery() {
+      if (!this.pendingMcpQuery) return
+
+      try {
+        const response = await fetch(
+          `http://status.localhost/api/mcp/approve/${this.pendingMcpQuery.id}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage: 'query' }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to approve query')
+        }
+
+        this.addDebugEntry('response', 'MCP Query Approved', {
+          queryId: this.pendingMcpQuery.id,
+        })
+      } catch (error) {
+        console.error('Approve query error:', error)
+      } finally {
+        this.pendingMcpQuery = null
+        this.showMcpQueryApproval = false
+      }
+    },
+
+    async rejectMcpQuery() {
+      if (!this.pendingMcpQuery) return
+
+      try {
+        await fetch(
+          `http://status.localhost/api/mcp/reject/${this.pendingMcpQuery.id}`,
+          { method: 'POST' }
+        )
+
+        this.addDebugEntry('response', 'MCP Query Rejected', {
+          queryId: this.pendingMcpQuery.id,
+        })
+      } catch (error) {
+        console.error('Reject query error:', error)
+      } finally {
+        this.pendingMcpQuery = null
+        this.showMcpQueryApproval = false
+      }
+    },
+
+    async approveMcpResults() {
+      if (!this.pendingMcpResults) return
+
+      try {
+        const response = await fetch(
+          `http://status.localhost/api/mcp/approve/${this.pendingMcpResults.id}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage: 'results' }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to approve results')
+        }
+
+        this.addDebugEntry('response', 'MCP Results Approved', {
+          queryId: this.pendingMcpResults.id,
+          resultCount: this.pendingMcpResults.resultCount,
+        })
+      } catch (error) {
+        console.error('Approve results error:', error)
+      } finally {
+        this.pendingMcpResults = null
+        this.showMcpResultsApproval = false
+      }
+    },
+
+    async rejectMcpResults() {
+      if (!this.pendingMcpResults) return
+
+      try {
+        await fetch(
+          `http://status.localhost/api/mcp/reject/${this.pendingMcpResults.id}`,
+          { method: 'POST' }
+        )
+
+        this.addDebugEntry('response', 'MCP Results Rejected', {
+          queryId: this.pendingMcpResults.id,
+        })
+      } catch (error) {
+        console.error('Reject results error:', error)
+      } finally {
+        this.pendingMcpResults = null
+        this.showMcpResultsApproval = false
+      }
+    },
+
+    // DB Query Approval Methods
+    async approveDbQuery() {
+      if (!this.pendingDbQuery) return
+
+      try {
+        const response = await fetch(
+          `http://status.localhost/api/mcp/approve/${this.pendingDbQuery.id}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage: 'query' }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to approve DB query')
+        }
+
+        this.addDebugEntry('response', 'DB Query Approved', {
+          queryId: this.pendingDbQuery.id,
+        })
+      } catch (error) {
+        console.error('Approve DB query error:', error)
+      } finally {
+        this.pendingDbQuery = null
+        this.showDbQueryApproval = false
+      }
+    },
+
+    async rejectDbQuery() {
+      if (!this.pendingDbQuery) return
+
+      try {
+        await fetch(
+          `http://status.localhost/api/mcp/reject/${this.pendingDbQuery.id}`,
+          { method: 'POST' }
+        )
+
+        this.addDebugEntry('response', 'DB Query Rejected', {
+          queryId: this.pendingDbQuery.id,
+        })
+      } catch (error) {
+        console.error('Reject DB query error:', error)
+      } finally {
+        this.pendingDbQuery = null
+        this.showDbQueryApproval = false
+      }
+    },
+
+    async approveDbResults() {
+      if (!this.pendingDbResults) return
+
+      try {
+        const response = await fetch(
+          `http://status.localhost/api/mcp/approve/${this.pendingDbResults.id}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stage: 'results' }),
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Failed to approve DB results')
+        }
+
+        this.addDebugEntry('response', 'DB Results Approved', {
+          queryId: this.pendingDbResults.id,
+          rowCount: this.pendingDbResults.rowCount,
+        })
+      } catch (error) {
+        console.error('Approve DB results error:', error)
+      } finally {
+        this.pendingDbResults = null
+        this.showDbResultsApproval = false
+      }
+    },
+
+    async rejectDbResults() {
+      if (!this.pendingDbResults) return
+
+      try {
+        await fetch(
+          `http://status.localhost/api/mcp/reject/${this.pendingDbResults.id}`,
+          { method: 'POST' }
+        )
+
+        this.addDebugEntry('response', 'DB Results Rejected', {
+          queryId: this.pendingDbResults.id,
+        })
+      } catch (error) {
+        console.error('Reject DB results error:', error)
+      } finally {
+        this.pendingDbResults = null
+        this.showDbResultsApproval = false
+      }
+    },
+
+    formatStreamLabels(stream) {
+      if (!stream) return ''
+      return Object.entries(stream)
+        .map(([k, v]) => `${k}="${v}"`)
         .join(', ')
     },
 
-    formatAnswer(answer) {
-      if (typeof answer === 'boolean') {
-        return answer ? 'Yes' : 'No'
-      }
-      if (Array.isArray(answer)) {
-        if (answer.length === 0) return '(empty)'
-        if (answer.length <= 3) {
-          return JSON.stringify(answer)
-        }
-        return `[${answer.length} items]`
-      }
-      if (typeof answer === 'object' && answer !== null) {
-        return JSON.stringify(answer)
-      }
-      return String(answer)
-    },
-
-    formatMarkdown(text) {
-      if (!text) return ''
-      // Use marked library for proper markdown rendering
-      return marked(text)
+    formatLogTimestamp(ts) {
+      if (!ts) return ''
+      // Loki timestamps are in nanoseconds
+      const ms = parseInt(ts, 10) / 1000000
+      return new Date(ms).toLocaleTimeString()
     },
   },
 }
 </script>
 
 <style scoped lang="scss">
-.ai-chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 600px;
-  max-height: 80vh;
+.log-analysis-container {
   border: 1px solid #dee2e6;
   background: #f8f9fa;
 }
 
-.ai-chat-header {
+.log-analysis-header {
   padding: 0.75rem 1rem;
   background: #ffffff;
   border-bottom: 1px solid #dee2e6;
 }
 
-.ai-chat-content {
-  flex: 1;
+.session-cost {
+  font-size: 0.8rem;
+  color: #757575;
+  font-weight: normal;
+}
+
+.log-analysis-step {
+  background: #ffffff;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.user-results {
+  max-height: 300px;
   overflow-y: auto;
-  padding: 1rem;
 }
 
-.ai-chat-messages {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.ai-message {
-  display: flex;
-  max-width: 85%;
-}
-
-.ai-message--user {
-  align-self: flex-end;
-
-  .ai-message-content {
-    background: #007bff;
-    color: white;
-  }
-}
-
-.ai-message--assistant {
-  align-self: flex-start;
-
-  .ai-message-content {
-    background: #ffffff;
-    border: 1px solid #dee2e6;
-  }
-}
-
-.ai-message--system {
-  align-self: center;
-  max-width: 100%;
-
-  .ai-message-content {
-    background: transparent;
-    text-align: center;
-  }
-}
-
-.ai-message-content {
-  padding: 0.75rem 1rem;
-  word-wrap: break-word;
-}
-
-.ai-welcome-message {
-  text-align: left;
-}
-
-.ai-queries {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #dee2e6;
-  font-size: 0.85em;
-}
-
-.ai-queries-header {
+.user-result-item {
+  border: 1px solid #dee2e6;
   cursor: pointer;
-  color: #6c757d;
+  transition: background-color 0.15s;
 
   &:hover {
-    color: #495057;
+    background-color: #e9ecef;
   }
 }
 
-.ai-queries-list {
+.selected-user-banner {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.log-analysis-messages {
+  background: #f5f5f5;
+  min-height: 200px;
+  max-height: 500px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.message-item {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  max-width: 85%;
+  background: #ffffff;
+}
+
+.message-user {
+  margin-left: auto;
+  border: 2px solid #28a745;
+  border-bottom-right-radius: 0.125rem;
+}
+
+.message-user .message-header {
+  color: #28a745;
+}
+
+.message-assistant {
+  margin-right: auto;
+  border: 2px solid #007bff;
+  border-bottom-left-radius: 0.125rem;
+}
+
+.message-assistant .message-header {
+  color: #007bff;
+}
+
+.message-cost {
   margin-top: 0.5rem;
-  padding-left: 1rem;
+  font-size: 0.7rem;
+  color: #9e9e9e;
+  text-align: right;
 }
 
-.ai-query-item {
-  margin-bottom: 0.25rem;
-}
-
-.ai-suggested-queries {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  font-size: 0.85em;
-}
-
-.ai-typing {
-  display: flex;
-  align-items: center;
-}
-
-.ai-typing-dot {
-  width: 8px;
-  height: 8px;
-  background: #6c757d;
-  border-radius: 50%;
-  margin-right: 4px;
-  animation: typing 1.4s infinite ease-in-out both;
-
-  &:nth-child(1) {
-    animation-delay: -0.32s;
-  }
-  &:nth-child(2) {
-    animation-delay: -0.16s;
-  }
-}
-
-@keyframes typing {
-  0%,
-  80%,
-  100% {
-    opacity: 0.3;
-  }
-  40% {
-    opacity: 1;
-  }
-}
-
-.ai-chat-footer {
-  padding: 0.75rem;
+.chat-input-area {
   background: #ffffff;
   border-top: 1px solid #dee2e6;
 }
 
-.ai-input-form {
-  display: flex;
+.message-content {
+  :deep(p) {
+    margin-bottom: 0.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    margin-bottom: 0.5rem;
+  }
+
+  :deep(code) {
+    background: #e9ecef;
+    padding: 0.1rem 0.3rem;
+    font-size: 0.85em;
+  }
+
+  /* PII highlighting - always red to show what was anonymised */
+  :deep(.pii-highlight) {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    border-bottom: 2px solid #ef5350;
+  }
+}
+
+/* Debug panel styles */
+.debug-panel {
+  background: #263238;
+  color: #eceff1;
+  border-bottom: 1px solid #dee2e6;
+  max-height: 300px;
+  overflow-y: auto;
+
+  h6 {
+    color: #80cbc4;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.debug-entries {
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+.debug-entry {
+  border-radius: 4px;
+
+  &.debug-request {
+    background: #1b5e20;
+    border-left: 3px solid #4caf50;
+  }
+
+  &.debug-response {
+    background: #0d47a1;
+    border-left: 3px solid #2196f3;
+  }
+
+  &.debug-error {
+    background: #b71c1c;
+    border-left: 3px solid #f44336;
+  }
+}
+
+.debug-header {
+  font-size: 0.9em;
+}
+
+.debug-data {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 3px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+  color: #b0bec5;
+}
+
+.token-mapping {
+  .token-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+
+    .token {
+      background: #ffcdd2;
+      color: #c62828;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    .real-value {
+      color: #ffcc80;
+    }
+  }
+}
+
+.gap-2 {
   gap: 0.5rem;
 }
 
-.ai-input {
-  flex: 1;
-  resize: none;
+/* Privacy Review Modal styles */
+.privacy-review-box {
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &.original {
+    background: #fff3e0;
+    border: 1px solid #ffcc80;
+  }
+
+  &.pseudonymized {
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+  }
 }
 
-.ai-send-btn {
-  align-self: flex-end;
+.privacy-review-section h6 {
+  margin-bottom: 0.5rem;
+  color: #616161;
 }
 
-code {
-  background: #e9ecef;
-  padding: 0.1rem 0.3rem;
+/* MCP Results Preview styles */
+.mcp-results-preview {
+  max-height: 400px;
+  overflow-y: auto;
+  background: #263238;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: monospace;
   font-size: 0.85em;
+}
+
+.result-stream {
+  border-bottom: 1px solid #37474f;
+  padding-bottom: 0.5rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.stream-labels {
+  color: #80cbc4;
+  margin-bottom: 0.25rem;
+}
+
+.log-entry {
+  color: #eceff1;
+  padding: 0.1rem 0;
+  display: flex;
+  gap: 0.5rem;
+
+  .timestamp {
+    color: #78909c;
+    flex-shrink: 0;
+  }
+
+  .log-line {
+    word-break: break-word;
+  }
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+/* DB Results Preview styles */
+.db-results-preview {
+  max-height: 400px;
+  overflow: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+
+  .table {
+    margin-bottom: 0;
+    font-size: 0.85em;
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      z-index: 1;
+    }
+
+    td {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 </style>
