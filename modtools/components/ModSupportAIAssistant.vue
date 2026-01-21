@@ -97,14 +97,14 @@
                 v-if="item.isPseudonymized"
                 class="badge bg-success ms-2"
                 title="This value was pseudonymized"
-                >✓</span
-              >
+                ><i class="fas fa-check"
+              /></span>
               <span
                 v-else-if="item.looksLikePii"
                 class="badge bg-danger ms-2"
                 title="This may contain PII"
-                >⚠</span
-              >
+                ><i class="fas fa-exclamation-triangle"
+              /></span>
             </td>
             <td v-if="showAnonymisedData">
               <span v-if="item.realValue" class="text-muted">{{
@@ -119,8 +119,12 @@
 
       <div class="mt-3 small text-muted">
         <strong>Legend:</strong>
-        <span class="badge bg-success ms-2">✓</span> Pseudonymized (safe)
-        <span class="badge bg-danger ms-2">⚠</span> May contain PII (review)
+        <span class="badge bg-success ms-2"><i class="fas fa-check" /></span>
+        Pseudonymized (safe)
+        <span class="badge bg-danger ms-2"
+          ><i class="fas fa-exclamation-triangle"
+        /></span>
+        May contain PII (review)
       </div>
     </b-modal>
 
@@ -177,7 +181,7 @@
           </small>
         </b-form-group>
 
-        <b-form-group label="MySQL Server" label-size="sm" class="mb-3">
+        <b-form-group label="MySQL Server" label-size="sm" class="mb-2">
           <b-form-input
             v-model="sqlServerUrl"
             placeholder="localhost:1234"
@@ -186,6 +190,36 @@
           <small class="text-muted">
             MySQL host:port for database queries (via SSH tunnel)
           </small>
+        </b-form-group>
+
+        <div class="row mb-3">
+          <div class="col-6">
+            <b-form-group label="MySQL Username" label-size="sm" class="mb-0">
+              <b-form-input
+                v-model="sqlServerUser"
+                placeholder="root"
+                size="sm"
+              />
+            </b-form-group>
+          </div>
+          <div class="col-6">
+            <b-form-group label="MySQL Password" label-size="sm" class="mb-0">
+              <b-form-input
+                v-model="sqlServerPassword"
+                type="password"
+                placeholder="password"
+                size="sm"
+              />
+            </b-form-group>
+          </div>
+        </div>
+
+        <b-form-group label="Database Name" label-size="sm" class="mb-3">
+          <b-form-input
+            v-model="sqlServerDatabase"
+            placeholder="iznik"
+            size="sm"
+          />
         </b-form-group>
 
         <div class="alert alert-info small mb-0">
@@ -258,192 +292,119 @@
             class="p-0"
             @click="showPrivacyModal = true"
           >
-            <span class="text-info">&#9432;</span> Privacy
+            <i class="fas fa-info-circle text-info" /> Privacy
           </b-button>
         </div>
       </div>
     </div>
 
-    <!-- Step 1: User Selection -->
-    <div
-      v-if="!selectedUser && !skippedUserSelection"
-      class="log-analysis-step p-3"
-    >
-      <h6>Step 1: Select a user to investigate</h6>
-      <p class="text-muted small mb-2">
-        Focus on a specific user for better results, or skip for general
-        queries.
-      </p>
-      <b-input-group class="mb-2">
-        <b-form-input
-          v-model="userSearch"
-          placeholder="Search by email, name, or user ID"
-          :disabled="searchingUser"
-          autocapitalize="none"
-          autocomplete="off"
-          @keyup.enter.exact="searchUsers"
-        />
-        <b-button
-          variant="primary"
-          :disabled="searchingUser"
-          @click="searchUsers"
-        >
-          <v-icon v-if="searchingUser" icon="sync" class="fa-spin" />
-          <v-icon v-else icon="search" /> Search
-        </b-button>
-        <b-button
-          variant="secondary"
-          :disabled="searchingUser"
-          @click="skipUserSelection"
-        >
-          Skip
-        </b-button>
-      </b-input-group>
-
-      <div v-if="searchResults.length > 0" class="user-results mt-2">
-        <div
-          v-for="user in searchResults"
-          :key="user.id"
-          class="user-result-item p-2"
-          @click="selectUser(user)"
-        >
-          <div class="d-flex align-items-center">
-            <div class="flex-grow-1">
-              <strong>{{ user.displayname || 'No name' }}</strong>
-              <span class="text-muted ml-2">{{ user.email }}</span>
-              <br />
-              <small class="text-muted">
-                ID: {{ user.id }}
-                <span v-if="user.lastaccess">
-                  | Last active: {{ formatDate(user.lastaccess) }}
-                </span>
-              </small>
-            </div>
-            <v-icon icon="chevron-right" />
-          </div>
-        </div>
+    <!-- Chat header with New Chat button -->
+    <div class="chat-header p-2 bg-light d-flex align-items-center">
+      <div class="flex-grow-1">
+        <span class="text-muted small">
+          Ask about any user by mentioning their email address in your query.
+        </span>
       </div>
-
-      <NoticeMessage v-if="noResults" class="mt-2">
-        No users found matching "{{ userSearch }}".
-      </NoticeMessage>
+      <b-button variant="outline-primary" size="sm" @click="newChat">
+        New Chat
+      </b-button>
     </div>
 
-    <!-- User selected or skipped: show either initial query or chat -->
+    <!-- Initial query (before conversation starts) -->
+    <div v-if="messages.length === 0" class="log-analysis-step p-3">
+      <h6>What would you like to investigate?</h6>
+      <b-form @submit.prevent="submitQuery">
+        <b-form-textarea
+          v-model="query"
+          rows="3"
+          max-rows="6"
+          placeholder="e.g., 'Why are they getting errors?' or 'Show their recent login activity'"
+          :disabled="isProcessing"
+          @keydown.enter.exact.prevent="submitQuery"
+        />
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <small v-if="query" class="text-muted">
+            Press Enter to submit, Shift+Enter for new line
+          </small>
+          <b-button
+            type="submit"
+            variant="primary"
+            :disabled="!query.trim() || isProcessing"
+          >
+            <b-spinner v-if="isProcessing" small />
+            <span v-else>Analyze</span>
+          </b-button>
+        </div>
+      </b-form>
+    </div>
+
+    <!-- Chat interface (after conversation starts) -->
     <template v-else>
-      <!-- User banner (always visible when user selected) -->
-      <div class="selected-user-banner p-2 bg-light d-flex align-items-center">
-        <div v-if="selectedUser" class="flex-grow-1">
-          <strong>{{ selectedUser.displayname || 'User' }}</strong>
-          <span class="text-muted ml-2">{{ selectedUser.email }}</span>
-          <small class="text-muted ml-2">(ID: {{ selectedUser.id }})</small>
-          <span v-if="selectedUser.lastaccess" class="text-muted ml-2">
-            | Last active: {{ formatDate(selectedUser.lastaccess) }}
-          </span>
+      <!-- Chat messages -->
+      <div ref="messagesContainer" class="log-analysis-messages p-3">
+        <div
+          v-for="(msg, idx) in messages"
+          :key="idx"
+          class="message-item mb-3"
+          :class="{
+            'message-user': msg.role === 'user',
+            'message-assistant': msg.role === 'assistant',
+          }"
+        >
+          <div class="message-header small text-muted mb-1">
+            {{ msg.role === 'user' ? 'You' : 'AI Support Helper' }}
+          </div>
+          <div class="message-content" v-html="formatMessageContent(msg)" />
+          <div
+            v-if="msg.role === 'assistant' && msg.costUsd"
+            class="message-cost"
+          >
+            Cost: ${{ msg.costUsd.toFixed(4) }}
+          </div>
         </div>
-        <div v-else class="flex-grow-1">
-          <strong class="text-secondary">General Query</strong>
-          <span class="text-muted ml-2">(no specific user selected)</span>
+
+        <!-- Processing indicator -->
+        <div v-if="isProcessing" class="message-item message-assistant mb-3">
+          <div class="message-header small text-muted mb-1">
+            AI Support Helper
+          </div>
+          <div class="message-content">
+            <div class="d-flex align-items-center">
+              <b-spinner small class="mr-2" />
+              <span>{{ processingStatus }}</span>
+            </div>
+            <b-button
+              variant="outline-danger"
+              size="sm"
+              class="mt-2"
+              @click="cancelQuery"
+            >
+              Cancel
+            </b-button>
+          </div>
         </div>
-        <b-button variant="outline-primary" size="sm" @click="newChat">
-          New Chat
-        </b-button>
       </div>
 
-      <!-- Initial query (before conversation starts) -->
-      <div v-if="messages.length === 0" class="log-analysis-step p-3">
-        <h6>What would you like to investigate?</h6>
-        <b-form @submit.prevent="submitQuery">
-          <b-form-textarea
+      <!-- Follow-up input -->
+      <div class="chat-input-area p-3">
+        <b-form class="d-flex gap-2" @submit.prevent="submitQuery">
+          <b-form-input
             v-model="query"
-            rows="3"
-            max-rows="6"
-            placeholder="e.g., 'Why are they getting errors?' or 'Show their recent login activity'"
+            placeholder="Ask a follow-up question..."
             :disabled="isProcessing"
+            class="flex-grow-1"
             @keydown.enter.exact.prevent="submitQuery"
           />
-          <div class="d-flex justify-content-between align-items-center mt-2">
-            <small v-if="query" class="text-muted">
-              Press Enter to submit, Shift+Enter for new line
-            </small>
-            <b-button
-              type="submit"
-              variant="primary"
-              :disabled="!query.trim() || isProcessing"
-            >
-              <b-spinner v-if="isProcessing" small />
-              <span v-else>Analyze</span>
-            </b-button>
-          </div>
+          <b-button
+            type="submit"
+            variant="primary"
+            :disabled="!query.trim() || isProcessing"
+          >
+            <b-spinner v-if="isProcessing" small />
+            <span v-else>Send</span>
+          </b-button>
         </b-form>
       </div>
-
-      <!-- Chat interface (after conversation starts) -->
-      <template v-else>
-        <!-- Chat messages -->
-        <div ref="messagesContainer" class="log-analysis-messages p-3">
-          <div
-            v-for="(msg, idx) in messages"
-            :key="idx"
-            class="message-item mb-3"
-            :class="{
-              'message-user': msg.role === 'user',
-              'message-assistant': msg.role === 'assistant',
-            }"
-          >
-            <div class="message-header small text-muted mb-1">
-              {{ msg.role === 'user' ? 'You' : 'AI Assistant' }}
-            </div>
-            <div class="message-content" v-html="formatMessageContent(msg)" />
-            <div
-              v-if="msg.role === 'assistant' && msg.costUsd"
-              class="message-cost"
-            >
-              Cost: ${{ msg.costUsd.toFixed(4) }}
-            </div>
-          </div>
-
-          <!-- Processing indicator -->
-          <div v-if="isProcessing" class="message-item message-assistant mb-3">
-            <div class="message-header small text-muted mb-1">AI Assistant</div>
-            <div class="message-content">
-              <div class="d-flex align-items-center">
-                <b-spinner small class="mr-2" />
-                <span>{{ processingStatus }}</span>
-              </div>
-              <b-button
-                variant="outline-danger"
-                size="sm"
-                class="mt-2"
-                @click="cancelQuery"
-              >
-                Cancel
-              </b-button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Follow-up input -->
-        <div class="chat-input-area p-3">
-          <b-form class="d-flex gap-2" @submit.prevent="submitQuery">
-            <b-form-input
-              v-model="query"
-              placeholder="Ask a follow-up question..."
-              :disabled="isProcessing"
-              class="flex-grow-1"
-              @keydown.enter.exact.prevent="submitQuery"
-            />
-            <b-button
-              type="submit"
-              variant="primary"
-              :disabled="!query.trim() || isProcessing"
-            >
-              <b-spinner v-if="isProcessing" small />
-              <span v-else>Send</span>
-            </b-button>
-          </b-form>
-        </div>
-      </template>
     </template>
   </div>
 </template>
@@ -451,8 +412,9 @@
 <script>
 import { marked } from 'marked'
 
-// Query sanitizer service - frontend talks to this for PII handling
-const SANITIZER_URL = 'http://mcp-sanitizer.localhost'
+// AI Sanitizer service - combined service for PII handling, Loki queries, and DB queries
+// Backwards compatible: mcp-sanitizer.localhost is aliased to ai-sanitizer.localhost in Traefik
+const SANITIZER_URL = 'http://ai-sanitizer.localhost'
 
 // AI support helper for Claude integration (same as existing AI assistant)
 const AI_SUPPORT_URL = 'http://ai-support-helper.localhost'
@@ -468,13 +430,8 @@ export default {
       sanitizerAvailable: true,
       showAnonymisedData: false,
 
-      // User search
-      userSearch: '',
-      searchingUser: false,
-      searchResults: [],
-      noResults: false,
+      // User context (optional - users can mention emails directly in chat)
       selectedUser: null,
-      skippedUserSelection: false,
 
       // Query input
       query: '',
@@ -497,6 +454,10 @@ export default {
       serverEnvironment: localStorage.getItem('aiSupport_environment') || 'dev',
       lokiServerUrl: localStorage.getItem('aiSupport_lokiUrl') || '',
       sqlServerUrl: localStorage.getItem('aiSupport_sqlUrl') || '',
+      sqlServerUser: localStorage.getItem('aiSupport_sqlUser') || '',
+      sqlServerPassword: localStorage.getItem('aiSupport_sqlPassword') || '',
+      sqlServerDatabase:
+        localStorage.getItem('aiSupport_sqlDatabase') || 'iznik',
       apiServerUrl: localStorage.getItem('aiSupport_apiUrl') || '',
     }
   },
@@ -639,93 +600,28 @@ export default {
       localStorage.setItem('aiSupport_environment', this.serverEnvironment)
       localStorage.setItem('aiSupport_lokiUrl', this.lokiServerUrl)
       localStorage.setItem('aiSupport_sqlUrl', this.sqlServerUrl)
+      localStorage.setItem('aiSupport_sqlUser', this.sqlServerUser)
+      localStorage.setItem('aiSupport_sqlPassword', this.sqlServerPassword)
+      localStorage.setItem('aiSupport_sqlDatabase', this.sqlServerDatabase)
       localStorage.setItem('aiSupport_apiUrl', this.apiServerUrl)
       console.log('Server settings saved:', {
         environment: this.serverEnvironment,
         api: this.apiServerUrl,
         loki: this.lokiServerUrl,
         sql: this.sqlServerUrl,
-      })
-    },
-
-    async searchUsers() {
-      if (!this.userSearch.trim()) return
-
-      this.searchingUser = true
-      this.searchResults = []
-      this.noResults = false
-
-      try {
-        let users = []
-
-        // Use MCP endpoint for user search (works for both dev and live)
-        // This goes directly to the database via the status server
-        const response = await fetch(
-          `http://status.localhost/api/mcp/user-search?search=${encodeURIComponent(
-            this.userSearch.trim()
-          )}&limit=10`,
-          {
-            method: 'GET',
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error(`Search failed: ${response.status}`)
-        }
-
-        const data = await response.json()
-        users = data.users || []
-
-        // Sort by last access
-        this.searchResults = users
-          .sort((a, b) => {
-            return (
-              new Date(b.lastaccess).getTime() -
-              new Date(a.lastaccess).getTime()
-            )
-          })
-          .slice(0, 10) // Limit to 10 results
-
-        // Auto-select if only one result
-        if (this.searchResults.length === 1) {
-          this.selectUser(this.searchResults[0])
-          return
-        }
-
-        this.noResults = this.searchResults.length === 0
-      } catch (error) {
-        console.error('User search error:', error)
-        this.noResults = true
-      } finally {
-        this.searchingUser = false
-      }
-    },
-
-    selectUser(user) {
-      this.selectedUser = user
-      this.searchResults = []
-      this.userSearch = ''
-      // Focus the query input after Vue updates the DOM
-      this.$nextTick(() => {
-        const textarea = this.$el.querySelector('textarea')
-        if (textarea) {
-          textarea.focus()
-        }
+        sqlUser: this.sqlServerUser,
       })
     },
 
     newChat() {
-      // Start a fresh conversation - clears user and all state
+      // Start a fresh conversation
       this.selectedUser = null
-      this.skippedUserSelection = false
       this.messages = []
       this.query = ''
       this.currentSessionId = null
       this.claudeSessionId = null
       this.localMapping = {}
       this.debugLog = []
-      this.searchResults = []
-      this.userSearch = ''
     },
 
     scrollToBottom() {
@@ -733,19 +629,6 @@ export default {
         const container = this.$refs.messagesContainer
         if (container) {
           container.scrollTop = container.scrollHeight
-        }
-      })
-    },
-
-    skipUserSelection() {
-      this.skippedUserSelection = true
-      this.searchResults = []
-      this.userSearch = ''
-      // Focus the query input after Vue updates the DOM
-      this.$nextTick(() => {
-        const textarea = this.$el.querySelector('textarea')
-        if (textarea) {
-          textarea.focus()
         }
       })
     },
@@ -764,7 +647,6 @@ export default {
 
     async submitQuery() {
       if (!this.query.trim() || this.isProcessing) return
-      if (!this.selectedUser && !this.skippedUserSelection) return
 
       // First, scan for PII
       try {
@@ -968,6 +850,16 @@ export default {
         }
         if (this.sqlServerUrl) {
           requestBody.sqlUrl = this.sqlServerUrl
+          // Include SQL credentials if configured
+          if (this.sqlServerUser) {
+            requestBody.sqlUser = this.sqlServerUser
+          }
+          if (this.sqlServerPassword) {
+            requestBody.sqlPassword = this.sqlServerPassword
+          }
+          if (this.sqlServerDatabase) {
+            requestBody.sqlDatabase = this.sqlServerDatabase
+          }
         }
 
         this.addDebugEntry('request', 'Claude Code Request', requestBody)
@@ -1049,18 +941,40 @@ export default {
       if (!text || !mapping) return text
 
       let result = text
-      for (const [token, realValue] of Object.entries(mapping)) {
-        // Always highlight PII in red - show either token or real value based on toggle
-        const displayValue = showTokens ? token : realValue
-        const highlightHtml = `<span class="pii-highlight" title="Anonymised: ${token} = ${realValue}">${displayValue}</span>`
 
-        // Replace both token and real value with highlighted version
-        result = result.split(token).join(highlightHtml)
-        if (!showTokens) {
-          // When showing real values, also replace any remaining tokens
-          result = result.split(realValue).join(highlightHtml)
+      // Build a map of what to search for and what to replace with
+      // Do all replacements in a single pass to avoid matching inside already-replaced content
+      const replacements = []
+
+      for (const [token, realValue] of Object.entries(mapping)) {
+        const displayValue = showTokens ? token : realValue
+        // Use data attribute instead of title with real value to avoid nested replacement issues
+        const highlightHtml = `<span class="pii-highlight" data-token="${token}">${displayValue}</span>`
+
+        // Always replace tokens
+        replacements.push({ search: token, replace: highlightHtml })
+
+        // When showing real values, also prepare to replace real values
+        // (in case they appear in the text but weren't tokenized)
+        if (!showTokens && realValue !== token) {
+          replacements.push({ search: realValue, replace: highlightHtml })
         }
       }
+
+      // Sort by length descending to replace longer matches first
+      // This prevents partial matches (e.g., replacing "test" inside "test@example.com")
+      replacements.sort((a, b) => b.search.length - a.search.length)
+
+      // Apply replacements
+      for (const { search, replace } of replacements) {
+        // Use a marker to avoid re-replacing already replaced content
+        const marker = `\x00HIGHLIGHT_${Math.random()
+          .toString(36)
+          .slice(2)}\x00`
+        result = result.split(search).join(marker)
+        result = result.split(marker).join(replace)
+      }
+
       return result
     },
 
