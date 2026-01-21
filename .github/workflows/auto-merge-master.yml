@@ -1,4 +1,4 @@
-name: Auto-merge production to app-ci-fd
+name: Reset app-ci-fd to production
 
 on:
   schedule:
@@ -7,13 +7,13 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  auto-merge:
+  reset-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout app-ci-fd branch
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: app-ci-fd
+          ref: production
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -22,34 +22,28 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Fetch production branch
-        run: git fetch origin production
-
-      - name: Check if merge is needed
+      - name: Check if reset is needed
         id: check
         run: |
-          # Check if production has changes not in app-ci-fd
-          git merge-base --is-ancestor origin/production HEAD && echo "up-to-date=true" >> $GITHUB_OUTPUT || echo "up-to-date=false" >> $GITHUB_OUTPUT
+          git fetch origin app-ci-fd
+          PROD_SHA=$(git rev-parse HEAD)
+          APP_SHA=$(git rev-parse origin/app-ci-fd)
+          if [ "$PROD_SHA" == "$APP_SHA" ]; then
+            echo "up-to-date=true" >> $GITHUB_OUTPUT
+            echo "ℹ️  app-ci-fd already matches production ($PROD_SHA)"
+          else
+            echo "up-to-date=false" >> $GITHUB_OUTPUT
+            echo "🔄 Will reset app-ci-fd ($APP_SHA) to production ($PROD_SHA)"
+          fi
 
-      - name: Merge production into app-ci-fd
+      - name: Reset app-ci-fd to production
         if: steps.check.outputs.up-to-date == 'false'
-        id: merge
-        continue-on-error: true
         run: |
-          git merge origin/production -m "Auto-merge production to app-ci-fd (daily scheduled)
-
-          Automated merge from production branch after successful tests.
-
-          🤖 Automated by GitHub Actions"
-
-      - name: Push merged changes
-        if: steps.merge.outcome == 'success'
-        run: |
-          git push origin app-ci-fd
-          echo "✅ Successfully merged and pushed production to app-ci-fd"
+          git push --force origin HEAD:app-ci-fd
+          echo "✅ Reset app-ci-fd to match production"
 
       - name: Trigger CircleCI build
-        if: steps.merge.outcome == 'success'
+        if: steps.check.outputs.up-to-date == 'false'
         env:
           CIRCLECI_TOKEN: ${{ secrets.CIRCLECI_TOKEN }}
         run: |
@@ -60,44 +54,11 @@ jobs:
             -d '{"branch":"app-ci-fd"}' \
             "https://circleci.com/api/v2/project/gh/Freegle/iznik-nuxt3/pipeline"
 
-      - name: Send merge failure notification
-        if: steps.merge.outcome == 'failure'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '🚨 Auto-merge failed: production → app-ci-fd',
-              body: `## Merge Conflict Detected
-
-              The scheduled daily merge from \`production\` to \`app-ci-fd\` failed due to conflicts.
-
-              **Action Required:**
-              1. Manually resolve conflicts:
-                 \`\`\`bash
-                 git checkout app-ci-fd
-                 git merge production
-                 # Resolve conflicts
-                 git commit
-                 git push origin app-ci-fd
-                 \`\`\`
-
-              2. Or review the conflict and decide how to proceed
-
-              **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-              🤖 Automated notification from GitHub Actions`,
-              labels: ['auto-merge-conflict', 'needs-attention']
-            })
-
       - name: Summary
         if: always()
         run: |
           if [ "${{ steps.check.outputs.up-to-date }}" == "true" ]; then
-            echo "ℹ️  app-ci-fd is already up-to-date with production"
-          elif [ "${{ steps.merge.outcome }}" == "success" ]; then
-            echo "✅ Successfully merged production to app-ci-fd and triggered build"
-          elif [ "${{ steps.merge.outcome }}" == "failure" ]; then
-            echo "❌ Merge failed - conflicts detected. Issue created."
+            echo "ℹ️  app-ci-fd already matches production - no action needed"
+          else
+            echo "✅ Reset app-ci-fd to production and triggered CircleCI build"
           fi
