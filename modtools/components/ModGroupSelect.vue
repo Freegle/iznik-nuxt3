@@ -122,6 +122,13 @@ export default {
       required: false,
       default: null,
     },
+    // When true, the modelValue was explicitly set from URL and should not
+    // be overridden by the remembered value (even if modelValue is 0).
+    urlOverride: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const miscStore = useMiscStore()
@@ -276,9 +283,9 @@ export default {
     },
     groupsloaded(newval) {
       // Only restore remembered group if no explicit value was set from URL.
-      // If modelValue is already non-zero, it was set from route params and
-      // should not be overridden by the remembered value.
-      if (this.modelValue) {
+      // Check urlOverride prop for cases where modelValue is 0 (All communities)
+      // but was explicitly set from URL params.
+      if (this.modelValue || this.urlOverride) {
         return
       }
       const val = this.miscStore.get('groupselect-' + this.remember)
@@ -314,7 +321,9 @@ export default {
         grouptype: 'Freegle'
       })
     } */
-    if (this.remember && !this.modelValue) {
+    // Only restore remembered group if no explicit value was set.
+    // Check urlOverride for cases where modelValue is 0 but explicit.
+    if (this.remember && !this.modelValue && !this.urlOverride) {
       let val = this.miscStore.get('groupselect-' + this.remember)
 
       if (typeof val !== 'undefined') {

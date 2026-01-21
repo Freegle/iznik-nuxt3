@@ -23,6 +23,7 @@
           modonly
           :work="['pending', 'pendingother']"
           remember="pending"
+          :url-override="urlOverride"
         />
         <ModtoolsViewControl misckey="modtoolsMessagesPendingSummary" />
         <b-button variant="link" @click="loadAll"> Load all </b-button>
@@ -101,6 +102,7 @@ export default {
       shownRulePopup: false,
       bump: 0,
       highlightMsgId: null,
+      urlOverride: false,
     }
   },
   computed: {
@@ -185,8 +187,10 @@ export default {
   async mounted() {
     // Check for query params from duplicate message link.
     const route = useRoute()
-    if (route.query.groupid) {
+    if (route.query.groupid !== undefined) {
       this.groupid = parseInt(route.query.groupid)
+      // Mark that URL explicitly set the group (even if 0 for "All").
+      this.urlOverride = true
     }
     if (route.query.msgid) {
       this.highlightMsgId = parseInt(route.query.msgid)
@@ -239,11 +243,8 @@ export default {
       this.miscStore.set({ key: 'cakeasked', value: true })
     }
 
-    const rememberedGroupId = this.miscStore.get('groupselect-pending')
-    // console.log('rememberedGroupId', rememberedGroupId)
-    if (typeof rememberedGroupId === 'number') {
-      this.groupid = rememberedGroupId
-    }
+    // Note: Don't restore remembered group here - ModGroupSelect handles it
+    // via its remember prop. Doing it here would override URL params.
   },
   methods: {
     async loadAll() {
