@@ -19,32 +19,24 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useAlertStore } from '~/stores/alert'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const alertStore = useAlertStore()
-    const { modal, hide, show } = useOurModal()
-    return { alertStore, modal, hide, show }
-  },
-  computed: {
-    alert() {
-      return this.alertStore.get(this.id)
-    },
-  },
-  async mounted() {
-    // await this.alertStore.fetch({ id: this.id })
-  },
-  methods: {},
-}
+})
+
+const alertStore = useAlertStore()
+const { modal, hide, show } = useOurModal()
+
+const alert = computed(() => alertStore.get(props.id))
+
+defineExpose({ modal, hide, show })
 </script>
 <style scoped>
 label {
