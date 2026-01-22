@@ -40,23 +40,9 @@
         </li>
       </ul>
     </div>
-    <div
-      v-if="
-        latestMessage &&
-        (me.systemrole === 'Admin' || me.systemrole === 'Support')
-      "
-      :class="{
-        'alert alert-danger': backupStatus === 'error',
-        'alert alert-warning': backupStatus === 'warning',
-      }"
-    >
-      <strong>System backed up on Yesterday up to:</strong>
-      {{ latestMessage }}
-      <span v-if="backupStatus === 'error'">
-        ❌ Backup is over 2 days old!</span
-      >
-      <span v-if="isRestoring"> ⚠️ Backup is currently restoring</span>
-    </div>
+    <ModYesterday
+      v-if="me.systemrole === 'Admin' || me.systemrole === 'Support'"
+    />
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
@@ -212,9 +198,6 @@ const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
 const appVersions = ref(null)
-const latestMessage = ref(null)
-const backupStatus = ref(null)
-const isRestoring = ref(false)
 // const dateFormat = ref(null)
 
 const groupid = computed({
@@ -335,86 +318,6 @@ onMounted(async () => {
     }
   } catch (e) {
     console.log('Failed to fetch app versions', e)
-  }
-
-  // Fetch Yesterday backup status for Admin/Support users
-  // IMPORTANT: We must check Yesterday's actual restore status, not the production database
-  if (me.value?.systemrole === 'Admin' || me.value?.systemrole === 'Support') {
-    try {
-      // First check Yesterday's restore status - this tells us if backups are actually working
-      const restoreResponse = await fetch(
-        'https://yesterday.ilovefreegle.org:8444/api/restore-status'
-      )
-
-      if (restoreResponse.ok) {
-        const restoreData = await restoreResponse.json()
-
-        if (restoreData.inProgress && restoreData.backupDate) {
-          // A restore is currently in progress
-          const formattedDate = dayjs(
-            restoreData.backupDate,
-            'YYYYMMDD'
-          ).format('D MMM YYYY')
-          latestMessage.value = `Restoring backup from ${formattedDate}...`
-          backupStatus.value = 'warning'
-          isRestoring.value = true
-        } else if (restoreData.status === 'failed') {
-          // Restore failed - this is critical, show error
-          const attemptedDate = restoreData.backupDate
-            ? dayjs(restoreData.backupDate, 'YYYYMMDD').format('D MMM YYYY')
-            : 'unknown'
-          latestMessage.value = `FAILED to restore ${attemptedDate} - check logs`
-          backupStatus.value = 'error'
-        } else if (restoreData.status === 'completed') {
-          // Restore succeeded - now get the actual backup date from Yesterday
-          try {
-            const currentBackupResponse = await fetch(
-              'https://yesterday.ilovefreegle.org:8444/api/current-backup'
-            )
-            if (currentBackupResponse.ok) {
-              const currentBackup = await currentBackupResponse.json()
-              if (currentBackup.date) {
-                const backupDate = dayjs(currentBackup.date, 'YYYYMMDD')
-                const formattedDate = backupDate.format('D MMM YYYY')
-                // Show backup creation time (from filename), not when it was loaded
-                const backupTime = currentBackup.backup_time || ''
-                latestMessage.value = `${formattedDate}${
-                  backupTime ? ' ' + backupTime : ''
-                }`
-
-                // Check if backup is stale (more than 2 days old)
-                const backupAge = dayjs().diff(backupDate, 'day')
-                if (backupAge > 2) {
-                  backupStatus.value = 'error'
-                } else {
-                  backupStatus.value = null
-                }
-              } else {
-                latestMessage.value = 'Unknown backup date'
-                backupStatus.value = 'warning'
-              }
-            } else {
-              latestMessage.value = 'Could not fetch backup info'
-              backupStatus.value = 'warning'
-            }
-          } catch (e) {
-            latestMessage.value = 'Could not fetch backup info'
-            backupStatus.value = 'warning'
-          }
-        } else {
-          // Unknown status
-          latestMessage.value = 'Unknown backup status'
-          backupStatus.value = 'warning'
-        }
-      } else {
-        latestMessage.value = 'Yesterday API unavailable'
-        backupStatus.value = 'warning'
-      }
-    } catch (e) {
-      // If Yesterday API is not accessible, show error - don't pretend things are fine
-      latestMessage.value = 'Cannot reach Yesterday server'
-      backupStatus.value = 'error'
-    }
   }
 
   update()
