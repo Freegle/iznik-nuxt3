@@ -53,83 +53,75 @@
     </b-card>
   </div>
 </template>
-<script>
-// import VisibleWhen from '~/components/VisibleWhen'
+<script setup>
+import { computed } from 'vue'
 import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const memberStore = useMemberStore()
-    const { myGroup } = useMe()
-    return {
-      memberStore,
-      myGroup,
-    }
-  },
-  computed: {
-    member() {
-      return this.memberStore.get(this.id)
-    },
-    variant() {
-      switch (this.member.happiness) {
-        case 'Happy':
-          return 'bg-success'
-        case 'Unhappy':
-          return 'bg-warning'
-        default:
-          return 'bg-light'
-      }
-    },
-    icon() {
-      switch (this.member.happiness) {
-        case 'Happy':
-          return 'smile'
-        case 'Unhappy':
-          return 'frown'
-        default:
-          return 'meh'
-      }
-    },
-    outcomeIcon() {
-      switch (this.member.outcome) {
-        case 'Taken':
-        case 'Received':
-          return 'check'
-        default:
-          return 'times'
-      }
-    },
-    groupname() {
-      let ret = null
-      const group = this.myGroup(this.member.groupid)
+})
 
-      if (group) {
-        ret = group.namedisplay
-      }
+const memberStore = useMemberStore()
+const { myGroup } = useMe()
 
-      return ret
-    },
-  },
-  mounted() {},
-  methods: {
-    visibilityChanged(visible) {
-      if (visible && !this.member.reviewed) {
-        // Mark this as reviewed.  They've had a chance to see it.
-        this.memberStore.happinessReviewed({
-          userid: this.member.user.id,
-          groupid: this.member.groupid,
-          happinessid: this.member.id,
-        })
-      }
-    },
-  },
+const member = computed(() => memberStore.get(props.id))
+
+const variant = computed(() => {
+  switch (member.value.happiness) {
+    case 'Happy':
+      return 'bg-success'
+    case 'Unhappy':
+      return 'bg-warning'
+    default:
+      return 'bg-light'
+  }
+})
+
+const icon = computed(() => {
+  switch (member.value.happiness) {
+    case 'Happy':
+      return 'smile'
+    case 'Unhappy':
+      return 'frown'
+    default:
+      return 'meh'
+  }
+})
+
+const outcomeIcon = computed(() => {
+  switch (member.value.outcome) {
+    case 'Taken':
+    case 'Received':
+      return 'check'
+    default:
+      return 'times'
+  }
+})
+
+const groupname = computed(() => {
+  let ret = null
+  const group = myGroup(member.value.groupid)
+
+  if (group) {
+    ret = group.namedisplay
+  }
+
+  return ret
+})
+
+function visibilityChanged(visible) {
+  if (visible && !member.value.reviewed) {
+    // Mark this as reviewed.  They've had a chance to see it.
+    memberStore.happinessReviewed({
+      userid: member.value.user.id,
+      groupid: member.value.groupid,
+      happinessid: member.value.id,
+    })
+  }
 }
 </script>
 <style scoped lang="scss">
