@@ -67,60 +67,47 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  props: {
-    rating: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  rating: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    const { amAModOn } = useModMe()
-    return {
-      userStore,
-      amAModOn,
+})
+
+const userStore = useUserStore()
+const { amAModOn } = useModMe()
+
+const groupName = computed(() => {
+  let ret = null
+
+  if (props.rating.rater) {
+    const rater = userStore.byId(props.rating.rater)
+    if (rater && rater.memberof) {
+      rater.memberof.forEach((g) => {
+        if (g.id === props.rating.groupid && amAModOn(g.id)) {
+          ret = g.namedisplay
+        }
+      })
     }
-  },
-  computed: {
-    groupName() {
-      let ret = null
+  }
 
-      if (this.rating.rater) {
-        const rater = this.userStore.byId(this.rating.rater)
-        if (rater && rater.memberof) {
-          rater.memberof.forEach((g) => {
-            if (g.id === this.rating.groupid && this.amAModOn(g.id)) {
-              ret = g.namedisplay
-            }
-          })
-        }
-      }
+  return ret
+})
 
-      return ret
-    },
-  },
-  mounted() {},
-  methods: {
-    visibilityChanged(visible) {
-      console.log('MMR visibilityChanged', visible, this.rating.reviewrequired)
-      if (visible) {
-        if (this.rating.reviewrequired) {
-          // Mark this as reviewed.  They've had a chance to see it.
-          this.userStore.ratingReviewed({
-            id: this.rating.id,
-          })
-        }
-
-        // TODO if (this.rating.rater) {
-        //  this.userStore.fetchMT({ id: this.rating.rater })
-        // }
-      }
-    },
-  },
+function visibilityChanged(visible) {
+  console.log('MMR visibilityChanged', visible, props.rating.reviewrequired)
+  if (visible) {
+    if (props.rating.reviewrequired) {
+      // Mark this as reviewed.  They've had a chance to see it.
+      userStore.ratingReviewed({
+        id: props.rating.id,
+      })
+    }
+  }
 }
 </script>

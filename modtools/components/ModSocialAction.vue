@@ -35,134 +35,133 @@
     </b-card-footer>
   </b-card>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { usePublicityStore } from '@/stores/publicity'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const publicityStore = usePublicityStore()
-    const { myGroups } = useMe()
-    const { checkWork } = useModMe()
-    return { publicityStore, myGroups, checkWork }
-  },
-  data: function () {
-    return {
-      busy: [],
-      actioned: [],
-    }
-  },
-  computed: {
-    groups() {
-      const ret = []
+})
 
-      // Cloning to avoid some strange issues which cause loops.
-      const groups = cloneDeep(this.myGroups)
+const publicityStore = usePublicityStore()
+const { myGroups } = useMe()
+const { checkWork } = useModMe()
 
-      this.item.uids.forEach((uid) => {
-        for (const group of groups) {
-          if (group.type === 'Freegle' && group.facebook) {
-            group.facebook.forEach((facebook) => {
-              if (parseInt(facebook.uid) === parseInt(uid)) {
-                group.facebookuid = facebook.uid
-                ret.push(group)
-              }
-            })
+const busy = ref([])
+const actioned = ref([])
+
+const groups = computed(() => {
+  const ret = []
+
+  // Cloning to avoid some strange issues which cause loops.
+  const groupsClone = cloneDeep(myGroups.value)
+
+  props.item.uids.forEach((uid) => {
+    for (const group of groupsClone) {
+      if (group.type === 'Freegle' && group.facebook) {
+        group.facebook.forEach((facebook) => {
+          if (parseInt(facebook.uid) === parseInt(uid)) {
+            group.facebookuid = facebook.uid
+            ret.push(group)
           }
-        }
-      })
-
-      // Sort so we get the buttons in alphabetical order.
-      ret.sort((a, b) => {
-        return a.namedisplay
-          .toLowerCase()
-          .localeCompare(b.namedisplay.toLowerCase())
-      })
-
-      return ret
-    },
-    someleft() {
-      let ret = false
-
-      this.groups.forEach((group) => {
-        if (!this.actioned.includes(group.id)) {
-          ret = true
-        }
-      })
-
-      return ret
-    },
-  },
-  methods: {
-    async share(group) {
-      this.busy.push(group.id)
-
-      await this.publicityStore.share({
-        id: this.item.id,
-        uid: group.facebookuid,
-      })
-
-      this.busy = this.busy.filter((g) => {
-        return g.id !== group.id
-      })
-
-      this.actioned.push(group.id)
-    },
-    async hide(group, noUpdate) {
-      this.busy.push(group.id)
-
-      await this.publicityStore.hide({
-        id: this.item.id,
-        uid: group.facebookuid,
-      })
-
-      this.busy = this.busy.filter((g) => {
-        return g.id !== group.id
-      })
-
-      this.actioned.push(group.id)
-
-      if (!noUpdate) {
-        this.updateWork()
+        })
       }
-    },
-    async shareAll() {
-      const promises = []
+    }
+  })
 
-      this.groups.forEach((group) => {
-        if (!this.actioned.includes(group.id)) {
-          promises.push(this.share(group, false))
-        }
-      })
+  // Sort so we get the buttons in alphabetical order.
+  ret.sort((a, b) => {
+    return a.namedisplay
+      .toLowerCase()
+      .localeCompare(b.namedisplay.toLowerCase())
+  })
 
-      await Promise.all(promises)
+  return ret
+})
 
-      this.updateWork()
-    },
-    hideAll() {
-      this.groups.forEach((group) => {
-        if (!this.actioned.includes(group.id)) {
-          this.hide(group)
-        }
-      })
-    },
-    isActioned(groupid) {
-      return this.actioned.includes(groupid)
-    },
-    isBusy(groupid) {
-      return this.busy.includes(groupid)
-    },
-    updateWork() {
-      this.checkWork()
-    },
-  },
+const someleft = computed(() => {
+  let ret = false
+
+  groups.value.forEach((group) => {
+    if (!actioned.value.includes(group.id)) {
+      ret = true
+    }
+  })
+
+  return ret
+})
+
+async function share(group) {
+  busy.value.push(group.id)
+
+  await publicityStore.share({
+    id: props.item.id,
+    uid: group.facebookuid,
+  })
+
+  busy.value = busy.value.filter((g) => {
+    return g.id !== group.id
+  })
+
+  actioned.value.push(group.id)
+}
+
+async function hideItem(group, noUpdate) {
+  busy.value.push(group.id)
+
+  await publicityStore.hide({
+    id: props.item.id,
+    uid: group.facebookuid,
+  })
+
+  busy.value = busy.value.filter((g) => {
+    return g.id !== group.id
+  })
+
+  actioned.value.push(group.id)
+
+  if (!noUpdate) {
+    updateWork()
+  }
+}
+
+async function shareAll() {
+  const promises = []
+
+  groups.value.forEach((group) => {
+    if (!actioned.value.includes(group.id)) {
+      promises.push(share(group, false))
+    }
+  })
+
+  await Promise.all(promises)
+
+  updateWork()
+}
+
+function hideAll() {
+  groups.value.forEach((group) => {
+    if (!actioned.value.includes(group.id)) {
+      hideItem(group)
+    }
+  })
+}
+
+function isActioned(groupid) {
+  return actioned.value.includes(groupid)
+}
+
+function isBusy(groupid) {
+  return busy.value.includes(groupid)
+}
+
+function updateWork() {
+  checkWork()
 }
 </script>
