@@ -21,7 +21,10 @@
     "coveralls": "node scripts/upload-coverage.js",
     "test:clean": "node -e \"const fs = require('fs'); const rimraf = path => { try { if (fs.existsSync(path)) fs.rmSync(path, { recursive: true, force: true }); } catch (e) { console.error('Error removing:', e); } }; rimraf('test-results'); rimraf('playwright-report'); rimraf('playwright-screenshots'); rimraf('coverage');\"",
     "test:ci": "npm run test:clean && playwright test",
-    "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js"
+    "test:unsubscribe-emails": "node tests/e2e/unsubscribe-test-emails.js",
+    "test:unit": "vitest",
+    "test:unit:run": "vitest run",
+    "test:unit:coverage": "vitest run --coverage"
   },
   "gitHooks": {
     "pre-commit": "npm run lint-staged"
@@ -46,19 +49,23 @@
   "devDependencies": {
     "@bootstrap-vue-next/nuxt": "^0.24.1",
     "@capacitor/cli": "^7.0.0",
+    "@happy-dom/global-registrator": "^20.3.4",
     "@nuxt/image": "^1.5.0",
     "@nuxt/test-utils": "^3.19.0",
     "@nuxtjs/eslint-config": "^12.1.0",
     "@nuxtjs/eslint-module": "^4.0.2",
     "@playwright/test": "^1.52.0",
     "@stripe/stripe-js": "^4.9.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vue-leaflet/vue-leaflet": "^0.6.1",
+    "@vue/test-utils": "^2.4.6",
     "@zadigetvoltaire/nuxt-gtm": "^0.0.13",
     "baseline-browser-mapping": "^2.9.11",
     "coveralls": "^3.1.1",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "happy-dom": "^20.3.4",
     "ipx": "^2.1.1",
     "lint": "^1.1.2",
     "monocart-reporter": "^2.9.21",
@@ -69,7 +76,8 @@
     "sitemap": "^7.1.1",
     "typescript": "^5.0.4",
     "vite-plugin-eslint2": "^5.0.0",
-    "vite-plugin-pwa": "^0.21.1"
+    "vite-plugin-pwa": "^0.21.1",
+    "vitest": "^3.2.4"
   },
   "dependencies": {
     "@algorithm.ts/lcs": "^4.0.3",
