@@ -6,10 +6,10 @@ export default async function globalSetup(config) {
   console.log('Playwright global setup start')
 
   try {
-    const setupResponse = await fetch(
-      // TODO Finnbarr: don't hard-code base API URL.
-      'http://apiv1.localhost/api/test?action=SetupDB'
-    )
+    const apiV1BaseUrl =
+      process.env.IZNIK_API_V1 || 'http://apiv1.localhost/api'
+
+    const setupResponse = await fetch(`${apiV1BaseUrl}/test?action=SetupDB`)
 
     if (!setupResponse.ok) {
       throw new Error(
