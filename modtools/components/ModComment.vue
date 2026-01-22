@@ -74,123 +74,104 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import ReadMore from 'vue-read-more3/src/ReadMoreComponent'
 import cloneDeep from 'lodash.clonedeep'
 import { setupModMembers } from '~/composables/useModMembers'
-import { useMemberStore } from '~/stores/member'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  components: { ReadMore },
-
-  props: {
-    comment: {
-      type: Object,
-      required: true,
-    },
-    user: {
-      type: Object,
-      required: true,
-    },
-    expandComments: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  comment: {
+    type: Object,
+    required: true,
   },
+  user: {
+    type: Object,
+    required: true,
+  },
+  expandComments: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-  setup() {
-    const groupStore = useGroupStore()
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { bump, context } = setupModMembers()
-    const { myid, supportOrAdmin, myGroup } = useMe()
-    const { amAModOn } = useModMe()
-    return {
-      bump,
-      context,
-      groupStore,
-      memberStore,
-      userStore,
-      myid,
-      supportOrAdmin,
-      myGroup,
-      amAModOn,
+const emit = defineEmits(['updated', 'editing'])
+
+const groupStore = useGroupStore()
+const userStore = useUserStore()
+const { bump, context } = setupModMembers()
+const { myid, supportOrAdmin, myGroup } = useMe()
+const { amAModOn } = useModMe()
+
+const showConfirmDelete = ref(false)
+const showCommentEditModal = ref(false)
+const savedComment = ref(null)
+
+const group = computed(() => {
+  let ret = null
+
+  if (props.comment.groupid) {
+    ret = myGroup(props.comment.groupid)
+
+    if (!ret) {
+      ret = groupStore.get(props.comment.groupid)
     }
-  },
-  data: function () {
-    return {
-      showConfirmDelete: false,
-      showCommentEditModal: false,
-      savedComment: null,
-    }
-  },
-  computed: {
-    group() {
-      let ret = null
+  }
 
-      if (this.comment.groupid) {
-        ret = this.myGroup(this.comment.groupid)
+  return ret
+})
 
-        if (!ret) {
-          ret = this.groupStore.get(this.comment.groupid)
-        }
-      }
+const groupname = computed(() => {
+  return group.value ? group.value.namedisplay : '#' + props.comment.groupid
+})
 
-      return ret
-    },
-    groupname() {
-      return this.group ? this.group.namedisplay : '#' + this.comment.groupid
-    },
-  },
-  mounted() {
-    // To stop it updating on screen when editing in a modal.
-    this.savedComment = cloneDeep(this.comment)
+async function updateComments() {
+  const userid = props.user.userid ? props.user.userid : props.user.id
 
-    if (this.comment.groupid && !this.group) {
-      // Need to fetch group
-      this.groupStore.fetch(this.comment.groupid)
-    }
-  },
-  methods: {
-    async updateComments() {
-      const userid = this.user.userid ? this.user.userid : this.user.id
+  await userStore.fetchMT({
+    id: userid,
+    emailhistory: true,
+  })
 
-      await this.userStore.fetchMT({
-        id: userid,
-        emailhistory: true,
-      })
-
-      const user = this.userStore.byId(userid)
-      const savedCommentId = this.savedComment.id
-      this.savedComment = false
-      if (user.comments) {
-        this.savedComment = user.comments.find((comm) => {
-          return comm.id === savedCommentId
-        })
-      }
-      this.context = null
-      this.bump++
-      this.$emit('updated')
-    },
-
-    deleteIt() {
-      this.showConfirmDelete = true
-    },
-
-    async deleteConfirmed() {
-      await this.userStore.deleteComment(this.comment.id)
-      this.updateComments()
-    },
-
-    editIt() {
-      this.showCommentEditModal = true
-      this.$emit('editing')
-    },
-  },
+  const user = userStore.byId(userid)
+  const savedCommentId = savedComment.value.id
+  savedComment.value = false
+  if (user.comments) {
+    savedComment.value = user.comments.find((comm) => {
+      return comm.id === savedCommentId
+    })
+  }
+  context.value = null
+  bump.value++
+  emit('updated')
 }
+
+function deleteIt() {
+  showConfirmDelete.value = true
+}
+
+async function deleteConfirmed() {
+  await userStore.deleteComment(props.comment.id)
+  updateComments()
+}
+
+function editIt() {
+  showCommentEditModal.value = true
+  emit('editing')
+}
+
+onMounted(() => {
+  // To stop it updating on screen when editing in a modal.
+  savedComment.value = cloneDeep(props.comment)
+
+  if (props.comment.groupid && !group.value) {
+    // Need to fetch group
+    groupStore.fetch(props.comment.groupid)
+  }
+})
 </script>
