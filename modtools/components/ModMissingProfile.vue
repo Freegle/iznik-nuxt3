@@ -21,43 +21,34 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const { myGroups } = useMe()
-    return { myGroups }
-  },
-  data: function () {
-    return {
-      summary: true,
+const { myGroups } = useMe()
+
+const summary = ref(true)
+
+const missing = computed(() => {
+  const ret = []
+
+  for (const group of myGroups) {
+    if (
+      group.type === 'Freegle' &&
+      (group.role === 'Moderator' || group.role === 'Owner') &&
+      group.publish &&
+      (!group.tagline || !group.profile)
+    ) {
+      ret.push({
+        group,
+      })
     }
-  },
-  computed: {
-    missing() {
-      const ret = []
+  }
 
-      for (const group of this.myGroups) {
-        if (
-          group.type === 'Freegle' &&
-          (group.role === 'Moderator' || group.role === 'Owner') &&
-          group.publish &&
-          (!group.tagline || !group.profile)
-        ) {
-          ret.push({
-            group,
-          })
-        }
-      }
+  return ret
+})
 
-      return ret
-    },
-  },
-  methods: {
-    expand() {
-      this.summary = false
-    },
-  },
+function expand() {
+  summary.value = false
 }
 </script>
