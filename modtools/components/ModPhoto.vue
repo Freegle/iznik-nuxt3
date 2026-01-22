@@ -18,66 +18,59 @@
   </span>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import { useMessageStore } from '~/stores/message'
+
 const PostPhoto = defineAsyncComponent(() =>
   import('../../components/PostPhoto')
 )
 
-export default {
-  components: {
-    PostPhoto,
+const props = defineProps({
+  attachment: {
+    type: Object,
+    required: true,
   },
-  props: {
-    attachment: {
-      type: Object,
-      required: true,
-    },
-    message: {
-      type: Object,
-      required: true,
-    },
+  message: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
-    return { messageStore }
-  },
-  data: function () {
-    return {
-      zoom: false,
+})
+
+const messageStore = useMessageStore()
+
+const zoom = ref(false)
+const modphotomodal = ref(null)
+
+const mods = computed(() => {
+  if (props.attachment.mods) {
+    const jsonmods = JSON.parse(props.attachment.mods)
+    if (!jsonmods) return {}
+    return jsonmods
+  }
+  return {}
+})
+
+function showModal() {
+  zoom.value = true
+  modphotomodal.value?.show()
+}
+
+async function removePhoto(id) {
+  console.log('MP removePhoto', id, props.message.id)
+  const attachments = []
+
+  props.message.attachments.forEach((a) => {
+    if (a.id !== id) {
+      attachments.push(a.id)
     }
-  },
-  computed: {
-    mods() {
-      if (this.attachment.mods) {
-        const jsonmods = JSON.parse(this.attachment.mods)
-        if (!jsonmods) return {}
-        return jsonmods
-      }
-      return {}
-    },
-  },
-  methods: {
-    showModal() {
-      this.zoom = true
-      this.$refs.modphotomodal?.show()
-    },
-    async removePhoto(id) {
-      console.log('MP removePhoto', id, this.message.id)
-      const attachments = []
+  })
 
-      this.message.attachments.forEach((a) => {
-        if (a.id !== id) {
-          attachments.push(a.id)
-        }
-      })
+  await messageStore.patch({ id: props.message.id, attachments })
+}
 
-      await this.messageStore.patch({ id: this.message.id, attachments })
-    },
-    async updatedPhoto() {
-      await this.messageStore.patch({ id: this.message.id })
-    },
-  },
+async function updatedPhoto() {
+  await messageStore.patch({ id: props.message.id })
 }
 </script>
 
