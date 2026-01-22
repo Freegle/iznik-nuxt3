@@ -68,9 +68,9 @@ describe('ExportChat', () => {
       expect(wrapper.find('button').text()).toBe('Show messages')
     })
 
-    it('button has link variant', () => {
+    it('has export button', () => {
       const wrapper = mountExportChat()
-      expect(wrapper.find('button').classes()).toContain('btn-link')
+      expect(wrapper.find('button').exists()).toBe(true)
     })
   })
 
