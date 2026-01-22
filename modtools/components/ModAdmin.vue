@@ -171,7 +171,7 @@
         <b-button v-if="!admin.heldby" variant="white" @click="hold">
           <v-icon icon="pause" /> Hold
         </b-button>
-        <b-button v-else variant="secondary" @click="release">
+        <b-button v-else variant="secondary" @click="releaseAdmin">
           <v-icon icon="play" /> Release
         </b-button>
         <b-button v-if="!admin.heldby" variant="primary" @click="approve">
@@ -187,109 +187,109 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useAdminsStore } from '~/stores/admins'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    open: {
-      type: Boolean,
-      required: false,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  emits: ['copy'],
-  setup() {
-    const adminsStore = useAdminsStore()
-    const groupStore = useGroupStore()
-    const userStore = useUserStore()
-    const { myid } = useMe()
-    const { checkWork } = useModMe()
-    return { adminsStore, groupStore, userStore, myid, checkWork }
+  open: {
+    type: Boolean,
+    required: false,
   },
-  data: function () {
-    return {
-      expanded: false,
-      saving: false,
-      saved: false,
-      showConfirmModal: false,
-    }
-  },
-  computed: {
-    admin() {
-      return this.adminsStore.get(this.id)
-    },
-    groupname() {
-      let ret = null
-      const group = this.groupStore.get(this.admin.groupid)
+})
 
-      if (group) {
-        ret = group.namedisplay
-      }
+const emit = defineEmits(['copy'])
 
-      return ret
-    },
-    holder() {
-      return this.admin.heldby ? this.userStore.byId(this.admin.heldby) : null
-    },
-  },
-  mounted() {
-    this.expanded = this.open
+const adminsStore = useAdminsStore()
+const groupStore = useGroupStore()
+const userStore = useUserStore()
+const { myid } = useMe()
+const { checkWork } = useModMe()
 
-    if (this.admin.heldby) {
-      // Get them in store so we can display their name.
-      this.userStore.fetch(this.admin.heldby)
-    }
-  },
-  methods: {
-    deleteIt() {
-      this.showConfirmModal = true
-    },
-    copyIt() {
-      this.$emit('copy', this.admin)
-    },
-    deleteConfirmed() {
-      this.adminsStore.delete({ id: this.id })
-      this.checkWork(true)
-    },
-    async save() {
-      this.saving = true
+const expanded = ref(false)
+const saving = ref(false)
+const saved = ref(false)
+const showConfirmModal = ref(false)
 
-      await this.adminsStore.edit({
-        id: this.admin.id,
-        subject: this.admin.subject,
-        text: this.admin.text,
-        pending: 1,
-      })
+const admin = computed(() => adminsStore.get(props.id))
 
-      this.saving = false
-      this.saved = true
-      setTimeout(() => {
-        this.saved = false
-      }, 2000)
-    },
-    hold() {
-      this.adminsStore.hold({ id: this.admin.id })
-      this.checkWork(true)
-    },
-    release() {
-      this.adminsStore.release({ id: this.admin.id })
-      this.checkWork(true)
-    },
-    async approve() {
-      await this.save()
+const groupname = computed(() => {
+  let ret = null
+  const group = groupStore.get(admin.value.groupid)
 
-      await this.adminsStore.approve({ id: this.admin.id })
+  if (group) {
+    ret = group.namedisplay
+  }
 
-      this.checkWork(true)
-    },
-  },
+  return ret
+})
+
+const holder = computed(() => {
+  return admin.value.heldby ? userStore.byId(admin.value.heldby) : null
+})
+
+onMounted(() => {
+  expanded.value = props.open
+
+  if (admin.value.heldby) {
+    // Get them in store so we can display their name.
+    userStore.fetch(admin.value.heldby)
+  }
+})
+
+function deleteIt() {
+  showConfirmModal.value = true
+}
+
+function copyIt() {
+  emit('copy', admin.value)
+}
+
+function deleteConfirmed() {
+  adminsStore.delete({ id: props.id })
+  checkWork(true)
+}
+
+async function save() {
+  saving.value = true
+
+  await adminsStore.edit({
+    id: admin.value.id,
+    subject: admin.value.subject,
+    text: admin.value.text,
+    pending: 1,
+  })
+
+  saving.value = false
+  saved.value = true
+  setTimeout(() => {
+    saved.value = false
+  }, 2000)
+}
+
+function hold() {
+  adminsStore.hold({ id: admin.value.id })
+  checkWork(true)
+}
+
+function releaseAdmin() {
+  adminsStore.release({ id: admin.value.id })
+  checkWork(true)
+}
+
+async function approve() {
+  await save()
+
+  await adminsStore.approve({ id: admin.value.id })
+
+  checkWork(true)
 }
 </script>
