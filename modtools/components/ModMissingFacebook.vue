@@ -74,7 +74,7 @@ const summary = ref(true)
 const invalid = computed(() => {
   const ret = []
 
-  for (const group of myGroups.value) {
+  for (const group of myGroups.value || []) {
     if (
       group.type === 'Freegle' &&
       group.facebook &&
@@ -98,7 +98,7 @@ const invalid = computed(() => {
 const notlinked = computed(() => {
   const ret = []
 
-  for (const group of myGroups.value) {
+  for (const group of myGroups.value || []) {
     if (
       group.type === 'Freegle' &&
       (group.role === 'Moderator' || group.role === 'Owner') &&

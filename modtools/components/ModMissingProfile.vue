@@ -32,7 +32,7 @@ const summary = ref(true)
 const missing = computed(() => {
   const ret = []
 
-  for (const group of myGroups) {
+  for (const group of myGroups.value || []) {
     if (
       group.type === 'Freegle' &&
       (group.role === 'Moderator' || group.role === 'Owner') &&

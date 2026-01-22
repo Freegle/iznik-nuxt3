@@ -80,9 +80,9 @@ const groups = computed(() => {
 
 const invalid = computed(() => {
   const ret = []
-  const mygroups = myGroups.value // myGroups has correct role
+  const mygroups = myGroups.value || [] // myGroups has correct role
 
-  for (const group of groups.value) {
+  for (const group of groups.value || []) {
     const mygroup = mygroups.find((g) => g.id === group.id)
     if (
       group.type === 'Freegle' &&
@@ -99,9 +99,9 @@ const invalid = computed(() => {
 
 const newRulesMissing = computed(() => {
   const ret = []
-  const mygroups = myGroups.value // myGroups has correct role
+  const mygroups = myGroups.value || [] // myGroups has correct role
 
-  for (const group of groups.value) {
+  for (const group of groups.value || []) {
     const mygroup = mygroups.find((g) => g.id === group.id)
     if (
       group.type === 'Freegle' &&
@@ -144,7 +144,7 @@ const newRulesMissing = computed(() => {
 })
 
 onMounted(async () => {
-  for (const g of myGroups.value) {
+  for (const g of myGroups.value || []) {
     await modGroupStore.fetchIfNeedBeMT(g.id)
   }
 

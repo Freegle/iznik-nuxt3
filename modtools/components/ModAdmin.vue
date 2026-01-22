@@ -171,7 +171,7 @@
         <b-button v-if="!admin.heldby" variant="white" @click="hold">
           <v-icon icon="pause" /> Hold
         </b-button>
-        <b-button v-else variant="secondary" @click="releaseAdmin">
+        <b-button v-else variant="secondary" @click="release">
           <v-icon icon="play" /> Release
         </b-button>
         <b-button v-if="!admin.heldby" variant="primary" @click="approve">
@@ -280,7 +280,7 @@ function hold() {
   checkWork(true)
 }
 
-function releaseAdmin() {
+function release() {
   adminsStore.release({ id: admin.value.id })
   checkWork(true)
 }

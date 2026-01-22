@@ -15,7 +15,13 @@ const modtoolsOnlyStores = modtoolsStores.filter((s) => !rootStores.includes(s))
 const storeAliases = {}
 for (const store of modtoolsOnlyStores) {
   const storeName = store.replace('.js', '')
+  // Support both ~ and @ prefixes for modtools stores
   storeAliases[`~/stores/${storeName}`] = path.join(
+    rootDir,
+    'modtools/stores',
+    store
+  )
+  storeAliases[`@/stores/${storeName}`] = path.join(
     rootDir,
     'modtools/stores',
     store
@@ -46,6 +52,9 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
+      // Nuxt virtual modules
+      '#app': path.join(rootDir, 'tests/unit/mocks/nuxt-app.js'),
+      '#imports': path.join(rootDir, 'tests/unit/mocks/nuxt-app.js'),
       // Specific store/composable aliases must come before generic ~ alias
       ...storeAliases,
       ...composableAliases,

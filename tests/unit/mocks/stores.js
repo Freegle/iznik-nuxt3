@@ -15,6 +15,7 @@ export function createMockMemberStore(overrides = {}) {
     members: [],
 
     // Actions (as vi.fn() for assertion)
+    add: vi.fn().mockResolvedValue({}),
     update: vi.fn().mockResolvedValue({}),
     delete: vi.fn().mockResolvedValue({}),
     fetch: vi.fn().mockResolvedValue({}),
@@ -22,6 +23,7 @@ export function createMockMemberStore(overrides = {}) {
     approve: vi.fn().mockResolvedValue({}),
     reviewHold: vi.fn().mockResolvedValue({}),
     reviewRelease: vi.fn().mockResolvedValue({}),
+    ban: vi.fn().mockResolvedValue({}),
 
     // Getters
     byId: vi.fn().mockReturnValue(null),
@@ -37,8 +39,47 @@ export function createMockMemberStore(overrides = {}) {
 export function createMockUserStore(overrides = {}) {
   return {
     user: null,
+    add: vi.fn().mockResolvedValue(123), // Returns user ID
+    fetch: vi.fn().mockResolvedValue({}),
     fetchMT: vi.fn().mockResolvedValue({}),
     updateUser: vi.fn().mockResolvedValue({}),
+    byId: vi.fn().mockReturnValue(null),
+    ...overrides,
+  }
+}
+
+/**
+ * Create a mock admins store
+ */
+export function createMockAdminsStore(overrides = {}) {
+  return {
+    get: vi.fn().mockReturnValue({
+      id: 1,
+      subject: 'Test Admin',
+      text: 'Test body',
+      created: '2024-01-01',
+      groupid: 1,
+      pending: true,
+    }),
+    edit: vi.fn().mockResolvedValue({}),
+    delete: vi.fn().mockResolvedValue({}),
+    hold: vi.fn().mockResolvedValue({}),
+    release: vi.fn().mockResolvedValue({}),
+    approve: vi.fn().mockResolvedValue({}),
+    ...overrides,
+  }
+}
+
+/**
+ * Create a mock group store
+ */
+export function createMockGroupStore(overrides = {}) {
+  return {
+    get: vi.fn().mockReturnValue({
+      id: 1,
+      namedisplay: 'Test Group',
+    }),
+    fetch: vi.fn().mockResolvedValue({}),
     ...overrides,
   }
 }
@@ -80,6 +121,7 @@ export function createMockAuthStore(overrides = {}) {
   return {
     user: null,
     saveAndGet: vi.fn().mockResolvedValue({}),
+    unbounceMT: vi.fn().mockResolvedValue({}),
     ...overrides,
   }
 }
@@ -101,6 +143,22 @@ export function createMockStdmsgStore(overrides = {}) {
 export function createMockModConfigStore(overrides = {}) {
   return {
     config: {},
+    fetch: vi.fn().mockResolvedValue({}),
+    ...overrides,
+  }
+}
+
+/**
+ * Create a mock alert store
+ */
+export function createMockAlertStore(overrides = {}) {
+  return {
+    get: vi.fn().mockReturnValue({
+      id: 1,
+      subject: 'Test Alert',
+      text: 'Alert text content',
+      html: '<p>Alert HTML content</p>',
+    }),
     fetch: vi.fn().mockResolvedValue({}),
     ...overrides,
   }

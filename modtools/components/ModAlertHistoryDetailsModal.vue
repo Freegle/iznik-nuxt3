@@ -36,7 +36,7 @@ const { modal, hide, show } = useOurModal()
 
 const alert = computed(() => alertStore.get(props.id))
 
-defineExpose({ modal, hide, show })
+defineExpose({ show, hide })
 </script>
 <style scoped>
 label {
