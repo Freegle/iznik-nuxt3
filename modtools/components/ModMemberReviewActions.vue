@@ -101,108 +101,100 @@
     />
   </b-card>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
-import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  props: {
-    memberid: {
-      type: Number,
-      required: true,
-    },
-    member: {
-      type: Object,
-      required: true,
-    },
-    membership: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  memberid: {
+    type: Number,
+    required: true,
   },
-  emits: ['forcerefresh'],
-  setup() {
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { me, myid } = useMe()
-    const { amAModOn } = useModMe()
-    return {
-      memberStore,
-      userStore,
-      me,
-      myid,
-      amAModOn,
+  member: {
+    type: Object,
+    required: true,
+  },
+  membership: {
+    type: Object,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['forcerefresh'])
+
+const memberStore = useMemberStore()
+const { me, myid } = useMe()
+const { amAModOn } = useModMe()
+
+const removeConfirm = ref(null)
+
+const reviewed = ref(false)
+const showConfirmModal = ref(false)
+
+const groupid = computed(() => {
+  let ret = null
+
+  props.member.memberof.forEach((h) => {
+    if (h.id === props.membership.id) {
+      ret = h.id
     }
-  },
-  data: function () {
-    return {
-      reviewed: false,
-      showConfirmModal: false,
-    }
-  },
-  computed: {
-    groupid() {
-      let ret = null
+  })
 
-      this.member.memberof.forEach((h) => {
-        if (h.id === this.membership.id) {
-          ret = h.id
-        }
-      })
+  return ret
+})
 
-      return ret
-    },
-    needsReview() {
-      if (this.reviewed) {
-        return false
-      }
+const needsReview = computed(() => {
+  if (reviewed.value) {
+    return false
+  }
 
-      return (
-        !this.membership.reviewedat ||
-        new Date(this.membership.reviewrequestedat).getTime() >=
-          new Date(this.membership.reviewedat).getTime()
-      )
-    },
-  },
-  methods: {
-    remove(callback) {
-      this.showConfirmModal = true
-      this.$refs.removeConfirm?.show()
+  return (
+    !props.membership.reviewedat ||
+    new Date(props.membership.reviewrequestedat).getTime() >=
+      new Date(props.membership.reviewedat).getTime()
+  )
+})
 
-      setTimeout(() => {
-        this.reviewed = true
-        callback()
-      }, 2000)
-    },
-    async removeConfirmed() {
-      await this.memberStore.remove(this.member.userid, this.membership.id)
+function remove(callback) {
+  showConfirmModal.value = true
+  removeConfirm.value?.show()
 
-      setTimeout(() => {
-        this.reviewed = true
-        this.forcerefresh(true)
-      }, 2000)
-    },
-    async ignore(callback) {
-      await this.memberStore.spamignore({
-        userid: this.member.userid,
-        groupid: this.membership.id,
-      })
+  setTimeout(() => {
+    reviewed.value = true
+    callback()
+  }, 2000)
+}
 
-      setTimeout(() => {
-        this.reviewed = true
-        callback()
-        this.forcerefresh(true)
-      }, 2000)
-    },
-    daysago(d) {
-      return dayjs().diff(dayjs(d), 'day')
-    },
-    forcerefresh() {
-      this.$emit('forcerefresh')
-    },
-  },
+async function removeConfirmed() {
+  await memberStore.remove(props.member.userid, props.membership.id)
+
+  setTimeout(() => {
+    reviewed.value = true
+    forcerefresh(true)
+  }, 2000)
+}
+
+async function ignore(callback) {
+  await memberStore.spamignore({
+    userid: props.member.userid,
+    groupid: props.membership.id,
+  })
+
+  setTimeout(() => {
+    reviewed.value = true
+    callback()
+    forcerefresh(true)
+  }, 2000)
+}
+
+function daysago(d) {
+  return dayjs().diff(dayjs(d), 'day')
+}
+
+function forcerefresh() {
+  emit('forcerefresh')
 }
 </script>

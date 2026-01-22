@@ -606,7 +606,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import Highlighter from 'vue-highlight-words'
 
 import { useLocationStore } from '~/stores/location'
@@ -625,614 +626,632 @@ import { useModGroupStore } from '@/stores/modgroup'
 
 import { twem } from '~/composables/useTwem'
 
-export default {
-  name: 'ModMessage',
-  components: {
-    Highlighter,
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-    editreview: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    noactions: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    summary: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    review: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    search: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    next: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    nextAfterRemoved: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+  editreview: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  setup(props) {
-    // If viewing message within chat then fromuser is a number and so must be zapped
-    if (props.message.fromuser && typeof props.message.fromuser === 'number') {
-      // eslint-disable-next-line vue/no-mutating-props
-      props.message.fromuser = null
+  noactions: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  summary: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  review: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  search: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  next: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  nextAfterRemoved: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
+
+const emit = defineEmits(['destroy'])
+
+// If viewing message within chat then fromuser is a number and so must be zapped
+if (props.message.fromuser && typeof props.message.fromuser === 'number') {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.fromuser = null
+}
+
+const locationStore = useLocationStore()
+const memberStore = useMemberStore()
+const messageStore = useMessageStore()
+const miscStore = useMiscStore()
+const modconfigStore = useModConfigStore()
+const modGroupStore = useModGroupStore()
+const userStore = useUserStore()
+const { typeOptions } = setupKeywords()
+const { me, myid } = useMe()
+const { myModGroups, myModGroup } = useModMe()
+
+const top = ref(null)
+const bottom = ref(null)
+const spamConfirm = ref(null)
+
+const saving = ref(false)
+const saved = ref(false)
+const showEmailSourceModal = ref(false)
+const showSpamModal = ref(false)
+const showMailSettings = ref(false)
+const showActions = ref(false)
+const showEmails = ref(false)
+const editing = ref(false)
+const expanded = ref(false)
+const editgroup = ref(null)
+const uploading = ref(false)
+const attachments = ref([])
+const homegroup = ref(null)
+const homegroupontn = ref(false)
+const historyGroups = reactive({})
+const editmessage = ref(false)
+
+const groupid = computed(() => {
+  // moved from mixins/keywords
+  let ret = 0
+
+  if (props.message && props.message.groups && props.message.groups.length) {
+    ret = props.message.groups[0].groupid
+  }
+  return ret
+})
+
+const messageGroup = computed(() => {
+  let ret = null
+
+  if (props.message && props.message.groups && props.message.groups.length) {
+    ret = props.message.groups[0].groupid
+  }
+
+  return ret
+})
+
+const messageHistory = computed(() => {
+  return props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.messagehistory
+    ? props.message.fromuser.messagehistory
+    : []
+})
+
+const group = computed(() => {
+  let ret = null
+
+  if (messageGroup.value) {
+    ret = myModGroups.value.find((g) => parseInt(g.id) === messageGroup.value)
+  }
+
+  return ret
+})
+
+const position = computed(() => {
+  let ret = null
+
+  if (props.message) {
+    if (props.message.location) {
+      // This is what we put in for message submitted on FD.
+      ret = props.message.location
+    } else if (props.message.lat || props.message.lng) {
+      // This happens for TN messages
+      ret = {
+        lat: props.message.lat,
+        lng: props.message.lng,
+      }
     }
-    const locationStore = useLocationStore()
-    const memberStore = useMemberStore()
-    const messageStore = useMessageStore()
-    const miscStore = useMiscStore()
-    const modconfigStore = useModConfigStore()
-    const modGroupStore = useModGroupStore()
-    const userStore = useUserStore()
-    const { typeOptions } = setupKeywords()
-    const { me, myid } = useMe()
-    const { myModGroups, myModGroup } = useModMe()
+  }
 
-    return {
-      locationStore,
-      memberStore,
-      messageStore,
-      miscStore,
-      modconfigStore,
-      modGroupStore,
-      userStore,
-      typeOptions,
-      me,
-      myid,
-      myModGroups,
-      myModGroup,
+  return ret
+})
+
+const outsideUK = computed(() => {
+  return (
+    position.value &&
+    (position.value.lng < -16 ||
+      position.value.lat < 49 ||
+      position.value.lng > 4 ||
+      position.value.lat > 64)
+  )
+})
+
+const pending = computed(() => {
+  return hasCollection('Pending')
+})
+
+const eSubject = computed(() => {
+  return twem(props.message.subject)
+})
+
+const eBody = computed(() => {
+  return twem(props.message.textbody)
+})
+
+const membership = computed(() => {
+  let ret = null
+
+  if (groupid.value) {
+    ret =
+      props.message.fromuser &&
+      props.message.fromuser.memberof &&
+      props.message.fromuser.memberof.find((g) => g.id === groupid.value)
+  }
+
+  return ret
+})
+
+const modconfig = computed(() => {
+  let ret = null
+  let configid = null
+
+  myModGroups.value.forEach((grp) => {
+    if (grp.id === groupid.value) {
+      configid = grp.mysettings?.configid
     }
-  },
-  data: function () {
-    return {
-      saving: false,
-      saved: false,
-      showEmailSourceModal: false,
-      showSpamModal: false,
-      showMailSettings: false,
-      showActions: false,
-      showEmails: false,
-      editing: false,
-      expanded: false,
-      editgroup: null,
-      uploading: false,
-      attachments: [],
-      homegroup: null,
-      homegroupontn: false,
-      historyGroups: {},
-      editmessage: false,
+  })
+
+  const configs = modconfigStore.configs
+  ret = configs.find((config) => config.id === configid)
+  if (!ret) {
+    ret = configs.find((config) => config.default)
+  }
+
+  return ret
+})
+
+const subjectClass = computed(() => {
+  let ret = 'text-success'
+
+  if (modconfig.value && modconfig.value.coloursubj) {
+    ret =
+      props.message.subject?.match &&
+      props.message.subject.match(modconfig.value.subjreg)
+        ? 'text-success'
+        : 'text-danger'
+  }
+
+  return ret
+})
+
+const oldSubject = computed(() => {
+  if (!props.editreview || !props.message || !props.message.edits) {
+    return null
+  }
+
+  // Edits are in descending time order.
+  let oldest = null
+
+  props.message.edits.forEach((edit) => {
+    if (edit.reviewrequired && edit.oldsubject) {
+      oldest = edit.oldsubject
     }
+  })
+
+  return oldest
+})
+
+const newSubject = computed(() => {
+  if (!props.editreview || !props.message || !props.message.edits) {
+    return null
+  }
+
+  // Find the newest and oldest texts; intermediates are just confusing.
+  // Edits are in descending time order.
+  let newest = null
+
+  props.message.edits.forEach((edit) => {
+    if (edit.reviewrequired) {
+      if (edit.newsubject && !newest) {
+        newest = edit.newsubject
+      }
+    }
+  })
+
+  return newest
+})
+
+const oldBody = computed(() => {
+  if (!props.editreview || !props.message || !props.message.edits) {
+    return null
+  }
+
+  // Edits are in descending time order.
+  let oldest = null
+
+  props.message.edits.forEach((edit) => {
+    if (edit.reviewrequired && edit.oldtext) {
+      oldest = edit.oldtext
+    }
+  })
+
+  return oldest
+})
+
+const newBody = computed(() => {
+  if (!props.editreview || !props.message || !props.message.edits) {
+    return null
+  }
+
+  // Find the newest and oldest texts; intermediates are just confusing.
+  // Edits are in descending time order.
+  let newest = props.message.textbody
+
+  props.message.edits.forEach((edit) => {
+    if (edit.reviewrequired) {
+      if (edit.newtext && !newest) {
+        newest = edit.newtext
+      }
+    }
+  })
+
+  return newest
+})
+
+const duplicateAge = computed(() => {
+  let ret = 31
+  let check = false
+
+  props.message.groups.forEach((g) => {
+    const grp = myModGroup(g.groupid)
+
+    // console.log("duplicateAge group", group?.settings?.duplicates)
+    if (
+      grp &&
+      grp.settings &&
+      grp.settings.duplicates && // TODO: MT group does not have settings
+      grp.settings.duplicates.check
+    ) {
+      check = true
+      const msgtype = props.message.type.toLowerCase()
+      ret = Math.min(ret, grp.settings.duplicates[msgtype])
+    }
+  })
+
+  // console.log('checkHistory duplicateAge',check,ret)
+  return check ? ret : null
+})
+
+const crossposts = computed(() => {
+  return checkHistory(false)
+})
+
+const duplicates = computed(() => {
+  return checkHistory(true)
+})
+
+const memberGroupIds = computed(() => {
+  return props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.memberof
+    ? props.message.fromuser.memberof.map((g) => g.id)
+    : []
+})
+
+watch(
+  () => props.summary,
+  (newVal) => {
+    if (newVal && expanded.value) {
+      expanded.value = false
+    } else if (!newVal && !expanded.value) {
+      expanded.value = true
+    }
+  }
+)
+
+watch(
+  () => props.nextAfterRemoved,
+  (newVal) => {
+    if (newVal === props.message.id) {
+      // This message is the one after one which has just been removed.  Make sure the top is visible.
+      bottom.value.scrollIntoView()
+      top.value.scrollIntoView(true)
+    }
+  }
+)
+
+watch(
+  messageHistory,
+  async (newVal) => {
+    // We want to ensure that we have the groups for any message history, so that we can use them in canonSubj.
+    // console.log('ModMessage: watch messageHistory',newVal)
+    await newVal.forEach(async function (message) {
+      if (!historyGroups[message.groupid]) {
+        historyGroups[message.groupid] = await modGroupStore.fetchIfNeedBeMT(
+          message.groupid
+        )
+      }
+    })
   },
-  computed: {
-    groupid() {
-      // moved from mixins/keywords
-      let ret = 0
+  { immediate: true }
+)
 
-      if (this.message && this.message.groups && this.message.groups.length) {
-        ret = this.message.groups[0].groupid
+onMounted(() => {
+  expanded.value = !props.summary
+  attachments.value = props.message.attachments
+  findHomeGroup()
+})
+
+onBeforeUnmount(() => {
+  emit('destroy', props.message.id, props.next)
+})
+
+function updateComments() {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.fromuser = userStore.byId(props.message.fromuser.id)
+}
+
+function imageAdded(id) {
+  let ret = false
+
+  if (props.editreview && props.message && props.message.edits) {
+    props.message.edits.forEach((edit) => {
+      const n = edit.newimages ? JSON.parse(edit.newimages) : []
+      const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
+      if (n.includes(id) && !o.includes(id)) {
+        ret = true
       }
-      return ret
-    },
-    messageGroup() {
-      let ret = null
+    })
+  }
 
-      if (this.message && this.message.groups && this.message.groups.length) {
-        ret = this.message.groups[0].groupid
+  return ret
+}
+
+function imageRemoved(id) {
+  let ret = false
+
+  if (props.editreview && props.message && props.message.edits) {
+    props.message.edits.forEach((edit) => {
+      const n = edit.newimages ? JSON.parse(edit.newimages) : []
+      const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
+      if (!n.includes(id) && o.includes(id)) {
+        ret = true
       }
+    })
+  }
 
-      return ret
-    },
-    messageHistory() {
-      return this.message &&
-        this.message.fromuser &&
-        this.message.fromuser.messagehistory
-        ? this.message.fromuser.messagehistory
-        : []
-    },
-    group() {
-      let ret = null
+  return ret
+}
 
-      if (this.messageGroup) {
-        ret = this.myModGroups.find((g) => parseInt(g.id) === this.messageGroup)
+function hasCollection(coll) {
+  let ret = false
+
+  if (props.message.groups) {
+    props.message.groups.forEach((grp) => {
+      if (grp.collection === coll) {
+        ret = true
       }
+    })
+  }
 
-      return ret
-    },
-    position() {
-      let ret = null
+  return ret
+}
 
-      if (this.message) {
-        if (this.message.location) {
-          // This is what we put in for message submitted on FD.
-          ret = this.message.location
-        } else if (this.message.lat || this.message.lng) {
-          // This happens for TN messages
-          ret = {
-            lat: this.message.lat,
-            lng: this.message.lng,
-          }
-        }
-      }
+function postcodeSelect(pc) {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.location = pc
+}
 
-      return ret
-    },
-    outsideUK() {
-      return (
-        this.position &&
-        (this.position.lng < -16 ||
-          this.position.lat < 49 ||
-          this.position.lng > 4 ||
-          this.position.lat > 64)
-      )
-    },
-    pending() {
-      return this.hasCollection('Pending')
-    },
-    approved() {
-      return this.hasCollection('Approved')
-    },
-    eSubject() {
-      return twem(this.message.subject)
-    },
-    eBody() {
-      return twem(this.message.textbody)
-    },
-    membership() {
-      let ret = null
+function startEdit() {
+  editmessage.value = props.message
+  editing.value = true
+  miscStore.modtoolsediting = true
+  editmessage.value.groups.forEach((grp) => {
+    editgroup.value = grp.groupid
+  })
+}
 
-      if (this.groupid) {
-        ret =
-          this.message.fromuser &&
-          this.message.fromuser.memberof &&
-          this.message.fromuser.memberof.find((g) => g.id === this.groupid)
-      }
+async function save() {
+  saving.value = true
 
-      return ret
-    },
-    modconfig() {
-      let ret = null
-      let configid = null
+  const attids = []
 
-      this.myModGroups.forEach((group) => {
-        if (group.id === this.groupid) {
-          configid = group.mysettings?.configid
-        }
-      })
+  for (const att of attachments.value) {
+    attids.push(att.id)
+  }
 
-      const configs = this.modconfigStore.configs
-      ret = configs.find((config) => config.id === configid)
-      if (!ret) {
-        ret = configs.find((config) => config.default)
-      }
+  if (editmessage.value.item && editmessage.value.location) {
+    // Well-structured message
+    await messageStore.patch({
+      id: editmessage.value.id,
+      msgtype: editmessage.value.type,
+      item: editmessage.value.item.name,
+      location: editmessage.value.location.name,
+      attachments: attids,
+      textbody: editmessage.value.textbody,
+    })
+  } else {
+    // Not
+    await messageStore.patch({
+      id: editmessage.value.id,
+      msgtype: editmessage.value.type,
+      subject: editmessage.value.subject,
+      attachments: attids,
+      textbody: editmessage.value.textbody,
+    })
+  }
 
-      return ret
-    },
-    subjectClass() {
-      let ret = 'text-success'
+  let alreadyon = false
 
-      if (this.modconfig && this.modconfig.coloursubj) {
-        ret =
-          this.message.subject?.match &&
-          this.message.subject.match(this.modconfig.subjreg)
-            ? 'text-success'
-            : 'text-danger'
-      }
+  editmessage.value.groups.forEach((g) => {
+    if (g.groupid === editgroup.value) {
+      alreadyon = true
+    }
+  })
 
-      return ret
-    },
-    oldSubject() {
-      if (!this.editreview || !this.message || !this.message.edits) {
-        return null
-      }
+  if (!alreadyon) {
+    await messageStore.move({
+      id: editmessage.value.id,
+      groupid: editgroup.value,
+    })
+  }
 
-      // Edits are in descending time order.
-      let oldest = null
+  saving.value = false
+  editing.value = false
+  miscStore.modtoolsediting = false
+}
 
-      this.message.edits.forEach((edit) => {
-        if (edit.reviewrequired && edit.oldsubject) {
-          oldest = edit.oldsubject
-        }
-      })
+function settingsChange(param, val) {
+  const params = {
+    userid: props.message.fromuser.id,
+    groupid: groupid.value,
+  }
+  params[param] = val
+  memberStore.update(params)
+}
 
-      return oldest
-    },
-    newSubject() {
-      if (!this.editreview || !this.message || !this.message.edits) {
-        return null
-      }
+async function toggleMail() {
+  showMailSettings.value = !showMailSettings.value
 
-      // Find the newest and oldest texts; intermediates are just confusing.
-      // Edits are in descending time order.
-      let newest = null
+  if (showMailSettings.value) {
+    // Get the user into the store for SettingsGroup.
+    await userStore.fetch(props.message.fromuser.id)
+  }
+}
 
-      this.message.edits.forEach((edit) => {
-        if (edit.reviewrequired) {
-          if (edit.newsubject && !newest) {
-            newest = edit.newsubject
-          }
-        }
-      })
+function canonSubj(message) {
+  let subj = message.subject
+  if (!subj) subj = ''
+  const grp = historyGroups[message.groupid]
 
-      return newest
-    },
-    oldBody() {
-      if (!this.editreview || !this.message || !this.message.edits) {
-        return null
-      }
+  if (grp && grp.settings && grp.settings.keywords) {
+    // TODO: MT group does not have settings
+    const keyword =
+      message.type === 'Offer'
+        ? grp.settings.keywords.offer
+        : grp.settings.keywords.wanted
+    if (keyword) {
+      subj = subj.replace(keyword, message.type.toUpperCase())
+    }
+  }
 
-      // Edits are in descending time order.
-      let oldest = null
+  if (subj.toLocaleLowerCase) {
+    subj = subj.toLocaleLowerCase()
 
-      this.message.edits.forEach((edit) => {
-        if (edit.reviewrequired && edit.oldtext) {
-          oldest = edit.oldtext
-        }
-      })
+    // Remove any group tag
+    subj = subj.replace(/^\[.*?\](.*)/, '$1')
 
-      return oldest
-    },
-    newBody() {
-      if (!this.editreview || !this.message || !this.message.edits) {
-        return null
-      }
+    // Remove duplicate spaces
+    subj = subj.replace(/\s+/g, ' ')
 
-      // Find the newest and oldest texts; intermediates are just confusing.
-      // Edits are in descending time order.
-      let newest = this.message.textbody
+    subj = subj.trim()
 
-      this.message.edits.forEach((edit) => {
-        if (edit.reviewrequired) {
-          if (edit.newtext && !newest) {
-            newest = edit.newtext
-          }
-        }
-      })
+    const matches = SUBJECT_REGEX.exec(subj)
+    if (matches?.length > 2) {
+      // Well-formed - remove the location.
+      subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
+    }
+  }
 
-      return newest
-    },
-    duplicateAge() {
-      let ret = 31
-      let check = false
+  return subj
+}
 
-      this.message.groups.forEach((g) => {
-        const group = this.myModGroup(g.groupid)
+function checkHistory(duplicateCheck) {
+  const ret = []
+  const subj = canonSubj(props.message)
+  const dupids = []
+  const crossids = []
 
-        // console.log("duplicateAge group", group?.settings?.duplicates)
-        if (
-          group &&
-          group.settings &&
-          group.settings.duplicates && // TODO: MT group does not have settings
-          group.settings.duplicates.check
-        ) {
-          check = true
-          const msgtype = this.message.type.toLowerCase()
-          ret = Math.min(ret, group.settings.duplicates[msgtype])
-        }
-      })
-
-      // console.log('checkHistory duplicateAge',check,ret)
-      return check ? ret : null
-    },
-    crossposts() {
-      return this.checkHistory(false)
-    },
-    duplicates() {
-      return this.checkHistory(true)
-    },
-    memberGroupIds() {
-      return this.message &&
-        this.message.fromuser &&
-        this.message.fromuser.memberof
-        ? this.message.fromuser.memberof.map((g) => g.id)
-        : []
-    },
-  },
-  watch: {
-    summary(newVal) {
-      if (newVal && this.expanded) {
-        this.expanded = false
-      } else if (!newVal && !this.expanded) {
-        this.expanded = true
-      }
-    },
-    nextAfterRemoved(newVal, oldVal) {
-      if (newVal === this.message.id) {
-        // This message is the one after one which has just been removed.  Make sure the top is visible.
-        this.$refs.bottom.scrollIntoView()
-        this.$refs.top.scrollIntoView(true)
-      }
-    },
-    messageHistory: {
-      immediate: true,
-      handler: async function (newVal) {
-        // We want to ensure that we have the groups for any message history, so that we can use them in canonSubj.
-        // console.log('ModMessage: watch messageHistory',newVal)
-        const self = this
-        await newVal.forEach(async function (message) {
-          if (!self.historyGroups[message.groupid]) {
-            self.historyGroups[message.groupid] =
-              await self.modGroupStore.fetchIfNeedBeMT(message.groupid)
-          }
-        })
-      },
-    },
-  },
-  mounted() {
-    this.expanded = !this.summary
-    this.attachments = this.message.attachments
-    this.findHomeGroup()
-  },
-  beforeUnmount() {
-    this.$emit('destroy', this.message.id, this.next)
-  },
-  methods: {
-    updateComments() {
-      // eslint-disable-next-line vue/no-mutating-props
-      this.message.fromuser = this.userStore.byId(this.message.fromuser.id)
-    },
-    imageAdded(id) {
-      let ret = false
-
-      if (this.editreview && this.message && this.message.edits) {
-        this.message.edits.forEach((edit) => {
-          const n = edit.newimages ? JSON.parse(edit.newimages) : []
-          const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
-          if (n.includes(id) && !o.includes(id)) {
-            ret = true
-          }
-        })
-      }
-
-      return ret
-    },
-    imageRemoved(id) {
-      let ret = false
-
-      if (this.editreview && this.message && this.message.edits) {
-        this.message.edits.forEach((edit) => {
-          const n = edit.newimages ? JSON.parse(edit.newimages) : []
-          const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
-          if (!n.includes(id) && o.includes(id)) {
-            ret = true
-          }
-        })
-      }
-
-      return ret
-    },
-    hasCollection(coll) {
-      let ret = false
-
-      if (this.message.groups) {
-        this.message.groups.forEach((group) => {
-          if (group.collection === coll) {
-            ret = true
-          }
-        })
-      }
-
-      return ret
-    },
-    postcodeSelect(pc) {
-      // eslint-disable-next-line vue/no-mutating-props
-      this.message.location = pc
-    },
-    startEdit() {
-      this.editmessage = this.message
-      this.editing = true
-      this.miscStore.modtoolsediting = true
-      this.editmessage.groups.forEach((group) => {
-        this.editgroup = group.groupid
-      })
-    },
-    async save() {
-      this.saving = true
-
-      const attids = []
-
-      for (const att of this.attachments) {
-        attids.push(att.id)
-      }
-
-      if (this.editmessage.item && this.editmessage.location) {
-        // Well-structured message
-        await this.messageStore.patch({
-          id: this.editmessage.id,
-          msgtype: this.editmessage.type,
-          item: this.editmessage.item.name,
-          location: this.editmessage.location.name,
-          attachments: attids,
-          textbody: this.editmessage.textbody,
-        })
-      } else {
-        // Not
-        await this.messageStore.patch({
-          id: this.editmessage.id,
-          msgtype: this.editmessage.type,
-          subject: this.editmessage.subject,
-          attachments: attids,
-          textbody: this.editmessage.textbody,
-        })
-      }
-
-      let alreadyon = false
-
-      this.editmessage.groups.forEach((g) => {
-        if (g.groupid === this.editgroup) {
-          alreadyon = true
-        }
-      })
-
-      if (!alreadyon) {
-        await this.messageStore.move({
-          id: this.editmessage.id,
-          groupid: this.editgroup,
-        })
-      }
-
-      this.saving = false
-      this.editing = false
-      this.miscStore.modtoolsediting = false
-    },
-    settingsChange(param, val) {
-      const params = {
-        userid: this.message.fromuser.id,
-        groupid: this.groupid,
-      }
-      params[param] = val
-      this.memberStore.update(params)
-    },
-    update(e) {
-      console.log('update', e)
-    },
-    async toggleMail() {
-      this.showMailSettings = !this.showMailSettings
-
-      if (this.showMailSettings) {
-        // Get the user into the store for SettingsGroup.
-        await this.userStore.fetch(this.message.fromuser.id)
-      }
-    },
-    canonSubj(message) {
-      let subj = message.subject
-      if (!subj) subj = ''
-      const group = this.historyGroups[message.groupid]
-
-      if (group && group.settings && group.settings.keywords) {
-        // TODO: MT group does not have settings
-        const keyword =
-          message.type === 'Offer'
-            ? group.settings.keywords.offer
-            : group.settings.keywords.wanted
-        if (keyword) {
-          subj = subj.replace(keyword, message.type.toUpperCase())
-        }
-      }
-
-      if (subj.toLocaleLowerCase) {
-        subj = subj.toLocaleLowerCase()
-
-        // Remove any group tag
-        subj = subj.replace(/^\[.*?\](.*)/, '$1')
-
-        // Remove duplicate spaces
-        subj = subj.replace(/\s+/g, ' ')
-
-        subj = subj.trim()
-
-        const matches = SUBJECT_REGEX.exec(subj)
-        if (matches?.length > 2) {
-          // Well-formed - remove the location.
-          subj = matches[1] + ': ' + matches[2].toLowerCase().trim()
-        }
-      }
-
-      return subj
-    },
-    checkHistory(duplicateCheck) {
-      const ret = []
-      const subj = this.canonSubj(this.message)
-      const dupids = []
-      const crossids = []
-
+  if (
+    props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.messagehistory
+  ) {
+    props.message.fromuser.messagehistory.forEach((message) => {
       if (
-        this.message &&
-        this.message.fromuser &&
-        this.message.fromuser.messagehistory
+        message.id !== props.message.id &&
+        duplicateAge.value &&
+        message.daysago <= duplicateAge.value
       ) {
-        this.message.fromuser.messagehistory.forEach((message) => {
-          if (
-            message.id !== this.message.id &&
-            this.duplicateAge &&
-            message.daysago <= this.duplicateAge
-          ) {
-            // if( duplicateCheck) console.log('checkHistory check',message)
-            if (this.canonSubj(message) === subj) {
-              // No point displaying any group tag in the duplicate.
-              message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
+        // if( duplicateCheck) console.log('checkHistory check',message)
+        if (canonSubj(message) === subj) {
+          // No point displaying any group tag in the duplicate.
+          message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
 
-              // Check whether there are groups in common.
-              const groupsInCommon = this.message.groups
-                .map((g) => g.groupid)
-                .filter((g) => g === message.groupid).length
+          // Check whether there are groups in common.
+          const groupsInCommon = props.message.groups
+            .map((g) => g.groupid)
+            .filter((g) => g === message.groupid).length
 
-              const key = message.id + '-' + message.arrival
+          const key = message.id + '-' + message.arrival
 
-              if (duplicateCheck && groupsInCommon) {
-                // Same group - so this is a duplicate
-                if (!dupids[key]) {
-                  dupids[key] = true
-                  ret.push(message)
-                }
-              } else if (!duplicateCheck && !groupsInCommon) {
-                // Different group - so this is a crosspost.
-                if (!crossids[key]) {
-                  crossids[key] = true
-                  ret.push(message)
-                }
-              }
+          if (duplicateCheck && groupsInCommon) {
+            // Same group - so this is a duplicate
+            if (!dupids[key]) {
+              dupids[key] = true
+              ret.push(message)
+            }
+          } else if (!duplicateCheck && !groupsInCommon) {
+            // Different group - so this is a crosspost.
+            if (!crossids[key]) {
+              crossids[key] = true
+              ret.push(message)
             }
           }
-        })
-      }
-      // if( duplicateCheck) console.log('checkHistory duplicateCheck',ret)
-      return ret
-    },
-    photoAdd() {
-      // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
-      // init callback below.
-      this.uploading = true
-    },
-    async findHomeGroup() {
-      if (this.message && this.message.lat && this.message.lng) {
-        const loc = await this.locationStore.fetch({
-          lat: this.message.lat,
-          lng: this.message.lng,
-        })
-
-        if (loc && loc.groupsnear && loc.groupsnear.length) {
-          // The group might not be on TN.
-          this.homegroup = loc.groupsnear[0].namedisplay
-          this.homegroupontn = loc.groupsnear[0].ontn
         }
       }
-    },
-    cancelEdit() {
-      this.editing = false
-      this.miscStore.modtoolsediting = false
+    })
+  }
+  // if( duplicateCheck) console.log('checkHistory duplicateCheck',ret)
+  return ret
+}
 
-      // Fetch the message again to revert any changes.
-      this.messageStore.fetch(this.message.id)
-    },
-    async backToPending(callback) {
-      await this.messageStore.backToPending(this.message.id)
-      callback()
-    },
-    spamReport() {
-      this.showSpamModal = true
-      this.$refs.spamConfirm?.show()
-    },
-  },
+function photoAdd() {
+  // Flag that we're uploading.  This will trigger the render of the filepond instance and subsequently the
+  // init callback below.
+  uploading.value = true
+}
+
+async function findHomeGroup() {
+  if (props.message && props.message.lat && props.message.lng) {
+    const loc = await locationStore.fetch({
+      lat: props.message.lat,
+      lng: props.message.lng,
+    })
+
+    if (loc && loc.groupsnear && loc.groupsnear.length) {
+      // The group might not be on TN.
+      homegroup.value = loc.groupsnear[0].namedisplay
+      homegroupontn.value = loc.groupsnear[0].ontn
+    }
+  }
+}
+
+function cancelEdit() {
+  editing.value = false
+  miscStore.modtoolsediting = false
+
+  // Fetch the message again to revert any changes.
+  messageStore.fetch(props.message.id)
+}
+
+async function backToPending(callback) {
+  await messageStore.backToPending(props.message.id)
+  callback()
+}
+
+function spamReport() {
+  showSpamModal.value = true
+  spamConfirm.value?.show()
 }
 </script>
 
