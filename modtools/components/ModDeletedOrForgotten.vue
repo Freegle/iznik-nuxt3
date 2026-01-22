@@ -25,18 +25,11 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
-import NoticeMessage from '~/components/NoticeMessage'
-
-export default {
-  components: {
-    NoticeMessage,
+<script setup>
+defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
-}
+})
 </script>

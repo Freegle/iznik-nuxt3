@@ -7,31 +7,28 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { diffChars } from 'diff'
 
-export default {
-  props: {
-    old: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    new: {
-      type: String,
-      required: false,
-      default: '',
-    },
+const props = defineProps({
+  old: {
+    type: String,
+    required: false,
+    default: '',
   },
-  computed: {
-    diff() {
-      if (!this.old || !this.new) {
-        return null
-      }
+  new: {
+    type: String,
+    required: false,
+    default: '',
+  },
+})
 
-      const ret = diffChars(this.old, this.new)
-      return ret
-    },
-  },
-}
+const diff = computed(() => {
+  if (!props.old || !props.new) {
+    return null
+  }
+
+  return diffChars(props.old, props.new)
+})
 </script>

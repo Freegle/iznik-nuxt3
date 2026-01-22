@@ -20,14 +20,12 @@
   </span>
 </template>
 
-<script>
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+<script setup>
+defineProps({
+  user: {
+    type: Object,
+    required: false,
+    default: null,
   },
-}
+})
 </script>
