@@ -19,28 +19,21 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    itemIds: {
-      type: Array,
-      required: true,
-    },
+defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { modal, hide } = useOurModal()
-    return { modal, hide }
+  itemIds: {
+    type: Array,
+    required: true,
   },
-  methods: {
-    show() {
-      this.modal.show()
-    },
-  },
-}
+})
+
+const { modal, hide, show } = useOurModal()
+
+defineExpose({ show, hide })
 </script>

@@ -8,13 +8,11 @@
     </span>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    shortlink: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineProps({
+  shortlink: {
+    type: Object,
+    required: true,
   },
-}
+})
 </script>

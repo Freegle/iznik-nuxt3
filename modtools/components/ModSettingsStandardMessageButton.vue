@@ -11,26 +11,21 @@
     />
   </div>
 </template>
-<script>
-// import { icon, variant } from '~/composables/useStdMsgs'
+<script setup>
+import { ref } from 'vue'
 
-export default {
-  props: {
-    stdmsg: {
-      type: Object,
-      required: true,
-    },
+defineProps({
+  stdmsg: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      showModal: false,
-    }
-  },
-  methods: {
-    click() {
-      this.showModal = true
-      this.$refs.stdMsgModal?.show()
-    },
-  },
+})
+
+const showModal = ref(false)
+const stdMsgModal = ref(null)
+
+function click() {
+  showModal.value = true
+  stdMsgModal.value?.show()
 }
 </script>
