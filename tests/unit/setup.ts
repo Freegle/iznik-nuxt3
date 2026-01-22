@@ -2,6 +2,19 @@ import { vi, beforeEach, afterEach } from 'vitest'
 import { config } from '@vue/test-utils'
 
 // ============================================
+// GLOBAL MOCKS (provided to template context)
+// ============================================
+// These functions are auto-imported by Nuxt but need to be provided as mocks in tests
+config.global.mocks = {
+  // Time formatting functions (from composables/useTimeFormat.js)
+  datetimeshort: (val: string) => `formatted:${val}`,
+  timeadapt: (val: string) => `adapted:${val}`,
+  timeago: (val: string) => `ago:${val}`,
+  dateonly: (val: string) => `dateonly:${val}`,
+  dateshort: (val: string) => `dateshort:${val}`,
+}
+
+// ============================================
 // GLOBAL STUBS (applied to all tests)
 // ============================================
 config.global.stubs = {

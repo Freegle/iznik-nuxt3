@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+// ref removed - not currently used
 import ModChatNoteModal from '~/modtools/components/ModChatNoteModal.vue'
 
 const mockHide = vi.fn()
@@ -144,7 +144,7 @@ describe('ModChatNoteModal', () => {
       expect(mockChatStore.byChatId).toHaveBeenCalledWith(123)
     })
 
-    it('onHide emits hidden event', async () => {
+    it('onHide emits hidden event', () => {
       const wrapper = mountComponent()
       wrapper.vm.onHide()
       expect(wrapper.emitted('hidden')).toBeTruthy()

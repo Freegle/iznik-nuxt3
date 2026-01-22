@@ -51,10 +51,24 @@ for (const composable of modtoolsOnlyComposables) {
 export default defineConfig({
   plugins: [vue()],
   resolve: {
+    // Allow imports without .vue extension
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {
       // Nuxt virtual modules
       '#app': path.join(rootDir, 'tests/unit/mocks/nuxt-app.js'),
       '#imports': path.join(rootDir, 'tests/unit/mocks/nuxt-app.js'),
+      // External module stubs for testing
+      'vue-read-more3/src/ReadMoreComponent': path.join(
+        rootDir,
+        'tests/unit/mocks/ReadMoreComponent.js'
+      ),
+      // Component stubs for testing
+      '~/components/ProfileImage': path.join(
+        rootDir,
+        'tests/unit/mocks/ProfileImage.js'
+      ),
+      // External library mocks
+      papaparse: path.join(rootDir, 'tests/unit/mocks/papaparse.js'),
       // Specific store/composable aliases must come before generic ~ alias
       ...storeAliases,
       ...composableAliases,

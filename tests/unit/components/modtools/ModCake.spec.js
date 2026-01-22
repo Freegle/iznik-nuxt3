@@ -85,7 +85,7 @@ describe('ModCake', () => {
       expect(wrapper.find('.toggle').exists()).toBe(true)
     })
 
-    it('shows dietary requirements section when modcake is true', async () => {
+    it('shows dietary requirements section when modcake is true', () => {
       mockMe.value.settings.modcake = true
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('dietary requirements')

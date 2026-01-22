@@ -26,95 +26,81 @@
     </infinite-loading>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useMiscStore } from '~/stores/misc'
 import { useVolunteeringStore } from '@/stores/volunteering'
 
-export default {
-  setup() {
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-    const volunteeringStore = useVolunteeringStore()
-    return {
-      authStore,
-      miscStore,
-      volunteeringStore,
-    }
-  },
-  data: function () {
-    return {
-      distance: 1000,
-      limit: 2,
-      show: 0,
-      bump: 0,
-      busy: false,
-    }
-  },
-  computed: {
-    volunteerings() {
-      return Object.values(this.volunteeringStore.list)
-    },
-    volwork() {
-      // Count for the type of work we're interested in.
-      console.log(
-        'TODO volunteering volwork',
-        this.authStore.work?.pendingvolunteering
-      )
-      return this.authStore.work ? this.authStore.work.pendingvolunteering : 0
-    },
-  },
-  watch: {
-    volwork(newVal, oldVal) {
-      // TODO: The page is always going to be visible so why might we not be?
-      console.log('volunteering watch volwork', newVal, oldVal)
-      if (newVal && oldVal && newVal > oldVal) {
-        // There's new stuff to do.  Reload.
-        this.volunteeringStore.clear()
-        this.bump++
-      } else {
-        // const visible = this.miscStore.get('visible')
-        // if (!visible) {
-        //  this.volunteeringStore.clear()
-        // }
-      }
-    },
-  },
-  mounted() {
-    // We don't want to pick up any approved volunteerings.
-    this.volunteeringStore.clear()
-  },
-  methods: {
-    loadMore: async function ($state) {
-      this.busy = true
+const authStore = useAuthStore()
+const volunteeringStore = useVolunteeringStore()
 
-      if (this.show < this.volunteerings.length) {
-        // This means that we will gradually add the volunteerings that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        this.show++
-        $state.loaded()
-      } else {
-        const currentCount = this.volunteerings.length
-        this.busy = false
+const distance = ref(1000)
+const limit = ref(2)
+const show = ref(0)
+const bump = ref(0)
+const busy = ref(false)
 
-        await this.volunteeringStore.fetchMT({
-          // context: this.context,
-          limit: this.limit,
-          pending: true,
-        })
-        // console.log('volunteering loadMore got', currentCount, this.volunteerings.length)
-        if (currentCount === this.volunteerings.length) {
-          this.complete = true
-          $state.complete()
-        } else {
-          $state.loaded()
-          this.show++
-        }
-        this.busy = false
-      }
-    },
-  },
+const volunteerings = computed(() => {
+  return Object.values(volunteeringStore.list)
+})
+
+const volwork = computed(() => {
+  console.log('TODO volunteering volwork', authStore.work?.pendingvolunteering)
+  return authStore.work ? authStore.work.pendingvolunteering : 0
+})
+
+watch(volwork, (newVal, oldVal) => {
+  console.log('volunteering watch volwork', newVal, oldVal)
+  if (newVal && oldVal && newVal > oldVal) {
+    // There's new stuff to do. Reload.
+    volunteeringStore.clear()
+    bump.value++
+  }
+})
+
+onMounted(() => {
+  // We don't want to pick up any approved volunteerings.
+  volunteeringStore.clear()
+})
+
+async function loadMore($state) {
+  busy.value = true
+
+  if (show.value < volunteerings.value.length) {
+    // This means that we will gradually add the volunteerings that we have fetched from the server into the DOM.
+    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+    show.value++
+    $state.loaded()
+  } else {
+    const currentCount = volunteerings.value.length
+    busy.value = false
+
+    await volunteeringStore.fetchMT({
+      limit: limit.value,
+      pending: true,
+    })
+
+    if (currentCount === volunteerings.value.length) {
+      $state.complete()
+    } else {
+      $state.loaded()
+      show.value++
+    }
+    busy.value = false
+  }
 }
+
+// Expose for template and tests
+defineExpose({
+  volunteerings,
+  volwork,
+  busy,
+  distance,
+  limit,
+  show,
+  bump,
+  loadMore,
+})
 </script>
 <style scoped lang="scss">
 //@import 'color-vars';

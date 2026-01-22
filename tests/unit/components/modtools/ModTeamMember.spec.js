@@ -87,7 +87,7 @@ describe('ModTeamMember', () => {
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
 
-    it('shows remove button when supportOrAdmin is true', async () => {
+    it('shows remove button when supportOrAdmin is true', () => {
       mockSupportOrAdmin.value = true
       const wrapper = mountComponent()
       expect(wrapper.find('button').exists()).toBe(true)

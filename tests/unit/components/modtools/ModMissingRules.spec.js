@@ -287,23 +287,23 @@ describe('ModMissingRules', () => {
       mockMyGroups.value = [{ id: 1 }, { id: 2 }]
       mountComponent()
       // Wait for mount hooks to run
-      await new Promise((r) => setTimeout(r, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
       expect(mockModGroupStore.fetchIfNeedBeMT).toHaveBeenCalledWith(1)
       expect(mockModGroupStore.fetchIfNeedBeMT).toHaveBeenCalledWith(2)
     })
 
     it('handles null myGroups in onMounted gracefully', async () => {
       mockMyGroups.value = null
-      const wrapper = mountComponent()
+      mountComponent()
       // Should not throw
-      await new Promise((r) => setTimeout(r, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
       expect(mockModGroupStore.fetchIfNeedBeMT).not.toHaveBeenCalled()
     })
 
     it('sets summary to false when expanded prop is true', async () => {
       mockMyGroups.value = []
       const wrapper = mountComponent({ expanded: true })
-      await new Promise((r) => setTimeout(r, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
       expect(wrapper.vm.summary).toBe(false)
     })
   })

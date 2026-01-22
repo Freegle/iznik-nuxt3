@@ -177,7 +177,7 @@ describe('ModChatReviewUser', () => {
   })
 
   describe('methods', () => {
-    it('addAComment sets showAddCommentModal to true', async () => {
+    it('addAComment sets showAddCommentModal to true', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.showAddCommentModal).toBe(false)
       wrapper.vm.addAComment()

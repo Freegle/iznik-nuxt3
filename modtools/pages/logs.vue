@@ -56,56 +56,49 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, watch, onMounted } from 'vue'
 import { useLogsStore } from '~/stores/logs'
 import { useModGroupStore } from '~/stores/modgroup'
 
-export default {
-  setup() {
-    const logsStore = useLogsStore()
-    return { logsStore }
-  },
-  data: function () {
-    return {
-      bump: 0,
-      groupid: null,
-      type: 'messages',
-      term: null,
-      busy: false,
-      activeTab: 0,
-    }
-  },
-  watch: {
-    groupid() {
-      this.clear(this.type)
-    },
-  },
-  mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
-    this.clear(this.type)
-  },
-  methods: {
-    clear(type, term) {
-      this.bump = Date.now()
-      this.type = type
+const logsStore = useLogsStore()
 
-      if (term) {
-        this.term = null
-      }
+const bump = ref(0)
+const groupid = ref(null)
+const type = ref('messages')
+const term = ref(null)
+const busy = ref(false)
+const activeTab = ref(0)
 
-      this.logsStore.setParams({
-        type,
-        search: this.term ? this.term.trim() : null,
-      })
+function clear(newType, clearTerm) {
+  bump.value = Date.now()
+  type.value = newType
 
-      this.logsStore.clear()
-    },
-    search() {
-      this.clear(this.type)
-    },
-  },
+  if (clearTerm) {
+    term.value = null
+  }
+
+  logsStore.setParams({
+    type: newType,
+    search: term.value ? term.value.trim() : null,
+  })
+
+  logsStore.clear()
 }
+
+function search() {
+  clear(type.value)
+}
+
+watch(groupid, () => {
+  clear(type.value)
+})
+
+onMounted(() => {
+  const modGroupStore = useModGroupStore()
+  modGroupStore.getModGroups()
+  clear(type.value)
+})
 </script>
 <style scoped>
 .max {

@@ -96,40 +96,40 @@ describe('ModDashboardFreeglersPosting', () => {
   })
 
   describe('rendering', () => {
-    it('shows loading state when loading', async () => {
+    it('shows loading state when loading', () => {
       mockLoading.value = true
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Loading')
     })
 
-    it('hides loading state when not loading', async () => {
+    it('hides loading state when not loading', () => {
       mockLoading.value = false
       mockUsersPosting.value = mockUsers
       const wrapper = mountComponent()
       expect(wrapper.text()).not.toContain('Loading')
     })
 
-    it('renders user list when data available', async () => {
+    it('renders user list when data available', () => {
       mockUsersPosting.value = mockUsers
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('User One')
       expect(wrapper.text()).toContain('User Two')
     })
 
-    it('renders user ids', async () => {
+    it('renders user ids', () => {
       mockUsersPosting.value = mockUsers
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('1')
       expect(wrapper.text()).toContain('2')
     })
 
-    it('renders profile images for each user', async () => {
+    it('renders profile images for each user', () => {
       mockUsersPosting.value = mockUsers
       const wrapper = mountComponent()
       expect(wrapper.findAll('.profile-image')).toHaveLength(2)
     })
 
-    it('does not render when no data and not loading', async () => {
+    it('does not render when no data and not loading', () => {
       mockLoading.value = false
       mockUsersPosting.value = []
       const wrapper = mountComponent()

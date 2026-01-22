@@ -65,7 +65,7 @@ describe('ModChatViewButton', () => {
   })
 
   describe('methods', () => {
-    it('view sets showModal to true', async () => {
+    it('view sets showModal to true', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.showModal).toBe(false)
       wrapper.vm.view()
