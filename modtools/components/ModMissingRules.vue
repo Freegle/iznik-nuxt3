@@ -56,112 +56,104 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    expanded: {
-      type: Boolean,
-      default: false,
-    },
+const props = defineProps({
+  expanded: {
+    type: Boolean,
+    default: false,
   },
-  setup() {
-    const modGroupStore = useModGroupStore()
-    const { myGroups } = useMe()
-    return {
-      modGroupStore,
-      myGroups,
-    }
-  },
-  data: function () {
-    return {
-      summary: true,
-    }
-  },
-  computed: {
-    groups() {
-      const ret = Object.values(this.modGroupStore.list)
-      return ret
-    },
-    invalid() {
-      const ret = []
-      const mygroups = this.myGroups // myGroups has correct role
+})
 
-      for (const group of this.groups) {
-        const mygroup = mygroups.find((g) => g.id === group.id)
-        if (
-          group.type === 'Freegle' &&
-          mygroup?.role === 'Owner' &&
-          !group.rules &&
-          group.publish
-        ) {
-          ret.push(group)
-        }
+const modGroupStore = useModGroupStore()
+const { myGroups } = useMe()
+
+const summary = ref(true)
+
+const groups = computed(() => {
+  const ret = Object.values(modGroupStore.list)
+  return ret
+})
+
+const invalid = computed(() => {
+  const ret = []
+  const mygroups = myGroups.value // myGroups has correct role
+
+  for (const group of groups.value) {
+    const mygroup = mygroups.find((g) => g.id === group.id)
+    if (
+      group.type === 'Freegle' &&
+      mygroup?.role === 'Owner' &&
+      !group.rules &&
+      group.publish
+    ) {
+      ret.push(group)
+    }
+  }
+
+  return ret
+})
+
+const newRulesMissing = computed(() => {
+  const ret = []
+  const mygroups = myGroups.value // myGroups has correct role
+
+  for (const group of groups.value) {
+    const mygroup = mygroups.find((g) => g.id === group.id)
+    if (
+      group.type === 'Freegle' &&
+      mygroup?.role === 'Owner' &&
+      group.rules &&
+      group.publish
+    ) {
+      const rules = group.rules ? JSON.parse(group.rules) : []
+
+      // Check if the rules object is missing any values from ['A', 'B', 'C'] or if the values are null
+      const newRules = [
+        'limitgroups',
+        'wastecarrier',
+        'carboot',
+        'chineselanterns',
+        'carseats',
+        'pondlife',
+        'copyright',
+        'porn',
+      ]
+      const missingRules = []
+      for (const newrule of newRules) {
+        const rule = rules[newrule]
+        if (!(newrule in rules) || typeof rule !== 'boolean')
+          missingRules.push(newrule)
       }
-
-      return ret
-    },
-    newRulesMissing() {
-      const ret = []
-      const mygroups = this.myGroups // myGroups has correct role
-
-      for (const group of this.groups) {
-        const mygroup = mygroups.find((g) => g.id === group.id)
-        if (
-          group.type === 'Freegle' &&
-          mygroup?.role === 'Owner' &&
-          group.rules &&
-          group.publish
-        ) {
-          const rules = group.rules ? JSON.parse(group.rules) : []
-
-          // Check if the rules object is missing any values from ['A', 'B', 'C'] or if the values are null
-          const newRules = [
-            'limitgroups',
-            'wastecarrier',
-            'carboot',
-            'chineselanterns',
-            'carseats',
-            'pondlife',
-            'copyright',
-            'porn',
-          ]
-          const missingRules = []
-          for (const newrule of newRules) {
-            const rule = rules[newrule]
-            if (!(newrule in rules) || typeof rule !== 'boolean')
-              missingRules.push(newrule)
-          }
-          if (missingRules.length > 0) {
-            // Take up to 3 missing rules, add an ellipsis if more, convert to a string
-            // and push to the ret array
-            group.missing =
-              missingRules.length > 3
-                ? missingRules.slice(0, 3).join(',') + '...'
-                : missingRules.slice(0, 3).join(',')
-            ret.push(group)
-          }
-        }
+      if (missingRules.length > 0) {
+        // Take up to 3 missing rules, add an ellipsis if more, convert to a string
+        // and push to the ret array
+        group.missing =
+          missingRules.length > 3
+            ? missingRules.slice(0, 3).join(',') + '...'
+            : missingRules.slice(0, 3).join(',')
+        ret.push(group)
       }
-
-      return ret
-    },
-  },
-  async mounted() {
-    for (const g of this.myGroups) {
-      await this.modGroupStore.fetchIfNeedBeMT(g.id)
     }
+  }
 
-    if (this.expanded) {
-      this.summary = false
-    }
-  },
-  methods: {
-    expand() {
-      this.summary = false
-    },
-  },
+  return ret
+})
+
+onMounted(async () => {
+  for (const g of myGroups.value) {
+    await modGroupStore.fetchIfNeedBeMT(g.id)
+  }
+
+  if (props.expanded) {
+    summary.value = false
+  }
+})
+
+function expand() {
+  summary.value = false
 }
 </script>

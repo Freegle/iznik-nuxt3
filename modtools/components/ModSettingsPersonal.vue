@@ -131,117 +131,110 @@
     <b-button variant="primary" to="/unsubscribe"> Unsubscribe </b-button>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '@/stores/misc'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const authStore = useAuthStore()
-    const miscStore = useMiscStore()
-    const { me } = useMe()
+const authStore = useAuthStore()
+const miscStore = useMiscStore()
+const { me } = useMe()
 
-    return {
-      authStore,
-      miscStore,
-      me,
-    }
-  },
-  data: function () {
-    return {
-      showEmailConfirmModal: false,
-      modNotifOptions: [
-        { text: 'Daily', value: 24 },
-        { text: 'After 12 hours', value: 12 },
-        { text: 'After 4 hours', value: 4 },
-        { text: 'After 2 hours', value: 2 },
-        { text: 'After 1 hour', value: 1 },
-        { text: 'Immediately', value: 0 },
-        { text: 'Never', value: -1 },
-      ],
-    }
-  },
-  computed: {
-    showme: {
-      get() {
-        return Object.keys(this.me.settings).includes('showmod')
-          ? Boolean(this.me.settings.showmod)
-          : true
-      },
-      set(newval) {
-        this.saveSetting('showmod', newval)
-      },
-    },
-    modnotifnewsfeed: {
-      get() {
-        return Object.keys(this.me.settings).includes('modnotifnewsfeed')
-          ? Boolean(this.me.settings.modnotifnewsfeed)
-          : true
-      },
-      set(newval) {
-        this.saveSetting('modnotifnewsfeed', newval)
-      },
-    },
-    modnotifs: {
-      get() {
-        return Object.keys(this.me.settings).includes('modnotifs')
-          ? parseInt(this.me.settings.modnotifs)
-          : 4
-      },
-      set(newval) {
-        this.saveSetting('modnotifs', newval)
-      },
-    },
-    backupmodnotifs: {
-      get() {
-        return Object.keys(this.me.settings).includes('backupmodnotifs')
-          ? parseInt(this.me.settings.backupmodnotifs)
-          : 12
-      },
-      set(newval) {
-        this.saveSetting('backupmodnotifs', newval)
-      },
-    },
-    enterAddsNewLine: {
-      get() {
-        return this.miscStore?.get('enternewlinemt')
-      },
-      set(newval) {
-        this.miscStore.set({
-          key: 'enternewlinemt',
-          value: newval,
-        })
-      },
-    },
-  },
-  methods: {
-    async saveName(callback) {
-      await this.authStore.saveAndGet({
-        displayname: this.me.displayname,
-      })
-      callback()
-    },
-    async saveEmail(callback) {
-      if (this.me.email) {
-        const data = await this.authStore.saveEmail({
-          email: this.me.email,
-        })
+const showEmailConfirmModal = ref(false)
 
-        if (data && data.ret === 10) {
-          this.showEmailConfirmModal = true
-        }
-      }
-      callback()
-    },
-    async saveSetting(name, val) {
-      const settings = this.me.settings
-      settings[name] = val
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
+const modNotifOptions = [
+  { text: 'Daily', value: 24 },
+  { text: 'After 12 hours', value: 12 },
+  { text: 'After 4 hours', value: 4 },
+  { text: 'After 2 hours', value: 2 },
+  { text: 'After 1 hour', value: 1 },
+  { text: 'Immediately', value: 0 },
+  { text: 'Never', value: -1 },
+]
+
+const showme = computed({
+  get() {
+    return Object.keys(me.value.settings).includes('showmod')
+      ? Boolean(me.value.settings.showmod)
+      : true
   },
+  set(newval) {
+    saveSetting('showmod', newval)
+  },
+})
+
+const modnotifnewsfeed = computed({
+  get() {
+    return Object.keys(me.value.settings).includes('modnotifnewsfeed')
+      ? Boolean(me.value.settings.modnotifnewsfeed)
+      : true
+  },
+  set(newval) {
+    saveSetting('modnotifnewsfeed', newval)
+  },
+})
+
+const modnotifs = computed({
+  get() {
+    return Object.keys(me.value.settings).includes('modnotifs')
+      ? parseInt(me.value.settings.modnotifs)
+      : 4
+  },
+  set(newval) {
+    saveSetting('modnotifs', newval)
+  },
+})
+
+const backupmodnotifs = computed({
+  get() {
+    return Object.keys(me.value.settings).includes('backupmodnotifs')
+      ? parseInt(me.value.settings.backupmodnotifs)
+      : 12
+  },
+  set(newval) {
+    saveSetting('backupmodnotifs', newval)
+  },
+})
+
+const enterAddsNewLine = computed({
+  get() {
+    return miscStore?.get('enternewlinemt')
+  },
+  set(newval) {
+    miscStore.set({
+      key: 'enternewlinemt',
+      value: newval,
+    })
+  },
+})
+
+async function saveName(callback) {
+  await authStore.saveAndGet({
+    displayname: me.value.displayname,
+  })
+  callback()
+}
+
+async function saveEmail(callback) {
+  if (me.value.email) {
+    const data = await authStore.saveEmail({
+      email: me.value.email,
+    })
+
+    if (data && data.ret === 10) {
+      showEmailConfirmModal.value = true
+    }
+  }
+  callback()
+}
+
+async function saveSetting(name, val) {
+  const settings = me.value.settings
+  settings[name] = val
+  await authStore.saveAndGet({
+    settings,
+  })
 }
 </script>
 <style scoped lang="scss">
