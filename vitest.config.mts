@@ -41,7 +41,13 @@ const modtoolsOnlyComposables = modtoolsComposables.filter(
 const composableAliases = {}
 for (const composable of modtoolsOnlyComposables) {
   const composableName = composable.replace('.js', '')
+  // Support both ~ and @ prefixes for modtools composables
   composableAliases[`~/composables/${composableName}`] = path.join(
+    rootDir,
+    'modtools/composables',
+    composable
+  )
+  composableAliases[`@/composables/${composableName}`] = path.join(
     rootDir,
     'modtools/composables',
     composable
@@ -84,8 +90,18 @@ export default defineConfig({
     testTimeout: 30000,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html'],
-      include: ['components/**/*.vue', 'modtools/components/**/*.vue'],
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      include: [
+        'components/**/*.vue',
+        'modtools/components/**/*.vue',
+        'composables/**/*.js',
+        'modtools/composables/**/*.js',
+        'stores/**/*.js',
+        'modtools/stores/**/*.js',
+        'pages/**/*.vue',
+        'modtools/pages/**/*.vue',
+      ],
     },
   },
 })
