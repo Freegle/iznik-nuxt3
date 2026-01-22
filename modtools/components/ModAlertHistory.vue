@@ -37,29 +37,28 @@
     />
   </b-row>
 </template>
-<script>
-export default {
-  props: {
-    alert: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  alert: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      showDetails: false,
-      showStats: false,
-    }
-  },
-  methods: {
-    details() {
-      this.showDetails = true
-      this.$refs.detailsModal?.show()
-    },
-    stats() {
-      this.showStats = true
-      this.$refs.statsModal?.show()
-    },
-  },
+})
+
+const showDetails = ref(false)
+const showStats = ref(false)
+const detailsModal = ref(null)
+const statsModal = ref(null)
+
+function details() {
+  showDetails.value = true
+  detailsModal.value?.show()
+}
+
+function stats() {
+  showStats.value = true
+  statsModal.value?.show()
 }
 </script>
