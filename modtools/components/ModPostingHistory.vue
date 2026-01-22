@@ -78,87 +78,88 @@
     />
   </span>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
-  },
-  data: function () {
-    return {
-      type: null,
-      modmailsonly: false,
-      showPostingHistoryModal: false,
-      showLogsModal: false,
-    }
-  },
-  computed: {
-    offers() {
-      return this.countType('Offer')
-    },
-    wanteds() {
-      return this.countType('Wanted')
-    },
-    userinfo() {
-      if (this.user.info) {
-        return this.user.info
+})
+
+const userStore = useUserStore()
+
+const history = ref(null)
+const logs = ref(null)
+
+const type = ref(null)
+const modmailsonly = ref(false)
+const showPostingHistoryModal = ref(false)
+const showLogsModal = ref(false)
+
+function countType(typeArg) {
+  let count = 0
+
+  if (props.user && props.user.messagehistory) {
+    props.user.messagehistory.forEach((entry) => {
+      if (entry.type === typeArg) {
+        count++
       }
+    })
+  }
 
-      const user = this.userStore.byId(this.userid)
+  return count
+}
 
-      if (user && user.info) {
-        return user.info
-      }
+const offers = computed(() => {
+  return countType('Offer')
+})
 
-      return null
-    },
-  },
-  mounted() {
-    if (!this.user.info) {
-      // Fetch with info so that we can display more.
-      this.userStore.fetch(this.user.id)
-    }
-  },
-  methods: {
-    countType(type) {
-      let count = 0
+const wanteds = computed(() => {
+  return countType('Wanted')
+})
 
-      if (this.user && this.user.messagehistory) {
-        this.user.messagehistory.forEach((entry) => {
-          if (entry.type === type) {
-            count++
-          }
-        })
-      }
+const userinfo = computed(() => {
+  if (props.user.info) {
+    return props.user.info
+  }
 
-      return count
-    },
-    showHistory(type = null) {
-      this.type = type
-      this.showPostingHistoryModal = true
-      this.$refs.history?.show()
-    },
-    showLogs() {
-      console.log('showLogs')
-      this.modmailsonly = false
+  const user = userStore.byId(props.user.id)
 
-      this.showLogsModal = true
-      this.$refs.logs?.show()
-    },
-    showModmails() {
-      this.modmailsonly = true
+  if (user && user.info) {
+    return user.info
+  }
 
-      this.showLogsModal = true
-      this.$refs.logs?.show()
-    },
-  },
+  return null
+})
+
+onMounted(() => {
+  if (!props.user.info) {
+    // Fetch with info so that we can display more.
+    userStore.fetch(props.user.id)
+  }
+})
+
+function showHistory(typeArg = null) {
+  type.value = typeArg
+  showPostingHistoryModal.value = true
+  history.value?.show()
+}
+
+function showLogs() {
+  console.log('showLogs')
+  modmailsonly.value = false
+
+  showLogsModal.value = true
+  logs.value?.show()
+}
+
+function showModmails() {
+  modmailsonly.value = true
+
+  showLogsModal.value = true
+  logs.value?.show()
 }
 </script>

@@ -59,77 +59,64 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useGroupStore } from '~/stores/group'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const groupStore = useGroupStore()
-    const { modal, hide } = useOurModal()
-    return { groupStore, modal, hide }
+  type: {
+    type: String,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      groupid: null,
-    }
-  },
-  computed: {
-    messages() {
-      let ret = []
+})
 
-      if (this.user && this.user.messagehistory) {
-        ret = this.user.messagehistory.filter((message) => {
-          return !this.type || this.type === message.type
-        })
+const groupStore = useGroupStore()
+const { modal, hide } = useOurModal()
 
-        const allGroups = this.groupStore.list
+const groupid = ref(null)
 
-        ret.forEach((message) => {
-          if (allGroups && allGroups[message.groupid]) {
-            message.groupname = allGroups[message.groupid].namedisplay
-          } else {
-            message.groupname = '#' + message.groupid
-          }
-        })
+const messages = computed(() => {
+  let ret = []
 
-        ret.sort((a, b) => {
-          return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
-        })
+  if (props.user && props.user.messagehistory) {
+    ret = props.user.messagehistory.filter((message) => {
+      return !props.type || props.type === message.type
+    })
+
+    const allGroups = groupStore.list
+
+    ret.forEach((message) => {
+      if (allGroups && allGroups[message.groupid]) {
+        message.groupname = allGroups[message.groupid].namedisplay
+      } else {
+        message.groupname = '#' + message.groupid
       }
+    })
 
-      if (this.groupid !== null && this.groupid !== 0) {
-        ret = ret.filter((message) => {
-          return message.groupid === this.groupid
-        })
-      }
+    ret.sort((a, b) => {
+      return new Date(b.arrival).getTime() - new Date(a.arrival).getTime()
+    })
+  }
 
-      return ret
-    },
-  },
-  mounted() {
-    // Not all the groups we show will be ours, so get them all for the group name.
-    // TODO: This gets all groups but cannot decide if needed:
-    // this.groupStore.listMT({
-    //  grouptype: 'Freegle'
-    // })
-  },
-  methods: {
-    show() {
-      this.groupid = null
-      this.modal.show()
-    },
-  },
+  if (groupid.value !== null && groupid.value !== 0) {
+    ret = ret.filter((message) => {
+      return message.groupid === groupid.value
+    })
+  }
+
+  return ret
+})
+
+function show() {
+  groupid.value = null
+  modal.value.show()
 }
+
+defineExpose({ show })
 </script>
