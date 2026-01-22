@@ -579,13 +579,12 @@ const test = base.test.extend({
 
           // Verify page content is visible
           const body = page.locator('body')
-          await body.waitFor({
-            state: 'visible',
+          await base.expect(body).toBeVisible({
             timeout: Math.min(timeout, 30000),
           })
 
           // Check if page contains error messages
-          const errorTextContent = await page.textContent('body')
+          const errorTextContent = await body.textContent()
 
           // Check for general error message
           if (errorTextContent.includes('Something went wrong')) {
@@ -676,6 +675,9 @@ const test = base.test.extend({
           // Re-throw with more context
           throw new Error(`Failed to navigate to ${path}: ${error.message}`)
         }
+
+        // If no error, then this navigation succeeded - no need to keep retrying.
+        break
       }
 
       // If we get here, navigation succeeded - return the page
