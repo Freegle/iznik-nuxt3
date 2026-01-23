@@ -74,35 +74,20 @@ describe('EmailOwn', () => {
   })
 
   describe('action buttons visibility', () => {
-    it('shows make primary button when user has an email', () => {
-      mockMe.value = { email: 'user@example.com' }
+    it.each([
+      [
+        { email: 'user@example.com' },
+        true,
+        'shows buttons when user has email',
+      ],
+      [{ email: null }, false, 'hides buttons when user has no email'],
+      [{ email: undefined }, false, 'hides buttons when email is undefined'],
+      [null, false, 'hides buttons when me is null'],
+    ])('me=%j -> buttons visible=%s (%s)', (meValue, visible) => {
+      mockMe.value = meValue
       const wrapper = mountEmailOwn()
-      expect(wrapper.find('.action-btn.primary').exists()).toBe(true)
-    })
-
-    it('shows delete button when user has an email', () => {
-      mockMe.value = { email: 'user@example.com' }
-      const wrapper = mountEmailOwn()
-      expect(wrapper.find('.action-btn.delete').exists()).toBe(true)
-    })
-
-    it('hides make primary button when me has no email', () => {
-      mockMe.value = { email: null }
-      const wrapper = mountEmailOwn()
-      expect(wrapper.find('.action-btn.primary').exists()).toBe(false)
-    })
-
-    it('hides delete button when me has no email', () => {
-      mockMe.value = { email: null }
-      const wrapper = mountEmailOwn()
-      expect(wrapper.find('.action-btn.delete').exists()).toBe(false)
-    })
-
-    it('hides buttons when me is null', () => {
-      mockMe.value = null
-      const wrapper = mountEmailOwn()
-      expect(wrapper.find('.action-btn.primary').exists()).toBe(false)
-      expect(wrapper.find('.action-btn.delete').exists()).toBe(false)
+      expect(wrapper.find('.action-btn.primary').exists()).toBe(visible)
+      expect(wrapper.find('.action-btn.delete').exists()).toBe(visible)
     })
   })
 
@@ -182,25 +167,6 @@ describe('EmailOwn', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts required email prop', () => {
-      const wrapper = mountEmailOwn()
-      expect(wrapper.props('email')).toEqual(defaultEmail)
-    })
-
-    it('accepts email object with various properties', () => {
-      const fullEmail = {
-        email: 'full@example.com',
-        preferred: true,
-        ourdomain: true,
-        verified: true,
-      }
-      const wrapper = mountEmailOwn({ email: fullEmail })
-      expect(wrapper.props('email').email).toBe('full@example.com')
-      expect(wrapper.props('email').preferred).toBe(true)
-    })
-  })
-
   describe('edge cases', () => {
     it('handles empty email string', () => {
       const emptyEmail = { email: '' }
@@ -222,45 +188,6 @@ describe('EmailOwn', () => {
       }
       const wrapper = mountEmailOwn({ email: longEmail })
       expect(wrapper.find('.email-address').text()).toBe(longEmail.email)
-    })
-
-    it('handles me with undefined email', () => {
-      mockMe.value = { email: undefined }
-      const wrapper = mountEmailOwn()
-      // Should hide buttons
-      expect(wrapper.find('.action-btn.primary').exists()).toBe(false)
-      expect(wrapper.find('.action-btn.delete').exists()).toBe(false)
-    })
-
-    it('calls store method when clicked', async () => {
-      // Use a successful response for this test since rejection error handling
-      // depends on how the component handles the promise
-      mockRemoveEmail.mockResolvedValue(undefined)
-
-      const wrapper = mountEmailOwn()
-      await wrapper.find('.action-btn.delete').trigger('click')
-
-      // The store method was called
-      expect(mockRemoveEmail).toHaveBeenCalledWith('test@example.com')
-    })
-  })
-
-  describe('layout and styling', () => {
-    it('email-item has flex layout', () => {
-      const wrapper = mountEmailOwn()
-      expect(wrapper.find('.email-item').exists()).toBe(true)
-    })
-
-    it('primary button has correct class', () => {
-      const wrapper = mountEmailOwn()
-      const primaryBtn = wrapper.find('.action-btn.primary')
-      expect(primaryBtn.exists()).toBe(true)
-    })
-
-    it('delete button has correct class', () => {
-      const wrapper = mountEmailOwn()
-      const deleteBtn = wrapper.find('.action-btn.delete')
-      expect(deleteBtn.exists()).toBe(true)
     })
   })
 })

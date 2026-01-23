@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
+import { modalBootstrapStubs } from '../mocks/bootstrap-stubs'
 import ChatBlockModal from '~/components/ChatBlockModal.vue'
 
-// Mock useOurModal
 const mockHide = vi.fn()
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
@@ -24,96 +24,41 @@ describe('ChatBlockModal', () => {
         user: { displayname: 'Test User' },
         ...props,
       },
-      global: {
-        stubs: {
-          'b-modal': {
-            template: `
-              <div class="modal" data-testid="modal">
-                <div class="modal-title">{{ title }}</div>
-                <slot></slot>
-                <div class="modal-footer"><slot name="footer"></slot></div>
-              </div>
-            `,
-            props: ['title', 'scrollable', 'noStacking', 'modalClass'],
-          },
-          'b-row': { template: '<div class="row"><slot /></div>' },
-          'b-col': { template: '<div class="col"><slot /></div>' },
-          'b-button': {
-            template:
-              '<button :class="variant" @click="$emit(\'click\')"><slot /></button>',
-            props: ['variant'],
-          },
-        },
-      },
+      global: { stubs: modalBootstrapStubs },
     })
   }
 
   describe('rendering', () => {
-    it('renders modal with correct title', () => {
+    it('renders modal with user-specific title and warning content', () => {
       const wrapper = createWrapper({ user: { displayname: 'John Doe' } })
       expect(wrapper.find('.modal-title').text()).toContain('Block John Doe')
-    })
-
-    it('displays warning message about blocking', () => {
-      const wrapper = createWrapper()
       expect(wrapper.text()).toContain("won't ever get any more chat messages")
-    })
-
-    it('asks for confirmation', () => {
-      const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Are you sure?')
     })
 
-    it('shows Cancel button', () => {
+    it.each([['Cancel'], ['Confirm']])('shows %s button', (buttonText) => {
       const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Cancel')
-    })
-
-    it('shows Confirm button', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Confirm')
+      expect(wrapper.text()).toContain(buttonText)
     })
   })
 
-  describe('props', () => {
-    it('requires user prop with displayname', () => {
-      const wrapper = createWrapper({
-        user: { displayname: 'Jane Smith', id: 123 },
-      })
-      expect(wrapper.props('user').displayname).toBe('Jane Smith')
-    })
-  })
-
-  describe('cancel action', () => {
+  describe('actions', () => {
     it('calls hide when Cancel is clicked', async () => {
       const wrapper = createWrapper()
       const cancelBtn = wrapper
         .findAll('button')
         .find((b) => b.text().includes('Cancel'))
       await cancelBtn.trigger('click')
-
       expect(mockHide).toHaveBeenCalled()
     })
-  })
 
-  describe('confirm action', () => {
-    it('emits confirm event when Confirm is clicked', async () => {
+    it('emits confirm and calls hide when Confirm is clicked', async () => {
       const wrapper = createWrapper()
       const confirmBtn = wrapper
         .findAll('button')
         .find((b) => b.text().includes('Confirm'))
       await confirmBtn.trigger('click')
-
       expect(wrapper.emitted('confirm')).toBeTruthy()
-    })
-
-    it('calls hide after confirm', async () => {
-      const wrapper = createWrapper()
-      const confirmBtn = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Confirm'))
-      await confirmBtn.trigger('click')
-
       expect(mockHide).toHaveBeenCalled()
     })
   })

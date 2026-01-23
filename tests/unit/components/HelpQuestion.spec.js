@@ -77,35 +77,12 @@ describe('HelpQuestion', () => {
   })
 
   describe('auto-expand behavior when few matches', () => {
-    it('shows answer content when matches <= 3', () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['q1', 'q2', 'q3'],
-        id: 'q1',
-      })
-      expect(wrapper.text()).toContain('Test answer content')
-    })
-
-    it('shows answer for exactly 3 matches', () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['a', 'b', 'c'],
-        id: 'a',
-      })
-      expect(wrapper.text()).toContain('Test answer content')
-    })
-
-    it('shows answer for 2 matches', () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['a', 'b'],
-        id: 'a',
-      })
-      expect(wrapper.text()).toContain('Test answer content')
-    })
-
-    it('shows answer for 1 match', () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['a'],
-        id: 'a',
-      })
+    it.each([
+      [1, ['q1']],
+      [2, ['q1', 'q2']],
+      [3, ['q1', 'q2', 'q3']],
+    ])('auto-expands answer when matches=%d', (_, matches) => {
+      const wrapper = mountHelpQuestion({ matches, id: 'q1' })
       expect(wrapper.text()).toContain('Test answer content')
     })
   })
@@ -138,107 +115,41 @@ describe('HelpQuestion', () => {
   })
 
   describe('expand toggle functionality', () => {
-    it('expand function toggles expanded state', async () => {
+    it('expands and collapses on title click', async () => {
       const wrapper = mountHelpQuestion({
         matches: ['q1', 'q2', 'q3', 'q4'],
         id: 'q1',
       })
 
-      // Initially hidden (matches > 3 and not expanded)
-      expect(wrapper.text()).not.toContain('Test answer content')
-
-      // The expand function is called by clicking either the h3 or the button
-      // Testing via h3 since it directly triggers the expand function
-      await wrapper.find('h3').trigger('click')
-
-      // Now visible
-      expect(wrapper.text()).toContain('Test answer content')
-    })
-
-    it('shows answer after clicking the title (h3)', async () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['q1', 'q2', 'q3', 'q4'],
-        id: 'q1',
-      })
-
-      // Initially hidden
-      expect(wrapper.text()).not.toContain('Test answer content')
-
-      // Click the title to expand
-      await wrapper.find('h3').trigger('click')
-
-      // Now visible
-      expect(wrapper.text()).toContain('Test answer content')
-    })
-
-    it('toggles expanded state on title click', async () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['q1', 'q2', 'q3', 'q4'],
-        id: 'q1',
-      })
-
-      // Click to expand
-      await wrapper.find('h3').trigger('click')
-      expect(wrapper.text()).toContain('Test answer content')
-
-      // Click to collapse
-      await wrapper.find('h3').trigger('click')
+      // Initially hidden with expand button
       expect(wrapper.text()).not.toContain('Test answer content')
       expect(wrapper.find('button').exists()).toBe(true)
-    })
 
-    it('hides the expand button once expanded', async () => {
-      const wrapper = mountHelpQuestion({
-        matches: ['q1', 'q2', 'q3', 'q4'],
-        id: 'q1',
-      })
-
-      // Button exists initially
-      expect(wrapper.find('button').exists()).toBe(true)
-
-      // Click to expand
+      // Click to expand - answer visible, button gone
       await wrapper.find('h3').trigger('click')
-
-      // Button should be gone (showing content instead)
+      expect(wrapper.text()).toContain('Test answer content')
       expect(wrapper.find('button').exists()).toBe(false)
-    })
-  })
 
-  describe('props validation', () => {
-    it('accepts matches array prop', () => {
-      const matches = ['a', 'b', 'c']
-      const wrapper = mountHelpQuestion({ id: 'a', matches })
-      expect(wrapper.props('matches')).toEqual(matches)
+      // Click to collapse - answer hidden, button back
+      await wrapper.find('h3').trigger('click')
+      expect(wrapper.text()).not.toContain('Test answer content')
+      expect(wrapper.find('button').exists()).toBe(true)
     })
   })
 
   describe('edge cases', () => {
-    it('handles empty matches array (question hidden)', () => {
-      const wrapper = mountHelpQuestion({
-        id: 'question-1',
-        matches: [],
-      })
-      // v-show uses display:none, check the style
+    it('hides question when matches array is empty', () => {
+      const wrapper = mountHelpQuestion({ id: 'q1', matches: [] })
       expect(wrapper.element.style.display).toBe('none')
     })
 
-    it('handles matches array with exactly 4 items (threshold)', () => {
-      const wrapper = mountHelpQuestion({
-        id: 'q1',
-        matches: ['q1', 'q2', 'q3', 'q4'],
-      })
-      // 4 > 3, so should show expand button
-      expect(wrapper.find('button').exists()).toBe(true)
-    })
-
-    it('expands correctly with many matches', async () => {
-      const wrapper = mountHelpQuestion({
-        id: 'q1',
-        matches: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10'],
-      })
-
-      await wrapper.find('h3').trigger('click')
-      expect(wrapper.text()).toContain('Test answer content')
+    it.each([
+      [4, true],
+      [10, true],
+    ])('shows expand button when matches=%d (>3)', (count, showsButton) => {
+      const matches = Array.from({ length: count }, (_, i) => `q${i + 1}`)
+      const wrapper = mountHelpQuestion({ id: 'q1', matches })
+      expect(wrapper.find('button').exists()).toBe(showsButton)
     })
   })
 })
