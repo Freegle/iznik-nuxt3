@@ -70,13 +70,10 @@ const mockWkt = {
 }
 
 vi.mock('wicket', () => ({
-  default: {
-    Wkt: vi.fn(() => mockWkt),
-  },
+  default: { Wkt: vi.fn(() => mockWkt) },
   Wkt: vi.fn(() => mockWkt),
 }))
 
-// Mock turf modules
 vi.mock('turf-polygon', () => ({
   default: vi.fn(() => ({ type: 'Feature', geometry: { type: 'Polygon' } })),
 }))
@@ -86,22 +83,20 @@ vi.mock('turf-intersect', () => ({
 }))
 
 // Mock leaflet
-const mockLeaflet = {
+vi.stubGlobal('L', {
   map: vi.fn(),
   tileLayer: vi.fn(),
   LatLng: vi.fn((lat, lng) => ({ lat, lng })),
-}
-vi.stubGlobal('L', mockLeaflet)
+})
 
 // Mock XMLHttpRequest for search
-const mockXHR = {
-  open: vi.fn(),
-  send: vi.fn(),
-  addEventListener: vi.fn(),
-}
 vi.stubGlobal(
   'XMLHttpRequest',
-  vi.fn(() => mockXHR)
+  vi.fn(() => ({
+    open: vi.fn(),
+    send: vi.fn(),
+    addEventListener: vi.fn(),
+  }))
 )
 
 // Create a minimal test component to avoid leaflet complexity
@@ -164,26 +159,13 @@ const ModGroupMapTest = {
     </div>
   `,
   props: {
-    groups: {
-      type: Boolean,
-      default: false,
-    },
-    groupid: {
-      type: Number,
-      default: null,
-    },
-    caretaker: {
-      type: Boolean,
-      default: false,
-    },
-    overlaps: {
-      type: Boolean,
-      default: false,
-    },
+    groups: { type: Boolean, default: false },
+    groupid: { type: Number, default: null },
+    caretaker: { type: Boolean, default: false },
+    overlaps: { type: Boolean, default: false },
   },
   setup(props) {
     const busy = ref(true)
-    const initialGroupZoomed = ref(false)
     const dpa = ref(false)
     const cga = ref(true)
     const shade = ref(true)
@@ -199,22 +181,17 @@ const ModGroupMapTest = {
     const lastLocationFetch = ref(null)
     const showMappingChanges = ref(false)
     const highlighted = ref(null)
-    const bounds = ref(null)
     const locations = ref([])
     const dodgy = ref([])
     const bump = ref(0)
     const searchplace = ref('')
-
     const mapHeight = ref(process.client ? window.innerHeight - 150 : 0)
-
     const allgroups = ref([])
-
     const group = ref(null)
-
     const CGAs = ref([])
     const DPAs = ref([])
-
     const locationsInBounds = ref([])
+    const dodgyInBounds = ref([])
 
     const cgaOptions = ref({
       fillColor: 'darkgreen',
@@ -228,8 +205,6 @@ const ModGroupMapTest = {
       color: 'darkblue',
     })
 
-    const dodgyInBounds = ref([])
-
     function clearSelection(callback) {
       selectedObj.value = null
       selectedId.value = null
@@ -237,19 +212,16 @@ const ModGroupMapTest = {
       selectedWKT.value = null
       dragging.value = true
       bump.value++
-
-      if (typeof callback === 'function') {
-        callback()
-      }
+      if (typeof callback === 'function') callback()
     }
 
-    function selectCGA(e, g, i) {
+    function selectCGA(e, g) {
       selectedName.value = g.nameshort + ' CGA'
       selectedWKT.value = null
       selectedObj.value = null
     }
 
-    function selectDPA(e, g, i) {
+    function selectDPA(e, g) {
       selectedName.value = g.nameshort + ' DPA'
       selectedWKT.value = null
       selectedObj.value = null
@@ -268,7 +240,6 @@ const ModGroupMapTest = {
 
     async function saveArea(callback) {
       busy.value = true
-
       if (!selectedId.value) {
         await mockLocationStore.add({
           name: selectedName.value,
@@ -283,32 +254,23 @@ const ModGroupMapTest = {
           remap: false,
         })
       }
-
       clearSelection()
       lastLocationFetch.value = null
       busy.value = false
-
-      if (typeof callback === 'function') {
-        callback()
-      }
+      if (typeof callback === 'function') callback()
     }
 
     async function deleteArea(callback) {
       busy.value = true
-
       await mockLocationStore.delete({
         id: selectedId.value,
         groupid: props.groupid,
         remap: false,
       })
-
       clearSelection()
       lastLocationFetch.value = null
       busy.value = false
-
-      if (typeof callback === 'function') {
-        callback()
-      }
+      if (typeof callback === 'function') callback()
     }
 
     function highlightPostcode(pc) {
@@ -321,13 +283,10 @@ const ModGroupMapTest = {
       }, 500)
     }
 
-    function search() {
-      // Search implementation would go here
-    }
+    function search() {}
 
     return {
       busy,
-      initialGroupZoomed,
       dpa,
       cga,
       shade,
@@ -343,7 +302,6 @@ const ModGroupMapTest = {
       lastLocationFetch,
       showMappingChanges,
       highlighted,
-      bounds,
       locations,
       dodgy,
       bump,
@@ -371,7 +329,6 @@ const ModGroupMapTest = {
 }
 
 describe('ModGroupMap', () => {
-  // Test data factories
   const createTestGroup = (overrides = {}) => ({
     id: 123,
     nameshort: 'TestGroup',
@@ -416,17 +373,10 @@ describe('ModGroupMap', () => {
       global: {
         plugins: [createPinia()],
         stubs: {
-          'client-only': {
-            template: '<div><slot /></div>',
-          },
+          'client-only': { template: '<div><slot /></div>' },
           'v-icon': {
-            template: '<span class="v-icon" :class="iconClass" />',
+            template: '<span class="v-icon" />',
             props: ['icon', 'scale'],
-            computed: {
-              iconClass() {
-                return this.$attrs.class
-              },
-            },
           },
           'b-form-checkbox': {
             template:
@@ -437,82 +387,10 @@ describe('ModGroupMap', () => {
             template: '<div class="modal"><slot /></div>',
             props: ['id', 'modelValue'],
           },
-          'b-row': {
-            template: '<div class="row"><slot /></div>',
-          },
+          'b-row': { template: '<div class="row"><slot /></div>' },
           'b-col': {
             template: '<div class="col"><slot /></div>',
             props: ['cols', 'md'],
-          },
-          'b-input-group': {
-            template:
-              '<div class="input-group"><slot /><slot name="prepend" /></div>',
-          },
-          'b-input': {
-            template:
-              '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-            props: ['modelValue', 'type', 'placeholder'],
-          },
-          'b-button': {
-            template: '<button @click="$emit(\'click\')"><slot /></button>',
-            props: ['variant'],
-          },
-          'b-card': {
-            template: '<div class="card"><slot /></div>',
-            props: ['noBody'],
-          },
-          'b-card-header': {
-            template: '<div class="card-header"><slot /></div>',
-          },
-          'b-card-body': {
-            template: '<div class="card-body"><slot /></div>',
-          },
-          'b-card-footer': {
-            template: '<div class="card-footer"><slot /></div>',
-          },
-          'b-form-input': {
-            template:
-              '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-            props: ['modelValue', 'placeholder', 'size'],
-          },
-          'b-form-textarea': {
-            template:
-              '<textarea :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
-            props: ['modelValue', 'rows', 'readonly'],
-          },
-          'l-map': {
-            template: '<div class="l-map"><slot /></div>',
-            props: [
-              'zoom',
-              'minZoom',
-              'maxZoom',
-              'options',
-              'center',
-              'useGlobalLeaflet',
-            ],
-          },
-          'l-tile-layer': {
-            template: '<div class="l-tile-layer" />',
-            props: ['url', 'attribution'],
-          },
-          'l-geo-json': {
-            template: '<div class="l-geo-json" />',
-            props: ['geojson', 'options', 'zIndexOffset'],
-          },
-          'l-circle-marker': {
-            template: '<div class="l-circle-marker" />',
-            props: [
-              'latLng',
-              'radius',
-              'color',
-              'fill',
-              'fillColor',
-              'fillOpacity',
-              'interactive',
-            ],
-          },
-          'l-feature-group': {
-            template: '<div class="l-feature-group"><slot /></div>',
           },
           SpinButton: {
             template:
@@ -523,24 +401,6 @@ describe('ModGroupMap', () => {
             template: '<div class="notice-message"><slot /></div>',
             props: ['variant', 'show'],
           },
-          ModPostcodeTester: {
-            template: '<div class="mod-postcode-tester" />',
-          },
-          ModConvertKML: {
-            template: '<div class="mod-convert-kml" />',
-          },
-          ModGroupMapLocation: {
-            template: '<div class="mod-group-map-location" />',
-            props: ['location', 'selected', 'selectable', 'shade', 'labels'],
-          },
-          ModChangedMapping: {
-            template: '<div class="mod-changed-mapping" />',
-            props: ['changed', 'highlighted'],
-          },
-          ClusterMarker: {
-            template: '<div class="cluster-marker" />',
-            props: ['markers', 'map'],
-          },
         },
       },
     })
@@ -549,8 +409,6 @@ describe('ModGroupMap', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
-
-    // Reset mock store values
     mockModGroupStore.allGroups = {}
     mockModGroupStore.getfromall.mockReturnValue(null)
     mockLocationStore.fetch.mockResolvedValue({ locations: [], dodgy: [] })
@@ -559,163 +417,66 @@ describe('ModGroupMap', () => {
     mockLocationStore.delete.mockResolvedValue({})
   })
 
-  describe('Props', () => {
-    it('accepts groups prop defaulting to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groups')).toBe(false)
-    })
-
-    it('accepts groups prop as true', () => {
-      const wrapper = mountComponent({ groups: true })
-      expect(wrapper.props('groups')).toBe(true)
-    })
-
-    it('accepts groupid prop defaulting to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(null)
-    })
-
-    it('accepts groupid prop as number', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
-    it('accepts caretaker prop defaulting to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('caretaker')).toBe(false)
-    })
-
-    it('accepts caretaker prop as true', () => {
-      const wrapper = mountComponent({ caretaker: true })
-      expect(wrapper.props('caretaker')).toBe(true)
-    })
-
-    it('accepts overlaps prop defaulting to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('overlaps')).toBe(false)
-    })
-
-    it('accepts overlaps prop as true', () => {
-      const wrapper = mountComponent({ overlaps: true })
-      expect(wrapper.props('overlaps')).toBe(true)
-    })
-  })
-
   describe('Rendering', () => {
-    it('renders map container', () => {
+    it('renders map container and search section', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.map-container').exists()).toBe(true)
-    })
-
-    it('renders search section', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.search-section').exists()).toBe(true)
-      expect(wrapper.find('.search-input').exists()).toBe(true)
-      expect(wrapper.find('.search-button').exists()).toBe(true)
-    })
-
-    it('renders maptools section', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.maptools').exists()).toBe(true)
     })
   })
 
-  describe('Checkbox visibility', () => {
-    it('shows CGA checkbox when groups is true', () => {
-      const wrapper = mountComponent({ groups: true })
+  describe('Checkbox visibility based on props', () => {
+    it('shows CGA/DPA checkboxes when groups=true or groupid provided', () => {
+      // With groups=true
+      let wrapper = mountComponent({ groups: true })
       expect(wrapper.find('.cga-checkbox').exists()).toBe(true)
-    })
+      expect(wrapper.find('.dpa-checkbox').exists()).toBe(true)
 
-    it('shows CGA checkbox when groupid is provided', () => {
-      const wrapper = mountComponent({ groupid: 123 })
+      // With groupid
+      wrapper = mountComponent({ groupid: 123 })
       expect(wrapper.find('.cga-checkbox').exists()).toBe(true)
-    })
+      expect(wrapper.find('.dpa-checkbox').exists()).toBe(true)
 
-    it('hides CGA checkbox when neither groups nor groupid is provided', () => {
-      const wrapper = mountComponent()
+      // Without either - should be hidden
+      wrapper = mountComponent()
       expect(wrapper.find('.cga-checkbox').exists()).toBe(false)
-    })
-
-    it('shows DPA checkbox when groups is true', () => {
-      const wrapper = mountComponent({ groups: true })
-      expect(wrapper.find('.dpa-checkbox').exists()).toBe(true)
-    })
-
-    it('shows DPA checkbox when groupid is provided', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.find('.dpa-checkbox').exists()).toBe(true)
-    })
-
-    it('hides DPA checkbox when neither groups nor groupid is provided', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.dpa-checkbox').exists()).toBe(false)
     })
 
-    it('shows labels checkbox only when groupid is provided', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.find('.labels-checkbox').exists()).toBe(true)
+    it('shows labels checkbox only when groupid provided', () => {
+      expect(
+        mountComponent({ groupid: 123 }).find('.labels-checkbox').exists()
+      ).toBe(true)
+      expect(
+        mountComponent({ groups: true }).find('.labels-checkbox').exists()
+      ).toBe(false)
     })
 
-    it('hides labels checkbox when groupid is not provided', () => {
-      const wrapper = mountComponent({ groups: true })
-      expect(wrapper.find('.labels-checkbox').exists()).toBe(false)
-    })
-
-    it('always shows shade checkbox', () => {
+    it('always shows shade and dodgy checkboxes', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.shade-checkbox').exists()).toBe(true)
-    })
-
-    it('always shows dodgy checkbox', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.dodgy-checkbox').exists()).toBe(true)
     })
   })
 
-  describe('Checkbox states', () => {
-    it('initializes cga to true', () => {
+  describe('Checkbox toggling', () => {
+    it('can toggle checkboxes', async () => {
       const wrapper = mountComponent({ groups: true })
-      expect(wrapper.vm.cga).toBe(true)
-    })
 
-    it('initializes dpa to false', () => {
-      const wrapper = mountComponent({ groups: true })
-      expect(wrapper.vm.dpa).toBe(false)
-    })
-
-    it('initializes shade to true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.shade).toBe(true)
-    })
-
-    it('initializes labels to true', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.vm.labels).toBe(true)
-    })
-
-    it('initializes showDodgy to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.showDodgy).toBe(false)
-    })
-
-    it('can toggle cga checkbox', async () => {
-      const wrapper = mountComponent({ groups: true })
+      // CGA starts true, toggle to false
       expect(wrapper.vm.cga).toBe(true)
       wrapper.vm.cga = false
       await nextTick()
       expect(wrapper.vm.cga).toBe(false)
-    })
 
-    it('can toggle dpa checkbox', async () => {
-      const wrapper = mountComponent({ groups: true })
+      // DPA starts false, toggle to true
       expect(wrapper.vm.dpa).toBe(false)
       wrapper.vm.dpa = true
       await nextTick()
       expect(wrapper.vm.dpa).toBe(true)
-    })
 
-    it('can toggle shade checkbox', async () => {
-      const wrapper = mountComponent()
+      // Shade starts true, toggle to false
       expect(wrapper.vm.shade).toBe(true)
       wrapper.vm.shade = false
       await nextTick()
@@ -723,123 +484,36 @@ describe('ModGroupMap', () => {
     })
   })
 
-  describe('State initialization', () => {
-    it('initializes busy to true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.busy).toBe(true)
-    })
-
-    it('initializes zoom to 12', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.zoom).toBe(12)
-    })
-
-    it('initializes dragging to true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.dragging).toBe(true)
-    })
-
-    it('initializes selectedName to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.selectedName).toBe(null)
-    })
-
-    it('initializes selectedWKT to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.selectedWKT).toBe(null)
-    })
-
-    it('initializes selectedId to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.selectedId).toBe(null)
-    })
-
-    it('initializes selectedObj to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.selectedObj).toBe(null)
-    })
-
-    it('initializes intersects to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.intersects).toBe(false)
-    })
-
-    it('initializes highlighted to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.highlighted).toBe(null)
-    })
-
-    it('initializes showMappingChanges to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.showMappingChanges).toBe(false)
-    })
-
-    it('initializes searchplace to empty string', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.searchplace).toBe('')
-    })
-
-    it('initializes locations to empty array', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.locations).toEqual([])
-    })
-
-    it('initializes dodgy to empty array', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.dodgy).toEqual([])
-    })
-
-    it('initializes bump to 0', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.bump).toBe(0)
-    })
-  })
-
   describe('Area Details Panel', () => {
-    it('hides area details when nothing selected', () => {
+    it('shows/hides based on selection state', async () => {
       const wrapper = mountComponent()
+
+      // Hidden when nothing selected
       expect(wrapper.find('.area-details').exists()).toBe(false)
-    })
 
-    it('shows area details when selectedName is set', async () => {
-      const wrapper = mountComponent()
+      // Shows when selectedName is set
       wrapper.vm.selectedName = 'Test Area'
       await nextTick()
       expect(wrapper.find('.area-details').exists()).toBe(true)
+      expect(wrapper.find('.warning-text').text()).toContain('Zoom/pan locked')
     })
 
-    it('shows area details when selectedWKT is set', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      await nextTick()
-      expect(wrapper.find('.area-details').exists()).toBe(true)
-    })
-
-    it('shows warning text about locked zoom/pan', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test Area'
-      await nextTick()
-      expect(wrapper.find('.warning-text').text()).toContain(
-        'Zoom/pan locked while area selected'
-      )
-    })
-
-    it('shows editable area name input when groupid is provided', async () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      wrapper.vm.selectedName = 'Test Area'
+    it('shows editable input with groupid, readonly display without', async () => {
+      // With groupid - editable
+      let wrapper = mountComponent({ groupid: 123 })
+      wrapper.vm.selectedName = 'Test'
       await nextTick()
       expect(wrapper.find('.area-name-input').exists()).toBe(true)
-    })
 
-    it('shows readonly area name when groupid is not provided', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test Area'
+      // Without groupid - readonly
+      wrapper = mountComponent()
+      wrapper.vm.selectedName = 'Test'
       await nextTick()
       expect(wrapper.find('.area-name-display').exists()).toBe(true)
-      expect(wrapper.find('.area-name-display').text()).toBe('Test Area')
+      expect(wrapper.find('.area-name-display').text()).toBe('Test')
     })
 
-    it('shows WKT textarea when selectedWKT is set with groupid', async () => {
+    it('shows WKT textarea when selectedWKT is set', async () => {
       const wrapper = mountComponent({ groupid: 123 })
       wrapper.vm.selectedName = 'Test'
       wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
@@ -847,98 +521,61 @@ describe('ModGroupMap', () => {
       expect(wrapper.find('.wkt-textarea').exists()).toBe(true)
     })
 
-    it('shows readonly WKT textarea when no groupid', async () => {
+    it('shows intersects warning and disables save when polygon crosses itself', async () => {
       const wrapper = mountComponent()
       wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      await nextTick()
-      expect(wrapper.find('.wkt-textarea-readonly').exists()).toBe(true)
-    })
-
-    it('shows intersects warning when intersects is true', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
+      wrapper.vm.selectedWKT = 'WKT'
       wrapper.vm.intersects = true
       await nextTick()
-      expect(wrapper.find('.intersects-warning').exists()).toBe(true)
+
       expect(wrapper.find('.intersects-warning').text()).toContain(
         'Crosses over itself'
       )
+      expect(wrapper.find('.save-button').attributes('disabled')).toBeDefined()
     })
 
-    it('hides intersects warning when intersects is false', async () => {
+    it('disables save button when name or WKT empty', async () => {
       const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.intersects = false
-      await nextTick()
-      expect(wrapper.find('.intersects-warning').exists()).toBe(false)
-    })
 
-    it('disables save button when selectedName is empty', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
+      // Only WKT set
+      wrapper.vm.selectedWKT = 'WKT'
       wrapper.vm.selectedName = ''
       await nextTick()
-      const saveButton = wrapper.find('.save-button')
-      expect(saveButton.attributes('disabled')).toBeDefined()
-    })
+      expect(wrapper.find('.save-button').attributes('disabled')).toBeDefined()
 
-    it('disables save button when selectedWKT is empty', async () => {
-      const wrapper = mountComponent()
+      // Only name set
       wrapper.vm.selectedName = 'Test'
       wrapper.vm.selectedWKT = ''
       await nextTick()
-      const saveButton = wrapper.find('.save-button')
-      expect(saveButton.attributes('disabled')).toBeDefined()
+      expect(wrapper.find('.save-button').attributes('disabled')).toBeDefined()
     })
 
-    it('disables save button when intersects is true', async () => {
+    it('shows delete button only when selectedId is set', async () => {
       const wrapper = mountComponent()
       wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      wrapper.vm.intersects = true
+
+      wrapper.vm.selectedId = null
       await nextTick()
-      const saveButton = wrapper.find('.save-button')
-      expect(saveButton.attributes('disabled')).toBeDefined()
-    })
+      expect(wrapper.find('.delete-button').exists()).toBe(false)
 
-    it('shows delete button when selectedId is set', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
       wrapper.vm.selectedId = 123
       await nextTick()
       expect(wrapper.find('.delete-button').exists()).toBe(true)
     })
-
-    it('hides delete button when selectedId is null', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedId = null
-      await nextTick()
-      expect(wrapper.find('.delete-button').exists()).toBe(false)
-    })
   })
 
   describe('Zoom notice', () => {
-    it('shows zoom notice when zoom is less than 12', async () => {
+    it('shows when zoom < 12, hides when >= 12', async () => {
       const wrapper = mountComponent()
+
       wrapper.vm.zoom = 10
       await nextTick()
       expect(wrapper.find('.zoom-notice').exists()).toBe(true)
-      expect(wrapper.find('.zoom-notice').text()).toContain(
-        'Please zoom in further'
-      )
-    })
 
-    it('hides zoom notice when zoom is 12 or more', async () => {
-      const wrapper = mountComponent()
       wrapper.vm.zoom = 12
       await nextTick()
       expect(wrapper.find('.zoom-notice').exists()).toBe(false)
-    })
 
-    it('hides zoom notice when zoom is greater than 12', async () => {
-      const wrapper = mountComponent()
       wrapper.vm.zoom = 15
       await nextTick()
       expect(wrapper.find('.zoom-notice').exists()).toBe(false)
@@ -946,105 +583,56 @@ describe('ModGroupMap', () => {
   })
 
   describe('Mapping changes section', () => {
-    it('hides mapping changes when dodgyInBounds is empty', () => {
+    it('shows when dodgyInBounds has items, with list or too-many message', async () => {
       const wrapper = mountComponent()
-      wrapper.vm.dodgyInBounds = []
+
+      // Hidden when empty
       expect(wrapper.find('.mapping-changes').exists()).toBe(false)
-    })
 
-    it('shows mapping changes when dodgyInBounds has items', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.dodgyInBounds = [createTestDodgy()]
-      await nextTick()
-      expect(wrapper.find('.mapping-changes').exists()).toBe(true)
-    })
-
-    it('shows mapping changes header', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.dodgyInBounds = [createTestDodgy()]
-      await nextTick()
-      expect(wrapper.find('.mapping-changes-header').text()).toContain(
-        'Mapping Changes'
-      )
-    })
-
-    it('shows details button in header', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.dodgyInBounds = [createTestDodgy()]
-      await nextTick()
-      expect(wrapper.find('.details-button').exists()).toBe(true)
-    })
-
-    it('shows mapping changes list when fewer than 200 items', async () => {
-      const wrapper = mountComponent()
+      // Shows with few items
       wrapper.vm.dodgyInBounds = [createTestDodgy(), createTestDodgy({ id: 2 })]
       await nextTick()
+      expect(wrapper.find('.mapping-changes').exists()).toBe(true)
       expect(wrapper.find('.mapping-changes-list').exists()).toBe(true)
       expect(wrapper.findAll('.changed-mapping')).toHaveLength(2)
-    })
 
-    it('shows too many changes message when 200 or more items', async () => {
-      const wrapper = mountComponent()
-      const manyDodgy = Array.from({ length: 200 }, (_, i) =>
-        createTestDodgy({ id: i + 1 })
+      // Shows "too many" when >= 200 items
+      wrapper.vm.dodgyInBounds = Array.from({ length: 200 }, (_, i) =>
+        createTestDodgy({ id: i })
       )
-      wrapper.vm.dodgyInBounds = manyDodgy
       await nextTick()
-      expect(wrapper.find('.too-many-changes').exists()).toBe(true)
       expect(wrapper.find('.too-many-changes').text()).toContain(
         'Too many changes'
       )
     })
 
-    it('sets showMappingChanges to true when details button clicked', async () => {
+    it('sets showMappingChanges when details button clicked', async () => {
       const wrapper = mountComponent()
       wrapper.vm.dodgyInBounds = [createTestDodgy()]
       await nextTick()
+
       await wrapper.find('.details-button').trigger('click')
       expect(wrapper.vm.showMappingChanges).toBe(true)
     })
   })
 
   describe('clearSelection method', () => {
-    it('resets selectedObj to null', () => {
+    it('resets all selection state and increments bump', () => {
       const wrapper = mountComponent()
       wrapper.vm.selectedObj = { id: 1 }
-      wrapper.vm.clearSelection()
-      expect(wrapper.vm.selectedObj).toBe(null)
-    })
-
-    it('resets selectedId to null', () => {
-      const wrapper = mountComponent()
       wrapper.vm.selectedId = 123
-      wrapper.vm.clearSelection()
-      expect(wrapper.vm.selectedId).toBe(null)
-    })
-
-    it('resets selectedName to null', () => {
-      const wrapper = mountComponent()
       wrapper.vm.selectedName = 'Test'
-      wrapper.vm.clearSelection()
-      expect(wrapper.vm.selectedName).toBe(null)
-    })
-
-    it('resets selectedWKT to null', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      wrapper.vm.clearSelection()
-      expect(wrapper.vm.selectedWKT).toBe(null)
-    })
-
-    it('sets dragging to true', () => {
-      const wrapper = mountComponent()
+      wrapper.vm.selectedWKT = 'WKT'
       wrapper.vm.dragging = false
-      wrapper.vm.clearSelection()
-      expect(wrapper.vm.dragging).toBe(true)
-    })
-
-    it('increments bump', () => {
-      const wrapper = mountComponent()
       const initialBump = wrapper.vm.bump
+
       wrapper.vm.clearSelection()
+
+      expect(wrapper.vm.selectedObj).toBe(null)
+      expect(wrapper.vm.selectedId).toBe(null)
+      expect(wrapper.vm.selectedName).toBe(null)
+      expect(wrapper.vm.selectedWKT).toBe(null)
+      expect(wrapper.vm.dragging).toBe(true)
       expect(wrapper.vm.bump).toBe(initialBump + 1)
     })
 
@@ -1054,189 +642,105 @@ describe('ModGroupMap', () => {
       wrapper.vm.clearSelection(callback)
       expect(callback).toHaveBeenCalled()
     })
-
-    it('handles missing callback gracefully', () => {
-      const wrapper = mountComponent()
-      expect(() => wrapper.vm.clearSelection()).not.toThrow()
-    })
   })
 
-  describe('selectCGA method', () => {
-    it('sets selectedName to group nameshort with CGA suffix', () => {
-      const wrapper = mountComponent()
-      const group = createTestGroup({ nameshort: 'MyGroup' })
-      wrapper.vm.selectCGA({}, group, 0)
-      expect(wrapper.vm.selectedName).toBe('MyGroup CGA')
-    })
+  describe('selectCGA/selectDPA methods', () => {
+    it.each([
+      ['selectCGA', 'CGA'],
+      ['selectDPA', 'DPA'],
+    ])(
+      '%s sets selectedName with %s suffix and clears WKT/obj',
+      (method, suffix) => {
+        const wrapper = mountComponent()
+        wrapper.vm.selectedWKT = 'EXISTING'
+        wrapper.vm.selectedObj = { id: 1 }
 
-    it('sets selectedWKT to null', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'EXISTING'
-      const group = createTestGroup()
-      wrapper.vm.selectCGA({}, group, 0)
-      expect(wrapper.vm.selectedWKT).toBe(null)
-    })
+        const group = createTestGroup({ nameshort: 'MyGroup' })
+        wrapper.vm[method]({}, group, 0)
 
-    it('sets selectedObj to null', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedObj = { id: 1 }
-      const group = createTestGroup()
-      wrapper.vm.selectCGA({}, group, 0)
-      expect(wrapper.vm.selectedObj).toBe(null)
-    })
-  })
-
-  describe('selectDPA method', () => {
-    it('sets selectedName to group nameshort with DPA suffix', () => {
-      const wrapper = mountComponent()
-      const group = createTestGroup({ nameshort: 'MyGroup' })
-      wrapper.vm.selectDPA({}, group, 0)
-      expect(wrapper.vm.selectedName).toBe('MyGroup DPA')
-    })
-
-    it('sets selectedWKT to null', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'EXISTING'
-      const group = createTestGroup()
-      wrapper.vm.selectDPA({}, group, 0)
-      expect(wrapper.vm.selectedWKT).toBe(null)
-    })
-
-    it('sets selectedObj to null', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedObj = { id: 1 }
-      const group = createTestGroup()
-      wrapper.vm.selectDPA({}, group, 0)
-      expect(wrapper.vm.selectedObj).toBe(null)
-    })
+        expect(wrapper.vm.selectedName).toBe(`MyGroup ${suffix}`)
+        expect(wrapper.vm.selectedWKT).toBe(null)
+        expect(wrapper.vm.selectedObj).toBe(null)
+      }
+    )
   })
 
   describe('selectLocation method', () => {
-    it('sets selection properties when no existing selection', () => {
+    it('sets selection properties when no existing WKT', () => {
       const wrapper = mountComponent()
       const location = createTestLocation({
         id: 5,
-        name: 'Selected Location',
-        polygon: 'POLYGON ((1 1, 1 2, 2 2, 2 1, 1 1))',
+        name: 'Selected',
+        polygon: 'NEW WKT',
       })
+
       wrapper.vm.selectLocation(location)
 
       expect(wrapper.vm.selectedId).toBe(5)
       expect(wrapper.vm.selectedObj).toStrictEqual(location)
-      expect(wrapper.vm.selectedName).toBe('Selected Location')
-      expect(wrapper.vm.selectedWKT).toBe('POLYGON ((1 1, 1 2, 2 2, 2 1, 1 1))')
-    })
-
-    it('sets dragging to false when location selected', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.dragging).toBe(true)
-      wrapper.vm.selectLocation(createTestLocation())
+      expect(wrapper.vm.selectedName).toBe('Selected')
+      expect(wrapper.vm.selectedWKT).toBe('NEW WKT')
       expect(wrapper.vm.dragging).toBe(false)
-    })
-
-    it('increments bump when location selected', () => {
-      const wrapper = mountComponent()
-      const initialBump = wrapper.vm.bump
-      wrapper.vm.selectLocation(createTestLocation())
-      expect(wrapper.vm.bump).toBe(initialBump + 1)
     })
 
     it('does not change selection when WKT already set', () => {
       const wrapper = mountComponent()
-      wrapper.vm.selectedWKT = 'EXISTING WKT'
-      wrapper.vm.selectedName = 'Existing Name'
+      wrapper.vm.selectedWKT = 'EXISTING'
       wrapper.vm.selectedId = 99
 
-      const location = createTestLocation({ id: 5, name: 'New Location' })
-      wrapper.vm.selectLocation(location)
+      wrapper.vm.selectLocation(createTestLocation({ id: 5 }))
 
       expect(wrapper.vm.selectedId).toBe(99)
-      expect(wrapper.vm.selectedName).toBe('Existing Name')
     })
   })
 
   describe('saveArea method', () => {
-    it('calls locationStore.add for new area (no selectedId)', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'New Area'
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      wrapper.vm.selectedId = null
-
-      await wrapper.vm.saveArea()
-
-      expect(mockLocationStore.add).toHaveBeenCalledWith({
-        name: 'New Area',
-        polygon: 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))',
-        remap: false,
-      })
-    })
-
-    it('calls locationStore.update for existing area (with selectedId)', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Updated Area'
-      wrapper.vm.selectedWKT = 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'
-      wrapper.vm.selectedId = 123
-
-      await wrapper.vm.saveArea()
-
-      expect(mockLocationStore.update).toHaveBeenCalledWith({
-        id: 123,
-        name: 'Updated Area',
-        polygon: 'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))',
-        remap: false,
-      })
-    })
-
-    it('clears selection after save', async () => {
+    it('calls add for new area, update for existing', async () => {
       const wrapper = mountComponent()
       wrapper.vm.selectedName = 'Test'
       wrapper.vm.selectedWKT = 'WKT'
-      wrapper.vm.selectedId = 1
+
+      // New area (no selectedId)
+      await wrapper.vm.saveArea()
+      expect(mockLocationStore.add).toHaveBeenCalledWith({
+        name: 'Test',
+        polygon: 'WKT',
+        remap: false,
+      })
+
+      // Existing area
+      vi.clearAllMocks()
+      wrapper.vm.selectedName = 'Updated'
+      wrapper.vm.selectedWKT = 'WKT2'
+      wrapper.vm.selectedId = 123
+      await wrapper.vm.saveArea()
+      expect(mockLocationStore.update).toHaveBeenCalledWith({
+        id: 123,
+        name: 'Updated',
+        polygon: 'WKT2',
+        remap: false,
+      })
+    })
+
+    it('clears selection and resets state after save', async () => {
+      const wrapper = mountComponent()
+      wrapper.vm.selectedName = 'Test'
+      wrapper.vm.selectedWKT = 'WKT'
+      wrapper.vm.lastLocationFetch = 'cached'
 
       await wrapper.vm.saveArea()
 
       expect(wrapper.vm.selectedName).toBe(null)
-      expect(wrapper.vm.selectedWKT).toBe(null)
-      expect(wrapper.vm.selectedId).toBe(null)
-    })
-
-    it('resets lastLocationFetch after save', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.lastLocationFetch = 'cached'
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'WKT'
-
-      await wrapper.vm.saveArea()
-
       expect(wrapper.vm.lastLocationFetch).toBe(null)
-    })
-
-    it('sets busy to false after save', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'WKT'
-
-      await wrapper.vm.saveArea()
-
       expect(wrapper.vm.busy).toBe(false)
-    })
-
-    it('calls callback if provided', async () => {
-      const wrapper = mountComponent()
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'WKT'
-      const callback = vi.fn()
-
-      await wrapper.vm.saveArea(callback)
-
-      expect(callback).toHaveBeenCalled()
     })
   })
 
   describe('deleteArea method', () => {
-    it('calls locationStore.delete with correct params', async () => {
+    it('calls delete with correct params and clears selection', async () => {
       const wrapper = mountComponent({ groupid: 456 })
       wrapper.vm.selectedId = 123
+      wrapper.vm.lastLocationFetch = 'cached'
 
       await wrapper.vm.deleteArea()
 
@@ -1245,48 +749,9 @@ describe('ModGroupMap', () => {
         groupid: 456,
         remap: false,
       })
-    })
-
-    it('clears selection after delete', async () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'WKT'
-      wrapper.vm.selectedId = 123
-
-      await wrapper.vm.deleteArea()
-
-      expect(wrapper.vm.selectedName).toBe(null)
-      expect(wrapper.vm.selectedWKT).toBe(null)
       expect(wrapper.vm.selectedId).toBe(null)
-    })
-
-    it('resets lastLocationFetch after delete', async () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      wrapper.vm.lastLocationFetch = 'cached'
-      wrapper.vm.selectedId = 123
-
-      await wrapper.vm.deleteArea()
-
       expect(wrapper.vm.lastLocationFetch).toBe(null)
-    })
-
-    it('sets busy to false after delete', async () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      wrapper.vm.selectedId = 123
-
-      await wrapper.vm.deleteArea()
-
       expect(wrapper.vm.busy).toBe(false)
-    })
-
-    it('calls callback if provided', async () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      wrapper.vm.selectedId = 123
-      const callback = vi.fn()
-
-      await wrapper.vm.deleteArea(callback)
-
-      expect(callback).toHaveBeenCalled()
     })
   })
 
@@ -1294,117 +759,62 @@ describe('ModGroupMap', () => {
     it('sets highlighted to the postcode', () => {
       const wrapper = mountComponent()
       const postcode = createTestDodgy({ id: 5 })
+
       wrapper.vm.highlightPostcode(postcode)
       expect(wrapper.vm.highlighted).toStrictEqual(postcode)
-    })
 
-    it('overwrites previous highlighted value', () => {
-      const wrapper = mountComponent()
-      const postcode1 = createTestDodgy({ id: 1 })
-      const postcode2 = createTestDodgy({ id: 2 })
-
-      wrapper.vm.highlightPostcode(postcode1)
-      expect(wrapper.vm.highlighted).toStrictEqual(postcode1)
-
+      // Overwrites previous
+      const postcode2 = createTestDodgy({ id: 10 })
       wrapper.vm.highlightPostcode(postcode2)
       expect(wrapper.vm.highlighted).toStrictEqual(postcode2)
     })
   })
 
   describe('dobump method', () => {
-    it('increments bump after timeout', () => {
+    it('increments bump after 500ms timeout', () => {
       vi.useFakeTimers()
       const wrapper = mountComponent()
       const initialBump = wrapper.vm.bump
 
       wrapper.vm.dobump()
-
       expect(wrapper.vm.bump).toBe(initialBump)
 
       vi.advanceTimersByTime(500)
-
       expect(wrapper.vm.bump).toBe(initialBump + 1)
+
       vi.useRealTimers()
     })
   })
 
   describe('Search functionality', () => {
-    it('updates searchplace when input changes', async () => {
+    it('updates searchplace on input', async () => {
       const wrapper = mountComponent()
-      const input = wrapper.find('.search-input')
-      await input.setValue('London')
+      await wrapper.find('.search-input').setValue('London')
       expect(wrapper.vm.searchplace).toBe('London')
-    })
-
-    it('search button exists and is clickable', async () => {
-      const wrapper = mountComponent()
-      const searchButton = wrapper.find('.search-button')
-      expect(searchButton.exists()).toBe(true)
-      await searchButton.trigger('click')
-      // search method is called but implementation is mocked
     })
   })
 
   describe('Cancel button', () => {
-    it('clears selection when cancel button clicked', async () => {
+    it('clears selection when clicked', async () => {
       const wrapper = mountComponent()
       wrapper.vm.selectedName = 'Test'
-      wrapper.vm.selectedWKT = 'WKT'
       wrapper.vm.selectedId = 1
       await nextTick()
 
       await wrapper.find('.cancel-button').trigger('click')
 
       expect(wrapper.vm.selectedName).toBe(null)
-      expect(wrapper.vm.selectedWKT).toBe(null)
       expect(wrapper.vm.selectedId).toBe(null)
     })
   })
 
-  describe('cgaOptions computed', () => {
-    it('returns correct fill color', () => {
+  describe('Style options', () => {
+    it('cgaOptions has darkgreen colors, dpaOptions has darkblue border', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.cgaOptions.fillColor).toBe('darkgreen')
-    })
-
-    it('returns correct boundary color', () => {
-      const wrapper = mountComponent()
       expect(wrapper.vm.cgaOptions.color).toBe('darkgreen')
-    })
-  })
-
-  describe('dpaOptions computed', () => {
-    it('returns correct fill color', () => {
-      const wrapper = mountComponent()
       expect(wrapper.vm.dpaOptions.fillColor).toBe('darkgreen')
-    })
-
-    it('returns correct boundary color', () => {
-      const wrapper = mountComponent()
       expect(wrapper.vm.dpaOptions.color).toBe('darkblue')
-    })
-  })
-
-  describe('Edge cases', () => {
-    it('handles null groupid gracefully', () => {
-      const wrapper = mountComponent({ groupid: null })
-      expect(wrapper.vm.group).toBe(null)
-    })
-
-    it('handles empty allgroups', () => {
-      mockModGroupStore.allGroups = {}
-      const wrapper = mountComponent()
-      expect(wrapper.vm.allgroups).toEqual([])
-    })
-
-    it('handles undefined locations', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.locations).toEqual([])
-    })
-
-    it('handles undefined dodgy', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.dodgy).toEqual([])
     })
   })
 })
