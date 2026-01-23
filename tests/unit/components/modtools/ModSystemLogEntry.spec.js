@@ -134,536 +134,267 @@ describe('ModSystemLogEntry', () => {
   })
 
   describe('rendering', () => {
-    it('renders log entry container', () => {
+    it('renders log entry with timestamp, source badge, action text, and details button', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.log-entry').exists()).toBe(true)
-    })
-
-    it('renders timestamp', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.timestamp').exists()).toBe(true)
       expect(wrapper.text()).toContain('10:30:00.123')
-    })
-
-    it('renders source badge', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.source-badge').exists()).toBe(true)
       expect(wrapper.text()).toContain('API')
-    })
-
-    it('renders action text', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.action-text').exists()).toBe(true)
-    })
-
-    it('renders details button', () => {
-      const wrapper = mountComponent()
       expect(wrapper.find('.details-btn').exists()).toBe(true)
     })
   })
 
   describe('sourceLabel computed', () => {
-    it('returns API for api source', () => {
-      const wrapper = mountComponent({ log: createLog({ source: 'api' }) })
-      expect(wrapper.vm.sourceLabel).toBe('API')
+    it.each([
+      ['api', 'API'],
+      ['client', 'User'],
+      ['email', 'Email'],
+      ['laravel-batch', 'Email'],
+      ['unknown_source', 'unknown_source'],
+    ])('returns %s label for %s source', (source, expected) => {
+      const wrapper = mountComponent({ log: createLog({ source }) })
+      expect(wrapper.vm.sourceLabel).toBe(expected)
     })
 
-    it('returns User for client source', () => {
-      const wrapper = mountComponent({ log: createLog({ source: 'client' }) })
-      expect(wrapper.vm.sourceLabel).toBe('User')
-    })
-
-    it('returns Email for email source', () => {
-      const wrapper = mountComponent({ log: createLog({ source: 'email' }) })
-      expect(wrapper.vm.sourceLabel).toBe('Email')
-    })
-
-    it('returns Email for laravel-batch source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'laravel-batch' }),
+    it('returns User for logs_table when same user, Mod when different', () => {
+      const sameUser = mountComponent({
+        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 123 }),
       })
-      expect(wrapper.vm.sourceLabel).toBe('Email')
-    })
+      expect(sameUser.vm.sourceLabel).toBe('User')
 
-    it('returns User for logs_table when same user', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'logs_table',
-          user_id: 123,
-          byuser_id: 123,
-        }),
+      const diffUser = mountComponent({
+        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 456 }),
       })
-      expect(wrapper.vm.sourceLabel).toBe('User')
-    })
-
-    it('returns Mod for logs_table when different users', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'logs_table',
-          user_id: 123,
-          byuser_id: 456,
-        }),
-      })
-      expect(wrapper.vm.sourceLabel).toBe('Mod')
-    })
-
-    it('returns source as-is for unknown sources', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'unknown_source' }),
-      })
-      expect(wrapper.vm.sourceLabel).toBe('unknown_source')
+      expect(diffUser.vm.sourceLabel).toBe('Mod')
     })
   })
 
   describe('sourceVariant computed', () => {
-    it('returns primary for user action in logs_table', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'logs_table',
-          user_id: 123,
-          byuser_id: 123,
-        }),
+    it('returns primary for user action and secondary for mod action in logs_table', () => {
+      const userAction = mountComponent({
+        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 123 }),
       })
-      expect(wrapper.vm.sourceVariant).toBe('primary')
+      expect(userAction.vm.sourceVariant).toBe('primary')
+
+      const modAction = mountComponent({
+        log: createLog({ source: 'logs_table', user_id: 123, byuser_id: 456 }),
+      })
+      expect(modAction.vm.sourceVariant).toBe('secondary')
     })
 
-    it('returns secondary for mod action in logs_table', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'logs_table',
-          user_id: 123,
-          byuser_id: 456,
-        }),
-      })
-      expect(wrapper.vm.sourceVariant).toBe('secondary')
-    })
-
-    it('returns success for laravel-batch source', () => {
-      const wrapper = mountComponent({
+    it('returns success for laravel-batch, uses getLogSourceVariant for others', () => {
+      const laravelBatch = mountComponent({
         log: createLog({ source: 'laravel-batch' }),
       })
-      expect(wrapper.vm.sourceVariant).toBe('success')
-    })
+      expect(laravelBatch.vm.sourceVariant).toBe('success')
 
-    it('uses getLogSourceVariant for other sources', () => {
-      const wrapper = mountComponent({ log: createLog({ source: 'api' }) })
-      expect(wrapper.vm.sourceVariant).toBe('info')
+      const api = mountComponent({ log: createLog({ source: 'api' }) })
+      expect(api.vm.sourceVariant).toBe('info')
     })
   })
 
   describe('entryClass computed', () => {
-    it('returns log-error for API 5xx status', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { status_code: 500 },
-        }),
-      })
-      expect(wrapper.vm.entryClass).toContain('log-error')
-    })
-
-    it('does not return log-error for API 4xx status', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { status_code: 400 },
-        }),
-      })
-      expect(wrapper.vm.entryClass).not.toContain('log-error')
-    })
-
-    it('returns log-error for error level non-API logs', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'client',
-          level: 'error',
-        }),
-      })
-      expect(wrapper.vm.entryClass).toContain('log-error')
-    })
-
-    it('returns log-warn for warn level non-API logs', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'client',
-          level: 'warn',
-        }),
-      })
-      expect(wrapper.vm.entryClass).toContain('log-warn')
-    })
-
-    it('returns empty for normal logs', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { status_code: 200 },
-        }),
-      })
-      expect(wrapper.vm.entryClass).toEqual([])
-    })
+    it.each([
+      [{ source: 'api', raw: { status_code: 500 } }, 'log-error', true],
+      [{ source: 'api', raw: { status_code: 400 } }, 'log-error', false],
+      [{ source: 'client', level: 'error' }, 'log-error', true],
+      [{ source: 'client', level: 'warn' }, 'log-warn', true],
+      [{ source: 'api', raw: { status_code: 200 } }, 'empty', true],
+    ])(
+      'returns correct class for %p',
+      (logProps, expectedClass, shouldContain) => {
+        const wrapper = mountComponent({ log: createLog(logProps) })
+        if (expectedClass === 'empty') {
+          expect(wrapper.vm.entryClass).toEqual([])
+        } else if (shouldContain) {
+          expect(wrapper.vm.entryClass).toContain(expectedClass)
+        } else {
+          expect(wrapper.vm.entryClass).not.toContain(expectedClass)
+        }
+      }
+    )
   })
 
   describe('rawApiCall computed', () => {
-    it('returns null for non-api source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'client' }),
-      })
-      expect(wrapper.vm.rawApiCall).toBeNull()
+    it('returns null for non-api source or missing endpoint info', () => {
+      expect(
+        mountComponent({ log: createLog({ source: 'client' }) }).vm.rawApiCall
+      ).toBeNull()
+      expect(
+        mountComponent({
+          log: createLog({ source: 'api', raw: { method: 'GET' } }),
+        }).vm.rawApiCall
+      ).toBeNull()
     })
 
-    it('returns formatted API call for v1 API', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { method: 'GET', call: 'user' },
-        }),
+    it('formats v1 API calls with /api prefix and v2 API calls as-is', () => {
+      const v1 = mountComponent({
+        log: createLog({ source: 'api', raw: { method: 'GET', call: 'user' } }),
       })
-      expect(wrapper.vm.rawApiCall).toBe('GET /api/user')
-    })
+      expect(v1.vm.rawApiCall).toBe('GET /api/user')
 
-    it('returns formatted API call for v2 API', () => {
-      const wrapper = mountComponent({
+      const v2 = mountComponent({
         log: createLog({
           source: 'api',
           raw: { method: 'POST', path: '/apiv2/message' },
         }),
       })
-      expect(wrapper.vm.rawApiCall).toBe('POST /apiv2/message')
-    })
-
-    it('returns null when no endpoint info', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          source: 'api',
-          raw: { method: 'GET' },
-        }),
-      })
-      expect(wrapper.vm.rawApiCall).toBeNull()
+      expect(v2.vm.rawApiCall).toBe('POST /apiv2/message')
     })
   })
 
   describe('duration computed', () => {
-    it('extracts duration from action text', () => {
-      const wrapper = mountComponent({
-        log: createLog({ text: 'API call (250ms)' }),
-      })
-      expect(wrapper.vm.duration).toBe('250ms')
-    })
-
-    it('returns duration from raw data', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          text: 'API call',
-          raw: { duration_ms: 150.5 },
-        }),
-      })
-      expect(wrapper.vm.duration).toBe('151ms')
-    })
-
-    it('returns null when no duration', () => {
-      const wrapper = mountComponent({
-        log: createLog({ text: 'Simple action' }),
-      })
-      expect(wrapper.vm.duration).toBeNull()
+    it('extracts duration from action text, raw.duration_ms, or returns null', () => {
+      expect(
+        mountComponent({ log: createLog({ text: 'API call (250ms)' }) }).vm
+          .duration
+      ).toBe('250ms')
+      expect(
+        mountComponent({
+          log: createLog({ text: 'API call', raw: { duration_ms: 150.5 } }),
+        }).vm.duration
+      ).toBe('151ms')
+      expect(
+        mountComponent({ log: createLog({ text: 'Simple action' }) }).vm
+          .duration
+      ).toBeNull()
     })
   })
 
   describe('ipAddress computed', () => {
-    it('returns ip from raw.ip', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { ip: '192.168.1.1' } }),
-      })
-      expect(wrapper.vm.ipAddress).toBe('192.168.1.1')
-    })
-
-    it('returns ip from raw.ip_address', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { ip_address: '10.0.0.1' } }),
-      })
-      expect(wrapper.vm.ipAddress).toBe('10.0.0.1')
-    })
-
-    it('returns ip from raw.client_ip', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { client_ip: '172.16.0.1' } }),
-      })
-      expect(wrapper.vm.ipAddress).toBe('172.16.0.1')
-    })
-
-    it('returns null for placeholder 0.0.0.0', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { ip: '0.0.0.0' } }),
-      })
-      expect(wrapper.vm.ipAddress).toBeNull()
-    })
-
-    it('returns null for placeholder ::', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { ip: '::' } }),
-      })
-      expect(wrapper.vm.ipAddress).toBeNull()
-    })
-
-    it('returns null when no ip', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.ipAddress).toBeNull()
+    it.each([
+      [{ ip: '192.168.1.1' }, '192.168.1.1'],
+      [{ ip_address: '10.0.0.1' }, '10.0.0.1'],
+      [{ client_ip: '172.16.0.1' }, '172.16.0.1'],
+      [{ ip: '0.0.0.0' }, null],
+      [{ ip: '::' }, null],
+      [{}, null],
+    ])('returns correct IP for raw=%p', (raw, expected) => {
+      const wrapper = mountComponent({ log: createLog({ raw }) })
+      expect(wrapper.vm.ipAddress).toBe(expected)
     })
   })
 
-  describe('sessionUrl computed', () => {
-    it('returns url from raw data', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { url: 'https://www.ilovefreegle.org/give' } }),
-      })
-      expect(wrapper.vm.sessionUrl).toBe('https://www.ilovefreegle.org/give')
-    })
-
-    it('returns null when no url', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.sessionUrl).toBeNull()
-    })
-  })
-
-  describe('sessionUrlDisplay computed', () => {
-    it('returns pathname and search from URL', () => {
+  describe('sessionUrl and sessionUrlDisplay computed', () => {
+    it('returns URL and formatted display path, truncating long paths', () => {
       const wrapper = mountComponent({
         log: createLog({
           raw: { url: 'https://www.ilovefreegle.org/give?type=offer' },
         }),
       })
+      expect(wrapper.vm.sessionUrl).toBe(
+        'https://www.ilovefreegle.org/give?type=offer'
+      )
       expect(wrapper.vm.sessionUrlDisplay).toBe('/give?type=offer')
-    })
 
-    it('truncates long paths', () => {
       const longPath =
         '/very/long/path/that/exceeds/fifty/characters/limit/test/more'
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: { url: `https://example.com${longPath}` },
-        }),
+      const longWrapper = mountComponent({
+        log: createLog({ raw: { url: `https://example.com${longPath}` } }),
       })
-      expect(wrapper.vm.sessionUrlDisplay.length).toBeLessThanOrEqual(50)
-      expect(wrapper.vm.sessionUrlDisplay).toContain('...')
-    })
+      expect(longWrapper.vm.sessionUrlDisplay.length).toBeLessThanOrEqual(50)
+      expect(longWrapper.vm.sessionUrlDisplay).toContain('...')
 
-    it('returns null when no sessionUrl', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.sessionUrlDisplay).toBeNull()
+      const noUrl = mountComponent({ log: createLog({ raw: {} }) })
+      expect(noUrl.vm.sessionUrl).toBeNull()
+      expect(noUrl.vm.sessionUrlDisplay).toBeNull()
     })
   })
 
   describe('messageSubject computed', () => {
-    it('returns subject from raw.message', () => {
+    it.each([
+      [{ message: { subject: 'OFFER: Chair' } }, 'OFFER: Chair'],
+      [{ subject: 'WANTED: Table' }, 'WANTED: Table'],
+      [{}, null],
+    ])('returns subject from raw=%p', (raw, expected) => {
+      const wrapper = mountComponent({ log: createLog({ raw }) })
+      expect(wrapper.vm.messageSubject).toBe(expected)
+    })
+  })
+
+  describe('queryParams/requestBody/responseBody computed', () => {
+    it('returns values from raw or null when missing', () => {
+      const params = { type: 'Offer', limit: 10 }
+      const body = { name: 'Test' }
+      const response = { ret: 0 }
+
       const wrapper = mountComponent({
         log: createLog({
-          raw: { message: { subject: 'OFFER: Chair' } },
+          raw: {
+            query_params: params,
+            request_body: body,
+            response_body: response,
+          },
         }),
       })
-      expect(wrapper.vm.messageSubject).toBe('OFFER: Chair')
-    })
-
-    it('returns subject from raw.subject', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { subject: 'WANTED: Table' } }),
-      })
-      expect(wrapper.vm.messageSubject).toBe('WANTED: Table')
-    })
-
-    it('returns null when no subject', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.messageSubject).toBeNull()
-    })
-  })
-
-  describe('queryParams computed', () => {
-    it('returns query_params from raw', () => {
-      const params = { type: 'Offer', limit: 10 }
-      const wrapper = mountComponent({
-        log: createLog({ raw: { query_params: params } }),
-      })
       expect(wrapper.vm.queryParams).toEqual(params)
-    })
-
-    it('returns null when no query_params', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.queryParams).toBeNull()
-    })
-  })
-
-  describe('requestBody computed', () => {
-    it('returns request_body from raw', () => {
-      const body = { name: 'Test', email: 'test@example.com' }
-      const wrapper = mountComponent({
-        log: createLog({ raw: { request_body: body } }),
-      })
       expect(wrapper.vm.requestBody).toEqual(body)
-    })
+      expect(wrapper.vm.responseBody).toEqual(response)
 
-    it('returns null when no request_body', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.requestBody).toBeNull()
-    })
-  })
-
-  describe('responseBody computed', () => {
-    it('returns response_body from raw', () => {
-      const body = { ret: 0, status: 'success' }
-      const wrapper = mountComponent({
-        log: createLog({ raw: { response_body: body } }),
-      })
-      expect(wrapper.vm.responseBody).toEqual(body)
-    })
-
-    it('returns null when no response_body', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.responseBody).toBeNull()
+      const emptyWrapper = mountComponent({ log: createLog({ raw: {} }) })
+      expect(emptyWrapper.vm.queryParams).toBeNull()
+      expect(emptyWrapper.vm.requestBody).toBeNull()
+      expect(emptyWrapper.vm.responseBody).toBeNull()
     })
   })
 
-  describe('isApiLog computed', () => {
-    it('returns true for api source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'api' }),
-      })
-      expect(wrapper.vm.isApiLog).toBe(true)
-    })
+  describe('isApiLog and requestId computed', () => {
+    it('returns true for api source and request_id from raw', () => {
+      expect(
+        mountComponent({ log: createLog({ source: 'api' }) }).vm.isApiLog
+      ).toBe(true)
+      expect(
+        mountComponent({ log: createLog({ source: 'client' }) }).vm.isApiLog
+      ).toBe(false)
 
-    it('returns false for non-api source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'client' }),
-      })
-      expect(wrapper.vm.isApiLog).toBe(false)
-    })
-  })
-
-  describe('requestId computed', () => {
-    it('returns request_id from raw', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { request_id: 'abc123' } }),
-      })
-      expect(wrapper.vm.requestId).toBe('abc123')
-    })
-
-    it('returns null when no request_id', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.requestId).toBeNull()
+      expect(
+        mountComponent({
+          log: createLog({ raw: { request_id: 'abc123' } }),
+        }).vm.requestId
+      ).toBe('abc123')
+      expect(
+        mountComponent({ log: createLog({ raw: {} }) }).vm.requestId
+      ).toBeNull()
     })
   })
 
   describe('deviceInfo computed', () => {
-    it('detects Chrome browser', () => {
+    it.each([
+      ['Chrome/120.0.0.0', 'Chrome'],
+      ['Firefox/121.0', 'Firefox'],
+      ['Safari/605.1.15', 'Safari'],
+      ['Edg/120.0.0.0', 'Edge'],
+    ])('detects %s browser', (ua, browser) => {
       const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent:
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-          },
-        }),
+        log: createLog({ raw: { user_agent: `Mozilla/5.0 ${ua}` } }),
       })
-      expect(wrapper.vm.deviceInfo.browser).toBe('Chrome')
+      expect(wrapper.vm.deviceInfo.browser).toBe(browser)
     })
 
-    it('detects Firefox browser', () => {
+    it.each([
+      ['iPhone', 'mobile'],
+      ['iPad', 'tablet'],
+      ['Windows NT', 'desktop'],
+    ])('detects %s device type', (uaFragment, type) => {
+      const ua =
+        uaFragment === 'Windows NT'
+          ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0'
+          : `Mozilla/5.0 (${uaFragment}; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15`
       const wrapper = mountComponent({
-        log: createLog({
-          raw: { user_agent: 'Mozilla/5.0 Firefox/121.0' },
-        }),
+        log: createLog({ raw: { user_agent: ua } }),
       })
-      expect(wrapper.vm.deviceInfo.browser).toBe('Firefox')
+      expect(wrapper.vm.deviceInfo.type).toBe(type)
     })
 
-    it('detects Safari browser', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent:
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15',
-          },
-        }),
-      })
-      expect(wrapper.vm.deviceInfo.browser).toBe('Safari')
-    })
-
-    it('detects Edge browser', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: { user_agent: 'Mozilla/5.0 Edg/120.0.0.0' },
-        }),
-      })
-      expect(wrapper.vm.deviceInfo.browser).toBe('Edge')
-    })
-
-    it('detects mobile device', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent:
-              'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148',
-          },
-        }),
-      })
-      expect(wrapper.vm.deviceInfo.type).toBe('mobile')
-    })
-
-    it('detects tablet device', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent:
-              'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
-          },
-        }),
-      })
-      expect(wrapper.vm.deviceInfo.type).toBe('tablet')
-    })
-
-    it('detects desktop by default', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent:
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0',
-          },
-        }),
-      })
-      expect(wrapper.vm.deviceInfo.type).toBe('desktop')
-    })
-
-    it('includes screen size when available', () => {
+    it('includes screen size and app info when available', () => {
       const wrapper = mountComponent({
         log: createLog({
           raw: {
             user_agent: 'Mozilla/5.0 Chrome/120.0',
             viewport_width: 1920,
             viewport_height: 1080,
-          },
-        }),
-      })
-      // Component uses multiplication sign (×) not x
-      expect(wrapper.vm.deviceInfo.screenSize).toBe('1920×1080')
-    })
-
-    it('detects app info', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent: 'Mozilla/5.0',
             app_platform: 'ios',
             app_model: 'iPhone 15',
             app_manufacturer: 'Apple',
@@ -671,305 +402,174 @@ describe('ModSystemLogEntry', () => {
           },
         }),
       })
+      expect(wrapper.vm.deviceInfo.screenSize).toBe('1920×1080')
       expect(wrapper.vm.deviceInfo.isApp).toBe(true)
       expect(wrapper.vm.deviceInfo.appPlatform).toBe('ios')
       expect(wrapper.vm.deviceInfo.appModel).toBe('iPhone 15')
-      expect(wrapper.vm.deviceInfo.appManufacturer).toBe('Apple')
-      expect(wrapper.vm.deviceInfo.appVersion).toBe('2.1.0')
     })
 
     it('returns null when no user agent', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
+      const wrapper = mountComponent({ log: createLog({ raw: {} }) })
       expect(wrapper.vm.deviceInfo).toBeNull()
     })
   })
 
   describe('hasDeviceInfo computed', () => {
-    it('returns truthy when browser is known', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: { user_agent: 'Mozilla/5.0 Chrome/120.0' },
-        }),
-      })
-      expect(wrapper.vm.hasDeviceInfo).toBeTruthy()
-    })
+    it('returns truthy when browser known or screenSize available, falsy otherwise', () => {
+      expect(
+        mountComponent({
+          log: createLog({ raw: { user_agent: 'Mozilla/5.0 Chrome/120.0' } }),
+        }).vm.hasDeviceInfo
+      ).toBeTruthy()
 
-    it('returns truthy when screenSize is available', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent: 'Mozilla/5.0',
-            viewport_width: 1920,
-            viewport_height: 1080,
-          },
-        }),
-      })
-      expect(wrapper.vm.hasDeviceInfo).toBeTruthy()
-    })
+      expect(
+        mountComponent({
+          log: createLog({
+            raw: {
+              user_agent: 'Mozilla/5.0',
+              viewport_width: 1920,
+              viewport_height: 1080,
+            },
+          }),
+        }).vm.hasDeviceInfo
+      ).toBeTruthy()
 
-    it('returns falsy when browser is unknown and no screen size', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: { user_agent: 'CustomBot/1.0' },
-        }),
-      })
-      expect(wrapper.vm.hasDeviceInfo).toBeFalsy()
-    })
+      expect(
+        mountComponent({
+          log: createLog({ raw: { user_agent: 'CustomBot/1.0' } }),
+        }).vm.hasDeviceInfo
+      ).toBeFalsy()
 
-    it('returns falsy when no deviceInfo', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.hasDeviceInfo).toBeFalsy()
+      expect(
+        mountComponent({ log: createLog({ raw: {} }) }).vm.hasDeviceInfo
+      ).toBeFalsy()
     })
   })
 
-  describe('sentryEventId computed', () => {
-    it('returns sentry_event_id from raw', () => {
+  describe('sentryEventId and sentryUrl computed', () => {
+    it('returns event ID and URL when present, null otherwise', () => {
       const wrapper = mountComponent({
         log: createLog({ raw: { sentry_event_id: 'abc123def456' } }),
       })
       expect(wrapper.vm.sentryEventId).toBe('abc123def456')
-    })
-
-    it('returns null when no sentry_event_id', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.sentryEventId).toBeNull()
-    })
-  })
-
-  describe('sentryUrl computed', () => {
-    it('returns Sentry URL when event ID exists', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { sentry_event_id: 'abc123def456' } }),
-      })
       expect(wrapper.vm.sentryUrl).toBe(
         'https://freegle.sentry.io/issues/?query=abc123def456'
       )
-    })
 
-    it('returns null when no event ID', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.vm.sentryUrl).toBeNull()
+      const emptyWrapper = mountComponent({ log: createLog({ raw: {} }) })
+      expect(emptyWrapper.vm.sentryEventId).toBeNull()
+      expect(emptyWrapper.vm.sentryUrl).toBeNull()
     })
   })
 
-  describe('displayUser computed', () => {
-    it('returns user from store when available', () => {
-      mockUserStore.list = {
-        123: { id: 123, displayname: 'Test User' },
-      }
+  describe('displayUser/byUser/displayGroup computed', () => {
+    it('returns entity from store, undefined when not in store, null when no ID', () => {
+      mockUserStore.list = { 123: { id: 123, displayname: 'Test User' } }
+      mockGroupStore.list = { 789: { id: 789, nameshort: 'TestGroup' } }
+
       const wrapper = mountComponent({
-        log: createLog({ user_id: 123 }),
+        log: createLog({ user_id: 123, byuser_id: 456, group_id: 789 }),
       })
       expect(wrapper.vm.displayUser).toEqual({
         id: 123,
         displayname: 'Test User',
       })
-    })
-
-    it('returns undefined when user not in store', () => {
-      mockUserStore.list = {}
-      const wrapper = mountComponent({
-        log: createLog({ user_id: 123 }),
-      })
-      expect(wrapper.vm.displayUser).toBeUndefined()
-    })
-
-    it('returns null when no user_id', () => {
-      const wrapper = mountComponent({
-        log: createLog({ user_id: null }),
-      })
-      expect(wrapper.vm.displayUser).toBeNull()
-    })
-  })
-
-  describe('byUser computed', () => {
-    it('returns byuser from store when available', () => {
-      mockUserStore.list = {
-        456: { id: 456, displayname: 'Mod User' },
-      }
-      const wrapper = mountComponent({
-        log: createLog({ byuser_id: 456 }),
-      })
-      expect(wrapper.vm.byUser).toEqual({
-        id: 456,
-        displayname: 'Mod User',
-      })
-    })
-
-    it('returns undefined when byuser not in store', () => {
-      mockUserStore.list = {}
-      const wrapper = mountComponent({
-        log: createLog({ byuser_id: 456 }),
-      })
-      expect(wrapper.vm.byUser).toBeUndefined()
-    })
-
-    it('returns null when no byuser_id', () => {
-      const wrapper = mountComponent({
-        log: createLog({ byuser_id: null }),
-      })
-      expect(wrapper.vm.byUser).toBeNull()
-    })
-  })
-
-  describe('displayGroup computed', () => {
-    it('returns group from store when available', () => {
-      mockGroupStore.list = {
-        789: { id: 789, nameshort: 'TestGroup' },
-      }
-      const wrapper = mountComponent({
-        log: createLog({ group_id: 789 }),
-      })
+      expect(wrapper.vm.byUser).toBeUndefined() // 456 not in store
       expect(wrapper.vm.displayGroup).toEqual({
         id: 789,
         nameshort: 'TestGroup',
       })
-    })
 
-    it('returns undefined when group not in store', () => {
-      mockGroupStore.list = {}
-      const wrapper = mountComponent({
-        log: createLog({ group_id: 789 }),
+      const noIds = mountComponent({
+        log: createLog({ user_id: null, byuser_id: null, group_id: null }),
       })
-      expect(wrapper.vm.displayGroup).toBeUndefined()
-    })
-
-    it('returns null when no group_id', () => {
-      const wrapper = mountComponent({
-        log: createLog({ group_id: null }),
-      })
-      expect(wrapper.vm.displayGroup).toBeNull()
+      expect(noIds.vm.displayUser).toBeNull()
+      expect(noIds.vm.byUser).toBeNull()
+      expect(noIds.vm.displayGroup).toBeNull()
     })
   })
 
   describe('formattedRaw computed', () => {
-    it('returns formatted JSON', () => {
+    it('returns formatted JSON or empty object', () => {
       const raw = { key: 'value', nested: { a: 1 } }
-      const wrapper = mountComponent({
-        log: createLog({ raw }),
-      })
-      expect(wrapper.vm.formattedRaw).toBe(JSON.stringify(raw, null, 2))
-    })
+      expect(mountComponent({ log: createLog({ raw }) }).vm.formattedRaw).toBe(
+        JSON.stringify(raw, null, 2)
+      )
 
-    it('returns empty object JSON when no raw', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: undefined }),
-      })
-      expect(wrapper.vm.formattedRaw).toBe('{}')
+      expect(
+        mountComponent({ log: createLog({ raw: undefined }) }).vm.formattedRaw
+      ).toBe('{}')
     })
   })
 
-  describe('count badge', () => {
-    it('does not show count badge when count is 1', () => {
+  describe('count badge and expanded entries', () => {
+    it('shows count badge when count > 1 and toggles expanded entries on click', async () => {
       const wrapper = mountComponent({ count: 1 })
       expect(wrapper.find('.count-badge').exists()).toBe(false)
-    })
 
-    it('shows count badge when count > 1', () => {
-      const wrapper = mountComponent({ count: 5 })
-      expect(wrapper.find('.count-badge').exists()).toBe(true)
-      expect(wrapper.text()).toContain('5x')
-    })
-
-    it('toggles expanded on count badge click', async () => {
-      const wrapper = mountComponent({
+      const multiWrapper = mountComponent({
         count: 3,
-        entries: [{ id: 1 }, { id: 2 }, { id: 3 }],
+        entries: [
+          { id: 1, timestamp: '2024-01-15T10:00:00Z' },
+          { id: 2, timestamp: '2024-01-15T10:15:00Z' },
+          { id: 3, timestamp: '2024-01-15T10:30:00Z' },
+        ],
       })
-      expect(wrapper.vm.isExpanded).toBe(false)
-      await wrapper.find('.count-badge').trigger('click')
-      expect(wrapper.vm.isExpanded).toBe(true)
-      await wrapper.find('.count-badge').trigger('click')
-      expect(wrapper.vm.isExpanded).toBe(false)
-    })
-  })
+      expect(multiWrapper.find('.count-badge').exists()).toBe(true)
+      expect(multiWrapper.text()).toContain('3x')
+      expect(multiWrapper.vm.isExpanded).toBe(false)
+      expect(multiWrapper.find('.expanded-entries').exists()).toBe(false)
 
-  describe('expanded entries', () => {
-    it('shows expanded entries when count > 1 and isExpanded', async () => {
-      const entries = [
-        { id: 1, timestamp: '2024-01-15T10:00:00Z' },
-        { id: 2, timestamp: '2024-01-15T10:15:00Z' },
-        { id: 3, timestamp: '2024-01-15T10:30:00Z' },
-      ]
-      const wrapper = mountComponent({ count: 3, entries })
-      await wrapper.find('.count-badge').trigger('click')
-      expect(wrapper.find('.expanded-entries').exists()).toBe(true)
-      expect(wrapper.findAll('.expanded-entry-row')).toHaveLength(3)
-    })
+      await multiWrapper.find('.count-badge').trigger('click')
+      expect(multiWrapper.vm.isExpanded).toBe(true)
+      expect(multiWrapper.find('.expanded-entries').exists()).toBe(true)
+      expect(multiWrapper.findAll('.expanded-entry-row')).toHaveLength(3)
 
-    it('does not show expanded entries when collapsed', () => {
-      const wrapper = mountComponent({
-        count: 3,
-        entries: [{ id: 1 }, { id: 2 }, { id: 3 }],
-      })
-      expect(wrapper.find('.expanded-entries').exists()).toBe(false)
+      await multiWrapper.find('.count-badge').trigger('click')
+      expect(multiWrapper.vm.isExpanded).toBe(false)
     })
   })
 
   describe('user column visibility', () => {
-    it('shows user column by default', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.log-col-user').exists()).toBe(true)
-    })
-
-    it('hides user column when hideUserColumn is true', () => {
-      const wrapper = mountComponent({ hideUserColumn: true })
-      expect(wrapper.find('.log-col-user').exists()).toBe(false)
+    it('shows by default, hides when hideUserColumn is true', () => {
+      expect(mountComponent().find('.log-col-user').exists()).toBe(true)
+      expect(
+        mountComponent({ hideUserColumn: true }).find('.log-col-user').exists()
+      ).toBe(false)
     })
   })
 
   describe('user display', () => {
-    it('shows user info when displayUser is available', () => {
+    it('shows user info, placeholder when loading, or Anon for api without user', () => {
       mockUserStore.list = {
         123: {
           id: 123,
           displayname: 'Test User',
-          profile: { url: 'https://example.com/photo.jpg' },
+          profile: { url: 'photo.jpg' },
         },
       }
-      const wrapper = mountComponent({
-        log: createLog({ user_id: 123 }),
-      })
-      expect(wrapper.find('.user-display').exists()).toBe(true)
-      expect(wrapper.text()).toContain('Test User')
-    })
+      const withUser = mountComponent({ log: createLog({ user_id: 123 }) })
+      expect(withUser.find('.user-display').exists()).toBe(true)
+      expect(withUser.text()).toContain('Test User')
 
-    it('shows user placeholder when loading', () => {
       mockUserStore.list = {}
-      const wrapper = mountComponent({
-        log: createLog({ user_id: 123 }),
-      })
-      expect(wrapper.find('.user-placeholder').exists()).toBe(true)
-      expect(wrapper.text()).toContain('#123')
-    })
+      const loading = mountComponent({ log: createLog({ user_id: 123 }) })
+      expect(loading.find('.user-placeholder').exists()).toBe(true)
+      expect(loading.text()).toContain('#123')
 
-    it('shows Anon for api source without user', () => {
-      const wrapper = mountComponent({
+      const anon = mountComponent({
         log: createLog({ source: 'api', user_id: null }),
       })
-      expect(wrapper.text()).toContain('Anon')
+      expect(anon.text()).toContain('Anon')
     })
   })
 
   describe('details modal', () => {
-    it('opens modal on details button click', async () => {
+    it('opens on details button click and shows modal content', async () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.showModal).toBe(false)
       await wrapper.find('.details-btn').trigger('click')
       expect(wrapper.vm.showModal).toBe(true)
-    })
-
-    it('shows modal content when open', async () => {
-      const wrapper = mountComponent()
-      await wrapper.find('.details-btn').trigger('click')
       expect(wrapper.find('.modal').exists()).toBe(true)
     })
   })
@@ -984,256 +584,166 @@ describe('ModSystemLogEntry', () => {
       expect(wrapper.emitted('filter-ip')[0]).toEqual(['192.168.1.1'])
     })
 
-    it('emits filter-trace when filter by trace clicked in modal', async () => {
-      const wrapper = mountComponent({
-        log: createLog({ trace_id: 'trace-123' }),
-      })
-      await wrapper.find('.details-btn').trigger('click')
-      wrapper.vm.filterByTraceAndClose()
-      expect(wrapper.emitted('filter-trace')).toBeTruthy()
-      expect(wrapper.emitted('filter-trace')[0]).toEqual(['trace-123'])
-      expect(wrapper.vm.showModal).toBe(false)
-    })
-
-    it('emits filter-session when filter by session clicked in modal', async () => {
-      const wrapper = mountComponent({
-        log: createLog({ session_id: 'session-456' }),
-      })
-      await wrapper.find('.details-btn').trigger('click')
-      wrapper.vm.filterBySessionAndClose()
-      expect(wrapper.emitted('filter-session')).toBeTruthy()
-      expect(wrapper.emitted('filter-session')[0]).toEqual(['session-456'])
-      expect(wrapper.vm.showModal).toBe(false)
-    })
-
-    it('emits filter-ip and closes modal', async () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { ip: '10.0.0.1' } }),
-      })
-      await wrapper.find('.details-btn').trigger('click')
-      wrapper.vm.filterByIpAndClose()
-      expect(wrapper.emitted('filter-ip')).toBeTruthy()
-      expect(wrapper.emitted('filter-ip')[0]).toEqual(['10.0.0.1'])
-      expect(wrapper.vm.showModal).toBe(false)
-    })
+    it.each([
+      ['filterByTraceAndClose', 'filter-trace', 'trace_id', 'trace-123'],
+      [
+        'filterBySessionAndClose',
+        'filter-session',
+        'session_id',
+        'session-456',
+      ],
+      ['filterByIpAndClose', 'filter-ip', 'raw', { ip: '10.0.0.1' }],
+    ])(
+      '%s emits %s and closes modal',
+      async (method, event, logProp, logValue) => {
+        const log =
+          logProp === 'raw'
+            ? createLog({ raw: logValue })
+            : createLog({ [logProp]: logValue })
+        const wrapper = mountComponent({ log })
+        await wrapper.find('.details-btn').trigger('click')
+        wrapper.vm[method]()
+        expect(wrapper.emitted(event)).toBeTruthy()
+        expect(wrapper.vm.showModal).toBe(false)
+      }
+    )
   })
 
   describe('methods', () => {
-    it('toggleExpanded toggles isExpanded state', () => {
+    it('toggleExpanded, formatEntryTime, and formatJson work correctly', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.isExpanded).toBe(false)
       wrapper.vm.toggleExpanded()
       expect(wrapper.vm.isExpanded).toBe(true)
       wrapper.vm.toggleExpanded()
       expect(wrapper.vm.isExpanded).toBe(false)
-    })
 
-    it('formatEntryTime calls formatLogTimestamp', () => {
-      const wrapper = mountComponent()
-      const result = wrapper.vm.formatEntryTime('2024-01-15T10:00:00Z')
-      expect(result).toBe('10:30:00.123')
-    })
-
-    it('formatJson formats object to JSON string', () => {
-      const wrapper = mountComponent()
-      const result = wrapper.vm.formatJson({ key: 'value' })
-      expect(result).toBe(JSON.stringify({ key: 'value' }, null, 2))
+      expect(wrapper.vm.formatEntryTime('2024-01-15T10:00:00Z')).toBe(
+        '10:30:00.123'
+      )
+      expect(wrapper.vm.formatJson({ key: 'value' })).toBe(
+        JSON.stringify({ key: 'value' }, null, 2)
+      )
     })
   })
 
   describe('user/group fetching on mount', () => {
-    it('fetches user when user_id present and not in store', () => {
+    it('fetches user/group when not in store, skips when already present', () => {
       mockUserStore.list = {}
-      mountComponent({
-        log: createLog({ user_id: 123 }),
-      })
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
-    })
-
-    it('does not fetch user when already in store', () => {
-      mockUserStore.list = { 123: { id: 123 } }
-      mountComponent({
-        log: createLog({ user_id: 123 }),
-      })
-      expect(mockUserStore.fetch).not.toHaveBeenCalled()
-    })
-
-    it('fetches group when group_id present and not in store', () => {
       mockGroupStore.list = {}
       mountComponent({
-        log: createLog({ group_id: 789 }),
+        log: createLog({ user_id: 123, byuser_id: 456, group_id: 789 }),
       })
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
       expect(mockGroupStore.fetch).toHaveBeenCalledWith(789)
-    })
 
-    it('does not fetch group when already in store', () => {
+      vi.clearAllMocks()
+      mockUserStore.list = { 123: { id: 123 } }
       mockGroupStore.list = { 789: { id: 789 } }
       mountComponent({
-        log: createLog({ group_id: 789 }),
+        log: createLog({ user_id: 123, group_id: 789 }),
       })
+      expect(mockUserStore.fetch).not.toHaveBeenCalled()
       expect(mockGroupStore.fetch).not.toHaveBeenCalled()
-    })
-
-    it('fetches byuser when byuser_id present and not in store', () => {
-      mockUserStore.list = {}
-      mountComponent({
-        log: createLog({ byuser_id: 456 }),
-      })
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
     })
   })
 
   describe('laravelLevel computed', () => {
-    it('returns parsed level for laravel-batch source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'laravel-batch' }),
-      })
-      expect(wrapper.vm.laravelLevel).toEqual({
-        level: 'INFO',
-        variant: 'info',
-      })
-    })
-
-    it('returns null for non-laravel-batch source', () => {
-      const wrapper = mountComponent({
-        log: createLog({ source: 'api' }),
-      })
-      expect(wrapper.vm.laravelLevel).toBeNull()
+    it('returns parsed level for laravel-batch, null for others', () => {
+      expect(
+        mountComponent({ log: createLog({ source: 'laravel-batch' }) }).vm
+          .laravelLevel
+      ).toEqual({ level: 'INFO', variant: 'info' })
+      expect(
+        mountComponent({ log: createLog({ source: 'api' }) }).vm.laravelLevel
+      ).toBeNull()
     })
   })
 
   describe('group and message display', () => {
-    it('shows group tag when displayGroup available', () => {
-      mockGroupStore.list = {
-        789: { id: 789, nameshort: 'TestGroup' },
-      }
-      const wrapper = mountComponent({
-        log: createLog({ group_id: 789 }),
-      })
-      expect(wrapper.find('.group-tag').exists()).toBe(true)
-      expect(wrapper.text()).toContain('TestGroup')
-    })
+    it('shows group tag/id and message tag based on availability', () => {
+      mockGroupStore.list = { 789: { id: 789, nameshort: 'TestGroup' } }
+      const withGroup = mountComponent({ log: createLog({ group_id: 789 }) })
+      expect(withGroup.find('.group-tag').exists()).toBe(true)
+      expect(withGroup.text()).toContain('TestGroup')
 
-    it('shows group id when group not in store', () => {
       mockGroupStore.list = {}
-      const wrapper = mountComponent({
-        log: createLog({ group_id: 789 }),
-      })
-      expect(wrapper.text()).toContain('group #789')
-    })
+      const noGroupData = mountComponent({ log: createLog({ group_id: 789 }) })
+      expect(noGroupData.text()).toContain('group #789')
 
-    it('shows message tag when message_id present', () => {
-      const wrapper = mountComponent({
+      const withMessage = mountComponent({
         log: createLog({ message_id: 555 }),
       })
-      expect(wrapper.find('.message-tag').exists()).toBe(true)
+      expect(withMessage.find('.message-tag').exists()).toBe(true)
     })
   })
 
   describe('sentry indicator', () => {
-    it('shows sentry indicator when sentryEventId present', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: { sentry_event_id: 'abc123' } }),
-      })
-      expect(wrapper.find('.sentry-indicator').exists()).toBe(true)
-    })
-
-    it('does not show sentry indicator when no sentryEventId', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.find('.sentry-indicator').exists()).toBe(false)
+    it('shows when sentryEventId present, hides otherwise', () => {
+      expect(
+        mountComponent({
+          log: createLog({ raw: { sentry_event_id: 'abc123' } }),
+        })
+          .find('.sentry-indicator')
+          .exists()
+      ).toBe(true)
+      expect(
+        mountComponent({ log: createLog({ raw: {} }) })
+          .find('.sentry-indicator')
+          .exists()
+      ).toBe(false)
     })
   })
 
   describe('device info display', () => {
-    it('shows device info summary when hasDeviceInfo', () => {
+    it('shows device info summary with screen and app chips when available', () => {
       const wrapper = mountComponent({
         log: createLog({
           raw: {
             user_agent: 'Mozilla/5.0 Chrome/120.0',
             viewport_width: 1920,
             viewport_height: 1080,
-          },
-        }),
-      })
-      expect(wrapper.find('.device-info-summary').exists()).toBe(true)
-    })
-
-    it('does not show device info summary when no device info', () => {
-      const wrapper = mountComponent({
-        log: createLog({ raw: {} }),
-      })
-      expect(wrapper.find('.device-info-summary').exists()).toBe(false)
-    })
-
-    it('shows screen size chip', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            user_agent: 'Mozilla/5.0 Chrome/120.0',
-            viewport_width: 1920,
-            viewport_height: 1080,
-          },
-        }),
-      })
-      expect(wrapper.find('.screen-chip').exists()).toBe(true)
-      // Component uses multiplication sign (×) not x
-      expect(wrapper.text()).toContain('1920×1080')
-    })
-
-    it('shows app chip when isApp', () => {
-      const wrapper = mountComponent({
-        log: createLog({
-          raw: {
-            // Need Chrome in UA to make hasDeviceInfo truthy
-            user_agent: 'Mozilla/5.0 Chrome/120.0',
             app_platform: 'ios',
             app_model: 'iPhone 15',
             app_manufacturer: 'Apple',
           },
         }),
       })
+      expect(wrapper.find('.device-info-summary').exists()).toBe(true)
+      expect(wrapper.find('.screen-chip').exists()).toBe(true)
+      expect(wrapper.text()).toContain('1920×1080')
       expect(wrapper.find('.app-chip').exists()).toBe(true)
+
+      expect(
+        mountComponent({ log: createLog({ raw: {} }) })
+          .find('.device-info-summary')
+          .exists()
+      ).toBe(false)
     })
   })
 
   describe('actionTextClean computed', () => {
-    it('removes duration from action text', () => {
-      mockUserStore.list = {}
-      mockGroupStore.list = {}
-      const wrapper = mountComponent({
+    it('removes duration and replaces user/group IDs with names', () => {
+      mockUserStore.list = { 123: { id: 123, displayname: 'John Doe' } }
+      mockGroupStore.list = { 789: { id: 789, nameshort: 'FreegleTest' } }
+
+      const withDuration = mountComponent({
         log: createLog({ text: 'API call (250ms)' }),
       })
-      expect(wrapper.vm.actionTextClean).not.toContain('(250ms)')
-    })
+      expect(withDuration.vm.actionTextClean).not.toContain('(250ms)')
 
-    it('replaces user #ID with username when available', () => {
-      mockUserStore.list = {
-        123: { id: 123, displayname: 'John Doe' },
-      }
-      const wrapper = mountComponent({
-        log: createLog({
-          user_id: 123,
-          text: 'Action by user #123',
-        }),
+      const withUser = mountComponent({
+        log: createLog({ user_id: 123, text: 'Action by user #123' }),
       })
-      expect(wrapper.vm.actionTextClean).toContain('John Doe')
-      expect(wrapper.vm.actionTextClean).not.toContain('user #123')
-    })
+      expect(withUser.vm.actionTextClean).toContain('John Doe')
+      expect(withUser.vm.actionTextClean).not.toContain('user #123')
 
-    it('replaces group #ID with group name when available', () => {
-      mockGroupStore.list = {
-        789: { id: 789, nameshort: 'FreegleTest' },
-      }
-      const wrapper = mountComponent({
-        log: createLog({
-          group_id: 789,
-          text: 'Joined group #789',
-        }),
+      const withGroup = mountComponent({
+        log: createLog({ group_id: 789, text: 'Joined group #789' }),
       })
-      expect(wrapper.vm.actionTextClean).toContain('FreegleTest')
-      expect(wrapper.vm.actionTextClean).not.toContain('group #789')
+      expect(withGroup.vm.actionTextClean).toContain('FreegleTest')
+      expect(withGroup.vm.actionTextClean).not.toContain('group #789')
     })
   })
 })
