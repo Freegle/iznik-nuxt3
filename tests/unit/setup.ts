@@ -45,19 +45,11 @@ import {
 // ============================================
 // VUE WARNINGS HANDLER - Fail tests on warnings
 // ============================================
-// Note: For scaffold tests, we allow "Missing required prop" warnings since
-// the scaffolds don't know the required props for each component.
-// Once tests are properly filled in with required props, those warnings will go away.
 const originalWarn = console.warn
 console.warn = (...args: unknown[]) => {
   const message = typeof args[0] === 'string' ? args[0] : ''
   if (message.includes('[Vue warn]')) {
-    // Allow missing required prop warnings for scaffold tests
-    if (message.includes('Missing required prop') || message.includes('Invalid prop')) {
-      originalWarn.apply(console, args)
-      return
-    }
-    // Throw an error for other Vue warnings
+    // Throw an error to fail the test
     throw new Error(`Vue warning should not occur in tests: ${args.join(' ')}`)
   }
   originalWarn.apply(console, args)
