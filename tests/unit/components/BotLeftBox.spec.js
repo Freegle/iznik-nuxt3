@@ -1,37 +1,133 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
 import BotLeftBox from '~/components/BotLeftBox.vue'
 
-
 describe('BotLeftBox', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  function mountComponent(props = {}) {
+  function createWrapper() {
     return mount(BotLeftBox, {
-      props: {
-        // Add required props
-        ...props,
-      },
       global: {
         stubs: {
-          'b-button': true,
-          'b-modal': true,
-          'b-row': { template: '<div><slot /></div>' },
-          'b-col': { template: '<div><slot /></div>' },
-          'v-icon': true,
-          'nuxt-link': { template: '<a><slot /></a>', props: ['to'] },
+          'nuxt-link': {
+            template: '<a :href="to"><slot /></a>',
+            props: ['to', 'noPrefetch'],
+          },
+          ExternalLink: {
+            template: '<a :href="href" :title="title"><slot /></a>',
+            props: ['href', 'title'],
+          },
+          'v-icon': {
+            template:
+              '<i :class="Array.isArray(icon) ? icon.join(\' \') : icon" />',
+            props: ['icon'],
+          },
         },
       },
     })
   }
 
   describe('rendering', () => {
-    it('mounts without error', () => {
-      const wrapper = mountComponent()
-      
+    it('mounts successfully', () => {
+      const wrapper = createWrapper()
       expect(wrapper.exists()).toBe(true)
+    })
+
+    it('renders footer-nav container', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.footer-nav').exists()).toBe(true)
+    })
+
+    it('renders footer-links section', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.footer-links').exists()).toBe(true)
+    })
+
+    it('renders footer-social section', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.footer-social').exists()).toBe(true)
+    })
+  })
+
+  describe('navigation links', () => {
+    it('includes About link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/about"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('About')
+    })
+
+    it('includes Terms link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/terms"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('Terms')
+    })
+
+    it('includes Privacy link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/privacy"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('Privacy')
+    })
+
+    it('includes Disclaimer link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/disclaimer"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('Disclaimer')
+    })
+
+    it('includes Donate link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/donate"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('Donate')
+    })
+
+    it('includes Contact link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="/help"]')
+      expect(link.exists()).toBe(true)
+      expect(link.text()).toBe('Contact')
+    })
+  })
+
+  describe('social links', () => {
+    it('includes Facebook link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="https://www.facebook.com/Freegle/"]')
+      expect(link.exists()).toBe(true)
+      expect(link.attributes('title')).toBe('Facebook')
+    })
+
+    it('includes Instagram link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find(
+        'a[href="https://www.instagram.com/thisisfreegle"]'
+      )
+      expect(link.exists()).toBe(true)
+      expect(link.attributes('title')).toBe('Instagram')
+    })
+
+    it('includes Twitter link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find('a[href="https://twitter.com/thisisfreegle"]')
+      expect(link.exists()).toBe(true)
+      expect(link.attributes('title')).toBe('X')
+    })
+
+    it('includes GitHub link', () => {
+      const wrapper = createWrapper()
+      const link = wrapper.find(
+        'a[href="https://github.com/Freegle/iznik-nuxt3"]'
+      )
+      expect(link.exists()).toBe(true)
+      expect(link.attributes('title')).toContain('GitHub')
+    })
+
+    it('has 4 social links', () => {
+      const wrapper = createWrapper()
+      const socialLinks = wrapper.findAll('.footer-social a')
+      expect(socialLinks).toHaveLength(4)
     })
   })
 })

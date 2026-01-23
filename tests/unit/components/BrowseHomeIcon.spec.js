@@ -1,37 +1,50 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
 import BrowseHomeIcon from '~/components/BrowseHomeIcon.vue'
 
-
 describe('BrowseHomeIcon', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  function mountComponent(props = {}) {
+  function createWrapper() {
     return mount(BrowseHomeIcon, {
-      props: {
-        // Add required props
-        ...props,
-      },
       global: {
         stubs: {
-          'b-button': true,
-          'b-modal': true,
-          'b-row': { template: '<div><slot /></div>' },
-          'b-col': { template: '<div><slot /></div>' },
-          'v-icon': true,
-          'nuxt-link': { template: '<a><slot /></a>', props: ['to'] },
+          'v-icon': {
+            template: '<i :class="icon" />',
+            props: ['icon'],
+          },
         },
       },
     })
   }
 
   describe('rendering', () => {
-    it('mounts without error', () => {
-      const wrapper = mountComponent()
-      
+    it('mounts successfully', () => {
+      const wrapper = createWrapper()
       expect(wrapper.exists()).toBe(true)
+    })
+
+    it('renders with icon class', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.icon').exists()).toBe(true)
+    })
+
+    it('contains home icon', () => {
+      const wrapper = createWrapper()
+      const icon = wrapper.find('i')
+      expect(icon.exists()).toBe(true)
+      expect(icon.classes()).toContain('home')
+    })
+
+    it('has flex layout classes', () => {
+      const wrapper = createWrapper()
+      const iconDiv = wrapper.find('.icon')
+      expect(iconDiv.classes()).toContain('d-flex')
+      expect(iconDiv.classes()).toContain('flex-column')
+      expect(iconDiv.classes()).toContain('justify-content-center')
+    })
+
+    it('has normal span wrapper', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.normal').exists()).toBe(true)
     })
   })
 })
