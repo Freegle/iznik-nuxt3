@@ -8,16 +8,15 @@ describe('ChatNotVisible', () => {
       global: {
         stubs: {
           'b-alert': {
-            template:
-              '<div class="alert" :class="[\'alert-\' + variant]"><slot /></div>',
+            template: '<div class="b-alert" :class="variant"><slot /></div>',
             props: ['variant', 'modelValue'],
           },
           'nuxt-link': {
-            template: '<a :href="to"><slot /></a>',
+            template: '<a :to="to"><slot /></a>',
             props: ['to', 'noPrefetch'],
           },
           SupportLink: {
-            template: '<a href="/support">support</a>',
+            template: '<a class="support-link">Support</a>',
           },
         },
       },
@@ -30,47 +29,40 @@ describe('ChatNotVisible', () => {
       expect(wrapper.exists()).toBe(true)
     })
 
-    it('displays danger alert', () => {
+    it('renders as danger alert', () => {
       const wrapper = createWrapper()
-      const alert = wrapper.find('.alert')
-      expect(alert.exists()).toBe(true)
-      expect(alert.classes()).toContain('alert-danger')
+      expect(wrapper.find('.b-alert.danger').exists()).toBe(true)
     })
 
-    it('displays heading about wrong account', () => {
+    it('displays error heading', () => {
       const wrapper = createWrapper()
-      const heading = wrapper.find('h3')
-      expect(heading.exists()).toBe(true)
-      expect(heading.text()).toContain("isn't for this account")
+      expect(wrapper.find('h3').text()).toBe(
+        "That chat isn't for this account."
+      )
     })
 
-    it('includes link to settings page', () => {
+    it('suggests checking email settings', () => {
       const wrapper = createWrapper()
-      const link = wrapper.find('a[href="/settings"]')
-      expect(link.exists()).toBe(true)
-      expect(link.text()).toBe('Settings')
+      expect(wrapper.text()).toContain('Please check your email')
+    })
+  })
+
+  describe('links', () => {
+    it('has Settings link', () => {
+      const wrapper = createWrapper()
+      const links = wrapper.findAll('a')
+      const settingsLink = links.find((l) => l.text() === 'Settings')
+      expect(settingsLink).toBeDefined()
     })
 
-    it('includes support link for account merging', () => {
+    it('has SupportLink component', () => {
       const wrapper = createWrapper()
-      const supportLink = wrapper.find('a[href="/support"]')
-      expect(supportLink.exists()).toBe(true)
+      expect(wrapper.find('.support-link').exists()).toBe(true)
     })
 
-    it('mentions checking email in settings', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('check your email')
-    })
-
-    it('mentions merging multiple accounts', () => {
+    it('mentions merging accounts', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('merge multiple accounts')
-    })
-
-    it('has mt-2 margin class', () => {
-      const wrapper = createWrapper()
-      // The alert is rendered, check the component structure
-      expect(wrapper.html()).toContain('alert')
     })
   })
 })

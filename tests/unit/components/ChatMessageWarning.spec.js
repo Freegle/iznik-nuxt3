@@ -1,37 +1,33 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
 import ChatMessageWarning from '~/components/ChatMessageWarning.vue'
 
-
 describe('ChatMessageWarning', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  function mountComponent(props = {}) {
-    return mount(ChatMessageWarning, {
-      props: {
-        // Add required props
-        ...props,
-      },
-      global: {
-        stubs: {
-          'b-button': true,
-          'b-modal': true,
-          'b-row': { template: '<div><slot /></div>' },
-          'b-col': { template: '<div><slot /></div>' },
-          'v-icon': true,
-          'nuxt-link': { template: '<a><slot /></a>', props: ['to'] },
-        },
-      },
-    })
+  function createWrapper() {
+    return mount(ChatMessageWarning)
   }
 
   describe('rendering', () => {
-    it('mounts without error', () => {
-      const wrapper = mountComponent()
-      
+    it('mounts successfully', () => {
+      const wrapper = createWrapper()
       expect(wrapper.exists()).toBe(true)
+    })
+
+    it('renders warning text', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.text()).toContain(
+        'This message may contain a phone number outside the UK'
+      )
+    })
+
+    it('mentions additional call costs', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.text()).toContain('costs more to call')
+    })
+
+    it('has text-danger class', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.text-danger').exists()).toBe(true)
     })
   })
 })
