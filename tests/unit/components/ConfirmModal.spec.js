@@ -76,29 +76,7 @@ describe('ConfirmModal', () => {
     })
   })
 
-  describe('props', () => {
-    it('defaults title to "Are you sure?"', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('title')).toBe('Are you sure?')
-    })
-
-    it('defaults message to default HTML', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('message')).toBe(
-        '<p>Are you sure you want to do this?</p>'
-      )
-    })
-
-    it('accepts custom title', () => {
-      const wrapper = createWrapper({ title: 'Confirm Delete' })
-      expect(wrapper.props('title')).toBe('Confirm Delete')
-    })
-
-    it('accepts custom message', () => {
-      const wrapper = createWrapper({ message: '<strong>Warning!</strong>' })
-      expect(wrapper.props('message')).toBe('<strong>Warning!</strong>')
-    })
-  })
+  // Props tests removed - already covered by rendering tests (lines 44-66)
 
   describe('interactions', () => {
     it('calls hide when Cancel button is clicked', async () => {

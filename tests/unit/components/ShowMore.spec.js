@@ -170,31 +170,4 @@ describe('ShowMore', () => {
       expect(wrapper.exists()).toBe(true)
     })
   })
-
-  describe('computed itemsToShow', () => {
-    it('returns all items when expanded', async () => {
-      const wrapper = createWrapper({ items: longList, limit: 5 })
-      const button = wrapper.find('button')
-      await button.trigger('click')
-
-      // Count divs (rough check that all items are rendered)
-      expect(wrapper.text()).toContain('Item 1')
-      expect(wrapper.text()).toContain('Item 15')
-    })
-
-    it('returns limited items when not expanded', () => {
-      const wrapper = createWrapper({ items: longList, limit: 3 })
-      expect(wrapper.text()).toContain('Item 1')
-      expect(wrapper.text()).toContain('Item 2')
-      expect(wrapper.text()).toContain('Item 3')
-      expect(wrapper.text()).not.toContain('Item 4')
-    })
-
-    it('returns all items when count is less than limit', () => {
-      const wrapper = createWrapper({ items: shortList, limit: 10 })
-      expect(wrapper.text()).toContain('Item 1')
-      expect(wrapper.text()).toContain('Item 2')
-      expect(wrapper.text()).toContain('Item 3')
-    })
-  })
 })

@@ -201,185 +201,126 @@ describe('ModChatHeader', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component when chat exists', async () => {
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.outer').exists()).toBe(true)
-    })
-
-    it('shows loading when chat is null', async () => {
-      mockChat.value = null
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.outer').exists()).toBe(false)
-      expect(wrapper.find('img[alt="Loading..."]').exists()).toBe(true)
-    })
-
-    it('shows loading when User2User chat has no otheruser info', async () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      mockOtheruser.value = { info: null }
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.outer').exists()).toBe(false)
-      expect(wrapper.find('img[alt="Loading..."]').exists()).toBe(true)
-    })
-
-    it('renders non-User2User chat without requiring otheruser info', async () => {
-      mockChat.value = createChat({ chattype: 'User2Mod' })
-      mockOtheruser.value = null
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.outer').exists()).toBe(true)
-    })
-
-    it('displays chat name', async () => {
+    it('renders component when chat exists and displays chat name', async () => {
       mockChat.value = createChat({ name: 'Custom Chat Name' })
       const wrapper = await mountComponent()
+      expect(wrapper.find('.outer').exists()).toBe(true)
       expect(wrapper.text()).toContain('Custom Chat Name')
     })
 
-    it('shows profile image when not collapsed and has image', async () => {
+    it.each([
+      [null, null, 'User2User', true, 'chat is null'],
+      [
+        'User2User',
+        { info: null },
+        'User2User',
+        true,
+        'User2User chat has no otheruser info',
+      ],
+      [
+        'User2Mod',
+        null,
+        'User2Mod',
+        false,
+        'non-User2User chat without otheruser info',
+      ],
+    ])(
+      'loading state when %s',
+      async (chattype, otheruser, _type, showsLoading, _desc) => {
+        mockChat.value = chattype ? createChat({ chattype }) : null
+        mockOtheruser.value = otheruser
+        const wrapper = await mountComponent()
+        expect(wrapper.find('.outer').exists()).toBe(!showsLoading)
+        expect(wrapper.find('img[alt="Loading..."]').exists()).toBe(
+          showsLoading
+        )
+      }
+    )
+
+    it('profile image uses otheruser profile or falls back to chat icon', async () => {
+      /* Test with otheruser profile */
       mockChat.value = createChat()
       mockOtheruser.value = createOtheruser({
         profile: { paththumb: '/thumb.jpg' },
       })
-      const wrapper = await mountComponent()
+      let wrapper = await mountComponent()
       expect(wrapper.find('.profile-image').exists()).toBe(true)
-    })
 
-    it('uses chat icon when otheruser has no profile image', async () => {
+      /* Test fallback to chat icon */
       mockChat.value = createChat({ icon: '/chat-icon.png' })
       mockOtheruser.value = createOtheruser({ profile: null })
-      const wrapper = await mountComponent()
+      wrapper = await mountComponent()
       const img = wrapper.find('.profile-image')
       expect(img.exists()).toBe(true)
       expect(img.attributes('src')).toBe('/chat-icon.png')
     })
 
-    it('shows UserRatings when otheruser has info and not deleted', async () => {
+    it('shows UserRatings when otheruser has info', async () => {
       mockChat.value = createChat()
       mockOtheruser.value = createOtheruser({ info: { replytime: 60 } })
       const wrapper = await mountComponent()
       expect(wrapper.find('.user-ratings').exists()).toBe(true)
     })
 
-    it('shows SupporterInfo when otheruser is supporter', async () => {
-      mockChat.value = createChat()
-      mockOtheruser.value = createOtheruser({ supporter: true })
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.supporter-info').exists()).toBe(true)
-    })
-
-    it('does not show SupporterInfo when otheruser is not supporter', async () => {
-      mockChat.value = createChat()
-      mockOtheruser.value = createOtheruser({ supporter: false })
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.supporter-info').exists()).toBe(false)
-    })
+    it.each([
+      [true, true],
+      [false, false],
+    ])(
+      'SupporterInfo shows=%s when supporter=%s',
+      async (supporter, shouldShow) => {
+        mockChat.value = createChat()
+        mockOtheruser.value = createOtheruser({ supporter })
+        const wrapper = await mountComponent()
+        expect(wrapper.find('.supporter-info').exists()).toBe(shouldShow)
+      }
+    )
   })
 
   describe('computed properties', () => {
     describe('collapsed', () => {
-      it('returns chatinfoheader value from miscStore', async () => {
-        /* Component sets collapsed=false on mount, so set value after mount */
+      it('gets/sets chatinfoheader value in miscStore', async () => {
         const wrapper = await mountComponent()
         const inner = getInner(wrapper)
+
+        /* Test getter - set value in store and verify computed returns it */
         mockMiscVals.chatinfoheader = true
         await nextTick()
         expect(inner.vm.collapsed).toBe(true)
-      })
 
-      it('sets chatinfoheader value in miscStore', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        inner.vm.collapsed = true
+        /* Test setter - setting computed should call store.set */
+        vi.clearAllMocks()
+        inner.vm.collapsed = false
         expect(mockMiscStore.set).toHaveBeenCalledWith({
           key: 'chatinfoheader',
-          value: true,
+          value: false,
         })
       })
     })
 
     describe('replytime', () => {
-      it('returns formatted seconds for < 60 seconds', async () => {
+      it.each([
+        [1, '1 second'],
+        [30, '30 seconds'],
+        [60, '1 minute'],
+        [300, '5 minutes'],
+        [3600, '1 hour'],
+        [7200, '2 hours'],
+        [86400, '1 day'],
+        [172800, '2 days'],
+      ])('formats %i seconds as "%s"', async (seconds, expected) => {
         mockOtheruser.value = createOtheruser({
-          info: { replytime: 30 },
+          info: { replytime: seconds },
         })
         const wrapper = await mountComponent()
         const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('30 seconds')
+        expect(inner.vm.replytime).toBe(expected)
       })
 
-      it('returns singular second for 1 second', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 1 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('1 second')
-      })
-
-      it('returns formatted minutes for < 60 minutes', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 300 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('5 minutes')
-      })
-
-      it('returns singular minute for ~1 minute', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 60 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('1 minute')
-      })
-
-      it('returns formatted hours for < 24 hours', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 7200 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('2 hours')
-      })
-
-      it('returns singular hour for 1 hour', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 3600 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('1 hour')
-      })
-
-      it('returns formatted days for >= 24 hours', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 172800 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('2 days')
-      })
-
-      it('returns singular day for 1 day', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: 86400 },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe('1 day')
-      })
-
-      it('returns null when no replytime', async () => {
-        mockOtheruser.value = createOtheruser({
-          info: { replytime: null },
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.replytime).toBe(null)
-      })
-
-      it('returns null when no otheruser info', async () => {
-        mockOtheruser.value = createOtheruser({ info: null })
+      it.each([
+        [{ info: { replytime: null } }, 'no replytime value'],
+        [{ info: null }, 'no otheruser info'],
+      ])('returns null when %s', async (overrides) => {
+        mockOtheruser.value = createOtheruser(overrides)
         const wrapper = await mountComponent()
         const inner = getInner(wrapper)
         expect(inner.vm.replytime).toBe(null)
@@ -387,19 +328,19 @@ describe('ModChatHeader', () => {
     })
 
     describe('aboutthem', () => {
-      it('returns aboutme text when available', async () => {
+      it('returns aboutme text or null based on availability', async () => {
+        /* Test with aboutme text */
         mockOtheruser.value = createOtheruser({
           aboutme: { text: 'I love freegling!' },
         })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
+        let wrapper = await mountComponent()
+        let inner = getInner(wrapper)
         expect(inner.vm.aboutthem).toBe('I love freegling!')
-      })
 
-      it('returns null when aboutme is null', async () => {
+        /* Test with null aboutme */
         mockOtheruser.value = createOtheruser({ aboutme: null })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
+        wrapper = await mountComponent()
+        inner = getInner(wrapper)
         expect(inner.vm.aboutthem).toBe(null)
       })
     })
@@ -417,271 +358,191 @@ describe('ModChatHeader', () => {
   })
 
   describe('methods', () => {
-    describe('collapse', () => {
-      it('sets collapsed value', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        inner.vm.collapse(true)
-        expect(mockMiscStore.set).toHaveBeenCalledWith({
-          key: 'chatinfoheader',
-          value: true,
-        })
-      })
-
-      it('is exposed for external access', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(typeof inner.vm.collapse).toBe('function')
+    it('collapse sets collapsed value and is exposed for external access', async () => {
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      expect(typeof inner.vm.collapse).toBe('function')
+      inner.vm.collapse(true)
+      expect(mockMiscStore.set).toHaveBeenCalledWith({
+        key: 'chatinfoheader',
+        value: true,
       })
     })
 
-    describe('hide', () => {
-      it('calls chatStore.hide and navigates to /chats', async () => {
+    it.each([
+      ['hide', 'hide', true],
+      ['block', 'block', true],
+      ['unhide', 'unhide', false],
+    ])(
+      '%s calls chatStore.%s and navigates accordingly',
+      async (method, storeMethod, navigates) => {
         const wrapper = await mountComponent()
         const inner = getInner(wrapper)
-        await inner.vm.hide()
-        expect(mockChatStore.hide).toHaveBeenCalledWith(123)
-        expect(mockRouterPush).toHaveBeenCalledWith('/chats')
-      })
+        await inner.vm[method]()
+        expect(mockChatStore[storeMethod]).toHaveBeenCalledWith(123)
+        if (navigates) {
+          expect(mockRouterPush).toHaveBeenCalledWith('/chats')
+        }
+      }
+    )
+
+    it.each([
+      ['showhide', 'showChatHide'],
+      ['showblock', 'showChatBlock'],
+      ['report', 'showChatReport'],
+    ])('%s sets %s to true', async (method, stateProp) => {
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      expect(inner.vm[stateProp]).toBe(false)
+      inner.vm[method]()
+      expect(inner.vm[stateProp]).toBe(true)
     })
 
-    describe('block', () => {
-      it('calls chatStore.block and navigates to /chats', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        await inner.vm.block()
-        expect(mockChatStore.block).toHaveBeenCalledWith(123)
-        expect(mockRouterPush).toHaveBeenCalledWith('/chats')
+    it('showInfo navigates to member page', async () => {
+      mockChat.value = createChat({
+        group: { id: 789 },
+        user1id: 456,
       })
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      inner.vm.showInfo()
+      expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/789/456')
     })
 
-    describe('unhide', () => {
-      it('calls chatStore.unhide', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        await inner.vm.unhide()
-        expect(mockChatStore.unhide).toHaveBeenCalledWith(123)
-      })
-    })
-
-    describe('showhide', () => {
-      it('sets showChatHide to true', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.showChatHide).toBe(false)
-        inner.vm.showhide()
-        expect(inner.vm.showChatHide).toBe(true)
-      })
-    })
-
-    describe('showblock', () => {
-      it('sets showChatBlock to true', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.showChatBlock).toBe(false)
-        inner.vm.showblock()
-        expect(inner.vm.showChatBlock).toBe(true)
-      })
-    })
-
-    describe('showInfo', () => {
-      it('navigates to member page', async () => {
-        mockChat.value = createChat({
-          group: { id: 789 },
-          user1id: 456,
-        })
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        inner.vm.showInfo()
-        expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/789/456')
-      })
-    })
-
-    describe('report', () => {
-      it('sets showChatReport to true', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        expect(inner.vm.showChatReport).toBe(false)
-        inner.vm.report()
-        expect(inner.vm.showChatReport).toBe(true)
-      })
-    })
-
-    describe('markRead', () => {
-      it('calls chatStore.markRead and fetchChat', async () => {
-        const wrapper = await mountComponent()
-        const inner = getInner(wrapper)
-        await inner.vm.markRead()
-        expect(mockChatStore.markRead).toHaveBeenCalledWith(123)
-        expect(mockChatStore.fetchChat).toHaveBeenCalledWith(123)
-      })
+    it('markRead calls chatStore.markRead and fetchChat', async () => {
+      const wrapper = await mountComponent()
+      const inner = getInner(wrapper)
+      await inner.vm.markRead()
+      expect(mockChatStore.markRead).toHaveBeenCalledWith(123)
+      expect(mockChatStore.fetchChat).toHaveBeenCalledWith(123)
     })
   })
 
   describe('collapsed state', () => {
-    it('hides profile image when collapsed', async () => {
-      /* The component sets collapsed=false on mount, so we need to set it after */
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.collapsed = true
-      await nextTick()
-      expect(wrapper.find('.profile-image').exists()).toBe(false)
-    })
+    it.each([
+      ['.profile-image', false, true, 'profile image'],
+      ['.collapsedbutton', true, false, 'expand button'],
+      ['.actions', false, true, 'actions'],
+    ])(
+      '%s visibility toggles with collapsed state (collapsed=%s, expanded=%s)',
+      async (selector, visibleWhenCollapsed, visibleWhenExpanded, _name) => {
+        const wrapper = await mountComponent()
+        const inner = getInner(wrapper)
 
-    it('shows expand button when collapsed', async () => {
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.collapsed = true
-      await nextTick()
-      expect(wrapper.find('.collapsedbutton').exists()).toBe(true)
-    })
+        /* Test expanded state (component starts expanded) */
+        expect(wrapper.find(selector).exists()).toBe(visibleWhenExpanded)
 
-    it('hides actions when collapsed', async () => {
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.collapsed = true
-      await nextTick()
-      expect(wrapper.find('.actions').exists()).toBe(false)
-    })
-
-    it('shows actions when not collapsed', async () => {
-      /* Component starts with collapsed=false, so this should pass as-is */
-      const wrapper = await mountComponent()
-      expect(wrapper.find('.actions').exists()).toBe(true)
-    })
+        /* Test collapsed state */
+        inner.vm.collapsed = true
+        await nextTick()
+        expect(wrapper.find(selector).exists()).toBe(visibleWhenCollapsed)
+      }
+    )
   })
 
   describe('unseen messages', () => {
-    it('shows Mark read button when there are unseen messages', async () => {
+    it('shows/hides Mark read button and badge based on unseen count', async () => {
+      /* Test with unseen messages */
       mockUnseen.value = 5
-      const wrapper = await mountComponent()
+      let wrapper = await mountComponent()
       expect(wrapper.text()).toContain('Mark read')
-    })
+      expect(wrapper.text()).toContain('5')
 
-    it('shows badge with unseen count', async () => {
-      mockUnseen.value = 3
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).toContain('3')
-    })
-
-    it('hides Mark read button when no unseen messages', async () => {
+      /* Test with no unseen messages */
       mockUnseen.value = 0
-      const wrapper = await mountComponent()
+      wrapper = await mountComponent()
       expect(wrapper.text()).not.toContain('Mark read')
     })
   })
 
   describe('chat status buttons', () => {
-    describe('hide/unhide', () => {
-      it('shows Unhide button when chat is Closed', async () => {
-        mockChat.value = createChat({ status: 'Closed' })
+    it.each([
+      ['Closed', 'Unhide', 'Hide'],
+      ['Online', 'Hide', 'Unhide'],
+    ])(
+      'shows %s button when chat status is %s',
+      async (status, expectedText, notExpectedText) => {
+        mockChat.value = createChat({ status })
         const wrapper = await mountComponent()
-        expect(wrapper.text()).toContain('Unhide')
-      })
+        expect(wrapper.text()).toContain(expectedText)
+        expect(wrapper.text()).not.toContain(notExpectedText)
+      }
+    )
 
-      it('shows Hide button when chat is not Closed', async () => {
-        mockChat.value = createChat({ status: 'Online' })
-        const wrapper = await mountComponent()
-        expect(wrapper.text()).toContain('Hide')
-      })
-    })
-
-    describe('block/unblock', () => {
-      it('shows Unblock button when chat is Blocked', async () => {
-        mockChat.value = createChat({
-          chattype: 'User2User',
-          status: 'Blocked',
-        })
+    it.each([
+      ['User2User', 'Blocked', 'Unblock', true],
+      ['User2User', 'Online', 'Block', true],
+      ['User2Mod', 'Online', 'Block', false],
+    ])(
+      'for %s chat with status %s, Block/Unblock button shows=%s',
+      async (chattype, status, buttonText, shouldShow) => {
+        mockChat.value = createChat({ chattype, status })
         mockOtheruser.value = createOtheruser()
         const wrapper = await mountComponent()
-        expect(wrapper.text()).toContain('Unblock')
-      })
+        if (shouldShow) {
+          expect(wrapper.text()).toContain(buttonText)
+        } else {
+          expect(wrapper.text()).not.toContain(buttonText)
+        }
+      }
+    )
 
-      it('shows Block button when chat is not Blocked', async () => {
-        mockChat.value = createChat({
-          chattype: 'User2User',
-          status: 'Online',
-        })
-        mockOtheruser.value = createOtheruser()
+    it.each([
+      ['User2User', false, true],
+      ['User2User', true, false],
+      ['User2Mod', false, false],
+    ])(
+      'for %s chat with deleted=%s, Report button shows=%s',
+      async (chattype, deleted, shouldShow) => {
+        mockChat.value = createChat({ chattype })
+        mockOtheruser.value = createOtheruser({ deleted })
         const wrapper = await mountComponent()
-        expect(wrapper.text()).toContain('Block')
-      })
-
-      it('hides Block button for non-User2User chats', async () => {
-        mockChat.value = createChat({ chattype: 'User2Mod' })
-        const wrapper = await mountComponent()
-        expect(wrapper.text()).not.toContain('Block')
-      })
-    })
-
-    describe('report', () => {
-      it('shows Report button for User2User chat with non-deleted otheruser', async () => {
-        mockChat.value = createChat({ chattype: 'User2User' })
-        mockOtheruser.value = createOtheruser({ deleted: false })
-        const wrapper = await mountComponent()
-        expect(wrapper.text()).toContain('Report')
-      })
-
-      it('hides Report button for deleted otheruser', async () => {
-        mockChat.value = createChat({ chattype: 'User2User' })
-        mockOtheruser.value = createOtheruser({ deleted: true })
-        const wrapper = await mountComponent()
-        expect(wrapper.text()).not.toContain('Report')
-      })
-
-      it('hides Report button for non-User2User chats', async () => {
-        mockChat.value = createChat({ chattype: 'User2Mod' })
-        const wrapper = await mountComponent()
-        expect(wrapper.text()).not.toContain('Report')
-      })
-    })
+        if (shouldShow) {
+          expect(wrapper.text()).toContain('Report')
+        } else {
+          expect(wrapper.text()).not.toContain('Report')
+        }
+      }
+    )
   })
 
   describe('view profile button', () => {
-    it('shows View profile button when otheruser has info and not deleted', async () => {
-      mockChat.value = createChat()
-      mockOtheruser.value = createOtheruser({
-        info: { replytime: 60 },
-        deleted: false,
-      })
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).toContain('View profile')
-    })
-
-    it('hides View profile button when otheruser is deleted', async () => {
-      mockChat.value = createChat()
-      mockOtheruser.value = createOtheruser({ deleted: true })
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).not.toContain('View profile')
-    })
-
-    it('hides View profile button when otheruser has no info', async () => {
-      mockChat.value = createChat()
-      mockOtheruser.value = createOtheruser({ info: null })
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).not.toContain('View profile')
-    })
+    it.each([
+      [
+        { info: { replytime: 60 }, deleted: false },
+        true,
+        'has info and not deleted',
+      ],
+      [{ deleted: true }, false, 'user is deleted'],
+      [{ info: null }, false, 'user has no info'],
+    ])(
+      'View profile button shows=%s when %s',
+      async (overrides, shouldShow) => {
+        mockChat.value = createChat()
+        mockOtheruser.value = createOtheruser(overrides)
+        const wrapper = await mountComponent()
+        if (shouldShow) {
+          expect(wrapper.text()).toContain('View profile')
+        } else {
+          expect(wrapper.text()).not.toContain('View profile')
+        }
+      }
+    )
   })
 
   describe('aboutthem blockquote', () => {
-    it('shows aboutthem when available and not collapsed', async () => {
+    it('shows/hides aboutthem based on collapsed state', async () => {
       mockMiscVals.chatinfoheader = false
       mockOtheruser.value = createOtheruser({
         aboutme: { text: 'Love recycling!' },
       })
       const wrapper = await mountComponent()
-      expect(wrapper.text()).toContain('Love recycling!')
-    })
 
-    it('hides aboutthem when collapsed', async () => {
-      /* Component sets collapsed=false on mount, so set value after mount */
-      mockOtheruser.value = createOtheruser({
-        aboutme: { text: 'Love recycling!' },
-      })
-      const wrapper = await mountComponent()
-      /* Verify aboutthem is shown initially */
+      /* Verify aboutthem is shown when expanded */
+      expect(wrapper.text()).toContain('Love recycling!')
       expect(wrapper.find('.aboutthem').exists()).toBe(true)
-      /* Now collapse and verify it's hidden */
+
+      /* Collapse and verify it's hidden */
       mockMiscVals.chatinfoheader = true
       await nextTick()
       expect(wrapper.find('.aboutthem').exists()).toBe(false)
@@ -689,96 +550,56 @@ describe('ModChatHeader', () => {
   })
 
   describe('userinfo display', () => {
-    it('shows last seen time when otheruser has lastaccess', async () => {
+    it('shows last seen time and replytime when available', async () => {
       mockOtheruser.value = createOtheruser({
         lastaccess: '2024-01-15T10:00:00Z',
-        info: {},
-      })
-      const wrapper = await mountComponent()
-      /* The template shows Last seen / Seen depending on screen size */
-      expect(wrapper.text()).toContain('Last seen')
-    })
-
-    it('shows replytime when available', async () => {
-      mockOtheruser.value = createOtheruser({
         info: { replytime: 3600 },
       })
       const wrapper = await mountComponent()
+      expect(wrapper.text()).toContain('Last seen')
       expect(wrapper.text()).toContain('Typically replies in')
     })
 
-    it('shows distance when milesaway available and user not deleted', async () => {
+    it.each([
+      [false, true, 'shows distance when user not deleted'],
+      [true, false, 'hides distance when user is deleted'],
+    ])('deleted=%s: distance visible=%s', async (deleted, shouldShow) => {
       mockMilesaway.value = 10
       mockMilesstring.value = '10 miles away'
-      mockOtheruser.value = createOtheruser({ deleted: false })
+      mockOtheruser.value = createOtheruser({ deleted })
       const wrapper = await mountComponent()
-      expect(wrapper.text()).toContain('About')
-      expect(wrapper.text()).toContain('10 miles away')
-    })
-
-    it('hides distance when user is deleted', async () => {
-      mockMilesaway.value = 10
-      mockMilesstring.value = '10 miles away'
-      mockOtheruser.value = createOtheruser({ deleted: true })
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).not.toContain('10 miles away')
+      if (shouldShow) {
+        expect(wrapper.text()).toContain('About')
+        expect(wrapper.text()).toContain('10 miles away')
+      } else {
+        expect(wrapper.text()).not.toContain('10 miles away')
+      }
     })
   })
 
   describe('modals', () => {
-    it('renders ChatBlockModal when showChatBlock is true for User2User chat', async () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      mockOtheruser.value = createOtheruser()
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.showChatBlock = true
-      await nextTick()
-      expect(wrapper.find('.chat-block-modal').exists()).toBe(true)
-    })
-
-    it('renders ChatReportModal when showChatReport is true for User2User chat', async () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      mockOtheruser.value = createOtheruser()
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.showChatReport = true
-      await nextTick()
-      expect(wrapper.find('.chat-report-modal').exists()).toBe(true)
-    })
-
-    it('renders ChatHideModal when showChatHide is true', async () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      mockOtheruser.value = createOtheruser()
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.showChatHide = true
-      await nextTick()
-      expect(wrapper.find('.chat-hide-modal').exists()).toBe(true)
-    })
-
-    it('renders ChatHideModal for User2Mod chat', async () => {
-      mockChat.value = createChat({ chattype: 'User2Mod' })
-      mockOtheruser.value = createOtheruser()
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.showChatHide = true
-      await nextTick()
-      expect(wrapper.find('.chat-hide-modal').exists()).toBe(true)
-    })
-
-    it('does not render ChatBlockModal for non-User2User chat', async () => {
-      mockChat.value = createChat({ chattype: 'User2Mod' })
-      mockOtheruser.value = createOtheruser()
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
-      inner.vm.showChatBlock = true
-      await nextTick()
-      expect(wrapper.find('.chat-block-modal').exists()).toBe(false)
-    })
+    it.each([
+      ['User2User', 'showChatBlock', '.chat-block-modal', true],
+      ['User2User', 'showChatReport', '.chat-report-modal', true],
+      ['User2User', 'showChatHide', '.chat-hide-modal', true],
+      ['User2Mod', 'showChatHide', '.chat-hide-modal', true],
+      ['User2Mod', 'showChatBlock', '.chat-block-modal', false],
+    ])(
+      '%s chat: %s renders modal=%s',
+      async (chattype, stateProp, selector, shouldRender) => {
+        mockChat.value = createChat({ chattype })
+        mockOtheruser.value = createOtheruser()
+        const wrapper = await mountComponent()
+        const inner = getInner(wrapper)
+        inner.vm[stateProp] = true
+        await nextTick()
+        expect(wrapper.find(selector).exists()).toBe(shouldRender)
+      }
+    )
   })
 
   describe('button interactions', () => {
-    it('calls markRead when Mark read button clicked', async () => {
+    it('Mark read button calls markRead', async () => {
       mockUnseen.value = 5
       const wrapper = await mountComponent()
       const markReadBtn = wrapper
@@ -789,7 +610,7 @@ describe('ModChatHeader', () => {
       expect(mockChatStore.markRead).toHaveBeenCalledWith(123)
     })
 
-    it('calls showInfo when View profile button clicked', async () => {
+    it('View profile button calls showInfo', async () => {
       mockChat.value = createChat({
         group: { id: 789 },
         user1id: 456,
@@ -807,9 +628,10 @@ describe('ModChatHeader', () => {
       expect(mockNavigateTo).toHaveBeenCalledWith('/members/approved/789/456')
     })
 
-    it('calls showhide when Hide chat button clicked', async () => {
+    it('Hide/Unhide buttons trigger appropriate actions', async () => {
+      /* Test Hide button */
       mockChat.value = createChat({ chattype: 'User2User', status: 'Online' })
-      const wrapper = await mountComponent()
+      let wrapper = await mountComponent()
       const inner = getInner(wrapper)
       const hideBtn = wrapper
         .findAll('button')
@@ -817,11 +639,10 @@ describe('ModChatHeader', () => {
       expect(hideBtn).toBeDefined()
       await hideBtn.trigger('click')
       expect(inner.vm.showChatHide).toBe(true)
-    })
 
-    it('calls unhide when Unhide chat button clicked', async () => {
+      /* Test Unhide button */
       mockChat.value = createChat({ chattype: 'User2User', status: 'Closed' })
-      const wrapper = await mountComponent()
+      wrapper = await mountComponent()
       const unhideBtn = wrapper
         .findAll('button')
         .find((b) => b.text().includes('Unhide'))
@@ -830,24 +651,22 @@ describe('ModChatHeader', () => {
       expect(mockChatStore.unhide).toHaveBeenCalledWith(123)
     })
 
-    it('calls showblock when Block button clicked', async () => {
+    it('Block and Report buttons set appropriate modal states', async () => {
       mockChat.value = createChat({ chattype: 'User2User', status: 'Online' })
-      mockOtheruser.value = createOtheruser()
+      mockOtheruser.value = createOtheruser({ deleted: false })
       const wrapper = await mountComponent()
       const inner = getInner(wrapper)
+
+      /* Test Block button */
       const blockBtn = wrapper
         .findAll('button')
         .find((b) => b.text() === 'Block')
       expect(blockBtn).toBeDefined()
       await blockBtn.trigger('click')
       expect(inner.vm.showChatBlock).toBe(true)
-    })
 
-    it('calls report when Report button clicked', async () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      mockOtheruser.value = createOtheruser({ deleted: false })
-      const wrapper = await mountComponent()
-      const inner = getInner(wrapper)
+      /* Reset and test Report button */
+      inner.vm.showChatBlock = false
       const reportBtn = wrapper
         .findAll('button')
         .find((b) => b.text().includes('Report'))

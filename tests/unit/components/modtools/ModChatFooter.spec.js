@@ -340,13 +340,9 @@ describe('ModChatFooter', () => {
   })
 
   describe('rendering', () => {
-    it('mounts with Suspense wrapper', async () => {
+    it('mounts with Suspense wrapper and eventually resolves from loading state', async () => {
       const wrapper = await mountComponent()
       expect(wrapper.exists()).toBe(true)
-    })
-
-    it('eventually resolves from loading state', async () => {
-      const wrapper = await mountComponent()
       // Give more time for async components
       for (let i = 0; i < 10; i++) {
         await flushPromises()
@@ -358,16 +354,18 @@ describe('ModChatFooter', () => {
   })
 
   describe('setupChatMT composable integration', () => {
-    it('setupChatMT is called with props.id', async () => {
+    it('setupChatMT is called with props.id on mount', async () => {
       const { setupChatMT } = await import('~/modtools/composables/useChatMT')
+      vi.clearAllMocks()
       await mountComponent({ id: 456 })
-      // The mock should have been called
       expect(setupChatMT).toHaveBeenCalled()
+      expect(setupChatMT).toHaveBeenCalledWith(456)
     })
   })
 
   describe('mock data structures', () => {
-    it('mockChat has correct structure', () => {
+    it('mockChat and mockOtheruser have correct structure and can be modified', () => {
+      // Verify initial structure
       expect(mockChat.value).toEqual({
         id: 123,
         chattype: 'User2Mod',
@@ -375,20 +373,14 @@ describe('ModChatFooter', () => {
         user1id: 456,
         group: { id: 789 },
       })
-    })
-
-    it('mockOtheruser has correct structure', () => {
       expect(mockOtheruser.value.id).toBe(456)
       expect(mockOtheruser.value.displayname).toBe('Test User')
       expect(mockOtheruser.value.spammer).toBe(false)
-    })
 
-    it('can modify mockOtheruser for different test scenarios', () => {
+      // Verify can modify for different scenarios
       mockOtheruser.value = createOtherUser({ spammer: true })
       expect(mockOtheruser.value.spammer).toBe(true)
-    })
 
-    it('can set bad ratings', () => {
       mockOtheruser.value = createOtherUser({
         info: { ratings: { Up: 2, Down: 5 } },
       })
@@ -397,141 +389,129 @@ describe('ModChatFooter', () => {
   })
 
   describe('chat types', () => {
-    it('User2Mod chat type is default', () => {
-      expect(mockChat.value.chattype).toBe('User2Mod')
-    })
-
-    it('can set User2User chat type', () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      expect(mockChat.value.chattype).toBe('User2User')
+    it.each([
+      ['User2Mod', 'User2Mod'],
+      ['User2User', 'User2User'],
+    ])('can set %s chat type', (chatType, expected) => {
+      mockChat.value = createChat({ chattype: chatType })
+      expect(mockChat.value.chattype).toBe(expected)
     })
   })
 
   describe('store mocks', () => {
-    it('mockChatStore.send is a mock function', () => {
-      expect(typeof mockChatStore.send).toBe('function')
-      expect(vi.isMockFunction(mockChatStore.send)).toBe(true)
-    })
-
-    it('mockChatStore.nudge is a mock function', () => {
-      expect(typeof mockChatStore.nudge).toBe('function')
-      expect(vi.isMockFunction(mockChatStore.nudge)).toBe(true)
-    })
-
-    it('mockChatStore.markRead is a mock function', () => {
-      expect(typeof mockChatStore.markRead).toBe('function')
-      expect(vi.isMockFunction(mockChatStore.markRead)).toBe(true)
-    })
-
-    it('mockChatStore.typing is a mock function', () => {
-      expect(typeof mockChatStore.typing).toBe('function')
-      expect(vi.isMockFunction(mockChatStore.typing)).toBe(true)
-    })
-
-    it('mockUserStore.fetch is a mock function', () => {
-      expect(typeof mockUserStore.fetch).toBe('function')
-      expect(vi.isMockFunction(mockUserStore.fetch)).toBe(true)
-    })
-
-    it('mockAddressStore.fetch is a mock function', () => {
-      expect(typeof mockAddressStore.fetch).toBe('function')
-      expect(vi.isMockFunction(mockAddressStore.fetch)).toBe(true)
+    it.each([
+      ['mockChatStore.send', mockChatStore.send],
+      ['mockChatStore.nudge', mockChatStore.nudge],
+      ['mockChatStore.markRead', mockChatStore.markRead],
+      ['mockChatStore.typing', mockChatStore.typing],
+      ['mockUserStore.fetch', mockUserStore.fetch],
+      ['mockAddressStore.fetch', mockAddressStore.fetch],
+    ])('%s is a mock function', (name, mockFn) => {
+      expect(typeof mockFn).toBe('function')
+      expect(vi.isMockFunction(mockFn)).toBe(true)
     })
   })
 
   describe('helper functions', () => {
-    it('createChat creates chat with defaults', () => {
-      const chat = createChat()
-      expect(chat.id).toBe(123)
-      expect(chat.chattype).toBe('User2Mod')
+    it('createChat creates chat with defaults and accepts overrides', () => {
+      const defaultChat = createChat()
+      expect(defaultChat.id).toBe(123)
+      expect(defaultChat.chattype).toBe('User2Mod')
+
+      const overriddenChat = createChat({ id: 999, chattype: 'User2User' })
+      expect(overriddenChat.id).toBe(999)
+      expect(overriddenChat.chattype).toBe('User2User')
     })
 
-    it('createChat accepts overrides', () => {
-      const chat = createChat({ id: 999, chattype: 'User2User' })
-      expect(chat.id).toBe(999)
-      expect(chat.chattype).toBe('User2User')
-    })
+    it('createOtherUser creates user with defaults and accepts overrides', () => {
+      const defaultUser = createOtherUser()
+      expect(defaultUser.id).toBe(456)
+      expect(defaultUser.spammer).toBe(false)
 
-    it('createOtherUser creates user with defaults', () => {
-      const user = createOtherUser()
-      expect(user.id).toBe(456)
-      expect(user.spammer).toBe(false)
-    })
-
-    it('createOtherUser accepts overrides', () => {
-      const user = createOtherUser({ spammer: true, deleted: true })
-      expect(user.spammer).toBe(true)
-      expect(user.deleted).toBe(true)
+      const overriddenUser = createOtherUser({ spammer: true, deleted: true })
+      expect(overriddenUser.spammer).toBe(true)
+      expect(overriddenUser.deleted).toBe(true)
     })
   })
 
   describe('rating scenarios', () => {
-    it('good ratings - Up > Down * 2', () => {
-      const user = createOtherUser({ info: { ratings: { Up: 10, Down: 1 } } })
-      // Up (10) > Down * 2 (2) - good ratings
-      expect(user.info.ratings.Up > user.info.ratings.Down * 2).toBe(true)
-    })
+    it.each([
+      [
+        'good ratings (Up > Down * 2)',
+        { Up: 10, Down: 1 },
+        { goodRatings: true, badRatings: false },
+      ],
+      [
+        'bad ratings (Down > 2 and Down * 2 > Up)',
+        { Up: 2, Down: 5 },
+        { goodRatings: false, badRatings: true },
+      ],
+      [
+        'thumbs down (Mine is Down)',
+        { Up: 5, Down: 0, Mine: 'Down' },
+        { thumbsDown: true },
+      ],
+    ])('%s', (scenario, ratings, expected) => {
+      const user = createOtherUser({ info: { ratings } })
 
-    it('bad ratings - Down > 2 and Down * 2 > Up', () => {
-      const user = createOtherUser({ info: { ratings: { Up: 2, Down: 5 } } })
-      // Down (5) > 2 and Down * 2 (10) > Up (2) - bad ratings
-      const badratings =
-        user.info.ratings.Down > 2 &&
-        user.info.ratings.Down * 2 > user.info.ratings.Up
-      expect(badratings).toBe(true)
-    })
+      if (expected.goodRatings !== undefined) {
+        const goodRatings = user.info.ratings.Up > user.info.ratings.Down * 2
+        expect(goodRatings).toBe(expected.goodRatings)
+      }
 
-    it('thumbs down - Mine is Down', () => {
-      const user = createOtherUser({
-        info: { ratings: { Up: 5, Down: 0, Mine: 'Down' } },
-      })
-      expect(user.info.ratings.Mine).toBe('Down')
+      if (expected.badRatings !== undefined) {
+        const badRatings =
+          user.info.ratings.Down > 2 &&
+          user.info.ratings.Down * 2 > user.info.ratings.Up
+        expect(badRatings).toBe(expected.badRatings)
+      }
+
+      if (expected.thumbsDown !== undefined) {
+        expect(user.info.ratings.Mine).toBe('Down')
+      }
     })
   })
 
   describe('expected replies', () => {
-    it('singular form for 1 expected reply', () => {
-      const user = createOtherUser({ expectedreplies: 1 })
-      const text =
-        user.expectedreplies === 1
-          ? '1 member is'
-          : `${user.expectedreplies} members are`
-      expect(text).toBe('1 member is')
-    })
-
-    it('plural form for multiple expected replies', () => {
-      const user = createOtherUser({ expectedreplies: 3 })
-      const text =
-        user.expectedreplies === 1
-          ? '1 member is'
-          : `${user.expectedreplies} members are`
-      expect(text).toBe('3 members are')
-    })
-
-    it('null when no expected replies', () => {
-      const user = createOtherUser({ expectedreplies: null })
-      expect(user.expectedreplies).toBeNull()
-    })
+    it.each([
+      [1, '1 member is'],
+      [3, '3 members are'],
+      [null, null],
+    ])(
+      'expectedreplies=%s returns correct text',
+      (expectedreplies, expectedText) => {
+        const user = createOtherUser({ expectedreplies })
+        if (expectedreplies === null) {
+          expect(user.expectedreplies).toBeNull()
+        } else {
+          const text =
+            user.expectedreplies === 1
+              ? '1 member is'
+              : `${user.expectedreplies} members are`
+          expect(text).toBe(expectedText)
+        }
+      }
+    )
   })
 
   describe('address suggestion logic', () => {
-    it('finds matching address prefix', () => {
+    it('finds matching address prefix or returns null for short messages', () => {
       const addresses = [
         { singleline: '123 Main St' },
         { singleline: '456 Oak Ave' },
       ]
+
+      // Test matching address
       const message = 'My address is 123'
       const lastWord = message.split(/\s+/).pop()
-
       const match = addresses.find((addr) =>
         addr.singleline.toLowerCase().startsWith(lastWord.toLowerCase())
       )
       expect(match).toEqual({ singleline: '123 Main St' })
-    })
 
-    it('returns null for short messages', () => {
-      const message = 'Hi'
-      const suggestAddress = message.length >= 3
+      // Test short message
+      const shortMessage = 'Hi'
+      const suggestAddress = shortMessage.length >= 3
       expect(suggestAddress).toBe(false)
     })
   })
@@ -544,13 +524,6 @@ describe('ModChatFooter', () => {
   })
 
   describe('component behavior when mounted', () => {
-    it('calls setupChatMT on mount', async () => {
-      const { setupChatMT } = await import('~/modtools/composables/useChatMT')
-      vi.clearAllMocks()
-      await mountComponent()
-      expect(setupChatMT).toHaveBeenCalledWith(123)
-    })
-
     it('fetches user data when chat has user1id', async () => {
       mockChat.value = createChat({ user1id: 789 })
       await mountComponent()
@@ -559,127 +532,75 @@ describe('ModChatFooter', () => {
   })
 
   describe('shrink computed behavior', () => {
-    it('shrink logic returns true for message > 120 chars', () => {
-      const message = 'A'.repeat(121)
-      expect(message.length > 120).toBe(true)
-    })
-
-    it('shrink logic returns false for message <= 120 chars', () => {
-      const message = 'A'.repeat(120)
-      expect(message.length > 120).toBe(false)
+    it.each([
+      [121, true],
+      [120, false],
+    ])('message length %d returns shrink=%s', (length, expected) => {
+      const message = 'A'.repeat(length)
+      expect(message.length > 120).toBe(expected)
     })
   })
 
   describe('noticesToShow computed behavior', () => {
-    it('returns true when user is spammer', () => {
-      const user = createOtherUser({ spammer: true })
-      expect(user.spammer).toBe(true)
-    })
-
-    it('returns true when user is deleted', () => {
-      const user = createOtherUser({ deleted: true })
-      expect(user.deleted).toBe(true)
-    })
-
-    it('returns true when user has comments', () => {
-      const user = createOtherUser({ comments: [{ id: 1, user1: 'Comment' }] })
-      expect(user.comments.length > 0).toBe(true)
-    })
-
-    it('returns false when no issues', () => {
-      const user = createOtherUser()
+    it.each([
+      ['spammer', { spammer: true }, true],
+      ['deleted', { deleted: true }, true],
+      ['has comments', { comments: [{ id: 1, user1: 'Comment' }] }, true],
+      ['no issues', {}, false],
+    ])('returns %s when user %s', (scenario, overrides, expected) => {
+      const user = createOtherUser(overrides)
       const hasNotices =
         user.spammer ||
         user.deleted ||
         (user.comments && user.comments.length > 0)
-      expect(hasNotices).toBe(false)
+      expect(hasNotices).toBe(expected)
     })
   })
 
   describe('badratings computed behavior', () => {
-    it('returns true when Down > 2 AND Down * 2 > Up', () => {
-      const ratings = { Up: 2, Down: 5 }
+    it.each([
+      [{ Up: 2, Down: 5 }, true, 'Down > 2 AND Down * 2 > Up'],
+      [{ Up: 5, Down: 2 }, false, 'Down <= 2'],
+      [{ Up: 10, Down: 3 }, false, 'Up >= Down * 2'],
+    ])('ratings %j returns %s (%s)', (ratings, expected) => {
       const badratings = ratings.Down > 2 && ratings.Down * 2 > ratings.Up
-      expect(badratings).toBe(true)
-    })
-
-    it('returns false when Down <= 2', () => {
-      const ratings = { Up: 5, Down: 2 }
-      const badratings = ratings.Down > 2 && ratings.Down * 2 > ratings.Up
-      expect(badratings).toBe(false)
-    })
-
-    it('returns false when Up >= Down * 2', () => {
-      const ratings = { Up: 10, Down: 3 }
-      const badratings = ratings.Down > 2 && ratings.Down * 2 > ratings.Up
-      expect(badratings).toBe(false)
+      expect(badratings).toBe(expected)
     })
   })
 
   describe('enterNewLine computed behavior', () => {
-    it('returns true when enternewlinemt is false', () => {
-      mockMiscStore.get.mockReturnValue(false)
-      // enterNewLine = !miscStore.get('enternewlinemt')
-      expect(!mockMiscStore.get('enternewlinemt')).toBe(true)
-    })
-
-    it('returns false when enternewlinemt is true', () => {
-      mockMiscStore.get.mockReturnValue(true)
-      expect(!mockMiscStore.get('enternewlinemt')).toBe(false)
-    })
-  })
-
-  describe('chat type differences', () => {
-    it('User2Mod chat shows mod-specific buttons', () => {
-      mockChat.value = createChat({ chattype: 'User2Mod' })
-      expect(mockChat.value.chattype).toBe('User2Mod')
-    })
-
-    it('User2User chat shows user-specific buttons', () => {
-      mockChat.value = createChat({ chattype: 'User2User' })
-      expect(mockChat.value.chattype).toBe('User2User')
+    it.each([
+      [false, true],
+      [true, false],
+    ])('when enternewlinemt=%s, enterNewLine=%s', (storeValue, expected) => {
+      mockMiscStore.get.mockReturnValue(storeValue)
+      expect(!mockMiscStore.get('enternewlinemt')).toBe(expected)
     })
   })
 
   describe('height computed behavior', () => {
-    it('calculates height based on message length', () => {
-      const message = 'A'.repeat(180)
-      // heightValue = min(6, round(180/60)) = min(6, 3) = 3
-      // height = 3 + 6 + 'rem' = '9rem'
+    it.each([
+      [180, '9rem', 'medium message'],
+      [600, '12rem', 'very long message (capped)'],
+    ])('message length %d calculates height=%s (%s)', (length, expected) => {
+      const message = 'A'.repeat(length)
       const heightValue = Math.min(6, Math.round(message.length / 60))
-      expect(heightValue + 6 + 'rem').toBe('9rem')
-    })
-
-    it('caps height at 12rem for very long messages', () => {
-      const message = 'A'.repeat(600)
-      const heightValue = Math.min(6, Math.round(message.length / 60))
-      expect(heightValue + 6 + 'rem').toBe('12rem')
+      expect(heightValue + 6 + 'rem').toBe(expected)
     })
   })
 
   describe('newline insertion logic', () => {
-    it('inserts newline at cursor position', () => {
-      const message = 'Hello World'
-      const cursorPos = 5
-      const newMessage =
-        message.slice(0, cursorPos) + '\n' + message.slice(cursorPos)
-      expect(newMessage).toBe('Hello\n World')
-    })
-
-    it('inserts newline at beginning', () => {
-      const message = 'Hello'
-      const cursorPos = 0
-      const newMessage =
-        message.slice(0, cursorPos) + '\n' + message.slice(cursorPos)
-      expect(newMessage).toBe('\nHello')
-    })
-
-    it('inserts newline at end', () => {
-      const message = 'Hello'
-      const cursorPos = 5
-      const newMessage =
-        message.slice(0, cursorPos) + '\n' + message.slice(cursorPos)
-      expect(newMessage).toBe('Hello\n')
-    })
+    it.each([
+      ['Hello World', 5, 'Hello\n World', 'middle of message'],
+      ['Hello', 0, '\nHello', 'beginning'],
+      ['Hello', 5, 'Hello\n', 'end'],
+    ])(
+      'inserting newline in "%s" at pos %d yields "%s" (%s)',
+      (message, cursorPos, expected) => {
+        const newMessage =
+          message.slice(0, cursorPos) + '\n' + message.slice(cursorPos)
+        expect(newMessage).toBe(expected)
+      }
+    )
   })
 })

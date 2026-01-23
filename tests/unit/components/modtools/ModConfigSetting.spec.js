@@ -103,54 +103,32 @@ describe('ModConfigSetting', () => {
 
   describe('rendering', () => {
     describe('input type (default)', () => {
-      it('renders input type by default', () => {
-        const wrapper = mountComponent()
-        expect(wrapper.find('.input-group').exists()).toBe(true)
-        expect(wrapper.find('.form-input').exists()).toBe(true)
-      })
+      it('renders input type by default or when explicit, with save button when not disabled', () => {
+        // Default (no type prop)
+        const wrapper1 = mountComponent()
+        expect(wrapper1.find('.input-group').exists()).toBe(true)
+        expect(wrapper1.find('.form-input').exists()).toBe(true)
+        expect(wrapper1.find('.spin-button').exists()).toBe(true)
+        expect(wrapper1.find('.spin-button').text()).toBe('Save')
 
-      it('renders input type when explicitly set', () => {
-        const wrapper = mountComponent({ type: 'input' })
-        expect(wrapper.find('.input-group').exists()).toBe(true)
-        expect(wrapper.find('.form-input').exists()).toBe(true)
-      })
-
-      it('renders SpinButton for input type when not disabled', () => {
-        const wrapper = mountComponent({ type: 'input' })
-        expect(wrapper.find('.spin-button').exists()).toBe(true)
-        expect(wrapper.find('.spin-button').text()).toBe('Save')
-      })
-
-      it('does not render SpinButton for input type when disabled', () => {
-        const wrapper = mountComponent({ type: 'input', disabled: true })
-        expect(wrapper.find('.spin-button').exists()).toBe(false)
+        // Explicit type='input'
+        const wrapper2 = mountComponent({ type: 'input' })
+        expect(wrapper2.find('.input-group').exists()).toBe(true)
+        expect(wrapper2.find('.form-input').exists()).toBe(true)
       })
     })
 
     describe('textarea type', () => {
-      it('renders textarea type', () => {
-        const wrapper = mountComponent({ type: 'textarea' })
-        expect(wrapper.find('.form-textarea').exists()).toBe(true)
-      })
+      it('renders textarea with save button, rows default to 3 or custom', () => {
+        // Default rows
+        const wrapper1 = mountComponent({ type: 'textarea' })
+        expect(wrapper1.find('.form-textarea').exists()).toBe(true)
+        expect(wrapper1.find('.form-textarea').attributes('rows')).toBe('3')
+        expect(wrapper1.find('.spin-button').exists()).toBe(true)
 
-      it('renders textarea with specified rows', () => {
-        const wrapper = mountComponent({ type: 'textarea', rows: 5 })
-        expect(wrapper.find('.form-textarea').attributes('rows')).toBe('5')
-      })
-
-      it('renders textarea with default rows of 3', () => {
-        const wrapper = mountComponent({ type: 'textarea' })
-        expect(wrapper.find('.form-textarea').attributes('rows')).toBe('3')
-      })
-
-      it('renders SpinButton for textarea type when not disabled', () => {
-        const wrapper = mountComponent({ type: 'textarea' })
-        expect(wrapper.find('.spin-button').exists()).toBe(true)
-      })
-
-      it('does not render SpinButton for textarea type when disabled', () => {
-        const wrapper = mountComponent({ type: 'textarea', disabled: true })
-        expect(wrapper.find('.spin-button').exists()).toBe(false)
+        // Custom rows
+        const wrapper2 = mountComponent({ type: 'textarea', rows: 5 })
+        expect(wrapper2.find('.form-textarea').attributes('rows')).toBe('5')
       })
     })
 
@@ -332,22 +310,16 @@ describe('ModConfigSetting', () => {
     })
 
     describe('toggleValue computed property', () => {
-      it('converts value to boolean true', () => {
-        mockModConfigStore.current = { testSetting: 'truthy' }
+      it.each([
+        ['truthy', true, 'truthy string'],
+        [null, false, 'null'],
+        ['', false, 'empty string'],
+        [0, false, 'zero'],
+        [1, true, 'number 1'],
+      ])('converts %s to %s (%s)', (configValue, expected) => {
+        mockModConfigStore.current = { testSetting: configValue }
         const wrapper = mountComponent({ name: 'testSetting', type: 'toggle' })
-        expect(wrapper.vm.toggleValue).toBe(true)
-      })
-
-      it('converts null value to boolean false', () => {
-        mockModConfigStore.current = { testSetting: null }
-        const wrapper = mountComponent({ name: 'testSetting', type: 'toggle' })
-        expect(wrapper.vm.toggleValue).toBe(false)
-      })
-
-      it('converts empty string to boolean false', () => {
-        mockModConfigStore.current = { testSetting: '' }
-        const wrapper = mountComponent({ name: 'testSetting', type: 'toggle' })
-        expect(wrapper.vm.toggleValue).toBe(false)
+        expect(wrapper.vm.toggleValue).toBe(expected)
       })
     })
 
@@ -552,41 +524,30 @@ describe('ModConfigSetting', () => {
   })
 
   describe('disabled state', () => {
-    it('disables input when disabled prop is true', () => {
-      const wrapper = mountComponent({ type: 'input', disabled: true })
-      expect(wrapper.find('.form-input').attributes('disabled')).toBeDefined()
-    })
+    it.each([
+      ['input', '.form-input', 'attributes', null],
+      ['textarea', '.form-textarea', 'attributes', null],
+      ['toggle', '.our-toggle.disabled', 'exists', null],
+      ['select', '.form-select', 'attributes', [{ value: 'a', text: 'A' }]],
+    ])(
+      '%s type is disabled and hides save button when disabled=true',
+      (type, selector, checkMethod, options) => {
+        const props = { type, disabled: true }
+        if (options) props.options = options
+        const wrapper = mountComponent(props)
 
-    it('disables textarea when disabled prop is true', () => {
-      const wrapper = mountComponent({ type: 'textarea', disabled: true })
-      expect(
-        wrapper.find('.form-textarea').attributes('disabled')
-      ).toBeDefined()
-    })
+        if (checkMethod === 'exists') {
+          expect(wrapper.find(selector).exists()).toBe(true)
+        } else {
+          expect(wrapper.find(selector).attributes('disabled')).toBeDefined()
+        }
 
-    it('disables toggle when disabled prop is true', () => {
-      const wrapper = mountComponent({ type: 'toggle', disabled: true })
-      expect(wrapper.find('.our-toggle.disabled').exists()).toBe(true)
-    })
-
-    it('disables select when disabled prop is true', () => {
-      const wrapper = mountComponent({
-        type: 'select',
-        options: [{ value: 'a', text: 'A' }],
-        disabled: true,
-      })
-      expect(wrapper.find('.form-select').attributes('disabled')).toBeDefined()
-    })
-
-    it('does not show save button for input when disabled', () => {
-      const wrapper = mountComponent({ type: 'input', disabled: true })
-      expect(wrapper.find('.spin-button').exists()).toBe(false)
-    })
-
-    it('does not show save button for textarea when disabled', () => {
-      const wrapper = mountComponent({ type: 'textarea', disabled: true })
-      expect(wrapper.find('.spin-button').exists()).toBe(false)
-    })
+        // Input and textarea have save buttons that should be hidden
+        if (type === 'input' || type === 'textarea') {
+          expect(wrapper.find('.spin-button').exists()).toBe(false)
+        }
+      }
+    )
   })
 
   describe('slot support', () => {

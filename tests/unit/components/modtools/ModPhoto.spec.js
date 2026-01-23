@@ -123,60 +123,26 @@ describe('ModPhoto', () => {
   })
 
   describe('mods computed property', () => {
-    it('returns empty object when attachment.mods is null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.mods).toEqual({})
-    })
-
-    it('returns empty object when attachment.mods is undefined', () => {
+    it.each([
+      [null, {}, 'null'],
+      [undefined, {}, 'undefined'],
+      ['null', {}, 'JSON null string'],
+      [JSON.stringify({ rotate: 90 }), { rotate: 90 }, 'simple object'],
+      [
+        JSON.stringify({ rotate: 180, filters: ['grayscale'] }),
+        { rotate: 180, filters: ['grayscale'] },
+        'complex object',
+      ],
+    ])('mods=%s returns %o (%s)', (modsValue, expected) => {
+      const attachment =
+        modsValue === undefined
+          ? { id: 1, path: '/photos/test.jpg' }
+          : { ...defaultProps.attachment, mods: modsValue }
       const wrapper = mountComponent({
-        attachment: {
-          id: 1,
-          path: '/photos/test.jpg',
-        },
+        attachment,
         message: defaultProps.message,
       })
-      expect(wrapper.vm.mods).toEqual({})
-    })
-
-    it('parses JSON mods string correctly', () => {
-      const modsData = { rotate: 90, brightness: 1.5 }
-      const wrapper = mountComponent({
-        attachment: {
-          ...defaultProps.attachment,
-          mods: JSON.stringify(modsData),
-        },
-        message: defaultProps.message,
-      })
-      expect(wrapper.vm.mods).toEqual(modsData)
-    })
-
-    it('returns empty object when mods JSON parses to null', () => {
-      const wrapper = mountComponent({
-        attachment: {
-          ...defaultProps.attachment,
-          mods: 'null',
-        },
-        message: defaultProps.message,
-      })
-      expect(wrapper.vm.mods).toEqual({})
-    })
-
-    it('handles complex mods object', () => {
-      const modsData = {
-        rotate: 180,
-        brightness: 0.8,
-        contrast: 1.2,
-        filters: ['grayscale'],
-      }
-      const wrapper = mountComponent({
-        attachment: {
-          ...defaultProps.attachment,
-          mods: JSON.stringify(modsData),
-        },
-        message: defaultProps.message,
-      })
-      expect(wrapper.vm.mods).toEqual(modsData)
+      expect(wrapper.vm.mods).toEqual(expected)
     })
   })
 

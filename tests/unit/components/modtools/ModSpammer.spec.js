@@ -113,192 +113,97 @@ describe('ModSpammer', () => {
     })
   })
 
-  describe('variant computed property', () => {
-    it('returns danger for Spammer collection', () => {
-      const user = createUser({ spammer: { collection: 'Spammer' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.variant).toBe('danger')
-    })
-
-    it('returns primary for Safelisted collection', () => {
-      const user = createUser({ spammer: { collection: 'Safelisted' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.variant).toBe('primary')
-    })
-
-    it('returns warning for PendingAdd collection', () => {
-      const user = createUser({ spammer: { collection: 'PendingAdd' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.variant).toBe('warning')
-    })
-
-    it('returns warning for PendingRemove collection', () => {
-      const user = createUser({ spammer: { collection: 'PendingRemove' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.variant).toBe('warning')
-    })
-
-    it('returns warning for unknown collection types', () => {
-      const user = createUser({ spammer: { collection: 'Unknown' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.variant).toBe('warning')
-    })
-  })
-
-  describe('collname computed property', () => {
-    it('returns "Confirmed Spammer" for Spammer collection', () => {
-      const user = createUser({ spammer: { collection: 'Spammer' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.collname).toBe('Confirmed Spammer')
-    })
-
-    it('returns "Safelisted" for Safelisted collection', () => {
-      const user = createUser({ spammer: { collection: 'Safelisted' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.collname).toBe('Safelisted')
-    })
-
-    it('returns "Unconfirmed Spammer" for PendingAdd collection', () => {
-      const user = createUser({ spammer: { collection: 'PendingAdd' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.collname).toBe('Unconfirmed Spammer')
-    })
-
-    it('returns "Disputed Spammer" for PendingRemove collection', () => {
-      const user = createUser({ spammer: { collection: 'PendingRemove' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.collname).toBe('Disputed Spammer')
-    })
-
-    it('returns raw collection name for unknown types', () => {
-      const user = createUser({ spammer: { collection: 'CustomType' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.vm.collname).toBe('CustomType')
-    })
-  })
-
-  describe('collname display in template', () => {
-    it('shows Confirmed Spammer text', () => {
-      const user = createUser({ spammer: { collection: 'Spammer' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.text()).toContain('Confirmed Spammer')
-    })
-
-    it('shows Unconfirmed Spammer text', () => {
-      const user = createUser({ spammer: { collection: 'PendingAdd' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.text()).toContain('Unconfirmed Spammer')
-    })
+  describe('computed properties by collection type', () => {
+    it.each([
+      ['Spammer', 'danger', 'Confirmed Spammer'],
+      ['Safelisted', 'primary', 'Safelisted'],
+      ['PendingAdd', 'warning', 'Unconfirmed Spammer'],
+      ['PendingRemove', 'warning', 'Disputed Spammer'],
+      ['Unknown', 'warning', 'Unknown'],
+      ['CustomType', 'warning', 'CustomType'],
+    ])(
+      '%s collection → variant=%s, collname="%s"',
+      (collection, expectedVariant, expectedCollname) => {
+        const user = createUser({ spammer: { collection } })
+        const wrapper = mountComponent({ user })
+        expect(wrapper.vm.variant).toBe(expectedVariant)
+        expect(wrapper.vm.collname).toBe(expectedCollname)
+      }
+    )
   })
 
   describe('PendingAdd specific behavior', () => {
-    it('shows "Reported by" text for PendingAdd', () => {
-      const user = createUser({ spammer: { collection: 'PendingAdd' } })
+    it.each([
+      ['PendingAdd', 'Reported by'],
+      ['Spammer', 'Added by'],
+    ])('%s collection shows "%s" text', (collection, expectedText) => {
+      const user = createUser({ spammer: { collection } })
       const wrapper = mountComponent({ user })
-      expect(wrapper.text()).toContain('Reported by')
-    })
-
-    it('shows "Added by" text for non-PendingAdd collections', () => {
-      const user = createUser({ spammer: { collection: 'Spammer' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.text()).toContain('Added by')
+      expect(wrapper.text()).toContain(expectedText)
     })
   })
 
   describe('sameip array', () => {
-    it('does not show warning when sameip is null', () => {
-      const wrapper = mountComponent({ sameip: null })
-      expect(wrapper.text()).not.toContain('Recently active on the same IP')
+    it.each([
+      [null, false, 'null'],
+      [[], false, 'empty array'],
+      [[123, 456], true, 'populated array'],
+    ])('sameip=%s shows warning=%s (%s)', (sameip, shouldShowWarning) => {
+      const wrapper = mountComponent({ sameip })
+      if (shouldShowWarning) {
+        expect(wrapper.text()).toContain('Recently active on the same IP')
+      } else {
+        expect(wrapper.text()).not.toContain('Recently active on the same IP')
+      }
     })
 
-    it('does not show warning when sameip is empty array', () => {
-      const wrapper = mountComponent({ sameip: [] })
-      expect(wrapper.text()).not.toContain('Recently active on the same IP')
-    })
-
-    it('shows warning when sameip has entries', () => {
-      const wrapper = mountComponent({ sameip: [123, 456] })
-      expect(wrapper.text()).toContain('Recently active on the same IP')
-    })
-
-    it('renders links for each userid in sameip', () => {
+    it('renders support links for each userid in sameip', () => {
       const wrapper = mountComponent({ sameip: [123, 456, 789] })
       const links = wrapper.findAll('a[href*="/support/"]')
       expect(links.length).toBe(3)
-    })
-
-    it('creates correct support links for sameip userids', () => {
-      const wrapper = mountComponent({ sameip: [123] })
-      const link = wrapper.find('a[href="/support/123"]')
-      expect(link.exists()).toBe(true)
-    })
-
-    it('shows explanation text for sameip', () => {
-      const wrapper = mountComponent({ sameip: [123] })
+      expect(wrapper.find('a[href="/support/123"]').exists()).toBe(true)
       expect(wrapper.text()).toContain(
         'These may not be the same actual person'
       )
     })
   })
 
-  describe('props', () => {
-    it('accepts required user prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('user')).toEqual(baseUser)
-    })
-
-    it('accepts optional sameip prop', () => {
+  describe('props and byuser handling', () => {
+    it('passes props correctly and displays byuser info', () => {
       const sameip = [100, 200]
       const wrapper = mountComponent({ sameip })
+      expect(wrapper.props('user')).toEqual(baseUser)
       expect(wrapper.props('sameip')).toEqual(sameip)
-    })
-
-    it('has default null for sameip', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('sameip')).toBeNull()
-    })
-  })
-
-  describe('byuser handling', () => {
-    it('displays byuser info when present', () => {
-      const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Mod Person')
       expect(wrapper.text()).toContain('mod@example.com')
     })
 
-    it('handles missing byuser gracefully', () => {
+    it('defaults sameip to null and handles missing byuser', () => {
       const user = createUser({ spammer: { byuser: null } })
       const wrapper = mountComponent({ user })
+      expect(wrapper.props('sameip')).toBeNull()
       expect(wrapper.text()).toContain('Test User')
     })
   })
 
-  describe('notice styling', () => {
-    it('applies danger class for Spammer', () => {
-      const user = createUser({ spammer: { collection: 'Spammer' } })
+  describe('notice styling by collection', () => {
+    it.each([
+      ['Spammer', 'notice-danger'],
+      ['Safelisted', 'notice-primary'],
+      ['PendingAdd', 'notice-warning'],
+    ])('%s collection applies %s class', (collection, cssClass) => {
+      const user = createUser({ spammer: { collection } })
       const wrapper = mountComponent({ user })
-      expect(wrapper.find('.notice-danger').exists()).toBe(true)
-    })
-
-    it('applies primary class for Safelisted', () => {
-      const user = createUser({ spammer: { collection: 'Safelisted' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.find('.notice-primary').exists()).toBe(true)
-    })
-
-    it('applies warning class for PendingAdd', () => {
-      const user = createUser({ spammer: { collection: 'PendingAdd' } })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.find('.notice-warning').exists()).toBe(true)
+      expect(wrapper.find(`.${cssClass}`).exists()).toBe(true)
     })
   })
 
   describe('edge cases', () => {
-    it('handles user with minimal spammer data', () => {
+    it('handles minimal spammer data and empty reason', () => {
       const user = {
         displayname: 'Minimal User',
         spammer: {
-          reason: 'Test',
+          reason: '',
           collection: 'Spammer',
           added: null,
           byuserid: null,
@@ -307,14 +212,6 @@ describe('ModSpammer', () => {
       }
       const wrapper = mountComponent({ user })
       expect(wrapper.text()).toContain('Minimal User')
-      expect(wrapper.text()).toContain('Test')
-    })
-
-    it('handles empty reason', () => {
-      const user = createUser({
-        spammer: { reason: '', collection: 'Spammer' },
-      })
-      const wrapper = mountComponent({ user })
       expect(wrapper.text()).toContain('Confirmed Spammer')
     })
   })

@@ -25,6 +25,24 @@ describe('ModMemberships', () => {
     ...overrides,
   })
 
+  // Helper to create multiple groups
+  const createGroups = (count, prefix = 'Group') =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i + 1,
+      membershipid: 100 + i + 1,
+      namedisplay: `${prefix} ${i + 1}`,
+      added: `2024-01-${String(i + 1).padStart(2, '0')}`,
+    }))
+
+  // Helper to create applied groups
+  const createApplied = (count) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: i + 1,
+      userid: 456,
+      namedisplay: `Applied ${i + 1}`,
+      added: `2024-01-${String(i + 1).padStart(2, '0')}`,
+    }))
+
   function mountComponent(props = {}) {
     return mount(ModMemberships, {
       props: {
@@ -56,16 +74,12 @@ describe('ModMemberships', () => {
       expect(wrapper.find('div').exists()).toBe(true)
     })
 
-    it('shows "Not on any communities" when no memberof', () => {
+    it.each([
+      ['null', null],
+      ['empty array', []],
+    ])('shows "Not on any communities" when memberof is %s', (_, memberof) => {
       const wrapper = mountComponent({
-        user: createUser({ memberof: null }),
-      })
-      expect(wrapper.text()).toContain('Not on any communities')
-    })
-
-    it('shows "Not on any communities" when memberof is empty', () => {
-      const wrapper = mountComponent({
-        user: createUser({ memberof: [] }),
+        user: createUser({ memberof }),
       })
       expect(wrapper.text()).toContain('Not on any communities')
     })
@@ -137,83 +151,15 @@ describe('ModMemberships', () => {
       expect(wrapper.vm.memberof[2].namedisplay).toBe('Old Group')
     })
 
-    it('shows first 3 memberships by default', () => {
+    it('shows first 3 memberships by default, all when allmemberships is true', async () => {
       const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-            {
-              id: 5,
-              membershipid: 105,
-              namedisplay: 'Group 5',
-              added: '2024-01-05',
-            },
-          ],
-        }),
+        user: createUser({ memberof: createGroups(5) }),
       })
-      expect(wrapper.vm.memberof.length).toBe(3)
-    })
 
-    it('shows all memberships when allmemberships is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-            {
-              id: 5,
-              membershipid: 105,
-              namedisplay: 'Group 5',
-              added: '2024-01-05',
-            },
-          ],
-        }),
-      })
+      // Default: shows first 3
+      expect(wrapper.vm.memberof.length).toBe(3)
+
+      // Toggle to show all
       wrapper.vm.allmemberships = true
       await wrapper.vm.$nextTick()
       expect(wrapper.vm.memberof.length).toBe(5)
@@ -221,229 +167,55 @@ describe('ModMemberships', () => {
   })
 
   describe('hiddenmemberofs computed', () => {
-    it('returns 0 when allmemberships is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-          ],
-        }),
-      })
-      wrapper.vm.allmemberships = true
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.hiddenmemberofs).toBe(0)
-    })
-
-    it('returns 0 when memberof has 3 or fewer entries', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-          ],
-        }),
-      })
-      expect(wrapper.vm.hiddenmemberofs).toBe(0)
-    })
-
-    it('returns correct count when more than 3 memberships', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-            {
-              id: 5,
-              membershipid: 105,
-              namedisplay: 'Group 5',
-              added: '2024-01-05',
-            },
-          ],
-        }),
-      })
-      expect(wrapper.vm.hiddenmemberofs).toBe(2)
-    })
-
-    it('returns 0 when user has no memberof', () => {
-      const wrapper = mountComponent({
-        user: createUser({ memberof: null }),
-      })
-      expect(wrapper.vm.hiddenmemberofs).toBe(0)
-    })
+    it.each([
+      ['allmemberships is true', { memberof: createGroups(4) }, true, 0],
+      [
+        'memberof has 3 or fewer entries',
+        { memberof: createGroups(2) },
+        false,
+        0,
+      ],
+      ['memberof is null', { memberof: null }, false, 0],
+      ['more than 3 memberships', { memberof: createGroups(5) }, false, 2],
+    ])(
+      'returns correct count when %s',
+      async (_, userOverrides, allmemberships, expected) => {
+        const wrapper = mountComponent({
+          user: createUser(userOverrides),
+        })
+        if (allmemberships) {
+          wrapper.vm.allmemberships = true
+          await wrapper.vm.$nextTick()
+        }
+        expect(wrapper.vm.hiddenmemberofs).toBe(expected)
+      }
+    )
   })
 
   describe('expand badge', () => {
-    it('shows badge when hidden memberships exist', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-          ],
-        }),
+    it('shows/hides badge based on hidden memberships and toggles allmemberships', async () => {
+      // With hidden memberships - badge shows
+      const wrapperWithHidden = mountComponent({
+        user: createUser({ memberof: createGroups(4) }),
       })
-      expect(wrapper.text()).toContain('+1 groups')
-    })
+      expect(wrapperWithHidden.text()).toContain('+1 groups')
+      expect(wrapperWithHidden.vm.allmemberships).toBe(false)
 
-    it('hides badge when no hidden memberships', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-          ],
-        }),
-      })
-      expect(wrapper.text()).not.toContain('+')
-    })
+      // Toggle to show all
+      wrapperWithHidden.vm.allmemberships = !wrapperWithHidden.vm.allmemberships
+      await wrapperWithHidden.vm.$nextTick()
+      expect(wrapperWithHidden.vm.allmemberships).toBe(true)
 
-    it('toggles allmemberships when badge clicked', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              membershipid: 102,
-              namedisplay: 'Group 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              membershipid: 103,
-              namedisplay: 'Group 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              membershipid: 104,
-              namedisplay: 'Group 4',
-              added: '2024-01-04',
-            },
-          ],
-        }),
+      // Without hidden memberships - no badge
+      const wrapperNoHidden = mountComponent({
+        user: createUser({ memberof: createGroups(1) }),
       })
-      expect(wrapper.vm.allmemberships).toBe(false)
-      // Directly toggle since the click event wiring depends on component implementation
-      wrapper.vm.allmemberships = !wrapper.vm.allmemberships
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.allmemberships).toBe(true)
+      expect(wrapperNoHidden.text()).not.toContain('+')
     })
   })
 
   describe('applied groups', () => {
-    it('shows applied groups', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Group 1',
-              added: '2024-01-01',
-            },
-          ],
-          applied: [
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied Group',
-              added: '2024-06-01',
-            },
-          ],
-        }),
-      })
-      expect(wrapper.text()).toContain('Applied Group')
-      expect(wrapper.text()).toContain('joined')
-    })
-
-    it('filters out applied groups that user is already member of', () => {
+    it('shows applied groups and filters out existing memberships', () => {
       const wrapper = mountComponent({
         user: createUser({
           memberof: [
@@ -459,14 +231,16 @@ describe('ModMemberships', () => {
             {
               id: 2,
               userid: 456,
-              namedisplay: 'New Group',
+              namedisplay: 'Applied Group',
               added: '2024-06-01',
             },
           ],
         }),
       })
+      expect(wrapper.text()).toContain('Applied Group')
+      expect(wrapper.text()).toContain('joined')
       expect(wrapper.vm.filteredApplied.length).toBe(1)
-      expect(wrapper.vm.filteredApplied[0].namedisplay).toBe('New Group')
+      expect(wrapper.vm.filteredApplied[0].namedisplay).toBe('Applied Group')
     })
 
     it('returns empty array when user has no applied', () => {
@@ -476,194 +250,50 @@ describe('ModMemberships', () => {
       expect(wrapper.vm.filteredApplied).toEqual([])
     })
 
-    it('shows first 3 applied by default', () => {
+    it('shows first 3 applied by default, all when allapplied is true', async () => {
       const wrapper = mountComponent({
         user: createUser({
           memberof: [],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Applied 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              userid: 456,
-              namedisplay: 'Applied 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              userid: 456,
-              namedisplay: 'Applied 4',
-              added: '2024-01-04',
-            },
-            {
-              id: 5,
-              userid: 456,
-              namedisplay: 'Applied 5',
-              added: '2024-01-05',
-            },
-          ],
+          applied: createApplied(5),
         }),
       })
-      expect(wrapper.vm.visibleApplied.length).toBe(3)
-    })
 
-    it('shows all applied when allapplied is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Applied 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              userid: 456,
-              namedisplay: 'Applied 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              userid: 456,
-              namedisplay: 'Applied 4',
-              added: '2024-01-04',
-            },
-          ],
-        }),
-      })
+      // Default: shows first 3
+      expect(wrapper.vm.visibleApplied.length).toBe(3)
+
+      // Toggle to show all
       wrapper.vm.allapplied = true
       await wrapper.vm.$nextTick()
-      expect(wrapper.vm.visibleApplied.length).toBe(4)
+      expect(wrapper.vm.visibleApplied.length).toBe(5)
     })
   })
 
   describe('hiddenapplieds computed', () => {
-    it('returns 0 when allapplied is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Applied 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              userid: 456,
-              namedisplay: 'Applied 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              userid: 456,
-              namedisplay: 'Applied 4',
-              added: '2024-01-04',
-            },
-          ],
-        }),
-      })
-      wrapper.vm.allapplied = true
-      await wrapper.vm.$nextTick()
-      expect(wrapper.vm.hiddenapplieds).toBe(0)
-    })
-
-    it('returns correct count when more than 3 applied', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Applied 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              userid: 456,
-              namedisplay: 'Applied 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              userid: 456,
-              namedisplay: 'Applied 4',
-              added: '2024-01-04',
-            },
-            {
-              id: 5,
-              userid: 456,
-              namedisplay: 'Applied 5',
-              added: '2024-01-05',
-            },
-          ],
-        }),
-      })
-      expect(wrapper.vm.hiddenapplieds).toBe(2)
-    })
+    it.each([
+      ['allapplied is true', 4, true, 0],
+      ['more than 3 applied', 5, false, 2],
+    ])(
+      'returns correct count when %s',
+      async (_, appliedCount, allapplied, expected) => {
+        const wrapper = mountComponent({
+          user: createUser({
+            memberof: [],
+            applied: createApplied(appliedCount),
+          }),
+        })
+        if (allapplied) {
+          wrapper.vm.allapplied = true
+          await wrapper.vm.$nextTick()
+        }
+        expect(wrapper.vm.hiddenapplieds).toBe(expected)
+      }
+    )
 
     it('shows applied badge when hidden applied exist', () => {
       const wrapper = mountComponent({
         user: createUser({
           memberof: [],
-          applied: [
-            {
-              id: 1,
-              userid: 456,
-              namedisplay: 'Applied 1',
-              added: '2024-01-01',
-            },
-            {
-              id: 2,
-              userid: 456,
-              namedisplay: 'Applied 2',
-              added: '2024-01-02',
-            },
-            {
-              id: 3,
-              userid: 456,
-              namedisplay: 'Applied 3',
-              added: '2024-01-03',
-            },
-            {
-              id: 4,
-              userid: 456,
-              namedisplay: 'Applied 4',
-              added: '2024-01-04',
-            },
-          ],
+          applied: createApplied(4),
         }),
       })
       expect(wrapper.text()).toContain('+1 applied')
@@ -671,50 +301,39 @@ describe('ModMemberships', () => {
   })
 
   describe('daysago function', () => {
-    it('returns correct days difference', () => {
+    it.each([
+      ['10 days ago', 10, 10],
+      ['today', 0, 0],
+    ])('returns %s correctly', (_, daysBack, expected) => {
       const wrapper = mountComponent()
-      const tenDaysAgo = dayjs().subtract(10, 'days').toISOString()
-      expect(wrapper.vm.daysago(tenDaysAgo)).toBe(10)
-    })
-
-    it('returns 0 for today', () => {
-      const wrapper = mountComponent()
-      const today = dayjs().toISOString()
-      expect(wrapper.vm.daysago(today)).toBe(0)
+      const date = dayjs().subtract(daysBack, 'days').toISOString()
+      expect(wrapper.vm.daysago(date)).toBe(expected)
     })
   })
 
   describe('recent membership styling', () => {
-    it('applies text-danger class for memberships added within 31 days', () => {
+    it.each([
+      ['text-danger for memberships within 31 days', 15, '.text-danger', true],
+      [
+        'text-muted for memberships older than 31 days',
+        60,
+        '.text-muted',
+        true,
+      ],
+    ])('applies %s', (_, daysBack, selector, shouldExist) => {
       const wrapper = mountComponent({
         user: createUser({
           memberof: [
             {
               id: 1,
               membershipid: 101,
-              namedisplay: 'Recent Group',
-              added: dayjs().subtract(15, 'days').toISOString(),
+              namedisplay: 'Test Group',
+              added: dayjs().subtract(daysBack, 'days').toISOString(),
             },
           ],
         }),
       })
-      expect(wrapper.find('.text-danger').exists()).toBe(true)
-    })
-
-    it('applies text-muted class for memberships older than 31 days', () => {
-      const wrapper = mountComponent({
-        user: createUser({
-          memberof: [
-            {
-              id: 1,
-              membershipid: 101,
-              namedisplay: 'Old Group',
-              added: dayjs().subtract(60, 'days').toISOString(),
-            },
-          ],
-        }),
-      })
-      expect(wrapper.find('.text-muted').exists()).toBe(true)
+      expect(wrapper.find(selector).exists()).toBe(shouldExist)
     })
   })
 })

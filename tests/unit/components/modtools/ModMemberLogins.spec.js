@@ -54,39 +54,17 @@ describe('ModMemberLogins', () => {
   })
 
   describe('login type display', () => {
-    it('shows "Email/Password" for Native login type', () => {
+    it.each([
+      ['Native', 'Email/Password'],
+      ['Facebook', 'Facebook'],
+      ['Yahoo', 'Yahoo'],
+      ['Google', 'Google'],
+      ['Apple', 'Apple'], // unknown types show as-is
+    ])('%s login shows "%s"', (type, expected) => {
       const wrapper = mountModMemberLogins({
-        logins: [{ id: 1, type: 'Native', lastaccess: '2024-01-01' }],
+        logins: [{ id: 1, type, lastaccess: '2024-01-01' }],
       })
-      expect(wrapper.text()).toContain('Email/Password')
-    })
-
-    it('shows "Facebook" for Facebook login type', () => {
-      const wrapper = mountModMemberLogins({
-        logins: [{ id: 1, type: 'Facebook', lastaccess: '2024-01-01' }],
-      })
-      expect(wrapper.text()).toContain('Facebook')
-    })
-
-    it('shows "Yahoo" for Yahoo login type', () => {
-      const wrapper = mountModMemberLogins({
-        logins: [{ id: 1, type: 'Yahoo', lastaccess: '2024-01-01' }],
-      })
-      expect(wrapper.text()).toContain('Yahoo')
-    })
-
-    it('shows "Google" for Google login type', () => {
-      const wrapper = mountModMemberLogins({
-        logins: [{ id: 1, type: 'Google', lastaccess: '2024-01-01' }],
-      })
-      expect(wrapper.text()).toContain('Google')
-    })
-
-    it('shows original type for unknown login types', () => {
-      const wrapper = mountModMemberLogins({
-        logins: [{ id: 1, type: 'Apple', lastaccess: '2024-01-01' }],
-      })
-      expect(wrapper.text()).toContain('Apple')
+      expect(wrapper.text()).toContain(expected)
     })
   })
 

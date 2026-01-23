@@ -31,6 +31,109 @@ describe('ModGroupSetting', () => {
     },
   }
 
+  const defaultStubs = {
+    'b-form-group': {
+      template: '<div class="form-group"><slot /></div>',
+      props: ['label'],
+    },
+    'b-form-text': {
+      template: '<div class="form-text"><slot /></div>',
+    },
+    'b-input-group': {
+      template: '<div class="input-group"><slot /><slot name="append" /></div>',
+    },
+    'b-form-input': {
+      template: `
+        <input
+          :value="modelValue"
+          :type="type || 'text'"
+          :step="step"
+          class="form-input"
+          @input="$emit('update:modelValue', $event.target.value)"
+        />
+      `,
+      props: ['modelValue', 'type', 'step'],
+    },
+    'b-form-textarea': {
+      template: `
+        <textarea
+          :value="modelValue"
+          :rows="rows"
+          class="form-textarea"
+          @input="$emit('update:modelValue', $event.target.value)"
+        />
+      `,
+      props: ['modelValue', 'rows'],
+    },
+    'b-row': { template: '<div class="row"><slot /></div>' },
+    'b-col': { template: '<div class="col"><slot /></div>' },
+    SpinButton: {
+      template: `
+        <button
+          class="spin-button"
+          :disabled="disabled"
+          @click="$emit('handle', $event)"
+        >
+          {{ label }}
+        </button>
+      `,
+      props: ['variant', 'iconName', 'label', 'disabled'],
+      emits: ['handle'],
+    },
+    OurToggle: {
+      template: `
+        <div
+          class="our-toggle"
+          :data-value="modelValue"
+          :data-disabled="disabled"
+          @click="handleClick"
+        >
+          Toggle
+        </div>
+      `,
+      props: [
+        'modelValue',
+        'height',
+        'width',
+        'fontSize',
+        'sync',
+        'labels',
+        'variant',
+        'disabled',
+      ],
+      emits: ['update:modelValue', 'change'],
+      methods: {
+        handleClick() {
+          if (!this.disabled) {
+            const newValue = !this.modelValue
+            this.$emit('update:modelValue', newValue)
+            this.$emit('change', newValue)
+          }
+        },
+      },
+    },
+  }
+
+  const simpleStubs = {
+    'b-form-group': {
+      template: '<div class="form-group"><slot /></div>',
+    },
+    'b-form-text': {
+      template: '<div class="form-text"><slot /></div>',
+    },
+    'b-input-group': {
+      template: '<div class="input-group"><slot /></div>',
+    },
+    'b-form-input': { template: '<input class="form-input" />' },
+    'b-form-textarea': {
+      template: '<textarea class="form-textarea" />',
+    },
+    'b-row': { template: '<div class="row"><slot /></div>' },
+    'b-col': { template: '<div class="col"><slot /></div>' },
+    SpinButton: { template: '<button class="spin-button" />' },
+    OurToggle: { template: '<div class="our-toggle" />' },
+  }
+
   function mountComponent(props = {}, groupOverrides = {}) {
     const group = { ...defaultGroup, ...groupOverrides }
     mockModGroupStore.get.mockReturnValue(group)
@@ -38,90 +141,16 @@ describe('ModGroupSetting', () => {
     return mount(ModGroupSetting, {
       props: { ...defaultProps, ...props },
       global: {
-        stubs: {
-          'b-form-group': {
-            template: '<div class="form-group"><slot /></div>',
-            props: ['label'],
-          },
-          'b-form-text': {
-            template: '<div class="form-text"><slot /></div>',
-          },
-          'b-input-group': {
-            template:
-              '<div class="input-group"><slot /><slot name="append" /></div>',
-          },
-          'b-form-input': {
-            template: `
-              <input
-                :value="modelValue"
-                :type="type || 'text'"
-                :step="step"
-                class="form-input"
-                @input="$emit('update:modelValue', $event.target.value)"
-              />
-            `,
-            props: ['modelValue', 'type', 'step'],
-          },
-          'b-form-textarea': {
-            template: `
-              <textarea
-                :value="modelValue"
-                :rows="rows"
-                class="form-textarea"
-                @input="$emit('update:modelValue', $event.target.value)"
-              />
-            `,
-            props: ['modelValue', 'rows'],
-          },
-          'b-row': { template: '<div class="row"><slot /></div>' },
-          'b-col': { template: '<div class="col"><slot /></div>' },
-          SpinButton: {
-            template: `
-              <button
-                class="spin-button"
-                :disabled="disabled"
-                @click="$emit('handle', $event)"
-              >
-                {{ label }}
-              </button>
-            `,
-            props: ['variant', 'iconName', 'label', 'disabled'],
-            emits: ['handle'],
-          },
-          OurToggle: {
-            template: `
-              <div
-                class="our-toggle"
-                :data-value="modelValue"
-                :data-disabled="disabled"
-                @click="handleClick"
-              >
-                Toggle
-              </div>
-            `,
-            props: [
-              'modelValue',
-              'height',
-              'width',
-              'fontSize',
-              'sync',
-              'labels',
-              'variant',
-              'disabled',
-            ],
-            emits: ['update:modelValue', 'change'],
-            methods: {
-              handleClick() {
-                if (!this.disabled) {
-                  const newValue = !this.modelValue
-                  this.$emit('update:modelValue', newValue)
-                  this.$emit('change', newValue)
-                }
-              },
-            },
-          },
-        },
+        stubs: defaultStubs,
       },
+    })
+  }
+
+  function mountWithNullGroup(props = {}) {
+    mockModGroupStore.get = vi.fn().mockReturnValue(null)
+    return mount(ModGroupSetting, {
+      props: { ...defaultProps, ...props },
+      global: { stubs: simpleStubs },
     })
   }
 
@@ -145,92 +174,65 @@ describe('ModGroupSetting', () => {
       expect(wrapper.find('.form-group').exists()).toBe(true)
     })
 
-    it('renders description text when provided', () => {
-      const wrapper = mountComponent({
+    it('renders description text only when provided', () => {
+      const withDescription = mountComponent({
         description: 'This is a helpful description',
       })
-      expect(wrapper.find('.form-text').exists()).toBe(true)
-      expect(wrapper.text()).toContain('This is a helpful description')
-    })
+      expect(withDescription.find('.form-text').exists()).toBe(true)
+      expect(withDescription.text()).toContain('This is a helpful description')
 
-    it('does not render description text when not provided', () => {
-      const wrapper = mountComponent({ description: null })
-      expect(wrapper.find('.form-text').exists()).toBe(false)
+      const withoutDescription = mountComponent({ description: null })
+      expect(withoutDescription.find('.form-text').exists()).toBe(false)
     })
   })
 
   describe('input type rendering', () => {
-    it('renders text input for type="input"', () => {
-      const wrapper = mountComponent({ type: 'input' })
-      expect(wrapper.find('.input-group').exists()).toBe(true)
-      expect(wrapper.find('.form-input').exists()).toBe(true)
-    })
+    it.each([
+      ['input', '.form-input', 'text'],
+      ['number', '.form-input', 'number'],
+      ['textarea', '.form-textarea', null],
+      ['toggle', '.our-toggle', null],
+      [undefined, '.form-input', 'text'], // default type
+    ])(
+      'renders correct element for type="%s"',
+      async (type, selector, expectedInputType) => {
+        const wrapper = mountComponent(type ? { type } : {})
+        await wrapper.vm.$nextTick()
 
-    it('renders number input for type="number"', async () => {
-      const wrapper = mountComponent({ type: 'number' })
-      await wrapper.vm.$nextTick()
-      expect(wrapper.find('.input-group').exists()).toBe(true)
-      const input = wrapper.find('.form-input')
-      expect(input.exists()).toBe(true)
-      expect(input.attributes('type')).toBe('number')
-    })
+        expect(wrapper.find(selector).exists()).toBe(true)
 
-    it('renders textarea for type="textarea"', () => {
-      const wrapper = mountComponent({ type: 'textarea' })
-      expect(wrapper.find('.form-textarea').exists()).toBe(true)
-    })
-
-    it('renders toggle for type="toggle"', () => {
-      const wrapper = mountComponent({ type: 'toggle' })
-      expect(wrapper.find('.our-toggle').exists()).toBe(true)
-    })
-
-    it('uses default type of "input" when not specified', () => {
-      const wrapper = mountComponent({})
-      expect(wrapper.find('.form-input').exists()).toBe(true)
-    })
+        if (expectedInputType && selector === '.form-input') {
+          expect(wrapper.find(selector).attributes('type')).toBe(
+            expectedInputType
+          )
+        }
+      }
+    )
   })
 
   describe('props', () => {
-    it('accepts required name prop', () => {
-      const wrapper = mountComponent({ name: 'testname' })
-      expect(wrapper.props('name')).toBe('testname')
+    it.each([
+      ['name', { name: 'testname' }, 'testname'],
+      ['groupid', { groupid: 456 }, 456],
+      ['label', { label: 'Test Label' }, 'Test Label'],
+      ['description', { description: 'Test description' }, 'Test description'],
+    ])('accepts %s prop', (propName, propsOverride, expected) => {
+      const wrapper = mountComponent(propsOverride)
+      expect(wrapper.props(propName)).toBe(expected)
     })
 
-    it('accepts required groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      expect(wrapper.props('groupid')).toBe(456)
-    })
-
-    it('accepts required label prop', () => {
-      const wrapper = mountComponent({ label: 'Test Label' })
-      expect(wrapper.props('label')).toBe('Test Label')
-    })
-
-    it('accepts optional description prop', () => {
-      const wrapper = mountComponent({ description: 'Test description' })
-      expect(wrapper.props('description')).toBe('Test description')
-    })
-
-    it('accepts step prop for number input with default of 1', () => {
-      const wrapper = mountComponent({ type: 'number' })
-      expect(wrapper.props('step')).toBe(1)
-    })
-
-    it('accepts custom step prop for number input', () => {
-      const wrapper = mountComponent({ type: 'number', step: 0.1 })
-      expect(wrapper.props('step')).toBe(0.1)
-    })
-
-    it('accepts rows prop for textarea with default of 3', () => {
-      const wrapper = mountComponent({ type: 'textarea' })
-      expect(wrapper.props('rows')).toBe(3)
-    })
-
-    it('accepts custom rows prop for textarea', () => {
-      const wrapper = mountComponent({ type: 'textarea', rows: 10 })
-      expect(wrapper.props('rows')).toBe(10)
-    })
+    it.each([
+      ['step', 'number', {}, 1],
+      ['step', 'number', { step: 0.1 }, 0.1],
+      ['rows', 'textarea', {}, 3],
+      ['rows', 'textarea', { rows: 10 }, 10],
+    ])(
+      '%s prop for %s type defaults to %s or accepts custom value',
+      (propName, type, extraProps, expected) => {
+        const wrapper = mountComponent({ type, ...extraProps })
+        expect(wrapper.props(propName)).toBe(expected)
+      }
+    )
   })
 
   describe('computed properties', () => {
@@ -239,129 +241,59 @@ describe('ModGroupSetting', () => {
       expect(mockModGroupStore.get).toHaveBeenCalledWith(789)
     })
 
-    it('readonly is true when myrole is not Owner', () => {
-      const wrapper = mountComponent({}, { myrole: 'Moderator' })
-      expect(wrapper.vm.readonly).toBe(true)
+    it.each([
+      ['Moderator', true],
+      ['Owner', false],
+    ])('readonly is %s when myrole is %s', (myrole, expectedReadonly) => {
+      const wrapper = mountComponent({}, { myrole })
+      expect(wrapper.vm.readonly).toBe(expectedReadonly)
     })
 
-    it('readonly is false when myrole is Owner', () => {
-      const wrapper = mountComponent({}, { myrole: 'Owner' })
-      expect(wrapper.vm.readonly).toBe(false)
-    })
-
-    it('readonly is true when group is null', () => {
-      // Set up mock before mounting
-      mockModGroupStore.get = vi.fn().mockReturnValue(null)
-      const wrapper = mount(ModGroupSetting, {
-        props: { ...defaultProps },
-        global: {
-          stubs: {
-            'b-form-group': {
-              template: '<div class="form-group"><slot /></div>',
-            },
-            'b-form-text': {
-              template: '<div class="form-text"><slot /></div>',
-            },
-            'b-input-group': {
-              template: '<div class="input-group"><slot /></div>',
-            },
-            'b-form-input': { template: '<input class="form-input" />' },
-            'b-form-textarea': {
-              template: '<textarea class="form-textarea" />',
-            },
-            'b-row': { template: '<div class="row"><slot /></div>' },
-            'b-col': { template: '<div class="col"><slot /></div>' },
-            SpinButton: { template: '<button class="spin-button" />' },
-            OurToggle: { template: '<div class="our-toggle" />' },
-          },
-        },
-      })
+    it('readonly is true and value is null when group is null', async () => {
+      const wrapper = mountWithNullGroup()
+      await flushPromises()
       expect(wrapper.vm.readonly).toBe(true)
+      expect(wrapper.vm.value).toBeNull()
     })
   })
 
   describe('getValueFromGroup', () => {
-    it('gets simple top-level property value', async () => {
-      const wrapper = mountComponent(
-        { name: 'nameshort' },
-        { nameshort: 'MyGroup' }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe('MyGroup')
-    })
+    it.each([
+      ['nameshort', { nameshort: 'MyGroup' }, 'MyGroup'],
+      ['settings.autoapprove', { settings: { autoapprove: 5 } }, 5],
+      [
+        'settings.autopost.delay',
+        { settings: { autopost: { delay: 30 } } },
+        30,
+      ],
+    ])(
+      'gets value for path "%s" using dot notation',
+      async (name, groupOverrides, expected) => {
+        const wrapper = mountComponent({ name }, groupOverrides)
+        await flushPromises()
+        expect(wrapper.vm.value).toBe(expected)
+      }
+    )
 
-    it('gets nested property value with dot notation', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.autoapprove' },
-        { settings: { autoapprove: 5 } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(5)
-    })
-
-    it('gets deeply nested property value', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.autopost.delay' },
-        { settings: { autopost: { delay: 30 } } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(30)
-    })
-
-    it('converts string value to boolean for toggle type', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.autoapprove', type: 'toggle' },
-        { settings: { autoapprove: '1' } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(true)
-    })
-
-    it('converts "0" string to false for toggle type', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.autoapprove', type: 'toggle' },
-        { settings: { autoapprove: '0' } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(false)
-    })
-
-    it('keeps boolean value as-is for toggle type', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.enabled', type: 'toggle' },
-        { settings: { enabled: true } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(true)
-    })
+    it.each([
+      ['1', true],
+      ['0', false],
+      [true, true],
+      [false, false],
+    ])(
+      'converts value %s to %s for toggle type',
+      async (inputValue, expected) => {
+        const wrapper = mountComponent(
+          { name: 'settings.flag', type: 'toggle' },
+          { settings: { flag: inputValue } }
+        )
+        await flushPromises()
+        expect(wrapper.vm.value).toBe(expected)
+      }
+    )
 
     it('handles missing group gracefully', async () => {
-      // Set up mock before mounting
-      mockModGroupStore.get = vi.fn().mockReturnValue(null)
-      const wrapper = mount(ModGroupSetting, {
-        props: { name: 'nameshort', groupid: 123, label: 'Short Name' },
-        global: {
-          stubs: {
-            'b-form-group': {
-              template: '<div class="form-group"><slot /></div>',
-            },
-            'b-form-text': {
-              template: '<div class="form-text"><slot /></div>',
-            },
-            'b-input-group': {
-              template: '<div class="input-group"><slot /></div>',
-            },
-            'b-form-input': { template: '<input class="form-input" />' },
-            'b-form-textarea': {
-              template: '<textarea class="form-textarea" />',
-            },
-            'b-row': { template: '<div class="row"><slot /></div>' },
-            'b-col': { template: '<div class="col"><slot /></div>' },
-            SpinButton: { template: '<button class="spin-button" />' },
-            OurToggle: { template: '<div class="our-toggle" />' },
-          },
-        },
-      })
+      const wrapper = mountWithNullGroup()
       await flushPromises()
       expect(wrapper.vm.value).toBeNull()
     })
@@ -370,7 +302,6 @@ describe('ModGroupSetting', () => {
   describe('save method', () => {
     it('does not call updateMT before mounted is true', async () => {
       const wrapper = mountComponent({ name: 'nameshort' })
-      // Immediately call save before mounted completes
       wrapper.vm.mounted = false
       await wrapper.vm.save()
       expect(mockModGroupStore.updateMT).not.toHaveBeenCalled()
@@ -382,8 +313,6 @@ describe('ModGroupSetting', () => {
       vi.runAllTimers()
       await flushPromises()
 
-      // The input is bound to the 'value' ref via v-model
-      // We need to update it via the component's internal ref or pass a direct value to save
       await wrapper.vm.save('NewName')
 
       expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
@@ -392,7 +321,10 @@ describe('ModGroupSetting', () => {
       })
     })
 
-    it('converts boolean true to 1 when saving', async () => {
+    it.each([
+      [true, 'boolean true'],
+      [false, 'boolean false'],
+    ])('handles %s value when saving toggle', async (value) => {
       const wrapper = mountComponent({
         name: 'settings.autoapprove',
         type: 'toggle',
@@ -402,31 +334,10 @@ describe('ModGroupSetting', () => {
       vi.runAllTimers()
       await flushPromises()
 
-      await wrapper.vm.save(true)
+      await wrapper.vm.save(value)
 
       expect(mockModGroupStore.updateMT).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 123,
-        })
-      )
-    })
-
-    it('converts boolean false to 0 when saving', async () => {
-      const wrapper = mountComponent({
-        name: 'settings.autoapprove',
-        type: 'toggle',
-        groupid: 123,
-      })
-      await flushPromises()
-      vi.runAllTimers()
-      await flushPromises()
-
-      await wrapper.vm.save(false)
-
-      expect(mockModGroupStore.updateMT).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 123,
-        })
+        expect.objectContaining({ id: 123 })
       )
     })
 
@@ -447,7 +358,6 @@ describe('ModGroupSetting', () => {
       vi.runAllTimers()
       await flushPromises()
 
-      // Pass the new value directly to save
       await wrapper.vm.save(5)
 
       expect(mockModGroupStore.updateMT).toHaveBeenCalledWith(
@@ -460,26 +370,20 @@ describe('ModGroupSetting', () => {
       )
     })
 
-    it('calls callback function if provided', async () => {
-      const wrapper = mountComponent({ name: 'nameshort' })
-      await flushPromises()
-      vi.runAllTimers()
-      await flushPromises()
-
-      const callback = vi.fn()
-      await wrapper.vm.save(callback)
-
-      expect(callback).toHaveBeenCalled()
-    })
-
-    it('uses callback value if it is not a function', async () => {
+    it('calls callback function if provided, otherwise uses value directly', async () => {
       const wrapper = mountComponent({ name: 'nameshort', groupid: 123 })
       await flushPromises()
       vi.runAllTimers()
       await flushPromises()
 
-      await wrapper.vm.save('DirectValue')
+      // Test callback function
+      const callback = vi.fn()
+      await wrapper.vm.save(callback)
+      expect(callback).toHaveBeenCalled()
 
+      // Test direct value
+      mockModGroupStore.updateMT.mockClear()
+      await wrapper.vm.save('DirectValue')
       expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
         id: 123,
         nameshort: 'DirectValue',
@@ -498,66 +402,47 @@ describe('ModGroupSetting', () => {
       expect(wrapper.vm.value).toBe('NewValue')
     })
 
-    it('calls save when SpinButton is clicked for input type', async () => {
-      const wrapper = mountComponent({ name: 'nameshort', type: 'input' })
-      await flushPromises()
-      vi.runAllTimers()
-      await flushPromises()
+    it.each([
+      ['input', 'nameshort', '.spin-button'],
+      ['textarea', 'description', '.spin-button'],
+      ['toggle', 'settings.autoapprove', '.our-toggle'],
+    ])(
+      'calls save when %s type control is activated',
+      async (type, name, selector) => {
+        const groupOverrides =
+          type === 'toggle' ? { settings: { autoapprove: false } } : {}
+        const wrapper = mountComponent({ name, type }, groupOverrides)
+        await flushPromises()
+        vi.runAllTimers()
+        await flushPromises()
 
-      const saveButton = wrapper.find('.spin-button')
-      await saveButton.trigger('click')
+        const control = wrapper.find(selector)
+        await control.trigger('click')
 
-      expect(mockModGroupStore.updateMT).toHaveBeenCalled()
-    })
+        expect(mockModGroupStore.updateMT).toHaveBeenCalled()
+      }
+    )
 
-    it('calls save when SpinButton is clicked for textarea type', async () => {
-      const wrapper = mountComponent({ name: 'description', type: 'textarea' })
-      await flushPromises()
-      vi.runAllTimers()
-      await flushPromises()
-
-      const saveButton = wrapper.find('.spin-button')
-      await saveButton.trigger('click')
-
-      expect(mockModGroupStore.updateMT).toHaveBeenCalled()
-    })
-
-    it('calls save when toggle changes', async () => {
-      const wrapper = mountComponent(
-        { name: 'settings.autoapprove', type: 'toggle' },
-        { settings: { autoapprove: false } }
-      )
-      await flushPromises()
-      vi.runAllTimers()
-      await flushPromises()
-
-      const toggle = wrapper.find('.our-toggle')
-      await toggle.trigger('click')
-
-      expect(mockModGroupStore.updateMT).toHaveBeenCalled()
-    })
-
-    it('disables save button when readonly', async () => {
-      const wrapper = mountComponent(
+    it('disables controls when readonly (non-Owner role)', async () => {
+      // Test save button disabled
+      const inputWrapper = mountComponent(
         { name: 'nameshort', type: 'input' },
         { myrole: 'Moderator' }
       )
       await flushPromises()
+      expect(
+        inputWrapper.find('.spin-button').attributes('disabled')
+      ).toBeDefined()
 
-      const saveButton = wrapper.find('.spin-button')
-      // The disabled attribute could be 'true', '', or present
-      expect(saveButton.attributes('disabled')).toBeDefined()
-    })
-
-    it('disables toggle when readonly', async () => {
-      const wrapper = mountComponent(
+      // Test toggle disabled
+      const toggleWrapper = mountComponent(
         { name: 'settings.autoapprove', type: 'toggle' },
         { myrole: 'Moderator' }
       )
       await flushPromises()
-
-      const toggle = wrapper.find('.our-toggle')
-      expect(toggle.attributes('data-disabled')).toBe('true')
+      expect(
+        toggleWrapper.find('.our-toggle').attributes('data-disabled')
+      ).toBe('true')
     })
   })
 
@@ -585,7 +470,6 @@ describe('ModGroupSetting', () => {
 
   describe('setDeep utility', () => {
     it('sets deeply nested value correctly', async () => {
-      // The group object that the store will return - must be the same reference
       const group = {
         ...defaultGroup,
         settings: {
@@ -597,7 +481,6 @@ describe('ModGroupSetting', () => {
         },
       }
 
-      // Mock must return the same object reference so setDeep can modify it
       mockModGroupStore.get = vi.fn().mockReturnValue(group)
       mockModGroupStore.updateMT = vi.fn().mockResolvedValue({})
 
@@ -608,33 +491,12 @@ describe('ModGroupSetting', () => {
           label: 'Test Label',
           type: 'input',
         },
-        global: {
-          stubs: {
-            'b-form-group': {
-              template: '<div class="form-group"><slot /></div>',
-            },
-            'b-form-text': {
-              template: '<div class="form-text"><slot /></div>',
-            },
-            'b-input-group': {
-              template: '<div class="input-group"><slot /></div>',
-            },
-            'b-form-input': { template: '<input class="form-input" />' },
-            'b-form-textarea': {
-              template: '<textarea class="form-textarea" />',
-            },
-            'b-row': { template: '<div class="row"><slot /></div>' },
-            'b-col': { template: '<div class="col"><slot /></div>' },
-            SpinButton: { template: '<button class="spin-button" />' },
-            OurToggle: { template: '<div class="our-toggle" />' },
-          },
-        },
+        global: { stubs: simpleStubs },
       })
       await flushPromises()
       vi.runAllTimers()
       await flushPromises()
 
-      // Pass the new value directly to save
       await wrapper.vm.save('newvalue')
 
       expect(mockModGroupStore.updateMT).toHaveBeenCalled()
@@ -644,18 +506,14 @@ describe('ModGroupSetting', () => {
   })
 
   describe('mounted lifecycle', () => {
-    it('loads value from group on mount', async () => {
+    it('loads value from group on mount and sets mounted to true', async () => {
       const wrapper = mountComponent(
         { name: 'nameshort' },
         { nameshort: 'MountedValue' }
       )
       await flushPromises()
       expect(wrapper.vm.value).toBe('MountedValue')
-    })
 
-    it('sets mounted to true after nextTick', async () => {
-      const wrapper = mountComponent({ name: 'nameshort' })
-      await flushPromises()
       vi.runAllTimers()
       await flushPromises()
       expect(wrapper.vm.mounted).toBe(true)
@@ -663,61 +521,27 @@ describe('ModGroupSetting', () => {
   })
 
   describe('edge cases', () => {
-    it('handles undefined nested property gracefully', async () => {
-      const wrapper = mountComponent(
+    it.each([
+      [
+        'undefined nested property',
         { name: 'settings.nonexistent.deep' },
-        { settings: {} }
-      )
-      await flushPromises()
-      // Should not throw and value should be null (initial value)
-      expect(wrapper.vm.value).toBeNull()
-    })
-
-    it('handles empty string value', async () => {
-      const wrapper = mountComponent({ name: 'nameshort' }, { nameshort: '' })
-      await flushPromises()
-      expect(wrapper.vm.value).toBe('')
-    })
-
-    it('handles zero as a valid number value', async () => {
-      const wrapper = mountComponent(
+        { settings: {} },
+        null,
+      ],
+      ['empty string value', { name: 'nameshort' }, { nameshort: '' }, ''],
+      [
+        'zero as valid number',
         { name: 'settings.delay', type: 'number' },
-        { settings: { delay: 0 } }
-      )
-      await flushPromises()
-      expect(wrapper.vm.value).toBe(0)
-    })
-
-    it('handles null group object from store', async () => {
-      // Set up mock before mounting
-      mockModGroupStore.get = vi.fn().mockReturnValue(null)
-      const wrapper = mount(ModGroupSetting, {
-        props: { name: 'nameshort', groupid: 123, label: 'Short Name' },
-        global: {
-          stubs: {
-            'b-form-group': {
-              template: '<div class="form-group"><slot /></div>',
-            },
-            'b-form-text': {
-              template: '<div class="form-text"><slot /></div>',
-            },
-            'b-input-group': {
-              template: '<div class="input-group"><slot /></div>',
-            },
-            'b-form-input': { template: '<input class="form-input" />' },
-            'b-form-textarea': {
-              template: '<textarea class="form-textarea" />',
-            },
-            'b-row': { template: '<div class="row"><slot /></div>' },
-            'b-col': { template: '<div class="col"><slot /></div>' },
-            SpinButton: { template: '<button class="spin-button" />' },
-            OurToggle: { template: '<div class="our-toggle" />' },
-          },
-        },
-      })
-      await flushPromises()
-      expect(wrapper.vm.value).toBeNull()
-      expect(wrapper.vm.readonly).toBe(true)
-    })
+        { settings: { delay: 0 } },
+        0,
+      ],
+    ])(
+      'handles %s gracefully',
+      async (description, props, groupOverrides, expected) => {
+        const wrapper = mountComponent(props, groupOverrides)
+        await flushPromises()
+        expect(wrapper.vm.value).toBe(expected)
+      }
+    )
   })
 })

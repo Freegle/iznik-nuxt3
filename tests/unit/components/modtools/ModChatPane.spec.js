@@ -172,15 +172,15 @@ describe('ModChatPane', () => {
   }
 
   describe('rendering', () => {
-    it('renders component inside Suspense wrapper', async () => {
-      const wrapper = await mountComponent()
+    it('renders component and shows appropriate content based on state', async () => {
+      /* Test 1: Basic rendering */
+      let wrapper = await mountComponent()
       await flushPromises()
       expect(wrapper.find('div').exists()).toBe(true)
-    })
 
-    it('shows "Please click on a chat" when id is 0', async () => {
+      /* Test 2: Shows "Please click on a chat" when id is 0 */
       mockAuthStore.user = { id: 1 }
-      const wrapper = await mountComponent({ id: 0 })
+      wrapper = await mountComponent({ id: 0 })
       await flushPromises()
       expect(wrapper.text()).toContain(
         'Please click on a chat in the left pane'
@@ -248,32 +248,34 @@ describe('ModChatPane', () => {
   })
 
   describe('computed properties', () => {
-    describe('stickyAdRendered', () => {
-      it('returns false when no sticky ad', async () => {
-        mockMiscStore.stickyAdRendered = false
+    it.each([
+      [false, false],
+      [true, true],
+    ])(
+      'stickyAdRendered returns %s when store value is %s',
+      async (expected, storeValue) => {
+        mockMiscStore.stickyAdRendered = storeValue
         const wrapper = await mountComponent()
         await flushPromises()
         const pane = getModChatPane(wrapper)
-        expect(pane.vm.stickyAdRendered).toBe(false)
-      })
-
-      it('returns true when sticky ad is rendered', async () => {
-        mockMiscStore.stickyAdRendered = true
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.stickyAdRendered).toBe(true)
-      })
-    })
+        expect(pane.vm.stickyAdRendered).toBe(expected)
+      }
+    )
 
     describe('chatmessages', () => {
-      it('returns empty array when no messages', async () => {
-        mockChatStore.messagesById.mockReturnValue([])
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.chatmessages).toEqual([])
-      })
+      it.each([
+        ['empty array', [], []],
+        ['null', null, []],
+      ])(
+        'returns empty array when messages is %s',
+        async (_desc, storeValue, expected) => {
+          mockChatStore.messagesById.mockReturnValue(storeValue)
+          const wrapper = await mountComponent()
+          await flushPromises()
+          const pane = getModChatPane(wrapper)
+          expect(pane.vm.chatmessages).toEqual(expected)
+        }
+      )
 
       it('returns reversed messages from store', async () => {
         const messages = [
@@ -293,116 +295,78 @@ describe('ModChatPane', () => {
           { id: 1, message: 'First' },
         ])
       })
-
-      it('returns empty array when messages is null', async () => {
-        mockChatStore.messagesById.mockReturnValue(null)
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.chatmessages).toEqual([])
-      })
     })
 
-    describe('notVisible', () => {
-      it('returns false when chat exists in store', async () => {
-        mockChatStore.byChatId.mockReturnValue({ id: 123 })
-        const wrapper = await mountComponent()
+    it.each([
+      ['chat exists in store', { id: 123 }, 123, false],
+      ['chat does not exist in store', null, 123, true],
+      ['id is 0', null, 0, false],
+    ])(
+      'notVisible returns correct value when %s',
+      async (_desc, chatValue, id, expected) => {
+        mockChatStore.byChatId.mockReturnValue(chatValue)
+        const wrapper = await mountComponent({ id })
         await flushPromises()
         const pane = getModChatPane(wrapper)
-        expect(pane.vm.notVisible).toBe(false)
-      })
+        expect(pane.vm.notVisible).toBe(expected)
+      }
+    )
 
-      it('returns true when chat does not exist in store', async () => {
-        mockChatStore.byChatId.mockReturnValue(null)
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.notVisible).toBe(true)
-      })
-
-      it('returns false when id is 0', async () => {
-        const wrapper = await mountComponent({ id: 0 })
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.notVisible).toBe(false)
-      })
+    it.each([
+      [false, 0],
+      [true, 1],
+    ])('opacity returns %s when loaded is %s', async (loaded, expected) => {
+      const wrapper = await mountComponent()
+      await flushPromises()
+      const pane = getModChatPane(wrapper)
+      pane.vm.loaded = loaded
+      await wrapper.vm.$nextTick()
+      expect(pane.vm.opacity).toBe(expected)
     })
 
-    describe('opacity', () => {
-      it('returns 0 when not loaded', async () => {
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        pane.vm.loaded = false
-        await wrapper.vm.$nextTick()
-        expect(pane.vm.opacity).toBe(0)
-      })
-
-      it('returns 1 when loaded', async () => {
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        pane.vm.loaded = true
-        await wrapper.vm.$nextTick()
-        expect(pane.vm.opacity).toBe(1)
-      })
-    })
-
-    describe('me', () => {
-      it('returns user from auth store', async () => {
-        mockAuthStore.user = { id: 999, displayname: 'Current User' }
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-        expect(pane.vm.me).toEqual({ id: 999, displayname: 'Current User' })
-      })
-
-      it('returns undefined when user is not logged in', async () => {
-        mockAuthStore.user = undefined
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
+    it.each([
+      [
+        { id: 999, displayname: 'Current User' },
+        { id: 999, displayname: 'Current User' },
+      ],
+      [undefined, undefined],
+    ])('me returns %s from auth store', async (authUser, expected) => {
+      mockAuthStore.user = authUser
+      const wrapper = await mountComponent()
+      await flushPromises()
+      const pane = getModChatPane(wrapper)
+      if (expected === undefined) {
         expect(pane.vm.me).toBeUndefined()
-      })
+      } else {
+        expect(pane.vm.me).toEqual(expected)
+      }
     })
   })
 
   describe('methods', () => {
     describe('typing', () => {
-      it('collapses header on small screens when typing starts', async () => {
-        mockMiscStore.breakpoint = 'xs'
-        mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
-        mockChat.value = { id: 123, user1id: 456 }
+      it.each([
+        ['xs', true, true],
+        ['sm', false, false],
+      ])(
+        'on %s screen, typing(%s) calls collapse(%s)',
+        async (breakpoint, typingState, expectedCollapse) => {
+          mockMiscStore.breakpoint = breakpoint
+          mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
+          mockChat.value = { id: 123, user1id: 456 }
 
-        const wrapper = await mountComponent()
-        await flushPromises()
+          const wrapper = await mountComponent()
+          await flushPromises()
 
-        /* Create a mock ref for chatheader */
-        const pane = getModChatPane(wrapper)
-        const mockCollapse = vi.fn()
-        pane.vm.chatheader = { collapse: mockCollapse }
+          const pane = getModChatPane(wrapper)
+          const mockCollapse = vi.fn()
+          pane.vm.chatheader = { collapse: mockCollapse }
 
-        pane.vm.typing(true)
+          pane.vm.typing(typingState)
 
-        expect(mockCollapse).toHaveBeenCalledWith(true)
-      })
-
-      it('expands header when typing stops on small screens', async () => {
-        mockMiscStore.breakpoint = 'sm'
-        mockChatStore.byChatId.mockReturnValue({ id: 123, user1id: 456 })
-        mockChat.value = { id: 123, user1id: 456 }
-
-        const wrapper = await mountComponent()
-        await flushPromises()
-
-        const pane = getModChatPane(wrapper)
-        const mockCollapse = vi.fn()
-        pane.vm.chatheader = { collapse: mockCollapse }
-
-        pane.vm.typing(false)
-
-        expect(mockCollapse).toHaveBeenCalledWith(false)
-      })
+          expect(mockCollapse).toHaveBeenCalledWith(expectedCollapse)
+        }
+      )
 
       it('does not collapse header on large screens', async () => {
         mockMiscStore.breakpoint = 'lg'
@@ -438,28 +402,20 @@ describe('ModChatPane', () => {
     })
 
     describe('topChanged', () => {
-      it('sets topVisible when visibility changes', async () => {
+      it('sets topVisible and triggers scroll check based on visibility', async () => {
         const wrapper = await mountComponent()
         await flushPromises()
         const pane = getModChatPane(wrapper)
 
-        pane.vm.topChanged(true)
-        expect(pane.vm.topVisible).toBe(true)
-
-        pane.vm.topChanged(false)
-        expect(pane.vm.topVisible).toBe(false)
-      })
-
-      it('triggers scroll check when top becomes visible', async () => {
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-
+        /* Test visibility true - sets topVisible and triggers scroll */
         pane.vm.scrollTimer = null
         pane.vm.topChanged(true)
-
-        /* Should have set a timer */
+        expect(pane.vm.topVisible).toBe(true)
         expect(pane.vm.scrollTimer).not.toBeNull()
+
+        /* Test visibility false - only sets topVisible */
+        pane.vm.topChanged(false)
+        expect(pane.vm.topVisible).toBe(false)
       })
 
       it('does not trigger scroll check if timer already exists', async () => {
@@ -497,48 +453,30 @@ describe('ModChatPane', () => {
     })
 
     describe('checkScroll', () => {
-      it('increases messagesToShow when top is visible', async () => {
-        mockChatStore.messagesById.mockReturnValue([
-          { id: 1 },
-          { id: 2 },
-          { id: 3 },
-          { id: 4 },
-          { id: 5 },
-          { id: 6 },
-          { id: 7 },
-          { id: 8 },
-          { id: 9 },
-          { id: 10 },
-          { id: 11 },
-          { id: 12 },
-          { id: 13 },
-          { id: 14 },
-          { id: 15 },
-        ])
+      it('increases messagesToShow when top is visible, sets loaded when all shown, and clears timer', async () => {
+        /* Test with many messages - increases count */
+        mockChatStore.messagesById.mockReturnValue(
+          Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+        )
 
         const wrapper = await mountComponent()
         await flushPromises()
         const pane = getModChatPane(wrapper)
 
+        /* Test timer clearing */
+        pane.vm.scrollTimer = 123
         pane.vm.topVisible = true
         pane.vm.messagesToShow = 5
-        pane.vm.scrollTimer = null
 
         pane.vm.checkScroll()
 
         /* Should increase by 10 (but not exceed total) */
         expect(pane.vm.messagesToShow).toBe(15)
-      })
+        /* Timer should have been cleared and reset */
+        expect(pane.vm.scrollTimer).not.toBe(123)
 
-      it('sets loaded to true when all messages shown', async () => {
-        mockChatStore.messagesById.mockReturnValue([{ id: 1 }, { id: 2 }])
-
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-
-        pane.vm.topVisible = true
-        pane.vm.messagesToShow = 2
+        /* Test loaded is set to true when all messages shown */
+        pane.vm.messagesToShow = 15
         pane.vm.loaded = false
         pane.vm.scrollTimer = null
 
@@ -546,26 +484,11 @@ describe('ModChatPane', () => {
 
         expect(pane.vm.loaded).toBe(true)
       })
-
-      it('clears scroll timer', async () => {
-        const wrapper = await mountComponent()
-        await flushPromises()
-        const pane = getModChatPane(wrapper)
-
-        pane.vm.scrollTimer = 123
-
-        pane.vm.checkScroll()
-
-        /* The function sets scrollTimer to null at the start */
-        /* Then may set a new one if needed */
-        /* But it should have cleared the old value */
-        expect(pane.vm.scrollTimer).not.toBe(123)
-      })
     })
   })
 
   describe('empty state', () => {
-    it('shows prompt when no chat id is provided', async () => {
+    it('shows prompt with correct styling when no chat id is provided', async () => {
       mockAuthStore.user = { id: 1 }
       const wrapper = await mountComponent({ id: 0 })
       await flushPromises()
@@ -573,12 +496,6 @@ describe('ModChatPane', () => {
       expect(wrapper.text()).toContain(
         'Please click on a chat in the left pane'
       )
-    })
-
-    it('has correct classes for empty state', async () => {
-      mockAuthStore.user = { id: 1 }
-      const wrapper = await mountComponent({ id: 0 })
-      await flushPromises()
 
       const prompt = wrapper.find('p.text-center')
       expect(prompt.exists()).toBe(true)
@@ -588,7 +505,7 @@ describe('ModChatPane', () => {
   })
 
   describe('chat content rendering', () => {
-    it('renders chat messages when available', async () => {
+    it('renders chat content, typing indicator, header and footer when chat is available', async () => {
       const messages = [
         { id: 1, chatid: 123, message: 'Hello' },
         { id: 2, chatid: 123, message: 'World' },
@@ -614,72 +531,36 @@ describe('ModChatPane', () => {
       pane.vm.loaded = true
       await wrapper.vm.$nextTick()
 
+      /* Check all chat content elements */
       expect(wrapper.find('.chatContent').exists()).toBe(true)
-    })
-
-    it('renders ChatTypingIndicator with chat', async () => {
-      mockChatStore.messagesById.mockReturnValue([{ id: 1, chatid: 123 }])
-      mockChatStore.byChatId.mockReturnValue({
-        id: 123,
-        user1id: 456,
-        icon: '/test-icon.png',
-      })
-      mockChat.value = {
-        id: 123,
-        user1id: 456,
-        icon: '/test-icon.png',
-      }
-
-      const wrapper = await mountComponent()
-      await flushPromises()
-      const pane = getModChatPane(wrapper)
-
-      pane.vm.messagesToShow = 1
-      await wrapper.vm.$nextTick()
-
-      const typingIndicator = wrapper.find('.typing-indicator')
-      expect(typingIndicator.exists()).toBe(true)
-    })
-
-    it('renders ModChatHeader and ModChatFooter', async () => {
-      mockChatStore.byChatId.mockReturnValue({
-        id: 123,
-        user1id: 456,
-      })
-      mockChat.value = { id: 123, user1id: 456 }
-
-      const wrapper = await mountComponent()
-      await flushPromises()
-
+      expect(wrapper.find('.typing-indicator').exists()).toBe(true)
       expect(wrapper.find('.chat-header').exists()).toBe(true)
       expect(wrapper.find('.chat-footer').exists()).toBe(true)
     })
   })
 
   describe('stickyAdRendered class', () => {
-    it('adds stickyAdRendered class when ad is shown on empty state', async () => {
-      mockMiscStore.stickyAdRendered = true
-      mockAuthStore.user = { id: 1 }
+    it.each([
+      ['empty state (p element)', true, 0, 'p.chatHolder', true],
+      ['empty state (p element)', false, 0, 'p.chatHolder', false],
+    ])(
+      'on %s with ad=%s, stickyAdRendered class presence is %s',
+      async (_desc, adRendered, chatId, selector, expectClass) => {
+        mockMiscStore.stickyAdRendered = adRendered
+        mockAuthStore.user = { id: 1 }
 
-      const wrapper = await mountComponent({ id: 0 })
-      await flushPromises()
+        const wrapper = await mountComponent({ id: chatId })
+        await flushPromises()
 
-      const prompt = wrapper.find('p.chatHolder')
-      expect(prompt.exists()).toBe(true)
-      expect(prompt.classes()).toContain('stickyAdRendered')
-    })
-
-    it('does not add stickyAdRendered class when no ad on empty state', async () => {
-      mockMiscStore.stickyAdRendered = false
-      mockAuthStore.user = { id: 1 }
-
-      const wrapper = await mountComponent({ id: 0 })
-      await flushPromises()
-
-      const prompt = wrapper.find('p.chatHolder')
-      expect(prompt.exists()).toBe(true)
-      expect(prompt.classes()).not.toContain('stickyAdRendered')
-    })
+        const element = wrapper.find(selector)
+        expect(element.exists()).toBe(true)
+        if (expectClass) {
+          expect(element.classes()).toContain('stickyAdRendered')
+        } else {
+          expect(element.classes()).not.toContain('stickyAdRendered')
+        }
+      }
+    )
 
     it('adds stickyAdRendered class to chatHolder div when ad is shown', async () => {
       mockMiscStore.stickyAdRendered = true
@@ -709,7 +590,7 @@ describe('ModChatPane', () => {
   })
 
   describe('store interactions', () => {
-    it('fetches chats on initialization when id is provided', async () => {
+    it('fetches chats on initialization when id is provided and chat not found', async () => {
       mockChatStore.byChatId.mockReturnValue(null)
       mockChat.value = null
 
@@ -720,35 +601,20 @@ describe('ModChatPane', () => {
       expect(mockChatStore.listChatsMT).toHaveBeenCalled()
     })
 
-    it('fetches messages when chat is found', async () => {
+    it('fetches messages and user when chat is found', async () => {
       mockChatStore.byChatId.mockReturnValue({
         id: 123,
-        user1id: 456,
+        user1id: 789,
       })
       mockChat.value = {
         id: 123,
-        user1id: 456,
+        user1id: 789,
       }
 
       await mountComponent({ id: 123 })
       await flushPromises()
 
       expect(mockChatStore.fetchMessages).toHaveBeenCalledWith(123)
-    })
-
-    it('fetches user when chat has user1id', async () => {
-      mockChatStore.byChatId.mockReturnValue({
-        id: 123,
-        user1id: 789,
-      })
-      mockChat.value = {
-        id: 123,
-        user1id: 789,
-      }
-
-      await mountComponent({ id: 123 })
-      await flushPromises()
-
       expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
     })
   })

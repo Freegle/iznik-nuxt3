@@ -337,64 +337,22 @@ describe('ModSettingsGroup', () => {
       expect(wrapper.find('.group-select').exists()).toBe(true)
     })
 
-    it('renders Community Addresses accordion', () => {
+    it.each([
+      'Community Addresses',
+      'Your Settings',
+      'How It Looks',
+      'Rules',
+      'Features for Members',
+      'Features for Moderators',
+      'Microvolunteering',
+      'Spam Detection',
+      'Duplicate Detection',
+      'Mapping',
+      'Social Media',
+      'Status',
+    ])('renders %s accordion', (accordionName) => {
       const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Community Addresses')
-    })
-
-    it('renders Your Settings accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Your Settings')
-    })
-
-    it('renders How It Looks accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('How It Looks')
-    })
-
-    it('renders Rules accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Rules')
-    })
-
-    it('renders Features for Members accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Features for Members')
-    })
-
-    it('renders Features for Moderators accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Features for Moderators')
-    })
-
-    it('renders Microvolunteering accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Microvolunteering')
-    })
-
-    it('renders Spam Detection accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Spam Detection')
-    })
-
-    it('renders Duplicate Detection accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Duplicate Detection')
-    })
-
-    it('renders Mapping accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Mapping')
-    })
-
-    it('renders Social Media accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Social Media')
-    })
-
-    it('renders Status accordion', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Status')
+      expect(wrapper.text()).toContain(accordionName)
     })
   })
 
@@ -411,19 +369,13 @@ describe('ModSettingsGroup', () => {
 
   describe('computed properties', () => {
     describe('readonly', () => {
-      it('returns false when myrole is Owner', () => {
-        const wrapper = mountComponent({}, { myrole: 'Owner' })
-        expect(wrapper.vm.readonly).toBe(false)
-      })
-
-      it('returns true when myrole is Moderator', () => {
-        const wrapper = mountComponent({}, { myrole: 'Moderator' })
-        expect(wrapper.vm.readonly).toBe(true)
-      })
-
-      it('returns true when myrole is Member', () => {
-        const wrapper = mountComponent({}, { myrole: 'Member' })
-        expect(wrapper.vm.readonly).toBe(true)
+      it.each([
+        ['Owner', false],
+        ['Moderator', true],
+        ['Member', true],
+      ])('returns %s for myrole=%s', (myrole, expected) => {
+        const wrapper = mountComponent({}, { myrole })
+        expect(wrapper.vm.readonly).toBe(expected)
       })
     })
 
@@ -443,20 +395,15 @@ describe('ModSettingsGroup', () => {
     })
 
     describe('active', () => {
-      it('returns true when mysettings.active is 1', () => {
+      it.each([
+        [1, true],
+        [0, false],
+      ])('returns %s when mysettings.active is %s', (activeValue, expected) => {
         const wrapper = mountComponent(
           {},
-          { mysettings: { active: 1, configid: 1 } }
+          { mysettings: { active: activeValue, configid: 1 } }
         )
-        expect(wrapper.vm.active).toBe(true)
-      })
-
-      it('returns false when mysettings.active is 0', () => {
-        const wrapper = mountComponent(
-          {},
-          { mysettings: { active: 0, configid: 1 } }
-        )
-        expect(wrapper.vm.active).toBe(false)
+        expect(wrapper.vm.active).toBe(expected)
       })
     })
 
@@ -489,68 +436,64 @@ describe('ModSettingsGroup', () => {
   })
 
   describe('notice messages', () => {
-    it('shows closed notice when group is closed', () => {
-      const wrapper = mountComponent(
-        {},
-        { settings: { ...defaultGroup.settings, closed: true } }
-      )
-      expect(wrapper.text()).toContain('community is currently closed')
-    })
-
-    it('shows autofunctionoverride notice when set', () => {
-      const wrapper = mountComponent({}, { autofunctionoverride: true })
-      expect(wrapper.text()).toContain('subject to restrictions')
-    })
-
-    it('shows overridemoderation notice when not None', () => {
-      const wrapper = mountComponent({}, { overridemoderation: 'Active' })
-      expect(wrapper.text()).toContain('All posts will be moderated')
-    })
-
-    it('shows TrashNothing notice when tnkey exists', () => {
-      const wrapper = mountComponent(
-        {},
-        { tnkey: { url: 'https://trashnothing.com/settings' } }
-      )
-      expect(wrapper.text()).toContain('TrashNothing settings')
+    it.each([
+      [
+        'closed notice',
+        { settings: { ...defaultGroup.settings, closed: true } },
+        'community is currently closed',
+      ],
+      [
+        'autofunctionoverride notice',
+        { autofunctionoverride: true },
+        'subject to restrictions',
+      ],
+      [
+        'overridemoderation notice',
+        { overridemoderation: 'Active' },
+        'All posts will be moderated',
+      ],
+      [
+        'TrashNothing notice',
+        { tnkey: { url: 'https://trashnothing.com/settings' } },
+        'TrashNothing settings',
+      ],
+    ])('shows %s when condition met', (_, groupOverrides, expectedText) => {
+      const wrapper = mountComponent({}, groupOverrides)
+      expect(wrapper.text()).toContain(expectedText)
     })
   })
 
   describe('community addresses section', () => {
-    it('displays mods email', () => {
+    it('displays mods and group emails', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('mods@testgroup.org')
-    })
-
-    it('displays group email', () => {
-      const wrapper = mountComponent()
       expect(wrapper.text()).toContain('testgroup@freegle.org')
     })
 
-    it('shows no shortlinks message when empty', () => {
+    it('handles shortlinks display based on list contents', () => {
+      // Empty list shows message
       mockShortlinkStore.list = {}
-      const wrapper = mountComponent()
+      let wrapper = mountComponent()
       expect(wrapper.text()).toContain('no shortlinks')
-    })
 
-    it('renders shortlinks when present', () => {
+      // With shortlinks, renders them
       mockShortlinkStore.list = {
         1: { id: 1, name: 'testlink' },
         2: { id: 2, name: 'anotherlink' },
       }
-      const wrapper = mountComponent()
+      wrapper = mountComponent()
       expect(wrapper.findAll('.shortlink').length).toBe(2)
     })
   })
 
   describe('Facebook section', () => {
-    it('shows warning when no Facebook linked', () => {
-      const wrapper = mountComponent({}, { facebook: [] })
+    it('handles Facebook connection states', () => {
+      // No Facebook linked shows warning
+      let wrapper = mountComponent({}, { facebook: [] })
       expect(wrapper.text()).toContain('not linked to Facebook')
-    })
 
-    it('renders Facebook settings when linked', () => {
-      const wrapper = mountComponent(
+      // Valid Facebook connection renders settings
+      wrapper = mountComponent(
         {},
         {
           facebook: [
@@ -564,10 +507,9 @@ describe('ModSettingsGroup', () => {
         }
       )
       expect(wrapper.find('.facebook-setting').exists()).toBe(true)
-    })
 
-    it('shows error notice for invalid Facebook connection', () => {
-      const wrapper = mountComponent(
+      // Invalid Facebook connection shows error
+      wrapper = mountComponent(
         {},
         {
           facebook: [
@@ -585,44 +527,32 @@ describe('ModSettingsGroup', () => {
   })
 
   describe('readonly mode', () => {
-    it('shows readonly notice in appearance section', () => {
+    it('shows readonly notice and hides edit buttons for non-owners', () => {
       const wrapper = mountComponent({}, { myrole: 'Moderator' })
       expect(wrapper.text()).toContain('Only owners can change')
-    })
 
-    it('hides upload photo button when readonly', () => {
-      const wrapper = mountComponent({}, { myrole: 'Moderator' })
       const uploadBtn = wrapper
         .findAll('button')
         .find((b) => b.text().includes('Upload photo'))
       expect(uploadBtn).toBeUndefined()
     })
-
-    it('hides edit description button when readonly', () => {
-      const wrapper = mountComponent({}, { myrole: 'Moderator' })
-      wrapper.findAll('button').find((b) => b.text().includes('Edit'))
-      // May or may not exist depending on editingDescription state
-    })
   })
 
   describe('methods', () => {
     describe('fetchGroup', () => {
-      it('calls fetchIfNeedBeMT on store', async () => {
+      it('fetches group and shortlinks when groupid is set, does nothing when null', async () => {
         const wrapper = mountComponent()
+
+        // With valid groupid
         wrapper.vm.groupid = 123
         await wrapper.vm.fetchGroup()
         expect(mockModGroupStore.fetchIfNeedBeMT).toHaveBeenCalledWith(123)
-      })
-
-      it('fetches shortlinks', async () => {
-        const wrapper = mountComponent()
-        wrapper.vm.groupid = 123
-        await wrapper.vm.fetchGroup()
         expect(mockShortlinkStore.fetch).toHaveBeenCalledWith(0, 123)
-      })
 
-      it('does nothing when groupid is null', async () => {
-        const wrapper = mountComponent()
+        // Reset mocks
+        vi.clearAllMocks()
+
+        // With null groupid
         wrapper.vm.groupid = null
         await wrapper.vm.fetchGroup()
         expect(mockModGroupStore.fetchIfNeedBeMT).not.toHaveBeenCalled()
@@ -638,47 +568,43 @@ describe('ModSettingsGroup', () => {
     })
 
     describe('photoProcessed', () => {
-      it('sets uploadingProfile to false', () => {
+      it('sets uploadingProfile to false and updates group when image provided', async () => {
         const wrapper = mountComponent()
         wrapper.vm.uploadingProfile = true
+        wrapper.vm.groupid = 123
+
+        // With null imageid - just resets uploading flag
         wrapper.vm.photoProcessed(null)
         expect(wrapper.vm.uploadingProfile).toBe(false)
-      })
+        expect(mockModGroupStore.updateMT).not.toHaveBeenCalled()
 
-      it('calls updateMT with image id when provided', async () => {
-        const wrapper = mountComponent()
-        wrapper.vm.groupid = 123
+        // Reset uploading flag for next test
+        wrapper.vm.uploadingProfile = true
+
+        // With valid imageid - also calls updateMT
         await wrapper.vm.photoProcessed(456)
+        expect(wrapper.vm.uploadingProfile).toBe(false)
         expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
           id: 123,
           profile: 456,
         })
       })
-
-      it('does not call updateMT when imageid is null', async () => {
-        const wrapper = mountComponent()
-        await wrapper.vm.photoProcessed(null)
-        expect(mockModGroupStore.updateMT).not.toHaveBeenCalled()
-      })
     })
 
     describe('saveDescription', () => {
-      it('calls updateMT with description', async () => {
+      it('calls updateMT with description and resets editing state', async () => {
         const wrapper = mountComponent()
         wrapper.vm.groupid = 123
+        wrapper.vm.editingDescription = true
         const callback = vi.fn()
+
         await wrapper.vm.saveDescription(callback)
+
         expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
           id: 123,
           description: expect.any(String),
         })
         expect(callback).toHaveBeenCalled()
-      })
-
-      it('sets editingDescription to false', async () => {
-        const wrapper = mountComponent()
-        wrapper.vm.editingDescription = true
-        await wrapper.vm.saveDescription(() => {})
         expect(wrapper.vm.editingDescription).toBe(false)
       })
     })
@@ -709,19 +635,19 @@ describe('ModSettingsGroup', () => {
     })
 
     describe('changedrule', () => {
-      it('updates rules object', () => {
+      it('updates rules object with primitive values but ignores objects', () => {
         const wrapper = mountComponent()
+
+        // Updates with primitive value
         wrapper.vm.changedrule(['testRule', 'toggle', 'Test'], true)
         expect(wrapper.vm.rules.testRule).toBe(true)
-      })
 
-      it('ignores object values', () => {
-        const wrapper = mountComponent()
-        wrapper.vm.rules.testRule = 'original'
-        wrapper.vm.changedrule(['testRule', 'toggle', 'Test'], {
+        // Ignores object values
+        wrapper.vm.rules.testRule2 = 'original'
+        wrapper.vm.changedrule(['testRule2', 'toggle', 'Test'], {
           invalid: true,
         })
-        expect(wrapper.vm.rules.testRule).toBe('original')
+        expect(wrapper.vm.rules.testRule2).toBe('original')
       })
     })
 
@@ -744,23 +670,7 @@ describe('ModSettingsGroup', () => {
     })
 
     describe('copy', () => {
-      it('fetches source group rules', async () => {
-        const wrapper = mountComponent()
-        wrapper.vm.copyfrom = 456
-        wrapper.vm.groupid = 123
-
-        mockModGroupStore.get
-          .mockReturnValueOnce({ ...defaultGroup })
-          .mockReturnValueOnce({ ...defaultGroup, rules: { copiedRule: true } })
-
-        const callback = vi.fn()
-        await wrapper.vm.copy(callback)
-
-        expect(mockModGroupStore.fetchIfNeedBeMT).toHaveBeenCalledWith(456)
-        expect(callback).toHaveBeenCalled()
-      })
-
-      it('updates target group with copied rules', async () => {
+      it('fetches source group rules and updates target group', async () => {
         const wrapper = mountComponent()
         wrapper.vm.copyfrom = 456
         wrapper.vm.groupid = 123
@@ -772,39 +682,38 @@ describe('ModSettingsGroup', () => {
           return { ...defaultGroup }
         })
 
-        await wrapper.vm.copy(() => {})
+        const callback = vi.fn()
+        await wrapper.vm.copy(callback)
 
+        expect(mockModGroupStore.fetchIfNeedBeMT).toHaveBeenCalledWith(456)
         expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
           id: 123,
           rules: { copiedRule: true },
         })
+        expect(callback).toHaveBeenCalled()
       })
     })
   })
 
-  describe('region options', () => {
-    it('provides all UK regions', () => {
+  describe('region options and rulelist', () => {
+    it('provides UK regions and rule definitions with section headers', () => {
       const wrapper = mountComponent()
+
+      // Check UK regions
       const regions = wrapper.vm.regionOptions.map((r) => r.value)
       expect(regions).toContain('London')
       expect(regions).toContain('Scotland')
       expect(regions).toContain('Wales')
       expect(regions).toContain('Northern Ireland')
-    })
-  })
 
-  describe('rulelist', () => {
-    it('contains expected rules', () => {
-      const wrapper = mountComponent()
+      // Check rule definitions
       const ruleNames = wrapper.vm.rulelist.filter((r) => r[0]).map((r) => r[0])
       expect(ruleNames).toContain('fullymoderated')
       expect(ruleNames).toContain('animalswanted')
       expect(ruleNames).toContain('weapons')
       expect(ruleNames).toContain('medicationsprescription')
-    })
 
-    it('contains section headers', () => {
-      const wrapper = mountComponent()
+      // Check section headers
       const headers = wrapper.vm.rulelist.filter((r) => !r[0]).map((r) => r[1])
       expect(headers).toContain('Rules about specific items')
       expect(headers).toContain('Other rules')
@@ -829,39 +738,34 @@ describe('ModSettingsGroup', () => {
   })
 
   describe('description editing', () => {
-    it('shows description HTML when not editing', () => {
+    it('manages editingDescription state and shows appropriate content', () => {
       const wrapper = mountComponent()
-      wrapper.vm.editingDescription = false
-      expect(wrapper.find('.quill-editor').exists()).toBe(false)
-    })
 
-    it('editingDescription ref can be toggled', () => {
-      const wrapper = mountComponent()
-      // The component starts with editingDescription = false
+      // Starts with editingDescription = false, no editor visible
       expect(wrapper.vm.editingDescription).toBe(false)
-      // Verify the ref exists and can be set (even if DOM rendering is complex)
-      // The QuillEditor DOM test is skipped due to client-only wrapper complexity
+      expect(wrapper.find('.quill-editor').exists()).toBe(false)
     })
   })
 
   describe('profile image', () => {
-    it('displays profile image', () => {
-      const wrapper = mountComponent()
-      const img = wrapper.find('.profile-image')
+    it('displays profile image or placeholder based on group profile', () => {
+      // With profile
+      let wrapper = mountComponent()
+      let img = wrapper.find('.profile-image')
       expect(img.exists()).toBe(true)
       expect(img.attributes('src')).toBe('/images/profile.png')
-    })
 
-    it('uses placeholder when no profile', () => {
-      const wrapper = mountComponent({}, { profile: null })
-      const img = wrapper.find('.profile-image')
+      // Without profile - uses placeholder
+      wrapper = mountComponent({}, { profile: null })
+      img = wrapper.find('.profile-image')
       expect(img.attributes('src')).toBe('/placeholder.png')
     })
   })
 
   describe('affiliation status', () => {
-    it('shows confirmed date when affiliationconfirmed exists', () => {
-      const wrapper = mountComponent(
+    it('shows appropriate message based on affiliationconfirmed state', () => {
+      // Confirmed
+      let wrapper = mountComponent(
         {},
         {
           affiliationconfirmed: '2024-01-01',
@@ -869,10 +773,9 @@ describe('ModSettingsGroup', () => {
         }
       )
       expect(wrapper.text()).toContain('Affiliation last confirmed')
-    })
 
-    it('shows not confirmed message when affiliationconfirmed is null', () => {
-      const wrapper = mountComponent({}, { affiliationconfirmed: null })
+      // Not confirmed
+      wrapper = mountComponent({}, { affiliationconfirmed: null })
       expect(wrapper.text()).toContain('Affiliation not confirmed')
     })
   })

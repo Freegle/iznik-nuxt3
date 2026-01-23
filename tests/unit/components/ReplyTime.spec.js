@@ -58,81 +58,29 @@ describe('ReplyTime', () => {
   })
 
   describe('reply time formatting', () => {
-    it('formats seconds (singular)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 1 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('1 second')
-      expect(wrapper.text()).not.toContain('1 seconds')
-    })
-
-    it('formats seconds (plural)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 30 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('30 seconds')
-    })
-
-    it('formats minutes (singular)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 60 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('1 minute')
-      expect(wrapper.text()).not.toContain('1 minutes')
-    })
-
-    it('formats minutes (plural)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 1800 }, // 30 minutes
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('30 minutes')
-    })
-
-    it('formats hours (singular)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 3600 }, // 1 hour
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('1 hour')
-      expect(wrapper.text()).not.toContain('1 hours')
-    })
-
-    it('formats hours (plural)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 7200 }, // 2 hours
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('2 hours')
-    })
-
-    it('formats days (singular)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 86400 }, // 1 day
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('1 day')
-      expect(wrapper.text()).not.toContain('1 days')
-    })
-
-    it('formats days (plural)', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 259200 }, // 3 days
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('3 days')
-    })
+    it.each([
+      [1, '1 second', '1 seconds'],
+      [30, '30 seconds', null],
+      [60, '1 minute', '1 minutes'],
+      [1800, '30 minutes', null],
+      [3600, '1 hour', '1 hours'],
+      [7200, '2 hours', null],
+      [86400, '1 day', '1 days'],
+      [259200, '3 days', null],
+    ])(
+      'formats %i seconds as "%s"',
+      (replytime, expected, shouldNotContain) => {
+        mockUserStore.byId.mockReturnValue({
+          id: 123,
+          info: { replytime },
+        })
+        const wrapper = createWrapper()
+        expect(wrapper.text()).toContain(expected)
+        if (shouldNotContain) {
+          expect(wrapper.text()).not.toContain(shouldNotContain)
+        }
+      }
+    )
 
     it('shows "Typically replies in" prefix', () => {
       mockUserStore.byId.mockReturnValue({
@@ -145,49 +93,19 @@ describe('ReplyTime', () => {
   })
 
   describe('edge cases', () => {
-    it('rounds seconds correctly', () => {
+    it.each([
+      [45.6, '46 seconds', 'rounds seconds'],
+      [150, '3 minutes', 'rounds minutes (2.5 min → 3)'],
+      [59, '59 seconds', 'boundary seconds/minutes'],
+      [59 * 60, '59 minutes', 'boundary minutes/hours'],
+      [23 * 60 * 60, '23 hours', 'boundary hours/days'],
+    ])('handles %s → "%s" (%s)', (replytime, expected) => {
       mockUserStore.byId.mockReturnValue({
         id: 123,
-        info: { replytime: 45.6 },
+        info: { replytime },
       })
       const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('46 seconds')
-    })
-
-    it('rounds minutes correctly', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 150 }, // 2.5 minutes
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('3 minutes')
-    })
-
-    it('handles boundary between seconds and minutes', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 59 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('59 seconds')
-    })
-
-    it('handles boundary between minutes and hours', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 59 * 60 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('59 minutes')
-    })
-
-    it('handles boundary between hours and days', () => {
-      mockUserStore.byId.mockReturnValue({
-        id: 123,
-        info: { replytime: 23 * 60 * 60 },
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('23 hours')
+      expect(wrapper.text()).toContain(expected)
     })
   })
 })

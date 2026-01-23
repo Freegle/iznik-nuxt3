@@ -42,17 +42,7 @@ describe('ModLog', () => {
   })
 
   describe('rendering', () => {
-    it('renders timestamp column', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        timestamp: '2024-01-15T10:00:00Z',
-        type: 'User',
-        subtype: 'Login',
-      })
-      expect(wrapper.text()).toContain('formatted:2024-01-15T10:00:00Z')
-    })
-
-    it('renders user column with ModLogUser', () => {
+    it('renders timestamp, user column with ModLogUser, and action column', () => {
       const wrapper = createWrapper({
         id: 1,
         timestamp: '2024-01-15T10:00:00Z',
@@ -60,269 +50,227 @@ describe('ModLog', () => {
         subtype: 'Login',
         byuser: { id: 123, displayname: 'Test User' },
       })
+      expect(wrapper.text()).toContain('formatted:2024-01-15T10:00:00Z')
       expect(wrapper.find('.mod-log-user').exists()).toBe(true)
-    })
-
-    it('renders action column', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        timestamp: '2024-01-15T10:00:00Z',
-        type: 'User',
-        subtype: 'Login',
-      })
       expect(wrapper.text()).toContain('Logged in')
     })
   })
 
   describe('sourceheader computed', () => {
-    it('returns null when message has no sourceheader', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { type: 'Offer' },
-      })
-      expect(wrapper.vm.sourceheader).toBeNull()
-    })
-
-    it('strips Yahoo- prefix from sourceheader', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { type: 'Offer', sourceheader: 'Yahoo-Web' },
-      })
-      expect(wrapper.vm.sourceheader).toBe('Web')
-    })
-
-    it('returns sourceheader as-is when no Yahoo- prefix', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { type: 'Offer', sourceheader: 'Email' },
-      })
-      expect(wrapper.vm.sourceheader).toBe('Email')
-    })
+    it.each([
+      [null, null, 'no sourceheader'],
+      ['Yahoo-Web', 'Web', 'Yahoo- prefix'],
+      ['Email', 'Email', 'no Yahoo- prefix'],
+    ])(
+      'returns %s when sourceheader is %s (%s)',
+      (input, expected, _description) => {
+        const wrapper = createWrapper({
+          id: 1,
+          type: 'Message',
+          subtype: 'Received',
+          message: { type: 'Offer', sourceheader: input },
+        })
+        expect(wrapper.vm.sourceheader).toBe(expected)
+      }
+    )
   })
 
   describe('postingStatus computed', () => {
-    it('returns "Unchanged" for UNCHANGED', () => {
+    it.each([
+      ['UNCHANGED', 'Unchanged'],
+      ['MODERATED', 'Moderated'],
+      ['DEFAULT', 'Group Settings'],
+      ['PROHIBITED', "Can't Post"],
+      ['UNKNOWN', null],
+    ])('returns correct status for %s', (input, expected) => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
         subtype: 'OurPostingStatus',
-        text: 'UNCHANGED',
+        text: input,
         group: { id: 1, nameshort: 'Test' },
       })
-      expect(wrapper.vm.postingStatus).toBe('Unchanged')
-    })
-
-    it('returns "Moderated" for MODERATED', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'OurPostingStatus',
-        text: 'MODERATED',
-        group: { id: 1, nameshort: 'Test' },
-      })
-      expect(wrapper.vm.postingStatus).toBe('Moderated')
-    })
-
-    it('returns "Group Settings" for DEFAULT', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'OurPostingStatus',
-        text: 'DEFAULT',
-        group: { id: 1, nameshort: 'Test' },
-      })
-      expect(wrapper.vm.postingStatus).toBe('Group Settings')
-    })
-
-    it('returns "Can\'t Post" for PROHIBITED', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'OurPostingStatus',
-        text: 'PROHIBITED',
-        group: { id: 1, nameshort: 'Test' },
-      })
-      expect(wrapper.vm.postingStatus).toBe("Can't Post")
-    })
-
-    it('returns null for unknown status', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'OurPostingStatus',
-        text: 'UNKNOWN',
-        group: { id: 1, nameshort: 'Test' },
-      })
-      expect(wrapper.vm.postingStatus).toBeNull()
+      expect(wrapper.vm.postingStatus).toBe(expected)
     })
   })
 
   describe('byuser computed', () => {
-    it('returns log.byuser', () => {
-      const byuser = { id: 456, displayname: 'Mod User' }
+    it.each([
+      [
+        { id: 456, displayname: 'Mod User' },
+        { id: 456, displayname: 'Mod User' },
+        'returns log.byuser when present',
+      ],
+      [undefined, undefined, 'returns undefined when log has no byuser'],
+    ])('%s', (byuser, expected, _description) => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
         subtype: 'Login',
         byuser,
       })
-      expect(wrapper.vm.byuser).toEqual(byuser)
-    })
-
-    it('returns undefined when log has no byuser', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Login',
-      })
-      expect(wrapper.vm.byuser).toBeUndefined()
+      expect(wrapper.vm.byuser).toEqual(expected)
     })
   })
 
   describe('Group log types', () => {
-    it('shows Joined for Group/Joined', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'Joined',
-        groupid: 1,
-      })
-      expect(wrapper.text()).toContain('Joined')
+    it.each([
+      [
+        { type: 'Group', subtype: 'Joined', groupid: 1 },
+        'Joined',
+        'shows Joined for Group/Joined',
+      ],
+      [
+        { type: 'Group', subtype: 'Applied', groupid: 1 },
+        'Applied',
+        'shows Applied for Group/Applied',
+      ],
+      [
+        { type: 'Group', subtype: 'Edit' },
+        'Edited group settings',
+        'shows Edited for Group/Edit',
+      ],
+      [
+        { type: 'Group', subtype: 'Autoapproved' },
+        'Auto-approved',
+        'shows Auto-approved for Group/Autoapproved',
+      ],
+      [
+        { type: 'Group', subtype: 'UnknownSubtype' },
+        'Unknown log type',
+        'shows unknown for unhandled subtypes',
+      ],
+    ])('%s', (logProps, expectedText, _description) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
     })
 
-    it('shows "added by" when user and byuser differ for Group/Joined', () => {
-      const wrapper = createWrapper({
+    it('shows "added by" and "Clicked on Join button" based on user context', () => {
+      // When user and byuser differ
+      const wrapperAddedBy = createWrapper({
         id: 1,
         type: 'Group',
         subtype: 'Joined',
         user: { id: 1, displayname: 'Member' },
         byuser: { id: 2, displayname: 'Mod' },
       })
-      expect(wrapper.text()).toContain('added by')
-    })
+      expect(wrapperAddedBy.text()).toContain('added by')
 
-    it('shows "Clicked on Join button" for Manual text', () => {
-      const wrapper = createWrapper({
+      // Manual text shows button click
+      const wrapperManual = createWrapper({
         id: 1,
         type: 'Group',
         subtype: 'Joined',
         text: 'Manual',
       })
-      expect(wrapper.text()).toContain('Clicked on Join button')
+      expect(wrapperManual.text()).toContain('Clicked on Join button')
     })
 
-    it('shows Applied for Group/Applied', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'Applied',
-        groupid: 1,
-      })
-      expect(wrapper.text()).toContain('Applied')
-    })
-
-    it('shows Left for Group/Left when same user', () => {
-      const wrapper = createWrapper({
+    it('shows Left when same user, Removed when different users for Group/Left', () => {
+      const wrapperSameUser = createWrapper({
         id: 1,
         type: 'Group',
         subtype: 'Left',
         user: { id: 1, displayname: 'User' },
         byuser: { id: 1, displayname: 'User' },
       })
-      expect(wrapper.text()).toContain('Left')
-    })
+      expect(wrapperSameUser.text()).toContain('Left')
 
-    it('shows Removed for Group/Left when different users', () => {
-      const wrapper = createWrapper({
+      const wrapperDiffUsers = createWrapper({
         id: 1,
         type: 'Group',
         subtype: 'Left',
         user: { id: 1, displayname: 'Member' },
         byuser: { id: 2, displayname: 'Mod' },
       })
-      expect(wrapper.text()).toContain('Removed member')
-    })
-
-    it('shows Edited for Group/Edit', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'Edit',
-      })
-      expect(wrapper.text()).toContain('Edited group settings')
-    })
-
-    it('shows Auto-approved for Group/Autoapproved', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'Autoapproved',
-      })
-      expect(wrapper.text()).toContain('Auto-approved')
-    })
-
-    it('shows unknown log type for unhandled subtypes', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'UnknownSubtype',
-      })
-      expect(wrapper.text()).toContain('Unknown log type')
+      expect(wrapperDiffUsers.text()).toContain('Removed member')
     })
   })
 
   describe('Message log types', () => {
-    it('shows Posted for Message/Received with Offer', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { type: 'Offer', groups: [{ id: 1, collection: 'Approved' }] },
-      })
-      expect(wrapper.text()).toContain('Posted')
-    })
-
-    it('shows Pending status for pending messages', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { type: 'Offer', groups: [{ id: 1, collection: 'Pending' }] },
-      })
-      expect(wrapper.text()).toContain('Pending')
-    })
-
-    it('shows Emailed for non-Offer/Wanted messages', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: {
-          type: 'Other',
-          subject: 'Test',
-          envelopeto: 'test@example.com',
+    it.each([
+      [
+        {
+          type: 'Message',
+          subtype: 'Received',
+          message: {
+            type: 'Offer',
+            groups: [{ id: 1, collection: 'Approved' }],
+          },
         },
-      })
-      expect(wrapper.text()).toContain('Emailed')
+        'Posted',
+        'shows Posted for Message/Received with Offer',
+      ],
+      [
+        {
+          type: 'Message',
+          subtype: 'Received',
+          message: {
+            type: 'Offer',
+            groups: [{ id: 1, collection: 'Pending' }],
+          },
+        },
+        'Pending',
+        'shows Pending status for pending messages',
+      ],
+      [
+        {
+          type: 'Message',
+          subtype: 'Received',
+          message: {
+            type: 'Other',
+            subject: 'Test',
+            envelopeto: 'test@example.com',
+          },
+        },
+        'Emailed',
+        'shows Emailed for non-Offer/Wanted messages',
+      ],
+      [
+        {
+          type: 'Message',
+          subtype: 'Received',
+          message: { id: 123, type: 'Other', deleted: true },
+        },
+        'deleted',
+        'shows deleted notice for deleted messages',
+      ],
+      [
+        { type: 'Message', subtype: 'Repost' },
+        'Manual repost',
+        'shows Manual repost for Message/Repost',
+      ],
+      [
+        { type: 'Message', subtype: 'Approved' },
+        'Approved message',
+        'shows Approved for Message/Approved',
+      ],
+      [
+        { type: 'Message', subtype: 'Deleted' },
+        'Deleted',
+        'shows Deleted for Message/Deleted',
+      ],
+      [
+        { type: 'Message', subtype: 'Hold' },
+        'Held',
+        'shows Held for Message/Hold',
+      ],
+      [
+        { type: 'Message', subtype: 'Release' },
+        'Released',
+        'shows Released for Message/Release',
+      ],
+      [
+        { type: 'Message', subtype: 'ClassifiedSpam' },
+        'Sent spam',
+        'shows Sent spam for Message/ClassifiedSpam',
+      ],
+    ])('%s', (logProps, expectedText, _description) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
     })
 
-    it('shows deleted notice for deleted messages', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: { id: 123, type: 'Other', deleted: true },
-      })
-      expect(wrapper.text()).toContain('deleted')
-    })
-
-    it('shows Autoreposted for Message/Autoreposted', () => {
+    it('shows Autoreposted with repost count for Message/Autoreposted', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'Message',
@@ -331,24 +279,6 @@ describe('ModLog', () => {
       })
       expect(wrapper.text()).toContain('Autoreposted')
       expect(wrapper.text()).toContain('repost 3')
-    })
-
-    it('shows Manual repost for Message/Repost', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Repost',
-      })
-      expect(wrapper.text()).toContain('Manual repost')
-    })
-
-    it('shows Approved for Message/Approved', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Approved',
-      })
-      expect(wrapper.text()).toContain('Approved message')
     })
 
     it('shows Rejected with danger class for Message/Rejected', () => {
@@ -371,34 +301,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('Modmail sent')
     })
 
-    it('shows Deleted for Message/Deleted', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Deleted',
-      })
-      expect(wrapper.text()).toContain('Deleted')
-    })
-
-    it('shows Held for Message/Hold', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Hold',
-      })
-      expect(wrapper.text()).toContain('Held')
-    })
-
-    it('shows Released for Message/Release', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Release',
-      })
-      expect(wrapper.text()).toContain('Released')
-    })
-
-    it('shows Edited for Message/Edit', () => {
+    it('shows Edited with text content for Message/Edit', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'Message',
@@ -409,7 +312,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('Subject changed')
     })
 
-    it('shows Marked as for Message/Outcome', () => {
+    it('shows Marked as with outcome text for Message/Outcome', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'Message',
@@ -420,16 +323,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('TAKEN')
     })
 
-    it('shows Sent spam for Message/ClassifiedSpam', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'ClassifiedSpam',
-      })
-      expect(wrapper.text()).toContain('Sent spam')
-    })
-
-    it('shows Flagged for Message/WorryWords', () => {
+    it('shows Flagged with warning text for Message/WorryWords', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'Message',
@@ -442,7 +336,64 @@ describe('ModLog', () => {
   })
 
   describe('User log types', () => {
-    it('shows Logged in for User/Login', () => {
+    it.each([
+      [
+        { type: 'User', subtype: 'Logout' },
+        'Logged out',
+        'shows Logged out for User/Logout',
+      ],
+      [
+        { type: 'User', subtype: 'Created' },
+        'User Created',
+        'shows User Created for User/Created',
+      ],
+      [
+        {
+          type: 'User',
+          subtype: 'Approved',
+          user: { id: 1, displayname: 'New Member' },
+        },
+        'Approved member',
+        'shows Approved member for User/Approved',
+      ],
+      [
+        {
+          type: 'User',
+          subtype: 'Rejected',
+          user: { id: 1, displayname: 'Rejected Member' },
+        },
+        'Rejected member',
+        'shows Rejected member for User/Rejected',
+      ],
+      [
+        {
+          type: 'User',
+          subtype: 'Hold',
+          user: { id: 1, displayname: 'Held Member' },
+        },
+        'Held member',
+        'shows Held member for User/Hold',
+      ],
+      [
+        {
+          type: 'User',
+          subtype: 'Release',
+          user: { id: 1, displayname: 'Released Member' },
+        },
+        'Released member',
+        'shows Released member for User/Release',
+      ],
+      [
+        { type: 'User', subtype: 'Split', text: 'into #789' },
+        'Split out into two users',
+        'shows Split for User/Split',
+      ],
+    ])('%s', (logProps, expectedText, _description) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
+    })
+
+    it('shows Logged in with method text for User/Login', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -453,25 +404,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('via email')
     })
 
-    it('shows Logged out for User/Logout', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Logout',
-      })
-      expect(wrapper.text()).toContain('Logged out')
-    })
-
-    it('shows User Created for User/Created', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Created',
-      })
-      expect(wrapper.text()).toContain('User Created')
-    })
-
-    it('shows Role changed for User/RoleChange', () => {
+    it('shows Role changed with role text for User/RoleChange', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -482,7 +415,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('changed to Moderator')
     })
 
-    it('shows Merged for User/Merged', () => {
+    it('shows Merged with user text for User/Merged', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -493,7 +426,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('User #456')
     })
 
-    it('shows Set Email Frequency for User/OurEmailFrequency', () => {
+    it('shows Set Email Frequency with frequency text for User/OurEmailFrequency', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -503,47 +436,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('Set Email Frequency to Daily')
     })
 
-    it('shows Approved member for User/Approved', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Approved',
-        user: { id: 1, displayname: 'New Member' },
-      })
-      expect(wrapper.text()).toContain('Approved member')
-    })
-
-    it('shows Rejected member for User/Rejected', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Rejected',
-        user: { id: 1, displayname: 'Rejected Member' },
-      })
-      expect(wrapper.text()).toContain('Rejected member')
-    })
-
-    it('shows Held member for User/Hold', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Hold',
-        user: { id: 1, displayname: 'Held Member' },
-      })
-      expect(wrapper.text()).toContain('Held member')
-    })
-
-    it('shows Released member for User/Release', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Release',
-        user: { id: 1, displayname: 'Released Member' },
-      })
-      expect(wrapper.text()).toContain('Released member')
-    })
-
-    it('shows Flagged for User/Suspect', () => {
+    it('shows Flagged with reason text for User/Suspect', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -555,17 +448,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('suspicious activity')
     })
 
-    it('shows Split for User/Split', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Split',
-        text: 'into #789',
-      })
-      expect(wrapper.text()).toContain('Split out into two users')
-    })
-
-    it('shows Bounce for User/Bounce', () => {
+    it('shows Bounce with bounce text for User/Bounce', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -575,7 +458,7 @@ describe('ModLog', () => {
       expect(wrapper.text()).toContain('Hard bounce')
     })
 
-    it('shows Postcode set for User/PostcodeChange', () => {
+    it('shows Postcode set with postcode for User/PostcodeChange', () => {
       const wrapper = createWrapper({
         id: 1,
         type: 'User',
@@ -587,128 +470,97 @@ describe('ModLog', () => {
   })
 
   describe('Config log types', () => {
-    it('shows Created config for Config/Created', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Config',
-        subtype: 'Created',
-        text: 'TestConfig',
-      })
-      expect(wrapper.text()).toContain('Created config TestConfig')
-    })
-
-    it('shows Deleted config for Config/Deleted', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Config',
-        subtype: 'Deleted',
-        text: 'OldConfig',
-      })
-      expect(wrapper.text()).toContain('Deleted config OldConfig')
-    })
-
-    it('shows Edited config for Config/Edit', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Config',
-        subtype: 'Edit',
-        config: { name: 'EditedConfig' },
-      })
-      expect(wrapper.text()).toContain('Edited config EditedConfig')
+    it.each([
+      [
+        { type: 'Config', subtype: 'Created', text: 'TestConfig' },
+        'Created config TestConfig',
+      ],
+      [
+        { type: 'Config', subtype: 'Deleted', text: 'OldConfig' },
+        'Deleted config OldConfig',
+      ],
+      [
+        { type: 'Config', subtype: 'Edit', config: { name: 'EditedConfig' } },
+        'Edited config EditedConfig',
+      ],
+    ])('shows correct text for %s', (logProps, expectedText) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
     })
   })
 
   describe('StdMsg log types', () => {
-    it('shows Created standard message for StdMsg/Created', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'StdMsg',
-        subtype: 'Created',
-        text: 'Welcome Message',
-      })
-      expect(wrapper.text()).toContain(
-        'Created standard message Welcome Message'
-      )
-    })
-
-    it('shows Deleted standard message for StdMsg/Deleted', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'StdMsg',
-        subtype: 'Deleted',
-        text: 'Old Message',
-      })
-      expect(wrapper.text()).toContain('Deleted standard message Old Message')
-    })
-
-    it('shows Edited standard message for StdMsg/Edit', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'StdMsg',
-        subtype: 'Edit',
-        stdmsg: { name: 'Edited Message' },
-      })
-      expect(wrapper.text()).toContain('Edited standard message')
+    it.each([
+      [
+        { type: 'StdMsg', subtype: 'Created', text: 'Welcome Message' },
+        'Created standard message Welcome Message',
+      ],
+      [
+        { type: 'StdMsg', subtype: 'Deleted', text: 'Old Message' },
+        'Deleted standard message Old Message',
+      ],
+      [
+        { type: 'StdMsg', subtype: 'Edit', stdmsg: { name: 'Edited Message' } },
+        'Edited standard message',
+      ],
+    ])('shows correct text for %s', (logProps, expectedText) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
     })
   })
 
   describe('Chat log types', () => {
-    it('shows Approved chat message for Chat/Approved', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Chat',
-        subtype: 'Approved',
-        user: { id: 1, displayname: 'Chat User' },
-      })
-      expect(wrapper.text()).toContain('Approved chat message')
-    })
-
-    it('shows unknown for unhandled Chat subtypes', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Chat',
-        subtype: 'UnknownChat',
-      })
-      expect(wrapper.text()).toContain('Unknown log type')
+    it.each([
+      [
+        {
+          type: 'Chat',
+          subtype: 'Approved',
+          user: { id: 1, displayname: 'Chat User' },
+        },
+        'Approved chat message',
+      ],
+      [{ type: 'Chat', subtype: 'UnknownChat' }, 'Unknown log type'],
+    ])('shows correct text for %s', (logProps, expectedText) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
+      expect(wrapper.text()).toContain(expectedText)
     })
   })
 
   describe('user display logic', () => {
-    it('shows log.user for Group/Joined when user differs from byuser', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Group',
-        subtype: 'Joined',
-        user: { id: 1, displayname: 'Member' },
-        byuser: { id: 2, displayname: 'Mod' },
-      })
-      // Should show log.user (Member) in the user column
+    it.each([
+      [
+        {
+          type: 'Group',
+          subtype: 'Joined',
+          user: { id: 1, displayname: 'Member' },
+          byuser: { id: 2, displayname: 'Mod' },
+        },
+        'shows log.user for Group/Joined when user differs from byuser',
+      ],
+      [
+        {
+          type: 'User',
+          subtype: 'Approved',
+          user: { id: 1, displayname: 'Member' },
+          byuser: { id: 2, displayname: 'Mod' },
+        },
+        'shows byuser for non-Joined when user differs from byuser',
+      ],
+      [
+        {
+          type: 'Message',
+          subtype: 'Received',
+          message: {
+            type: 'Offer',
+            fromuser: { id: 3, displayname: 'Poster' },
+          },
+        },
+        'shows message.fromuser when no user or byuser',
+      ],
+    ])('%s', (logProps, _description) => {
+      const wrapper = createWrapper({ id: 1, ...logProps })
       const userCols = wrapper.findAll('.mod-log-user')
       expect(userCols.length).toBeGreaterThan(0)
-    })
-
-    it('shows byuser for non-Joined when user differs from byuser', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'User',
-        subtype: 'Approved',
-        user: { id: 1, displayname: 'Member' },
-        byuser: { id: 2, displayname: 'Mod' },
-      })
-      expect(wrapper.find('.mod-log-user').exists()).toBe(true)
-    })
-
-    it('shows message.fromuser when no user or byuser', () => {
-      const wrapper = createWrapper({
-        id: 1,
-        type: 'Message',
-        subtype: 'Received',
-        message: {
-          type: 'Offer',
-          fromuser: { id: 3, displayname: 'Poster' },
-        },
-      })
-      expect(wrapper.find('.mod-log-user').exists()).toBe(true)
     })
   })
 
@@ -723,8 +575,9 @@ describe('ModLog', () => {
       expect(wrapper.find('.row').exists()).toBe(true)
     })
 
-    it('handles User/Deleted with byuser present', () => {
-      const wrapper = createWrapper({
+    it('handles User/Deleted with byuser (Rejected) and without byuser (self-leave)', () => {
+      // With byuser - shows Rejected member
+      const wrapperWithByuser = createWrapper({
         id: 1,
         type: 'User',
         subtype: 'Deleted',
@@ -732,18 +585,17 @@ describe('ModLog', () => {
         byuser: { id: 2, displayname: 'Mod' },
         text: 'violation',
       })
-      expect(wrapper.text()).toContain('Rejected member')
-    })
+      expect(wrapperWithByuser.text()).toContain('Rejected member')
 
-    it('handles User/Deleted without byuser (self-leave)', () => {
-      const wrapper = createWrapper({
+      // Without byuser - shows User left platform
+      const wrapperWithoutByuser = createWrapper({
         id: 1,
         type: 'User',
         subtype: 'Deleted',
         user: { id: 1, displayname: 'User' },
         text: 'privacy',
       })
-      expect(wrapper.text()).toContain('User left platform')
+      expect(wrapperWithoutByuser.text()).toContain('User left platform')
     })
   })
 })
