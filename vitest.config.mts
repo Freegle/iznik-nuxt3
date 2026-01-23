@@ -93,6 +93,19 @@ export default defineConfig({
       papaparse: path.join(rootDir, 'tests/unit/mocks/papaparse.js'),
       'vue-letter': path.join(rootDir, 'tests/unit/mocks/vue-letter.js'),
       letterparser: path.join(rootDir, 'tests/unit/mocks/letterparser.js'),
+      // Handsontable mocks
+      '@handsontable/vue3': path.join(
+        rootDir,
+        'tests/unit/mocks/handsontable.js'
+      ),
+      'handsontable/registry': path.join(
+        rootDir,
+        'tests/unit/mocks/handsontable-registry.js'
+      ),
+      'handsontable/dist/handsontable.full.css': path.join(
+        rootDir,
+        'tests/unit/mocks/handsontable-css.js'
+      ),
       // Composable mocks for testing
       '~/composables/useOurModal': path.join(
         rootDir,
