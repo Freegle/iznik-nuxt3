@@ -104,6 +104,7 @@ export function createMockMessageStore(overrides = {}) {
  */
 export function createMockSpammerStore(overrides = {}) {
   return {
+    report: vi.fn().mockResolvedValue({}),
     confirm: vi.fn().mockResolvedValue({}),
     requestremove: vi.fn().mockResolvedValue({}),
     remove: vi.fn().mockResolvedValue({}),
