@@ -23,9 +23,9 @@ jobs:
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "Submodule name: $REPO_NAME"
 
-          # Clone FreegleDocker
+          # Clone FreegleDocker (no --depth 1 so we can rebase)
           echo "Cloning FreegleDocker..."
-          git clone --depth 1 https://x-access-token:${GH_TOKEN}@github.com/Freegle/FreegleDocker.git
+          git clone https://x-access-token:${GH_TOKEN}@github.com/Freegle/FreegleDocker.git
           cd FreegleDocker
 
           # Configure git
@@ -49,8 +49,6 @@ jobs:
             exit 0
           fi
 
-          # Commit and push
-          git add "$REPO_NAME"
           # Get first line of commit message, properly escaped
           COMMIT_MSG=$(cat <<'COMMIT_MSG_EOF'
           ${{ github.event.head_commit.message }}
@@ -58,10 +56,51 @@ jobs:
           )
           # Take first line only and sanitize
           COMMIT_MSG=$(echo "$COMMIT_MSG" | head -1 | tr -d '"' | sed 's/^[[:space:]]*//')
-          git commit -m "Update $REPO_NAME submodule - $COMMIT_MSG"
 
-          echo "Pushing to FreegleDocker..."
-          git push origin master
+          # Push with retry logic to handle concurrent submodule updates
+          MAX_RETRIES=5
+          RETRY_DELAY=2
 
-          echo "✅ Successfully updated FreegleDocker submodule reference"
-          echo "CircleCI will automatically trigger from this push"
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Push attempt $i of $MAX_RETRIES..."
+
+            # Stage the submodule change
+            git add "$REPO_NAME"
+
+            # Check if there are changes to commit (might be up to date after rebase)
+            if git diff --cached --quiet; then
+              echo "✅ Submodule already at correct commit after rebase - no update needed"
+              exit 0
+            fi
+
+            # Commit
+            git commit -m "Update $REPO_NAME submodule - $COMMIT_MSG"
+
+            # Try to push
+            if git push origin master; then
+              echo "✅ Successfully updated FreegleDocker submodule reference"
+              echo "CircleCI will automatically trigger from this push"
+              exit 0
+            fi
+
+            echo "⚠️ Push failed (likely concurrent update), retrying..."
+
+            # Pull with rebase to incorporate other changes
+            # Reset our commit, pull latest, then our change will be re-staged in next iteration
+            git reset --soft HEAD~1
+            git fetch origin master
+            git reset --hard origin/master
+
+            # Re-checkout the submodule to the correct commit
+            cd "$REPO_NAME"
+            git checkout "${{ github.sha }}"
+            cd ..
+
+            # Wait before retrying (exponential backoff)
+            SLEEP_TIME=$((RETRY_DELAY * i))
+            echo "Waiting ${SLEEP_TIME}s before retry..."
+            sleep $SLEEP_TIME
+          done
+
+          echo "❌ Failed to push after $MAX_RETRIES attempts"
+          exit 1
