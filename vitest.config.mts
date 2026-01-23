@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import fs from 'node:fs'
+import os from 'node:os'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 
@@ -73,6 +74,11 @@ export default defineConfig({
         rootDir,
         'tests/unit/mocks/ProfileImage.js'
       ),
+      // Stub for ModCommentAddModal (has deep dependency chain)
+      '~/components/ModCommentAddModal': path.join(
+        rootDir,
+        'tests/unit/mocks/ModCommentAddModal.js'
+      ),
       // External library mocks
       papaparse: path.join(rootDir, 'tests/unit/mocks/papaparse.js'),
       // Composable mocks for testing
@@ -93,6 +99,14 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     testTimeout: 30000,
+    // Memory-safe configuration for WSL environments
+    // See: https://vitest.dev/guide/improving-performance
+    pool: 'forks', // 'forks' is more stable than 'threads' for memory isolation
+    // Limit workers based on available memory (WSL often has limited resources)
+    // Using 50% of CPU cores as a safe default - adjust if needed
+    maxWorkers: process.env.CI ? 2 : Math.max(1, Math.floor(os.cpus().length / 2)),
+    // Disable file parallelism if running with --single-thread for debugging
+    fileParallelism: !process.env.VITEST_SINGLE_THREAD,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
