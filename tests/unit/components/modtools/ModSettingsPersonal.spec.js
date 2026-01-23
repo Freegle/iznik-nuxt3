@@ -134,11 +134,6 @@ describe('ModSettingsPersonal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders display name input', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Your visible name')

@@ -82,11 +82,6 @@ describe('Related Page', () => {
   }
 
   describe('rendering', () => {
-    it('renders ScrollToTop component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-    })
-
     it('renders ModHelpRelated component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.mod-help-related').exists()).toBe(true)

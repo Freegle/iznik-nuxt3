@@ -941,19 +941,6 @@ describe('ModChatReview', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 789 })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message').id).toBe(789)
-    })
-  })
-
   describe('modals', () => {
     it('renders ModChatNoteModal when showModChatNoteModal is true', async () => {
       const wrapper = mountComponent()

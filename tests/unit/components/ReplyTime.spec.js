@@ -32,11 +32,6 @@ describe('ReplyTime', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows unknown message when no user data', () => {
       mockUserStore.byId.mockReturnValue(null)
       const wrapper = createWrapper()
@@ -56,11 +51,6 @@ describe('ReplyTime', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
     it('calls userStore.byId with the id', () => {
       createWrapper({ id: 789 })
       expect(mockUserStore.byId).toHaveBeenCalledWith(789)

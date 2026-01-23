@@ -205,11 +205,6 @@ describe('HelpQuestion', () => {
   })
 
   describe('props validation', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountHelpQuestion({ id: 'test-id' })
-      expect(wrapper.props('id')).toBe('test-id')
-    })
-
     it('accepts matches array prop', () => {
       const matches = ['a', 'b', 'c']
       const wrapper = mountHelpQuestion({ id: 'a', matches })

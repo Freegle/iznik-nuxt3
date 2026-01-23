@@ -123,11 +123,6 @@ describe('InterestedInOthersModal', () => {
   })
 
   describe('rendering', () => {
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows user displayname in title', async () => {
       mockData.user = {
         id: 1,
@@ -162,20 +157,6 @@ describe('InterestedInOthersModal', () => {
     it('shows Close button', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.text()).toContain('Close')
-    })
-  })
-
-  describe('props', () => {
-    it('requires msgid prop', async () => {
-      const wrapper = await createWrapper({ msgid: 999 })
-      // Component should mount with the prop
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('requires userid prop', async () => {
-      const wrapper = await createWrapper({ userid: 888 })
-      // Component should mount with the prop
-      expect(wrapper.exists()).toBe(true)
     })
   })
 

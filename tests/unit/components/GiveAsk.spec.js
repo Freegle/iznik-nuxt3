@@ -66,13 +66,6 @@ describe('GiveAsk', () => {
       expect(container.classes()).not.toContain('d-block')
       expect(container.classes()).not.toContain('d-xl-none')
     })
-
-    it('defaults mobile to false', () => {
-      const wrapper = mountGiveAsk()
-      const container = wrapper.find('div')
-      expect(container.classes()).not.toContain('d-block')
-      expect(container.classes()).not.toContain('d-xl-none')
-    })
   })
 
   describe('styling', () => {

@@ -280,20 +280,6 @@ describe('ModMessageMicroVolunteering', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 888 })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message')).toEqual(message)
-    })
-
-    it('accepts microvolunteering prop', () => {
-      const mv = createTestMicrovolunteering({ userid: 111 })
-      const wrapper = mountComponent({ microvolunteering: mv })
-      expect(wrapper.props('microvolunteering')).toEqual(mv)
-    })
-  })
-
   describe('conditional rendering', () => {
     it('shows reject section only when result is Reject', () => {
       const wrapper = mountComponent({

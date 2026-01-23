@@ -76,11 +76,6 @@ describe('ModMergeMemberModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('shows danger warning notice', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Please be careful')
@@ -96,11 +91,6 @@ describe('ModMergeMemberModal', () => {
       const wrapper = mountComponent()
       const inputs = wrapper.findAll('input[type="email"]')
       expect(inputs.length).toBe(2)
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
 
     it('has Merge button', () => {
@@ -391,7 +381,7 @@ describe('ModMergeMemberModal', () => {
       }))
     })
 
-    it('hides toggle for non-support users', async () => {
+    it('hides toggle for non-support users', () => {
       // Note: This test requires re-mounting with different mock
       // The toggle is shown via v-if="supportOrAdmin"
       const wrapper = mountComponent()

@@ -106,11 +106,6 @@ describe('ModCommentAddModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('displays user displayname in title', () => {
       const wrapper = mountComponent({
         user: createTestUser({ displayname: 'John Doe' }),

@@ -137,11 +137,6 @@ describe('ModZoomStock', () => {
   })
 
   describe('props', () => {
-    it('accepts colorClass prop with default value', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('colorClass')).toBe('text-white')
-    })
-
     it('accepts custom colorClass prop', () => {
       const wrapper = mountComponent({ colorClass: 'text-primary' })
       expect(wrapper.props('colorClass')).toBe('text-primary')

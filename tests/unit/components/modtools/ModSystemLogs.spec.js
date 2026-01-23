@@ -193,23 +193,6 @@ describe('ModSystemLogs', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts userid prop', async () => {
-      const wrapper = await mountComponent({ userid: 123 })
-      expect(wrapper.props('userid')).toBe(123)
-    })
-
-    it('accepts groupid prop', async () => {
-      const wrapper = await mountComponent({ groupid: 456 })
-      expect(wrapper.props('groupid')).toBe(456)
-    })
-
-    it('accepts msgid prop', async () => {
-      const wrapper = await mountComponent({ msgid: 789 })
-      expect(wrapper.props('msgid')).toBe(789)
-    })
-  })
-
   describe('computed properties', () => {
     it('logsAsTree reflects store state', async () => {
       const logs = [{ trace_id: 'trace-1' }]

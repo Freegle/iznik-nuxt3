@@ -97,14 +97,6 @@ describe('ModBouncing', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts user prop', () => {
-      const user = { id: 789, email: 'other@test.com', role: 'Owner' }
-      const wrapper = mountComponent({ user })
-      expect(wrapper.props('user')).toEqual(user)
-    })
-  })
-
   describe('role-based behavior', () => {
     it('shows cannot unbounce message for non-Member roles when not support', () => {
       const wrapper = mountComponent({

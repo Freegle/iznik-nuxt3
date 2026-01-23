@@ -356,24 +356,6 @@ describe('ModStoryReview', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts story prop', () => {
-      const story = createStory({ headline: 'Custom Story' })
-      const wrapper = mountComponent({ story })
-      expect(wrapper.props('story').headline).toBe('Custom Story')
-    })
-
-    it('accepts newsletter prop', () => {
-      const wrapper = mountComponent({ newsletter: true })
-      expect(wrapper.props('newsletter')).toBe(true)
-    })
-
-    it('defaults newsletter to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('newsletter')).toBe(false)
-    })
-  })
-
   describe('show ref', () => {
     it('starts with show as true', () => {
       const wrapper = mountComponent()

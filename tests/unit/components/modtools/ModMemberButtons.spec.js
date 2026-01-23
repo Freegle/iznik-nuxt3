@@ -141,11 +141,6 @@ describe('ModMemberButtons', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders OurToggle for autosend control', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.our-toggle').exists()).toBe(true)
@@ -565,35 +560,6 @@ describe('ModMemberButtons', () => {
       expect(wrapper.vm.showAddCommentModal).toBe(false)
       wrapper.vm.addAComment()
       expect(wrapper.vm.showAddCommentModal).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member').displayname).toBe('Custom User')
-    })
-
-    it('accepts modconfig prop', () => {
-      const modconfig = createModConfig([{ id: 1, title: 'Test' }])
-      const wrapper = mountComponent({ modconfig })
-      expect(wrapper.props('modconfig')).toEqual(modconfig)
-    })
-
-    it('defaults modconfig to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('modconfig')).toBeNull()
-    })
-
-    it('defaults spamignore to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('spamignore')).toBe(false)
-    })
-
-    it('defaults actions to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('actions')).toBe(false)
     })
   })
 

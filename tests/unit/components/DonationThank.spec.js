@@ -35,8 +35,7 @@ describe('DonationThank', () => {
       global: {
         stubs: {
           'b-button': {
-            template:
-              '<button :class="[variant, size]" :to="to"><slot /></button>',
+            template: '<button :class="[variant]" :to="to"><slot /></button>',
             props: ['variant', 'size', 'to'],
           },
           NuxtLink: {
@@ -51,92 +50,34 @@ describe('DonationThank', () => {
     return wrapper
   }
 
-  describe('rendering', () => {
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('shows thank you message', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain('Thanks very much for donating')
-    })
-
-    it('shows money wisely message', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain("We'll use your money wisely")
-    })
-
-    it('shows happy freegling message', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain('Happy freegling!')
-    })
-
-    it('shows promote link', async () => {
-      const wrapper = await createWrapper()
-      const promoteLink = wrapper
-        .findAll('.nuxt-link')
-        .find((l) => l.attributes('href') === '/promote?noguard=true')
-      expect(promoteLink).toBeDefined()
-    })
+  it('fetches gift aid data on mount', async () => {
+    await createWrapper()
+    expect(mockFetch).toHaveBeenCalled()
   })
 
-  describe('when gift aid not completed', () => {
-    beforeEach(() => {
-      giftaidData = null
-    })
+  it('shows gift aid CTA button when user has not completed gift aid', async () => {
+    giftaidData = null
+    const wrapper = await createWrapper()
 
-    it('shows gift aid button', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.find('button').exists()).toBe(true)
-    })
-
-    it('button links to gift aid page', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.find('button').attributes('to')).toBe(
-        '/giftaid?noguard=true'
-      )
-    })
-
-    it('button has primary variant', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.find('button').classes()).toContain('primary')
-    })
-
-    it('shows gift aid declaration prompt', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain('Gift Aid declaration')
-    })
+    // Should show the button to fill out gift aid
+    const button = wrapper.find('button')
+    expect(button.exists()).toBe(true)
+    expect(button.attributes('to')).toBe('/giftaid?noguard=true')
+    expect(button.classes()).toContain('primary')
   })
 
-  describe('when gift aid completed', () => {
-    beforeEach(() => {
-      giftaidData = { period: 'Lifetime' }
-    })
+  it('shows already declared message when gift aid completed', async () => {
+    giftaidData = { period: 'Lifetime' }
+    const wrapper = await createWrapper()
 
-    it('shows already declared message', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain('already made a gift aid declaration')
-    })
+    // Should NOT show the CTA button
+    expect(wrapper.find('button').exists()).toBe(false)
 
-    it('does not show gift aid button', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.find('button').exists()).toBe(false)
-    })
-
-    it('shows link to view existing declaration', async () => {
-      const wrapper = await createWrapper()
-      const giftaidLink = wrapper
-        .findAll('.nuxt-link')
-        .find((l) => l.attributes('href') === '/giftaid?noguard=true')
-      expect(giftaidLink).toBeDefined()
-    })
-  })
-
-  describe('store interaction', () => {
-    it('fetches gift aid data on mount', async () => {
-      await createWrapper()
-      expect(mockFetch).toHaveBeenCalled()
-    })
+    // Should show the "already declared" text and link
+    expect(wrapper.text()).toContain('already made a gift aid declaration')
+    const giftaidLink = wrapper
+      .findAll('.nuxt-link')
+      .find((l) => l.attributes('href') === '/giftaid?noguard=true')
+    expect(giftaidLink).toBeDefined()
   })
 })

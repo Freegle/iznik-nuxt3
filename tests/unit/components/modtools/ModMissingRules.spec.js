@@ -270,18 +270,6 @@ describe('ModMissingRules', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts expanded prop', () => {
-      const wrapper = mountComponent({ expanded: true })
-      expect(wrapper.props('expanded')).toBe(true)
-    })
-
-    it('defaults expanded to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('expanded')).toBe(false)
-    })
-  })
-
   describe('onMounted', () => {
     it('fetches groups from store when myGroups has values', async () => {
       mockMyGroups.value = [{ id: 1 }, { id: 2 }]

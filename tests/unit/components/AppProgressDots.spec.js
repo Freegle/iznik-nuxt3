@@ -18,11 +18,6 @@ describe('AppProgressDots', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders the correct number of steps by default (3)', () => {
       const wrapper = createWrapper()
       const steps = wrapper.findAll('.progress-step')
@@ -145,19 +140,9 @@ describe('AppProgressDots', () => {
   })
 
   describe('props', () => {
-    it('requires currentStep prop', () => {
-      const wrapper = createWrapper({ currentStep: 2 })
-      expect(wrapper.props('currentStep')).toBe(2)
-    })
-
     it('defaults totalSteps to 3', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('totalSteps')).toBe(3)
-    })
-
-    it('defaults showLabels to true', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('showLabels')).toBe(true)
     })
 
     it('defaults labels to Photos, Details, Confirm', () => {

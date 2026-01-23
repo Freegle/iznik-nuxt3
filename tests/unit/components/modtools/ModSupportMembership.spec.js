@@ -112,11 +112,6 @@ describe('ModSupportMembership', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.card').exists()).toBe(true)
-    })
-
     it('displays the group name', () => {
       const wrapper = mountComponent({
         membership: createMembership({ nameshort: 'MyGroup' }),

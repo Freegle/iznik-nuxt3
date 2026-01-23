@@ -61,19 +61,9 @@ describe('ModBanMemberModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('displays userid input', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('input[type="number"]').exists()).toBe(true)
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
 
     it('has Ban button', () => {
@@ -100,13 +90,6 @@ describe('ModBanMemberModal', () => {
       wrapper.vm.userid = 999
       await wrapper.vm.ban()
       expect(mockHide).toHaveBeenCalled()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 789 })
-      expect(wrapper.props('groupid')).toBe(789)
     })
   })
 

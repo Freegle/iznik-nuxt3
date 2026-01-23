@@ -332,11 +332,6 @@ describe('ModSettingsGroup', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders group select', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.group-select').exists()).toBe(true)
@@ -404,11 +399,6 @@ describe('ModSettingsGroup', () => {
   })
 
   describe('props', () => {
-    it('accepts initialGroup prop', () => {
-      const wrapper = mountComponent({ initialGroup: 456 })
-      expect(wrapper.props('initialGroup')).toBe(456)
-    })
-
     it('uses null as default for initialGroup', () => {
       // Test the prop default directly by checking if mounting without it works
       // We use the full stub set to avoid component resolution warnings
@@ -610,9 +600,7 @@ describe('ModSettingsGroup', () => {
 
     it('hides edit description button when readonly', () => {
       const wrapper = mountComponent({}, { myrole: 'Moderator' })
-      const editBtn = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Edit'))
+      wrapper.findAll('button').find((b) => b.text().includes('Edit'))
       // May or may not exist depending on editingDescription state
     })
   })
@@ -847,7 +835,7 @@ describe('ModSettingsGroup', () => {
       expect(wrapper.find('.quill-editor').exists()).toBe(false)
     })
 
-    it('editingDescription ref can be toggled', async () => {
+    it('editingDescription ref can be toggled', () => {
       const wrapper = mountComponent()
       // The component starts with editingDescription = false
       expect(wrapper.vm.editingDescription).toBe(false)

@@ -93,11 +93,6 @@ describe('members/review.vue page', () => {
   })
 
   describe('initial state', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.help-stub').exists()).toBe(true)
-    })
-
     it('renders scroll to top component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.scroll-stub').exists()).toBe(true)

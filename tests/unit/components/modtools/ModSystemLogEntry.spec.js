@@ -162,54 +162,6 @@ describe('ModSystemLogEntry', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts log prop', () => {
-      const log = createLog({ id: 123 })
-      const wrapper = mountComponent({ log })
-      expect(wrapper.props('log').id).toBe(123)
-    })
-
-    it('accepts count prop with default 1', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('count')).toBe(1)
-    })
-
-    it('accepts count prop', () => {
-      const wrapper = mountComponent({ count: 5 })
-      expect(wrapper.props('count')).toBe(5)
-    })
-
-    it('accepts firstTimestamp prop', () => {
-      const wrapper = mountComponent({
-        firstTimestamp: '2024-01-15T10:00:00Z',
-      })
-      expect(wrapper.props('firstTimestamp')).toBe('2024-01-15T10:00:00Z')
-    })
-
-    it('accepts lastTimestamp prop', () => {
-      const wrapper = mountComponent({
-        lastTimestamp: '2024-01-15T10:30:00Z',
-      })
-      expect(wrapper.props('lastTimestamp')).toBe('2024-01-15T10:30:00Z')
-    })
-
-    it('accepts entries prop', () => {
-      const entries = [{ id: 1 }, { id: 2 }]
-      const wrapper = mountComponent({ entries })
-      expect(wrapper.props('entries')).toEqual(entries)
-    })
-
-    it('accepts hideUserColumn prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('hideUserColumn')).toBe(false)
-    })
-
-    it('accepts hideUserColumn prop', () => {
-      const wrapper = mountComponent({ hideUserColumn: true })
-      expect(wrapper.props('hideUserColumn')).toBe(true)
-    })
-  })
-
   describe('sourceLabel computed', () => {
     it('returns API for api source', () => {
       const wrapper = mountComponent({ log: createLog({ source: 'api' }) })

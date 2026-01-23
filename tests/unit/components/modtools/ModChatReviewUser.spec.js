@@ -53,11 +53,6 @@ describe('ModChatReviewUser', () => {
   })
 
   describe('rendering', () => {
-    it('renders user displayname', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Test User')
-    })
-
     it('renders user id', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('123')
@@ -198,16 +193,6 @@ describe('ModChatReviewUser', () => {
   })
 
   describe('props', () => {
-    it('accepts user prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('user').id).toBe(123)
-    })
-
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(456)
-    })
-
     it('has default null for tag prop', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('tag')).toBe(null)

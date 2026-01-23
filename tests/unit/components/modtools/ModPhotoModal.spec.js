@@ -104,11 +104,6 @@ describe('ModPhotoModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.b-modal').exists()).toBe(true)
-    })
-
     it('renders with correct modal id based on attachment id', () => {
       const wrapper = mountComponent()
       const modal = wrapper.find('.b-modal')

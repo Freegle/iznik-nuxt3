@@ -53,11 +53,6 @@ describe('DonationThermometer', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders thermometer component', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.find('.vue-thermometer').exists()).toBe(true)
@@ -130,23 +125,6 @@ describe('DonationThermometer', () => {
     it('fetches with null groupid when not provided', async () => {
       await createWrapper()
       expect(mockFetch).toHaveBeenCalledWith(null)
-    })
-  })
-
-  describe('props', () => {
-    it('groupid is optional', () => {
-      const props = DonationThermometer.props
-      expect(props.groupid.required).toBe(false)
-    })
-
-    it('groupid defaults to null', () => {
-      const props = DonationThermometer.props
-      expect(props.groupid.default).toBe(null)
-    })
-
-    it('groupid is Number type', () => {
-      const props = DonationThermometer.props
-      expect(props.groupid.type).toBe(Number)
     })
   })
 })

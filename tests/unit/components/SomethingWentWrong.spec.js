@@ -79,11 +79,6 @@ describe('SomethingWentWrong', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows nothing when no errors and not reloading', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.notice-message').exists()).toBe(false)

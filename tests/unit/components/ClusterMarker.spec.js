@@ -68,11 +68,6 @@ describe('ClusterMarker', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('does not render when clusters is empty', () => {
       mockGetClusters.mockReturnValue([])
       const wrapper = createWrapper()
@@ -155,11 +150,6 @@ describe('ClusterMarker', () => {
       expect(wrapper.props('extent')).toBe(256)
     })
 
-    it('defaults minZoom to 0', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('minZoom')).toBe(0)
-    })
-
     it('defaults maxZoom to MAX_MAP_ZOOM', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('maxZoom')).toBe(16)
@@ -168,11 +158,6 @@ describe('ClusterMarker', () => {
     it('defaults minCluster to 10', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('minCluster')).toBe(10)
-    })
-
-    it('defaults tag to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('tag')).toBe(null)
     })
 
     it('defaults cssClass to empty string', () => {

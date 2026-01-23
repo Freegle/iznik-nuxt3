@@ -90,11 +90,6 @@ describe('ModMemberSummary', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders OFFER badge', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('OFFER')

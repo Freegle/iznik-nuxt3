@@ -30,24 +30,24 @@ const mockChatMessage = {
   image: null,
 }
 
+const mockComposableReturn = {
+  chat: { value: mockChat },
+  chatmessage: { value: mockChatMessage },
+  emessage: 'Hello there!',
+  messageIsFromCurrentUser: false,
+  chatMessageProfileImage: '/path/to/image.jpg',
+  chatMessageProfileName: 'Test User',
+  regexEmail: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
+}
+
 vi.mock('~/composables/useChat', () => ({
-  useChatMessageBase: vi.fn(() => ({
-    chat: { value: mockChat },
-    chatmessage: { value: mockChatMessage },
-    emessage: 'Hello there!',
-    messageIsFromCurrentUser: false,
-    chatMessageProfileImage: '/path/to/image.jpg',
-    chatMessageProfileName: 'Test User',
-    regexEmail: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-  })),
+  useChatMessageBase: vi.fn(() => ({ ...mockComposableReturn })),
 }))
 
 // Mock location store
-const mockTypeahead = vi.fn().mockResolvedValue([])
-
 vi.mock('~/stores/location', () => ({
   useLocationStore: () => ({
-    typeahead: mockTypeahead,
+    typeahead: vi.fn().mockResolvedValue([]),
   }),
 }))
 
@@ -103,103 +103,29 @@ describe('ChatMessageText', () => {
     })
   }
 
-  describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
+  it('applies myChatMessage styling based on message sender', async () => {
+    // Message from other user - no special class
+    const wrapper = createWrapper()
+    expect(wrapper.find('.myChatMessage').exists()).toBe(false)
+    expect(wrapper.find('.chatMessageWrapper').exists()).toBe(true)
 
-    it('renders chat message wrapper', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.find('.chatMessageWrapper').exists()).toBe(true)
+    // Message from current user - has myChatMessage class
+    const { useChatMessageBase } = await import('~/composables/useChat')
+    useChatMessageBase.mockReturnValueOnce({
+      ...mockComposableReturn,
+      messageIsFromCurrentUser: true,
     })
-
-    it('renders profile image', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.find('.profile-image').exists()).toBe(true)
-    })
-
-    it('displays message text', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Hello there!')
-    })
+    const wrapperMine = createWrapper()
+    expect(wrapperMine.find('.myChatMessage').exists()).toBe(true)
   })
 
-  describe('message styling', () => {
-    it('applies myChatMessage class when message is from current user', async () => {
-      const { useChatMessageBase } = await import('~/composables/useChat')
-      useChatMessageBase.mockReturnValueOnce({
-        chat: { value: mockChat },
-        chatmessage: { value: mockChatMessage },
-        emessage: 'Hello!',
-        messageIsFromCurrentUser: true,
-        chatMessageProfileImage: '/path/to/image.jpg',
-        chatMessageProfileName: 'Test User',
-        regexEmail: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-      })
-      const wrapper = createWrapper()
-      expect(wrapper.find('.myChatMessage').exists()).toBe(true)
-    })
+  it('highlights emails only when highlightEmails prop is true', () => {
+    // Without highlighting
+    const wrapperNoHighlight = createWrapper({ highlightEmails: false })
+    expect(wrapperNoHighlight.find('.highlighter').exists()).toBe(false)
 
-    it('does not apply myChatMessage class when message is from other user', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.find('.myChatMessage').exists()).toBe(false)
-    })
-  })
-
-  describe('email highlighting', () => {
-    it('does not highlight when highlightEmails is false', () => {
-      const wrapper = createWrapper({ highlightEmails: false })
-      expect(wrapper.find('.highlighter').exists()).toBe(false)
-    })
-
-    it('renders Highlighter when highlightEmails is true', () => {
-      const wrapper = createWrapper({ highlightEmails: true })
-      // The Highlighter component should be rendered when highlightEmails is true
-      // Note: The actual highlighting functionality is tested via the Highlighter component
-      expect(wrapper.find('.highlighter').exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('requires chatid prop', () => {
-      const props = ChatMessageText.props
-      expect(props.chatid.required).toBe(true)
-    })
-
-    it('chatid is Number type', () => {
-      const props = ChatMessageText.props
-      expect(props.chatid.type).toBe(Number)
-    })
-
-    it('requires id prop', () => {
-      const props = ChatMessageText.props
-      expect(props.id.required).toBe(true)
-    })
-
-    it('id is Number type', () => {
-      const props = ChatMessageText.props
-      expect(props.id.type).toBe(Number)
-    })
-
-    it('pov is optional', () => {
-      const props = ChatMessageText.props
-      expect(props.pov.required).toBe(false)
-    })
-
-    it('pov defaults to null', () => {
-      const props = ChatMessageText.props
-      expect(props.pov.default).toBe(null)
-    })
-
-    it('highlightEmails is optional', () => {
-      const props = ChatMessageText.props
-      expect(props.highlightEmails.required).toBe(false)
-    })
-
-    it('highlightEmails defaults to false', () => {
-      const props = ChatMessageText.props
-      expect(props.highlightEmails.default).toBe(false)
-    })
+    // With highlighting
+    const wrapperWithHighlight = createWrapper({ highlightEmails: true })
+    expect(wrapperWithHighlight.find('.highlighter').exists()).toBe(true)
   })
 })

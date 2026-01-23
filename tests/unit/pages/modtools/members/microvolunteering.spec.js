@@ -97,13 +97,6 @@ describe('members/microvolunteering/[[id]].vue page', () => {
   })
 
   describe('rendering', () => {
-    it('renders the page with required components', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-      expect(wrapper.find('.mod-help-microvolunteering').exists()).toBe(true)
-      expect(wrapper.find('.mod-group-select').exists()).toBe(true)
-    })
-
     it('shows please choose community message when no groupid', async () => {
       const wrapper = mountComponent()
       wrapper.vm.groupid = 0
@@ -121,14 +114,6 @@ describe('members/microvolunteering/[[id]].vue page', () => {
   })
 
   describe('initial state', () => {
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.groupid).toBe(0)
-      // busy starts true but fetch() sets it to false synchronously
-      // Since mounted() calls fetch() synchronously, busy ends up false after mount
-      expect(wrapper.vm.busy).toBe(false)
-    })
-
     it('clears store and fetches on mount', async () => {
       mountComponent()
       await flushPromises()

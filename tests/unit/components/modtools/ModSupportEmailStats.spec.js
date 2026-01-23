@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 
 import ModSupportEmailStats from '~/modtools/components/ModSupportEmailStats.vue'
 
@@ -164,11 +164,6 @@ describe('ModSupportEmailStats', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.email-stats-container').exists()).toBe(true)
-    })
-
     it('displays the info message about email tracking', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Email tracking statistics')
@@ -586,35 +581,35 @@ describe('ModSupportEmailStats', () => {
   })
 
   describe('onDatePresetChange', () => {
-    it('handles hour preset', async () => {
+    it('handles hour preset', () => {
       const wrapper = mountComponent()
       wrapper.vm.onDatePresetChange('hour')
 
       expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
     })
 
-    it('handles day preset', async () => {
+    it('handles day preset', () => {
       const wrapper = mountComponent()
       wrapper.vm.onDatePresetChange('day')
 
       expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
     })
 
-    it('handles 7days preset', async () => {
+    it('handles 7days preset', () => {
       const wrapper = mountComponent()
       wrapper.vm.onDatePresetChange('7days')
 
       expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
     })
 
-    it('handles 30days preset', async () => {
+    it('handles 30days preset', () => {
       const wrapper = mountComponent()
       wrapper.vm.onDatePresetChange('30days')
 
       expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
     })
 
-    it('does not fetch for custom preset', async () => {
+    it('does not fetch for custom preset', () => {
       vi.clearAllMocks()
       const wrapper = mountComponent()
       // Clear calls from mount

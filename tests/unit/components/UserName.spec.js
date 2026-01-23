@@ -33,11 +33,6 @@ describe('UserName', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders as a span element', () => {
       const wrapper = createWrapper()
       expect(wrapper.element.tagName.toLowerCase()).toBe('span')
@@ -57,16 +52,6 @@ describe('UserName', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
-    it('defaults showId to true', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('showId')).toBe(true)
-    })
-
     it('defaults intro to empty string', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('intro')).toBe('')

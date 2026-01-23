@@ -93,11 +93,6 @@ describe('ModMemberRating', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.card').exists()).toBe(true)
-    })
-
     it('displays rater displayname', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Rater User')
@@ -291,14 +286,6 @@ describe('ModMemberRating', () => {
       })
       expect(wrapper.text()).toContain('Bad experience')
       expect(wrapper.text()).toContain('Some comment')
-    })
-  })
-
-  describe('props', () => {
-    it('accepts rating prop', () => {
-      const rating = createRating()
-      const wrapper = mountComponent({ rating })
-      expect(wrapper.props('rating')).toEqual(rating)
     })
   })
 

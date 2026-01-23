@@ -343,11 +343,6 @@ describe('ModGiftAid', () => {
   })
 
   describe('props', () => {
-    it('accepts giftaid prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('giftaid')).toEqual(validGiftaid)
-    })
-
     it('copies giftaid prop to editgiftaid on mount', async () => {
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()

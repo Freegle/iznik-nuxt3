@@ -58,11 +58,6 @@ describe('ChatTypingIndicator', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('does not show indicator when not typing', () => {
       mockChatStore.byChatId.mockReturnValue({
         lasttype: null,
@@ -118,21 +113,6 @@ describe('ChatTypingIndicator', () => {
   })
 
   describe('props', () => {
-    it('requires chatid prop', () => {
-      const wrapper = createWrapper({ chatid: 42 })
-      expect(wrapper.props('chatid')).toBe(42)
-    })
-
-    it('requires icon prop', () => {
-      const wrapper = createWrapper({ icon: 'https://example.com/pic.jpg' })
-      expect(wrapper.props('icon')).toBe('https://example.com/pic.jpg')
-    })
-
-    it('defaults name to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('name')).toBe(null)
-    })
-
     it('accepts custom name', () => {
       const wrapper = createWrapper({ name: 'John Doe' })
       expect(wrapper.props('name')).toBe('John Doe')

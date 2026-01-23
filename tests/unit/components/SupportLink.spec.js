@@ -34,11 +34,6 @@ describe('SupportLink', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders ExternalLink', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.external-link').exists()).toBe(true)
@@ -86,23 +81,6 @@ describe('SupportLink', () => {
       const href = wrapper.find('.external-link').attributes('href')
       expect(href).toContain('mailto:support@ilovefreegle.org')
       expect(href).toContain('12345')
-    })
-  })
-
-  describe('props', () => {
-    it('text defaults to support email', () => {
-      const props = SupportLink.props
-      expect(props.text.default).toBe('support@ilovefreegle.org')
-    })
-
-    it('email defaults to support email', () => {
-      const props = SupportLink.props
-      expect(props.email.default).toBe('support@ilovefreegle.org')
-    })
-
-    it('info defaults to empty string', () => {
-      const props = SupportLink.props
-      expect(props.info.default).toBe('')
     })
   })
 

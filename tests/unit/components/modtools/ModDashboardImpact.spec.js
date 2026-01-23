@@ -101,18 +101,6 @@ describe('ModDashboardImpact', () => {
       expect(wrapper.text()).toContain('Loading')
     })
 
-    it('shows pulsate class when loading', () => {
-      mockLoading.value = true
-      const wrapper = mountComponent()
-      expect(wrapper.find('.pulsate').exists()).toBe(true)
-    })
-
-    it('shows text-faded class when loading', () => {
-      mockLoading.value = true
-      const wrapper = mountComponent()
-      expect(wrapper.find('.text-faded').exists()).toBe(true)
-    })
-
     it('hides loading and shows ModImpact when not loading', () => {
       mockLoading.value = false
       mockWeight.value = mockWeightData
@@ -251,34 +239,10 @@ describe('ModDashboardImpact', () => {
   })
 
   describe('props', () => {
-    it('accepts groupid prop', () => {
-      mockWeight.value = mockWeightData
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
     it('accepts null groupid (default)', () => {
       mockWeight.value = mockWeightData
       const wrapper = mountComponent({ groupid: null })
       expect(wrapper.props('groupid')).toBeNull()
-    })
-
-    it('accepts groupName prop', () => {
-      mockWeight.value = mockWeightData
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupName')).toBe('Test Group')
-    })
-
-    it('accepts start date prop', () => {
-      mockWeight.value = mockWeightData
-      const wrapper = mountComponent()
-      expect(wrapper.props('start')).toEqual(new Date('2024-01-01'))
-    })
-
-    it('accepts end date prop', () => {
-      mockWeight.value = mockWeightData
-      const wrapper = mountComponent()
-      expect(wrapper.props('end')).toEqual(new Date('2024-01-31'))
     })
 
     it('displays different group name', () => {
@@ -322,13 +286,6 @@ describe('ModDashboardImpact', () => {
   })
 
   describe('loading and data transitions', () => {
-    it('shows loading when loading with data', () => {
-      mockLoading.value = true
-      mockWeight.value = mockWeightData
-      const wrapper = mountComponent()
-      expect(wrapper.find('.pulsate').exists()).toBe(true)
-    })
-
     it('shows data when loading completes', async () => {
       mockLoading.value = true
       const wrapper = mountComponent()

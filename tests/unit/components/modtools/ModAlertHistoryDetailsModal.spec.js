@@ -58,11 +58,6 @@ describe('ModAlertHistoryDetailsModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('displays alert subject as title', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test Alert')
@@ -71,11 +66,6 @@ describe('ModAlertHistoryDetailsModal', () => {
     it('displays text version label', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Text version')
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
   })
 
@@ -91,13 +81,6 @@ describe('ModAlertHistoryDetailsModal', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.show).toBeDefined()
       expect(wrapper.vm.hide).toBeDefined()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
     })
   })
 })

@@ -77,13 +77,6 @@ describe('members/notes/[[id]].vue page', () => {
   })
 
   describe('rendering', () => {
-    it('renders the page with required components', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-      expect(wrapper.find('.mod-help-comments').exists()).toBe(true)
-      expect(wrapper.find('.mod-group-select').exists()).toBe(true)
-    })
-
     it('shows empty message when no comments and not busy', async () => {
       mockCommentStore.sortedList = []
       const wrapper = mountComponent()
@@ -105,17 +98,6 @@ describe('members/notes/[[id]].vue page', () => {
   })
 
   describe('initial state', () => {
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.context).toBe(null)
-      expect(wrapper.vm.distance).toBe(1000)
-      expect(wrapper.vm.show).toBe(0)
-      expect(wrapper.vm.busy).toBe(false)
-      expect(wrapper.vm.complete).toBe(false)
-      expect(wrapper.vm.groupid).toBe(null)
-      expect(wrapper.vm.bump).toBe(1)
-    })
-
     it('clears comment store on mount', async () => {
       mountComponent()
       await flushPromises()

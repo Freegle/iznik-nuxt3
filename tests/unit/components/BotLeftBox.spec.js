@@ -26,11 +26,6 @@ describe('BotLeftBox', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders footer-nav container', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.footer-nav').exists()).toBe(true)

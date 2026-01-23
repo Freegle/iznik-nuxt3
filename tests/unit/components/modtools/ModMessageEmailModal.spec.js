@@ -108,11 +108,6 @@ describe('ModMessageEmailModal', () => {
       expect(wrapper.props('id')).toBe(456)
     })
 
-    it('accepts collection prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('collection')).toBeNull()
-    })
-
     it('accepts collection prop with value', () => {
       const wrapper = mountComponent({ collection: 'Pending' })
       expect(wrapper.props('collection')).toBe('Pending')

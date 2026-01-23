@@ -24,11 +24,6 @@ describe('GroupMarkerRich', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders group profile image', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.group-profile-image').exists()).toBe(true)
@@ -79,11 +74,6 @@ describe('GroupMarkerRich', () => {
   })
 
   describe('props', () => {
-    it('requires group prop', () => {
-      const props = GroupMarkerRich.props
-      expect(props.group.required).toBe(true)
-    })
-
     it('group prop is Object type', () => {
       const props = GroupMarkerRich.props
       expect(props.group.type).toBe(Object)

@@ -25,11 +25,6 @@ describe('ShortLinks', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders empty container when no shortlinks', () => {
       const wrapper = createWrapper({ shortlinks: [] })
       expect(wrapper.find('div').exists()).toBe(true)
@@ -54,13 +49,6 @@ describe('ShortLinks', () => {
   })
 
   describe('props', () => {
-    it('requires shortlinks prop', () => {
-      const wrapper = createWrapper({
-        shortlinks: [{ id: 1 }],
-      })
-      expect(wrapper.props('shortlinks')).toEqual([{ id: 1 }])
-    })
-
     it('handles single shortlink', () => {
       const wrapper = createWrapper({
         shortlinks: [{ id: 999 }],

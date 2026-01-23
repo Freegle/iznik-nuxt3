@@ -44,19 +44,9 @@ describe('ModCakeModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('includes ModCake component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.mod-cake').exists()).toBe(true)
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
 
     it('displays settings link text', () => {

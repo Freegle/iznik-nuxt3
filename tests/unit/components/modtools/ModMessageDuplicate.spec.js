@@ -42,11 +42,6 @@ describe('ModMessageDuplicate', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div.text-danger.small').exists()).toBe(true)
-    })
-
     it('displays "Duplicate of" text', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Duplicate of')
@@ -242,12 +237,6 @@ describe('ModMessageDuplicate', () => {
   })
 
   describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 888 })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message')).toEqual(message)
-    })
-
     it('message prop is required', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('message')).toBeDefined()

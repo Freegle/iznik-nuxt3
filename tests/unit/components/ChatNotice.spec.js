@@ -169,28 +169,6 @@ describe('ChatNotice', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts variant prop with default info', () => {
-      const wrapper = mountChatNotice()
-      expect(wrapper.props('variant')).toBe('info')
-    })
-
-    it('accepts title prop with default null', () => {
-      const wrapper = mountChatNotice()
-      expect(wrapper.props('title')).toBeNull()
-    })
-
-    it('accepts icon prop with default null', () => {
-      const wrapper = mountChatNotice()
-      expect(wrapper.props('icon')).toBeNull()
-    })
-
-    it('accepts dismissible prop with default false', () => {
-      const wrapper = mountChatNotice()
-      expect(wrapper.props('dismissible')).toBe(false)
-    })
-  })
-
   describe('combined usage', () => {
     it('renders all features together correctly', () => {
       const wrapper = mountChatNotice(

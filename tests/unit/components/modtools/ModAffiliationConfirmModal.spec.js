@@ -108,11 +108,4 @@ describe('ModAffiliationConfirmModal', () => {
       expect(mockHide).toHaveBeenCalled()
     })
   })
-
-  describe('props', () => {
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 999 })
-      expect(wrapper.props('groupid')).toBe(999)
-    })
-  })
 })

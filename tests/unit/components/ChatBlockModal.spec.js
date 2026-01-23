@@ -49,11 +49,6 @@ describe('ChatBlockModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders modal with correct title', () => {
       const wrapper = createWrapper({ user: { displayname: 'John Doe' } })
       expect(wrapper.find('.modal-title').text()).toContain('Block John Doe')
@@ -81,11 +76,6 @@ describe('ChatBlockModal', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 42 })
-      expect(wrapper.props('id')).toBe(42)
-    })
-
     it('requires user prop with displayname', () => {
       const wrapper = createWrapper({
         user: { displayname: 'Jane Smith', id: 123 },

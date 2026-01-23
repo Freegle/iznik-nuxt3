@@ -151,11 +151,4 @@ describe('ModSpamKeywordBadge', () => {
       expect(wrapper.vm.showDeleteConfirm).toBe(true)
     })
   })
-
-  describe('props', () => {
-    it('accepts spamKeyword prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('spamKeyword').word).toBe('spam_word')
-    })
-  })
 })

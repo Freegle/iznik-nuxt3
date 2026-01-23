@@ -166,11 +166,6 @@ describe('ModSettingsModConfig', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders introductory text', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Standard Messages')

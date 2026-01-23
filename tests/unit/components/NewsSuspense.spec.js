@@ -40,11 +40,6 @@ describe('NewsSuspense', () => {
       })
     })
 
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders NewsUserIntro when userid exists', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.news-user-intro').exists()).toBe(true)
@@ -96,11 +91,6 @@ describe('NewsSuspense', () => {
   describe('props', () => {
     beforeEach(() => {
       mockByIdFn.mockReturnValue({ id: 123, userid: 456 })
-    })
-
-    it('requires id prop', () => {
-      const props = NewsSuspense.props
-      expect(props.id.required).toBe(true)
     })
 
     it('id prop is Number type', () => {

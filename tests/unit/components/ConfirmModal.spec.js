@@ -41,11 +41,6 @@ describe('ConfirmModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays default title "Are you sure?"', () => {
       const wrapper = createWrapper()
       const modal = wrapper.find('.modal')

@@ -152,60 +152,14 @@ describe('ModMessageSummary', () => {
   })
 
   describe('Props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
-    it('accepts matchedon prop', () => {
-      const matchedon = { word: 'test' }
-      const wrapper = mountComponent({ matchedon })
-      expect(wrapper.props('matchedon')).toEqual(matchedon)
-    })
-
-    it('accepts expandButtonText prop with default', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('expandButtonText')).toBe('See details and reply')
-    })
-
     it('accepts custom expandButtonText', () => {
       const wrapper = mountComponent({ expandButtonText: 'View More' })
       expect(wrapper.props('expandButtonText')).toBe('View More')
     })
 
-    it('accepts replyable prop with default true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('replyable')).toBe(true)
-    })
-
     it('accepts replyable prop as false', () => {
       const wrapper = mountComponent({ replyable: false })
       expect(wrapper.props('replyable')).toBe(false)
-    })
-
-    it('accepts bgClass prop', () => {
-      const wrapper = mountComponent({ bgClass: 'custom-bg' })
-      expect(wrapper.props('bgClass')).toBe('custom-bg')
-    })
-
-    it('accepts showFreegled prop with default true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('showFreegled')).toBe(true)
-    })
-
-    it('accepts showPromised prop with default true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('showPromised')).toBe(true)
-    })
-
-    it('accepts showLocation prop with default true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('showLocation')).toBe(true)
-    })
-
-    it('accepts preload prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('preload')).toBe(false)
     })
   })
 

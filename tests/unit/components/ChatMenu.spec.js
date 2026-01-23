@@ -180,11 +180,6 @@ describe('ChatMenu', () => {
   })
 
   describe('props', () => {
-    it('accepts isListItem prop with default true', () => {
-      const wrapper = mountChatMenu()
-      expect(wrapper.props('isListItem')).toBe(true)
-    })
-
     it('accepts isListItem prop as false', () => {
       const wrapper = mountChatMenu({ isListItem: false })
       expect(wrapper.props('isListItem')).toBe(false)

@@ -105,11 +105,6 @@ describe('ChatMessageSummary', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders ChatMessageCard when message exists', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.find('.chat-message-card').exists()).toBe(true)
@@ -120,23 +115,6 @@ describe('ChatMessageSummary', () => {
       expect(wrapper.find('.chat-message-card').attributes('data-id')).toBe(
         '456'
       )
-    })
-  })
-
-  describe('props', () => {
-    it('requires id prop', async () => {
-      const wrapper = await createWrapper({ id: 789 })
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('defaults chatid to null', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('accepts chatid prop', async () => {
-      const wrapper = await createWrapper({ chatid: 456 })
-      expect(wrapper.exists()).toBe(true)
     })
   })
 

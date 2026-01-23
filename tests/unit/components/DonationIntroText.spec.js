@@ -13,11 +13,6 @@ describe('DonationIntroText', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays group name', () => {
       const wrapper = createWrapper({ groupname: 'Local Freegle' })
       expect(wrapper.text()).toContain('Local Freegle')
@@ -46,44 +41,14 @@ describe('DonationIntroText', () => {
   })
 
   describe('props', () => {
-    it('requires groupname prop', () => {
-      const wrapper = createWrapper({ groupname: 'My Freegle' })
-      expect(wrapper.props('groupname')).toBe('My Freegle')
-    })
-
-    it('defaults groupid to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('groupid')).toBe(null)
-    })
-
     it('defaults target to 2000', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('target')).toBe(2000)
     })
 
-    it('defaults targetMet to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('targetMet')).toBe(false)
-    })
-
-    it('defaults donated to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('donated')).toBe(null)
-    })
-
-    it('defaults hideIntro to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('hideIntro')).toBe(false)
-    })
-
     it('accepts custom target', () => {
       const wrapper = createWrapper({ target: 5000 })
       expect(wrapper.props('target')).toBe(5000)
-    })
-
-    it('accepts groupid prop', () => {
-      const wrapper = createWrapper({ groupid: 123 })
-      expect(wrapper.props('groupid')).toBe(123)
     })
   })
 

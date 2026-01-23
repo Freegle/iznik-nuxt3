@@ -215,18 +215,6 @@ describe('ModLogs', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts groupid prop', () => {
-      const wrapper = createWrapper({ groupid: 123 })
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
-    it('defaults groupid to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('groupid')).toBeNull()
-    })
-  })
-
   describe('edge cases', () => {
     it('handles empty logs list', () => {
       mockLogsStore.list = []

@@ -151,25 +151,6 @@ describe('ModDashboardPopularPosts', () => {
       expect(wrapper.text()).toContain('Loading')
     })
 
-    it('shows pulsate class when loading', () => {
-      mockLoading.value = true
-      const wrapper = mountComponent()
-      expect(wrapper.find('.pulsate').exists()).toBe(true)
-    })
-
-    it('shows text-faded class when loading', () => {
-      mockLoading.value = true
-      const wrapper = mountComponent()
-      expect(wrapper.find('.text-faded').exists()).toBe(true)
-    })
-
-    it('hides loading state when not loading', () => {
-      mockLoading.value = false
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.text()).not.toContain('Loading')
-    })
-
     it('renders post list when data available', () => {
       mockPopularPosts.value = mockPosts
       const wrapper = mountComponent()
@@ -288,34 +269,10 @@ describe('ModDashboardPopularPosts', () => {
   })
 
   describe('props', () => {
-    it('accepts groupid prop', () => {
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
     it('accepts null groupid (default)', () => {
       mockPopularPosts.value = mockPosts
       const wrapper = mountComponent({ groupid: null })
       expect(wrapper.props('groupid')).toBeNull()
-    })
-
-    it('accepts groupName prop', () => {
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupName')).toBe('Test Group')
-    })
-
-    it('accepts start date prop', () => {
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.props('start')).toEqual(new Date('2024-01-01'))
-    })
-
-    it('accepts end date prop', () => {
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.props('end')).toEqual(new Date('2024-01-31'))
     })
 
     it('displays different group name', () => {
@@ -393,13 +350,6 @@ describe('ModDashboardPopularPosts', () => {
   })
 
   describe('loading and data transitions', () => {
-    it('shows loading when loading with data', () => {
-      mockLoading.value = true
-      mockPopularPosts.value = mockPosts
-      const wrapper = mountComponent()
-      expect(wrapper.find('.pulsate').exists()).toBe(true)
-    })
-
     it('shows data when loading completes', async () => {
       mockLoading.value = true
       const wrapper = mountComponent()

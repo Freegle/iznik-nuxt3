@@ -471,12 +471,4 @@ describe('ModMemberReview', () => {
       expect(wrapper.vm.showEmails).toBe(true)
     })
   })
-
-  describe('props', () => {
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member').displayname).toBe('Custom User')
-    })
-  })
 })

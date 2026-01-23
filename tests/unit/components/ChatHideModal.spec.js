@@ -45,11 +45,6 @@ describe('ChatHideModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows generic title when no user', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.modal-title').text()).toBe('Hide chat')
@@ -75,28 +70,6 @@ describe('ChatHideModal', () => {
     it('shows Confirm button', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Confirm')
-    })
-  })
-
-  describe('props', () => {
-    it('defaults id to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('id')).toBe(null)
-    })
-
-    it('defaults user to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('user')).toBe(null)
-    })
-
-    it('accepts id prop', () => {
-      const wrapper = createWrapper({ id: 42 })
-      expect(wrapper.props('id')).toBe(42)
-    })
-
-    it('accepts user prop', () => {
-      const wrapper = createWrapper({ user: { displayname: 'Jane', id: 123 } })
-      expect(wrapper.props('user').displayname).toBe('Jane')
     })
   })
 

@@ -70,11 +70,6 @@ describe('Logs Page', () => {
   }
 
   describe('rendering', () => {
-    it('renders ScrollToTop component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-    })
-
     it('renders tabs for Messages and Members', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Messages')

@@ -106,11 +106,6 @@ describe('ModMemberHappiness', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.card').exists()).toBe(true)
-    })
-
     it('displays user displayname', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test User')
@@ -296,13 +291,6 @@ describe('ModMemberHappiness', () => {
       const wrapper = mountComponent({ id: 123 })
       expect(wrapper.vm.member).toEqual(member)
       expect(mockMemberStore.get).toHaveBeenCalledWith(123)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
     })
   })
 })

@@ -60,11 +60,6 @@ describe('AddToCalendar', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays "Add to Calendar" button text', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Add to Calendar')
@@ -84,27 +79,6 @@ describe('AddToCalendar', () => {
   })
 
   describe('props', () => {
-    it('requires calendarLink prop', () => {
-      // This tests that the component has the prop defined as required
-      const wrapper = createWrapper()
-      expect(wrapper.props('calendarLink')).toBeTruthy()
-    })
-
-    it('accepts variant prop', () => {
-      const wrapper = createWrapper({ variant: 'success' })
-      expect(wrapper.props('variant')).toBe('success')
-    })
-
-    it('accepts size prop', () => {
-      const wrapper = createWrapper({ size: 'lg' })
-      expect(wrapper.props('size')).toBe('lg')
-    })
-
-    it('accepts btnClass prop', () => {
-      const wrapper = createWrapper({ btnClass: 'custom-class' })
-      expect(wrapper.props('btnClass')).toBe('custom-class')
-    })
-
     it('defaults size to md', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('size')).toBe('md')

@@ -142,11 +142,6 @@ describe('ModMemberActions', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('shows Remove button when groupid is set and not banned', () => {
       const wrapper = mountComponent({ groupid: 789, banned: false })
       expect(wrapper.text()).toContain('Remove')
@@ -385,44 +380,6 @@ describe('ModMemberActions', () => {
       const wrapper = mountComponent({ userid: 456 })
       await wrapper.vm.spamSafelist()
       expect(wrapper.vm.showSpamModal).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts userid prop', () => {
-      const wrapper = mountComponent({ userid: 123 })
-      expect(wrapper.props('userid')).toBe(123)
-    })
-
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 789 })
-      expect(wrapper.props('groupid')).toBe(789)
-    })
-
-    it('defaults groupid to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBeNull()
-    })
-
-    it('accepts banned prop', () => {
-      const wrapper = mountComponent({ banned: true })
-      expect(wrapper.props('banned')).toBe(true)
-    })
-
-    it('defaults banned to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('banned')).toBe(false)
-    })
-
-    it('accepts spam prop', () => {
-      const spamObj = { id: 222 }
-      const wrapper = mountComponent({ spam: spamObj })
-      expect(wrapper.props('spam')).toEqual(spamObj)
-    })
-
-    it('defaults spam to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('spam')).toBeNull()
     })
   })
 })

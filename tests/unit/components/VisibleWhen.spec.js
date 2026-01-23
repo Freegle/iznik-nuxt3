@@ -33,11 +33,6 @@ describe('VisibleWhen', () => {
   }
 
   describe('rendering with at prop', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper({ at: ['md'] })
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows slot when breakpoint matches at array', () => {
       breakpointValue = 'md'
       const wrapper = createWrapper({ at: ['md', 'lg'] })

@@ -668,12 +668,4 @@ describe('ModRelatedMember', () => {
       expect(wrapper.vm.user1.emails[1].email).toBe('user@gmail.com')
     })
   })
-
-  describe('props', () => {
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member').displayname).toBe('Custom User')
-    })
-  })
 })

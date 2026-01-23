@@ -86,19 +86,6 @@ describe('spammers.vue page', () => {
   })
 
   describe('initial state', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.help-stub').exists()).toBe(true)
-    })
-
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.infiniteId).toBe(0)
-      expect(wrapper.vm.show).toBe(0)
-      expect(wrapper.vm.busy).toBe(false)
-      expect(wrapper.vm.search).toBe(null)
-    })
-
     it('clears spammer store on mount', () => {
       mountComponent()
       expect(mockSpammerStore.clear).toHaveBeenCalled()

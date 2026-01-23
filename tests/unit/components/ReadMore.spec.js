@@ -17,11 +17,6 @@ describe('ReadMore', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays full text when under maxChars', () => {
       const wrapper = createWrapper({ text: shortText })
       expect(wrapper.text()).toContain(shortText)
@@ -47,11 +42,6 @@ describe('ReadMore', () => {
   })
 
   describe('props', () => {
-    it('requires text prop', () => {
-      const wrapper = createWrapper({ text: 'Test text' })
-      expect(wrapper.props('text')).toBe('Test text')
-    })
-
     it('defaults maxChars to 100', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('maxChars')).toBe(100)

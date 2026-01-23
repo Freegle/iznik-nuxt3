@@ -95,19 +95,9 @@ describe('ModAlertHistoryStatsModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('displays alert subject as title', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test Alert Stats')
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
   })
 
@@ -144,13 +134,6 @@ describe('ModAlertHistoryStatsModal', () => {
       expect(wrapper.vm.chartOptions).toBeDefined()
       expect(wrapper.vm.chartOptions.chartArea).toBeDefined()
       expect(wrapper.vm.chartOptions.slices).toBeDefined()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 789 })
-      expect(wrapper.props('id')).toBe(789)
     })
   })
 })

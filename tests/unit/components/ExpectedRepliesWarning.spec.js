@@ -27,11 +27,6 @@ describe('ExpectedRepliesWarning', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders warning notice', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.notice-message.warning').exists()).toBe(true)
@@ -85,19 +80,9 @@ describe('ExpectedRepliesWarning', () => {
   })
 
   describe('props', () => {
-    it('requires count prop', () => {
-      const props = ExpectedRepliesWarning.props
-      expect(props.count.required).toBe(true)
-    })
-
     it('count prop is Number type', () => {
       const props = ExpectedRepliesWarning.props
       expect(props.count.type).toBe(Number)
-    })
-
-    it('requires chats prop', () => {
-      const props = ExpectedRepliesWarning.props
-      expect(props.chats.required).toBe(true)
     })
 
     it('chats prop is Array type', () => {

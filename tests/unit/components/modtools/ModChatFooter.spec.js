@@ -541,11 +541,6 @@ describe('ModChatFooter', () => {
       mockTooSoonToNudge.value = true
       expect(mockTooSoonToNudge.value).toBe(true)
     })
-
-    it('tooSoonToNudge defaults to false', () => {
-      mockTooSoonToNudge.value = false
-      expect(mockTooSoonToNudge.value).toBe(false)
-    })
   })
 
   describe('component behavior when mounted', () => {

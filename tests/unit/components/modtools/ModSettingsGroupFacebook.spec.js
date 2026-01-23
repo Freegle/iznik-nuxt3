@@ -51,11 +51,6 @@ describe('ModSettingsGroupFacebook', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays check icon indicating linked status', () => {
       const wrapper = mountComponent()
       const icon = wrapper.find('.v-icon')

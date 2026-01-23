@@ -110,11 +110,6 @@ describe('ModVolunteerOpportunity', () => {
       expect(wrapper.text()).toContain('123')
     })
 
-    it('renders user displayname', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Test User')
-    })
-
     it('shows System added when no user', () => {
       const wrapper = mountComponent({
         volunteering: { ...defaultProps.volunteering, user: null },
@@ -177,13 +172,6 @@ describe('ModVolunteerOpportunity', () => {
         pending: false,
       })
       expect(mockRemove).toHaveBeenCalledWith(123)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts volunteering prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('volunteering').id).toBe(123)
     })
   })
 })

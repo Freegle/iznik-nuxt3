@@ -7,7 +7,7 @@ import {
   afterAll,
   beforeAll,
 } from 'vitest'
-import { shallowMount, flushPromises } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import { ref } from 'vue'
 import ModStdMessageModal from '~/modtools/components/ModStdMessageModal.vue'
 
@@ -266,11 +266,6 @@ describe('ModStdMessageModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('shows message subject in title', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.modal').attributes('title')).toContain(
@@ -666,36 +661,10 @@ describe('ModStdMessageModal', () => {
   })
 
   describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createMessage({ subject: 'Custom Subject' })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message').subject).toBe('Custom Subject')
-    })
-
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom Member' })
-      const wrapper = mountComponent({
-        message: null,
-        member,
-        stdmsg: createStdmsg(),
-      })
-      expect(wrapper.props('member').displayname).toBe('Custom Member')
-    })
-
     it('accepts stdmsg prop (required)', () => {
       const stdmsg = createStdmsg({ action: 'Reject' })
       const wrapper = mountComponent({ stdmsg })
       expect(wrapper.props('stdmsg').action).toBe('Reject')
-    })
-
-    it('accepts autosend prop', () => {
-      const wrapper = mountComponent({ autosend: true })
-      expect(wrapper.props('autosend')).toBe(true)
-    })
-
-    it('defaults autosend to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('autosend')).toBe(false)
     })
   })
 

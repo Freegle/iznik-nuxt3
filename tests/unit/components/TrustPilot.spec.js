@@ -32,11 +32,6 @@ describe('TrustPilot', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders ExternalLink when trustpilotLink is set', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.external-link').exists()).toBe(true)

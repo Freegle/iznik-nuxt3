@@ -54,11 +54,6 @@ describe('ModMessageCrosspost', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div.small').exists()).toBe(true)
-    })
-
     it('displays "Crosspost" text', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Crosspost')
@@ -172,20 +167,6 @@ describe('ModMessageCrosspost', () => {
       mockGroupStore.get.mockReturnValue({ id: 456, namedisplay: 'Existing' })
       mountComponent()
       expect(mockGroupStore.fetch).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 999, subject: 'Custom' })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message')).toEqual(message)
-    })
-
-    it('requires message prop', () => {
-      // Test that component uses message prop correctly
-      const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeDefined()
     })
   })
 

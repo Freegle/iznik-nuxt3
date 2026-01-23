@@ -165,11 +165,6 @@ describe('Feedback Page', () => {
   }
 
   describe('rendering', () => {
-    it('renders ScrollToTop component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-    })
-
     it('renders ModHelpFeedback component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.mod-help-feedback').exists()).toBe(true)

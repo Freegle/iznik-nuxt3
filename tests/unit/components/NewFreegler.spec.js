@@ -17,11 +17,6 @@ describe('NewFreegler', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays welcome message', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain("If you're a new freegler then welcome!")

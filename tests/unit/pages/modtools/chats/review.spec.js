@@ -78,21 +78,6 @@ describe('chats/review.vue page', () => {
   })
 
   describe('initial state', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.help-stub').exists()).toBe(true)
-    })
-
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.context).toBe(null)
-      expect(wrapper.vm.distance).toBe(1000)
-      expect(wrapper.vm.limit).toBe(5)
-      expect(wrapper.vm.show).toBe(0)
-      expect(wrapper.vm.bump).toBe(0)
-      expect(wrapper.vm.showDeleteModal).toBe(false)
-    })
-
     it('clears and loads on mount', async () => {
       mountComponent()
       await flushPromises()

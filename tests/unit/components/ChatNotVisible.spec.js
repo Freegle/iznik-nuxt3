@@ -24,11 +24,6 @@ describe('ChatNotVisible', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders as danger alert', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-alert.danger').exists()).toBe(true)

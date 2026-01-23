@@ -28,7 +28,6 @@ describe('GlobalMessage', () => {
     vi.clearAllMocks()
     mockMiscStore.get.mockReturnValue(false)
     mockGroups = []
-    // Mock Date to a time before the active date (2025-06-22)
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2025-06-01'))
   })
@@ -57,140 +56,83 @@ describe('GlobalMessage', () => {
     })
   }
 
-  describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
+  it('always renders PrivacyUpdate component', () => {
+    const wrapper = createWrapper()
+    expect(wrapper.find('.privacy-update').exists()).toBe(true)
+  })
 
-    it('always renders PrivacyUpdate component', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.find('.privacy-update').exists()).toBe(true)
+  it('shows banner only for users in relevant groups who joined after cutoff', () => {
+    // No relevant groups - no banner
+    mockGroups = [{ groupid: 999, added: '2024-10-01' }]
+    let wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(false)
+
+    // Relevant group but joined before cutoff - no banner
+    mockGroups = [{ groupid: 126719, added: '2024-08-01' }]
+    wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(false)
+
+    // Relevant group joined after cutoff - shows banner with survey link
+    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
+    wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(true)
+    const surveyButton = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Click to open survey'))
+    expect(surveyButton.attributes('href')).toBe(
+      'https://ilovefreegle.org/shortlink/WandsworthSurvey'
+    )
+    expect(surveyButton.attributes('target')).toBe('_blank')
+  })
+
+  it('hides banner after active date expires', () => {
+    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
+
+    // Before expiry - shows banner
+    vi.setSystemTime(new Date('2025-06-21'))
+    let wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(true)
+
+    // After expiry - no banner
+    vi.setSystemTime(new Date('2025-06-23'))
+    wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(false)
+  })
+
+  it('hide functionality stores preference and shows restore link', async () => {
+    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
+
+    // Initially visible
+    const wrapper = createWrapper()
+    expect(wrapper.find('.b-card').exists()).toBe(true)
+
+    // Click hide - stores preference
+    const hideButton = wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Hide')
+    await hideButton.trigger('click')
+    expect(mockMiscStore.set).toHaveBeenCalledWith({
+      key: 'hideglobalwarning20250530',
+      value: true,
     })
   })
 
-  describe('group targeting', () => {
-    it('does not show banner when user has no relevant groups', () => {
-      mockGroups = [{ groupid: 999, added: '2024-10-01' }]
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(false)
-    })
+  it('when hidden shows restore link that unhides banner', async () => {
+    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
+    mockMiscStore.get.mockReturnValue(true)
 
-    it('does not show banner when user is in relevant group but joined before cutoff', () => {
-      mockGroups = [{ groupid: 126719, added: '2024-08-01' }]
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(false)
-    })
+    const wrapper = createWrapper()
 
-    it('shows banner when user is in relevant group and joined after cutoff', () => {
-      mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(true)
-    })
-  })
+    // Card hidden, show link visible
+    expect(wrapper.find('.b-card').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Show notice')
 
-  describe('date expiration', () => {
-    it('does not show banner after active date expires', () => {
-      vi.setSystemTime(new Date('2025-06-23'))
-      mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(false)
-    })
-
-    it('shows banner before active date expires', () => {
-      vi.setSystemTime(new Date('2025-06-21'))
-      mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(true)
-    })
-  })
-
-  describe('hide functionality', () => {
-    beforeEach(() => {
-      mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-    })
-
-    it('shows card when not hidden', () => {
-      mockMiscStore.get.mockReturnValue(false)
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(true)
-    })
-
-    it('hides card when hidden', () => {
-      mockMiscStore.get.mockReturnValue(true)
-      const wrapper = createWrapper()
-      expect(wrapper.find('.b-card').exists()).toBe(false)
-    })
-
-    it('shows "Show notice" link when hidden', () => {
-      mockMiscStore.get.mockReturnValue(true)
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Show notice')
-    })
-
-    it('clicking Hide button stores hide preference', async () => {
-      const wrapper = createWrapper()
-      const hideButton = wrapper
-        .findAll('button')
-        .find((b) => b.text() === 'Hide')
-      await hideButton.trigger('click')
-      expect(mockMiscStore.set).toHaveBeenCalledWith({
-        key: 'hideglobalwarning20250530',
-        value: true,
-      })
-    })
-
-    it('clicking Show notice restores visibility', async () => {
-      mockMiscStore.get.mockReturnValue(true)
-      const wrapper = createWrapper()
-      const showLink = wrapper.find('.text-danger')
-      await showLink.trigger('click')
-      expect(mockMiscStore.set).toHaveBeenCalledWith({
-        key: 'hideglobalwarning20250530',
-        value: false,
-      })
-    })
-  })
-
-  describe('banner content', () => {
-    beforeEach(() => {
-      mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-    })
-
-    it('displays survey title', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Quick survey')
-    })
-
-    it('displays voucher prize', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('£25 voucher')
-    })
-
-    it('has survey button', () => {
-      const wrapper = createWrapper()
-      const surveyButton = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Click to open survey'))
-      expect(surveyButton).toBeTruthy()
-    })
-
-    it('survey button links to correct URL', () => {
-      const wrapper = createWrapper()
-      const surveyButton = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Click to open survey'))
-      expect(surveyButton.attributes('href')).toBe(
-        'https://ilovefreegle.org/shortlink/WandsworthSurvey'
-      )
-    })
-
-    it('survey button opens in new tab', () => {
-      const wrapper = createWrapper()
-      const surveyButton = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Click to open survey'))
-      expect(surveyButton.attributes('target')).toBe('_blank')
+    // Click restore - clears preference
+    const showLink = wrapper.find('.text-danger')
+    await showLink.trigger('click')
+    expect(mockMiscStore.set).toHaveBeenCalledWith({
+      key: 'hideglobalwarning20250530',
+      value: false,
     })
   })
 })

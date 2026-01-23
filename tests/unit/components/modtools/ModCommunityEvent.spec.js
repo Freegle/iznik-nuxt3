@@ -208,11 +208,4 @@ describe('ModCommunityEvent', () => {
       expect(wrapper.vm.showModal).toBe(true)
     })
   })
-
-  describe('props', () => {
-    it('accepts event prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('event').id).toBe(123)
-    })
-  })
 })

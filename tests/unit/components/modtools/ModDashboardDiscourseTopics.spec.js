@@ -285,34 +285,10 @@ describe('ModDashboardDiscourseTopics', () => {
   })
 
   describe('props', () => {
-    it('accepts groupid prop', () => {
-      mockDiscourseTopics.value = JSON.stringify(mockTopicsData)
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
     it('accepts null groupid (default)', () => {
       mockDiscourseTopics.value = JSON.stringify(mockTopicsData)
       const wrapper = mountComponent({ groupid: null })
       expect(wrapper.props('groupid')).toBeNull()
-    })
-
-    it('accepts groupName prop', () => {
-      mockDiscourseTopics.value = JSON.stringify(mockTopicsData)
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupName')).toBe('Test Group')
-    })
-
-    it('accepts start date prop', () => {
-      mockDiscourseTopics.value = JSON.stringify(mockTopicsData)
-      const wrapper = mountComponent()
-      expect(wrapper.props('start')).toEqual(new Date('2024-01-01'))
-    })
-
-    it('accepts end date prop', () => {
-      mockDiscourseTopics.value = JSON.stringify(mockTopicsData)
-      const wrapper = mountComponent()
-      expect(wrapper.props('end')).toEqual(new Date('2024-01-31'))
     })
   })
 

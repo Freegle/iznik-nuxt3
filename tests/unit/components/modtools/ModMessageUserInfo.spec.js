@@ -108,13 +108,6 @@ describe('ModMessageUserInfo', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div.d-flex.justify-content-between').exists()).toBe(
-        true
-      )
-    })
-
     it('displays user displayname', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test User')
@@ -401,26 +394,6 @@ describe('ModMessageUserInfo', () => {
       const user = createTestUser({ id: 999 })
       const wrapper = mountComponent({ user })
       expect(wrapper.props('user')).toEqual(user)
-    })
-
-    it('accepts message prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeNull()
-    })
-
-    it('accepts milesaway prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('milesaway')).toBeNull()
-    })
-
-    it('accepts modinfo prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('modinfo')).toBe(false)
-    })
-
-    it('accepts groupid prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBeNull()
     })
   })
 

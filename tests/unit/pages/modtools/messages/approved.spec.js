@@ -185,12 +185,6 @@ describe('messages/approved/[[id]]/[[term]].vue page', () => {
   })
 
   describe('rendering', () => {
-    it('renders the page with required components', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-      expect(wrapper.find('.mod-group-select').exists()).toBe(true)
-    })
-
     it('shows empty message when no messages and not busy', async () => {
       mockMessages.value = []
       mockBusy.value = false

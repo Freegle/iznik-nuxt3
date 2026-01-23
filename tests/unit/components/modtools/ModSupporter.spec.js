@@ -93,19 +93,9 @@ describe('ModSupporter', () => {
       expect(wrapper.props('size')).toBe('md')
     })
 
-    it('accepts size prop', () => {
-      const wrapper = mountComponent({ size: 'lg' })
-      expect(wrapper.props('size')).toBe('lg')
-    })
-
     it('has default hidden of false', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('hidden')).toBe(false)
-    })
-
-    it('accepts hidden prop', () => {
-      const wrapper = mountComponent({ hidden: true })
-      expect(wrapper.props('hidden')).toBe(true)
     })
   })
 })

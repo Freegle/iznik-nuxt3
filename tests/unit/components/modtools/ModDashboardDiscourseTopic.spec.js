@@ -167,11 +167,4 @@ describe('ModDashboardDiscourseTopic', () => {
       expect(link.attributes('href')).toContain('discourse.ilovefreegle.org')
     })
   })
-
-  describe('props', () => {
-    it('accepts topic prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('topic').name).toBe('Test User')
-    })
-  })
 })

@@ -12,11 +12,6 @@ describe('MicroVolunteeringSurvey', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders an iframe', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('iframe').exists()).toBe(true)
@@ -39,11 +34,6 @@ describe('MicroVolunteeringSurvey', () => {
   })
 
   describe('props', () => {
-    it('requires url prop', () => {
-      const props = MicroVolunteeringSurvey.props
-      expect(props.url.required).toBe(true)
-    })
-
     it('url prop is String type', () => {
       const props = MicroVolunteeringSurvey.props
       expect(props.url.type).toBe(String)

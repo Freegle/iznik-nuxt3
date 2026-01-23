@@ -8,11 +8,6 @@ describe('ChatMessageWarning', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders warning text', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain(

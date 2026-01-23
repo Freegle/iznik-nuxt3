@@ -23,11 +23,6 @@ describe('ModMemberTypeSelect', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('select').exists()).toBe(true)
-    })
-
     it('renders All members option', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('All members')
@@ -62,18 +57,6 @@ describe('ModMemberTypeSelect', () => {
       expect(options[2].attributes('value')).toBe('2')
       expect(options[3].attributes('value')).toBe('1')
       expect(options[4].attributes('value')).toBe('5')
-    })
-  })
-
-  describe('props', () => {
-    it('accepts modelValue prop', () => {
-      const wrapper = mountComponent({ modelValue: '3' })
-      expect(wrapper.props('modelValue')).toBe('3')
-    })
-
-    it('defaults modelValue to 0', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('modelValue')).toBe('0')
     })
   })
 

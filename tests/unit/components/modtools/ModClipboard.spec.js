@@ -121,11 +121,4 @@ describe('ModClipboard', () => {
       expect(wrapper.find('i').attributes('data-icon')).toBe('check')
     })
   })
-
-  describe('props validation', () => {
-    it('accepts value prop', () => {
-      const wrapper = mountModClipboard('custom text')
-      expect(wrapper.props('value')).toBe('custom text')
-    })
-  })
 })

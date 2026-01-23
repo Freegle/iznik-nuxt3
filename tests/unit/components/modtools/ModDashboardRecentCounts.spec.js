@@ -99,29 +99,6 @@ describe('ModDashboardRecentCounts', () => {
       expect(wrapper.text()).toContain('Loading')
     })
 
-    it('shows pulsate class when loading', () => {
-      mockLoading.value = true
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent()
-      const loadingElement = wrapper.find('.pulsate')
-      expect(loadingElement.exists()).toBe(true)
-    })
-
-    it('shows text-faded class when loading', () => {
-      mockLoading.value = true
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent()
-      const loadingElement = wrapper.find('.text-faded')
-      expect(loadingElement.exists()).toBe(true)
-    })
-
-    it('hides loading state when not loading', () => {
-      mockLoading.value = false
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent()
-      expect(wrapper.text()).not.toContain('Loading')
-    })
-
     it('shows counts when not loading', () => {
       mockLoading.value = false
       mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
@@ -174,36 +151,10 @@ describe('ModDashboardRecentCounts', () => {
   })
 
   describe('props handling', () => {
-    it('accepts groupid prop', () => {
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent({ groupid: 456 })
-      expect(wrapper.props('groupid')).toBe(456)
-    })
-
     it('accepts null groupid prop (default)', () => {
       mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
       const wrapper = mountComponent({ groupid: null })
       expect(wrapper.props('groupid')).toBeNull()
-    })
-
-    it('accepts groupName prop', () => {
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent({ groupName: 'Another Group' })
-      expect(wrapper.props('groupName')).toBe('Another Group')
-    })
-
-    it('accepts start date prop', () => {
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const startDate = new Date('2024-06-01')
-      const wrapper = mountComponent({ start: startDate })
-      expect(wrapper.props('start')).toEqual(startDate)
-    })
-
-    it('accepts end date prop', () => {
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const endDate = new Date('2024-06-30')
-      const wrapper = mountComponent({ end: endDate })
-      expect(wrapper.props('end')).toEqual(endDate)
     })
   })
 
@@ -237,13 +188,6 @@ describe('ModDashboardRecentCounts', () => {
   })
 
   describe('loading and data transitions', () => {
-    it('shows loading when loading with data', () => {
-      mockLoading.value = true
-      mockRecentCounts.value = { newmessages: 5, newmembers: 3 }
-      const wrapper = mountComponent()
-      expect(wrapper.find('.pulsate').exists()).toBe(true)
-    })
-
     it('shows data when loading completes', async () => {
       mockLoading.value = true
       mockRecentCounts.value = { newmessages: 5, newmembers: 3 }

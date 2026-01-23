@@ -260,16 +260,6 @@ describe('ModImpact', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('border')).toBe(false)
     })
-
-    it('accepts start prop', () => {
-      const wrapper = mountComponent({ start: '2024-01-01' })
-      expect(wrapper.props('start')).toBe('2024-01-01')
-    })
-
-    it('accepts end prop', () => {
-      const wrapper = mountComponent({ end: '2024-12-31' })
-      expect(wrapper.props('end')).toBe('2024-12-31')
-    })
   })
 
   describe('display with full stats', () => {

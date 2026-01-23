@@ -231,21 +231,6 @@ describe('ModGroupSetting', () => {
       const wrapper = mountComponent({ type: 'textarea', rows: 10 })
       expect(wrapper.props('rows')).toBe(10)
     })
-
-    it('accepts toggleWidth prop with default of 150', () => {
-      const wrapper = mountComponent({ type: 'toggle' })
-      expect(wrapper.props('toggleWidth')).toBe(150)
-    })
-
-    it('accepts toggleChecked prop', () => {
-      const wrapper = mountComponent({ type: 'toggle', toggleChecked: 'Yes' })
-      expect(wrapper.props('toggleChecked')).toBe('Yes')
-    })
-
-    it('accepts toggleUnchecked prop', () => {
-      const wrapper = mountComponent({ type: 'toggle', toggleUnchecked: 'No' })
-      expect(wrapper.props('toggleUnchecked')).toBe('No')
-    })
   })
 
   describe('computed properties', () => {

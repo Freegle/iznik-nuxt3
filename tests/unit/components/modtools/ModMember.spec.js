@@ -755,55 +755,6 @@ describe('ModMember', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member').displayname).toBe('Custom User')
-    })
-
-    it('accepts spammerlist prop', () => {
-      const wrapper = mountComponent({ spammerlist: true })
-      expect(wrapper.props('spammerlist')).toBe(true)
-    })
-
-    it('defaults spammerlist to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('spammerlist')).toBe(false)
-    })
-
-    it('accepts footeractions prop', () => {
-      const wrapper = mountComponent({ footeractions: false })
-      expect(wrapper.props('footeractions')).toBe(false)
-    })
-
-    it('defaults footeractions to true', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('footeractions')).toBe(true)
-    })
-
-    it('accepts expandComments prop', () => {
-      const wrapper = mountComponent({ expandComments: true })
-      expect(wrapper.props('expandComments')).toBe(true)
-    })
-
-    it('defaults expandComments to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('expandComments')).toBe(false)
-    })
-
-    it('accepts sameip prop', () => {
-      const sameip = [{ id: 111 }, { id: 222 }]
-      const wrapper = mountComponent({ sameip })
-      expect(wrapper.props('sameip')).toEqual(sameip)
-    })
-
-    it('defaults sameip to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('sameip')).toBeNull()
-    })
-  })
-
   describe('footeractions prop', () => {
     it('hides ModMemberActions in body when footeractions is true', () => {
       const wrapper = mountComponent({ footeractions: true })

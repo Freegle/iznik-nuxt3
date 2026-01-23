@@ -26,11 +26,6 @@ describe('SponsorLogo', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows image by default', () => {
       const wrapper = createWrapper({ image: '/sponsor.png' })
       expect(wrapper.find('.b-img').exists()).toBe(true)

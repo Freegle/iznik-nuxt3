@@ -64,11 +64,6 @@ describe('ModSupportFindGroupVolunteer', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.row').exists()).toBe(true)
-    })
-
     it('displays the volunteer userid with hashtag icon', () => {
       const wrapper = mountComponent({
         volunteer: createVolunteer({ userid: 789 }),

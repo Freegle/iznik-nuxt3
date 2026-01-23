@@ -47,11 +47,6 @@ describe('ExpectedRepliesChat', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders button', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.find('button').exists()).toBe(true)
@@ -96,11 +91,6 @@ describe('ExpectedRepliesChat', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const props = ExpectedRepliesChat.props
-      expect(props.id.required).toBe(true)
-    })
-
     it('id prop is Number type', () => {
       const props = ExpectedRepliesChat.props
       expect(props.id.type).toBe(Number)

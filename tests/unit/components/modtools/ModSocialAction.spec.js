@@ -565,16 +565,6 @@ describe('ModSocialAction', () => {
   })
 
   describe('props', () => {
-    it('requires item prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('item')).toMatchObject({
-        id: 123,
-        date: '2024-01-15T10:00:00Z',
-        iframe: '<iframe src="https://facebook.com/embed"></iframe>',
-        uids: ['100', '200', '300'],
-      })
-    })
-
     it('uses item.id for share calls', async () => {
       const wrapper = mountComponent({ id: 456, uids: ['200'] })
       const group = wrapper.vm.groups[0]

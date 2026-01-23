@@ -59,11 +59,6 @@ describe('ModRulesModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('renders modal with correct id', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.modal').attributes('id')).toBe('modRulesModal')

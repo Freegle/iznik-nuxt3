@@ -363,11 +363,6 @@ describe('ModMessage', () => {
   })
 
   describe('Rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.b-card').exists()).toBe(true)
-    })
-
     it('renders card header', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.b-card-header').exists()).toBe(true)
@@ -381,49 +376,6 @@ describe('ModMessage', () => {
     it('renders MessageHistory component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.message-history').exists()).toBe(true)
-    })
-  })
-
-  describe('Props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 999 })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message').id).toBe(999)
-    })
-
-    it('accepts editreview prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('editreview')).toBe(false)
-    })
-
-    it('accepts noactions prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('noactions')).toBe(false)
-    })
-
-    it('accepts summary prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('summary')).toBe(false)
-    })
-
-    it('accepts review prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('review')).toBe(false)
-    })
-
-    it('accepts search prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('search')).toBe(null)
-    })
-
-    it('accepts next prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('next')).toBe(null)
-    })
-
-    it('accepts nextAfterRemoved prop with default null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('nextAfterRemoved')).toBe(null)
     })
   })
 

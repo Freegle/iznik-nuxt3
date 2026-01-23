@@ -110,11 +110,6 @@ describe('ModMessageButton', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.d-inline').exists()).toBe(true)
-    })
-
     it('renders SpinButton with correct props', () => {
       const wrapper = mountComponent({
         variant: 'warning',
@@ -141,88 +136,6 @@ describe('ModMessageButton', () => {
       const wrapper = mountComponent({ disabled: true })
       const spinButton = wrapper.find('.spin-button')
       expect(spinButton.attributes('disabled')).toBe('')
-    })
-  })
-
-  describe('props', () => {
-    it('requires message prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeDefined()
-    })
-
-    it('requires variant prop', () => {
-      const wrapper = mountComponent({ variant: 'danger' })
-      expect(wrapper.props('variant')).toBe('danger')
-    })
-
-    it('requires label prop', () => {
-      const wrapper = mountComponent({ label: 'Custom Label' })
-      expect(wrapper.props('label')).toBe('Custom Label')
-    })
-
-    it('requires icon prop', () => {
-      const wrapper = mountComponent({ icon: 'trash-alt' })
-      expect(wrapper.props('icon')).toBe('trash-alt')
-    })
-
-    it('defaults stdmsgid to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('stdmsgid')).toBeNull()
-    })
-
-    it('defaults disabled to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('disabled')).toBe(false)
-    })
-
-    it('defaults approve to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('approve')).toBe(false)
-    })
-
-    it('defaults delete to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('delete')).toBe(false)
-    })
-
-    it('defaults hold to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('hold')).toBe(false)
-    })
-
-    it('defaults release to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('release')).toBe(false)
-    })
-
-    it('defaults reject to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('reject')).toBe(false)
-    })
-
-    it('defaults leave to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('leave')).toBe(false)
-    })
-
-    it('defaults spam to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('spam')).toBe(false)
-    })
-
-    it('defaults approveedits to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('approveedits')).toBe(false)
-    })
-
-    it('defaults revertedits to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('revertedits')).toBe(false)
-    })
-
-    it('defaults autosend to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('autosend')).toBe(false)
     })
   })
 

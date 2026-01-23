@@ -212,11 +212,6 @@ describe('ModMessages', () => {
   })
 
   describe('props', () => {
-    it('accepts editreview prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('editreview')).toBe(false)
-    })
-
     it('accepts editreview prop as true', () => {
       const wrapper = mountComponent({ editreview: true })
       expect(wrapper.props('editreview')).toBe(true)

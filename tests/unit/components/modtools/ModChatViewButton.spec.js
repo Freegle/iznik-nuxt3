@@ -74,16 +74,6 @@ describe('ModChatViewButton', () => {
   })
 
   describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 789 })
-      expect(wrapper.props('id')).toBe(789)
-    })
-
-    it('accepts pov prop', () => {
-      const wrapper = mountComponent({ pov: 999 })
-      expect(wrapper.props('pov')).toBe(999)
-    })
-
     it('has default value for pov', () => {
       const wrapper = mount(ModChatViewButton, {
         props: { id: 123 },

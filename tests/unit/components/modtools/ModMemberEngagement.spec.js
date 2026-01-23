@@ -269,14 +269,6 @@ describe('ModMemberEngagement', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts member prop', () => {
-      const member = createMember({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member').displayname).toBe('Custom User')
-    })
-  })
-
   describe('edge cases', () => {
     it('handles member with undefined engagement', () => {
       const wrapper = mountComponent({

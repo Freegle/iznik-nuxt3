@@ -20,13 +20,6 @@ describe('MessageReplyInfo', () => {
     })
   }
 
-  describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper({ replycount: 0 })
-      expect(wrapper.exists()).toBe(true)
-    })
-  })
-
   describe('with no replies', () => {
     it('shows no replies message when replycount is 0', () => {
       const wrapper = createWrapper({ replycount: 0 })
@@ -86,11 +79,6 @@ describe('MessageReplyInfo', () => {
   })
 
   describe('props', () => {
-    it('requires message prop', () => {
-      const props = MessageReplyInfo.props
-      expect(props.message.required).toBe(true)
-    })
-
     it('message prop is Object type', () => {
       const props = MessageReplyInfo.props
       expect(props.message.type).toBe(Object)

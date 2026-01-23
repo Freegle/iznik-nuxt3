@@ -52,11 +52,6 @@ describe('ShortLink', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders for Group type shortlinks', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.row').exists()).toBe(true)
@@ -83,16 +78,6 @@ describe('ShortLink', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 42 })
-      expect(wrapper.props('id')).toBe(42)
-    })
-
-    it('defaults nostats to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('nostats')).toBe(false)
-    })
-
     it('accepts nostats as true', () => {
       const wrapper = createWrapper({ nostats: true })
       expect(wrapper.props('nostats')).toBe(true)

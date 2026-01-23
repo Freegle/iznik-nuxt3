@@ -35,11 +35,6 @@ describe('ModMessageRelated', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div.text-success.small').exists()).toBe(true)
-    })
-
     it('displays "Related to" text', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Related to')
@@ -65,12 +60,6 @@ describe('ModMessageRelated', () => {
   })
 
   describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 456, subject: 'Custom subject' })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message')).toEqual(message)
-    })
-
     it('message prop is required', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('message')).toBeDefined()

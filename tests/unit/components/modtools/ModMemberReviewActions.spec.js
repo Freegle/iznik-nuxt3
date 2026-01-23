@@ -124,11 +124,6 @@ describe('ModMemberReviewActions', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.card').exists()).toBe(true)
-    })
-
     it('displays group namedisplay', () => {
       const wrapper = mountComponent({
         membership: createMembership({ namedisplay: 'My Group' }),
@@ -436,25 +431,6 @@ describe('ModMemberReviewActions', () => {
       const wrapper = mountComponent()
       wrapper.vm.forcerefresh()
       expect(wrapper.emitted('forcerefresh')).toBeTruthy()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts memberid prop', () => {
-      const wrapper = mountComponent({ memberid: 123 })
-      expect(wrapper.props('memberid')).toBe(123)
-    })
-
-    it('accepts member prop', () => {
-      const member = createMember()
-      const wrapper = mountComponent({ member })
-      expect(wrapper.props('member')).toEqual(member)
-    })
-
-    it('accepts membership prop', () => {
-      const membership = createMembership()
-      const wrapper = mountComponent({ membership })
-      expect(wrapper.props('membership')).toEqual(membership)
     })
   })
 

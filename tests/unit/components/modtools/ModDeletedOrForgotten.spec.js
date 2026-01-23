@@ -87,11 +87,4 @@ describe('ModDeletedOrForgotten', () => {
       expect(wrapper.text()).not.toContain('recover their account')
     })
   })
-
-  describe('props', () => {
-    it('accepts user prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('user').deleted).toBe('2024-01-15')
-    })
-  })
 })

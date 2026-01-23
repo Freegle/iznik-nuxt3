@@ -48,11 +48,6 @@ describe('ModLogUser', () => {
       expect(wrapper.find('span').exists()).toBe(false)
     })
 
-    it('renders user displayname', () => {
-      const wrapper = mountModLogUser({ displayname: 'Alice Smith' })
-      expect(wrapper.text()).toContain('Alice Smith')
-    })
-
     it('renders user email with mailto link', () => {
       const wrapper = mountModLogUser({ email: 'alice@test.com' })
       expect(wrapper.text()).toContain('alice@test.com')

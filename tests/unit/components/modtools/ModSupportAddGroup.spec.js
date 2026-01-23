@@ -84,11 +84,6 @@ describe('ModSupportAddGroup', () => {
   }
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('shows disclaimer text about not being tested in MT3', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('NOT TESTED IN MT3')

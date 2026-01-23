@@ -274,14 +274,6 @@ describe('ModChatHeader', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts id prop', async () => {
-      const wrapper = await mountComponent({ id: 999 })
-      const inner = getInner(wrapper)
-      expect(inner.props('id')).toBe(999)
-    })
-  })
-
   describe('computed properties', () => {
     describe('collapsed', () => {
       it('returns chatinfoheader value from miscStore', async () => {

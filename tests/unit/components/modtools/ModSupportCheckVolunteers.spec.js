@@ -40,11 +40,6 @@ describe('ModSupportCheckVolunteers', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('displays the instructions', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Paste in email addresses, one per line')
@@ -123,7 +118,7 @@ describe('ModSupportCheckVolunteers', () => {
   })
 
   describe('check function', () => {
-    it('clears previous results when check is called', async () => {
+    it('clears previous results when check is called', () => {
       const wrapper = mountComponent()
       wrapper.vm.results = [{ text: 'old result', error: false }]
       wrapper.vm.emails = 'test@example.com'

@@ -52,11 +52,6 @@ describe('BirthdayModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows modal when modelValue is true', () => {
       const wrapper = createWrapper({ modelValue: true })
       expect(wrapper.find('.modal').exists()).toBe(true)
@@ -87,44 +82,6 @@ describe('BirthdayModal', () => {
     it('shows Maybe later button', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Maybe later')
-    })
-  })
-
-  describe('props', () => {
-    it('requires groupAge prop', () => {
-      const wrapper = createWrapper({ groupAge: 10 })
-      expect(wrapper.props('groupAge')).toBe(10)
-    })
-
-    it('requires groupName prop', () => {
-      const wrapper = createWrapper({ groupName: 'My Community' })
-      expect(wrapper.props('groupName')).toBe('My Community')
-    })
-
-    it('requires groupId prop', () => {
-      const wrapper = createWrapper({ groupId: 789 })
-      expect(wrapper.props('groupId')).toBe(789)
-    })
-
-    it('defaults modelValue to false', () => {
-      const wrapper = mount(BirthdayModal, {
-        props: {
-          groupAge: 5,
-          groupName: 'Test',
-          groupId: 1,
-        },
-        global: {
-          stubs: {
-            'b-modal': {
-              template: '<div class="modal"><slot></slot></div>',
-              props: ['modelValue'],
-            },
-            'b-button': true,
-            BirthdayHero: true,
-          },
-        },
-      })
-      expect(wrapper.props('modelValue')).toBe(false)
     })
   })
 

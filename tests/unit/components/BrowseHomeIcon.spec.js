@@ -17,11 +17,6 @@ describe('BrowseHomeIcon', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders with icon class', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.icon').exists()).toBe(true)

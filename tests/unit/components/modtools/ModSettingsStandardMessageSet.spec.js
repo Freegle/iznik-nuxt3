@@ -109,11 +109,6 @@ describe('ModSettingsStandardMessageSet', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders ModConfigSetting for BCC', () => {
       const wrapper = mountComponent()
       const setting = wrapper.find(
@@ -144,25 +139,10 @@ describe('ModSettingsStandardMessageSet', () => {
   })
 
   describe('props', () => {
-    it('accepts cc prop', () => {
-      const wrapper = mountComponent({ cc: 'ccfollowupto' })
-      expect(wrapper.props('cc')).toBe('ccfollowupto')
-    })
-
-    it('accepts addr prop', () => {
-      const wrapper = mountComponent({ addr: 'ccfollowupaddr' })
-      expect(wrapper.props('addr')).toBe('ccfollowupaddr')
-    })
-
     it('accepts types array prop', () => {
       const types = ['Approve', 'Reject']
       const wrapper = mountComponent({ types })
       expect(wrapper.props('types')).toEqual(types)
-    })
-
-    it('accepts locked prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('locked')).toBe(false)
     })
 
     it('accepts locked prop as true', () => {

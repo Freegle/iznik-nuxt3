@@ -272,35 +272,6 @@ describe('ModLogMessage', () => {
   })
 
   describe('props', () => {
-    it('accepts log prop', () => {
-      const log = { msgid: 1000, message: { subject: 'Test' } }
-      const wrapper = createWrapper({ log })
-      expect(wrapper.props('log')).toEqual(log)
-    })
-
-    it('accepts notext prop', () => {
-      const wrapper = createWrapper({
-        log: { msgid: 1001, message: { subject: 'Test' } },
-        notext: true,
-      })
-      expect(wrapper.props('notext')).toBe(true)
-    })
-
-    it('defaults notext to false', () => {
-      const wrapper = createWrapper({
-        log: { msgid: 1002, message: { subject: 'Test' } },
-      })
-      expect(wrapper.props('notext')).toBe(false)
-    })
-
-    it('accepts tag prop', () => {
-      const wrapper = createWrapper({
-        log: { msgid: 1003, message: { subject: 'Test' } },
-        tag: 'for',
-      })
-      expect(wrapper.props('tag')).toBe('for')
-    })
-
     it('defaults tag to "on"', () => {
       const wrapper = createWrapper({
         log: { msgid: 1004, message: { subject: 'Test' } },

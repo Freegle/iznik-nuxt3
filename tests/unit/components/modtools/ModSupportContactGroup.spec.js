@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 
 // Import component after mocks
 import ModSupportContactGroup from '~/modtools/components/ModSupportContactGroup.vue'
@@ -108,11 +108,6 @@ describe('ModSupportContactGroup', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('shows fetch communities button when groups not loaded', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Fetch communities')

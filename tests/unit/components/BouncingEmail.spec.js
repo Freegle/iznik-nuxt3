@@ -35,11 +35,6 @@ describe('BouncingEmail', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders row and column structure', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.row').exists()).toBe(true)

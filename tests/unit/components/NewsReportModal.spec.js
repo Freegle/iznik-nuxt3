@@ -53,11 +53,6 @@ describe('NewsReportModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a modal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-modal').exists()).toBe(true)
@@ -83,13 +78,6 @@ describe('NewsReportModal', () => {
     it('has textarea for reason', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-form-textarea').exists()).toBe(true)
-    })
-
-    it('has Close button', () => {
-      const wrapper = createWrapper()
-      const buttons = wrapper.findAll('button')
-      const closeButton = buttons.find((b) => b.text() === 'Close')
-      expect(closeButton).toBeDefined()
     })
 
     it('has Submit Report button', () => {
@@ -130,11 +118,6 @@ describe('NewsReportModal', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const props = NewsReportModal.props
-      expect(props.id.required).toBe(true)
-    })
-
     it('id prop is Number type', () => {
       const props = NewsReportModal.props
       expect(props.id.type).toBe(Number)

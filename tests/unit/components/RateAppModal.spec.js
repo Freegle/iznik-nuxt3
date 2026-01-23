@@ -46,11 +46,6 @@ describe('RateAppModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a modal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-modal').exists()).toBe(true)

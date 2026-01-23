@@ -239,13 +239,6 @@ describe('ModChatPane', () => {
   })
 
   describe('props', () => {
-    it('accepts id prop', async () => {
-      const wrapper = await mountComponent({ id: 789 })
-      await flushPromises()
-      const pane = getModChatPane(wrapper)
-      expect(pane.props('id')).toBe(789)
-    })
-
     it('requires id prop as Number', async () => {
       const wrapper = await mountComponent({ id: 456 })
       await flushPromises()

@@ -73,11 +73,6 @@ describe('ChatMessageNudge', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a card with warning border', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.border-warning').exists()).toBe(true)
@@ -86,28 +81,6 @@ describe('ChatMessageNudge', () => {
     it('renders bell icon', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.bell').exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('requires chatid prop', () => {
-      const wrapper = createWrapper({ chatid: 789 })
-      expect(wrapper.props('chatid')).toBe(789)
-    })
-
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 999 })
-      expect(wrapper.props('id')).toBe(999)
-    })
-
-    it('defaults pov to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('pov')).toBe(null)
-    })
-
-    it('accepts pov prop', () => {
-      const wrapper = createWrapper({ pov: 5 })
-      expect(wrapper.props('pov')).toBe(5)
     })
   })
 

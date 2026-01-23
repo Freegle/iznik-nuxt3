@@ -58,11 +58,6 @@ describe('DaDisableCTA', () => {
       mockFetchConfig.mockResolvedValue([{ value: '1' }])
     })
 
-    it('mounts successfully', async () => {
-      const wrapper = await createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows the CTA when ads are enabled', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.find('.da-disable-cta').exists()).toBe(true)

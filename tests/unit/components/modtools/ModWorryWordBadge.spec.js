@@ -195,11 +195,4 @@ describe('ModWorryWordBadge', () => {
       expect(wrapper.vm.showDeleteConfirm).toBe(false)
     })
   })
-
-  describe('props', () => {
-    it('accepts worryword prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('worryword').keyword).toBe('worry_word')
-    })
-  })
 })

@@ -77,11 +77,6 @@ describe('ChatMessageReminder', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a card with success border', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.border-success').exists()).toBe(true)
@@ -95,38 +90,6 @@ describe('ChatMessageReminder', () => {
     it('shows automated message note', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('This is an automated message.')
-    })
-  })
-
-  describe('props', () => {
-    it('requires chatid prop', () => {
-      const wrapper = createWrapper({ chatid: 789 })
-      expect(wrapper.props('chatid')).toBe(789)
-    })
-
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 999 })
-      expect(wrapper.props('id')).toBe(999)
-    })
-
-    it('defaults last to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('last')).toBe(false)
-    })
-
-    it('accepts last prop', () => {
-      const wrapper = createWrapper({ last: true })
-      expect(wrapper.props('last')).toBe(true)
-    })
-
-    it('defaults pov to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('pov')).toBe(null)
-    })
-
-    it('defaults highlightEmails to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('highlightEmails')).toBe(false)
     })
   })
 

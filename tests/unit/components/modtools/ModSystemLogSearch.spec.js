@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ModSystemLogSearch from '~/modtools/components/ModSystemLogSearch.vue'
 
@@ -151,21 +151,6 @@ describe('ModSystemLogSearch', () => {
   })
 
   describe('props', () => {
-    it('accepts userid prop', () => {
-      const wrapper = mountComponent({ userid: 123 })
-      expect(wrapper.props('userid')).toBe(123)
-    })
-
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 456 })
-      expect(wrapper.props('groupid')).toBe(456)
-    })
-
-    it('accepts msgid prop', () => {
-      const wrapper = mountComponent({ msgid: 789 })
-      expect(wrapper.props('msgid')).toBe(789)
-    })
-
     it('syncs userid prop to userIdInput', async () => {
       const wrapper = mountComponent({ userid: 123 })
       await wrapper.vm.$nextTick()
@@ -305,7 +290,7 @@ describe('ModSystemLogSearch', () => {
       expect(mockSystemLogsStore.setEmailFilter).toHaveBeenCalledWith(null)
     })
 
-    it('setTimeRange updates store and emits search', async () => {
+    it('setTimeRange updates store and emits search', () => {
       const wrapper = mountComponent()
       wrapper.vm.setTimeRange('7d')
       expect(mockSystemLogsStore.setTimeRange).toHaveBeenCalledWith('7d')

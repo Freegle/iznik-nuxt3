@@ -70,11 +70,6 @@ describe('ModCake', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays cake information text', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('randomly select one member')

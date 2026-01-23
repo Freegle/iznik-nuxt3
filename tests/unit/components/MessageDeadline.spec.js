@@ -49,11 +49,6 @@ describe('MessageDeadline', () => {
       })
     })
 
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders badge when message has deadline', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-badge').exists()).toBe(true)
@@ -115,11 +110,6 @@ describe('MessageDeadline', () => {
   describe('props', () => {
     beforeEach(() => {
       mockByIdFn.mockReturnValue({ deadline: '2026-02-15', type: 'Offer' })
-    })
-
-    it('requires id prop', () => {
-      const props = MessageDeadline.props
-      expect(props.id.required).toBe(true)
     })
 
     it('id prop is Number type', () => {

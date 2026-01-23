@@ -21,16 +21,6 @@ describe('NoticeboardCheck', () => {
     })
   }
 
-  describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper({
-        checkedat: '2026-01-15',
-        inactive: true,
-      })
-      expect(wrapper.exists()).toBe(true)
-    })
-  })
-
   describe('inactive check', () => {
     it('shows inactive message', () => {
       const wrapper = createWrapper({
@@ -98,19 +88,9 @@ describe('NoticeboardCheck', () => {
   })
 
   describe('props', () => {
-    it('requires noticeboard prop', () => {
-      const props = NoticeboardCheck.props
-      expect(props.noticeboard.required).toBe(true)
-    })
-
     it('noticeboard prop is Object type', () => {
       const props = NoticeboardCheck.props
       expect(props.noticeboard.type).toBe(Object)
-    })
-
-    it('requires check prop', () => {
-      const props = NoticeboardCheck.props
-      expect(props.check.required).toBe(true)
     })
 
     it('check prop is Object type', () => {

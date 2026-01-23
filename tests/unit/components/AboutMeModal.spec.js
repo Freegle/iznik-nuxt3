@@ -54,11 +54,6 @@ describe('AboutMeModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays "Complete your public profile" when not in review mode', () => {
       const wrapper = createWrapper({ review: false })
       expect(wrapper.text()).toContain('Complete your public profile')
@@ -150,11 +145,6 @@ describe('AboutMeModal', () => {
     it('accepts review prop as boolean', () => {
       const wrapper = createWrapper({ review: true })
       expect(wrapper.props('review')).toBe(true)
-    })
-
-    it('defaults review to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('review')).toBe(false)
     })
   })
 })

@@ -38,11 +38,6 @@ describe('ModFindMessagesFromMember', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.input-group').exists()).toBe(true)
-    })
-
     it('renders input with correct placeholder', () => {
       const wrapper = mountComponent()
       const input = wrapper.find('input')
@@ -93,7 +88,7 @@ describe('ModFindMessagesFromMember', () => {
       expect(callback).toHaveBeenCalled()
     })
 
-    it('search does not throw when callback is not a function', async () => {
+    it('search does not throw when callback is not a function', () => {
       const wrapper = mountComponent()
       wrapper.vm.term = 'test'
       expect(() => wrapper.vm.search('not a function')).not.toThrow()

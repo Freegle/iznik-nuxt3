@@ -55,21 +55,6 @@ describe('AutocompleteLocal', () => {
       const wrapper = mountAutocomplete({ items })
       expect(wrapper.props('items')).toEqual(items)
     })
-
-    it('accepts size prop', () => {
-      const wrapper = mountAutocomplete({ size: '30' })
-      expect(wrapper.find('input').attributes('size')).toBe('30')
-    })
-
-    it('accepts placeholder prop', () => {
-      const wrapper = mountAutocomplete({ placeholder: 'Search...' })
-      expect(wrapper.find('input').attributes('placeholder')).toBe('Search...')
-    })
-
-    it('accepts isAsync prop', () => {
-      const wrapper = mountAutocomplete({ isAsync: true })
-      expect(wrapper.props('isAsync')).toBe(true)
-    })
   })
 
   describe('filtering', () => {

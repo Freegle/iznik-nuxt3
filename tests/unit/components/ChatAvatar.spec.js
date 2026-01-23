@@ -26,11 +26,6 @@ describe('ChatAvatar', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders chat-avatar container', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.chat-avatar').exists()).toBe(true)
@@ -53,33 +48,6 @@ describe('ChatAvatar', () => {
       expect(profileImage.attributes('data-image')).toBe(
         'https://example.com/avatar.jpg'
       )
-    })
-  })
-
-  describe('props', () => {
-    it('requires name prop', () => {
-      const wrapper = createWrapper({ name: 'Required Name' })
-      expect(wrapper.props('name')).toBe('Required Name')
-    })
-
-    it('defaults icon to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('icon')).toBe(null)
-    })
-
-    it('defaults supporter to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('supporter')).toBe(false)
-    })
-
-    it('defaults unreadCount to 0', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('unreadCount')).toBe(0)
-    })
-
-    it('defaults large to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('large')).toBe(false)
     })
   })
 

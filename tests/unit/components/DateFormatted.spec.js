@@ -25,11 +25,6 @@ describe('DateFormatted', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders as a span element', () => {
       const wrapper = createWrapper()
       expect(wrapper.element.tagName.toLowerCase()).toBe('span')
@@ -37,19 +32,9 @@ describe('DateFormatted', () => {
   })
 
   describe('props', () => {
-    it('requires value prop', () => {
-      const wrapper = createWrapper({ value: '2024-01-01' })
-      expect(wrapper.props('value')).toBe('2024-01-01')
-    })
-
     it('defaults format to datetime', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('format')).toBe('datetime')
-    })
-
-    it('accepts format prop', () => {
-      const wrapper = createWrapper({ format: 'dateonly' })
-      expect(wrapper.props('format')).toBe('dateonly')
     })
   })
 

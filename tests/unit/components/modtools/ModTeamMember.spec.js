@@ -125,16 +125,4 @@ describe('ModTeamMember', () => {
       expect(mockRemove).toHaveBeenCalled()
     })
   })
-
-  describe('props', () => {
-    it('accepts teamid prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('teamid')).toBe(1)
-    })
-
-    it('accepts member prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('member').displayname).toBe('Test Member')
-    })
-  })
 })

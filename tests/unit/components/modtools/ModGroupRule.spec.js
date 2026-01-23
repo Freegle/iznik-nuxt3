@@ -151,21 +151,6 @@ describe('ModGroupRule', () => {
   })
 
   describe('props', () => {
-    it('accepts setting prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('setting')).toBe('test value')
-    })
-
-    it('accepts name prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('name')).toBe('testSetting')
-    })
-
-    it('accepts label prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('label')).toBe('Test Label')
-    })
-
     it('has default type of input', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('type')).toBe('input')

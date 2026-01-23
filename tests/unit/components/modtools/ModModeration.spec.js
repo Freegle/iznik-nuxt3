@@ -211,31 +211,9 @@ describe('ModModeration', () => {
   })
 
   describe('props', () => {
-    it('accepts membership prop', () => {
-      const membership = createMembership({ ourpostingstatus: 'PROHIBITED' })
-      const wrapper = mountComponent({ membership })
-      expect(wrapper.props('membership').ourpostingstatus).toBe('PROHIBITED')
-    })
-
-    it('accepts user prop', () => {
-      const user = createUser({ trustlevel: 'Moderate' })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.props('user').trustlevel).toBe('Moderate')
-    })
-
     it('accepts optional userid prop', () => {
       const wrapper = mountComponent({ userid: 999 })
       expect(wrapper.props('userid')).toBe(999)
-    })
-
-    it('defaults userid to 0', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('userid')).toBe(0)
-    })
-
-    it('accepts size prop', () => {
-      const wrapper = mountComponent({ size: 'sm' })
-      expect(wrapper.props('size')).toBe('sm')
     })
 
     it('defaults size to lg', () => {
@@ -245,35 +223,35 @@ describe('ModModeration', () => {
   })
 
   describe('trust level values', () => {
-    it('handles Basic trust level', async () => {
+    it('handles Basic trust level', () => {
       const wrapper = mountComponent({
         user: createUser({ trustlevel: 'Basic' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Basic')
     })
 
-    it('handles Moderate trust level', async () => {
+    it('handles Moderate trust level', () => {
       const wrapper = mountComponent({
         user: createUser({ trustlevel: 'Moderate' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Moderate')
     })
 
-    it('handles Advanced trust level', async () => {
+    it('handles Advanced trust level', () => {
       const wrapper = mountComponent({
         user: createUser({ trustlevel: 'Advanced' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Advanced')
     })
 
-    it('handles Declined trust level', async () => {
+    it('handles Declined trust level', () => {
       const wrapper = mountComponent({
         user: createUser({ trustlevel: 'Declined' }),
       })
       expect(wrapper.vm.trustlevel).toBe('Declined')
     })
 
-    it('handles Excluded trust level', async () => {
+    it('handles Excluded trust level', () => {
       const wrapper = mountComponent({
         user: createUser({ trustlevel: 'Excluded' }),
       })

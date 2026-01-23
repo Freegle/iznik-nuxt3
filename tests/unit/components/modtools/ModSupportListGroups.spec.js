@@ -71,11 +71,6 @@ describe('ModSupportListGroups', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('shows loading message when busy', async () => {
       const wrapper = mountComponent()
       wrapper.vm.busy = true

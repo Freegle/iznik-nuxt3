@@ -107,11 +107,6 @@ describe('ModMemberButton', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('button').exists()).toBe(true)
-    })
-
     it('renders SpinButton with correct props', () => {
       const wrapper = mountComponent({
         variant: 'danger',
@@ -332,31 +327,6 @@ describe('ModMemberButton', () => {
   })
 
   describe('props', () => {
-    it('accepts member prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('member')).toEqual(defaultMember)
-    })
-
-    it('accepts stdmsgid prop', () => {
-      const wrapper = mountComponent({ stdmsgid: 123 })
-      expect(wrapper.props('stdmsgid')).toBe(123)
-    })
-
-    it('defaults stdmsgid to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('stdmsgid')).toBeNull()
-    })
-
-    it('defaults disabled to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('disabled')).toBe(false)
-    })
-
-    it('defaults autosend to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('autosend')).toBe(false)
-    })
-
     it('defaults all action props to false', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('delete')).toBe(false)

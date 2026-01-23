@@ -35,11 +35,6 @@ describe('ModMemberSearchbox', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.input-group').exists()).toBe(true)
-    })
-
     it('renders input field', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('input').exists()).toBe(true)
@@ -48,18 +43,6 @@ describe('ModMemberSearchbox', () => {
     it('renders search button', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('button').exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts search prop', () => {
-      const wrapper = mountComponent({ search: 'test@example.com' })
-      expect(wrapper.props('search')).toBe('test@example.com')
-    })
-
-    it('defaults search to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('search')).toBeNull()
     })
   })
 

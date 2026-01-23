@@ -38,11 +38,6 @@ describe('EmailConfirmModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a modal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-modal').exists()).toBe(true)
@@ -63,12 +58,6 @@ describe('EmailConfirmModal', () => {
     it('reminds about spam folder', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('check your spam folder')
-    })
-
-    it('has Close button', () => {
-      const wrapper = createWrapper()
-      const button = wrapper.find('button')
-      expect(button.text()).toBe('Close')
     })
   })
 

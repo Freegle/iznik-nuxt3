@@ -209,11 +209,4 @@ describe('ModPopularPost', () => {
       expect(wrapper.vm.show).toBe(false)
     })
   })
-
-  describe('props', () => {
-    it('accepts item prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('item').msgid).toBe(123)
-    })
-  })
 })

@@ -96,16 +96,6 @@ describe('ModChatNoteModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
-    })
-
     it('has Add Mod Message button', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Add Mod Message')
@@ -157,13 +147,6 @@ describe('ModChatNoteModal', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.show).toBeDefined()
       expect(wrapper.vm.hide).toBeDefined()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts chatid prop', () => {
-      const wrapper = mountComponent({ chatid: 456 })
-      expect(wrapper.props('chatid')).toBe(456)
     })
   })
 })

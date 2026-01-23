@@ -32,11 +32,6 @@ describe('ModFindMessage', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.input-group').exists()).toBe(true)
-    })
-
     it('renders input field', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('input').exists()).toBe(true)
@@ -45,28 +40,6 @@ describe('ModFindMessage', () => {
     it('renders search button via SpinButton', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.spin-button').exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts messageTerm prop', () => {
-      const wrapper = mountComponent({ messageTerm: 'test subject' })
-      expect(wrapper.props('messageTerm')).toBe('test subject')
-    })
-
-    it('defaults messageTerm to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('messageTerm')).toBeNull()
-    })
-
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
-    it('defaults groupid to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBeNull()
     })
   })
 

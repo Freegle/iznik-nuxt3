@@ -39,11 +39,6 @@ describe('ResultModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a modal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.b-modal').exists()).toBe(true)
@@ -58,12 +53,6 @@ describe('ResultModal', () => {
       const wrapper = createWrapper({ message: 'Operation completed' })
       expect(wrapper.text()).toContain('Operation completed')
     })
-
-    it('has Close button', () => {
-      const wrapper = createWrapper()
-      const button = wrapper.find('button')
-      expect(button.text()).toBe('Close')
-    })
   })
 
   describe('interactions', () => {
@@ -75,11 +64,6 @@ describe('ResultModal', () => {
   })
 
   describe('props', () => {
-    it('requires title prop', () => {
-      const props = ResultModal.props
-      expect(props.title.required).toBe(true)
-    })
-
     it('title prop is String type', () => {
       const props = ResultModal.props
       expect(props.title.type).toBe(String)

@@ -93,11 +93,6 @@ describe('ChatRSVPModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows default title when not chase up', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.modal-title').text()).toBe('Do you expect a reply?')
@@ -120,11 +115,6 @@ describe('ChatRSVPModal', () => {
   })
 
   describe('props', () => {
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
     it('requires user prop with displayname', () => {
       const wrapper = createWrapper({
         user: { displayname: 'Jane Smith', id: 789 },

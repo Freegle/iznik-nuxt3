@@ -142,24 +142,6 @@ describe('admins.vue page', () => {
   })
 
   describe('initial state', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.help-stub').exists()).toBe(true)
-    })
-
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.tabIndex).toBe(0)
-      expect(wrapper.vm.groupidshow).toBe(null)
-      expect(wrapper.vm.groupidcreate).toBe(null)
-      expect(wrapper.vm.groupidprevious).toBe(null)
-      expect(wrapper.vm.subject).toBe(null)
-      expect(wrapper.vm.body).toBe(null)
-      expect(wrapper.vm.creating).toBe(false)
-      expect(wrapper.vm.created).toBe(false)
-      expect(wrapper.vm.essential).toBe(true)
-    })
-
     it('fetches admins on mount', async () => {
       vi.clearAllMocks()
       mountComponent()

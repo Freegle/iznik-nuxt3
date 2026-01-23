@@ -49,11 +49,6 @@ describe('ModMessageWorry', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('displays NoticeMessage for each worry word', () => {
       const wrapper = mountComponent({
         message: createTestMessage({
@@ -240,12 +235,6 @@ describe('ModMessageWorry', () => {
   })
 
   describe('props', () => {
-    it('accepts message prop', () => {
-      const message = createTestMessage({ id: 999 })
-      const wrapper = mountComponent({ message })
-      expect(wrapper.props('message')).toEqual(message)
-    })
-
     it('message prop is required', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('message')).toBeDefined()

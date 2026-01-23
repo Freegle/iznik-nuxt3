@@ -279,16 +279,4 @@ describe('ModAdmin', () => {
       expect(mockUserStore.fetch).not.toHaveBeenCalled()
     })
   })
-
-  describe('props', () => {
-    it('accepts id prop', () => {
-      const wrapper = mountComponent({ id: 999 })
-      expect(wrapper.props('id')).toBe(999)
-    })
-
-    it('accepts open prop', () => {
-      const wrapper = mountComponent({ open: true })
-      expect(wrapper.props('open')).toBe(true)
-    })
-  })
 })

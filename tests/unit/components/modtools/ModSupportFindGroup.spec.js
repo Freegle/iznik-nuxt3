@@ -147,11 +147,6 @@ describe('ModSupportFindGroup', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders autocomplete input', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.autocomplete').exists()).toBe(true)
@@ -298,7 +293,7 @@ describe('ModSupportFindGroup', () => {
         const wrapper = mountComponent()
         wrapper.vm.searchgroup = 'Test'
 
-        const _ = wrapper.vm.volunteers
+        expect(wrapper.vm.volunteers).toBeDefined() // triggers getter
         expect(mockMemberStore.getByGroup).toHaveBeenCalled()
       })
     })

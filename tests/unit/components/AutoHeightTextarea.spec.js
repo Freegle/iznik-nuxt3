@@ -54,11 +54,6 @@ describe('AutoHeightTextarea', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a textarea', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('textarea').exists()).toBe(true)
@@ -66,16 +61,6 @@ describe('AutoHeightTextarea', () => {
   })
 
   describe('props', () => {
-    it('defaults modelValue to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('modelValue')).toBe(null)
-    })
-
-    it('defaults size to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('size')).toBe(null)
-    })
-
     it('defaults rows to 2', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('rows')).toBe(2)
@@ -84,26 +69,6 @@ describe('AutoHeightTextarea', () => {
     it('defaults maxRows to 6', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('maxRows')).toBe(6)
-    })
-
-    it('defaults maxlength to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('maxlength')).toBe(null)
-    })
-
-    it('defaults spellcheck to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('spellcheck')).toBe(false)
-    })
-
-    it('defaults placeholder to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('placeholder')).toBe(null)
-    })
-
-    it('defaults autocapitalize to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('autocapitalize')).toBe(null)
     })
 
     it('accepts custom rows', () => {

@@ -43,11 +43,6 @@ describe('ModSupportChat', () => {
   }
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.layout').exists()).toBe(true)
-    })
-
     it('displays chat ID', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('123')
@@ -220,11 +215,6 @@ describe('ModSupportChat', () => {
   })
 
   describe('props', () => {
-    it('requires chat prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('chat')).toEqual(defaultProps.chat)
-    })
-
     it('has optional pov prop with null default', () => {
       const wrapper = mount(ModSupportChat, {
         props: {

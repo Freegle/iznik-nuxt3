@@ -75,11 +75,6 @@ describe('ChatReportModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows modal with correct title', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.modal-title').text()).toBe('Oh dear...')
@@ -125,18 +120,6 @@ describe('ChatReportModal', () => {
     it('renders GroupSelect component', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('[data-testid="group-select"]').exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('requires user prop', () => {
-      const wrapper = createWrapper({ user: { displayname: 'Jane Doe' } })
-      expect(wrapper.props('user').displayname).toBe('Jane Doe')
-    })
-
-    it('requires chatid prop', () => {
-      const wrapper = createWrapper({ chatid: 456 })
-      expect(wrapper.props('chatid')).toBe(456)
     })
   })
 

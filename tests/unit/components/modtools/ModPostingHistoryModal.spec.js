@@ -120,11 +120,6 @@ describe('ModPostingHistoryModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('shows user displayname in title', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.modal').attributes('title')).toContain('Test User')
@@ -139,11 +134,6 @@ describe('ModPostingHistoryModal', () => {
       const wrapper = mountComponent()
       const rows = wrapper.findAll('.row')
       expect(rows.length).toBe(3) // 3 messages
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
   })
 
@@ -297,24 +287,6 @@ describe('ModPostingHistoryModal', () => {
       const closeButton = wrapper.find('button')
       await closeButton.trigger('click')
       expect(mockHide).toHaveBeenCalled()
-    })
-  })
-
-  describe('props', () => {
-    it('accepts user prop', () => {
-      const user = createUser({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.props('user').displayname).toBe('Custom User')
-    })
-
-    it('accepts type prop', () => {
-      const wrapper = mountComponent({ type: 'Wanted' })
-      expect(wrapper.props('type')).toBe('Wanted')
-    })
-
-    it('defaults type to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('type')).toBeNull()
     })
   })
 

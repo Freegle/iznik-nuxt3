@@ -70,11 +70,6 @@ describe('VolunteeringPage', () => {
   })
 
   describe('rendering', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.infinite-loading').exists()).toBe(true)
-    })
-
     it('renders volunteerings from store', async () => {
       mockVolunteeringStore.list = {
         1: { id: 1, title: 'Vol 1' },

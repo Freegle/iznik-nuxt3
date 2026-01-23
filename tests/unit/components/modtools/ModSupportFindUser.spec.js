@@ -74,11 +74,6 @@ describe('ModSupportFindUser', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders the search input', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.form-input').exists()).toBe(true)

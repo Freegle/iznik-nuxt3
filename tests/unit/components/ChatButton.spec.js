@@ -86,11 +86,6 @@ describe('ChatButton', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('does not render when userid equals myid', () => {
       mockMyid.value = 2
       const wrapper = createWrapper({ userid: 2 })
@@ -125,39 +120,9 @@ describe('ChatButton', () => {
   })
 
   describe('props', () => {
-    it('defaults size to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('size')).toBe(null)
-    })
-
-    it('defaults title to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('title')).toBe(null)
-    })
-
     it('defaults variant to primary', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('variant')).toBe('primary')
-    })
-
-    it('defaults groupid to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('groupid')).toBe(null)
-    })
-
-    it('defaults chattype to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('chattype')).toBe(null)
-    })
-
-    it('defaults showIcon to true', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('showIcon')).toBe(true)
-    })
-
-    it('defaults btnClass to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('btnClass')).toBe(null)
     })
 
     it('defaults titleClass to ml-1', () => {

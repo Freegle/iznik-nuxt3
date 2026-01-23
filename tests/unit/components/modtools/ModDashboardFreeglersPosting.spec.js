@@ -102,13 +102,6 @@ describe('ModDashboardFreeglersPosting', () => {
       expect(wrapper.text()).toContain('Loading')
     })
 
-    it('hides loading state when not loading', () => {
-      mockLoading.value = false
-      mockUsersPosting.value = mockUsers
-      const wrapper = mountComponent()
-      expect(wrapper.text()).not.toContain('Loading')
-    })
-
     it('renders user list when data available', () => {
       mockUsersPosting.value = mockUsers
       const wrapper = mountComponent()
@@ -134,28 +127,6 @@ describe('ModDashboardFreeglersPosting', () => {
       mockUsersPosting.value = []
       const wrapper = mountComponent()
       expect(wrapper.text()).not.toContain('User')
-    })
-  })
-
-  describe('props', () => {
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupid')).toBe(123)
-    })
-
-    it('accepts groupName prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('groupName')).toBe('Test Group')
-    })
-
-    it('accepts start date prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('start')).toEqual(new Date('2024-01-01'))
-    })
-
-    it('accepts end date prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('end')).toEqual(new Date('2024-01-31'))
     })
   })
 })

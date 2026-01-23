@@ -51,11 +51,6 @@ describe('ForgetFailModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('shows modal with correct title', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.modal-title').text()).toBe(

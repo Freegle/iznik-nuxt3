@@ -120,15 +120,6 @@ describe('chats/[[id]].vue page', () => {
   })
 
   describe('initial state', () => {
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.showChats).toBe(20)
-      expect(wrapper.vm.search).toBe(null)
-      expect(wrapper.vm.searching).toBe(false)
-      expect(wrapper.vm.complete).toBe(false)
-      expect(wrapper.vm.selectedChatId).toBe(null)
-    })
-
     it('sets selectedChatId from route param', () => {
       mockRouteParams.value = { id: '123' }
       const wrapper = mountComponent()

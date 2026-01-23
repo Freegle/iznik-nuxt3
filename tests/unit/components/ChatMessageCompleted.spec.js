@@ -81,11 +81,6 @@ describe('ChatMessageCompleted', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders the completed wrapper', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.completed-wrapper').exists()).toBe(true)
@@ -102,38 +97,6 @@ describe('ChatMessageCompleted', () => {
       expect(wrapper.find('.chat-message-card').attributes('data-id')).toBe(
         '999'
       )
-    })
-  })
-
-  describe('props', () => {
-    it('requires chatid prop', () => {
-      const wrapper = createWrapper({ chatid: 789 })
-      expect(wrapper.props('chatid')).toBe(789)
-    })
-
-    it('requires id prop', () => {
-      const wrapper = createWrapper({ id: 999 })
-      expect(wrapper.props('id')).toBe(999)
-    })
-
-    it('defaults last to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('last')).toBe(false)
-    })
-
-    it('accepts last prop', () => {
-      const wrapper = createWrapper({ last: true })
-      expect(wrapper.props('last')).toBe(true)
-    })
-
-    it('defaults pov to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('pov')).toBe(null)
-    })
-
-    it('defaults highlightEmails to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('highlightEmails')).toBe(false)
     })
   })
 

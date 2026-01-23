@@ -717,12 +717,4 @@ describe('ModMemberships', () => {
       expect(wrapper.find('.text-muted').exists()).toBe(true)
     })
   })
-
-  describe('props', () => {
-    it('accepts user prop', () => {
-      const user = createUser({ displayname: 'Custom User' })
-      const wrapper = mountComponent({ user })
-      expect(wrapper.props('user').displayname).toBe('Custom User')
-    })
-  })
 })

@@ -43,11 +43,6 @@ describe('EmailBelongsToSomeoneElse', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays the other email address', () => {
       const wrapper = createWrapper({ theirs: 'other@example.com' })
       expect(wrapper.text()).toContain('other@example.com')
@@ -71,13 +66,6 @@ describe('EmailBelongsToSomeoneElse', () => {
     it('shows Request merge button', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Request merge')
-    })
-  })
-
-  describe('props', () => {
-    it('requires theirs prop', () => {
-      const wrapper = createWrapper({ theirs: 'test@email.com' })
-      expect(wrapper.props('theirs')).toBe('test@email.com')
     })
   })
 

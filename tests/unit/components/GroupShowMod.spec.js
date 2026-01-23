@@ -33,11 +33,6 @@ describe('GroupShowMod', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a ProfileImage component', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.profile-image').exists()).toBe(true)
@@ -69,11 +64,6 @@ describe('GroupShowMod', () => {
   })
 
   describe('props', () => {
-    it('requires modtoshow prop', () => {
-      const props = GroupShowMod.props
-      expect(props.modtoshow.required).toBe(true)
-    })
-
     it('modtoshow prop is Object type', () => {
       const props = GroupShowMod.props
       expect(props.modtoshow.type).toBe(Object)

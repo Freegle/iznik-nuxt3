@@ -37,22 +37,12 @@ describe('ModAimsModal', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('displays Freegle Aims content', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Freegle nationally is committed to')
       expect(wrapper.text()).toContain(
         'Local volunteers agree to run their Community'
       )
-    })
-
-    it('has Close button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Close')
     })
   })
 

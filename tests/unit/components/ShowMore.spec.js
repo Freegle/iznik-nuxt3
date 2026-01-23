@@ -33,11 +33,6 @@ describe('ShowMore', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders all items when count is under limit', () => {
       const wrapper = createWrapper({ items: shortList, limit: 10 })
       expect(wrapper.findAll('div').length).toBeGreaterThanOrEqual(
@@ -66,11 +61,6 @@ describe('ShowMore', () => {
   })
 
   describe('props', () => {
-    it('requires items prop', () => {
-      const wrapper = createWrapper({ items: shortList })
-      expect(wrapper.props('items')).toEqual(shortList)
-    })
-
     it('defaults limit to 10', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('limit')).toBe(10)

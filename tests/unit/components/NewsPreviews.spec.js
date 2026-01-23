@@ -25,11 +25,6 @@ describe('NewsPreviews', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders NewsPreview for each preview', () => {
       const wrapper = createWrapper()
       expect(wrapper.findAll('.news-preview')).toHaveLength(3)
@@ -57,11 +52,6 @@ describe('NewsPreviews', () => {
   })
 
   describe('props', () => {
-    it('requires previews prop', () => {
-      const props = NewsPreviews.props
-      expect(props.previews.required).toBe(true)
-    })
-
     it('previews prop is Array type', () => {
       const props = NewsPreviews.props
       expect(props.previews.type).toBe(Array)

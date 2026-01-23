@@ -72,11 +72,6 @@ describe('ModCommentUser', () => {
   })
 
   describe('rendering', () => {
-    it('renders user displayname', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Test User')
-    })
-
     it('renders user id', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('123')
@@ -199,11 +194,6 @@ describe('ModCommentUser', () => {
   })
 
   describe('props', () => {
-    it('accepts comment prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('comment').id).toBe(100)
-    })
-
     it('passes comment to ModComment', () => {
       const wrapper = mountComponent()
       // ModComment is stubbed, check stub exists

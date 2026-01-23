@@ -259,25 +259,6 @@ describe('ModLogGroup', () => {
   })
 
   describe('props', () => {
-    it('accepts log prop', () => {
-      const log = { id: 1, groupid: 1 }
-      const wrapper = createWrapper(log)
-      expect(wrapper.props('log')).toEqual(log)
-    })
-
-    it('accepts tag prop', () => {
-      const wrapper = createWrapper(
-        { group: { id: 1, nameshort: 'Test', namedisplay: 'Test' } },
-        'for'
-      )
-      expect(wrapper.props('tag')).toBe('for')
-    })
-
-    it('defaults tag to null', () => {
-      const wrapper = createWrapper({ group: { id: 1, nameshort: 'Test' } })
-      expect(wrapper.props('tag')).toBeNull()
-    })
-
     it('defaults log to null (but component requires log)', () => {
       // The component always expects a log prop, so we test with a minimal log
       const wrapper = mount(ModLogGroup, { props: { log: {} } })

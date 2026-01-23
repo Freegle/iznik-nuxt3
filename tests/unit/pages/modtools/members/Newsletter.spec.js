@@ -38,11 +38,6 @@ describe('Newsletter Page', () => {
   }
 
   describe('rendering', () => {
-    it('renders ScrollToTop component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.scroll-to-top').exists()).toBe(true)
-    })
-
     it('shows empty message when no stories', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain(

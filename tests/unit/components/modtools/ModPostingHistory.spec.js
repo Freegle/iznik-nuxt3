@@ -445,34 +445,6 @@ describe('ModPostingHistory', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts user prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('user')).toEqual(defaultUser)
-    })
-
-    it('requires user prop', () => {
-      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-      try {
-        mount(ModPostingHistory, {
-          props: {},
-          global: {
-            stubs: {
-              'b-badge': true,
-              'b-button': true,
-              'v-icon': true,
-              ModPostingHistoryModal: true,
-              ModLogsModal: true,
-            },
-          },
-        })
-      } catch {
-        // Expected to fail due to missing required prop
-      }
-      consoleWarn.mockRestore()
-    })
-  })
-
   describe('edge cases', () => {
     it('handles user with undefined messagehistory', () => {
       const wrapper = mountComponent({

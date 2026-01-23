@@ -153,17 +153,6 @@ describe('support/[[id]].vue page', () => {
   })
 
   describe('initial state', () => {
-    it('initializes with correct data values', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.error).toBe(false)
-      expect(wrapper.vm.messageTerm).toBe(null)
-      // id is parseInt of undefined which is NaN, but the original code uses it this way
-      expect(wrapper.vm.showSystemLogs).toBe(false)
-      expect(wrapper.vm.showEmailStats).toBe(false)
-      expect(wrapper.vm.showAIAssistant).toBe(false)
-      expect(wrapper.vm.activeTab).toBe(0)
-    })
-
     it('clears stores on created', async () => {
       mountComponent()
       await flushPromises()

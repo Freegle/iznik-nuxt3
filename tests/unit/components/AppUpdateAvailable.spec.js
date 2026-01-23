@@ -45,11 +45,6 @@ describe('AppUpdateAvailable', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('does not show notice when appupdaterequired is false', () => {
       mockMobileStore.appupdaterequired = false
       const wrapper = createWrapper()

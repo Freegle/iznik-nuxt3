@@ -17,11 +17,6 @@ describe('HomeIcon', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders a v-icon component', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.v-icon').exists()).toBe(true)

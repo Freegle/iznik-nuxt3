@@ -109,11 +109,6 @@ describe('AddressModal', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays Address Book title when not in choose mode', () => {
       const wrapper = createWrapper({ choose: false })
       // The title is in the b-modal attrs, check the wrapper renders
@@ -139,16 +134,6 @@ describe('AddressModal', () => {
   })
 
   describe('choose mode', () => {
-    it('accepts choose prop', () => {
-      const wrapper = createWrapper({ choose: true })
-      expect(wrapper.props('choose')).toBe(true)
-    })
-
-    it('defaults choose to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('choose')).toBe(false)
-    })
-
     it('shows Cancel button in choose mode', () => {
       const wrapper = createWrapper({ choose: true })
       expect(wrapper.text()).toContain('Cancel')

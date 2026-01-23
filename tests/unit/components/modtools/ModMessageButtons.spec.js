@@ -166,37 +166,10 @@ describe('ModMessageButtons', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders OurToggle for autosend control', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.our-toggle').exists()).toBe(true)
       expect(wrapper.find('.our-toggle').text()).toContain('Allow autosend')
-    })
-  })
-
-  describe('props', () => {
-    it('requires message prop', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('message')).toBeDefined()
-    })
-
-    it('defaults modconfig to null', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('modconfig')).toBeNull()
-    })
-
-    it('defaults editreview to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('editreview')).toBe(false)
-    })
-
-    it('defaults cantpost to false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('cantpost')).toBe(false)
     })
   })
 

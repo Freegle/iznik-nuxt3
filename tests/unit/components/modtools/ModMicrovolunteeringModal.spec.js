@@ -105,20 +105,6 @@ describe('ModMicrovolunteeringModal', () => {
   })
 
   describe('props', () => {
-    it('accepts user prop', async () => {
-      const customUser = { id: 456, displayname: 'Custom User' }
-      const wrapper = mountComponent(customUser)
-      await flushPromises()
-      expect(wrapper.props('user')).toEqual(expect.objectContaining(customUser))
-    })
-
-    it('accepts itemIds prop', async () => {
-      const customItemIds = [10, 20, 30]
-      const wrapper = mountComponent({}, customItemIds)
-      await flushPromises()
-      expect(wrapper.props('itemIds')).toEqual(customItemIds)
-    })
-
     it('handles empty itemIds array', async () => {
       const wrapper = mountComponent({}, [])
       await flushPromises()

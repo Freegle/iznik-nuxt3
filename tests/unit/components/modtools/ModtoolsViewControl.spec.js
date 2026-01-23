@@ -48,22 +48,10 @@ describe('ModtoolsViewControl', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.our-toggle').exists()).toBe(true)
-    })
-
     it('renders OurToggle with correct props', () => {
       const wrapper = mountComponent()
       const toggle = wrapper.find('.our-toggle')
       expect(toggle.exists()).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('requires misckey prop', () => {
-      const wrapper = mountComponent({ misckey: 'customKey' })
-      expect(wrapper.props('misckey')).toBe('customKey')
     })
   })
 
@@ -82,7 +70,7 @@ describe('ModtoolsViewControl', () => {
 
     it('summary getter calls miscStore.get with correct key', () => {
       const wrapper = mountComponent({ misckey: 'myTestKey' })
-      wrapper.vm.summary // trigger getter
+      expect(wrapper.vm.summary).toBeDefined() // triggers getter
       expect(mockMiscStore.get).toHaveBeenCalledWith('myTestKey')
     })
 
@@ -128,9 +116,8 @@ describe('ModtoolsViewControl', () => {
       const wrapper1 = mountComponent({ misckey: 'key1' })
       const wrapper2 = mountComponent({ misckey: 'key2' })
 
-      wrapper1.vm.summary
-      wrapper2.vm.summary
-
+      expect(wrapper1.vm.summary).toBeDefined() // triggers getter
+      expect(wrapper2.vm.summary).toBeDefined()
       expect(mockMiscStore.get).toHaveBeenCalledWith('key1')
       expect(mockMiscStore.get).toHaveBeenCalledWith('key2')
     })

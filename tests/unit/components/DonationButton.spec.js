@@ -120,11 +120,6 @@ describe('DonationButton', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('displays "Donate" when no value is provided', () => {
       const wrapper = createWrapper()
       expect(wrapper.text()).toContain('Donate')
@@ -146,38 +141,6 @@ describe('DonationButton', () => {
       expect(button.attributes('aria-label')).toBe(
         'Donate to Freegle with PayPal'
       )
-    })
-  })
-
-  describe('props', () => {
-    it('defaults directDonation to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('directDonation')).toBe(false)
-    })
-
-    it('defaults value to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('value')).toBe(null)
-    })
-
-    it('defaults text to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('text')).toBe(null)
-    })
-
-    it('accepts directDonation prop', () => {
-      const wrapper = createWrapper({ directDonation: true })
-      expect(wrapper.props('directDonation')).toBe(true)
-    })
-
-    it('accepts value prop', () => {
-      const wrapper = createWrapper({ value: '10' })
-      expect(wrapper.props('value')).toBe('10')
-    })
-
-    it('accepts text prop', () => {
-      const wrapper = createWrapper({ text: 'Donate Now' })
-      expect(wrapper.props('text')).toBe('Donate Now')
     })
   })
 

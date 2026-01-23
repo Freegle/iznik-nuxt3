@@ -365,23 +365,6 @@ describe('ModLogsModal', () => {
     })
   })
 
-  describe('props', () => {
-    it('accepts userid prop', () => {
-      const wrapper = createWrapper({ userid: 999 })
-      expect(wrapper.props('userid')).toBe(999)
-    })
-
-    it('accepts modmailsonly prop', () => {
-      const wrapper = createWrapper({ modmailsonly: true })
-      expect(wrapper.props('modmailsonly')).toBe(true)
-    })
-
-    it('defaults modmailsonly to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('modmailsonly')).toBe(false)
-    })
-  })
-
   describe('edge cases', () => {
     it('handles fetch returning undefined context', async () => {
       const wrapper = createWrapper()

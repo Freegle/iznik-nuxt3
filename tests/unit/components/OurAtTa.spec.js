@@ -27,11 +27,6 @@ describe('OurAtTa', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders Mentionable component', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.mentionable').exists()).toBe(true)
@@ -75,11 +70,6 @@ describe('OurAtTa', () => {
   })
 
   describe('props', () => {
-    it('requires members prop', () => {
-      const props = OurAtTa.props
-      expect(props.members.required).toBe(true)
-    })
-
     it('members prop is Array type', () => {
       const props = OurAtTa.props
       expect(props.members.type).toBe(Array)

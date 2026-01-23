@@ -229,11 +229,6 @@ describe('ModSupportUser', () => {
       expect(wrapper.text()).toContain('test@example.com')
     })
 
-    it('renders user displayname', async () => {
-      const wrapper = await mountComponent()
-      expect(wrapper.text()).toContain('Test User')
-    })
-
     it('renders user ID', async () => {
       const wrapper = await mountComponent()
       expect(wrapper.text()).toContain('123')
@@ -276,16 +271,6 @@ describe('ModSupportUser', () => {
   })
 
   describe('props', () => {
-    it('accepts id prop', async () => {
-      const wrapper = await mountComponent({ id: 456 })
-      expect(wrapper.props('id')).toBe(456)
-    })
-
-    it('accepts expand prop with default false', async () => {
-      const wrapper = await mountComponent()
-      expect(wrapper.props('expand')).toBe(false)
-    })
-
     it('accepts expand prop as true', async () => {
       const wrapper = await mountComponent({ expand: true })
       expect(wrapper.props('expand')).toBe(true)

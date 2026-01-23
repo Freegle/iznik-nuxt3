@@ -69,11 +69,6 @@ describe('CommunityEventsPage', () => {
   })
 
   describe('rendering', () => {
-    it('renders the page', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.infinite-loading').exists()).toBe(true)
-    })
-
     it('renders events from store', async () => {
       mockCommunityEventStore.list = {
         1: { id: 1, title: 'Event 1' },

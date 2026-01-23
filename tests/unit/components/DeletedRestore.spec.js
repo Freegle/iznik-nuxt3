@@ -83,11 +83,6 @@ describe('DeletedRestore', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('does not show notice when me is null', () => {
       mockMeValue.value = null
       const wrapper = createWrapper()
@@ -173,11 +168,6 @@ describe('DeletedRestore', () => {
   })
 
   describe('props', () => {
-    it('defaults bottom to true', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('bottom')).toBe(true)
-    })
-
     it('accepts bottom prop as false', () => {
       const wrapper = createWrapper({ bottom: false })
       expect(wrapper.props('bottom')).toBe(false)

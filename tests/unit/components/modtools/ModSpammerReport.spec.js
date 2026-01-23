@@ -71,11 +71,6 @@ describe('ModSpammerReport', () => {
   })
 
   describe('rendering', () => {
-    it('renders the modal', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.modal').exists()).toBe(true)
-    })
-
     it('renders the textarea for reason input', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('textarea').exists()).toBe(true)
@@ -88,12 +83,6 @@ describe('ModSpammerReport', () => {
   })
 
   describe('props', () => {
-    it('accepts user prop', () => {
-      const user = { id: 456, displayname: 'Another User' }
-      const wrapper = mountComponent({ user })
-      expect(wrapper.props('user')).toEqual(user)
-    })
-
     it('accepts safelist prop defaulting to false', () => {
       const wrapper = mountComponent()
       expect(wrapper.props('safelist')).toBe(false)

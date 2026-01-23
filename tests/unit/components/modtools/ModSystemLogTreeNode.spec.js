@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import ModSystemLogTreeNode from '~/modtools/components/ModSystemLogTreeNode.vue'
 
@@ -136,17 +136,6 @@ describe('ModSystemLogTreeNode', () => {
   })
 
   describe('props', () => {
-    it('accepts node prop', () => {
-      const node = createStandaloneNode()
-      const wrapper = mountComponent({ node })
-      expect(wrapper.props('node')).toEqual(node)
-    })
-
-    it('accepts hideUserColumn prop with default false', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.props('hideUserColumn')).toBe(false)
-    })
-
     it('accepts hideUserColumn prop as true', () => {
       const wrapper = mountComponent({ hideUserColumn: true })
       expect(wrapper.props('hideUserColumn')).toBe(true)
@@ -205,7 +194,7 @@ describe('ModSystemLogTreeNode', () => {
     })
 
     it('parentLog returns log for standalone', () => {
-      const log = createLog({ id: 888 })
+      createLog({ id: 888 })
       const wrapper = mountComponent({
         node: createStandaloneNode({ id: 888 }),
       })
@@ -454,7 +443,7 @@ describe('ModSystemLogTreeNode', () => {
   })
 
   describe('emits', () => {
-    it('emits filter-trace when child emits it', async () => {
+    it('emits filter-trace when child emits it', () => {
       mockSystemLogsStore.isGroupExpanded.mockReturnValue(true)
       const wrapper = mountComponent({
         node: createTraceGroupNode({
@@ -466,12 +455,12 @@ describe('ModSystemLogTreeNode', () => {
       expect(wrapper.emitted('filter-trace')).toBeFalsy()
     })
 
-    it('emits filter-session when child emits it', async () => {
+    it('emits filter-session when child emits it', () => {
       const wrapper = mountComponent()
       expect(wrapper.emitted('filter-session')).toBeFalsy()
     })
 
-    it('emits filter-ip when child emits it', async () => {
+    it('emits filter-ip when child emits it', () => {
       const wrapper = mountComponent()
       expect(wrapper.emitted('filter-ip')).toBeFalsy()
     })

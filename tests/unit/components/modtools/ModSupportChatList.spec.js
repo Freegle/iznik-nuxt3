@@ -53,11 +53,6 @@ describe('ModSupportChatList', () => {
   }
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('renders infinite-loading component', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.infinite-loading').exists()).toBe(true)

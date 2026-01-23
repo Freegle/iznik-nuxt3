@@ -77,24 +77,6 @@ describe('ModMicrovolunteeringDetailsButton', () => {
   })
 
   describe('props', () => {
-    it('accepts user prop', async () => {
-      const customUser = {
-        id: 456,
-        displayname: 'Custom User',
-        email: 'custom@example.com',
-      }
-      const wrapper = mountComponent(customUser)
-      await flushPromises()
-      expect(wrapper.props('user')).toEqual(expect.objectContaining(customUser))
-    })
-
-    it('accepts items prop', async () => {
-      const customItems = [{ id: 10 }, { id: 20 }]
-      const wrapper = mountComponent({}, customItems)
-      await flushPromises()
-      expect(wrapper.props('items')).toEqual(customItems)
-    })
-
     it('handles empty items array', async () => {
       const wrapper = mountComponent({}, [])
       await flushPromises()

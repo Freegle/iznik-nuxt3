@@ -106,11 +106,6 @@ describe('ModMemberExportButton', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('div').exists()).toBe(true)
-    })
-
     it('shows Export button when group exists', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Export')
@@ -221,13 +216,6 @@ describe('ModMemberExportButton', () => {
       const wrapper = mountComponent()
       wrapper.vm.download()
       expect(wrapper.vm.showExportModal).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts groupid prop', () => {
-      const wrapper = mountComponent({ groupid: 123 })
-      expect(wrapper.props('groupid')).toBe(123)
     })
   })
 

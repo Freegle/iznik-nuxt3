@@ -53,11 +53,6 @@ describe('ModAlertHistory', () => {
   })
 
   describe('rendering', () => {
-    it('renders the component', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.find('.row').exists()).toBe(true)
-    })
-
     it('displays alert subject', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test Alert')
@@ -98,14 +93,6 @@ describe('ModAlertHistory', () => {
       const wrapper = mountComponent()
       wrapper.vm.stats()
       expect(wrapper.vm.showStats).toBe(true)
-    })
-  })
-
-  describe('props', () => {
-    it('accepts alert prop', () => {
-      const customAlert = { ...defaultAlert, subject: 'Custom Alert' }
-      const wrapper = mountComponent({ alert: customAlert })
-      expect(wrapper.props('alert').subject).toBe('Custom Alert')
     })
   })
 })

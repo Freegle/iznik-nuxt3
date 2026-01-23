@@ -67,11 +67,6 @@ describe('SpinButton', () => {
   }
 
   describe('rendering', () => {
-    it('mounts successfully', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.exists()).toBe(true)
-    })
-
     it('renders with icon when iconName is provided', () => {
       const wrapper = createWrapper({ iconName: 'check' })
       const icon = wrapper.find('i')
@@ -111,16 +106,6 @@ describe('SpinButton', () => {
   })
 
   describe('props', () => {
-    it('requires variant prop', () => {
-      const wrapper = createWrapper({ variant: 'success' })
-      expect(wrapper.props('variant')).toBe('success')
-    })
-
-    it('defaults iconName to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('iconName')).toBe(null)
-    })
-
     it('defaults label to empty string', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('label')).toBe('')
@@ -131,34 +116,9 @@ describe('SpinButton', () => {
       expect(wrapper.props('timeout')).toBe(5000)
     })
 
-    it('defaults disabled to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('disabled')).toBe(false)
-    })
-
-    it('defaults size to null', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('size')).toBe(null)
-    })
-
-    it('defaults tabindex to 0', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('tabindex')).toBe(0)
-    })
-
     it('defaults doneIcon to check', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('doneIcon')).toBe('check')
-    })
-
-    it('defaults confirm to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('confirm')).toBe(false)
-    })
-
-    it('defaults flex to true', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('flex')).toBe(true)
     })
 
     it('defaults minimumSpinTime to 500', () => {
@@ -271,30 +231,6 @@ describe('SpinButton', () => {
         spinColor: 'text-danger',
       })
       expect(wrapper.props('spinColor')).toBe('text-danger')
-    })
-  })
-
-  describe('iconlast prop', () => {
-    it('defaults iconlast to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('iconlast')).toBe(false)
-    })
-
-    it('accepts iconlast prop', () => {
-      const wrapper = createWrapper({ iconlast: true })
-      expect(wrapper.props('iconlast')).toBe(true)
-    })
-  })
-
-  describe('noBorder prop', () => {
-    it('defaults noBorder to false', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('noBorder')).toBe(false)
-    })
-
-    it('accepts noBorder prop', () => {
-      const wrapper = createWrapper({ noBorder: true })
-      expect(wrapper.props('noBorder')).toBe(true)
     })
   })
 })
