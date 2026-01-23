@@ -23,6 +23,7 @@ import {
 ;(globalThis as Record<string, unknown>).onBeforeUnmount = onBeforeUnmount
 ;(globalThis as Record<string, unknown>).defineAsyncComponent = defineAsyncComponent
 
+
 // ============================================
 // GLOBAL VARIABLE MOCKS (for pinia-plugin-persistedstate)
 // ============================================

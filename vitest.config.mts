@@ -80,7 +80,19 @@ export default defineConfig({
         'tests/unit/mocks/ModCommentAddModal.js'
       ),
       // External library mocks
+      // More specific paths must come before less specific ones
+      '@vueup/vue-quill/dist/vue-quill.snow.css': path.join(
+        rootDir,
+        'tests/unit/mocks/vue-quill.css'
+      ),
+      '@vueup/vue-quill': path.join(rootDir, 'tests/unit/mocks/vue-quill.js'),
+      'quill-html-edit-button': path.join(
+        rootDir,
+        'tests/unit/mocks/quill-html-edit-button.js'
+      ),
       papaparse: path.join(rootDir, 'tests/unit/mocks/papaparse.js'),
+      'vue-letter': path.join(rootDir, 'tests/unit/mocks/vue-letter.js'),
+      letterparser: path.join(rootDir, 'tests/unit/mocks/letterparser.js'),
       // Composable mocks for testing
       '~/composables/useOurModal': path.join(
         rootDir,
@@ -104,7 +116,9 @@ export default defineConfig({
     pool: 'forks', // 'forks' is more stable than 'threads' for memory isolation
     // Limit workers based on available memory (WSL often has limited resources)
     // Using 50% of CPU cores as a safe default - adjust if needed
-    maxWorkers: process.env.CI ? 2 : Math.max(1, Math.floor(os.cpus().length / 2)),
+    maxWorkers: process.env.CI
+      ? 2
+      : Math.max(1, Math.floor(os.cpus().length / 2)),
     // Disable file parallelism if running with --single-thread for debugging
     fileParallelism: !process.env.VITEST_SINGLE_THREAD,
     coverage: {
