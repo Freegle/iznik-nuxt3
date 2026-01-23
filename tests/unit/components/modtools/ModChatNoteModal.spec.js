@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-// ref removed - not currently used
+import { ref } from 'vue'
 import ModChatNoteModal from '~/modtools/components/ModChatNoteModal.vue'
 
 const mockHide = vi.fn()
@@ -29,9 +29,10 @@ vi.mock('~/stores/chat', () => ({
   useChatStore: () => mockChatStore,
 }))
 
+// Mock with proper Vue ref to avoid template ref warnings
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
-    modal: { value: null },
+    modal: ref(null),
     hide: mockHide,
   }),
 }))

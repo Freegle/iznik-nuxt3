@@ -27,7 +27,7 @@ import { useMe } from '~/composables/useMe'
 const props = defineProps({
   user: {
     type: Object,
-    required: true,
+    default: null,
   },
   expandComments: {
     type: Boolean,

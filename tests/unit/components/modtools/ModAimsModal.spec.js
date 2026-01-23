@@ -1,13 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import ModAimsModal from '~/modtools/components/ModAimsModal.vue'
 
 const mockHide = vi.fn()
 
-// Mock the composable
+// Mock the composable with proper Vue ref to avoid template ref warnings
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
-    modal: { value: null },
+    modal: ref(null),
     show: vi.fn(),
     hide: mockHide,
   }),

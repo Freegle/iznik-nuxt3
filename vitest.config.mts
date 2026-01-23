@@ -75,6 +75,11 @@ export default defineConfig({
       ),
       // External library mocks
       papaparse: path.join(rootDir, 'tests/unit/mocks/papaparse.js'),
+      // Composable mocks for testing
+      '~/composables/useOurModal': path.join(
+        rootDir,
+        'tests/unit/mocks/useOurModal.js'
+      ),
       // Specific store/composable aliases must come before generic ~ alias
       ...storeAliases,
       ...composableAliases,

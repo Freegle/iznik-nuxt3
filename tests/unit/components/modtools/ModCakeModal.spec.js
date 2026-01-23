@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import ModCakeModal from '~/modtools/components/ModCakeModal.vue'
 
+// Mock hide function that tests can spy on
 const mockHide = vi.fn()
 
+// Override the global useOurModal mock with our custom spy
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
-    modal: { value: null },
+    modal: ref(null), // Use proper Vue ref to avoid template ref warnings
+    show: vi.fn(),
     hide: mockHide,
   }),
 }))

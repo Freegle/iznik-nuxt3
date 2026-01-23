@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createMockAlertStore } from '../../mocks/stores'
 import ModAlertHistoryStatsModal from '~/modtools/components/ModAlertHistoryStatsModal.vue'
 
@@ -11,9 +12,10 @@ vi.mock('~/stores/alert', () => ({
   useAlertStore: () => mockAlertStore,
 }))
 
+// Mock with proper Vue ref to avoid template ref warnings
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
-    modal: { value: null },
+    modal: ref(null),
     show: mockShow,
     hide: mockHide,
   }),

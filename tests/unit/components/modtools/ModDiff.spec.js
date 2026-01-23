@@ -78,7 +78,17 @@ describe('ModDiff', () => {
     })
 
     it('handles missing props gracefully', () => {
-      const wrapper = mount(ModDiff)
+      const wrapper = mount(ModDiff, {
+        global: {
+          stubs: {
+            DiffPart: {
+              template:
+                '<span class="diff-part" :data-added="part.added" :data-removed="part.removed">{{ part.value }}</span>',
+              props: ['part'],
+            },
+          },
+        },
+      })
       expect(wrapper.findAll('.diff-part').length).toBe(0)
     })
   })

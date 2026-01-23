@@ -1,5 +1,19 @@
 import { vi, beforeEach, afterEach } from 'vitest'
 import { config } from '@vue/test-utils'
+import { ref, defineComponent, h } from 'vue'
+
+// ============================================
+// VUE WARNINGS HANDLER - Fail tests on warnings
+// ============================================
+const originalWarn = console.warn
+console.warn = (...args: unknown[]) => {
+  const message = typeof args[0] === 'string' ? args[0] : ''
+  if (message.includes('[Vue warn]')) {
+    // Throw an error to fail the test
+    throw new Error(`Vue warning should not occur in tests: ${args.join(' ')}`)
+  }
+  originalWarn.apply(console, args)
+}
 
 // ============================================
 // GLOBAL MOCKS (provided to template context)

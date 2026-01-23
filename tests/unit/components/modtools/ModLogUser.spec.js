@@ -32,6 +32,18 @@ describe('ModLogUser', () => {
     it('renders nothing when user is null', () => {
       const wrapper = mount(ModLogUser, {
         props: { user: null },
+        global: {
+          stubs: {
+            'v-icon': {
+              template: '<i :data-icon="icon" :title="title"></i>',
+              props: ['icon', 'title'],
+            },
+            ExternalLink: {
+              template: '<a :href="href"><slot /></a>',
+              props: ['href'],
+            },
+          },
+        },
       })
       expect(wrapper.find('span').exists()).toBe(false)
     })

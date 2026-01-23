@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createMockUserStore } from '../../mocks/stores'
 import ModBanMemberConfirmModal from '~/modtools/components/ModBanMemberConfirmModal.vue'
 
@@ -27,9 +28,10 @@ vi.mock('@/stores/modgroup', () => ({
   useModGroupStore: () => mockModGroupStore,
 }))
 
+// Mock with proper Vue ref to avoid template ref warnings
 vi.mock('~/composables/useOurModal', () => ({
   useOurModal: () => ({
-    modal: { value: null },
+    modal: ref(null),
     show: mockShow,
     hide: mockHide,
   }),
