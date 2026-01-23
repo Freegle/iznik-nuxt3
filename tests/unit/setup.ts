@@ -56,6 +56,90 @@ console.warn = (...args: unknown[]) => {
 }
 
 // ============================================
+// NUXT COMPOSABLE GLOBALS (for auto-imports)
+// ============================================
+// Mock useNuxtApp to provide $api and other injected services
+const mockApi = {
+  dashboard: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  message: { fetch: vi.fn().mockResolvedValue({ data: {} }), fetchMultiple: vi.fn().mockResolvedValue([]) },
+  user: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  chat: { fetch: vi.fn().mockResolvedValue({ data: {} }), listChats: vi.fn().mockResolvedValue([]) },
+  group: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  news: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  notification: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  story: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  tryst: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  volunteering: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  communityevent: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  shortlink: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  address: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  isochrone: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+  location: { fetch: vi.fn().mockResolvedValue({ data: {} }) },
+}
+
+const mockNuxtApp = {
+  $api: mockApi,
+  $dayjs: (val: unknown) => ({
+    format: () => 'formatted',
+    fromNow: () => 'now',
+    isBefore: () => false,
+    isAfter: () => true,
+    diff: () => 0,
+    add: () => ({ format: () => 'formatted' }),
+    subtract: () => ({ format: () => 'formatted' }),
+  }),
+  $pinia: {},
+}
+
+;(globalThis as Record<string, unknown>).useNuxtApp = () => mockNuxtApp
+
+// Mock useRoute
+;(globalThis as Record<string, unknown>).useRoute = () => ({
+  params: {},
+  query: {},
+  path: '/',
+  name: 'index',
+  fullPath: '/',
+})
+
+// Mock useRouter
+;(globalThis as Record<string, unknown>).useRouter = () => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  go: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+})
+
+// Mock useRuntimeConfig
+;(globalThis as Record<string, unknown>).useRuntimeConfig = () => ({
+  public: {
+    APIv1: 'http://apiv1.localhost',
+    APIv2: 'http://apiv2.localhost',
+    GOOGLE_MAPS_KEY: 'test-key',
+    GOOGLE_CLIENT_ID: 'test-client-id',
+    FACEBOOK_APPID: 'test-fb-id',
+    SENTRY_DSN: '',
+    YAHOO_APPID: 'test-yahoo-id',
+  },
+})
+
+// Mock navigateTo
+;(globalThis as Record<string, unknown>).navigateTo = vi.fn()
+
+// Mock useCookie
+;(globalThis as Record<string, unknown>).useCookie = () => ref(null)
+
+// Mock useState
+;(globalThis as Record<string, unknown>).useState = (key: string, init?: () => unknown) => ref(init ? init() : null)
+
+// Mock useFetch
+;(globalThis as Record<string, unknown>).useFetch = vi.fn().mockResolvedValue({ data: ref(null), pending: ref(false), error: ref(null) })
+
+// Mock useAsyncData
+;(globalThis as Record<string, unknown>).useAsyncData = vi.fn().mockResolvedValue({ data: ref(null), pending: ref(false), error: ref(null) })
+
+// ============================================
 // GLOBAL MOCKS (provided to template context)
 // ============================================
 // These functions are auto-imported by Nuxt but need to be provided as mocks in tests
