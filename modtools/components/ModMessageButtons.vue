@@ -158,7 +158,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useMessageStore } from '~/stores/message'
-import { copyStdMsgs } from '~/composables/useStdMsgs'
+import { copyStdMsgs, icon, variant } from '~/composables/useStdMsgs'
 
 const props = defineProps({
   message: {
