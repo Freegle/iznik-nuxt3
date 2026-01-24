@@ -1,170 +1,261 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ReadMore from '~/components/ReadMore.vue'
 
 describe('ReadMore', () => {
-  const shortText = 'Short text'
-  const longText =
-    'This is a very long text that exceeds the default maximum character limit and should be truncated with a read more link to expand it.'
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   function createWrapper(props = {}) {
     return mount(ReadMore, {
       props: {
-        text: shortText,
+        text: 'This is a short text',
         ...props,
       },
     })
   }
 
   describe('rendering', () => {
+    it('renders a div container', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('div').exists()).toBe(true)
+    })
+
+    it('renders paragraph with text', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('p').exists()).toBe(true)
+    })
+
     it('displays full text when under maxChars', () => {
-      const wrapper = createWrapper({ text: shortText })
-      expect(wrapper.text()).toContain(shortText)
+      const wrapper = createWrapper({ text: 'Short text', maxChars: 100 })
+      expect(wrapper.text()).toContain('Short text')
     })
+  })
 
+  describe('truncation', () => {
     it('truncates text when over maxChars', () => {
-      const wrapper = createWrapper({ text: longText, maxChars: 50 })
-      expect(wrapper.text()).toContain('...')
-      expect(wrapper.text().length).toBeLessThan(longText.length)
+      const longText =
+        'This is a very long text that should be truncated because it exceeds the maximum character limit'
+      const wrapper = createWrapper({ text: longText, maxChars: 20 })
+      expect(wrapper.vm.formattedString).toBe('This is a very long ...')
     })
 
-    it('shows "read more" link when text is truncated', () => {
-      const wrapper = createWrapper({ text: longText, maxChars: 50 })
+    it('shows full text when exactly at maxChars', () => {
+      const wrapper = createWrapper({
+        text: '12345678901234567890',
+        maxChars: 20,
+      })
+      expect(wrapper.vm.formattedString).toBe('12345678901234567890')
+    })
+
+    it('adds ellipsis when truncated', () => {
+      const wrapper = createWrapper({
+        text: 'abcdefghijklmnopqrstuvwxyz',
+        maxChars: 10,
+      })
+      expect(wrapper.vm.formattedString).toContain('...')
+    })
+  })
+
+  describe('read more link', () => {
+    it('shows read more link when text exceeds maxChars', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({ text: longText, maxChars: 100 })
+      const readMoreLink = wrapper.find('#readmore')
+      expect(readMoreLink.exists()).toBe(true)
+    })
+
+    it('hides read more link when text is under maxChars', () => {
+      const wrapper = createWrapper({ text: 'Short', maxChars: 100 })
+      // When text is under maxChars, v-show hides the span containing the links
+      // Check that the condition text.length > maxChars is false
+      expect(wrapper.props('text').length > wrapper.props('maxChars')).toBe(
+        false
+      )
+      // The span with v-show should have display: none style
+      const linkContainer = wrapper.find('p > span')
+      expect(linkContainer.attributes('style')).toContain('display: none')
+    })
+
+    it('displays moreStr text on read more link', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        moreStr: 'Show more',
+      })
+      expect(wrapper.text()).toContain('Show more')
+    })
+
+    it('uses default moreStr of "read more"', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({ text: longText, maxChars: 100 })
       expect(wrapper.text()).toContain('read more')
     })
+  })
 
-    it('does not show "read more" link when text is short', () => {
-      const wrapper = createWrapper({ text: shortText, maxChars: 100 })
-      // The link is hidden with v-show, so it exists but isn't visible
-      const links = wrapper.findAll('a')
-      expect(links.length).toBe(2) // Both links exist but are hidden
+  describe('read more interaction', () => {
+    it('expands text when read more is clicked', async () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        lessStr: 'Show less',
+      })
+
+      // Initially truncated
+      expect(wrapper.vm.isReadMore).toBe(false)
+      expect(wrapper.vm.formattedString.length).toBeLessThan(longText.length)
+
+      // Click read more
+      await wrapper.find('#readmore').trigger('click')
+
+      // Now expanded
+      expect(wrapper.vm.isReadMore).toBe(true)
+      expect(wrapper.vm.formattedString).toBe(longText)
+    })
+
+    it('collapses text when read less is clicked', async () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        lessStr: 'Show less',
+      })
+
+      // Expand
+      await wrapper.find('#readmore').trigger('click')
+      expect(wrapper.vm.isReadMore).toBe(true)
+
+      // Find and click the "read less" link (second link)
+      const links = wrapper.findAll('#readmore')
+      await links[1].trigger('click')
+
+      expect(wrapper.vm.isReadMore).toBe(false)
+    })
+
+    it('prevents default when link is #', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        link: '#',
+      })
+
+      const event = { preventDefault: vi.fn() }
+
+      wrapper.vm.triggerReadMore(event, true)
+
+      expect(event.preventDefault).toHaveBeenCalled()
+    })
+
+    it('does not prevent default when link is not #', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        link: '/some-page',
+      })
+
+      const event = { preventDefault: vi.fn() }
+
+      wrapper.vm.triggerReadMore(event, true)
+
+      expect(event.preventDefault).not.toHaveBeenCalled()
     })
   })
 
   describe('props', () => {
-    it('defaults maxChars to 100', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('maxChars')).toBe(100)
+    it('requires text prop', () => {
+      const wrapper = createWrapper({ text: 'Test text' })
+      expect(wrapper.props('text')).toBe('Test text')
     })
 
-    it('defaults moreStr to "read more"', () => {
+    it('has moreStr prop defaulting to "read more"', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('moreStr')).toBe('read more')
     })
 
-    it('defaults lessStr to empty string', () => {
+    it('has lessStr prop defaulting to empty string', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('lessStr')).toBe('')
     })
 
-    it('defaults link to "#"', () => {
+    it('has link prop defaulting to #', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('link')).toBe('#')
+    })
+
+    it('has maxChars prop defaulting to 100', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('maxChars')).toBe(100)
+    })
+
+    it('accepts custom moreStr', () => {
+      const wrapper = createWrapper({ moreStr: 'Continue reading' })
+      expect(wrapper.props('moreStr')).toBe('Continue reading')
+    })
+
+    it('accepts custom lessStr', () => {
+      const wrapper = createWrapper({ lessStr: 'Collapse' })
+      expect(wrapper.props('lessStr')).toBe('Collapse')
+    })
+
+    it('accepts custom link', () => {
+      const wrapper = createWrapper({ link: '/details' })
+      expect(wrapper.props('link')).toBe('/details')
     })
 
     it('accepts custom maxChars', () => {
       const wrapper = createWrapper({ maxChars: 50 })
       expect(wrapper.props('maxChars')).toBe(50)
     })
+  })
 
-    it('accepts custom moreStr', () => {
-      const wrapper = createWrapper({ moreStr: 'Show more' })
-      expect(wrapper.props('moreStr')).toBe('Show more')
+  describe('computed formattedString', () => {
+    it('returns full text when not truncated and isReadMore is false', () => {
+      const wrapper = createWrapper({ text: 'Short', maxChars: 100 })
+      expect(wrapper.vm.formattedString).toBe('Short')
     })
 
-    it('accepts custom lessStr', () => {
-      const wrapper = createWrapper({ lessStr: 'Show less' })
-      expect(wrapper.props('lessStr')).toBe('Show less')
+    it('returns full text when isReadMore is true', async () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({
+        text: longText,
+        maxChars: 100,
+        lessStr: 'less',
+      })
+
+      await wrapper.find('#readmore').trigger('click')
+
+      expect(wrapper.vm.formattedString).toBe(longText)
+    })
+
+    it('returns truncated text with ellipsis when over maxChars', () => {
+      const wrapper = createWrapper({
+        text: 'This is a longer text that needs truncation',
+        maxChars: 10,
+      })
+      expect(wrapper.vm.formattedString).toBe('This is a ...')
     })
   })
 
-  describe('expand/collapse functionality', () => {
-    it('expands text when "read more" is clicked', async () => {
-      const wrapper = createWrapper({ text: longText, maxChars: 50 })
-
-      // Initially truncated
-      expect(wrapper.text()).toContain('...')
-
-      // Click read more
-      const readMoreLink = wrapper.find('#readmore')
-      await readMoreLink.trigger('click')
-
-      // Should show full text
-      expect(wrapper.text()).toContain(longText)
-      expect(wrapper.text()).not.toContain('...')
+  describe('link href', () => {
+    it('sets href to # by default', () => {
+      const longText = 'A'.repeat(150)
+      const wrapper = createWrapper({ text: longText, maxChars: 100 })
+      expect(wrapper.find('#readmore').attributes('href')).toBe('#')
     })
 
-    it('collapses text when "less" link is clicked', async () => {
+    it('sets custom href when provided', () => {
+      const longText = 'A'.repeat(150)
       const wrapper = createWrapper({
         text: longText,
-        maxChars: 50,
-        lessStr: 'Show less',
+        maxChars: 100,
+        link: '/read-full',
       })
-
-      // Expand first
-      const readMoreLink = wrapper.find('#readmore')
-      await readMoreLink.trigger('click')
-
-      // Find and click the "show less" link
-      const links = wrapper.findAll('#readmore')
-      const showLessLink = links[1]
-      await showLessLink.trigger('click')
-
-      // Should be truncated again
-      expect(wrapper.text()).toContain('...')
-    })
-
-    it('prevents default when link is "#"', async () => {
-      const wrapper = createWrapper({ text: longText, maxChars: 50 })
-      const event = { preventDefault: vi.fn() }
-      await wrapper.vm.triggerReadMore(event, true)
-
-      expect(event.preventDefault).toHaveBeenCalled()
-    })
-  })
-
-  describe('custom moreStr and lessStr', () => {
-    it('displays custom moreStr', () => {
-      const wrapper = createWrapper({
-        text: longText,
-        maxChars: 50,
-        moreStr: 'Expand',
-      })
-      expect(wrapper.text()).toContain('Expand')
-    })
-
-    it('displays custom lessStr when expanded', async () => {
-      const wrapper = createWrapper({
-        text: longText,
-        maxChars: 50,
-        lessStr: 'Collapse',
-      })
-
-      // Expand
-      const readMoreLink = wrapper.find('#readmore')
-      await readMoreLink.trigger('click')
-
-      expect(wrapper.text()).toContain('Collapse')
-    })
-  })
-
-  describe('edge cases', () => {
-    it('handles text exactly at maxChars', () => {
-      const exactText = 'a'.repeat(100)
-      const wrapper = createWrapper({ text: exactText, maxChars: 100 })
-      expect(wrapper.text()).toContain(exactText)
-    })
-
-    it('handles empty text', () => {
-      const wrapper = createWrapper({ text: '' })
-      expect(wrapper.exists()).toBe(true)
-    })
-
-    it('handles text with one character over maxChars', () => {
-      const textOverByOne = 'a'.repeat(101)
-      const wrapper = createWrapper({ text: textOverByOne, maxChars: 100 })
-      expect(wrapper.text()).toContain('...')
-      expect(wrapper.text()).toContain('read more')
+      expect(wrapper.find('#readmore').attributes('href')).toBe('/read-full')
     })
   })
 })
