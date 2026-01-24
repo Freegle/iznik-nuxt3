@@ -2042,13 +2042,12 @@ const testWithFixtures = test.extend({
       await sendReplyButton.click()
       console.log('Clicked Send your reply button')
 
-      // Wait for "Welcome to Freegle" modal containing "It looks like this is your first time"
-      console.log('Waiting for Welcome to Freegle modal')
-      console.log(
-        'DEBUG: Current URL before waiting for modal:',
-        freshPage.url()
-      )
-      console.log('DEBUG: Checking for any modals on page...')
+      // Wait for either:
+      // 1. "Welcome to Freegle" modal (new user success)
+      // 2. LoginModal in "Welcome back" mode (if loggedInEver is somehow true)
+      // 3. LoginModal in signup mode (Join the Reuse Revolution)
+      console.log('Waiting for modal after clicking Send...')
+      console.log('DEBUG: Current URL:', freshPage.url())
 
       // Check what modals exist first
       const allModals = await freshPage.locator('.modal-content').count()
@@ -2061,6 +2060,112 @@ const testWithFixtures = test.extend({
         console.log('DEBUG: Modal texts found:', modalTexts)
       }
 
+      // Check if LoginModal appeared in "Welcome back" mode (needs to switch to signup)
+      const loginModal = freshPage.locator('.modal-content').filter({
+        hasText: 'Welcome back',
+      })
+      const loginModalVisible = await loginModal
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false)
+
+      if (loginModalVisible) {
+        console.log(
+          'LoginModal appeared in "Welcome back" mode - switching to signup'
+        )
+
+        // Click the "Join" button to switch to signup mode
+        const joinButton = loginModal.locator('button:has-text("Join")')
+        await joinButton.click()
+        console.log('Clicked Join button to switch to signup mode')
+
+        // Wait for the mode to switch (name field should appear)
+        await freshPage.waitForTimeout(500)
+
+        // Now fill in the signup form
+        // Fill name
+        const nameInput = loginModal.locator(
+          'input#fullname, input[name="fullname"]'
+        )
+        await nameInput.waitFor({ state: 'visible', timeout: 5000 })
+        await nameInput.fill('Test User')
+        console.log('Filled name in signup form')
+
+        // Email should already be filled, but verify
+        const emailInput = loginModal.locator('input[type="email"]')
+        const emailValue = await emailInput.inputValue()
+        if (!emailValue) {
+          await emailInput.fill(email)
+          console.log('Filled email in signup form')
+        }
+
+        // Fill password
+        const passwordInput = loginModal
+          .locator('input[type="password"], input[placeholder*="password" i]')
+          .first()
+        await passwordInput.waitFor({ state: 'visible', timeout: 5000 })
+        await passwordInput.fill('testpassword123')
+        console.log('Filled password in signup form')
+
+        // Click Join Freegle button
+        const joinFreegleButton = loginModal.locator(
+          'button:has-text("Join Freegle")'
+        )
+        await joinFreegleButton.click()
+        console.log('Clicked Join Freegle button')
+
+        // Wait for registration to complete and navigate to chats
+        try {
+          await freshPage.waitForURL('**/chats/**', {
+            timeout: timeouts.navigation.default,
+          })
+          console.log('Successfully registered and navigated to chats')
+
+          // Handle ContactDetailsAskModal if it appears
+          try {
+            const contactModal = freshPage.locator('.modal-content').filter({
+              hasText: 'Contact details',
+            })
+            await contactModal.waitFor({ state: 'visible', timeout: 3000 })
+            console.log('ContactDetailsAskModal appeared, filling postcode')
+
+            const postcodeInput = contactModal.locator(
+              'input[placeholder*="postcode"], .pcinp'
+            )
+            await postcodeInput.fill('EH3 6SS')
+
+            const modalCloseButton = contactModal.locator(
+              '.btn-close, .close, button[aria-label="Close"]'
+            )
+            if ((await modalCloseButton.count()) > 0) {
+              await modalCloseButton.click()
+            }
+          } catch {
+            console.log('No contact details modal appeared')
+          }
+
+          // Verify chat entry exists
+          await freshPage.waitForSelector('.chat-entry', {
+            timeout: timeouts.ui.appearance,
+          })
+          const chatCount = await freshPage
+            .locator('.chat-entry')
+            .filter({ visible: true })
+            .count()
+          console.log(
+            `Found ${chatCount} chat entries after signup via login modal`
+          )
+
+          await freshContext.close()
+          return chatCount > 0
+        } catch (error) {
+          console.log('Error after signup:', error.message)
+          await freshContext.close()
+          return false
+        }
+      }
+
+      // Normal flow - look for Welcome to Freegle modal
       try {
         const welcomeModal = freshPage
           .locator('.modal-content')
@@ -2071,12 +2176,10 @@ const testWithFixtures = test.extend({
             hasText: 'It looks like this is your first time',
           })
 
-        console.log(
-          'DEBUG: About to wait for Welcome modal with shorter timeout...'
-        )
+        console.log('Looking for Welcome to Freegle modal...')
         await welcomeModal.waitFor({
           state: 'visible',
-          timeout: 5000, // Much shorter timeout - if modal doesn't appear quickly, it's probably not coming
+          timeout: 5000,
         })
 
         console.log('Welcome to Freegle modal appeared')
