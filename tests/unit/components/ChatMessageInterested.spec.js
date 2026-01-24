@@ -1,6 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ChatMessageInterested from '~/components/ChatMessageInterested.vue'
+
+// Mock defineAsyncComponent to prevent async import race conditions during test cleanup
+vi.stubGlobal('defineAsyncComponent', (fn) => ({
+  name: 'MockedAsyncComponent',
+  template: '<div class="mocked-async-component" />',
+}))
+
+// Mock vue-highlight-words to prevent prop validation errors
+vi.mock('vue-highlight-words', () => ({
+  default: {
+    name: 'Highlighter',
+    props: ['textToHighlight', 'searchWords', 'highlightClassName'],
+    template: '<span class="highlighter">{{ textToHighlight }}</span>',
+  },
+}))
 
 const {
   mockChat,
@@ -71,6 +86,8 @@ vi.mock('~/composables/useMe', () => ({
 }))
 
 describe('ChatMessageInterested', () => {
+  let wrapper = null
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockChat.value = { lastmsgseen: 10 }
@@ -90,8 +107,15 @@ describe('ChatMessageInterested', () => {
     mockMessageStore.byId.mockReturnValue(null)
   })
 
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount()
+      wrapper = null
+    }
+  })
+
   function createWrapper(props = {}) {
-    return mount(ChatMessageInterested, {
+    wrapper = mount(ChatMessageInterested, {
       props: {
         chatid: 1,
         id: 100,
@@ -120,10 +144,6 @@ describe('ChatMessageInterested', () => {
             template: '<span class="v-icon" :data-icon="icon" />',
             props: ['icon'],
           },
-          Highlighter: {
-            template: '<span class="highlighter">{{ textToHighlight }}</span>',
-            props: ['textToHighlight', 'searchWords', 'highlightClassName'],
-          },
           OutcomeModal: {
             template:
               '<div class="outcome-modal" :data-id="id" :data-type="type" />',
@@ -136,6 +156,7 @@ describe('ChatMessageInterested', () => {
         },
       },
     })
+    return wrapper
   }
 
   describe('rendering', () => {
