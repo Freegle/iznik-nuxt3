@@ -280,10 +280,7 @@ async function clickReplyButton(page) {
 /**
  * Helper: Click Send and wait for result
  */
-async function clickSendAndWait(
-  page,
-  { expectWelcomeModal = false, email = null } = {}
-) {
+async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
   const sendButton = page
     .locator('.btn:has-text("Send your reply")')
     .filter({ visible: true })
@@ -295,82 +292,27 @@ async function clickSendAndWait(
   console.log('[Reply] Clicked Send your reply')
 
   if (expectWelcomeModal) {
-    // First check for "Welcome back" modal (loggedInEver is true in fresh context)
-    const welcomeBackModal = page.locator('.modal-content').filter({
-      hasText: 'Welcome back',
+    // Wait for either welcome modal OR navigation to chats (modal might not appear in all flows)
+    const welcomeModal = page.locator('.modal-content').filter({
+      hasText: 'Welcome to Freegle',
     })
-    const welcomeBackVisible = await welcomeBackModal
-      .waitFor({ state: 'visible', timeout: 3000 })
-      .then(() => true)
-      .catch(() => false)
 
-    if (welcomeBackVisible) {
-      console.log(
-        '[Reply] LoginModal appeared in "Welcome back" mode - switching to signup'
-      )
-
-      // Click the "Join" button to switch to signup mode
-      const joinButton = welcomeBackModal.locator('button:has-text("Join")')
-      await joinButton.click()
-      console.log('[Reply] Clicked Join button to switch to signup mode')
-
-      // After clicking Join, use #loginModal selector (text filter becomes stale)
-      const signupModal = page.locator('#loginModal .modal-content')
-
-      // Wait for fullname field and fill signup form
-      const nameInput = signupModal.locator(
-        'input#fullname, input[name="fullname"]'
-      )
-      await nameInput.waitFor({ state: 'visible', timeout: 10000 })
-      await nameInput.fill('Test User')
-      console.log('[Reply] Filled name in signup form')
-
-      // Email should already be filled, but verify
-      const emailInput = signupModal.locator('input[type="email"]')
-      const emailValue = await emailInput.inputValue()
-      if (!emailValue && email) {
-        await emailInput.fill(email)
-        console.log('[Reply] Filled email in signup form')
-      }
-
-      // Fill password
-      const passwordInput = signupModal
-        .locator('input[type="password"], input[placeholder*="password" i]')
-        .first()
-      await passwordInput.waitFor({ state: 'visible', timeout: 5000 })
-      await passwordInput.fill('testpassword123')
-      console.log('[Reply] Filled password in signup form')
-
-      // Click Join Freegle button
-      const joinFreegleButton = signupModal.locator(
-        'button:has-text("Join Freegle")'
-      )
-      await joinFreegleButton.click()
-      console.log('[Reply] Clicked Join Freegle button')
-
-      // Navigation will happen after signup - handled below
-    } else {
-      // Check for "Welcome to Freegle" modal (normal new user flow)
-      const welcomeModal = page.locator('.modal-content').filter({
-        hasText: 'Welcome to Freegle',
+    // Race between welcome modal and navigation to chats
+    try {
+      await welcomeModal.waitFor({
+        state: 'visible',
+        timeout: 10000, // shorter timeout since it might not appear
       })
+      console.log('[Reply] Welcome modal appeared')
 
-      try {
-        await welcomeModal.waitFor({
-          state: 'visible',
-          timeout: 10000,
-        })
-        console.log('[Reply] Welcome modal appeared')
-
-        // Close the modal
-        const closeButton = welcomeModal.locator(
-          '.btn:has-text("Close and Continue")'
-        )
-        await closeButton.click()
-        console.log('[Reply] Closed welcome modal')
-      } catch {
-        console.log('[Reply] Welcome modal did not appear, continuing...')
-      }
+      // Close the modal
+      const closeButton = welcomeModal.locator(
+        '.btn:has-text("Close and Continue")'
+      )
+      await closeButton.click()
+      console.log('[Reply] Closed welcome modal')
+    } catch {
+      console.log('[Reply] Welcome modal did not appear, continuing...')
     }
   }
 
