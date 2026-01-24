@@ -22,6 +22,16 @@
       >
         RSVP - reply expected
       </b-badge>
+      <span
+        v-if="mod && chatmessage?.bymailid"
+        class="btn btn-sm btn-white mb-2 ml-2 clickme"
+        :title="
+          'Received by email #' + chatmessage?.bymailid + ' click to view'
+        "
+        @click="showOriginal = true"
+      >
+        <v-icon icon="info-circle" /> View original email
+      </span>
     </div>
     <div v-else class="d-flex justify-content-end chat__dateread--mine">
       <span v-if="chatmessage?.seenbyall" title="This message has been read.">
@@ -71,6 +81,16 @@
       <span :title="datetimeshort(chatmessage?.date)" class="ml-1">{{
         timeadaptChat(chatmessage?.date)
       }}</span>
+      <span
+        v-if="mod && chatmessage?.bymailid"
+        class="btn btn-sm btn-white mb-2 ml-2 clickme"
+        :title="
+          'Received by email #' + chatmessage?.bymailid + ' click to view'
+        "
+        @click="showOriginal = true"
+      >
+        <v-icon icon="info-circle" /> View original email
+      </span>
       <b-badge
         v-if="chatmessage?.replyexpected && !chatmessage?.replyreceived"
         variant="danger"
@@ -79,14 +99,23 @@
         RSVP - reply requested
       </b-badge>
     </div>
+    <ModMessageEmailModal
+      v-if="showOriginal"
+      :id="chatmessage?.bymailid"
+      @hidden="showOriginal = false"
+    />
   </div>
 </template>
 <script setup>
 import { useUserStore } from '~/stores/user'
 import { useChatMessageBase } from '~/composables/useChat'
 import { datetimeshort, timeadaptChat } from '~/composables/useTimeFormat'
-import { ref, computed, onMounted } from '#imports'
+import { ref, computed, onMounted, defineAsyncComponent } from '#imports'
 import { useMe } from '~/composables/useMe'
+
+const ModMessageEmailModal = defineAsyncComponent(() =>
+  import('~/modtools/components/ModMessageEmailModal.vue')
+)
 
 const props = defineProps({
   chatid: {
@@ -118,6 +147,7 @@ const { chat, otheruser, chatmessage, messageIsFromCurrentUser } =
 
 // Data properties
 const chatMessageUser = ref(null)
+const showOriginal = ref(false)
 
 // Computed properties
 const othermodname = computed(() => {
