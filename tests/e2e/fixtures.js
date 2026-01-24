@@ -2061,38 +2061,38 @@ const testWithFixtures = test.extend({
       }
 
       // Check if LoginModal appeared in "Welcome back" mode (needs to switch to signup)
-      const loginModal = freshPage.locator('.modal-content').filter({
+      const welcomeBackModal = freshPage.locator('.modal-content').filter({
         hasText: 'Welcome back',
       })
-      const loginModalVisible = await loginModal
+      const welcomeBackVisible = await welcomeBackModal
         .waitFor({ state: 'visible', timeout: 3000 })
         .then(() => true)
         .catch(() => false)
 
-      if (loginModalVisible) {
+      if (welcomeBackVisible) {
         console.log(
           'LoginModal appeared in "Welcome back" mode - switching to signup'
         )
 
         // Click the "Join" button to switch to signup mode
-        const joinButton = loginModal.locator('button:has-text("Join")')
+        const joinButton = welcomeBackModal.locator('button:has-text("Join")')
         await joinButton.click()
         console.log('Clicked Join button to switch to signup mode')
 
-        // Wait for the mode to switch (name field should appear)
-        await freshPage.waitForTimeout(500)
+        // After clicking Join, the modal text changes from "Welcome back" to "Join the Reuse Revolution"
+        // So we need to use the #loginModal locator instead of the text-filtered one
+        const signupModal = freshPage.locator('#loginModal .modal-content')
 
-        // Now fill in the signup form
-        // Fill name
-        const nameInput = loginModal.locator(
+        // Wait for the fullname field to appear (indicates signup mode is active)
+        const nameInput = signupModal.locator(
           'input#fullname, input[name="fullname"]'
         )
-        await nameInput.waitFor({ state: 'visible', timeout: 5000 })
+        await nameInput.waitFor({ state: 'visible', timeout: 10000 })
         await nameInput.fill('Test User')
         console.log('Filled name in signup form')
 
         // Email should already be filled, but verify
-        const emailInput = loginModal.locator('input[type="email"]')
+        const emailInput = signupModal.locator('input[type="email"]')
         const emailValue = await emailInput.inputValue()
         if (!emailValue) {
           await emailInput.fill(email)
@@ -2100,7 +2100,7 @@ const testWithFixtures = test.extend({
         }
 
         // Fill password
-        const passwordInput = loginModal
+        const passwordInput = signupModal
           .locator('input[type="password"], input[placeholder*="password" i]')
           .first()
         await passwordInput.waitFor({ state: 'visible', timeout: 5000 })
@@ -2108,7 +2108,7 @@ const testWithFixtures = test.extend({
         console.log('Filled password in signup form')
 
         // Click Join Freegle button
-        const joinFreegleButton = loginModal.locator(
+        const joinFreegleButton = signupModal.locator(
           'button:has-text("Join Freegle")'
         )
         await joinFreegleButton.click()
