@@ -11,6 +11,7 @@ export {
   onMounted,
   onBeforeUnmount,
   defineAsyncComponent,
+  toRef,
 } from 'vue'
 
 export function useNuxtApp() {
