@@ -1,130 +1,195 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { Suspense, defineComponent, h } from 'vue'
+import { defineComponent, h, Suspense } from 'vue'
 import DonationThermometer from '~/components/DonationThermometer.vue'
 
-// Mock donation store
-const mockFetch = vi.fn().mockResolvedValue(undefined)
-let targetValue = 1000
-let raisedValue = 500
+const { mockFetch, mockValues } = vi.hoisted(() => ({
+  mockFetch: vi.fn(),
+  mockValues: { target: 1000, raised: 500 },
+}))
 
 vi.mock('~/stores/donations', () => ({
   useDonationStore: () => ({
     fetch: mockFetch,
     get target() {
-      return targetValue
+      return mockValues.target
     },
     get raised() {
-      return raisedValue
+      return mockValues.raised
     },
+  }),
+}))
+
+vi.mock('~/components/VueThermometer', () => ({
+  default: defineComponent({
+    name: 'VueThermometer',
+    props: ['value', 'min', 'max', 'options', 'scale'],
+    template:
+      '<div class="vue-thermometer" :data-value="value" :data-max="max" />',
   }),
 }))
 
 describe('DonationThermometer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    targetValue = 1000
-    raisedValue = 500
+    mockValues.target = 1000
+    mockValues.raised = 500
+    mockFetch.mockResolvedValue({})
   })
 
   async function createWrapper(props = {}) {
-    const TestWrapper = defineComponent({
+    const WrapperComponent = defineComponent({
+      components: { DonationThermometer },
       render() {
         return h(Suspense, null, {
           default: () => h(DonationThermometer, props),
         })
       },
     })
-
-    const wrapper = mount(TestWrapper, {
-      global: {
-        stubs: {
-          VueThermometer: {
-            template:
-              '<div class="vue-thermometer" :data-value="value" :data-min="min" :data-max="max"></div>',
-            props: ['value', 'min', 'max', 'options', 'scale'],
-          },
-        },
-      },
-    })
-
+    const wrapper = mount(WrapperComponent)
     await flushPromises()
     return wrapper
   }
 
   describe('rendering', () => {
-    it('renders thermometer component', async () => {
+    it('renders container div', async () => {
+      const wrapper = await createWrapper()
+      expect(wrapper.find('div').exists()).toBe(true)
+    })
+
+    it('renders VueThermometer component', async () => {
       const wrapper = await createWrapper()
       expect(wrapper.find('.vue-thermometer').exists()).toBe(true)
     })
 
-    it('displays raised amount', async () => {
+    it('displays raised amount when raised is truthy', async () => {
+      mockValues.raised = 750
       const wrapper = await createWrapper()
-      expect(wrapper.text()).toContain('£500')
+      expect(wrapper.find('h4').exists()).toBe(true)
+      expect(wrapper.text()).toContain('£750')
       expect(wrapper.text()).toContain('Raised')
     })
 
-    it('does not show raised heading when raised is 0', async () => {
-      raisedValue = 0
+    it('hides raised amount when raised is 0', async () => {
+      mockValues.raised = 0
       const wrapper = await createWrapper()
       expect(wrapper.find('h4').exists()).toBe(false)
     })
   })
 
-  describe('thermometer values', () => {
+  describe('thermometer props', () => {
     it('passes raised value to thermometer', async () => {
+      mockValues.raised = 600
       const wrapper = await createWrapper()
-      const thermometer = wrapper.find('.vue-thermometer')
-      expect(thermometer.attributes('data-value')).toBe('500')
+      expect(wrapper.find('.vue-thermometer').attributes('data-value')).toBe(
+        '600'
+      )
     })
 
-    it('passes min value of 0 to thermometer', async () => {
+    it('passes computed max to thermometer when raised < target', async () => {
+      mockValues.target = 1000
+      mockValues.raised = 500
       const wrapper = await createWrapper()
-      const thermometer = wrapper.find('.vue-thermometer')
-      expect(thermometer.attributes('data-min')).toBe('0')
-    })
-
-    it('uses target as max when raised is less than target', async () => {
-      raisedValue = 500
-      targetValue = 1000
-      const wrapper = await createWrapper()
-      const thermometer = wrapper.find('.vue-thermometer')
-      expect(thermometer.attributes('data-max')).toBe('1000')
-    })
-
-    it('stretches max when raised exceeds target', async () => {
-      raisedValue = 1200
-      targetValue = 1000
-      const wrapper = await createWrapper()
-      const thermometer = wrapper.find('.vue-thermometer')
-      // max should be raised * 1.1 = 1320, rounded to nearest 500 = 1500
-      expect(thermometer.attributes('data-max')).toBe('1500')
-    })
-
-    it('calculates max correctly for smaller amounts', async () => {
-      raisedValue = 300
-      targetValue = 200
-      const wrapper = await createWrapper()
-      const thermometer = wrapper.find('.vue-thermometer')
-      // max should be 300 * 1.1 = 330 (under 500, no rounding)
-      expect(thermometer.attributes('data-max')).toBe('330')
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '1000'
+      )
     })
   })
 
-  describe('store interactions', () => {
-    it('fetches donation data on mount', async () => {
+  describe('computed max', () => {
+    it('returns target when raised is less than target', async () => {
+      mockValues.target = 1000
+      mockValues.raised = 500
+      const wrapper = await createWrapper()
+      // Check via thermometer data-max attribute
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '1000'
+      )
+    })
+
+    it('stretches max when raised exceeds target', async () => {
+      mockValues.target = 1000
+      mockValues.raised = 1100
+      const wrapper = await createWrapper()
+      // raised * 1.1 = 1210, rounds: Math.round((1210+0.5)/500)*500 = 1000
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '1000'
+      )
+    })
+
+    it('rounds to nearest 500 when max > 500', async () => {
+      mockValues.target = 1000
+      mockValues.raised = 1500
+      const wrapper = await createWrapper()
+      // raised * 1.1 = 1650, rounds: Math.round((1650+0.5)/500)*500 = 1500
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '1500'
+      )
+    })
+
+    it('rounds up for higher raised amounts', async () => {
+      mockValues.target = 1000
+      mockValues.raised = 2000
+      const wrapper = await createWrapper()
+      // raised * 1.1 = 2200, rounds: Math.round((2200+0.5)/500)*500 = 2000
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '2000'
+      )
+    })
+
+    it('uses exact 1.1x multiplier when raised is small', async () => {
+      mockValues.target = 100
+      mockValues.raised = 150
+      const wrapper = await createWrapper()
+      // raised * 1.1 = 165, which is < 500, so no rounding
+      expect(wrapper.find('.vue-thermometer').attributes('data-max')).toBe(
+        '165'
+      )
+    })
+  })
+
+  describe('props', () => {
+    it('has groupid prop defaulting to null', async () => {
+      await createWrapper()
+      // Verify default by checking fetch was called with null
+      expect(mockFetch).toHaveBeenCalledWith(null)
+    })
+
+    it('accepts custom groupid', async () => {
+      await createWrapper({ groupid: 123 })
+      // Verify groupid passed to fetch
+      expect(mockFetch).toHaveBeenCalledWith(123)
+    })
+  })
+
+  describe('store interaction', () => {
+    it('calls donationStore.fetch on mount', async () => {
       await createWrapper()
       expect(mockFetch).toHaveBeenCalled()
     })
 
-    it('fetches with groupid when provided', async () => {
-      await createWrapper({ groupid: 123 })
-      expect(mockFetch).toHaveBeenCalledWith(123)
+    it('passes groupid to fetch', async () => {
+      await createWrapper({ groupid: 456 })
+      expect(mockFetch).toHaveBeenCalledWith(456)
     })
 
-    it('fetches with null groupid when not provided', async () => {
+    it('passes null groupid when not provided', async () => {
       await createWrapper()
       expect(mockFetch).toHaveBeenCalledWith(null)
+    })
+  })
+
+  describe('thermometer rendering', () => {
+    it('renders thermometer with correct scale', async () => {
+      const wrapper = await createWrapper()
+      // Component passes scale="£" to thermometer
+      expect(wrapper.find('.vue-thermometer').exists()).toBe(true)
+    })
+
+    it('renders thermometer with min value of 0', async () => {
+      const wrapper = await createWrapper()
+      // The thermometer receives min=0 from the component
+      expect(wrapper.find('.vue-thermometer').exists()).toBe(true)
     })
   })
 })

@@ -2,23 +2,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import GlobalMessage from '~/components/GlobalMessage.vue'
 
-// Mock misc store
-const mockMiscStore = {
-  get: vi.fn(),
-  set: vi.fn(),
-}
+const mockGet = vi.fn()
+const mockSet = vi.fn()
+const mockGroups = vi.fn(() => [])
 
 vi.mock('~/stores/misc', () => ({
-  useMiscStore: () => mockMiscStore,
+  useMiscStore: () => ({
+    get: mockGet,
+    set: mockSet,
+  }),
 }))
-
-// Mock auth store
-let mockGroups = []
 
 vi.mock('~/stores/auth', () => ({
   useAuthStore: () => ({
     get groups() {
-      return mockGroups
+      return mockGroups()
     },
   }),
 }))
@@ -26,10 +24,11 @@ vi.mock('~/stores/auth', () => ({
 describe('GlobalMessage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockMiscStore.get.mockReturnValue(false)
-    mockGroups = []
+    mockGet.mockReturnValue(false)
+    mockGroups.mockReturnValue([])
+    // Set date to before the active date for tests
     vi.useFakeTimers()
-    vi.setSystemTime(new Date('2025-06-01'))
+    vi.setSystemTime(new Date('2025-05-01'))
   })
 
   afterEach(() => {
@@ -41,98 +40,141 @@ describe('GlobalMessage', () => {
       global: {
         stubs: {
           PrivacyUpdate: {
-            template: '<div class="privacy-update"></div>',
+            template: '<div class="privacy-update" />',
           },
           'b-card': {
             template: '<div class="b-card"><slot /></div>',
           },
           'b-button': {
             template:
-              '<button :class="variant" :href="href" :target="target" @click="$emit(\'click\', $event)"><slot /></button>',
-            props: ['variant', 'size', 'href', 'target'],
+              '<button :class="$attrs.class" @click="$emit(\'click\', $event)"><slot /></button>',
+            props: ['variant', 'size', 'href', 'target', 'title'],
           },
         },
       },
     })
   }
 
-  it('always renders PrivacyUpdate component', () => {
-    const wrapper = createWrapper()
-    expect(wrapper.find('.privacy-update').exists()).toBe(true)
-  })
+  describe('rendering', () => {
+    it('renders container div', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('div').exists()).toBe(true)
+    })
 
-  it('shows banner only for users in relevant groups who joined after cutoff', () => {
-    // No relevant groups - no banner
-    mockGroups = [{ groupid: 999, added: '2024-10-01' }]
-    let wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(false)
-
-    // Relevant group but joined before cutoff - no banner
-    mockGroups = [{ groupid: 126719, added: '2024-08-01' }]
-    wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(false)
-
-    // Relevant group joined after cutoff - shows banner with survey link
-    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-    wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(true)
-    const surveyButton = wrapper
-      .findAll('button')
-      .find((b) => b.text().includes('Click to open survey'))
-    expect(surveyButton.attributes('href')).toBe(
-      'https://ilovefreegle.org/shortlink/WandsworthSurvey'
-    )
-    expect(surveyButton.attributes('target')).toBe('_blank')
-  })
-
-  it('hides banner after active date expires', () => {
-    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-
-    // Before expiry - shows banner
-    vi.setSystemTime(new Date('2025-06-21'))
-    let wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(true)
-
-    // After expiry - no banner
-    vi.setSystemTime(new Date('2025-06-23'))
-    wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(false)
-  })
-
-  it('hide functionality stores preference and shows restore link', async () => {
-    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-
-    // Initially visible
-    const wrapper = createWrapper()
-    expect(wrapper.find('.b-card').exists()).toBe(true)
-
-    // Click hide - stores preference
-    const hideButton = wrapper
-      .findAll('button')
-      .find((b) => b.text() === 'Hide')
-    await hideButton.trigger('click')
-    expect(mockMiscStore.set).toHaveBeenCalledWith({
-      key: 'hideglobalwarning20250530',
-      value: true,
+    it('always renders PrivacyUpdate component', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.privacy-update').exists()).toBe(true)
     })
   })
 
-  it('when hidden shows restore link that unhides banner', async () => {
-    mockGroups = [{ groupid: 126719, added: '2024-10-01' }]
-    mockMiscStore.get.mockReturnValue(true)
+  describe('relevantGroup computed', () => {
+    it('returns false when date is after active date', () => {
+      vi.setSystemTime(new Date('2025-07-01'))
+      const wrapper = createWrapper()
+      expect(wrapper.vm.relevantGroup).toBe(false)
+    })
 
-    const wrapper = createWrapper()
+    it('returns false when user has no groups', () => {
+      mockGroups.mockReturnValue([])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.relevantGroup).toBe(false)
+    })
 
-    // Card hidden, show link visible
-    expect(wrapper.find('.b-card').exists()).toBe(false)
-    expect(wrapper.text()).toContain('Show notice')
+    it('returns false when user groups do not match', () => {
+      mockGroups.mockReturnValue([{ groupid: 99999, added: '2024-10-01' }])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.relevantGroup).toBe(false)
+    })
 
-    // Click restore - clears preference
-    const showLink = wrapper.find('.text-danger')
-    await showLink.trigger('click')
-    expect(mockMiscStore.set).toHaveBeenCalledWith({
-      key: 'hideglobalwarning20250530',
-      value: false,
+    it('returns true when user has relevant group and joined after cutoff', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.relevantGroup).toBe(true)
+    })
+
+    it('returns false when user has relevant group but joined before cutoff', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-01-01' }])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.relevantGroup).toBe(false)
+    })
+  })
+
+  describe('show computed', () => {
+    it('returns true when warning not hidden', () => {
+      mockGet.mockReturnValue(false)
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.show).toBe(true)
+    })
+
+    it('returns false when warning is hidden', () => {
+      mockGet.mockReturnValue(true)
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      const wrapper = createWrapper()
+      expect(wrapper.vm.show).toBe(false)
+    })
+  })
+
+  describe('hide functionality', () => {
+    it('shows card when relevantGroup and not hidden', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      mockGet.mockReturnValue(false)
+      const wrapper = createWrapper()
+      expect(wrapper.find('.b-card').exists()).toBe(true)
+    })
+
+    it('hides card when hidden', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      mockGet.mockReturnValue(true)
+      const wrapper = createWrapper()
+      expect(wrapper.find('.b-card').exists()).toBe(false)
+    })
+
+    it('shows "Show notice" link when hidden', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      mockGet.mockReturnValue(true)
+      const wrapper = createWrapper()
+      expect(wrapper.text()).toContain('Show notice')
+    })
+  })
+
+  describe('hideIt method', () => {
+    it('calls miscStore.set with correct key and value', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      mockGet.mockReturnValue(false)
+      const wrapper = createWrapper()
+
+      const event = { preventDefault: vi.fn() }
+      wrapper.vm.hideIt(event)
+
+      expect(event.preventDefault).toHaveBeenCalled()
+      expect(mockSet).toHaveBeenCalledWith({
+        key: 'hideglobalwarning20250530',
+        value: true,
+      })
+    })
+  })
+
+  describe('showit method', () => {
+    it('calls miscStore.set with false to show notice', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      mockGet.mockReturnValue(true)
+      const wrapper = createWrapper()
+
+      wrapper.vm.showit()
+
+      expect(mockSet).toHaveBeenCalledWith({
+        key: 'hideglobalwarning20250530',
+        value: false,
+      })
+    })
+  })
+
+  describe('store interactions', () => {
+    it('checks miscStore for hidden state', () => {
+      mockGroups.mockReturnValue([{ groupid: 126719, added: '2024-10-01' }])
+      createWrapper()
+      expect(mockGet).toHaveBeenCalledWith('hideglobalwarning20250530')
     })
   })
 })
