@@ -92,7 +92,10 @@ test.describe('Reply Flow - New User Registration', () => {
       replyText: 'Interested in this item as a new user from browse!',
       collectText: 'Can collect anytime',
     })
-    await clickSendAndWait(page, { expectWelcomeModal: true })
+    await clickSendAndWait(page, {
+      expectWelcomeModal: true,
+      email: replyEmail,
+    })
 
     expect(page.url()).toContain('/chats/')
     console.log('[Test] New user registration from browse page successful')
@@ -135,7 +138,10 @@ test.describe('Reply Flow - New User Registration', () => {
       replyText: 'Interested in this item as a new user from explore!',
       collectText: 'Can collect anytime',
     })
-    await clickSendAndWait(page, { expectWelcomeModal: true })
+    await clickSendAndWait(page, {
+      expectWelcomeModal: true,
+      email: replyEmail,
+    })
 
     expect(page.url()).toContain('/chats/')
     console.log('[Test] New user registration from explore page successful')
