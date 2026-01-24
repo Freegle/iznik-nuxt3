@@ -1,26 +1,18 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ShowMore from '~/components/ShowMore.vue'
 
 describe('ShowMore', () => {
-  const shortList = [
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-    { id: 3, name: 'Item 3' },
-  ]
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-  const longList = Array.from({ length: 15 }, (_, i) => ({
-    id: i + 1,
-    name: `Item ${i + 1}`,
-  }))
-
-  function createWrapper(props = {}, slots = {}) {
+  function createWrapper(props = {}) {
     return mount(ShowMore, {
       props: {
-        items: shortList,
+        items: [],
         ...props,
       },
-      slots,
       global: {
         stubs: {
           'b-button': {
@@ -33,40 +25,126 @@ describe('ShowMore', () => {
   }
 
   describe('rendering', () => {
-    it('renders all items when count is under limit', () => {
-      const wrapper = createWrapper({ items: shortList, limit: 10 })
-      expect(wrapper.findAll('div').length).toBeGreaterThanOrEqual(
-        shortList.length
-      )
+    it('renders container div', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('div').exists()).toBe(true)
     })
 
-    it('renders only limited items when count exceeds limit', () => {
-      const wrapper = createWrapper({ items: longList, limit: 5 })
-      // Should show 5 items initially plus wrapper and button
-      const text = wrapper.text()
-      expect(text).toContain('Item 1')
-      expect(text).toContain('Item 5')
-      expect(text).not.toContain('Item 6')
+    it('renders items using slot', () => {
+      const items = [{ id: 1 }, { id: 2 }]
+      const wrapper = mount(ShowMore, {
+        props: { items },
+        slots: {
+          item: ({ item }) => `Item ${item.id}`,
+        },
+        global: {
+          stubs: {
+            'b-button': { template: '<button><slot /></button>' },
+          },
+        },
+      })
+
+      expect(wrapper.text()).toContain('Item 1')
+      expect(wrapper.text()).toContain('Item 2')
     })
 
-    it('shows "Show more..." button when items exceed limit', () => {
-      const wrapper = createWrapper({ items: longList, limit: 5 })
+    it('renders default slot content when no item slot provided', () => {
+      const items = [{ id: 1 }, { id: 2 }]
+      const wrapper = createWrapper({ items })
+
+      expect(wrapper.text()).toContain('Item 1')
+      expect(wrapper.text()).toContain('Item 2')
+    })
+  })
+
+  describe('limit behavior', () => {
+    it('shows all items when under limit', () => {
+      const items = [{ id: 1 }, { id: 2 }, { id: 3 }]
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      expect(wrapper.vm.itemsToShow.length).toBe(3)
+    })
+
+    it('limits items when over limit', () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      expect(wrapper.vm.itemsToShow.length).toBe(10)
+    })
+
+    it('shows exactly limit items when at limit', () => {
+      const items = Array.from({ length: 10 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      // At the limit (10 items, limit 10), all items show because it's not > limit
+      expect(wrapper.vm.itemsToShow.length).toBe(10)
+    })
+  })
+
+  describe('show more button', () => {
+    it('shows button when items exceed limit', () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      expect(wrapper.find('button').exists()).toBe(true)
       expect(wrapper.text()).toContain('Show more...')
     })
 
-    it('does not show "Show more..." button when items under limit', () => {
-      const wrapper = createWrapper({ items: shortList, limit: 10 })
-      expect(wrapper.text()).not.toContain('Show more...')
+    it('hides button when items under limit', () => {
+      const items = [{ id: 1 }, { id: 2 }]
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      expect(wrapper.find('button').exists()).toBe(false)
+    })
+
+    it('hides button when expanded', async () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      await wrapper.find('button').trigger('click')
+
+      expect(wrapper.find('button').exists()).toBe(false)
+    })
+  })
+
+  describe('expansion', () => {
+    it('starts not expanded', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.vm.expanded).toBe(false)
+    })
+
+    it('expands when show more is clicked', async () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      await wrapper.find('button').trigger('click')
+
+      expect(wrapper.vm.expanded).toBe(true)
+    })
+
+    it('shows all items when expanded', async () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      await wrapper.find('button').trigger('click')
+
+      expect(wrapper.vm.itemsToShow.length).toBe(15)
     })
   })
 
   describe('props', () => {
-    it('defaults limit to 10', () => {
+    it('requires items prop', () => {
+      const items = [{ id: 1 }]
+      const wrapper = createWrapper({ items })
+      expect(wrapper.props('items')).toEqual([{ id: 1 }])
+    })
+
+    it('has limit prop defaulting to 10', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('limit')).toBe(10)
     })
 
-    it('defaults keyfield to "id"', () => {
+    it('has keyfield prop defaulting to id', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('keyfield')).toBe('id')
     })
@@ -82,92 +160,40 @@ describe('ShowMore', () => {
     })
   })
 
-  describe('expand functionality', () => {
-    it('expands to show all items when button is clicked', async () => {
-      const wrapper = createWrapper({ items: longList, limit: 5 })
+  describe('computed itemsToShow', () => {
+    it('returns all items when expanded is true', () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
 
-      // Initially shows limited items
-      expect(wrapper.text()).not.toContain('Item 15')
+      wrapper.vm.expanded = true
 
-      // Click the button
-      const button = wrapper.find('button')
-      await button.trigger('click')
-
-      // Should now show all items
-      expect(wrapper.text()).toContain('Item 15')
+      expect(wrapper.vm.itemsToShow.length).toBe(15)
     })
 
-    it('hides "Show more..." button after expanding', async () => {
-      const wrapper = createWrapper({ items: longList, limit: 5 })
+    it('returns sliced items when not expanded and over limit', () => {
+      const items = Array.from({ length: 15 }, (_, i) => ({ id: i + 1 }))
+      const wrapper = createWrapper({ items, limit: 10 })
 
-      // Click the button
-      const button = wrapper.find('button')
-      await button.trigger('click')
-
-      // Button should be hidden
-      expect(wrapper.find('button').exists()).toBe(false)
-    })
-  })
-
-  describe('slots', () => {
-    it('uses default slot content when no item slot provided', () => {
-      const wrapper = createWrapper({ items: shortList })
-      expect(wrapper.text()).toContain('Item 1')
+      expect(wrapper.vm.itemsToShow.length).toBe(10)
+      expect(wrapper.vm.itemsToShow[0].id).toBe(1)
+      expect(wrapper.vm.itemsToShow[9].id).toBe(10)
     })
 
-    it('uses custom item slot when provided', () => {
-      const wrapper = mount(ShowMore, {
-        props: { items: shortList },
-        slots: {
-          item: '<template #item="{ item }"><span class="custom">{{ item.name }}</span></template>',
-        },
-        global: {
-          stubs: {
-            'b-button': {
-              template: '<button @click="$emit(\'click\')"><slot /></button>',
-            },
-          },
-        },
-      })
-      expect(wrapper.findAll('.custom').length).toBe(shortList.length)
+    it('returns all items when under limit regardless of expanded', () => {
+      const items = [{ id: 1 }, { id: 2 }]
+      const wrapper = createWrapper({ items, limit: 10 })
+
+      expect(wrapper.vm.itemsToShow.length).toBe(2)
     })
   })
 
-  describe('edge cases', () => {
-    it('handles empty items array', () => {
-      const wrapper = createWrapper({ items: [] })
-      expect(wrapper.exists()).toBe(true)
-      expect(wrapper.find('button').exists()).toBe(false)
-    })
+  describe('keyfield usage', () => {
+    it('uses custom keyfield for item keys', () => {
+      const items = [{ name: 'Alice' }, { name: 'Bob' }]
+      const wrapper = createWrapper({ items, keyfield: 'name' })
 
-    it('handles items exactly at limit', () => {
-      const exactList = Array.from({ length: 10 }, (_, i) => ({
-        id: i + 1,
-        name: `Item ${i + 1}`,
-      }))
-      const wrapper = createWrapper({ items: exactList, limit: 10 })
-      expect(wrapper.find('button').exists()).toBe(false)
-    })
-
-    it('handles items one over limit', () => {
-      const overByOne = Array.from({ length: 11 }, (_, i) => ({
-        id: i + 1,
-        name: `Item ${i + 1}`,
-      }))
-      const wrapper = createWrapper({ items: overByOne, limit: 10 })
-      expect(wrapper.find('button').exists()).toBe(true)
-    })
-
-    it('uses custom keyfield for keying', () => {
-      const customKeyItems = [
-        { customId: 'a', name: 'Item A' },
-        { customId: 'b', name: 'Item B' },
-      ]
-      const wrapper = createWrapper({
-        items: customKeyItems,
-        keyfield: 'customId',
-      })
-      expect(wrapper.exists()).toBe(true)
+      expect(wrapper.text()).toContain('Item Alice')
+      expect(wrapper.text()).toContain('Item Bob')
     })
   })
 })
