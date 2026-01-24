@@ -111,6 +111,15 @@ export default defineConfig({
         rootDir,
         'tests/unit/mocks/useOurModal.js'
       ),
+      // Capacitor/mobile module mocks
+      '@capacitor/preferences': path.join(
+        rootDir,
+        'tests/unit/mocks/capacitor-preferences.js'
+      ),
+      '@aspect/aspectra': path.join(
+        rootDir,
+        'tests/unit/mocks/aspectra-barcode-scanner.js'
+      ),
       // Specific store/composable aliases must come before generic ~ alias
       ...storeAliases,
       ...composableAliases,
