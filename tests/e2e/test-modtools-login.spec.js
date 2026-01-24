@@ -27,16 +27,16 @@ test.describe('ModTools login tests', () => {
     expect(currentUrl).toContain('/login')
     expect(currentUrl).toContain('return=/')
 
-    // Wait for the "Let's get freegling!" text to appear
-    const loginText = page.locator("text=Let's get freegling!")
-    await loginText.waitFor({
+    // Wait for the login modal to appear with "Join the Reuse Revolution" text
+    const loginModal = page.locator('text=Join the Reuse Revolution')
+    await loginModal.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
-    // Verify the login text is displayed
-    const isLoginVisible = await loginText.isVisible()
-    expect(isLoginVisible).toBe(true)
+    // Verify the login modal is displayed
+    const isModalVisible = await loginModal.isVisible()
+    expect(isModalVisible).toBe(true)
   })
 
   test('login page should display login prompt', async ({
@@ -71,15 +71,15 @@ test.describe('ModTools login tests', () => {
       }
     }
 
-    // Wait for the "Let's get freegling!" text to appear
-    const loginText = page.locator("text=Let's get freegling!")
-    await loginText.waitFor({
+    // Wait for the login modal to appear with "Join the Reuse Revolution" text
+    const loginModal = page.locator('text=Join the Reuse Revolution')
+    await loginModal.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
-    // Verify the login text is displayed
-    const isLoginVisible = await loginText.isVisible()
-    expect(isLoginVisible).toBe(true)
+    // Verify the login modal is displayed
+    const isModalVisible = await loginModal.isVisible()
+    expect(isModalVisible).toBe(true)
   })
 })
