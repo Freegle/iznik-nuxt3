@@ -3,19 +3,24 @@ import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
 import LoadingIndicator from '~/components/LoadingIndicator.vue'
 
-// Mock useLoadingIndicator globally
-const isLoadingRef = ref(true)
-beforeEach(() => {
-  isLoadingRef.value = true
-  globalThis.useLoadingIndicator = vi.fn(() => ({
-    isLoading: isLoadingRef,
-  }))
-})
+const mockIsLoading = ref(false)
+
+// Mock the auto-imported useLoadingIndicator composable
+globalThis.useLoadingIndicator = vi.fn(() => ({
+  isLoading: mockIsLoading,
+}))
 
 describe('LoadingIndicator', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockIsLoading.value = false
+  })
+
   function createWrapper(props = {}) {
     return mount(LoadingIndicator, {
-      props,
+      props: {
+        ...props,
+      },
       global: {
         stubs: {
           'b-img': {
@@ -29,58 +34,117 @@ describe('LoadingIndicator', () => {
   }
 
   describe('rendering', () => {
-    it('has loading-indicator class', () => {
+    it('renders loading indicator container', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.loading-indicator').exists()).toBe(true)
     })
 
-    it('renders loader image', () => {
+    it('renders loading image', () => {
       const wrapper = createWrapper()
       const img = wrapper.find('.b-img')
+      expect(img.exists()).toBe(true)
       expect(img.attributes('src')).toBe('/loader.gif')
       expect(img.attributes('alt')).toBe('Loading')
     })
   })
 
-  describe('default props', () => {
-    it('uses default width of 100', () => {
+  describe('dimensions', () => {
+    it('uses default width and height', () => {
       const wrapper = createWrapper()
       const img = wrapper.find('.b-img')
       expect(img.attributes('width')).toBe('100px')
-    })
-
-    it('uses default height of 100', () => {
-      const wrapper = createWrapper()
-      const img = wrapper.find('.b-img')
       expect(img.attributes('height')).toBe('100px')
     })
-  })
 
-  describe('custom props', () => {
-    it('accepts custom width', () => {
+    it('uses custom width', () => {
       const wrapper = createWrapper({ width: 50 })
       const img = wrapper.find('.b-img')
       expect(img.attributes('width')).toBe('50px')
     })
 
-    it('accepts custom height', () => {
+    it('uses custom height', () => {
       const wrapper = createWrapper({ height: 75 })
       const img = wrapper.find('.b-img')
       expect(img.attributes('height')).toBe('75px')
     })
 
-    it('adds transition class when withTransition is true', () => {
-      const wrapper = createWrapper({ withTransition: true })
-      expect(wrapper.find('.loading-indicator--transitioned').exists()).toBe(
-        true
+    it('uses custom width and height together', () => {
+      const wrapper = createWrapper({ width: 200, height: 150 })
+      const img = wrapper.find('.b-img')
+      expect(img.attributes('width')).toBe('200px')
+      expect(img.attributes('height')).toBe('150px')
+    })
+  })
+
+  describe('visibility', () => {
+    it('has opacity 0 when not loading', () => {
+      mockIsLoading.value = false
+      const wrapper = createWrapper()
+      expect(wrapper.find('.loading-indicator').attributes('style')).toContain(
+        'opacity: 0'
       )
     })
 
-    it('has no transition class when withTransition is false', () => {
-      const wrapper = createWrapper({ withTransition: false })
-      expect(wrapper.find('.loading-indicator--transitioned').exists()).toBe(
-        false
+    it('has opacity 1 when loading', () => {
+      mockIsLoading.value = true
+      const wrapper = createWrapper()
+      expect(wrapper.find('.loading-indicator').attributes('style')).toContain(
+        'opacity: 1'
       )
+    })
+  })
+
+  describe('transition class', () => {
+    it('does not apply transition class by default', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.loading-indicator').classes()).not.toContain(
+        'loading-indicator--transitioned'
+      )
+    })
+
+    it('applies transition class when withTransition is true', () => {
+      const wrapper = createWrapper({ withTransition: true })
+      expect(wrapper.find('.loading-indicator').classes()).toContain(
+        'loading-indicator--transitioned'
+      )
+    })
+  })
+
+  describe('useLoadingIndicator composable', () => {
+    it('calls useLoadingIndicator with throttle', () => {
+      createWrapper({ throttle: 500 })
+      expect(globalThis.useLoadingIndicator).toHaveBeenCalledWith({
+        throttle: 500,
+      })
+    })
+
+    it('calls useLoadingIndicator with default throttle 0', () => {
+      createWrapper()
+      expect(globalThis.useLoadingIndicator).toHaveBeenCalledWith({
+        throttle: 0,
+      })
+    })
+  })
+
+  describe('props', () => {
+    it('has width prop defaulting to 100', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('width')).toBe(100)
+    })
+
+    it('has height prop defaulting to 100', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('height')).toBe(100)
+    })
+
+    it('has throttle prop defaulting to 0', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('throttle')).toBe(0)
+    })
+
+    it('has withTransition prop defaulting to false', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('withTransition')).toBe(false)
     })
   })
 })

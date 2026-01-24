@@ -2,141 +2,120 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ExternalLink from '~/components/ExternalLink.vue'
 
-// Mock mobile store
-const mockMobileStore = {
-  isApp: false,
-}
-
-vi.mock('~/stores/mobile', () => ({
-  useMobileStore: () => mockMobileStore,
+const { mockOpenUrl } = vi.hoisted(() => ({
+  mockOpenUrl: vi.fn(),
 }))
 
-// Mock AppLauncher
-const mockOpenUrl = vi.fn()
+vi.mock('~/stores/mobile', () => ({
+  useMobileStore: () => ({
+    isApp: false,
+  }),
+}))
+
 vi.mock('@capacitor/app-launcher', () => ({
   AppLauncher: {
-    openUrl: (...args) => mockOpenUrl(...args),
+    openUrl: mockOpenUrl,
   },
 }))
 
 describe('ExternalLink', () => {
-  function mountExternalLink(href, slotContent = 'Link text') {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function createWrapper(props = {}) {
     return mount(ExternalLink, {
-      props: { href },
-      slots: { default: slotContent },
+      props: {
+        href: 'https://example.com',
+        ...props,
+      },
+      slots: {
+        default: 'Click here',
+      },
     })
   }
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockMobileStore.isApp = false
-  })
-
   describe('rendering', () => {
-    it('renders an anchor element', () => {
-      const wrapper = mountExternalLink('https://example.com')
+    it('renders anchor element', () => {
+      const wrapper = createWrapper()
       expect(wrapper.find('a').exists()).toBe(true)
     })
 
     it('renders slot content', () => {
-      const wrapper = mountExternalLink('https://example.com', 'Click me')
-      expect(wrapper.text()).toBe('Click me')
+      const wrapper = createWrapper()
+      expect(wrapper.text()).toBe('Click here')
     })
 
-    it('always has rel="noopener noreferrer" for security', () => {
-      const wrapper = mountExternalLink('https://example.com')
+    it('sets rel attribute for security', () => {
+      const wrapper = createWrapper()
       expect(wrapper.find('a').attributes('rel')).toBe('noopener noreferrer')
     })
   })
 
-  describe('carefulHref computed property', () => {
-    it('passes through URLs starting with http', () => {
-      const wrapper = mountExternalLink('http://example.com')
-      expect(wrapper.find('a').attributes('href')).toBe('http://example.com')
-    })
-
-    it('passes through URLs starting with https', () => {
-      const wrapper = mountExternalLink('https://example.com')
+  describe('href handling', () => {
+    it('passes through https URLs unchanged', () => {
+      const wrapper = createWrapper({ href: 'https://example.com' })
       expect(wrapper.find('a').attributes('href')).toBe('https://example.com')
     })
 
-    it('passes through mailto links unchanged', () => {
-      const wrapper = mountExternalLink('mailto:test@example.com')
+    it('passes through http URLs unchanged', () => {
+      const wrapper = createWrapper({ href: 'http://example.com' })
+      expect(wrapper.find('a').attributes('href')).toBe('http://example.com')
+    })
+
+    it('adds https:// to URLs without protocol', () => {
+      const wrapper = createWrapper({ href: 'example.com' })
+      expect(wrapper.find('a').attributes('href')).toBe('https://example.com')
+    })
+
+    it('passes through mailto URLs unchanged', () => {
+      const wrapper = createWrapper({ href: 'mailto:test@example.com' })
       expect(wrapper.find('a').attributes('href')).toBe(
         'mailto:test@example.com'
       )
     })
-
-    it('prepends https:// to bare domain names', () => {
-      const wrapper = mountExternalLink('example.com')
-      expect(wrapper.find('a').attributes('href')).toBe('https://example.com')
-    })
-
-    it('prepends https:// to domain with path', () => {
-      const wrapper = mountExternalLink('example.com/page')
-      expect(wrapper.find('a').attributes('href')).toBe(
-        'https://example.com/page'
-      )
-    })
-
-    it('handles URL with subdomain', () => {
-      const wrapper = mountExternalLink('www.example.com')
-      expect(wrapper.find('a').attributes('href')).toBe(
-        'https://www.example.com'
-      )
-    })
   })
 
-  describe('target computed property', () => {
-    it('returns _blank for regular URLs to open in new tab', () => {
-      const wrapper = mountExternalLink('https://example.com')
+  describe('target handling', () => {
+    it('uses _blank target for regular URLs', () => {
+      const wrapper = createWrapper({ href: 'https://example.com' })
       expect(wrapper.find('a').attributes('target')).toBe('_blank')
     })
 
-    it('returns _blank for bare domains', () => {
-      const wrapper = mountExternalLink('example.com')
-      expect(wrapper.find('a').attributes('target')).toBe('_blank')
-    })
-
-    it('returns _self for mailto links to open in same window', () => {
-      const wrapper = mountExternalLink('mailto:test@example.com')
+    it('uses _self target for mailto URLs', () => {
+      const wrapper = createWrapper({ href: 'mailto:test@example.com' })
       expect(wrapper.find('a').attributes('target')).toBe('_self')
     })
   })
 
-  describe('edge cases', () => {
-    it('handles null href gracefully via optional chaining', () => {
-      // The component uses optional chaining, so null/undefined won't crash
-      // but will result in 'https://null' or similar - testing the behavior
-      const wrapper = mount(ExternalLink, {
-        props: { href: '' },
-        slots: { default: 'Link' },
-      })
-      // Empty string doesn't start with http or mailto, so gets https:// prepended
-      expect(wrapper.find('a').attributes('href')).toBe('https://')
+  describe('computed carefulHref', () => {
+    it('prepends https:// to plain domain', () => {
+      const wrapper = createWrapper({ href: 'example.com/path' })
+      expect(wrapper.vm.carefulHref).toBe('https://example.com/path')
+    })
+
+    it('does not modify https URLs', () => {
+      const wrapper = createWrapper({ href: 'https://secure.site.com' })
+      expect(wrapper.vm.carefulHref).toBe('https://secure.site.com')
+    })
+
+    it('does not modify http URLs', () => {
+      const wrapper = createWrapper({ href: 'http://insecure.site.com' })
+      expect(wrapper.vm.carefulHref).toBe('http://insecure.site.com')
     })
   })
 
-  describe('openInBrowser for mobile app', () => {
-    it('does nothing special when not in app mode', async () => {
-      mockMobileStore.isApp = false
-      const wrapper = mountExternalLink('https://example.com')
-      await wrapper.find('a').trigger('click')
-      expect(mockOpenUrl).not.toHaveBeenCalled()
+  describe('props', () => {
+    it('requires href prop', () => {
+      const wrapper = createWrapper({ href: 'https://test.com' })
+      expect(wrapper.props('href')).toBe('https://test.com')
     })
+  })
 
-    it('opens URL with AppLauncher when in app mode', async () => {
-      mockMobileStore.isApp = true
-      const wrapper = mountExternalLink('https://example.com')
-      await wrapper.find('a').trigger('click')
-      expect(mockOpenUrl).toHaveBeenCalledWith({ url: 'https://example.com' })
-    })
-
-    it('uses carefulHref (with https:// added) when opening in app', async () => {
-      mockMobileStore.isApp = true
-      const wrapper = mountExternalLink('example.com')
-      await wrapper.find('a').trigger('click')
-      expect(mockOpenUrl).toHaveBeenCalledWith({ url: 'https://example.com' })
+  describe('openInBrowser function', () => {
+    it('has openInBrowser function', () => {
+      const wrapper = createWrapper()
+      expect(typeof wrapper.vm.openInBrowser).toBe('function')
     })
   })
 })

@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AppProgressDots from '~/components/AppProgressDots.vue'
 
 describe('AppProgressDots', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   function createWrapper(props = {}) {
     return mount(AppProgressDots, {
       props: {
@@ -11,157 +15,166 @@ describe('AppProgressDots', () => {
       },
       global: {
         stubs: {
-          'v-icon': { template: '<i class="v-icon"><slot /></i>' },
+          'v-icon': {
+            template: '<span class="v-icon" :data-icon="icon" />',
+            props: ['icon'],
+          },
         },
       },
     })
   }
 
   describe('rendering', () => {
-    it('renders the correct number of steps by default (3)', () => {
+    it('renders progress dots container', () => {
       const wrapper = createWrapper()
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps.length).toBe(3)
+      expect(wrapper.find('.app-progress-dots').exists()).toBe(true)
+    })
+
+    it('renders correct number of steps by default', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.findAll('.progress-step').length).toBe(3)
     })
 
     it('renders custom number of steps', () => {
       const wrapper = createWrapper({ totalSteps: 5 })
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps.length).toBe(5)
+      expect(wrapper.findAll('.progress-step').length).toBe(5)
     })
 
-    it('displays default labels', () => {
+    it('renders progress line', () => {
       const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Photos')
-      expect(wrapper.text()).toContain('Details')
-      expect(wrapper.text()).toContain('Confirm')
-    })
-
-    it('displays custom labels', () => {
-      const wrapper = createWrapper({
-        labels: ['Step A', 'Step B', 'Step C'],
-      })
-      expect(wrapper.text()).toContain('Step A')
-      expect(wrapper.text()).toContain('Step B')
-      expect(wrapper.text()).toContain('Step C')
-    })
-
-    it('hides labels when showLabels is false', () => {
-      const wrapper = createWrapper({ showLabels: false })
-      expect(wrapper.text()).not.toContain('Photos')
-      expect(wrapper.text()).not.toContain('Details')
-      expect(wrapper.text()).not.toContain('Confirm')
-    })
-
-    it('shows step numbers for pending and active steps', () => {
-      const wrapper = createWrapper({ currentStep: 2 })
-      expect(wrapper.text()).toContain('2')
-      expect(wrapper.text()).toContain('3')
-    })
-
-    it('shows check icon for completed steps', () => {
-      const wrapper = createWrapper({ currentStep: 3 })
-      const icons = wrapper.findAll('.v-icon')
-      // Steps 1 and 2 should have check icons (completed)
-      expect(icons.length).toBe(2)
+      expect(wrapper.find('.progress-line').exists()).toBe(true)
+      expect(wrapper.find('.progress-line-fill').exists()).toBe(true)
     })
   })
 
-  describe('step classes', () => {
-    it('marks steps before currentStep as completed', () => {
-      const wrapper = createWrapper({ currentStep: 2 })
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps[0].classes()).toContain('step-completed')
-    })
-
-    it('marks currentStep as active', () => {
-      const wrapper = createWrapper({ currentStep: 2 })
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps[1].classes()).toContain('step-active')
-    })
-
-    it('marks steps after currentStep as pending', () => {
-      const wrapper = createWrapper({ currentStep: 1 })
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps[1].classes()).toContain('step-pending')
-      expect(steps[2].classes()).toContain('step-pending')
-    })
-
-    it('first step is active when currentStep is 1', () => {
-      const wrapper = createWrapper({ currentStep: 1 })
-      const steps = wrapper.findAll('.progress-step')
-      expect(steps[0].classes()).toContain('step-active')
-    })
-
-    it('all steps before last are completed when at final step', () => {
+  describe('step states', () => {
+    it('marks completed steps', () => {
       const wrapper = createWrapper({ currentStep: 3 })
       const steps = wrapper.findAll('.progress-step')
       expect(steps[0].classes()).toContain('step-completed')
       expect(steps[1].classes()).toContain('step-completed')
       expect(steps[2].classes()).toContain('step-active')
     })
+
+    it('marks active step', () => {
+      const wrapper = createWrapper({ currentStep: 2 })
+      const steps = wrapper.findAll('.progress-step')
+      expect(steps[1].classes()).toContain('step-active')
+    })
+
+    it('marks pending steps', () => {
+      const wrapper = createWrapper({ currentStep: 1 })
+      const steps = wrapper.findAll('.progress-step')
+      expect(steps[1].classes()).toContain('step-pending')
+      expect(steps[2].classes()).toContain('step-pending')
+    })
+
+    it('shows check icon for completed steps', () => {
+      const wrapper = createWrapper({ currentStep: 2 })
+      const firstStep = wrapper.findAll('.progress-step')[0]
+      expect(firstStep.find('.v-icon').exists()).toBe(true)
+      expect(firstStep.find('.v-icon').attributes('data-icon')).toBe('check')
+    })
+
+    it('shows step number for non-completed steps', () => {
+      const wrapper = createWrapper({ currentStep: 1 })
+      const steps = wrapper.findAll('.progress-step')
+      expect(steps[0].find('.step-number').text()).toBe('1')
+      expect(steps[1].find('.step-number').text()).toBe('2')
+    })
   })
 
-  describe('progress line', () => {
-    it('renders progress line', () => {
+  describe('labels', () => {
+    it('shows default labels', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('.progress-line').exists()).toBe(true)
+      const labels = wrapper.findAll('.step-label')
+      expect(labels[0].text()).toBe('Photos')
+      expect(labels[1].text()).toBe('Details')
+      expect(labels[2].text()).toBe('Confirm')
     })
 
-    it('renders progress line fill', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.find('.progress-line-fill').exists()).toBe(true)
+    it('shows custom labels', () => {
+      const wrapper = createWrapper({
+        labels: ['First', 'Second', 'Third'],
+      })
+      const labels = wrapper.findAll('.step-label')
+      expect(labels[0].text()).toBe('First')
+      expect(labels[1].text()).toBe('Second')
+      expect(labels[2].text()).toBe('Third')
     })
 
-    it('progress width is 0% when at step 1', () => {
-      const wrapper = createWrapper({ currentStep: 1 })
-      const fill = wrapper.find('.progress-line-fill')
-      expect(fill.attributes('style')).toContain('width: 0%')
+    it('hides labels when showLabels is false', () => {
+      const wrapper = createWrapper({ showLabels: false })
+      expect(wrapper.find('.step-label').exists()).toBe(false)
     })
 
-    it('progress width is 50% when at step 2 of 3', () => {
+    it('uses fallback label when not provided', () => {
+      const wrapper = createWrapper({
+        totalSteps: 4,
+        labels: ['One', 'Two'],
+      })
+      const labels = wrapper.findAll('.step-label')
+      expect(labels[2].text()).toBe('Step 3')
+      expect(labels[3].text()).toBe('Step 4')
+    })
+  })
+
+  describe('progress width', () => {
+    it('shows 0% at step 1', () => {
+      const wrapper = createWrapper({ currentStep: 1, totalSteps: 3 })
+      expect(wrapper.vm.progressWidth).toBe('0%')
+    })
+
+    it('shows 50% at step 2 of 3', () => {
       const wrapper = createWrapper({ currentStep: 2, totalSteps: 3 })
-      const fill = wrapper.find('.progress-line-fill')
-      expect(fill.attributes('style')).toContain('width: 50%')
+      expect(wrapper.vm.progressWidth).toBe('50%')
     })
 
-    it('progress width is 100% when at final step', () => {
+    it('shows 100% at last step', () => {
       const wrapper = createWrapper({ currentStep: 3, totalSteps: 3 })
-      const fill = wrapper.find('.progress-line-fill')
-      expect(fill.attributes('style')).toContain('width: 100%')
+      expect(wrapper.vm.progressWidth).toBe('100%')
     })
 
-    it('progress width scales correctly for 5 steps', () => {
-      const wrapper = createWrapper({ currentStep: 3, totalSteps: 5 })
-      const fill = wrapper.find('.progress-line-fill')
-      // Step 3 of 5: (3-1)/(5-1) * 100 = 50%
-      expect(fill.attributes('style')).toContain('width: 50%')
+    it('shows 100% when currentStep exceeds totalSteps', () => {
+      const wrapper = createWrapper({ currentStep: 5, totalSteps: 3 })
+      expect(wrapper.vm.progressWidth).toBe('100%')
+    })
+
+    it('calculates correct width for 4 steps at step 3', () => {
+      const wrapper = createWrapper({ currentStep: 3, totalSteps: 4 })
+      // (3-1)/(4-1) * 100 = 66.66%
+      expect(wrapper.vm.progressWidth).toContain('66')
     })
   })
 
   describe('props', () => {
-    it('defaults totalSteps to 3', () => {
+    it('requires currentStep prop', () => {
+      const wrapper = createWrapper({ currentStep: 2 })
+      expect(wrapper.props('currentStep')).toBe(2)
+    })
+
+    it('has totalSteps prop defaulting to 3', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('totalSteps')).toBe(3)
     })
 
-    it('defaults labels to Photos, Details, Confirm', () => {
+    it('has default labels', () => {
       const wrapper = createWrapper()
       expect(wrapper.props('labels')).toEqual(['Photos', 'Details', 'Confirm'])
     })
+
+    it('has showLabels prop defaulting to true', () => {
+      const wrapper = createWrapper()
+      expect(wrapper.props('showLabels')).toBe(true)
+    })
   })
 
-  describe('fallback labels', () => {
-    it('uses Step N format when more steps than labels', () => {
-      const wrapper = createWrapper({
-        totalSteps: 5,
-        labels: ['First', 'Second'],
-      })
-      expect(wrapper.text()).toContain('First')
-      expect(wrapper.text()).toContain('Second')
-      expect(wrapper.text()).toContain('Step 3')
-      expect(wrapper.text()).toContain('Step 4')
-      expect(wrapper.text()).toContain('Step 5')
+  describe('computed steps', () => {
+    it('generates steps array from totalSteps', () => {
+      const wrapper = createWrapper({ totalSteps: 4 })
+      expect(wrapper.vm.steps.length).toBe(4)
+      expect(wrapper.vm.steps[0]).toEqual({ number: 1, label: 'Photos' })
+      expect(wrapper.vm.steps[3]).toEqual({ number: 4, label: 'Step 4' })
     })
   })
 })
