@@ -32,6 +32,7 @@
               <b-col cols="6" class="text-success font-weight-bold">
                 <ProfileImage
                   :image="user.profile.turl"
+                  :name="user.displayname"
                   is-thumbnail
                   size="sm"
                   class="breakgrid"

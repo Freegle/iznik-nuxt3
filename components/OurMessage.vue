@@ -63,6 +63,7 @@ import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
 import { useAuthStore } from '~/stores/auth'
 import { useMiscStore } from '~/stores/misc'
+import { action } from '~/composables/useClientLog'
 
 const MessageExpanded = defineAsyncComponent(() =>
   import('~/components/MessageExpanded')
@@ -166,6 +167,14 @@ const message = computed(() => {
 
 // Methods
 function expand() {
+  // Log the expand decision for debugging mobile navigation issues.
+  action('message_expand', {
+    message_id: props.id,
+    is_mobile: isMobile.value,
+    breakpoint: miscStore.breakpoint,
+    path: isMobile.value ? 'mobile_overlay' : 'desktop_modal',
+  })
+
   if (!message.value?.successful) {
     if (isMobile.value) {
       // Show full-screen modal overlay instead of navigating
@@ -180,6 +189,9 @@ function expand() {
 }
 
 function closeMobileExpanded() {
+  action('message_mobile_close', {
+    message_id: props.id,
+  })
   showMobileExpanded.value = false
 }
 

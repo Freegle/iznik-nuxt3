@@ -53,6 +53,7 @@
           ref="itemInput"
           v-model="item"
           placeholder="e.g. Red sofa"
+          maxlength="60"
           size="lg"
           :state="itemState"
           @blur="onItemBlur"

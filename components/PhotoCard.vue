@@ -12,6 +12,7 @@
     <OurUploadedImage
       v-if="ouruid"
       :src="ouruid"
+      :modifiers="externalmods"
       class="photo-image"
       alt="Photo"
       :width="200"
@@ -140,6 +141,10 @@ const props = defineProps({
   showRotate: {
     type: Boolean,
     default: true,
+  },
+  externalmods: {
+    type: Object,
+    default: null,
   },
 })
 

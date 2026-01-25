@@ -60,8 +60,6 @@
           :identifier="infiniteId"
           @infinite="loadMore"
         >
-          <template #no-results> Nothing to show just now. </template>
-          <template #no-more />
           <template #spinner>
             <b-img lazy src="/loader.gif" alt="Loading" />
           </template>
@@ -73,13 +71,14 @@
 <script>
 import { useAuthStore } from '~/stores/auth'
 import { useSpammerStore } from '~/stores/spammer'
-import { useModGroupStore } from '@/stores/modgroup'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   setup() {
     const authStore = useAuthStore()
     const spammerStore = useSpammerStore()
-    return { authStore, spammerStore }
+    const { hasPermissionSpamAdmin } = useModMe()
+    return { authStore, spammerStore, hasPermissionSpamAdmin }
   },
   data: function () {
     return {
@@ -147,8 +146,6 @@ export default {
     },
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // Start in Pending Add if they have rights to see it.
     this.spammerStore.clear()
 

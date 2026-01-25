@@ -15,7 +15,12 @@ export const useGroupStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-
+    clear() {
+      this.list = {}
+      this.messages = {}
+      this.allGroups = {}
+      this._remember = {}
+    },
     async fetch(id, force) {
       if (id) {
         if (isNaN(id)) {

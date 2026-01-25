@@ -38,6 +38,8 @@
 <script>
 import cloneDeep from 'lodash.clonedeep'
 import { usePublicityStore } from '@/stores/publicity'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -48,7 +50,9 @@ export default {
   },
   setup() {
     const publicityStore = usePublicityStore()
-    return { publicityStore }
+    const { myGroups } = useMe()
+    const { checkWork } = useModMe()
+    return { publicityStore, myGroups, checkWork }
   },
   data: function () {
     return {

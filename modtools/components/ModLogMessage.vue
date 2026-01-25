@@ -13,8 +13,7 @@
       <span v-if="!notext && log.text && log.text.length > 0">
         with <em>{{ log.text }} </em></span
       >
-      <ModLogStdMsg :log="log" />
-      <ModLogGroup :log="log" :tag="tag" />
+      <ModLogStdMsg :log="log" /> <ModLogGroup :log="log" :tag="tag" />
     </span>
     <span v-else>
       <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ log.msgid }}

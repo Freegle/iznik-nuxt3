@@ -9,7 +9,7 @@
       <b-badge :variant="variant">
         {{ engagement }}
       </b-badge>
-      <Supporter v-if="member.supporter" class="small" />
+      <ModSupporter v-if="member.supporter" class="small" />
     </div>
   </div>
 </template>

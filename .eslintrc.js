@@ -31,7 +31,12 @@ module.exports = {
   ignorePatterns: ['android/*', 'ios/*', 'capacitor.config.ts'],
   overrides: [
     {
-      files: ['layouts/*.vue', 'pages/**/*.vue'],
+      files: [
+        'layouts/*.vue',
+        'pages/**/*.vue',
+        'modtools/layouts/*.vue',
+        'modtools/pages/**/*.vue',
+      ],
       rules: {
         // Not sure why we have two copies of this, one above and one here, but this one makes [id] work.
         'vue/multi-word-component-names': 'off',

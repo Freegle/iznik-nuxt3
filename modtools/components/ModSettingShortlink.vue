@@ -9,8 +9,6 @@
   </div>
 </template>
 <script>
-import { pluralise } from '~/composables/usePluralise'
-
 export default {
   props: {
     shortlink: {

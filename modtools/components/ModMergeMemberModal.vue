@@ -86,9 +86,12 @@
             active of them, or add Notes to each one to say that they're the
             same real person.
           </NoticeMessage>
+          <NoticeMessage v-if="error" variant="danger">
+            {{ error }}
+          </NoticeMessage>
         </div>
       </template>
-      <template #footer slot-scope="{ hide }">
+      <template #footer>
         <b-button variant="white" @click="hide"> Close </b-button>
         <b-button
           v-if="!merged"
@@ -105,11 +108,13 @@
 <script>
 import { useAuthStore } from '~/stores/auth'
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const { modal, hide } = useOurModal()
-    return { modal, hide }
+    const { supportOrAdmin } = useMe()
+    return { modal, hide, supportOrAdmin }
   },
   data: function () {
     return {
@@ -120,6 +125,7 @@ export default {
       reason: null,
       merged: false,
       byemail: true,
+      error: null,
     }
   },
   computed: {
@@ -151,22 +157,31 @@ export default {
       this.$emit('hidden')
     },
     async merge() {
+      this.error = false
       const authStore = useAuthStore()
-      if (this.byemail) {
-        await authStore.merge({
-          email1: this.email1,
-          email2: this.email2,
-          reason: this.reason,
-        })
-      } else {
-        await authStore.merge({
-          id1: this.id1,
-          id2: this.id2,
-          reason: this.reason,
-        })
-      }
+      try {
+        if (this.byemail) {
+          await authStore.merge({
+            email1: this.email1,
+            email2: this.email2,
+            reason: this.reason,
+          })
+        } else {
+          await authStore.merge({
+            id1: this.id1,
+            id2: this.id2,
+            reason: this.reason,
+          })
+        }
 
-      this.merged = true
+        this.merged = true
+      } catch (e) {
+        this.error = e.message
+        const statuspos = e.message.indexOf('status:')
+        if (statuspos !== -1) {
+          this.error = e.message.substring(statuspos)
+        }
+      }
     },
   },
 }

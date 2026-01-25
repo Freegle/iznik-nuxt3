@@ -182,7 +182,7 @@ onMounted(async () => {
 }
 
 .jobs-page-content {
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
 
@@ -232,9 +232,21 @@ onMounted(async () => {
 }
 
 .jobs-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
+
+  @include media-breakpoint-up(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include media-breakpoint-up(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include media-breakpoint-up(xl) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .jobs-empty {

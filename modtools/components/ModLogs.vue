@@ -13,8 +13,6 @@
     <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
 
     <infinite-loading :distance="distance" @infinite="loadMore">
-      <template #no-results />
-      <template #no-more />
       <template #spinner>
         <b-img lazy src="/loader.gif" alt="Loading" />
       </template>

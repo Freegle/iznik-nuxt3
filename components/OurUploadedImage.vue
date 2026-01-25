@@ -8,7 +8,7 @@
     :provider="chooseProvider"
     :src="chooseSrc"
     :modifiers="modString"
-    :class="(className ? className : '') + ' ' + isFluid"
+    :class="imageClasses"
     :alt="alt"
     :width="width"
     :height="height"
@@ -90,6 +90,23 @@ const props = defineProps({
 })
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
+
+const isAI = computed(() => {
+  if (!props.modifiers) return false
+  const mods =
+    typeof props.modifiers === 'string'
+      ? JSON.parse(props.modifiers)
+      : props.modifiers
+  return mods?.ai === true
+})
+
+const imageClasses = computed(() => {
+  const classes = []
+  if (props.className) classes.push(props.className)
+  if (isFluid.value) classes.push(isFluid.value)
+  if (isAI.value) classes.push('ai-image-duotone')
+  return classes.join(' ')
+})
 
 if (process.client && props.src?.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)

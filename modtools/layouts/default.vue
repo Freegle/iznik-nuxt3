@@ -24,9 +24,15 @@
           v-if="loggedIn"
           id="menu-option-modtools-discourse2"
           class="text-center p-0 mr-4"
-          @click="discourse"
         >
-          <div id="discourseIcon" class="position-relative">
+          <div
+            id="discourseIcon"
+            class="position-relative clickable"
+            role="button"
+            tabindex="0"
+            @click="discourse"
+            @keydown.enter="discourse"
+          >
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">Us</div>
             <b-badge
@@ -67,8 +73,15 @@
     </b-navbar>
 
     <div :key="'nuxt2-' + bump" class="d-flex">
-      <div v-if="showMenu" class="leftmenu text--medium-large-spaced">
-        <ModMenuItemLeft link="/" name="Dashboard" />
+      <div
+        v-if="showMenu && loggedIn"
+        class="leftmenu text--medium-large-spaced"
+      >
+        <ModMenuItemLeft
+          link="/"
+          name="Dashboard"
+          @mobilehidemenu="mobilehidemenu"
+        />
         <hr />
         <div class="pl-1">Messages</div>
         <ModMenuItemLeft
@@ -77,22 +90,35 @@
           :count="['pending']"
           :othercount="['pendingother']"
           indent
+          @mobilehidemenu="mobilehidemenu"
         />
-        <ModMenuItemLeft link="/messages/approved" name="Approved" indent />
+        <ModMenuItemLeft
+          link="/messages/approved"
+          name="Approved"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
         <ModMenuItemLeft
           link="/messages/edits"
           name="Edits"
           :count="['editreview']"
           indent
+          @mobilehidemenu="mobilehidemenu"
         />
         <hr />
         <div class="pl-1">Members</div>
-        <ModMenuItemLeft link="/members/approved" name="Approved" indent />
+        <ModMenuItemLeft
+          link="/members/approved"
+          name="Approved"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
         <ModMenuItemLeft
           link="/members/review"
           name="Member Review"
           :count="['spammembers']"
           indent
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/chats/review"
@@ -100,18 +126,21 @@
           :count="['chatreview']"
           :othercount="['chatreviewother']"
           indent
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/members/related"
           name="Related"
           :count="['relatedmembers']"
           indent
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/members/stories"
           name="Stories"
           indent
           :count="['stories']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           v-if="hasPermissionNewsletter"
@@ -119,6 +148,7 @@
           name="Newsletter"
           indent
           :count="['newsletterstories']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           v-if="hasPermissionGiftAid"
@@ -126,40 +156,52 @@
           name="Gift Aid"
           indent
           :count="['giftaid']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/members/feedback"
           name="Feedback"
           indent
           :othercount="['happiness']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/members/microvolunteering"
           indent
           name="MicroVols"
+          @mobilehidemenu="mobilehidemenu"
         />
-        <ModMenuItemLeft link="/members/notes" name="Notes" indent />
+        <ModMenuItemLeft
+          link="/members/notes"
+          name="Notes"
+          indent
+          @mobilehidemenu="mobilehidemenu"
+        />
         <hr />
         <hr />
         <ModMenuItemLeft
           link="/communityevents"
           name="Events"
           :count="['pendingevents']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/volunteering"
           name="Volunteering"
           :count="['pendingvolunteering']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/publicity"
           name="Publicity"
           :count="['socialactions', 'popularposts']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/admins"
           name="Admins"
           :count="['pendingadmins']"
+          @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
           link="/spammers"
@@ -169,12 +211,30 @@
               ? ['spammerpendingadd', 'spammerpendingremove']
               : []
           "
+          @mobilehidemenu="mobilehidemenu"
         />
         <hr />
-        <ModMenuItemLeft link="/logs" name="Logs" />
-        <ModMenuItemLeft v-if="supportOrAdmin" link="/support" name="Support" />
-        <ModMenuItemLeft link="/settings" name="Settings" />
-        <ModMenuItemLeft link="/teams" name="Teams" />
+        <ModMenuItemLeft
+          link="/logs"
+          name="Logs"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          v-if="supportOrAdmin"
+          link="/support"
+          name="Support"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/settings"
+          name="Settings"
+          @mobilehidemenu="mobilehidemenu"
+        />
+        <ModMenuItemLeft
+          link="/teams"
+          name="Teams"
+          @mobilehidemenu="mobilehidemenu"
+        />
         <div>
           <ExternalLink
             href="https://wiki.ilovefreegle.org/ModTools"
@@ -186,8 +246,8 @@
         <div>
           <a href="#" class="pl-1" @click="logOut"> Logout </a>
         </div>
-        <div id="mtinfo" :title="buildDate">
-          MT-{{ version }} <br />{{ buildDate }}
+        <div v-if="inMTapp" id="mtinfo" :title="inMTapp">
+          MT app {{ inMTapp }}
         </div>
       </div>
       <div class="ml-0 pl-0 pl-sm-1 pr-0 pr-sm-1 pageContent w-100">
@@ -195,242 +255,257 @@
       </div>
     </div>
     <!--ChatPopups v-if="loggedIn" class="d-none d-sm-block" /-->
-    <GoogleOneTap v-if="oneTap" @loggedin="googleLoggedIn" />
+    <GoogleOneTap
+      v-if="oneTap"
+      @loggedin="googleLoggedIn"
+      @complete="googleLoaded"
+    />
     <LoginModal v-if="!loggedIn" ref="loginModal" :key="'login-' + bumpLogin" />
     <div id="sizer" ref="sizer" class="d-none d-lg-block" />
     <SomethingWentWrong />
   </div>
 </template>
 
-<script lang="ts">
+<script setup>
+import { useRoute } from 'vue-router'
+import { useRouter } from '#imports'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useMiscStore } from '@/stores/misc'
+import { useModGroupStore } from '@/stores/modgroup'
 import { useModConfigStore } from '@/stores/modconfig'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 import { buildHead } from '~/composables/useMTBuildHead'
 
-export default {
-  async setup() {
-    let ready = false
-    const oneTap = ref(false)
-    const googleReady = ref(false)
-    const authStore = useAuthStore()
-    const jwt = authStore.auth.jwt
-    const chatStore = useChatStore()
-    const miscStore = useMiscStore()
-    const modConfigStore = useModConfigStore()
-    const persistent = authStore.auth.persistent
+const router = useRouter()
+const route = useRoute()
 
-    if (process.client) {
-      // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
-      miscStore.apiCount = 0
-    }
+const loginModal = ref(null)
+const sizer = ref(null)
+const logo = '/icon_modtools.png'
+const showMenu = ref(true)
+const timeTimer = ref(null)
+const bump = ref(0)
+const bumpLogin = ref(0)
 
-    if (jwt || persistent) {
-      // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
-      // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
-      // whether or not we can log in that way.
-      let user = null
+const ready = ref(false)
+const oneTap = ref(false)
+const authStore = useAuthStore()
+const jwt = authStore.auth.jwt
+const chatStore = useChatStore()
+const miscStore = useMiscStore()
+const modGroupStore = useModGroupStore()
+const modConfigStore = useModConfigStore()
+const persistent = authStore.auth.persistent
+const { supportOrAdmin } = useMe()
+const {
+  hasPermissionNewsletter,
+  hasPermissionSpamAdmin,
+  hasPermissionGiftAid,
+  checkWork,
+} = useModMe()
 
-      try {
-        user = await authStore.fetchUser()
-      } catch (e) {
-        console.log('Error fetching user', e)
+if (process.client) {
+  // Ensure we don't wrongly think we have some outstanding requests if the server happened to start some.
+  miscStore.apiCount = 0
+}
+
+if (jwt || persistent) {
+  // We have some credentials, which may or may not be valid on the server.  If they are, then we can crack on and
+  // start rendering the page.  This will be quicker than waiting for GoogleOneTap to load on the client and tell us
+  // whether or not we can log in that way.
+  let user = null
+
+  try {
+    user = await authStore.fetchUser()
+  } catch (e) {
+    console.log('Error fetching user', e)
+  }
+
+  if (user) {
+    ready.value = true
+  }
+}
+if (!ready.value) {
+  // We don't have a valid JWT.  See if OneTap can sign us in.
+  oneTap.value = true
+}
+
+const runtimeConfig = useRuntimeConfig()
+useHead(
+  buildHead(
+    route,
+    runtimeConfig,
+    'ModTools',
+    'Moderation tool for Freegle volunteers'
+  )
+)
+useHead({
+  bodyAttrs: {
+    class: 'bodyMT',
+  },
+})
+
+const loginStateKnown = computed(() => authStore.loginStateKnown)
+const loggedIn = computed(() => authStore.user !== null)
+const inMTapp = ref(false)
+
+const discourseCount = computed(() => {
+  const discourse = authStore.discourse
+  return discourse
+    ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
+    : 0
+})
+
+const menuCount = computed(() => {
+  const work = authStore?.work
+  if (!work || !work.total) return 0
+  return work.total
+})
+
+watch(
+  () => route.fullPath,
+  async (newVal, oldVal) => {
+    const routechanged = newVal !== oldVal
+    if (sizer.value && routechanged) {
+      const el = document.getElementById('sizer')
+      if (getComputedStyle(el).display !== 'block') {
+        // Not large screen, hide menu on move.
+        showMenu.value = false
       }
+    }
 
-      if (user) {
-        ready = true
+    if (routechanged) {
+      if (route.query?.inMTapp) {
+        const queryinMTapp =
+          route.query.inMTapp === 'true' ? '0.4.6' : route.query.inMTapp
+        console.error('queryinMTapp', queryinMTapp)
+        window.sessionStorage.setItem('inMTapp', queryinMTapp)
+        inMTapp.value = queryinMTapp
       }
+      // Get per-group-work and ensure all current groups are in modGroupStore
+      await modGroupStore.getModGroups()
     }
-    if (!ready) {
-      // We don't have a valid JWT.  See if OneTap can sign us in.
-      oneTap.value = true
+  }
+)
+
+watch(
+  () => loginStateKnown,
+  (newVal) => {
+    if (newVal.value) {
+      // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
+      bump.value++
     }
-    const runtimeConfig = useRuntimeConfig()
-    const route = useRoute()
-    useHead(
-      buildHead(
-        route,
-        runtimeConfig,
-        'ModTools',
-        'Moderation tool for Freegle volunteers'
-      )
+  },
+  { immediate: true }
+)
+
+// Lifecycle hooks and watches
+onMounted(async () => {
+  inMTapp.value = window.sessionStorage?.getItem('inMTapp')
+
+  // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
+  // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
+  if (!loginStateKnown.value) {
+    await authStore.fetchUser()
+  }
+
+  // If not logged in then show loginModal and force it to stay open
+  const me = authStore.user
+  if (!me || !me.id) {
+    authStore.forceLogin = true
+    loginModal.value.show()
+    return
+  }
+
+  // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
+  // cause displayed fromNow() values to change, rather than starting a timer for each of them.
+  updateTime()
+
+  // miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
+
+  // Check for work in global modtools/mixins/modme
+  const miscStore = useMiscStore()
+  miscStore.workTimer = setTimeout(checkWork, 0)
+
+  await modConfigStore.fetch({ all: true })
+
+  // Get chats and poll regularly for new ones
+  chatStore.fetchLatestChatsMT()
+})
+
+onBeforeUnmount(() => {
+  const miscStore = useMiscStore()
+  if (miscStore.workTimer) {
+    clearTimeout(miscStore.workTimer)
+    miscStore.workTimer = false
+  }
+})
+
+async function logOut() {
+  console.log('Logout')
+  await authStore.logout()
+  authStore.forceLogin = true
+
+  // Go to the landing page.
+  router.push('/')
+}
+
+function requestLogin() {
+  console.log('MODTOOLS.VUE requestLogin')
+  loginModal.value.show()
+}
+
+function discourse(e) {
+  window.open('https://discourse.ilovefreegle.org/')
+  e.stopPropagation()
+  e.preventDefault()
+}
+
+function clicklogo(e) {
+  console.log('clicklogo', route.fullPath)
+  if (route.fullPath === '/') {
+    // Click on current route.  Reload.
+    e.stopPropagation()
+    router.go()
+  } else {
+    router.push('/')
+  }
+}
+
+function toggleMenu() {
+  showMenu.value = !showMenu.value
+}
+
+function updateTime() {
+  miscStore.setTime()
+  timeTimer.value = setTimeout(updateTime, 30000)
+}
+
+function googleLoggedIn() {
+  // Re-render the page, now that we are logged in.
+  bump.value++
+}
+
+function googleLoaded() {
+  if (
+    loginModal.value &&
+    loginModal.value.showModal &&
+    loginModal.value.email
+  ) {
+    console.log(
+      'Showing login modal - leave well alone',
+      loginModal.value.email
     )
-    useHead({
-      bodyAttrs: {
-        class: 'bodyMT',
-      },
-    })
+  } else {
+    bumpLogin.value++
+  }
+}
 
-    return {
-      authStore,
-      chatStore,
-      googleReady,
-      miscStore,
-      modConfigStore,
-      oneTap,
-    }
-  },
-  data: function () {
-    return {
-      logo: '/icon_modtools.png',
-      showMenu: true,
-      sliding: false,
-      timeTimer: null,
-      chatCount: 0,
-      // complete: true,  // CC
-      bump: 0,
-      bumpLogin: 0,
-    }
-  },
-  computed: {
-    discourseCount() {
-      const discourse = this.authStore.discourse
-      return discourse
-        ? discourse.notifications + discourse.newtopics + discourse.unreadtopics
-        : 0
-      // return 77
-    },
-    slideclass() {
-      return this.showMenu ? 'slide-in' : 'slide-out'
-    },
-    menuCount() {
-      const work = this.authStore?.work
-      if (!work || !work.total) return 0
-      return work.total
-    },
-    work() {
-      return this.authStore.work
-    },
-    version() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.VERSION
-    },
-    buildDate() {
-      const runtimeConfig = useRuntimeConfig()
-      return runtimeConfig.public.BUILD_DATE
-    },
-  },
-  watch: {
-    loginStateKnown: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          // We now know whether or not we have logged in.  Re-render the page to make it reflect that.
-          this.bump++
-        }
-      },
-    },
-  },
-  async mounted() {
-    // For this layout we don't need to be logged in.  So can just continue.  But we want to know first whether or
-    // not we are logged in.  We might already know that from the server via cookies, but if not, find out.
-    if (!this.loginStateKnown) {
-      await this.authStore.fetchUser()
-    }
-
-    // If not logged in then show loginModal
-    const me = this.authStore.user
-    if (!me || !me.id) {
-      // Wait for next tick to ensure LoginModal is rendered before accessing ref
-      await this.$nextTick()
-      if (this.$refs.loginModal) {
-        this.$refs.loginModal.show()
-      }
-      return
-    }
-
-    // Start our timer.  Holding the time in the store allows us to update the time regularly and have reactivity
-    // cause displayed fromNow() values to change, rather than starting a timer for each of them.
-    this.updateTime()
-
-    // this.miscStore.set({ key: 'modtools', value: true, }) // Already done in app.vue
-
-    // Check for work in global modtools/mixins/modme
-    const miscStore = useMiscStore()
-    miscStore.workTimer = setTimeout(this.checkWork, 0)
-
-    await this.modConfigStore.fetch({ all: true })
-
-    // Get chats and poll regularly for new ones
-    this.chatStore.fetchLatestChatsMT()
-  },
-  beforeUnmount() {
-    const miscStore = useMiscStore()
-    if (miscStore.workTimer) {
-      clearTimeout(miscStore.workTimer)
-      miscStore.workTimer = false
-    }
-  },
-  methods: {
-    async logOut() {
-      // Remove all cookies, both client and server.  This seems to be necessary to kill off the PHPSESSID cookie
-      // on the server, which would otherwise keep us logged in despite our efforts.
-      console.log('Logout')
-      try {
-        this.$cookies.removeAll()
-      } catch (e) {}
-
-      await this.authStore.logout()
-      this.authStore.forceLogin = false
-
-      // Go to the landing page.
-      router.push('/')
-    },
-    async requestLogin() {
-      console.log('MODTOOLS.VUE requestLogin')
-      await this.$nextTick()
-      if (this.$refs.loginModal) {
-        this.$refs.loginModal.show()
-      }
-    },
-    discourse(e) {
-      window.open('https://discourse.ilovefreegle.org/')
-      e.stopPropagation()
-      e.preventDefault()
-    },
-    chats(e) {
-      this.$router.push('/chats')
-      e.stopPropagation()
-      e.preventDefault()
-    },
-    clicklogo(e) {
-      console.log('clicklogo', this.$route.fullPath)
-      if (this.$route.fullPath === '/') {
-        // Click on current route.  Reload.
-        e.stopPropagation()
-        this.$router.go()
-      } else {
-        this.$router.push('/')
-      }
-    },
-    toggleMenu() {
-      this.showMenu = !this.showMenu
-    },
-    updateTime() {
-      this.miscStore.setTime()
-      this.timeTimer = setTimeout(this.updateTime, 30000)
-    },
-    googleLoggedIn() {
-      // Re-render the page, now that we are logged in.
-      this.bump++
-    },
-    googleLoaded() {
-      if (
-        this.$refs.loginModal &&
-        this.$refs.loginModal.showModal &&
-        this.$refs.loginModal.email
-      ) {
-        console.log(
-          'Showing login modal - leave well alone',
-          this.$refs.loginModal.email
-        )
-      } else {
-        this.bumpLogin++
-      }
-    },
-  },
+function mobilehidemenu() {
+  showMenu.value = false
 }
 </script>
 
@@ -492,6 +567,7 @@ nav .navbar-nav li a,
 
 #discourseIcon {
   color: $color-white !important;
+  cursor: pointer;
 }
 
 nav .navbar-nav li a.nuxt-link-active {
@@ -608,6 +684,6 @@ a:hover {
 
 #mtinfo {
   text-align: left;
-  font-size: 75%;
+  font-size: 65%;
 }
 </style>

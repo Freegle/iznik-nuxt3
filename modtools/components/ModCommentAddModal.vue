@@ -5,8 +5,9 @@
       ref="modal"
       size="lg"
       no-stacking
+      @hidden="onHide"
     >
-      <template #title class="w-100">
+      <template #title>
         Add Note for {{ user.displayname }} <span v-if="groupname">on</span>
         {{ groupname }}
       </template>
@@ -82,8 +83,11 @@ export default {
     },
     groupname: {
       type: String,
+      required: false,
+      default: null,
     },
   },
+  emits: ['hidden', 'added'],
   setup() {
     const { bump, context } = setupModMembers()
     const { modal, hide } = useOurModal()
@@ -113,20 +117,8 @@ export default {
     }
   },
   methods: {
-    show() {
-      this.user1 = null
-      this.user2 = null
-      this.user3 = null
-      this.user4 = null
-      this.user5 = null
-      this.user6 = null
-      this.user7 = null
-      this.user8 = null
-      this.user9 = null
-      this.user10 = null
-      this.user11 = null
-      this.flag = null
-      this.modal.show()
+    onHide() {
+      this.$emit('hidden')
     },
     toggleFlag() {
       this.flag = !this.flag
@@ -152,7 +144,7 @@ export default {
 
       const userStore = useUserStore()
       await userStore.fetchMT({
-        search: this.user.id,
+        id: this.user.id,
         emailhistory: true,
       })
       this.context = null

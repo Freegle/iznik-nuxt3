@@ -86,7 +86,7 @@
                   <MessageTag
                     :id="message.id"
                     :inline="true"
-                    class="title-tag"
+                    class="title-tag ps-1 pe-1"
                   />
                   <span class="title-subject">{{ strippedSubject }}</span>
                 </div>

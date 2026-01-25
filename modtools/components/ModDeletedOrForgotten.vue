@@ -19,7 +19,7 @@
     </NoticeMessage>
     <NoticeMessage v-else variant="danger" class="mt-2">
       <p>
-        This account was deleted on {{ dateonly(user.forgotten) }} and the data
+        This account was deleted on {{ dateonly(user.deleted) }} and the data
         was removed on {{ dateonly(user.forgotten) }}.
       </p>
     </NoticeMessage>

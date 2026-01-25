@@ -20,6 +20,7 @@ import ConfigAPI from './ConfigAPI.js'
 import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
+import EmailTrackingAPI from './EmailTrackingAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
@@ -39,6 +40,7 @@ import NoticeboardAPI from './NoticeboardAPI.js'
 import NotificationAPI from './NotificationAPI.js'
 import SessionAPI from './SessionAPI.js'
 import ShortlinksAPI from './ShortlinksAPI.js'
+import SimulationAPI from './SimulationAPI.js'
 import SocialActionsAPI from './SocialActionsAPI.js'
 import SpammersAPI from './SpammersAPI.js'
 import StatusAPI from './StatusAPI.js'
@@ -66,6 +68,7 @@ export default (config) => {
     dashboard: new DashboardAPI(options),
     domain: new DomainAPI(options),
     donations: new DonationsAPI(options),
+    emailtracking: new EmailTrackingAPI(options),
     giftaid: new GiftAidAPI(options),
     group: new GroupAPI(options),
     image: new ImageAPI(options),
@@ -85,6 +88,7 @@ export default (config) => {
     notification: new NotificationAPI(options),
     session: new SessionAPI(options),
     shortlinks: new ShortlinksAPI(options),
+    simulation: new SimulationAPI(options),
     socialactions: new SocialActionsAPI(options),
     spammers: new SpammersAPI(options),
     status: new StatusAPI(options),

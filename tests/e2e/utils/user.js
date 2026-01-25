@@ -118,6 +118,42 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
     if (navigateToHome) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
+
+      // Wait for DOM to be ready - don't use networkidle as the app has background polling
+      // that can prevent network from becoming idle, causing timeouts in parallel runs
+      await page.waitForLoadState('domcontentloaded', {
+        timeout: timeouts.navigation.default,
+      })
+
+      // Verify logged-out state by checking localStorage auth is cleared
+      const isLoggedOut = await page.evaluate(() => {
+        try {
+          const authData = localStorage.getItem('auth')
+          if (!authData) return true
+          const parsed = JSON.parse(authData)
+          const tokens = parsed?.auth
+          // Check if there are any valid tokens remaining
+          return !(tokens?.jwt || tokens?.persistent)
+        } catch (e) {
+          return true // If we can't parse, assume logged out
+        }
+      })
+
+      if (!isLoggedOut) {
+        console.log(
+          'Warning: Auth data still present after logout, clearing again'
+        )
+        // Try clearing again
+        await clearSessionData(page)
+        // Reload to ensure fresh state
+        await page.reload({ timeout: timeouts.navigation.initial })
+        // Wait for DOM to be ready - don't use networkidle as the app has background polling
+        await page.waitForLoadState('domcontentloaded', {
+          timeout: timeouts.navigation.default,
+        })
+      }
+
+      console.log('Verified logged-out state')
     }
 
     return page
@@ -125,6 +161,96 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
     console.error(`Error clearing session data: ${error.message}`)
     throw error
   }
+}
+
+/**
+ * Waits for an enabled sign-in button on the page.
+ * With SSR, buttons may be rendered disabled and only become enabled after Vue hydration.
+ * This function polls until a visible, enabled button is found or timeout.
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @returns {Promise<import('@playwright/test').Locator|null>} - Returns the enabled button locator or null
+ */
+async function waitForEnabledSignInButton(page) {
+  const buttons = page.locator('.test-signinbutton')
+  // Wait for at least one element to be visible
+  await page
+    .locator('.test-signinbutton:visible')
+    .first()
+    .waitFor({ timeout: timeouts.ui.appearance })
+  const count = await buttons.count()
+  console.log(`Found ${count} .test-signinbutton elements`)
+
+  if (count === 0) {
+    console.error('Could not find .test-signinbutton on homepage')
+    return null
+  }
+
+  // With SSR, buttons may be rendered disabled and only become enabled after
+  // Vue hydration. Poll until we find an enabled button or timeout.
+  const hydrationTimeout = timeouts.ui.appearance
+  const pollInterval = 200
+  const startTime = Date.now()
+  let signInButton = null
+
+  while (Date.now() - startTime < hydrationTimeout) {
+    // Look for the first visible and enabled button
+    for (let i = 0; i < count; i++) {
+      const btn = buttons.nth(i)
+
+      // Check if this button is visible
+      const isVisible = await btn.isVisible({ timeout: 500 }).catch(() => false)
+
+      if (isVisible) {
+        // Check if it's enabled by checking various disabled states
+        const isDisabled = await btn
+          .evaluate((el) => {
+            // For button elements, check the disabled property
+            if (el.disabled) return true
+
+            // For any element, check disabled attribute values
+            const disabledAttr = el.getAttribute('disabled')
+            if (disabledAttr === 'true' || disabledAttr === '') return true
+
+            // Check for disabled classes
+            if (el.classList.contains('disabled')) return true
+
+            return false
+          })
+          .catch(() => false)
+
+        if (!isDisabled) {
+          console.log(`Found visible, enabled button at index ${i}`)
+          signInButton = btn
+          break
+        }
+      }
+    }
+
+    if (signInButton) {
+      break
+    }
+
+    // Wait before retrying - button may still be disabled during hydration
+    console.log(
+      'Sign-in button disabled (likely awaiting hydration), retrying...'
+    )
+    await page.waitForTimeout(pollInterval)
+  }
+
+  if (!signInButton) {
+    console.error(
+      'Could not find visible, enabled .test-signinbutton on homepage after waiting for hydration'
+    )
+    return null
+  }
+
+  // Wait for the button to be ready
+  await signInButton.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+
+  return signInButton
 }
 
 /**
@@ -162,77 +288,18 @@ async function signUpViaHomepage(
   }
 
   // Wait for page to be fully loaded with JavaScript
-  await page.waitForLoadState('networkidle', {
+  // Don't use networkidle - the app has background polling that prevents idle state
+  await page.waitForLoadState('domcontentloaded', {
     timeout: timeouts.navigation.default,
   })
 
   // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
 
-  const buttons = page.locator('.test-signinbutton')
-  // Wait for at least one element to be visible
-  await page
-    .locator('.test-signinbutton:visible')
-    .first()
-    .waitFor({ timeout: timeouts.ui.appearance })
-  const count = await buttons.count()
-  console.log(`Found ${count} .test-signinbutton elements`)
-
-  if (count === 0) {
-    console.error('Could not find .test-signinbutton on homepage')
-    return false
-  }
-
-  // Look for the first visible and enabled button
-  let signInButton = null
-  for (let i = 0; i < count; i++) {
-    const btn = buttons.nth(i)
-
-    // Check if this button is visible
-    const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
-
-    if (isVisible) {
-      // Check if it's enabled by checking various disabled states
-      const isDisabled = await btn
-        .evaluate((el) => {
-          // For button elements, check the disabled property
-          if (el.disabled) return true
-
-          // For any element, check disabled attribute values
-          const disabledAttr = el.getAttribute('disabled')
-          if (disabledAttr === 'true' || disabledAttr === '') return true
-
-          // Check for disabled classes
-          if (el.classList.contains('disabled')) return true
-
-          return false
-        })
-        .catch(() => false)
-
-      if (!isDisabled) {
-        console.log(`Found visible, enabled button at index ${i}`)
-        signInButton = btn
-        break
-      } else {
-        console.log(`Button at index ${i} is disabled`)
-      }
-    } else {
-      console.log(`Button at index ${i} is not visible`)
-    }
-  }
-
+  const signInButton = await waitForEnabledSignInButton(page)
   if (!signInButton) {
-    console.error(
-      'Could not find visible, enabled .test-signinbutton on homepage'
-    )
     return false
   }
-
-  // Wait for the button to be ready and click it
-  await signInButton.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
 
   console.log(`Found valid sign-in button, clicking...`)
   await signInButton.click()
@@ -240,7 +307,7 @@ async function signUpViaHomepage(
   // Wait for login modal to appear
   console.log('Waiting for login modal')
   await page
-    .locator('#loginModal, .modal-dialog:has-text("Let\'s get freegling")')
+    .locator('#loginModal, .modal-dialog:has-text("Join the Reuse Revolution")')
     .first()
     .waitFor({
       state: 'visible',
@@ -381,6 +448,11 @@ async function signUpViaHomepage(
     } else if (currentUrl.includes('/myposts')) {
       console.log('Redirected to myposts page - registration successful')
     }
+
+    // Wait for auth to be persisted to localStorage before returning
+    // This ensures navigation to other pages preserves the logged-in state
+    await waitForAuthPersistence(page)
+
     return true
   } catch (error) {
     // If we're not redirected to explore, look for other success indicators
@@ -417,6 +489,11 @@ async function signUpViaHomepage(
       }
     }
 
+    // If registration was successful via indicators, also wait for auth persistence
+    if (registrationSuccessful) {
+      await waitForAuthPersistence(page)
+    }
+
     return registrationSuccessful
   }
 }
@@ -450,70 +527,10 @@ async function loginViaHomepage(
   // Find and click the sign-in button on the homepage to open the login modal
   console.log('Opening login modal')
 
-  const buttons = page.locator('.test-signinbutton')
-  // Wait for at least one element to be visible
-  await page
-    .locator('.test-signinbutton:visible')
-    .first()
-    .waitFor({ timeout: timeouts.ui.appearance })
-  const count = await buttons.count()
-  console.log(`Found ${count} .test-signinbutton elements`)
-
-  if (count === 0) {
-    console.error('Could not find .test-signinbutton on homepage')
-    return false
-  }
-
-  // Look for the first visible and enabled button
-  let signInButton = null
-  for (let i = 0; i < count; i++) {
-    const btn = buttons.nth(i)
-
-    // Check if this button is visible
-    const isVisible = await btn.isVisible({ timeout: 2000 }).catch(() => false)
-
-    if (isVisible) {
-      // Check if it's enabled by checking various disabled states
-      const isDisabled = await btn
-        .evaluate((el) => {
-          // For button elements, check the disabled property
-          if (el.disabled) return true
-
-          // For any element, check disabled attribute values
-          const disabledAttr = el.getAttribute('disabled')
-          if (disabledAttr === 'true' || disabledAttr === '') return true
-
-          // Check for disabled classes
-          if (el.classList.contains('disabled')) return true
-
-          return false
-        })
-        .catch(() => false)
-
-      if (!isDisabled) {
-        console.log(`Found visible, enabled button at index ${i}`)
-        signInButton = btn
-        break
-      } else {
-        console.log(`Button at index ${i} is disabled`)
-      }
-    } else {
-      console.log(`Button at index ${i} is not visible`)
-    }
-  }
-
+  const signInButton = await waitForEnabledSignInButton(page)
   if (!signInButton) {
-    console.error(
-      'Could not find visible, enabled .test-signinbutton on homepage'
-    )
     return false
   }
-
-  // Wait for the button to be ready and click it
-  await signInButton.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
 
   console.log(`Found valid sign-in button, clicking...`)
   await signInButton.click()

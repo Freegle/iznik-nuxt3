@@ -143,6 +143,9 @@ export const useVolunteeringStore = defineStore({
       await api(this.config).volunteering.del(id)
       delete this.list[id]
     },
+    remove(id) {
+      delete this.list[id]
+    },
     async setDates(params) {
       const promises = []
 

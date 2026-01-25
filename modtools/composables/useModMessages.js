@@ -10,7 +10,7 @@
 
 import { useMessageStore } from '~/stores/message'
 import { useAuthStore } from '@/stores/auth'
-import { useModGroupStore } from '@/stores/modgroup'
+// import { useModGroupStore } from '@/stores/modgroup'
 import { useMiscStore } from '@/stores/misc'
 
 // All values need to be reset by one caller of setupModMessages()
@@ -103,8 +103,8 @@ export function setupModMessages(reset) {
     distance.value = 10
   }
 
-  const getMessages = async (workCount) => {
-    // console.log('<><><> getMessages', collection.value, groupid.value, workCount)
+  const getMessages = async (workdetail) => {
+    // console.log('<><><> getMessages', collection.value, groupid.value, workdetail)
 
     const messageStore = useMessageStore()
     messageStore.clearContext()
@@ -117,9 +117,12 @@ export function setupModMessages(reset) {
       summary: false,
       // limit: Math.max(limit.value, newVal)
     }
-    if (workCount) params.limit = Math.max(limit.value, workCount)
+    if (workdetail && workdetail.total) {
+      params.limit = Math.max(limit.value, workdetail.total)
+    }
     // console.log('uMM getMessages',params.limit)
     // params.debug = 'uMM getMessages',
+    messageStore.clear()
     await messageStore.fetchMessagesMT(params)
 
     // Force them to show.
@@ -150,24 +153,50 @@ export function setupModMessages(reset) {
       }
       return work[workType.value]
     } catch (e) {
-      console.log('>>>>useModMessages exception', e.message)
+      console.log('>>>>useModMessages work exception', e.message)
       return 0
     }
   })
 
-  watch(work, async (newVal, oldVal) => {
-    // console.log('<<<<useModMessages watch work. oldVal:', oldVal, 'newVal:', newVal)
+  const workdetail = computed(() => {
+    // console.log('uMM workdetail',workType.value)
+    const ret = {}
+    try {
+      const authStore = useAuthStore()
+      const work = authStore.work
+      if (!work) return ret
+      if (!workType.value) return ret
+      ret.total = 0
+      if (Array.isArray(workType.value)) {
+        for (const worktype of workType.value) {
+          ret[worktype] = work[worktype]
+          ret.total += work[worktype]
+        }
+      } else {
+        ret[workType.value] = work[workType.value]
+        ret.total += work[workType.value]
+      }
+      // console.log('uMM workdetail',ret)
+      return ret
+    } catch (e) {
+      console.log('>>>>useModMessages workdetail exception', e.message)
+      return {}
+    }
+  })
+
+  watch(workdetail, (newVal, oldVal) => {
+    // console.log('<<<<useModMessages watch workdetail. oldVal:', oldVal, 'newVal:', newVal)
+    if (JSON.stringify(oldVal) === JSON.stringify(newVal)) return // Not actually changed
     // if( collection.value!=='Pending') return
     let doFetch = false
 
-    const messageStore = useMessageStore()
     const miscStore = useMiscStore()
     // console.log('uMM getMessages',miscStore.deferGetMessages)
     if (miscStore.deferGetMessages) return
 
     const bodyoverflow = document.body.style.overflow
     if (bodyoverflow !== 'hidden') {
-      if (newVal > oldVal) {
+      if (newVal !== oldVal) {
         // There's new stuff to fetch.
         // console.log('Fetch')
         doFetch = true
@@ -186,7 +215,7 @@ export function setupModMessages(reset) {
       }
 
       if (doFetch) {
-        // console.log('uMM watch work getmessages', newVal)
+        // console.log('uMM watch workdetail getmessages', newVal)
         getMessages(newVal)
       }
     }

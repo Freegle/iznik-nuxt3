@@ -28,8 +28,6 @@ const all = computed(() => {
   return ('groupid' in route.params) ? route.params.groupid === "all" : false
 }) */
 const caretaker = computed(() => {
-  const caretaker =
-    'groupid' in route.params ? route.params.groupid === 'caretaker' : false
   return 'groupid' in route.params
     ? route.params.groupid === 'caretaker'
     : false
@@ -38,7 +36,6 @@ const caretaker = computed(() => {
 const loaded = ref(false)
 
 onMounted(async () => {
-  modGroupStore.getModGroups()
   // Get the data before we load the map to avoid timing windows.
   // Get CGAs and DPAs for all groups - but no locations
   await modGroupStore.listMT({

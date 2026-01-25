@@ -59,7 +59,7 @@
         variant="danger"
         icon="ban"
         spam
-        label="Spam"
+        label="Delete as Spam"
       />
     </div>
     <div v-else-if="approved" class="d-inline">
@@ -82,7 +82,7 @@
         variant="danger"
         icon="ban"
         spam
-        label="Spam"
+        label="Delete as Spam"
       />
       <SpinButton
         v-if="message.type === 'Offer' && !message.outcomes.length"
@@ -157,8 +157,8 @@
 </template>
 <script>
 import { useMessageStore } from '~/stores/message'
+import { copyStdMsgs } from '~/composables/useStdMsgs'
 import { useStdmsgStore } from '~/stores/stdmsg'
-import { icon, variant, copyStdMsgs } from '~/composables/useStdMsgs'
 
 export default {
   props: {

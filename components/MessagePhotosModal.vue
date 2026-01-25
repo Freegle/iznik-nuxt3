@@ -11,6 +11,22 @@
         {{ currentIndex + 1 }} / {{ attachmentCount }}
       </div>
 
+      <!-- Navigation arrows (desktop) -->
+      <button
+        v-if="attachmentCount > 1 && currentIndex > 0"
+        class="nav-arrow nav-arrow-left"
+        @click.stop="goToImage(currentIndex - 1)"
+      >
+        <v-icon icon="chevron-left" />
+      </button>
+      <button
+        v-if="attachmentCount > 1 && currentIndex < attachmentCount - 1"
+        class="nav-arrow nav-arrow-right"
+        @click.stop="goToImage(currentIndex + 1)"
+      >
+        <v-icon icon="chevron-right" />
+      </button>
+
       <!-- Swipeable image area -->
       <div
         ref="imageContainer"
@@ -437,6 +453,58 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  font-size: 1.25rem;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  /* Larger icons on bigger screens */
+  @media (min-width: 768px) {
+    width: 56px;
+    height: 56px;
+    font-size: 1.75rem;
+  }
+
+  @media (min-width: 1200px) {
+    width: 64px;
+    height: 64px;
+    font-size: 2rem;
+  }
+}
+
+.nav-arrow-left {
+  left: 1rem;
+}
+
+.nav-arrow-right {
+  right: 1rem;
+}
+
+/* Show arrows on hover over the viewer (desktop only) */
+@media (hover: hover) and (pointer: fine) {
+  .fullscreen-viewer:hover .nav-arrow {
+    opacity: 1;
+  }
 }
 
 .nav-dots {

@@ -212,10 +212,15 @@ const {
 } = useChatMessageBase(props.chatid, props.id, props.pov)
 
 // Computed properties
-const refmsgid = computed(() => chatmessage.value?.refmsgid)
-const refmsg = computed(() =>
-  refmsgid.value ? messageStore.byId(refmsgid.value) : null
-)
+// MT context may have refmsg object directly on chatmessage instead of/in addition to refmsgid
+const refmsgid = computed(() => {
+  if (chatmessage.value?.refmsg) return chatmessage.value.refmsg.id
+  return chatmessage.value?.refmsgid
+})
+const refmsg = computed(() => {
+  if (chatmessage.value?.refmsg) return chatmessage.value.refmsg
+  return refmsgid.value ? messageStore.byId(refmsgid.value) : null
+})
 
 // Methods
 const fetchMessage = async () => {

@@ -3,9 +3,10 @@
     <PostPhoto
       v-bind="attachment"
       :externalmods="mods"
+      :show-ai-badge="true"
       @remove="removePhoto"
       @updated="updatedPhoto"
-      @clicked="showModal"
+      @click="showModal"
     />
     <ModPhotoModal
       v-if="zoom"

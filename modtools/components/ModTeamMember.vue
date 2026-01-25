@@ -1,7 +1,12 @@
 <template>
   <b-row class="mb-2">
     <b-col cols="4">
-      <ProfileImage :image="member.profile.turl" class="mr-2" size="lg" />
+      <ProfileImage
+        :image="member.profile.turl"
+        :name="member.displayname"
+        class="mr-2"
+        size="lg"
+      />
     </b-col>
     <b-col cols="6">
       <strong>{{ member.displayname }}</strong>
@@ -18,6 +23,7 @@
 </template>
 <script>
 import { useTeamStore } from '@/stores/team'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -29,6 +35,10 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  setup() {
+    const { supportOrAdmin } = useMe()
+    return { supportOrAdmin }
   },
   methods: {
     async remove() {

@@ -5,26 +5,33 @@ const version = JSON.parse(packageJson).version || 0
 // import config from '../config'
 console.log('Building iznik-modtools', version)
 
+process.env.MT = 'true'
+
 export default defineNuxtConfig({
   // target: 'static',
   ssr: false,
   extends: ['../'],
   compatibilityDate: '2024-11-26',
+
+  // Override parent's cdnURL to use same-origin proxy approach.
+  // This avoids CORS issues in strict browsers (Firefox with privacy settings).
+  // Assets are requested from /netlify/... which _redirects proxies to the deploy URL.
+  $production: {
+    app: {
+      cdnURL: process.env.DEPLOY_URL
+        ? '/netlify/' + process.env.DEPLOY_URL.replace('https://', '')
+        : '',
+    },
+  },
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
     'leaflet/dist/leaflet.css',
   ],
-  /* modules: [
-    '@pinia/nuxt',
-    '@nuxt/image',
-    'nuxt-vite-legacy',
-    '@bootstrap-vue-next/nuxt'
-  ], */
   runtimeConfig: {
     public: {
       VERSION: version,
-      BUILD_DATE: new Date().toISOString(),
+      BUILD_DATE: new Date().toLocaleString('en-GB'),
     },
   },
   vite: {
@@ -49,10 +56,6 @@ export default defineNuxtConfig({
       //  : false, // disable cssnano when not in production
     },
   },
-  /* modules: [
-  ],
-  plugins: [
-  ], */
 
   // Sometimes we need to change the host when doing local testing with browser stack.
   devServer: {
@@ -95,6 +98,7 @@ export default defineNuxtConfig({
         },
       ],
       meta: [
+        // These add to the ones in ../nuxt.config.ts
         { name: 'robots', content: 'noindex' },
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -105,32 +109,4 @@ export default defineNuxtConfig({
       ],
     },
   },
-  /* image: {
-    uploadcare: {
-      provider: 'uploadcare',
-      cdnURL: config.UPLOADCARE_CDN,
-    },
-
-    weserv: {
-      provider: 'weserv',
-      baseURL: config.TUS_UPLOADER,
-      weservURL: config.IMAGE_DELIVERY,
-    },
-
-    // We want sharp images on fancy screens.
-    densities: [1, 2],
-
-    // Uploadcare only supports images upto 3000, and the screen sizes are doubled when requesting because of densities.
-    // So we already need to drop the top-level screen sizes, and we also don't want to request images which are too
-    // large because this affects our charged bandwidth.  So we only go up to 768.
-    screens: {
-      xs: 320,
-      sm: 576,
-      md: 768,
-      lg: 768,
-      xl: 768,
-      xxl: 768,
-      '2xl': 768,
-    },
-  } */
 })

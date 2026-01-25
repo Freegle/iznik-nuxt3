@@ -53,8 +53,6 @@ import { useHelpBox } from '~/composables/useHelpBox'
 
 const { hide, toggleHelp, showHelp } = useHelpBox()
 
-const id = ref('areamap')
-
 onMounted(() => {
   hide()
 })

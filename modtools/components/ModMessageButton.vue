@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline">
-    <div class="position-relative d-inline">
+    <div class="position-relative d-inline-block">
       <SpinButton
         :variant="variant"
         :spinclass="spinclass"
@@ -49,6 +49,7 @@
 
 import { useMessageStore } from '~/stores/message'
 import { useStdmsgStore } from '~/stores/stdmsg'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   props: {
@@ -137,7 +138,8 @@ export default {
   setup() {
     const messageStore = useMessageStore()
     const stdmsgStore = useStdmsgStore()
-    return { messageStore, stdmsgStore }
+    const { checkWorkDeferGetMessages } = useModMe()
+    return { messageStore, stdmsgStore, checkWorkDeferGetMessages }
   },
   data: function () {
     return {
@@ -207,8 +209,9 @@ export default {
         }
 
         this.showStdMsgModal = true
-        await nextTick()
         this.$refs.stdmodal?.show()
+        await this.$nextTick()
+        this.$refs.stdmodal?.fillin()
       }
       if (callback) callback()
     },
@@ -219,7 +222,7 @@ export default {
       })
       this.checkWorkDeferGetMessages()
     },
-    async deleteIt() {
+    deleteIt() {
       this.showDeleteModal = true
     },
     async deleteConfirmed() {
@@ -264,11 +267,9 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-//@import 'color-vars';
-
 .autosend {
   right: 4px;
-  bottom: -20px;
+  bottom: 0px;
   position: absolute;
   color: $color-purple;
 }

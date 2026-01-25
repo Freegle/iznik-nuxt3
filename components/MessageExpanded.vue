@@ -141,12 +141,11 @@
 
           <!-- Poster overlay on photo (shown on shorter screens) -->
           <client-only>
-            <NuxtLink
+            <div
               v-if="poster"
-              :to="posterProfileUrl"
               class="poster-overlay"
               :class="{ 'poster-overlay--below-carousel': attachmentCount > 1 }"
-              @click.stop
+              @click.stop="showProfileModal = true"
             >
               <div class="poster-overlay-avatar-wrapper">
                 <ProfileImage
@@ -171,13 +170,18 @@
                   <span v-if="poster.info?.offers" class="poster-overlay-stat">
                     <v-icon icon="gift" />{{ poster.info.offers }}
                   </span>
+                  <span
+                    v-if="poster.info?.offers && poster.info?.wanteds"
+                    class="poster-overlay-separator"
+                    >•</span
+                  >
                   <span v-if="poster.info?.wanteds" class="poster-overlay-stat">
                     <v-icon icon="search" />{{ poster.info.wanteds }}
                   </span>
                 </div>
               </div>
               <v-icon icon="chevron-right" class="poster-overlay-chevron" />
-            </NuxtLink>
+            </div>
           </client-only>
 
           <!-- Title overlay at bottom of photo - matches summary layout -->
@@ -215,7 +219,7 @@
                     class="replies"
                     @click.stop
                   >
-                    <v-icon icon="comments" />{{ replyCount }}
+                    <v-icon icon="reply" />{{ replyCount }}
                   </span>
                   <span
                     v-if="message.deliverypossible && isOffer"
@@ -245,8 +249,18 @@
             <div class="title-row">
               <span class="title-subject">{{ subjectItemName }}</span>
             </div>
-            <div v-if="subjectLocation" class="title-location">
-              {{ subjectLocation }}
+            <div class="location-row">
+              <div v-if="subjectLocation" class="title-location">
+                {{ subjectLocation }}
+              </div>
+              <div class="photo-actions">
+                <button
+                  class="photo-action-btn"
+                  @click.stop="showShareModal = true"
+                >
+                  <v-icon icon="share-alt" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -297,19 +311,17 @@
             <client-only>
               <div v-if="poster" class="section-header section-header--poster">
                 <span class="section-header-text">POSTED BY</span>
-                <NuxtLink
-                  :to="posterProfileUrl"
+                <span
                   class="section-id-link"
-                  @click.stop
+                  @click.stop="showProfileModal = true"
                 >
                   #{{ poster.id }}
-                </NuxtLink>
+                </span>
               </div>
-              <NuxtLink
+              <div
                 v-if="poster"
-                :to="posterProfileUrl"
                 class="poster-section-wrapper"
-                @click.stop
+                @click.stop="showProfileModal = true"
               >
                 <div class="poster-avatar-wrapper">
                   <ProfileImage
@@ -333,13 +345,14 @@
                       <v-icon icon="gift" />{{ poster.info.offers
                       }}<span class="poster-stat-label">OFFERs</span>
                     </span>
+                    <span
+                      v-if="poster.info?.offers && poster.info?.wanteds"
+                      class="poster-stat-separator"
+                      >•</span
+                    >
                     <span v-if="poster.info?.wanteds" class="poster-stat">
                       <v-icon icon="search" />{{ poster.info.wanteds
                       }}<span class="poster-stat-label">WANTEDs</span>
-                    </span>
-                    <span v-if="poster.info?.replies" class="poster-stat">
-                      <v-icon icon="reply" />{{ poster.info.replies
-                      }}<span class="poster-stat-label">replies</span>
                     </span>
                   </div>
                   <div v-if="posterAboutMe" class="poster-aboutme">
@@ -355,7 +368,7 @@
                   @click.stop.prevent
                 />
                 <v-icon icon="chevron-right" class="poster-chevron" />
-              </NuxtLink>
+              </div>
             </client-only>
           </div>
 
@@ -535,6 +548,13 @@
       @hidden="showShareModal = false"
     />
 
+    <!-- Profile Modal -->
+    <ProfileModal
+      v-if="showProfileModal && poster?.id"
+      :id="poster.id"
+      @hidden="showProfileModal = false"
+    />
+
     <!-- Report Modal -->
     <MessageReportModal
       v-if="showReportModal"
@@ -553,8 +573,10 @@ import {
   onUnmounted,
 } from 'vue'
 import { useMiscStore } from '~/stores/misc'
+import { useMobileStore } from '~/stores/mobile'
 import { useMe } from '~/composables/useMe'
 import { useMessageDisplay } from '~/composables/useMessageDisplay'
+import { action } from '~/composables/useClientLog'
 import MessageTextBody from '~/components/MessageTextBody'
 import MessageTag from '~/components/MessageTag'
 import NoticeMessage from '~/components/NoticeMessage'
@@ -569,6 +591,9 @@ const MessagePhotosModal = defineAsyncComponent(() =>
 )
 const MessageShareModal = defineAsyncComponent(() =>
   import('~/components/MessageShareModal')
+)
+const ProfileModal = defineAsyncComponent(() =>
+  import('~/components/ProfileModal')
 )
 const MessageReportModal = defineAsyncComponent(() =>
   import('~/components/MessageReportModal')
@@ -604,6 +629,7 @@ const props = defineProps({
 const emit = defineEmits(['zoom', 'close'])
 
 const miscStore = useMiscStore()
+const mobileStore = useMobileStore()
 const { me, loggedIn } = useMe()
 
 // Use shared composable for common message display logic
@@ -626,7 +652,6 @@ const {
   placeholderClass,
   categoryIcon,
   poster,
-  posterProfileUrl,
 } = useMessageDisplay(props.id)
 
 const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
@@ -634,9 +659,11 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 // State
 const replied = ref(false)
 const replyExpanded = ref(false)
+const mountTime = ref(null)
 const showMapModal = ref(false)
-const showMessagePhotosModal = ref(false)
 const showShareModal = ref(false)
+const showProfileModal = ref(false)
+const showMessagePhotosModal = ref(false)
 const showReportModal = ref(false)
 const currentPhotoIndex = ref(0)
 const containerRef = ref(null)
@@ -835,6 +862,23 @@ function updateWindowHeight() {
 }
 
 onMounted(() => {
+  mountTime.value = Date.now()
+
+  // Log mount for debugging mobile navigation issues.
+  action('message_expanded_mount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    in_modal: props.inModal,
+    breakpoint: miscStore.breakpoint,
+  })
+
+  // Prevent orientation changes while fullscreen overlay is open - keyboard opening
+  // changes viewport dimensions which would incorrectly trigger landscape mode and
+  // cause ScrollGrid to unmount/remount components, losing the modal state.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(true)
+  }
+
   // Enable ken-burns animation now that hydration is complete
   isMounted.value = true
 
@@ -847,6 +891,45 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  const timeOpenMs = mountTime.value ? Date.now() - mountTime.value : null
+
+  action('message_expanded_unmount', {
+    message_id: props.id,
+    fullscreen_overlay: props.fullscreenOverlay,
+    time_open_ms: timeOpenMs,
+  })
+
+  // Clear the fullscreen modal flag so orientation detection resumes.
+  // Re-check orientation since it may have changed while blocked.
+  if (props.fullscreenOverlay) {
+    miscStore.setFullscreenModalOpen(false)
+    // Use same detection method as OrientationFettler: Capacitor for app, matchMedia for web.
+    if (mobileStore.isApp) {
+      // In app, use Capacitor ScreenOrientation plugin.
+      import('@capacitor/screen-orientation')
+        .then(({ ScreenOrientation }) => {
+          ScreenOrientation.orientation().then((orientation) => {
+            const isLandscape =
+              orientation.type === 'landscape-primary' ||
+              orientation.type === 'landscape-secondary'
+            miscStore.setLandscape(isLandscape)
+          })
+        })
+        .catch(() => {
+          // Fallback to matchMedia if plugin unavailable.
+          if (typeof window !== 'undefined') {
+            miscStore.setLandscape(
+              window.matchMedia('(orientation: landscape)').matches
+            )
+          }
+        })
+    } else if (typeof window !== 'undefined') {
+      miscStore.setLandscape(
+        window.matchMedia('(orientation: landscape)').matches
+      )
+    }
+  }
+
   stopThumbnailAutoScroll()
   window.removeEventListener('resize', updateWindowHeight)
 })
@@ -1425,6 +1508,43 @@ onUnmounted(() => {
   min-width: 0;
 }
 
+.location-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.photo-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: $color-white-opacity-25;
+  color: $color-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-white-opacity-50;
+  }
+
+  svg {
+    font-size: 0.75rem;
+  }
+}
+
 .title-tag {
   font-size: 0.9rem !important;
   white-space: nowrap !important;
@@ -1530,7 +1650,7 @@ onUnmounted(() => {
 .poster-overlay {
   display: none;
   position: absolute;
-  bottom: 7rem; // Above title-overlay which has ~6rem height
+  bottom: 7rem; /* Above title-overlay which has ~6rem height */
   right: 1rem;
   background: $color-white-opacity-95;
   backdrop-filter: blur(8px);
@@ -1543,6 +1663,7 @@ onUnmounted(() => {
   gap: 0.5rem;
   box-shadow: 0 2px 8px $color-black-opacity-15;
   border: 1px solid $color-gray-3;
+  cursor: pointer;
 
   &:hover {
     background: $color-white;
@@ -1614,6 +1735,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.15rem;
+}
+
+.poster-overlay-separator {
+  color: $color-gray--base;
 }
 
 .poster-overlay-chevron {
@@ -1714,7 +1839,7 @@ onUnmounted(() => {
   }
 }
 
-/* Poster section wrapper - now a link for tablet layout with ratings */
+/* Poster section wrapper - clickable to open profile modal */
 .poster-section-wrapper {
   display: flex;
   align-items: flex-start;
@@ -1727,6 +1852,7 @@ onUnmounted(() => {
   background: $color-white;
   border: 1px solid $color-gray--light;
   border-left: 3px solid $colour-info-fg;
+  cursor: pointer;
 
   &:hover {
     text-decoration: none;
@@ -1855,6 +1981,10 @@ onUnmounted(() => {
   @include media-breakpoint-up(md) {
     display: inline;
   }
+}
+
+.poster-stat-separator {
+  color: $color-gray--base;
 }
 
 .poster-chevron {
@@ -2031,27 +2161,21 @@ onUnmounted(() => {
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/mixins/_breakpoints';
 
-/* Ken Burns effect - slow pan and zoom, mobile/tablet only */
+/* Ken Burns effect - slow pan and zoom for ~10s then stop centered, mobile/tablet only */
 @keyframes kenburns {
   0% {
-    transform: scale(1.15) translate(0%, 3%);
-  }
-  25% {
-    transform: scale(1.15) translate(-3%, 0%);
+    transform: scale(1.15) translate(3%, 3%);
   }
   50% {
-    transform: scale(1.15) translate(0%, -3%);
-  }
-  75% {
-    transform: scale(1.15) translate(3%, 0%);
+    transform: scale(1.15) translate(-3%, -3%);
   }
   100% {
-    transform: scale(1.15) translate(0%, 3%);
+    transform: scale(1) translate(0%, 0%);
   }
 }
 
 .photo-container.ken-burns img {
-  animation: kenburns 20s ease-in-out infinite;
+  animation: kenburns 10s ease-in-out forwards;
   will-change: transform;
   transform-origin: center center;
 

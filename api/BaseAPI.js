@@ -38,6 +38,7 @@ export default class BaseAPI {
 
       const authStore = useAuthStore()
       const mobileStore = useMobileStore()
+      const miscStore = useMiscStore()
 
       // Add trace headers for distributed tracing.
       const traceHeaders = getTraceHeaders()
@@ -73,16 +74,34 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params.
-        config.params = Object.fromEntries(
-          Object.entries(config.params).filter(([_, v]) => v)
-        )
+        // Remove falsey values from the params, unless dontzapfalsey is set.
+        // This is needed when we want to pass 0 as a value (e.g., reviewed: 0).
+        const keepFalsey = config.params.dontzapfalsey
+        delete config.params.dontzapfalsey
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        if (!keepFalsey) {
+          config.params = Object.fromEntries(
+            Object.entries(config.params).filter(([_, v]) => v)
+          )
+        }
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
+
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
@@ -90,7 +109,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools
         config.params.app = mobileStore.isApp
 
         // JSON-encode these for to pass.
@@ -101,12 +120,11 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools
         config.data.app = mobileStore.isApp
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
@@ -116,10 +134,17 @@ export default class BaseAPI {
         headers,
       })
 
-      if (data.jwt && data.jwt !== authStore.auth.jwt && data.persistent) {
-        // We've been given a new JWT.  Use it in future.  This can happen after user merge or periodically when
-        // we renew the JWT.
-        authStore.setAuth(data.jwt, data.persistent)
+      if (data.jwt && data.persistent) {
+        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
+        // in-flight API responses from restoring auth after an intentional logout.
+        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
+          console.log('JWT renewal: updating auth tokens from API response')
+          authStore.setAuth(data.jwt, data.persistent)
+        } else if (!authStore.auth.jwt) {
+          console.log(
+            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
+          )
+        }
       }
     } catch (e) {
       if (e.message.match(/.*aborted.*/i)) {
@@ -314,6 +339,7 @@ export default class BaseAPI {
 
     try {
       const authStore = useAuthStore()
+      const miscStore = useMiscStore()
 
       if (authStore?.auth?.jwt) {
         // Use the JWT to authenticate the request if possible.
@@ -340,16 +366,34 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params.
-        config.params = Object.fromEntries(
-          Object.entries(config.params).filter(([_, v]) => v)
-        )
+        // Remove falsey values from the params, unless dontzapfalsey is set.
+        // This is needed when we want to pass 0 as a value (e.g., reviewed: 0).
+        const keepFalsey = config.params.dontzapfalsey
+        delete config.params.dontzapfalsey
 
-        // URL encode the parameters if any
-        const urlParams = new URLSearchParams(config.params).toString()
+        if (!keepFalsey) {
+          config.params = Object.fromEntries(
+            Object.entries(config.params).filter(([_, v]) => v)
+          )
+        }
 
-        if (urlParams.length) {
-          path += '&' + urlParams
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
+        const urlParams = new URLSearchParams()
+        for (const [key, value] of Object.entries(config.params)) {
+          if (Array.isArray(value)) {
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
+          } else {
+            urlParams.append(key, value)
+          }
+        }
+        const urlParamsStr = urlParams.toString()
+
+        if (urlParamsStr.length) {
+          path += '&' + urlParamsStr
         }
       } else if (method !== 'POST') {
         // Any parameters are passed in config.params.
@@ -357,7 +401,7 @@ export default class BaseAPI {
           config.params = {}
         }
 
-        config.params.modtools = false
+        config.params.modtools = miscStore.modtools
 
         // JSON-encode these for to pass.
         body = JSON.stringify(config.params)
@@ -367,11 +411,10 @@ export default class BaseAPI {
           config.data = {}
         }
 
-        config.data.modtools = false
+        config.data.modtools = miscStore.modtools
         body = JSON.stringify(config.data)
       }
 
-      const miscStore = useMiscStore()
       await miscStore.waitForOnline()
       miscStore.api(1)
       ;[status, data] = await ourFetch(this.config.public.APIv2 + path, {

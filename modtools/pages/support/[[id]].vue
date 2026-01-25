@@ -1,143 +1,175 @@
 <template>
   <div>
     <div v-if="supportOrAdmin">
-      <b-tabs v-model="activeSection" content-class="mt-3" card>
-        <!-- USERS SECTION -->
-        <b-tab>
-          <template #title>
-            <h2 class="ml-2 mr-2">Users</h2>
-          </template>
-          <b-tabs v-model="userTab" content-class="mt-2" pills>
-            <b-tab title="Find User">
-              <ModSupportFindUser :id="id" />
-            </b-tab>
-            <b-tab title="Find Message">
-              <p>
-                You can search for message by id, or by subject. This will only
-                return the first few results, so the more specific, the better.
-              </p>
-              <ModFindMessage
-                :message-term="messageTerm"
-                @searched="searchedMessage"
-                @changed="changedMessageTerm"
+      <div>
+        <b-tabs v-model="activeTab" content-class="mt-3" card>
+          <!-- User Tab -->
+          <b-tab>
+            <template #title>
+              <h2 class="ml-2 mr-2">User</h2>
+            </template>
+            <ModSupportFindUser :id="id" />
+          </b-tab>
+
+          <!-- Community Tab with sub-tabs -->
+          <b-tab @click="onCommunityTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Community</h2>
+            </template>
+            <div class="subtabs-wrapper">
+              <b-tabs
+                v-model="communitySubTab"
+                content-class="mt-3"
+                class="subtabs"
+              >
+                <b-tab @click="onFindCommunityTab">
+                  <template #title>
+                    <span class="subtab-title">Find</span>
+                  </template>
+                  <ModSupportFindGroup ref="findGroupComponent" />
+                </b-tab>
+                <b-tab @click="onListCommunitiesTab">
+                  <template #title>
+                    <span class="subtab-title">List</span>
+                  </template>
+                  <ModSupportListGroups ref="listGroupsComponent" />
+                </b-tab>
+                <b-tab>
+                  <template #title>
+                    <span class="subtab-title">Contact</span>
+                  </template>
+                  <ModSupportContactGroup />
+                </b-tab>
+                <b-tab>
+                  <template #title>
+                    <span class="subtab-title">Add</span>
+                  </template>
+                  <ModSupportAddGroup />
+                </b-tab>
+                <b-tab>
+                  <template #title>
+                    <span class="subtab-title">Check Volunteers</span>
+                  </template>
+                  <ModSupportCheckVolunteers />
+                </b-tab>
+              </b-tabs>
+            </div>
+          </b-tab>
+
+          <!-- Message Tab -->
+          <b-tab>
+            <template #title>
+              <h2 class="ml-2 mr-2">Message</h2>
+            </template>
+            <p>
+              You can search for message by id, or by subject. This will only
+              return the first few results, so the more specific, the better.
+            </p>
+            <ModFindMessage
+              :message-term="messageTerm"
+              @searched="searchedMessage"
+              @changed="changedMessageTerm"
+            />
+            <div v-if="messages" class="mt-2">
+              <ModMessage
+                v-for="message in messages"
+                :key="'message-' + message.id"
+                :message="message"
+                noactions
               />
-              <div v-if="messages" class="mt-2">
-                <ModMessage
-                  v-for="message in messages"
-                  :key="'message-' + message.id"
-                  :message="message"
-                  noactions
-                />
-              </div>
-              <NoticeMessage v-if="error" class="mt-2" variant="warning">
-                Couldn't fetch that message. Almost always this is because the
-                message doesn't exist (or has been very deleted).
-              </NoticeMessage>
-            </b-tab>
-          </b-tabs>
-        </b-tab>
+            </div>
+            <NoticeMessage v-if="error" class="mt-2" variant="warning">
+              Couldn't fetch that message. Almost always this is because the
+              message doesn't exist (or has been very deleted).
+            </NoticeMessage>
+          </b-tab>
 
-        <!-- COMMUNITIES SECTION -->
-        <b-tab @click="onCommunitySection">
-          <template #title>
-            <h2 class="ml-2 mr-2">Communities</h2>
-          </template>
-          <b-tabs v-model="communityTab" content-class="mt-2" pills>
-            <b-tab title="Find" @click="onFindCommunityTab">
-              <ModSupportFindGroup ref="findGroupComponent" />
-            </b-tab>
-            <b-tab title="List" @click="onListCommunitiesTab">
-              <ModSupportListGroups ref="listGroupsComponent" />
-            </b-tab>
-            <b-tab title="Contact">
-              <ModSupportContactGroup />
-            </b-tab>
-            <b-tab title="Add">
-              <ModSupportAddGroup />
-            </b-tab>
-            <b-tab title="Check Volunteers">
-              <ModSupportCheckVolunteers />
-            </b-tab>
-          </b-tabs>
-        </b-tab>
-
-        <!-- SYSTEM SECTION -->
-        <b-tab @click="onSystemSection">
-          <template #title>
-            <h2 class="ml-2 mr-2">System</h2>
-          </template>
-          <b-tabs v-model="systemTab" content-class="mt-2" pills>
-            <b-tab @click="onSystemLogsTab">
-              <template #title>
-                System Logs
+          <!-- Logs Tab with sub-tabs -->
+          <b-tab @click="onLogsTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">
+                Logs
                 <b-badge
                   variant="danger"
                   class="ml-1"
-                  style="font-size: 0.6em; vertical-align: super"
+                  style="font-size: 0.4em; vertical-align: super"
                   >WIP</b-badge
                 >
-              </template>
-              <NoticeMessage variant="warning" class="mb-2">
-                <b>Work in Progress:</b> We're part way through a slow migration
-                from our own logging infrastructure to third-party solutions.
-                This will include more detailed information to help diagnose
-                problems - such as device type, screen size, browser, and a
-                detailed trace of user actions. Please report bugs or usability
-                issues to
-                <ExternalLink href="mailto:geeks@ilovefreegle.org">
-                  geeks@ilovefreegle.org </ExternalLink
-                >. See
-                <ExternalLink
-                  href="https://github.com/Freegle/FreegleDocker/blob/master/Logging.md"
-                >
-                  Logging.md
-                </ExternalLink>
-                for technical details.
-              </NoticeMessage>
-              <ModSystemLogs
-                v-if="showSystemLogs"
-                :key="'systemlogs-' + systemLogsBump"
-              />
-            </b-tab>
-            <b-tab @click="onAIAssistantTab">
-              <template #title>
-                AI Support
-                <b-badge
-                  variant="danger"
-                  class="ml-1"
-                  style="font-size: 0.6em; vertical-align: super"
-                  >WIP</b-badge
-                >
-              </template>
-              <ModSupportAIAssistant
-                v-if="showAIAssistant"
-                :key="'aiassistant-' + aiAssistantBump"
-              />
-            </b-tab>
-            <b-tab title="Email Stats" @click="onEmailStatsTab">
-              <ModSupportEmailStats
-                v-if="showEmailStats"
-                :key="'emailstats-' + emailStatsBump"
-              />
-            </b-tab>
-          </b-tabs>
-        </b-tab>
+              </h2>
+            </template>
+            <NoticeMessage variant="warning" class="mb-2">
+              <b>Work in Progress:</b> We're part way through a slow migration
+              from our own logging infrastructure to third-party solutions. This
+              will include more detailed information to help diagnose problems -
+              such as device type, screen size, browser, and a detailed trace of
+              user actions. Please report bugs or usability issues to
+              <ExternalLink href="mailto:geeks@ilovefreegle.org">
+                geeks@ilovefreegle.org </ExternalLink
+              >. See
+              <ExternalLink
+                href="https://github.com/Freegle/FreegleDocker/blob/master/Logging.md"
+              >
+                Logging.md
+              </ExternalLink>
+              for technical details.
+            </NoticeMessage>
+            <div class="subtabs-wrapper">
+              <b-tabs v-model="logsSubTab" content-class="mt-3" class="subtabs">
+                <b-tab @click="onSystemLogsTab">
+                  <template #title>
+                    <span class="subtab-title">System Logs</span>
+                  </template>
+                  <ModSystemLogs
+                    v-if="showSystemLogs"
+                    :key="'systemlogs-' + systemLogsBump"
+                  />
+                </b-tab>
+                <b-tab @click="onEmailStatsTab">
+                  <template #title>
+                    <span class="subtab-title">Email Stats</span>
+                  </template>
+                  <ModSupportEmailStats
+                    v-if="showEmailStats"
+                    :key="'emailstats-' + emailStatsBump"
+                  />
+                </b-tab>
+                <b-tab @click="onAIAssistantTab">
+                  <template #title>
+                    <span class="subtab-title">AI Support Helper</span>
+                  </template>
+                  <ModSupportAIAssistant
+                    v-if="showAIAssistant"
+                    :key="'aiassistant-' + aiAssistantBump"
+                  />
+                </b-tab>
+              </b-tabs>
+            </div>
+          </b-tab>
 
-        <!-- SPAM SECTION -->
-        <b-tab @click="onSpamSection">
-          <template #title>
-            <h2 class="ml-2 mr-2">Spam</h2>
-          </template>
-          <b-tabs v-model="spamTab" content-class="mt-2" pills>
-            <b-tab title="Worry Words" @click="onWorryWordsTab">
-              <ModSupportWorryWords ref="worryWordsComponent" />
-            </b-tab>
-            <b-tab title="Spam Keywords" @click="onSpamKeywordsTab">
-              <ModSupportSpamKeywords ref="spamKeywordsComponent" />
-            </b-tab>
-          </b-tabs>
-        </b-tab>
-      </b-tabs>
+          <!-- Spam Tab with sub-tabs -->
+          <b-tab @click="onSpamTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Spam</h2>
+            </template>
+            <div class="subtabs-wrapper">
+              <b-tabs v-model="spamSubTab" content-class="mt-3" class="subtabs">
+                <b-tab @click="onWorryWordsTab">
+                  <template #title>
+                    <span class="subtab-title">Worry Words</span>
+                  </template>
+                  <ModSupportWorryWords ref="worryWordsComponent" />
+                </b-tab>
+                <b-tab @click="onSpamKeywordsTab">
+                  <template #title>
+                    <span class="subtab-title">Spam Keywords</span>
+                  </template>
+                  <ModSupportSpamKeywords ref="spamKeywordsComponent" />
+                </b-tab>
+              </b-tabs>
+            </div>
+          </b-tab>
+        </b-tabs>
+      </div>
     </div>
     <NoticeMessage v-else variant="warning">
       You don't have access to Support Tools.
@@ -166,15 +198,14 @@ export default {
       id: 0,
       showSystemLogs: false,
       systemLogsBump: 0,
-      showAIAssistant: false,
-      aiAssistantBump: 0,
       showEmailStats: false,
       emailStatsBump: 0,
-      activeSection: 0,
-      userTab: 0,
-      communityTab: 0,
-      systemTab: 0,
-      spamTab: 0,
+      showAIAssistant: false,
+      aiAssistantBump: 0,
+      activeTab: 0,
+      communitySubTab: 0,
+      logsSubTab: 0,
+      spamSubTab: 0,
     }
   },
   computed: {
@@ -185,34 +216,87 @@ export default {
   created() {
     const route = useRoute()
     this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-    this.chatStore.list = []
+    this.chatStore.list = [] // this.chatStore.clear()
     this.messageStore.clear()
+  },
+  mounted() {
+    // Handle tab query parameter after component is mounted.
+    const route = useRoute()
 
-    // Handle section query parameter.
-    const sectionParam = route.query.section
-    if (sectionParam) {
-      const sectionMap = { users: 0, communities: 1, system: 2, spam: 3 }
-      if (sectionMap[sectionParam] !== undefined) {
-        this.activeSection = sectionMap[sectionParam]
-      }
+    // Top-level tab mapping.
+    const topTabMap = {
+      user: 0,
+      community: 1,
+      message: 2,
+      logs: 3,
+      spam: 4,
     }
 
-    // Handle tab query parameter within sections.
+    // Sub-tab mappings.
+    const communitySubTabMap = {
+      find: 0,
+      list: 1,
+      contact: 2,
+      add: 3,
+      volunteers: 4,
+    }
+
+    const logsSubTabMap = {
+      system: 0,
+      email: 1,
+      ai: 2,
+    }
+
+    const spamSubTabMap = {
+      worry: 0,
+      keywords: 1,
+    }
+
     const tabParam = route.query.tab
-    if (tabParam) {
-      if (tabParam === 'logs') {
-        this.activeSection = 2
-        this.systemTab = 0
-        this.onSystemLogsTab()
-      } else if (tabParam === 'ai') {
-        this.activeSection = 2
-        this.systemTab = 1
-        this.onAIAssistantTab()
-      } else if (tabParam === 'emailstats') {
-        this.activeSection = 2
-        this.systemTab = 2
-        this.onEmailStatsTab()
-      }
+    const subTabParam = route.query.subtab
+
+    if (tabParam && topTabMap[tabParam] !== undefined) {
+      this.$nextTick(() => {
+        this.activeTab = topTabMap[tabParam]
+
+        // Handle sub-tabs.
+        if (tabParam === 'community') {
+          this.onCommunityTab()
+          if (subTabParam && communitySubTabMap[subTabParam] !== undefined) {
+            this.communitySubTab = communitySubTabMap[subTabParam]
+            if (subTabParam === 'find') {
+              this.onFindCommunityTab()
+            } else if (subTabParam === 'list') {
+              this.onListCommunitiesTab()
+            }
+          }
+        } else if (tabParam === 'logs') {
+          this.onLogsTab()
+          if (subTabParam && logsSubTabMap[subTabParam] !== undefined) {
+            this.logsSubTab = logsSubTabMap[subTabParam]
+            if (subTabParam === 'system') {
+              this.onSystemLogsTab()
+            } else if (subTabParam === 'email') {
+              this.onEmailStatsTab()
+            } else if (subTabParam === 'ai') {
+              this.onAIAssistantTab()
+            }
+          } else {
+            // Default to system logs.
+            this.onSystemLogsTab()
+          }
+        } else if (tabParam === 'spam') {
+          this.onSpamTab()
+          if (subTabParam && spamSubTabMap[subTabParam] !== undefined) {
+            this.spamSubTab = spamSubTabMap[subTabParam]
+            if (subTabParam === 'worry') {
+              this.onWorryWordsTab()
+            } else if (subTabParam === 'keywords') {
+              this.onSpamKeywordsTab()
+            }
+          }
+        }
+      })
     }
   },
   methods: {
@@ -226,8 +310,10 @@ export default {
 
       if (term) {
         if (!isNaN(term)) {
+          // This is a raw message id
           await this.searchById(term)
         } else if (term.substring(0, 1) === '#' && !isNaN(term.substring(1))) {
+          // This is a #id
           await this.searchById(term.substring(1))
         } else {
           await this.searchBySubject(term)
@@ -255,59 +341,72 @@ export default {
       await this.messageStore.searchMT({ term: subj, groupid: this.groupid })
     },
 
-    onCommunitySection() {
-      // Initialize first tab when section is selected.
-      this.onFindCommunityTab()
-    },
-
-    onSystemSection() {
-      // Initialize first tab when section is selected.
-      this.onSystemLogsTab()
-    },
-
-    onSpamSection() {
-      // Initialize first tab when section is selected.
-      this.onWorryWordsTab()
+    onCommunityTab() {
+      // Initialize community tab - load find communities by default.
+      this.$nextTick(() => {
+        this.onFindCommunityTab()
+      })
     },
 
     async onFindCommunityTab() {
+      // Load communities when tab is selected
       if (this.$refs.findGroupComponent) {
         await this.$refs.findGroupComponent.loadCommunities()
       }
     },
 
     async onWorryWordsTab() {
+      // Fetch worry words when tab is selected
       if (this.$refs.worryWordsComponent) {
         await this.$refs.worryWordsComponent.fetchWorryWords()
       }
     },
 
     async onSpamKeywordsTab() {
+      // Fetch spam keywords when tab is selected
       if (this.$refs.spamKeywordsComponent) {
         await this.$refs.spamKeywordsComponent.fetchSpamKeywords()
       }
     },
 
     async onListCommunitiesTab() {
+      // Fetch communities when tab is selected
       if (this.$refs.listGroupsComponent) {
         await this.$refs.listGroupsComponent.fetchCommunities()
       }
     },
 
+    onLogsTab() {
+      // Initialize logs tab - show system logs by default.
+      this.$nextTick(() => {
+        this.onSystemLogsTab()
+      })
+    },
+
     onSystemLogsTab() {
+      // Initialize system logs when tab is clicked.
       this.systemLogsBump = Date.now()
       this.showSystemLogs = true
       this.systemLogsStore.clear()
     },
 
+    onEmailStatsTab() {
+      // Initialize email stats when tab is clicked.
+      this.emailStatsBump = Date.now()
+      this.showEmailStats = true
+    },
+
     onAIAssistantTab() {
+      // Initialize AI assistant when tab is clicked.
       this.aiAssistantBump = Date.now()
       this.showAIAssistant = true
     },
 
-    onEmailStatsTab() {
-      this.emailStatsBump = Date.now()
-      this.showEmailStats = true
+    onSpamTab() {
+      // Initialize spam tab - load worry words by default.
+      this.$nextTick(() => {
+        this.onWorryWordsTab()
+      })
     },
   },
 }
@@ -315,5 +414,65 @@ export default {
 <style scoped>
 .max {
   max-width: 300px;
+}
+
+/* Subtab container - visually distinct grouped panel */
+:deep(.subtabs) {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Subtab navigation - segmented control style */
+:deep(.subtabs .nav-tabs) {
+  border: 1px solid #adb5bd !important;
+  background-color: #e9ecef !important;
+  padding: 3px !important;
+  display: inline-flex !important;
+  gap: 0 !important;
+}
+
+:deep(.subtabs .nav-item) {
+  margin-bottom: 0 !important;
+}
+
+:deep(.subtabs .nav-link) {
+  border: none !important;
+  border-right: 1px solid #adb5bd !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 1rem !important;
+  color: #495057 !important;
+  font-weight: 500 !important;
+  background-color: transparent !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+:deep(.subtabs .nav-item:last-child .nav-link) {
+  border-right: none !important;
+}
+
+:deep(.subtabs .nav-link:hover) {
+  color: #28a745 !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+:deep(.subtabs .nav-link.active) {
+  color: #fff !important;
+  background-color: #28a745 !important;
+  font-weight: 600 !important;
+}
+
+/* Subtab content area */
+:deep(.subtabs .tab-content) {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.subtab-title {
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
 }
 </style>

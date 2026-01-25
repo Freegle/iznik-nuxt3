@@ -7,7 +7,7 @@
       <v-icon icon="trash-alt" /> Ban
     </b-button>
     <b-button v-if="!spam" variant="white" @click="spamReport">
-      <v-icon icon="ban" /> Spammer
+      <v-icon icon="ban" /> Report Spammer
     </b-button>
     <b-button v-if="supportOrAdmin" variant="white" @click="spamSafelist">
       <v-icon icon="check" /> Safelist
@@ -34,12 +34,12 @@
       @confirm="banConfirmed"
     />
     <ModCommentAddModal
-      v-if="addComment"
-      ref="addComment"
+      v-if="showAddCommentModal"
       :user="user"
       :groupid="groupid"
       :groupname="groupname"
       @added="commentadded"
+      @hidden="showAddCommentModal = false"
     />
     <ModSpammerReport
       v-if="showSpamModal"
@@ -53,6 +53,7 @@
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
@@ -80,13 +81,14 @@ export default {
     const groupStore = useGroupStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
-    return { groupStore, memberStore, userStore }
+    const { me, supportOrAdmin } = useMe()
+    return { groupStore, memberStore, userStore, me, supportOrAdmin }
   },
   data: function () {
     return {
       removeConfirm: false,
       banConfirm: false,
-      addComment: false,
+      showAddCommentModal: false,
       user: null,
       showSpamModal: false,
       safelist: false,
@@ -105,8 +107,9 @@ export default {
     reportUser() {
       return {
         // Due to inconsistencies about userid vs id in objects.
-        userid: this.user.id,
-        displayname: this.user.displayname,
+        userid: this.user?.id,
+        id: this.user?.id,
+        displayname: this.user?.displayname,
       }
     },
   },
@@ -159,12 +162,11 @@ export default {
         await this.fetchUser()
       }
 
-      this.addComment = true
-      this.$refs.addComment?.show()
+      this.showAddCommentModal = true
     },
     async commentadded() {
       await this.userStore.fetchMT({
-        search: this.userid,
+        id: this.userid,
         emailhistory: true,
       })
 

@@ -22,9 +22,12 @@ const props = defineProps({
   misckey: { type: String, required: true },
 })
 
-const summary = computed(() => {
-  const ret = miscStore.get(props.misckey)
-  return typeof ret === 'undefined' ? false : ret
+const summary = computed({
+  get: () => {
+    const ret = miscStore.get(props.misckey)
+    return typeof ret === 'undefined' ? false : ret
+  },
+  set: (newValue) => {},
 })
 
 const toggleView = (c, e) => {

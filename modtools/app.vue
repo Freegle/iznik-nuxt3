@@ -37,6 +37,7 @@ import { useLogoStore } from '~/stores/logo'
 import { useLocationStore } from '~/stores/location'
 import { useShortlinkStore } from '~/stores/shortlinks'
 import { useMiscStore } from '~/stores/misc'
+import { useConfigStore } from '~/stores/config'
 // polyfills
 import 'core-js/actual/array/to-sorted'
 
@@ -51,9 +52,9 @@ import { useStdmsgStore } from '~/stores/stdmsg'
 import { computed, watch, reloadNuxtApp } from '#imports'
 import { useModGroupStore } from '~/stores/modgroup'
 import { usePublicityStore } from '~/stores/publicity'
+import { useSystemConfigStore } from '~/stores/systemconfig'
 
 const route = useRoute()
-const loadingIndicatorThrottle = ref(5000)
 
 // We're having trouble accessing the Nuxt config from within a Pinia store.  So instead we access it here, then
 // pass it in to each store via an init() action.
@@ -98,6 +99,7 @@ const domainStore = useDomainStore()
 const logoStore = useLogoStore()
 const locationStore = useLocationStore()
 const shortlinkStore = useShortlinkStore()
+const configStore = useConfigStore()
 const adminsStore = useAdminsStore()
 const alertStore = useAlertStore()
 const commentStore = useCommentStore()
@@ -108,6 +110,7 @@ const modGroupStore = useModGroupStore()
 const spammerStore = useSpammerStore()
 const stdmsgStore = useStdmsgStore()
 const publicityStore = usePublicityStore()
+const systemConfigStore = useSystemConfigStore()
 
 miscStore.init(runtimeConfig)
 groupStore.init(runtimeConfig)
@@ -139,6 +142,7 @@ domainStore.init(runtimeConfig)
 logoStore.init(runtimeConfig)
 locationStore.init(runtimeConfig)
 shortlinkStore.init(runtimeConfig)
+configStore.init(runtimeConfig)
 adminsStore.init(runtimeConfig)
 alertStore.init(runtimeConfig)
 commentStore.init(runtimeConfig)
@@ -149,6 +153,7 @@ modGroupStore.init(runtimeConfig)
 spammerStore.init(runtimeConfig)
 stdmsgStore.init(runtimeConfig)
 publicityStore.init(runtimeConfig)
+systemConfigStore.init(runtimeConfig)
 
 miscStore.modtools = true
 
@@ -221,7 +226,6 @@ if (process.client) {
   const chatCount = computed(() => {
     return chatStore.unreadCount
   })
-
 
   useHead({
     titleTemplate: (titleChunk) => {

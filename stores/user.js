@@ -64,7 +64,10 @@ export const useUserStore = defineStore({
       if (this.fetching[id]) {
         await this.fetching[id]
         await nextTick()
-        return this.list[id]
+        // Only return early if not forcing - otherwise continue to queue refresh
+        if (!force) {
+          return this.list[id]
+        }
       }
 
       // Add to pending batch and wait for the batch to complete
@@ -101,7 +104,8 @@ export const useUserStore = defineStore({
         }
         resolvers[id].push(resolve)
 
-        if ((force || !this.list[id]) && !this.fetching[id]) {
+        const shouldFetch = (force || !this.list[id]) && !this.fetching[id]
+        if (shouldFetch) {
           if (!idsToFetch.includes(id)) {
             idsToFetch.push(id)
           }
@@ -118,7 +122,9 @@ export const useUserStore = defineStore({
       }
     },
     async fetchMultiple(ids) {
-      // Filter out IDs that are already being fetched
+      // Filter out IDs that are currently being fetched (to avoid duplicate requests)
+      // Note: We don't filter by this.list[id] because processBatch() already decided
+      // these IDs need fetching (including force-refresh cases)
       const left = ids
         .map((id) => parseInt(id))
         .filter((id) => !this.fetching[id])

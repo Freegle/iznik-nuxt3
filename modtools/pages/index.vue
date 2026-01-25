@@ -13,6 +13,36 @@
       Here's your dashboard, where you can see what your communities have been
       doing recently.
     </p>
+    <div v-if="appVersions">
+      <strong>Current app releases:</strong>
+      <ul>
+        <li>
+          Freegle iOS <strong>v{{ appVersions.fd.ios.version }}</strong> ({{
+            appVersions.fd.ios.date
+          }})
+        </li>
+        <li>
+          Freegle Android
+          <strong>v{{ appVersions.fd.android.version }}</strong> ({{
+            appVersions.fd.android.date
+          }})
+        </li>
+        <li>
+          ModTools iOS <strong>v{{ appVersions.mt.ios.version }}</strong> ({{
+            appVersions.mt.ios.date
+          }})
+        </li>
+        <li>
+          ModTools Android
+          <strong>v{{ appVersions.mt.android.version }}</strong> ({{
+            appVersions.mt.android.date
+          }})
+        </li>
+      </ul>
+    </div>
+    <ModYesterday
+      v-if="me.systemrole === 'Admin' || me.systemrole === 'Support'"
+    />
     <!-- eslint-disable-next-line -->
     <p>Need any help moderating? Mail <ExternalLink href="mailto:mentors@ilovefreegle.org">mentors@ilovefreegle.org</ExternalLink>
     </p>
@@ -36,7 +66,7 @@
           v-model="groupid"
           all
           modonly
-          :systemwide="admin"
+          :systemwide="me.systemrole === 'Admin'"
           active
         />
       </div>
@@ -151,25 +181,24 @@
 import dayjs from 'dayjs'
 import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
-import { buildHead } from '~/composables/useMTBuildHead'
+import { useConfigStore } from '@/stores/config'
+// import { buildHead } from '~/composables/useMTBuildHead'
+import { useMe } from '~/composables/useMe'
 
 const miscStore = useMiscStore()
 const modGroupStore = useModGroupStore()
+const configStore = useConfigStore()
 
-/* const version = computed(() => {
-  return runtimeConfig.public.VERSION
-})
-
-const buildDate = computed(() => {
-  return runtimeConfig.public.BUILD_DATE
-}) */
+// Use me and myid computed properties from useMe composable for consistency
+const { me } = useMe()
 
 const showVolunteersWeek = ref(false)
 const starti = ref(null)
 const endi = ref(null)
 const start = ref(null)
 const end = ref(null)
-const dateFormat = ref(null)
+const appVersions = ref(null)
+// const dateFormat = ref(null)
 
 const groupid = computed({
   get: () => {
@@ -222,8 +251,6 @@ watch(showInfo, () => {
 })
 
 onMounted(async () => {
-  modGroupStore.getModGroups()
-
   // Volunteers' Week is between 1st and 7th June every year.
   if (
     dayjs().get('month') === 5 &&
@@ -235,6 +262,62 @@ onMounted(async () => {
     setTimeout(() => {
       showVolunteersWeek.value = false
     }, 30000)
+  }
+
+  // Fetch app version info
+  try {
+    const fdIosVersion = await configStore.fetch('app_fd_version_ios_latest')
+    const fdIosDate = await configStore.fetch('app_fd_version_ios_date')
+    const fdAndroidVersion = await configStore.fetch(
+      'app_fd_version_android_latest'
+    )
+    const fdAndroidDate = await configStore.fetch('app_fd_version_android_date')
+    const mtIosVersion = await configStore.fetch('app_mt_version_ios_latest')
+    const mtIosDate = await configStore.fetch('app_mt_version_ios_date')
+    const mtAndroidVersion = await configStore.fetch(
+      'app_mt_version_android_latest'
+    )
+    const mtAndroidDate = await configStore.fetch('app_mt_version_android_date')
+
+    if (
+      fdIosVersion?.length &&
+      fdAndroidVersion?.length &&
+      mtIosVersion?.length &&
+      mtAndroidVersion?.length
+    ) {
+      appVersions.value = {
+        fd: {
+          ios: {
+            version: fdIosVersion[0].value,
+            date: fdIosDate?.length
+              ? dayjs(fdIosDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+          android: {
+            version: fdAndroidVersion[0].value,
+            date: fdAndroidDate?.length
+              ? dayjs(fdAndroidDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+        },
+        mt: {
+          ios: {
+            version: mtIosVersion[0].value,
+            date: mtIosDate?.length
+              ? dayjs(mtIosDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+          android: {
+            version: mtAndroidVersion[0].value,
+            date: mtAndroidDate?.length
+              ? dayjs(mtAndroidDate[0].value).format('D MMM YYYY')
+              : 'Unknown',
+          },
+        },
+      }
+    }
+  } catch (e) {
+    console.log('Failed to fetch app versions', e)
   }
 
   update()

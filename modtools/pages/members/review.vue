@@ -6,11 +6,11 @@
       <ModPostcodeTester />
 
       <div
-        v-for="(member, ix) in visibleMembers"
+        v-for="member in visibleMembers"
         :key="'memberlist-' + member.id"
         class="p-0 mt-2"
       >
-        <ModMemberReview :member="member" />
+        <ModMemberReview :member="member" @forcerefresh="forcerefresh" />
       </div>
 
       <infinite-loading
@@ -20,27 +20,25 @@
         :identifier="bump"
         @infinite="loadMore"
       >
-        <template #no-results>
-          <p class="p-2">There are no members to review at the moment.</p>
-        </template>
-        <template #no-more>
-          <p class="p-2">There are no members to review at the moment.</p>
-        </template>
         <template #spinner>
           <b-img lazy src="/loader.gif" alt="Loading" />
+        </template>
+        <template #complete>
+          <notice-message v-if="!visibleMembers?.length">
+            There are no members to review at the moment.
+          </notice-message>
         </template>
       </infinite-loading>
     </client-only>
   </div>
 </template>
 <script>
-import { useMemberStore } from '~/stores/member'
 import { setupModMembers } from '~/composables/useModMembers'
+import { useMemberStore } from '~/stores/member'
 import { useMiscStore } from '@/stores/misc'
-import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  async setup() {
+  setup() {
     const memberStore = useMemberStore()
     const miscStore = useMiscStore()
     const modMembers = setupModMembers(true)
@@ -49,6 +47,7 @@ export default {
     modMembers.collection.value = 'Spam'
     modMembers.groupid.value = 0
     modMembers.group.value = null
+    modMembers.limit.value = 100
     return {
       memberStore,
       miscStore,
@@ -61,11 +60,16 @@ export default {
     }
   },
   mounted() {
-    const modGroupStore = useModGroupStore()
-    modGroupStore.getModGroups()
     // reset infiniteLoading on return to page
     this.memberStore.clear()
     this.bump++
+  },
+  methods: {
+    forcerefresh() {
+      this.$nextTick(() => {
+        this.bump++
+      })
+    },
   },
 }
 </script>

@@ -324,296 +324,45 @@
               <strong class="mr-1 mt-2">Copy rules from:</strong>
               <ModGroupSelect v-model="copyfrom" modonly class="mb-2 mr-2" />
               <div>
-                <b-button
-                  variant="secondary"
+                <SpinButton
+                  variant="white"
+                  icon-name="copy"
+                  :label="'Copy to ' + group.nameshort"
                   :disabled="copyfrom <= 0 || copyfrom === groupid"
-                  @click="copy"
-                >
-                  <v-icon icon="copy" /> Copy to {{ group.nameshort }}
-                </b-button>
+                  @handle="copy"
+                />
               </div>
             </div>
             <div :key="rulesBump">
               <h4>Rules about the group</h4>
-              <ModGroupRule
-                :groupid="groupid"
-                name="fullymoderated"
-                label="Do you moderate all posts?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
+              <SpinButton
+                variant="white"
+                icon-name="save"
+                label="Save all rule changes"
+                :disabled="readonly"
+                @handle="saverules"
               />
-              <ModGroupRule
-                :groupid="groupid"
-                name="requirefirstpostoffer"
-                label="Do you require a member’s first post to be an Offer?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="limitconcurrentwanteds"
-                label="Do you limit the number of Wanted posts allowed at one time?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="limitgroups"
-                label="Do you limit the number of groups a member can join?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="restrictcrossposting"
-                label="Do you restrict cross-posting to other groups?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="allowloans"
-                label="Do you allow any loans or requests to borrow?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="suggesteddonations"
-                label="Do you allow people to ask for a donation to charity when offering items?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="declareselling"
-                label="Do you inform members that they must declare if they intend to sell items on?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="restrictpersonalinfo"
-                label="Do you restrict personal info in posts eg telephone numbers, addresses?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="restrictdistance"
-                label="Do you remove any members purely for being out of your group area?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <h4>Rules about specific items</h4>
-              <ModGroupRule
-                :groupid="groupid"
-                name="animalswanted"
-                label="Do you allow any requests for animals on your group?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="animalsoffer"
-                label="Do you allow any offers of animals for rehoming on your group?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="weapons"
-                label="Do you allow any requests or offers of weapons on your group?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="firearms"
-                label="Do you allow any offers or requests for guns if members have a firearms license?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="knives"
-                label="Do you allow any offers or requests for household or craft knives?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="knivesrestrict"
-                label="If so, do you restrict these to over 18s and only if personally collected?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="medicationsprescription"
-                label="Do you allow any offers or requests for prescription medication?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="medicationsotc"
-                label="Do you allow any offers or requests for over-the-counter medication?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="medicationsanimals"
-                label="Do you allow any offers or requests for medication for animals?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="contactlenses"
-                label="Do you allow any offers or requests for Contact Lenses?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="contactlensessolutions"
-                label="Do you allow any offers or requests for Contact Lens Solutions?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="tobacco"
-                label="Do you allow any offers or requests for tobacco?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="vaping"
-                label="Do you allow any offers or requests for Vaping products?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="alcohol"
-                label="Do you allow any offers or requests for Alcohol?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="gascylinders"
-                label="Do you allow any offers or requests for Gas Cylinders?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="tickets"
-                label="Do you allow any offers or requests for vouchers, coupons or tickets?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="wastecarrier"
-                label="Do you ask for a waste carrier license in any requests for scrap metal?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="carboot"
-                label="Do you allow any requests for items to sell at car boot sales?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="chineselanterns"
-                label="Do you allow any offers or requests for Chinese Lanterns?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="carseats"
-                label="Do you allow any offers or requests for Child/Baby Car Seats?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="pondlife"
-                label="Do you allow any offers or requests for pondlife (eg frog spawn) or pond plants?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="copyright"
-                label="Do you allow any offers or requests for original items subject to copyright, eg computer software or games, music, films?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <ModGroupRule
-                :groupid="groupid"
-                name="porn"
-                label="Do you allow any offers or requests for items that you consider pornographic?"
-                type="toggle"
-                toggle-checked="Yes"
-                toggle-unchecked="No"
-                new-rule
-              />
-              <h4>Other rules</h4>
-              <ModGroupRule
-                :groupid="groupid"
-                name="other"
-                label="Please add in information about any rules you have which aren't covered by the questions above."
-                type="textarea"
+              <div v-for="rule in rulelist" :key="rule[0]">
+                <ModGroupRule
+                  v-if="rule[0]"
+                  :setting="rules[rule[0]]"
+                  :name="rule[0]"
+                  :label="rule[2]"
+                  :readonly="readonly"
+                  :type="rule[1]"
+                  :toggle-checked="rule[3]"
+                  :toggle-unchecked="rule[4]"
+                  :new-rule="rule[5] == 'New'"
+                  @change="changedrule(rule, $event)"
+                />
+                <h4 v-else>{{ rule[1] }}</h4>
+              </div>
+              <SpinButton
+                variant="white"
+                icon-name="save"
+                label="Save all rule changes"
+                :disabled="readonly"
+                @handle="saverules"
               />
             </div>
           </b-card-body>
@@ -1070,8 +819,11 @@
             />
             <b-form-text class="mb-2">
               You can visualise these areas by cutting and pasting the data into
-              <!-- eslint-disable-next-line -->
-              <ExternalLink href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html">this tool</ExternalLink>. You can also view all community areas
+              <ExternalLink
+                href="https://arthur-e.github.io/Wicket/sandbox-gmaps3.html"
+                >this tool</ExternalLink
+              >
+              - You can also view all community areas
               <!-- eslint-disable-next-line -->
               <nuxt-link to="/map">here</nuxt-link>,
               or all caretaker communities
@@ -1284,11 +1036,11 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import htmlEditButton from 'quill-html-edit-button'
 
+import { useShortlinkStore } from '~/stores/shortlinks'
 import { useAuthStore } from '~/stores/auth'
 import { useModConfigStore } from '~/stores/modconfig'
-import { useShortlinkStore } from '~/stores/shortlinks'
 import { useModGroupStore } from '@/stores/modgroup'
-import api from '~/api'
+import { useMe } from '~/composables/useMe'
 
 export default {
   components: {
@@ -1311,12 +1063,16 @@ export default {
       module: htmlEditButton,
       options: {}, // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
     }
+    const { fetchMe, myid, supportOrAdmin } = useMe()
     return {
       authStore,
       modGroupStore,
       modConfigStore,
       shortlinkStore,
       quillModules,
+      fetchMe,
+      myid,
+      supportOrAdmin,
     }
   },
   data: function () {
@@ -1325,6 +1081,7 @@ export default {
       groupid: null,
       uploadingProfile: false,
       editingDescription: false,
+      rules: {},
       rulesBump: 0,
       toolbarOptions: [
         [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -1336,6 +1093,250 @@ export default {
         ['link', 'image', 'video'],
         ['clean'],
       ],
+      rulelist: [
+        ['fullymoderated', 'toggle', 'Do you moderate all posts?', 'Yes', 'No'],
+        [
+          'requirefirstpostoffer',
+          'toggle',
+          'Do you require a member’s first post to be an Offer?',
+          'Yes',
+          'No',
+        ],
+        [
+          'limitconcurrentwanteds',
+          'toggle',
+          'Do you limit the number of Wanted posts allowed at one time?',
+          'Yes',
+          'No',
+        ],
+        [
+          'limitgroups',
+          'toggle',
+          'Do you limit the number of groups a member can join?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'restrictcrossposting',
+          'toggle',
+          'Do you restrict cross-posting to other groups?',
+          'Yes',
+          'No',
+        ],
+        [
+          'allowloans',
+          'toggle',
+          'Do you allow any loans or requests to borrow?',
+          'Yes',
+          'No',
+        ],
+        [
+          'suggesteddonations',
+          'toggle',
+          'Do you allow people to ask for a donation to charity when offering items?',
+          'Yes',
+          'No',
+        ],
+        [
+          'declareselling',
+          'toggle',
+          'Do you inform members that they must declare if they intend to sell items on?',
+          'Yes',
+          'No',
+        ],
+        [
+          'restrictpersonalinfo',
+          'toggle',
+          'Do you restrict personal info in posts eg telephone numbers, addresses?',
+          'Yes',
+          'No',
+        ],
+        [
+          'restrictdistance',
+          'toggle',
+          'Do you remove any members purely for being out of your group area?',
+          'Yes',
+          'No',
+        ],
+        [false, 'Rules about specific items'],
+        [
+          'animalswanted',
+          'toggle',
+          'Do you allow any requests for animals on your group?',
+          'Yes',
+          'No',
+        ],
+        [
+          'animalsoffer',
+          'toggle',
+          'Do you allow any offers of animals for rehoming on your group?',
+          'Yes',
+          'No',
+        ],
+        [
+          'weapons',
+          'toggle',
+          'Do you allow any requests or offers of weapons on your group?',
+          'Yes',
+          'No',
+        ],
+        [
+          'firearms',
+          'toggle',
+          'Do you allow any offers or requests for guns if members have a firearms license?',
+          'Yes',
+          'No',
+        ],
+        [
+          'knives',
+          'toggle',
+          'Do you allow any offers or requests for household or craft knives?',
+          'Yes',
+          'No',
+        ],
+        [
+          'knivesrestrict',
+          'toggle',
+          'If so, do you restrict these to over 18s and only if personally collected?',
+          'Yes',
+          'No',
+        ],
+        [
+          'medicationsprescription',
+          'toggle',
+          'Do you allow any offers or requests for prescription medication?',
+          'Yes',
+          'No',
+        ],
+        [
+          'medicationsotc',
+          'toggle',
+          'Do you allow any offers or requests for over-the-counter medication?',
+          'Yes',
+          'No',
+        ],
+        [
+          'medicationsanimals',
+          'toggle',
+          'Do you allow any offers or requests for medication for animals?',
+          'Yes',
+          'No',
+        ],
+        [
+          'contactlenses',
+          'toggle',
+          'Do you allow any offers or requests for Contact Lenses?',
+          'Yes',
+          'No',
+        ],
+        [
+          'contactlensessolutions',
+          'toggle',
+          'Do you allow any offers or requests for Contact Lens Solutions?',
+          'Yes',
+          'No',
+        ],
+        [
+          'tobacco',
+          'toggle',
+          'Do you allow any offers or requests for tobacco?',
+          'Yes',
+          'No',
+        ],
+        [
+          'vaping',
+          'toggle',
+          'Do you allow any offers or requests for Vaping products?',
+          'Yes',
+          'No',
+        ],
+        [
+          'alcohol',
+          'toggle',
+          'Do you allow any offers or requests for Alcohol?',
+          'Yes',
+          'No',
+        ],
+        [
+          'gascylinders',
+          'toggle',
+          'Do you allow any offers or requests for Gas Cylinders?',
+          'Yes',
+          'No',
+        ],
+        [
+          'tickets',
+          'toggle',
+          'Do you allow any offers or requests for vouchers, coupons or tickets?',
+          'Yes',
+          'No',
+        ],
+        [
+          'wastecarrier',
+          'toggle',
+          'Do you ask for a waste carrier license in any requests for scrap metal?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'carboot',
+          'toggle',
+          'Do you allow any requests for items to sell at car boot sales?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'chineselanterns',
+          'toggle',
+          'Do you allow any offers or requests for Chinese Lanterns?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'carseats',
+          'toggle',
+          'Do you allow any offers or requests for Child/Baby Car Seats?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'pondlife',
+          'toggle',
+          'Do you allow any offers or requests for pondlife (eg frog spawn) or pond plants?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'copyright',
+          'toggle',
+          'Do you allow any offers or requests for original items subject to copyright, eg computer software or games, music, films?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [
+          'porn',
+          'toggle',
+          'Do you allow any offers or requests for items that you consider pornographic?',
+          'Yes',
+          'No',
+          'New',
+        ],
+        [false, 'Other rules'],
+        [
+          'other',
+          'textarea',
+          'Please add in information about any rules you have which are not covered by the questions above.',
+          'Yes',
+          'No',
+        ],
+      ],
     }
   },
   computed: {
@@ -1343,7 +1344,6 @@ export default {
       return this.group.myrole !== 'Owner'
     },
     group() {
-      // const g = this.modGroupStore.get(this.groupid)
       return this.modGroupStore.get(this.groupid)
     },
     shortlinks() {
@@ -1411,7 +1411,7 @@ export default {
     },
   },
   watch: {
-    groupid() {
+    groupid(newval) {
       this.fetchGroup()
     },
   },
@@ -1425,6 +1425,19 @@ export default {
       this.editingDescription = false
 
       await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
+      const group = this.modGroupStore.get(this.groupid)
+      let rules = group?.rules || {}
+      // console.log('fetchGroup rules',rules)
+      rules = typeof rules === 'string' ? JSON.parse(rules) : rules
+      const unsetrules = {}
+      for (const rule of this.rulelist) {
+        if (rule[0]) {
+          unsetrules[rule[0]] = null
+        }
+      }
+      // console.log('unsetrules',unsetrules)
+      // console.log('rules',rules)
+      this.rules = { ...unsetrules, ...rules }
 
       this.shortlinkStore.fetch(0, this.groupid)
     },
@@ -1433,6 +1446,19 @@ export default {
         components: ['configs'],
         modtools: true,
       })
+    },
+    changedrule(rule, newval) {
+      if (typeof newval !== 'object') {
+        this.rules[rule[0]] = newval
+      }
+    },
+    async saverules(callback) {
+      await this.modGroupStore.updateMT({
+        id: this.groupid,
+        rules: this.rules,
+      })
+      this.fetchGroup()
+      callback()
     },
     async saveMembershipSetting(name, val) {
       const settings = this.group.mysettings
@@ -1443,7 +1469,6 @@ export default {
         userid: this.myid,
         settings,
       })
-
       this.fetchMe(true, ['groups'])
     },
     uploadProfile() {
@@ -1481,7 +1506,7 @@ export default {
       this.editingDescription = false
       callback()
     },
-    async copy() {
+    async copy(callback) {
       await this.modGroupStore.fetchIfNeedBeMT(this.copyfrom)
 
       const copyfrom = this.modGroupStore.get(this.copyfrom)
@@ -1496,9 +1521,11 @@ export default {
         })
 
         await this.modGroupStore.fetchGroupMT(this.groupid) // Reload group
+        this.fetchGroup()
 
         this.rulesBump++
       }
+      callback()
     },
   },
 }

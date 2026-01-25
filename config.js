@@ -3,6 +3,7 @@ const ADS_MEDIUM_BANNER_SIZES = [[728, 90]]
 const ADS_SQUARISH_SIZES = [[300, 250]]
 
 const CONFIG = {
+  IS_MT: process.env.MT === 'true', // For MT set in modtools/nuxt.config.ts
   APP_ENV: process.env.APP_ENV,
   NODE_ENV: process.env.NODE_ENV,
   USE_COOKIES: process.env.USE_COOKIES === 'True', // 'True' or 'False'
@@ -17,6 +18,8 @@ const CONFIG = {
   // This is where the user site is.
   USER_SITE: process.env.USER_SITE || 'https://www.ilovefreegle.org',
   USER_DOMAIN: 'ilovefreegle.org',
+
+  MODTOOLS_SITE: 'https://modtools.org',
 
   // This is where images are served from.
   //
@@ -58,6 +61,9 @@ const CONFIG = {
 
   SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
   SENTRY_STRICT: process.env.SENTRY_STRICT !== 'false', // Default true, set to 'false' for debug builds
+
+  SENTRY_DSN_MT:
+    'https://1ab4fc0b56b355f5e794857f8e25d316@o118493.ingest.us.sentry.io/4506712427855872',
 
   // Cookie banner for this site.
   COOKIEYES: process.env.COOKIEYES || null,

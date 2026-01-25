@@ -5,7 +5,9 @@
       :items="groupitems"
       class="max"
       size="40"
-      placeholder="Start typing a community name..."
+      :placeholder="
+        loading ? 'Loading communities...' : 'Start typing a community name...'
+      "
       :disabled="loading"
     />
     <div v-if="group && group.url">
@@ -79,11 +81,11 @@
       >.
       <br />
       <br />
-      <Clipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
       Explore page:
       <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
       <br />
-      <Clipboard
+      <ModClipboard
         v-if="group.modsemail"
         class="mr-3 mb-1"
         :value="group.modsemail"
@@ -92,7 +94,7 @@
       <!-- eslint-disable-next-line -->
       <ExternalLink :href="'mailto:' + group.modsemail">{{ group.modsemail }}</ExternalLink>
       <br />
-      <Clipboard
+      <ModClipboard
         v-if="group.groupemail"
         class="mr-3 mb-1"
         :value="group.groupemail"
@@ -108,7 +110,7 @@
           :key="'facebook-' + facebook.id"
         >
           <div v-if="facebook.type === 'Page'">
-            <Clipboard
+            <ModClipboard
               class="mr-3 mb-1"
               :value="'https://facebook.com/pg/' + facebook.id"
             />
@@ -126,6 +128,18 @@
         group.affiliationconfirmedby
       }}
       <br />
+      <h4 class="mt-2">Names</h4>
+      <p>Short name:</p>
+      <b-form-input v-model="group.nameshort" class="mb-2" />
+      <p>Full name:</p>
+      <b-form-input v-model="group.namefull" class="mb-2" />
+      <SpinButton
+        variant="white"
+        icon-name="save"
+        label="Save Names"
+        class="mt-2"
+        @handle="saveNames"
+      />
       <h4 class="mt-2">Centre</h4>
       <p>Lat/lng of group centre:</p>
       <div class="d-flex">
@@ -204,11 +218,9 @@ import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
 
 export default {
-  async setup() {
+  setup() {
     const modGroupStore = useModGroupStore()
     const memberStore = useMemberStore()
-
-    await modGroupStore.listMT({ grouptype: 'Freegle' })
 
     return { modGroupStore, memberStore }
   },
@@ -343,6 +355,17 @@ export default {
     },
   },
   methods: {
+    async loadallgroups(callback) {
+      await this.modGroupStore.listMT({ grouptype: 'Freegle' })
+      if (callback) callback()
+    },
+    async loadCommunities() {
+      if (this.groupitems.length === 0) {
+        this.loading = true
+        await this.loadallgroups()
+        this.loading = false
+      }
+    },
     canonGroupName(name) {
       return name ? name.toLowerCase().replace(/-|_| /g, '') : null
     },
@@ -371,7 +394,15 @@ export default {
       }
       callback()
     },
-    async saveCentres(callback) {
+    saveNames(callback) {
+      this.modGroupStore.updateMT({
+        id: this.groupid,
+        namefull: this.group.namefull,
+        nameshort: this.group.nameshort,
+      })
+      callback()
+    },
+    saveCentres(callback) {
       this.modGroupStore.updateMT({
         id: this.groupid,
         lat: this.group.lat,

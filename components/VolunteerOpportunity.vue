@@ -193,6 +193,12 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  item: {
+    // MT
+    type: Object,
+    required: false,
+    default: null,
+  },
   id: {
     type: Number,
     required: true,
@@ -221,7 +227,8 @@ const showModal = ref(false)
 // Initialize data from props
 if (props.id) {
   const v = await volunteeringStore.fetch(props.id)
-  if (v) {
+  if (v && v.userid) {
+    // MT
     await userStore.fetch(v.userid)
 
     v.groups?.forEach(async (id) => {
@@ -232,6 +239,7 @@ if (props.id) {
 
 // Computed properties
 const volunteering = computed(() => {
+  if (props.item) return props.item // MT
   const v = volunteeringStore?.byId(props.id)
 
   if (v) {

@@ -1,12 +1,14 @@
+import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import dayjs from 'dayjs'
 import { nextTick } from 'vue'
 import api from '~/api'
 import { GROUP_REPOSTS, MESSAGE_EXPIRE_TIME } from '~/constants'
 import { useGroupStore } from '~/stores/group'
-import { APIError } from '~/api/BaseAPI'
+import { APIError } from '~/api/APIErrors'
 import { useAuthStore } from '~/stores/auth'
 import { useIsochroneStore } from '~/stores/isochrone'
+import { useMiscStore } from '~/stores/misc'
 
 // Debounce delay for batching message fetches (ms)
 const BATCH_DELAY = 50
@@ -23,6 +25,9 @@ export const useMessageStore = defineStore({
     // In bounds
     bounds: {},
     activePostsCounter: 0,
+
+    // The context from the last fetch, used for fetchMore (ModTools)
+    context: null,
   }),
   actions: {
     init(config) {
@@ -34,6 +39,8 @@ export const useMessageStore = defineStore({
       // Debounced batching state
       this.pendingFetches = []
       this.batchTimer = null
+      // ModTools context
+      this.context = null
     },
     async fetchCount(browseView, log = true) {
       const ret = await api(this.config).message.count(browseView, log)
@@ -358,7 +365,18 @@ export const useMessageStore = defineStore({
         id: params.id,
       })
 
-      await this.fetch(params.id, true)
+      const miscStore = useMiscStore()
+      if (miscStore.modtools) {
+        const message = await this.fetchMT({
+          id: params.id,
+          messagehistory: true,
+        })
+        if (message) {
+          this.list[message.id] = message
+        }
+      } else {
+        await this.fetch(params.id, true) // Gets message.fromuser as int not object
+      }
 
       return data
     },
@@ -367,6 +385,11 @@ export const useMessageStore = defineStore({
     },
     clear() {
       this.$reset()
+      this.clearContext()
+    },
+    clearContext() {
+      // ModTools
+      this.context = null
     },
     async promise(id, userid) {
       await api(this.config).message.update({
@@ -415,7 +438,159 @@ export const useMessageStore = defineStore({
       const isochroneStore = useIsochroneStore()
       isochroneStore.markSeen(ids)
 
+      // Also update local cache to prevent watcher loop in MessageList.vue
+      const idSet = new Set(ids)
+      Object.keys(this.list).forEach((key) => {
+        const id = parseInt(key)
+        if (idSet.has(id) && this.list[id]) {
+          this.list[id].unseen = false
+        }
+      })
+
       await this.fetchCount()
+    },
+    // ModTools-specific methods below
+    async searchMT(params) {
+      const { messages } = await api(this.config).message.fetchMessages({
+        subaction: 'searchall',
+        search: params.term,
+        exactonly: true,
+        groupid: params.groupid,
+      })
+      for (const message of messages) {
+        this.list[message.id] = message
+      }
+    },
+    async fetchMessagesMT(params) {
+      if (params.context) {
+        // Ensure the context is a real object, in case it has been in the store.
+        params.context = cloneDeep(params.context)
+      }
+      if (!params.context) params.context = null
+
+      const data = await api(this.config).message.fetchMessages(params)
+      if (!data.messages) return
+      const messages = data.messages
+      const context = data.context // Can be undefined if search complete
+
+      if (params.collection !== 'Draft') {
+        // We don't use context for drafts - there aren't many.
+        this.context = context
+      }
+      for (const message of messages) {
+        if (!message.subject) message.subject = ''
+        this.list[message.id] = message
+      }
+    },
+    async fetchMT(params) {
+      const { message } = await api(this.config).message.fetchMT(params)
+      if (message && !message.subject) message.subject = ''
+      return message
+    },
+    async updateMT(params) {
+      // Rely on refresh elsewhere
+      return await api(this.config).message.update(params)
+    },
+    async delete(params) {
+      await api(this.config).message.delete(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+
+      delete this.list[params.id]
+    },
+    async approveedits(params) {
+      await api(this.config).message.approveEdits(params.id)
+
+      this.remove({ id: params.id })
+    },
+    async revertedits(params) {
+      await api(this.config).message.revertEdits(params.id)
+
+      this.remove({ id: params.id })
+    },
+    async backToPending(id) {
+      await api(this.config).message.update({
+        id,
+        action: 'BackToPending',
+      })
+      this.remove({ id })
+    },
+    async approve(params) {
+      await api(this.config).message.approve(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+
+      this.remove({ id: params.id })
+    },
+    async reject(params) {
+      await api(this.config).message.reject(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+
+      this.remove({ id: params.id })
+    },
+    async reply(params) {
+      await api(this.config).message.reply(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+      // Do not remove from list
+    },
+    async hold(params) {
+      await api(this.config).message.hold(params.id)
+      const { message } = await api(this.config).message.fetchMT({
+        id: params.id,
+        messagehistory: true,
+      })
+      this.list[message.id] = message
+    },
+    async release(params) {
+      await api(this.config).message.release(params.id)
+      const { message } = await api(this.config).message.fetchMT({
+        id: params.id,
+        messagehistory: true,
+      })
+      this.list[message.id] = message
+    },
+    async spam(params) {
+      await api(this.config).message.spam(params.id, params.groupid)
+
+      this.remove({ id: params.id })
+    },
+    async move(params) {
+      await api(this.config).message.update({
+        id: params.id,
+        groupid: params.groupid,
+        action: 'Move',
+      })
+
+      await this.fetch(params.id, true)
+    },
+    async searchMember(term, groupid) {
+      const { messages } = await api(this.config).message.fetchMessages({
+        subaction: 'searchmemb',
+        search: term,
+        groupid,
+      })
+      await this.clear()
+      for (const message of messages) {
+        this.list[message.id] = message
+      }
     },
   },
   getters: {
@@ -431,6 +606,16 @@ export const useMessageStore = defineStore({
     all: (state) => Object.values(state.list),
     byUser: (state) => (userid) => {
       return state.byUserList[userid] || []
+    },
+    getByGroup: (state) => (groupid) => {
+      // ModTools
+      const ret = Object.values(state.list).filter((message) => {
+        return (
+          message.groups.length > 0 &&
+          parseInt(message.groups[0].groupid) === parseInt(groupid)
+        )
+      })
+      return ret
     },
   },
 })

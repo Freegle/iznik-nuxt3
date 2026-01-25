@@ -28,22 +28,23 @@
         >
           <UserRatings
             :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
           <SupporterInfo v-if="otheruser.supporter" class="align-self-end" />
         </div>
+        <div v-if="isMT" class="name font-weight-bold black d-block d-md-none">
+          {{ chat.name }}
+        </div>
         <div class="name font-weight-bold black text--large d-none d-md-block">
           {{ chat.name }}
         </div>
         <div
-          v-if="otheruser && otheruser.info && !otheruser?.deleted"
+          v-if="collapsed && otheruser && otheruser.info && !otheruser?.deleted"
           class="d-none d-md-flex flex-column align-content-between pr-1 ratings"
         >
           <UserRatings
             :id="chat.otheruid"
-            :key="'otheruser-' + chat.otheruid"
             class="mb-1 mb-md-0 mt-1 d-flex justify-content-end"
             size="sm"
           />
@@ -325,6 +326,7 @@
   </div>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import ProfileImage from './ProfileImage'
 import { useChatStore } from '~/stores/chat'
 import { setupChat } from '~/composables/useChat'
@@ -332,6 +334,8 @@ import { twem, useRouter } from '#imports'
 import { useMiscStore } from '~/stores/misc'
 import SupporterInfo from '~/components/SupporterInfo'
 import { timeago } from '~/composables/useTimeFormat'
+
+console.log('ChatHeader: Script setup executing')
 
 const ChatBlockModal = defineAsyncComponent(() => import('./ChatBlockModal'))
 const ChatHideModal = defineAsyncComponent(() => import('./ChatHideModal'))
@@ -360,10 +364,12 @@ const showChatReport = ref(false)
 const chatStore = useChatStore()
 const miscStore = useMiscStore()
 const router = useRouter()
+const isMT = ref(miscStore.modtools)
 
 const collapsed = computed({
   get: () => miscStore?.get('chatinfoheader'),
   set: (newVal) => {
+    console.log('ChatHeader: collapsed changing to', newVal)
     miscStore.set({
       key: 'chatinfoheader',
       value: newVal,
@@ -372,6 +378,7 @@ const collapsed = computed({
 })
 
 function collapse(val) {
+  console.log('ChatHeader: collapse() called with', val)
   collapsed.value = val
 }
 
@@ -383,6 +390,10 @@ defineExpose({
 const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
   props.id
 )
+
+onMounted(() => {
+  console.log('ChatHeader: onMounted, collapsed:', collapsed.value, 'otheruser:', !!otheruser?.value)
+})
 
 // Set initial collapsed state
 miscStore.set({
@@ -457,7 +468,12 @@ const showblock = () => {
 }
 
 const showInfo = () => {
-  showProfileModal.value = true
+  if (miscStore.modtools) {
+    // MT
+    navigateTo(
+      '/members/approved/' + chat.value.group.id + '/' + chat.value.user1id
+    )
+  } else showProfileModal.value = true
 }
 
 const report = () => {

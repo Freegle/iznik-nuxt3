@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal id="modEmailMessageModal" ref="modal" size="lg" @hidden="onHide">
-      <template #title class="w-100"> Message received by email </template>
+      <template #title> Message received by email </template>
       <template #default>
         <p>
           Sometimes messages which arrive by email aren't translated into Chat
@@ -75,16 +75,14 @@ export default {
       return this.parsed ? this.parsed.html : null
     },
   },
+  async mounted() {
+    // Get message directly rather than via store, to get message mail source
+    this.message = await this.messageStore.fetchMT({
+      id: this.id,
+      messagehistory: true,
+    })
+  },
   methods: {
-    async show() {
-      // Get message directly rather than via store, to get message mail source
-      this.message = await this.messageStore.fetchMT({
-        id: this.id,
-        messagehistory: true,
-      })
-
-      this.showModal = true
-    },
     onHide() {
       this.$emit('hidden')
     },

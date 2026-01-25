@@ -20,6 +20,14 @@
                 </h4>
               </div>
               <h4 v-else>Message from Freegle Volunteers</h4>
+              <div v-if="realMod" class="text-muted small">
+                <div class="small">
+                  (Sent by
+                  <v-icon icon="hashtag" class="text-muted" scale="0.5" />{{
+                    chatmessage.userid
+                  }})
+                </div>
+              </div>
             </b-card-title>
             <b-card-text>
               <div :class="emessage ? 'media-body chatMessage' : 'media-body'">
@@ -122,11 +130,8 @@ const props = defineProps({
 })
 
 // Use the chat base composable
-const { chat, chatmessage, emessage, refmsg, me, myid } = useChatMessageBase(
-  props.chatid,
-  props.id,
-  props.pov
-)
+const { chat, chatmessage, emessage, refmsg, me, myid, realMe } =
+  useChatMessageBase(props.chatid, props.id, props.pov)
 
 const composeStore = useComposeStore()
 const contactGroupId = ref(null)
@@ -140,6 +145,16 @@ const group = computed(() => {
 
 const amUser = computed(() => {
   return chat.value && chat.value.user && chat.value.user.id === myid
+})
+
+const realMod = computed(() => {
+  // Show "(Sent by #...)" to moderators, support, and admins
+  return (
+    realMe.value &&
+    (realMe.value.systemrole === 'Moderator' ||
+      realMe.value.systemrole === 'Support' ||
+      realMe.value.systemrole === 'Admin')
+  )
 })
 
 async function repost() {

@@ -36,48 +36,32 @@
         <p v-if="word.worryword.type === 'Regulated'">
           This post looks as though it might contain a regulated substance.
           These are not legal on Freegle. If in doubt please check on
-          <a
-            href="https://discourse.ilovefreegle.org/"
-            data-realurl="true"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Central</a
-          >
+          <ExternalLink href="https://discourse.ilovefreegle.org/">
+            Central
+          </ExternalLink>
           first.
         </p>
         <p v-if="word.worryword.type === 'Reportable'">
           This post looks as though it might contain a reportable substance.
           These may need to be reported to the police. Please ask the member
           about it to see what their reason is, and if in doubt discuss on
-          <a
-            href="https://discourse.ilovefreegle.org/"
-            data-realurl="true"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Central</a
+          <ExternalLink href="https://discourse.ilovefreegle.org/">
+            Central </ExternalLink
           >.
         </p>
         <p v-if="word.worryword.type === 'Medicine'">
           This post looks as though it might contain a drug, medicine or
           supplement. These are not legal on Freegle. Please do not approve this
           without checking on
-          <a
-            href="https://discourse.ilovefreegle.org/"
-            data-realurl="true"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Central</a
-          >
+          <ExternalLink href="https://discourse.ilovefreegle.org/">
+            Central
+          </ExternalLink>
           first.
         </p>
         <p>
           You can find more information
-          <a
-            href="https://wiki.ilovefreegle.org/Worry_Words"
-            data-realurl="true"
-            target="_blank"
-            rel="noopener noreferrer"
-            >here</a
+          <ExternalLink href="https://wiki.ilovefreegle.org/Worry_Words">
+            here </ExternalLink
           >.
         </p>
       </div>

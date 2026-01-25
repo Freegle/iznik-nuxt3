@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '~/api'
+// import api from '~/api' // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
 
 export const useMiscStore = defineStore({
   id: 'misc',
@@ -11,6 +11,7 @@ export const useMiscStore = defineStore({
     time: null,
     breakpoint: null,
     isLandscape: false,
+    fullscreenModalOpen: false,
     vals: {},
     somethingWentWrong: false,
     errorDetails: null,
@@ -25,6 +26,10 @@ export const useMiscStore = defineStore({
     adsDisabled: false,
     boredWithJobs: false,
     lastTyping: null,
+    modtools: false,
+    modtoolsediting: false, // Set when editing message in situ: do not check for work
+    worktimer: false,
+    deferGetMessages: false,
     source: null,
     marketingConsent: true,
   }),
@@ -44,9 +49,12 @@ export const useMiscStore = defineStore({
     setLandscape(val) {
       this.isLandscape = val
     },
+    setFullscreenModalOpen(val) {
+      this.fullscreenModalOpen = val
+    },
     setSource(val) {
       this.source = val
-      api(this.config).logs.src(val)
+      // api(this.config).logs.src(val) // REMOVE FROM MT AS GENERATES SOME CIRCULAR REFERENCE
     },
     setErrorDetails(error) {
       this.somethingWentWrong = true
@@ -163,6 +171,18 @@ export const useMiscStore = defineStore({
     },
     setMarketingConsent(value) {
       this.marketingConsent = value
+    },
+    async fetchLatestMessage() {
+      try {
+        const response = await fetch(
+          this.config.public.APIv2 + '/latestmessage'
+        )
+        const data = await response.json()
+        return data
+      } catch (e) {
+        console.log('Failed to fetch latest message time', e)
+        return { ret: 1, status: 'Error' }
+      }
     },
   },
   getters: {

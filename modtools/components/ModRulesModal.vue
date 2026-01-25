@@ -24,11 +24,13 @@
 </template>
 <script>
 import { useOurModal } from '~/composables/useOurModal'
+import { useMe } from '~/composables/useMe'
 
 export default {
   setup() {
     const { modal, show, hide } = useOurModal()
-    return { modal, show, hide }
+    const { myGroup } = useMe()
+    return { modal, show, hide, myGroup }
   },
   data: function () {
     return {

@@ -8,6 +8,7 @@
       <div>
         <ProfileImage
           :image="comment.user.profile.turl"
+          :name="comment.user.displayname"
           class="ml-1 mb-1 inline"
           is-thumbnail
           size="sm"

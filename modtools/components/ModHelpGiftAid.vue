@@ -35,8 +35,6 @@ import { useHelpBox } from '~/composables/useHelpBox'
 
 const { hide, toggleHelp, showHelp } = useHelpBox()
 
-const id = ref('giftaid')
-
 onMounted(() => {
   hide()
 })

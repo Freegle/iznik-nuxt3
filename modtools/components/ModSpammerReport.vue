@@ -50,6 +50,10 @@
           Spammer reports will be reviewed before they're added to the list.
           They'll only be added if they meet those criteria.
         </p>
+        <p>
+          Please do not delete a post until the Spam team has had a chance to
+          check things out.
+        </p>
       </div>
       <p>
         This reason will be visible to other moderators, so please make sure
@@ -93,20 +97,17 @@ export default {
     }
   },
   methods: {
-    show() {
-      this.modal.show()
-    },
-
     async send() {
       if (this.reason) {
+        const userid = this.user.id ?? this.user.userid
         if (this.safelist) {
           await this.spammerStore.safelist({
-            userid: this.user.userid,
+            userid,
             reason: this.reason,
           })
         } else {
           await this.spammerStore.report({
-            userid: this.user.userid,
+            userid,
             reason: this.reason,
           })
         }

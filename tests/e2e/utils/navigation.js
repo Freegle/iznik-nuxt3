@@ -31,7 +31,10 @@ function setupNavigationHelpers(page) {
       // First try waiting for load state if not already specified
       await this.waitForLoadState('load', { timeout: timeouts.ui.appearance })
     } catch (error) {
-      console.log('Load state wait failed, continuing without additional wait:', error.message)
+      console.log(
+        'Load state wait failed, continuing without additional wait:',
+        error.message
+      )
       // Don't use any timer fallback - just continue
     }
 

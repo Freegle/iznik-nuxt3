@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
@@ -52,8 +51,18 @@ export const useMemberStore = defineStore({
         params.stdmsgid,
         params.body
       )
-
-      delete this.list[params.id]
+      let foundid = false
+      for (const membership of Object.values(this.list)) {
+        if (
+          membership.userid === params.id &&
+          membership.groupid === params.groupid
+        ) {
+          foundid = membership.id
+        }
+      }
+      if (foundid) {
+        delete this.list[foundid]
+      }
     },
     async fetchMembers(params) {
       // console.log('useMemberStore fetchMembers',params)
@@ -62,16 +71,13 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
 
-      // if (!params.context) {
-      //  params.context = this.context
-      // }
-      if (params.context) {
-        // Ensure the context is a real object, in case it has been in the store.
-        params.context = cloneDeep(params.context)
+      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
+      if (params.context && typeof params.context === 'object') {
+        for (const key of Object.keys(params.context)) {
+          params[`context[${key}]`] = params.context[key]
+        }
+        delete params.context
       }
-      // if (params.context) {
-      //  console.log('fetchMembers params.context', params.context)
-      // }
 
       const { members, context, ratings } = await api(
         this.config
@@ -190,13 +196,15 @@ export const useMemberStore = defineStore({
         membershipid: params.membershipid,
       })
     },
-    async askMerge(params) {
+    async askMerge(id, params) {
+      console.log('useMemberStore askMerge', id, params)
       await api(this.config).merge.ask(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
-    async ignoreMerge(params) {
+    async ignoreMerge(id, params) {
+      console.log('useMemberStore ignoreMerge', id, params)
       await api(this.config).merge.ignore(params)
-      delete this.list[params.user1]
+      delete this.list[id]
     },
   },
   getters: {

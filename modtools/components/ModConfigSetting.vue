@@ -5,7 +5,7 @@
     </b-form-text>
     <b-input-group v-if="type === 'input'">
       <b-form-input v-model="value" :disabled="disabled" />
-      <slot v-if="!disabled" name="append">
+      <slot v-if="!disabled && setifrequired" name="append">
         <SpinButton
           variant="white"
           icon-name="save"
@@ -125,10 +125,14 @@ export default {
       required: false,
       default: false,
     },
+    required: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     const modConfigStore = useModConfigStore()
-
     return { modConfigStore }
   },
   data: function () {
@@ -139,6 +143,12 @@ export default {
   computed: {
     config() {
       return this.modConfigStore.current
+    },
+    setifrequired() {
+      if (this.required) {
+        return this.forSave && this.forSave.trim().length > 0
+      }
+      return true
     },
     value: {
       get() {
@@ -187,6 +197,9 @@ export default {
             : this.forSave
         }
       } else {
+        if (this.forSave === null && this.type === 'input' && this.config) {
+          this.forSave = this.config[this.name]
+        }
         data[this.name] = this.forSave
       }
 

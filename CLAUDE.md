@@ -61,10 +61,12 @@ IMPORTANT: When making visual/layout changes (CSS, templates, component structur
 - When adding Playwright tests, look for existing utility functions (e.g. for logging in/signing up) to use before writing the code.
 
 ## Branch Management
-- **Freegle**: Built from `master` branch using `./iznik-nuxt3` directory
-- **ModTools**: Built from `modtools` branch using `./iznik-nuxt3-modtools` directory
-- Two separate checkouts are required because different services need different branches
-- The `modtools` branch contains ModTools-specific configuration and components
+- **Both Freegle and ModTools** are now built from the `production` branch
+- The `modtools` branch has been merged into `master`, and `master` is merged to `production` after tests pass
+- Two separate Netlify sites deploy from the same branch with different build commands:
+  - **Freegle site**: `npm run build` → `dist/`
+  - **ModTools site**: `cd modtools && npm run build` → `modtools/dist/`
+- Local development uses `./iznik-nuxt3` for Freegle and `./iznik-nuxt3-modtools` for ModTools (same repo, can be same branch)
 
 ## CSS/SCSS Guidelines
 - **Never use `//` comments in SCSS** - they cause Vite compilation errors. Always use `/* */` style comments.

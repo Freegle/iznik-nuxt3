@@ -24,7 +24,7 @@
               mixture of low economic value which would require sorting), you
               must not freegle it. If in doubt, check
               <ExternalLink
-                href="https://www.gov.uk/government/publications/legal-definition-of-waste-guidance/decide-if-a-material-is-waste-or-not#decide-if-your-material-is-waste"
+                href="https://www.gov.uk/guidance/check-if-your-material-is-waste"
                 >here</ExternalLink
               >.
             </p>

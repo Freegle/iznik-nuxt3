@@ -3,20 +3,17 @@
     <b-card bg-variant="white" no-body>
       <b-card-header class="d-flex justify-content-between flex-wrap">
         <div>
-          <div v-if="isLJ">
-            {{ indexPlusOne }}
-            LoveJunk user #{{ user.ljuserid }}
-          </div>
-          <div v-else>
-            {{ indexPlusOne }}
+          <div v-if="isLJ">LoveJunk user #{{ user.ljuserid }}</div>
+          <div v-else-if="email">
             <!-- eslint-disable-next-line -->
-            <v-icon icon="envelope" class="mr-1" />
+            <ModClipboard class="mr-1" :value="email" />
             <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
           </div>
         </div>
         <div>
           <ProfileImage
             :image="member.profile.turl"
+            :name="member.displayname"
             class="ml-1 mb-1 inline"
             is-thumbnail
             size="sm"
@@ -76,25 +73,39 @@
           <span :title="datetime(member.bandate)">{{
             timeago(member.bandate)
           }}</span>
-          <span v-if="member.bannedby">by #{{ member.bannedby }}</span> - check
+          <span v-if="member.bannedby"> by #{{ member.bannedby }}</span> - check
           logs for info.
           <b-button variant="link" size="sm" @click="confirmUnban(member)">
             Unban
           </b-button>
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
-          <SettingsGroup
-            v-if="groupid && member.ourpostingstatus"
-            :groupid="groupid"
-            :emailfrequency="member.emailfrequency"
-            :membership-m-t="member"
-            :volunteeringallowed="Boolean(member.volunteeringallowed)"
-            :eventsallowed="Boolean(member.eventsallowed)"
-            :moderation="member.ourpostingstatus"
-            :userid="member.userid"
-            class="border border-info p-1 flex-grow-1 mr-1"
-            @change="settingsChange"
-          />
+          <div class="border border-info p-1 flex-grow-1 mr-1">
+            <SettingsGroup
+              v-if="groupid && member.ourpostingstatus"
+              :emailfrequency="member.emailfrequency"
+              :membership-m-t="member"
+              :moderation="member.ourpostingstatus"
+              :userid="member.userid"
+              xclass="border border-info p-1 flex-grow-1 mr-1"
+              @update:emailfrequency="
+                settingsChange('emailfrequency', groupid, $event)
+              "
+              @update:eventsallowed="
+                settingsChange('eventsallowed', groupid, $event)
+              "
+              @update:volunteeringallowed="
+                settingsChange('volunteeringallowed', groupid, $event)
+              "
+            />
+            <div class="fw-bold mt-1">Moderation status:</div>
+            <ModModeration
+              :user="user"
+              :userid="member.userid"
+              :membership="member"
+              class="order-2 order-md-3 order-lg-4"
+            />
+          </div>
           <div>
             <ModMemberSummary :member="member" />
             <ModMemberEngagement :member="member" />
@@ -229,6 +240,7 @@
               }"
               variant="modgreen"
               class="mb-2"
+              @change="changeAutorepost"
             />
           </div>
         </div>
@@ -248,6 +260,13 @@
             :groupid="groupid"
             :role="member.role"
           />
+          <!--div v-if="chatid" class="d-inline btn border">
+            <v-icon class="me-1" style="color: blue" icon="comments" />
+            <NuxtLink :to="'/chats/' + chatid">Chat</NuxtLink>
+          </div-->
+          <b-button variant="white" class="mr-2 mb-1" @click="showChat">
+            <v-icon icon="comments" /> View Chat
+          </b-button>
           <ChatButton
             :userid="member.userid"
             :groupid="member.groupid"
@@ -278,24 +297,27 @@
       @confirm="unban"
       @hidden="showUnbanModal = false"
     />
+    <ModChatModal
+      v-if="showModChatModal && chatid"
+      :id="chatid"
+      ref="modChatModal"
+      :pov="0"
+      @hidden="showModChatModal = false"
+    />
   </div>
 </template>
 <script>
-import { pluralise } from '~/composables/usePluralise'
-
-import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
+import { useChatStore } from '~/stores/chat'
+import { useMe } from '~/composables/useMe'
 
 export default {
   props: {
     member: {
       type: Object,
       required: true,
-    },
-    index: {
-      type: Number,
-      required: false,
     },
     spammerlist: {
       type: Boolean,
@@ -319,10 +341,20 @@ export default {
     },
   },
   setup() {
+    const chatStore = useChatStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const modConfigStore = useModConfigStore()
-    return { memberStore, modConfigStore, userStore }
+    const { me, myGroups, myGroup } = useMe()
+    return {
+      chatStore,
+      memberStore,
+      modConfigStore,
+      userStore,
+      me,
+      myGroups,
+      myGroup,
+    }
   },
   data: function () {
     return {
@@ -335,14 +367,12 @@ export default {
       showLogsModal: false,
       showUnbanModal: false,
       showUnbanModalTitle: '',
+      showModChatModal: false,
       banned: false,
+      chatid: 0,
     }
   },
   computed: {
-    indexPlusOne() {
-      if (typeof this.index === 'undefined') return ''
-      return this.index + 1 + ': '
-    },
     email() {
       // Depending on which context we're used it, we might or might not have an email returned.
       let ret = this.member.email
@@ -460,24 +490,22 @@ export default {
     }
   },
   methods: {
-    async showHistory(type = null) {
+    showHistory(type = null) {
       this.type = type
       this.showPostingHistoryModal = true
-      await nextTick()
-      this.$refs.history.show()
+      this.$refs.history?.show()
     },
-    async showLogs() {
+    showLogs() {
       this.modmailsonly = false
       this.showLogsModal = true
-      await nextTick()
-      this.$refs.logs.show()
+      this.$refs.logs?.show()
     },
-    settingsChange(e) {
+    settingsChange(param, groupid, val) {
       const params = {
         userid: this.member.userid,
-        groupid: e.groupid,
+        groupid,
       }
-      params[e.param] = e.val
+      params[param] = val
       this.memberStore.update(params)
     },
     async changeNotification(e, type) {
@@ -511,6 +539,14 @@ export default {
         newslettersallowed: e.value,
       })
     },
+    async changeAutorepost(e) {
+      const settings = this.user.settings || {}
+      settings.autorepostsdisable = !e.value
+      await this.userStore.edit({
+        id: this.member.userid,
+        settings,
+      })
+    },
     confirmUnban(member) {
       this.showUnbanModal = true
       this.showUnbanModalTitle = 'Unban #' + member.userid
@@ -518,7 +554,19 @@ export default {
     },
     async unban() {
       this.showUnbanModal = false
-      await this.memberStore.unban(this.user.id, this.groupid)
+      await this.memberStore.unban(this.member.userid, this.groupid)
+      // eslint-disable-next-line vue/no-mutating-props
+      delete this.member.bandate
+      // eslint-disable-next-line vue/no-mutating-props
+      delete this.member.bannedby
+    },
+    async showChat() {
+      this.chatid = await this.chatStore.openChatToMods(
+        this.member.groupid,
+        this.member.userid
+      )
+      this.showModChatModal = true
+      this.$refs.modChatModal?.show()
     },
   },
 }

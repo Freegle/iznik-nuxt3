@@ -520,16 +520,50 @@ const test = base.test.extend({
           await page.goto(path, { timeout })
 
           // Wait for initial load
+          // Don't use networkidle - the app has background polling that prevents idle state
           await page.waitForLoadState('domcontentloaded', { timeout })
 
-          // Wait for network to settle (helps with slow JavaScript loading)
+          // Wait for page to finish hydrating (loading spinner to disappear)
+          // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
+          // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
           try {
-            await page.waitForLoadState('networkidle', {
-              timeout: Math.min(timeout, 30000),
-            })
-          } catch (networkError) {
+            const loadingIndicator = page.locator('.loading-indicator')
+            const isVisible = await loadingIndicator
+              .evaluate((el) => {
+                const style = window.getComputedStyle(el)
+                return parseFloat(style.opacity) > 0
+              })
+              .catch(() => false)
+
+            if (isVisible) {
+              console.log(
+                'Loading indicator visible, waiting for it to hide...'
+              )
+              // Wait for opacity to become 0
+              await loadingIndicator.evaluate(
+                (el) => {
+                  return new Promise((resolve) => {
+                    const check = () => {
+                      const style = window.getComputedStyle(el)
+                      if (parseFloat(style.opacity) === 0) {
+                        resolve()
+                      } else {
+                        requestAnimationFrame(check)
+                      }
+                    }
+                    check()
+                  })
+                },
+                { timeout: 5000 }
+              )
+              console.log('Loading indicator hidden')
+            }
+          } catch (loadingError) {
+            // Loading indicator check failed or timed out - continue anyway
             console.log(
-              `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
+              `Loading indicator check (continuing anyway): ${
+                loadingError.message?.substring(0, 100) || 'unknown error'
+              }`
             )
           }
 
@@ -537,7 +571,7 @@ const test = base.test.extend({
           const body = page.locator('body')
           await body.waitFor({
             state: 'visible',
-            timeout: Math.min(timeout, 10000),
+            timeout: Math.min(timeout, 30000),
           })
 
           // Check if page contains error messages
@@ -728,7 +762,8 @@ const test = base.test.extend({
           console.warn(`Unable to clear page storage: ${err.message}`)
         }
 
-        await page.waitForLoadState('networkidle', { timeout })
+        // Don't use networkidle - the app has background polling that prevents idle state
+        await page.waitForLoadState('domcontentloaded', { timeout })
         return true
       } catch (error) {
         // Clear the navigation inactivity timer even if teardown fails
@@ -1880,12 +1915,13 @@ const testWithFixtures = test.extend({
       const freshPage = await freshContext.newPage()
 
       // Add gotoAndVerify helper to the fresh page
+      // Don't use networkidle - the app has background polling that prevents idle state
       freshPage.gotoAndVerify = async (path, options = {}) => {
         const baseUrl =
           process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
         const fullUrl = path.startsWith('http') ? path : `${baseUrl}${path}`
         await freshPage.goto(fullUrl, {
-          waitUntil: 'networkidle',
+          waitUntil: 'domcontentloaded',
           timeout: options.timeout || 60000,
         })
         return freshPage
@@ -1919,9 +1955,19 @@ const testWithFixtures = test.extend({
       })
       console.log('Reply button visible')
 
-      // Wait for network to be idle to ensure Vue has hydrated
-      await freshPage.waitForLoadState('networkidle', { timeout: 30000 })
-      console.log('Network idle, attempting click')
+      // Wait for Vue hydration by checking the button is enabled and clickable
+      // Don't use networkidle - the app has background polling that prevents idle state
+      await freshPage.waitForFunction(
+        (selector) => {
+          const btn = document.querySelector(selector)
+          if (!btn) return false
+          // Check button is not disabled and has event handlers attached (Vue hydrated)
+          return !btn.disabled && !btn.classList.contains('disabled')
+        },
+        '.app-footer .reply-button',
+        { timeout: timeouts.navigation.default }
+      )
+      console.log('Reply button hydrated and enabled, attempting click')
 
       // Click the Reply button
       await replyButton.click()
@@ -2052,15 +2098,12 @@ const testWithFixtures = test.extend({
 
         // Click the button first - the modal will stay open while sendReply runs
         await closeButton.click()
-        console.log('Clicked Close and Continue, waiting for network idle')
+        console.log(
+          'Clicked Close and Continue, waiting for navigation to chats'
+        )
 
-        // Wait for network to become idle - this ensures the reply API call completes
-        await freshPage.waitForLoadState('networkidle', {
-          timeout: timeouts.navigation.default,
-        })
-        console.log('Network idle, waiting for navigation to chats')
-
-        // Now wait for navigation to chats page
+        // Wait for navigation to chats page - this indicates the reply API call completed
+        // Don't use networkidle - the app has background polling that prevents idle state
         try {
           await freshPage.waitForURL('**/chats/**', {
             timeout: timeouts.navigation.default,

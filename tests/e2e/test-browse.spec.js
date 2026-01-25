@@ -215,9 +215,6 @@ test.describe('Browse Page Tests', () => {
 
       console.log(`Found ${messageCount} messages on browse page`)
 
-      // Debug: Wait for messages to load and then dump the DOM
-      await page.waitForLoadState('networkidle')
-
       // Debug: Get the HTML of the first message card to see its structure
       const firstCard = page.locator('.messagecard').first()
       if ((await firstCard.count()) > 0) {
@@ -301,7 +298,6 @@ test.describe('Browse Page Tests', () => {
 
     // Test search with search term in URL
     console.log('Testing browse page with search term in URL')
-    await page.waitForLoadState('networkidle')
     await page.gotoAndVerify('/browse/furniture', {
       timeout: timeouts.navigation.default,
     })

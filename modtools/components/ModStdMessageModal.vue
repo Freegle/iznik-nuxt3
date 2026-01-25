@@ -30,12 +30,9 @@
         "
         class="d-flex justify-content-start"
       >
-        <b-form-select
-          v-model="message.type"
-          :options="typeOptions"
-          class="type mr-1"
-          size="lg"
-        />
+        <!-- eslint-disable-next-line -->
+        <b-form-select v-model="message.type" :options="typeOptions" class="type mr-1" size="lg" />
+        <!-- eslint-disable-next-line -->
         <b-form-input v-model="message.item.name" size="lg" class="mr-1" />
         <b-input-group>
           <PostCode
@@ -143,13 +140,15 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import { useUserStore } from '~/stores/user'
 import { setupKeywords } from '~/composables/useKeywords'
+import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMemberStore } from '~/stores/member'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 import { SUBJECT_REGEX } from '~/constants'
+import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/composables/useModMe'
 
 export default {
   components: {},
@@ -175,12 +174,14 @@ export default {
     },
   },
   setup() {
-    const { modal, hide } = useOurModal()
+    const { modal, show, hide } = useOurModal()
     const modGroupStore = useModGroupStore()
     const messageStore = useMessageStore()
     const memberStore = useMemberStore()
     const userStore = useUserStore()
     const { typeOptions } = setupKeywords()
+    const { me } = useMe()
+    const { checkWorkDeferGetMessages } = useModMe()
     return {
       modGroupStore,
       memberStore,
@@ -189,6 +190,9 @@ export default {
       typeOptions,
       modal,
       hide,
+      show,
+      me,
+      checkWorkDeferGetMessages,
     }
   },
   data: function () {
@@ -244,7 +248,7 @@ export default {
       let ret = null
       if (this.member) {
         ret = this.member.email
-      } else {
+      } else if (this.message.fromuser && this.message.fromuser.emails) {
         this.message.fromuser.emails.forEach((email) => {
           if (
             email.email &&
@@ -366,7 +370,7 @@ export default {
     },
   },
   methods: {
-    async show() {
+    async fillin() {
       // Calculate initial subject.  Everything apart from Edits adds a Re:.
       const defpref = this.stdmsg.action === 'Edit' ? '' : 'Re:'
 
@@ -429,6 +433,7 @@ export default {
                 matches[3] +
                 ')'
 
+              // eslint-disable-next-line vue/no-mutating-props
               this.message.item.name = matches[2].toLowerCase().trim()
             } else {
               this.subject = this.subject.toLowerCase().trim()
@@ -491,6 +496,7 @@ export default {
 
       if (group && text) {
         text = text.replace(/\$networkname/g, 'Freegle')
+        // eslint-disable-next-line prefer-regex-literals
         const re = new RegExp('Freegle', 'ig')
         text = text.replace(
           /\$groupnonetwork/g,
@@ -542,8 +548,9 @@ export default {
                 const daysago = dayjs().diff(postdate, 'day')
 
                 if (msg.type === keyword && daysago < self.recentDays) {
+                  console.log('Add for', msg, msg.postdate, dayjs(msg.postdate))
                   recentmsg +=
-                    dayjs(msg.postdate).format('lll') +
+                    dayjs(msg.postdate).format('dddd Do HH:mm a') +
                     ' - ' +
                     msg.subject +
                     '\n'
@@ -573,14 +580,12 @@ export default {
         if (this.user && this.user.joined) {
           text = text.replace(
             /\$membersubdate/g,
+            // eslint-disable-next-line new-cap
             new dayjs(this.user.joined).format('lll')
           )
         }
 
-        text = text.replace(
-          /\$membermail/g,
-          this.message ? this.message.fromaddr : this.member.email
-        )
+        text = text.replace(/\$membermail/g, this.toEmail)
         let from
 
         if (this.message) {
@@ -602,9 +607,11 @@ export default {
 
         if (this.message && this.message.duplicates) {
           this.message.duplicates.forEach((m) => {
+            // eslint-disable-next-line new-cap
             summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
           })
 
+          // eslint-disable-next-line prefer-regex-literals
           const regex = new RegExp('\\$duplicatemessages', 'gim')
           text = text.replace(regex, summ)
         }
@@ -759,6 +766,7 @@ export default {
       if (callback) callback()
     },
     postcodeSelect(newpc) {
+      // eslint-disable-next-line vue/no-mutating-props
       this.message.location = newpc
     },
     moveLeft() {

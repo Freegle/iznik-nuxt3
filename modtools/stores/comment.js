@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash.clonedeep'
 import { defineStore } from 'pinia'
 import api from '~/api'
 
@@ -17,6 +16,13 @@ export const useCommentStore = defineStore({
       this.context = null
     },
     async fetch(params) {
+      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
+      if (params.context) {
+        for (const key of Object.keys(params.context)) {
+          params[`context[${key}]`] = params.context[key]
+        }
+        delete params.context
+      }
       const data = await api(this.config).comment.fetch(params)
       if (params && params.id) {
         this.list[data.comment.id] = data.comment
