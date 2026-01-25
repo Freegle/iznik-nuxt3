@@ -47,7 +47,6 @@
     "@bootstrap-vue-next/nuxt": "^0.24.1",
     "@capacitor/cli": "^7.0.0",
     "@nuxt/image": "^1.5.0",
-    "@nuxt/test-utils": "^3.19.0",
     "@nuxtjs/eslint-config": "^12.1.0",
     "@nuxtjs/eslint-module": "^4.0.2",
     "@playwright/test": "^1.52.0",
