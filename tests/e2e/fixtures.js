@@ -520,18 +520,8 @@ const test = base.test.extend({
           await page.goto(path, { timeout })
 
           // Wait for initial load
+          // Don't use networkidle - the app has background polling that prevents idle state
           await page.waitForLoadState('domcontentloaded', { timeout })
-
-          // Wait for network to settle (helps with slow JavaScript loading)
-          try {
-            await page.waitForLoadState('networkidle', {
-              timeout: Math.min(timeout, 30000),
-            })
-          } catch (networkError) {
-            console.log(
-              `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
-            )
-          }
 
           // Wait for page to finish hydrating (loading spinner to disappear)
           // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
@@ -772,7 +762,8 @@ const test = base.test.extend({
           console.warn(`Unable to clear page storage: ${err.message}`)
         }
 
-        await page.waitForLoadState('networkidle', { timeout })
+        // Don't use networkidle - the app has background polling that prevents idle state
+        await page.waitForLoadState('domcontentloaded', { timeout })
         return true
       } catch (error) {
         // Clear the navigation inactivity timer even if teardown fails
@@ -1924,12 +1915,13 @@ const testWithFixtures = test.extend({
       const freshPage = await freshContext.newPage()
 
       // Add gotoAndVerify helper to the fresh page
+      // Don't use networkidle - the app has background polling that prevents idle state
       freshPage.gotoAndVerify = async (path, options = {}) => {
         const baseUrl =
           process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
         const fullUrl = path.startsWith('http') ? path : `${baseUrl}${path}`
         await freshPage.goto(fullUrl, {
-          waitUntil: 'networkidle',
+          waitUntil: 'domcontentloaded',
           timeout: options.timeout || 60000,
         })
         return freshPage
@@ -2106,15 +2098,12 @@ const testWithFixtures = test.extend({
 
         // Click the button first - the modal will stay open while sendReply runs
         await closeButton.click()
-        console.log('Clicked Close and Continue, waiting for network idle')
+        console.log(
+          'Clicked Close and Continue, waiting for navigation to chats'
+        )
 
-        // Wait for network to become idle - this ensures the reply API call completes
-        await freshPage.waitForLoadState('networkidle', {
-          timeout: timeouts.navigation.default,
-        })
-        console.log('Network idle, waiting for navigation to chats')
-
-        // Now wait for navigation to chats page
+        // Wait for navigation to chats page - this indicates the reply API call completed
+        // Don't use networkidle - the app has background polling that prevents idle state
         try {
           await freshPage.waitForURL('**/chats/**', {
             timeout: timeouts.navigation.default,

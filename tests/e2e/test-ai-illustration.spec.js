@@ -18,7 +18,7 @@ function addGotoAndVerify(page) {
       process.env.TEST_BASE_URL || 'http://freegle-prod-local.localhost'
     const fullUrl = path.startsWith('http') ? path : `${baseUrl}${path}`
     await page.goto(fullUrl, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: options.timeout || 60000,
     })
     return page
@@ -38,7 +38,7 @@ async function navigateToMobileDetails(page, flowType) {
     timeout: timeouts.navigation.default,
   })
 
-  await page.waitForLoadState('networkidle', {
+  await page.waitForLoadState('domcontentloaded', {
     timeout: timeouts.navigation.default,
   })
 
@@ -53,7 +53,7 @@ async function navigateToMobileDetails(page, flowType) {
   if ((await nextButton.count()) > 0) {
     console.log('Found Next button, clicking it to skip photos')
     await nextButton.first().click()
-    await page.waitForLoadState('networkidle', {
+    await page.waitForLoadState('domcontentloaded', {
       timeout: timeouts.navigation.default,
     })
   } else {
@@ -130,7 +130,7 @@ test.describe('AI Illustration Tests - Give Flow', () => {
     console.log('Blurred item input to trigger AI illustration fetch')
 
     // Wait for network to settle after blur
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
     console.log('Network idle after blur')
 
     // Take a screenshot after the blur
@@ -195,7 +195,7 @@ test.describe('AI Illustration Tests - Give Flow', () => {
     await itemInput.first().blur()
 
     // Wait for any network activity
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
 
     // The item name should remain as entered
     const inputValue = await itemInput.first().inputValue()
@@ -251,7 +251,7 @@ test.describe('AI Illustration Tests - Find Flow', () => {
     console.log('Blurred item input to trigger AI illustration fetch')
 
     // Wait for network to settle after blur
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
     console.log('Network idle after blur')
 
     // Take a screenshot after the blur
@@ -316,7 +316,7 @@ test.describe('AI Illustration Tests - Find Flow', () => {
     await itemInput.first().blur()
 
     // Wait for any network activity
-    await page.waitForLoadState('networkidle', { timeout: 15000 })
+    await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
 
     // The item name should remain as entered
     const inputValue = await itemInput.first().inputValue()
@@ -365,7 +365,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
         timeout: timeouts.navigation.default,
       })
 
-      await page.waitForLoadState('networkidle', {
+      await page.waitForLoadState('domcontentloaded', {
         timeout: timeouts.navigation.default,
       })
       console.log('Give desktop page loaded')
@@ -393,7 +393,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
       console.log('Blurred item input to trigger AI illustration fetch')
 
       // Wait for network to settle after blur
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
       console.log('Network idle after blur')
 
       // Take a screenshot after the blur
@@ -455,7 +455,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
         timeout: timeouts.navigation.default,
       })
 
-      await page.waitForLoadState('networkidle', {
+      await page.waitForLoadState('domcontentloaded', {
         timeout: timeouts.navigation.default,
       })
 
@@ -481,7 +481,7 @@ test.describe('AI Illustration Tests - Give Desktop Flow', () => {
       await desktopItemInput.first().blur()
 
       // Wait for any network activity
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
 
       // The item name should remain as entered
       const inputValue = await desktopItemInput.first().inputValue()
@@ -535,7 +535,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
         timeout: timeouts.navigation.default,
       })
 
-      await page.waitForLoadState('networkidle', {
+      await page.waitForLoadState('domcontentloaded', {
         timeout: timeouts.navigation.default,
       })
       console.log('Find desktop page loaded')
@@ -563,7 +563,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
       console.log('Blurred item input to trigger AI illustration fetch')
 
       // Wait for network to settle after blur
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
       console.log('Network idle after blur')
 
       // Take a screenshot after the blur
@@ -625,7 +625,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
         timeout: timeouts.navigation.default,
       })
 
-      await page.waitForLoadState('networkidle', {
+      await page.waitForLoadState('domcontentloaded', {
         timeout: timeouts.navigation.default,
       })
 
@@ -651,7 +651,7 @@ test.describe('AI Illustration Tests - Find Desktop Flow', () => {
       await desktopItemInput.first().blur()
 
       // Wait for any network activity
-      await page.waitForLoadState('networkidle', { timeout: 15000 })
+      await page.waitForLoadState('domcontentloaded', { timeout: 15000 })
 
       // The item name should remain as entered
       const inputValue = await desktopItemInput.first().inputValue()
@@ -693,7 +693,7 @@ test.describe('AI Illustration Tests - Page Load Verification', () => {
     })
 
     // Wait for the page to fully load
-    await page.waitForLoadState('networkidle', {
+    await page.waitForLoadState('domcontentloaded', {
       timeout: timeouts.navigation.default,
     })
 
@@ -730,7 +730,7 @@ test.describe('AI Illustration Tests - Page Load Verification', () => {
     })
 
     // Wait for the page to fully load
-    await page.waitForLoadState('networkidle', {
+    await page.waitForLoadState('domcontentloaded', {
       timeout: timeouts.navigation.default,
     })
 

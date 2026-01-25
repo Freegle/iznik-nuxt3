@@ -288,7 +288,8 @@ async function signUpViaHomepage(
   }
 
   // Wait for page to be fully loaded with JavaScript
-  await page.waitForLoadState('networkidle', {
+  // Don't use networkidle - the app has background polling that prevents idle state
+  await page.waitForLoadState('domcontentloaded', {
     timeout: timeouts.navigation.default,
   })
 
@@ -306,7 +307,7 @@ async function signUpViaHomepage(
   // Wait for login modal to appear
   console.log('Waiting for login modal')
   await page
-    .locator('#loginModal, .modal-dialog:has-text("Let\'s get freegling")')
+    .locator('#loginModal, .modal-dialog:has-text("Join the Reuse Revolution")')
     .first()
     .waitFor({
       state: 'visible',
