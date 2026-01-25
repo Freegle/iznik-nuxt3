@@ -36,10 +36,27 @@ async function waitForAuthInLocalStorage(page) {
  */
 async function waitForAuthHydration(page) {
   console.log('[Auth] Waiting for page to stabilize and auth to hydrate...')
-  await page.waitForLoadState('networkidle', {
+  // Wait for DOM to be ready, then check for auth in localStorage
+  // Don't use networkidle - the app has background polling that prevents idle state
+  await page.waitForLoadState('domcontentloaded', {
     timeout: timeouts.navigation.default,
   })
-  console.log('[Auth] Page stabilized')
+  // Wait for Pinia to hydrate auth from localStorage
+  await page.waitForFunction(
+    () => {
+      try {
+        const authData = localStorage.getItem('auth')
+        if (!authData) return true // No auth expected, that's fine
+        const parsed = JSON.parse(authData)
+        // Check if auth store has been hydrated (has structure)
+        return parsed && typeof parsed === 'object'
+      } catch {
+        return true // Parse error means no valid auth, continue
+      }
+    },
+    { timeout: timeouts.ui.appearance }
+  )
+  console.log('[Auth] Page stabilized and auth hydrated')
 }
 
 /**

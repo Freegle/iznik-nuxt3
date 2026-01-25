@@ -27,15 +27,18 @@ test.describe('ModTools login tests', () => {
     expect(currentUrl).toContain('/login')
     expect(currentUrl).toContain('return=/')
 
-    // Wait for the login modal to appear with "Join the Reuse Revolution" text
-    const loginModal = page.locator('text=Join the Reuse Revolution')
-    await loginModal.waitFor({
+    // Wait for the login modal to appear (ModTools shows LoginModal for unauthenticated users)
+    // The modal shows "Join the Reuse Revolution!" text
+    const loginModal = page.locator(
+      '#loginModal, .modal-content:has-text("Join the Reuse Revolution")'
+    )
+    await loginModal.first().waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
     // Verify the login modal is displayed
-    const isModalVisible = await loginModal.isVisible()
+    const isModalVisible = await loginModal.first().isVisible()
     expect(isModalVisible).toBe(true)
   })
 
@@ -71,15 +74,18 @@ test.describe('ModTools login tests', () => {
       }
     }
 
-    // Wait for the login modal to appear with "Join the Reuse Revolution" text
-    const loginModal = page.locator('text=Join the Reuse Revolution')
-    await loginModal.waitFor({
+    // Wait for the login modal to appear (ModTools shows LoginModal for unauthenticated users)
+    // The modal shows "Join the Reuse Revolution!" text
+    const loginModal = page.locator(
+      '#loginModal, .modal-content:has-text("Join the Reuse Revolution")'
+    )
+    await loginModal.first().waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
 
     // Verify the login modal is displayed
-    const isModalVisible = await loginModal.isVisible()
+    const isModalVisible = await loginModal.first().isVisible()
     expect(isModalVisible).toBe(true)
   })
 })
