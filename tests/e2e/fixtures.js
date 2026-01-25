@@ -2060,27 +2060,52 @@ const testWithFixtures = test.extend({
         console.log('DEBUG: Modal texts found:', modalTexts)
       }
 
-      // Check if LoginModal appeared in "Welcome back" mode (needs to switch to signup)
-      const loginModal = freshPage.locator('.modal-content').filter({
+      // Check if LoginModal appeared - either in "Welcome back" mode or "Join the Reuse Revolution" mode
+      const loginModalWelcomeBack = freshPage.locator('.modal-content').filter({
         hasText: 'Welcome back',
       })
-      const loginModalVisible = await loginModal
+      const loginModalSignup = freshPage.locator('.modal-content').filter({
+        hasText: 'Join the Reuse Revolution',
+      })
+
+      // Check which modal is visible
+      const welcomeBackVisible = await loginModalWelcomeBack
         .waitFor({ state: 'visible', timeout: 3000 })
         .then(() => true)
         .catch(() => false)
 
-      if (loginModalVisible) {
-        console.log(
-          'LoginModal appeared in "Welcome back" mode - switching to signup'
-        )
+      const signupVisible = !welcomeBackVisible
+        ? await loginModalSignup
+            .waitFor({ state: 'visible', timeout: 1000 })
+            .then(() => true)
+            .catch(() => false)
+        : false
 
-        // Click the "Join" button to switch to signup mode
-        const joinButton = loginModal.locator('button:has-text("Join")')
-        await joinButton.click()
-        console.log('Clicked Join button to switch to signup mode')
+      const loginModal = welcomeBackVisible
+        ? loginModalWelcomeBack
+        : signupVisible
+        ? loginModalSignup
+        : null
+      const loginModalVisible = welcomeBackVisible || signupVisible
 
-        // Wait for the mode to switch (name field should appear)
-        await freshPage.waitForTimeout(500)
+      if (loginModalVisible && loginModal) {
+        if (welcomeBackVisible) {
+          console.log(
+            'LoginModal appeared in "Welcome back" mode - switching to signup'
+          )
+
+          // Click the "Join" button to switch to signup mode
+          const joinButton = loginModal.locator('button:has-text("Join")')
+          await joinButton.click()
+          console.log('Clicked Join button to switch to signup mode')
+
+          // Wait for the mode to switch (name field should appear)
+          await freshPage.waitForTimeout(500)
+        } else {
+          console.log(
+            'LoginModal appeared in "Join the Reuse Revolution" signup mode - already in signup'
+          )
+        }
 
         // Now fill in the signup form
         // Fill name
