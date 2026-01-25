@@ -1963,9 +1963,19 @@ const testWithFixtures = test.extend({
       })
       console.log('Reply button visible')
 
-      // Wait for network to be idle to ensure Vue has hydrated
-      await freshPage.waitForLoadState('networkidle', { timeout: 30000 })
-      console.log('Network idle, attempting click')
+      // Wait for Vue hydration by checking the button is enabled and clickable
+      // Don't use networkidle - the app has background polling that prevents idle state
+      await freshPage.waitForFunction(
+        (selector) => {
+          const btn = document.querySelector(selector)
+          if (!btn) return false
+          // Check button is not disabled and has event handlers attached (Vue hydrated)
+          return !btn.disabled && !btn.classList.contains('disabled')
+        },
+        '.app-footer .reply-button',
+        { timeout: timeouts.navigation.default }
+      )
+      console.log('Reply button hydrated and enabled, attempting click')
 
       // Click the Reply button
       await replyButton.click()
