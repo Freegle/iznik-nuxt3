@@ -93,6 +93,11 @@ async function clearSessionData(page) {
           store.$reset()
         }
       }
+      // Explicitly clear loggedInEver which is preserved by auth store's $reset
+      const authStore = window.$nuxt.$pinia._s.get('auth')
+      if (authStore) {
+        authStore.loggedInEver = false
+      }
     }
   })
 
