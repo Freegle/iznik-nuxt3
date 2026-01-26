@@ -107,11 +107,13 @@ const generateUniqueTestEmail = (prefix = 'test') => {
 const test = base.test.extend({
   // Create a new isolated context for each test
   context: async ({ browser }, use) => {
-    // Create a fresh context for this test
+    // Create a fresh context for this test with explicitly empty storage
+    // This ensures no localStorage/sessionStorage/cookies leak between tests
     const context = await browser.newContext({
       ignoreHTTPSErrors: true, // Useful for local dev environments
       acceptDownloads: true,
       viewport: { width: 1280, height: 720 },
+      storageState: { cookies: [], origins: [] }, // Start with blank storage
     })
 
     console.log(`Created new isolated browser context for test`)
