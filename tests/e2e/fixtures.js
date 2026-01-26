@@ -2091,6 +2091,9 @@ const testWithFixtures = test.extend({
       const loginModalVisible = welcomeBackVisible || signupVisible
 
       if (loginModalVisible && loginModal) {
+        // After mode switch, we need a fresh locator since the modal text changes
+        let currentModal = loginModal
+
         if (welcomeBackVisible) {
           console.log(
             'LoginModal appeared in "Welcome back" mode - switching to signup'
@@ -2101,17 +2104,23 @@ const testWithFixtures = test.extend({
           await joinButton.click()
           console.log('Clicked Join button to switch to signup mode')
 
-          // Wait for the mode to switch (name field should appear)
-          await freshPage.waitForTimeout(500)
+          // Wait for the mode to switch - the modal text changes from "Welcome back"
+          // to "Join the Reuse Revolution", so we need to re-query for the modal
+          const signupModal = freshPage.locator('.modal-content').filter({
+            hasText: 'Join the Reuse Revolution',
+          })
+          await signupModal.waitFor({ state: 'visible', timeout: 5000 })
+          currentModal = signupModal
+          console.log('Modal switched to signup mode')
         } else {
           console.log(
             'LoginModal appeared in "Join the Reuse Revolution" signup mode - already in signup'
           )
         }
 
-        // Now fill in the signup form
+        // Now fill in the signup form using the current modal reference
         // Fill name
-        const nameInput = loginModal.locator(
+        const nameInput = currentModal.locator(
           'input#fullname, input[name="fullname"]'
         )
         await nameInput.waitFor({ state: 'visible', timeout: 5000 })
@@ -2119,7 +2128,7 @@ const testWithFixtures = test.extend({
         console.log('Filled name in signup form')
 
         // Email should already be filled, but verify
-        const emailInput = loginModal.locator('input[type="email"]')
+        const emailInput = currentModal.locator('input[type="email"]')
         const emailValue = await emailInput.inputValue()
         if (!emailValue) {
           await emailInput.fill(email)
@@ -2127,7 +2136,7 @@ const testWithFixtures = test.extend({
         }
 
         // Fill password
-        const passwordInput = loginModal
+        const passwordInput = currentModal
           .locator('input[type="password"], input[placeholder*="password" i]')
           .first()
         await passwordInput.waitFor({ state: 'visible', timeout: 5000 })
@@ -2135,7 +2144,7 @@ const testWithFixtures = test.extend({
         console.log('Filled password in signup form')
 
         // Click Join Freegle button
-        const joinFreegleButton = loginModal.locator(
+        const joinFreegleButton = currentModal.locator(
           'button:has-text("Join Freegle")'
         )
         await joinFreegleButton.click()
