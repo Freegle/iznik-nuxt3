@@ -1,0 +1,4 @@
+Contact: mailto:geeks@ilovefreegle.org
+Preferred-Languages: en
+Canonical: https://www.ilovefreegle.org/.well-known/security.txt
+Policy: https://www.ilovefreegle.org/security
