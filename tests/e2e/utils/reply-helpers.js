@@ -62,13 +62,11 @@ async function waitForAuthHydration(page) {
 /**
  * Helper: Dismiss login modal if it appears
  * Browse and explore pages show a signup modal for non-logged-in users
- * The modal may appear in either "Join" mode (new users) or "Welcome back" mode (returning users)
  */
 async function dismissLoginModalIfPresent(page) {
   // Check if login modal is visible (it appears on browse/explore for non-logged-in users)
-  // Match either the signup mode ("Join the Reuse Revolution") or login mode ("Welcome back")
   const loginModal = page.locator(
-    '#loginModal, .modal-content:has-text("Join the Reuse Revolution"), .modal-content:has-text("Welcome back")'
+    '#loginModal, .modal-content:has-text("Join the Reuse Revolution")'
   )
 
   try {
@@ -311,62 +309,27 @@ async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
   console.log('[Reply] Clicked Send your reply')
 
   if (expectWelcomeModal) {
-    // For new user flows, we expect either:
-    // 1. "Welcome to Freegle" modal (registration success) - close it and continue
-    // 2. Direct navigation to chats (already registered/logged in)
-    // 3. "Welcome back" login modal (registration failed, user already exists) - error case
+    // Wait for either welcome modal OR navigation to chats (modal might not appear in all flows)
     const welcomeModal = page.locator('.modal-content').filter({
       hasText: 'Welcome to Freegle',
     })
-    const loginModal = page.locator('.modal-content').filter({
-      hasText: 'Welcome back',
-    })
 
-    // Race between different outcomes
-    const result = await Promise.race([
-      welcomeModal
-        .waitFor({ state: 'visible', timeout: 15000 })
-        .then(() => 'welcome'),
-      loginModal
-        .waitFor({ state: 'visible', timeout: 15000 })
-        .then(() => 'login'),
-      page.waitForURL(/\/chats\//, { timeout: 15000 }).then(() => 'navigated'),
-    ]).catch(() => 'timeout')
+    // Race between welcome modal and navigation to chats
+    try {
+      await welcomeModal.waitFor({
+        state: 'visible',
+        timeout: 10000, // shorter timeout since it might not appear
+      })
+      console.log('[Reply] Welcome modal appeared')
 
-    console.log(`[Reply] After send, result: ${result}`)
-
-    if (result === 'welcome') {
-      console.log('[Reply] Welcome modal appeared (registration success)')
+      // Close the modal
       const closeButton = welcomeModal.locator(
         '.btn:has-text("Close and Continue")'
       )
       await closeButton.click()
       console.log('[Reply] Closed welcome modal')
-    } else if (result === 'login') {
-      // This is unexpected for new user flow - log diagnostic info
-      console.log('[Reply] ERROR: Login modal appeared instead of registration')
-      console.log(
-        '[Reply] This indicates the registration API failed or returned "user exists"'
-      )
-      console.log('[Reply] Check if the test email was already used')
-
-      // Take a screenshot for debugging
-      await page.screenshot({
-        path: '/tmp/reply-login-modal-unexpected.png',
-        fullPage: true,
-      })
-
-      // Try to close the modal and continue - but this will likely fail downstream
-      const closeButton = page.locator('.btn-close, [aria-label="Close"]')
-      if (await closeButton.isVisible()) {
-        await closeButton.click()
-        console.log('[Reply] Closed login modal (attempting to continue)')
-      }
-    } else if (result === 'navigated') {
-      console.log('[Reply] Already navigated to chats (no modal needed)')
-      return // Already at destination
-    } else {
-      console.log('[Reply] Timeout waiting for modal or navigation')
+    } catch {
+      console.log('[Reply] Welcome modal did not appear, continuing...')
     }
   }
 
