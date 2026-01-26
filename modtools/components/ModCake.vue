@@ -21,6 +21,10 @@
       us love cake, but if for any reason you'd prefer us not to send you any,
       just ignore this.
     </p>
+    <p>
+      By opting in for cake, you're also agreeing that if we have your phone
+      number, we can pass it to delivery drivers to help get your cake to you.
+    </p>
     <OurToggle
       v-model="modcake"
       class="mt-2"
@@ -73,6 +77,9 @@ const modcake = computed({
   },
   set(newval) {
     saveSetting('modcake', newval)
+    if (newval) {
+      saveSetting('modcakedate', new Date().toISOString())
+    }
   },
 })
 
