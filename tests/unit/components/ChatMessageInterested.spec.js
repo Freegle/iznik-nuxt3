@@ -85,6 +85,19 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
+// Mock misc store - modtools flag for linkification
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => ({
+    modtools: false,
+  }),
+}))
+
+// Mock linkify composable - document.createElement not available in test env
+vi.mock('~/composables/useLinkify', () => ({
+  linkifyText: (text) => text || '',
+  linkifyAndHighlightEmails: (text) => text || '',
+}))
+
 describe('ChatMessageInterested', () => {
   let wrapper = null
 

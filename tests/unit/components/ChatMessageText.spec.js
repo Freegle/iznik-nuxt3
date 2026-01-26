@@ -51,6 +51,19 @@ vi.mock('~/stores/location', () => ({
   }),
 }))
 
+// Mock misc store - modtools flag for linkification
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => ({
+    modtools: false,
+  }),
+}))
+
+// Mock linkify composable - document.createElement not available in test env
+vi.mock('~/composables/useLinkify', () => ({
+  linkifyText: (text) => text || '',
+  linkifyAndHighlightEmails: (text) => text || '',
+}))
+
 // Mock map composables
 vi.mock('~/composables/useMap', () => ({
   attribution: () => '© OpenStreetMap',
