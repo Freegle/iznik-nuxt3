@@ -84,7 +84,7 @@ export const useComposeStore = defineStore({
               try {
                 const result = await this.$api.image.post({
                   externaluid: attachment.ouruid,
-                  externalmods: JSON.stringify({ ai: true }),
+                  externalmods: { ai: true },
                 })
                 if (result.ret === 0 && result.id) {
                   attids.push(result.id)
@@ -543,7 +543,8 @@ export const useComposeStore = defineStore({
           const realPhotos = atts.filter(
             (a) => !a.externalmods || a.externalmods.ai !== true
           )
-          const hasDescription = message.description && message.description.trim()
+          const hasDescription =
+            message.description && message.description.trim()
           const hasRealPhotos = realPhotos.length > 0
 
           // A message is valid if there is an item, and either a description or real photos.
