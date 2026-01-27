@@ -308,11 +308,17 @@ function validateAndNext() {
     return
   }
 
-  // Check that we have either a description or a photo.
+  // Check that we have either a description or real (non-AI) photos.
+  // AI-only photos require a description.
   const hasDescription = description.value && description.value.trim()
-  const hasPhotos = attachments.value && attachments.value.length > 0
+  const realPhotos = attachments.value
+    ? attachments.value.filter(
+        (a) => !a.externalmods || a.externalmods.ai !== true
+      )
+    : []
+  const hasRealPhotos = realPhotos.length > 0
 
-  if (!hasDescription && !hasPhotos) {
+  if (!hasDescription && !hasRealPhotos) {
     showDescriptionError.value = true
     nextTick(() => {
       const textarea = document.getElementById('description')

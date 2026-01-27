@@ -75,11 +75,24 @@ export const useComposeStore = defineStore({
       const attids = []
 
       // Extract the server attachment id from message.attachments.
-      // Filter out AI illustrations - they have externalmods.ai = true
       if (message.attachments) {
         for (const attachment of message.attachments) {
-          // Skip AI illustrations - they're just for display
+          // AI illustrations need to be converted to real server-side attachments
           if (attachment.externalmods && attachment.externalmods.ai) {
+            // Create a real attachment from the AI illustration's external UID
+            if (attachment.ouruid) {
+              try {
+                const result = await this.$api.image.post({
+                  externaluid: attachment.ouruid,
+                  externalmods: JSON.stringify({ ai: true }),
+                })
+                if (result.ret === 0 && result.id) {
+                  attids.push(result.id)
+                }
+              } catch (e) {
+                console.error('Failed to create AI illustration attachment:', e)
+              }
+            }
             continue
           }
           // Only include attachments with numeric IDs (server-side attachments)
@@ -526,12 +539,19 @@ export const useComposeStore = defineStore({
         for (const message of messages) {
           const atts = message.attachments ? message.attachments : []
 
-          // A message is valid if there is an item, and either a description or a photo.
+          // Count only real (non-AI) photos - AI illustrations don't count as "having a photo"
+          const realPhotos = atts.filter(
+            (a) => !a.externalmods || a.externalmods.ai !== true
+          )
+          const hasDescription = message.description && message.description.trim()
+          const hasRealPhotos = realPhotos.length > 0
+
+          // A message is valid if there is an item, and either a description or real photos.
+          // AI-only photos require a description.
           if (
             !message.item ||
             !message.item.trim() ||
-            ((!message.description || !message.description.trim()) &&
-              !atts.length)
+            (!hasDescription && !hasRealPhotos)
           ) {
             valid = false
           }
