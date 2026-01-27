@@ -14,48 +14,50 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useMessageStore } from '~/stores/message'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const chatStore = useChatStore()
-    const messageStore = useMessageStore()
-    const { supportOrAdmin } = useMe()
-    return { chatStore, messageStore, supportOrAdmin }
-  },
-  data() {
-    return {
-      id: null,
-      notfound: false,
-      chat: null,
-      pov: null,
-    }
-  },
-  computed: {},
-  created() {
-    const route = useRoute()
-    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-  },
-  async mounted() {
-    await this.messageStore.clear()
-    await this.chatStore.clear()
-    if (!this.id) {
-      return
-    }
-    await this.chatStore.fetchChat(this.id)
+// Stores
+const chatStore = useChatStore()
+const messageStore = useMessageStore()
 
-    this.chat = this.chatStore.byChatId(this.id)
+// Composables
+const { supportOrAdmin } = useMe()
 
-    if (this.chat) {
-      this.pov = this.chat.user1.id
-    } else {
-      this.notfound = true
-    }
-  },
-  methods: {},
-}
+// Route
+const route = useRoute()
+
+// Template refs
+const modChatModal = ref(null)
+
+// Local state (formerly data())
+const id = ref('id' in route.params ? parseInt(route.params.id) : 0)
+const notfound = ref(false)
+const chat = ref(null)
+const pov = ref(null)
+
+// Lifecycle
+onMounted(async () => {
+  await messageStore.clear()
+  await chatStore.clear()
+
+  if (!id.value) {
+    return
+  }
+
+  await chatStore.fetchChat(id.value)
+
+  chat.value = chatStore.byChatId(id.value)
+
+  if (chat.value) {
+    pov.value = chat.value.user1.id
+  } else {
+    notfound.value = true
+  }
+})
 </script>

@@ -63,92 +63,91 @@
     </b-badge>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
+
 const MEMBERSHIPS_SHOW = 3
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      allmemberships: false,
-      allapplied: false,
-    }
-  },
-  computed: {
-    memberof() {
-      if (!this.user || !this.user.memberof) {
-        return null
+})
+
+const allmemberships = ref(false)
+const allapplied = ref(false)
+
+const memberof = computed(() => {
+  if (!props.user || !props.user.memberof) {
+    return null
+  }
+
+  const ms = [...props.user.memberof]
+
+  ms.sort(function (a, b) {
+    return new Date(b.added).getTime() - new Date(a.added).getTime()
+  })
+
+  if (allmemberships.value) {
+    return ms
+  } else {
+    return ms.slice(0, MEMBERSHIPS_SHOW)
+  }
+})
+
+const hiddenmemberofs = computed(() => {
+  return allmemberships.value
+    ? 0
+    : props.user &&
+      props.user.memberof &&
+      props.user.memberof.length > MEMBERSHIPS_SHOW
+    ? props.user.memberof.length - MEMBERSHIPS_SHOW
+    : 0
+})
+
+const filteredApplied = computed(() => {
+  if (!props.user || !props.user.applied || !props.user.memberof) {
+    return []
+  }
+
+  // Filter out anything we're already on.
+  const ms = props.user.applied.filter((g) => {
+    let member = false
+    props.user.memberof.forEach((h) => {
+      if (h.id === g.id) {
+        member = true
       }
+    })
 
-      const ms = this.user.memberof
+    return !member
+  })
 
-      ms.sort(function (a, b) {
-        return new Date(b.added).getTime() - new Date(a.added).getTime()
-      })
+  ms.sort(function (a, b) {
+    return new Date(b.added).getTime() - new Date(a.added).getTime()
+  })
 
-      if (this.allmemberships) {
-        return ms
-      } else {
-        return ms.slice(0, MEMBERSHIPS_SHOW)
-      }
-    },
-    hiddenmemberofs() {
-      return this.allmemberships
-        ? 0
-        : this.user &&
-          this.user.memberof &&
-          this.user.memberof.length > MEMBERSHIPS_SHOW
-        ? this.user.memberof.length - MEMBERSHIPS_SHOW
-        : 0
-    },
-    filteredApplied() {
-      if (!this.user || !this.user.applied || !this.user.memberof) {
-        return []
-      }
+  return ms
+})
 
-      // Filter out anything we're already on.
-      const ms = this.user.applied.filter((g) => {
-        let member = false
-        this.user.memberof.forEach((h) => {
-          if (h.id === g.id) {
-            member = true
-          }
-        })
+const visibleApplied = computed(() => {
+  if (allapplied.value) {
+    return filteredApplied.value
+  } else {
+    return filteredApplied.value.slice(0, MEMBERSHIPS_SHOW)
+  }
+})
 
-        return !member
-      })
+const hiddenapplieds = computed(() => {
+  return allapplied.value
+    ? 0
+    : filteredApplied.value.length > MEMBERSHIPS_SHOW
+    ? filteredApplied.value.length - MEMBERSHIPS_SHOW
+    : 0
+})
 
-      ms.sort(function (a, b) {
-        return new Date(b.added).getTime() - new Date(a.added).getTime()
-      })
-
-      return ms
-    },
-    visibleApplied() {
-      if (this.allapplied) {
-        return this.filteredApplied
-      } else {
-        return this.filteredApplied.slice(0, MEMBERSHIPS_SHOW)
-      }
-    },
-    hiddenapplieds() {
-      return this.allapplied
-        ? 0
-        : this.filteredApplied.length > MEMBERSHIPS_SHOW
-        ? this.filteredApplied.length - MEMBERSHIPS_SHOW
-        : 0
-    },
-  },
-  methods: {
-    daysago(d) {
-      return dayjs().diff(dayjs(d), 'days')
-    },
-  },
+function daysago(d) {
+  return dayjs().diff(dayjs(d), 'days')
 }
 </script>

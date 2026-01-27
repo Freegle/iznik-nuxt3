@@ -46,86 +46,74 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import Wkt from 'wicket'
 import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    userid: {
-      type: Number,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  userid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const modGroupStore = useModGroupStore()
-    const userStore = useUserStore()
-    const { modal, show, hide } = useOurModal()
-    return { modGroupStore, userStore, modal, show, hide }
+  groupid: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      homefail: false,
-      homeGroup: false,
-      reason: null,
-    }
-  },
-  computed: {
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-    user() {
-      return this.userStore.byId(this.userid)
-    },
-  },
-  mounted() {
-    // console.log('mounted', cloneDeep(this.group))
-    // TODO: Why: await this.modGroupStore.listMT({
-    //  grouptype: 'Freegle'
-    // })
+})
 
-    const area = this.group.poly || this.group.polyofficial
-    if (area) {
-      console.log('Area', area)
+const emit = defineEmits(['confirm'])
 
-      try {
-        const wkt = new Wkt.Wkt()
-        console.log('Area2')
-        wkt.read(area)
-        console.log('Area3', wkt.type)
-        const obj = wkt.toObject()
-        console.log('Area4')
-        const bounds = obj.getBounds()
-        console.log('Bounds', bounds, this.user)
+const modGroupStore = useModGroupStore()
+const userStore = useUserStore()
+const { modal, show, hide } = useOurModal()
 
-        const lat = this.user.settings?.mylocation?.lat
-        const lng = this.user.settings?.mylocation?.lng
+const homefail = ref(false)
+const homeGroup = ref(false)
+const reason = ref(null)
 
-        if (
-          (lat || lng) &&
-          (this.user.memberof.length === 1 || bounds.contains([lat, lng]))
-        ) {
-          this.homeGroup = true
-        }
-      } catch (e) {
-        this.homefail = true
-        console.error(e)
-      }
-    }
-  },
-  methods: {
-    ban() {
-      if (this.reason) {
-        this.$emit('confirm', this.reason)
-        this.hide()
-      }
-    },
-  },
+const group = computed(() => modGroupStore.get(props.groupid))
+const user = computed(() => userStore.byId(props.userid))
+
+function ban() {
+  if (reason.value) {
+    emit('confirm', reason.value)
+    hide()
+  }
 }
+
+onMounted(() => {
+  const area = group.value.poly || group.value.polyofficial
+  if (area) {
+    console.log('Area', area)
+
+    try {
+      const wkt = new Wkt.Wkt()
+      console.log('Area2')
+      wkt.read(area)
+      console.log('Area3', wkt.type)
+      const obj = wkt.toObject()
+      console.log('Area4')
+      const bounds = obj.getBounds()
+      console.log('Bounds', bounds, user.value)
+
+      const lat = user.value.settings?.mylocation?.lat
+      const lng = user.value.settings?.mylocation?.lng
+
+      if (
+        (lat || lng) &&
+        (user.value.memberof.length === 1 || bounds.contains([lat, lng]))
+      ) {
+        homeGroup.value = true
+      }
+    } catch (e) {
+      homefail.value = true
+      console.error(e)
+    }
+  }
+})
+
+defineExpose({ show, hide })
 </script>

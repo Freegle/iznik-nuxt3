@@ -105,101 +105,96 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
-export default {
-  name: 'ModSupportWorryWords',
-  setup() {
-    const systemConfigStore = useSystemConfigStore()
-    return { systemConfigStore }
-  },
-  data() {
-    return {
-      newWorryWord: '',
-      patternType: 'literal',
-      worryWordType: 'Review',
-      patternTypeOptions: [
-        { text: 'Literal (exact word/phrase)', value: 'literal' },
-        { text: 'Regular Expression (advanced)', value: 'regex' },
-      ],
-      regexError: '',
-      worrywordTypeFilter: 'all',
-      worryWordTypeOptions: [
-        { text: 'Review', value: 'Review' },
-        { text: 'Regulated', value: 'Regulated' },
-        { text: 'Reportable', value: 'Reportable' },
-        { text: 'Medicine', value: 'Medicine' },
-        { text: 'Allowed', value: 'Allowed' },
-      ],
-      worrywordTypeOptions: [
-        { text: 'All Types', value: 'all' },
-        { text: 'Review', value: 'Review' },
-        { text: 'Regulated', value: 'Regulated' },
-        { text: 'Reportable', value: 'Reportable' },
-        { text: 'Medicine', value: 'Medicine' },
-        { text: 'Allowed', value: 'Allowed' },
-      ],
-    }
-  },
-  computed: {
-    regexValidationState() {
-      if (this.patternType !== 'regex' || !this.newWorryWord.trim()) {
-        return null
-      }
+const systemConfigStore = useSystemConfigStore()
 
-      try {
-        // eslint-disable-next-line no-new
-        new RegExp(this.newWorryWord.trim())
-        return true
-      } catch (e) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.regexError = `Invalid regex: ${e.message}`
-        return false
-      }
-    },
+const newWorryWord = ref('')
+const patternType = ref('literal')
+const worryWordType = ref('Review')
+const regexError = ref('')
+const worrywordTypeFilter = ref('all')
 
-    filteredWorrywords() {
-      if (this.worrywordTypeFilter === 'all') {
-        return this.systemConfigStore.getWorrywords
-      }
-      return this.systemConfigStore.getWorrywords.filter(
-        (worryword) => worryword.type === this.worrywordTypeFilter
-      )
-    },
-  },
-  methods: {
-    async fetchWorryWords() {
-      // Fetch worry words when tab is selected
-      await this.systemConfigStore.fetchWorrywords()
-    },
+const patternTypeOptions = [
+  { text: 'Literal (exact word/phrase)', value: 'literal' },
+  { text: 'Regular Expression (advanced)', value: 'regex' },
+]
 
-    async addWorryWord() {
-      if (!this.newWorryWord || !this.newWorryWord.trim()) return
+const worryWordTypeOptions = [
+  { text: 'Review', value: 'Review' },
+  { text: 'Regulated', value: 'Regulated' },
+  { text: 'Reportable', value: 'Reportable' },
+  { text: 'Medicine', value: 'Medicine' },
+  { text: 'Allowed', value: 'Allowed' },
+]
 
-      const trimmedWord = this.newWorryWord.trim()
+const worrywordTypeOptions = [
+  { text: 'All Types', value: 'all' },
+  { text: 'Review', value: 'Review' },
+  { text: 'Regulated', value: 'Regulated' },
+  { text: 'Reportable', value: 'Reportable' },
+  { text: 'Medicine', value: 'Medicine' },
+  { text: 'Allowed', value: 'Allowed' },
+]
 
-      // For regex patterns, validate first
-      if (this.patternType === 'regex') {
-        try {
-          // eslint-disable-next-line no-new
-          new RegExp(trimmedWord)
-        } catch (e) {
-          this.regexError = `Invalid regex: ${e.message}`
-          return
-        }
-      }
+const regexValidationState = computed(() => {
+  if (patternType.value !== 'regex' || !newWorryWord.value.trim()) {
+    return null
+  }
 
-      // Add pattern type prefix to distinguish regex from literal
-      const patternToAdd =
-        this.patternType === 'regex' ? `REGEX:${trimmedWord}` : trimmedWord
+  try {
+    // eslint-disable-next-line no-new
+    new RegExp(newWorryWord.value.trim())
+    return true
+  } catch (e) {
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    regexError.value = `Invalid regex: ${e.message}`
+    return false
+  }
+})
 
-      // Use the selected type from the form
-      const type = this.worryWordType
+const filteredWorrywords = computed(() => {
+  if (worrywordTypeFilter.value === 'all') {
+    return systemConfigStore.getWorrywords
+  }
+  return systemConfigStore.getWorrywords.filter(
+    (worryword) => worryword.type === worrywordTypeFilter.value
+  )
+})
 
-      await this.systemConfigStore.addWorryword(patternToAdd, type)
-      this.newWorryWord = ''
-    },
-  },
+async function fetchWorryWords() {
+  // Fetch worry words when tab is selected
+  await systemConfigStore.fetchWorrywords()
 }
+
+async function addWorryWord() {
+  if (!newWorryWord.value || !newWorryWord.value.trim()) return
+
+  const trimmedWord = newWorryWord.value.trim()
+
+  // For regex patterns, validate first
+  if (patternType.value === 'regex') {
+    try {
+      // eslint-disable-next-line no-new
+      new RegExp(trimmedWord)
+    } catch (e) {
+      regexError.value = `Invalid regex: ${e.message}`
+      return
+    }
+  }
+
+  // Add pattern type prefix to distinguish regex from literal
+  const patternToAdd =
+    patternType.value === 'regex' ? `REGEX:${trimmedWord}` : trimmedWord
+
+  // Use the selected type from the form
+  const type = worryWordType.value
+
+  await systemConfigStore.addWorryword(patternToAdd, type)
+  newWorryWord.value = ''
+}
+
+defineExpose({ fetchWorryWords })
 </script>

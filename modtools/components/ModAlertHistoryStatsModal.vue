@@ -47,80 +47,68 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useAlertStore } from '~/stores/alert'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: {
-    GChart,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup() {
-    const alertStore = useAlertStore()
-    const { modal, hide, show } = useOurModal()
-    return { alertStore, modal, hide, show }
-  },
-  data: function () {
-    return {
-      chartOptions: {
-        chartArea: { width: '80%', height: '80%' },
-        slices: {
-          0: { color: 'green' },
-          1: { color: 'orange' },
-        },
-      },
-    }
-  },
-  computed: {
-    alert() {
-      return this.alertStore.get(this.id)
-    },
-    groupData() {
-      if (this.alert) {
-        let reached = 0
-        let total = 0
-        this.alert.stats.responses.groups.forEach((group) => {
-          total++
-          group.summary.forEach((result) => {
-            if (result.rsp === 'Reached') {
-              reached++
-            }
-          })
-        })
+})
 
-        return [
-          ['Result', 'Count'],
-          ['Responded', reached],
-          ['No Response', total - reached],
-        ]
-      } else {
-        return null
-      }
-    },
-    volunteerData() {
-      if (this.alert) {
-        return [
-          ['Result', 'Count'],
-          ['Responded', this.alert.stats.responses.mods.reached],
-          ['No Response', this.alert.stats.responses.mods.none],
-        ]
-      } else {
-        return null
-      }
-    },
+const alertStore = useAlertStore()
+const { modal, hide, show } = useOurModal()
+
+const chartOptions = {
+  chartArea: { width: '80%', height: '80%' },
+  slices: {
+    0: { color: 'green' },
+    1: { color: 'orange' },
   },
-  async mounted() {
-    // await this.alertStore.fetch({ id: this.id })
-  },
-  methods: {},
 }
+
+const alert = computed(() => alertStore.get(props.id))
+
+const groupData = computed(() => {
+  if (alert.value) {
+    let reached = 0
+    let total = 0
+    alert.value.stats.responses.groups.forEach((group) => {
+      total++
+      group.summary.forEach((result) => {
+        if (result.rsp === 'Reached') {
+          reached++
+        }
+      })
+    })
+
+    return [
+      ['Result', 'Count'],
+      ['Responded', reached],
+      ['No Response', total - reached],
+    ]
+  } else {
+    return null
+  }
+})
+
+const volunteerData = computed(() => {
+  if (alert.value) {
+    return [
+      ['Result', 'Count'],
+      ['Responded', alert.value.stats.responses.mods.reached],
+      ['No Response', alert.value.stats.responses.mods.none],
+    ]
+  } else {
+    return null
+  }
+})
+
+defineExpose({ show, hide })
 </script>
 <style scoped>
 label {

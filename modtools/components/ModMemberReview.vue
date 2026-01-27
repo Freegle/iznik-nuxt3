@@ -152,7 +152,8 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '~/stores/user'
 import { useModGroupStore } from '~/stores/modgroup'
@@ -160,195 +161,152 @@ import { useModMe } from '~/composables/useModMe'
 
 const MEMBERSHIPS_SHOW = 3
 
-export default {
-  name: 'ModMember',
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  emits: ['forcerefresh'],
-  setup() {
-    const userStore = useUserStore()
-    const modGroupStore = useModGroupStore()
-    const { amAModOn } = useModMe()
-    return {
-      userStore,
-      amAModOn,
-      modGroupStore,
+})
+
+const emit = defineEmits(['forcerefresh'])
+
+const userStore = useUserStore()
+const modGroupStore = useModGroupStore()
+const { amAModOn } = useModMe()
+
+const history = ref(null)
+const logs = ref(null)
+
+const showEmails = ref(false)
+const type = ref(null)
+const allmemberships = ref(false)
+const showPostingHistoryModal = ref(false)
+const showLogsModal = ref(false)
+const reviewed = ref(false)
+
+const isLJ = computed(() => {
+  return user.value && user.value.ljuserid
+})
+
+const allmemberof = computed(() => {
+  let ms = []
+
+  if (props.member && props.member.memberof) {
+    ms = props.member.memberof
+  }
+
+  if (!ms) {
+    return []
+  }
+
+  return ms
+})
+
+const sortedMemberOf = computed(() => {
+  const members = allmemberof.value
+
+  return members.sort((a, b) => {
+    const areview =
+      amAModOn(a.id) &&
+      a.reviewrequestedat &&
+      (!a.reviewedat ||
+        new Date(a.reviewrequestedat).getTime() >
+          new Date(a.reviewedat).getTime())
+    const breview =
+      amAModOn(b.id) &&
+      b.reviewrequestedat &&
+      (!b.reviewedat ||
+        new Date(b.reviewrequestedat).getTime() >
+          new Date(b.reviewedat).getTime())
+
+    if (areview && !breview) {
+      return -1
+    } else if (breview && !areview) {
+      return 1
+    } else {
+      return b.added.localeCompare(a.added)
     }
-  },
-  data: function () {
-    return {
-      saving: false,
-      saved: false,
-      showEmails: false,
-      type: null,
-      allmemberships: false,
-      showSpamModal: false,
-      showPostingHistoryModal: false,
-      showLogsModal: false,
-      reviewed: false,
-    }
-  },
-  computed: {
-    isLJ() {
-      return this.user && this.user.ljuserid
-    },
-    allmemberof() {
-      let ms = []
+  })
+})
 
-      if (this.member && this.member.memberof) {
-        ms = this.member.memberof
+const memberof = computed(() => {
+  if (allmemberships.value) {
+    return sortedMemberOf.value
+  } else {
+    return sortedMemberOf.value.slice(0, MEMBERSHIPS_SHOW)
+  }
+})
+
+const firstgrouppolygon = computed(() => {
+  if (sortedMemberOf.value.length > 0) {
+    const group = sortedMemberOf.value[0]
+    const modgroup = modGroupStore.get(group.id)
+    if (modgroup) return modgroup.polygon
+  }
+  return null
+})
+
+const email = computed(() => {
+  // Depending on which context we're used it, we might or might not have an email returned.
+  let ret = props.member.email
+
+  if (!props.member.email && props.member.emails) {
+    props.member.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
       }
+    })
+  }
 
-      if (!ms) {
-        return []
-      }
+  return ret
+})
 
-      return ms
-    },
-    memberof() {
-      if (this.allmemberships) {
-        return this.sortedMemberOf
-      } else {
-        return this.sortedMemberOf.slice(0, MEMBERSHIPS_SHOW)
-      }
-    },
-    sortedMemberOf() {
-      const members = this.allmemberof
+const hiddenmemberofs = computed(() => {
+  return allmemberships.value
+    ? 0
+    : allmemberof.value.length > MEMBERSHIPS_SHOW
+    ? allmemberof.value.length - MEMBERSHIPS_SHOW
+    : 0
+})
 
-      return members.sort((a, b) => {
-        const areview =
-          this.amAModOn(a.id) &&
-          a.reviewrequestedat &&
-          (!a.reviewedat ||
-            new Date(a.reviewrequestedat).getTime() >
-              new Date(a.reviewedat).getTime())
-        const breview =
-          this.amAModOn(b.id) &&
-          b.reviewrequestedat &&
-          (!b.reviewedat ||
-            new Date(b.reviewrequestedat).getTime() >
-              new Date(b.reviewedat).getTime())
+const inactive = computed(() => {
+  // This code matches server code in sendOurMails.
+  return (
+    props.member &&
+    props.member.lastaccess &&
+    dayjs().diff(dayjs(props.member.lastaccess), 'day') >= 365 / 2
+  )
+})
 
-        if (areview && !breview) {
-          return -1
-        } else if (breview && !areview) {
-          return 1
-        } else {
-          return b.added.localeCompare(a.added)
-        }
-      })
-    },
-    firstgrouppolygon() {
-      if (this.sortedMemberOf.length > 0) {
-        const group = this.sortedMemberOf[0]
-        const modgroup = this.modGroupStore.get(group.id)
-        if (modgroup) return modgroup.polygon
-      }
-      return null
-    },
-    email() {
-      // Depending on which context we're used it, we might or might not have an email returned.
-      let ret = this.member.email
+const user = computed(() => {
+  return userStore.byId(props.member.userid)
+})
 
-      if (!this.member.email && this.member.emails) {
-        this.member.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
-      }
+onMounted(() => {
+  if (!props.member.info) {
+    // Fetch with info so that we can display more.
+    userStore.fetchMT({
+      id: props.member.userid,
+      info: true,
+    })
+  }
+})
 
-      return ret
-    },
-    hiddenmemberofs() {
-      return this.allmemberships
-        ? 0
-        : this.allmemberof.length > MEMBERSHIPS_SHOW
-        ? this.allmemberof.length - MEMBERSHIPS_SHOW
-        : 0
-    },
-    inactive() {
-      // This code matches server code in sendOurMails.
-      return (
-        this.member &&
-        this.member.lastaccess &&
-        dayjs().diff(dayjs(this.member.lastaccess), 'day') >= 365 / 2
-      )
-    },
-    user() {
-      return this.userStore.byId(this.member.userid)
-    },
-    settings() {
-      if (this.user && this.user.settings && this.user.settings) {
-        return this.user.settings
-      } else {
-        return {}
-      }
-    },
-    notifications() {
-      let ret = {}
+function showHistory(typeArg = null) {
+  type.value = typeArg
+  showPostingHistoryModal.value = true
+  history.value?.show()
+}
 
-      if (this.settings && this.settings.notifications) {
-        ret = this.settings.notifications
-      } else {
-        ret = {
-          email: true,
-          emailmine: false,
-          push: true,
-          facebook: true,
-          app: true,
-        }
-      }
+function showLogs() {
+  showLogsModal.value = true
+  logs.value?.show()
+}
 
-      return ret
-    },
-    relevantallowed: {
-      get() {
-        return this.user && Boolean(this.user.relevantallowed)
-      },
-      set(newval) {
-        this.user.relevantallowed = newval
-      },
-    },
-    newslettersallowed: {
-      get() {
-        return this.user && Boolean(this.user.newslettersallowed)
-      },
-      set(newval) {
-        this.user.newslettersallowed = newval
-      },
-    },
-  },
-  mounted() {
-    if (!this.member.info) {
-      // Fetch with info so that we can display more.
-      this.userStore.fetchMT({
-        id: this.member.userid,
-        info: true,
-      })
-    }
-  },
-  methods: {
-    showHistory(type = null) {
-      this.type = type
-      this.showPostingHistoryModal = true
-      this.$refs.history?.show()
-    },
-    showLogs() {
-      this.modmailsonly = false
-      this.showLogsModal = true
-      this.$refs.logs?.show()
-    },
-    forcerefresh(hideMember = false) {
-      if (hideMember) {
-        this.reviewed = true
-      }
-      this.$emit('forcerefresh')
-    },
-  },
+function forcerefresh(hideMember = false) {
+  if (hideMember) {
+    reviewed.value = true
+  }
+  emit('forcerefresh')
 }
 </script>

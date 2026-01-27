@@ -105,84 +105,80 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const { modal, hide } = useOurModal()
-    const { supportOrAdmin } = useMe()
-    return { modal, hide, supportOrAdmin }
-  },
-  data: function () {
-    return {
-      email1: null,
-      email2: null,
-      id1: null,
-      id2: null,
-      reason: null,
-      merged: false,
-      byemail: true,
-      error: null,
+const emit = defineEmits(['hidden'])
+
+const { modal, hide } = useOurModal()
+const { supportOrAdmin } = useMe()
+const authStore = useAuthStore()
+
+const email1 = ref(null)
+const email2 = ref(null)
+const id1 = ref(null)
+const id2 = ref(null)
+const reason = ref(null)
+const merged = ref(false)
+const byemail = ref(true)
+const error = ref(null)
+
+const tn = computed(() => {
+  return (
+    (email1.value && email1.value.includes('trashnothing')) ||
+    (email2.value && email2.value.includes('trashnothing'))
+  )
+})
+
+const cantMerge = computed(() => {
+  if (!reason.value || tn.value) {
+    return true
+  }
+
+  if (email1.value && email2.value) {
+    return false
+  }
+
+  if (id1.value && id2.value) {
+    return false
+  }
+
+  return true
+})
+
+function onShow() {}
+
+function onHide() {
+  emit('hidden')
+}
+
+async function merge() {
+  error.value = false
+  try {
+    if (byemail.value) {
+      await authStore.merge({
+        email1: email1.value,
+        email2: email2.value,
+        reason: reason.value,
+      })
+    } else {
+      await authStore.merge({
+        id1: id1.value,
+        id2: id2.value,
+        reason: reason.value,
+      })
     }
-  },
-  computed: {
-    tn() {
-      return (
-        (this.email1 && this.email1.includes('trashnothing')) ||
-        (this.email2 && this.email2.includes('trashnothing'))
-      )
-    },
-    cantMerge() {
-      if (!this.reason || this.tn) {
-        return true
-      }
 
-      if (this.email1 && this.email2) {
-        return false
-      }
-
-      if (this.id1 && this.id2) {
-        return false
-      }
-
-      return true
-    },
-  },
-  methods: {
-    onShow() {},
-    onHide() {
-      this.$emit('hidden')
-    },
-    async merge() {
-      this.error = false
-      const authStore = useAuthStore()
-      try {
-        if (this.byemail) {
-          await authStore.merge({
-            email1: this.email1,
-            email2: this.email2,
-            reason: this.reason,
-          })
-        } else {
-          await authStore.merge({
-            id1: this.id1,
-            id2: this.id2,
-            reason: this.reason,
-          })
-        }
-
-        this.merged = true
-      } catch (e) {
-        this.error = e.message
-        const statuspos = e.message.indexOf('status:')
-        if (statuspos !== -1) {
-          this.error = e.message.substring(statuspos)
-        }
-      }
-    },
-  },
+    merged.value = true
+  } catch (e) {
+    error.value = e.message
+    const statuspos = e.message.indexOf('status:')
+    if (statuspos !== -1) {
+      error.value = e.message.substring(statuspos)
+    }
+  }
 }
 </script>

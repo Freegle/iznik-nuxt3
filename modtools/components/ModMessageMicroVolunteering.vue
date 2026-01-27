@@ -51,44 +51,42 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-    microvolunteering: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
+  microvolunteering: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    user() {
-      return this.userStore?.byId(this.microvolunteering.userid)
-    },
-    email() {
-      let ret = null
+})
 
-      if (this.user && this.user.emails) {
-        this.user.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore?.byId(props.microvolunteering.userid)
+})
+
+const email = computed(() => {
+  let ret = null
+
+  if (user.value && user.value.emails) {
+    user.value.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
       }
+    })
+  }
 
-      return ret
-    },
-  },
-  mounted() {
-    this.userStore.fetch(this.microvolunteering.userid)
-  },
-}
+  return ret
+})
+
+onMounted(() => {
+  userStore.fetch(props.microvolunteering.userid)
+})
 </script>

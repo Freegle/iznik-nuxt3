@@ -70,51 +70,44 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useSpammerStore } from '~/stores/spammer'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    safelist: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { modal, hide } = useOurModal()
-    const spammerStore = useSpammerStore()
-    return { spammerStore, modal, hide }
+  safelist: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data: function () {
-    return {
-      reason: null,
-    }
-  },
-  methods: {
-    async send() {
-      if (this.reason) {
-        const userid = this.user.id ?? this.user.userid
-        if (this.safelist) {
-          await this.spammerStore.safelist({
-            userid,
-            reason: this.reason,
-          })
-        } else {
-          await this.spammerStore.report({
-            userid,
-            reason: this.reason,
-          })
-        }
+})
 
-        this.hide()
-      }
-    },
-  },
+const { modal, hide } = useOurModal()
+const spammerStore = useSpammerStore()
+
+const reason = ref(null)
+
+async function send() {
+  if (reason.value) {
+    const userid = props.user.id ?? props.user.userid
+    if (props.safelist) {
+      await spammerStore.safelist({
+        userid,
+        reason: reason.value,
+      })
+    } else {
+      await spammerStore.report({
+        userid,
+        reason: reason.value,
+      })
+    }
+
+    hide()
+  }
 }
 </script>

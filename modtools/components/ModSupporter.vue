@@ -20,32 +20,28 @@
     />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    hidden: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
   },
-  data() {
-    return {
-      showSupporterInfoModal: false,
-    }
+  hidden: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  methods: {
-    showModal(e) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.showSupporterInfoModal = true
-    },
-  },
+})
+
+const showSupporterInfoModal = ref(false)
+
+function showModal(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  showSupporterInfoModal.value = true
 }
 </script>
 <style scoped lang="scss">

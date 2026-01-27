@@ -32,29 +32,28 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    chat: {
-      type: Object,
-      required: true,
-    },
-    pov: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  chat: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    otheruser() {
-      if (!this.chat || this.chat.chattype !== 'User2User') {
-        return null
-      } else {
-        return this.chat.user1 === this.pov ? this.chat.user2 : this.chat.user1
-      }
-    },
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-}
+})
+
+const otheruser = computed(() => {
+  if (!props.chat || props.chat.chattype !== 'User2User') {
+    return null
+  } else {
+    return props.chat.user1 === props.pov ? props.chat.user2 : props.chat.user1
+  }
+})
 </script>
 <style scoped lang="scss">
 //@import 'color-vars';

@@ -3,7 +3,7 @@
     <div
       v-if="!highlighted || highlighted.id !== changed.id"
       class="small clickme"
-      @click="$emit('click')"
+      @click="emit('click')"
     >
       {{ changed.name }}: {{ changed.oldname }} => {{ changed.newname }}
     </div>
@@ -12,18 +12,18 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    changed: {
-      type: Object,
-      required: true,
-    },
-    highlighted: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+<script setup>
+defineProps({
+  changed: {
+    type: Object,
+    required: true,
   },
-}
+  highlighted: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+})
+
+const emit = defineEmits(['click'])
 </script>

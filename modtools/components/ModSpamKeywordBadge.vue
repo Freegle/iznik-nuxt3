@@ -29,65 +29,52 @@
   </b-badge>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
-export default {
-  name: 'ModSpamKeywordBadge',
-  props: {
-    spamKeyword: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  spamKeyword: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const systemConfigStore = useSystemConfigStore()
-    return { systemConfigStore }
-  },
-  data() {
-    return {
-      showDeleteConfirm: false,
-      deleteConfirmMessage: '',
-    }
-  },
-  computed: {
-    isLoading() {
-      return this.systemConfigStore.isLoading
-    },
+})
 
-    isRegexPattern() {
-      return this.spamKeyword.type === 'Regex'
-    },
+const systemConfigStore = useSystemConfigStore()
 
-    displayText() {
-      return this.spamKeyword.word
-    },
+const showDeleteConfirm = ref(false)
+const deleteConfirmMessage = ref('')
 
-    spamKeywordVariant() {
-      // Color-code based on action: Review, Spam, Whitelist
-      switch (this.spamKeyword.action) {
-        case 'Review':
-          return 'warning'
-        case 'Spam':
-          return 'danger'
-        case 'Whitelist':
-          return 'success'
-        default:
-          return 'secondary'
-      }
-    },
-  },
-  methods: {
-    confirmDelete() {
-      this.deleteConfirmMessage = `Are you sure you want to delete the spam keyword "${this.spamKeyword.word}"? This will affect system-wide message filtering and cannot be undone.`
-      this.showDeleteConfirm = true
-    },
+const isLoading = computed(() => {
+  return systemConfigStore.isLoading
+})
 
-    async handleDelete() {
-      await this.systemConfigStore.deleteSpamKeyword(this.spamKeyword.id)
-      this.showDeleteConfirm = false
-      this.deleteConfirmMessage = ''
-    },
-  },
+const displayText = computed(() => {
+  return props.spamKeyword.word
+})
+
+const spamKeywordVariant = computed(() => {
+  // Color-code based on action: Review, Spam, Whitelist
+  switch (props.spamKeyword.action) {
+    case 'Review':
+      return 'warning'
+    case 'Spam':
+      return 'danger'
+    case 'Whitelist':
+      return 'success'
+    default:
+      return 'secondary'
+  }
+})
+
+function confirmDelete() {
+  deleteConfirmMessage.value = `Are you sure you want to delete the spam keyword "${props.spamKeyword.word}"? This will affect system-wide message filtering and cannot be undone.`
+  showDeleteConfirm.value = true
+}
+
+async function handleDelete() {
+  await systemConfigStore.deleteSpamKeyword(props.spamKeyword.id)
+  showDeleteConfirm.value = false
+  deleteConfirmMessage.value = ''
 }
 </script>

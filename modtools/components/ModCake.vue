@@ -56,64 +56,53 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const authStore = useAuthStore()
-    const { me } = useMe()
+const authStore = useAuthStore()
+const { me } = useMe()
 
-    return {
-      authStore,
-      me,
+const notes = ref(null)
+
+const modcake = computed({
+  get() {
+    if (me.value && me.value.settings) {
+      return Object.keys(me.value.settings).includes('modcake')
+        ? me.value.settings.modcake
+        : false
+    }
+    return false
+  },
+  set(newval) {
+    saveSetting('modcake', newval)
+    if (newval) {
+      saveSetting('modcakedate', new Date().toISOString())
     }
   },
-  data: function () {
-    return {
-      notes: null,
-    }
+})
+
+const cakenotes = computed({
+  get() {
+    return Object.keys(me.value.settings).includes('modcakenotes')
+      ? me.value.settings.modcakenotes
+      : null
   },
-  computed: {
-    modcake: {
-      get() {
-        if (this.me && this.me.settings) {
-          return Object.keys(this.me.settings).includes('modcake')
-            ? this.me.settings.modcake
-            : false
-        }
-        return false
-      },
-      set(newval) {
-        this.saveSetting('modcake', newval)
-        if (newval) {
-          this.saveSetting('modcakedate', new Date().toISOString())
-        }
-      },
-    },
-    cakenotes: {
-      get() {
-        return Object.keys(this.me.settings).includes('modcakenotes')
-          ? this.me.settings.modcakenotes
-          : null
-      },
-      set(newval) {
-        this.notes = newval
-      },
-    },
+  set(newval) {
+    notes.value = newval
   },
-  methods: {
-    async saveSetting(name, val) {
-      const settings = this.me.settings
-      settings[name] = val
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    },
-    saveNotes() {
-      this.saveSetting('modcakenotes', this.notes)
-    },
-  },
+})
+
+async function saveSetting(name, val) {
+  const settings = me.value.settings
+  settings[name] = val
+  await authStore.saveAndGet({
+    settings,
+  })
+}
+
+function saveNotes() {
+  saveSetting('modcakenotes', notes.value)
 }
 </script>

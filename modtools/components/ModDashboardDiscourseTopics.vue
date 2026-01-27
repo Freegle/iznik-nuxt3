@@ -21,46 +21,62 @@
     </b-card-body>
   </b-card>
 </template>
-<script>
-import ModDashboardBase from './ModDashboardBase'
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useModDashboard } from '~/modtools/composables/useModDashboard'
 
-export default {
-  extends: ModDashboardBase,
-  data: function () {
-    return {
-      askfor: ['DiscourseTopics'],
-      DiscourseTopics: null,
-      refreshTimer: null,
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  groupName: {
+    type: String,
+    required: true,
+  },
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+})
+
+const { DiscourseTopics, maybeFetch } = useModDashboard(props, [
+  'DiscourseTopics',
+])
+
+const refreshTimer = ref(null)
+
+const top5 = computed(() => {
+  let ret = []
+
+  if (DiscourseTopics.value) {
+    const topics = JSON.parse(DiscourseTopics.value)
+    if (topics && topics.latest_posts) {
+      ret = topics.latest_posts.slice(0, 5)
     }
-  },
-  computed: {
-    top5() {
-      let ret = []
+  }
 
-      if (this.DiscourseTopics) {
-        const topics = JSON.parse(this.DiscourseTopics)
-        if (topics && topics.latest_posts) {
-          ret = topics.latest_posts.slice(0, 5)
-        }
-      }
+  return ret
+})
 
-      return ret
-    },
-  },
-  mounted() {
-    this.refreshTimer = setTimeout(this.doRefresh, 10 * 60 * 1000)
-  },
-  beforeUnmount() {
-    if (this.refreshTimer) {
-      clearTimeout(this.refreshTimer)
-      this.refreshTimer = null
-    }
-  },
-  methods: {
-    doRefresh() {
-      this.maybeFetch()
-      this.refreshTimer = setTimeout(this.doRefresh, 10 * 60 * 1000)
-    },
-  },
+function doRefresh() {
+  maybeFetch()
+  refreshTimer.value = setTimeout(doRefresh, 10 * 60 * 1000)
 }
+
+onMounted(() => {
+  refreshTimer.value = setTimeout(doRefresh, 10 * 60 * 1000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer.value) {
+    clearTimeout(refreshTimer.value)
+    refreshTimer.value = null
+  }
+})
 </script>

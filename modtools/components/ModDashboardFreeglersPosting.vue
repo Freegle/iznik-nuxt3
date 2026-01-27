@@ -44,16 +44,28 @@
     </div>
   </div>
 </template>
-<script>
-import ModDashboardBase from '~/components/ModDashboardBase'
+<script setup>
+import { useModDashboard } from '~/modtools/composables/useModDashboard'
 
-export default {
-  extends: ModDashboardBase,
-  data: function () {
-    return {
-      askfor: ['UsersPosting'],
-      UsersPosting: null,
-    }
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-}
+  groupName: {
+    type: String,
+    required: true,
+  },
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+})
+
+const { loading, UsersPosting } = useModDashboard(props, ['UsersPosting'])
 </script>

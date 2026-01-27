@@ -41,7 +41,7 @@
   </client-only>
 </template>
 
-<script>
+<script setup>
 // Handles:
 //  /messages/approved
 //  /messages/approved/<groupid>
@@ -51,185 +51,180 @@
 //  - Email/name/id search doesn't change URL
 //  - Message id/subject search changes URL <term>
 
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMiscStore } from '@/stores/misc'
 import { useMessageStore } from '@/stores/message'
 import { setupModMessages } from '@/composables/useModMessages'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const messageStore = useMessageStore()
-    const miscStore = useMiscStore()
-    const modMessages = setupModMessages(true)
-    modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
-    modMessages.collection.value = 'Approved'
-    // modMessages.workType.value = 'approved'
-    const { me } = useMe()
-    return {
-      messageStore,
-      miscStore,
-      me,
-      ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
-    }
-  },
-  data: function () {
-    return {
-      chosengroupid: 0,
-      error: false,
-      bump: 0,
-      urlOverride: false,
-    }
-  },
-  computed: {
-    id() {
-      // Given groupid
-      const route = useRoute()
-      if ('id' in route.params && route.params.id)
-        return parseInt(route.params.id)
-      return 0
-    },
-    groupName() {
-      if (this.group) {
-        return this.group.namedisplay
-      }
+// Stores
+const messageStore = useMessageStore()
 
-      return null
-    },
-  },
-  watch: {
-    chosengroupid(newVal) {
-      const router = useRouter()
-      if (newVal !== this.id) {
-        this.$nextTick(() => {
-          if (newVal === 0) {
-            // console.log('chosengroupid GO HOME')
-            router.push('/messages/approved/')
-          } else {
-            // console.log('chosengroupid GOTO', newVal, typeof newVal)
-            this.groupid = newVal // Sometimes route change does not work so save as groupid just in case
-            router.push('/messages/approved/' + newVal)
-          }
-        })
-      } else {
-        // console.log('chosengroupid SAME')
-      }
-    },
-  },
-  mounted() {
-    const route = useRoute()
-    this.groupid = this.id
-    this.chosengroupid = this.id
-    this.memberTerm = ''
-    this.messageTerm = ''
-    // Mark that URL explicitly set the group (even if 0 for "All").
-    if ('id' in route.params && route.params.id !== undefined) {
-      this.urlOverride = true
-    }
-    if ('term' in route.params && route.params.term)
-      this.messageTerm = route.params.term
-    if (this.messageTerm) {
-      // Clear existing messages and reset state for fresh search.
-      // Without this, the store may have old messages that get shown
-      // instead of searching for the specific message from the URL.
-      this.show = 0
-      this.context = null
-      this.messageStore.clear()
-      this.bump++
-    }
-  },
-  methods: {
-    changedMessageTerm(term) {
-      this.messageTerm = term.trim()
-    },
-    searchedMessage(term) {
-      const router = useRouter()
-      term = term.trim()
-      if (term.length > 0) {
-        router.push('/messages/approved/' + this.groupid + '/' + term)
-      } else if (this.groupid) {
-        router.push('/messages/approved/' + this.groupid)
-      } else {
+// Composables
+const modMessages = setupModMessages(true)
+modMessages.summarykey.value = 'modtoolsMessagesApprovedSummary'
+modMessages.collection.value = 'Approved'
+
+const { me } = useMe()
+
+// Destructure modMessages for template access
+const {
+  busy,
+  context,
+  group,
+  groupid,
+  show,
+  collection,
+  messageTerm,
+  memberTerm,
+  distance,
+  messages,
+} = modMessages
+
+// Local state (formerly data())
+const chosengroupid = ref(0)
+const bump = ref(0)
+const urlOverride = ref(false)
+
+// Computed properties
+const id = computed(() => {
+  const route = useRoute()
+  if ('id' in route.params && route.params.id) {
+    return parseInt(route.params.id)
+  }
+  return 0
+})
+
+const groupName = computed(() => {
+  if (group.value) {
+    return group.value.namedisplay
+  }
+  return null
+})
+
+// Watchers
+watch(chosengroupid, (newVal) => {
+  const router = useRouter()
+  if (newVal !== id.value) {
+    nextTick(() => {
+      if (newVal === 0) {
         router.push('/messages/approved/')
-      }
-    },
-    searchedMember(term) {
-      this.show = 0
-      this.messageTerm = null
-      this.memberTerm = term?.trim()
-      this.context = null
-      this.messageStore.clear()
-
-      // Need to rerender the infinite scroll
-      this.bump++
-    },
-
-    async loadMore($state) {
-      this.busy = true
-      if (!this.me) {
-        console.log('Ignore load more on MT page with no session.')
-        $state.complete()
-      } else if (this.show < this.messages.length) {
-        // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        // console.log('this.show++', this.show)
-        this.show++
-        $state.loaded()
       } else {
-        // console.log('Actually loadMore')
-        // const currentCount = this.messages.length
-        const currentCount = Object.keys(this.messageStore.list).length // Use total messages found, not just this,messages as this stops too soon
-        // console.log('Actually loadMore', currentCount)
-
-        let params
-
-        if (this.messageTerm) {
-          params = {
-            subaction: 'searchall',
-            search: this.messageTerm,
-            exactonly: true,
-            groupid: this.groupid,
-          }
-        } else if (this.memberTerm) {
-          params = {
-            // TODO: Need to keep fetching as first found batch may not contain
-            subaction: 'searchmemb',
-            search: this.memberTerm,
-            // groupid: this.groupid // TODO: First fetch without this and then second with, with context
-          }
-          if (this.context) {
-            // To get it to work for this case, only set groupid if already got a context!
-            params.groupid = this.groupid
-          }
-        } else {
-          params = {
-            groupid: this.groupid,
-            collection: this.collection,
-            modtools: true,
-            summary: false,
-          }
-        }
-
-        params.context = this.context
-        params.limit = this.messages.length + this.distance
-        // console.log('Approved loadMore DO', params, '>>>', Object.keys(this.messageStore.list).length, this.context)
-
-        // params.debug = '[[term]] loadMore',
-        await this.messageStore.fetchMessagesMT(params)
-        this.context = this.messageStore.context
-        // console.log('Approved LoadMore GOT', this.context)
-        // console.log('Approved LoadMore GOT', currentCount, this.messages.length, '>>>', Object.keys(this.messageStore.list).length)
-
-        // if (currentCount === this.messages.length) {
-        if (currentCount === Object.keys(this.messageStore.list).length) {
-          $state.complete()
-        } else {
-          $state.loaded()
-          this.show++
-        }
+        groupid.value = newVal // Sometimes route change does not work so save as groupid just in case
+        router.push('/messages/approved/' + newVal)
       }
-      this.busy = false
-    },
-  },
+    })
+  }
+})
+
+// Lifecycle
+onMounted(() => {
+  const route = useRoute()
+  groupid.value = id.value
+  chosengroupid.value = id.value
+  memberTerm.value = ''
+  messageTerm.value = ''
+  // Mark that URL explicitly set the group (even if 0 for "All").
+  if ('id' in route.params && route.params.id !== undefined) {
+    urlOverride.value = true
+  }
+  if ('term' in route.params && route.params.term) {
+    messageTerm.value = route.params.term
+  }
+  if (messageTerm.value) {
+    // Clear existing messages and reset state for fresh search.
+    // Without this, the store may have old messages that get shown
+    // instead of searching for the specific message from the URL.
+    show.value = 0
+    context.value = null
+    messageStore.clear()
+    bump.value++
+  }
+})
+
+// Methods
+function changedMessageTerm(term) {
+  messageTerm.value = term.trim()
+}
+
+function searchedMessage(term) {
+  const router = useRouter()
+  term = term.trim()
+  if (term.length > 0) {
+    router.push('/messages/approved/' + groupid.value + '/' + term)
+  } else if (groupid.value) {
+    router.push('/messages/approved/' + groupid.value)
+  } else {
+    router.push('/messages/approved/')
+  }
+}
+
+function searchedMember(term) {
+  show.value = 0
+  messageTerm.value = null
+  memberTerm.value = term?.trim()
+  context.value = null
+  messageStore.clear()
+
+  // Need to rerender the infinite scroll
+  bump.value++
+}
+
+async function loadMore($state) {
+  busy.value = true
+  if (!me.value) {
+    console.log('Ignore load more on MT page with no session.')
+    $state.complete()
+  } else if (show.value < messages.value.length) {
+    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
+    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+    show.value++
+    $state.loaded()
+  } else {
+    const currentCount = Object.keys(messageStore.list).length // Use total messages found, not just messages as this stops too soon
+
+    let params
+
+    if (messageTerm.value) {
+      params = {
+        subaction: 'searchall',
+        search: messageTerm.value,
+        exactonly: true,
+        groupid: groupid.value,
+      }
+    } else if (memberTerm.value) {
+      params = {
+        // TODO: Need to keep fetching as first found batch may not contain
+        subaction: 'searchmemb',
+        search: memberTerm.value,
+        // groupid: groupid.value // TODO: First fetch without this and then second with, with context
+      }
+      if (context.value) {
+        // To get it to work for this case, only set groupid if already got a context!
+        params.groupid = groupid.value
+      }
+    } else {
+      params = {
+        groupid: groupid.value,
+        collection: collection.value,
+        modtools: true,
+        summary: false,
+      }
+    }
+
+    params.context = context.value
+    params.limit = messages.value.length + distance.value
+
+    await messageStore.fetchMessagesMT(params)
+    context.value = messageStore.context
+
+    if (currentCount === Object.keys(messageStore.list).length) {
+      $state.complete()
+    } else {
+      $state.loaded()
+      show.value++
+    }
+  }
+  busy.value = false
 }
 </script>

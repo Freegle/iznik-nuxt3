@@ -146,112 +146,86 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { setupChat } from '~/composables/useChat'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    pov: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  async setup(props) {
-    const { modal, hide } = useOurModal()
+  pov: {
+    type: Number,
+    required: true,
+  },
+})
 
-    const {
-      // TODO Returns wrong chat
-      chat,
-      otheruser,
-      tooSoonToNudge,
-      chatStore,
-      chatmessages,
-      milesaway,
-      milesstring,
-    } = await setupChat(props.id)
+const { modal, hide } = useOurModal()
 
-    return {
-      chat,
-      otheruser,
-      tooSoonToNudge,
-      chatStore,
-      chatmessages,
-      milesaway,
-      milesstring,
-      modal,
-      hide,
+const { chatStore, chatmessages } = await setupChat(props.id)
+const chat2 = ref(null)
+
+// Construct basic user details by hand. u1settings and u2settings also available
+// Depending on our p.o.v. we may need to swap user1 and user2
+const user1 = computed(() => {
+  let ret = null
+
+  if (chat2.value) {
+    if (chat2.value.user1 && chat2.value.user1.id === props.pov) {
+      ret = chat2.value.user2
+    } else {
+      ret = chat2.value.user1
     }
-  },
-  data: function () {
-    return {
-      busy: true,
-      chat2: null,
+  }
+  return ret
+})
+
+const user2 = computed(() => {
+  let ret = null
+
+  if (chat2.value) {
+    if (chat2.value.user2 && chat2.value.user2.id === props.pov) {
+      ret = chat2.value.user2
+    } else {
+      ret = chat2.value.user1
     }
-  },
-  computed: {
-    // Construct basic user details by hand. u1settings and u2settings also available
-    // Depending on our p.o.v. we may need to swap user1 and user2
-    user1() {
-      let ret = null
+  }
 
-      if (this.chat2) {
-        if (this.chat2.user1 && this.chat2.user1.id === this.pov) {
-          ret = this.chat2.user2
-        } else {
-          ret = this.chat2.user1
-        }
-      }
-      return ret
-    },
-    user2() {
-      let ret = null
+  return ret
+})
 
-      if (this.chat2) {
-        if (this.chat2.user2 && this.chat2.user2.id === this.pov) {
-          ret = this.chat2.user2
-        } else {
-          ret = this.chat2.user1
-        }
-      }
-
-      return ret
-    },
-  },
-  async mounted() {
-    await this.show()
-  },
-  methods: {
-    async show() {
-      // await this.chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, this.id)
-      await this.chatStore.fetchChat(this.id)
-      await this.chatStore.fetchMessages(this.id)
-      this.chat2 = this.chatStore.byChatId(this.id)
-      this.modal.show()
-    },
-    closeit() {
-      // console.log('MCM closeit', this.id)
-      // We have loaded this chat into store, but it's probably not ours.  So update the list, otherwise next
-      // time we go into chats we'll see weirdness.  No need to await though, and that makes closing chats sluggish.
-      /* MT3: Not done yet - is it needed?
-      const modtools = this.$store.getters['misc/get']('modtools')
-      this.$store.dispatch('chats/listChats', {
-        chattypes: modtools
-          ? ['User2Mod', 'Mod2Mod']
-          : ['User2User', 'User2Mod']
-      })
-      */
-      this.hide()
-    },
-    loadMore($state) {
-      $state.complete()
-    },
-  },
+async function show() {
+  // await chatStore.listChatsMT({ chattypes: ['User2Mod', 'Mod2Mod'] }, props.id)
+  await chatStore.fetchChat(props.id)
+  await chatStore.fetchMessages(props.id)
+  chat2.value = chatStore.byChatId(props.id)
+  modal.value.show()
 }
+
+function closeit() {
+  // console.log('MCM closeit', props.id)
+  // We have loaded this chat into store, but it's probably not ours.  So update the list, otherwise next
+  // time we go into chats we'll see weirdness.  No need to await though, and that makes closing chats sluggish.
+  /* MT3: Not done yet - is it needed?
+  const modtools = this.$store.getters['misc/get']('modtools')
+  this.$store.dispatch('chats/listChats', {
+    chattypes: modtools
+      ? ['User2Mod', 'Mod2Mod']
+      : ['User2User', 'User2Mod']
+  })
+  */
+  hide()
+}
+
+function loadMore($state) {
+  $state.complete()
+}
+
+onMounted(async () => {
+  await show()
+})
 </script>
 <style scoped lang="scss">
 //@import 'color-vars';

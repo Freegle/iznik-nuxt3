@@ -29,31 +29,29 @@
     </b-col>
   </b-row>
 </template>
-<script>
-export default {
-  props: {
-    volunteer: {
-      type: Object,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: true,
-    },
-  },
-  computed: {
-    active() {
-      if (
-        this.volunteer &&
-        this.volunteer.settings &&
-        (this.volunteer.settings.active ||
-          !('active' in this.volunteer.settings))
-      ) {
-        return true
-      }
+<script setup>
+import { computed } from 'vue'
 
-      return false
-    },
+const props = defineProps({
+  volunteer: {
+    type: Object,
+    required: true,
   },
-}
+  groupid: {
+    type: Number,
+    required: true,
+  },
+})
+
+const active = computed(() => {
+  if (
+    props.volunteer &&
+    props.volunteer.settings &&
+    (props.volunteer.settings.active || !('active' in props.volunteer.settings))
+  ) {
+    return true
+  }
+
+  return false
+})
 </script>

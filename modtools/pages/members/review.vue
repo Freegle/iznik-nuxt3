@@ -32,44 +32,42 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, nextTick, onMounted } from 'vue'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useMemberStore } from '~/stores/member'
 import { useMiscStore } from '@/stores/misc'
 
-export default {
-  setup() {
-    const memberStore = useMemberStore()
-    const miscStore = useMiscStore()
-    const modMembers = setupModMembers(true)
-    modMembers.context.value = null
-    modMembers.sort.value = false
-    modMembers.collection.value = 'Spam'
-    modMembers.groupid.value = 0
-    modMembers.group.value = null
-    modMembers.limit.value = 100
-    return {
-      memberStore,
-      miscStore,
-      ...modMembers, // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
-    }
-  },
-  data: function () {
-    return {
-      bump: 0,
-    }
-  },
-  mounted() {
-    // reset infiniteLoading on return to page
-    this.memberStore.clear()
-    this.bump++
-  },
-  methods: {
-    forcerefresh() {
-      this.$nextTick(() => {
-        this.bump++
-      })
-    },
-  },
+const memberStore = useMemberStore()
+// eslint-disable-next-line no-unused-vars
+const miscStore = useMiscStore()
+
+// Setup mod members composable
+const modMembers = setupModMembers(true)
+modMembers.context.value = null
+modMembers.sort.value = false
+modMembers.collection.value = 'Spam'
+modMembers.groupid.value = 0
+modMembers.group.value = null
+modMembers.limit.value = 100
+
+// Destructure for template access
+const { distance, visibleMembers, loadMore } = modMembers
+
+// Reactive state (was data())
+const bump = ref(0)
+
+// Methods
+function forcerefresh() {
+  nextTick(() => {
+    bump.value++
+  })
 }
+
+// Lifecycle - mounted
+onMounted(() => {
+  // reset infiniteLoading on return to page
+  memberStore.clear()
+  bump.value++
+})
 </script>
