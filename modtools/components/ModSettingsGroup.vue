@@ -195,9 +195,8 @@
               </b-button>
               <OurUploader
                 v-if="uploadingProfile"
+                v-model="profileAtts"
                 type="Group"
-                :groupid="groupid"
-                @photo-processed="photoProcessed"
               />
             </b-form-group>
             <ModGroupSetting
@@ -1080,6 +1079,7 @@ export default {
       copyfrom: null,
       groupid: null,
       uploadingProfile: false,
+      profileAtts: [],
       editingDescription: false,
       rules: {},
       rulesBump: 0,
@@ -1414,6 +1414,24 @@ export default {
     groupid(newval) {
       this.fetchGroup()
     },
+    profileAtts: {
+      handler(newVal) {
+        this.uploadingProfile = false
+        if (newVal?.length) {
+          // Get the image ID from the uploaded attachment and update the group profile
+          const imageid = newVal[0].id
+          if (imageid) {
+            this.modGroupStore.updateMT({
+              id: this.groupid,
+              profile: imageid,
+            })
+          }
+          // Clear the array for next upload
+          this.profileAtts = []
+        }
+      },
+      deep: true,
+    },
   },
   mounted() {
     this.groupid = this.initialGroup
@@ -1473,18 +1491,6 @@ export default {
     },
     uploadProfile() {
       this.uploadingProfile = true
-    },
-    photoProcessed(imageid) {
-      // We have uploaded a photo.  Remove the uploader
-      this.uploadingProfile = false
-
-      // Set the image id in the group.
-      if (imageid) {
-        this.modGroupStore.updateMT({
-          id: this.groupid,
-          profile: imageid,
-        })
-      }
     },
     saveGroupSetting(name, val) {
       // Note that we get a sneaky progress indicator and success from SpinButton even though actually we're doing the
