@@ -47,68 +47,68 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
+import { useNuxtApp } from '#app'
 import { useChatStore } from '~/stores/chat'
 import { useOurModal } from '~/composables/useOurModal'
 import { untwem } from '~/composables/useTwem'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    chatid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  chatid: {
+    type: Number,
+    required: true,
   },
-  emits: ['hidden'],
-  setup() {
-    const chatStore = useChatStore()
-    const { modal, hide } = useOurModal()
-    const { myGroup } = useMe()
-    return { chatStore, modal, hide, myGroup }
-  },
-  data: function () {
-    return {
-      chat: null,
-      note: null,
-      groupid: null,
-    }
-  },
-  computed: {
-    user1() {
-      return this.chat ? this.chat.user1 : null
-    },
-    user2() {
-      return this.chat ? this.chat.user2 : null
-    },
-  },
-  methods: {
-    show() {
-      // Take a copy rather than use computed as it isn't ours and will vanish from the store.
-      this.chat = this.chatStore.byChatId(this.chatid)
-    },
-    onHide() {
-      this.$emit('hidden')
-    },
-    async addit() {
-      // Encode up any emojis.
-      let msg = untwem(this.note)
+})
 
-      const group = this.myGroup(this.groupid)
+const emit = defineEmits(['hidden'])
 
-      msg += `\n\n${group.namedisplay} Volunteer`
+const { $api } = useNuxtApp()
+const chatStore = useChatStore()
+const { modal, hide } = useOurModal()
+const { myGroup } = useMe()
 
-      console.log('addit', msg)
+const chat = ref(null)
+const note = ref(null)
+const groupid = ref(null)
 
-      // Send it (direct)
-      await this.$api.chat.sendMT({
-        roomid: this.chatid,
-        message: msg,
-        modnote: true,
-      })
+const user1 = computed(() => {
+  return chat.value ? chat.value.user1 : null
+})
 
-      this.hide()
-    },
-  },
+const user2 = computed(() => {
+  return chat.value ? chat.value.user2 : null
+})
+
+function show() {
+  // Take a copy rather than use computed as it isn't ours and will vanish from the store.
+  chat.value = chatStore.byChatId(props.chatid)
 }
+
+function onHide() {
+  emit('hidden')
+}
+
+async function addit() {
+  // Encode up any emojis.
+  let msg = untwem(note.value)
+
+  const group = myGroup(groupid.value)
+
+  msg += `\n\n${group.namedisplay} Volunteer`
+
+  console.log('addit', msg)
+
+  // Send it (direct)
+  await $api.chat.sendMT({
+    roomid: props.chatid,
+    message: msg,
+    modnote: true,
+  })
+
+  hide()
+}
+
+defineExpose({ show, hide })
 </script>

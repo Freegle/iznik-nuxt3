@@ -19,33 +19,32 @@
     ><span v-else class="text-normal">, still open</span>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { useGroupStore } from '~/stores/group'
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup() {
-    const groupStore = useGroupStore()
-    return { groupStore }
-  },
-  computed: {
-    group() {
-      return this.groupStore.get(this.message.groupid)
-    },
-    groupname() {
-      return this.group ? this.group.namedisplay : null
-    },
-  },
-  mounted() {
-    const group = this.groupStore.get(this.message.groupid)
 
-    if (!group) {
-      this.groupStore.fetch(this.message.groupid)
-    }
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-}
+})
+
+const groupStore = useGroupStore()
+
+const group = computed(() => {
+  return groupStore.get(props.message.groupid)
+})
+
+const groupname = computed(() => {
+  return group.value ? group.value.namedisplay : null
+})
+
+onMounted(() => {
+  const g = groupStore.get(props.message.groupid)
+
+  if (!g) {
+    groupStore.fetch(props.message.groupid)
+  }
+})
 </script>

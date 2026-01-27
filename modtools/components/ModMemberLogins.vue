@@ -10,39 +10,26 @@
     </b-badge>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  methods: {
-    loginType(type) {
-      let ret = type
+})
 
-      switch (type) {
-        case 'Native': {
-          ret = 'Email/Password'
-          break
-        }
-        case 'Facebook': {
-          ret = 'Facebook'
-          break
-        }
-        case 'Yahoo': {
-          ret = 'Yahoo'
-          break
-        }
-        case 'Google': {
-          ret = 'Google'
-          break
-        }
-      }
-
-      return ret
-    },
-  },
+function loginType(type) {
+  switch (type) {
+    case 'Native':
+      return 'Email/Password'
+    case 'Facebook':
+      return 'Facebook'
+    case 'Yahoo':
+      return 'Yahoo'
+    case 'Google':
+      return 'Google'
+    default:
+      return type
+  }
 }
 </script>

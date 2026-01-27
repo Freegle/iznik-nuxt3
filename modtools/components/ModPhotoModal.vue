@@ -23,47 +23,45 @@
   </b-modal>
 </template>
 
-<script>
+<script setup>
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    attachment: {
-      type: Object,
-      required: true,
-    },
-    message: {
-      type: Object,
-      required: true,
-    },
-    externalmods: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  attachment: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { modal, show, hide } = useOurModal()
-    const messageStore = useMessageStore()
-    return { messageStore, modal, show, hide }
+  message: {
+    type: Object,
+    required: true,
   },
-  methods: {
-    async updatedPhoto() {
-      await this.messageStore.patch({ id: this.message.id })
-    },
-    async removePhoto(id) {
-      const attachments = []
+  externalmods: {
+    type: Object,
+    required: true,
+  },
+})
 
-      this.message.attachments.forEach((a) => {
-        if (a.id !== id) {
-          attachments.push(a.id)
-        }
-      })
+const { modal, show, hide } = useOurModal()
+const messageStore = useMessageStore()
 
-      await this.messageStore.patch({ id: this.message.id, attachments })
-    },
-  },
+async function updatedPhoto() {
+  await messageStore.patch({ id: props.message.id })
 }
+
+async function removePhoto(id) {
+  const attachments = []
+
+  props.message.attachments.forEach((a) => {
+    if (a.id !== id) {
+      attachments.push(a.id)
+    }
+  })
+
+  await messageStore.patch({ id: props.message.id, attachments })
+}
+
+defineExpose({ show, hide })
 </script>
 
 <style scoped>

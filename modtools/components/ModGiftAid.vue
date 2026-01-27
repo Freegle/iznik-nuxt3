@@ -81,101 +81,97 @@
     </b-row>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    giftaid: {
-      type: Object,
-      required: true,
-    },
-  },
-  data: function () {
-    return {
-      editgiftaid: false,
-      hide: false,
-    }
-  },
-  computed: {
-    nameInvalid() {
-      if (!this.editgiftaid) return false
-      return this.editgiftaid?.fullname.indexOf(' ') === -1
-    },
-    postcodeInvalid() {
-      if (!this.editgiftaid) return false
-      return (
-        !this.editgiftaid?.postcode ||
-        this.editgiftaid?.postcode.indexOf(' ') === -1
-      )
-    },
-    houseInvalid() {
-      if (!this.editgiftaid) return false
-      return !this.editgiftaid?.housenameornumber
-    },
-    email() {
-      let email = null
-      if (!this.editgiftaid) return email
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useNuxtApp } from '#app'
 
-      if (this.editgiftaid?.email) {
-        this.editgiftaid.email.forEach((e) => {
-          if (!e.ourdomain && (e.preferred || email === null)) {
-            email = e.email
-          }
-        })
-      }
+const props = defineProps({
+  giftaid: {
+    type: Object,
+    required: true,
+  },
+})
 
-      return email
-    },
-  },
-  mounted() {
-    this.editgiftaid = this.giftaid
-  },
-  methods: {
-    save(callback) {
-      const { id, period, fullname, homeaddress, postcode, housenameornumber } =
-        this.editgiftaid
-      this.$api.giftaid.edit(
-        id,
-        period,
-        fullname,
-        homeaddress,
-        postcode,
-        housenameornumber,
-        false
-      )
-      callback()
-    },
-    reviewed(callback) {
-      this.$api.giftaid.edit(
-        this.editgiftaid.id,
-        null,
-        null,
-        null,
-        null,
-        null,
-        true
-      )
-      callback()
-      this.hide = true
-    },
-    giveup(callback) {
-      if (!this.editgiftaid.donations) {
-        // Approve these as a way of getting them off the list even though they're not linked to a donation.
-        this.reviewed()
-      } else {
-        this.$api.giftaid.edit(
-          this.editgiftaid.id,
-          null,
-          null,
-          null,
-          null,
-          null,
-          false,
-          true
-        )
-        this.hide = true
+const { $api } = useNuxtApp()
+
+const editgiftaid = ref(false)
+const hide = ref(false)
+
+const nameInvalid = computed(() => {
+  if (!editgiftaid.value) return false
+  return editgiftaid.value?.fullname.indexOf(' ') === -1
+})
+
+const postcodeInvalid = computed(() => {
+  if (!editgiftaid.value) return false
+  return (
+    !editgiftaid.value?.postcode ||
+    editgiftaid.value?.postcode.indexOf(' ') === -1
+  )
+})
+
+const houseInvalid = computed(() => {
+  if (!editgiftaid.value) return false
+  return !editgiftaid.value?.housenameornumber
+})
+
+const email = computed(() => {
+  let emailVal = null
+  if (!editgiftaid.value) return emailVal
+
+  if (editgiftaid.value?.email) {
+    editgiftaid.value.email.forEach((e) => {
+      if (!e.ourdomain && (e.preferred || emailVal === null)) {
+        emailVal = e.email
       }
-      callback()
-    },
-  },
+    })
+  }
+
+  return emailVal
+})
+
+function save(callback) {
+  const { id, period, fullname, homeaddress, postcode, housenameornumber } =
+    editgiftaid.value
+  $api.giftaid.edit(
+    id,
+    period,
+    fullname,
+    homeaddress,
+    postcode,
+    housenameornumber,
+    false
+  )
+  callback()
 }
+
+function reviewed(callback) {
+  $api.giftaid.edit(editgiftaid.value.id, null, null, null, null, null, true)
+  if (callback) callback()
+  hide.value = true
+}
+
+function giveup(callback) {
+  if (!editgiftaid.value.donations) {
+    // Approve these as a way of getting them off the list even though they're not linked to a donation.
+    reviewed()
+  } else {
+    $api.giftaid.edit(
+      editgiftaid.value.id,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+      true
+    )
+    hide.value = true
+  }
+  callback()
+}
+
+onMounted(() => {
+  editgiftaid.value = props.giftaid
+})
 </script>

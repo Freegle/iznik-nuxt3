@@ -30,28 +30,27 @@
     </b-card-body>
   </b-card>
 </template>
-<script>
-export default {
-  props: {
-    comment: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    email() {
-      let ret = null
+<script setup>
+import { computed } from 'vue'
 
-      if (!this.comment.user.email && this.comment.user.emails) {
-        this.comment.user.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
+const props = defineProps({
+  comment: {
+    type: Object,
+    required: true,
+  },
+})
+
+const email = computed(() => {
+  let ret = null
+
+  if (!props.comment.user.email && props.comment.user.emails) {
+    props.comment.user.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
       }
+    })
+  }
 
-      return ret
-    },
-  },
-}
+  return ret
+})
 </script>

@@ -20,13 +20,10 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  setup() {
-    const { modal, hide } = useOurModal()
-    return { modal, hide }
-  },
-}
+const { modal, hide } = useOurModal()
+
+defineExpose({ modal, hide })
 </script>

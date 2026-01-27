@@ -197,7 +197,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, useTemplateRef } from 'vue'
 import { defineRule, Form as VeeForm, Field, ErrorMessage } from 'vee-validate'
 import { required, email, min, max } from '@vee-validate/rules'
 import { useAdminsStore } from '~/stores/admins'
@@ -210,149 +211,149 @@ defineRule('email', email)
 defineRule('min', min)
 defineRule('max', max)
 
-export default {
-  name: 'AdminsManagement',
-  components: {
-    VeeForm,
-    Field,
-    ErrorMessage,
-  },
-  setup() {
-    const adminsStore = useAdminsStore()
-    const modGroupStore = useModGroupStore()
-    const { myGroups, supportOrAdmin } = useMe()
-    const { checkWork } = useModMe()
-    return { adminsStore, modGroupStore, myGroups, supportOrAdmin, checkWork }
-  },
-  data: function () {
-    return {
-      tabIndex: 0,
-      groupidshow: null,
-      groupidcreate: null,
-      groupidprevious: null,
-      subject: null,
-      body: null,
-      ctatext: null,
-      ctalink: null,
-      creating: false,
-      created: false,
-      essential: true,
-    }
-  },
-  computed: {
-    pendingcount() {
-      let count = 0
+const adminsStore = useAdminsStore()
+const modGroupStore = useModGroupStore()
+const { myGroups, supportOrAdmin } = useMe()
+const { checkWork } = useModMe()
 
-      for (const g of this.myGroups) {
-        const group = this.modGroupStore.get(g.id)
-        if (group) {
-          if (
-            group.type === 'Freegle' &&
-            // (!this.modonly ||
-            (group.role === 'Owner' || group.role === 'Moderator')
-          ) {
-            if (group.work && group.work.pendingadmins) {
-              count += group.work.pendingadmins
-            }
-          }
+// Template ref for form
+const form = useTemplateRef('form')
+
+// Reactive state (was data())
+const tabIndex = ref(0)
+const groupidshow = ref(null)
+const groupidcreate = ref(null)
+const groupidprevious = ref(null)
+const subject = ref(null)
+const body = ref(null)
+const ctatext = ref(null)
+const ctalink = ref(null)
+const creating = ref(false)
+const created = ref(false)
+const essential = ref(true)
+
+// Computed properties
+const pendingcount = computed(() => {
+  let count = 0
+
+  for (const g of myGroups.value) {
+    const group = modGroupStore.get(g.id)
+    if (group) {
+      if (
+        group.type === 'Freegle' &&
+        (group.role === 'Owner' || group.role === 'Moderator')
+      ) {
+        if (group.work && group.work.pendingadmins) {
+          count += group.work.pendingadmins
         }
       }
+    }
+  }
 
-      return count
-    },
-    pending() {
-      return this.adminsStore.list
-        .filter((a) => a.pending)
-        .sort(function (a, b) {
-          return new Date(b.created).getTime() - new Date(a.created).getTime()
-        })
-    },
-    previous() {
-      return this.adminsStore.list
-        .filter((a) => !a.pending)
-        .sort(function (a, b) {
-          return new Date(b.created).getTime() - new Date(a.created).getTime()
-        })
-    },
-  },
-  watch: {
-    groupidshow(newval) {
-      this.fetch(newval)
-    },
-    groupidprevious(newval) {
-      this.fetch(newval)
-    },
-  },
-  mounted() {
-    this.fetch(this.groupidshow)
-  },
-  methods: {
-    fetchPending() {
-      this.fetch(this.groupidshow)
-    },
-    fetchPrevious() {
-      this.fetch(this.groupidprevious)
-    },
-    async create() {
-      const validate = await this.$refs.form.validate()
-      if (!validate.valid) {
-        return
-      }
+  return count
+})
 
-      this.creating = true
+const pending = computed(() => {
+  return adminsStore.list
+    .filter((a) => a.pending)
+    .sort(function (a, b) {
+      return new Date(b.created).getTime() - new Date(a.created).getTime()
+    })
+})
 
-      if ((this.ctatext && this.ctalink) || (!this.ctatext && !this.ctalink)) {
-        await this.adminsStore.add({
-          groupid: this.groupidcreate > 0 ? this.groupidcreate : null,
-          subject: this.subject,
-          text: this.body,
-          ctatext: this.ctatext,
-          ctalink: this.ctalink,
-          essential: this.essential,
-        })
+const previous = computed(() => {
+  return adminsStore.list
+    .filter((a) => !a.pending)
+    .sort(function (a, b) {
+      return new Date(b.created).getTime() - new Date(a.created).getTime()
+    })
+})
 
-        this.creating = false
-        this.created = true
+// Watchers
+watch(groupidshow, (newval) => {
+  fetchAdmins(newval)
+})
 
-        setTimeout(() => {
-          this.created = false
-        }, 2000)
+watch(groupidprevious, (newval) => {
+  fetchAdmins(newval)
+})
 
-        this.checkWork(true)
-      }
-    },
-    async fetch(groupid) {
-      await this.adminsStore.clear()
-      await this.adminsStore.fetch({
-        groupid,
-      })
-    },
-    validateSubject(value) {
-      if (!value) {
-        return 'Please enter a subject.'
-      }
-
-      if (value.toLowerCase().includes('admin')) {
-        return 'Do not include ADMIN in your subject.'
-      }
-
-      return true
-    },
-    validateBody(value) {
-      if (!value) {
-        return 'Please add the message.'
-      }
-      return true
-    },
-    copyAdmin(admin) {
-      this.essential = admin.essential === 1
-      this.groupidcreate = admin.groupid
-      this.subject = admin.subject
-      this.body = admin.text
-      this.ctatext = admin.ctatext
-      this.ctalink = admin.ctalink
-      this.tabIndex = 1
-    },
-  },
+// Methods
+function fetchPending() {
+  fetchAdmins(groupidshow.value)
 }
+
+function fetchPrevious() {
+  fetchAdmins(groupidprevious.value)
+}
+
+async function create() {
+  const validate = await form.value.validate()
+  if (!validate.valid) {
+    return
+  }
+
+  creating.value = true
+
+  if ((ctatext.value && ctalink.value) || (!ctatext.value && !ctalink.value)) {
+    await adminsStore.add({
+      groupid: groupidcreate.value > 0 ? groupidcreate.value : null,
+      subject: subject.value,
+      text: body.value,
+      ctatext: ctatext.value,
+      ctalink: ctalink.value,
+      essential: essential.value,
+    })
+
+    creating.value = false
+    created.value = true
+
+    setTimeout(() => {
+      created.value = false
+    }, 2000)
+
+    checkWork(true)
+  }
+}
+
+async function fetchAdmins(groupid) {
+  await adminsStore.clear()
+  await adminsStore.fetch({
+    groupid,
+  })
+}
+
+function validateSubject(value) {
+  if (!value) {
+    return 'Please enter a subject.'
+  }
+
+  if (value.toLowerCase().includes('admin')) {
+    return 'Do not include ADMIN in your subject.'
+  }
+
+  return true
+}
+
+function validateBody(value) {
+  if (!value) {
+    return 'Please add the message.'
+  }
+  return true
+}
+
+function copyAdmin(admin) {
+  essential.value = admin.essential === 1
+  groupidcreate.value = admin.groupid
+  subject.value = admin.subject
+  body.value = admin.text
+  ctatext.value = admin.ctatext
+  ctalink.value = admin.ctalink
+  tabIndex.value = 1
+}
+
+// Lifecycle - mounted
+onMounted(() => {
+  fetchAdmins(groupidshow.value)
+})
 </script>

@@ -74,25 +74,41 @@
     </div>
   </div>
 </template>
-<script>
-import ModDashboardBase from '~/components/ModDashboardBase'
+<script setup>
+import { ref, computed } from 'vue'
+import { useModDashboard } from '~/modtools/composables/useModDashboard'
 
-export default {
-  extends: ModDashboardBase,
-  data: function () {
-    return {
-      askfor: ['ModeratorsActive'],
-      ModeratorsActive: null,
-      grouprequired: true,
-      ModeratorsExpanded: false,
-    }
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    ModeratorsActiveVisible() {
-      return this.ModeratorsExpanded
-        ? this.ModeratorsActive
-        : this.ModeratorsActive.slice(0, 10)
-    },
+  groupName: {
+    type: String,
+    required: true,
   },
-}
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+})
+
+const { loading, ModeratorsActive } = useModDashboard(
+  props,
+  ['ModeratorsActive'],
+  true // grouprequired
+)
+
+const ModeratorsExpanded = ref(false)
+
+const ModeratorsActiveVisible = computed(() => {
+  return ModeratorsExpanded.value
+    ? ModeratorsActive.value
+    : ModeratorsActive.value.slice(0, 10)
+})
 </script>

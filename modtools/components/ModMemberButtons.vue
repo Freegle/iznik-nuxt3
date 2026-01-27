@@ -155,141 +155,131 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, defineAsyncComponent } from 'vue'
 import ModMemberButton from './ModMemberButton'
 import ModMemberActions from './ModMemberActions'
 import ModCommentAddModal from '~/components/ModCommentAddModal'
 import { useModMe } from '~/composables/useModMe'
 
-const OurToggle = () => import('~/components/OurToggle')
+const OurToggle = defineAsyncComponent(() => import('~/components/OurToggle'))
 
-export default {
-  components: {
-    ModCommentAddModal,
-    ModMemberActions,
-    ModMemberButton,
-    OurToggle,
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
-    modconfig: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    spamignore: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    actions: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  modconfig: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  setup() {
-    const { hasPermissionSpamAdmin } = useModMe()
-    return { hasPermissionSpamAdmin }
+  spamignore: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data: function () {
-    return {
-      showRare: false,
-      allowAutoSend: true,
-      showAddCommentModal: false,
-    }
+  actions: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    approved() {
-      return this.hasCollection('Approved')
-    },
-    spam() {
-      return this.member.spammer
-    },
-    validActions() {
-      // The standard messages we show depend on the valid ones for this type of member.
-      if (this.approved) {
-        return ['Leave Approved Member', 'Delete Approved Member']
-      }
+})
 
-      return []
-    },
-    rareToShow() {
-      return this.filterByAction.length - this.filtered.length
-    },
-    filterByAction() {
-      if (this.modconfig) {
-        return this.modconfig.stdmsgs.filter((stdmsg) => {
-          return this.validActions.includes(stdmsg.action)
-        })
-      }
+const { hasPermissionSpamAdmin } = useModMe()
 
-      return []
-    },
-    filtered() {
-      if (this.modconfig) {
-        return this.filterByAction.filter((stdmsg) => {
-          return this.showRare || !parseInt(stdmsg.rarelyused)
-        })
-      }
+const showRare = ref(false)
+const allowAutoSend = ref(true)
+const showAddCommentModal = ref(false)
 
-      return []
-    },
-  },
-  methods: {
-    icon(stdmsg) {
-      switch (stdmsg.action) {
-        case 'Approve Member':
-          return 'check'
-        case 'Reject Member':
-          return 'times'
-        case 'Leave Member':
-        case 'Leave Approved Member':
-          return 'envelope'
-        case 'Delete Approved Member':
-          return 'trash-alt'
-        case 'Edit':
-          return 'pen'
-        default:
-          return 'check'
-      }
-    },
-    variant(stdmsg) {
-      switch (stdmsg.action) {
-        case 'Approve Member':
-          return 'primary'
-        case 'Reject Member':
-          return 'warning'
-        case 'Leave Member':
-        case 'Leave Approved Member':
-          return 'primary'
-        case 'Delete Approved Member':
-          return 'danger'
-        case 'Edit':
-          return 'primary'
-        default:
-          return 'white'
-      }
-    },
-    hasCollection(coll) {
-      let ret = false
+function hasCollection(coll) {
+  let ret = false
 
-      if (this.member.memberof) {
-        this.member.memberof.forEach((group) => {
-          if (group.id === this.member.groupid && group.collection === coll) {
-            ret = true
-          }
-        })
+  if (props.member.memberof) {
+    props.member.memberof.forEach((group) => {
+      if (group.id === props.member.groupid && group.collection === coll) {
+        ret = true
       }
+    })
+  }
 
-      return ret
-    },
-    addAComment() {
-      this.showAddCommentModal = true
-    },
-  },
+  return ret
+}
+
+const approved = computed(() => hasCollection('Approved'))
+
+const spam = computed(() => props.member.spammer)
+
+const validActions = computed(() => {
+  // The standard messages we show depend on the valid ones for this type of member.
+  if (approved.value) {
+    return ['Leave Approved Member', 'Delete Approved Member']
+  }
+
+  return []
+})
+
+const filterByAction = computed(() => {
+  if (props.modconfig) {
+    return props.modconfig.stdmsgs.filter((stdmsg) => {
+      return validActions.value.includes(stdmsg.action)
+    })
+  }
+
+  return []
+})
+
+const filtered = computed(() => {
+  if (props.modconfig) {
+    return filterByAction.value.filter((stdmsg) => {
+      return showRare.value || !parseInt(stdmsg.rarelyused)
+    })
+  }
+
+  return []
+})
+
+const rareToShow = computed(() => {
+  return filterByAction.value.length - filtered.value.length
+})
+
+function icon(stdmsg) {
+  switch (stdmsg.action) {
+    case 'Approve Member':
+      return 'check'
+    case 'Reject Member':
+      return 'times'
+    case 'Leave Member':
+    case 'Leave Approved Member':
+      return 'envelope'
+    case 'Delete Approved Member':
+      return 'trash-alt'
+    case 'Edit':
+      return 'pen'
+    default:
+      return 'check'
+  }
+}
+
+function variant(stdmsg) {
+  switch (stdmsg.action) {
+    case 'Approve Member':
+      return 'primary'
+    case 'Reject Member':
+      return 'warning'
+    case 'Leave Member':
+    case 'Leave Approved Member':
+      return 'primary'
+    case 'Delete Approved Member':
+      return 'danger'
+    case 'Edit':
+      return 'primary'
+    default:
+      return 'white'
+  }
+}
+
+function addAComment() {
+  showAddCommentModal.value = true
 }
 </script>

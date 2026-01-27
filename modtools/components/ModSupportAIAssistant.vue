@@ -578,7 +578,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { marked } from 'marked'
 import { useUserStore } from '~/stores/user'
 
@@ -588,832 +589,827 @@ const SANITIZER_URL = 'http://mcp-sanitizer.localhost'
 // AI support helper for Claude integration (same as existing AI assistant)
 const AI_SUPPORT_URL = 'http://ai-support-helper.localhost'
 
-export default {
-  name: 'ModSupportAIAssistant',
-  data() {
-    return {
-      // UI state
-      showPrivacyModal: false,
-      showPiiWarning: false,
-      showPrivacyReview: false,
-      sanitizerAvailable: true,
-      showAnonymisedData: false,
-      debugMode: false,
-      privacyReviewMode: true, // Default on for privacy verification
-      pendingPrivacyReview: null,
+// UI state
+const showPrivacyModal = ref(false)
+const showPiiWarning = ref(false)
+const showPrivacyReview = ref(false)
+const sanitizerAvailable = ref(true)
+const showAnonymisedData = ref(false)
+const debugMode = ref(false)
+const privacyReviewMode = ref(true) // Default on for privacy verification
+const pendingPrivacyReview = ref(null)
 
-      // User search
-      userSearch: '',
-      searchingUser: false,
-      searchResults: [],
-      noResults: false,
-      selectedUser: null,
-      skippedUserSelection: false,
+// User search
+const userSearch = ref('')
+const searchingUser = ref(false)
+const searchResults = ref([])
+const noResults = ref(false)
+const selectedUser = ref(null)
+const skippedUserSelection = ref(false)
 
-      // Query input
-      query: '',
-      detectedPii: [],
-      pendingQuery: null,
+// Query input
+const query = ref('')
+const detectedPii = ref([])
+const pendingQuery = ref(null)
 
-      // Processing
-      isProcessing: false,
-      processingStatus: 'Analyzing...',
-      currentSessionId: null,
-      claudeSessionId: null, // For Claude Code conversation continuity
-      localMapping: {},
+// Processing
+const isProcessing = ref(false)
+const processingStatus = ref('Analyzing...')
+const currentSessionId = ref(null)
+const claudeSessionId = ref(null) // For Claude Code conversation continuity
+const localMapping = ref({})
 
-      // Conversation with raw data for debug
-      messages: [],
-      debugLog: [],
+// Conversation with raw data for debug
+const messages = ref([])
+const debugLog = ref([])
 
-      // MCP query approval state
-      showMcpQueryApproval: false,
-      showMcpResultsApproval: false,
-      pendingMcpQuery: null,
-      pendingMcpResults: null,
-      mcpPollInterval: null,
+// MCP query approval state
+const showMcpQueryApproval = ref(false)
+const showMcpResultsApproval = ref(false)
+const pendingMcpQuery = ref(null)
+const pendingMcpResults = ref(null)
+const mcpPollInterval = ref(null)
 
-      // DB query approval state
-      showDbQueryApproval: false,
-      showDbResultsApproval: false,
-      pendingDbQuery: null,
-      pendingDbResults: null,
-    }
-  },
-  computed: {
-    totalCost() {
-      return this.messages
-        .filter((m) => m.role === 'assistant' && m.costUsd)
-        .reduce((sum, m) => sum + m.costUsd, 0)
-    },
-  },
-  async mounted() {
-    await this.checkSanitizerAvailability()
-  },
-  beforeUnmount() {
-    this.stopMcpPolling()
-  },
-  methods: {
-    async checkSanitizerAvailability() {
-      try {
-        const response = await fetch(`${SANITIZER_URL}/health`)
-        this.sanitizerAvailable = response.ok
-      } catch {
-        this.sanitizerAvailable = false
-      }
-    },
+// DB query approval state
+const showDbQueryApproval = ref(false)
+const showDbResultsApproval = ref(false)
+const pendingDbQuery = ref(null)
+const pendingDbResults = ref(null)
 
-    async searchUsers() {
-      if (!this.userSearch.trim()) return
+// Template refs
+const messagesContainer = ref(null)
 
-      this.searchingUser = true
-      this.searchResults = []
-      this.noResults = false
+const totalCost = computed(() => {
+  return messages.value
+    .filter((m) => m.role === 'assistant' && m.costUsd)
+    .reduce((sum, m) => sum + m.costUsd, 0)
+})
 
-      try {
-        const userStore = useUserStore()
-        userStore.clear()
+onMounted(async () => {
+  await checkSanitizerAvailability()
+})
 
-        await userStore.fetchMT({
-          search: this.userSearch.trim(),
-          emailhistory: true,
-        })
+onBeforeUnmount(() => {
+  stopMcpPolling()
+})
+async function checkSanitizerAvailability() {
+  try {
+    const response = await fetch(`${SANITIZER_URL}/health`)
+    sanitizerAvailable.value = response.ok
+  } catch {
+    sanitizerAvailable.value = false
+  }
+}
 
-        // Get results and sort by last access
-        this.searchResults = Object.values(userStore.list)
-          .sort((a, b) => {
-            return (
-              new Date(b.lastaccess).getTime() -
-              new Date(a.lastaccess).getTime()
-            )
-          })
-          .slice(0, 10) // Limit to 10 results
+async function searchUsers() {
+  if (!userSearch.value.trim()) return
 
-        // Auto-select if only one result
-        if (this.searchResults.length === 1) {
-          this.selectUser(this.searchResults[0])
-          return
-        }
+  searchingUser.value = true
+  searchResults.value = []
+  noResults.value = false
 
-        this.noResults = this.searchResults.length === 0
-      } catch (error) {
-        console.error('User search error:', error)
-        this.noResults = true
-      } finally {
-        this.searchingUser = false
-      }
-    },
+  try {
+    const userStore = useUserStore()
+    userStore.clear()
 
-    selectUser(user) {
-      this.selectedUser = user
-      this.searchResults = []
-      this.userSearch = ''
-      // Focus the query input after Vue updates the DOM
-      this.$nextTick(() => {
-        const textarea = this.$el.querySelector('textarea')
-        if (textarea) {
-          textarea.focus()
-        }
-      })
-    },
+    await userStore.fetchMT({
+      search: userSearch.value.trim(),
+      emailhistory: true,
+    })
 
-    newChat() {
-      // Start a fresh conversation - clears user and all state
-      this.selectedUser = null
-      this.skippedUserSelection = false
-      this.messages = []
-      this.query = ''
-      this.currentSessionId = null
-      this.claudeSessionId = null
-      this.localMapping = {}
-      this.debugLog = []
-      this.searchResults = []
-      this.userSearch = ''
-      // Clear any pending approval states
-      this.showMcpQueryApproval = false
-      this.showMcpResultsApproval = false
-      this.pendingMcpQuery = null
-      this.pendingMcpResults = null
-      this.showDbQueryApproval = false
-      this.showDbResultsApproval = false
-      this.pendingDbQuery = null
-      this.pendingDbResults = null
-    },
-
-    scrollToBottom() {
-      this.$nextTick(() => {
-        const container = this.$refs.messagesContainer
-        if (container) {
-          container.scrollTop = container.scrollHeight
-        }
-      })
-    },
-
-    skipUserSelection() {
-      this.skippedUserSelection = true
-      this.searchResults = []
-      this.userSearch = ''
-      // Focus the query input after Vue updates the DOM
-      this.$nextTick(() => {
-        const textarea = this.$el.querySelector('textarea')
-        if (textarea) {
-          textarea.focus()
-        }
-      })
-    },
-
-    addDebugEntry(type, label, data, tokenMapping = null) {
-      if (this.debugMode) {
-        this.debugLog.push({
-          type,
-          label,
-          data,
-          tokenMapping,
-          timestamp: new Date().toLocaleTimeString(),
-        })
-      }
-    },
-
-    async submitQuery() {
-      if (!this.query.trim() || this.isProcessing) return
-      if (!this.selectedUser && !this.skippedUserSelection) return
-
-      // First, scan for PII
-      try {
-        const scanPayload = {
-          query: this.query,
-          knownPii: this.selectedUser
-            ? {
-                email: this.selectedUser.email,
-                displayname: this.selectedUser.displayname,
-                userid: this.selectedUser.id,
-              }
-            : {},
-        }
-
-        this.addDebugEntry('request', 'PII Scan Request', scanPayload)
-
-        const response = await fetch(`${SANITIZER_URL}/scan`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(scanPayload),
-        })
-
-        if (response.ok) {
-          const scanResult = await response.json()
-          this.addDebugEntry('response', 'PII Scan Response', scanResult)
-
-          if (scanResult.containsEmailTrail) {
-            alert(
-              'Your query appears to contain copy-pasted email content. Please describe the issue in your own words to protect user privacy.'
-            )
-            return
-          }
-
-          if (scanResult.detectedPii && scanResult.detectedPii.length > 0) {
-            this.detectedPii = scanResult.detectedPii
-            this.pendingQuery = this.query
-            this.showPiiWarning = true
-            return
-          }
-        }
-      } catch (error) {
-        console.error('PII scan error:', error)
-        this.addDebugEntry('error', 'PII Scan Error', {
-          message: error.message,
-        })
-      }
-
-      await this.executeQuery(this.query)
-    },
-
-    confirmPiiQuery() {
-      if (this.pendingQuery) {
-        this.executeQuery(this.pendingQuery)
-        this.pendingQuery = null
-      }
-      this.showPiiWarning = false
-    },
-
-    cancelPiiQuery() {
-      this.pendingQuery = null
-      this.showPiiWarning = false
-    },
-
-    async approvePrivacyReview() {
-      if (this.pendingPrivacyReview) {
-        const { originalQuery, pseudonymizedQuery } = this.pendingPrivacyReview
-        this.pendingPrivacyReview = null
-        this.showPrivacyReview = false
-        await this.proceedWithQuery(originalQuery, pseudonymizedQuery)
-      }
-    },
-
-    cancelPrivacyReview() {
-      this.pendingPrivacyReview = null
-      this.showPrivacyReview = false
-      this.query = ''
-    },
-
-    async executeQuery(queryText) {
-      this.isProcessing = true
-      this.processingStatus = 'Sanitizing query...'
-
-      try {
-        // Step 1: Sanitize the query
-        const sanitizePayload = {
-          query: queryText,
-          knownPii: this.selectedUser
-            ? {
-                email: this.selectedUser.email,
-                displayname: this.selectedUser.displayname,
-                userid: this.selectedUser.id,
-                postcode: this.selectedUser.postcode,
-                location: this.selectedUser.location,
-              }
-            : {},
-          userId: this.selectedUser?.id || 0,
-        }
-
-        this.addDebugEntry('request', 'Sanitize Request', sanitizePayload)
-
-        const sanitizeResponse = await fetch(`${SANITIZER_URL}/sanitize`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(sanitizePayload),
-        })
-
-        if (!sanitizeResponse.ok) {
-          const error = await sanitizeResponse.json()
-          throw new Error(error.message || 'Failed to sanitize query')
-        }
-
-        const sanitizeResult = await sanitizeResponse.json()
-        const { pseudonymizedQuery, sessionId, localMapping } = sanitizeResult
-
-        this.addDebugEntry(
-          'response',
-          'Sanitize Response',
-          { pseudonymizedQuery, sessionId },
-          localMapping
+    // Get results and sort by last access
+    searchResults.value = Object.values(userStore.list)
+      .sort((a, b) => {
+        return (
+          new Date(b.lastaccess).getTime() - new Date(a.lastaccess).getTime()
         )
+      })
+      .slice(0, 10) // Limit to 10 results
 
-        this.currentSessionId = sessionId
-        this.localMapping = { ...this.localMapping, ...localMapping }
+    // Auto-select if only one result
+    if (searchResults.value.length === 1) {
+      selectUser(searchResults.value[0])
+      return
+    }
 
-        // If privacy review mode is enabled, show review modal and wait for approval
-        if (this.privacyReviewMode) {
-          this.pendingPrivacyReview = {
-            originalQuery: queryText,
-            pseudonymizedQuery,
-            mapping: localMapping,
-            sessionId,
+    noResults.value = searchResults.value.length === 0
+  } catch (error) {
+    console.error('User search error:', error)
+    noResults.value = true
+  } finally {
+    searchingUser.value = false
+  }
+}
+
+function selectUser(user) {
+  selectedUser.value = user
+  searchResults.value = []
+  userSearch.value = ''
+  // Focus the query input after Vue updates the DOM
+  nextTick(() => {
+    const textarea = document.querySelector('.log-analysis-container textarea')
+    if (textarea) {
+      textarea.focus()
+    }
+  })
+}
+
+function newChat() {
+  // Start a fresh conversation - clears user and all state
+  selectedUser.value = null
+  skippedUserSelection.value = false
+  messages.value = []
+  query.value = ''
+  currentSessionId.value = null
+  claudeSessionId.value = null
+  localMapping.value = {}
+  debugLog.value = []
+  searchResults.value = []
+  userSearch.value = ''
+  // Clear any pending approval states
+  showMcpQueryApproval.value = false
+  showMcpResultsApproval.value = false
+  pendingMcpQuery.value = null
+  pendingMcpResults.value = null
+  showDbQueryApproval.value = false
+  showDbResultsApproval.value = false
+  pendingDbQuery.value = null
+  pendingDbResults.value = null
+}
+
+function scrollToBottom() {
+  nextTick(() => {
+    const container = messagesContainer.value
+    if (container) {
+      container.scrollTop = container.scrollHeight
+    }
+  })
+}
+
+function skipUserSelection() {
+  skippedUserSelection.value = true
+  searchResults.value = []
+  userSearch.value = ''
+  // Focus the query input after Vue updates the DOM
+  nextTick(() => {
+    const textarea = document.querySelector('.log-analysis-container textarea')
+    if (textarea) {
+      textarea.focus()
+    }
+  })
+}
+
+function addDebugEntry(type, label, data, tokenMapping = null) {
+  if (debugMode.value) {
+    debugLog.value.push({
+      type,
+      label,
+      data,
+      tokenMapping,
+      timestamp: new Date().toLocaleTimeString(),
+    })
+  }
+}
+
+async function submitQuery() {
+  if (!query.value.trim() || isProcessing.value) return
+  if (!selectedUser.value && !skippedUserSelection.value) return
+
+  // First, scan for PII
+  try {
+    const scanPayload = {
+      query: query.value,
+      knownPii: selectedUser.value
+        ? {
+            email: selectedUser.value.email,
+            displayname: selectedUser.value.displayname,
+            userid: selectedUser.value.id,
           }
-          this.isProcessing = false
-          this.showPrivacyReview = true
-          return
-        }
+        : {},
+    }
 
-        // Otherwise proceed directly
-        await this.proceedWithQuery(queryText, pseudonymizedQuery)
-      } catch (error) {
-        console.error('Query error:', error)
-        this.addDebugEntry('error', 'Query Error', { message: error.message })
-        this.messages.push({
-          role: 'assistant',
-          content: `Error: ${error.message}`,
-          rawContent: `Error: ${error.message}`,
-        })
-        this.scrollToBottom()
-      } finally {
-        this.isProcessing = false
-      }
-    },
+    addDebugEntry('request', 'PII Scan Request', scanPayload)
 
-    async proceedWithQuery(queryText, pseudonymizedQuery) {
-      this.isProcessing = true
+    const response = await fetch(`${SANITIZER_URL}/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scanPayload),
+    })
 
-      // Start polling for MCP approval requests if privacy review mode is on
-      if (this.privacyReviewMode) {
-        this.startMcpPolling()
+    if (response.ok) {
+      const scanResult = await response.json()
+      addDebugEntry('response', 'PII Scan Response', scanResult)
+
+      if (scanResult.containsEmailTrail) {
+        alert(
+          'Your query appears to contain copy-pasted email content. Please describe the issue in your own words to protect user privacy.'
+        )
+        return
       }
 
-      try {
-        // Add user message to conversation (store both raw and display versions)
-        this.messages.push({
-          role: 'user',
-          content: queryText,
-          rawContent: queryText,
-        })
-        this.scrollToBottom()
+      if (scanResult.detectedPii && scanResult.detectedPii.length > 0) {
+        detectedPii.value = scanResult.detectedPii
+        pendingQuery.value = query.value
+        showPiiWarning.value = true
+        return
+      }
+    }
+  } catch (error) {
+    console.error('PII scan error:', error)
+    addDebugEntry('error', 'PII Scan Error', {
+      message: error.message,
+    })
+  }
 
-        this.processingStatus = 'Analyzing...'
+  await executeQuery(query.value)
+}
 
-        // Send pseudonymized query to Claude Code for log analysis
-        const logResult = await this.queryLogsForUser(pseudonymizedQuery)
+function confirmPiiQuery() {
+  if (pendingQuery.value) {
+    executeQuery(pendingQuery.value)
+    pendingQuery.value = null
+  }
+  showPiiWarning.value = false
+}
 
-        this.addDebugEntry('response', 'Log Analysis Response (raw)', {
+function cancelPiiQuery() {
+  pendingQuery.value = null
+  showPiiWarning.value = false
+}
+
+async function approvePrivacyReview() {
+  if (pendingPrivacyReview.value) {
+    const { originalQuery, pseudonymizedQuery } = pendingPrivacyReview.value
+    pendingPrivacyReview.value = null
+    showPrivacyReview.value = false
+    await proceedWithQuery(originalQuery, pseudonymizedQuery)
+  }
+}
+
+function cancelPrivacyReview() {
+  pendingPrivacyReview.value = null
+  showPrivacyReview.value = false
+  query.value = ''
+}
+
+async function executeQuery(queryText) {
+  isProcessing.value = true
+  processingStatus.value = 'Sanitizing query...'
+
+  try {
+    // Step 1: Sanitize the query
+    const sanitizePayload = {
+      query: queryText,
+      knownPii: selectedUser.value
+        ? {
+            email: selectedUser.value.email,
+            displayname: selectedUser.value.displayname,
+            userid: selectedUser.value.id,
+            postcode: selectedUser.value.postcode,
+            location: selectedUser.value.location,
+          }
+        : {},
+      userId: selectedUser.value?.id || 0,
+    }
+
+    addDebugEntry('request', 'Sanitize Request', sanitizePayload)
+
+    const sanitizeResponse = await fetch(`${SANITIZER_URL}/sanitize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sanitizePayload),
+    })
+
+    if (!sanitizeResponse.ok) {
+      const error = await sanitizeResponse.json()
+      throw new Error(error.message || 'Failed to sanitize query')
+    }
+
+    const sanitizeResult = await sanitizeResponse.json()
+    const {
+      pseudonymizedQuery,
+      sessionId,
+      localMapping: newMapping,
+    } = sanitizeResult
+
+    addDebugEntry(
+      'response',
+      'Sanitize Response',
+      { pseudonymizedQuery, sessionId },
+      newMapping
+    )
+
+    currentSessionId.value = sessionId
+    localMapping.value = { ...localMapping.value, ...newMapping }
+
+    // If privacy review mode is enabled, show review modal and wait for approval
+    if (privacyReviewMode.value) {
+      pendingPrivacyReview.value = {
+        originalQuery: queryText,
+        pseudonymizedQuery,
+        mapping: newMapping,
+        sessionId,
+      }
+      isProcessing.value = false
+      showPrivacyReview.value = true
+      return
+    }
+
+    // Otherwise proceed directly
+    await proceedWithQuery(queryText, pseudonymizedQuery)
+  } catch (error) {
+    console.error('Query error:', error)
+    addDebugEntry('error', 'Query Error', { message: error.message })
+    messages.value.push({
+      role: 'assistant',
+      content: `Error: ${error.message}`,
+      rawContent: `Error: ${error.message}`,
+    })
+    scrollToBottom()
+  } finally {
+    isProcessing.value = false
+  }
+}
+
+async function proceedWithQuery(queryText, pseudonymizedQuery) {
+  isProcessing.value = true
+
+  // Start polling for MCP approval requests if privacy review mode is on
+  if (privacyReviewMode.value) {
+    startMcpPolling()
+  }
+
+  try {
+    // Add user message to conversation (store both raw and display versions)
+    messages.value.push({
+      role: 'user',
+      content: queryText,
+      rawContent: queryText,
+    })
+    scrollToBottom()
+
+    processingStatus.value = 'Analyzing...'
+
+    // Send pseudonymized query to Claude Code for log analysis
+    const logResult = await queryLogsForUser(pseudonymizedQuery)
+
+    addDebugEntry('response', 'Log Analysis Response (raw)', {
+      analysis:
+        logResult.analysis.substring(0, 500) +
+        (logResult.analysis.length > 500 ? '...' : ''),
+      costUsd: logResult.costUsd,
+    })
+
+    // Step 3: Store both raw and de-tokenized versions with cost
+    const deTokenizedResponse = deTokenize(logResult.analysis)
+
+    messages.value.push({
+      role: 'assistant',
+      content: deTokenizedResponse,
+      rawContent: logResult.analysis,
+      mapping: { ...localMapping.value },
+      costUsd: logResult.costUsd,
+      usage: logResult.usage,
+    })
+    scrollToBottom()
+
+    query.value = ''
+  } catch (error) {
+    console.error('Query error:', error)
+    addDebugEntry('error', 'Query Error', { message: error.message })
+    messages.value.push({
+      role: 'assistant',
+      content: `Error: ${error.message}`,
+      rawContent: `Error: ${error.message}`,
+    })
+    scrollToBottom()
+  } finally {
+    stopMcpPolling()
+    isProcessing.value = false
+  }
+}
+
+async function queryLogsForUser(userQuery) {
+  try {
+    const requestBody = {
+      query: userQuery,
+      userId: selectedUser.value?.id || 0,
+    }
+
+    // Include Claude session ID for conversation continuity
+    if (claudeSessionId.value) {
+      requestBody.claudeSessionId = claudeSessionId.value
+    }
+
+    addDebugEntry('request', 'Claude Code Request', requestBody)
+
+    const response = await fetch(`${AI_SUPPORT_URL}/api/log-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return `**Log Analysis Service**\n\nThe AI-powered log analysis service is being set up.`
+      }
+      const errorData = await response.json().catch(() => ({}))
+      // Handle expired session gracefully - clear it and inform user
+      if (response.status === 410 || errorData.error === 'SESSION_EXPIRED') {
+        claudeSessionId.value = null
+        return {
           analysis:
-            logResult.analysis.substring(0, 500) +
-            (logResult.analysis.length > 500 ? '...' : ''),
-          costUsd: logResult.costUsd,
-        })
-
-        // Step 3: Store both raw and de-tokenized versions with cost
-        const deTokenizedResponse = this.deTokenize(logResult.analysis)
-
-        this.messages.push({
-          role: 'assistant',
-          content: deTokenizedResponse,
-          rawContent: logResult.analysis,
-          mapping: { ...this.localMapping },
-          costUsd: logResult.costUsd,
-          usage: logResult.usage,
-        })
-        this.scrollToBottom()
-
-        this.query = ''
-      } catch (error) {
-        console.error('Query error:', error)
-        this.addDebugEntry('error', 'Query Error', { message: error.message })
-        this.messages.push({
-          role: 'assistant',
-          content: `Error: ${error.message}`,
-          rawContent: `Error: ${error.message}`,
-        })
-        this.scrollToBottom()
-      } finally {
-        this.stopMcpPolling()
-        this.isProcessing = false
-      }
-    },
-
-    async queryLogsForUser(userQuery) {
-      try {
-        const requestBody = {
-          query: userQuery,
-          userId: this.selectedUser?.id || 0,
-        }
-
-        // Include Claude session ID for conversation continuity
-        if (this.claudeSessionId) {
-          requestBody.claudeSessionId = this.claudeSessionId
-        }
-
-        this.addDebugEntry('request', 'Claude Code Request', requestBody)
-
-        const response = await fetch(`${AI_SUPPORT_URL}/api/log-analysis`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-        })
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            return `**Log Analysis Service**\n\nThe AI-powered log analysis service is being set up.`
-          }
-          const errorData = await response.json().catch(() => ({}))
-          // Handle expired session gracefully - clear it and inform user
-          if (
-            response.status === 410 ||
-            errorData.error === 'SESSION_EXPIRED'
-          ) {
-            this.claudeSessionId = null
-            return {
-              analysis:
-                '**Session Expired**\n\nYour previous conversation has expired. Please ask your question again to start a new session.',
-              costUsd: null,
-            }
-          }
-          throw new Error(errorData.message || 'Failed to query logs')
-        }
-
-        const data = await response.json()
-
-        // Save Claude session ID for conversation continuity
-        if (data.claudeSessionId) {
-          this.claudeSessionId = data.claudeSessionId
-          this.addDebugEntry('response', 'Claude Code Response', {
-            claudeSessionId: data.claudeSessionId,
-            isNewSession: data.isNewSession,
-            analysisLength: data.analysis?.length || 0,
-            costUsd: data.costUsd,
-            usage: data.usage,
-          })
-        }
-
-        // Return analysis and cost info
-        return {
-          analysis: data.analysis || 'No analysis available.',
-          costUsd: data.costUsd,
-          usage: data.usage,
-        }
-      } catch (error) {
-        if (error.message.includes('fetch')) {
-          const userInfo = this.selectedUser
-            ? `\n\nUser ID for manual search: **${this.selectedUser.id}**`
-            : ''
-          return {
-            analysis: `**Log Analysis Service**\n\nThe AI log analysis service is not currently running.${userInfo}`,
-            costUsd: null,
-          }
-        }
-        return {
-          analysis: `Unable to query logs: ${error.message}`,
+            '**Session Expired**\n\nYour previous conversation has expired. Please ask your question again to start a new session.',
           costUsd: null,
         }
       }
-    },
+      throw new Error(errorData.message || 'Failed to query logs')
+    }
 
-    deTokenize(text) {
-      if (!text || !this.localMapping) return text
+    const data = await response.json()
 
-      let result = text
-      for (const [token, realValue] of Object.entries(this.localMapping)) {
-        result = result.split(token).join(realValue)
+    // Save Claude session ID for conversation continuity
+    if (data.claudeSessionId) {
+      claudeSessionId.value = data.claudeSessionId
+      addDebugEntry('response', 'Claude Code Response', {
+        claudeSessionId: data.claudeSessionId,
+        isNewSession: data.isNewSession,
+        analysisLength: data.analysis?.length || 0,
+        costUsd: data.costUsd,
+        usage: data.usage,
+      })
+    }
+
+    // Return analysis and cost info
+    return {
+      analysis: data.analysis || 'No analysis available.',
+      costUsd: data.costUsd,
+      usage: data.usage,
+    }
+  } catch (error) {
+    if (error.message.includes('fetch')) {
+      const userInfo = selectedUser.value
+        ? `\n\nUser ID for manual search: **${selectedUser.value.id}**`
+        : ''
+      return {
+        analysis: `**Log Analysis Service**\n\nThe AI log analysis service is not currently running.${userInfo}`,
+        costUsd: null,
       }
-      return result
-    },
+    }
+    return {
+      analysis: `Unable to query logs: ${error.message}`,
+      costUsd: null,
+    }
+  }
+}
 
-    highlightPii(text, mapping, showTokens) {
-      if (!text || !mapping) return text
+function deTokenize(text) {
+  if (!text || !localMapping.value) return text
 
-      let result = text
-      for (const [token, realValue] of Object.entries(mapping)) {
-        // Always highlight PII in red - show either token or real value based on toggle
-        const displayValue = showTokens ? token : realValue
-        const highlightHtml = `<span class="pii-highlight" title="Anonymised: ${token} = ${realValue}">${displayValue}</span>`
+  let result = text
+  for (const [token, realValue] of Object.entries(localMapping.value)) {
+    result = result.split(token).join(realValue)
+  }
+  return result
+}
 
-        // Replace both token and real value with highlighted version
-        result = result.split(token).join(highlightHtml)
-        if (!showTokens) {
-          // When showing real values, also replace any remaining tokens
-          result = result.split(realValue).join(highlightHtml)
-        }
+function highlightPii(text, mapping, showTokens) {
+  if (!text || !mapping) return text
+
+  let result = text
+  for (const [token, realValue] of Object.entries(mapping)) {
+    // Always highlight PII in red - show either token or real value based on toggle
+    const displayValue = showTokens ? token : realValue
+    const highlightHtml = `<span class="pii-highlight" title="Anonymised: ${token} = ${realValue}">${displayValue}</span>`
+
+    // Replace both token and real value with highlighted version
+    result = result.split(token).join(highlightHtml)
+    if (!showTokens) {
+      // When showing real values, also replace any remaining tokens
+      result = result.split(realValue).join(highlightHtml)
+    }
+  }
+  return result
+}
+
+function formatMessageContent(msg) {
+  if (!msg.content) return ''
+
+  // Start with the de-tokenized content, then re-highlight based on toggle
+  let html = marked(msg.content)
+
+  // Always highlight PII - toggle controls whether we show token or real value
+  if (msg.mapping && Object.keys(msg.mapping).length > 0) {
+    html = highlightPii(html, msg.mapping, showAnonymisedData.value)
+  }
+
+  return html
+}
+
+function formatDebugData(data) {
+  if (typeof data === 'string') return data
+  return JSON.stringify(data, null, 2)
+}
+
+function cancelQuery() {
+  isProcessing.value = false
+  processingStatus.value = ''
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+}
+
+// MCP Query Approval Methods
+function startMcpPolling() {
+  if (mcpPollInterval.value) return // Already polling
+
+  mcpPollInterval.value = setInterval(async () => {
+    await pollPendingMcpQueries()
+  }, 2000) // Poll every 2 seconds
+}
+
+function stopMcpPolling() {
+  if (mcpPollInterval.value) {
+    clearInterval(mcpPollInterval.value)
+    mcpPollInterval.value = null
+  }
+}
+
+async function pollPendingMcpQueries() {
+  if (!isProcessing.value || !privacyReviewMode.value) return
+
+  try {
+    const response = await fetch('http://status.localhost/api/mcp/pending')
+    if (!response.ok) return
+
+    const data = await response.json()
+    const queries = data.queries || []
+
+    // Check for pending log query approval
+    const pendingLogQuery = queries.find(
+      (q) => q.status === 'pending_query' && q.type === 'log'
+    )
+    if (pendingLogQuery && !showMcpQueryApproval.value) {
+      pendingMcpQuery.value = pendingLogQuery
+      showMcpQueryApproval.value = true
+    }
+
+    // Check for pending log results approval
+    const pendingLogResults = queries.find(
+      (q) => q.status === 'pending_results' && q.type === 'log'
+    )
+    if (pendingLogResults && !showMcpResultsApproval.value) {
+      pendingMcpResults.value = {
+        ...pendingLogResults,
+        resultCount:
+          pendingLogResults.results?.data?.result?.reduce(
+            (sum, s) => sum + (s.values?.length || 0),
+            0
+          ) || 0,
+        streamCount: pendingLogResults.results?.data?.result?.length || 0,
+        results: pendingLogResults.results?.data?.result || [],
       }
-      return result
-    },
+      showMcpResultsApproval.value = true
+    }
 
-    formatMessageContent(msg) {
-      if (!msg.content) return ''
+    // Check for pending DB query approval
+    const pendingDbQueryResult = queries.find(
+      (q) => q.status === 'pending_query' && q.type === 'db'
+    )
+    if (pendingDbQueryResult && !showDbQueryApproval.value) {
+      pendingDbQuery.value = pendingDbQueryResult
+      showDbQueryApproval.value = true
+    }
 
-      // Start with the de-tokenized content, then re-highlight based on toggle
-      let html = marked(msg.content)
-
-      // Always highlight PII - toggle controls whether we show token or real value
-      if (msg.mapping && Object.keys(msg.mapping).length > 0) {
-        html = this.highlightPii(html, msg.mapping, this.showAnonymisedData)
+    // Check for pending DB results approval
+    const pendingDbResultsResult = queries.find(
+      (q) => q.status === 'pending_results' && q.type === 'db'
+    )
+    if (pendingDbResultsResult && !showDbResultsApproval.value) {
+      pendingDbResults.value = {
+        ...pendingDbResultsResult,
+        rows: pendingDbResultsResult.results?.rows || [],
+        columns: pendingDbResultsResult.results?.columns || [],
+        rowCount: pendingDbResultsResult.results?.rowCount || 0,
+        tokenCount: pendingDbResultsResult.results?.tokenCount || 0,
       }
+      showDbResultsApproval.value = true
+    }
+  } catch (error) {
+    console.error('MCP polling error:', error)
+  }
+}
 
-      return html
-    },
+async function approveMcpQuery() {
+  if (!pendingMcpQuery.value) return
 
-    formatDebugData(data) {
-      if (typeof data === 'string') return data
-      return JSON.stringify(data, null, 2)
-    },
-
-    cancelQuery() {
-      this.isProcessing = false
-      this.processingStatus = ''
-    },
-
-    formatDate(dateStr) {
-      if (!dateStr) return ''
-      const date = new Date(dateStr)
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
-    },
-
-    // MCP Query Approval Methods
-    startMcpPolling() {
-      if (this.mcpPollInterval) return // Already polling
-
-      this.mcpPollInterval = setInterval(async () => {
-        await this.pollPendingMcpQueries()
-      }, 2000) // Poll every 2 seconds
-    },
-
-    stopMcpPolling() {
-      if (this.mcpPollInterval) {
-        clearInterval(this.mcpPollInterval)
-        this.mcpPollInterval = null
+  try {
+    const response = await fetch(
+      `http://status.localhost/api/mcp/approve/${pendingMcpQuery.value.id}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: 'query' }),
       }
-    },
+    )
 
-    async pollPendingMcpQueries() {
-      if (!this.isProcessing || !this.privacyReviewMode) return
+    if (!response.ok) {
+      throw new Error('Failed to approve query')
+    }
 
-      try {
-        const response = await fetch('http://status.localhost/api/mcp/pending')
-        if (!response.ok) return
+    addDebugEntry('response', 'MCP Query Approved', {
+      queryId: pendingMcpQuery.value.id,
+    })
+  } catch (error) {
+    console.error('Approve query error:', error)
+  } finally {
+    pendingMcpQuery.value = null
+    showMcpQueryApproval.value = false
+  }
+}
 
-        const data = await response.json()
-        const queries = data.queries || []
+async function rejectMcpQuery() {
+  if (!pendingMcpQuery.value) return
 
-        // Check for pending log query approval
-        const pendingLogQuery = queries.find(
-          (q) => q.status === 'pending_query' && q.type === 'log'
-        )
-        if (pendingLogQuery && !this.showMcpQueryApproval) {
-          this.pendingMcpQuery = pendingLogQuery
-          this.showMcpQueryApproval = true
-        }
+  try {
+    await fetch(
+      `http://status.localhost/api/mcp/reject/${pendingMcpQuery.value.id}`,
+      { method: 'POST' }
+    )
 
-        // Check for pending log results approval
-        const pendingLogResults = queries.find(
-          (q) => q.status === 'pending_results' && q.type === 'log'
-        )
-        if (pendingLogResults && !this.showMcpResultsApproval) {
-          this.pendingMcpResults = {
-            ...pendingLogResults,
-            resultCount:
-              pendingLogResults.results?.data?.result?.reduce(
-                (sum, s) => sum + (s.values?.length || 0),
-                0
-              ) || 0,
-            streamCount: pendingLogResults.results?.data?.result?.length || 0,
-            results: pendingLogResults.results?.data?.result || [],
-          }
-          this.showMcpResultsApproval = true
-        }
+    addDebugEntry('response', 'MCP Query Rejected', {
+      queryId: pendingMcpQuery.value.id,
+    })
+  } catch (error) {
+    console.error('Reject query error:', error)
+  } finally {
+    pendingMcpQuery.value = null
+    showMcpQueryApproval.value = false
+  }
+}
 
-        // Check for pending DB query approval
-        const pendingDbQuery = queries.find(
-          (q) => q.status === 'pending_query' && q.type === 'db'
-        )
-        if (pendingDbQuery && !this.showDbQueryApproval) {
-          this.pendingDbQuery = pendingDbQuery
-          this.showDbQueryApproval = true
-        }
+async function approveMcpResults() {
+  if (!pendingMcpResults.value) return
 
-        // Check for pending DB results approval
-        const pendingDbResults = queries.find(
-          (q) => q.status === 'pending_results' && q.type === 'db'
-        )
-        if (pendingDbResults && !this.showDbResultsApproval) {
-          this.pendingDbResults = {
-            ...pendingDbResults,
-            rows: pendingDbResults.results?.rows || [],
-            columns: pendingDbResults.results?.columns || [],
-            rowCount: pendingDbResults.results?.rowCount || 0,
-            tokenCount: pendingDbResults.results?.tokenCount || 0,
-          }
-          this.showDbResultsApproval = true
-        }
-      } catch (error) {
-        console.error('MCP polling error:', error)
+  try {
+    const response = await fetch(
+      `http://status.localhost/api/mcp/approve/${pendingMcpResults.value.id}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: 'results' }),
       }
-    },
+    )
 
-    async approveMcpQuery() {
-      if (!this.pendingMcpQuery) return
+    if (!response.ok) {
+      throw new Error('Failed to approve results')
+    }
 
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingMcpQuery.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'query' }),
-          }
-        )
+    addDebugEntry('response', 'MCP Results Approved', {
+      queryId: pendingMcpResults.value.id,
+      resultCount: pendingMcpResults.value.resultCount,
+    })
+  } catch (error) {
+    console.error('Approve results error:', error)
+  } finally {
+    pendingMcpResults.value = null
+    showMcpResultsApproval.value = false
+  }
+}
 
-        if (!response.ok) {
-          throw new Error('Failed to approve query')
-        }
+async function rejectMcpResults() {
+  if (!pendingMcpResults.value) return
 
-        this.addDebugEntry('response', 'MCP Query Approved', {
-          queryId: this.pendingMcpQuery.id,
-        })
-      } catch (error) {
-        console.error('Approve query error:', error)
-      } finally {
-        this.pendingMcpQuery = null
-        this.showMcpQueryApproval = false
+  try {
+    await fetch(
+      `http://status.localhost/api/mcp/reject/${pendingMcpResults.value.id}`,
+      { method: 'POST' }
+    )
+
+    addDebugEntry('response', 'MCP Results Rejected', {
+      queryId: pendingMcpResults.value.id,
+    })
+  } catch (error) {
+    console.error('Reject results error:', error)
+  } finally {
+    pendingMcpResults.value = null
+    showMcpResultsApproval.value = false
+  }
+}
+
+// DB Query Approval Methods
+async function approveDbQuery() {
+  if (!pendingDbQuery.value) return
+
+  try {
+    const response = await fetch(
+      `http://status.localhost/api/mcp/approve/${pendingDbQuery.value.id}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: 'query' }),
       }
-    },
+    )
 
-    async rejectMcpQuery() {
-      if (!this.pendingMcpQuery) return
+    if (!response.ok) {
+      throw new Error('Failed to approve DB query')
+    }
 
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingMcpQuery.id}`,
-          { method: 'POST' }
-        )
+    addDebugEntry('response', 'DB Query Approved', {
+      queryId: pendingDbQuery.value.id,
+    })
+  } catch (error) {
+    console.error('Approve DB query error:', error)
+  } finally {
+    pendingDbQuery.value = null
+    showDbQueryApproval.value = false
+  }
+}
 
-        this.addDebugEntry('response', 'MCP Query Rejected', {
-          queryId: this.pendingMcpQuery.id,
-        })
-      } catch (error) {
-        console.error('Reject query error:', error)
-      } finally {
-        this.pendingMcpQuery = null
-        this.showMcpQueryApproval = false
+async function rejectDbQuery() {
+  if (!pendingDbQuery.value) return
+
+  try {
+    await fetch(
+      `http://status.localhost/api/mcp/reject/${pendingDbQuery.value.id}`,
+      { method: 'POST' }
+    )
+
+    addDebugEntry('response', 'DB Query Rejected', {
+      queryId: pendingDbQuery.value.id,
+    })
+  } catch (error) {
+    console.error('Reject DB query error:', error)
+  } finally {
+    pendingDbQuery.value = null
+    showDbQueryApproval.value = false
+  }
+}
+
+async function approveDbResults() {
+  if (!pendingDbResults.value) return
+
+  try {
+    const response = await fetch(
+      `http://status.localhost/api/mcp/approve/${pendingDbResults.value.id}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: 'results' }),
       }
-    },
+    )
 
-    async approveMcpResults() {
-      if (!this.pendingMcpResults) return
+    if (!response.ok) {
+      throw new Error('Failed to approve DB results')
+    }
 
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingMcpResults.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'results' }),
-          }
-        )
+    addDebugEntry('response', 'DB Results Approved', {
+      queryId: pendingDbResults.value.id,
+      rowCount: pendingDbResults.value.rowCount,
+    })
+  } catch (error) {
+    console.error('Approve DB results error:', error)
+  } finally {
+    pendingDbResults.value = null
+    showDbResultsApproval.value = false
+  }
+}
 
-        if (!response.ok) {
-          throw new Error('Failed to approve results')
-        }
+async function rejectDbResults() {
+  if (!pendingDbResults.value) return
 
-        this.addDebugEntry('response', 'MCP Results Approved', {
-          queryId: this.pendingMcpResults.id,
-          resultCount: this.pendingMcpResults.resultCount,
-        })
-      } catch (error) {
-        console.error('Approve results error:', error)
-      } finally {
-        this.pendingMcpResults = null
-        this.showMcpResultsApproval = false
-      }
-    },
+  try {
+    await fetch(
+      `http://status.localhost/api/mcp/reject/${pendingDbResults.value.id}`,
+      { method: 'POST' }
+    )
 
-    async rejectMcpResults() {
-      if (!this.pendingMcpResults) return
+    addDebugEntry('response', 'DB Results Rejected', {
+      queryId: pendingDbResults.value.id,
+    })
+  } catch (error) {
+    console.error('Reject DB results error:', error)
+  } finally {
+    pendingDbResults.value = null
+    showDbResultsApproval.value = false
+  }
+}
 
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingMcpResults.id}`,
-          { method: 'POST' }
-        )
+function formatStreamLabels(stream) {
+  if (!stream) return ''
+  return Object.entries(stream)
+    .map(([k, v]) => `${k}="${v}"`)
+    .join(', ')
+}
 
-        this.addDebugEntry('response', 'MCP Results Rejected', {
-          queryId: this.pendingMcpResults.id,
-        })
-      } catch (error) {
-        console.error('Reject results error:', error)
-      } finally {
-        this.pendingMcpResults = null
-        this.showMcpResultsApproval = false
-      }
-    },
-
-    // DB Query Approval Methods
-    async approveDbQuery() {
-      if (!this.pendingDbQuery) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingDbQuery.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'query' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve DB query')
-        }
-
-        this.addDebugEntry('response', 'DB Query Approved', {
-          queryId: this.pendingDbQuery.id,
-        })
-      } catch (error) {
-        console.error('Approve DB query error:', error)
-      } finally {
-        this.pendingDbQuery = null
-        this.showDbQueryApproval = false
-      }
-    },
-
-    async rejectDbQuery() {
-      if (!this.pendingDbQuery) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingDbQuery.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'DB Query Rejected', {
-          queryId: this.pendingDbQuery.id,
-        })
-      } catch (error) {
-        console.error('Reject DB query error:', error)
-      } finally {
-        this.pendingDbQuery = null
-        this.showDbQueryApproval = false
-      }
-    },
-
-    async approveDbResults() {
-      if (!this.pendingDbResults) return
-
-      try {
-        const response = await fetch(
-          `http://status.localhost/api/mcp/approve/${this.pendingDbResults.id}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stage: 'results' }),
-          }
-        )
-
-        if (!response.ok) {
-          throw new Error('Failed to approve DB results')
-        }
-
-        this.addDebugEntry('response', 'DB Results Approved', {
-          queryId: this.pendingDbResults.id,
-          rowCount: this.pendingDbResults.rowCount,
-        })
-      } catch (error) {
-        console.error('Approve DB results error:', error)
-      } finally {
-        this.pendingDbResults = null
-        this.showDbResultsApproval = false
-      }
-    },
-
-    async rejectDbResults() {
-      if (!this.pendingDbResults) return
-
-      try {
-        await fetch(
-          `http://status.localhost/api/mcp/reject/${this.pendingDbResults.id}`,
-          { method: 'POST' }
-        )
-
-        this.addDebugEntry('response', 'DB Results Rejected', {
-          queryId: this.pendingDbResults.id,
-        })
-      } catch (error) {
-        console.error('Reject DB results error:', error)
-      } finally {
-        this.pendingDbResults = null
-        this.showDbResultsApproval = false
-      }
-    },
-
-    formatStreamLabels(stream) {
-      if (!stream) return ''
-      return Object.entries(stream)
-        .map(([k, v]) => `${k}="${v}"`)
-        .join(', ')
-    },
-
-    formatLogTimestamp(ts) {
-      if (!ts) return ''
-      // Loki timestamps are in nanoseconds
-      const ms = parseInt(ts, 10) / 1000000
-      return new Date(ms).toLocaleTimeString()
-    },
-  },
+function formatLogTimestamp(ts) {
+  if (!ts) return ''
+  // Loki timestamps are in nanoseconds
+  const ms = parseInt(ts, 10) / 1000000
+  return new Date(ms).toLocaleTimeString()
 }
 </script>
 

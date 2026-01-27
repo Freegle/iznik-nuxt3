@@ -68,18 +68,15 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      expand: false,
-    }
-  },
-}
+})
+
+const expand = ref(false)
 </script>

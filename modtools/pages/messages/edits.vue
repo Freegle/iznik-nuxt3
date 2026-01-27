@@ -16,38 +16,35 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { watch } from 'vue'
 import { setupModMessages } from '~/composables/useModMessages'
-import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 
-export default {
-  setup() {
-    const miscStore = useMiscStore()
-    const modMessages = setupModMessages(true)
-    modMessages.collection.value = 'Edit'
-    modMessages.workType.value = 'editreview'
-    return {
-      miscStore,
-      ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
-    }
-  },
-  data: function () {
-    return {}
-  },
-  watch: {
-    groupid: {
-      async handler(newVal, oldVal) {
-        this.context = null
+const modGroupStore = useModGroupStore()
 
-        const modGroupStore = useModGroupStore()
-        await modGroupStore.fetchIfNeedBeMT(newVal)
-        this.group = modGroupStore.get(newVal)
-        await this.getMessages()
+const {
+  busy,
+  context,
+  group,
+  groupid,
+  workType,
+  show,
+  collection,
+  messages,
+  getMessages,
+} = setupModMessages(true)
 
-        this.show = this.messages.length
-      },
-    },
-  },
-}
+collection.value = 'Edit'
+workType.value = 'editreview'
+
+watch(groupid, async (newVal) => {
+  context.value = null
+
+  await modGroupStore.fetchIfNeedBeMT(newVal)
+  group.value = modGroupStore.get(newVal)
+  await getMessages()
+
+  show.value = messages.value.length
+})
 </script>

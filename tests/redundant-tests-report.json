@@ -1,0 +1,1682 @@
+{
+  "summary": {
+    "totalFiles": 271,
+    "totalTests": 5829,
+    "lowValueTests": 179,
+    "percentage": 3
+  },
+  "fileStats": [
+    {
+      "file": "tests/unit/components/GiveAsk.spec.js",
+      "total": 8,
+      "lowValue": 3,
+      "percentage": 38
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAddMemberModal.spec.js",
+      "total": 7,
+      "lowValue": 2,
+      "percentage": 29
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "total": 65,
+      "lowValue": 16,
+      "percentage": 25
+    },
+    {
+      "file": "tests/unit/components/modtools/ModVolunteerOpportunity.spec.js",
+      "total": 13,
+      "lowValue": 3,
+      "percentage": 23
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "total": 35,
+      "lowValue": 8,
+      "percentage": 23
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommunityEvent.spec.js",
+      "total": 16,
+      "lowValue": 3,
+      "percentage": 19
+    },
+    {
+      "file": "tests/unit/components/NewFreegler.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/ChatNotVisible.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/modtools/ModLogStdMsg.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatViewButton.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/modtools/ModBanMemberModal.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAffiliationConfirmModal.spec.js",
+      "total": 6,
+      "lowValue": 1,
+      "percentage": 17
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageEmailModal.spec.js",
+      "total": 26,
+      "lowValue": 4,
+      "percentage": 15
+    },
+    {
+      "file": "tests/unit/components/ConfirmModal.spec.js",
+      "total": 16,
+      "lowValue": 2,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/ChatNotice.spec.js",
+      "total": 30,
+      "lowValue": 4,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "total": 55,
+      "lowValue": 7,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/modtools/ModRole.spec.js",
+      "total": 8,
+      "lowValue": 1,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPopularPost.spec.js",
+      "total": 16,
+      "lowValue": 2,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupRule.spec.js",
+      "total": 16,
+      "lowValue": 2,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/components/modtools/ModClipboard.spec.js",
+      "total": 8,
+      "lowValue": 1,
+      "percentage": 13
+    },
+    {
+      "file": "tests/unit/pages/modtools/Logs.spec.js",
+      "total": 17,
+      "lowValue": 2,
+      "percentage": 12
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "total": 41,
+      "lowValue": 5,
+      "percentage": 12
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMenuItemLeft.spec.js",
+      "total": 17,
+      "lowValue": 2,
+      "percentage": 12
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "total": 19,
+      "lowValue": 2,
+      "percentage": 11
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "total": 62,
+      "lowValue": 7,
+      "percentage": 11
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberSearchbox.spec.js",
+      "total": 9,
+      "lowValue": 1,
+      "percentage": 11
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatModal.spec.js",
+      "total": 38,
+      "lowValue": 4,
+      "percentage": 11
+    },
+    {
+      "file": "tests/unit/components/modtools/ModBanMemberConfirmModal.spec.js",
+      "total": 9,
+      "lowValue": 1,
+      "percentage": 11
+    },
+    {
+      "file": "tests/unit/components/ChatMenu.spec.js",
+      "total": 20,
+      "lowValue": 2,
+      "percentage": 10
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsPersonal.spec.js",
+      "total": 44,
+      "lowValue": 4,
+      "percentage": 9
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "total": 82,
+      "lowValue": 7,
+      "percentage": 9
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "total": 54,
+      "lowValue": 5,
+      "percentage": 9
+    },
+    {
+      "file": "tests/unit/components/modtools/ModConvertKML.spec.js",
+      "total": 11,
+      "lowValue": 1,
+      "percentage": 9
+    },
+    {
+      "file": "tests/unit/components/ExportPost.spec.js",
+      "total": 26,
+      "lowValue": 2,
+      "percentage": 8
+    },
+    {
+      "file": "tests/unit/components/AboutMeModal.spec.js",
+      "total": 12,
+      "lowValue": 1,
+      "percentage": 8
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogSearch.spec.js",
+      "total": 40,
+      "lowValue": 3,
+      "percentage": 8
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessages.spec.js",
+      "total": 25,
+      "lowValue": 2,
+      "percentage": 8
+    },
+    {
+      "file": "tests/unit/components/DeletedRestore.spec.js",
+      "total": 14,
+      "lowValue": 1,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpammerReport.spec.js",
+      "total": 43,
+      "lowValue": 3,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpamKeywordBadge.spec.js",
+      "total": 15,
+      "lowValue": 1,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingShortlink.spec.js",
+      "total": 14,
+      "lowValue": 1,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteeringModal.spec.js",
+      "total": 28,
+      "lowValue": 2,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "total": 111,
+      "lowValue": 8,
+      "percentage": 7
+    },
+    {
+      "file": "tests/unit/components/GroupMarker.spec.js",
+      "total": 16,
+      "lowValue": 1,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsStandardMessageSet.spec.js",
+      "total": 34,
+      "lowValue": 2,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteeringDetailsButton.spec.js",
+      "total": 18,
+      "lowValue": 1,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMergeButton.spec.js",
+      "total": 17,
+      "lowValue": 1,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentAddModal.spec.js",
+      "total": 48,
+      "lowValue": 3,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/modtools/AutocompleteLocal.spec.js",
+      "total": 16,
+      "lowValue": 1,
+      "percentage": 6
+    },
+    {
+      "file": "tests/unit/components/ExportChat.spec.js",
+      "total": 20,
+      "lowValue": 1,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModWorryWordBadge.spec.js",
+      "total": 21,
+      "lowValue": 1,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportUser.spec.js",
+      "total": 43,
+      "lowValue": 2,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStoryReview.spec.js",
+      "total": 42,
+      "lowValue": 2,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModFindMessage.spec.js",
+      "total": 20,
+      "lowValue": 1,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentEditModal.spec.js",
+      "total": 57,
+      "lowValue": 3,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAdmin.spec.js",
+      "total": 21,
+      "lowValue": 1,
+      "percentage": 5
+    },
+    {
+      "file": "tests/unit/pages/modtools/GiftAid.spec.js",
+      "total": 23,
+      "lowValue": 1,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModZoomStock.spec.js",
+      "total": 28,
+      "lowValue": 1,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogTreeNode.spec.js",
+      "total": 50,
+      "lowValue": 2,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportCheckVolunteers.spec.js",
+      "total": 24,
+      "lowValue": 1,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportAddGroup.spec.js",
+      "total": 48,
+      "lowValue": 2,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteering.spec.js",
+      "total": 27,
+      "lowValue": 1,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModDashboardPopularPosts.spec.js",
+      "total": 27,
+      "lowValue": 1,
+      "percentage": 4
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportMembership.spec.js",
+      "total": 36,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStdMessageModal.spec.js",
+      "total": 60,
+      "lowValue": 2,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModRelatedMember.spec.js",
+      "total": 36,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageMicroVolunteering.spec.js",
+      "total": 33,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMergeMemberModal.spec.js",
+      "total": 31,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberships.spec.js",
+      "total": 29,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberReview.spec.js",
+      "total": 33,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberEngagement.spec.js",
+      "total": 31,
+      "lowValue": 1,
+      "percentage": 3
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogEntry.spec.js",
+      "total": 121,
+      "lowValue": 3,
+      "percentage": 2
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSocialAction.spec.js",
+      "total": 52,
+      "lowValue": 1,
+      "percentage": 2
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsModConfig.spec.js",
+      "total": 59,
+      "lowValue": 1,
+      "percentage": 2
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPostingHistory.spec.js",
+      "total": 61,
+      "lowValue": 1,
+      "percentage": 2
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPhotoModal.spec.js",
+      "total": 46,
+      "lowValue": 1,
+      "percentage": 2
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMember.spec.js",
+      "total": 71,
+      "lowValue": 1,
+      "percentage": 1
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatReview.spec.js",
+      "total": 103,
+      "lowValue": 1,
+      "percentage": 1
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatHeader.spec.js",
+      "total": 72,
+      "lowValue": 1,
+      "percentage": 1
+    }
+  ],
+  "duplicatedNames": [
+    [
+      "shows ",
+      78
+    ],
+    [
+      "returns ",
+      28
+    ],
+    [
+      "displays ",
+      24
+    ],
+    [
+      "selected",
+      22
+    ],
+    [
+      "update:modelValue",
+      9
+    ],
+    [
+      "remove",
+      8
+    ],
+    [
+      "does not show ",
+      6
+    ],
+    [
+      "hidden",
+      6
+    ],
+    [
+      "calls hide when Close button clicked",
+      5
+    ],
+    [
+      "handle",
+      5
+    ],
+    [
+      "skips ourdomain emails",
+      5
+    ],
+    [
+      "fetches user if not already loaded",
+      5
+    ],
+    [
+      "shows data when loading completes",
+      5
+    ],
+    [
+      "accepts null groupid (default)",
+      5
+    ],
+    [
+      "displays user displayname",
+      4
+    ],
+    [
+      "renders a modal",
+      4
+    ],
+    [
+      "shows modal with correct title",
+      4
+    ],
+    [
+      "shows Cancel button",
+      4
+    ],
+    [
+      "id prop is Number type",
+      4
+    ],
+    [
+      "click",
+      4
+    ],
+    [
+      "displays group name",
+      4
+    ],
+    [
+      "displays different group name",
+      4
+    ],
+    [
+      "exposes show method",
+      4
+    ],
+    [
+      "clears timer on unmount",
+      4
+    ],
+    [
+      "does not show modal initially",
+      4
+    ],
+    [
+      "calls callback if provided",
+      4
+    ],
+    [
+      "handles null myGroups gracefully",
+      4
+    ],
+    [
+      "includes wiki link",
+      4
+    ],
+    [
+      "wiki link has correct URL",
+      4
+    ],
+    [
+      "includes ",
+      4
+    ]
+  ],
+  "lowValueTests": [
+    {
+      "file": "tests/unit/pages/modtools/Logs.spec.js",
+      "line": 85,
+      "test": "renders search input in each tab",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/pages/modtools/Logs.spec.js",
+      "line": 229,
+      "test": "starts with busy as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/pages/modtools/GiftAid.spec.js",
+      "line": 158,
+      "test": "has search input",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/NewFreegler.spec.js",
+      "line": 44,
+      "test": "has Privacy link",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/GroupMarker.spec.js",
+      "line": 177,
+      "test": "accepts size prop values",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/GiveAsk.spec.js",
+      "line": 26,
+      "test": "renders two buttons for Give and Ask",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/GiveAsk.spec.js",
+      "line": 32,
+      "test": "renders Give button with gift icon",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/GiveAsk.spec.js",
+      "line": 39,
+      "test": "renders Ask button with shopping-cart icon",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/ExportPost.spec.js",
+      "line": 86,
+      "test": "renders details button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/ExportPost.spec.js",
+      "line": 92,
+      "test": "has export button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/ExportChat.spec.js",
+      "line": 71,
+      "test": "has export button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/DeletedRestore.spec.js",
+      "line": 171,
+      "test": "accepts bottom prop as false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ConfirmModal.spec.js",
+      "line": 68,
+      "test": "renders Cancel button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/ConfirmModal.spec.js",
+      "line": 73,
+      "test": "renders Confirm button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/ChatNotice.spec.js",
+      "line": 173,
+      "test": "accepts variant prop with default info",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ChatNotice.spec.js",
+      "line": 178,
+      "test": "accepts title prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ChatNotice.spec.js",
+      "line": 183,
+      "test": "accepts icon prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ChatNotice.spec.js",
+      "line": 188,
+      "test": "accepts dismissible prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ChatNotVisible.spec.js",
+      "line": 46,
+      "test": "has Settings link",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/ChatMenu.spec.js",
+      "line": 183,
+      "test": "accepts isListItem prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/ChatMenu.spec.js",
+      "line": 188,
+      "test": "accepts isListItem prop as false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/AboutMeModal.spec.js",
+      "line": 145,
+      "test": "accepts review prop as boolean",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModZoomStock.spec.js",
+      "line": 140,
+      "test": "accepts colorClass prop with default value",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModWorryWordBadge.spec.js",
+      "line": 89,
+      "test": "renders delete button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModVolunteerOpportunity.spec.js",
+      "line": 125,
+      "test": "renders Approve button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModVolunteerOpportunity.spec.js",
+      "line": 130,
+      "test": "renders Edit button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModVolunteerOpportunity.spec.js",
+      "line": 135,
+      "test": "renders Delete button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogTreeNode.spec.js",
+      "line": 139,
+      "test": "accepts hideUserColumn prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogTreeNode.spec.js",
+      "line": 144,
+      "test": "accepts hideUserColumn prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogSearch.spec.js",
+      "line": 120,
+      "test": "renders email input",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogSearch.spec.js",
+      "line": 125,
+      "test": "renders IP input",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogSearch.spec.js",
+      "line": 135,
+      "test": "renders search button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogEntry.spec.js",
+      "line": 159,
+      "test": "renders details button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogEntry.spec.js",
+      "line": 166,
+      "test": "accepts count prop with default 1",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSystemLogEntry.spec.js",
+      "line": 171,
+      "test": "accepts hideUserColumn prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportUser.spec.js",
+      "line": 274,
+      "test": "accepts expand prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportUser.spec.js",
+      "line": 279,
+      "test": "accepts expand prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportMembership.spec.js",
+      "line": 435,
+      "test": "renders remove button with correct props",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 150,
+      "test": "renders autocomplete input",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 164,
+      "test": "has loading false by default",
+      "pattern": "/it\\(['\"]has \\w+ (false|true|null) by default/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 171,
+      "test": "starts with loading as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 176,
+      "test": "starts with searchgroup as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 181,
+      "test": "starts with fetchingVolunteers as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 186,
+      "test": "starts with CGAerror as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportFindGroup.spec.js",
+      "line": 191,
+      "test": "starts with DPAerror as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 127,
+      "test": "starts with busy as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 132,
+      "test": "starts with from as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 137,
+      "test": "starts with groupid as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 142,
+      "test": "starts with tryhard as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 147,
+      "test": "starts with confirm as false",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 152,
+      "test": "starts with subject as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 157,
+      "test": "starts with text as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportContactGroup.spec.js",
+      "line": 162,
+      "test": "starts with html as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportCheckVolunteers.spec.js",
+      "line": 68,
+      "test": "starts with emails as null",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportAddGroup.spec.js",
+      "line": 109,
+      "test": "has latitude input field",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSupportAddGroup.spec.js",
+      "line": 115,
+      "test": "has longitude input field",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStoryReview.spec.js",
+      "line": 101,
+      "test": "renders the component when story exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStoryReview.spec.js",
+      "line": 360,
+      "test": "starts with show as true",
+      "pattern": "/it\\(['\"]starts with \\w+ as (null|false|true|0|'')/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStdMessageModal.spec.js",
+      "line": 302,
+      "test": "renders subject input",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModStdMessageModal.spec.js",
+      "line": 664,
+      "test": "accepts stdmsg prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpammerReport.spec.js",
+      "line": 79,
+      "test": "has Cancel button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpammerReport.spec.js",
+      "line": 86,
+      "test": "accepts safelist prop defaulting to false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpammerReport.spec.js",
+      "line": 91,
+      "test": "accepts safelist prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSpamKeywordBadge.spec.js",
+      "line": 78,
+      "test": "renders delete button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSocialAction.spec.js",
+      "line": 151,
+      "test": "renders the component when there are groups to share to",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsStandardMessageSet.spec.js",
+      "line": 148,
+      "test": "accepts locked prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsStandardMessageSet.spec.js",
+      "line": 153,
+      "test": "accepts locked prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsPersonal.spec.js",
+      "line": 142,
+      "test": "renders email input",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsPersonal.spec.js",
+      "line": 182,
+      "test": "renders unsubscribe button with link to /unsubscribe",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsPersonal.spec.js",
+      "line": 402,
+      "test": "renders name input with placeholder",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsPersonal.spec.js",
+      "line": 408,
+      "test": "renders email input with placeholder",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsModConfig.spec.js",
+      "line": 194,
+      "test": "renders Create button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "line": 96,
+      "test": "renders Unlink button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingsGroupFacebook.spec.js",
+      "line": 103,
+      "test": "renders Unlink button with white variant",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModSettingShortlink.spec.js",
+      "line": 27,
+      "test": "renders a link with the correct href",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModRole.spec.js",
+      "line": 116,
+      "test": "accepts required props",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModRelatedMember.spec.js",
+      "line": 102,
+      "test": "renders the card",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPostingHistory.spec.js",
+      "line": 92,
+      "test": "renders the component with border",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPopularPost.spec.js",
+      "line": 141,
+      "test": "renders Share button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPopularPost.spec.js",
+      "line": 146,
+      "test": "renders Hide button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModPhotoModal.spec.js",
+      "line": 150,
+      "test": "has Close button in footer",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteeringModal.spec.js",
+      "line": 91,
+      "test": "renders Cancel button in footer",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteeringModal.spec.js",
+      "line": 99,
+      "test": "renders Cancel button with white variant",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteeringDetailsButton.spec.js",
+      "line": 59,
+      "test": "renders View button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMicrovolunteering.spec.js",
+      "line": 261,
+      "test": "renders message link with id and subject",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessages.spec.js",
+      "line": 215,
+      "test": "accepts editreview prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessages.spec.js",
+      "line": 220,
+      "test": "accepts editreview prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "line": 393,
+      "test": "accepts user prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "line": 399,
+      "test": "accepts message prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "line": 404,
+      "test": "accepts milesaway prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "line": 409,
+      "test": "accepts modinfo prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageUserInfo.spec.js",
+      "line": 414,
+      "test": "accepts groupid prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 155,
+      "test": "accepts expandButtonText prop with default",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 165,
+      "test": "accepts replyable prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 170,
+      "test": "accepts replyable prop as false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 175,
+      "test": "accepts showFreegled prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 180,
+      "test": "accepts showPromised prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 185,
+      "test": "accepts showLocation prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageSummary.spec.js",
+      "line": 190,
+      "test": "accepts preload prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageMicroVolunteering.spec.js",
+      "line": 64,
+      "test": "renders the component with reject result",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageEmailModal.spec.js",
+      "line": 77,
+      "test": "renders the modal component",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageEmailModal.spec.js",
+      "line": 106,
+      "test": "accepts id prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageEmailModal.spec.js",
+      "line": 111,
+      "test": "accepts collection prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessageEmailModal.spec.js",
+      "line": 116,
+      "test": "accepts collection prop with value",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 383,
+      "test": "accepts editreview prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 388,
+      "test": "accepts noactions prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 393,
+      "test": "accepts summary prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 398,
+      "test": "accepts review prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 403,
+      "test": "accepts search prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 408,
+      "test": "accepts next prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMessage.spec.js",
+      "line": 413,
+      "test": "accepts nextAfterRemoved prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMergeMemberModal.spec.js",
+      "line": 96,
+      "test": "has Merge button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMergeButton.spec.js",
+      "line": 37,
+      "test": "renders a button element",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMenuItemLeft.spec.js",
+      "line": 85,
+      "test": "renders a link with the correct href",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMenuItemLeft.spec.js",
+      "line": 221,
+      "test": "accepts required props",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberships.spec.js",
+      "line": 54,
+      "test": "renders the component when user exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberSearchbox.spec.js",
+      "line": 43,
+      "test": "renders search button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberReview.spec.js",
+      "line": 176,
+      "test": "renders the component when member exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMemberEngagement.spec.js",
+      "line": 44,
+      "test": "renders the component when member exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModMember.spec.js",
+      "line": 270,
+      "test": "renders the component when member exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModLogStdMsg.spec.js",
+      "line": 45,
+      "test": "accepts log prop with stdmsg object",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "line": 163,
+      "test": "renders text input for type=",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "line": 169,
+      "test": "renders number input for type=",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "line": 215,
+      "test": "accepts step prop for number input with default of 1",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "line": 225,
+      "test": "accepts rows prop for textarea with default of 3",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSetting.spec.js",
+      "line": 235,
+      "test": "accepts toggleWidth prop with default of 150",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 156,
+      "test": "accepts labelSrOnly prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 161,
+      "test": "accepts modelValue prop with default 0",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 166,
+      "test": "accepts all prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 171,
+      "test": "accepts allMy prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 176,
+      "test": "accepts listall prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 181,
+      "test": "accepts systemwide prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 186,
+      "test": "accepts modonly prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 191,
+      "test": "accepts active prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 196,
+      "test": "accepts size prop with default md",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 201,
+      "test": "accepts work prop with default empty array",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 206,
+      "test": "accepts restrict prop with default true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 211,
+      "test": "accepts remember prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 216,
+      "test": "accepts disabled prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 221,
+      "test": "accepts customName prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 226,
+      "test": "accepts customVal prop with default null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupSelect.spec.js",
+      "line": 231,
+      "test": "accepts urlOverride prop with default false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupRule.spec.js",
+      "line": 108,
+      "test": "renders text input for type=",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupRule.spec.js",
+      "line": 113,
+      "test": "renders number input for type=",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 563,
+      "test": "accepts groups prop defaulting to false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 568,
+      "test": "accepts groups prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 573,
+      "test": "accepts groupid prop defaulting to null",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 578,
+      "test": "accepts groupid prop as number",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 583,
+      "test": "accepts caretaker prop defaulting to false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 588,
+      "test": "accepts caretaker prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 593,
+      "test": "accepts overlaps prop defaulting to false",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModGroupMap.spec.js",
+      "line": 598,
+      "test": "accepts overlaps prop as true",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModFindMessage.spec.js",
+      "line": 40,
+      "test": "renders search button via SpinButton",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModDashboardPopularPosts.spec.js",
+      "line": 192,
+      "test": "renders external links for each post",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModConvertKML.spec.js",
+      "line": 66,
+      "test": "renders Convert button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommunityEvent.spec.js",
+      "line": 142,
+      "test": "renders Approve button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommunityEvent.spec.js",
+      "line": 147,
+      "test": "renders Edit button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommunityEvent.spec.js",
+      "line": 152,
+      "test": "renders Delete button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentEditModal.spec.js",
+      "line": 213,
+      "test": "accepts user prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentEditModal.spec.js",
+      "line": 219,
+      "test": "accepts comment prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentEditModal.spec.js",
+      "line": 228,
+      "test": "accepts groupname prop (optional)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentAddModal.spec.js",
+      "line": 230,
+      "test": "accepts user prop (required)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentAddModal.spec.js",
+      "line": 236,
+      "test": "accepts groupid prop (optional)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModCommentAddModal.spec.js",
+      "line": 246,
+      "test": "accepts groupname prop (optional)",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModClipboard.spec.js",
+      "line": 57,
+      "test": "renders a button element",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatViewButton.spec.js",
+      "line": 44,
+      "test": "renders the button",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatReview.spec.js",
+      "line": 140,
+      "test": "renders the card",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatModal.spec.js",
+      "line": 177,
+      "test": "renders the modal with correct id",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatModal.spec.js",
+      "line": 190,
+      "test": "has Close button in footer",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatModal.spec.js",
+      "line": 549,
+      "test": "accepts id prop as required Number",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatModal.spec.js",
+      "line": 555,
+      "test": "accepts pov prop as required Number",
+      "pattern": "/it\\(['\"]accepts \\w+ prop/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModChatHeader.spec.js",
+      "line": 204,
+      "test": "renders the component when chat exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModBanMemberModal.spec.js",
+      "line": 69,
+      "test": "has Ban button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModBanMemberConfirmModal.spec.js",
+      "line": 113,
+      "test": "has Ban button",
+      "pattern": "/it\\(['\"]has \\w+ (button|link|input)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAffiliationConfirmModal.spec.js",
+      "line": 65,
+      "test": "renders the modal when group exists",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAdmin.spec.js",
+      "line": 124,
+      "test": "renders the card",
+      "pattern": "/it\\(['\"]renders the (component|modal|card)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAddMemberModal.spec.js",
+      "line": 66,
+      "test": "renders email input when not added",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/ModAddMemberModal.spec.js",
+      "line": 71,
+      "test": "renders Add button when not added",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    },
+    {
+      "file": "tests/unit/components/modtools/AutocompleteLocal.spec.js",
+      "line": 30,
+      "test": "renders an input element",
+      "pattern": "/it\\(['\"]renders \\w+ (input|button|link|element)/i"
+    }
+  ]
+}

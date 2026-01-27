@@ -65,94 +65,92 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
+import { useNuxtApp } from '#app'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupname: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  emits: ['hidden', 'added'],
-  setup() {
-    const { bump, context } = setupModMembers()
-    const { modal, hide } = useOurModal()
-    return { bump, context, modal, hide }
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      user1: null,
-      user2: null,
-      user3: null,
-      user4: null,
-      user5: null,
-      user6: null,
-      user7: null,
-      user8: null,
-      user9: null,
-      user10: null,
-      user11: null,
-      placeholders: [
-        null,
-        'Add a comment about this member here',
-        '...and more information here',
-        '...and here',
-        '...you get the idea',
-      ],
-      flag: false,
-    }
+  groupname: {
+    type: String,
+    required: false,
+    default: null,
   },
-  methods: {
-    onHide() {
-      this.$emit('hidden')
-    },
-    toggleFlag() {
-      this.flag = !this.flag
-    },
-    async save() {
-      // Go direct to API because comments aren't in the Store separately.
-      await this.$api.comment.add({
-        userid: this.user.id,
-        groupid: this.groupid,
-        user1: this.user1,
-        user2: this.user2,
-        user3: this.user3,
-        user4: this.user4,
-        user5: this.user5,
-        user6: this.user6,
-        user7: this.user7,
-        user8: this.user8,
-        user9: this.user9,
-        user10: this.user10,
-        user11: this.user11,
-        flag: this.flag,
-      })
+})
 
-      const userStore = useUserStore()
-      await userStore.fetchMT({
-        id: this.user.id,
-        emailhistory: true,
-      })
-      this.context = null
-      this.bump++
+const emit = defineEmits(['hidden', 'added'])
 
-      this.$emit('added')
-      this.hide()
-    },
-  },
+const { $api } = useNuxtApp()
+const userStore = useUserStore()
+const { bump, context } = setupModMembers()
+const { modal, hide } = useOurModal()
+
+const user1 = ref(null)
+const user2 = ref(null)
+const user3 = ref(null)
+const user4 = ref(null)
+const user5 = ref(null)
+const user6 = ref(null)
+const user7 = ref(null)
+const user8 = ref(null)
+const user9 = ref(null)
+const user10 = ref(null)
+const user11 = ref(null)
+const placeholders = [
+  null,
+  'Add a comment about this member here',
+  '...and more information here',
+  '...and here',
+  '...you get the idea',
+]
+const flag = ref(false)
+
+function onHide() {
+  emit('hidden')
+}
+
+function toggleFlag() {
+  flag.value = !flag.value
+}
+
+async function save() {
+  // Go direct to API because comments aren't in the Store separately.
+  await $api.comment.add({
+    userid: props.user.id,
+    groupid: props.groupid,
+    user1: user1.value,
+    user2: user2.value,
+    user3: user3.value,
+    user4: user4.value,
+    user5: user5.value,
+    user6: user6.value,
+    user7: user7.value,
+    user8: user8.value,
+    user9: user9.value,
+    user10: user10.value,
+    user11: user11.value,
+    flag: flag.value,
+  })
+
+  await userStore.fetchMT({
+    id: props.user.id,
+    emailhistory: true,
+  })
+  context.value = null
+  bump.value++
+
+  emit('added')
+  hide()
 }
 </script>

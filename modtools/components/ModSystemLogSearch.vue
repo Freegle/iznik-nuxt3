@@ -144,251 +144,183 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 import { useSystemLogsStore } from '../stores/systemlogs'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    userid: {
-      type: [Number, String],
-      default: null,
-    },
-    groupid: {
-      type: [Number, String],
-      default: null,
-    },
-    msgid: {
-      type: [Number, String],
-      default: null,
-    },
+const props = defineProps({
+  userid: {
+    type: [Number, String],
+    default: null,
   },
-  emits: [
-    'search',
-    'refresh',
-    'clear-user',
-    'clear-group',
-    'clear-msg',
-    'update:userid',
-    'update:groupid',
-    'update:msgid',
-    'expand-all',
-  ],
-  setup() {
-    const systemLogsStore = useSystemLogsStore()
-    const userStore = useUserStore()
-    return { systemLogsStore, userStore }
+  groupid: {
+    type: [Number, String],
+    default: null,
   },
-  data() {
-    return {
-      userIdInput: '',
-      msgIdInput: '',
-      groupIdInput: '',
-      ipInput: '',
-      emailInput: '',
-      lookingUpEmail: false,
-      emailLookupError: null,
-      timeOptions: [
-        { value: '1h', label: 'Last hour' },
-        { value: '24h', label: 'Last day' },
-        { value: '7d', label: 'Last week' },
-        { value: '30d', label: 'Last month' },
-        { value: '365d', label: 'Last year' },
-        { value: 'ever', label: 'All time' },
-      ],
+  msgid: {
+    type: [Number, String],
+    default: null,
+  },
+})
+
+const emit = defineEmits([
+  'search',
+  'refresh',
+  'clear-user',
+  'clear-group',
+  'clear-msg',
+  'update:userid',
+  'update:groupid',
+  'update:msgid',
+  'expand-all',
+])
+
+const systemLogsStore = useSystemLogsStore()
+const userStore = useUserStore()
+
+const userIdInput = ref('')
+const msgIdInput = ref('')
+const groupIdInput = ref('')
+const ipInput = ref('')
+const emailInput = ref('')
+const lookingUpEmail = ref(false)
+const emailLookupError = ref(null)
+const timeOptions = [
+  { value: '1h', label: 'Last hour' },
+  { value: '24h', label: 'Last day' },
+  { value: '7d', label: 'Last week' },
+  { value: '30d', label: 'Last month' },
+  { value: '365d', label: 'Last year' },
+  { value: 'ever', label: 'All time' },
+]
+
+const timeRange = computed({
+  get() {
+    return systemLogsStore.timeRange
+  },
+  set(value) {
+    systemLogsStore.setTimeRange(value)
+  },
+})
+
+const showPolling = computed({
+  get() {
+    return systemLogsStore.showPolling
+  },
+  set(value) {
+    systemLogsStore.setShowPolling(value)
+  },
+})
+
+const loading = computed(() => systemLogsStore.loading)
+
+const timeRangeLabel = computed(() => {
+  const option = timeOptions.find((o) => o.value === timeRange.value)
+  return option ? option.label : 'Time'
+})
+
+watch(
+  () => props.userid,
+  (val) => {
+    userIdInput.value = val || ''
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.groupid,
+  (val) => {
+    groupIdInput.value = val || ''
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.msgid,
+  (val) => {
+    msgIdInput.value = val || ''
+  },
+  { immediate: true }
+)
+
+async function doSearch() {
+  // If email is entered, clear user ID first then look up to get the correct user ID
+  if (emailInput.value.trim()) {
+    userIdInput.value = ''
+    await lookupEmail()
+    // Even if user not found, we still search by email address
+  }
+
+  // Apply ID filters before searching
+  if (userIdInput.value) {
+    emit('update:userid', parseInt(userIdInput.value, 10))
+  } else {
+    emit('update:userid', null)
+  }
+  if (msgIdInput.value) {
+    emit('update:msgid', parseInt(msgIdInput.value, 10))
+  } else {
+    emit('update:msgid', null)
+  }
+  if (groupIdInput.value) {
+    emit('update:groupid', parseInt(groupIdInput.value, 10))
+  } else {
+    emit('update:groupid', null)
+  }
+  if (ipInput.value) {
+    systemLogsStore.setIpFilter(ipInput.value.trim())
+  } else {
+    systemLogsStore.setIpFilter(null)
+  }
+  // Set email filter to search by email address in logs (in addition to user ID)
+  if (emailInput.value.trim()) {
+    systemLogsStore.setEmailFilter(emailInput.value.trim())
+  } else {
+    systemLogsStore.setEmailFilter(null)
+  }
+  emit('search')
+}
+
+function setTimeRange(value) {
+  systemLogsStore.setTimeRange(value)
+  emit('search')
+}
+
+async function lookupEmail() {
+  const email = emailInput.value.trim()
+  if (!email) {
+    return
+  }
+
+  lookingUpEmail.value = true
+  emailLookupError.value = null
+
+  try {
+    userStore.clear()
+    await userStore.fetchMT({
+      search: email,
+      emailhistory: true,
+    })
+
+    const users = Object.values(userStore.list)
+    if (users.length === 0) {
+      emailLookupError.value =
+        'No user found for this email - searching by email only.'
+    } else if (users.length === 1) {
+      userIdInput.value = users[0].id.toString()
+      // Keep email in field - we'll search by BOTH user ID and email
+    } else {
+      userIdInput.value = users[0].id.toString()
+      // Keep email in field - we'll search by BOTH user ID and email
+      emailLookupError.value = `Found ${users.length} users, using first: #${users[0].id}`
     }
-  },
-  computed: {
-    timeRange: {
-      get() {
-        return this.systemLogsStore.timeRange
-      },
-      set(value) {
-        this.systemLogsStore.setTimeRange(value)
-      },
-    },
-    sortDirection: {
-      get() {
-        return this.systemLogsStore.sortDirection
-      },
-      set(value) {
-        this.systemLogsStore.setSortDirection(value)
-      },
-    },
-    showPolling: {
-      get() {
-        return this.systemLogsStore.showPolling
-      },
-      set(value) {
-        this.systemLogsStore.setShowPolling(value)
-      },
-    },
-    traceId() {
-      return this.systemLogsStore.traceId
-    },
-    sessionId() {
-      return this.systemLogsStore.sessionId
-    },
-    ipAddress() {
-      return this.systemLogsStore.ipAddress
-    },
-    loading() {
-      return this.systemLogsStore.loading
-    },
-    timeRangeLabel() {
-      const option = this.timeOptions.find((o) => o.value === this.timeRange)
-      return option ? option.label : 'Time'
-    },
-    hasActiveFilters() {
-      return (
-        this.userid ||
-        this.groupid ||
-        this.msgid ||
-        this.traceId ||
-        this.sessionId ||
-        this.ipAddress
-      )
-    },
-  },
-  watch: {
-    userid: {
-      immediate: true,
-      handler(val) {
-        this.userIdInput = val || ''
-      },
-    },
-    groupid: {
-      immediate: true,
-      handler(val) {
-        this.groupIdInput = val || ''
-      },
-    },
-    msgid: {
-      immediate: true,
-      handler(val) {
-        this.msgIdInput = val || ''
-      },
-    },
-  },
-  methods: {
-    async doSearch() {
-      // If email is entered, clear user ID first then look up to get the correct user ID
-      if (this.emailInput.trim()) {
-        this.userIdInput = ''
-        await this.lookupEmail()
-        // Even if user not found, we still search by email address
-      }
-
-      // Apply ID filters before searching
-      if (this.userIdInput) {
-        this.$emit('update:userid', parseInt(this.userIdInput, 10))
-      } else {
-        this.$emit('update:userid', null)
-      }
-      if (this.msgIdInput) {
-        this.$emit('update:msgid', parseInt(this.msgIdInput, 10))
-      } else {
-        this.$emit('update:msgid', null)
-      }
-      if (this.groupIdInput) {
-        this.$emit('update:groupid', parseInt(this.groupIdInput, 10))
-      } else {
-        this.$emit('update:groupid', null)
-      }
-      if (this.ipInput) {
-        this.systemLogsStore.setIpFilter(this.ipInput.trim())
-      } else {
-        this.systemLogsStore.setIpFilter(null)
-      }
-      // Set email filter to search by email address in logs (in addition to user ID)
-      if (this.emailInput.trim()) {
-        this.systemLogsStore.setEmailFilter(this.emailInput.trim())
-      } else {
-        this.systemLogsStore.setEmailFilter(null)
-      }
-      this.$emit('search')
-    },
-    setTimeRange(value) {
-      this.systemLogsStore.setTimeRange(value)
-      this.$emit('search')
-    },
-    clearUserFilter() {
-      this.userIdInput = ''
-      this.$emit('clear-user')
-    },
-    clearMsgFilter() {
-      this.msgIdInput = ''
-      this.$emit('clear-msg')
-    },
-    clearGroupFilter() {
-      this.groupIdInput = ''
-      this.$emit('clear-group')
-    },
-    clearTraceFilter() {
-      this.systemLogsStore.setTraceFilter(null)
-      this.$emit('search')
-    },
-    clearSessionFilter() {
-      this.systemLogsStore.setSessionFilter(null)
-      this.$emit('search')
-    },
-    clearIpFilter() {
-      this.ipInput = ''
-      this.systemLogsStore.setIpFilter(null)
-      this.$emit('search')
-    },
-    clearAllFilters() {
-      this.userIdInput = ''
-      this.msgIdInput = ''
-      this.groupIdInput = ''
-      this.ipInput = ''
-      this.emailInput = ''
-      this.emailLookupError = null
-      this.systemLogsStore.setTraceFilter(null)
-      this.systemLogsStore.setSessionFilter(null)
-      this.systemLogsStore.setIpFilter(null)
-      this.systemLogsStore.setEmailFilter(null)
-      this.$emit('clear-user')
-      this.$emit('clear-group')
-      this.$emit('clear-msg')
-      this.$emit('search')
-    },
-    async lookupEmail() {
-      const email = this.emailInput.trim()
-      if (!email) {
-        return
-      }
-
-      this.lookingUpEmail = true
-      this.emailLookupError = null
-
-      try {
-        this.userStore.clear()
-        await this.userStore.fetchMT({
-          search: email,
-          emailhistory: true,
-        })
-
-        const users = Object.values(this.userStore.list)
-        if (users.length === 0) {
-          this.emailLookupError =
-            'No user found for this email - searching by email only.'
-        } else if (users.length === 1) {
-          this.userIdInput = users[0].id.toString()
-          // Keep email in field - we'll search by BOTH user ID and email
-        } else {
-          this.userIdInput = users[0].id.toString()
-          // Keep email in field - we'll search by BOTH user ID and email
-          this.emailLookupError = `Found ${users.length} users, using first: #${users[0].id}`
-        }
-      } catch (e) {
-        console.error('Email lookup failed:', e)
-        this.emailLookupError = 'Failed to lookup email.'
-      } finally {
-        this.lookingUpEmail = false
-      }
-    },
-  },
+  } catch (e) {
+    console.error('Email lookup failed:', e)
+    emailLookupError.value = 'Failed to lookup email.'
+  } finally {
+    lookingUpEmail.value = false
+  }
 }
 </script>
 

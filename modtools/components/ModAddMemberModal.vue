@@ -46,43 +46,38 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useMemberStore } from '~/stores/member'
 import { useUserStore } from '~/stores/user'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { modal, show, hide } = useOurModal()
-    return { memberStore, userStore, modal, show, hide }
-  },
-  data: function () {
-    return {
-      email: null,
-      addedId: null,
-    }
-  },
-  methods: {
-    async add() {
-      this.addedId = await this.userStore.add({
-        email: this.email,
-      })
+})
 
-      if (this.addedId) {
-        await this.memberStore.add({
-          userid: this.addedId,
-          groupid: this.groupid,
-        })
-      }
-    },
-  },
+const memberStore = useMemberStore()
+const userStore = useUserStore()
+const { modal, show, hide } = useOurModal()
+
+const email = ref(null)
+const addedId = ref(null)
+
+async function add() {
+  addedId.value = await userStore.add({
+    email: email.value,
+  })
+
+  if (addedId.value) {
+    await memberStore.add({
+      userid: addedId.value,
+      groupid: props.groupid,
+    })
+  }
 }
+
+defineExpose({ show, hide })
 </script>

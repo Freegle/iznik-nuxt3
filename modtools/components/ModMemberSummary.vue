@@ -82,81 +82,75 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
-export default {
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
+
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
-  },
-  data: function () {
-    return {
-      type: null,
-      showPostingHistoryModal: false,
-      showLogsModal: false,
+})
+
+const userStore = useUserStore()
+
+const history = ref(null)
+const logs = ref(null)
+
+const type = ref(null)
+const showPostingHistoryModal = ref(false)
+const showLogsModal = ref(false)
+
+function countType(typeToCount) {
+  let count = 0
+
+  if (props.member && props.member.messagehistory) {
+    props.member.messagehistory.forEach((entry) => {
+      if (entry.type === typeToCount && entry.daysago < 31 && !entry.deleted) {
+        count++
+      }
+    })
+  }
+
+  return count
+}
+
+const offers = computed(() => countType('Offer'))
+const wanteds = computed(() => countType('Wanted'))
+
+const userinfo = computed(() => {
+  if (props.member.info) {
+    return props.member.info
+  }
+  const user = userStore.byId(props.member.userid)
+  if (user && user.info) {
+    return user.info
+  }
+
+  return null
+})
+
+onMounted(() => {
+  if (props.member.id) {
+    if (!userStore.byId(props.member.id)) {
+      userStore.fetchMT({
+        id: props.member.id,
+        info: true,
+        emailhistory: true,
+      })
     }
-  },
-  computed: {
-    offers() {
-      return this.countType('Offer')
-    },
-    wanteds() {
-      return this.countType('Wanted')
-    },
-    userinfo() {
-      if (this.member.info) {
-        return this.member.info
-      }
-      const user = this.userStore.byId(this.member.userid)
-      if (user && user.info) {
-        return user.info
-      }
+  }
+})
 
-      return null
-    },
-  },
-  mounted() {
-    if (this.member.id) {
-      if (!this.userStore.byId(this.member.id)) {
-        this.userStore.fetchMT({
-          id: this.member.id,
-          info: true,
-          emailhistory: true,
-        })
-      }
-    }
-  },
-  methods: {
-    countType(type) {
-      let count = 0
+function showHistory(typeArg = null) {
+  type.value = typeArg
+  showPostingHistoryModal.value = true
+  history.value?.show()
+}
 
-      if (this.member && this.member.messagehistory) {
-        this.member.messagehistory.forEach((entry) => {
-          if (entry.type === type && entry.daysago < 31 && !entry.deleted) {
-            count++
-          }
-        })
-      }
-
-      return count
-    },
-    showHistory(type = null) {
-      this.type = type
-      this.showPostingHistoryModal = true
-      this.$refs.history?.show()
-    },
-    showModmails() {
-      this.modmailsonly = true
-
-      this.showLogsModal = true
-      this.$refs.logs?.show()
-    },
-  },
+function showModmails() {
+  showLogsModal.value = true
+  logs.value?.show()
 }
 </script>

@@ -65,6 +65,14 @@
   </client-only>
 </template>
 <script setup>
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  defineAsyncComponent,
+} from '#imports'
 import ModChatHeader from '~/modtools/components/ModChatHeader'
 import ModChatFooter from '~/modtools/components/ModChatFooter'
 import ChatTypingIndicator from '~/components/ChatTypingIndicator'
