@@ -567,22 +567,25 @@ describe('ModSettingsGroup', () => {
       })
     })
 
-    describe('photoProcessed', () => {
-      it('sets uploadingProfile to false and updates group when image provided', async () => {
+    describe('profileAtts watcher', () => {
+      it('sets uploadingProfile to false and updates group when attachment added', async () => {
         const wrapper = mountComponent()
         wrapper.vm.uploadingProfile = true
         wrapper.vm.groupid = 123
 
-        // With null imageid - just resets uploading flag
-        wrapper.vm.photoProcessed(null)
+        // With empty array - just resets uploading flag
+        wrapper.vm.profileAtts = []
+        await wrapper.vm.$nextTick()
         expect(wrapper.vm.uploadingProfile).toBe(false)
         expect(mockModGroupStore.updateMT).not.toHaveBeenCalled()
 
         // Reset uploading flag for next test
         wrapper.vm.uploadingProfile = true
 
-        // With valid imageid - also calls updateMT
-        await wrapper.vm.photoProcessed(456)
+        // With valid attachment - also calls updateMT
+        wrapper.vm.profileAtts = [{ id: 456 }]
+        await wrapper.vm.$nextTick()
+        await wrapper.vm.$nextTick() // Extra tick for watcher to process
         expect(wrapper.vm.uploadingProfile).toBe(false)
         expect(mockModGroupStore.updateMT).toHaveBeenCalledWith({
           id: 123,
