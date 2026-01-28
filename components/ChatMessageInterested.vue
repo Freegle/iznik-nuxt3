@@ -21,10 +21,28 @@
           class="mt-1 mb-2"
         />
         <div>
-          <!-- eslint-disable-next-line -->
-          <span v-if="(chatmessage.secondsago < 60) || (chatmessage.id > chat.lastmsgseen)" class="prewrap font-weight-bold" v-html="emessage" />
-          <!-- eslint-disable-next-line -->
-          <span v-else class="preline forcebreak" v-html="emessage" />
+          <!-- ModTools: clickable links enabled -->
+          <template v-if="isModTools">
+            <span
+              v-if="
+                chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
+              "
+              class="prewrap font-weight-bold"
+              v-html="linkifiedMessage"
+            />
+            <span v-else class="preline forcebreak" v-html="linkifiedMessage" />
+          </template>
+          <!-- Freegle: no clickable links for safety -->
+          <template v-else>
+            <span
+              v-if="
+                chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
+              "
+              class="prewrap font-weight-bold"
+              >{{ emessage }}</span
+            >
+            <span v-else class="preline forcebreak">{{ emessage }}</span>
+          </template>
           <b-img
             v-if="chatmessage.image"
             fluid
@@ -97,53 +115,105 @@
       <div v-else>
         <ChatMessageSummary v-if="refmsgid" :id="refmsgid" class="mt-1 mb-2" />
         <div>
-          <span v-if="!highlightEmails">
-            <span
-              v-if="
-                chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
-              "
-              class="prewrap font-weight-bold"
-              >{{ emessage }}</span
-            >
-            <span v-else class="preline forcebreak">{{ emessage }}</span>
-            <b-img
-              v-if="chatmessage.image"
-              fluid
-              :src="chatmessage.image.path"
-              lazy
-              rounded
-            />
-          </span>
-          <span v-else>
-            <span
-              v-if="
-                chatmessage.secondsago < 60 || chatmessage.id > chat.lastmsgseen
-              "
-              class="font-weight-bold"
-            >
-              <Highlighter
-                :text-to-highlight="emessage"
-                :search-words="[regexEmail]"
-                highlight-class-name="highlight"
-                class="prewrap"
+          <!-- ModTools: clickable links enabled -->
+          <template v-if="isModTools">
+            <span v-if="!highlightEmails">
+              <span
+                v-if="
+                  chatmessage.secondsago < 60 ||
+                  chatmessage.id > chat.lastmsgseen
+                "
+                class="prewrap font-weight-bold"
+                v-html="linkifiedMessage"
+              />
+              <span
+                v-else
+                class="preline forcebreak"
+                v-html="linkifiedMessage"
+              />
+              <b-img
+                v-if="chatmessage.image"
+                fluid
+                :src="chatmessage.image.path"
+                lazy
+                rounded
               />
             </span>
             <span v-else>
-              <Highlighter
-                :text-to-highlight="emessage"
-                :search-words="[regexEmail]"
-                highlight-class-name="highlight"
+              <span
+                v-if="
+                  chatmessage.secondsago < 60 ||
+                  chatmessage.id > chat.lastmsgseen
+                "
+                class="prewrap font-weight-bold"
+                v-html="linkifiedAndHighlightedMessage"
+              />
+              <span
+                v-else
                 class="preline forcebreak"
+                v-html="linkifiedAndHighlightedMessage"
+              />
+              <b-img
+                v-if="chatmessage.image"
+                fluid
+                :src="chatmessage.image.path"
+                lazy
+                rounded
               />
             </span>
-            <b-img
-              v-if="chatmessage.image"
-              fluid
-              :src="chatmessage.image.path"
-              lazy
-              rounded
-            />
-          </span>
+          </template>
+          <!-- Freegle: no clickable links for safety -->
+          <template v-else>
+            <span v-if="!highlightEmails">
+              <span
+                v-if="
+                  chatmessage.secondsago < 60 ||
+                  chatmessage.id > chat.lastmsgseen
+                "
+                class="prewrap font-weight-bold"
+                >{{ emessage }}</span
+              >
+              <span v-else class="preline forcebreak">{{ emessage }}</span>
+              <b-img
+                v-if="chatmessage.image"
+                fluid
+                :src="chatmessage.image.path"
+                lazy
+                rounded
+              />
+            </span>
+            <span v-else>
+              <span
+                v-if="
+                  chatmessage.secondsago < 60 ||
+                  chatmessage.id > chat.lastmsgseen
+                "
+                class="font-weight-bold"
+              >
+                <Highlighter
+                  :text-to-highlight="emessage"
+                  :search-words="[regexEmail]"
+                  highlight-class-name="highlight"
+                  class="prewrap"
+                />
+              </span>
+              <span v-else>
+                <Highlighter
+                  :text-to-highlight="emessage"
+                  :search-words="[regexEmail]"
+                  highlight-class-name="highlight"
+                  class="preline forcebreak"
+                />
+              </span>
+              <b-img
+                v-if="chatmessage.image"
+                fluid
+                :src="chatmessage.image.path"
+                lazy
+                rounded
+              />
+            </span>
+          </template>
         </div>
       </div>
     </div>
@@ -155,12 +225,17 @@ import {
   fetchReferencedMessage,
   useChatMessageBase,
 } from '~/composables/useChat'
+import {
+  linkifyText,
+  linkifyAndHighlightEmails,
+} from '~/composables/useLinkify'
 import { useMessageStore } from '~/stores/message'
 import { ref, onMounted, computed } from '#imports'
 import ProfileImage from '~/components/ProfileImage'
 import ChatMessageSummary from '~/components/ChatMessageSummary'
 import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
+import { useMiscStore } from '~/stores/misc'
 
 const OutcomeModal = defineAsyncComponent(() =>
   import('~/components/OutcomeModal')
@@ -192,6 +267,7 @@ const props = defineProps({
 
 const messageStore = useMessageStore()
 const chatStore = useChatStore()
+const miscStore = useMiscStore()
 const { myid } = useMe()
 
 // Data properties
@@ -220,6 +296,19 @@ const refmsgid = computed(() => {
 const refmsg = computed(() => {
   if (chatmessage.value?.refmsg) return chatmessage.value.refmsg
   return refmsgid.value ? messageStore.byId(refmsgid.value) : null
+})
+
+// In ModTools, we make URLs clickable. In Freegle, we don't for safety reasons.
+const isModTools = computed(() => miscStore.modtools)
+
+// Linkified message for ModTools (without email highlighting)
+const linkifiedMessage = computed(() => {
+  return linkifyText(emessage.value)
+})
+
+// Linkified message with email highlighting for ModTools chat review
+const linkifiedAndHighlightedMessage = computed(() => {
+  return linkifyAndHighlightEmails(emessage.value, regexEmail.value)
 })
 
 // Methods
@@ -263,3 +352,20 @@ onMounted(async () => {
   await fetchReferencedMessage(props.chatid, props.id)
 })
 </script>
+<style scoped lang="scss">
+/* Chat link styling for ModTools - uses :deep() since content is rendered via v-html */
+:deep(.chat-link) {
+  color: $color-blue--base;
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+/* Email highlight styling for ModTools - matches the Highlighter component */
+:deep(.highlight) {
+  color: $color-blue--base;
+  background-color: initial;
+}
+</style>

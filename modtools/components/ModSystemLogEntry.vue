@@ -512,8 +512,8 @@
   </div>
 </template>
 
-<script>
-import { useSystemLogsStore } from '../stores/systemlogs'
+<script setup>
+import { ref, computed, watch } from 'vue'
 import {
   formatLogText,
   getLogLevelClass,
@@ -525,474 +525,500 @@ import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
 import api from '~/api'
 
-export default {
-  props: {
-    log: {
-      type: Object,
-      required: true,
-    },
-    count: {
-      type: Number,
-      default: 1,
-    },
-    firstTimestamp: {
-      type: String,
-      default: null,
-    },
-    lastTimestamp: {
-      type: String,
-      default: null,
-    },
-    entries: {
-      type: Array,
-      default: () => [],
-    },
-    hideUserColumn: {
-      type: Boolean,
-      default: false,
-    },
+const props = defineProps({
+  log: {
+    type: Object,
+    required: true,
   },
-  emits: ['filter-trace', 'filter-session', 'filter-ip'],
-  setup() {
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
-    const systemLogsStore = useSystemLogsStore()
-    return { userStore, groupStore, systemLogsStore }
+  count: {
+    type: Number,
+    default: 1,
   },
-  data() {
-    return {
-      userLoading: false,
-      groupLoading: false,
-      isExpanded: false,
-      showModal: false,
-      // API headers (fetched on demand for v1 API logs)
-      apiHeaders: null,
-      headersLoading: false,
-      headersError: null,
+  firstTimestamp: {
+    type: String,
+    default: null,
+  },
+  lastTimestamp: {
+    type: String,
+    default: null,
+  },
+  entries: {
+    type: Array,
+    default: () => [],
+  },
+  hideUserColumn: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const emit = defineEmits(['filter-trace', 'filter-session', 'filter-ip'])
+
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+
+const userLoading = ref(false)
+const groupLoading = ref(false)
+const isExpanded = ref(false)
+const showModal = ref(false)
+// API headers (fetched on demand for v1 API logs)
+const apiHeaders = ref(null)
+const headersLoading = ref(false)
+const headersError = ref(null)
+
+const formattedTime = computed(() => {
+  return formatLogTimestamp(props.log.timestamp, 'short')
+})
+
+const fullTimestamp = computed(() => {
+  return formatLogTimestamp(props.log.timestamp, 'full')
+})
+
+const firstTime = computed(() => {
+  return formatLogTimestamp(
+    props.firstTimestamp || props.log.timestamp,
+    'short'
+  )
+})
+
+const lastTime = computed(() => {
+  return formatLogTimestamp(props.lastTimestamp || props.log.timestamp, 'short')
+})
+
+const sourceLabel = computed(() => {
+  // For logs_table, determine if this is a user action or a mod action.
+  // User actions: User type logs where byuser_id equals user_id or is null.
+  // Mod actions: Logs where byuser_id differs from user_id (mod acting on user).
+  if (props.log.source === 'logs_table') {
+    const isModAction =
+      props.log.byuser_id &&
+      props.log.user_id &&
+      props.log.byuser_id !== props.log.user_id
+    return isModAction ? 'Mod' : 'User'
+  }
+
+  // Laravel batch logs - show as "Email" since they're mostly email-related
+  if (props.log.source === 'laravel-batch') {
+    return 'Email'
+  }
+
+  const labels = {
+    api: 'API',
+    api_headers: 'Hdrs',
+    client: 'User',
+    email: 'Email',
+    batch: 'Batch',
+  }
+  return labels[props.log.source] || props.log.source
+})
+
+const sourceVariant = computed(() => {
+  // For logs_table, use primary (blue) for user actions, secondary (gray) for mod actions.
+  if (props.log.source === 'logs_table') {
+    const isModAction =
+      props.log.byuser_id &&
+      props.log.user_id &&
+      props.log.byuser_id !== props.log.user_id
+    return isModAction ? 'secondary' : 'primary'
+  }
+  // Laravel batch logs are email-related, use success (green)
+  if (props.log.source === 'laravel-batch') {
+    return 'success'
+  }
+  return getLogSourceVariant(props.log.source)
+})
+
+const levelClass = computed(() => {
+  return getLogLevelClass(props.log)
+})
+
+const actionText = computed(() => {
+  return formatLogText(props.log)
+})
+
+const actionTextClean = computed(() => {
+  // Remove duration from action text (we display it separately)
+  let text = actionText.value.replace(/\s*\(\d+ms\)\s*$/, '').trim()
+
+  // Enrich with actual entity names where we have them
+  // Replace user #ID with username
+  if (displayUser.value?.displayname) {
+    text = text.replace(
+      new RegExp(`user #${props.log.user_id}\\b`, 'gi'),
+      displayUser.value.displayname
+    )
+  }
+
+  // Replace group #ID with group name
+  if (displayGroup.value?.nameshort) {
+    text = text.replace(
+      new RegExp(`group #${props.log.group_id}\\b`, 'gi'),
+      displayGroup.value.nameshort
+    )
+  }
+
+  return text
+})
+
+const duration = computed(() => {
+  // Extract duration from action text or raw data
+  const match = actionText.value.match(/\((\d+ms)\)/)
+  if (match) return match[1]
+  const raw = props.log.raw || {}
+  if (raw.duration_ms) return `${Math.round(raw.duration_ms)}ms`
+  return null
+})
+
+const rawApiCall = computed(() => {
+  // Show raw API call for API source logs
+  if (props.log.source !== 'api') return null
+  const raw = props.log.raw || {}
+  const method = raw.method || 'GET'
+  // v2 uses 'path' (e.g., "/apiv2/messages"), v1 uses 'call' (e.g., "messages")
+  let endpoint = raw.endpoint || raw.path || raw.call
+  if (!endpoint) return null
+  // Ensure endpoint starts with a slash and has proper prefix
+  if (!endpoint.startsWith('/')) {
+    // v1 API - add /api/ prefix
+    endpoint = '/api/' + endpoint
+  }
+  return `${method} ${endpoint}`
+})
+
+const entryClass = computed(() => {
+  const classes = []
+  // For API logs, only show error styling for actual server errors:
+  // - HTTP 5xx status codes only
+  // Normal responses like "not logged in" (ret=1) are NOT errors.
+  if (props.log.source === 'api') {
+    const raw = props.log.raw || {}
+    const statusCode = raw.status_code || raw.status || 200
+    if (statusCode >= 500) {
+      classes.push('log-error')
+    }
+  } else if (props.log.level === 'error') {
+    classes.push('log-error')
+  } else if (props.log.level === 'warn') {
+    classes.push('log-warn')
+  }
+  return classes
+})
+
+const displayUser = computed(() => {
+  if (props.log.user_id) {
+    return userStore.list[props.log.user_id]
+  }
+  return null
+})
+
+const byUser = computed(() => {
+  if (props.log.byuser_id) {
+    return userStore.list[props.log.byuser_id]
+  }
+  return null
+})
+
+const displayGroup = computed(() => {
+  if (props.log.group_id) {
+    return groupStore.list[props.log.group_id]
+  }
+  return null
+})
+
+const messageSubject = computed(() => {
+  // Try to get subject from raw data
+  const raw = props.log.raw || {}
+  return raw.message?.subject || raw.subject || null
+})
+
+const formattedRaw = computed(() => {
+  return JSON.stringify(props.log.raw || {}, null, 2)
+})
+
+const ipAddress = computed(() => {
+  const raw = props.log.raw || {}
+  const ip = raw.ip || raw.ip_address || raw.client_ip || null
+  // Filter out placeholder addresses that aren't useful.
+  if (ip === '0.0.0.0' || ip === '::') {
+    return null
+  }
+  return ip
+})
+
+const sessionUrl = computed(() => {
+  // Get the page URL from client logs.
+  const raw = props.log.raw || {}
+  return raw.url || null
+})
+
+const sessionUrlDisplay = computed(() => {
+  // Show a shortened version of the URL (pathname only).
+  if (!sessionUrl.value) return null
+  try {
+    const url = new URL(sessionUrl.value)
+    // Show pathname, truncated if long.
+    const path = url.pathname + url.search
+    return path.length > 50 ? path.substring(0, 47) + '...' : path
+  } catch {
+    return sessionUrl.value.substring(0, 50)
+  }
+})
+
+const queryParams = computed(() => {
+  const raw = props.log.raw || {}
+  return raw.query_params || null
+})
+
+const requestBody = computed(() => {
+  const raw = props.log.raw || {}
+  return raw.request_body || null
+})
+
+const responseBody = computed(() => {
+  const raw = props.log.raw || {}
+  return raw.response_body || null
+})
+
+// Check if this is an API log (headers are logged separately for both v1 and v2)
+const isApiLog = computed(() => {
+  return props.log.source === 'api'
+})
+
+// Get the request_id for correlation with headers
+const requestId = computed(() => {
+  const raw = props.log.raw || {}
+  return raw.request_id || null
+})
+
+/* Device info parsing for session_start and client logs */
+const deviceInfo = computed(() => {
+  const raw = props.log.raw || {}
+  const ua = raw.user_agent || props.log.user_agent || ''
+  if (!ua) return null
+
+  const info = {
+    type: 'desktop',
+    typeIcon: 'desktop',
+    browser: 'unknown',
+    browserIcon: 'globe-europe',
+    os: 'unknown',
+    screenSize: null,
+  }
+
+  // Detect device type
+  if (/mobile|android.*mobile|iphone|ipod/i.test(ua)) {
+    info.type = 'mobile'
+    info.typeIcon = 'mobile-alt'
+  } else if (/tablet|ipad|android(?!.*mobile)/i.test(ua)) {
+    info.type = 'tablet'
+    info.typeIcon = 'tablet-alt'
+  }
+
+  // Detect browser - use FontAwesome brand icons.
+  if (/edg/i.test(ua)) {
+    info.browser = 'Edge'
+    info.browserIcon = ['fab', 'edge']
+  } else if (/chrome/i.test(ua) && !/edg/i.test(ua)) {
+    info.browser = 'Chrome'
+    info.browserIcon = ['fab', 'chrome']
+  } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
+    info.browser = 'Safari'
+    info.browserIcon = ['fab', 'safari']
+  } else if (/firefox/i.test(ua)) {
+    info.browser = 'Firefox'
+    info.browserIcon = ['fab', 'firefox-browser']
+  }
+
+  // Detect OS
+  if (/windows/i.test(ua)) {
+    info.os = 'Windows'
+  } else if (/macintosh|mac os/i.test(ua)) {
+    info.os = 'macOS'
+  } else if (/iphone|ipad|ipod/i.test(ua)) {
+    info.os = 'iOS'
+  } else if (/android/i.test(ua)) {
+    info.os = 'Android'
+  } else if (/linux/i.test(ua)) {
+    info.os = 'Linux'
+  }
+
+  // Get screen size from raw data (session_start logs)
+  if (raw.viewport_width && raw.viewport_height) {
+    info.screenSize = `${raw.viewport_width}×${raw.viewport_height}`
+  }
+
+  // Get app-specific info
+  if (raw.app_platform) {
+    info.isApp = true
+    info.appPlatform = raw.app_platform
+    info.appModel = raw.app_model
+    info.appManufacturer = raw.app_manufacturer
+    info.appVersion = raw.app_version || null
+  }
+
+  return info
+})
+
+const hasDeviceInfo = computed(() => {
+  return (
+    deviceInfo.value &&
+    (deviceInfo.value.browser !== 'unknown' || deviceInfo.value.screenSize)
+  )
+})
+
+const sentryEventId = computed(() => {
+  // Get Sentry event ID from raw data for error logs.
+  const raw = props.log.raw || {}
+  return raw.sentry_event_id || null
+})
+
+const sentryUrl = computed(() => {
+  // Generate Sentry URL for the event.
+  if (!sentryEventId.value) return null
+  // Freegle Sentry organization and project.
+  return `https://freegle.sentry.io/issues/?query=${sentryEventId.value}`
+})
+
+const laravelLevel = computed(() => {
+  return parseLaravelLogLevel(props.log)
+})
+
+watch(
+  () => props.log.user_id,
+  (id) => {
+    if (id && !userStore.list[id]) {
+      fetchUser(id)
     }
   },
-  computed: {
-    formattedTime() {
-      return formatLogTimestamp(this.log.timestamp, 'short')
-    },
-    fullTimestamp() {
-      return formatLogTimestamp(this.log.timestamp, 'full')
-    },
-    firstTime() {
-      return formatLogTimestamp(
-        this.firstTimestamp || this.log.timestamp,
-        'short'
-      )
-    },
-    lastTime() {
-      return formatLogTimestamp(
-        this.lastTimestamp || this.log.timestamp,
-        'short'
-      )
-    },
-    sourceLabel() {
-      // For logs_table, determine if this is a user action or a mod action.
-      // User actions: User type logs where byuser_id equals user_id or is null.
-      // Mod actions: Logs where byuser_id differs from user_id (mod acting on user).
-      if (this.log.source === 'logs_table') {
-        const isModAction =
-          this.log.byuser_id &&
-          this.log.user_id &&
-          this.log.byuser_id !== this.log.user_id
-        return isModAction ? 'Mod' : 'User'
-      }
+  { immediate: true }
+)
 
-      // Laravel batch logs - show as "Email" since they're mostly email-related
-      if (this.log.source === 'laravel-batch') {
-        return 'Email'
-      }
-
-      const labels = {
-        api: 'API',
-        api_headers: 'Hdrs',
-        client: 'User',
-        email: 'Email',
-        batch: 'Batch',
-      }
-      return labels[this.log.source] || this.log.source
-    },
-    sourceVariant() {
-      // For logs_table, use primary (blue) for user actions, secondary (gray) for mod actions.
-      if (this.log.source === 'logs_table') {
-        const isModAction =
-          this.log.byuser_id &&
-          this.log.user_id &&
-          this.log.byuser_id !== this.log.user_id
-        return isModAction ? 'secondary' : 'primary'
-      }
-      // Laravel batch logs are email-related, use success (green)
-      if (this.log.source === 'laravel-batch') {
-        return 'success'
-      }
-      return getLogSourceVariant(this.log.source)
-    },
-    levelClass() {
-      return getLogLevelClass(this.log)
-    },
-    actionText() {
-      return formatLogText(this.log)
-    },
-    actionTextClean() {
-      // Remove duration from action text (we display it separately)
-      let text = this.actionText.replace(/\s*\(\d+ms\)\s*$/, '').trim()
-
-      // Enrich with actual entity names where we have them
-      // Replace user #ID with username
-      if (this.displayUser?.displayname) {
-        text = text.replace(
-          new RegExp(`user #${this.log.user_id}\\b`, 'gi'),
-          this.displayUser.displayname
-        )
-      }
-
-      // Replace group #ID with group name
-      if (this.displayGroup?.nameshort) {
-        text = text.replace(
-          new RegExp(`group #${this.log.group_id}\\b`, 'gi'),
-          this.displayGroup.nameshort
-        )
-      }
-
-      return text
-    },
-    duration() {
-      // Extract duration from action text or raw data
-      const match = this.actionText.match(/\((\d+ms)\)/)
-      if (match) return match[1]
-      const raw = this.log.raw || {}
-      if (raw.duration_ms) return `${Math.round(raw.duration_ms)}ms`
-      return null
-    },
-    rawApiCall() {
-      // Show raw API call for API source logs
-      if (this.log.source !== 'api') return null
-      const raw = this.log.raw || {}
-      const method = raw.method || 'GET'
-      // v2 uses 'path' (e.g., "/apiv2/messages"), v1 uses 'call' (e.g., "messages")
-      let endpoint = raw.endpoint || raw.path || raw.call
-      if (!endpoint) return null
-      // Ensure endpoint starts with a slash and has proper prefix
-      if (!endpoint.startsWith('/')) {
-        // v1 API - add /api/ prefix
-        endpoint = '/api/' + endpoint
-      }
-      return `${method} ${endpoint}`
-    },
-    entryClass() {
-      const classes = []
-      // For API logs, only show error styling for actual server errors:
-      // - HTTP 5xx status codes only
-      // Normal responses like "not logged in" (ret=1) are NOT errors.
-      if (this.log.source === 'api') {
-        const raw = this.log.raw || {}
-        const statusCode = raw.status_code || raw.status || 200
-        if (statusCode >= 500) {
-          classes.push('log-error')
-        }
-      } else if (this.log.level === 'error') {
-        classes.push('log-error')
-      } else if (this.log.level === 'warn') {
-        classes.push('log-warn')
-      }
-      return classes
-    },
-    displayUser() {
-      if (this.log.user_id) {
-        return this.userStore.list[this.log.user_id]
-      }
-      return null
-    },
-    byUser() {
-      if (this.log.byuser_id) {
-        return this.userStore.list[this.log.byuser_id]
-      }
-      return null
-    },
-    displayGroup() {
-      if (this.log.group_id) {
-        return this.groupStore.list[this.log.group_id]
-      }
-      return null
-    },
-    messageSubject() {
-      // Try to get subject from raw data
-      const raw = this.log.raw || {}
-      return raw.message?.subject || raw.subject || null
-    },
-    formattedRaw() {
-      return JSON.stringify(this.log.raw || {}, null, 2)
-    },
-    ipAddress() {
-      const raw = this.log.raw || {}
-      const ip = raw.ip || raw.ip_address || raw.client_ip || null
-      // Filter out placeholder addresses that aren't useful.
-      if (ip === '0.0.0.0' || ip === '::') {
-        return null
-      }
-      return ip
-    },
-    sessionUrl() {
-      // Get the page URL from client logs.
-      const raw = this.log.raw || {}
-      return raw.url || null
-    },
-    sessionUrlDisplay() {
-      // Show a shortened version of the URL (pathname only).
-      if (!this.sessionUrl) return null
-      try {
-        const url = new URL(this.sessionUrl)
-        // Show pathname, truncated if long.
-        const path = url.pathname + url.search
-        return path.length > 50 ? path.substring(0, 47) + '...' : path
-      } catch {
-        return this.sessionUrl.substring(0, 50)
-      }
-    },
-    queryParams() {
-      const raw = this.log.raw || {}
-      return raw.query_params || null
-    },
-    requestBody() {
-      const raw = this.log.raw || {}
-      return raw.request_body || null
-    },
-    responseBody() {
-      const raw = this.log.raw || {}
-      return raw.response_body || null
-    },
-    // Check if this is an API log (headers are logged separately for both v1 and v2)
-    isApiLog() {
-      return this.log.source === 'api'
-    },
-    // Get the request_id for correlation with headers
-    requestId() {
-      const raw = this.log.raw || {}
-      return raw.request_id || null
-    },
-    /* Device info parsing for session_start and client logs */
-    deviceInfo() {
-      const raw = this.log.raw || {}
-      const ua = raw.user_agent || this.log.user_agent || ''
-      if (!ua) return null
-
-      const info = {
-        type: 'desktop',
-        typeIcon: 'desktop',
-        browser: 'unknown',
-        browserIcon: 'globe-europe',
-        os: 'unknown',
-        screenSize: null,
-      }
-
-      // Detect device type
-      if (/mobile|android.*mobile|iphone|ipod/i.test(ua)) {
-        info.type = 'mobile'
-        info.typeIcon = 'mobile-alt'
-      } else if (/tablet|ipad|android(?!.*mobile)/i.test(ua)) {
-        info.type = 'tablet'
-        info.typeIcon = 'tablet-alt'
-      }
-
-      // Detect browser - use FontAwesome brand icons.
-      if (/edg/i.test(ua)) {
-        info.browser = 'Edge'
-        info.browserIcon = ['fab', 'edge']
-      } else if (/chrome/i.test(ua) && !/edg/i.test(ua)) {
-        info.browser = 'Chrome'
-        info.browserIcon = ['fab', 'chrome']
-      } else if (/safari/i.test(ua) && !/chrome/i.test(ua)) {
-        info.browser = 'Safari'
-        info.browserIcon = ['fab', 'safari']
-      } else if (/firefox/i.test(ua)) {
-        info.browser = 'Firefox'
-        info.browserIcon = ['fab', 'firefox-browser']
-      }
-
-      // Detect OS
-      if (/windows/i.test(ua)) {
-        info.os = 'Windows'
-      } else if (/macintosh|mac os/i.test(ua)) {
-        info.os = 'macOS'
-      } else if (/iphone|ipad|ipod/i.test(ua)) {
-        info.os = 'iOS'
-      } else if (/android/i.test(ua)) {
-        info.os = 'Android'
-      } else if (/linux/i.test(ua)) {
-        info.os = 'Linux'
-      }
-
-      // Get screen size from raw data (session_start logs)
-      if (raw.viewport_width && raw.viewport_height) {
-        info.screenSize = `${raw.viewport_width}×${raw.viewport_height}`
-      }
-
-      // Get app-specific info
-      if (raw.app_platform) {
-        info.isApp = true
-        info.appPlatform = raw.app_platform
-        info.appModel = raw.app_model
-        info.appManufacturer = raw.app_manufacturer
-        info.appVersion = raw.app_version || null
-      }
-
-      return info
-    },
-    hasDeviceInfo() {
-      return (
-        this.deviceInfo &&
-        (this.deviceInfo.browser !== 'unknown' || this.deviceInfo.screenSize)
-      )
-    },
-    sentryEventId() {
-      // Get Sentry event ID from raw data for error logs.
-      const raw = this.log.raw || {}
-      return raw.sentry_event_id || null
-    },
-    sentryUrl() {
-      // Generate Sentry URL for the event.
-      if (!this.sentryEventId) return null
-      // Freegle Sentry organization and project.
-      return `https://freegle.sentry.io/issues/?query=${this.sentryEventId}`
-    },
-    laravelLevel() {
-      return parseLaravelLogLevel(this.log)
-    },
+watch(
+  () => props.log.byuser_id,
+  (id) => {
+    if (id && !userStore.list[id]) {
+      fetchUser(id)
+    }
   },
-  watch: {
-    'log.user_id': {
-      immediate: true,
-      handler(id) {
-        if (id && !this.userStore.list[id]) {
-          this.fetchUser(id)
-        }
-      },
-    },
-    'log.byuser_id': {
-      immediate: true,
-      handler(id) {
-        if (id && !this.userStore.list[id]) {
-          this.fetchUser(id)
-        }
-      },
-    },
-    'log.group_id': {
-      immediate: true,
-      handler(id) {
-        if (id && !this.groupStore.list[id]) {
-          this.fetchGroup(id)
-        }
-      },
-    },
-    showModal(newVal) {
-      // Fetch headers when modal opens for API logs
-      if (newVal && this.isApiLog && !this.apiHeaders && !this.headersLoading) {
-        this.fetchApiHeaders()
-      }
-    },
+  { immediate: true }
+)
+
+watch(
+  () => props.log.group_id,
+  (id) => {
+    if (id && !groupStore.list[id]) {
+      fetchGroup(id)
+    }
   },
-  methods: {
-    async fetchUser(id) {
-      if (!id) return
-      this.userLoading = true
-      try {
-        await this.userStore.fetch(id)
-      } catch (e) {
-        console.error('Failed to fetch user', id, e)
-      } finally {
-        this.userLoading = false
+  { immediate: true }
+)
+
+watch(showModal, (newVal) => {
+  // Fetch headers when modal opens for API logs
+  if (newVal && isApiLog.value && !apiHeaders.value && !headersLoading.value) {
+    fetchApiHeaders()
+  }
+})
+
+async function fetchUser(id) {
+  if (!id) return
+  userLoading.value = true
+  try {
+    await userStore.fetch(id)
+  } catch (e) {
+    console.error('Failed to fetch user', id, e)
+  } finally {
+    userLoading.value = false
+  }
+}
+
+async function fetchGroup(id) {
+  if (!id) return
+  groupLoading.value = true
+  try {
+    await groupStore.fetch(id)
+  } catch (e) {
+    console.error('Failed to fetch group', id, e)
+  } finally {
+    groupLoading.value = false
+  }
+}
+
+function formatEntryTime(timestamp) {
+  return formatLogTimestamp(timestamp, 'short')
+}
+
+function formatEntryText(entry) {
+  return formatLogText(entry)
+}
+
+function formatJson(data) {
+  return JSON.stringify(data, null, 2)
+}
+
+function toggleExpanded() {
+  isExpanded.value = !isExpanded.value
+}
+
+function filterByIp() {
+  emit('filter-ip', ipAddress.value)
+}
+
+function filterByTraceAndClose() {
+  showModal.value = false
+  emit('filter-trace', props.log.trace_id)
+}
+
+function filterBySessionAndClose() {
+  showModal.value = false
+  emit('filter-session', props.log.session_id)
+}
+
+function filterByIpAndClose() {
+  showModal.value = false
+  emit('filter-ip', ipAddress.value)
+}
+
+async function fetchApiHeaders() {
+  if (!isApiLog.value) return
+
+  headersLoading.value = true
+  headersError.value = null
+
+  try {
+    const config = useRuntimeConfig()
+
+    let response
+    if (requestId.value) {
+      // Use request_id for precise correlation
+      response = await api(config).systemlogs.fetchHeadersByRequestId(
+        requestId.value
+      )
+    } else {
+      // Fallback to timestamp-based matching for older logs
+      const raw = props.log.raw || {}
+      response = await api(config).systemlogs.fetchHeadersByTimestamp(
+        props.log.timestamp,
+        raw.endpoint || raw.call,
+        props.log.user_id
+      )
+    }
+
+    if (response.logs && response.logs.length > 0) {
+      // Find the best match (by request_id if available)
+      const match = requestId.value
+        ? response.logs.find((l) => l.raw?.request_id === requestId.value)
+        : response.logs[0]
+      if (match) {
+        apiHeaders.value = match.raw || {}
       }
-    },
-    async fetchGroup(id) {
-      if (!id) return
-      this.groupLoading = true
-      try {
-        await this.groupStore.fetch(id)
-      } catch (e) {
-        console.error('Failed to fetch group', id, e)
-      } finally {
-        this.groupLoading = false
-      }
-    },
-    formatEntryTime(timestamp) {
-      return formatLogTimestamp(timestamp, 'short')
-    },
-    formatEntryText(entry) {
-      return formatLogText(entry)
-    },
-    formatJson(data) {
-      return JSON.stringify(data, null, 2)
-    },
-    toggleExpanded() {
-      this.isExpanded = !this.isExpanded
-    },
-    filterByTrace() {
-      this.$emit('filter-trace', this.log.trace_id)
-    },
-    filterBySession() {
-      this.$emit('filter-session', this.log.session_id)
-    },
-    filterByIp() {
-      this.$emit('filter-ip', this.ipAddress)
-    },
-    filterByTraceAndClose() {
-      this.showModal = false
-      this.$emit('filter-trace', this.log.trace_id)
-    },
-    filterBySessionAndClose() {
-      this.showModal = false
-      this.$emit('filter-session', this.log.session_id)
-    },
-    filterByIpAndClose() {
-      this.showModal = false
-      this.$emit('filter-ip', this.ipAddress)
-    },
-    async fetchApiHeaders() {
-      if (!this.isApiLog) return
-
-      this.headersLoading = true
-      this.headersError = null
-
-      try {
-        const config = useRuntimeConfig()
-
-        let response
-        if (this.requestId) {
-          // Use request_id for precise correlation
-          response = await api(config).systemlogs.fetchHeadersByRequestId(
-            this.requestId
-          )
-        } else {
-          // Fallback to timestamp-based matching for older logs
-          const raw = this.log.raw || {}
-          response = await api(config).systemlogs.fetchHeadersByTimestamp(
-            this.log.timestamp,
-            raw.endpoint || raw.call,
-            this.log.user_id
-          )
-        }
-
-        if (response.logs && response.logs.length > 0) {
-          // Find the best match (by request_id if available)
-          const match = this.requestId
-            ? response.logs.find((l) => l.raw?.request_id === this.requestId)
-            : response.logs[0]
-          if (match) {
-            this.apiHeaders = match.raw || {}
-          }
-        }
-      } catch (e) {
-        console.error('Failed to fetch API headers', e)
-        this.headersError = e.message || 'Failed to fetch headers'
-      } finally {
-        this.headersLoading = false
-      }
-    },
-  },
+    }
+  } catch (e) {
+    console.error('Failed to fetch API headers', e)
+    headersError.value = e.message || 'Failed to fetch headers'
+  } finally {
+    headersLoading.value = false
+  }
 }
 </script>
 

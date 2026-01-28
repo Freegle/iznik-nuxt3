@@ -36,108 +36,101 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useLogsStore } from '~/stores/logs'
 import { useMemberStore } from '~/stores/member'
-import InfiniteLoading from '~/components/InfiniteLoading'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: { InfiniteLoading },
-  props: {
-    userid: {
-      type: Number,
-      required: true,
-    },
-    modmailsonly: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  userid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    const logsStore = useLogsStore()
-    const memberStore = useMemberStore()
-    const { modal, hide } = useOurModal()
-    return { logsStore, memberStore, userStore, modal, hide }
+  modmailsonly: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data: function () {
-    return {
-      busy: false,
-      context: null,
-      bump: 0,
+})
+
+const userStore = useUserStore()
+const logsStore = useLogsStore()
+const memberStore = useMemberStore()
+const { modal, hide } = useOurModal()
+
+const busy = ref(false)
+const context = ref(null)
+const bump = ref(0)
+
+const logs = computed(() => logsStore.list)
+
+const user = computed(() => {
+  let ret = null
+  let u = userStore?.byId(props.userid)
+
+  if (u) {
+    if (u && u.info) {
+      ret = u
+    } else {
+      u = memberStore.getByUserId(props.userid)
+
+      if (u && u.info) {
+        ret = u
+      }
     }
-  },
-  computed: {
-    logs() {
-      return this.logsStore.list
-    },
-    user() {
-      let ret = null
-      let user = this.userStore?.byId(this.userid)
+  }
 
-      if (user) {
-        if (user && user.info) {
-          ret = user
-        } else {
-          user = this.memberStore.getByUserId(this.userid)
+  return ret
+})
 
-          if (user && user.info) {
-            ret = user
-          }
-        }
-      }
+const title = computed(() => {
+  let ret
 
-      return ret
-    },
-    title() {
-      let ret
+  if (props.modmailsonly) {
+    ret = 'Modmails '
+  } else {
+    ret = 'Logs '
+  }
 
-      if (this.modmailsonly) {
-        ret = 'Modmails '
-      } else {
-        ret = 'Logs '
-      }
+  ret += user.value ? 'for ' + user.value.displayname : ''
 
-      ret += this.user ? 'for ' + this.user.displayname : ''
+  return ret
+})
 
-      return ret
-    },
-  },
-  mounted() {
-    this.logsStore.clear()
-  },
-  methods: {
-    show() {
-      // Clear the log context - otherwise if we open another modal for this user then it will get confused and
-      // fetch from a previous context and show no logs.
-      this.logsStore.clear()
-      this.bump++
-      this.modal.show()
-    },
-    async fetchChunk($state) {
-      this.busy = true
-      const currentCount = this.logs.length
-      // console.log('MLM fetchChunk',currentCount,this.userid,this.context,this.modmailsonly)
-
-      this.context = await this.logsStore.fetch({
-        logtype: 'user',
-        userid: this.userid,
-        context: this.context,
-        modmailsonly: this.modmailsonly,
-      })
-
-      if (this.logs.length === currentCount) {
-        // We've returned less than a chunk, so we must be done.
-        $state.complete()
-      } else {
-        $state.loaded()
-      }
-
-      this.busy = false
-    },
-  },
+function show() {
+  // Clear the log context - otherwise if we open another modal for this user then it will get confused and
+  // fetch from a previous context and show no logs.
+  logsStore.clear()
+  bump.value++
+  modal.value.show()
 }
+
+async function fetchChunk($state) {
+  busy.value = true
+  const currentCount = logs.value.length
+
+  context.value = await logsStore.fetch({
+    logtype: 'user',
+    userid: props.userid,
+    context: context.value,
+    modmailsonly: props.modmailsonly,
+  })
+
+  if (logs.value.length === currentCount) {
+    // We've returned less than a chunk, so we must be done.
+    $state.complete()
+  } else {
+    $state.loaded()
+  }
+
+  busy.value = false
+}
+
+onMounted(() => {
+  logsStore.clear()
+})
+
+defineExpose({ show, hide })
 </script>

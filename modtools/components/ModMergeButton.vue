@@ -10,17 +10,12 @@
     />
   </div>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      showMergeMemberModal: false,
-    }
-  },
-  methods: {
-    mergeMember() {
-      this.showMergeMemberModal = true
-    },
-  },
+<script setup>
+import { ref } from 'vue'
+
+const showMergeMemberModal = ref(false)
+
+function mergeMember() {
+  showMergeMemberModal.value = true
 }
 </script>

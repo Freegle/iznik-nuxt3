@@ -268,6 +268,7 @@ export default defineNuxtConfig({
     'nuxt-vite-legacy',
     '@bootstrap-vue-next/nuxt',
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
+    // @nuxt/test-utils/module is added automatically by vitest config
     // We are using Playwire so we don't load AdSense ourselves.
     // [
     //   '@nuxtjs/google-adsense',
@@ -291,7 +292,8 @@ export default defineNuxtConfig({
     },
     close: (nuxt) => {
       // Required to stop build hanging - see https://github.com/nuxt/cli/issues/193
-      if (!nuxt.options._prepare) {
+      // Skip in test mode to avoid killing vitest
+      if (!nuxt.options._prepare && config.NODE_ENV !== 'test') {
         process.exit()
       }
     },
@@ -460,57 +462,60 @@ export default defineNuxtConfig({
       },
     },
     plugins:
-      config.ISAPP && production
-        ? [
-            // App builds with Sentry: include chunk splitting for better loading
-            splitVendorChunkPlugin(),
-            sentryVitePlugin({
-              org: 'freegle',
-              project: 'capacitor',
-              authToken: config.SENTRY_AUTH_TOKEN,
-              // For non-strict mode (debug builds), log errors but don't fail the build
-              errorHandler: config.SENTRY_STRICT
-                ? undefined // Use default (throw on error)
-                : (err) => {
-                    console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
+      // Skip heavy plugins during unit testing for faster test startup
+      config.NODE_ENV === 'test'
+        ? []
+        : config.ISAPP && production
+          ? [
+              // App builds with Sentry: include chunk splitting for better loading
+              splitVendorChunkPlugin(),
+              sentryVitePlugin({
+                org: 'freegle',
+                project: 'capacitor',
+                authToken: config.SENTRY_AUTH_TOKEN,
+                // For non-strict mode (debug builds), log errors but don't fail the build
+                errorHandler: config.SENTRY_STRICT
+                  ? undefined // Use default (throw on error)
+                  : (err) => {
+                      console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
+                    },
+                // Disable release management for non-strict mode to avoid API timeouts
+                release: config.SENTRY_STRICT
+                  ? undefined // Use default release management
+                  : { create: false, finalize: false },
+              }),
+            ]
+          : config.ISAPP
+            ? [
+                // App builds without Sentry: still need chunk splitting
+                splitVendorChunkPlugin(),
+              ]
+            : [
+                splitVendorChunkPlugin(),
+                VitePWA({
+                  registerType: 'autoUpdate',
+                  workbox: {
+                    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
                   },
-              // Disable release management for non-strict mode to avoid API timeouts
-              release: config.SENTRY_STRICT
-                ? undefined // Use default release management
-                : { create: false, finalize: false },
-            }),
-          ]
-        : config.ISAPP
-        ? [
-            // App builds without Sentry: still need chunk splitting
-            splitVendorChunkPlugin(),
-          ]
-        : [
-            splitVendorChunkPlugin(),
-            VitePWA({
-              registerType: 'autoUpdate',
-              workbox: {
-                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
-              },
-            }),
-            eslintPlugin({
-              exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
-            }),
-            sentryVitePlugin({
-              org: 'freegle',
-              // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
-              project: config.IS_MT ? 'modtools' : 'nuxt3',
-              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
-              errorHandler: (err) => {
-                // Only log warning for gateway timeouts, fail for other errors
-                if (err.message && err.message.includes('504')) {
-                  console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
-                } else {
-                  throw err
-                }
-              },
-            }),
-          ],
+                }),
+                eslintPlugin({
+                  exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
+                }),
+                sentryVitePlugin({
+                  org: 'freegle',
+                  // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
+                  project: config.IS_MT ? 'modtools' : 'nuxt3',
+                  // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+                  errorHandler: (err) => {
+                    // Only log warning for gateway timeouts, fail for other errors
+                    if (err.message && err.message.includes('504')) {
+                      console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
+                    } else {
+                      throw err
+                    }
+                  },
+                }),
+              ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy

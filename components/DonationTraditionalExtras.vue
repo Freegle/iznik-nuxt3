@@ -3,7 +3,8 @@
     <p class="mt-2 small">
       You'll get a cute little
       <SupporterInfo size="sm" class="d-inline" />
-      badge so that people can see you're a committed freegler.
+      badge for a year so that people can see you're a committed freegler, and
+      we'll turn off ads for a month.
       <!-- eslint-disable-next-line -->
       Anything you can give is very welcome. You can find other ways to donate (e.g. bank transfer or cheque) <nuxt-link no-prefetch to="/donate?noguard=true">here</nuxt-link>.
     </p>

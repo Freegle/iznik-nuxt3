@@ -30,72 +30,63 @@
   </b-badge>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
-export default {
-  name: 'ModWorryWordBadge',
-  props: {
-    worryword: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  worryword: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const systemConfigStore = useSystemConfigStore()
-    return { systemConfigStore }
-  },
-  data() {
-    return {
-      showDeleteConfirm: false,
-      deleteConfirmMessage: '',
-    }
-  },
-  computed: {
-    isLoading() {
-      return this.systemConfigStore.isLoading
-    },
+})
 
-    isRegexPattern() {
-      return this.worryword.keyword.startsWith('REGEX:')
-    },
+const systemConfigStore = useSystemConfigStore()
 
-    displayText() {
-      return this.isRegexPattern
-        ? this.worryword.keyword.substring(6)
-        : this.worryword.keyword
-    },
+const showDeleteConfirm = ref(false)
+const deleteConfirmMessage = ref('')
 
-    worrywordVariant() {
-      // Color-code based on type first, then consider regex
-      const isRegex = this.isRegexPattern
+const isLoading = computed(() => {
+  return systemConfigStore.isLoading
+})
 
-      switch (this.worryword.type) {
-        case 'Regulated':
-          return isRegex ? 'danger' : 'warning'
-        case 'Reportable':
-          return 'danger'
-        case 'Medicine':
-          return 'info'
-        case 'Allowed':
-          return 'success'
-        case 'Review':
-        default:
-          return isRegex ? 'info' : 'secondary'
-      }
-    },
-  },
-  methods: {
-    confirmDelete() {
-      this.deleteConfirmMessage = `Are you sure you want to delete the worry word "${this.worryword.keyword}"? This will affect system-wide message filtering and cannot be undone.`
-      this.showDeleteConfirm = true
-    },
+const isRegexPattern = computed(() => {
+  return props.worryword.keyword.startsWith('REGEX:')
+})
 
-    async handleDelete() {
-      await this.systemConfigStore.deleteWorryword(this.worryword.id)
-      this.showDeleteConfirm = false
-      this.deleteConfirmMessage = ''
-    },
-  },
+const displayText = computed(() => {
+  return isRegexPattern.value
+    ? props.worryword.keyword.substring(6)
+    : props.worryword.keyword
+})
+
+const worrywordVariant = computed(() => {
+  // Color-code based on type first, then consider regex
+  const isRegex = isRegexPattern.value
+
+  switch (props.worryword.type) {
+    case 'Regulated':
+      return isRegex ? 'danger' : 'warning'
+    case 'Reportable':
+      return 'danger'
+    case 'Medicine':
+      return 'info'
+    case 'Allowed':
+      return 'success'
+    case 'Review':
+    default:
+      return isRegex ? 'info' : 'secondary'
+  }
+})
+
+function confirmDelete() {
+  deleteConfirmMessage.value = `Are you sure you want to delete the worry word "${props.worryword.keyword}"? This will affect system-wide message filtering and cannot be undone.`
+  showDeleteConfirm.value = true
+}
+
+async function handleDelete() {
+  await systemConfigStore.deleteWorryword(props.worryword.id)
+  showDeleteConfirm.value = false
+  deleteConfirmMessage.value = ''
 }
 </script>

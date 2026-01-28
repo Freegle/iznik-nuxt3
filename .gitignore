@@ -38,6 +38,7 @@ public/js/prebid-base-*
 *.sh
 *.txt
 !VERSION.txt
+!public/.well-known/security.txt
 resources
 save
 /playwright-report/

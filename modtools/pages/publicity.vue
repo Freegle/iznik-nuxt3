@@ -19,42 +19,39 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { usePublicityStore } from '@/stores/publicity'
 
-export default {
-  setup() {
-    const publicityStore = usePublicityStore()
-    return { publicityStore }
-  },
-  computed: {
-    items() {
-      const items = this.publicityStore.list
+const publicityStore = usePublicityStore()
 
-      if (items) {
-        return Object.values(items).sort(function (a, b) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
-        })
-      }
+const items = computed(() => {
+  const itemList = publicityStore.list
 
-      return []
-    },
-    popularPosts() {
-      const items = this.publicityStore.popularposts
+  if (itemList) {
+    return Object.values(itemList).sort(function (a, b) {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
+  }
 
-      if (items) {
-        return Object.values(items).sort(function (a, b) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime()
-        })
-      }
+  return []
+})
 
-      return []
-    },
-  },
-  async mounted() {
-    await this.publicityStore.clear()
-    await this.publicityStore.fetch({ reviewed: 0 })
-    console.log('Fetched publicity')
-  },
-}
+const popularPosts = computed(() => {
+  const itemList = publicityStore.popularposts
+
+  if (itemList) {
+    return Object.values(itemList).sort(function (a, b) {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
+  }
+
+  return []
+})
+
+onMounted(async () => {
+  await publicityStore.clear()
+  await publicityStore.fetch({ reviewed: 0 })
+  console.log('Fetched publicity')
+})
 </script>

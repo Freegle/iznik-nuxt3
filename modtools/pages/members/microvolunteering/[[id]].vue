@@ -79,175 +79,182 @@
     </client-only>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
 import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
-export default {
-  components: {
-    GChart,
-  },
-  setup() {
-    const microVolunteeringStore = useMicroVolunteeringStore()
-    return {
-      microVolunteeringStore,
+
+// Stores
+const microVolunteeringStore = useMicroVolunteeringStore()
+
+// Local state (formerly data())
+const groupid = ref(0)
+const busy = ref(true)
+
+// Computed properties
+const activityOptions = computed(() => {
+  return {
+    interpolateNulls: false,
+    legend: { position: 'none' },
+    vAxis: { viewWindow: { min: 0 } },
+    hAxis: {
+      format: 'MMM yyyy',
+    },
+    series: {
+      0: { color: 'blue' },
+    },
+  }
+})
+
+const items = computed(() => {
+  const itemsList = Object.values(microVolunteeringStore.list)
+  itemsList.sort(function (a, b) {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  })
+  return itemsList
+})
+
+const userCounts = computed(() => {
+  const ret = {}
+
+  items.value.forEach((i) => {
+    if (i.user) {
+      if (ret[i.user.id]) {
+        ret[i.user.id]++
+      } else {
+        ret[i.user.id] = 1
+      }
     }
-  },
-  data() {
-    return {
-      groupid: 0,
-      busy: true,
+  })
+
+  const ret2 = []
+
+  for (const r in ret) {
+    if (ret[r]) {
+      ret2.push({
+        userid: r,
+        count: ret[r],
+      })
     }
-  },
-  computed: {
-    activityOptions() {
-      return {
-        interpolateNulls: false,
-        legend: { position: 'none' },
-        vAxis: { viewWindow: { min: 0 } },
-        hAxis: {
-          format: 'MMM yyyy',
-        },
-        series: {
-          0: { color: 'blue' },
-        },
+  }
+
+  ret2.sort(function (a, b) {
+    return b.count - a.count
+  })
+
+  return ret2
+})
+
+const topUsers = computed(() => {
+  return userCounts.value.slice(0, 10)
+})
+
+const userActivity = computed(() => {
+  const ret = {}
+
+  items.value.forEach((i) => {
+    if (i.user) {
+      if (ret[i.user.id]) {
+        ret[i.user.id].push(i)
+      } else {
+        ret[i.user.id] = [i]
       }
-    },
-    items() {
-      const items = Object.values(this.microVolunteeringStore.list)
-      items.sort(function (a, b) {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      })
+    }
+  })
 
-      return items
-    },
-    userCounts() {
-      const ret = {}
+  return ret
+})
 
-      this.items.forEach((i) => {
-        if (i.user) {
-          if (ret[i.user.id]) {
-            ret[i.user.id]++
-          } else {
-            ret[i.user.id] = 1
-          }
-        }
-      })
+// Watchers
+watch(groupid, (newVal) => {
+  microVolunteeringStore.clear()
+  fetchData()
+})
 
-      const ret2 = []
+// Lifecycle
+onMounted(() => {
+  microVolunteeringStore.clear()
+  fetchData()
+})
 
-      for (const r in ret) {
-        if (ret[r]) {
-          ret2.push({
-            userid: r,
-            count: ret[r],
-          })
-        }
-      }
+// Methods
+function fetchData() {
+  busy.value = true
 
-      ret2.sort(function (a, b) {
-        return b.count - a.count
-      })
+  if (groupid.value) {
+    const start = dayjs().subtract(90, 'day').format('YYYY-MM-DD')
 
-      return ret2
-    },
-    topUsers() {
-      return this.userCounts.slice(0, 10)
-    },
-    userActivity() {
-      const ret = {}
+    microVolunteeringStore.fetch({
+      list: true,
+      groupid: groupid.value,
+      limit: 10000,
+      start,
+    })
+  }
 
-      this.items.forEach((i) => {
-        if (i.user) {
-          if (ret[i.user.id]) {
-            ret[i.user.id].push(i)
-          } else {
-            ret[i.user.id] = [i]
-          }
-        }
-      })
-
-      return ret
-    },
-  },
-  watch: {
-    groupid(newVal) {
-      this.microVolunteeringStore.clear()
-      this.fetch()
-    },
-  },
-  mounted() {
-    this.microVolunteeringStore.clear()
-    this.fetch()
-  },
-  methods: {
-    fetch() {
-      this.busy = true
-
-      if (this.groupid) {
-        const start = dayjs().subtract(90, 'day').format('YYYY-MM-DD')
-
-        this.microVolunteeringStore.fetch({
-          list: true,
-          groupid: this.groupid,
-          limit: 10000,
-          start,
-        })
-      }
-
-      this.busy = false
-    },
-    activityData(data) {
-      const dates = []
-
-      // Empty out the series so that we get data at each point.
-      for (let i = 0; i <= 90; i++) {
-        dates[dayjs().subtract(i, 'day').format('YYYY-MM-DD')] = 0
-      }
-
-      data.forEach((d) => {
-        const date = dayjs(d.timestamp).format('YYYY-MM-DD')
-
-        if (!dates[date]) {
-          dates[date] = 0
-        }
-
-        dates[date]++
-      })
-
-      const ret = [['Date', 'Count']]
-
-      for (const date in dates) {
-        ret.push([new Date(date), dates[date]])
-      }
-
-      return ret
-    },
-    accuracy(data) {
-      let right = 0
-      let wrong = 0
-
-      data.forEach((d) => {
-        if (d.score_positive) {
-          right++
-        } else if (d.score_negative) {
-          wrong++
-        }
-      })
-
-      return [right, wrong]
-    },
-    accuracyPercentage(data) {
-      const score = this.accuracy(data)
-      return Math.round((100 * score[0]) / (score[0] + score[1]))
-    },
-    accuracyTotal(data) {
-      const score = this.accuracy(data)
-      return score[0] + score[1]
-    },
-  },
+  busy.value = false
 }
+
+function activityData(data) {
+  const dates = []
+
+  // Empty out the series so that we get data at each point.
+  for (let i = 0; i <= 90; i++) {
+    dates[dayjs().subtract(i, 'day').format('YYYY-MM-DD')] = 0
+  }
+
+  data.forEach((d) => {
+    const date = dayjs(d.timestamp).format('YYYY-MM-DD')
+
+    if (!dates[date]) {
+      dates[date] = 0
+    }
+
+    dates[date]++
+  })
+
+  const ret = [['Date', 'Count']]
+
+  for (const date in dates) {
+    ret.push([new Date(date), dates[date]])
+  }
+
+  return ret
+}
+
+function accuracy(data) {
+  let right = 0
+  let wrong = 0
+
+  data.forEach((d) => {
+    if (d.score_positive) {
+      right++
+    } else if (d.score_negative) {
+      wrong++
+    }
+  })
+
+  return [right, wrong]
+}
+
+function accuracyPercentage(data) {
+  const score = accuracy(data)
+  return Math.round((100 * score[0]) / (score[0] + score[1]))
+}
+
+function accuracyTotal(data) {
+  const score = accuracy(data)
+  return score[0] + score[1]
+}
+
+// Expose fetch method for tests (renamed to avoid conflict with native fetch)
+defineExpose({
+  fetch: fetchData,
+})
 </script>
+
 <style scoped>
 select {
   max-width: 300px;

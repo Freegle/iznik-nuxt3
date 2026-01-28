@@ -86,12 +86,11 @@ test.describe('Homepage tests', () => {
     console.log(`[DEBUG] Navigation completed in ${Date.now() - startTime}ms`)
 
     // Wait for page to fully load - using the new page directly instead of fixture's waitForNuxtPageLoad
+    // Don't use networkidle - the app has background polling that prevents idle state
     console.log(`[DEBUG] Waiting for page load state with 30s timeout`)
     const loadStartTime = Date.now()
     try {
       await page.waitForLoadState('domcontentloaded', { timeout: 30000 })
-      // Also wait for network to settle
-      await page.waitForLoadState('networkidle', { timeout: 30000 })
       console.log(
         `[DEBUG] Page load completed in ${Date.now() - loadStartTime}ms`
       )

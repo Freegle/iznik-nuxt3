@@ -61,17 +61,28 @@ async function clearSessionData(page) {
     }
   })
 
-  // Clear all browser storage
+  // Clear all browser storage and Pinia state
+  // IMPORTANT: Clear localStorage AFTER modifying Pinia stores, because the
+  // persistence plugin may write to localStorage when store values change.
+  // By clearing localStorage last, we ensure all persisted data is removed.
   await page.evaluate(() => {
-    try {
-      localStorage.clear()
-    } catch {
-      // Ignore
-    }
-    try {
-      sessionStorage.clear()
-    } catch {
-      // Ignore
+    // Clear Pinia stores FIRST (this may trigger persistence writes)
+    if (window.$nuxt && window.$nuxt.$pinia) {
+      for (const store of window.$nuxt.$pinia._s.values()) {
+        if (store.$reset) {
+          store.$reset()
+        }
+      }
+      // Explicitly clear loggedInEver which is preserved by auth store's logout()
+      const authStore = window.$nuxt.$pinia._s.get('auth')
+      if (authStore) {
+        authStore.loggedInEver = false
+        authStore.loginCount = 0
+        // Also clear auth tokens
+        authStore.auth = { jwt: null, persistent: null }
+        authStore.user = null
+        authStore.loginStateKnown = false
+      }
     }
 
     // Clear indexedDB
@@ -86,13 +97,18 @@ async function clearSessionData(page) {
         .catch(() => {})
     }
 
-    // Clear Pinia stores if they exist
-    if (window.$nuxt && window.$nuxt.$pinia) {
-      for (const store of window.$nuxt.$pinia._s.values()) {
-        if (store.$reset) {
-          store.$reset()
-        }
-      }
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear()
+    } catch {
+      // Ignore
+    }
+
+    // Clear localStorage LAST to ensure any persistence writes are cleared
+    try {
+      localStorage.clear()
+    } catch {
+      // Ignore
     }
   })
 
@@ -119,8 +135,9 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
 
-      // Wait for network to settle after navigation
-      await page.waitForLoadState('networkidle', {
+      // Wait for DOM to be ready - don't use networkidle as the app has background polling
+      // that can prevent network from becoming idle, causing timeouts in parallel runs
+      await page.waitForLoadState('domcontentloaded', {
         timeout: timeouts.navigation.default,
       })
 
@@ -146,7 +163,8 @@ async function logoutIfLoggedIn(page, navigateToHome = true) {
         await clearSessionData(page)
         // Reload to ensure fresh state
         await page.reload({ timeout: timeouts.navigation.initial })
-        await page.waitForLoadState('networkidle', {
+        // Wait for DOM to be ready - don't use networkidle as the app has background polling
+        await page.waitForLoadState('domcontentloaded', {
           timeout: timeouts.navigation.default,
         })
       }
@@ -286,7 +304,8 @@ async function signUpViaHomepage(
   }
 
   // Wait for page to be fully loaded with JavaScript
-  await page.waitForLoadState('networkidle', {
+  // Don't use networkidle - the app has background polling that prevents idle state
+  await page.waitForLoadState('domcontentloaded', {
     timeout: timeouts.navigation.default,
   })
 
@@ -304,7 +323,7 @@ async function signUpViaHomepage(
   // Wait for login modal to appear
   console.log('Waiting for login modal')
   await page
-    .locator('#loginModal, .modal-dialog:has-text("Let\'s get freegling")')
+    .locator('#loginModal, .modal-dialog:has-text("Join the Reuse Revolution")')
     .first()
     .waitFor({
       state: 'visible',

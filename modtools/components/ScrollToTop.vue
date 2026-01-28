@@ -9,40 +9,39 @@
     </b-button>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    prepend: {
-      type: String,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+defineProps({
+  prepend: {
+    type: String,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      scrollY: 0,
-    }
-  },
-  mounted() {
-    if (process.client) {
-      window.addEventListener('scroll', this.handleScroll)
-    }
-  },
-  beforeUnmount() {
-    if (process.client) {
-      window.removeEventListener('scroll', this.handleScroll)
-      this.scrollY = 0
-    }
-  },
-  methods: {
-    handleScroll(e) {
-      this.scrollY = window.scrollY
-    },
-    scrollToTop() {
-      window.scrollTo(0, 0)
-    },
-  },
+})
+
+const scrollY = ref(0)
+
+function handleScroll() {
+  scrollY.value = window.scrollY
 }
+
+function scrollToTop() {
+  window.scrollTo(0, 0)
+}
+
+onMounted(() => {
+  if (process.client) {
+    window.addEventListener('scroll', handleScroll)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (process.client) {
+    window.removeEventListener('scroll', handleScroll)
+    scrollY.value = 0
+  }
+})
 </script>
 <style>
 .pos {

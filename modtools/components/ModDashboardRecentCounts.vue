@@ -14,16 +14,28 @@
     </p>
   </div>
 </template>
-<script>
-import ModDashboardBase from '~/components/ModDashboardBase'
+<script setup>
+import { useModDashboard } from '~/modtools/composables/useModDashboard'
 
-export default {
-  extends: ModDashboardBase,
-  data: function () {
-    return {
-      askfor: ['RecentCounts'],
-      RecentCounts: null,
-    }
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-}
+  groupName: {
+    type: String,
+    required: true,
+  },
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+})
+
+const { loading, RecentCounts } = useModDashboard(props, ['RecentCounts'])
 </script>

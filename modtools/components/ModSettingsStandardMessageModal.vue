@@ -78,126 +78,126 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { reactive, computed } from 'vue'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useStdmsgStore } from '~/stores/stdmsg'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    types: {
-      type: Array,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  setup() {
-    const modConfigStore = useModConfigStore()
-    const stdmsgStore = useStdmsgStore()
-    const { modal, hide } = useOurModal()
-    const { myid } = useMe()
-    return { modConfigStore, stdmsgStore, modal, hide, myid }
+  types: {
+    type: Array,
+    required: false,
+    default: null,
   },
-  data: function () {
-    const ret = {
-      newmsg: [],
-      options: [
-        { value: null, text: '-- Pending Messages -- ' },
-        { value: 'Approve', text: 'Approve' },
-        { value: 'Reject', text: 'Reject' },
-        { value: 'Leave', text: 'Reply' },
-        { value: 'Edit', text: 'Edit' },
-        { value: 'Hold Message', text: 'Reply and Hold' },
-        { value: null, text: '-- Approved Messages -- ' },
-        { value: 'Delete Approved Message', text: 'Delete' },
-        { value: 'Leave Approved Message', text: 'Reply' },
-        { value: null, text: '-- Approved Members --' },
-        { value: 'Delete Approved Member', text: 'Remove' },
-        { value: 'Leave Approved Member', text: 'Reply' },
-      ],
-    }
+})
 
-    if (this.types) {
-      ret.options = ret.options.filter((o) => this.types.includes(o.value))
-    }
+defineEmits(['hide'])
 
-    return ret
-  },
-  computed: {
-    locked() {
-      return (
-        this.config &&
-        this.config.protected &&
-        parseInt(this.config.createdby) !== this.myid
-      )
-    },
-    config() {
-      return this.modConfigStore.current
-    },
-    stdmsg() {
-      if (!this.id) {
-        // Creating.
-        return this.newmsg
-      } else {
-        // Existing - find it in the config.
-        return this.config
-          ? this.config.stdmsgs.find((s) => {
-              return s.id === this.id
-            })
-          : null
-      }
-    },
-    title() {
-      if (!this.id) {
-        return 'Create a standard message'
-      } else if (this.locked) {
-        return 'View ' + this.stdmsg.title
-      } else {
-        return 'Edit ' + this.stdmsg.title
-      }
-    },
-  },
-  methods: {
-    async show() {
-      // Fetch the current value, if any, before opening the modal.
-      if (this.id) {
-        await this.stdmsgStore.fetch(this.id)
-      }
-      this.modal.show()
-    },
-    hidex() {
-      this.$emit('hide')
-    },
-    async save() {
-      if (!this.id) {
-        await this.stdmsgStore.add({
-          ...this.stdmsg,
-          configid: this.config.id,
+const modConfigStore = useModConfigStore()
+const stdmsgStore = useStdmsgStore()
+const { modal, hide } = useOurModal()
+const { myid } = useMe()
+
+const newmsg = reactive([])
+
+const allOptions = [
+  { value: null, text: '-- Pending Messages -- ' },
+  { value: 'Approve', text: 'Approve' },
+  { value: 'Reject', text: 'Reject' },
+  { value: 'Leave', text: 'Reply' },
+  { value: 'Edit', text: 'Edit' },
+  { value: 'Hold Message', text: 'Reply and Hold' },
+  { value: null, text: '-- Approved Messages -- ' },
+  { value: 'Delete Approved Message', text: 'Delete' },
+  { value: 'Leave Approved Message', text: 'Reply' },
+  { value: null, text: '-- Approved Members --' },
+  { value: 'Delete Approved Member', text: 'Remove' },
+  { value: 'Leave Approved Member', text: 'Reply' },
+]
+
+const options = computed(() => {
+  if (props.types) {
+    return allOptions.filter((o) => props.types.includes(o.value))
+  }
+  return allOptions
+})
+
+const config = computed(() => {
+  return modConfigStore.current
+})
+
+const locked = computed(() => {
+  return (
+    config.value &&
+    config.value.protected &&
+    parseInt(config.value.createdby) !== myid.value
+  )
+})
+
+const stdmsg = computed(() => {
+  if (!props.id) {
+    // Creating.
+    return newmsg
+  } else {
+    // Existing - find it in the config.
+    return config.value
+      ? config.value.stdmsgs.find((s) => {
+          return s.id === props.id
         })
-      } else {
-        await this.stdmsgStore.update({
-          ...this.stdmsg,
-        })
-      }
+      : null
+  }
+})
 
-      this.hide()
-    },
-    async deleteIt() {
-      await this.stdmsgStore.delete({
-        id: this.stdmsg.id,
-        configid: this.config.id,
-      })
+const title = computed(() => {
+  if (!props.id) {
+    return 'Create a standard message'
+  } else if (locked.value) {
+    return 'View ' + stdmsg.value.title
+  } else {
+    return 'Edit ' + stdmsg.value.title
+  }
+})
 
-      this.hide()
-    },
-  },
+async function show() {
+  // Fetch the current value, if any, before opening the modal.
+  if (props.id) {
+    await stdmsgStore.fetch(props.id)
+  }
+  modal.value.show()
 }
+
+async function save() {
+  if (!props.id) {
+    await stdmsgStore.add({
+      ...stdmsg.value,
+      configid: config.value.id,
+    })
+  } else {
+    await stdmsgStore.update({
+      ...stdmsg.value,
+    })
+  }
+
+  hide()
+}
+
+async function deleteIt() {
+  await stdmsgStore.delete({
+    id: stdmsg.value.id,
+    configid: config.value.id,
+  })
+
+  hide()
+}
+
+defineExpose({ show })
 </script>
 <style scoped>
 label {

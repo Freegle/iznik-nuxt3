@@ -15,322 +15,296 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { computed, watch, onMounted } from 'vue'
 import cloneDeep from 'lodash.clonedeep'
 import { useMiscStore } from '~/stores/misc'
-import { useGroupStore } from '~/stores/group'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    /**
-     * Selected value
-     *
-     *   if null
-     *     if   all=true       --> "all groups"
-     *     else all=false      --> "you must select a group"
-     *   else if it's a number --> use that group id
-     *
-     * (0 is not a valid group number)
-     */
-    label: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    labelSrOnly: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    modelValue: {
-      type: Number,
-      default: 0,
-    },
-    // Whether we show "All my groups" or "Please choose a group"
-    all: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    allMy: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    // Whether to list all Freegle groups.
-    listall: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    // Whether to show the systemwide option.  This will only show if we're an system admin.
-    systemwide: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    // Whether to only show groups on which we are a mod.
-    modonly: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    // Whether "All my communities" should be "My active communities"
-    active: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'md',
-    },
-    // Whether to show work counts in the group names.
-    work: {
-      type: Array,
-      required: false,
-      default() {
-        return []
-      },
-    },
-    // Whether to restrict to our own groups
-    restrict: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    remember: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    customName: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    customVal: {
-      type: Number,
-      required: false,
-      default: null,
+/**
+ * Selected value
+ *
+ *   if null
+ *     if   all=true       --> "all groups"
+ *     else all=false      --> "you must select a group"
+ *   else if it's a number --> use that group id
+ *
+ * (0 is not a valid group number)
+ */
+const props = defineProps({
+  label: {
+    type: String,
+    required: false,
+    default: '',
+  },
+  labelSrOnly: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  modelValue: {
+    type: Number,
+    default: 0,
+  },
+  // Whether we show "All my groups" or "Please choose a group"
+  all: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  allMy: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  // Whether to list all Freegle groups.
+  listall: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  // Whether to show the systemwide option.  This will only show if we're an system admin.
+  systemwide: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  // Whether to only show groups on which we are a mod.
+  modonly: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  // Whether "All my communities" should be "My active communities"
+  active: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: 'md',
+  },
+  // Whether to show work counts in the group names.
+  work: {
+    type: Array,
+    required: false,
+    default() {
+      return []
     },
   },
-  setup() {
-    const miscStore = useMiscStore()
-    const groupStore = useGroupStore()
-    const modGroupStore = useModGroupStore()
-    const { me } = useMe()
-
-    return { miscStore, groupStore, modGroupStore, me }
+  // Whether to restrict to our own groups
+  restrict: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  data: function () {
-    return {
-      remembered: false, // Needed to cope with delay on very first load obtaining modgroup list
-    }
+  remember: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {
-    selectedGroup: {
-      get() {
-        return this.modelValue
-      },
-      set(val) {
-        if (this.modGroupStore.received) {
-          // Only update once all groups received
-          this.$emit('update:modelValue', val)
-
-          if (this.remember) {
-            this.miscStore.set({
-              key: 'groupselect-' + this.remember,
-              value: val,
-            })
-          }
-        }
-      },
-    },
-    groups() {
-      let ret = []
-      if (this.listall) {
-        ret = Object.values(this.modGroupStore.allGroups).filter((g) => {
-          return g.id
-        })
-      } else {
-        ret = Object.values(this.modGroupStore.list)
-      }
-
-      ret = ret || []
-      return ret
-    },
-    sortedGroups() {
-      // We need to clone the groups, because we're about to sort.  Sort is in-place, which means we trigger
-      // reactivity changes and end up with a render loop.
-      let groups = cloneDeep(this.groups)
-      groups = groups.sort((a, b) => {
-        if (!a.namedisplay) {
-          console.error('Bad group in ModGroupSelect', a, b, this.groups)
-        }
-        return a.namedisplay
-          .toLowerCase()
-          .localeCompare(b.namedisplay.toLowerCase())
-      })
-
-      return groups
-    },
-    groupOptions() {
-      const groups = []
-
-      if (this.customName) {
-        groups.push({
-          value: this.customVal,
-          text: this.customName,
-          selected: this.selectedGroup === this.customVal,
-        })
-      }
-
-      if (this.all) {
-        groups.push({
-          value: 0,
-          text: this.active
-            ? '-- My active communities --'
-            : this.allMy
-            ? '-- All my communities --'
-            : '-- All communities --',
-          selected: this.selectedGroup === 0,
-        })
-      } else {
-        groups.push({
-          value: 0,
-          text: '-- Please choose --',
-          selected: this.selectedGroup === 0,
-        })
-      }
-
-      if (this.systemwide) {
-        // Check we're allowed.
-        if (
-          this.me &&
-          (this.me.systemrole === 'Admin' || this.me.systemrole === 'Support')
-        ) {
-          groups.push({
-            value: -2,
-            text: '-- Systemwide --',
-            selected: this.selectedGroup === -2,
-          })
-        }
-      }
-
-      for (const group of this.sortedGroups) {
-        if (
-          this.listall ||
-          !this.modonly ||
-          group.role === 'Owner' ||
-          group.role === 'Moderator'
-        ) {
-          let text = group.namedisplay
-
-          if (this.work) {
-            this.work.forEach((type) => {
-              if (group.work && group.work[type]) {
-                text += ' (' + group.work[type] + ')'
-              }
-            })
-          }
-          if (group.mysettings && group.mysettings.active === 0) {
-            text += ' - backup'
-          }
-
-          groups.push({
-            value: group.id,
-            text,
-            selected: this.selectedGroup === group.id,
-          })
-        }
-      }
-
-      return groups
-    },
-
-    invalidSelection() {
-      return (
-        this.groupOptions.length > 0 &&
-        !this.groupOptions.some((option) => option.selected)
-      )
-    },
-    groupsloaded() {
-      return this.modGroupStore.received
-    },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  watch: {
-    invalidSelection: {
-      immediate: true,
-      handler(val) {
-        if (val && this.restrict) this.selectedGroup = 0
-      },
-    },
-    groupsloaded(newval) {
-      // Only restore remembered group if no explicit value was set from URL.
-      // If modelValue is already non-zero, it was set from route params and
-      // should not be overridden by the remembered value.
-      if (this.modelValue) {
-        return
-      }
-      const val = this.miscStore.get('groupselect-' + this.remember)
-      if (val && val !== this.modelValue) {
-        this.$emit('update:modelValue', val)
-      }
-    },
-    // groupOptions: {
-    //   immediate: true,
-    //   handler(val) {
-    //     // If we only have one real group then don't force them to choose.
-    //     let count = 0
-    //     let group = null
-    //     val.forEach((option) => {
-    //       if (option.value > 0) {
-    //         group = option.value
-    //         count++
-    //       }
-    //     })
-    //
-    //     if (count === 1 && this.selectedGroup === 0) {
-    //       this.selectedGroup = group
-    //     }
-    //   },
-    // },
+  customName: {
+    type: String,
+    required: false,
+    default: null,
   },
-  mounted() {
-    // MT CHANGED
-    /* if (this.listall) {
-      console.error('MGS listMT mounted listall')
-      console.trace()
-      await this.modGroupStore.listMT({
-        grouptype: 'Freegle'
-      })
-    } */
-    if (this.remember && !this.modelValue) {
-      let val = this.miscStore.get('groupselect-' + this.remember)
+  customVal: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  // When true, the modelValue was explicitly set from URL and should not
+  // be overridden by the remembered value (even if modelValue is 0).
+  urlOverride: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      if (typeof val !== 'undefined') {
-        val = parseInt(val)
-        // let found = false
-        this.groups.forEach((g) => {
-          if (g.id === val) {
-            // found = true
-            this.selectedGroup = g.id
-          }
+const emit = defineEmits(['update:modelValue'])
+
+const miscStore = useMiscStore()
+const modGroupStore = useModGroupStore()
+const { me } = useMe()
+
+const selectedGroup = computed({
+  get() {
+    return props.modelValue
+  },
+  set(val) {
+    if (modGroupStore.received) {
+      // Only update once all groups received
+      emit('update:modelValue', val)
+
+      if (props.remember) {
+        miscStore.set({
+          key: 'groupselect-' + props.remember,
+          value: val,
         })
-        // if (!found) this.remembered = val
       }
     }
   },
-}
+})
+
+const groups = computed(() => {
+  let ret = []
+  if (props.listall) {
+    ret = Object.values(modGroupStore.allGroups).filter((g) => {
+      return g.id
+    })
+  } else {
+    ret = Object.values(modGroupStore.list)
+  }
+
+  ret = ret || []
+  return ret
+})
+
+const sortedGroups = computed(() => {
+  // We need to clone the groups, because we're about to sort.  Sort is in-place, which means we trigger
+  // reactivity changes and end up with a render loop.
+  let groupList = cloneDeep(groups.value)
+  groupList = groupList.sort((a, b) => {
+    if (!a.namedisplay) {
+      console.error('Bad group in ModGroupSelect', a, b, groups.value)
+    }
+    return a.namedisplay
+      .toLowerCase()
+      .localeCompare(b.namedisplay.toLowerCase())
+  })
+
+  return groupList
+})
+
+const groupOptions = computed(() => {
+  const groupList = []
+
+  if (props.customName) {
+    groupList.push({
+      value: props.customVal,
+      text: props.customName,
+      selected: selectedGroup.value === props.customVal,
+    })
+  }
+
+  if (props.all) {
+    groupList.push({
+      value: 0,
+      text: props.active
+        ? '-- My active communities --'
+        : props.allMy
+        ? '-- All my communities --'
+        : '-- All communities --',
+      selected: selectedGroup.value === 0,
+    })
+  } else {
+    groupList.push({
+      value: 0,
+      text: '-- Please choose --',
+      selected: selectedGroup.value === 0,
+    })
+  }
+
+  if (props.systemwide) {
+    // Check we're allowed.
+    if (
+      me.value &&
+      (me.value.systemrole === 'Admin' || me.value.systemrole === 'Support')
+    ) {
+      groupList.push({
+        value: -2,
+        text: '-- Systemwide --',
+        selected: selectedGroup.value === -2,
+      })
+    }
+  }
+
+  for (const group of sortedGroups.value) {
+    if (
+      props.listall ||
+      !props.modonly ||
+      group.role === 'Owner' ||
+      group.role === 'Moderator'
+    ) {
+      let text = group.namedisplay
+
+      if (props.work) {
+        props.work.forEach((type) => {
+          if (group.work && group.work[type]) {
+            text += ' (' + group.work[type] + ')'
+          }
+        })
+      }
+      if (group.mysettings && group.mysettings.active === 0) {
+        text += ' - backup'
+      }
+
+      groupList.push({
+        value: group.id,
+        text,
+        selected: selectedGroup.value === group.id,
+      })
+    }
+  }
+
+  return groupList
+})
+
+const invalidSelection = computed(() => {
+  return (
+    groupOptions.value.length > 0 &&
+    !groupOptions.value.some((option) => option.selected)
+  )
+})
+
+const groupsloaded = computed(() => modGroupStore.received)
+
+watch(
+  invalidSelection,
+  (val) => {
+    if (val && props.restrict) selectedGroup.value = 0
+  },
+  { immediate: true }
+)
+
+watch(groupsloaded, () => {
+  // Only restore remembered group if no explicit value was set from URL.
+  // Check urlOverride prop for cases where modelValue is 0 (All communities)
+  // but was explicitly set from URL params.
+  if (props.modelValue || props.urlOverride) {
+    return
+  }
+  const val = miscStore.get('groupselect-' + props.remember)
+  if (val && val !== props.modelValue) {
+    emit('update:modelValue', val)
+  }
+})
+
+onMounted(() => {
+  // Only restore remembered group if no explicit value was set.
+  // Check urlOverride for cases where modelValue is 0 but explicit.
+  if (props.remember && !props.modelValue && !props.urlOverride) {
+    let val = miscStore.get('groupselect-' + props.remember)
+
+    if (typeof val !== 'undefined') {
+      val = parseInt(val)
+      groups.value.forEach((g) => {
+        if (g.id === val) {
+          selectedGroup.value = g.id
+        }
+      })
+    }
+  }
+})
 </script>
 <style scoped>
 select {

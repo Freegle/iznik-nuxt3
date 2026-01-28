@@ -1031,7 +1031,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, reactive } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import htmlEditButton from 'quill-html-edit-button'
@@ -1041,493 +1042,490 @@ import { useAuthStore } from '~/stores/auth'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
+import { useNuxtApp } from '#app'
 
-export default {
-  components: {
-    QuillEditor,
+const props = defineProps({
+  initialGroup: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  props: {
-    initialGroup: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+})
+
+const { $api } = useNuxtApp()
+const authStore = useAuthStore()
+const modGroupStore = useModGroupStore()
+const modConfigStore = useModConfigStore()
+const shortlinkStore = useShortlinkStore()
+const { fetchMe, myid, supportOrAdmin } = useMe()
+
+const quillModules = {
+  name: 'htmlEditButton',
+  module: htmlEditButton,
+  options: {}, // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
+}
+
+const copyfrom = ref(null)
+const groupid = ref(null)
+const uploadingProfile = ref(false)
+const editingDescription = ref(false)
+const rules = reactive({})
+const rulesBump = ref(0)
+
+const toolbarOptions = [
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  ['blockquote', 'code-block'],
+  [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
+  [{ indent: '-1' }, { indent: '+1' }],
+  [{ color: [] }, { background: [] }],
+  ['link', 'image', 'video'],
+  ['clean'],
+]
+
+const rulelist = [
+  ['fullymoderated', 'toggle', 'Do you moderate all posts?', 'Yes', 'No'],
+  [
+    'requirefirstpostoffer',
+    'toggle',
+    "Do you require a member's first post to be an Offer?",
+    'Yes',
+    'No',
+  ],
+  [
+    'limitconcurrentwanteds',
+    'toggle',
+    'Do you limit the number of Wanted posts allowed at one time?',
+    'Yes',
+    'No',
+  ],
+  [
+    'limitgroups',
+    'toggle',
+    'Do you limit the number of groups a member can join?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'restrictcrossposting',
+    'toggle',
+    'Do you restrict cross-posting to other groups?',
+    'Yes',
+    'No',
+  ],
+  [
+    'allowloans',
+    'toggle',
+    'Do you allow any loans or requests to borrow?',
+    'Yes',
+    'No',
+  ],
+  [
+    'suggesteddonations',
+    'toggle',
+    'Do you allow people to ask for a donation to charity when offering items?',
+    'Yes',
+    'No',
+  ],
+  [
+    'declareselling',
+    'toggle',
+    'Do you inform members that they must declare if they intend to sell items on?',
+    'Yes',
+    'No',
+  ],
+  [
+    'restrictpersonalinfo',
+    'toggle',
+    'Do you restrict personal info in posts eg telephone numbers, addresses?',
+    'Yes',
+    'No',
+  ],
+  [
+    'restrictdistance',
+    'toggle',
+    'Do you remove any members purely for being out of your group area?',
+    'Yes',
+    'No',
+  ],
+  [false, 'Rules about specific items'],
+  [
+    'animalswanted',
+    'toggle',
+    'Do you allow any requests for animals on your group?',
+    'Yes',
+    'No',
+  ],
+  [
+    'animalsoffer',
+    'toggle',
+    'Do you allow any offers of animals for rehoming on your group?',
+    'Yes',
+    'No',
+  ],
+  [
+    'weapons',
+    'toggle',
+    'Do you allow any requests or offers of weapons on your group?',
+    'Yes',
+    'No',
+  ],
+  [
+    'firearms',
+    'toggle',
+    'Do you allow any offers or requests for guns if members have a firearms license?',
+    'Yes',
+    'No',
+  ],
+  [
+    'knives',
+    'toggle',
+    'Do you allow any offers or requests for household or craft knives?',
+    'Yes',
+    'No',
+  ],
+  [
+    'knivesrestrict',
+    'toggle',
+    'If so, do you restrict these to over 18s and only if personally collected?',
+    'Yes',
+    'No',
+  ],
+  [
+    'medicationsprescription',
+    'toggle',
+    'Do you allow any offers or requests for prescription medication?',
+    'Yes',
+    'No',
+  ],
+  [
+    'medicationsotc',
+    'toggle',
+    'Do you allow any offers or requests for over-the-counter medication?',
+    'Yes',
+    'No',
+  ],
+  [
+    'medicationsanimals',
+    'toggle',
+    'Do you allow any offers or requests for medication for animals?',
+    'Yes',
+    'No',
+  ],
+  [
+    'contactlenses',
+    'toggle',
+    'Do you allow any offers or requests for Contact Lenses?',
+    'Yes',
+    'No',
+  ],
+  [
+    'contactlensessolutions',
+    'toggle',
+    'Do you allow any offers or requests for Contact Lens Solutions?',
+    'Yes',
+    'No',
+  ],
+  [
+    'tobacco',
+    'toggle',
+    'Do you allow any offers or requests for tobacco?',
+    'Yes',
+    'No',
+  ],
+  [
+    'vaping',
+    'toggle',
+    'Do you allow any offers or requests for Vaping products?',
+    'Yes',
+    'No',
+  ],
+  [
+    'alcohol',
+    'toggle',
+    'Do you allow any offers or requests for Alcohol?',
+    'Yes',
+    'No',
+  ],
+  [
+    'gascylinders',
+    'toggle',
+    'Do you allow any offers or requests for Gas Cylinders?',
+    'Yes',
+    'No',
+  ],
+  [
+    'tickets',
+    'toggle',
+    'Do you allow any offers or requests for vouchers, coupons or tickets?',
+    'Yes',
+    'No',
+  ],
+  [
+    'wastecarrier',
+    'toggle',
+    'Do you ask for a waste carrier license in any requests for scrap metal?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'carboot',
+    'toggle',
+    'Do you allow any requests for items to sell at car boot sales?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'chineselanterns',
+    'toggle',
+    'Do you allow any offers or requests for Chinese Lanterns?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'carseats',
+    'toggle',
+    'Do you allow any offers or requests for Child/Baby Car Seats?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'pondlife',
+    'toggle',
+    'Do you allow any offers or requests for pondlife (eg frog spawn) or pond plants?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'copyright',
+    'toggle',
+    'Do you allow any offers or requests for original items subject to copyright, eg computer software or games, music, films?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [
+    'porn',
+    'toggle',
+    'Do you allow any offers or requests for items that you consider pornographic?',
+    'Yes',
+    'No',
+    'New',
+  ],
+  [false, 'Other rules'],
+  [
+    'other',
+    'textarea',
+    'Please add in information about any rules you have which are not covered by the questions above.',
+    'Yes',
+    'No',
+  ],
+]
+
+const readonly = computed(() => {
+  return group.value.myrole !== 'Owner'
+})
+
+const group = computed(() => {
+  return modGroupStore.get(groupid.value)
+})
+
+const shortlinks = computed(() => {
+  return shortlinkStore.list
+})
+
+const active = computed({
+  get() {
+    return Boolean(group.value.mysettings.active)
   },
-  setup() {
-    const authStore = useAuthStore()
-    const modGroupStore = useModGroupStore()
-    const modConfigStore = useModConfigStore()
-    const shortlinkStore = useShortlinkStore()
-    const quillModules = {
-      name: 'htmlEditButton',
-      module: htmlEditButton,
-      options: {}, // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
+  set(newval) {
+    saveMembershipSetting('active', newval ? 1 : 0)
+  },
+})
+
+const region = computed({
+  get() {
+    return group.value.region
+  },
+  set(newval) {
+    saveGroupSetting('region', newval)
+  },
+})
+
+const modconfig = computed({
+  get() {
+    return parseInt(group.value.mysettings.configid)
+  },
+  set(newval) {
+    saveMembershipSetting('configid', newval)
+  },
+})
+
+const modConfigs = computed(() => {
+  return modConfigStore.configs
+})
+
+const modConfigOptions = computed(() => {
+  const ret = []
+  modConfigs.value.forEach((c) => {
+    ret.push({
+      value: c.id,
+      text: c.name,
+    })
+  })
+
+  return ret
+})
+
+const regionOptions = [
+  { text: 'East', value: 'East' },
+  { text: 'London', value: 'London' },
+  { text: 'Midlands West', value: 'West Midlands' },
+  { text: 'Midlands East', value: 'East Midlands' },
+  { text: 'North East', value: 'North East' },
+  { text: 'North West', value: 'North West' },
+  { text: 'Northern Ireland', value: 'Northern Ireland' },
+  { text: 'South East', value: 'South East' },
+  { text: 'South West', value: 'South West' },
+  { text: 'Wales', value: 'Wales' },
+  { text: 'Yorkshire and the Humber', value: 'Yorkshire and the Humber' },
+  { text: 'Scotland', value: 'Scotland' },
+]
+
+watch(groupid, () => {
+  fetchGroup()
+})
+
+onMounted(() => {
+  groupid.value = props.initialGroup
+  fetchConfigs()
+})
+
+async function fetchGroup() {
+  if (!groupid.value) return
+  editingDescription.value = false
+
+  await modGroupStore.fetchIfNeedBeMT(groupid.value)
+  const groupData = modGroupStore.get(groupid.value)
+  let groupRules = groupData?.rules || {}
+  // console.log('fetchGroup rules',groupRules)
+  groupRules =
+    typeof groupRules === 'string' ? JSON.parse(groupRules) : groupRules
+  const unsetrules = {}
+  for (const rule of rulelist) {
+    if (rule[0]) {
+      unsetrules[rule[0]] = null
     }
-    const { fetchMe, myid, supportOrAdmin } = useMe()
-    return {
-      authStore,
-      modGroupStore,
-      modConfigStore,
-      shortlinkStore,
-      quillModules,
-      fetchMe,
-      myid,
-      supportOrAdmin,
-    }
-  },
-  data: function () {
-    return {
-      copyfrom: null,
-      groupid: null,
-      uploadingProfile: false,
-      editingDescription: false,
-      rules: {},
-      rulesBump: 0,
-      toolbarOptions: [
-        [{ header: [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        ['blockquote', 'code-block'],
-        [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
-        [{ indent: '-1' }, { indent: '+1' }],
-        [{ color: [] }, { background: [] }],
-        ['link', 'image', 'video'],
-        ['clean'],
-      ],
-      rulelist: [
-        ['fullymoderated', 'toggle', 'Do you moderate all posts?', 'Yes', 'No'],
-        [
-          'requirefirstpostoffer',
-          'toggle',
-          'Do you require a member’s first post to be an Offer?',
-          'Yes',
-          'No',
-        ],
-        [
-          'limitconcurrentwanteds',
-          'toggle',
-          'Do you limit the number of Wanted posts allowed at one time?',
-          'Yes',
-          'No',
-        ],
-        [
-          'limitgroups',
-          'toggle',
-          'Do you limit the number of groups a member can join?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'restrictcrossposting',
-          'toggle',
-          'Do you restrict cross-posting to other groups?',
-          'Yes',
-          'No',
-        ],
-        [
-          'allowloans',
-          'toggle',
-          'Do you allow any loans or requests to borrow?',
-          'Yes',
-          'No',
-        ],
-        [
-          'suggesteddonations',
-          'toggle',
-          'Do you allow people to ask for a donation to charity when offering items?',
-          'Yes',
-          'No',
-        ],
-        [
-          'declareselling',
-          'toggle',
-          'Do you inform members that they must declare if they intend to sell items on?',
-          'Yes',
-          'No',
-        ],
-        [
-          'restrictpersonalinfo',
-          'toggle',
-          'Do you restrict personal info in posts eg telephone numbers, addresses?',
-          'Yes',
-          'No',
-        ],
-        [
-          'restrictdistance',
-          'toggle',
-          'Do you remove any members purely for being out of your group area?',
-          'Yes',
-          'No',
-        ],
-        [false, 'Rules about specific items'],
-        [
-          'animalswanted',
-          'toggle',
-          'Do you allow any requests for animals on your group?',
-          'Yes',
-          'No',
-        ],
-        [
-          'animalsoffer',
-          'toggle',
-          'Do you allow any offers of animals for rehoming on your group?',
-          'Yes',
-          'No',
-        ],
-        [
-          'weapons',
-          'toggle',
-          'Do you allow any requests or offers of weapons on your group?',
-          'Yes',
-          'No',
-        ],
-        [
-          'firearms',
-          'toggle',
-          'Do you allow any offers or requests for guns if members have a firearms license?',
-          'Yes',
-          'No',
-        ],
-        [
-          'knives',
-          'toggle',
-          'Do you allow any offers or requests for household or craft knives?',
-          'Yes',
-          'No',
-        ],
-        [
-          'knivesrestrict',
-          'toggle',
-          'If so, do you restrict these to over 18s and only if personally collected?',
-          'Yes',
-          'No',
-        ],
-        [
-          'medicationsprescription',
-          'toggle',
-          'Do you allow any offers or requests for prescription medication?',
-          'Yes',
-          'No',
-        ],
-        [
-          'medicationsotc',
-          'toggle',
-          'Do you allow any offers or requests for over-the-counter medication?',
-          'Yes',
-          'No',
-        ],
-        [
-          'medicationsanimals',
-          'toggle',
-          'Do you allow any offers or requests for medication for animals?',
-          'Yes',
-          'No',
-        ],
-        [
-          'contactlenses',
-          'toggle',
-          'Do you allow any offers or requests for Contact Lenses?',
-          'Yes',
-          'No',
-        ],
-        [
-          'contactlensessolutions',
-          'toggle',
-          'Do you allow any offers or requests for Contact Lens Solutions?',
-          'Yes',
-          'No',
-        ],
-        [
-          'tobacco',
-          'toggle',
-          'Do you allow any offers or requests for tobacco?',
-          'Yes',
-          'No',
-        ],
-        [
-          'vaping',
-          'toggle',
-          'Do you allow any offers or requests for Vaping products?',
-          'Yes',
-          'No',
-        ],
-        [
-          'alcohol',
-          'toggle',
-          'Do you allow any offers or requests for Alcohol?',
-          'Yes',
-          'No',
-        ],
-        [
-          'gascylinders',
-          'toggle',
-          'Do you allow any offers or requests for Gas Cylinders?',
-          'Yes',
-          'No',
-        ],
-        [
-          'tickets',
-          'toggle',
-          'Do you allow any offers or requests for vouchers, coupons or tickets?',
-          'Yes',
-          'No',
-        ],
-        [
-          'wastecarrier',
-          'toggle',
-          'Do you ask for a waste carrier license in any requests for scrap metal?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'carboot',
-          'toggle',
-          'Do you allow any requests for items to sell at car boot sales?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'chineselanterns',
-          'toggle',
-          'Do you allow any offers or requests for Chinese Lanterns?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'carseats',
-          'toggle',
-          'Do you allow any offers or requests for Child/Baby Car Seats?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'pondlife',
-          'toggle',
-          'Do you allow any offers or requests for pondlife (eg frog spawn) or pond plants?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'copyright',
-          'toggle',
-          'Do you allow any offers or requests for original items subject to copyright, eg computer software or games, music, films?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [
-          'porn',
-          'toggle',
-          'Do you allow any offers or requests for items that you consider pornographic?',
-          'Yes',
-          'No',
-          'New',
-        ],
-        [false, 'Other rules'],
-        [
-          'other',
-          'textarea',
-          'Please add in information about any rules you have which are not covered by the questions above.',
-          'Yes',
-          'No',
-        ],
-      ],
-    }
-  },
-  computed: {
-    readonly() {
-      return this.group.myrole !== 'Owner'
-    },
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-    shortlinks() {
-      return this.shortlinkStore.list
-    },
-    active: {
-      get() {
-        return Boolean(this.group.mysettings.active)
-      },
-      set(newval) {
-        this.saveMembershipSetting('active', newval ? 1 : 0)
-      },
-    },
-    region: {
-      get() {
-        return this.group.region
-      },
-      set(newval) {
-        this.saveGroupSetting('region', newval)
-      },
-    },
-    modconfig: {
-      get() {
-        return parseInt(this.group.mysettings.configid)
-      },
-      set(newval) {
-        this.saveMembershipSetting('configid', newval)
-      },
-    },
-    tagline: {
-      get() {
-        return this.group.tagline
-      },
-      set() {},
-    },
-    modConfigs() {
-      return this.modConfigStore.configs
-    },
-    modConfigOptions() {
-      const ret = []
-      this.modConfigs.forEach((c) => {
-        ret.push({
-          value: c.id,
-          text: c.name,
-        })
-      })
+  }
+  // console.log('unsetrules',unsetrules)
+  // console.log('rules',groupRules)
+  Object.assign(rules, { ...unsetrules, ...groupRules })
 
-      return ret
-    },
-    regionOptions() {
-      return [
-        { text: 'East', value: 'East' },
-        { text: 'London', value: 'London' },
-        { text: 'Midlands West', value: 'West Midlands' },
-        { text: 'Midlands East', value: 'East Midlands' },
-        { text: 'North East', value: 'North East' },
-        { text: 'North West', value: 'North West' },
-        { text: 'Northern Ireland', value: 'Northern Ireland' },
-        { text: 'South East', value: 'South East' },
-        { text: 'South West', value: 'South West' },
-        { text: 'Wales', value: 'Wales' },
-        { text: 'Yorkshire and the Humber', value: 'Yorkshire and the Humber' },
-        { text: 'Scotland', value: 'Scotland' },
-      ]
-    },
-  },
-  watch: {
-    groupid(newval) {
-      this.fetchGroup()
-    },
-  },
-  mounted() {
-    this.groupid = this.initialGroup
-    this.fetchConfigs()
-  },
-  methods: {
-    async fetchGroup() {
-      if (!this.groupid) return
-      this.editingDescription = false
+  shortlinkStore.fetch(0, groupid.value)
+}
 
-      await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
-      const group = this.modGroupStore.get(this.groupid)
-      let rules = group?.rules || {}
-      // console.log('fetchGroup rules',rules)
-      rules = typeof rules === 'string' ? JSON.parse(rules) : rules
-      const unsetrules = {}
-      for (const rule of this.rulelist) {
-        if (rule[0]) {
-          unsetrules[rule[0]] = null
-        }
-      }
-      // console.log('unsetrules',unsetrules)
-      // console.log('rules',rules)
-      this.rules = { ...unsetrules, ...rules }
+async function fetchConfigs() {
+  await $api.session.fetch({
+    components: ['configs'],
+    modtools: true,
+  })
+}
 
-      this.shortlinkStore.fetch(0, this.groupid)
-    },
-    async fetchConfigs() {
-      await this.$api.session.fetch({
-        components: ['configs'],
-        modtools: true,
-      })
-    },
-    changedrule(rule, newval) {
-      if (typeof newval !== 'object') {
-        this.rules[rule[0]] = newval
-      }
-    },
-    async saverules(callback) {
-      await this.modGroupStore.updateMT({
-        id: this.groupid,
-        rules: this.rules,
-      })
-      this.fetchGroup()
-      callback()
-    },
-    async saveMembershipSetting(name, val) {
-      const settings = this.group.mysettings
-      settings[name] = val
+function changedrule(rule, newval) {
+  if (typeof newval !== 'object') {
+    rules[rule[0]] = newval
+  }
+}
 
-      await this.authStore.setGroup({
-        groupid: this.groupid,
-        userid: this.myid,
-        settings,
-      })
-      this.fetchMe(true, ['groups'])
-    },
-    uploadProfile() {
-      this.uploadingProfile = true
-    },
-    photoProcessed(imageid) {
-      // We have uploaded a photo.  Remove the uploader
-      this.uploadingProfile = false
+async function saverules(callback) {
+  await modGroupStore.updateMT({
+    id: groupid.value,
+    rules,
+  })
+  fetchGroup()
+  callback()
+}
 
-      // Set the image id in the group.
-      if (imageid) {
-        this.modGroupStore.updateMT({
-          id: this.groupid,
-          profile: imageid,
-        })
-      }
-    },
-    saveGroupSetting(name, val) {
-      // Note that we get a sneaky progress indicator and success from SpinButton even though actually we're doing the
-      // work here triggered by the set on the computed value.
-      const data = {
-        id: this.groupid,
-      }
+async function saveMembershipSetting(name, val) {
+  const settings = group.value.mysettings
+  settings[name] = val
 
-      data[name] = val
+  await authStore.setGroup({
+    groupid: groupid.value,
+    userid: myid.value,
+    settings,
+  })
+  fetchMe(true, ['groups'])
+}
 
-      this.modGroupStore.updateMT(data)
-    },
-    async saveDescription(callback) {
-      await this.modGroupStore.updateMT({
-        id: this.groupid,
-        description: this.group.description,
-      })
+function uploadProfile() {
+  uploadingProfile.value = true
+}
 
-      this.editingDescription = false
-      callback()
-    },
-    async copy(callback) {
-      await this.modGroupStore.fetchIfNeedBeMT(this.copyfrom)
+function photoProcessed(imageid) {
+  // We have uploaded a photo.  Remove the uploader
+  uploadingProfile.value = false
 
-      const copyfrom = this.modGroupStore.get(this.copyfrom)
+  // Set the image id in the group.
+  if (imageid) {
+    modGroupStore.updateMT({
+      id: groupid.value,
+      profile: imageid,
+    })
+  }
+}
 
-      if (copyfrom) {
-        let rules = copyfrom.rules
-        rules = typeof rules === 'string' ? JSON.parse(rules) : rules
+function saveGroupSetting(name, val) {
+  // Note that we get a sneaky progress indicator and success from SpinButton even though actually we're doing the
+  // work here triggered by the set on the computed value.
+  const data = {
+    id: groupid.value,
+  }
 
-        await this.modGroupStore.updateMT({
-          id: this.groupid,
-          rules,
-        })
+  data[name] = val
 
-        await this.modGroupStore.fetchGroupMT(this.groupid) // Reload group
-        this.fetchGroup()
+  modGroupStore.updateMT(data)
+}
 
-        this.rulesBump++
-      }
-      callback()
-    },
-  },
+async function saveDescription(callback) {
+  await modGroupStore.updateMT({
+    id: groupid.value,
+    description: group.value.description,
+  })
+
+  editingDescription.value = false
+  callback()
+}
+
+async function copy(callback) {
+  await modGroupStore.fetchIfNeedBeMT(copyfrom.value)
+
+  const copyfromGroup = modGroupStore.get(copyfrom.value)
+
+  if (copyfromGroup) {
+    let copyfromRules = copyfromGroup.rules
+    copyfromRules =
+      typeof copyfromRules === 'string'
+        ? JSON.parse(copyfromRules)
+        : copyfromRules
+
+    await modGroupStore.updateMT({
+      id: groupid.value,
+      rules: copyfromRules,
+    })
+
+    await modGroupStore.fetchGroupMT(groupid.value) // Reload group
+    fetchGroup()
+
+    rulesBump.value++
+  }
+  callback()
 }
 </script>
 <style scoped lang="scss">

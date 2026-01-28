@@ -104,79 +104,77 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
 // membership.id is groupid and membership.membershipid is membershipid
-import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  props: {
-    membership: {
-      type: Object,
-      required: true,
-    },
-    userid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  membership: {
+    type: Object,
+    required: true,
   },
-  emits: ['fetchuser'],
-  setup() {
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { checkWork } = useModMe()
-    return { memberStore, userStore, checkWork }
+  userid: {
+    type: Number,
+    required: true,
   },
-  methods: {
-    async changeEvents(newval) {
-      const params = {
-        userid: this.userid,
-        groupid: this.membership.id,
-        eventsallowed: newval,
-      }
+})
 
-      await this.memberStore.update(params)
-    },
-    async changeVolunteering(newval) {
-      const params = {
-        userid: this.userid,
-        groupid: this.membership.id,
-        volunteeringallowed: newval,
-      }
+const emit = defineEmits(['fetchuser'])
 
-      await this.memberStore.update(params)
-    },
-    async changeFrequency(newval) {
-      // newval not used but this.membership.emailfrequency has new value
-      const params = {
-        userid: this.userid,
-        groupid: this.membership.id,
-        emailfrequency: this.membership.emailfrequency,
-      }
+const memberStore = useMemberStore()
+const { checkWork } = useModMe()
 
-      await this.memberStore.update(params)
-    },
-    async changePostingStatus(newval) {
-      // newval not used but this.membership.ourpostingstatus has new value
-      const params = {
-        userid: this.userid,
-        groupid: this.membership.id,
-        ourpostingstatus: this.membership.ourpostingstatus,
-      }
+async function changeEvents(newval) {
+  const params = {
+    userid: props.userid,
+    groupid: props.membership.id,
+    eventsallowed: newval,
+  }
 
-      await this.memberStore.update(params)
-    },
-    remove(callback) {
-      this.memberStore.remove(
-        this.userid,
-        this.membership.id,
-        this.membership.membershipid
-      )
-      this.$emit('fetchuser')
-      if (callback) callback()
-      this.checkWork(true)
-    },
-  },
+  await memberStore.update(params)
+}
+
+async function changeVolunteering(newval) {
+  const params = {
+    userid: props.userid,
+    groupid: props.membership.id,
+    volunteeringallowed: newval,
+  }
+
+  await memberStore.update(params)
+}
+
+async function changeFrequency() {
+  // props.membership.emailfrequency has new value
+  const params = {
+    userid: props.userid,
+    groupid: props.membership.id,
+    emailfrequency: props.membership.emailfrequency,
+  }
+
+  await memberStore.update(params)
+}
+
+async function changePostingStatus() {
+  // props.membership.ourpostingstatus has new value
+  const params = {
+    userid: props.userid,
+    groupid: props.membership.id,
+    ourpostingstatus: props.membership.ourpostingstatus,
+  }
+
+  await memberStore.update(params)
+}
+
+function remove(callback) {
+  memberStore.remove(
+    props.userid,
+    props.membership.id,
+    props.membership.membershipid
+  )
+  emit('fetchuser')
+  if (callback) callback()
+  checkWork(true)
 }
 </script>

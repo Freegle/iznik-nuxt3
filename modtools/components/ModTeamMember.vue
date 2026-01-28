@@ -21,35 +21,32 @@
     </b-col>
   </b-row>
 </template>
-<script>
+<script setup>
 import { useTeamStore } from '@/stores/team'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    teamid: {
-      type: Number,
-      required: true,
-    },
-    member: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  teamid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const { supportOrAdmin } = useMe()
-    return { supportOrAdmin }
+  member: {
+    type: Object,
+    required: true,
   },
-  methods: {
-    async remove() {
-      const teamStore = useTeamStore()
-      await teamStore.remove({
-        id: this.teamid,
-        userid: this.member.id,
-      })
-      this.$emit('removed')
-    },
-  },
+})
+
+const emit = defineEmits(['removed'])
+
+const { supportOrAdmin } = useMe()
+
+async function remove() {
+  const teamStore = useTeamStore()
+  await teamStore.remove({
+    id: props.teamid,
+    userid: props.member.id,
+  })
+  emit('removed')
 }
 </script>
 <style scoped>

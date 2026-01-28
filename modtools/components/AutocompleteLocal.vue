@@ -26,107 +26,109 @@
     </ul>
   </div>
 </template>
-<script>
+<script setup>
 // Originally based on https://alligator.io/vuejs/vue-autocomplete-component/ by
 // https://alligator.io/author/filipa-lacerda
-export default {
-  props: {
-    items: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    isAsync: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: '20',
-    },
-    placeholder: {
-      type: String,
-      required: false,
-      default: null,
-    },
-  },
+import { ref, watch, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 
-  data() {
-    return {
-      isOpen: false,
-      results: [],
-      search: '',
-      isLoading: false,
-      arrowCounter: 0,
+const props = defineProps({
+  items: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
+  isAsync: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: '20',
+  },
+  placeholder: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const emit = defineEmits(['update:modelValue', 'input'])
+
+const isOpen = ref(false)
+const results = ref([])
+const search = ref('')
+const isLoading = ref(false)
+const arrowCounter = ref(0)
+
+watch(
+  () => props.items,
+  (val, oldValue) => {
+    if (val.length !== oldValue.length) {
+      results.value = val
+      isLoading.value = false
     }
-  },
-  watch: {
-    items: function (val, oldValue) {
-      // actually compare them
-      if (val.length !== oldValue.length) {
-        this.results = val
-        this.isLoading = false
-      }
-    },
-  },
-  mounted() {
-    document.addEventListener('click', this.handleClickOutside)
-  },
-  unmounted() {
-    document.removeEventListener('click', this.handleClickOutside)
-  },
+  }
+)
 
-  methods: {
-    onChange() {
-      // Let's warn the parent that a change was made
-      this.$emit('update:modelValue', this.search)
+const instance = getCurrentInstance()
 
-      // Is the data given by an outside ajax request?
-      if (this.isAsync) {
-        this.isLoading = true
-      } else {
-        // Let's search our flat array
-        this.filterResults()
-        this.isOpen = true
-      }
-    },
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
 
-    filterResults() {
-      // first uncapitalize all the things
-      this.results = this.items.filter((item) => {
-        return item.toLowerCase().includes(this.search.toLowerCase())
-      })
-    },
-    setResult(result) {
-      this.search = result
-      this.isOpen = false
-      this.$emit('update:modelValue', this.search)
-    },
-    onArrowDown(evt) {
-      if (this.arrowCounter < this.results.length) {
-        this.arrowCounter = this.arrowCounter + 1
-      }
-    },
-    onArrowUp() {
-      if (this.arrowCounter > 0) {
-        this.arrowCounter = this.arrowCounter - 1
-      }
-    },
-    onEnter() {
-      this.search = this.results[this.arrowCounter]
-      this.$emit('input', this.search)
-      this.isOpen = false
-      this.arrowCounter = -1
-    },
-    handleClickOutside(evt) {
-      if (!this.$el.contains(evt.target)) {
-        this.isOpen = false
-        this.arrowCounter = -1
-      }
-    },
-  },
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+function onChange() {
+  emit('update:modelValue', search.value)
+
+  if (props.isAsync) {
+    isLoading.value = true
+  } else {
+    filterResults()
+    isOpen.value = true
+  }
+}
+
+function filterResults() {
+  results.value = props.items.filter((item) => {
+    return item.toLowerCase().includes(search.value.toLowerCase())
+  })
+}
+
+function setResult(result) {
+  search.value = result
+  isOpen.value = false
+  emit('update:modelValue', search.value)
+}
+
+function onArrowDown() {
+  if (arrowCounter.value < results.value.length) {
+    arrowCounter.value = arrowCounter.value + 1
+  }
+}
+
+function onArrowUp() {
+  if (arrowCounter.value > 0) {
+    arrowCounter.value = arrowCounter.value - 1
+  }
+}
+
+function onEnter() {
+  search.value = results.value[arrowCounter.value]
+  emit('input', search.value)
+  isOpen.value = false
+  arrowCounter.value = -1
+}
+
+function handleClickOutside(evt) {
+  if (!instance.proxy.$el.contains(evt.target)) {
+    isOpen.value = false
+    arrowCounter.value = -1
+  }
 }
 </script>
 <style scoped>

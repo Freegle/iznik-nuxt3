@@ -110,7 +110,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import htmlEditButton from 'quill-html-edit-button'
@@ -119,103 +120,82 @@ import ModAlertHistory from './ModAlertHistory'
 import { useAlertStore } from '~/stores/alert'
 import { useModGroupStore } from '~/stores/modgroup'
 
-/* let VueEditor, htmlEditButton
+const alertStore = useAlertStore()
+const modGroupStore = useModGroupStore()
 
-if (process.client) {
-  const Quill = require('vue2-editor').Quill
-  window.Quill = Quill
-  htmlEditButton = require('quill-html-edit-button').htmlEditButton
-  VueEditor = require('vue2-editor').VueEditor
-  Quill.register('modules/htmlEditButton', htmlEditButton)
-} */
+const quillModules = {
+  name: 'htmlEditButton',
+  module: htmlEditButton,
+  options: {},
+}
 
-export default {
-  components: {
-    ModAlertHistory,
-    QuillEditor,
-  },
-  setup() {
-    const alertStore = useAlertStore()
-    const modGroupStore = useModGroupStore()
-    const quillModules = {
-      name: 'htmlEditButton',
-      module: htmlEditButton,
-      options: {}, // https://github.com/benwinding/quill-html-edit-button?tab=readme-ov-file#options
-    }
-    return { alertStore, modGroupStore, quillModules }
-  },
-  data: function () {
-    return {
-      busy: false,
-      from: null,
-      groupid: null,
-      tryhard: false,
-      confirm: false,
-      subject: null,
-      text: null,
-      html: null,
-      toolbarOptions: [
-        [{ header: [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        ['blockquote', 'code-block'],
-        [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
-        [{ indent: '-1' }, { indent: '+1' }],
-        [{ color: [] }, { background: [] }],
-        ['link', 'image', 'video'],
-        ['clean'],
-      ],
-    }
-  },
-  computed: {
-    gotallgroups() {
-      return Object.values(this.modGroupStore.allGroups).length > 0
-    },
-    valid() {
-      return this.from && this.subject && this.text && this.groupid
-    },
-    alerts() {
-      const alerts = Object.values(this.alertStore.list)
-      alerts.sort(function (a, b) {
-        return new Date(b.created).getTime() - new Date(a.created).getTime()
-      })
-      return alerts
-    },
-  },
-  mounted() {
-    // this.alertStore.clear()
-  },
-  methods: {
-    async loadallgroups(callback) {
-      await this.modGroupStore.listMT({ grouptype: 'Freegle' })
-      callback()
-    },
-    async send(callback) {
-      const data = {
-        from: this.from,
-        subject: this.subject,
-        text: this.text,
-        html: this.html,
-        askclick: this.confirm ? 1 : 0,
-        tryhard: this.tryhard ? 1 : 0,
-      }
+const busy = ref(false)
+const from = ref(null)
+const groupid = ref(null)
+const tryhard = ref(false)
+const confirm = ref(false)
+const subject = ref(null)
+const text = ref(null)
+const html = ref(null)
 
-      if (this.groupid > 0) {
-        data.groupid = this.groupid
-      } else {
-        data.groupid = 'AllFreegle'
-      }
+const toolbarOptions = [
+  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  ['blockquote', 'code-block'],
+  [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
+  [{ indent: '-1' }, { indent: '+1' }],
+  [{ color: [] }, { background: [] }],
+  ['link', 'image', 'video'],
+  ['clean'],
+]
 
-      await this.alertStore.add(data)
-      callback()
-    },
-    async fetch() {
-      this.busy = true
+const gotallgroups = computed(() => {
+  return Object.values(modGroupStore.allGroups).length > 0
+})
 
-      await this.alertStore.fetch()
+const valid = computed(() => {
+  return from.value && subject.value && text.value && groupid.value
+})
 
-      this.busy = false
-    },
-  },
+const alerts = computed(() => {
+  const alertList = Object.values(alertStore.list)
+  alertList.sort(function (a, b) {
+    return new Date(b.created).getTime() - new Date(a.created).getTime()
+  })
+  return alertList
+})
+
+async function loadallgroups(callback) {
+  await modGroupStore.listMT({ grouptype: 'Freegle' })
+  callback()
+}
+
+async function send(callback) {
+  const data = {
+    from: from.value,
+    subject: subject.value,
+    text: text.value,
+    html: html.value,
+    askclick: confirm.value ? 1 : 0,
+    tryhard: tryhard.value ? 1 : 0,
+  }
+
+  if (groupid.value > 0) {
+    data.groupid = groupid.value
+  } else {
+    data.groupid = 'AllFreegle'
+  }
+
+  await alertStore.add(data)
+  callback()
+}
+
+async function fetch() {
+  busy.value = true
+
+  await alertStore.fetch()
+
+  busy.value = false
 }
 </script>
 <style scoped>

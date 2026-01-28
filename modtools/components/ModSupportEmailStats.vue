@@ -712,474 +712,441 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
 import { useRuntimeConfig } from '#app'
 
-export default {
-  name: 'ModSupportEmailStats',
-  components: {
-    GChart,
+const emailTrackingStore = useEmailTrackingStore()
+const runtimeConfig = useRuntimeConfig()
+emailTrackingStore.init(runtimeConfig)
+
+// Default to last 7 days.
+const today = new Date()
+const sevenDaysAgo = new Date(today)
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+// Format as local ISO datetime for datetime-local inputs (adjusts for timezone)
+const toLocalISOString = (d) => {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 19)
+}
+
+const showInfoModal = ref(false)
+const datePreset = ref('7days')
+const startDate = ref(toLocalISOString(sevenDaysAgo))
+const endDate = ref(toLocalISOString(today))
+const emailType = ref('')
+const userIdOrEmail = ref('')
+
+const datePresetOptions = [
+  { text: 'Last hour', value: 'hour' },
+  { text: 'Last 24 hours', value: 'day' },
+  { text: 'Last 7 days', value: '7days' },
+  { text: 'Last 30 days', value: '30days' },
+  { text: 'Custom dates', value: 'custom' },
+]
+
+const emailTypeOptions = [
+  { text: 'All Types', value: '' },
+  { text: 'Chat Notification', value: 'ChatNotification' },
+  {
+    text: 'Chat Notification (User to Mod)',
+    value: 'ChatNotificationUser2Mod',
   },
-  setup() {
-    const emailTrackingStore = useEmailTrackingStore()
-    const runtimeConfig = useRuntimeConfig()
-    emailTrackingStore.init(runtimeConfig)
-    return { emailTrackingStore }
+  {
+    text: 'Chat Notification (Mod to Mod)',
+    value: 'ChatNotificationMod2Mod',
   },
-  data() {
-    // Default to last 7 days.
-    const today = new Date()
-    const sevenDaysAgo = new Date(today)
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  { text: 'Welcome', value: 'WelcomeMail' },
+  { text: 'Digest', value: 'UnifiedDigest' },
+  { text: 'Donation Thank You', value: 'DonationThank' },
+  { text: 'Donation Ask', value: 'DonationAsk' },
+]
 
-    // Format as local ISO datetime for datetime-local inputs (adjusts for timezone)
-    const toLocalISOString = (d) => {
-      return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 19)
-    }
+const emailFields = [
+  { key: 'email_type', label: 'Type', sortable: true },
+  { key: 'subject', label: 'Subject', sortable: false },
+  { key: 'sent_at', label: 'Sent', sortable: true },
+  { key: 'opened_at', label: 'Opened', sortable: true },
+  { key: 'clicked_at', label: 'Clicked', sortable: true },
+  { key: 'bounced_at', label: 'Bounced', sortable: true },
+  { key: 'unsubscribed_at', label: 'Unsubscribed', sortable: true },
+]
 
-    return {
-      showInfoModal: false,
-      datePreset: '7days',
-      startDate: toLocalISOString(sevenDaysAgo),
-      endDate: toLocalISOString(today),
-      emailType: '',
-      userIdOrEmail: '',
-      datePresetOptions: [
-        { text: 'Last hour', value: 'hour' },
-        { text: 'Last 24 hours', value: 'day' },
-        { text: 'Last 7 days', value: '7days' },
-        { text: 'Last 30 days', value: '30days' },
-        { text: 'Custom dates', value: 'custom' },
-      ],
-      emailTypeOptions: [
-        { text: 'All Types', value: '' },
-        { text: 'Chat Notification', value: 'ChatNotification' },
-        {
-          text: 'Chat Notification (User to Mod)',
-          value: 'ChatNotificationUser2Mod',
-        },
-        {
-          text: 'Chat Notification (Mod to Mod)',
-          value: 'ChatNotificationMod2Mod',
-        },
-        { text: 'Welcome', value: 'WelcomeMail' },
-        { text: 'Digest', value: 'UnifiedDigest' },
-        { text: 'Donation Thank You', value: 'DonationThank' },
-        { text: 'Donation Ask', value: 'DonationAsk' },
-      ],
-      emailFields: [
-        { key: 'email_type', label: 'Type', sortable: true },
-        { key: 'subject', label: 'Subject', sortable: false },
-        { key: 'sent_at', label: 'Sent', sortable: true },
-        { key: 'opened_at', label: 'Opened', sortable: true },
-        { key: 'clicked_at', label: 'Clicked', sortable: true },
-        { key: 'bounced_at', label: 'Bounced', sortable: true },
-        { key: 'unsubscribed_at', label: 'Unsubscribed', sortable: true },
-      ],
-    }
-  },
-  computed: {
-    formattedStats() {
-      const stats = this.emailTrackingStore.formattedStats
-      if (!stats) return null
+const formattedStats = computed(() => {
+  const stats = emailTrackingStore.formattedStats
+  if (!stats) return null
 
-      return {
-        totalSent: parseInt(stats.totalSent) || 0,
-        opened: parseInt(stats.opened) || 0,
-        clicked: parseInt(stats.clicked) || 0,
-        bounced: parseInt(stats.bounced) || 0,
-        openRate: stats.openRate,
-        clickRate: stats.clickRate,
-        clickToOpenRate: stats.clickToOpenRate,
-        bounceRate: stats.bounceRate,
-      }
-    },
-    formattedAMPStats() {
-      const stats = this.emailTrackingStore.formattedAMPStats
-      if (!stats) return null
+  return {
+    totalSent: parseInt(stats.totalSent) || 0,
+    opened: parseInt(stats.opened) || 0,
+    clicked: parseInt(stats.clicked) || 0,
+    bounced: parseInt(stats.bounced) || 0,
+    openRate: stats.openRate,
+    clickRate: stats.clickRate,
+    clickToOpenRate: stats.clickToOpenRate,
+    bounceRate: stats.bounceRate,
+  }
+})
 
-      const totalWithAMP = parseInt(stats.totalWithAMP) || 0
-      const totalWithoutAMP = parseInt(stats.totalWithoutAMP) || 0
-      const ampOpened = parseInt(stats.ampOpened) || 0
-      const nonAMPOpened = parseInt(stats.nonAMPOpened) || 0
-      const totalEmails = totalWithAMP + totalWithoutAMP
-      const totalOpened = ampOpened + nonAMPOpened
-      const totalOpenRate =
-        totalEmails > 0 ? ((totalOpened / totalEmails) * 100).toFixed(1) : '0.0'
+const formattedAMPStats = computed(() => {
+  const stats = emailTrackingStore.formattedAMPStats
+  if (!stats) return null
 
-      // Calculate non-AMP client open rate for AMP emails
-      // This is AMP emails that were opened but NOT via AMP rendering (opened in non-AMP clients)
-      const ampRenderRateNum = parseFloat(stats.ampRenderRate) || 0
-      const ampOpenRateNum = parseFloat(stats.ampOpenRate) || 0
-      const ampNonAMPClientOpenRate = Math.max(
-        0,
-        ampOpenRateNum - ampRenderRateNum
-      ).toFixed(1)
+  const totalWithAMP = parseInt(stats.totalWithAMP) || 0
+  const totalWithoutAMP = parseInt(stats.totalWithoutAMP) || 0
+  const ampOpened = parseInt(stats.ampOpened) || 0
+  const nonAMPOpened = parseInt(stats.nonAMPOpened) || 0
+  const totalEmails = totalWithAMP + totalWithoutAMP
+  const totalOpened = ampOpened + nonAMPOpened
+  const totalOpenRate =
+    totalEmails > 0 ? ((totalOpened / totalEmails) * 100).toFixed(1) : '0.0'
 
-      // Calculate total click rate
-      const ampClicked = parseInt(stats.ampClicked) || 0
-      const nonAMPClicked = parseInt(stats.nonAMPClicked) || 0
-      const totalClicked = ampClicked + nonAMPClicked
-      const totalClickRate =
-        totalEmails > 0
-          ? ((totalClicked / totalEmails) * 100).toFixed(1)
-          : '0.0'
+  // Calculate non-AMP client open rate for AMP emails
+  // This is AMP emails that were opened but NOT via AMP rendering (opened in non-AMP clients)
+  const ampRenderRateNum = parseFloat(stats.ampRenderRate) || 0
+  const ampOpenRateNum = parseFloat(stats.ampOpenRate) || 0
+  const ampNonAMPClientOpenRate = Math.max(
+    0,
+    ampOpenRateNum - ampRenderRateNum
+  ).toFixed(1)
 
-      return {
-        totalWithAMP,
-        totalWithoutAMP,
-        totalEmails,
-        ampPercentage: stats.ampPercentage,
-        ampRendered: parseInt(stats.ampRendered) || 0,
-        ampRenderRate: stats.ampRenderRate,
-        ampNonAMPClientOpenRate,
-        ampOpened,
-        ampOpenRate: stats.ampOpenRate,
-        ampClickRate: stats.ampClickRate,
-        ampBounceRate: stats.ampBounceRate,
-        ampReplyRate: stats.ampReplyRate,
-        ampActionRate: stats.ampActionRate,
-        // Response rate and breakdown
-        ampResponseRate: stats.ampResponseRate,
-        ampReplyViaAMPRate: stats.ampReplyViaAMPRate,
-        ampReplyViaEmailRate: stats.ampReplyViaEmailRate,
-        ampReplyClickRate: stats.ampReplyClickRate,
-        ampOtherClickRate: stats.ampOtherClickRate,
-        nonAMPOpened,
-        nonAMPOpenRate: stats.nonAMPOpenRate,
-        nonAMPClickRate: stats.nonAMPClickRate,
-        nonAMPBounceRate: stats.nonAMPBounceRate,
-        nonAMPReplyRate: stats.nonAMPReplyRate,
-        nonAMPActionRate: stats.nonAMPActionRate,
-        // Non-AMP response rate and breakdown
-        nonAMPResponseRate: stats.nonAMPResponseRate,
-        nonAMPReplyClickRate: stats.nonAMPReplyClickRate,
-        nonAMPOtherClickRate: stats.nonAMPOtherClickRate,
-        totalOpened,
-        totalOpenRate,
-        totalClicked,
-        totalClickRate,
-      }
-    },
-    ampProportionChartData() {
-      if (!this.formattedAMPStats) return null
-      const { totalWithAMP, totalWithoutAMP } = this.formattedAMPStats
-      if (totalWithAMP === 0 && totalWithoutAMP === 0) return null
+  // Calculate total click rate
+  const ampClicked = parseInt(stats.ampClicked) || 0
+  const nonAMPClicked = parseInt(stats.nonAMPClicked) || 0
+  const totalClicked = ampClicked + nonAMPClicked
+  const totalClickRate =
+    totalEmails > 0 ? ((totalClicked / totalEmails) * 100).toFixed(1) : '0.0'
 
-      return [
-        ['Type', 'Count'],
-        ['AMP Emails', totalWithAMP],
-        ['Non-AMP Emails', totalWithoutAMP],
-      ]
-    },
-    ampProportionChartOptions() {
-      return {
-        pieHole: 0.4,
-        colors: ['#6f42c1', '#6c757d'],
-        legend: { position: 'bottom', textStyle: { fontSize: 11 } },
-        chartArea: { width: '90%', height: '75%' },
-        pieSliceText: 'percentage',
-        pieSliceTextStyle: { fontSize: 11 },
-        tooltip: { text: 'both' },
-      }
-    },
-    ampClientOpenChartData() {
-      if (!this.formattedAMPStats) return null
-      const { ampRendered, ampOpened } = this.formattedAMPStats
-      if (ampOpened === 0) return null
+  return {
+    totalWithAMP,
+    totalWithoutAMP,
+    totalEmails,
+    ampPercentage: stats.ampPercentage,
+    ampRendered: parseInt(stats.ampRendered) || 0,
+    ampRenderRate: stats.ampRenderRate,
+    ampNonAMPClientOpenRate,
+    ampOpened,
+    ampOpenRate: stats.ampOpenRate,
+    ampClickRate: stats.ampClickRate,
+    ampBounceRate: stats.ampBounceRate,
+    ampReplyRate: stats.ampReplyRate,
+    ampActionRate: stats.ampActionRate,
+    // Response rate and breakdown
+    ampResponseRate: stats.ampResponseRate,
+    ampReplyViaAMPRate: stats.ampReplyViaAMPRate,
+    ampReplyViaEmailRate: stats.ampReplyViaEmailRate,
+    ampReplyClickRate: stats.ampReplyClickRate,
+    ampOtherClickRate: stats.ampOtherClickRate,
+    nonAMPOpened,
+    nonAMPOpenRate: stats.nonAMPOpenRate,
+    nonAMPClickRate: stats.nonAMPClickRate,
+    nonAMPBounceRate: stats.nonAMPBounceRate,
+    nonAMPReplyRate: stats.nonAMPReplyRate,
+    nonAMPActionRate: stats.nonAMPActionRate,
+    // Non-AMP response rate and breakdown
+    nonAMPResponseRate: stats.nonAMPResponseRate,
+    nonAMPReplyClickRate: stats.nonAMPReplyClickRate,
+    nonAMPOtherClickRate: stats.nonAMPOtherClickRate,
+    totalOpened,
+    totalOpenRate,
+    totalClicked,
+    totalClickRate,
+  }
+})
 
-      // AMP emails opened: how many were opened in AMP-enabled vs non-AMP clients
-      const ampClientOpens = ampRendered || 0
-      const nonAMPClientOpens = Math.max(0, ampOpened - ampClientOpens)
+const ampProportionChartData = computed(() => {
+  if (!formattedAMPStats.value) return null
+  const { totalWithAMP, totalWithoutAMP } = formattedAMPStats.value
+  if (totalWithAMP === 0 && totalWithoutAMP === 0) return null
 
-      if (ampClientOpens === 0 && nonAMPClientOpens === 0) return null
+  return [
+    ['Type', 'Count'],
+    ['AMP Emails', totalWithAMP],
+    ['Non-AMP Emails', totalWithoutAMP],
+  ]
+})
 
-      return [
-        ['Client Type', 'Opens'],
-        ['AMP-enabled client', ampClientOpens],
-        ['Non-AMP client', nonAMPClientOpens],
-      ]
-    },
-    ampClientOpenChartOptions() {
-      return {
-        pieHole: 0.4,
-        colors: ['#6f42c1', '#adb5bd'],
-        legend: { position: 'bottom', textStyle: { fontSize: 11 } },
-        chartArea: { width: '90%', height: '75%' },
-        pieSliceText: 'percentage',
-        pieSliceTextStyle: { fontSize: 11 },
-        tooltip: { text: 'both' },
-      }
-    },
-    clickedLinksFieldsComputed() {
-      if (this.emailTrackingStore.aggregateClickedLinks) {
-        return [
-          { key: 'normalized_url', label: 'Link Pattern', sortable: false },
-          { key: 'click_count', label: 'Clicks', sortable: true },
-          { key: 'example_urls', label: 'Example URLs', sortable: false },
-        ]
-      } else {
-        return [
-          { key: 'url', label: 'URL', sortable: false },
-          { key: 'click_count', label: 'Clicks', sortable: true },
-        ]
-      }
-    },
-    ampResponseRateTotal() {
-      if (!this.formattedAMPStats) return '0.0'
-      const viaAMP = parseFloat(this.formattedAMPStats.ampReplyViaAMPRate) || 0
-      const viaEmail =
-        parseFloat(this.formattedAMPStats.ampReplyViaEmailRate) || 0
-      const viaWeb = parseFloat(this.formattedAMPStats.ampReplyClickRate) || 0
-      return (viaAMP + viaEmail + viaWeb).toFixed(1)
-    },
-    nonAMPResponseRateTotal() {
-      if (!this.formattedAMPStats) return '0.0'
-      const viaEmail = parseFloat(this.formattedAMPStats.nonAMPReplyRate) || 0
-      const viaWeb =
-        parseFloat(this.formattedAMPStats.nonAMPReplyClickRate) || 0
-      return (viaEmail + viaWeb).toFixed(1)
-    },
-  },
-  watch: {
-    datePreset(newPreset) {
-      // Handle period changes - set dates and fetch stats
-      this.onDatePresetChange(newPreset)
-    },
-    emailType() {
-      this.fetchStats()
-    },
-    startDate() {
-      if (this.datePreset === 'custom') {
-        this.fetchStats()
-      }
-    },
-    endDate() {
-      if (this.datePreset === 'custom') {
-        this.fetchStats()
-      }
-    },
-  },
-  mounted() {
-    // Auto-fetch stats when the component is displayed.
-    this.fetchStats()
-  },
-  methods: {
-    async fetchStats() {
-      this.emailTrackingStore.setFilters({
-        type: this.emailType,
-        start: this.startDate,
-        end: this.endDate,
-      })
-      // Fetch all data in parallel.
-      await Promise.all([
-        this.emailTrackingStore.fetchStats(),
-        this.emailTrackingStore.fetchTimeSeries(),
-        this.emailTrackingStore.fetchStatsByType(),
-        this.emailTrackingStore.fetchClickedLinks(),
-      ])
-    },
+const ampProportionChartOptions = {
+  pieHole: 0.4,
+  colors: ['#6f42c1', '#6c757d'],
+  legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+  chartArea: { width: '90%', height: '75%' },
+  pieSliceText: 'percentage',
+  pieSliceTextStyle: { fontSize: 11 },
+  tooltip: { text: 'both' },
+}
 
-    async fetchUserEmails() {
-      if (!this.userIdOrEmail) return
-      const input = this.userIdOrEmail.trim()
-      // If it looks like an email, pass as string; otherwise parse as int.
-      if (input.includes('@')) {
-        await this.emailTrackingStore.fetchUserEmails(input)
-      } else {
-        await this.emailTrackingStore.fetchUserEmails(parseInt(input))
-      }
+const ampClientOpenChartData = computed(() => {
+  if (!formattedAMPStats.value) return null
+  const { ampRendered, ampOpened } = formattedAMPStats.value
+  if (ampOpened === 0) return null
+
+  // AMP emails opened: how many were opened in AMP-enabled vs non-AMP clients
+  const ampClientOpens = ampRendered || 0
+  const nonAMPClientOpens = Math.max(0, ampOpened - ampClientOpens)
+
+  if (ampClientOpens === 0 && nonAMPClientOpens === 0) return null
+
+  return [
+    ['Client Type', 'Opens'],
+    ['AMP-enabled client', ampClientOpens],
+    ['Non-AMP client', nonAMPClientOpens],
+  ]
+})
+
+const ampClientOpenChartOptions = {
+  pieHole: 0.4,
+  colors: ['#6f42c1', '#adb5bd'],
+  legend: { position: 'bottom', textStyle: { fontSize: 11 } },
+  chartArea: { width: '90%', height: '75%' },
+  pieSliceText: 'percentage',
+  pieSliceTextStyle: { fontSize: 11 },
+  tooltip: { text: 'both' },
+}
+
+const clickedLinksFieldsComputed = computed(() => {
+  if (emailTrackingStore.aggregateClickedLinks) {
+    return [
+      { key: 'normalized_url', label: 'Link Pattern', sortable: false },
+      { key: 'click_count', label: 'Clicks', sortable: true },
+      { key: 'example_urls', label: 'Example URLs', sortable: false },
+    ]
+  } else {
+    return [
+      { key: 'url', label: 'URL', sortable: false },
+      { key: 'click_count', label: 'Clicks', sortable: true },
+    ]
+  }
+})
+
+const ampResponseRateTotal = computed(() => {
+  if (!formattedAMPStats.value) return '0.0'
+  const viaAMP = parseFloat(formattedAMPStats.value.ampReplyViaAMPRate) || 0
+  const viaEmail = parseFloat(formattedAMPStats.value.ampReplyViaEmailRate) || 0
+  const viaWeb = parseFloat(formattedAMPStats.value.ampReplyClickRate) || 0
+  return (viaAMP + viaEmail + viaWeb).toFixed(1)
+})
+
+const nonAMPResponseRateTotal = computed(() => {
+  if (!formattedAMPStats.value) return '0.0'
+  const viaEmail = parseFloat(formattedAMPStats.value.nonAMPReplyRate) || 0
+  const viaWeb = parseFloat(formattedAMPStats.value.nonAMPReplyClickRate) || 0
+  return (viaEmail + viaWeb).toFixed(1)
+})
+
+watch(datePreset, (newPreset) => {
+  // Handle period changes - set dates and fetch stats
+  onDatePresetChange(newPreset)
+})
+
+watch(emailType, () => {
+  fetchStats()
+})
+
+watch(startDate, () => {
+  if (datePreset.value === 'custom') {
+    fetchStats()
+  }
+})
+
+watch(endDate, () => {
+  if (datePreset.value === 'custom') {
+    fetchStats()
+  }
+})
+
+onMounted(() => {
+  // Auto-fetch stats when the component is displayed.
+  fetchStats()
+})
+
+async function fetchStats() {
+  emailTrackingStore.setFilters({
+    type: emailType.value,
+    start: startDate.value,
+    end: endDate.value,
+  })
+  // Fetch all data in parallel.
+  await Promise.all([
+    emailTrackingStore.fetchStats(),
+    emailTrackingStore.fetchTimeSeries(),
+    emailTrackingStore.fetchStatsByType(),
+    emailTrackingStore.fetchClickedLinks(),
+  ])
+}
+
+async function fetchUserEmails() {
+  if (!userIdOrEmail.value) return
+  const input = userIdOrEmail.value.trim()
+  // If it looks like an email, pass as string; otherwise parse as int.
+  if (input.includes('@')) {
+    await emailTrackingStore.fetchUserEmails(input)
+  } else {
+    await emailTrackingStore.fetchUserEmails(parseInt(input))
+  }
+}
+
+async function loadMoreUserEmails() {
+  await emailTrackingStore.loadMoreUserEmails()
+}
+
+function onDatePresetChange(preset) {
+  const now = new Date()
+
+  let start
+  const end = now
+
+  switch (preset) {
+    case 'hour':
+      start = new Date(now)
+      start.setHours(start.getHours() - 1)
+      // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
+      startDate.value = formatDateTimeForAPI(start)
+      endDate.value = formatDateTimeForAPI(end)
+      fetchStats()
+      return
+    case 'day':
+      start = new Date(now)
+      start.setDate(start.getDate() - 1)
+      // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
+      startDate.value = formatDateTimeForAPI(start)
+      endDate.value = formatDateTimeForAPI(end)
+      fetchStats()
+      return
+    case '7days':
+      start = new Date(now)
+      start.setDate(start.getDate() - 7)
+      break
+    case '30days':
+      start = new Date(now)
+      start.setDate(start.getDate() - 30)
+      break
+    case 'custom':
+      // Keep current dates, user will set them manually.
+      return
+    default:
+      start = new Date(now)
+      start.setDate(start.getDate() - 7)
+  }
+
+  // For longer periods, just use date (YYYY-MM-DD)
+  startDate.value = start.toISOString().split('T')[0]
+  endDate.value = now.toISOString().split('T')[0]
+  fetchStats()
+}
+
+function formatDateTimeForAPI(date) {
+  // Format as ISO 8601 local datetime (YYYY-MM-DDTHH:MM:SS)
+  // This format works with datetime-local inputs and the API
+  const pad = (n) => String(n).padStart(2, '0')
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    'T' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes()) +
+    ':' +
+    pad(date.getSeconds())
+  )
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+// Chart options for Google Charts.
+function getEngagementChartOptions() {
+  return {
+    title: 'Opens and Clicks Over Time',
+    curveType: 'function',
+    legend: { position: 'bottom' },
+    chartArea: { width: '85%', height: '70%' },
+    vAxis: {
+      title: 'Rate (%)',
+      viewWindow: { min: 0 },
+      format: '#.#',
     },
-
-    async loadMoreUserEmails() {
-      await this.emailTrackingStore.loadMoreUserEmails()
+    hAxis: {
+      title: 'Date',
+      format: 'dd MMM',
     },
-
-    onDatePresetChange(preset) {
-      const now = new Date()
-
-      let startDate
-      const endDate = now
-
-      switch (preset) {
-        case 'hour':
-          startDate = new Date(now)
-          startDate.setHours(startDate.getHours() - 1)
-          // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
-          this.startDate = this.formatDateTimeForAPI(startDate)
-          this.endDate = this.formatDateTimeForAPI(endDate)
-          this.fetchStats()
-          return
-        case 'day':
-          startDate = new Date(now)
-          startDate.setDate(startDate.getDate() - 1)
-          // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
-          this.startDate = this.formatDateTimeForAPI(startDate)
-          this.endDate = this.formatDateTimeForAPI(endDate)
-          this.fetchStats()
-          return
-        case '7days':
-          startDate = new Date(now)
-          startDate.setDate(startDate.getDate() - 7)
-          break
-        case '30days':
-          startDate = new Date(now)
-          startDate.setDate(startDate.getDate() - 30)
-          break
-        case 'custom':
-          // Keep current dates, user will set them manually.
-          return
-        default:
-          startDate = new Date(now)
-          startDate.setDate(startDate.getDate() - 7)
-      }
-
-      // For longer periods, just use date (YYYY-MM-DD)
-      this.startDate = startDate.toISOString().split('T')[0]
-      this.endDate = now.toISOString().split('T')[0]
-      this.fetchStats()
+    series: {
+      0: { color: '#28a745' }, // Open rate - green
+      1: { color: '#17a2b8' }, // Click rate - blue
     },
-
-    formatDateTimeForAPI(date) {
-      // Format as ISO 8601 local datetime (YYYY-MM-DDTHH:MM:SS)
-      // This format works with datetime-local inputs and the API
-      const pad = (n) => String(n).padStart(2, '0')
-      return (
-        date.getFullYear() +
-        '-' +
-        pad(date.getMonth() + 1) +
-        '-' +
-        pad(date.getDate()) +
-        'T' +
-        pad(date.getHours()) +
-        ':' +
-        pad(date.getMinutes()) +
-        ':' +
-        pad(date.getSeconds())
-      )
+    animation: {
+      startup: true,
+      duration: 500,
+      easing: 'out',
     },
+  }
+}
 
-    formatDate(dateStr) {
-      if (!dateStr) return '-'
-      const date = new Date(dateStr)
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+function getTypeComparisonOptions() {
+  return {
+    title: 'Opens and Clicks by Email Type',
+    legend: { position: 'bottom' },
+    chartArea: { width: '85%', height: '65%' },
+    vAxis: {
+      title: 'Rate (%)',
+      viewWindow: { min: 0 },
+      format: '#.#',
     },
+    hAxis: {
+      title: 'Email Type',
+    },
+    series: {
+      0: { color: '#28a745' }, // Open rate - green
+      1: { color: '#17a2b8' }, // Click rate - blue
+    },
+    bar: { groupWidth: '70%' },
+    animation: {
+      startup: true,
+      duration: 500,
+      easing: 'out',
+    },
+  }
+}
 
-    // Chart options for Google Charts.
-    getEngagementChartOptions() {
-      return {
-        title: 'Opens and Clicks Over Time',
-        curveType: 'function',
-        legend: { position: 'bottom' },
-        chartArea: { width: '85%', height: '70%' },
-        vAxis: {
-          title: 'Rate (%)',
-          viewWindow: { min: 0 },
-          format: '#.#',
-        },
-        hAxis: {
-          title: 'Date',
-          format: 'dd MMM',
-        },
-        series: {
-          0: { color: '#28a745' }, // Open rate - green
-          1: { color: '#17a2b8' }, // Click rate - blue
-        },
-        animation: {
-          startup: true,
-          duration: 500,
-          easing: 'out',
-        },
-      }
+function getVolumeChartOptions() {
+  return {
+    title: 'Email Volume Over Time',
+    curveType: 'function',
+    legend: { position: 'none' },
+    chartArea: { width: '85%', height: '70%' },
+    vAxis: {
+      title: 'Emails Sent',
+      viewWindow: { min: 0 },
     },
-
-    getTypeComparisonOptions() {
-      return {
-        title: 'Opens and Clicks by Email Type',
-        legend: { position: 'bottom' },
-        chartArea: { width: '85%', height: '65%' },
-        vAxis: {
-          title: 'Rate (%)',
-          viewWindow: { min: 0 },
-          format: '#.#',
-        },
-        hAxis: {
-          title: 'Email Type',
-        },
-        series: {
-          0: { color: '#28a745' }, // Open rate - green
-          1: { color: '#17a2b8' }, // Click rate - blue
-        },
-        bar: { groupWidth: '70%' },
-        animation: {
-          startup: true,
-          duration: 500,
-          easing: 'out',
-        },
-      }
+    hAxis: {
+      title: 'Date',
+      format: 'dd MMM',
     },
-
-    getVolumeChartOptions() {
-      return {
-        title: 'Email Volume Over Time',
-        curveType: 'function',
-        legend: { position: 'none' },
-        chartArea: { width: '85%', height: '70%' },
-        vAxis: {
-          title: 'Emails Sent',
-          viewWindow: { min: 0 },
-        },
-        hAxis: {
-          title: 'Date',
-          format: 'dd MMM',
-        },
-        series: {
-          0: { color: '#28a745' }, // Green
-        },
-        animation: {
-          startup: true,
-          duration: 500,
-          easing: 'out',
-        },
-      }
+    series: {
+      0: { color: '#28a745' }, // Green
     },
-
-    getAMPComparisonOptions() {
-      return {
-        title: 'AMP vs Non-AMP Action Rates',
-        legend: { position: 'bottom' },
-        chartArea: { width: '80%', height: '65%' },
-        vAxis: {
-          title: 'Rate (%)',
-          viewWindow: { min: 0 },
-          format: '#.#',
-        },
-        hAxis: {
-          title: '',
-        },
-        series: {
-          0: { color: '#6f42c1' }, // AMP - purple
-          1: { color: '#6c757d' }, // Non-AMP - gray
-        },
-        bar: { groupWidth: '60%' },
-        animation: {
-          startup: true,
-          duration: 500,
-          easing: 'out',
-        },
-      }
+    animation: {
+      startup: true,
+      duration: 500,
+      easing: 'out',
     },
-  },
+  }
 }
 </script>
 <style scoped>

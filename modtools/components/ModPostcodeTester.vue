@@ -26,24 +26,12 @@
     </b-card-body>
   </b-card>
 </template>
-<script>
-import PostCode from '~/components/PostCode'
-export default {
-  components: {
-    PostCode,
-  },
-  data: function () {
-    return {
-      postcode: null,
-    }
-  },
-  methods: {
-    postcodeSelect(pc) {
-      this.postcode = pc
-    },
-    postcodeClear() {
-      this.postcode = null
-    },
-  },
+<script setup>
+import { ref } from 'vue'
+
+const postcode = ref(null)
+
+function postcodeSelect(pc) {
+  postcode.value = pc
 }
 </script>
