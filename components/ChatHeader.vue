@@ -392,7 +392,12 @@ const { chat, otheruser, unseen, milesaway, milesstring } = await setupChat(
 )
 
 onMounted(() => {
-  console.log('ChatHeader: onMounted, collapsed:', collapsed.value, 'otheruser:', !!otheruser?.value)
+  console.log(
+    'ChatHeader: onMounted, collapsed:',
+    collapsed.value,
+    'otheruser:',
+    !!otheruser?.value
+  )
 })
 
 // Set initial collapsed state
