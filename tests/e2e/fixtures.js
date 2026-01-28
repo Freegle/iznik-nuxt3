@@ -516,65 +516,17 @@ const test = base.test.extend({
             `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
 
-          // Navigate with timeout
+          // Navigate with timeout.
+          // Uses waitUntil: 'load' by default, which indicates that the page is fully loaded.
           await page.goto(path, { timeout })
-
-          // Wait for initial load
-          await page.waitForLoadState('domcontentloaded', { timeout })
-
-          // Wait for network to settle (helps with slow JavaScript loading)
-          try {
-            await page.waitForLoadState('networkidle', {
-              timeout: Math.min(timeout, 30000),
-            })
-          } catch (networkError) {
-            console.log(
-              `Network didn't become idle within timeout, continuing anyway: ${networkError.message}`
-            )
-          }
 
           // Wait for page to finish hydrating (loading spinner to disappear)
           // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
           // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
-          try {
-            const loadingIndicator = page.locator('.loading-indicator')
-            const isVisible = await loadingIndicator
-              .evaluate((el) => {
-                const style = window.getComputedStyle(el)
-                return parseFloat(style.opacity) > 0
-              })
-              .catch(() => false)
-
-            if (isVisible) {
-              console.log(
-                'Loading indicator visible, waiting for it to hide...'
-              )
-              // Wait for opacity to become 0
-              await loadingIndicator.evaluate(
-                (el) => {
-                  return new Promise((resolve) => {
-                    const check = () => {
-                      const style = window.getComputedStyle(el)
-                      if (parseFloat(style.opacity) === 0) {
-                        resolve()
-                      } else {
-                        requestAnimationFrame(check)
-                      }
-                    }
-                    check()
-                  })
-                },
-                { timeout: 5000 }
-              )
-              console.log('Loading indicator hidden')
-            }
-          } catch (loadingError) {
-            // Loading indicator check failed or timed out - continue anyway
-            console.log(
-              `Loading indicator check (continuing anyway): ${
-                loadingError.message?.substring(0, 100) || 'unknown error'
-              }`
-            )
+          // Can't use Playwright's toBeVisible assertion since that doesn't check opacity.
+          const loadingIndicator = page.locator('.loading-indicator')
+          if (loadingIndicator.count() > 0) {
+            await base.expect(loadingIndicator).toHaveCSS('opacity', '0')
           }
 
           // Verify page content is visible
