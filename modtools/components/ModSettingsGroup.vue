@@ -195,9 +195,8 @@
               </b-button>
               <OurUploader
                 v-if="uploadingProfile"
+                v-model="profileAtts"
                 type="Group"
-                :groupid="groupid"
-                @photo-processed="photoProcessed"
               />
             </b-form-group>
             <ModGroupSetting
@@ -1068,6 +1067,7 @@ const quillModules = {
 const copyfrom = ref(null)
 const groupid = ref(null)
 const uploadingProfile = ref(false)
+const profileAtts = ref([])
 const editingDescription = ref(false)
 const rules = reactive({})
 const rulesBump = ref(0)
@@ -1402,6 +1402,26 @@ watch(groupid, () => {
   fetchGroup()
 })
 
+watch(
+  profileAtts,
+  (newVal) => {
+    uploadingProfile.value = false
+    if (newVal?.length) {
+      // Get the image ID from the uploaded attachment and update the group profile
+      const imageid = newVal[0].id
+      if (imageid) {
+        modGroupStore.updateMT({
+          id: groupid.value,
+          profile: imageid,
+        })
+      }
+      // Clear the array for next upload
+      profileAtts.value = []
+    }
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   groupid.value = props.initialGroup
   fetchConfigs()
@@ -1466,19 +1486,6 @@ async function saveMembershipSetting(name, val) {
 
 function uploadProfile() {
   uploadingProfile.value = true
-}
-
-function photoProcessed(imageid) {
-  // We have uploaded a photo.  Remove the uploader
-  uploadingProfile.value = false
-
-  // Set the image id in the group.
-  if (imageid) {
-    modGroupStore.updateMT({
-      id: groupid.value,
-      profile: imageid,
-    })
-  }
 }
 
 function saveGroupSetting(name, val) {
