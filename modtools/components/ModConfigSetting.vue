@@ -58,155 +58,148 @@
     </div>
   </b-form-group>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useModConfigStore } from '~/stores/modconfig'
 
-export default {
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    configid: {
-      type: Number,
-      required: true,
-    },
-    label: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: 'input',
-    },
-    rows: {
-      type: Number,
-      required: false,
-      default: 3,
-    },
-    toggleWidth: {
-      type: Number,
-      required: false,
-      default: 150,
-    },
-    toggleChecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    toggleUnchecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    valueChecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    valueUnchecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    options: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    disabled: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    required: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  name: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const modConfigStore = useModConfigStore()
-    return { modConfigStore }
+  configid: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      forSave: null,
-    }
+  label: {
+    type: String,
+    required: true,
   },
-  computed: {
-    config() {
-      return this.modConfigStore.current
-    },
-    setifrequired() {
-      if (this.required) {
-        return this.forSave && this.forSave.trim().length > 0
-      }
-      return true
-    },
-    value: {
-      get() {
-        let ret = null
+  description: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  type: {
+    type: String,
+    required: false,
+    default: 'input',
+  },
+  rows: {
+    type: Number,
+    required: false,
+    default: 3,
+  },
+  toggleWidth: {
+    type: Number,
+    required: false,
+    default: 150,
+  },
+  toggleChecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  toggleUnchecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  valueChecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  valueUnchecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  options: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  required: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-        if (this.config) {
-          if (this.type === 'toggle') {
-            ret = this.config[this.name]
+const modConfigStore = useModConfigStore()
 
-            if (this.valueChecked) {
-              ret = ret === this.valueChecked
-            }
-          } else {
-            ret = this.config[this.name]
-          }
-        }
-        return ret
-      },
-      set(newval) {
-        this.forSave = newval
-      },
-    },
-    toggleValue: {
-      get() {
-        return Boolean(this.value)
-      },
-      set(newval) {
-        this.value = newval
-      },
-    },
-  },
-  methods: {
-    async save(callbackorvalue) {
-      const data = {
-        id: this.configid,
-      }
+const forSave = ref(null)
 
-      if (this.type === 'toggle') {
-        this.forSave = callbackorvalue
-        // We can override the values sent.
-        if (this.forSave) {
-          data[this.name] = this.valueChecked ? this.valueChecked : this.forSave
-        } else {
-          data[this.name] = this.valueUnchecked
-            ? this.valueUnchecked
-            : this.forSave
+const config = computed(() => modConfigStore.current)
+
+const setifrequired = computed(() => {
+  if (props.required) {
+    return forSave.value && forSave.value.trim().length > 0
+  }
+  return true
+})
+
+const value = computed({
+  get() {
+    let ret = null
+
+    if (config.value) {
+      if (props.type === 'toggle') {
+        ret = config.value[props.name]
+
+        if (props.valueChecked) {
+          ret = ret === props.valueChecked
         }
       } else {
-        if (this.forSave === null && this.type === 'input' && this.config) {
-          this.forSave = this.config[this.name]
-        }
-        data[this.name] = this.forSave
+        ret = config.value[props.name]
       }
-
-      await this.modConfigStore.updateConfig(data)
-      if (typeof callbackorvalue === 'function') callbackorvalue()
-    },
+    }
+    return ret
   },
+  set(newval) {
+    forSave.value = newval
+  },
+})
+
+const toggleValue = computed({
+  get() {
+    return Boolean(value.value)
+  },
+  set(newval) {
+    value.value = newval
+  },
+})
+
+async function save(callbackorvalue) {
+  const data = {
+    id: props.configid,
+  }
+
+  if (props.type === 'toggle') {
+    forSave.value = callbackorvalue
+    // We can override the values sent.
+    if (forSave.value) {
+      data[props.name] = props.valueChecked ? props.valueChecked : forSave.value
+    } else {
+      data[props.name] = props.valueUnchecked
+        ? props.valueUnchecked
+        : forSave.value
+    }
+  } else {
+    if (forSave.value === null && props.type === 'input' && config.value) {
+      forSave.value = config.value[props.name]
+    }
+    data[props.name] = forSave.value
+  }
+
+  await modConfigStore.updateConfig(data)
+  if (typeof callbackorvalue === 'function') callbackorvalue()
 }
 </script>
 <style scoped lang="scss">

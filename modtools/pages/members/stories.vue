@@ -13,34 +13,26 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { useStoryStore } from '@/stores/stories'
 
-export default {
-  setup() {
-    const storyStore = useStoryStore()
-    return {
-      storyStore,
-    }
-  },
-  computed: {
-    stories() {
-      const stories = this.storyStore.list
+const storyStore = useStoryStore()
 
-      if (stories) {
-        return Object.values(stories)
-      }
+const stories = computed(() => {
+  const storyList = storyStore.list
 
-      return []
-    },
-  },
-  async mounted() {
-    await this.storyStore.fetchMT({
-      reviewed: 0,
-      dontzapfalsey: true, // Stop BaseAPI from removing above zero value
-    })
-  },
+  if (storyList) {
+    return Object.values(storyList)
+  }
 
-  methods: {},
-}
+  return []
+})
+
+onMounted(async () => {
+  await storyStore.fetchMT({
+    reviewed: 0,
+    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
+  })
+})
 </script>

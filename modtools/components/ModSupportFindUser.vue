@@ -36,93 +36,87 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      searching: false,
-      searchuser: null,
-      show: 0,
-      searched: false,
-      searchresults: [],
-    }
-  },
-  computed: {
-    expand() {
-      return this.searchresults.length === 1
-    },
-    visible() {
-      return this.searchresults && this.searchresults.length
-        ? this.searchresults.slice(0, this.show)
-        : []
-    },
-  },
-  mounted() {
-    // Clear the user cache to make sure we don't display any results before we've searched.
-    const userStore = useUserStore()
+})
+
+const userStore = useUserStore()
+
+const searching = ref(false)
+const searchuser = ref(null)
+const show = ref(0)
+const searched = ref(false)
+const searchresults = ref([])
+
+const expand = computed(() => {
+  return searchresults.value.length === 1
+})
+
+const visible = computed(() => {
+  return searchresults.value && searchresults.value.length
+    ? searchresults.value.slice(0, show.value)
+    : []
+})
+
+onMounted(() => {
+  // Clear the user cache to make sure we don't display any results before we've searched.
+  userStore.clear()
+
+  if (props.id) {
+    console.log('mounted', props.id)
+    searchuser.value = props.id
+    usersearch()
+  }
+})
+
+async function usersearch() {
+  if (!searchuser.value) {
+    return
+  }
+  const val = searchuser.value.toString().trim()
+
+  if (val) {
+    searching.value = true
+
+    show.value = 0
     userStore.clear()
 
-    if (this.id) {
-      console.log('mounted', this.id)
-      this.searchuser = this.id
-      this.usersearch()
-    }
-  },
-  methods: {
-    async usersearch() {
-      if (!this.searchuser) {
-        return
-      }
-      const val = this.searchuser.toString().trim()
+    await userStore.fetchMT({
+      search: val,
+      emailhistory: true,
+    })
+    searching.value = false
+    searched.value = true
 
-      if (val) {
-        this.searching = true
+    // Get a copy of the results here.  The store might change later if we view a chat and have to fetch another
+    // user.  That can cause us to get confused.
 
-        this.show = 0
-        const userStore = useUserStore()
-        userStore.clear()
+    // Show most recent first
+    searchresults.value = Object.values(userStore.list).sort((a, b) => {
+      return new Date(b.lastaccess).getTime() - new Date(a.lastaccess).getTime()
+    })
+  }
+}
 
-        await userStore.fetchMT({
-          search: val,
-          emailhistory: true,
-        })
-        this.searching = false
-        this.searched = true
+function loadMoreUsers($state) {
+  // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
+  // we render onscreen the faster vue is to do so.
+  show.value++
 
-        // Get a copy of the results here.  The store might change later if we view a chat and have to fetch another
-        // user.  That can cause us to get confused.
-
-        // Show most recent first
-        this.searchresults = Object.values(userStore.list).sort((a, b) => {
-          return (
-            new Date(b.lastaccess).getTime() - new Date(a.lastaccess).getTime()
-          )
-        })
-      }
-    },
-    loadMoreUsers: function ($state) {
-      // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
-      // we render onscreen the faster vue is to do so.
-      this.show++
-
-      if (this.show > this.searchresults.length) {
-        this.show = this.searchresults.length
-        $state.complete()
-        this.complete = true
-      } else {
-        $state.loaded()
-      }
-    },
-  },
+  if (show.value > searchresults.value.length) {
+    show.value = searchresults.value.length
+    $state.complete()
+  } else {
+    $state.loaded()
+  }
 }
 </script>
 <style scoped>

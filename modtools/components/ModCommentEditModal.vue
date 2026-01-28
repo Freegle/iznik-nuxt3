@@ -94,59 +94,56 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    comment: {
-      type: Object,
-      required: true,
-    },
-    groupname: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    const { modal, hide } = useOurModal()
-    return { userStore, modal, hide }
+  comment: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      editcomment: false,
-      placeholders: [
-        null,
-        'Add a comment about this member here',
-        '...and more information here',
-        '...and here',
-        '...you get the idea',
-      ],
-    }
+  groupname: {
+    type: String,
+    required: false,
+    default: null,
   },
-  computed: {},
-  mounted() {
-    this.editcomment = this.comment
-  },
-  methods: {
-    onHide() {
-      this.$emit('hidden')
-    },
-    toggleFlag() {
-      this.editcomment.flag = !this.editcomment.flag
-    },
-    async save() {
-      await this.userStore.saveComment(this.editcomment)
-      this.$emit('edited')
-      this.hide()
-    },
-  },
+})
+
+const emit = defineEmits(['hidden', 'edited'])
+
+const userStore = useUserStore()
+const { modal, hide } = useOurModal()
+
+const editcomment = ref(false)
+const placeholders = [
+  null,
+  'Add a comment about this member here',
+  '...and more information here',
+  '...and here',
+  '...you get the idea',
+]
+
+function onHide() {
+  emit('hidden')
 }
+
+function toggleFlag() {
+  editcomment.value.flag = !editcomment.value.flag
+}
+
+async function save() {
+  await userStore.saveComment(editcomment.value)
+  emit('edited')
+  hide()
+}
+
+onMounted(() => {
+  editcomment.value = props.comment
+})
 </script>

@@ -19,73 +19,70 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import pluralize from 'pluralize'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    expandComments: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null,
   },
-  setup() {
-    const { oneOfMyGroups } = useMe()
-    return { oneOfMyGroups }
+  expandComments: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data: function () {
-    return {
-      showAll: false,
-    }
-  },
-  computed: {
-    showMore() {
-      pluralize.addIrregularRule('more note', 'more notes')
-      return pluralize('more note', this.sortedComments.length - 1, true)
-    },
-    sortedComments() {
-      const ret = this.user ? this.user.comments : []
+})
 
-      if (ret) {
-        ret.sort((a, b) => {
-          const aone = this.oneOfMyGroups(a.groupid)
-          const bone = this.oneOfMyGroups(b.groupid)
+const emit = defineEmits(['updateComments', 'editing'])
 
-          if (aone && !bone) {
-            return -1
-          } else if (bone && !aone) {
-            return 1
-          } else {
-            return 0
-          }
-        })
-      }
+const { oneOfMyGroups } = useMe()
 
-      return ret || []
-    },
-    comments() {
-      if (this.showAll) {
-        return this.sortedComments
-      } else if (this.sortedComments.length) {
-        return [this.sortedComments[0]]
+const showAll = ref(false)
+
+const showMore = computed(() => {
+  pluralize.addIrregularRule('more note', 'more notes')
+  return pluralize('more note', sortedComments.value.length - 1, true)
+})
+
+const sortedComments = computed(() => {
+  const ret = props.user ? props.user.comments : []
+
+  if (ret) {
+    ret.sort((a, b) => {
+      const aone = oneOfMyGroups(a.groupid)
+      const bone = oneOfMyGroups(b.groupid)
+
+      if (aone && !bone) {
+        return -1
+      } else if (bone && !aone) {
+        return 1
       } else {
-        return []
+        return 0
       }
-    },
-  },
-  methods: {
-    updated() {
-      this.$emit('updateComments')
-    },
-    editing() {
-      this.$emit('editing')
-    },
-  },
+    })
+  }
+
+  return ret || []
+})
+
+const comments = computed(() => {
+  if (showAll.value) {
+    return sortedComments.value
+  } else if (sortedComments.value.length) {
+    return [sortedComments.value[0]]
+  } else {
+    return []
+  }
+})
+
+function updated() {
+  emit('updateComments')
+}
+
+function editing() {
+  emit('editing')
 }
 </script>

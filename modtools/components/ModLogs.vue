@@ -19,73 +19,64 @@
     </infinite-loading>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useLogsStore } from '~/stores/logs'
 
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  emits: ['busy', 'idle'],
-  setup() {
-    const logsStore = useLogsStore()
-    return { logsStore }
-  },
-  data: function () {
-    return {
-      distance: 1000,
-      limit: 50,
-      show: 0,
-      busy: false,
-    }
-  },
+})
 
-  computed: {
-    logs() {
-      return this.logsStore.list
-    },
-  },
+const emit = defineEmits(['busy', 'idle'])
 
-  methods: {
-    async loadMore($state) {
-      this.busy = true
-      this.$emit('busy')
-      const params = this.logsStore.params
+const logsStore = useLogsStore()
 
-      if (this.show < this.logs.length) {
-        this.show++
-        $state.loaded()
+const distance = ref(1000)
+const limit = ref(50)
+const show = ref(0)
+const busy = ref(false)
+
+const logs = computed(() => {
+  return logsStore.list
+})
+
+async function loadMore($state) {
+  busy.value = true
+  emit('busy')
+  const params = logsStore.params
+
+  if (show.value < logs.value.length) {
+    show.value++
+    $state.loaded()
+  } else {
+    const currentCount = logs.value.length
+    try {
+      await logsStore.fetch({
+        limit: limit.value,
+        groupid: props.groupid,
+        logtype: params.type,
+        search: params.search,
+      })
+
+      const logsList = logsStore.list
+
+      if (currentCount === logsList.length) {
+        $state.complete()
       } else {
-        const currentCount = this.logs.length
-        try {
-          await this.logsStore.fetch({
-            limit: this.limit,
-            groupid: this.groupid,
-            logtype: params.type,
-            search: params.search,
-          })
-
-          const logs = this.logsStore.list
-
-          if (currentCount === logs.length) {
-            $state.complete()
-          } else {
-            $state.loaded()
-            this.show++
-          }
-        } catch (e) {
-          $state.complete()
-          console.log('Complete on error', e)
-        }
+        $state.loaded()
+        show.value++
       }
+    } catch (e) {
+      $state.complete()
+      console.log('Complete on error', e)
+    }
+  }
 
-      this.busy = false
-      this.$emit('idle')
-    },
-  },
+  busy.value = false
+  emit('idle')
 }
 </script>

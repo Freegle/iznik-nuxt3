@@ -330,593 +330,615 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useSystemLogsStore } from '../stores/systemlogs'
-import ModSystemLogEntry from './ModSystemLogEntry.vue'
+
+defineOptions({
+  name: 'ModSystemLogTreeNode',
+})
 
 const BATCH_SIZE = 50
 
-export default {
-  name: 'ModSystemLogTreeNode',
-  components: {
-    ModSystemLogEntry,
+const props = defineProps({
+  node: {
+    type: Object,
+    required: true,
   },
-  props: {
-    node: {
-      type: Object,
-      required: true,
-    },
-    hideUserColumn: {
-      type: Boolean,
-      default: false,
-    },
+  hideUserColumn: {
+    type: Boolean,
+    default: false,
   },
-  emits: ['filter-trace', 'filter-session', 'filter-ip'],
-  setup() {
-    const systemLogsStore = useSystemLogsStore()
-    return { systemLogsStore }
-  },
-  data() {
-    return {
-      visibleChildCount: BATCH_SIZE,
-      observer: null,
-      expandedRoutes: {},
-      expandedApis: {},
-      toggledRoutes: {}, // Track routes that have been explicitly toggled
+})
+
+// eslint-disable-next-line no-unused-vars
+const emit = defineEmits(['filter-trace', 'filter-session', 'filter-ip'])
+
+const systemLogsStore = useSystemLogsStore()
+
+const loadMoreSentinel = ref(null)
+const visibleChildCount = ref(BATCH_SIZE)
+let observer = null
+const expandedRoutes = ref({})
+const expandedApis = ref({})
+const toggledRoutes = ref({})
+
+const isPageLoadGroup = computed(() => props.node.type === 'page-load-group')
+
+const isPageLoadExpanded = computed(() => {
+  if (!isPageLoadGroup.value) return false
+  return systemLogsStore.isGroupExpanded(props.node.groupKey)
+})
+
+const pageLoadChildCount = computed(() => {
+  if (!isPageLoadGroup.value) return 0
+  return props.node.children?.length || 0
+})
+
+const pageLoadTimestampRange = computed(() => {
+  if (!isPageLoadGroup.value) return ''
+  const formatTime = (ts) => {
+    const d = new Date(ts)
+    return d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+  }
+  const first = formatTime(props.node.firstTimestamp)
+  const last = formatTime(props.node.lastTimestamp)
+  if (first === last) return first
+  return `${first} - ${last}`
+})
+
+const isTraceGroup = computed(() => props.node.type === 'trace-group')
+
+const hasChildren = computed(() => {
+  // Has children if it's a trace group with more than 1 log.
+  // Use childCount from summary if available.
+  if (props.node.childCount !== undefined) {
+    return isTraceGroup.value && props.node.childCount > 1
+  }
+  return isTraceGroup.value && totalLogCount.value > 1
+})
+
+const childCount = computed(() => {
+  // Use childCount from summary if available.
+  if (props.node.childCount !== undefined) {
+    return props.node.childCount
+  }
+  return totalLogCount.value
+})
+
+const parentLog = computed(() => {
+  // For trace-group, use parent; for standalone, use log.
+  return isTraceGroup.value ? props.node.parent : props.node.log
+})
+
+const isExpanded = computed(() => {
+  if (!isTraceGroup.value) return false
+  return systemLogsStore.isGroupExpanded(props.node.trace_id)
+})
+
+const isLoading = computed(() => {
+  // Check if children are being loaded.
+  return props.node.loading || false
+})
+
+const childrenLoaded = computed(() => {
+  // Check if children have been fetched.
+  return props.node.children && props.node.children.length > 0
+})
+
+// Get all logs in chronological order.
+// Note: parent log is NOT included here - it's shown separately at the top level.
+const allLogsChronological = computed(() => {
+  if (!isTraceGroup.value) return []
+
+  const allLogs = []
+  if (props.node.children) {
+    for (const child of props.node.children) {
+      allLogs.push(child)
     }
-  },
-  computed: {
-    isPageLoadGroup() {
-      return this.node.type === 'page-load-group'
-    },
-    isPageLoadExpanded() {
-      if (!this.isPageLoadGroup) return false
-      return this.systemLogsStore.isGroupExpanded(this.node.groupKey)
-    },
-    pageLoadChildCount() {
-      if (!this.isPageLoadGroup) return 0
-      return this.node.children?.length || 0
-    },
-    pageLoadTimestampRange() {
-      if (!this.isPageLoadGroup) return ''
-      const formatTime = (ts) => {
-        const d = new Date(ts)
-        return d.toLocaleTimeString('en-GB', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      }
-      const first = formatTime(this.node.firstTimestamp)
-      const last = formatTime(this.node.lastTimestamp)
-      if (first === last) return first
-      return `${first} - ${last}`
-    },
-    isTraceGroup() {
-      return this.node.type === 'trace-group'
-    },
-    hasChildren() {
-      // Has children if it's a trace group with more than 1 log.
-      // Use childCount from summary if available.
-      if (this.node.childCount !== undefined) {
-        return this.isTraceGroup && this.node.childCount > 1
-      }
-      return this.isTraceGroup && this.totalLogCount > 1
-    },
-    childCount() {
-      // Use childCount from summary if available.
-      if (this.node.childCount !== undefined) {
-        return this.node.childCount
-      }
-      return this.totalLogCount
-    },
-    parentLog() {
-      // For trace-group, use parent; for standalone, use log.
-      return this.isTraceGroup ? this.node.parent : this.node.log
-    },
-    isExpanded() {
-      if (!this.isTraceGroup) return false
-      return this.systemLogsStore.isGroupExpanded(this.node.trace_id)
-    },
-    isLoading() {
-      // Check if children are being loaded.
-      return this.node.loading || false
-    },
-    childrenLoaded() {
-      // Check if children have been fetched.
-      return this.node.children && this.node.children.length > 0
-    },
-    // Get all logs in chronological order.
-    // Note: parent log is NOT included here - it's shown separately at the top level.
-    allLogsChronological() {
-      if (!this.isTraceGroup) return []
+  }
 
-      const allLogs = []
-      if (this.node.children) {
-        for (const child of this.node.children) {
-          allLogs.push(child)
+  // Sort by timestamp (use getTime() for efficient numeric comparison)
+  allLogs.sort((a, b) => {
+    const timeA = new Date(a.log.timestamp).getTime()
+    const timeB = new Date(b.log.timestamp).getTime()
+    return timeA - timeB
+  })
+
+  return allLogs
+})
+
+// Build hierarchical tree: Route > API > Server logs
+const hierarchicalTree = computed(() => {
+  if (!isTraceGroup.value) return []
+
+  // Use allLogsChronological
+  const allLogs = [...allLogsChronological.value]
+
+  // Build hierarchy: routes > API calls > server logs
+  const routes = []
+  let currentRoute = null
+
+  // Helper to extract route from any log that has it.
+  const getRouteFromLog = (log) => {
+    const raw = log.raw || {}
+    // Check for route in various fields.
+    const routeName = raw.page_name || raw.url || raw.route || null
+    if (routeName) {
+      return routeName.startsWith('/') ? routeName : `/${routeName}`
+    }
+    return null
+  }
+
+  for (const item of allLogs) {
+    const log = item.log
+    const isPageView =
+      log.source === 'client' && log.raw?.event_type === 'page_view'
+    const isApiCall = log.source === 'api'
+    // Email logs include laravel-batch and email sources, or batch logs about emails
+    const isEmailLog =
+      log.source === 'laravel-batch' ||
+      log.source === 'email' ||
+      (log.source === 'batch' &&
+        (log.text?.toLowerCase().includes('email') ||
+          log.text?.toLowerCase().includes('mail')))
+    const isServerLog =
+      ['logs_table', 'batch', 'email', 'laravel-batch'].includes(log.source) &&
+      !isEmailLog
+    const isClientEvent = log.source === 'client' && !isPageView
+
+    if (isPageView) {
+      // Start a new route.
+      const pageName = getRouteFromLog(log) || '/Unknown'
+      currentRoute = {
+        type: 'route',
+        log,
+        pageName,
+        apiCalls: [],
+        otherLogs: [],
+        emailLogs: [],
+      }
+      routes.push(currentRoute)
+    } else if (isEmailLog) {
+      // Email log - add to current route's emailLogs
+      if (!currentRoute) {
+        currentRoute = {
+          type: 'route',
+          log: null,
+          pageName: '(Emails)',
+          apiCalls: [],
+          otherLogs: [],
+          emailLogs: [],
         }
+        routes.push(currentRoute)
       }
-
-      // Sort by timestamp (use getTime() for efficient numeric comparison)
-      allLogs.sort((a, b) => {
-        const timeA = new Date(a.log.timestamp).getTime()
-        const timeB = new Date(b.log.timestamp).getTime()
-        return timeA - timeB
+      currentRoute.emailLogs.push(item)
+    } else if (isApiCall) {
+      // API call - add to current route or create orphan route.
+      if (!currentRoute) {
+        currentRoute = {
+          type: 'route',
+          log: null,
+          pageName: '(API calls)',
+          apiCalls: [],
+          otherLogs: [],
+          emailLogs: [],
+        }
+        routes.push(currentRoute)
+      }
+      currentRoute.apiCalls.push({
+        type: 'api-call',
+        log,
+        serverLogs: [],
       })
-
-      return allLogs
-    },
-    // Build hierarchical tree: Route > API > Server logs
-    hierarchicalTree() {
-      if (!this.isTraceGroup) return []
-
-      // Use allLogsChronological
-      const allLogs = [...this.allLogsChronological]
-
-      // Build hierarchy: routes > API calls > server logs
-      const routes = []
-      let currentRoute = null
-
-      // Helper to extract route from any log that has it.
-      const getRouteFromLog = (log) => {
-        const raw = log.raw || {}
-        // Check for route in various fields.
-        const routeName = raw.page_name || raw.url || raw.route || null
-        if (routeName) {
-          return routeName.startsWith('/') ? routeName : `/${routeName}`
-        }
-        return null
-      }
-
-      for (const item of allLogs) {
-        const log = item.log
-        const isPageView =
-          log.source === 'client' && log.raw?.event_type === 'page_view'
-        const isApiCall = log.source === 'api'
-        // Email logs include laravel-batch and email sources, or batch logs about emails
-        const isEmailLog =
-          log.source === 'laravel-batch' ||
-          log.source === 'email' ||
-          (log.source === 'batch' &&
-            (log.text?.toLowerCase().includes('email') ||
-              log.text?.toLowerCase().includes('mail')))
-        const isServerLog =
-          ['logs_table', 'batch', 'email', 'laravel-batch'].includes(
-            log.source
-          ) && !isEmailLog
-        const isClientEvent = log.source === 'client' && !isPageView
-
-        if (isPageView) {
-          // Start a new route.
-          const pageName = getRouteFromLog(log) || '/Unknown'
-          currentRoute = {
-            type: 'route',
-            log,
-            pageName,
-            apiCalls: [],
-            otherLogs: [],
-            emailLogs: [],
-          }
-          routes.push(currentRoute)
-        } else if (isEmailLog) {
-          // Email log - add to current route's emailLogs
-          if (!currentRoute) {
-            currentRoute = {
-              type: 'route',
-              log: null,
-              pageName: '(Emails)',
-              apiCalls: [],
-              otherLogs: [],
-              emailLogs: [],
-            }
-            routes.push(currentRoute)
-          }
-          currentRoute.emailLogs.push(item)
-        } else if (isApiCall) {
-          // API call - add to current route or create orphan route.
-          if (!currentRoute) {
-            currentRoute = {
-              type: 'route',
-              log: null,
-              pageName: '(API calls)',
-              apiCalls: [],
-              otherLogs: [],
-              emailLogs: [],
-            }
-            routes.push(currentRoute)
-          }
-          currentRoute.apiCalls.push({
-            type: 'api-call',
-            log,
-            serverLogs: [],
-          })
-        } else if (isServerLog) {
-          // Server log - attach to most recent API call.
-          if (currentRoute && currentRoute.apiCalls.length > 0) {
-            const lastApi =
-              currentRoute.apiCalls[currentRoute.apiCalls.length - 1]
-            lastApi.serverLogs.push(item)
-          } else if (currentRoute) {
-            currentRoute.otherLogs.push(item)
-          } else {
-            // Orphan server log.
-            currentRoute = {
-              type: 'route',
-              log: null,
-              pageName: '(Background)',
-              apiCalls: [],
-              otherLogs: [item],
-              emailLogs: [],
-            }
-            routes.push(currentRoute)
-          }
-        } else if (isClientEvent) {
-          // Other client events - check if they have route info.
-          const eventRoute = getRouteFromLog(log)
-
-          if (!currentRoute) {
-            // Create a new route using the event's route if available.
-            currentRoute = {
-              type: 'route',
-              log: eventRoute ? log : null,
-              pageName: eventRoute || '(Events)',
-              apiCalls: [],
-              otherLogs: [],
-              emailLogs: [],
-            }
-            routes.push(currentRoute)
-          } else if (eventRoute && currentRoute.pageName.startsWith('(')) {
-            // Update the route name if we have one and current is a placeholder.
-            currentRoute.pageName = eventRoute
-            currentRoute.log = log
-          }
-          currentRoute.otherLogs.push(item)
-        }
-      }
-
-      return routes
-    },
-    totalLogCount() {
-      // Only count top-level items: routes + their direct otherLogs.
-      // API calls are nested within routes and shown when route is expanded.
-      let count = 0
-      for (const route of this.hierarchicalTree) {
-        count++ // Route itself
-        count += route.otherLogs.length
-      }
-      return count
-    },
-    visibleChildren() {
-      // Flatten for pagination (simplified)
-      return this.hierarchicalTree.slice(0, this.visibleChildCount)
-    },
-    hasMoreChildren() {
-      return this.totalLogCount > this.visibleChildCount
-    },
-    remainingChildCount() {
-      return this.totalLogCount - this.visibleChildCount
-    },
-    // Extract routes from all client page_view logs for breadcrumb summary.
-    // Uses routeSummary from node if available (lazy loading mode).
-    routeBreadcrumbs() {
-      if (!this.isTraceGroup) return null
-
-      // Use routeSummary from summary data if available.
-      if (this.node.routeSummary && this.node.routeSummary.length > 0) {
-        return this.node.routeSummary
-      }
-
-      // Fallback: build from loaded children.
-      const routes = []
-      for (const item of this.allLogsChronological) {
-        const log = item.log
-        if (log.source === 'client') {
-          const raw = log.raw || {}
-          if (raw.event_type === 'page_view') {
-            const pageName = raw.page_name || raw.url || ''
-            if (pageName) {
-              const route = pageName.startsWith('/') ? pageName : `/${pageName}`
-              if (routes.length === 0 || routes[routes.length - 1] !== route) {
-                routes.push(route)
-              }
-            }
-          }
-        }
-      }
-
-      return routes.length > 0 ? routes : null
-    },
-    // Get truncated routes array for breadcrumb display
-    truncatedBreadcrumbs() {
-      const routes = this.routeBreadcrumbs
-      if (!routes || routes.length === 0) return []
-
-      const MAX_LENGTH = 60
-      let totalLength = routes[0].length
-      const result = [routes[0]]
-
-      for (let i = 1; i < routes.length; i++) {
-        const nextLength = routes[i].length + 3 // +3 for chevron separator space
-        if (totalLength + nextLength > MAX_LENGTH) {
-          break
-        }
-        totalLength += nextLength
-        result.push(routes[i])
-      }
-
-      return result
-    },
-    // Return routes as breadcrumb segments (each route is shown as-is).
-    breadcrumbSegments() {
-      const routes = this.truncatedBreadcrumbs
-      if (!routes || routes.length === 0) return []
-      return routes
-    },
-    // Check if breadcrumbs were truncated
-    isTruncated() {
-      const routes = this.routeBreadcrumbs
-      if (!routes) return false
-      return this.truncatedBreadcrumbs.length < routes.length
-    },
-    // Check if any breadcrumb indicates mobile app (capacitor://)
-    isMobileApp() {
-      const routes = this.routeBreadcrumbs
-      if (!routes) return false
-      return routes.some(
-        (r) => r.startsWith('capacitor://') || r.includes('capacitor://')
-      )
-    },
-    // Keep formattedBreadcrumbs for showBreadcrumbSummary check
-    formattedBreadcrumbs() {
-      return this.breadcrumbSegments.length > 0
-    },
-    // Show breadcrumb summary when we have routes (collapsed or expanded)
-    showBreadcrumbSummary() {
-      return this.hasChildren && this.formattedBreadcrumbs
-    },
-    // Generate a fallback description when no route breadcrumbs available
-    summaryDescription() {
-      const parts = []
-
-      // Count user actions and API calls from the node
-      if (this.node.childCount) {
-        parts.push(
-          `${this.node.childCount} log${this.node.childCount !== 1 ? 's' : ''}`
-        )
-      }
-
-      // Add source info if available
-      if (this.node.sources && this.node.sources.length > 0) {
-        const sourceList = this.node.sources.join(', ')
-        parts.push(`(${sourceList})`)
-      }
-
-      // Fallback to parentLog info if available
-      if (parts.length === 0 && this.parentLog) {
-        const raw = this.parentLog.raw || {}
-        if (raw.page_name || raw.url) {
-          return raw.page_name || raw.url
-        }
-      }
-
-      return parts.length > 0 ? parts.join(' ') : 'Session activity'
-    },
-    // Get first timestamp for collapsed summary.
-    // Uses node summary data if available.
-    firstTimestamp() {
-      if (this.node.firstTimestamp) {
-        return this.node.firstTimestamp
-      }
-      const logs = this.allLogsChronological
-      if (logs.length === 0) return null
-      return logs[0].log.timestamp
-    },
-    // Get last timestamp for collapsed summary.
-    // Uses node summary data if available.
-    lastTimestamp() {
-      if (this.node.lastTimestamp) {
-        return this.node.lastTimestamp
-      }
-      const logs = this.allLogsChronological
-      if (logs.length === 0) return null
-      return logs[logs.length - 1].log.timestamp
-    },
-    // Format timestamp for display
-    timestampRange() {
-      if (!this.firstTimestamp) return null
-      const formatTime = (ts) => {
-        const d = new Date(ts)
-        return d.toLocaleTimeString('en-GB', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      }
-      const first = formatTime(this.firstTimestamp)
-      const last = formatTime(this.lastTimestamp)
-      if (first === last) return first
-      return `${first} - ${last}`
-    },
-  },
-  watch: {
-    isExpanded(newVal) {
-      if (newVal) {
-        // Reset visible count when expanding
-        this.visibleChildCount = BATCH_SIZE
-        // Set up observer after DOM updates
-        this.$nextTick(() => {
-          this.setupObserver()
-        })
+    } else if (isServerLog) {
+      // Server log - attach to most recent API call.
+      if (currentRoute && currentRoute.apiCalls.length > 0) {
+        const lastApi = currentRoute.apiCalls[currentRoute.apiCalls.length - 1]
+        lastApi.serverLogs.push(item)
+      } else if (currentRoute) {
+        currentRoute.otherLogs.push(item)
       } else {
-        // Clean up observer when collapsing
-        this.cleanupObserver()
+        // Orphan server log.
+        currentRoute = {
+          type: 'route',
+          log: null,
+          pageName: '(Background)',
+          apiCalls: [],
+          otherLogs: [item],
+          emailLogs: [],
+        }
+        routes.push(currentRoute)
       }
-    },
-  },
-  mounted() {
-    if (this.isExpanded) {
-      this.setupObserver()
+    } else if (isClientEvent) {
+      // Other client events - check if they have route info.
+      const eventRoute = getRouteFromLog(log)
+
+      if (!currentRoute) {
+        // Create a new route using the event's route if available.
+        currentRoute = {
+          type: 'route',
+          log: eventRoute ? log : null,
+          pageName: eventRoute || '(Events)',
+          apiCalls: [],
+          otherLogs: [],
+          emailLogs: [],
+        }
+        routes.push(currentRoute)
+      } else if (eventRoute && currentRoute.pageName.startsWith('(')) {
+        // Update the route name if we have one and current is a placeholder.
+        currentRoute.pageName = eventRoute
+        currentRoute.log = log
+      }
+      currentRoute.otherLogs.push(item)
     }
-  },
-  beforeUnmount() {
-    this.cleanupObserver()
-  },
-  methods: {
-    // Format breadcrumb segment - strip capacitor://localhost prefix
-    formatBreadcrumbSegment(segment) {
-      if (segment.startsWith('capacitor://localhost')) {
-        return segment.replace('capacitor://localhost', '')
-      }
-      if (segment.startsWith('/capacitor://localhost')) {
-        return segment.replace('/capacitor://localhost', '')
-      }
-      return segment
-    },
-    // Check if a specific route is from mobile app (capacitor://)
-    isRouteFromMobile(route) {
-      if (!route || !route.pageName) return false
-      return (
-        route.pageName.includes('capacitor://') ||
-        route.pageName.startsWith('/capacitor://')
-      )
-    },
-    togglePageLoadExpand() {
-      if (this.isPageLoadGroup) {
-        this.systemLogsStore.toggleGroupExpanded(this.node.groupKey)
-      }
-    },
-    async toggleExpand() {
-      if (this.isTraceGroup) {
-        const wasExpanded = this.isExpanded
-        this.systemLogsStore.toggleGroupExpanded(this.node.trace_id)
+  }
 
-        // If expanding and children not yet loaded, fetch them.
-        if (!wasExpanded && !this.childrenLoaded && this.node.trace_id) {
-          // Pass time bounds from the summary for a more efficient query.
-          const timeBounds =
-            this.node.firstTimestamp && this.node.lastTimestamp
-              ? {
-                  start: this.node.firstTimestamp,
-                  end: this.node.lastTimestamp,
-                }
-              : null
-          await this.systemLogsStore.fetchTraceChildren(
-            this.node.trace_id,
-            timeBounds
-          )
-        }
-      }
-    },
-    loadMoreChildren() {
-      this.visibleChildCount = Math.min(
-        this.visibleChildCount + BATCH_SIZE,
-        this.childCount
-      )
-      // Re-observe after loading more
-      this.$nextTick(() => {
-        this.setupObserver()
-      })
-    },
-    setupObserver() {
-      this.cleanupObserver()
-      if (!this.hasMoreChildren) return
+  return routes
+})
 
-      const sentinel = this.$refs.loadMoreSentinel
-      if (!sentinel) return
+const totalLogCount = computed(() => {
+  // Only count top-level items: routes + their direct otherLogs.
+  // API calls are nested within routes and shown when route is expanded.
+  let count = 0
+  for (const route of hierarchicalTree.value) {
+    count++ // Route itself
+    count += route.otherLogs.length
+  }
+  return count
+})
 
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            this.loadMoreChildren()
-          }
-        },
-        {
-          rootMargin: '200px',
-        }
-      )
-      this.observer.observe(sentinel)
-    },
-    cleanupObserver() {
-      if (this.observer) {
-        this.observer.disconnect()
-        this.observer = null
-      }
-    },
-    toggleRoute(routeIdx) {
-      this.toggledRoutes[routeIdx] = true
-      this.expandedRoutes[routeIdx] = !this.expandedRoutes[routeIdx]
-    },
-    toggleApi(routeIdx, apiIdx) {
-      const key = `${routeIdx}-${apiIdx}`
-      this.expandedApis[key] = !this.expandedApis[key]
-    },
-    isRouteExpanded(routeIdx) {
-      return !!this.expandedRoutes[routeIdx]
-    },
-    isRouteVisible(routeIdx, route) {
-      // Route is visible if explicitly expanded OR auto-expand applies (when not toggled)
-      return (
-        this.isRouteExpanded(routeIdx) ||
-        (!this.toggledRoutes[routeIdx] && this.shouldAutoExpand(route))
-      )
-    },
-    isApiExpanded(routeIdx, apiIdx) {
-      const key = `${routeIdx}-${apiIdx}`
-      return !!this.expandedApis[key]
-    },
-    shouldAutoExpand(route) {
-      // Auto-expand if only 1 API call or no API calls (just other logs)
-      return route.apiCalls.length <= 1
-    },
-    hasRouteChildren(route) {
-      // Route has expandable children if it has API calls, other logs, or email logs
-      return (
-        route.apiCalls.length > 0 ||
-        route.otherLogs.length > 0 ||
-        (route.emailLogs?.length || 0) > 0
-      )
-    },
-    async expand() {
-      // Expand this node if it's not already expanded (called by parent via ref).
-      if (this.isTraceGroup && !this.isExpanded) {
-        await this.toggleExpand()
-      }
-      if (this.isPageLoadGroup && !this.isPageLoadExpanded) {
-        this.togglePageLoadExpand()
-      }
+const visibleChildren = computed(() => {
+  // Flatten for pagination (simplified)
+  return hierarchicalTree.value.slice(0, visibleChildCount.value)
+})
 
-      // After children are loaded, expand all routes and APIs within this node
-      if (this.isExpanded || this.isPageLoadExpanded) {
-        // Wait for next tick to ensure children are rendered
-        await this.$nextTick()
-        this.expandAllInternal()
-      }
-    },
-    expandAllInternal() {
-      // Expand all routes within this node
-      const routes = this.hierarchicalTree || []
-      for (let routeIdx = 0; routeIdx < routes.length; routeIdx++) {
-        const route = routes[routeIdx]
-        if (this.hasRouteChildren(route) && !this.isRouteExpanded(routeIdx)) {
-          this.toggledRoutes[routeIdx] = true
-          this.expandedRoutes[routeIdx] = true
-        }
-        // Also expand all APIs within this route
-        for (let apiIdx = 0; apiIdx < route.apiCalls.length; apiIdx++) {
-          const api = route.apiCalls[apiIdx]
-          if (
-            api.serverLogs.length > 0 &&
-            !this.isApiExpanded(routeIdx, apiIdx)
-          ) {
-            const key = `${routeIdx}-${apiIdx}`
-            this.expandedApis[key] = true
+const hasMoreChildren = computed(() => {
+  return totalLogCount.value > visibleChildCount.value
+})
+
+const remainingChildCount = computed(() => {
+  return totalLogCount.value - visibleChildCount.value
+})
+
+// Extract routes from all client page_view logs for breadcrumb summary.
+// Uses routeSummary from node if available (lazy loading mode).
+const routeBreadcrumbs = computed(() => {
+  if (!isTraceGroup.value) return null
+
+  // Use routeSummary from summary data if available.
+  if (props.node.routeSummary && props.node.routeSummary.length > 0) {
+    return props.node.routeSummary
+  }
+
+  // Fallback: build from loaded children.
+  const routes = []
+  for (const item of allLogsChronological.value) {
+    const log = item.log
+    if (log.source === 'client') {
+      const raw = log.raw || {}
+      if (raw.event_type === 'page_view') {
+        const pageName = raw.page_name || raw.url || ''
+        if (pageName) {
+          const route = pageName.startsWith('/') ? pageName : `/${pageName}`
+          if (routes.length === 0 || routes[routes.length - 1] !== route) {
+            routes.push(route)
           }
         }
       }
-    },
-  },
+    }
+  }
+
+  return routes.length > 0 ? routes : null
+})
+
+// Get truncated routes array for breadcrumb display
+const truncatedBreadcrumbs = computed(() => {
+  const routes = routeBreadcrumbs.value
+  if (!routes || routes.length === 0) return []
+
+  const MAX_LENGTH = 60
+  let totalLength = routes[0].length
+  const result = [routes[0]]
+
+  for (let i = 1; i < routes.length; i++) {
+    const nextLength = routes[i].length + 3 // +3 for chevron separator space
+    if (totalLength + nextLength > MAX_LENGTH) {
+      break
+    }
+    totalLength += nextLength
+    result.push(routes[i])
+  }
+
+  return result
+})
+
+// Return routes as breadcrumb segments (each route is shown as-is).
+const breadcrumbSegments = computed(() => {
+  const routes = truncatedBreadcrumbs.value
+  if (!routes || routes.length === 0) return []
+  return routes
+})
+
+// Check if breadcrumbs were truncated
+const isTruncated = computed(() => {
+  const routes = routeBreadcrumbs.value
+  if (!routes) return false
+  return truncatedBreadcrumbs.value.length < routes.length
+})
+
+// Check if any breadcrumb indicates mobile app (capacitor://)
+const isMobileApp = computed(() => {
+  const routes = routeBreadcrumbs.value
+  if (!routes) return false
+  return routes.some(
+    (r) => r.startsWith('capacitor://') || r.includes('capacitor://')
+  )
+})
+
+// Keep formattedBreadcrumbs for template
+const formattedBreadcrumbs = computed(() => {
+  return breadcrumbSegments.value.length > 0
+})
+
+// Generate a fallback description when no route breadcrumbs available
+const summaryDescription = computed(() => {
+  const parts = []
+
+  // Count user actions and API calls from the node
+  if (props.node.childCount) {
+    parts.push(
+      `${props.node.childCount} log${props.node.childCount !== 1 ? 's' : ''}`
+    )
+  }
+
+  // Add source info if available
+  if (props.node.sources && props.node.sources.length > 0) {
+    const sourceList = props.node.sources.join(', ')
+    parts.push(`(${sourceList})`)
+  }
+
+  // Fallback to parentLog info if available
+  if (parts.length === 0 && parentLog.value) {
+    const raw = parentLog.value.raw || {}
+    if (raw.page_name || raw.url) {
+      return raw.page_name || raw.url
+    }
+  }
+
+  return parts.length > 0 ? parts.join(' ') : 'Session activity'
+})
+
+// Get first timestamp for collapsed summary.
+// Uses node summary data if available.
+const firstTimestamp = computed(() => {
+  if (props.node.firstTimestamp) {
+    return props.node.firstTimestamp
+  }
+  const logs = allLogsChronological.value
+  if (logs.length === 0) return null
+  return logs[0].log.timestamp
+})
+
+// Get last timestamp for collapsed summary.
+// Uses node summary data if available.
+const lastTimestamp = computed(() => {
+  if (props.node.lastTimestamp) {
+    return props.node.lastTimestamp
+  }
+  const logs = allLogsChronological.value
+  if (logs.length === 0) return null
+  return logs[logs.length - 1].log.timestamp
+})
+
+// Format timestamp for display
+const timestampRange = computed(() => {
+  if (!firstTimestamp.value) return null
+  const formatTime = (ts) => {
+    const d = new Date(ts)
+    return d.toLocaleTimeString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+  }
+  const first = formatTime(firstTimestamp.value)
+  const last = formatTime(lastTimestamp.value)
+  if (first === last) return first
+  return `${first} - ${last}`
+})
+
+watch(isExpanded, (newVal) => {
+  if (newVal) {
+    // Reset visible count when expanding
+    visibleChildCount.value = BATCH_SIZE
+    // Set up observer after DOM updates
+    nextTick(() => {
+      setupObserver()
+    })
+  } else {
+    // Clean up observer when collapsing
+    cleanupObserver()
+  }
+})
+
+onMounted(() => {
+  if (isExpanded.value) {
+    setupObserver()
+  }
+})
+
+onBeforeUnmount(() => {
+  cleanupObserver()
+})
+
+// Format breadcrumb segment - strip capacitor://localhost prefix
+function formatBreadcrumbSegment(segment) {
+  if (segment.startsWith('capacitor://localhost')) {
+    return segment.replace('capacitor://localhost', '')
+  }
+  if (segment.startsWith('/capacitor://localhost')) {
+    return segment.replace('/capacitor://localhost', '')
+  }
+  return segment
 }
+
+// Check if a specific route is from mobile app (capacitor://)
+function isRouteFromMobile(route) {
+  if (!route || !route.pageName) return false
+  return (
+    route.pageName.includes('capacitor://') ||
+    route.pageName.startsWith('/capacitor://')
+  )
+}
+
+function togglePageLoadExpand() {
+  if (isPageLoadGroup.value) {
+    systemLogsStore.toggleGroupExpanded(props.node.groupKey)
+  }
+}
+
+async function toggleExpand() {
+  if (isTraceGroup.value) {
+    const wasExpanded = isExpanded.value
+    systemLogsStore.toggleGroupExpanded(props.node.trace_id)
+
+    // If expanding and children not yet loaded, fetch them.
+    if (!wasExpanded && !childrenLoaded.value && props.node.trace_id) {
+      // Pass time bounds from the summary for a more efficient query.
+      const timeBounds =
+        props.node.firstTimestamp && props.node.lastTimestamp
+          ? {
+              start: props.node.firstTimestamp,
+              end: props.node.lastTimestamp,
+            }
+          : null
+      await systemLogsStore.fetchTraceChildren(props.node.trace_id, timeBounds)
+    }
+  }
+}
+
+function loadMoreChildren() {
+  visibleChildCount.value = Math.min(
+    visibleChildCount.value + BATCH_SIZE,
+    childCount.value
+  )
+  // Re-observe after loading more
+  nextTick(() => {
+    setupObserver()
+  })
+}
+
+function setupObserver() {
+  cleanupObserver()
+  if (!hasMoreChildren.value) return
+
+  const sentinel = loadMoreSentinel.value
+  if (!sentinel) return
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreChildren()
+      }
+    },
+    {
+      rootMargin: '200px',
+    }
+  )
+  observer.observe(sentinel)
+}
+
+function cleanupObserver() {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+}
+
+function toggleRoute(routeIdx) {
+  toggledRoutes.value[routeIdx] = true
+  expandedRoutes.value[routeIdx] = !expandedRoutes.value[routeIdx]
+}
+
+function toggleApi(routeIdx, apiIdx) {
+  const key = `${routeIdx}-${apiIdx}`
+  expandedApis.value[key] = !expandedApis.value[key]
+}
+
+function isRouteExpanded(routeIdx) {
+  return !!expandedRoutes.value[routeIdx]
+}
+
+function isRouteVisible(routeIdx, route) {
+  // Route is visible if explicitly expanded OR auto-expand applies (when not toggled)
+  return (
+    isRouteExpanded(routeIdx) ||
+    (!toggledRoutes.value[routeIdx] && shouldAutoExpand(route))
+  )
+}
+
+function isApiExpanded(routeIdx, apiIdx) {
+  const key = `${routeIdx}-${apiIdx}`
+  return !!expandedApis.value[key]
+}
+
+function shouldAutoExpand(route) {
+  // Auto-expand if only 1 API call or no API calls (just other logs)
+  return route.apiCalls.length <= 1
+}
+
+function hasRouteChildren(route) {
+  // Route has expandable children if it has API calls, other logs, or email logs
+  return (
+    route.apiCalls.length > 0 ||
+    route.otherLogs.length > 0 ||
+    (route.emailLogs?.length || 0) > 0
+  )
+}
+
+async function expand() {
+  // Expand this node if it's not already expanded (called by parent via ref).
+  if (isTraceGroup.value && !isExpanded.value) {
+    await toggleExpand()
+  }
+  if (isPageLoadGroup.value && !isPageLoadExpanded.value) {
+    togglePageLoadExpand()
+  }
+
+  // After children are loaded, expand all routes and APIs within this node
+  if (isExpanded.value || isPageLoadExpanded.value) {
+    // Wait for next tick to ensure children are rendered
+    await nextTick()
+    expandAllInternal()
+  }
+}
+
+function expandAllInternal() {
+  // Expand all routes within this node
+  const routes = hierarchicalTree.value || []
+  for (let routeIdx = 0; routeIdx < routes.length; routeIdx++) {
+    const route = routes[routeIdx]
+    if (hasRouteChildren(route) && !isRouteExpanded(routeIdx)) {
+      toggledRoutes.value[routeIdx] = true
+      expandedRoutes.value[routeIdx] = true
+    }
+    // Also expand all APIs within this route
+    for (let apiIdx = 0; apiIdx < route.apiCalls.length; apiIdx++) {
+      const api = route.apiCalls[apiIdx]
+      if (api.serverLogs.length > 0 && !isApiExpanded(routeIdx, apiIdx)) {
+        const key = `${routeIdx}-${apiIdx}`
+        expandedApis.value[key] = true
+      }
+    }
+  }
+}
+
+defineExpose({ expand })
 </script>
 
 <style scoped>

@@ -72,164 +72,170 @@
     </client-only>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useMiscStore } from '@/stores/misc'
 import { useMemberStore } from '@/stores/member'
 import { setupModMembers } from '@/composables/useModMembers'
 import { useMe } from '~/composables/useMe'
+import { pluralise } from '~/composables/usePluralise'
 
-export default {
-  setup() {
-    const memberStore = useMemberStore()
-    const miscStore = useMiscStore()
-    const modMembers = setupModMembers(true)
-    modMembers.context.value = null
-    modMembers.collection.value = 'Approved'
-    // Need to init groupid and search now
+// Stores
+const memberStore = useMemberStore()
+
+// Composables
+const modMembers = setupModMembers(true)
+modMembers.context.value = null
+modMembers.collection.value = 'Approved'
+
+// Initialize groupid and search from route
+const route = useRoute()
+let gid = 0
+if ('id' in route.params && route.params.id) gid = parseInt(route.params.id)
+modMembers.groupid.value = gid
+let termInit = ''
+if ('term' in route.params && route.params.term) termInit = route.params.term
+modMembers.search.value = termInit
+
+const { myGroups } = useMe()
+
+// Destructure modMembers for template access
+const {
+  bump,
+  context,
+  group,
+  groupid,
+  search,
+  filter,
+  sort,
+  distance,
+  members,
+  loadMore,
+} = modMembers
+
+// Local state (formerly data())
+const chosengroupid = ref(0)
+const showAddMember = ref(false)
+const showBanMember = ref(false)
+
+// Template refs
+const addmodal = ref(null)
+const banmodal = ref(null)
+
+// Computed properties
+const id = computed(() => {
+  try {
     const route = useRoute()
-    let gid = 0
-    if ('id' in route.params && route.params.id) gid = parseInt(route.params.id)
-    modMembers.groupid.value = gid
-    let term = ''
-    if ('term' in route.params && route.params.term) term = route.params.term
-    modMembers.search.value = term
-    const { myGroups } = useMe()
-    return {
-      memberStore,
-      miscStore,
-      myGroups,
-      ...modMembers, // bump, busy, context, group, groupid, limit, search, filter, show, sort, collection, messageTerm, memberTerm, nextAfterRemoved, distance, members, visibleMembers, loadMore
+    if ('id' in route.params && route.params.id) {
+      return parseInt(route.params.id)
     }
-  },
-  data: function () {
-    return {
-      chosengroupid: 0,
-      showAddMember: false,
-      showBanMember: false,
-    }
-  },
-  computed: {
-    id() {
-      try {
-        // Weirdly we get inject error here when clicking the link to view profile of shown member eg to /profile/12345678
-        const route = useRoute()
-        if ('id' in route.params && route.params.id)
-          return parseInt(route.params.id)
-      } catch (e) {
-        console.error('members [[term]] id', e.message)
-      }
-      return 0
-    },
-    term() {
-      const route = useRoute()
-      if ('term' in route.params && route.params.term) return route.params.term
-      return null
-    },
-    groupName() {
-      if (this.group) {
-        return this.group.namedisplay
-      }
-      return null
-    },
-  },
-  watch: {
-    filter(newVal) {
-      // console.log('[[term]] filter', newVal)
-      this.context = null
-      this.memberStore.clear()
-      this.bump++
-    },
-    chosengroupid(newVal) {
-      // console.log('chosengroupid', newVal, this.search.length)
-      const router = useRouter()
-      if (newVal !== this.id) {
-        if (newVal === 0) {
-          // console.log('chosengroupid GO HOME')
-          router.push('/members/approved/')
-        } else {
-          // console.log('chosengroupid GOTO',newVal)
-          let path = '/members/approved/' + newVal
-          if (this.search.length > 0) path += '/' + this.search
-          router.push(path)
-        }
-      } else {
-        // console.log('chosengroupid SAME')
-      }
-    },
-    /* groupid(newVal) {
-      console.log('[[term]] groupid', newVal)
-      this.bump++
-      this.memberStore.clear()
-    }, */
-  },
-  mounted() {
-    const route = useRoute()
-    this.groupid = this.id
-    this.chosengroupid = this.id
-    this.search = ''
-    if ('term' in route.params && route.params.term)
-      this.search = route.params.term
-    // console.log('members approved mounted', this.groupid, '-', this.search, '-', Object.keys(this.memberStore.list).length)
+  } catch (e) {
+    console.error('members [[term]] id', e.message)
+  }
+  return 0
+})
 
-    // reset infiniteLoading on return to page
-    this.memberStore.clear()
+const term = computed(() => {
+  const route = useRoute()
+  if ('term' in route.params && route.params.term) return route.params.term
+  return null
+})
 
-    if (!this.groupid) {
-      // If we have not selected a group, check if we are only a mod on one.  If so, then go to that group so that
-      // we don't need to bother selecting it.
-      let countmod = 0
-      let lastmod = null
-      this.myGroups.forEach((g) => {
-        if (g.role === 'Moderator' || g.role === 'Owner') {
-          countmod++
-          lastmod = g.id
-        }
-      })
+const groupName = computed(() => {
+  if (group.value) {
+    return group.value.namedisplay
+  }
+  return null
+})
 
-      if (countmod === 1) {
-        this.groupid = lastmod
-        const router = useRouter()
-        router.push('/members/approved/' + lastmod)
-      }
-    }
-    if (this.term) {
-      // Turn off sorting for searches
-      this.sort = false
+// Watchers
+watch(filter, (newVal) => {
+  context.value = null
+  memberStore.clear()
+  bump.value++
+})
+
+watch(chosengroupid, (newVal) => {
+  const router = useRouter()
+  if (newVal !== id.value) {
+    if (newVal === 0) {
+      router.push('/members/approved/')
     } else {
-      this.sort = true
+      let path = '/members/approved/' + newVal
+      if (search.value.length > 0) path += '/' + search.value
+      router.push(path)
     }
-    // this.bump++
-  },
-  methods: {
-    addMember() {
-      this.showAddMember = true
-      this.$refs.addmodal?.show()
-    },
-    banMember() {
-      this.showBanMember = true
-      this.$refs.banmodal?.show()
-    },
-    startsearch(search) {
-      // console.log('[[term]] startsearch', search)
-      // Initiate search again even if search has not changed
-      search = search.trim()
-      this.search = search
-      this.context = null
-      this.memberStore.clear()
+  }
+})
+
+// Lifecycle
+onMounted(() => {
+  const route = useRoute()
+  groupid.value = id.value
+  chosengroupid.value = id.value
+  search.value = ''
+  if ('term' in route.params && route.params.term) {
+    search.value = route.params.term
+  }
+
+  // Reset infiniteLoading on return to page
+  memberStore.clear()
+
+  if (!groupid.value) {
+    // If we have not selected a group, check if we are only a mod on one.
+    // If so, then go to that group so that we don't need to bother selecting it.
+    let countmod = 0
+    let lastmod = null
+    myGroups.value.forEach((g) => {
+      if (g.role === 'Moderator' || g.role === 'Owner') {
+        countmod++
+        lastmod = g.id
+      }
+    })
+
+    if (countmod === 1) {
+      groupid.value = lastmod
       const router = useRouter()
-      let newpath = '/members/approved/'
-      if (search) {
-        newpath = '/members/approved/' + this.groupid + '/' + search
-      } else if (this.groupid) {
-        newpath = '/members/approved/' + this.groupid
-      }
-      if (newpath !== router.currentRoute.value.path) {
-        router.push(newpath)
-      } else {
-        this.bump++
-      }
-    },
-  },
+      router.push('/members/approved/' + lastmod)
+    }
+  }
+
+  if (term.value) {
+    // Turn off sorting for searches
+    sort.value = false
+  } else {
+    sort.value = true
+  }
+})
+
+// Methods
+function addMember() {
+  showAddMember.value = true
+  addmodal.value?.show()
+}
+
+function banMember() {
+  showBanMember.value = true
+  banmodal.value?.show()
+}
+
+function startsearch(searchTerm) {
+  searchTerm = searchTerm.trim()
+  search.value = searchTerm
+  context.value = null
+  memberStore.clear()
+  const router = useRouter()
+  let newpath = '/members/approved/'
+  if (searchTerm) {
+    newpath = '/members/approved/' + groupid.value + '/' + searchTerm
+  } else if (groupid.value) {
+    newpath = '/members/approved/' + groupid.value
+  }
+  if (newpath !== router.currentRoute.value.path) {
+    router.push(newpath)
+  } else {
+    bump.value++
+  }
 }
 </script>

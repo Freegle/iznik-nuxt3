@@ -28,45 +28,46 @@
     </div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    topic: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    avatar() {
-      return (
-        'https://discourse.ilovefreegle.org/' +
-        this.topic.avatar_template.replace('{size}', '45')
-      )
-    },
-    snippet() {
-      let ret = this.topic.raw
-        .replace('\n', ' ')
-        .replace(/!\[image.*?\]/g, '')
-        .replace(/\[quote.*?\]/g, '"')
-        .replace(/\[\/quote\]/g, '"')
-      const p = ret.indexOf('>')
+<script setup>
+import { computed } from 'vue'
 
-      if (p !== -1) {
-        ret = ret.substring(0, p)
-      }
-
-      return ret.substring(0, 120) + '...'
-    },
-    link() {
-      return (
-        'https://discourse.ilovefreegle.org/t/' +
-        this.topic.topic_slug +
-        '/' +
-        this.topic.topic_id +
-        '/' +
-        this.topic.post_number
-      )
-    },
+const props = defineProps({
+  topic: {
+    type: Object,
+    required: true,
   },
-}
+})
+
+const avatar = computed(() => {
+  return (
+    'https://discourse.ilovefreegle.org/' +
+    props.topic.avatar_template.replace('{size}', '45')
+  )
+})
+
+const snippet = computed(() => {
+  let ret = props.topic.raw
+    .replace('\n', ' ')
+    .replace(/!\[image.*?\]/g, '')
+    .replace(/\[quote.*?\]/g, '"')
+    .replace(/\[\/quote\]/g, '"')
+  const p = ret.indexOf('>')
+
+  if (p !== -1) {
+    ret = ret.substring(0, p)
+  }
+
+  return ret.substring(0, 120) + '...'
+})
+
+const link = computed(() => {
+  return (
+    'https://discourse.ilovefreegle.org/t/' +
+    props.topic.topic_slug +
+    '/' +
+    props.topic.topic_id +
+    '/' +
+    props.topic.post_number
+  )
+})
 </script>

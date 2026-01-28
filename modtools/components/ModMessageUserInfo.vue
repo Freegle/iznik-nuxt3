@@ -69,110 +69,100 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import pluralize from 'pluralize'
 import dayjs from 'dayjs'
-import ModPostingHistory from './ModPostingHistory'
-import ModMemberships from './ModMemberships'
 import { useMiscStore } from '~/stores/misc'
-import ModSupporter from '~/components/ModSupporter'
-import ProfileImage from '~/components/ProfileImage'
-const ModModeration = () => import('./ModModeration')
 
-export default {
-  components: {
-    ModSupporter,
-    ModMemberships,
-    ModPostingHistory,
-    ModModeration,
-    ProfileImage,
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    message: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    milesaway: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    modinfo: {
-      type: Boolean,
-      default: false,
-    },
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+  message: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  computed: {
-    membership() {
-      let ret = null
-
-      if (
-        this.groupid &&
-        this.message &&
-        this.message.fromuser &&
-        this.message.fromuser.memberof
-      ) {
-        ret = this.message.fromuser.memberof.find((g) => {
-          return g.id === this.groupid
-        })
-
-        if (ret) {
-          // Hack around format to match what the component needs.
-          ret = JSON.parse(JSON.stringify(ret))
-          ret.userid = this.message.fromuser.id
-          ret.id = this.groupid
-        }
-      }
-
-      return ret
-    },
-    joinedAge() {
-      if (this.membership) {
-        // eslint-disable-next-line new-cap
-        return new dayjs().diff(new dayjs(this.membership.added), 'days')
-      }
-
-      return null
-    },
-    clicklink() {
-      const miscStore = useMiscStore()
-      if (miscStore.modtools) {
-        return '/members/approved/' + this.groupid + '/' + this.user.id
-      } else {
-        return '/profile/' + this.user.id
-      }
-    },
+  milesaway: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  methods: {
-    milesAwayPlural() {
-      return pluralize('mile', this.milesaway, true)
-    },
-    openOffersPlural() {
-      if (this.user?.info?.openoffers) {
-        pluralize.addIrregularRule('open OFFER', 'open OFFERs')
-        return pluralize('open OFFER', this.user.info.openoffers, true)
-      }
-      return ''
-    },
-    openWantedsPlural() {
-      if (this.user?.info?.openwanteds) {
-        pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
-        return pluralize('open WANTED', this.user.info.openwanteds, true)
-      }
-      return ''
-    },
+  modinfo: {
+    type: Boolean,
+    default: false,
   },
-}
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+})
+
+const miscStore = useMiscStore()
+
+const membership = computed(() => {
+  let ret = null
+
+  if (
+    props.groupid &&
+    props.message &&
+    props.message.fromuser &&
+    props.message.fromuser.memberof
+  ) {
+    ret = props.message.fromuser.memberof.find((g) => {
+      return g.id === props.groupid
+    })
+
+    if (ret) {
+      // Hack around format to match what the component needs.
+      ret = JSON.parse(JSON.stringify(ret))
+      ret.userid = props.message.fromuser.id
+      ret.id = props.groupid
+    }
+  }
+
+  return ret
+})
+
+const joinedAge = computed(() => {
+  if (membership.value) {
+    // eslint-disable-next-line new-cap
+    return new dayjs().diff(new dayjs(membership.value.added), 'days')
+  }
+
+  return null
+})
+
+const clicklink = computed(() => {
+  if (miscStore.modtools) {
+    return '/members/approved/' + props.groupid + '/' + props.user.id
+  } else {
+    return '/profile/' + props.user.id
+  }
+})
+
+const milesAwayPlural = computed(() => {
+  return pluralize('mile', props.milesaway, true)
+})
+
+const openOffersPlural = computed(() => {
+  if (props.user?.info?.openoffers) {
+    pluralize.addIrregularRule('open OFFER', 'open OFFERs')
+    return pluralize('open OFFER', props.user.info.openoffers, true)
+  }
+  return ''
+})
+
+const openWantedsPlural = computed(() => {
+  if (props.user?.info?.openwanteds) {
+    pluralize.addIrregularRule('open WANTED', 'open WANTEDs')
+    return pluralize('open WANTED', props.user.info.openwanteds, true)
+  }
+  return ''
+})
 </script>
 <style scoped>
 .email {

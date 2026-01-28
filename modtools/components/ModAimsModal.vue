@@ -109,13 +109,10 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  setup() {
-    const { modal, hide } = useOurModal(224)
-    return { modal, hide }
-  },
-}
+const { modal, hide, show } = useOurModal(224)
+
+defineExpose({ show, hide })
 </script>

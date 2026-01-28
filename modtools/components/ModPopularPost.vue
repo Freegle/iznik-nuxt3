@@ -49,59 +49,53 @@
     </b-card-footer>
   </b-card>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
 import { usePublicityStore } from '@/stores/publicity'
 
-export default {
-  props: {
-    item: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const groupStore = useGroupStore()
-    const messageStore = useMessageStore()
-    const publicityStore = usePublicityStore()
-    return { groupStore, messageStore, publicityStore }
-  },
-  data: function () {
-    return {
-      show: true,
-    }
-  },
-  computed: {
-    message() {
-      return this.messageStore.byId(this.item.msgid)
-    },
-    group() {
-      return this.groupStore.get(this.item.groupid)
-    },
-  },
-  mounted() {
-    this.messageStore.fetch(this.item.msgid)
+})
 
-    this.groupStore.fetch(this.item.groupid)
-  },
-  methods: {
-    async share() {
-      await this.publicityStore.sharePopularPost({
-        groupid: this.item.groupid,
-        msgid: this.item.msgid,
-      })
+const groupStore = useGroupStore()
+const messageStore = useMessageStore()
+const publicityStore = usePublicityStore()
 
-      this.show = false
-    },
-    async hide() {
-      await this.publicityStore.hidePopularPost({
-        groupid: this.item.groupid,
-        msgid: this.item.msgid,
-      })
+const show = ref(true)
 
-      this.show = false
-    },
-  },
+const message = computed(() => {
+  return messageStore.byId(props.item.msgid)
+})
+
+const group = computed(() => {
+  return groupStore.get(props.item.groupid)
+})
+
+onMounted(() => {
+  messageStore.fetch(props.item.msgid)
+  groupStore.fetch(props.item.groupid)
+})
+
+async function share() {
+  await publicityStore.sharePopularPost({
+    groupid: props.item.groupid,
+    msgid: props.item.msgid,
+  })
+
+  show.value = false
+}
+
+async function hide() {
+  await publicityStore.hidePopularPost({
+    groupid: props.item.groupid,
+    msgid: props.item.msgid,
+  })
+
+  show.value = false
 }
 </script>

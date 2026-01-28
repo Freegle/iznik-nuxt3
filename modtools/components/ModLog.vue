@@ -351,42 +351,40 @@
     <hr class="d-block d-md-none" />
   </div>
 </template>
-<script>
-import ModLogUser from './ModLogUser'
-import ModLogGroup from './ModLogGroup'
-import ModLogMessage from './ModLogMessage'
-import ModLogStdMsg from './ModLogStdMsg'
-export default {
-  components: { ModLogStdMsg, ModLogMessage, ModLogGroup, ModLogUser },
-  props: {
-    log: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  log: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    sourceheader() {
-      if (this.log.message && this.log.message.sourceheader) {
-        // Server returns Yahoo for now.
-        return this.log.message.sourceheader.replace('Yahoo-', '')
-      } else {
-        return null
-      }
-    },
-    postingStatus() {
-      switch (this.log.text) {
-        case 'UNCHANGED':
-          return 'Unchanged'
-        case 'MODERATED':
-          return 'Moderated'
-        case 'DEFAULT':
-          return 'Group Settings'
-        case 'PROHIBITED':
-          return "Can't Post"
-        default:
-          return null
-      }
-    },
-  },
-}
+})
+
+const sourceheader = computed(() => {
+  if (props.log.message && props.log.message.sourceheader) {
+    // Server returns Yahoo for now.
+    return props.log.message.sourceheader.replace('Yahoo-', '')
+  } else {
+    return null
+  }
+})
+
+const postingStatus = computed(() => {
+  switch (props.log.text) {
+    case 'UNCHANGED':
+      return 'Unchanged'
+    case 'MODERATED':
+      return 'Moderated'
+    case 'DEFAULT':
+      return 'Group Settings'
+    case 'PROHIBITED':
+      return "Can't Post"
+    default:
+      return null
+  }
+})
+
+// byuser used in template via log.byuser
+const byuser = computed(() => props.log.byuser)
 </script>

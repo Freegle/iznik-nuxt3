@@ -43,230 +43,223 @@
     </b-card-footer>
   </b-card>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import dayjs from 'dayjs'
 import { useMemberStore } from '~/stores/member'
 
 const LONG_THRESHOLD = 4
 
-export default {
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  emits: ['processed'],
-  computed: {
-    posted1() {
-      return this.posted(this.user1)
-    },
-    posted2() {
-      return this.posted(this.user2)
-    },
-    whichposted() {
-      return this.count(this.posted1, this.posted2)
-    },
-    joined1() {
-      return this.isMember(this.user1)
-    },
-    joined2() {
-      return this.isMember(this.user2)
-    },
-    postedOrJoined1() {
-      return this.posted1 || this.joined1
-    },
-    postedOrJoined2() {
-      return this.posted2 || this.joined2
-    },
-    whichjoined() {
-      return this.count(this.joined1, this.joined2)
-    },
-    user1() {
-      const m1 = new Date(this.member.lastaccess)
-      const m2 = new Date(this.member.relatedto.lastaccess)
+})
 
-      return m1 > m2 ? this.member : this.member.relatedto
-    },
-    user2() {
-      const m1 = new Date(this.member.lastaccess)
-      const m2 = new Date(this.member.relatedto.lastaccess)
+const emit = defineEmits(['processed'])
 
-      return m1 <= m2 ? this.member : this.member.relatedto
-    },
-    activeSameDay() {
-      return dayjs(this.user1.lastaccess).isSame(
-        dayjs(this.user2.lastaccess),
-        'day'
-      )
-    },
-    probablySame() {
-      return (
-        this.similarNameOrEmail && (this.groupsInCommon || this.activeSameDay)
-      )
-    },
-    groupsInCommon() {
-      const common = this.user1.memberof.filter((group) => {
-        const gid = group.id
-        let found = false
+const memberStore = useMemberStore()
 
-        this.user2.memberof.forEach((group2) => {
-          if (group2.id === gid) {
-            found = true
-          }
-        })
+function posted(member) {
+  return member.messagehistory && member.messagehistory.length
+}
 
-        return found
+function isMember(member) {
+  return member.memberof && member.memberof.length
+}
+
+function count(l, r) {
+  if (l && r) {
+    return 'Both'
+  } else if (l) {
+    return 'First only'
+  } else if (r) {
+    return 'Second only'
+  } else {
+    return 'Neither'
+  }
+}
+
+function getEmail(member) {
+  // Depending on which context we're used it, we might or might not have an email returned.
+  let ret = member.email
+
+  if (!member.email && member.emails) {
+    member.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
+      }
+    })
+  }
+
+  return ret
+}
+
+function findLongest(str1, str2) {
+  // From https://codereview.stackexchange.com/questions/210940/find-longest-common-string-subsequence
+  const s1 = str1 + ''
+  const s2 = str2 + ''
+
+  const removeDistinct = (a, b) =>
+    a
+      .split('')
+      // eslint-disable-next-line array-callback-return
+      .filter((c) => {
+        ;(b + '').includes(c)
       })
-
-      return common && common.length
-    },
-    similarNameOrEmail() {
-      let ret = false
-      let e1 = this.email(this.user1)
-      let e2 = this.email(this.user2)
-
-      if (e1 && e2) {
-        e1 = e1.substring(e1, e1.indexOf('@'))
-        e2 = e2.substring(e2, e2.indexOf('@'))
-
-        if (e1 && e2 && this.findLongest(e1, e2) >= LONG_THRESHOLD) {
-          ret = true
+      .join('')
+  const findFirstSeq = (a, b) => {
+    let seq = ''
+    let i
+    let j = 0
+    for (i = 0; i < a.length; i++) {
+      const c = a[i]
+      while (j++ < b.length) {
+        if (seq.length + (b.length - j - 2) < max) {
+          return ''
+        }
+        if (c === b[j - 1]) {
+          seq += c
+          break
         }
       }
-
-      const n1 = this.user1.displayname
-      const n2 = this.user2.displayname
-
-      if (n1 && n2 && this.findLongest(n1, n2) >= LONG_THRESHOLD) {
-        ret = true
-      }
-
-      return ret
-    },
-  },
-  methods: {
-    posted(member) {
-      return member.messagehistory && member.messagehistory.length
-    },
-    isMember(member) {
-      return member.memberof && member.memberof.length
-    },
-    count(l, r) {
-      if (l && r) {
-        return 'Both'
-      } else if (l) {
-        return 'First only'
-      } else if (r) {
-        return 'Second only'
+    }
+    return seq
+  }
+  const findSubseq = (a, b) => {
+    if (b.length <= max || a.length <= max) {
+      return maxSeq
+    }
+    while (a.length && a.length > max) {
+      const seq = findFirstSeq(a, b)
+      if (seq.length > max) {
+        max = seq.length
+        a = a.slice(max)
+        maxSeq = seq
       } else {
-        return 'Neither'
+        a = a.slice(1)
       }
-    },
-    findLongest(s1, s2) {
-      // From https://codereview.stackexchange.com/questions/210940/find-longest-common-string-subsequence
-      s1 = s1 + ''
-      s2 = s2 + ''
+    }
+    return maxSeq
+  }
 
-      const removeDistinct = (s1, s2) =>
-        s1
-          .split('')
-          // eslint-disable-next-line array-callback-return
-          .filter((c) => {
-            ;(s2 + '').includes(c)
-          })
-          .join('')
-      const findFirstSeq = (s1, s2) => {
-        let seq = ''
-        let i
-        let j = 0
-        for (i = 0; i < s1.length; i++) {
-          const c = s1[i]
-          while (j++ < s2.length) {
-            if (seq.length + (s2.length - j - 2) < max) {
-              return ''
-            }
-            if (c === s2[j - 1]) {
-              seq += c
-              break
-            }
-          }
-        }
-        return seq
+  let max = 0
+  let maxSeq
+  if (s1 === s2) {
+    return s1.length
+  }
+  const s1D = removeDistinct(s1, s2)
+  const s2D = removeDistinct(s2, s1)
+  if (s1D && s2D) {
+    if (s1D === s2D) {
+      return s1D.length
+    }
+
+    findSubseq(s1D, s2D)
+    const ret = findSubseq(s2D, s1D)
+    return ret ? ret.length : 0
+  } else {
+    return 0
+  }
+}
+
+const user1 = computed(() => {
+  const m1 = new Date(props.member.lastaccess)
+  const m2 = new Date(props.member.relatedto.lastaccess)
+
+  return m1 > m2 ? props.member : props.member.relatedto
+})
+
+const user2 = computed(() => {
+  const m1 = new Date(props.member.lastaccess)
+  const m2 = new Date(props.member.relatedto.lastaccess)
+
+  return m1 <= m2 ? props.member : props.member.relatedto
+})
+
+const posted1 = computed(() => posted(user1.value))
+const posted2 = computed(() => posted(user2.value))
+const whichposted = computed(() => count(posted1.value, posted2.value))
+
+const joined1 = computed(() => isMember(user1.value))
+const joined2 = computed(() => isMember(user2.value))
+const whichjoined = computed(() => count(joined1.value, joined2.value))
+
+const activeSameDay = computed(() => {
+  return dayjs(user1.value.lastaccess).isSame(
+    dayjs(user2.value.lastaccess),
+    'day'
+  )
+})
+
+const groupsInCommon = computed(() => {
+  const common = user1.value.memberof.filter((group) => {
+    const gid = group.id
+    let found = false
+
+    user2.value.memberof.forEach((group2) => {
+      if (group2.id === gid) {
+        found = true
       }
-      const findSubseq = (s1, s2) => {
-        if (s2.length <= max || s1.length <= max) {
-          return maxSeq
-        }
-        while (s1.length && s1.length > max) {
-          const seq = findFirstSeq(s1, s2)
-          if (seq.length > max) {
-            max = seq.length
-            s1 = s1.slice(max)
-            maxSeq = seq
-          } else {
-            s1 = s1.slice(1)
-          }
-        }
-        return maxSeq
-      }
+    })
 
-      let max = 0
-      let maxSeq
-      if (s1 === s2) {
-        return s1.length
-      }
-      const s1D = removeDistinct(s1, s2)
-      const s2D = removeDistinct(s2, s1)
-      if (s1D && s2D) {
-        if (s1D === s2D) {
-          return s1D.length
-        }
+    return found
+  })
 
-        findSubseq(s1D, s2D)
-        const ret = findSubseq(s2D, s1D)
-        return ret ? ret.length : 0
-      } else {
-        return 0
-      }
-    },
-    email(member) {
-      // Depending on which context we're used it, we might or might not have an email returned.
-      let ret = member.email
+  return common && common.length
+})
 
-      if (!member.email && member.emails) {
-        member.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
-      }
+const similarNameOrEmail = computed(() => {
+  let ret = false
+  let e1 = getEmail(user1.value)
+  let e2 = getEmail(user2.value)
 
-      return ret
-    },
-    async ask() {
-      const memberStore = useMemberStore()
-      await memberStore.askMerge(this.member.id, {
-        user1: this.user1.id,
-        user2: this.user2.id,
-      })
+  if (e1 && e2) {
+    e1 = e1.substring(e1, e1.indexOf('@'))
+    e2 = e2.substring(e2, e2.indexOf('@'))
 
-      this.updateWork()
-    },
-    async ignore() {
-      const memberStore = useMemberStore()
-      await memberStore.ignoreMerge(this.member.id, {
-        user1: this.user1.id,
-        user2: this.user2.id,
-      })
+    if (e1 && e2 && findLongest(e1, e2) >= LONG_THRESHOLD) {
+      ret = true
+    }
+  }
 
-      this.updateWork()
-    },
-    updateWork() {
-      // this.fetchMe(true, ['work'])
-      this.$emit('processed')
-    },
-  },
+  const n1 = user1.value.displayname
+  const n2 = user2.value.displayname
+
+  if (n1 && n2 && findLongest(n1, n2) >= LONG_THRESHOLD) {
+    ret = true
+  }
+
+  return ret
+})
+
+const probablySame = computed(() => {
+  return (
+    similarNameOrEmail.value && (groupsInCommon.value || activeSameDay.value)
+  )
+})
+
+function updateWork() {
+  emit('processed')
+}
+
+async function ask() {
+  await memberStore.askMerge(props.member.id, {
+    user1: user1.value.id,
+    user2: user2.value.id,
+  })
+
+  updateWork()
+}
+
+async function ignore() {
+  await memberStore.ignoreMerge(props.member.id, {
+    user1: user1.value.id,
+    user2: user2.value.id,
+  })
+
+  updateWork()
 }
 </script>
 <style scoped>

@@ -26,57 +26,65 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import dayjs from 'dayjs'
-import ModDashboardBase from '~/components/ModDashboardBase'
+import { useModDashboard } from '~/modtools/composables/useModDashboard'
 import {
   getBenefitPerTonne,
   CO2_PER_TONNE,
 } from '~/composables/useReuseBenefit'
 
-export default {
-  extends: ModDashboardBase,
-  data: function () {
-    return {
-      askfor: ['Weight'],
-      Weight: null,
-    }
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    startf() {
-      return dayjs(this.start).format('YYYY-MM-DD')
-    },
-    endf() {
-      return dayjs(this.end).format('YYYY-MM-DD')
-    },
-    totalWeight() {
-      const weights = this.Weight
-      let total = 0
-      const start = dayjs(this.start)
-      const end = dayjs(this.end)
+  groupName: {
+    type: String,
+    required: true,
+  },
+  start: {
+    type: Date,
+    required: true,
+  },
+  end: {
+    type: Date,
+    required: true,
+  },
+})
 
-      if (weights) {
-        for (const w of weights) {
-          if (
-            start.isSameOrBefore(dayjs(w.date), 'days') &&
-            end.isSameOrAfter(dayjs(w.date), 'days')
-          ) {
-            total += w.count
-          }
-        }
+const { loading, Weight } = useModDashboard(props, ['Weight'])
+
+const startf = computed(() => dayjs(props.start).format('YYYY-MM-DD'))
+
+const endf = computed(() => dayjs(props.end).format('YYYY-MM-DD'))
+
+const totalWeight = computed(() => {
+  const weights = Weight.value
+  let total = 0
+  const start = dayjs(props.start)
+  const end = dayjs(props.end)
+
+  if (weights) {
+    for (const w of weights) {
+      if (
+        start.isSameOrBefore(dayjs(w.date), 'days') &&
+        end.isSameOrAfter(dayjs(w.date), 'days')
+      ) {
+        total += w.count
       }
+    }
+  }
 
-      return total / 1000
-    },
-    // Benefit of reuse per tonne and CO2 impact based on WRAP figures.
-    // https://wrap.org.uk/resources/tool/benefits-reuse-tool
-    // The benefit value is inflation-adjusted to current year prices.
-    totalBenefit() {
-      return this.totalWeight * getBenefitPerTonne()
-    },
-    totalCO2() {
-      return this.totalWeight * CO2_PER_TONNE
-    },
-  },
-}
+  return total / 1000
+})
+
+// Benefit of reuse per tonne and CO2 impact based on WRAP figures.
+// https://wrap.org.uk/resources/tool/benefits-reuse-tool
+// The benefit value is inflation-adjusted to current year prices.
+const totalBenefit = computed(() => totalWeight.value * getBenefitPerTonne())
+
+const totalCO2 = computed(() => totalWeight.value * CO2_PER_TONNE)
 </script>

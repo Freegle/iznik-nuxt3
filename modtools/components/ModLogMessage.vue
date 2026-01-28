@@ -21,38 +21,34 @@
     </span>
   </span>
 </template>
-<script>
-import ModLogGroup from './ModLogGroup'
-import ModLogStdMsg from './ModLogStdMsg'
-export default {
-  components: { ModLogStdMsg, ModLogGroup },
-  props: {
-    log: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    notext: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    tag: {
-      type: String,
-      required: false,
-      default: 'on',
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  log: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  computed: {
-    messagesubject() {
-      if (this.log.message) {
-        return this.log.message.subject
-          ? this.log.message.subject
-          : '(Blank subject line)'
-      } else {
-        return '(Message now deleted)'
-      }
-    },
+  notext: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-}
+  tag: {
+    type: String,
+    required: false,
+    default: 'on',
+  },
+})
+
+const messagesubject = computed(() => {
+  if (props.log.message) {
+    return props.log.message.subject
+      ? props.log.message.subject
+      : '(Blank subject line)'
+  } else {
+    return '(Message now deleted)'
+  }
+})
 </script>

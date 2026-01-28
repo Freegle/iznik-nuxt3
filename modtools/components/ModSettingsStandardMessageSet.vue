@@ -67,92 +67,84 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { copyStdMsgs } from '~/composables/useStdMsgs'
 import { useModConfigStore } from '~/stores/modconfig'
 
-export default {
-  components: {
-    draggable,
+const props = defineProps({
+  cc: {
+    type: String,
+    required: true,
   },
-  props: {
-    cc: {
-      type: String,
-      required: true,
-    },
-    addr: {
-      type: String,
-      required: true,
-    },
-    types: {
-      type: Array,
-      required: true,
-    },
-    locked: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  addr: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const modConfigStore = useModConfigStore()
+  types: {
+    type: Array,
+    required: true,
+  },
+  locked: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-    return { modConfigStore }
-  },
-  data: function () {
-    return {
-      ccopts: [
-        { value: 'Nobody', text: 'Nobody' },
-        { value: 'Me', text: 'Me' },
-        { value: 'Specific', text: 'Specific email' },
-      ],
-      stdmsgscopy: null,
-      showModal: false,
-      bump: 0,
-      dragging: false,
-    }
-  },
-  computed: {
-    config() {
-      return this.modConfigStore.current
-    },
-  },
-  watch: {
-    config(newval) {
-      this.stdmsgscopy = copyStdMsgs(newval)
-    },
-  },
-  mounted() {
-    this.stdmsgscopy = copyStdMsgs(this.config)
-  },
-  methods: {
-    updateOrder() {
-      // Undivided joy, we have new order.
-      const newOrder = this.stdmsgscopy.map((s) => s.id)
+const modConfigStore = useModConfigStore()
 
-      this.modConfigStore.updateConfig({
-        id: this.config.id,
-        messageorder: JSON.stringify(newOrder),
-      })
-    },
-    visible(stdmsg) {
-      return this.types.includes(stdmsg.action)
-    },
-    add() {
-      this.showModal = true
-    },
-    async fetch() {
-      // Update any changed/new buttons.
-      await this.modConfigStore.fetchConfig({
-        id: this.config.id,
-        configuring: true,
-      })
+const ccopts = [
+  { value: 'Nobody', text: 'Nobody' },
+  { value: 'Me', text: 'Me' },
+  { value: 'Specific', text: 'Specific email' },
+]
 
-      const config = this.modConfigStore.current
-      this.stdmsgscopy = copyStdMsgs(config)
-      this.bump++
-    },
-  },
+const stdmsgscopy = ref(null)
+const showModal = ref(false)
+const bump = ref(0)
+const dragging = ref(false)
+
+const config = computed(() => {
+  return modConfigStore.current
+})
+
+watch(config, (newval) => {
+  stdmsgscopy.value = copyStdMsgs(newval)
+})
+
+onMounted(() => {
+  stdmsgscopy.value = copyStdMsgs(config.value)
+})
+
+function updateOrder() {
+  // Undivided joy, we have new order.
+  const newOrder = stdmsgscopy.value.map((s) => s.id)
+
+  modConfigStore.updateConfig({
+    id: config.value.id,
+    messageorder: JSON.stringify(newOrder),
+  })
+}
+
+function visible(stdmsg) {
+  return props.types.includes(stdmsg.action)
+}
+
+function add() {
+  showModal.value = true
+}
+
+async function fetch() {
+  // Update any changed/new buttons.
+  await modConfigStore.fetchConfig({
+    id: config.value.id,
+    configuring: true,
+  })
+
+  const currentConfig = modConfigStore.current
+  stdmsgscopy.value = copyStdMsgs(currentConfig)
+  bump.value++
 }
 </script>

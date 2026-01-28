@@ -61,7 +61,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 import { setupModMessages } from '~/composables/useModMessages'
@@ -71,231 +72,253 @@ import { useMiscStore } from '@/stores/misc'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const authStore = useAuthStore()
-    const messageStore = useMessageStore()
-    const miscStore = useMiscStore()
-    const modGroupStore = useModGroupStore()
-    const modMessages = setupModMessages(true)
-    modMessages.summarykey.value = 'modtoolsMessagesPendingSummary'
-    // modMessages.collection.value = ['Pending','PendingOther']
-    modMessages.collection.value = 'Pending' // Pending also gets PendingOther
-    modMessages.workType.value = ['pending', 'pendingother']
-    // modMessages.workType.value = 'pending'
-    const { me, myGroups } = useMe()
-    return {
-      authStore,
-      messageStore,
-      miscStore,
-      modGroupStore,
-      me,
-      myGroups,
-      ...modMessages, // busy, context, group, groupid, limit, workType, show, collection, messageTerm, memberTerm, distance, summary, messages, visibleMessages, work,
-    }
-  },
-  data: function () {
-    return {
-      showCakeModal: false,
-      showAimsModal: false,
-      affiliationGroup: null,
-      shownRulePopup: false,
-      bump: 0,
-      highlightMsgId: null,
-      urlOverride: false,
-    }
-  },
-  computed: {
-    groups() {
-      const ret = Object.values(this.modGroupStore.list)
-      return ret
-    },
-    groupsreceived() {
-      return this.modGroupStore.received
-    },
-    rulesGroup() {
-      if (!this.modGroupStore.received) return null
-      let ret = null
-      const mygroups = this.myGroups // myGroups has correct role
-      for (const group of this.groups) {
-        const mygroup = mygroups.find((g) => g.id === group.id)
-        const rules = group.rules ? JSON.parse(group.rules) : null
-        const missingRules = group.rules
-          ? [
-              'limitgroups',
-              'wastecarrier',
-              'carboot',
-              'chineselanterns',
-              'carseats',
-              'pondlife',
-              'copyright',
-              'porn',
-            ].filter((rule) => !Object.keys(rules).includes(rule))
-          : null
+const authStore = useAuthStore()
+const messageStore = useMessageStore()
+const miscStore = useMiscStore()
+const modGroupStore = useModGroupStore()
+const route = useRoute()
 
-        if (
-          group.type === 'Freegle' &&
-          mygroup?.role === 'Owner' &&
-          group.publish &&
-          (!group.rules || (missingRules && missingRules.length))
-        ) {
-          // console.log('Missing rules', group.nameshort, missingRules)
-          ret = group.id
+const {
+  busy,
+  context,
+  group,
+  groupid,
+  limit,
+  workType,
+  show,
+  collection,
+  distance,
+  summarykey,
+  messages,
+  visibleMessages,
+  nextAfterRemoved,
+  getMessages,
+} = setupModMessages(true)
+
+summarykey.value = 'modtoolsMessagesPendingSummary'
+collection.value = 'Pending' // Pending also gets PendingOther
+workType.value = ['pending', 'pendingother']
+
+const { me, myGroups } = useMe()
+
+// Data
+const showCakeModal = ref(false)
+const showAimsModal = ref(false)
+const affiliationGroup = ref(null)
+const shownRulePopup = ref(false)
+const bump = ref(0)
+const highlightMsgId = ref(null)
+const urlOverride = ref(false)
+
+// Template refs
+const end = ref(null)
+const rules = ref(null)
+
+// Computed
+const groups = computed(() => {
+  return Object.values(modGroupStore.list)
+})
+
+const groupsreceived = computed(() => {
+  return modGroupStore.received
+})
+
+const rulesGroup = computed(() => {
+  if (!modGroupStore.received) return null
+  let ret = null
+  const mygroupsList = myGroups.value // myGroups has correct role
+  for (const groupItem of groups.value) {
+    const mygroup = mygroupsList.find((g) => g.id === groupItem.id)
+    const groupRules = groupItem.rules ? JSON.parse(groupItem.rules) : null
+    const missingRules = groupItem.rules
+      ? [
+          'limitgroups',
+          'wastecarrier',
+          'carboot',
+          'chineselanterns',
+          'carseats',
+          'pondlife',
+          'copyright',
+          'porn',
+        ].filter((rule) => !Object.keys(groupRules).includes(rule))
+      : null
+
+    if (
+      groupItem.type === 'Freegle' &&
+      mygroup?.role === 'Owner' &&
+      groupItem.publish &&
+      (!groupItem.rules || (missingRules && missingRules.length))
+    ) {
+      ret = groupItem.id
+      break
+    }
+  }
+  return ret
+})
+
+// Watch for rulesGroup changes and show popup when needed
+watch(rulesGroup, (newVal) => {
+  if (newVal && !shownRulePopup.value) {
+    shownRulePopup.value = true
+    rules.value?.show()
+  }
+})
+
+// Watchers
+watch(groupid, async (newVal) => {
+  context.value = null
+  await modGroupStore.fetchIfNeedBeMT(newVal)
+  group.value = modGroupStore.get(newVal)
+  show.value = 0
+  bump.value++
+})
+
+watch(visibleMessages, (newVal) => {
+  // Scroll to highlighted message when it appears in the list.
+  if (highlightMsgId.value && newVal?.length) {
+    const found = newVal.find((m) => m.id === highlightMsgId.value)
+    if (found) {
+      nextTick(() => {
+        const el = document.getElementById('msg-' + highlightMsgId.value)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Clear highlight so we don't scroll again on future updates.
+          highlightMsgId.value = null
+        }
+      })
+    }
+  }
+})
+
+// Lifecycle
+onMounted(async () => {
+  // Check for query params from duplicate message link.
+  if (route.query.groupid !== undefined) {
+    groupid.value = parseInt(route.query.groupid)
+    // Mark that URL explicitly set the group (even if 0 for "All").
+    urlOverride.value = true
+  }
+  if (route.query.msgid) {
+    highlightMsgId.value = parseInt(route.query.msgid)
+  }
+
+  // Consider affiliation ask.
+  const lastask = miscStore.get('lastaffiliationask')
+  const now = new Date().getTime()
+
+  // Ask for affiliation not too frequently.
+  if (!lastask || now - lastask > 7 * 24 * 60 * 60 * 1000) {
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5)
+    }
+    const shuffledGroups = shuffleArray([...groups.value])
+
+    for (const groupItem of shuffledGroups) {
+      if (groupItem.myrole === 'Owner' || groupItem.myrole === 'Moderator') {
+        const postdate = dayjs(groupItem.affiliationconfirmed)
+        const daysago = dayjs().diff(postdate, 'day')
+        if (!groupItem.affiliationconfirmed || daysago > 365) {
+          affiliationGroup.value = groupItem.id
           break
         }
       }
-      if (ret && !this.shownRulePopup) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.shownRulePopup = true
-        this.$refs.rules?.show()
-      }
-      return ret
-    },
-  },
-  watch: {
-    groupid: {
-      async handler(newVal, oldVal) {
-        // console.log('PENDING groupid changed', oldVal, newVal)
-        this.context = null
-
-        const modGroupStore = useModGroupStore()
-        await modGroupStore.fetchIfNeedBeMT(newVal)
-        this.group = modGroupStore.get(newVal)
-        this.show = 0
-        this.bump++
-      },
-    },
-    visibleMessages: {
-      handler(newVal) {
-        // Scroll to highlighted message when it appears in the list.
-        if (this.highlightMsgId && newVal?.length) {
-          const found = newVal.find((m) => m.id === this.highlightMsgId)
-          if (found) {
-            this.$nextTick(() => {
-              const el = document.getElementById('msg-' + this.highlightMsgId)
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                // Clear highlight so we don't scroll again on future updates.
-                this.highlightMsgId = null
-              }
-            })
-          }
-        }
-      },
-    },
-  },
-  async mounted() {
-    // Check for query params from duplicate message link.
-    const route = useRoute()
-    if (route.query.groupid !== undefined) {
-      this.groupid = parseInt(route.query.groupid)
-      // Mark that URL explicitly set the group (even if 0 for "All").
-      this.urlOverride = true
-    }
-    if (route.query.msgid) {
-      this.highlightMsgId = parseInt(route.query.msgid)
     }
 
-    // Consider affiliation ask.
-    const lastask = this.miscStore.get('lastaffiliationask')
-    const now = new Date().getTime()
+    miscStore.set({ key: 'lastaffiliationask', value: now })
+  }
 
-    // Ask for affiliation not too frequently.
-    if (!lastask || now - lastask > 7 * 24 * 60 * 60 * 1000) {
-      function shuffleArray(array) {
-        return array.sort(() => Math.random() - 0.5)
-      }
-      const groups = shuffleArray(this.groups)
+  // AIMS
+  const user = authStore.user
+  const lastaimsshow = user?.settings?.lastaimsshow
 
-      for (const group of groups) {
-        // console.log('group', group.nameshort)
-        if (group.myrole === 'Owner' || group.myrole === 'Moderator') {
-          const postdate = dayjs(group.affiliationconfirmed)
-          const daysago = dayjs().diff(postdate, 'day')
-          // console.log('daysago', daysago)
-          if (!group.affiliationconfirmed || daysago > 365) {
-            this.affiliationGroup = group.id
-            break
-          }
-        }
-      }
+  if (!lastaimsshow || dayjs().diff(dayjs(lastaimsshow), 'days') > 365) {
+    showAimsModal.value = true
 
-      this.miscStore.set({ key: 'lastaffiliationask', value: now })
-    }
+    const settings = user.settings
+    settings.lastaimsshow = dayjs().toISOString()
+    await authStore.saveAndGet({
+      settings,
+    })
+  }
 
-    // AIMS
-    const me = this.authStore.user
-    const lastaimsshow = me?.settings?.lastaimsshow
+  // CAKE
+  if (!miscStore.get('cakeasked')) {
+    showCakeModal.value = true
+    miscStore.set({ key: 'cakeasked', value: true })
+  }
 
-    if (!lastaimsshow || dayjs().diff(dayjs(lastaimsshow), 'days') > 365) {
-      this.showAimsModal = true
+  // Note: Don't restore remembered group here - ModGroupSelect handles it
+  // via its remember prop. Doing it here would override URL params.
+})
 
-      const settings = me.settings
-      settings.lastaimsshow = dayjs().toISOString()
-      await this.authStore.saveAndGet({
-        settings,
-      })
-    }
+// Methods
+async function loadAll() {
+  // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
+  limit.value = 1000
+  await getMessages()
 
-    // CAKE
-    if (!this.miscStore.get('cakeasked')) {
-      this.showCakeModal = true
-      this.miscStore.set({ key: 'cakeasked', value: true })
-    }
-
-    // Note: Don't restore remembered group here - ModGroupSelect handles it
-    // via its remember prop. Doing it here would override URL params.
-  },
-  methods: {
-    async loadAll() {
-      // This is a bit of a hack - we clear the store and fetch 1000 messages, which is likely to be all of them.
-      this.limit = 1000
-      await this.getMessages()
-
-      this.$refs.end.scrollIntoView()
-    },
-    destroy(oldid, nextid) {
-      this.nextAfterRemoved = nextid
-    },
-    async loadMore($state) {
-      this.busy = true
-      // console.log( 'Pending loadMore:', this.show, this.visibleMessages?.length, this.messages?.length, this.modGroupStore.received)
-      if (!this.me) {
-        console.log('Ignore load more on MT page with no session.')
-        $state.complete()
-      } else if (this.show < this.messages.length) {
-        // console.log('Pending loadMore inc')
-        // This means that we will gradually add the messages that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        // console.log('this.show++', this.show)
-        this.show++
-        $state.loaded()
-      } else {
-        // const currentCount = this.messages.length
-        const currentCount = Object.keys(this.messageStore.list).length // Use total messages found, not just this,messages as this stops too soon
-        // console.log('Actually loadMore', currentCount)
-
-        const params = {
-          groupid: this.groupid,
-          collection: this.collection,
-          modtools: true,
-          summary: false,
-          context: this.context,
-          limit: this.messages.length + this.distance,
-        }
-
-        await this.messageStore.fetchMessagesMT(params)
-        this.context = this.messageStore.context
-
-        if (currentCount === Object.keys(this.messageStore.list).length) {
-          $state.complete()
-        } else {
-          $state.loaded()
-          this.show++
-        }
-      }
-      this.busy = false
-    },
-  },
+  end.value?.scrollIntoView()
 }
+
+function destroy(oldid, nextid) {
+  nextAfterRemoved.value = nextid
+}
+
+async function loadMore($state) {
+  busy.value = true
+
+  if (!me.value) {
+    console.log('Ignore load more on MT page with no session.')
+    $state.complete()
+  } else if (show.value < messages.value.length) {
+    // This means that we will gradually add the messages that we have fetched from the server into the DOM.
+    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+    show.value++
+    $state.loaded()
+  } else {
+    const currentCount = Object.keys(messageStore.list).length
+
+    const params = {
+      groupid: groupid.value,
+      collection: collection.value,
+      modtools: true,
+      summary: false,
+      context: context.value,
+      limit: messages.value.length + distance.value,
+    }
+
+    await messageStore.fetchMessagesMT(params)
+    context.value = messageStore.context
+
+    if (currentCount === Object.keys(messageStore.list).length) {
+      $state.complete()
+    } else {
+      $state.loaded()
+      show.value++
+    }
+  }
+  busy.value = false
+}
+
+// Expose for template and tests
+defineExpose({
+  showCakeModal,
+  showAimsModal,
+  affiliationGroup,
+  bump,
+  highlightMsgId,
+  urlOverride,
+  groups,
+  groupsreceived,
+  rulesGroup,
+  me,
+  myGroups,
+  busy,
+  messages,
+  groupid,
+  limit,
+  loadAll,
+  destroy,
+  loadMore,
+})
 </script>

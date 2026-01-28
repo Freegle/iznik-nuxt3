@@ -82,258 +82,206 @@
     </b-row>
   </client-only>
 </template>
-<script>
-import dayjs from 'dayjs'
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-// import { pluralise } from '~/composables/usePluralise'
-import { useAuthStore } from '~/stores/auth'
+import dayjs from 'dayjs'
 import { useChatStore } from '~/stores/chat'
-// import { setupChat } from '~/composables/useChat'
-import { useRouter } from '#imports'
 
-export default {
-  setup() {
-    const chatStore = useChatStore()
-    const authStore = useAuthStore()
-    /* const {
-      chat,
-      otheruser,
-      tooSoonToNudge,
-      chatStore,
-      chatmessages,
-      milesaway,
-    } = await setupChat(props.id) */
+// Stores
+const chatStore = useChatStore()
 
-    return {
-      authStore,
-      chatStore,
-      // chat,
-      // otheruser,
-      // tooSoonToNudge,
-      // miscStore,
-      // messageStore,
-      // addressStore,
-      // chatmessages,
-      // milesaway,
-    }
-  },
-  data: function () {
-    return {
-      id: 0,
-      // showHideAllModal: false,
-      // minShowChats: 20,
-      showChats: 20,
-      search: null,
-      searching: false,
-      searchlast: null,
-      loading: true,
-      complete: false,
-      limit: 5,
-      bump: 1,
-      distance: 1000,
-      selectedChatId: null,
-      showClosed: false,
-      // adsVisible: false,
-    }
-  },
-  computed: {
-    messages() {
-      return []
-      // return this.chatStore.getMessages(REVIEWCHAT)
-    },
-    /* milesaway(){
-      this.authStore.user?.lat,
-      this.authStore.user?.lng,
-      otheruser?.value?.lat,
-      otheruser?.value?.lng
-    ),
-    milesstring() {
-      return pluralise('mile', milesaway.value, true) + ' away'
-    }, */
-    chats() {
-      return this.chatStore?.list ? this.chatStore.list : []
-    },
-    showingOlder() {
-      console.log('[[id]] showingOlder')
-      return this.chatStore.searchSince !== null
-    },
-    closedChats() {
-      return this.scanChats(true, this.chats)
-    },
-    closedCount() {
-      let ret = 0
+// Route
+const route = useRoute()
+const router = useRouter()
 
-      for (const chat of this.closedChats) {
-        if (chat.status === 'Closed') {
-          ret += chat.unseen
-        }
-      }
+// Local state (formerly data())
+const id = ref('id' in route.params ? parseInt(route.params.id) : 0)
+if (isNaN(id.value)) id.value = 0
+const showChats = ref(20)
+const search = ref(null)
+const searching = ref(false)
+const searchlast = ref(null)
+const loading = ref(true)
+const complete = ref(false)
+const bump = ref(1)
+const distance = ref(1000)
+const selectedChatId = ref(id.value ? id.value : null)
+const showClosed = ref(false)
 
-      return ret
-    },
-    filteredChats() {
-      return this.scanChats(this.showClosed, this.chats)
-    },
-    visibleChats() {
-      const chats =
-        this.bump && this.filteredChats
-          ? this.filteredChats.slice(0, this.showChats)
-          : []
-      return chats
-    },
-  },
-  watch: {
-    search(newVal, oldVal) {
-      this.showChats = 0
-      this.bump = Date.now()
+console.log('[[id]] created', route.params.id, id.value)
 
-      if (!newVal) {
-        // Force a refresh to remove any old chats.
-        this.listChats()
-      } else {
-        // Force a server search to pick up old chats or more subtle matches.
-        this.searchMore()
-      }
-    },
-  },
-  created() {
-    const route = useRoute()
-    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-    if (isNaN(this.id)) this.id = 0
-    if (this.id) this.selectedChatId = this.id
-    console.log('[[id]] created', route.params.id, this.id)
-  },
-  async mounted() {
-    // Do not clear chat store - all chats are got but only updated if lastdate changed
-    // this.chatStore.clear()
-    await this.listChats()
-    this.loading = false
-  },
-  methods: {
-    async listChats(age, search) {
-      const params = {
-        chattypes: ['User2Mod', 'Mod2Mod'],
-      }
-      if (age) {
-        params.age = age
-      }
-      if (search) {
-        params.search = search
-      }
+// Computed properties
+const chats = computed(() => {
+  return chatStore?.list ? chatStore.list : []
+})
 
-      await this.chatStore.listChatsMT(params, this.id)
-      this.bump++
-    },
-    scanChats(closed, chats) {
-      // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
-      if (chats && this.search && this.searching) {
-        const l = this.search.toLowerCase()
-        chats = chats.filter((chat) => {
-          if (
-            chat.name.toLowerCase().includes(l) ||
-            (chat.snippet &&
-              typeof chat.snippet === 'string' &&
-              chat.snippet.toLowerCase().includes(l))
-          ) {
-            // Found in the name of the chat (which may include a user
-            return true
-          }
+const filteredChats = computed(() => {
+  return scanChats(showClosed.value, chats.value)
+})
 
-          return false
-        })
-      }
-      if (this.id) {
-        chats = chats.filter((chat) => {
-          if (!chat.id || !this.id) return false
-          if (this.id && !closed && chat.id === this.id) {
-            return true
-          }
+const visibleChats = computed(() => {
+  const chatList =
+    bump.value && filteredChats.value
+      ? filteredChats.value.slice(0, showChats.value)
+      : []
+  return chatList
+})
 
-          if (chat.status === 'Blocked' || chat.status === 'Closed') {
-            return closed
-          }
+// Watchers
+watch(search, (newVal, oldVal) => {
+  showChats.value = 0
+  bump.value = Date.now()
 
-          return !closed
-        })
-      }
+  if (!newVal) {
+    // Force a refresh to remove any old chats.
+    listChats()
+  } else {
+    // Force a server search to pick up old chats or more subtle matches.
+    searchMore()
+  }
+})
 
-      // Sort to show unseen first then more recent first
-      chats.sort((a, b) => {
-        if (a.unseen === 0 && b.unseen > 0) {
-          return 1
-        } else if (a.unseen > 0 && b.unseen === 0) {
-          return -1
-        }
-        if (a.lastdate && b.lastdate) {
-          return dayjs(b.lastdate).diff(dayjs(a.lastdate))
-        } else if (a.lastdate) {
-          return -1
-        } else if (b.lastdate) {
-          return 1
-        } else {
-          return 0
-        }
-      })
+// Methods
+async function listChats(age, searchTerm) {
+  const params = {
+    chattypes: ['User2Mod', 'Mod2Mod'],
+  }
+  if (age) {
+    params.age = age
+  }
+  if (searchTerm) {
+    params.search = searchTerm
+  }
 
-      return chats
-    },
-    loadMore($state) {
-      // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
-      // we render onscreen the faster vue is to do so.
-      const chats = this.filteredChats
-      this.showChats++
-
-      if (this.showChats > chats.length) {
-        this.showChats = chats.length
-        $state.complete()
-        this.complete = true
-      } else {
-        $state.loaded()
-      }
-    },
-    async markAllRead() {
-      console.log('markAllRead A')
-      this.loading = true
-      for (const chat of this.filteredChats) {
-        if (chat.unseen) {
-          console.log('markAllRead B', chat.unseen, chat.lastmsg)
-          await this.chatStore.markRead(chat.id)
-        }
-      }
-      console.log('markAllRead C')
-
-      this.chatStore.clear()
-      await this.listChats()
-      this.loading = false
-    },
-    gotoChat(id) {
-      const router = useRouter()
-      router.push('/chats/' + id)
-    },
-    async searchMore() {
-      // console.log('searchMore', this.search, this.searchlast)
-      if (this.searching) {
-        // Queue until we've finished.
-        this.searchlast = this.search
-      } else {
-        this.searching = this.search
-
-        await this.listChats(null, this.search)
-
-        while (this.searchlast) {
-          // We have another search queued.
-          const val2 = this.searchlast
-          this.searching = this.searchlast
-          this.searchlast = null
-          await this.listChats(null, val2)
-        }
-
-        this.searching = null
-      }
-    },
-  },
+  await chatStore.listChatsMT(params, id.value)
+  bump.value++
 }
+
+function scanChats(closed, chatList) {
+  // We apply the search on names in here so that we can respond on the client rapidly while the background server search is more thorough.
+  let result = chatList ? [...chatList] : []
+
+  if (result.length && search.value && searching.value) {
+    const l = search.value.toLowerCase()
+    result = result.filter((chat) => {
+      if (
+        chat.name.toLowerCase().includes(l) ||
+        (chat.snippet &&
+          typeof chat.snippet === 'string' &&
+          chat.snippet.toLowerCase().includes(l))
+      ) {
+        // Found in the name of the chat (which may include a user
+        return true
+      }
+
+      return false
+    })
+  }
+
+  if (id.value) {
+    result = result.filter((chat) => {
+      if (!chat.id || !id.value) return false
+      if (id.value && !closed && chat.id === id.value) {
+        return true
+      }
+
+      if (chat.status === 'Blocked' || chat.status === 'Closed') {
+        return closed
+      }
+
+      return !closed
+    })
+  }
+
+  // Sort to show unseen first then more recent first
+  result.sort((a, b) => {
+    if (a.unseen === 0 && b.unseen > 0) {
+      return 1
+    } else if (a.unseen > 0 && b.unseen === 0) {
+      return -1
+    }
+    if (a.lastdate && b.lastdate) {
+      return dayjs(b.lastdate).diff(dayjs(a.lastdate))
+    } else if (a.lastdate) {
+      return -1
+    } else if (b.lastdate) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  return result
+}
+
+function loadMore($state) {
+  // We use an infinite scroll on the list of chats because even though we have all the data in hand, the less
+  // we render onscreen the faster vue is to do so.
+  const chatList = filteredChats.value
+  showChats.value++
+
+  if (showChats.value > chatList.length) {
+    showChats.value = chatList.length
+    $state.complete()
+    complete.value = true
+  } else {
+    $state.loaded()
+  }
+}
+
+async function markAllRead() {
+  console.log('markAllRead A')
+  loading.value = true
+  for (const chat of filteredChats.value) {
+    if (chat.unseen) {
+      console.log('markAllRead B', chat.unseen, chat.lastmsg)
+      await chatStore.markRead(chat.id)
+    }
+  }
+  console.log('markAllRead C')
+
+  chatStore.clear()
+  await listChats()
+  loading.value = false
+}
+
+function gotoChat(chatId) {
+  router.push('/chats/' + chatId)
+}
+
+async function searchMore() {
+  // console.log('searchMore', search.value, searchlast.value)
+  if (searching.value) {
+    // Queue until we've finished.
+    searchlast.value = search.value
+  } else {
+    searching.value = search.value
+
+    await listChats(null, search.value)
+
+    while (searchlast.value) {
+      // We have another search queued.
+      const val2 = searchlast.value
+      searching.value = searchlast.value
+      searchlast.value = null
+      await listChats(null, val2)
+    }
+
+    searching.value = null
+  }
+}
+
+// Lifecycle (formerly mounted)
+onMounted(async () => {
+  // Do not clear chat store - all chats are got but only updated if lastdate changed
+  // chatStore.clear()
+  await listChats()
+  loading.value = false
+})
 </script>
+
 <style scoped lang="scss">
 .chatback {
   background-color: $color-yellow--light;

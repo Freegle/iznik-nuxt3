@@ -84,7 +84,7 @@
           <v-icon icon="user" /> Impersonate (localhost:3002)
         </b-button>
         <ModMergeButton class="mr-2 mb-1" />
-        <b-button variant="white" class="mr-2 mb-1" @click="logs">
+        <b-button variant="white" class="mr-2 mb-1" @click="showLogsModal">
           <v-icon icon="book-open" /> Logs
         </b-button>
         <b-button variant="white" class="mr-2 mb-1" @click="profile">
@@ -398,36 +398,6 @@
         </b-button>
       </div>
       <p v-else>No posting history.</p>
-      <h3 class="mt-2">Chat Moderation</h3>
-      <div>
-        <p>
-          Controls how this user's chat messages are handled. 'Fully moderated'
-          means all messages go to mod review before delivery (effectively a
-          shadow ban).
-        </p>
-        <b-form-select
-          v-model="chatmodstatus"
-          class="mb-2 flex-shrink-1 font-weight-bold"
-        >
-          <b-form-select-option value="Moderated">
-            Moderated (default - spam checked)
-          </b-form-select-option>
-          <b-form-select-option value="Unmoderated">
-            Unmoderated (bypass spam checks)
-          </b-form-select-option>
-          <b-form-select-option value="Fully">
-            Fully moderated (all messages to review)
-          </b-form-select-option>
-        </b-form-select>
-        <NoticeMessage
-          v-if="user.chatmodstatus === 'Fully'"
-          variant="warning"
-          class="mb-2"
-        >
-          This user is fully moderated - all their chat messages go to mod
-          review before being delivered.
-        </NoticeMessage>
-      </div>
       <h3 class="mt-2">ChitChat</h3>
       <div>
         <p>Moderation status:</p>
@@ -524,7 +494,7 @@
     />
     <ConfirmModal
       v-if="purgeConfirm"
-      ref="purgeConfirm"
+      ref="purgeConfirmRef"
       :title="
         'Purge ' + user.displayname + ' ' + user.email + ' from the system?'
       "
@@ -534,7 +504,7 @@
     <ProfileModal
       v-if="showProfile && user && user.info"
       :id="id"
-      ref="profile"
+      ref="profileRef"
       @hidden="showProfile = false"
     />
     <ModSpammerReport
@@ -552,289 +522,296 @@
   </b-card>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import ExternalLink from '~/components/ExternalLink'
-import { useMemberStore } from '~/stores/member'
 
 const SHOW = 3
 
-export default {
-  components: {
-    ExternalLink,
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    expand: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+  expand: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  setup() {
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    return { memberStore, userStore }
+})
+
+const userStore = useUserStore()
+
+const user = ref(null)
+const expanded = ref(true)
+const purgeConfirm = ref(false)
+const showAllMemberships = ref(false)
+const showAllMembershipHistories = ref(false)
+const showAllMessageHistories = ref(false)
+const showAllEmailHistories = ref(false)
+const showSpamModal = ref(false)
+const newpassword = ref(null)
+const newemail = ref(null)
+const newEmailAs = ref(1)
+const showAddCommentModal = ref(false)
+const emailAddError = ref(null)
+const showLogs = ref(false)
+const showProfile = ref(false)
+
+const logs = ref(null)
+const profileRef = ref(null)
+const purgeConfirmRef = ref(null)
+const spamConfirm = ref(null)
+
+const preferredemail = computed(() => {
+  if (user.value.email) return user.value.email
+  if (!user.value.emails) return false
+  if (user.value.emails.length === 0) return false
+  const pref = user.value.emails.find((e) => e.preferred)
+  if (pref) return pref.email
+  return user.value.emails[0].email
+})
+
+const reportUser = computed(() => {
+  return {
+    // Due to inconsistencies about userid vs id in objects.
+    userid: user.value.id,
+    displayname: user.value.displayname,
+  }
+})
+
+const admin = computed(() => {
+  return user.value && user.value.systemrole === 'Admin'
+})
+
+const freegleMemberships = computed(() => {
+  return user.value && user.value.memberof
+    ? user.value.memberof
+        .filter((m) => m.type === 'Freegle')
+        .sort(function (a, b) {
+          return a.nameshort
+            .toLowerCase()
+            .localeCompare(b.nameshort.toLowerCase())
+        })
+    : []
+})
+
+const memberships = computed(() => {
+  return showAllMemberships.value
+    ? freegleMemberships.value
+    : freegleMemberships.value.slice(0, SHOW)
+})
+
+const membershipsUnshown = computed(() => {
+  const ret =
+    freegleMemberships.value.length > SHOW
+      ? freegleMemberships.value.length - SHOW
+      : 0
+  return ret
+})
+
+const otherEmails = computed(() => {
+  return user.value.emails.filter((e) => {
+    return e.email !== user.value.email && !e.ourdomain
+  })
+})
+
+const membershiphistories = computed(() => {
+  const times = []
+  const ret = []
+
+  if (user.value && user.value.membershiphistory) {
+    user.value.membershiphistory.forEach((h) => {
+      if (!times.includes(h.timestamp)) {
+        times.push(h.timestamp)
+        ret.push(h)
+      }
+    })
+  }
+
+  return ret
+})
+
+const membershipHistoriesShown = computed(() => {
+  return showAllMembershipHistories.value
+    ? membershiphistories.value
+    : membershiphistories.value.slice(0, SHOW)
+})
+
+const membershipHistoriesUnshown = computed(() => {
+  const ret =
+    membershiphistories.value.length > SHOW
+      ? membershiphistories.value.length - SHOW
+      : 0
+  return ret
+})
+
+const messageHistoriesShown = computed(() => {
+  return showAllMessageHistories.value
+    ? user.value.messagehistory
+    : user.value.messagehistory.slice(0, SHOW)
+})
+
+const messageHistoriesUnshown = computed(() => {
+  const ret =
+    user.value.messagehistory.length > SHOW
+      ? user.value.messagehistory.length - SHOW
+      : 0
+  return ret
+})
+
+const sortedHistories = computed(() => {
+  const ret =
+    user.value.emailhistory && user.value.emailhistory.length
+      ? user.value.emailhistory
+      : []
+
+  ret.sort(function (a, b) {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  })
+
+  return ret
+})
+
+const emailHistoriesShown = computed(() => {
+  return showAllEmailHistories.value
+    ? sortedHistories.value
+    : sortedHistories.value.slice(0, SHOW)
+})
+
+const emailHistoriesUnshown = computed(() => {
+  const ret =
+    user.value.emailhistory.length > SHOW
+      ? user.value.emailhistory.length - SHOW
+      : 0
+  return ret
+})
+
+const chatsFiltered = computed(() => {
+  return user.value.chatrooms
+    ? user.value.chatrooms
+        .filter((c) => c.chattype !== 'Mod2Mod')
+        .sort((a, b) => {
+          return new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
+        })
+    : []
+})
+
+const newsfeedmodstatus = computed({
+  get() {
+    return user.value.newsfeedmodstatus
   },
-  data: function () {
-    return {
-      user: null,
-      expanded: true,
-      purgeConfirm: false,
-      showAllMemberships: false,
-      showAllMembershipHistories: false,
-      showAllMessages: false,
-      showAllMessageHistories: false,
-      showAllEmailHistories: false,
-      showSpamModal: false,
-      newpassword: null,
-      newemail: null,
-      newEmailAs: 1,
-      showAddCommentModal: false,
-      emailAddError: null,
-      showLogs: false,
-      showProfile: false,
+  async set(newVal) {
+    await userStore.edit({
+      id: user.value.id,
+      newsfeedmodstatus: newVal,
+    })
+  },
+})
+
+onMounted(async () => {
+  expanded.value = props.expand
+  user.value = userStore.byId(props.id)
+  if (user.value) {
+    await fetchUser()
+  }
+})
+
+async function fetchUser() {
+  if (props.id) {
+    await userStore.fetchMT({
+      search: props.id,
+      emailhistory: true,
+      info: true,
+    })
+    user.value = userStore.byId(props.id)
+    if (user.value && user.value.spammer && user.value.spammer.byuserid) {
+      await userStore.fetchMT({ search: user.value.spammer.byuserid })
+      user.value.spammer.byuser = await userStore.fetch(
+        user.value.spammer.byuserid
+      )
     }
-  },
-  computed: {
-    preferredemail() {
-      if (this.user.email) return this.user.email
-      if (!this.user.emails) return false
-      if (this.user.emails.length === 0) return false
-      const pref = this.user.emails.find((e) => e.preferred)
-      if (pref) return pref.email
-      return this.user.emails[0].email
-    },
-    reportUser() {
-      return {
-        // Due to inconsistencies about userid vs id in objects.
-        userid: this.user.id,
-        displayname: this.user.displayname,
-      }
-    },
-    freegleMemberships() {
-      return this.user && this.user.memberof
-        ? this.user.memberof
-            .filter((m) => m.type === 'Freegle')
-            .sort(function (a, b) {
-              return a.nameshort
-                .toLowerCase()
-                .localeCompare(b.nameshort.toLowerCase())
-            })
-        : []
-    },
-    memberships() {
-      return this.showAllMemberships
-        ? this.freegleMemberships
-        : this.freegleMemberships.slice(0, SHOW)
-    },
-    membershipsUnshown() {
-      const ret =
-        this.freegleMemberships.length > SHOW
-          ? this.freegleMemberships.length - SHOW
-          : 0
-      return ret
-    },
-    otherEmails() {
-      return this.user.emails.filter((e) => {
-        return e.email !== this.user.email && !e.ourdomain
+  }
+}
+
+function showLogsModal() {
+  showLogs.value = true
+  logs.value?.show()
+}
+
+async function profile() {
+  console.log('MSU profile', props.id)
+  await userStore.fetchMT({
+    // TODO Might need to be search: props.id
+    id: props.id,
+    info: true,
+  })
+  showProfile.value = true
+  profileRef.value?.show()
+}
+
+function purgeConfirmed() {
+  userStore.purge(props.id)
+}
+
+function purge() {
+  purgeConfirm.value = true
+  purgeConfirmRef.value?.show()
+}
+
+function spamReport() {
+  showSpamModal.value = true
+  spamConfirm.value?.show()
+}
+
+async function setPassword(callback) {
+  if (newpassword.value) {
+    await userStore.edit({
+      id: user.value.id,
+      password: newpassword.value,
+    })
+  }
+  callback()
+}
+
+async function addEmail(callback) {
+  emailAddError.value = null
+
+  if (newemail.value) {
+    try {
+      await userStore.addEmail({
+        id: user.value.id,
+        email: newemail.value,
+        primary: parseInt(newEmailAs.value) === 1,
       })
-    },
-    membershiphistories() {
-      const times = []
-      const ret = []
-
-      if (this.user && this.user.membershiphistory) {
-        this.user.membershiphistory.forEach((h) => {
-          if (!times.includes(h.timestamp)) {
-            times.push(h.timestamp)
-            ret.push(h)
-          }
-        })
-      }
-
-      return ret
-    },
-    membershipHistoriesShown() {
-      return this.showAllMembershipHistories
-        ? this.membershiphistories
-        : this.membershiphistories.slice(0, SHOW)
-    },
-    membershipHistoriesUnshown() {
-      const ret =
-        this.membershiphistories.length > SHOW
-          ? this.membershiphistories.length - SHOW
-          : 0
-      return ret
-    },
-    messageHistoriesShown() {
-      return this.showAllMessageHistories
-        ? this.user.messagehistory
-        : this.user.messagehistory.slice(0, SHOW)
-    },
-    messageHistoriesUnshown() {
-      const ret =
-        this.user.messagehistory.length > SHOW
-          ? this.user.messagehistory.length - SHOW
-          : 0
-      return ret
-    },
-    sortedHistories() {
-      const ret =
-        this.user.emailhistory && this.user.emailhistory.length
-          ? this.user.emailhistory
-          : []
-
-      ret.sort(function (a, b) {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      })
-
-      return ret
-    },
-    emailHistoriesShown() {
-      return this.showAllEmailHistories
-        ? this.sortedHistories
-        : this.sortedHistories.slice(0, SHOW)
-    },
-    emailHistoriesUnshown() {
-      const ret =
-        this.user.emailhistory.length > SHOW
-          ? this.user.emailhistory.length - SHOW
-          : 0
-      return ret
-    },
-    chatsFiltered() {
-      return this.user.chatrooms
-        ? this.user.chatrooms
-            .filter((c) => c.chattype !== 'Mod2Mod')
-            .sort((a, b) => {
-              return (
-                new Date(b.lastdate).getTime() - new Date(a.lastdate).getTime()
-              )
-            })
-        : []
-    },
-    newsfeedmodstatus: {
-      get() {
-        return this.user.newsfeedmodstatus
-      },
-      async set(newVal) {
-        await this.userStore.edit({
-          id: this.user.id,
-          newsfeedmodstatus: newVal,
-        })
-      },
-    },
-    chatmodstatus: {
-      get() {
-        return this.user.chatmodstatus
-      },
-      async set(newVal) {
-        await this.userStore.edit({
-          id: this.user.id,
-          chatmodstatus: newVal,
-        })
-        await this.fetchUser()
-      },
-    },
-  },
-  async mounted() {
-    this.expanded = this.expand
-    this.user = this.userStore.byId(this.id)
-    if (this.user) {
-      await this.fetchUser()
+    } catch (e) {
+      emailAddError.value = e.message
     }
-  },
-  methods: {
-    async fetchUser() {
-      if (this.id) {
-        await this.userStore.fetchMT({
-          search: this.id,
-          emailhistory: true,
-          info: true,
-        })
-        this.user = this.userStore.byId(this.id)
-        if (this.user && this.user.spammer && this.user.spammer.byuserid) {
-          await this.userStore.fetchMT({ search: this.user.spammer.byuserid })
-          this.user.spammer.byuser = await this.userStore.fetch(
-            this.user.spammer.byuserid
-          )
-        }
-      }
-    },
-    logs() {
-      this.showLogs = true
-      this.$refs.logs?.show()
-    },
-    async profile() {
-      console.log('MSU profile', this.id)
-      await this.userStore.fetchMT({
-        // TODO Might need to be search: this.id
-        id: this.id,
-        info: true,
-      })
-      this.showProfile = true
-      this.$refs.profile?.show()
-    },
-    purgeConfirmed() {
-      this.userStore.purge(this.id)
-    },
-    purge() {
-      this.purgeConfirm = true
-      this.$refs.purgeConfirm?.show()
-    },
-    spamReport() {
-      this.showSpamModal = true
-      this.$refs.spamConfirm?.show()
-    },
-    async setPassword(callback) {
-      if (this.newpassword) {
-        await this.userStore.edit({
-          id: this.user.id,
-          password: this.newpassword,
-        })
-      }
-      callback()
-    },
-    async addEmail(callback) {
-      this.emailAddError = null
+  }
+  callback()
+}
 
-      if (this.newemail) {
-        try {
-          await this.userStore.addEmail({
-            id: this.user.id,
-            email: this.newemail,
-            primary: parseInt(this.newEmailAs) === 1,
-          })
-        } catch (e) {
-          this.emailAddError = e.message
-        }
-      }
-      callback()
-    },
-    maybeExpand() {
-      // Ignore text selection
-      if (!window.getSelection().toString()) {
-        this.expanded = !this.expanded
-      }
-    },
-    addAComment() {
-      this.showAddCommentModal = true
-    },
-    async updateComments() {
-      const userid = this.user.userid ? this.user.userid : this.user.id
-      console.log('updateComments', userid)
+function maybeExpand() {
+  // Ignore text selection
+  if (!window.getSelection().toString()) {
+    expanded.value = !expanded.value
+  }
+}
 
-      await this.userStore.fetchMT({
-        id: userid,
-        emailhistory: true,
-      })
-      await this.fetchUser()
-    },
-  },
+function addAComment() {
+  showAddCommentModal.value = true
+}
+
+async function updateComments() {
+  const userid = user.value.userid ? user.value.userid : user.value.id
+  console.log('updateComments', userid)
+
+  await userStore.fetchMT({
+    id: userid,
+    emailhistory: true,
+  })
+  await fetchUser()
 }
 </script>
 <style scoped>

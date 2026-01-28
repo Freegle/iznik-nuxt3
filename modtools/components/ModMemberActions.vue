@@ -17,18 +17,18 @@
     </b-button>
     <ConfirmModal
       v-if="removeConfirm && groupname"
-      ref="removeConfirm"
+      ref="removeConfirmRef"
       :title="'Remove ' + displayname + ' from ' + groupname + '?'"
       @confirm="removeConfirmed"
     />
     <ConfirmModal
       v-if="removeConfirm && !groupname"
-      ref="removeConfirm"
+      ref="removeConfirmRef"
       title="Please select a group first."
     />
     <ModBanMemberConfirmModal
       v-if="banConfirm"
-      ref="banConfirm"
+      ref="banConfirmRef"
       :userid="userid"
       :groupid="groupid"
       @confirm="banConfirmed"
@@ -43,153 +43,160 @@
     />
     <ModSpammerReport
       v-if="showSpamModal"
-      ref="spamConfirm"
+      ref="spamConfirmRef"
       :user="reportUser"
       :safelist="safelist"
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    userid: {
-      type: Number,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    banned: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    spam: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  userid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const groupStore = useGroupStore()
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { me, supportOrAdmin } = useMe()
-    return { groupStore, memberStore, userStore, me, supportOrAdmin }
+  groupid: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      removeConfirm: false,
-      banConfirm: false,
-      showAddCommentModal: false,
-      user: null,
-      showSpamModal: false,
-      safelist: false,
-    }
+  banned: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  computed: {
-    displayname() {
-      return this.user ? this.user.displayname : null
-    },
-    group() {
-      return this.groupStore.get(this.groupid)
-    },
-    groupname() {
-      return this.group ? this.group.nameshort : null
-    },
-    reportUser() {
-      return {
-        // Due to inconsistencies about userid vs id in objects.
-        userid: this.user?.id,
-        id: this.user?.id,
-        displayname: this.user?.displayname,
-      }
-    },
+  spam: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  methods: {
-    async fetchUser() {
-      await this.userStore.fetch(this.userid, true)
+})
 
-      this.user = this.userStore.byId(this.userid)
-    },
-    async remove() {
-      if (!this.user) {
-        await this.fetchUser()
-      }
+const emit = defineEmits(['commentadded'])
 
-      this.removeConfirm = true
-      this.$refs.removeConfirm?.show()
-    },
-    removeConfirmed() {
-      this.memberStore.remove(this.userid, this.groupid)
-    },
-    async ban() {
-      if (!this.user) {
-        await this.fetchUser()
-      }
+const { $api } = useNuxtApp()
+const groupStore = useGroupStore()
+const memberStore = useMemberStore()
+const userStore = useUserStore()
+const { me, supportOrAdmin } = useMe()
 
-      if (!this.group) {
-        await this.groupStore.fetch(this.groupid)
-      }
+const removeConfirmRef = ref(null)
+const banConfirmRef = ref(null)
+const spamConfirmRef = ref(null)
 
-      this.banConfirm = true
-      this.$refs.banConfirm?.show()
-    },
-    async banConfirmed(reason) {
-      this.memberStore.ban(this.userid, this.groupid)
-      await this.$api.comment.add({
-        userid: this.userid,
-        groupid: this.groupid,
-        user1:
-          'Banned on ' +
-          this.group.nameshort +
-          ' by ' +
-          this.me.displayname +
-          ' reason: ' +
-          reason,
-        flag: true,
-      })
-    },
-    async addAComment() {
-      if (!this.user) {
-        await this.fetchUser()
-      }
+const removeConfirm = ref(false)
+const banConfirm = ref(false)
+const showAddCommentModal = ref(false)
+const user = ref(null)
+const showSpamModal = ref(false)
+const safelist = ref(false)
 
-      this.showAddCommentModal = true
-    },
-    async commentadded() {
-      await this.userStore.fetchMT({
-        id: this.userid,
-        emailhistory: true,
-      })
+const displayname = computed(() => {
+  return user.value ? user.value.displayname : null
+})
 
-      this.$emit('commentadded')
-    },
-    async spamReport() {
-      if (!this.user) {
-        await this.fetchUser()
-      }
+const group = computed(() => groupStore.get(props.groupid))
 
-      this.safelist = false
-      this.showSpamModal = true
-      this.$refs.spamConfirm?.show()
-    },
-    async spamSafelist() {
-      if (!this.user) {
-        await this.fetchUser()
-      }
+const groupname = computed(() => {
+  return group.value ? group.value.nameshort : null
+})
 
-      this.safelist = true
-      this.showSpamModal = true
-      this.$refs.spamConfirm?.show()
-    },
-  },
+const reportUser = computed(() => {
+  return {
+    // Due to inconsistencies about userid vs id in objects.
+    userid: user.value?.id,
+    id: user.value?.id,
+    displayname: user.value?.displayname,
+  }
+})
+
+async function fetchUser() {
+  await userStore.fetch(props.userid, true)
+  user.value = userStore.byId(props.userid)
+}
+
+async function remove() {
+  if (!user.value) {
+    await fetchUser()
+  }
+
+  removeConfirm.value = true
+  removeConfirmRef.value?.show()
+}
+
+function removeConfirmed() {
+  memberStore.remove(props.userid, props.groupid)
+}
+
+async function ban() {
+  if (!user.value) {
+    await fetchUser()
+  }
+
+  if (!group.value) {
+    await groupStore.fetch(props.groupid)
+  }
+
+  banConfirm.value = true
+  banConfirmRef.value?.show()
+}
+
+async function banConfirmed(reason) {
+  memberStore.ban(props.userid, props.groupid)
+  await $api.comment.add({
+    userid: props.userid,
+    groupid: props.groupid,
+    user1:
+      'Banned on ' +
+      group.value.nameshort +
+      ' by ' +
+      me.value.displayname +
+      ' reason: ' +
+      reason,
+    flag: true,
+  })
+}
+
+async function addAComment() {
+  if (!user.value) {
+    await fetchUser()
+  }
+
+  showAddCommentModal.value = true
+}
+
+async function commentadded() {
+  await userStore.fetchMT({
+    id: props.userid,
+    emailhistory: true,
+  })
+
+  emit('commentadded')
+}
+
+async function spamReport() {
+  if (!user.value) {
+    await fetchUser()
+  }
+
+  safelist.value = false
+  showSpamModal.value = true
+  spamConfirmRef.value?.show()
+}
+
+async function spamSafelist() {
+  if (!user.value) {
+    await fetchUser()
+  }
+
+  safelist.value = true
+  showSpamModal.value = true
+  spamConfirmRef.value?.show()
 }
 </script>

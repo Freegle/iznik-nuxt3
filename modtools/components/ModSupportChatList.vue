@@ -13,39 +13,34 @@
     </infinite-loading>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    chats: {
-      type: Array,
-      required: true,
-    },
-    pov: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  chats: {
+    type: Array,
+    required: true,
   },
-  data: function () {
-    return {
-      showChats: 0,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  computed: {
-    chatsShown() {
-      return this.chats ? this.chats.slice(0, this.showChats) : []
-    },
-  },
-  methods: {
-    loadMoreChats($state) {
-      // We use an infinite load for the list because it's a lot of DOM to add at initial page load.
-      if (this.showChats < this.chats.length) {
-        this.showChats += 10
-        $state.loaded()
-      } else {
-        $state.complete()
-      }
-    },
-  },
+})
+
+const showChats = ref(0)
+
+const chatsShown = computed(() => {
+  return props.chats ? props.chats.slice(0, showChats.value) : []
+})
+
+function loadMoreChats($state) {
+  // We use an infinite load for the list because it's a lot of DOM to add at initial page load.
+  if (showChats.value < props.chats.length) {
+    showChats.value += 10
+    $state.loaded()
+  } else {
+    $state.complete()
+  }
 }
 </script>

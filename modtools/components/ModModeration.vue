@@ -16,81 +16,79 @@
     </b-form-select>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  props: {
-    membership: {
-      type: Object,
-      required: true,
-    },
-    user: {
-      type: Object,
-      required: true,
-    },
-    userid: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    size: {
-      type: String,
-      required: false,
-      default: 'lg',
-    },
+const props = defineProps({
+  membership: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const userStore = useUserStore()
-    return { userStore }
+  user: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    postingStatus: {
-      get() {
-        return this.membership.ourpostingstatus || 'MODERATED'
-      },
-      async set(val) {
-        const groupid = this.membership.groupid ?? this.membership.id
-        const userid = this.userid ? this.userid : this.user.id
-        await this.userStore.edit({
-          id: userid,
-          groupid,
-          ourPostingStatus: val,
-        })
-      },
-    },
-    trustlevel: {
-      get() {
-        return this.user.trustlevel ? this.user.trustlevel : null
-      },
-      async set(val) {
-        const groupid = this.membership.groupid ?? this.membership.id
-        const userid = this.userid ? this.userid : this.user.id
-        await this.userStore.edit({
-          id: userid,
-          groupid,
-          trustlevel: val,
-        })
-      },
-    },
-    options() {
-      return [
-        {
-          value: 'MODERATED',
-          text: 'Moderated',
-        },
-        {
-          value: 'DEFAULT',
-          text: 'Group Settings',
-        },
-        {
-          value: 'PROHIBITED',
-          text: "Can't Post",
-        },
-      ]
-    },
+  userid: {
+    type: Number,
+    required: false,
+    default: 0,
   },
-}
+  size: {
+    type: String,
+    required: false,
+    default: 'lg',
+  },
+})
+
+const userStore = useUserStore()
+
+const postingStatus = computed({
+  get() {
+    return props.membership.ourpostingstatus || 'MODERATED'
+  },
+  async set(val) {
+    const groupid = props.membership.groupid ?? props.membership.id
+    const userid = props.userid ? props.userid : props.user.id
+    await userStore.edit({
+      id: userid,
+      groupid,
+      ourPostingStatus: val,
+    })
+  },
+})
+
+const trustlevel = computed({
+  get() {
+    return props.user.trustlevel ? props.user.trustlevel : null
+  },
+  async set(val) {
+    const groupid = props.membership.groupid ?? props.membership.id
+    const userid = props.userid ? props.userid : props.user.id
+    await userStore.edit({
+      id: userid,
+      groupid,
+      trustlevel: val,
+    })
+  },
+})
+
+const options = computed(() => {
+  return [
+    {
+      value: 'MODERATED',
+      text: 'Moderated',
+    },
+    {
+      value: 'DEFAULT',
+      text: 'Group Settings',
+    },
+    {
+      value: 'PROHIBITED',
+      text: "Can't Post",
+    },
+  ]
+})
 </script>
 <style scoped>
 .sel {

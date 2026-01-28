@@ -138,7 +138,8 @@
     </template>
   </b-modal>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 import dayjs from 'dayjs'
 import { setupKeywords } from '~/composables/useKeywords'
 import { useUserStore } from '~/stores/user'
@@ -150,645 +151,618 @@ import { SUBJECT_REGEX } from '~/constants'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  components: {},
-  props: {
-    message: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    member: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    stdmsg: {
-      type: Object,
-      required: true,
-    },
-    autosend: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  message: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  setup() {
-    const { modal, show, hide } = useOurModal()
-    const modGroupStore = useModGroupStore()
-    const messageStore = useMessageStore()
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const { typeOptions } = setupKeywords()
-    const { me } = useMe()
-    const { checkWorkDeferGetMessages } = useModMe()
-    return {
-      modGroupStore,
-      memberStore,
-      messageStore,
-      userStore,
-      typeOptions,
-      modal,
-      hide,
-      show,
-      me,
-      checkWorkDeferGetMessages,
-    }
+  member: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      subject: null,
-      body: null,
-      bodyInitialLength: 0,
-      replyTooShort: false,
-      keywordList: ['Offer', 'Taken', 'Wanted', 'Received', 'Other'],
-      recentDays: 31,
-      changingNewModStatus: false,
-      changedNewModStatus: false,
-      changingNewDelStatus: false,
-      changedNewDelStatus: false,
-      changingHold: false,
-      changedHold: false,
-      margTop: 0,
-      margLeft: 0,
-    }
+  stdmsg: {
+    type: Object,
+    required: true,
   },
-  computed: {
-    groupid() {
-      let ret = null
+  autosend: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      if (this.member) {
-        ret = this.member.groupid
-      } else if (
-        this.message &&
-        this.message.groups &&
-        this.message.groups.length
+const { modal, show, hide } = useOurModal()
+const modGroupStore = useModGroupStore()
+const messageStore = useMessageStore()
+const memberStore = useMemberStore()
+const userStore = useUserStore()
+const { typeOptions } = setupKeywords()
+const { me } = useMe()
+const { checkWorkDeferGetMessages } = useModMe()
+
+const subject = ref(null)
+const body = ref(null)
+const bodyInitialLength = ref(0)
+const replyTooShort = ref(false)
+const keywordList = ['Offer', 'Taken', 'Wanted', 'Received', 'Other']
+const recentDays = 31
+const changingNewModStatus = ref(false)
+const changedNewModStatus = ref(false)
+const changingNewDelStatus = ref(false)
+const changedNewDelStatus = ref(false)
+const changingHold = ref(false)
+const changedHold = ref(false)
+const margTop = ref(0)
+const margLeft = ref(0)
+
+const groupid = computed(() => {
+  let ret = null
+
+  if (props.member) {
+    ret = props.member.groupid
+  } else if (
+    props.message &&
+    props.message.groups &&
+    props.message.groups.length
+  ) {
+    ret = props.message.groups[0].groupid
+  }
+  return ret
+})
+
+const user = computed(() => {
+  return props.message ? props.message.fromuser : props.member
+})
+
+const userid = computed(() => {
+  // Because of server inconsistencies we need to be a bit careful about how we get the user id.
+  let ret = null
+
+  if (user.value) {
+    ret = user.value.userid ? user.value.userid : user.value.id
+  }
+
+  return ret
+})
+
+const fromName = computed(() => {
+  return me.value.displayname
+})
+
+const toEmail = computed(() => {
+  let ret = null
+  if (props.member) {
+    ret = props.member.email
+  } else if (props.message.fromuser && props.message.fromuser.emails) {
+    props.message.fromuser.emails.forEach((email) => {
+      if (
+        email.email &&
+        !email.email.includes('users.ilovefreegle.org') &&
+        (ret === null || email.preferred)
       ) {
-        ret = this.message.groups[0].groupid
+        ret = email.email
       }
-      return ret
-    },
-    user() {
-      return this.message ? this.message.fromuser : this.member
-    },
-    userid() {
-      // Because of server inconsistencies we need to be a bit careful about how we get the user id.
-      let ret = null
+    })
+  }
 
-      if (this.user) {
-        ret = this.user.userid ? this.user.userid : this.user.id
+  return ret
+})
+
+const processLabel = computed(() => {
+  switch (props.stdmsg.action) {
+    case 'Approve':
+    case 'Approve Member':
+      return 'Send and Approve'
+    case 'Reject':
+    case 'Reject Member':
+      return 'Send and Reject'
+    case 'Leave':
+    case 'Leave Member':
+    case 'Leave Approved Message':
+    case 'Leave Approved Member':
+      return 'Send and Leave'
+    case 'Delete':
+    case 'Delete Approved Message':
+    case 'Delete Approved Member':
+      return 'Send and Delete'
+    case 'Edit':
+      return 'Save Edit'
+    case 'Hold Message':
+      return 'Send and Hold'
+    default:
+      return 'Send'
+  }
+})
+
+const modstatus = computed(() => {
+  switch (props.stdmsg.newmodstatus) {
+    case 'UNCHANGED':
+      return 'Unchanged'
+    case 'MODERATED':
+      return 'Moderated'
+    case 'DEFAULT':
+      return 'Group Settings'
+    case 'PROHIBITED':
+      return "Can't Post"
+    default:
+      return null
+  }
+})
+
+const emailfrequency = computed(() => {
+  switch (props.stdmsg.newdelstatus) {
+    case 'DIGEST':
+      return 24
+    case 'NONE':
+      return 0
+    case 'SINGLE':
+      return -1
+    case 'ANNOUNCEMENT':
+      return 0
+    default:
+      return 0
+  }
+})
+
+const warning = computed(() => {
+  let ret = null
+
+  if (body.value) {
+    const checks = {
+      yahoo:
+        'Yahoo Groups is no longer supported, so any mention of it is probably out of date.',
+      republisher:
+        'Republisher is old and any mention of it is probably not valid any more.',
+      messagemaker:
+        'The Message Maker is no longer a separate tool; please just refer people to www.ilovefreegle.org.',
+      cafe: 'The ChitChat area of the site is the place for cafe-type requests now.',
+      newsfeed: 'Newsfeed is now called ChitChat.',
+      freegledirect:
+        'Freegle Direct is no longer an active term; we just talk about "our website" or "www.ilovefreegle.org" now.',
+      'www.freegle.in':
+        "www.freegle.in should just be freegle.in - it won't work with the www.",
+      'http://': "It's better to use https:// links rather than http:// links.",
+    }
+
+    // Remove groups.ilovefreegle.org, which is the volunteers address.
+    let trimmed = body.value.replace(/\s/g, '').toLowerCase()
+
+    // Remove any Yahoo email addresses, which would trigger a false match.
+    trimmed = trimmed.replace('@yahoo', '')
+
+    for (const keyword in checks) {
+      if (trimmed.includes(keyword)) {
+        ret = checks[keyword]
+      }
+    }
+  }
+
+  return ret
+})
+
+watch(body, () => {
+  replyTooShort.value = false
+})
+
+async function fillin() {
+  // Calculate initial subject.  Everything apart from Edits adds a Re:.
+  const defpref = props.stdmsg.action === 'Edit' ? '' : 'Re:'
+
+  if (props.member) {
+    subject.value =
+      (props.stdmsg.subjpref ? props.stdmsg.subjpref : defpref) +
+      (props.stdmsg.subjsuff ? props.stdmsg.subjsuff : '')
+  } else {
+    subject.value =
+      (props.stdmsg.subjpref ? props.stdmsg.subjpref : defpref) +
+      (props.stdmsg.action === 'Edit' ? '' : ': ') +
+      props.message.subject +
+      (props.stdmsg.subjsuff ? props.stdmsg.subjsuff : '')
+  }
+
+  subject.value = await substitutionStrings(subject.value)
+
+  // Calculate initial body
+  let msg = props.message ? props.message.textbody : ''
+  msg = msg || ''
+
+  if (msg || props.member) {
+    if (msg) {
+      // We have an existing body to include.  Quote it, unless it's an edit.
+      const edit = props.stdmsg && props.stdmsg.action === 'Edit'
+      if (!edit && msg) {
+        msg = '> ' + (msg + '').replace(/((\r\n)|\r|\n)/gm, '\n> ')
       }
 
-      return ret
-    },
-    fromName() {
-      return this.me.displayname
-    },
-    toEmail() {
-      let ret = null
-      if (this.member) {
-        ret = this.member.email
-      } else if (this.message.fromuser && this.message.fromuser.emails) {
-        this.message.fromuser.emails.forEach((email) => {
-          if (
-            email.email &&
-            !email.email.includes('users.ilovefreegle.org') &&
-            (ret === null || email.preferred)
-          ) {
-            ret = email.email
+      bodyInitialLength.value = msg.length
+    }
+
+    if (props.stdmsg) {
+      if (props.stdmsg.body) {
+        // Text to insert.
+        if (props.stdmsg.insert === 'Top') {
+          msg = props.stdmsg.body.trim() + '\n\n' + msg
+        } else {
+          msg = msg + '\n\n' + props.stdmsg.body.trim()
+        }
+      } else if (props.stdmsg.action !== 'Edit' && msg) {
+        // No text to insert - add a couple of blank lines at the top for typing.
+        msg = '\n\n' + msg
+      }
+
+      if (props.stdmsg.edittext === 'Correct Case') {
+        // First the subject
+        const matches = SUBJECT_REGEX.exec(subject.value)
+        if (
+          matches &&
+          matches.length > 0 &&
+          matches[0].length > 0 &&
+          props.message.item
+        ) {
+          subject.value =
+            matches[1] +
+            ': ' +
+            matches[2].toLowerCase().trim() +
+            ' (' +
+            matches[3] +
+            ')'
+
+          // eslint-disable-next-line vue/no-mutating-props
+          props.message.item.name = matches[2].toLowerCase().trim()
+        } else {
+          subject.value = subject.value.toLowerCase().trim()
+        }
+
+        // Now the textbody.
+        msg = msg.toLowerCase()
+
+        // Contentious choice of single space
+        msg = msg.replace(/\.( |(&nbsp;))+/g, '. ')
+        msg = msg.replace(/\.\n/g, '.[-<br>-]. ')
+        msg = msg.replace(/\.\s\n/g, '. [-<br>-]. ')
+        const wordSplit = '. '
+        const wordArray = msg.split(wordSplit)
+        const numWords = wordArray.length
+
+        for (let x = 0; x < numWords; x++) {
+          if (wordArray[x]) {
+            wordArray[x] = wordArray[x].replace(
+              wordArray[x].charAt(0),
+              wordArray[x].charAt(0).toUpperCase()
+            )
+
+            if (x === 0) {
+              msg = wordArray[x] + '. '
+            } else if (x !== numWords - 1) {
+              msg = msg + wordArray[x] + '. '
+            } else if (x === numWords - 1) {
+              msg = msg + wordArray[x]
+            }
+          }
+        }
+
+        msg = msg.replace(/\[-<br>-\]\.\s/g, '\n')
+        msg = msg.replace(/\si\s/g, ' I ')
+        msg = msg.replace(/(<p>.)/i, (a, b) => {
+          return b.toUpperCase()
+        })
+      }
+    }
+  } else if (props.stdmsg) {
+    // No existing body
+    msg = '\n\n' + (props.stdmsg.body ? props.stdmsg.body : '')
+  }
+
+  body.value = (await substitutionStrings(msg)).trim()
+
+  if (props.autosend && !warning.value) {
+    // Start doing stuff.
+    process()
+  }
+}
+
+async function substitutionStrings(text) {
+  await modGroupStore.fetchIfNeedBeMT(groupid.value)
+  const group = modGroupStore.get(groupid.value)
+  if (!group) return text
+
+  if (group && text) {
+    text = text.replace(/\$networkname/g, 'Freegle')
+    // eslint-disable-next-line prefer-regex-literals
+    const re = new RegExp('Freegle', 'ig')
+    text = text.replace(/\$groupnonetwork/g, group.namedisplay.replace(re, ''))
+
+    text = text.replace(/\$groupname/g, group.namedisplay)
+    text = text.replace(/\$owneremail/g, group.modsemail)
+    text = text.replace(/\$volunteersemail/g, group.modsemail)
+    text = text.replace(/\$volunteeremail/g, group.modsemail)
+    text = text.replace(/\$groupemail/g, group.groupemail)
+    text = text.replace(/\$groupurl/g, group.url)
+    text = text.replace(/\$myname/g, me.value.displayname)
+    text = text.replace(/\$nummembers/g, group.membercount)
+    text = text.replace(/\$nummods/g, group.modcount)
+    if (group.settings && group.settings.reposts)
+      text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
+    if (group.settings && group.settings.reposts)
+      text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
+
+    text = text.replace(
+      /\$origsubj/g,
+      props.message ? props.message.subject : ''
+    )
+
+    if (user.value.messagehistory) {
+      const history = user.value.messagehistory
+      let recentmsg = ''
+      let count = 0
+      if (history.length) {
+        history.forEach((msg) => {
+          if (msg.daysago < recentDays) {
+            recentmsg +=
+              dayjs(msg.postdate).format('lll') + ' - ' + msg.subject + '\n'
+            count++
           }
         })
       }
+      text = text.replace(/\$recentmsg/gim, recentmsg)
+      text = text.replace(/\$numrecentmsg/gim, count)
 
-      return ret
-    },
-    processLabel() {
-      switch (this.stdmsg.action) {
-        case 'Approve':
-        case 'Approve Member':
-          return 'Send and Approve'
-        case 'Reject':
-        case 'Reject Member':
-          return 'Send and Reject'
-        case 'Leave':
-        case 'Leave Member':
-        case 'Leave Approved Message':
-        case 'Leave Approved Member':
-          return 'Send and Leave'
-        case 'Delete':
-        case 'Delete Approved Message':
-        case 'Delete Approved Member':
-          return 'Send and Delete'
-        case 'Edit':
-          return 'Save Edit'
-        case 'Hold Message':
-          return 'Send and Hold'
-        default:
-          return 'Send'
-      }
-    },
-    modstatus() {
-      switch (this.stdmsg.newmodstatus) {
-        case 'UNCHANGED':
-          return 'Unchanged'
-        case 'MODERATED':
-          return 'Moderated'
-        case 'DEFAULT':
-          return 'Group Settings'
-        case 'PROHIBITED':
-          return "Can't Post"
-        default:
-          return null
-      }
-    },
-    emailfrequency() {
-      switch (this.stdmsg.newdelstatus) {
-        case 'DIGEST':
-          return 24
-        case 'NONE':
-          return 0
-        case 'SINGLE':
-          return -1
-        case 'ANNOUNCEMENT':
-          return 0
-        default:
-          return 0
-      }
-    },
-    delstatus() {
-      switch (this.emailfrequency) {
-        case 24:
-          return 'Every Day'
-        case 0:
-          return 'Never'
-        case -1:
-          return 'Immediately'
-        default:
-          return 'Unknown'
-      }
-    },
-    warning() {
-      let ret = null
+      keywordList.forEach((keyword) => {
+        let recentmsg = ''
+        let count = 0
 
-      if (this.body) {
-        const checks = {
-          yahoo:
-            'Yahoo Groups is no longer supported, so any mention of it is probably out of date.',
-          republisher:
-            'Republisher is old and any mention of it is probably not valid any more.',
-          messagemaker:
-            'The Message Maker is no longer a separate tool; please just refer people to www.ilovefreegle.org.',
-          cafe: 'The ChitChat area of the site is the place for cafe-type requests now.',
-          newsfeed: 'Newsfeed is now called ChitChat.',
-          freegledirect:
-            'Freegle Direct is no longer an active term; we just talk about "our website" or "www.ilovefreegle.org" now.',
-          'www.freegle.in':
-            "www.freegle.in should just be freegle.in - it won't work with the www.",
-          'http://':
-            "It's better to use https:// links rather than http:// links.",
-        }
+        if (history.length) {
+          history.forEach((msg) => {
+            const postdate = dayjs(msg.postdate)
+            const daysago = dayjs().diff(postdate, 'day')
 
-        // Remove groups.ilovefreegle.org, which is the volunteers address.
-        let trimmed = this.body.replace(/\s/g, '').toLowerCase()
-
-        // Remove any Yahoo email addresses, which would trigger a false match.
-        trimmed = trimmed.replace('@yahoo', '')
-
-        for (const keyword in checks) {
-          if (trimmed.includes(keyword)) {
-            ret = checks[keyword]
-          }
-        }
-      }
-
-      return ret
-    },
-  },
-  watch: {
-    body() {
-      this.replyTooShort = false
-    },
-  },
-  methods: {
-    async fillin() {
-      // Calculate initial subject.  Everything apart from Edits adds a Re:.
-      const defpref = this.stdmsg.action === 'Edit' ? '' : 'Re:'
-
-      if (this.member) {
-        this.subject =
-          (this.stdmsg.subjpref ? this.stdmsg.subjpref : defpref) +
-          (this.stdmsg.subjsuff ? this.stdmsg.subjsuff : '')
-      } else {
-        this.subject =
-          (this.stdmsg.subjpref ? this.stdmsg.subjpref : defpref) +
-          (this.stdmsg.action === 'Edit' ? '' : ': ') +
-          this.message.subject +
-          (this.stdmsg.subjsuff ? this.stdmsg.subjsuff : '')
-      }
-
-      this.subject = await this.substitutionStrings(this.subject)
-
-      // Calculate initial body
-      let msg = this.message ? this.message.textbody : ''
-      msg = msg || ''
-
-      if (msg || this.member) {
-        if (msg) {
-          // We have an existing body to include.  Quote it, unless it's an edit.
-          const edit = this.stdmsg && this.stdmsg.action === 'Edit'
-          if (!edit && msg) {
-            msg = '> ' + (msg + '').replace(/((\r\n)|\r|\n)/gm, '\n> ')
-          }
-
-          this.bodyInitialLength = msg.length
-        }
-
-        if (this.stdmsg) {
-          if (this.stdmsg.body) {
-            // Text to insert.
-            if (this.stdmsg.insert === 'Top') {
-              msg = this.stdmsg.body.trim() + '\n\n' + msg
-            } else {
-              msg = msg + '\n\n' + this.stdmsg.body.trim()
+            if (msg.type === keyword && daysago < recentDays) {
+              console.log('Add for', msg, msg.postdate, dayjs(msg.postdate))
+              recentmsg +=
+                dayjs(msg.postdate).format('dddd Do HH:mm a') +
+                ' - ' +
+                msg.subject +
+                '\n'
+              count++
             }
-          } else if (this.stdmsg.action !== 'Edit' && msg) {
-            // No text to insert - add a couple of blank lines at the top for typing.
-            msg = '\n\n' + msg
-          }
-
-          if (this.stdmsg.edittext === 'Correct Case') {
-            // First the subject
-            const matches = SUBJECT_REGEX.exec(this.subject)
-            if (
-              matches &&
-              matches.length > 0 &&
-              matches[0].length > 0 &&
-              this.message.item
-            ) {
-              this.subject =
-                matches[1] +
-                ': ' +
-                matches[2].toLowerCase().trim() +
-                ' (' +
-                matches[3] +
-                ')'
-
-              // eslint-disable-next-line vue/no-mutating-props
-              this.message.item.name = matches[2].toLowerCase().trim()
-            } else {
-              this.subject = this.subject.toLowerCase().trim()
-            }
-
-            // Now the textbody.
-            msg = msg.toLowerCase()
-
-            // Contentious choice of single space
-            msg = msg.replace(/\.( |(&nbsp;))+/g, '. ')
-            msg = msg.replace(/\.\n/g, '.[-<br>-]. ')
-            msg = msg.replace(/\.\s\n/g, '. [-<br>-]. ')
-            const wordSplit = '. '
-            const wordArray = msg.split(wordSplit)
-            const numWords = wordArray.length
-
-            for (let x = 0; x < numWords; x++) {
-              if (wordArray[x]) {
-                wordArray[x] = wordArray[x].replace(
-                  wordArray[x].charAt(0),
-                  wordArray[x].charAt(0).toUpperCase()
-                )
-
-                if (x === 0) {
-                  msg = wordArray[x] + '. '
-                } else if (x !== numWords - 1) {
-                  msg = msg + wordArray[x] + '. '
-                } else if (x === numWords - 1) {
-                  msg = msg + wordArray[x]
-                }
-              }
-            }
-
-            msg = msg.replace(/\[-<br>-\]\.\s/g, '\n')
-            msg = msg.replace(/\si\s/g, ' I ')
-            msg = msg.replace(/(<p>.)/i, (a, b) => {
-              return b.toUpperCase()
-            })
-          }
+          })
         }
-      } else if (this.stdmsg) {
-        // No existing body
-        msg = '\n\n' + (this.stdmsg.body ? this.stdmsg.body : '')
-      }
-
-      this.body = (await this.substitutionStrings(msg)).trim()
-
-      this.showModal = true
-
-      if (this.autosend && !this.warning) {
-        // Start doing stuff.
-        this.process()
-      }
-    },
-    async substitutionStrings(text) {
-      const self = this
-      await this.modGroupStore.fetchIfNeedBeMT(this.groupid)
-      const group = this.modGroupStore.get(this.groupid)
-      if (!group) return text
-
-      if (group && text) {
-        text = text.replace(/\$networkname/g, 'Freegle')
-        // eslint-disable-next-line prefer-regex-literals
-        const re = new RegExp('Freegle', 'ig')
-        text = text.replace(
-          /\$groupnonetwork/g,
-          group.namedisplay.replace(re, '')
-        )
-
-        text = text.replace(/\$groupname/g, group.namedisplay)
-        text = text.replace(/\$owneremail/g, group.modsemail)
-        text = text.replace(/\$volunteersemail/g, group.modsemail)
-        text = text.replace(/\$volunteeremail/g, group.modsemail)
-        text = text.replace(/\$groupemail/g, group.groupemail)
-        text = text.replace(/\$groupurl/g, group.url)
-        text = text.replace(/\$myname/g, this.me.displayname)
-        text = text.replace(/\$nummembers/g, group.membercount)
-        text = text.replace(/\$nummods/g, group.modcount)
-        if (group.settings && group.settings.reposts)
-          text = text.replace(/\$repostoffer/g, group.settings.reposts.offer)
-        if (group.settings && group.settings.reposts)
-          text = text.replace(/\$repostwanted/g, group.settings.reposts.wanted)
 
         text = text.replace(
-          /\$origsubj/g,
-          this.message ? this.message.subject : ''
+          new RegExp('\\$recent' + keyword.toLowerCase(), 'gim'),
+          recentmsg
         )
+        text = text.replace(
+          new RegExp('\\$numrecent' + keyword.toLowerCase(), 'gim'),
+          count
+        )
+      })
+    }
 
-        if (this.user.messagehistory) {
-          const history = this.user.messagehistory
-          let recentmsg = ''
-          let count = 0
-          if (history.length) {
-            history.forEach((msg) => {
-              if (msg.daysago < self.recentDays) {
-                recentmsg +=
-                  dayjs(msg.postdate).format('lll') + ' - ' + msg.subject + '\n'
-                count++
-              }
-            })
-          }
-          text = text.replace(/\$recentmsg/gim, recentmsg)
-          text = text.replace(/\$numrecentmsg/gim, count)
+    if (props.member) {
+      text = text.replace(
+        /\$memberreason/g,
+        props.member.joincomment ? props.member.joincomment : ''
+      )
+    }
 
-          this.keywordList.forEach((keyword) => {
-            let recentmsg = ''
-            let count = 0
+    if (user.value && user.value.joined) {
+      text = text.replace(
+        /\$membersubdate/g,
+        // eslint-disable-next-line new-cap
+        new dayjs(user.value.joined).format('lll')
+      )
+    }
 
-            if (history.length) {
-              history.forEach((msg) => {
-                const postdate = dayjs(msg.postdate)
-                const daysago = dayjs().diff(postdate, 'day')
+    text = text.replace(/\$membermail/g, toEmail.value)
+    let from
 
-                if (msg.type === keyword && daysago < self.recentDays) {
-                  console.log('Add for', msg, msg.postdate, dayjs(msg.postdate))
-                  recentmsg +=
-                    dayjs(msg.postdate).format('dddd Do HH:mm a') +
-                    ' - ' +
-                    msg.subject +
-                    '\n'
-                  count++
-                }
-              })
-            }
+    if (props.message) {
+      from = props.message.fromuser.realemail
+        ? props.message.fromuser.realemail
+        : props.message.fromaddr
+    } else {
+      from = props.member.email
+    }
 
-            text = text.replace(
-              new RegExp('\\$recent' + keyword.toLowerCase(), 'gim'),
-              recentmsg
-            )
-            text = text.replace(
-              new RegExp('\\$numrecent' + keyword.toLowerCase(), 'gim'),
-              count
-            )
-          })
-        }
+    const fromid = from
+      ? from.substring(0, from.indexOf('@'))
+      : user.value.displayname
+    text = text.replace(/\$memberid/g, fromid)
+    const membername = user.value.displayname || fromid
+    text = text.replace(/\$membername/g, membername)
 
-        if (this.member) {
-          text = text.replace(
-            /\$memberreason/g,
-            this.member.joincomment ? this.member.joincomment : ''
-          )
-        }
+    let summ = ''
 
-        if (this.user && this.user.joined) {
-          text = text.replace(
-            /\$membersubdate/g,
-            // eslint-disable-next-line new-cap
-            new dayjs(this.user.joined).format('lll')
-          )
-        }
+    if (props.message && props.message.duplicates) {
+      props.message.duplicates.forEach((m) => {
+        // eslint-disable-next-line new-cap
+        summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
+      })
 
-        text = text.replace(/\$membermail/g, this.toEmail)
-        let from
+      // eslint-disable-next-line prefer-regex-literals
+      const regex = new RegExp('\\$duplicatemessages', 'gim')
+      text = text.replace(regex, summ)
+    }
+  }
 
-        if (this.message) {
-          from = this.message.fromuser.realemail
-            ? this.message.fromuser.realemail
-            : this.message.fromaddr
-        } else {
-          from = this.member.email
-        }
-
-        const fromid = from
-          ? from.substring(0, from.indexOf('@'))
-          : this.user.displayname
-        text = text.replace(/\$memberid/g, fromid)
-        const membername = this.user.displayname || fromid
-        text = text.replace(/\$membername/g, membername)
-
-        let summ = ''
-
-        if (this.message && this.message.duplicates) {
-          this.message.duplicates.forEach((m) => {
-            // eslint-disable-next-line new-cap
-            summ += new dayjs(m.date).format('lll') + ' - ' + m.subject + '\n'
-          })
-
-          // eslint-disable-next-line prefer-regex-literals
-          const regex = new RegExp('\\$duplicatemessages', 'gim')
-          text = text.replace(regex, summ)
-        }
-      }
-
-      return text
-    },
-
-    async process(callback) {
-      this.replyTooShort = false
-
-      const msglen = this.body.length - this.bodyInitialLength
-
-      if (this.stdmsg.action !== 'Edit' && msglen >= 0 && msglen < 30) {
-        this.replyTooShort = true
-      } else {
-        if (
-          this.stdmsg.newdelstatus &&
-          this.stdmsg.newdelstatus !== 'UNCHANGED'
-        ) {
-          this.changingNewDelStatus = true
-          await this.userStore.edit({
-            id: this.userid,
-            groupid: this.groupid,
-            emailfrequency: this.emailfrequency,
-          })
-          this.changingNewDelStatus = false
-          this.changedNewDelStatus = true
-        }
-
-        if (
-          this.stdmsg.newmodstatus &&
-          this.stdmsg.newmodstatus !== 'UNCHANGED'
-        ) {
-          this.changingNewModStatus = true
-          await this.userStore.edit({
-            id: this.userid,
-            groupid: this.groupid,
-            ourPostingStatus: this.stdmsg.newmodstatus,
-          })
-          this.changingNewModStatus = false
-          this.changedNewModStatus = true
-        }
-
-        const subj = this.subject.trim()
-        const body = this.body.trim()
-
-        switch (this.stdmsg.action) {
-          case 'Approve':
-            await this.messageStore.approve({
-              id: this.message.id,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Leave':
-          case 'Leave Approved Message':
-            await this.messageStore.reply({
-              id: this.message.id,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Hold Message':
-            this.changingHold = true
-
-            await this.messageStore.hold({
-              id: this.message.id,
-            })
-
-            this.changingHold = false
-            this.changedHold = true
-
-            await this.messageStore.reply({
-              id: this.message.id,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Leave Member':
-          case 'Leave Approved Member':
-            await this.memberStore.reply({
-              id: this.member.userid,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Reject':
-            await this.messageStore.reject({
-              id: this.message.id,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Delete':
-          case 'Delete Approved Message':
-            await this.messageStore.delete({
-              id: this.message.id,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Delete Member':
-          case 'Delete Approved Member':
-            await this.memberStore.delete({
-              id: this.member.userid,
-              groupid: this.groupid,
-              subject: subj,
-              body,
-              stdmsgid: this.stdmsg.id,
-            })
-            break
-          case 'Edit':
-            if (this.message) {
-              if (this.message.item && this.message.location) {
-                // Well-structured message
-                await this.messageStore.patch({
-                  id: this.message.id,
-                  msgtype: this.message.type,
-                  item: this.message.item.name,
-                  location: this.message.location.name,
-                  textbody: body,
-                })
-              } else {
-                // Not
-                await this.messageStore.patch({
-                  id: this.message.id,
-                  subject: subj,
-                  textbody: body,
-                })
-              }
-            }
-            break
-          default:
-            console.error('Unknown stdmsg action', this.stdmsg.action)
-        }
-        this.checkWorkDeferGetMessages()
-        this.hide()
-      }
-      if (callback) callback()
-    },
-    postcodeSelect(newpc) {
-      // eslint-disable-next-line vue/no-mutating-props
-      this.message.location = newpc
-    },
-    moveLeft() {
-      this.margLeft -= 10
-      window.document.getElementById('stdmsgmodal').style.left =
-        this.margLeft + 'px'
-    },
-    moveRight() {
-      this.margLeft += 10
-      window.document.getElementById('stdmsgmodal').style.left =
-        this.margLeft + 'px'
-    },
-    moveUp() {
-      this.margTop -= 10
-      window.document.getElementById('stdmsgmodal').style.top =
-        this.margTop + 'px'
-    },
-    moveDown() {
-      this.margTop += 10
-      window.document.getElementById('stdmsgmodal').style.top =
-        this.margTop + 'px'
-    },
-  },
+  return text
 }
+
+async function process(callback) {
+  replyTooShort.value = false
+
+  const msglen = body.value.length - bodyInitialLength.value
+
+  if (props.stdmsg.action !== 'Edit' && msglen >= 0 && msglen < 30) {
+    replyTooShort.value = true
+  } else {
+    if (
+      props.stdmsg.newdelstatus &&
+      props.stdmsg.newdelstatus !== 'UNCHANGED'
+    ) {
+      changingNewDelStatus.value = true
+      await userStore.edit({
+        id: userid.value,
+        groupid: groupid.value,
+        emailfrequency: emailfrequency.value,
+      })
+      changingNewDelStatus.value = false
+      changedNewDelStatus.value = true
+    }
+
+    if (
+      props.stdmsg.newmodstatus &&
+      props.stdmsg.newmodstatus !== 'UNCHANGED'
+    ) {
+      changingNewModStatus.value = true
+      await userStore.edit({
+        id: userid.value,
+        groupid: groupid.value,
+        ourPostingStatus: props.stdmsg.newmodstatus,
+      })
+      changingNewModStatus.value = false
+      changedNewModStatus.value = true
+    }
+
+    const subj = subject.value.trim()
+    const bodyText = body.value.trim()
+
+    switch (props.stdmsg.action) {
+      case 'Approve':
+        await messageStore.approve({
+          id: props.message.id,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Leave':
+      case 'Leave Approved Message':
+        await messageStore.reply({
+          id: props.message.id,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Hold Message':
+        changingHold.value = true
+
+        await messageStore.hold({
+          id: props.message.id,
+        })
+
+        changingHold.value = false
+        changedHold.value = true
+
+        await messageStore.reply({
+          id: props.message.id,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Leave Member':
+      case 'Leave Approved Member':
+        await memberStore.reply({
+          id: props.member.userid,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Reject':
+        await messageStore.reject({
+          id: props.message.id,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Delete':
+      case 'Delete Approved Message':
+        await messageStore.delete({
+          id: props.message.id,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Delete Member':
+      case 'Delete Approved Member':
+        await memberStore.delete({
+          id: props.member.userid,
+          groupid: groupid.value,
+          subject: subj,
+          body: bodyText,
+          stdmsgid: props.stdmsg.id,
+        })
+        break
+      case 'Edit':
+        if (props.message) {
+          if (props.message.item && props.message.location) {
+            // Well-structured message
+            await messageStore.patch({
+              id: props.message.id,
+              msgtype: props.message.type,
+              item: props.message.item.name,
+              location: props.message.location.name,
+              textbody: bodyText,
+            })
+          } else {
+            // Not
+            await messageStore.patch({
+              id: props.message.id,
+              subject: subj,
+              textbody: bodyText,
+            })
+          }
+        }
+        break
+      default:
+        console.error('Unknown stdmsg action', props.stdmsg.action)
+    }
+    checkWorkDeferGetMessages()
+    hide()
+  }
+  if (callback) callback()
+}
+
+function postcodeSelect(newpc) {
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.location = newpc
+}
+
+function moveLeft() {
+  margLeft.value -= 10
+  window.document.getElementById('stdmsgmodal').style.left =
+    margLeft.value + 'px'
+}
+
+function moveRight() {
+  margLeft.value += 10
+  window.document.getElementById('stdmsgmodal').style.left =
+    margLeft.value + 'px'
+}
+
+function moveUp() {
+  margTop.value -= 10
+  window.document.getElementById('stdmsgmodal').style.top = margTop.value + 'px'
+}
+
+function moveDown() {
+  margTop.value += 10
+  window.document.getElementById('stdmsgmodal').style.top = margTop.value + 'px'
+}
+
+defineExpose({ fillin, show, modal })
 </script>

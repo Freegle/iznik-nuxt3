@@ -10,34 +10,29 @@
     <b-button variant="link" @click="showModal"> View </b-button>
   </div>
 </template>
-<script>
-export default {
-  components: {},
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    items: {
-      type: Array,
-      required: true,
-    },
+<script setup>
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  data: function () {
-    return {
-      showMicrovolunteeringModal: false,
-    }
+  items: {
+    type: Array,
+    required: true,
   },
-  computed: {
-    itemIds() {
-      return this.items.map((m) => m.id)
-    },
-  },
-  methods: {
-    showModal() {
-      this.showMicrovolunteeringModal = true
-      this.$refs.microvolunteering?.show()
-    },
-  },
+})
+
+const showMicrovolunteeringModal = ref(false)
+const microvolunteering = ref(null)
+
+const itemIds = computed(() => {
+  return props.items.map((m) => m.id)
+})
+
+function showModal() {
+  showMicrovolunteeringModal.value = true
+  microvolunteering.value?.show()
 }
 </script>

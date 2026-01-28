@@ -12,30 +12,26 @@
     </b-button>
   </div>
 </template>
-<script>
+<script setup>
 import { useGroupStore } from '~/stores/group'
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: true,
-    },
-    facebook: {
-      type: Object,
-      required: true,
-    },
+
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const groupStore = useGroupStore()
-    return { groupStore }
+  facebook: {
+    type: Object,
+    required: true,
   },
-  methods: {
-    async unlink() {
-      await this.groupStore.removeFacebook({
-        uid: this.facebook.uid,
-        groupid: this.groupid,
-      })
-    },
-  },
+})
+
+const groupStore = useGroupStore()
+
+async function unlink() {
+  await groupStore.removeFacebook({
+    uid: props.facebook.uid,
+    groupid: props.groupid,
+  })
 }
 </script>

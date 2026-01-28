@@ -109,96 +109,91 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
-export default {
-  name: 'ModSupportSpamKeywords',
-  setup() {
-    const systemConfigStore = useSystemConfigStore()
-    return { systemConfigStore }
-  },
-  data() {
-    return {
-      newSpamKeyword: '',
-      patternType: 'literal',
-      patternTypeOptions: [
-        { text: 'Literal (exact word/phrase)', value: 'literal' },
-        { text: 'Regular Expression (advanced)', value: 'regex' },
-      ],
-      actionType: 'Review',
-      actionTypeOptions: [
-        { text: 'Review', value: 'Review' },
-        { text: 'Spam', value: 'Spam' },
-        { text: 'Whitelist', value: 'Whitelist' },
-      ],
-      regexError: '',
-      spamKeywordTypeFilter: 'all',
-      spamKeywordTypeOptions: [
-        { text: 'All Types', value: 'all' },
-        { text: 'Literal', value: 'Literal' },
-        { text: 'Regex', value: 'Regex' },
-      ],
-    }
-  },
-  computed: {
-    regexValidationState() {
-      if (this.patternType !== 'regex' || !this.newSpamKeyword.trim()) {
-        return null
-      }
+const systemConfigStore = useSystemConfigStore()
 
-      try {
-        // eslint-disable-next-line no-new
-        new RegExp(this.newSpamKeyword.trim())
-        return true
-      } catch (e) {
-        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-        this.regexError = `Invalid regex: ${e.message}`
-        return false
-      }
-    },
+const newSpamKeyword = ref('')
+const patternType = ref('literal')
+const actionType = ref('Review')
+const regexError = ref('')
+const spamKeywordTypeFilter = ref('all')
 
-    filteredSpamKeywords() {
-      if (this.spamKeywordTypeFilter === 'all') {
-        return this.systemConfigStore.getSpamKeywords
-      }
-      return this.systemConfigStore.getSpamKeywords.filter(
-        (spamKeyword) => spamKeyword.type === this.spamKeywordTypeFilter
-      )
-    },
-  },
-  methods: {
-    async fetchSpamKeywords() {
-      // Fetch spam keywords when tab is selected
-      await this.systemConfigStore.fetchSpamKeywords()
-    },
+const patternTypeOptions = [
+  { text: 'Literal (exact word/phrase)', value: 'literal' },
+  { text: 'Regular Expression (advanced)', value: 'regex' },
+]
 
-    async addSpamKeyword() {
-      if (!this.newSpamKeyword || !this.newSpamKeyword.trim()) return
+const actionTypeOptions = [
+  { text: 'Review', value: 'Review' },
+  { text: 'Spam', value: 'Spam' },
+  { text: 'Whitelist', value: 'Whitelist' },
+]
 
-      const trimmedWord = this.newSpamKeyword.trim()
+const spamKeywordTypeOptions = [
+  { text: 'All Types', value: 'all' },
+  { text: 'Literal', value: 'Literal' },
+  { text: 'Regex', value: 'Regex' },
+]
 
-      // For regex patterns, validate first
-      if (this.patternType === 'regex') {
-        try {
-          // eslint-disable-next-line no-new
-          new RegExp(trimmedWord)
-        } catch (e) {
-          this.regexError = `Invalid regex: ${e.message}`
-          return
-        }
-      }
+const regexValidationState = computed(() => {
+  if (patternType.value !== 'regex' || !newSpamKeyword.value.trim()) {
+    return null
+  }
 
-      // For spam keywords, the type determines if it's Literal or Regex
-      const keywordType = this.patternType === 'regex' ? 'Regex' : 'Literal'
+  try {
+    // eslint-disable-next-line no-new
+    new RegExp(newSpamKeyword.value.trim())
+    return true
+  } catch (e) {
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    regexError.value = `Invalid regex: ${e.message}`
+    return false
+  }
+})
 
-      await this.systemConfigStore.addSpamKeyword(
-        trimmedWord,
-        keywordType,
-        this.actionType
-      )
-      this.newSpamKeyword = ''
-    },
-  },
+const filteredSpamKeywords = computed(() => {
+  if (spamKeywordTypeFilter.value === 'all') {
+    return systemConfigStore.getSpamKeywords
+  }
+  return systemConfigStore.getSpamKeywords.filter(
+    (spamKeyword) => spamKeyword.type === spamKeywordTypeFilter.value
+  )
+})
+
+async function fetchSpamKeywords() {
+  // Fetch spam keywords when tab is selected
+  await systemConfigStore.fetchSpamKeywords()
 }
+
+async function addSpamKeyword() {
+  if (!newSpamKeyword.value || !newSpamKeyword.value.trim()) return
+
+  const trimmedWord = newSpamKeyword.value.trim()
+
+  // For regex patterns, validate first
+  if (patternType.value === 'regex') {
+    try {
+      // eslint-disable-next-line no-new
+      new RegExp(trimmedWord)
+    } catch (e) {
+      regexError.value = `Invalid regex: ${e.message}`
+      return
+    }
+  }
+
+  // For spam keywords, the type determines if it's Literal or Regex
+  const keywordType = patternType.value === 'regex' ? 'Regex' : 'Literal'
+
+  await systemConfigStore.addSpamKeyword(
+    trimmedWord,
+    keywordType,
+    actionType.value
+  )
+  newSpamKeyword.value = ''
+}
+
+defineExpose({ fetchSpamKeywords })
 </script>

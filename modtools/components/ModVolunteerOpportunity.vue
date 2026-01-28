@@ -77,42 +77,34 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useVolunteeringStore } from '@/stores/volunteering'
 
-export default {
-  props: {
-    volunteering: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  volunteering: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const volunteeringStore = useVolunteeringStore()
-    return {
-      volunteeringStore,
-    }
-  },
-  data: function () {
-    return {
-      modalShown: false,
-    }
-  },
-  methods: {
-    edit() {
-      this.modalShown = true
-      this.$refs.volunteeringmodal?.show()
-    },
-    deleteme() {
-      this.volunteeringStore.delete(this.volunteering.id)
-    },
-    approve() {
-      this.volunteeringStore.save({
-        id: this.volunteering.id,
-        pending: false,
-      })
-      this.volunteeringStore.remove(this.volunteering.id)
-    },
-  },
+})
+
+const volunteeringStore = useVolunteeringStore()
+
+const modalShown = ref(false)
+
+function edit() {
+  modalShown.value = true
+}
+
+function deleteme() {
+  volunteeringStore.delete(props.volunteering.id)
+}
+
+function approve() {
+  volunteeringStore.save({
+    id: props.volunteering.id,
+    pending: false,
+  })
+  volunteeringStore.remove(props.volunteering.id)
 }
 </script>

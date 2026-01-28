@@ -14,29 +14,27 @@
     </slot>
   </b-input-group>
 </template>
-<script>
-export default {
-  props: {
-    search: {
-      type: String,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const props = defineProps({
+  search: {
+    type: String,
+    required: false,
+    default: null,
   },
-  emits: ['search'],
-  data: function () {
-    return {
-      term: null,
-    }
-  },
-  mounted() {
-    this.term = this.search
-  },
-  methods: {
-    dosearch() {
-      this.$emit('search', this.term)
-    },
-  },
+})
+
+const emit = defineEmits(['search'])
+
+const term = ref(null)
+
+onMounted(() => {
+  term.value = props.search
+})
+
+function dosearch() {
+  emit('search', term.value)
 }
 </script>
 <style scoped>

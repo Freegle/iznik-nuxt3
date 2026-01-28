@@ -45,39 +45,33 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useGroupStore } from '@/stores/group'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const groupStore = useGroupStore()
-    const { modal, hide } = useOurModal()
-    const { myGroup } = useMe()
-    return { groupStore, modal, hide, myGroup }
-  },
-  data: function () {
-    return {}
-  },
-  computed: {
-    group() {
-      return this.myGroup(this.groupid)
-    },
-  },
-  methods: {
-    async confirm() {
-      await this.groupStore.confirmAffiliation({
-        id: this.groupid,
-      })
-      this.hide()
-    },
-  },
+})
+
+const groupStore = useGroupStore()
+const { modal, hide, show } = useOurModal()
+const { myGroup } = useMe()
+
+const group = computed(() => {
+  return myGroup(props.groupid)
+})
+
+async function confirm() {
+  await groupStore.confirmAffiliation({
+    id: props.groupid,
+  })
+  hide()
 }
+
+defineExpose({ show, hide })
 </script>
