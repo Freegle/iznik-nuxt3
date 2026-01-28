@@ -398,6 +398,36 @@
         </b-button>
       </div>
       <p v-else>No posting history.</p>
+      <h3 class="mt-2">Chat Moderation</h3>
+      <div>
+        <p>
+          Controls how this user's chat messages are handled. 'Fully moderated'
+          means all messages go to mod review before delivery (effectively a
+          shadow ban).
+        </p>
+        <b-form-select
+          v-model="chatmodstatus"
+          class="mb-2 flex-shrink-1 font-weight-bold"
+        >
+          <b-form-select-option value="Moderated">
+            Moderated (default - spam checked)
+          </b-form-select-option>
+          <b-form-select-option value="Unmoderated">
+            Unmoderated (bypass spam checks)
+          </b-form-select-option>
+          <b-form-select-option value="Fully">
+            Fully moderated (all messages to review)
+          </b-form-select-option>
+        </b-form-select>
+        <NoticeMessage
+          v-if="user.chatmodstatus === 'Fully'"
+          variant="warning"
+          class="mb-2"
+        >
+          This user is fully moderated - all their chat messages go to mod
+          review before being delivered.
+        </NoticeMessage>
+      </div>
       <h3 class="mt-2">ChitChat</h3>
       <div>
         <p>Moderation status:</p>
@@ -707,6 +737,19 @@ const newsfeedmodstatus = computed({
       id: user.value.id,
       newsfeedmodstatus: newVal,
     })
+  },
+})
+
+const chatmodstatus = computed({
+  get() {
+    return user.value.chatmodstatus
+  },
+  async set(newVal) {
+    await userStore.edit({
+      id: user.value.id,
+      chatmodstatus: newVal,
+    })
+    await fetchUser()
   },
 })
 

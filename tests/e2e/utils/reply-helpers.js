@@ -169,8 +169,11 @@ async function navigateToMessageViaBrowse(
 
 /**
  * Helper: Navigate to a message via the explore page and open reply section
+ * @param {Page} page - Playwright page
+ * @param {string} groupName - Group name to explore
+ * @param {string} itemText - Optional item text to search for (recommended for parallel test isolation)
  */
-async function navigateToMessageViaExplore(page, groupName) {
+async function navigateToMessageViaExplore(page, groupName, itemText = null) {
   console.log(`[Explore] Navigating to /explore/${groupName}`)
   await page.gotoAndVerify(`/explore/${groupName}`, {
     timeout: timeouts.navigation.default,
@@ -184,10 +187,34 @@ async function navigateToMessageViaExplore(page, groupName) {
     timeout: timeouts.ui.appearance,
   })
 
-  // Click on a message to expand it
-  const messageCard = page
-    .locator('.message-summary-mobile, .messagecard')
-    .first()
+  // Try to find the specific message by item text or fall back to first card
+  let messageCard
+  if (itemText) {
+    console.log(`[Explore] Looking for message with text: ${itemText}`)
+    // Look for a card containing the unique item text
+    messageCard = page
+      .locator(
+        `.message-summary-mobile:has-text("${itemText}"), .messagecard:has-text("${itemText}")`
+      )
+      .first()
+
+    // Check if found
+    const count = await messageCard.count()
+    if (count === 0) {
+      console.warn(
+        `[Explore] WARNING: Message with "${itemText}" not found, using first card (may cause parallel test collision)`
+      )
+      messageCard = page
+        .locator('.message-summary-mobile, .messagecard')
+        .first()
+    }
+  } else {
+    console.warn(
+      '[Explore] WARNING: No itemText provided, clicking first message (may cause parallel test collision)'
+    )
+    messageCard = page.locator('.message-summary-mobile, .messagecard').first()
+  }
+
   await messageCard.waitFor({
     state: 'visible',
     timeout: timeouts.ui.appearance,
