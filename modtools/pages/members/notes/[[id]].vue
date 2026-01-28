@@ -35,98 +35,95 @@
     </client-only>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { useCommentStore } from '~/stores/comment'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const commentStore = useCommentStore()
-    const { myid } = useMe()
-    return {
-      commentStore,
-      myid,
-    }
-  },
-  data: function () {
-    return {
-      context: null,
-      distance: 1000,
-      limit: 2,
-      show: 0,
-      busy: false,
-      complete: false,
-      groupid: null,
-      bump: 1,
-    }
-  },
-  computed: {
-    filteredComments() {
-      return this.comments.filter((c) => {
-        return (
-          this.groupid === null ||
-          this.groupid === c.groupid ||
-          c.flag ||
-          c.byuser?.id === this.myid
-        )
+// Stores and composables
+const commentStore = useCommentStore()
+const { myid } = useMe()
+
+// Local state (formerly data())
+const context = ref(null)
+const distance = ref(1000)
+const show = ref(0)
+const busy = ref(false)
+const complete = ref(false)
+const groupid = ref(null)
+const bump = ref(1)
+
+// Computed properties
+const comments = computed(() => {
+  return commentStore.sortedList
+})
+
+const filteredComments = computed(() => {
+  return comments.value.filter((c) => {
+    return (
+      groupid.value === null ||
+      groupid.value === c.groupid ||
+      c.flag ||
+      c.byuser?.id === myid.value
+    )
+  })
+})
+
+const visibleComments = computed(() => {
+  return filteredComments.value.slice(0, show.value)
+})
+
+// Watchers
+watch(groupid, () => {
+  bump.value++
+  commentStore.clear()
+  context.value = null
+})
+
+// Lifecycle
+onMounted(() => {
+  commentStore.clear()
+})
+
+// Methods
+async function loadMore($state) {
+  busy.value = true
+
+  if (show.value < comments.value.length) {
+    // This means that we will gradually add the members that we have fetched from the server into the DOM.
+    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+    show.value++
+    $state.loaded()
+  } else {
+    const currentCount = comments.value.length
+
+    try {
+      await commentStore.fetch({
+        context: context.value,
+        groupid: groupid.value,
       })
-    },
-    visibleComments() {
-      return this.filteredComments.slice(0, this.show)
-    },
-    comments() {
-      return this.commentStore.sortedList
-    },
-  },
-  watch: {
-    groupid() {
-      this.bump++
-      this.commentStore.clear()
-      this.context = null
-    },
-  },
-  mounted() {
-    this.commentStore.clear()
-  },
-  methods: {
-    async loadMore($state) {
-      this.busy = true
 
-      if (this.show < this.comments.length) {
-        // This means that we will gradually add the members that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        this.show++
-        $state.loaded()
+      context.value = commentStore.context
+
+      if (currentCount === comments.value.length) {
+        complete.value = true
+        busy.value = false
+        $state.complete()
       } else {
-        const currentCount = this.comments.length
-
-        try {
-          await this.commentStore.fetch({
-            context: this.context,
-            groupid: this.groupid,
-          })
-
-          this.context = this.commentStore.context
-
-          if (currentCount === this.comments.length) {
-            this.complete = true
-            this.busy = false
-            $state.complete()
-          } else {
-            $state.loaded()
-            this.busy = false
-            this.show++
-          }
-        } catch (e) {
-          $state.complete()
-          this.busy = false
-          console.log('Complete on error', e)
-        }
+        $state.loaded()
+        busy.value = false
+        show.value++
       }
-    },
-  },
+    } catch (e) {
+      $state.complete()
+      busy.value = false
+      console.log('Complete on error', e)
+    }
+  }
 }
 </script>
+
 <style scoped>
 select {
   max-width: 300px;

@@ -74,10 +74,16 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params.
-        config.params = Object.fromEntries(
-          Object.entries(config.params).filter(([_, v]) => v)
-        )
+        // Remove falsey values from the params, unless dontzapfalsey is set.
+        // This is needed when we want to pass 0 as a value (e.g., reviewed: 0).
+        const keepFalsey = config.params.dontzapfalsey
+        delete config.params.dontzapfalsey
+
+        if (!keepFalsey) {
+          config.params = Object.fromEntries(
+            Object.entries(config.params).filter(([_, v]) => v)
+          )
+        }
 
         // URL encode the parameters, handling arrays specially for PHP
         // PHP expects arrays as key[]=value1&key[]=value2
@@ -360,10 +366,16 @@ export default class BaseAPI {
         'max-age=0, must-revalidate, no-cache, no-store, private'
 
       if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params.
-        config.params = Object.fromEntries(
-          Object.entries(config.params).filter(([_, v]) => v)
-        )
+        // Remove falsey values from the params, unless dontzapfalsey is set.
+        // This is needed when we want to pass 0 as a value (e.g., reviewed: 0).
+        const keepFalsey = config.params.dontzapfalsey
+        delete config.params.dontzapfalsey
+
+        if (!keepFalsey) {
+          config.params = Object.fromEntries(
+            Object.entries(config.params).filter(([_, v]) => v)
+          )
+        }
 
         // URL encode the parameters, handling arrays specially for PHP
         // PHP expects arrays as key[]=value1&key[]=value2

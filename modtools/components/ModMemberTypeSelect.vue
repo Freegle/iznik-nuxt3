@@ -7,27 +7,27 @@
     <option value="5">Banned</option>
   </b-form-select>
 </template>
-<script>
-export default {
-  props: {
-    value: {
-      type: String,
-      required: false,
-      default: '0',
-    },
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    required: false,
+    default: '0',
   },
-  computed: {
-    type: {
-      // Seems to work when called with v-model="xxx"
-      get() {
-        return this.value
-      },
-      set(val) {
-        this.$emit('input', val + '')
-      },
-    },
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const type = computed({
+  get() {
+    return props.modelValue
   },
-}
+  set(val) {
+    emit('update:modelValue', val + '')
+  },
+})
 </script>
 <style scoped>
 select {

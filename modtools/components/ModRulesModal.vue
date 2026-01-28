@@ -22,51 +22,41 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
-import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const { modal, show, hide } = useOurModal()
-    const { myGroup } = useMe()
-    return { modal, show, hide, myGroup }
-  },
-  data: function () {
-    return {
-      enableIn: 0,
-      timer: null,
-    }
-  },
-  computed: {
-    group() {
-      return this.myGroup(this.groupid)
-    },
-    delay() {
-      const now = new Date()
-      const start = new Date(now.getFullYear(), 3, 6)
-      const diff = now - start
-      const oneDay = 1000 * 60 * 60 * 24
-      return Math.floor(diff / oneDay)
-    },
-  },
-  mounted() {
-    this.enableIn = this.delay
-    this.timer = setTimeout(this.tick, 1000)
-  },
-  beforeUnmount() {
-    if (this.timer) {
-      clearTimeout(this.timer)
-    }
-  },
-  methods: {
-    tick() {
-      this.timer = null
-      if (this.enableIn > 0) {
-        this.enableIn -= 1
-        this.timer = setTimeout(this.tick, 1000)
-      }
-    },
-  },
+const { modal, show, hide } = useOurModal()
+
+const enableIn = ref(0)
+const timer = ref(null)
+
+const delay = computed(() => {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 3, 6)
+  const diff = now - start
+  const oneDay = 1000 * 60 * 60 * 24
+  return Math.floor(diff / oneDay)
+})
+
+function tick() {
+  timer.value = null
+  if (enableIn.value > 0) {
+    enableIn.value -= 1
+    timer.value = setTimeout(tick, 1000)
+  }
 }
+
+onMounted(() => {
+  enableIn.value = delay.value
+  timer.value = setTimeout(tick, 1000)
+})
+
+onBeforeUnmount(() => {
+  if (timer.value) {
+    clearTimeout(timer.value)
+  }
+})
+
+defineExpose({ show, hide })
 </script>

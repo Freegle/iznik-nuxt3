@@ -246,9 +246,6 @@
         <div>
           <a href="#" class="pl-1" @click="logOut"> Logout </a>
         </div>
-        <div id="mtinfo" :title="buildDate">
-          MT-{{ version }} <br />{{ buildDate }}
-        </div>
         <div v-if="inMTapp" id="mtinfo" :title="inMTapp">
           MT app {{ inMTapp }}
         </div>
@@ -366,16 +363,6 @@ const menuCount = computed(() => {
   const work = authStore?.work
   if (!work || !work.total) return 0
   return work.total
-})
-
-const version = computed(() => {
-  const runtimeConfig = useRuntimeConfig()
-  return runtimeConfig.public.VERSION
-})
-
-const buildDate = computed(() => {
-  const runtimeConfig = useRuntimeConfig()
-  return runtimeConfig.public.BUILD_DATE
 })
 
 watch(

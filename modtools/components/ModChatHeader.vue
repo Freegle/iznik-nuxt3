@@ -9,8 +9,8 @@
           class="profile d-flex flex-column justify-content-around flex-grow-1"
         >
           <ProfileImage
-            v-if="!collapsed && (otheruser?.profile?.paththumb || chat.icon)"
-            :image="otheruser?.profile?.paththumb || chat.icon"
+            v-if="!collapsed && (otheruser?.profile?.turl || chat.icon)"
+            :image="otheruser?.profile?.turl || chat.icon"
             :name="chat.name"
             class="pr-1 clickme d-none d-md-flex"
             is-thumbnail

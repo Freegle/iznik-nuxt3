@@ -68,133 +68,137 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 import { useSpammerStore } from '~/stores/spammer'
 import { useModMe } from '~/composables/useModMe'
 
-export default {
-  setup() {
-    const authStore = useAuthStore()
-    const spammerStore = useSpammerStore()
-    const { hasPermissionSpamAdmin } = useModMe()
-    return { authStore, spammerStore, hasPermissionSpamAdmin }
-  },
-  data: function () {
-    return {
-      infiniteId: 0,
-      tabIndex: 0,
-      show: 0,
-      busy: false,
-      search: null,
+const route = useRoute()
+const authStore = useAuthStore()
+const spammerStore = useSpammerStore()
+const { hasPermissionSpamAdmin } = useModMe()
+
+// Reactive state (was data())
+const infiniteId = ref(0)
+const tabIndex = ref(0)
+const show = ref(0)
+const busy = ref(false)
+const search = ref(null)
+
+// Computed properties
+const pendingaddcount = computed(() => {
+  return authStore.work ? authStore.work.spammerpendingadd : 0
+})
+
+const pendingremovecount = computed(() => {
+  return authStore.work ? authStore.work.spammerpendingremove : 0
+})
+
+const collection = computed(() => {
+  let ret = null
+
+  switch (tabIndex.value) {
+    case 0: {
+      ret = 'Spammer'
+      break
     }
-  },
-  computed: {
-    pendingaddcount() {
-      return this.authStore.work ? this.authStore.work.spammerpendingadd : 0
-    },
-    pendingremovecount() {
-      return this.authStore.work ? this.authStore.work.spammerpendingremove : 0
-    },
-    spammers() {
-      const ret = this.spammerStore.getList(this.collection)
-
-      // Need to move the byuser into the spammer object so that ModSpammer finds it.
-      ret.forEach((s) => {
-        s.user.spammer.byuser = s.byuser
-      })
-
-      return ret
-    },
-    visibleSpammers() {
-      return this.spammers ? this.spammers.slice(0, this.show) : []
-    },
-    collection() {
-      let ret = null
-
-      switch (this.tabIndex) {
-        case 0: {
-          ret = 'Spammer'
-          break
-        }
-        case 1: {
-          ret = 'PendingAdd'
-          break
-        }
-        case 2: {
-          ret = 'Whitelisted'
-          break
-        }
-        case 3: {
-          ret = 'PendingRemove'
-          break
-        }
-      }
-
-      console.log('Spammer collection', this.tabIndex, ret)
-      return ret
-    },
-  },
-  watch: {
-    tabIndex(newVal) {
-      this.spammerStore.clear()
-      this.infiniteId++
-    },
-    $route(to, from) {
-      // Clear store when we move away to prevent items showing again when we come back on potentially a different tab.
-      this.spammerStore.clear()
-    },
-  },
-  mounted() {
-    // Start in Pending Add if they have rights to see it.
-    this.spammerStore.clear()
-
-    if (this.hasPermissionSpamAdmin) {
-      if (this.search) {
-        this.tabIndex = 0
-      } else {
-        this.tabIndex = 1
-      }
-    } else {
-      this.tabIndex = 0
+    case 1: {
+      ret = 'PendingAdd'
+      break
     }
-  },
-  methods: {
-    searched(term) {
-      this.spammerStore.clear()
-      this.search = term
-      this.infiniteId++
-    },
-    async loadMore($state) {
-      // console.log('Spammers loadMore', this.show, this.spammers.length)
-      this.busy = true
+    case 2: {
+      ret = 'Whitelisted'
+      break
+    }
+    case 3: {
+      ret = 'PendingRemove'
+      break
+    }
+  }
 
-      if (this.show < this.spammers.length) {
-        // This means that we will gradually add the members that we have fetched from the server into the DOM.
-        // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-        this.show++
-        $state.loaded()
-        this.busy = false
-      } else {
-        const currentCount = this.spammers.length
-        // console.log('fetch',this.search)
-        await this.spammerStore.fetch({
-          collection: this.collection,
-          search: this.search,
-          modtools: true,
-        })
-        this.context = this.spammerStore.getContext()
+  console.log('Spammer collection', tabIndex.value, ret)
+  return ret
+})
 
-        if (currentCount === this.spammers.length) {
-          this.busy = false
-          $state.complete()
-        } else {
-          $state.loaded()
-          this.busy = false
-          this.show++
-        }
-      }
-    },
-  },
+const spammers = computed(() => {
+  const ret = spammerStore.getList(collection.value)
+
+  // Need to move the byuser into the spammer object so that ModSpammer finds it.
+  ret.forEach((s) => {
+    s.user.spammer.byuser = s.byuser
+  })
+
+  return ret
+})
+
+const visibleSpammers = computed(() => {
+  return spammers.value ? spammers.value.slice(0, show.value) : []
+})
+
+// Watchers
+watch(tabIndex, () => {
+  spammerStore.clear()
+  infiniteId.value++
+})
+
+watch(
+  () => route.path,
+  () => {
+    // Clear store when we move away to prevent items showing again when we come back on potentially a different tab.
+    spammerStore.clear()
+  }
+)
+
+// Methods
+function searched(term) {
+  spammerStore.clear()
+  search.value = term
+  infiniteId.value++
 }
+
+async function loadMore($state) {
+  busy.value = true
+
+  if (show.value < spammers.value.length) {
+    // This means that we will gradually add the members that we have fetched from the server into the DOM.
+    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
+    show.value++
+    $state.loaded()
+    busy.value = false
+  } else {
+    const currentCount = spammers.value.length
+    await spammerStore.fetch({
+      collection: collection.value,
+      search: search.value,
+      modtools: true,
+    })
+
+    if (currentCount === spammers.value.length) {
+      busy.value = false
+      $state.complete()
+    } else {
+      $state.loaded()
+      busy.value = false
+      show.value++
+    }
+  }
+}
+
+// Lifecycle - mounted
+onMounted(() => {
+  // Start in Pending Add if they have rights to see it.
+  spammerStore.clear()
+
+  if (hasPermissionSpamAdmin.value) {
+    if (search.value) {
+      tabIndex.value = 0
+    } else {
+      tabIndex.value = 1
+    }
+  } else {
+    tabIndex.value = 0
+  }
+})
 </script>

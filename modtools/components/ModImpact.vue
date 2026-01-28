@@ -209,99 +209,99 @@
     </b-row>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import pluralize from 'pluralize'
-export default {
-  props: {
-    totalWeight: {
-      type: Number,
-      required: true,
-    },
-    totalBenefit: {
-      type: Number,
-      required: true,
-    },
-    totalCO2: {
-      type: Number,
-      required: true,
-    },
-    totalGifts: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    totalMembers: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    groupCount: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    range: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    start: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    end: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    border: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  computed: {
-    fullStats() {
-      // Have we been passed a full set of stats or just the first three?
-      return this.totalMembers
-    },
-    scale() {
-      return this.fullStats ? 3 : 4
-    },
-    heading() {
-      return this.fullStats ? 'h5' : 'h2'
-    },
-  },
-  methods: {
-    groupCountCommunties() {
-      pluralize.addIrregularRule('COMMUNITY', 'COMMUNITIES')
-      return pluralize('COMMUNITY', this.groupCount, true)
-    },
-    groupCountServes() {
-      pluralize.addIrregularRule('SERVES', 'SERVE')
-      return pluralize('SERVES', this.groupCount, true)
-    },
-    totalGiftsPlural() {
-      pluralize.addIrregularRule('GIFT', 'GIFTS')
-      return pluralize('GIFT', this.totalGifts, true)
-    },
-    totalMembersPlural() {
-      pluralize.addIrregularRule('MEMBER', 'MEMBERS')
-      return pluralize('MEMBER', this.totalMembers, true)
-    },
-    roundIt(val) {
-      let ret = null
 
-      if (val < 100) {
-        ret = Math.round(val * 10) / 10
-      } else {
-        ret = Math.round(val)
-      }
-
-      return ret
-    },
+const props = defineProps({
+  totalWeight: {
+    type: Number,
+    required: true,
   },
+  totalBenefit: {
+    type: Number,
+    required: true,
+  },
+  totalCO2: {
+    type: Number,
+    required: true,
+  },
+  totalGifts: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  totalMembers: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  groupCount: {
+    type: Number,
+    required: false,
+    default: null,
+  },
+  range: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  start: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  end: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  border: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const fullStats = computed(() => {
+  // Have we been passed a full set of stats or just the first three?
+  return props.totalMembers
+})
+
+const scale = computed(() => (fullStats.value ? 3 : 4))
+
+const heading = computed(() => (fullStats.value ? 'h5' : 'h2'))
+
+const groupCountCommunties = computed(() => {
+  pluralize.addIrregularRule('COMMUNITY', 'COMMUNITIES')
+  return pluralize('COMMUNITY', props.groupCount, true)
+})
+
+const groupCountServes = computed(() => {
+  pluralize.addIrregularRule('SERVES', 'SERVE')
+  return pluralize('SERVES', props.groupCount, true)
+})
+
+const totalGiftsPlural = computed(() => {
+  pluralize.addIrregularRule('GIFT', 'GIFTS')
+  return pluralize('GIFT', props.totalGifts, true)
+})
+
+const totalMembersPlural = computed(() => {
+  pluralize.addIrregularRule('MEMBER', 'MEMBERS')
+  return pluralize('MEMBER', props.totalMembers, true)
+})
+
+function roundIt(val) {
+  let ret = null
+
+  if (val < 100) {
+    ret = Math.round(val * 10) / 10
+  } else {
+    ret = Math.round(val)
+  }
+
+  return ret
 }
 </script>
 <style scoped lang="scss">

@@ -13,10 +13,11 @@ async function verifyMarketingConsentInSettings(page, expectedChecked) {
     `[DEBUG] verifyMarketingConsentInSettings: Expected consent = ${expectedChecked}`
   )
 
-  await page.waitForLoadState('networkidle')
+  // Navigate to settings and wait for DOM to be ready
+  // Note: Don't use networkidle - the app has background polling that prevents network from becoming idle
   await page.goto('/settings')
-  await page.waitForLoadState('networkidle')
-  console.log('[DEBUG] Navigated to /settings and waited for networkidle')
+  await page.waitForLoadState('domcontentloaded')
+  console.log('[DEBUG] Navigated to /settings and waited for domcontentloaded')
 
   // Find the "Freegle updates" option row (marketing consent setting)
   // Structure is: .option-row > .option-info > span.option-label "Freegle updates"

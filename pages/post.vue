@@ -27,7 +27,7 @@
         <div class="option-content">
           <h3 class="option-title">Find something</h3>
           <p class="option-description">
-            Looking for something? Post a request and see if anyone has it.
+            Ask the community and see if anyone has one spare.
           </p>
         </div>
         <v-icon icon="chevron-right" class="chevron" />

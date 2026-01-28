@@ -81,60 +81,37 @@
     </b-card>
   </div>
 </template>
-<script>
-import { useGroupStore } from '~/stores/group'
-import { useStoryStore } from '~/stores/stories'
+<script setup>
+import { ref } from 'vue'
 
-export default {
-  props: {
-    story: {
-      type: Object,
-      required: true,
-    },
-    newsletter: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  },
-  setup() {
-    const groupStore = useGroupStore()
-    const storyStore = useStoryStore()
-    return {
-      groupStore,
-      storyStore,
-    }
-  },
-  data: function () {
-    return {
-      show: true,
-    }
-  },
-  computed: {
-    groupname() {
-      let ret = null
-      const group = this.groupStore.get(this.story.groupid)
+const { $api } = useNuxtApp()
 
-      if (group) {
-        ret = group.namedisplay
-      }
+const props = defineProps({
+  story: {
+    type: Object,
+    required: true,
+  },
+  newsletter: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
 
-      return ret
-    },
-  },
-  methods: {
-    async useForNewsletter() {
-      await this.$api.stories.useForNewsletter(this.story.id)
-      this.show = false
-    },
-    async useForPublicity() {
-      await this.$api.stories.useForPublicity(this.story.id)
-      this.show = false
-    },
-    async dontUseForPublicity() {
-      await this.$api.stories.dontUseForPublicity(this.story.id)
-      this.show = false
-    },
-  },
+const show = ref(true)
+
+async function useForNewsletter() {
+  await $api.stories.useForNewsletter(props.story.id)
+  show.value = false
+}
+
+async function useForPublicity() {
+  await $api.stories.useForPublicity(props.story.id)
+  show.value = false
+}
+
+async function dontUseForPublicity() {
+  await $api.stories.dontUseForPublicity(props.story.id)
+  show.value = false
 }
 </script>

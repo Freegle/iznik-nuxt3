@@ -57,58 +57,54 @@
     </notice-message>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useModMe } from '~/composables/useModMe'
-import ModClipboard from '~/modtools/components/ModClipboard'
-export default {
-  components: { ModClipboard },
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    sameip: {
-      type: Array,
-      required: false,
-      default: null,
-    },
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const { hasPermissionSpamAdmin } = useModMe()
-    return { hasPermissionSpamAdmin }
+  sameip: {
+    type: Array,
+    required: false,
+    default: null,
   },
-  computed: {
-    variant() {
-      switch (this.user.spammer.collection) {
-        case 'Spammer': {
-          return 'danger'
-        }
-        case 'Safelisted': {
-          return 'primary'
-        }
-        default: {
-          return 'warning'
-        }
-      }
-    },
-    collname() {
-      switch (this.user.spammer.collection) {
-        case 'Spammer': {
-          return 'Confirmed Spammer'
-        }
-        case 'Safelisted': {
-          return 'Safelisted'
-        }
-        case 'PendingAdd': {
-          return 'Unconfirmed Spammer'
-        }
-        case 'PendingRemove': {
-          return 'Disputed Spammer'
-        }
-        default:
-          return this.user.spammer.collection
-      }
-    },
-  },
-}
+})
+
+const { hasPermissionSpamAdmin } = useModMe()
+
+const variant = computed(() => {
+  switch (props.user.spammer.collection) {
+    case 'Spammer': {
+      return 'danger'
+    }
+    case 'Safelisted': {
+      return 'primary'
+    }
+    default: {
+      return 'warning'
+    }
+  }
+})
+
+const collname = computed(() => {
+  switch (props.user.spammer.collection) {
+    case 'Spammer': {
+      return 'Confirmed Spammer'
+    }
+    case 'Safelisted': {
+      return 'Safelisted'
+    }
+    case 'PendingAdd': {
+      return 'Unconfirmed Spammer'
+    }
+    case 'PendingRemove': {
+      return 'Disputed Spammer'
+    }
+    default:
+      return props.user.spammer.collection
+  }
+})
 </script>

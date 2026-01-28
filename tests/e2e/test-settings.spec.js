@@ -50,7 +50,8 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   console.log(`Testing email level: ${level.text}`)
 
   // Sign up to access settings page
-  await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
+  // Don't use networkidle - the app has background polling that prevents idle state
+  await page.gotoAndVerify('/')
   await signUpViaHomepage(page, testEmail, 'Test User')
 
   // Navigate to settings page
@@ -165,9 +166,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     takeScreenshot,
   }) => {
     // Sign up and navigate to settings
-    await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
+    // Don't use networkidle - the app has background polling that prevents idle state
+    await page.gotoAndVerify('/')
     await signUpViaHomepage(page, testEmail, 'Test User')
-    await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
+    await page.gotoAndVerify('/settings')
 
     // Wait for email settings section
     await page.waitForSelector('text=Email Settings', {
@@ -178,9 +180,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     const emailLevelSelect = page.locator('.email-select')
     await emailLevelSelect.selectOption('Full')
 
-    // Wait for network requests to complete (settings save)
-    await page.waitForLoadState('networkidle')
-
+    // Wait for the setting to be saved
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Check if advanced settings button is visible
@@ -243,9 +243,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     takeScreenshot,
   }) => {
     // Sign up and navigate to settings
-    await page.gotoAndVerify('/', { waitUntil: 'networkidle' })
+    // Don't use networkidle - the app has background polling that prevents idle state
+    await page.gotoAndVerify('/')
     await signUpViaHomepage(page, testEmail, 'Test User')
-    await page.gotoAndVerify('/settings', { waitUntil: 'networkidle' })
+    await page.gotoAndVerify('/settings')
 
     // Wait for email settings section
     await page.waitForSelector('text=Email Settings', {
@@ -260,9 +261,7 @@ test.describe('Settings Page - Email Level Settings', () => {
 
     await emailLevelSelect.selectOption('None')
 
-    // Wait for network requests to complete (settings save)
-    await page.waitForLoadState('networkidle')
-
+    // Wait for the setting to be saved
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Check for warning message about not getting emails
@@ -281,9 +280,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     // Switch back to a setting that allows emails
     await emailLevelSelect.selectOption('Full')
 
-    // Wait for network requests to complete (settings save)
-    await page.waitForLoadState('networkidle')
-
+    // Wait for the setting to be saved
     await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Warning should be gone

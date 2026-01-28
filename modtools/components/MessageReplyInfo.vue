@@ -15,13 +15,11 @@
     </span>
   </client-only>
 </template>
-<script>
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-}
+})
 </script>

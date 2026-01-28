@@ -55,7 +55,7 @@ test.describe('User ratings tests', () => {
         console.log(`API REQUEST: ${request.method()} ${url}`)
       }
     })
-    page.on('response', async (response) => {
+    page.on('response', (response) => {
       const url = response.url()
       if (
         url.includes('/api/') &&
@@ -163,8 +163,8 @@ test.describe('User ratings tests', () => {
     })
     console.log('Confirmed UserRatings component is visible')
 
-    // Wait for network to be idle to ensure data is loaded
-    await page.waitForLoadState('networkidle', { timeout: 30000 })
+    // Wait for data to be loaded - don't use networkidle as the app has background polling
+    await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Log what browser console messages we've seen so far
     console.log(`Browser logs so far: ${browserLogs.length}`)

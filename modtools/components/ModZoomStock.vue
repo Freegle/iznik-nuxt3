@@ -17,7 +17,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useMiscStore } from '~/stores/misc'
 
@@ -26,51 +27,47 @@ const START = '1400'
 const STARTHOUR = 13
 const END = '1700'
 
-export default {
-  props: {
-    colorClass: {
-      type: String,
-      required: false,
-      default: 'text-white',
-    },
+defineProps({
+  colorClass: {
+    type: String,
+    required: false,
+    default: 'text-white',
   },
-  setup() {
-    const miscStore = useMiscStore()
-    return { miscStore }
-  },
-  data: function () {
-    return {
-      nextOne: null,
-    }
-  },
-  computed: {
-    timeNow() {
-      return this.miscStore.time ? dayjs().format('HHmm') : ''
-    },
-    fromNow() {
-      return this.miscStore.time && this.nextOne ? this.nextOne : null
-    },
-    today() {
-      const d = dayjs()
-      return d.day() === DAY_OF_WEEK && this.timeNow < START
-    },
-    now() {
-      return (
-        dayjs().day() === DAY_OF_WEEK &&
-        this.timeNow >= START &&
-        this.timeNow <= END
-      )
-    },
-  },
-  mounted() {
-    let d = dayjs().hour(STARTHOUR).minute(0).second(0)
+})
 
-    if (d.day() < DAY_OF_WEEK) {
-      d = d.day(DAY_OF_WEEK)
-    } else {
-      d = d.add(1, 'week').day(DAY_OF_WEEK)
-    }
-    this.nextOne = d
-  },
-}
+const miscStore = useMiscStore()
+
+const nextOne = ref(null)
+
+const timeNow = computed(() => {
+  return miscStore.time ? dayjs().format('HHmm') : ''
+})
+
+const fromNow = computed(() => {
+  return miscStore.time && nextOne.value ? nextOne.value : null
+})
+
+const today = computed(() => {
+  const d = dayjs()
+  return d.day() === DAY_OF_WEEK && timeNow.value < START
+})
+
+const now = computed(() => {
+  return (
+    dayjs().day() === DAY_OF_WEEK &&
+    timeNow.value >= START &&
+    timeNow.value <= END
+  )
+})
+
+onMounted(() => {
+  let d = dayjs().hour(STARTHOUR).minute(0).second(0)
+
+  if (d.day() < DAY_OF_WEEK) {
+    d = d.day(DAY_OF_WEEK)
+  } else {
+    d = d.add(1, 'week').day(DAY_OF_WEEK)
+  }
+  nextOne.value = d
+})
 </script>

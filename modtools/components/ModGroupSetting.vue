@@ -62,185 +62,173 @@
     </div>
   </b-form-group>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useModGroupStore } from '@/stores/modgroup'
 
-export default {
-  props: {
-    name: {
-      type: String,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: true,
-    },
-    label: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    type: {
-      type: String,
-      required: false,
-      default: 'input',
-    },
-    step: {
-      type: Number,
-      required: false,
-      default: 1,
-    },
-    rows: {
-      type: Number,
-      required: false,
-      default: 3,
-    },
-    toggleWidth: {
-      type: Number,
-      required: false,
-      default: 150,
-    },
-    toggleChecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    toggleUnchecked: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  name: {
+    type: String,
+    required: true,
   },
-  setup() {
-    const modGroupStore = useModGroupStore()
-    return { modGroupStore }
+  groupid: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      value: null,
-      mounted: false, // Stops save during load process
+  label: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  type: {
+    type: String,
+    required: false,
+    default: 'input',
+  },
+  step: {
+    type: Number,
+    required: false,
+    default: 1,
+  },
+  rows: {
+    type: Number,
+    required: false,
+    default: 3,
+  },
+  toggleWidth: {
+    type: Number,
+    required: false,
+    default: 150,
+  },
+  toggleChecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  toggleUnchecked: {
+    type: String,
+    required: false,
+    default: null,
+  },
+})
+
+const modGroupStore = useModGroupStore()
+
+const value = ref(null)
+const mounted = ref(false)
+
+const group = computed(() => modGroupStore.get(props.groupid))
+
+const readonly = computed(() => group.value?.myrole !== 'Owner')
+
+/**
+ * From https://stackoverflow.com/questions/18936915/dynamically-set-property-of-nested-object
+ *
+ * Dynamically sets a deeply nested value in an object.
+ * Optionally "bores" a path to it if its undefined.
+ */
+function setDeep(obj, path, val, setrecursively = false) {
+  let level = 0
+
+  path.reduce((a, b) => {
+    level++
+
+    if (
+      setrecursively &&
+      typeof a[b] === 'undefined' &&
+      level !== path.length
+    ) {
+      a[b] = {}
+      return a[b]
     }
-  },
-  computed: {
-    readonly() {
-      return this.group.myrole !== 'Owner'
-    },
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-  },
-  watch: {
-    groupid(newval) {
-      this.getValueFromGroup()
-    },
-  },
-  mounted() {
-    this.getValueFromGroup()
-    this.$nextTick(() => {
-      this.mounted = true
-    })
-  },
-  methods: {
-    /**
-     * From https://stackoverflow.com/questions/18936915/dynamically-set-property-of-nested-object
-     *
-     * Dynamically sets a deeply nested value in an object.
-     * Optionally "bores" a path to it if its undefined.
-     * @function
-     * @param {!object} obj  - The object which contains the value you want to change/set.
-     * @param {!array} path  - The array representation of path to the value you want to change/set.
-     * @param {!mixed} value - The value you want to set it to.
-     * @param {boolean} setrecursively - If true, will set value of non-existing path as well.
-     */
-    setDeep(obj, path, value, setrecursively = false) {
-      let level = 0
 
-      path.reduce((a, b) => {
-        level++
-
-        if (
-          setrecursively &&
-          typeof a[b] === 'undefined' &&
-          level !== path.length
-        ) {
-          a[b] = {}
-          return a[b]
-        }
-
-        if (level === path.length) {
-          a[b] = value
-          return value
-        } else {
-          return a[b]
-        }
-      }, obj)
-    },
-
-    async save(callbackorvalue) {
-      if (this.mounted) {
-        const data = {
-          id: this.groupid,
-        }
-
-        const p = this.name.indexOf('.')
-        let val =
-          typeof callbackorvalue !== 'function' ? callbackorvalue : this.value
-
-        if (typeof val === 'boolean') {
-          val = val ? 1 : 0
-        }
-
-        if (p === -1) {
-          // Top level property
-          data[this.name] = val
-        } else {
-          // Lower down - we send the top one but we need to modify it wherever it is.
-          const top = this.name.substring(0, p)
-          const topobj = this.modGroupStore.get(this.groupid)
-
-          this.setDeep(topobj, this.name.split('.'), val)
-          data[top] = topobj[top]
-        }
-
-        await this.modGroupStore.updateMT(data)
-      }
-      if (typeof callbackorvalue === 'function') callbackorvalue()
-    },
-    getValueFromGroup() {
-      let obj = this.modGroupStore.get(this.groupid)
-
-      if (obj) {
-        let name = this.name
-        let p
-
-        do {
-          p = name.indexOf('.')
-
-          if (p === -1) {
-            // Got there.
-            if (this.type === 'toggle') {
-              this.value =
-                typeof obj[name] === 'boolean'
-                  ? obj[name]
-                  : Boolean(parseInt(obj[name]))
-            } else {
-              this.value = obj[name]
-            }
-          } else {
-            const l1 = name.substring(0, p)
-            const l2 = name.substring(p + 1)
-            obj = obj[l1]
-            name = l2
-          }
-        } while (p !== -1 && obj)
-      }
-    },
-  },
+    if (level === path.length) {
+      a[b] = val
+      return val
+    } else {
+      return a[b]
+    }
+  }, obj)
 }
+
+function getValueFromGroup() {
+  let obj = modGroupStore.get(props.groupid)
+
+  if (obj) {
+    let name = props.name
+    let p
+
+    do {
+      p = name.indexOf('.')
+
+      if (p === -1) {
+        // Got there.
+        if (props.type === 'toggle') {
+          value.value =
+            typeof obj[name] === 'boolean'
+              ? obj[name]
+              : Boolean(parseInt(obj[name]))
+        } else {
+          value.value = obj[name]
+        }
+      } else {
+        const l1 = name.substring(0, p)
+        const l2 = name.substring(p + 1)
+        obj = obj[l1]
+        name = l2
+      }
+    } while (p !== -1 && obj)
+  }
+}
+
+async function save(callbackorvalue) {
+  if (mounted.value) {
+    const data = {
+      id: props.groupid,
+    }
+
+    const p = props.name.indexOf('.')
+    let val =
+      typeof callbackorvalue !== 'function' ? callbackorvalue : value.value
+
+    if (typeof val === 'boolean') {
+      val = val ? 1 : 0
+    }
+
+    if (p === -1) {
+      // Top level property
+      data[props.name] = val
+    } else {
+      // Lower down - we send the top one but we need to modify it wherever it is.
+      const top = props.name.substring(0, p)
+      const topobj = modGroupStore.get(props.groupid)
+
+      setDeep(topobj, props.name.split('.'), val)
+      data[top] = topobj[top]
+    }
+
+    await modGroupStore.updateMT(data)
+  }
+  if (typeof callbackorvalue === 'function') callbackorvalue()
+}
+
+watch(
+  () => props.groupid,
+  () => {
+    getValueFromGroup()
+  }
+)
+
+onMounted(() => {
+  getValueFromGroup()
+  nextTick(() => {
+    mounted.value = true
+  })
+})
 </script>
 <style scoped lang="scss">
 //@import 'color-vars';

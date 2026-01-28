@@ -297,136 +297,135 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useMiscStore } from '@/stores/misc'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const miscStore = useMiscStore()
-    const modConfigStore = useModConfigStore()
-    const { myid } = useMe()
-    return { miscStore, modConfigStore, myid }
+const miscStore = useMiscStore()
+const modConfigStore = useModConfigStore()
+const { myid } = useMe()
+
+const loading = ref(false)
+const showUsing = ref(false)
+const newconfigname = ref(null)
+const copyconfigname = ref(null)
+const showDeleteModal = ref(false)
+
+const configid = computed({
+  get() {
+    const config = miscStore.get('settingsconfig')
+    return config || null
   },
-  data: function () {
-    return {
-      loading: false,
-      showUsing: false,
-      newconfigname: null,
-      copyconfigname: null,
-      showDeleteModal: false,
+  async set(newval) {
+    await miscStore.set({ key: 'settingsconfig', value: newval })
+  },
+})
+
+const locked = computed(() => {
+  return Boolean(
+    config.value &&
+      config.value.protected &&
+      parseInt(config.value.createdby) !== myid.value
+  )
+})
+
+const configOptions = computed(() => {
+  const ret = [
+    {
+      value: null,
+      text: '-- Please choose --',
+    },
+  ]
+
+  const configs = modConfigStore.configs
+
+  configs.forEach((c) => {
+    ret.push({
+      value: c.id,
+      text: c.name,
+    })
+  })
+
+  return ret
+})
+
+const config = computed(() => {
+  return modConfigStore.current
+})
+
+watch(
+  configid,
+  async (newval) => {
+    loading.value = true
+    showUsing.value = false
+
+    if (newval) {
+      await modConfigStore.fetchConfig({
+        id: newval,
+        configuring: true,
+      })
     }
+
+    loading.value = false
   },
-  computed: {
-    configid: {
-      get() {
-        const config = this.miscStore.get('settingsconfig')
-        return config || null
-      },
-      async set(newval) {
-        await this.miscStore.set({ key: 'settingsconfig', value: newval })
-      },
-    },
-    locked() {
-      return Boolean(
-        this.config &&
-          this.config.protected &&
-          parseInt(this.config.createdby) !== this.myid
-      )
-    },
-    configOptions() {
-      const ret = [
-        {
-          value: null,
-          text: '-- Please choose --',
-        },
-      ]
+  { immediate: true }
+)
 
-      const configs = this.modConfigStore.configs
+onMounted(() => {
+  modConfigStore.fetch({
+    all: true,
+  })
+})
 
-      configs.forEach((c) => {
-        ret.push({
-          value: c.id,
-          text: c.name,
-        })
-      })
+onBeforeUnmount(() => {
+  // Refetch the configs into the session so that if we go to a page where the config is used, the changes will
+  // be reflected.
+  modConfigStore.fetch({
+    all: true,
+  })
+})
 
-      return ret
-    },
-    config() {
-      return this.modConfigStore.current
-    },
-  },
-  watch: {
-    configid: {
-      immediate: true,
-      handler: async function (newval) {
-        this.loading = true
-        this.showUsing = false
+async function create(callback) {
+  configid.value = await modConfigStore.add({
+    name: newconfigname.value,
+    configuring: true,
+  })
 
-        if (newval) {
-          await this.modConfigStore.fetchConfig({
-            id: newval,
-            configuring: true,
-          })
-        }
+  modConfigStore.fetch({
+    all: true,
+  })
+  callback()
+}
 
-        this.loading = false
-      },
-    },
-  },
-  mounted() {
-    this.modConfigStore.fetch({
-      all: true,
-    })
-  },
-  beforeUnmount() {
-    // Refetch the configs into the session so that if we go to a page where the config is used, the changes will
-    // be reflected.
-    this.modConfigStore.fetch({
-      all: true,
-    })
-  },
-  methods: {
-    async create(callback) {
-      this.configid = await this.modConfigStore.add({
-        name: this.newconfigname,
-        configuring: true,
-      })
+async function copy(callback) {
+  configid.value = await modConfigStore.add({
+    name: copyconfigname.value,
+    id: config.value.id,
+    configuring: true,
+  })
 
-      this.modConfigStore.fetch({
-        all: true,
-      })
-      callback()
-    },
-    async copy(callback) {
-      this.configid = await this.modConfigStore.add({
-        name: this.copyconfigname,
-        id: this.config.id,
-        configuring: true,
-      })
+  modConfigStore.fetch({
+    all: true,
+  })
+  callback()
+}
 
-      this.modConfigStore.fetch({
-        all: true,
-      })
-      callback()
-    },
-    deleteIt() {
-      this.showDeleteModal = true
-    },
-    async deleteConfirmed() {
-      await this.modConfigStore.delete({
-        id: this.configid,
-      })
+function deleteIt() {
+  showDeleteModal.value = true
+}
 
-      this.modConfigStore.fetch({
-        all: true,
-      })
+async function deleteConfirmed() {
+  await modConfigStore.delete({
+    id: configid.value,
+  })
 
-      this.configid = null
-    },
-  },
+  modConfigStore.fetch({
+    all: true,
+  })
+
+  configid.value = null
 }
 </script>
 <style scoped lang="scss">

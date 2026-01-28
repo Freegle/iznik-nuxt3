@@ -669,6 +669,15 @@ export function useReplyStateMachine(messageId) {
         newUserPassword.value = ret.password
         loggedInEver.value = true
 
+        // Set auth tokens BEFORE fetchMe, otherwise fetchMe will use stale credentials.
+        // The registration response contains JWT and persistent tokens for the new user.
+        if (ret.jwt && ret.persistent) {
+          log('Setting auth from registration response', {
+            userid: ret.persistent?.userid,
+          })
+          authStore.setAuth(ret.jwt, ret.persistent)
+        }
+
         // Persist the new user flag
         persistState()
 

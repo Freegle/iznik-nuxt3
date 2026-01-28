@@ -83,243 +83,238 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import { useSystemLogsStore } from '../stores/systemlogs'
-import ModSystemLogSearch from './ModSystemLogSearch.vue'
-import ModSystemLogTreeNode from './ModSystemLogTreeNode.vue'
 import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  components: {
-    ModSystemLogSearch,
-    ModSystemLogTreeNode,
+const props = defineProps({
+  userid: {
+    type: [Number, String],
+    default: null,
   },
-  props: {
-    userid: {
-      type: [Number, String],
-      default: null,
-    },
-    groupid: {
-      type: [Number, String],
-      default: null,
-    },
-    msgid: {
-      type: [Number, String],
-      default: null,
-    },
+  groupid: {
+    type: [Number, String],
+    default: null,
   },
-  emits: ['update:userid', 'update:groupid', 'update:msgid'],
-  setup() {
-    const systemLogsStore = useSystemLogsStore()
-    const userStore = useUserStore()
-    const groupStore = useGroupStore()
-    return { systemLogsStore, userStore, groupStore }
+  msgid: {
+    type: [Number, String],
+    default: null,
   },
-  data() {
-    return {
-      distance: 1000,
-      localUserid: null,
-      localGroupid: null,
-      localMsgid: null,
+})
+
+const emit = defineEmits(['update:userid', 'update:groupid', 'update:msgid'])
+
+const systemLogsStore = useSystemLogsStore()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
+
+const treeNodes = ref(null)
+const distance = ref(1000)
+const localUserid = ref(null)
+const localGroupid = ref(null)
+const localMsgid = ref(null)
+
+const logsAsTree = computed(() => systemLogsStore.logsAsTree)
+const loading = computed(() => systemLogsStore.loading)
+const error = computed(() => systemLogsStore.error)
+const hasMore = computed(() => systemLogsStore.hasMore)
+const isFilteringByUser = computed(() => !!localUserid.value)
+const hasLogs = computed(() => logsAsTree.value.length > 0)
+
+const emptyStateHint = computed(() => {
+  const filters = []
+  if (localUserid.value) {
+    filters.push(`user #${localUserid.value}`)
+  }
+  if (systemLogsStore.email) {
+    filters.push(`email "${systemLogsStore.email}"`)
+  }
+  if (localGroupid.value) {
+    filters.push(`group #${localGroupid.value}`)
+  }
+  if (localMsgid.value) {
+    filters.push(`message #${localMsgid.value}`)
+  }
+  if (systemLogsStore.ipAddress) {
+    filters.push(`IP ${systemLogsStore.ipAddress}`)
+  }
+
+  const timeRange = systemLogsStore.timeRange
+  const timeLabels = {
+    '1h': 'the last hour',
+    '24h': 'the last 24 hours',
+    '7d': 'the last 7 days',
+    '30d': 'the last 30 days',
+    '365d': 'the last year',
+    ever: 'all time',
+  }
+  const timeLabel = timeLabels[timeRange] || timeRange
+
+  if (filters.length > 0) {
+    return `Searched for ${filters.join(', ')} in ${timeLabel}.`
+  }
+  return `No activity recorded in ${timeLabel}. Try expanding the time range.`
+})
+
+watch(
+  () => props.userid,
+  (val) => {
+    localUserid.value = val
+    systemLogsStore.setUserFilter(val)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.groupid,
+  (val) => {
+    localGroupid.value = val
+    systemLogsStore.setGroupFilter(val)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.msgid,
+  (val) => {
+    localMsgid.value = val
+    systemLogsStore.setMsgFilter(val)
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  const config = useRuntimeConfig()
+  systemLogsStore.init(config)
+  fetchLogs()
+})
+
+async function fetchLogs() {
+  systemLogsStore.clear()
+  await systemLogsStore.fetchSummaries()
+  await batchFetchEntities()
+}
+
+async function batchFetchEntities() {
+  const { userIds, groupIds } = systemLogsStore.entityIds
+
+  // Batch fetch users that aren't already in the store
+  const missingUserIds = userIds.filter((id) => !userStore.list[id])
+  if (missingUserIds.length > 0) {
+    // Fetch in batches of 20 to avoid overloading the API
+    const BATCH_SIZE = 20
+    for (let i = 0; i < missingUserIds.length; i += BATCH_SIZE) {
+      const batch = missingUserIds.slice(i, i + BATCH_SIZE)
+      await Promise.all(
+        batch.map((id) => userStore.fetch(id).catch(() => null))
+      )
     }
-  },
-  computed: {
-    logsAsTree() {
-      return this.systemLogsStore.logsAsTree
-    },
-    loading() {
-      return this.systemLogsStore.loading
-    },
-    error() {
-      return this.systemLogsStore.error
-    },
-    hasMore() {
-      return this.systemLogsStore.hasMore
-    },
-    isFilteringByUser() {
-      return !!this.localUserid
-    },
-    hasLogs() {
-      return this.logsAsTree.length > 0
-    },
-    emptyStateHint() {
-      const filters = []
-      if (this.localUserid) {
-        filters.push(`user #${this.localUserid}`)
-      }
-      if (this.systemLogsStore.email) {
-        filters.push(`email "${this.systemLogsStore.email}"`)
-      }
-      if (this.localGroupid) {
-        filters.push(`group #${this.localGroupid}`)
-      }
-      if (this.localMsgid) {
-        filters.push(`message #${this.localMsgid}`)
-      }
-      if (this.systemLogsStore.ipAddress) {
-        filters.push(`IP ${this.systemLogsStore.ipAddress}`)
-      }
+  }
 
-      const timeRange = this.systemLogsStore.timeRange
-      const timeLabels = {
-        '1h': 'the last hour',
-        '24h': 'the last 24 hours',
-        '7d': 'the last 7 days',
-        '30d': 'the last 30 days',
-        '365d': 'the last year',
-        ever: 'all time',
-      }
-      const timeLabel = timeLabels[timeRange] || timeRange
+  // Batch fetch groups that aren't already in the store
+  const missingGroupIds = groupIds.filter((id) => !groupStore.list[id])
+  if (missingGroupIds.length > 0) {
+    const BATCH_SIZE = 20
+    for (let i = 0; i < missingGroupIds.length; i += BATCH_SIZE) {
+      const batch = missingGroupIds.slice(i, i + BATCH_SIZE)
+      await Promise.all(
+        batch.map((id) => groupStore.fetch(id).catch(() => null))
+      )
+    }
+  }
+}
 
-      if (filters.length > 0) {
-        return `Searched for ${filters.join(', ')} in ${timeLabel}.`
-      }
-      return `No activity recorded in ${timeLabel}. Try expanding the time range.`
-    },
-  },
-  watch: {
-    userid: {
-      immediate: true,
-      handler(val) {
-        this.localUserid = val
-        this.systemLogsStore.setUserFilter(val)
-      },
-    },
-    groupid: {
-      immediate: true,
-      handler(val) {
-        this.localGroupid = val
-        this.systemLogsStore.setGroupFilter(val)
-      },
-    },
-    msgid: {
-      immediate: true,
-      handler(val) {
-        this.localMsgid = val
-        this.systemLogsStore.setMsgFilter(val)
-      },
-    },
-  },
-  mounted() {
-    const config = useRuntimeConfig()
-    this.systemLogsStore.init(config)
-    this.fetchLogs()
-  },
-  methods: {
-    async fetchLogs() {
-      this.systemLogsStore.clear()
-      await this.systemLogsStore.fetchSummaries()
-      await this.batchFetchEntities()
-    },
-    async batchFetchEntities() {
-      const { userIds, groupIds } = this.systemLogsStore.entityIds
+async function loadMore($state) {
+  if (!hasMore.value || loading.value) {
+    $state.complete()
+    return
+  }
 
-      // Batch fetch users that aren't already in the store
-      const missingUserIds = userIds.filter((id) => !this.userStore.list[id])
-      if (missingUserIds.length > 0) {
-        // Fetch in batches of 20 to avoid overloading the API
-        const BATCH_SIZE = 20
-        for (let i = 0; i < missingUserIds.length; i += BATCH_SIZE) {
-          const batch = missingUserIds.slice(i, i + BATCH_SIZE)
-          await Promise.all(
-            batch.map((id) => this.userStore.fetch(id).catch(() => null))
-          )
-        }
-      }
+  const currentCount = systemLogsStore.summaries.length
+  await systemLogsStore.fetchSummaries({
+    append: true,
+    end: systemLogsStore.lastTimestamp,
+  })
+  if (systemLogsStore.summaries.length === currentCount) {
+    $state.complete()
+  } else {
+    await batchFetchEntities()
+    $state.loaded()
+  }
+}
 
-      // Batch fetch groups that aren't already in the store
-      const missingGroupIds = groupIds.filter((id) => !this.groupStore.list[id])
-      if (missingGroupIds.length > 0) {
-        const BATCH_SIZE = 20
-        for (let i = 0; i < missingGroupIds.length; i += BATCH_SIZE) {
-          const batch = missingGroupIds.slice(i, i + BATCH_SIZE)
-          await Promise.all(
-            batch.map((id) => this.groupStore.fetch(id).catch(() => null))
-          )
-        }
+function expandAllNodes() {
+  // Expand all tree nodes via refs.
+  if (treeNodes.value) {
+    const nodes = Array.isArray(treeNodes.value)
+      ? treeNodes.value
+      : [treeNodes.value]
+    nodes.forEach((node) => {
+      if (node.expand) {
+        node.expand()
       }
-    },
-    async loadMore($state) {
-      if (!this.hasMore || this.loading) {
-        $state.complete()
-        return
-      }
+    })
+  }
+}
 
-      const currentCount = this.systemLogsStore.summaries.length
-      await this.systemLogsStore.fetchSummaries({
-        append: true,
-        end: this.systemLogsStore.lastTimestamp,
-      })
-      if (this.systemLogsStore.summaries.length === currentCount) {
-        $state.complete()
-      } else {
-        await this.batchFetchEntities()
-        $state.loaded()
-      }
-    },
-    expandAllNodes() {
-      // Expand all tree nodes via refs.
-      if (this.$refs.treeNodes) {
-        const nodes = Array.isArray(this.$refs.treeNodes)
-          ? this.$refs.treeNodes
-          : [this.$refs.treeNodes]
-        nodes.forEach((node) => {
-          if (node.expand) {
-            node.expand()
-          }
-        })
-      }
-    },
-    clearError() {
-      this.systemLogsStore.error = null
-    },
-    updateUserid(val) {
-      this.localUserid = val
-      this.systemLogsStore.setUserFilter(val)
-      this.$emit('update:userid', val)
-    },
-    updateGroupid(val) {
-      this.localGroupid = val
-      this.systemLogsStore.setGroupFilter(val)
-      this.$emit('update:groupid', val)
-    },
-    updateMsgid(val) {
-      this.localMsgid = val
-      this.systemLogsStore.setMsgFilter(val)
-      this.$emit('update:msgid', val)
-    },
-    clearUserFilter() {
-      this.localUserid = null
-      this.systemLogsStore.setUserFilter(null)
-      this.$emit('update:userid', null)
-      this.fetchLogs()
-    },
-    clearGroupFilter() {
-      this.localGroupid = null
-      this.systemLogsStore.setGroupFilter(null)
-      this.$emit('update:groupid', null)
-      this.fetchLogs()
-    },
-    clearMsgFilter() {
-      this.localMsgid = null
-      this.systemLogsStore.setMsgFilter(null)
-      this.$emit('update:msgid', null)
-      this.fetchLogs()
-    },
-    filterByTrace(traceId) {
-      this.systemLogsStore.setTraceFilter(traceId)
-      this.fetchLogs()
-    },
-    filterBySession(sessionId) {
-      this.systemLogsStore.setSessionFilter(sessionId)
-      this.fetchLogs()
-    },
-    filterByIp(ip) {
-      this.systemLogsStore.setIpFilter(ip)
-      this.fetchLogs()
-    },
-  },
+function clearError() {
+  systemLogsStore.error = null
+}
+
+function updateUserid(val) {
+  localUserid.value = val
+  systemLogsStore.setUserFilter(val)
+  emit('update:userid', val)
+}
+
+function updateGroupid(val) {
+  localGroupid.value = val
+  systemLogsStore.setGroupFilter(val)
+  emit('update:groupid', val)
+}
+
+function updateMsgid(val) {
+  localMsgid.value = val
+  systemLogsStore.setMsgFilter(val)
+  emit('update:msgid', val)
+}
+
+function clearUserFilter() {
+  localUserid.value = null
+  systemLogsStore.setUserFilter(null)
+  emit('update:userid', null)
+  fetchLogs()
+}
+
+function clearGroupFilter() {
+  localGroupid.value = null
+  systemLogsStore.setGroupFilter(null)
+  emit('update:groupid', null)
+  fetchLogs()
+}
+
+function clearMsgFilter() {
+  localMsgid.value = null
+  systemLogsStore.setMsgFilter(null)
+  emit('update:msgid', null)
+  fetchLogs()
+}
+
+function filterByTrace(traceId) {
+  systemLogsStore.setTraceFilter(traceId)
+  fetchLogs()
+}
+
+function filterBySession(sessionId) {
+  systemLogsStore.setSessionFilter(sessionId)
+  fetchLogs()
+}
+
+function filterByIp(ip) {
+  systemLogsStore.setIpFilter(ip)
+  fetchLogs()
 }
 </script>
 

@@ -38,178 +38,173 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, nextTick } from 'vue'
 import saveAs from 'save-file'
 import { createObjectCsvWriter } from 'csv-writer'
 import { useMemberStore } from '~/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
 import { useModGroupStore } from '~/stores/modgroup'
 
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const modGroupStore = useModGroupStore()
-    const memberStore = useMemberStore()
-    const { modal, show, hide } = useOurModal()
-    return { modGroupStore, memberStore, modal, show, hide }
-  },
-  data: function () {
-    return {
-      showExportModal: false,
-      context: null,
-      cancelled: false,
-      limit: 100,
-      fetched: 0,
-      exportList: [],
-      modalButtonLabel: 'Cancel',
+})
+
+const modGroupStore = useModGroupStore()
+const memberStore = useMemberStore()
+const { modal } = useOurModal()
+
+const showExportModal = ref(false)
+const context = ref(null)
+const cancelled = ref(false)
+const limit = 100
+const fetched = ref(0)
+const exportList = ref([])
+const modalButtonLabel = ref('Cancel')
+
+const group = computed(() => modGroupStore.get(props.groupid))
+
+const admin = computed(() => group.value?.myrole === 'Owner')
+
+const progressValue = computed(() => {
+  return group.value && group.value.membercount
+    ? Math.round((100 * fetched.value) / group.value.membercount)
+    : 0
+})
+
+function cancelit() {
+  cancelled.value = true
+  exportList.value = []
+  showExportModal.value = false
+}
+
+async function exportChunk() {
+  if (!cancelled.value) {
+    await memberStore.clear()
+    await memberStore.fetchMembers({
+      groupid: props.groupid,
+      collection: 'Approved',
+      modtools: true,
+      summary: false,
+      context: context.value,
+      limit,
+    })
+  }
+
+  const members = memberStore.getByGroup(props.groupid)
+  fetched.value += members.length
+
+  members.forEach((member) => {
+    const otheremails = []
+    member.otheremails.forEach((email) => {
+      if (email.email !== member.email) {
+        otheremails.push(email.email)
+      }
+    })
+
+    const comments = []
+    member.comments.forEach((comment) => {
+      if (comment.user1) {
+        comments.push(comment.user1)
+      }
+      if (comment.user2) {
+        comments.push(comment.user2)
+      }
+      if (comment.user3) {
+        comments.push(comment.user3)
+      }
+      if (comment.user4) {
+        comments.push(comment.user4)
+      }
+      if (comment.user5) {
+        comments.push(comment.user5)
+      }
+      if (comment.user6) {
+        comments.push(comment.user6)
+      }
+      if (comment.user7) {
+        comments.push(comment.user7)
+      }
+      if (comment.user8) {
+        comments.push(comment.user8)
+      }
+      if (comment.user9) {
+        comments.push(comment.user9)
+      }
+      if (comment.user10) {
+        comments.push(comment.user10)
+      }
+      if (comment.user11) {
+        comments.push(comment.user11)
+      }
+    })
+    // List seems to include some members already returned so ignore duplicates
+    if (!exportList.value.find((m) => m.id === member.userid)) {
+      exportList.value.push({
+        id: member.userid,
+        name: member.displayname,
+        email: member.email,
+        joined: member.joined,
+        lastactive: member.lastaccess,
+        role: member.role,
+        otheremails: otheremails.join(', '),
+        settings: JSON.stringify(member.settings, null, 0),
+        postingstatus: member.ourpostingstatus,
+        bouncing: member.bouncing,
+        trustlevel: member.trustlevel,
+        comments: comments.join('; '),
+      })
     }
-  },
-  computed: {
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-    progressValue() {
-      return this.group && this.group.membercount
-        ? Math.round((100 * this.fetched) / this.group.membercount)
-        : 0
-    },
-  },
-  methods: {
-    download() {
-      this.modalButtonLabel = 'Cancel'
-      this.context = null
-      this.cancelled = false
-      this.exportList = []
-      this.fetched = 0
-      this.showExportModal = true
-      this.$nextTick(() => {
-        this.modal.show()
-        this.exportChunk()
-      })
-    },
-    cancelit() {
-      this.cancelled = true
-      this.exportList = []
-      this.showExportModal = false
-    },
-    async exportChunk() {
-      if (!this.cancelled) {
-        await this.memberStore.clear()
-        await this.memberStore.fetchMembers({
-          groupid: this.groupid,
-          collection: 'Approved',
-          modtools: true,
-          summary: false,
-          context: this.context,
-          limit: this.limit,
-        })
-      }
+  })
 
-      const members = this.memberStore.getByGroup(this.groupid)
-      this.fetched += members.length
+  context.value = memberStore.context
+  if (!cancelled.value && members.length) {
+    // More to get
+    nextTick(() => {
+      exportChunk()
+    })
+  } else {
+    // Got them all.
+    const writer = createObjectCsvWriter({
+      path: 'members.csv',
+      header: [
+        { id: 'id', title: 'Id' },
+        { id: 'name', title: 'Name' },
+        { id: 'email', title: 'Email' },
+        { id: 'joined', title: 'Joined' },
+        { id: 'lastactive', title: 'Last Active' },
+        { id: 'role', title: 'Role' },
+        { id: 'otheremails', title: 'Other Emails' },
+        { id: 'settings', title: 'Settings' },
+        { id: 'postingstatus', title: 'Posting Status' },
+        { id: 'bouncing', title: 'Bouncing' },
+        { id: 'trustlevel', title: 'MicroVolunteering' },
+        { id: 'comments', title: 'Comments' },
+      ],
+    })
+    const str =
+      writer.csvStringifier.getHeaderString() +
+      writer.csvStringifier.stringifyRecords(exportList.value)
+    const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
+    modalButtonLabel.value = 'Done'
+    await saveAs(blob, 'members.csv')
+    showExportModal.value = false
+  }
+}
 
-      members.forEach((member) => {
-        const otheremails = []
-        member.otheremails.forEach((email) => {
-          if (email.email !== member.email) {
-            otheremails.push(email.email)
-          }
-        })
-
-        const comments = []
-        member.comments.forEach((comment) => {
-          if (comment.user1) {
-            comments.push(comment.user1)
-          }
-          if (comment.user2) {
-            comments.push(comment.user2)
-          }
-          if (comment.user3) {
-            comments.push(comment.user3)
-          }
-          if (comment.user4) {
-            comments.push(comment.user4)
-          }
-          if (comment.user5) {
-            comments.push(comment.user5)
-          }
-          if (comment.user6) {
-            comments.push(comment.user6)
-          }
-          if (comment.user7) {
-            comments.push(comment.user7)
-          }
-          if (comment.user8) {
-            comments.push(comment.user8)
-          }
-          if (comment.user9) {
-            comments.push(comment.user9)
-          }
-          if (comment.user10) {
-            comments.push(comment.user10)
-          }
-          if (comment.user11) {
-            comments.push(comment.user11)
-          }
-        })
-        // List seems to include some members already returned so ignore duplicates
-        if (!this.exportList.find((m) => m.id === member.userid)) {
-          this.exportList.push({
-            id: member.userid,
-            name: member.displayname,
-            email: member.email,
-            joined: member.joined,
-            lastactive: member.lastaccess,
-            role: member.role,
-            otheremails: otheremails.join(', '),
-            settings: JSON.stringify(member.settings, null, 0),
-            postingstatus: member.ourpostingstatus,
-            bouncing: member.bouncing,
-            trustlevel: member.trustlevel,
-            comments: comments.join('; '),
-          })
-        }
-      })
-
-      this.context = this.memberStore.context
-      if (!this.cancelled && members.length) {
-        // More to get
-        this.$nextTick(() => {
-          this.exportChunk()
-        })
-      } else {
-        // Got them all.
-        const writer = createObjectCsvWriter({
-          path: 'members.csv',
-          header: [
-            { id: 'id', title: 'Id' },
-            { id: 'name', title: 'Name' },
-            { id: 'email', title: 'Email' },
-            { id: 'joined', title: 'Joined' },
-            { id: 'lastactive', title: 'Last Active' },
-            { id: 'role', title: 'Role' },
-            { id: 'otheremails', title: 'Other Emails' },
-            { id: 'settings', title: 'Settings' },
-            { id: 'postingstatus', title: 'Posting Status' },
-            { id: 'bouncing', title: 'Bouncing' },
-            { id: 'trustlevel', title: 'MicroVolunteering' },
-            { id: 'comments', title: 'Comments' },
-          ],
-        })
-        const str =
-          writer.csvStringifier.getHeaderString() +
-          writer.csvStringifier.stringifyRecords(this.exportList)
-        const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
-        this.modalButtonLabel = 'Done'
-        await saveAs(blob, 'members.csv')
-        this.showExportModal = false
-      }
-    },
-  },
+function download() {
+  modalButtonLabel.value = 'Cancel'
+  context.value = null
+  cancelled.value = false
+  exportList.value = []
+  fetched.value = 0
+  showExportModal.value = true
+  nextTick(() => {
+    modal.value.show()
+    exportChunk()
+  })
 }
 </script>

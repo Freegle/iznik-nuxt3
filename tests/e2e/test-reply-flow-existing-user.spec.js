@@ -300,8 +300,8 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     // Log out from poster
     await logoutIfLoggedIn(page)
 
-    // Navigate via explore page
-    await navigateToMessageViaExplore(page, 'FreeglePlayground')
+    // Navigate via explore page and find our specific message
+    await navigateToMessageViaExplore(page, 'FreeglePlayground', uniqueItem)
     await clickReplyButton(page)
 
     // Fill in reply with existing user's email

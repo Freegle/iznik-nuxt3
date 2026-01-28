@@ -4,31 +4,27 @@
     <v-icon v-else icon="check" />
   </b-button>
 </template>
-<script>
-export default {
-  props: {
-    value: {
-      type: String,
-      required: true,
-    },
+<script setup>
+import { ref } from 'vue'
+
+const props = defineProps({
+  value: {
+    type: String,
+    required: true,
   },
-  data: function () {
-    return {
-      saving: false,
+})
+
+const saving = ref(false)
+
+async function copy() {
+  saving.value = true
+  if (process.client) {
+    if (process.env.IS_APP) {
+      window.cordova.plugins.clipboard.copy(props.value)
+    } else {
+      await navigator.clipboard.writeText(props.value)
     }
-  },
-  methods: {
-    async copy() {
-      this.saving = true
-      if (process.client) {
-        if (process.env.IS_APP) {
-          window.cordova.plugins.clipboard.copy(this.selectedText)
-        } else {
-          await navigator.clipboard.writeText(this.value)
-        }
-      }
-      setTimeout(() => (this.saving = false), 1000)
-    },
-  },
+  }
+  setTimeout(() => (saving.value = false), 1000)
 }
 </script>

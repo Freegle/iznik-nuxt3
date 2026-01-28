@@ -24,36 +24,28 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useMe } from '~/composables/useMe'
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-  },
-  setup() {
-    const { supportOrAdmin } = useMe()
-    return { supportOrAdmin }
-  },
-  data: function () {
-    return {
-      unbouncing: false,
-      unbounced: false,
-    }
-  },
-  methods: {
-    async unbounce() {
-      this.unbouncing = true
 
-      const authStore = useAuthStore()
-      await authStore.unbounceMT(this.user.id)
-
-      this.unbouncing = false
-      this.unbounced = true
-    },
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
   },
+})
+
+const authStore = useAuthStore()
+const { supportOrAdmin } = useMe()
+
+const unbouncing = ref(false)
+const unbounced = ref(false)
+
+async function unbounce() {
+  unbouncing.value = true
+  await authStore.unbounceMT(props.user.id)
+  unbouncing.value = false
+  unbounced.value = true
 }
 </script>

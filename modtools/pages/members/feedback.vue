@@ -97,193 +97,191 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import dayjs from 'dayjs'
 import { GChart } from 'vue-google-charts'
+import { useNuxtApp } from '#app'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '@/stores/member'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  components: {
-    GChart,
+const { $api } = useNuxtApp()
+
+const memberStore = useMemberStore()
+const userStore = useUserStore()
+const {
+  busy,
+  context,
+  groupid,
+  limit,
+  show,
+  collection,
+  distance,
+  members,
+  filter,
+  loadMore,
+} = setupModMembers(true)
+collection.value = 'Happiness'
+limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
+const { fetchMe } = useMe()
+
+// Data
+const tabIndex = ref(0)
+const happinessData = ref([])
+const bump = ref(0)
+const happinessOptions = {
+  chartArea: {
+    width: '80%',
+    height: '80%',
   },
-  setup() {
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const modMembers = setupModMembers(true)
-    modMembers.collection.value = 'Happiness'
-    modMembers.limit.value = 1000 // Get everything (probably) so that the ratings and feedback are interleaved.
-    const { fetchMe } = useMe()
-    return {
-      memberStore,
-      userStore,
-      ...modMembers, // busy, context, group, groupid, limit, show, collection, messageTerm, memberTerm, distance, summary, members, visibleMembers, loadMore
-      fetchMe,
-    }
-  },
-  data: function () {
-    return {
-      tabIndex: 0,
-      happinessData: [],
-      bump: 0,
-      // collection: 'Happiness',
-      happinessOptions: {
-        // title: 'Freegler Feedback',
-        chartArea: {
-          width: '80%',
-          height: '80%',
-        },
-        pieSliceBorderColor: 'darkgrey',
-        colors: ['green', '#f8f9fa', 'orange'],
-        slices2: {
-          1: { offset: 0.2 },
-          2: { offset: 0.2 },
-          3: { offset: 0.2 },
-        },
-      },
-    }
-  },
-  computed: {
-    ratings() {
-      return this.memberStore.ratings
-    },
-    sortedItems() {
-      // console.log('sortedItems A', this.members.length, this.ratings.length)
-      const objs = []
-
-      this.members.forEach((m) => {
-        objs.push({
-          type: 'Member',
-          object: m,
-          timestamp: m.timestamp,
-          id: 'member-' + m.id,
-        })
-      })
-      // console.log('sortedItems B', objs.length)
-
-      objs.sort(function (a, b) {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      })
-
-      return objs
-    },
-    visibleItems() {
-      // console.log('visibleItems', this.show)
-      return this.sortedItems.slice(0, this.show)
-      // return this.sortedItems
-    },
-  },
-  watch: {
-    filter() {
-      this.context = null
-      this.show = 0
-      this.memberStore.clear()
-      this.bump++
-    },
-    groupid() {
-      this.getHappiness()
-      this.bump++
-    },
-    tabIndex() {
-      console.log('tabIndex changed', this.show)
-      this.bump++
-    },
-  },
-  async mounted() {
-    this.filter = 'Comments'
-    await this.getHappiness()
-  },
-  methods: {
-    async getHappiness() {
-      const start = dayjs().subtract(1, 'year').toDate().toISOString()
-      // console.log('feedback getHappiness', start)
-      const ret = await this.$api.dashboard.fetch({
-        components: ['Happiness'],
-        start,
-        end: new Date().toISOString(),
-        allgroups: !this.groupid,
-        group: this.groupid > 0 ? this.groupid : null,
-        systemwide: this.groupid < 0,
-      })
-
-      if (ret.Happiness) {
-        this.happinessData = [['Feedback', 'Count']]
-        ret.Happiness.forEach((h) => {
-          this.happinessData.push([h.happiness, h.count])
-        })
-      }
-    },
-    filterMatch(member) {
-      const val = member.happiness
-
-      if (!this.filter) {
-        return true
-      }
-
-      if (this.filter === 'Comments') {
-        const comment = member.comments
-          ? ('' + member.comments).replace(/[\n\r]+/g, '').trim()
-          : ''
-
-        if (comment.length) {
-          return true
-        }
-      } else {
-        if (this.filter === val) {
-          return true
-        }
-
-        if (this.filter === 'Fine' && !val) {
-          return true
-        }
-      }
-
-      return false
-    },
-    async markAll() {
-      await this.memberStore.clear()
-
-      const params = {
-        groupid: this.groupid,
-        collection: this.collection,
-        modtools: true,
-        summary: false,
-        context: null,
-        limit: 1000,
-      }
-      console.log('markAll', params)
-
-      await this.memberStore.fetchMembers(params)
-      console.log('markAll received')
-
-      this.$nextTick(() => {
-        this.members.forEach(async (member) => {
-          // console.log('markAll member', member.id, member.reviewed)
-          if (!member.reviewed) {
-            const params = {
-              userid: member.fromuser,
-              groupid: member.groupid,
-              happinessid: member.id,
-            }
-            // console.log('markAll happinessReviewed', params)
-            await this.memberStore.happinessReviewed(params)
-          }
-        })
-        this.ratings.forEach(async (rating) => {
-          if (rating.reviewrequired) {
-            // console.log('markAll ratingReviewed', { id: rating.id })
-            await this.userStore.ratingReviewed({
-              id: rating.id,
-            })
-          }
-        })
-      })
-      this.fetchMe(true, ['work'])
-    },
+  pieSliceBorderColor: 'darkgrey',
+  colors: ['green', '#f8f9fa', 'orange'],
+  slices2: {
+    1: { offset: 0.2 },
+    2: { offset: 0.2 },
+    3: { offset: 0.2 },
   },
 }
+
+// Computed
+const ratings = computed(() => {
+  return memberStore.ratings
+})
+
+const sortedItems = computed(() => {
+  const objs = []
+
+  members.value.forEach((m) => {
+    objs.push({
+      type: 'Member',
+      object: m,
+      timestamp: m.timestamp,
+      id: 'member-' + m.id,
+    })
+  })
+
+  objs.sort(function (a, b) {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  })
+
+  return objs
+})
+
+const visibleItems = computed(() => {
+  return sortedItems.value.slice(0, show.value)
+})
+
+// Watchers
+watch(filter, () => {
+  context.value = null
+  show.value = 0
+  memberStore.clear()
+  bump.value++
+})
+
+watch(groupid, () => {
+  getHappiness()
+  bump.value++
+})
+
+watch(tabIndex, () => {
+  console.log('tabIndex changed', show.value)
+  bump.value++
+})
+
+// Methods
+async function getHappiness() {
+  const start = dayjs().subtract(1, 'year').toDate().toISOString()
+  const ret = await $api.dashboard.fetch({
+    components: ['Happiness'],
+    start,
+    end: new Date().toISOString(),
+    allgroups: !groupid.value,
+    group: groupid.value > 0 ? groupid.value : null,
+    systemwide: groupid.value < 0,
+  })
+
+  if (ret.Happiness) {
+    happinessData.value = [['Feedback', 'Count']]
+    ret.Happiness.forEach((h) => {
+      happinessData.value.push([h.happiness, h.count])
+    })
+  }
+}
+
+function filterMatch(member) {
+  const val = member.happiness
+
+  if (!filter.value) {
+    return true
+  }
+
+  if (filter.value === 'Comments') {
+    const comment = member.comments
+      ? ('' + member.comments).replace(/[\n\r]+/g, '').trim()
+      : ''
+
+    if (comment.length) {
+      return true
+    }
+  } else {
+    if (filter.value === val) {
+      return true
+    }
+
+    if (filter.value === 'Fine' && !val) {
+      return true
+    }
+  }
+
+  return false
+}
+
+async function markAll() {
+  await memberStore.clear()
+
+  const params = {
+    groupid: groupid.value,
+    collection: collection.value,
+    modtools: true,
+    summary: false,
+    context: null,
+    limit: 1000,
+  }
+  console.log('markAll', params)
+
+  await memberStore.fetchMembers(params)
+  console.log('markAll received')
+
+  nextTick(() => {
+    members.value.forEach(async (member) => {
+      if (!member.reviewed) {
+        const reviewParams = {
+          userid: member.fromuser,
+          groupid: member.groupid,
+          happinessid: member.id,
+        }
+        await memberStore.happinessReviewed(reviewParams)
+      }
+    })
+    ratings.value.forEach(async (rating) => {
+      if (rating.reviewrequired) {
+        await userStore.ratingReviewed({
+          id: rating.id,
+        })
+      }
+    })
+  })
+  fetchMe(true, ['work'])
+}
+
+// Lifecycle
+onMounted(async () => {
+  filter.value = 'Comments'
+  await getHappiness()
+})
 </script>
 <style scoped>
 select {

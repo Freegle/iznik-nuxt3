@@ -33,33 +33,27 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useMemberStore } from '@/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  props: {
-    groupid: {
-      type: Number,
-      required: true,
-    },
+const props = defineProps({
+  groupid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const { modal, show, hide } = useOurModal()
-    return { modal, show, hide }
-  },
-  data: function () {
-    return {
-      userid: null,
-    }
-  },
-  methods: {
-    async ban() {
-      const memberStore = useMemberStore()
-      await memberStore.ban(this.userid, this.groupid)
+})
 
-      this.hide()
-    },
-  },
+const memberStore = useMemberStore()
+const { modal, show, hide } = useOurModal()
+
+const userid = ref(null)
+
+async function ban() {
+  await memberStore.ban(userid.value, props.groupid)
+  hide()
 }
+
+defineExpose({ modal, show, hide })
 </script>

@@ -15,29 +15,26 @@
     />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    pov: {
-      type: Number,
-      required: false,
-      default: null,
-    },
+<script setup>
+import { ref } from 'vue'
+
+defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      showModal: false,
-    }
+  pov: {
+    type: Number,
+    required: false,
+    default: null,
   },
-  methods: {
-    view() {
-      this.showModal = true
-      this.$refs.modChatModal?.show()
-    },
-  },
+})
+
+const showModal = ref(false)
+const modChatModal = ref(null)
+
+function view() {
+  showModal.value = true
+  modChatModal.value?.show()
 }
 </script>

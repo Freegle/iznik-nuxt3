@@ -155,117 +155,113 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useMessageStore } from '~/stores/message'
-import { copyStdMsgs } from '~/composables/useStdMsgs'
-import { useStdmsgStore } from '~/stores/stdmsg'
+import { copyStdMsgs, icon, variant } from '~/composables/useStdMsgs'
 
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-    modconfig: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    editreview: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    cantpost: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const messageStore = useMessageStore()
-    const stdmsgStore = useStdmsgStore()
-    return { messageStore, stdmsgStore }
+  modconfig: {
+    type: Object,
+    required: false,
+    default: null,
   },
-  data: function () {
-    return {
-      showRare: false,
-      allowAutoSend: true,
+  editreview: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  cantpost: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+const messageStore = useMessageStore()
+
+const showRare = ref(false)
+const allowAutoSend = ref(true)
+
+function hasCollection(coll) {
+  let ret = false
+
+  if (props.message.groups) {
+    props.message.groups.forEach((group) => {
+      if (group.collection === coll) {
+        ret = true
+      }
+    })
+  }
+
+  return ret
+}
+
+const pending = computed(() => {
+  return hasCollection('Pending')
+})
+
+const approved = computed(() => {
+  return hasCollection('Approved')
+})
+
+const validActions = computed(() => {
+  // The standard messages we show depend on the valid ones for this type of message.
+  if (pending.value) {
+    const ret = ['Reject', 'Leave', 'Delete', 'Edit', 'Hold Message']
+    if (!props.cantpost) {
+      ret.push('Approve')
     }
-  },
-  computed: {
-    pending() {
-      return this.hasCollection('Pending')
-    },
-    approved() {
-      return this.hasCollection('Approved')
-    },
-    validActions() {
-      // The standard messages we show depend on the valid ones for this type of message.
-      if (this.pending) {
-        const ret = ['Reject', 'Leave', 'Delete', 'Edit', 'Hold Message']
-        if (!this.cantpost) {
-          ret.push('Approve')
-        }
-        return ret
-      } else if (this.approved) {
-        return ['Leave Approved Message', 'Delete Approved Message', 'Edit']
-      }
+    return ret
+  } else if (approved.value) {
+    return ['Leave Approved Message', 'Delete Approved Message', 'Edit']
+  }
 
-      return []
-    },
-    rareToShow() {
-      return this.filterByAction.length - this.filtered.length
-    },
-    stdmsgs() {
-      if (this.modconfig) {
-        return copyStdMsgs(this.modconfig)
-      } else {
-        return []
-      }
-    },
-    filterByAction() {
-      if (this.modconfig) {
-        return this.stdmsgs.filter((stdmsg) => {
-          return this.validActions.includes(stdmsg.action)
-        })
-      }
+  return []
+})
 
-      return []
-    },
-    filtered() {
-      if (this.modconfig) {
-        return this.filterByAction.filter((stdmsg) => {
-          return this.showRare || !parseInt(stdmsg.rarelyused)
-        })
-      }
+const stdmsgs = computed(() => {
+  if (props.modconfig) {
+    return copyStdMsgs(props.modconfig)
+  } else {
+    return []
+  }
+})
 
-      return []
-    },
-  },
-  methods: {
-    hasCollection(coll) {
-      let ret = false
+const filterByAction = computed(() => {
+  if (props.modconfig) {
+    return stdmsgs.value.filter((stdmsg) => {
+      return validActions.value.includes(stdmsg.action)
+    })
+  }
 
-      if (this.message.groups) {
-        this.message.groups.forEach((group) => {
-          if (group.collection === coll) {
-            ret = true
-          }
-        })
-      }
+  return []
+})
 
-      return ret
-    },
-    outcome(callback, type) {
-      const self = this
-      this.messageStore.updateMT({
-        action: 'Outcome',
-        id: self.message.id,
-        outcome: type,
-      })
-      if (callback) callback()
-    },
-  },
+const filtered = computed(() => {
+  if (props.modconfig) {
+    return filterByAction.value.filter((stdmsg) => {
+      return showRare.value || !parseInt(stdmsg.rarelyused)
+    })
+  }
+
+  return []
+})
+
+const rareToShow = computed(() => {
+  return filterByAction.value.length - filtered.value.length
+})
+
+function outcome(callback, type) {
+  messageStore.updateMT({
+    action: 'Outcome',
+    id: props.message.id,
+    outcome: type,
+  })
+  if (callback) callback()
 }
 </script>

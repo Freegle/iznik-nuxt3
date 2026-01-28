@@ -66,57 +66,49 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useGroupStore } from '~/stores/group'
 
-export default {
-  props: {
-    event: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  event: {
+    type: Object,
+    required: true,
   },
-  setup(props) {
-    const communityEventStore = useCommunityEventStore()
-    const groupStore = useGroupStore()
-    return {
-      communityEventStore,
-      groupStore,
-    }
-  },
-  data: function () {
-    return {
-      showModal: false,
-    }
-  },
-  computed: {
-    groups() {
-      const ret = []
-      this.event?.groups?.forEach((id) => {
-        const group = this.groupStore?.get(id)
+})
 
-        if (group) {
-          ret.push(group)
-        }
-      })
-      return ret
-    },
-  },
-  methods: {
-    edit() {
-      this.showModal = true
-      this.$refs.eventmodal?.show()
-    },
-    deleteme() {
-      this.communityEventStore.delete(this.event.id)
-    },
-    approve() {
-      this.communityEventStore.save({
-        id: this.event.id,
-        pending: false,
-      })
-    },
-  },
+const communityEventStore = useCommunityEventStore()
+const groupStore = useGroupStore()
+
+const showModal = ref(false)
+const eventmodal = ref(null)
+
+const groups = computed(() => {
+  const ret = []
+  props.event?.groups?.forEach((id) => {
+    const group = groupStore?.get(id)
+
+    if (group) {
+      ret.push(group)
+    }
+  })
+  return ret
+})
+
+function edit() {
+  showModal.value = true
+  eventmodal.value?.show()
+}
+
+function deleteme() {
+  communityEventStore.delete(props.event.id)
+}
+
+function approve() {
+  communityEventStore.save({
+    id: props.event.id,
+    pending: false,
+  })
 }
 </script>

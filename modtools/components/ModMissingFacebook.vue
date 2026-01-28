@@ -63,80 +63,72 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const { myGroups, myGroup } = useMe()
-    return { myGroups, myGroup }
-  },
-  data: function () {
-    return {
-      summary: true,
+const { myGroups } = useMe()
+
+const summary = ref(true)
+
+const invalid = computed(() => {
+  const ret = []
+
+  for (const group of myGroups.value || []) {
+    if (
+      group.type === 'Freegle' &&
+      group.facebook &&
+      (group.role === 'Moderator' || group.role === 'Owner') &&
+      group.publish
+    ) {
+      for (const fb of group.facebook) {
+        if (!fb.valid && fb.type === 'Page') {
+          ret.push({
+            page: fb,
+            group,
+          })
+        }
+      }
     }
-  },
-  computed: {
-    invalid() {
-      const ret = []
+  }
 
-      for (const group of this.myGroups) {
-        if (
-          group.type === 'Freegle' &&
-          group.facebook &&
-          (group.role === 'Moderator' || group.role === 'Owner') &&
-          group.publish
-        ) {
-          for (const fb of group.facebook) {
-            if (!fb.valid && fb.type === 'Page') {
-              ret.push({
-                page: fb,
-                group,
-              })
-            }
+  return ret
+})
+
+const notlinked = computed(() => {
+  const ret = []
+
+  for (const group of myGroups.value || []) {
+    if (
+      group.type === 'Freegle' &&
+      (group.role === 'Moderator' || group.role === 'Owner') &&
+      group.publish
+    ) {
+      if (!group.facebook) {
+        ret.push({
+          group,
+        })
+      } else {
+        let valid = true
+        group.facebook.forEach((f) => {
+          if (!f.valid) {
+            valid = false
           }
+        })
+
+        if (!valid) {
+          ret.push({
+            group,
+          })
         }
       }
+    }
+  }
 
-      return ret
-    },
-    notlinked() {
-      const ret = []
+  return ret
+})
 
-      for (const group of this.myGroups) {
-        if (
-          group.type === 'Freegle' &&
-          (group.role === 'Moderator' || group.role === 'Owner') &&
-          group.publish
-        ) {
-          if (!group.facebook) {
-            ret.push({
-              group,
-            })
-          } else {
-            let valid = true
-            group.facebook.forEach((f) => {
-              if (!f.valid) {
-                valid = false
-              }
-            })
-
-            if (!valid) {
-              ret.push({
-                group,
-              })
-            }
-          }
-        }
-      }
-
-      return ret
-    },
-  },
-  methods: {
-    expand() {
-      this.summary = false
-    },
-  },
+function expand() {
+  summary.value = false
 }
 </script>

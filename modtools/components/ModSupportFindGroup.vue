@@ -213,207 +213,202 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '@/stores/modgroup'
 
-export default {
-  setup() {
-    const modGroupStore = useModGroupStore()
-    const memberStore = useMemberStore()
+const modGroupStore = useModGroupStore()
+const memberStore = useMemberStore()
 
-    return { modGroupStore, memberStore }
-  },
-  data: function () {
-    return {
-      loading: false,
-      searchgroup: null,
-      fetchingVolunteers: false,
-      CGAerror: null,
-      DPAerror: null,
-    }
-  },
-  computed: {
-    groups() {
-      const groups = Object.values(this.modGroupStore.allGroups)
-      return groups
-    },
-    groupitems() {
-      const ret = []
+const loading = ref(false)
+const searchgroup = ref(null)
+const fetchingVolunteers = ref(false)
+const CGAerror = ref(null)
+const DPAerror = ref(null)
 
-      if (this.groups) {
-        this.groups.forEach((g) => {
-          if (
-            this.canonGroupName(g.nameshort) !==
-            this.canonGroupName(g.namedisplay)
-          ) {
-            ret.push(g.nameshort + ' / ' + g.namedisplay)
-          } else {
-            ret.push(g.nameshort)
-          }
-        })
-      }
+const groups = computed(() => {
+  return Object.values(modGroupStore.allGroups)
+})
 
-      return ret
-    },
-    groupid() {
-      let ret = null
+const groupitems = computed(() => {
+  const ret = []
 
-      if (this.searchgroup) {
-        ret = this.groups.find((g) => {
-          let name = g.nameshort
-
-          if (
-            this.canonGroupName(g.nameshort) !==
-            this.canonGroupName(g.namedisplay)
-          ) {
-            name = g.nameshort + ' / ' + g.namedisplay
-          }
-
-          return name === this.searchgroup
-        })
-
-        ret = ret ? ret.id : null
-      }
-
-      return ret
-    },
-    group() {
-      return this.modGroupStore.get(this.groupid)
-    },
-    volunteers() {
-      return this.memberStore.getByGroup(this.groupid)
-    },
-    sortedVolunteers() {
-      const r = this.volunteers
-      r.sort((a, b) => {
-        if (a.lastmoderated && !b.lastmoderated) {
-          return -1
-        } else if (b.lastmoderated && !a.lastmoderated) {
-          return 1
-        } else {
-          return (
-            new Date(b.lastmoderated).getTime() -
-            new Date(a.lastmoderated).getTime()
-          )
-        }
-      })
-
-      return r
-    },
-    regionOptions() {
-      return [
-        { text: 'East', value: 'East' },
-        { text: 'London', value: 'London' },
-        { text: 'Midlands West', value: 'West Midlands' },
-        { text: 'Midlands East', value: 'East Midlands' },
-        { text: 'North East', value: 'North East' },
-        { text: 'North West', value: 'North West' },
-        { text: 'Northern Ireland', value: 'Northern Ireland' },
-        { text: 'South East', value: 'South East' },
-        { text: 'South West', value: 'South West' },
-        { text: 'Wales', value: 'Wales' },
-        { text: 'Yorkshire and the Humber', value: 'Yorkshire and the Humber' },
-        { text: 'Scotland', value: 'Scotland' },
-      ]
-    },
-    region: {
-      get() {
-        return this.group.region
-      },
-      set(newval) {
-        this.modGroupStore.updateMT({
-          id: this.group.id,
-          region: newval,
-        })
-      },
-    },
-  },
-  watch: {
-    async groupid(id) {
-      if (id) {
-        // Get the full group info
-        await this.modGroupStore.fetchIfNeedBeMT(id)
-
-        // And the list of volunteers
-        this.fetchingVolunteers = true
-        this.memberStore.clear()
-
-        await this.memberStore.fetchMembers({
-          groupid: this.groupid,
-          collection: 'Approved',
-          modtools: true,
-          summary: false,
-          limit: 1000,
-          filter: 2,
-        })
-
-        this.fetchingVolunteers = false
+  if (groups.value) {
+    groups.value.forEach((g) => {
+      if (canonGroupName(g.nameshort) !== canonGroupName(g.namedisplay)) {
+        ret.push(g.nameshort + ' / ' + g.namedisplay)
       } else {
-        this.memberStore.clear()
+        ret.push(g.nameshort)
       }
-    },
+    })
+  }
+
+  return ret
+})
+
+const groupid = computed(() => {
+  let ret = null
+
+  if (searchgroup.value) {
+    ret = groups.value.find((g) => {
+      let name = g.nameshort
+
+      if (canonGroupName(g.nameshort) !== canonGroupName(g.namedisplay)) {
+        name = g.nameshort + ' / ' + g.namedisplay
+      }
+
+      return name === searchgroup.value
+    })
+
+    ret = ret ? ret.id : null
+  }
+
+  return ret
+})
+
+const group = computed(() => {
+  return modGroupStore.get(groupid.value)
+})
+
+const volunteers = computed(() => {
+  return memberStore.getByGroup(groupid.value)
+})
+
+const sortedVolunteers = computed(() => {
+  const r = volunteers.value
+  r.sort((a, b) => {
+    if (a.lastmoderated && !b.lastmoderated) {
+      return -1
+    } else if (b.lastmoderated && !a.lastmoderated) {
+      return 1
+    } else {
+      return (
+        new Date(b.lastmoderated).getTime() -
+        new Date(a.lastmoderated).getTime()
+      )
+    }
+  })
+
+  return r
+})
+
+const regionOptions = [
+  { text: 'East', value: 'East' },
+  { text: 'London', value: 'London' },
+  { text: 'Midlands West', value: 'West Midlands' },
+  { text: 'Midlands East', value: 'East Midlands' },
+  { text: 'North East', value: 'North East' },
+  { text: 'North West', value: 'North West' },
+  { text: 'Northern Ireland', value: 'Northern Ireland' },
+  { text: 'South East', value: 'South East' },
+  { text: 'South West', value: 'South West' },
+  { text: 'Wales', value: 'Wales' },
+  { text: 'Yorkshire and the Humber', value: 'Yorkshire and the Humber' },
+  { text: 'Scotland', value: 'Scotland' },
+]
+
+const region = computed({
+  get() {
+    return group.value.region
   },
-  methods: {
-    async loadallgroups(callback) {
-      await this.modGroupStore.listMT({ grouptype: 'Freegle' })
-      if (callback) callback()
-    },
-    async loadCommunities() {
-      if (this.groupitems.length === 0) {
-        this.loading = true
-        await this.loadallgroups()
-        this.loading = false
-      }
-    },
-    canonGroupName(name) {
-      return name ? name.toLowerCase().replace(/-|_| /g, '') : null
-    },
-    async saveCGA(callback) {
-      console.log('saveCGA', this.group.cga)
-      this.CGAerror = null
-      try {
-        await this.modGroupStore.updateMT({
-          id: this.groupid,
-          polyofficial: this.group.cga,
-        })
-      } catch (e) {
-        this.CGAerror = e.message
-      }
-      callback()
-    },
-    async saveDPA(callback) {
-      this.DPAerror = null
-      try {
-        await this.modGroupStore.updateMT({
-          id: this.groupid,
-          poly: this.group.dpa,
-        })
-      } catch (e) {
-        this.DPAerror = e.message
-      }
-      callback()
-    },
-    saveNames(callback) {
-      this.modGroupStore.updateMT({
-        id: this.groupid,
-        namefull: this.group.namefull,
-        nameshort: this.group.nameshort,
-      })
-      callback()
-    },
-    saveCentres(callback) {
-      this.modGroupStore.updateMT({
-        id: this.groupid,
-        lat: this.group.lat,
-        lng: this.group.lng,
-        altlat: this.group.altlat,
-        altlng: this.group.altlng,
-      })
-      callback()
-    },
+  set(newval) {
+    modGroupStore.updateMT({
+      id: group.value.id,
+      region: newval,
+    })
   },
+})
+
+watch(groupid, async (id) => {
+  if (id) {
+    // Get the full group info
+    await modGroupStore.fetchIfNeedBeMT(id)
+
+    // And the list of volunteers
+    fetchingVolunteers.value = true
+    memberStore.clear()
+
+    await memberStore.fetchMembers({
+      groupid: groupid.value,
+      collection: 'Approved',
+      modtools: true,
+      summary: false,
+      limit: 1000,
+      filter: 2,
+    })
+
+    fetchingVolunteers.value = false
+  } else {
+    memberStore.clear()
+  }
+})
+
+async function loadallgroups(callback) {
+  await modGroupStore.listMT({ grouptype: 'Freegle' })
+  if (callback) callback()
 }
+
+async function loadCommunities() {
+  if (groupitems.value.length === 0) {
+    loading.value = true
+    await loadallgroups()
+    loading.value = false
+  }
+}
+
+function canonGroupName(name) {
+  return name ? name.toLowerCase().replace(/-|_| /g, '') : null
+}
+
+async function saveCGA(callback) {
+  console.log('saveCGA', group.value.cga)
+  CGAerror.value = null
+  try {
+    await modGroupStore.updateMT({
+      id: groupid.value,
+      polyofficial: group.value.cga,
+    })
+  } catch (e) {
+    CGAerror.value = e.message
+  }
+  callback()
+}
+
+async function saveDPA(callback) {
+  DPAerror.value = null
+  try {
+    await modGroupStore.updateMT({
+      id: groupid.value,
+      poly: group.value.dpa,
+    })
+  } catch (e) {
+    DPAerror.value = e.message
+  }
+  callback()
+}
+
+function saveNames(callback) {
+  modGroupStore.updateMT({
+    id: groupid.value,
+    namefull: group.value.namefull,
+    nameshort: group.value.nameshort,
+  })
+  callback()
+}
+
+function saveCentres(callback) {
+  modGroupStore.updateMT({
+    id: groupid.value,
+    lat: group.value.lat,
+    lng: group.value.lng,
+    altlat: group.value.altlat,
+    altlng: group.value.altlng,
+  })
+  callback()
+}
+
+defineExpose({ loadCommunities })
 </script>
 <style scoped>
 .max {
