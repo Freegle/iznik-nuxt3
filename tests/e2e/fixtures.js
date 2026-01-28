@@ -256,6 +256,7 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 404.*api\/session/, // Session API 404 can happen when trying to logout when not logged in.
       /Failed to load resource: the server responded with a status of 404.*delivery\.localhost/, // Delivery service 404 errors for missing images can happen during normal operation.
       /FedCM get\(\) rejects with/, // Not available in test
+      /Error retrieving a token./, // Also related to GSI FedCM, not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
