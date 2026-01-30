@@ -10,7 +10,7 @@ const { execSync } = require('child_process')
 
 const args = process.argv.slice(2)
 const dryRun = args.includes('--dry-run')
-const patternArg = args.find(a => a.startsWith('--pattern='))
+const patternArg = args.find((a) => a.startsWith('--pattern='))
 const pattern = patternArg ? patternArg.split('=')[1] : 'components/*.vue'
 
 // Get list of component files
@@ -20,7 +20,9 @@ const testsDir = path.join(__dirname, '..', 'tests', 'unit', 'components')
 // Find all Vue files matching pattern
 function findComponents(dir, pattern) {
   try {
-    const result = execSync(`find ${dir} -name "*.vue" -type f`, { encoding: 'utf8' })
+    const result = execSync(`find ${dir} -name "*.vue" -type f`, {
+      encoding: 'utf8',
+    })
     return result.trim().split('\n').filter(Boolean)
   } catch (e) {
     return []
@@ -48,13 +50,15 @@ function parseComponent(filePath) {
   }
 
   // Extract defineProps
-  const propsMatch = content.match(/defineProps\s*(?:<[^>]+>)?\s*\(\s*\{([^}]+)\}/s)
+  const propsMatch = content.match(
+    /defineProps\s*(?:<[^>]+>)?\s*\(\s*\{([^}]+)\}/s
+  )
   if (propsMatch) {
     info.hasProps = true
     const propsBlock = propsMatch[1]
     const propNames = propsBlock.match(/(\w+)\s*:/g)
     if (propNames) {
-      info.props = propNames.map(p => p.replace(':', '').trim())
+      info.props = propNames.map((p) => p.replace(':', '').trim())
     }
   }
 
@@ -63,7 +67,8 @@ function parseComponent(filePath) {
   if (emitsMatch) {
     info.hasEmits = true
     const emitsStr = emitsMatch[1]
-    info.emits = emitsStr.match(/'([^']+)'/g)?.map(e => e.replace(/'/g, '')) || []
+    info.emits =
+      emitsStr.match(/'([^']+)'/g)?.map((e) => e.replace(/'/g, '')) || []
   }
 
   return info
@@ -71,10 +76,19 @@ function parseComponent(filePath) {
 
 // Generate test file content
 function generateTest(componentInfo, relativePath) {
-  const { name, props, emits, hasSlots, usesStore, usesModal, isAsync, storeMatches } = componentInfo
+  const {
+    name,
+    props,
+    emits,
+    hasSlots,
+    usesStore,
+    usesModal,
+    isAsync,
+    storeMatches,
+  } = componentInfo
 
   // Build imports section
-  let imports = `import { describe, it, expect, vi, beforeEach } from 'vitest'
+  const imports = `import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import ${name} from '~/components/${name}.vue'`
 
@@ -83,8 +97,11 @@ import ${name} from '~/components/${name}.vue'`
 
   // Mock stores
   const uniqueStores = [...new Set(storeMatches)]
-  uniqueStores.forEach(storeCall => {
-    const storeName = storeCall.replace('use', '').replace('Store', '').toLowerCase()
+  uniqueStores.forEach((storeCall) => {
+    const storeName = storeCall
+      .replace('use', '')
+      .replace('Store', '')
+      .toLowerCase()
     mocks += `
 // Mock ${storeCall}
 const mock${storeCall.replace('use', '')} = {
@@ -108,11 +125,12 @@ vi.mock('~/composables/useOurModal', () => ({
   }
 
   // Build mount helper
-  const propsDefault = props.length > 0
-    ? props.map(p => `        // ${p}: undefined,`).join('\n')
-    : '        // Add required props'
+  const propsDefault =
+    props.length > 0
+      ? props.map((p) => `        // ${p}: undefined,`).join('\n')
+      : '        // Add required props'
 
-  let mountHelper = `
+  const mountHelper = `
   function mountComponent(props = {}) {
     return mount(${name}, {
       props: {
@@ -147,11 +165,15 @@ ${propsDefault}
     testCases += `
 
   describe('props', () => {
-${props.map(p => `    it('accepts ${p} prop', () => {
+${props
+  .map(
+    (p) => `    it('accepts ${p} prop', () => {
       // TODO: Add appropriate test value
       const wrapper = mountComponent({ ${p}: undefined })
       expect(wrapper.props('${p}')).toBeDefined()
-    })`).join('\n\n')}
+    })`
+  )
+  .join('\n\n')}
   })`
   }
 
@@ -160,12 +182,16 @@ ${props.map(p => `    it('accepts ${p} prop', () => {
     testCases += `
 
   describe('events', () => {
-${emits.map(e => `    it('emits ${e} event', async () => {
+${emits
+  .map(
+    (e) => `    it('emits ${e} event', async () => {
       const wrapper = mountComponent()
       // TODO: Trigger the event
       // await wrapper.find('...').trigger('click')
       // expect(wrapper.emitted('${e}')).toBeTruthy()
-    })`).join('\n\n')}
+    })`
+  )
+  .join('\n\n')}
   })`
   }
 
@@ -205,7 +231,7 @@ let skipped = 0
 
 console.log(`Found ${components.length} components`)
 
-components.forEach(compPath => {
+components.forEach((compPath) => {
   const name = path.basename(compPath, '.vue')
   const testPath = path.join(testsDir, `${name}.spec.js`)
 
