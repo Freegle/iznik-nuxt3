@@ -112,19 +112,6 @@
               <v-icon icon="map-marker-alt" />
               <span>{{ volunteering.location }}</span>
             </div>
-            <div
-              v-if="volunteering.groups && volunteering.groups.length > 0"
-              class="volop-card__meta-item"
-            >
-              <v-icon icon="users" />
-              <span>
-                Posted on
-                <span v-for="(group, index) in groups" :key="index">
-                  <span v-if="index > 0">, </span>
-                  {{ group.namedisplay }}
-                </span>
-              </span>
-            </div>
           </div>
           <read-more
             v-if="description"
