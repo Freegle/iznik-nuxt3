@@ -287,9 +287,9 @@ describe('VolunteerOpportunity', () => {
   })
 
   describe('groups display', () => {
-    it('shows group name in detail mode', async () => {
+    it('does not show group name in card body (shown in ModTools header instead)', async () => {
       const wrapper = await createWrapper({ summary: false })
-      expect(wrapper.text()).toContain('Freegle London')
+      expect(wrapper.text()).not.toContain('Posted on')
     })
   })
 
