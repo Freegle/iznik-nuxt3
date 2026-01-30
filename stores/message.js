@@ -286,10 +286,18 @@ export const useMessageStore = defineStore({
 
       const promise = api(this.config).message.fetchByUser(userid, active)
 
+      const authStore = useAuthStore()
+      const isOwnMessages = authStore.user?.id === userid
+
       // If we're getting non-active messages make sure we hit the server as the cache might be of active only.
       if (!active || force || !this.byUserList[userid]) {
         messages = await promise
         for (const message of messages) {
+          // Own messages are always treated as seen.
+          if (isOwnMessages) {
+            message.unseen = false
+          }
+
           if (!message.hasoutcome) {
             const expired = await this.hasExpired(message)
 
@@ -303,6 +311,11 @@ export const useMessageStore = defineStore({
         // Fetch but don't wait
         promise.then(async (msgs) => {
           for (const message of msgs) {
+            // Own messages are always treated as seen.
+            if (isOwnMessages) {
+              message.unseen = false
+            }
+
             if (!message.hasoutcome) {
               const expired = await this.hasExpired(message)
 
