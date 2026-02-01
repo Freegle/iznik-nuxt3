@@ -31,8 +31,8 @@
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky"
                   :max-height="mobileMaxHeight"
-                  max-width="100vw"
-                  min-width="100vw"
+                  max-width="100%"
+                  min-width="100%"
                   div-id="div-gpt-ad-1699973618906-0"
                   :jobs="true"
                   :hide-jobs-header="true"
@@ -44,8 +44,8 @@
                 <ExternalDa
                   ad-unit-path="/22794232631/freegle_sticky_desktop"
                   :max-height="desktopMaxHeight"
-                  max-width="100vw"
-                  min-width="100vw"
+                  max-width="100%"
+                  min-width="100%"
                   div-id="div-gpt-ad-1707999304775-0"
                   :jobs="true"
                   :hide-jobs-header="true"
