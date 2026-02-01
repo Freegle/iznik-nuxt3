@@ -337,7 +337,8 @@ function expand(e) {
 
 :deep(.photo-image),
 :deep(picture),
-:deep(picture img) {
+:deep(picture img),
+:deep(.photo-image img) {
   width: 100%;
   height: 100%;
   object-fit: cover;
