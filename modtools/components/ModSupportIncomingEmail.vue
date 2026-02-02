@@ -3,8 +3,7 @@
     <NoticeMessage variant="info" class="mb-3">
       <p class="mb-0">
         <strong>Incoming email routing.</strong> Shows emails received and how
-        they were routed by the incoming mail processor. Data comes from Loki
-        logs.
+        they were routed.
       </p>
     </NoticeMessage>
 
@@ -31,7 +30,6 @@
         :disabled="store.incomingLoading"
         @click="refresh"
       >
-        <b-icon icon="arrow-clockwise" />
         Refresh
       </b-button>
     </div>
@@ -81,7 +79,10 @@
 
     <!-- Loading -->
     <div v-if="store.incomingLoading && !store.incomingEntries.length">
-      <b-skeleton-table :rows="5" :columns="5" />
+      <div class="text-center py-3">
+        <span class="spinner-border spinner-border-sm" />
+        Loading...
+      </div>
     </div>
 
     <!-- Error -->
@@ -111,8 +112,7 @@
         hover
         small
         responsive
-        sort-by="timestamp"
-        sort-desc
+        :sort-by="[{ key: 'timestamp', order: 'desc' }]"
       >
         <template #cell(timestamp)="data">
           {{ formatTime(data.value) }}
@@ -147,10 +147,9 @@
           :disabled="store.incomingLoading"
           @click="loadMore"
         >
-          <b-icon
+          <span
             v-if="store.incomingLoading"
-            icon="arrow-clockwise"
-            animation="spin"
+            class="spinner-border spinner-border-sm me-1"
           />
           Load more
         </b-button>

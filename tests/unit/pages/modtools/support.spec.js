@@ -95,6 +95,9 @@ describe('support/[[id]].vue page', () => {
           ModSupportEmailStats: {
             template: '<div class="mod-support-email-stats" />',
           },
+          ModSupportIncomingEmail: {
+            template: '<div class="mod-support-incoming-email" />',
+          },
           ModSupportAIAssistant: {
             template: '<div class="mod-support-ai-assistant" />',
           },

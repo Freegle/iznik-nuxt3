@@ -716,11 +716,8 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
-import { useRuntimeConfig } from '#app'
 
 const emailTrackingStore = useEmailTrackingStore()
-const runtimeConfig = useRuntimeConfig()
-emailTrackingStore.init(runtimeConfig)
 
 // Default to last 7 days.
 const today = new Date()
