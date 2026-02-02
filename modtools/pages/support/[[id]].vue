@@ -126,11 +126,20 @@
                 </b-tab>
                 <b-tab @click="onEmailStatsTab">
                   <template #title>
-                    <span class="subtab-title">Email Stats</span>
+                    <span class="subtab-title">Outgoing Email</span>
                   </template>
                   <ModSupportEmailStats
                     v-if="showEmailStats"
                     :key="'emailstats-' + emailStatsBump"
+                  />
+                </b-tab>
+                <b-tab @click="onIncomingEmailTab">
+                  <template #title>
+                    <span class="subtab-title">Incoming Email</span>
+                  </template>
+                  <ModSupportIncomingEmail
+                    v-if="showIncomingEmail"
+                    :key="'incomingemail-' + incomingEmailBump"
                   />
                 </b-tab>
                 <b-tab @click="onAIAssistantTab">
@@ -200,6 +209,8 @@ export default {
       systemLogsBump: 0,
       showEmailStats: false,
       emailStatsBump: 0,
+      showIncomingEmail: false,
+      incomingEmailBump: 0,
       showAIAssistant: false,
       aiAssistantBump: 0,
       activeTab: 0,
@@ -244,7 +255,8 @@ export default {
     const logsSubTabMap = {
       system: 0,
       email: 1,
-      ai: 2,
+      incoming: 2,
+      ai: 3,
     }
 
     const spamSubTabMap = {
@@ -278,6 +290,8 @@ export default {
               this.onSystemLogsTab()
             } else if (subTabParam === 'email') {
               this.onEmailStatsTab()
+            } else if (subTabParam === 'incoming') {
+              this.onIncomingEmailTab()
             } else if (subTabParam === 'ai') {
               this.onAIAssistantTab()
             }
@@ -394,6 +408,11 @@ export default {
       // Initialize email stats when tab is clicked.
       this.emailStatsBump = Date.now()
       this.showEmailStats = true
+    },
+
+    onIncomingEmailTab() {
+      this.incomingEmailBump = Date.now()
+      this.showIncomingEmail = true
     },
 
     onAIAssistantTab() {
