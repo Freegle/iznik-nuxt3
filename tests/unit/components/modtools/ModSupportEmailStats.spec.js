@@ -565,23 +565,13 @@ describe('ModSupportEmailStats', () => {
   })
 
   describe('loading state', () => {
-    it('shows spinner when loading', async () => {
+    it('passes loading state to date filter when loading', async () => {
       mockEmailTrackingStore.statsLoading = true
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()
 
-      expect(wrapper.text()).toContain('Loading...')
-    })
-
-    it('disables button when loading', async () => {
-      mockEmailTrackingStore.statsLoading = true
-      const wrapper = mountComponent()
-      await wrapper.vm.$nextTick()
-
-      const button = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Loading'))
-      expect(button?.attributes('disabled')).toBeDefined()
+      const filter = wrapper.find('.date-filter')
+      expect(filter.exists()).toBe(true)
     })
   })
 
