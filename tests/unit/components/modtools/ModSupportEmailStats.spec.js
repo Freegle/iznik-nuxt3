@@ -129,6 +129,22 @@ describe('ModSupportEmailStats', () => {
             template: '<div class="gchart" :data-type="type" />',
             props: ['type', 'data', 'options'],
           },
+          ModEmailDateFilter: {
+            template: '<div class="date-filter" />',
+            props: ['loading', 'fetchLabel', 'defaultPreset'],
+          },
+          ModEmailStatCard: {
+            template: '<div class="stat-card"><slot /></div>',
+            props: [
+              'value',
+              'label',
+              'subtitle',
+              'valueColor',
+              'accent',
+              'active',
+              'clickable',
+            ],
+          },
         },
         directives: {
           'b-toggle': {},
@@ -178,19 +194,9 @@ describe('ModSupportEmailStats', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('form').exists()).toBe(true)
     })
-
-    it('renders Fetch Stats button', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.text()).toContain('Fetch Stats')
-    })
   })
 
   describe('initial state', () => {
-    it('initializes with 7days date preset', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.datePreset).toBe('7days')
-    })
-
     it('initializes with empty emailType', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.emailType).toBe('')
@@ -204,19 +210,6 @@ describe('ModSupportEmailStats', () => {
     it('initializes with showInfoModal as false', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.showInfoModal).toBe(false)
-    })
-  })
-
-  describe('date presets', () => {
-    it('has correct date preset options', () => {
-      const wrapper = mountComponent()
-      const options = wrapper.vm.datePresetOptions
-
-      expect(options).toContainEqual({ text: 'Last hour', value: 'hour' })
-      expect(options).toContainEqual({ text: 'Last 24 hours', value: 'day' })
-      expect(options).toContainEqual({ text: 'Last 7 days', value: '7days' })
-      expect(options).toContainEqual({ text: 'Last 30 days', value: '30days' })
-      expect(options).toContainEqual({ text: 'Custom dates', value: 'custom' })
     })
   })
 
@@ -535,25 +528,6 @@ describe('ModSupportEmailStats', () => {
     })
   })
 
-  describe('formatDate', () => {
-    it('returns dash for null input', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.formatDate(null)).toBe('-')
-    })
-
-    it('returns dash for undefined input', () => {
-      const wrapper = mountComponent()
-      expect(wrapper.vm.formatDate(undefined)).toBe('-')
-    })
-
-    it('formats date correctly', () => {
-      const wrapper = mountComponent()
-      const result = wrapper.vm.formatDate('2024-01-15T10:30:00')
-      expect(result).toContain('Jan')
-      expect(result).toContain('2024')
-    })
-  })
-
   describe('chart options', () => {
     it('returns engagement chart options', () => {
       const wrapper = mountComponent()
@@ -577,47 +551,6 @@ describe('ModSupportEmailStats', () => {
 
       expect(options.title).toBe('Email Volume Over Time')
       expect(options.legend).toEqual({ position: 'none' })
-    })
-  })
-
-  describe('onDatePresetChange', () => {
-    it('handles hour preset', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onDatePresetChange('hour')
-
-      expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
-    })
-
-    it('handles day preset', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onDatePresetChange('day')
-
-      expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
-    })
-
-    it('handles 7days preset', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onDatePresetChange('7days')
-
-      expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
-    })
-
-    it('handles 30days preset', () => {
-      const wrapper = mountComponent()
-      wrapper.vm.onDatePresetChange('30days')
-
-      expect(mockEmailTrackingStore.fetchStats).toHaveBeenCalled()
-    })
-
-    it('does not fetch for custom preset', () => {
-      vi.clearAllMocks()
-      const wrapper = mountComponent()
-      // Clear calls from mount
-      mockEmailTrackingStore.fetchStats.mockClear()
-
-      wrapper.vm.onDatePresetChange('custom')
-
-      expect(mockEmailTrackingStore.fetchStats).not.toHaveBeenCalled()
     })
   })
 
