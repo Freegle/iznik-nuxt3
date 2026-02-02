@@ -126,11 +126,20 @@
                 </b-tab>
                 <b-tab @click="onEmailStatsTab">
                   <template #title>
-                    <span class="subtab-title">Email Stats</span>
+                    <span class="subtab-title">Outgoing Email</span>
                   </template>
                   <ModSupportEmailStats
                     v-if="showEmailStats"
                     :key="'emailstats-' + emailStatsBump"
+                  />
+                </b-tab>
+                <b-tab @click="onIncomingEmailTab">
+                  <template #title>
+                    <span class="subtab-title">Incoming Email</span>
+                  </template>
+                  <ModSupportIncomingEmail
+                    v-if="showIncomingEmail"
+                    :key="'incomingemail-' + incomingEmailBump"
                   />
                 </b-tab>
                 <b-tab @click="onAIAssistantTab">
@@ -210,6 +219,8 @@ const showSystemLogs = ref(false)
 const systemLogsBump = ref(0)
 const showEmailStats = ref(false)
 const emailStatsBump = ref(0)
+const showIncomingEmail = ref(false)
+const incomingEmailBump = ref(0)
 const showAIAssistant = ref(false)
 const aiAssistantBump = ref(0)
 const activeTab = ref(0)
@@ -237,7 +248,8 @@ const communitySubTabMap = {
 const logsSubTabMap = {
   system: 0,
   email: 1,
-  ai: 2,
+  incoming: 2,
+  ai: 3,
 }
 
 const spamSubTabMap = {
@@ -283,6 +295,8 @@ onMounted(() => {
             onSystemLogsTab()
           } else if (subTabParam === 'email') {
             onEmailStatsTab()
+          } else if (subTabParam === 'incoming') {
+            onIncomingEmailTab()
           } else if (subTabParam === 'ai') {
             onAIAssistantTab()
           }
@@ -401,6 +415,11 @@ function onEmailStatsTab() {
   // Initialize email stats when tab is clicked.
   emailStatsBump.value = Date.now()
   showEmailStats.value = true
+}
+
+function onIncomingEmailTab() {
+  incomingEmailBump.value = Date.now()
+  showIncomingEmail.value = true
 }
 
 function onAIAssistantTab() {

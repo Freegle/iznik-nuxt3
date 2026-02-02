@@ -51,6 +51,20 @@ export const useEmailTrackingStore = defineStore({
     // Pagination for user emails.
     limit: 50,
     offset: 0,
+
+    // Incoming email state (from Loki logs).
+    incomingEntries: [],
+    incomingLoading: false,
+    incomingError: null,
+    incomingHasMore: true,
+    incomingSearch: '',
+    incomingTimeRange: '24h',
+    incomingOutcomeFilter: '',
+
+    // Bounce entries (from Loki logs).
+    bounceEntries: [],
+    bounceLoading: false,
+    bounceError: null,
   }),
   actions: {
     init(config) {
@@ -309,6 +323,102 @@ export const useEmailTrackingStore = defineStore({
         this.currentUserId = userId
       }
     },
+
+    // Incoming email actions.
+    async fetchIncomingEmails(append = false) {
+      this.incomingLoading = true
+      this.incomingError = null
+
+      try {
+        const params = {
+          sources: 'incoming_mail',
+          limit: 500,
+          start: this.incomingTimeRange,
+        }
+
+        if (append && this.incomingEntries.length > 0) {
+          const lastEntry =
+            this.incomingEntries[this.incomingEntries.length - 1]
+          params.end = lastEntry.timestamp
+        }
+
+        const result = await api(this.config).systemlogs.fetch(params)
+        const logs = result?.logs || []
+
+        const parsed = logs.map((log) => {
+          const raw = log.raw || {}
+          return {
+            id: log.id,
+            timestamp: log.timestamp,
+            envelope_from: raw.envelope_from || '',
+            envelope_to: raw.envelope_to || '',
+            from_address: raw.from_address || '',
+            subject: raw.subject || '',
+            message_id: raw.message_id || '',
+            routing_outcome: raw.routing_outcome || log.subtype || '',
+            group_id: raw.group_id || null,
+            group_name: raw.group_name || '',
+            user_id: raw.user_id || null,
+            to_user_id: raw.to_user_id || null,
+            chat_id: raw.chat_id || null,
+            message_ref_id: raw.message_id_ref || null,
+          }
+        })
+
+        if (append) {
+          this.incomingEntries = [...this.incomingEntries, ...parsed]
+        } else {
+          this.incomingEntries = parsed
+        }
+
+        this.incomingHasMore = logs.length >= 500
+      } catch (e) {
+        this.incomingError = e.message || 'Failed to fetch incoming email logs'
+      } finally {
+        this.incomingLoading = false
+      }
+    },
+
+    clearIncoming() {
+      this.incomingEntries = []
+      this.incomingHasMore = true
+      this.incomingError = null
+      this.incomingSearch = ''
+      this.incomingOutcomeFilter = ''
+    },
+
+    async fetchBounceEvents() {
+      this.bounceLoading = true
+      this.bounceError = null
+
+      try {
+        const params = {
+          sources: 'bounce',
+          limit: 500,
+          start: this.incomingTimeRange,
+        }
+
+        const result = await api(this.config).systemlogs.fetch(params)
+        const logs = result?.logs || []
+
+        this.bounceEntries = logs.map((log) => {
+          const raw = log.raw || {}
+          return {
+            id: log.id,
+            timestamp: log.timestamp,
+            email: raw.email || '',
+            user_id: raw.user_id || 0,
+            is_permanent: raw.is_permanent || false,
+            reason: raw.reason || '',
+            subtype: log.subtype || '',
+          }
+        })
+      } catch (e) {
+        this.bounceError = e.message || 'Failed to fetch bounce logs'
+      } finally {
+        this.bounceLoading = false
+      }
+    },
   },
   getters: {
     hasStats: (state) => state.stats !== null,
@@ -328,6 +438,42 @@ export const useEmailTrackingStore = defineStore({
 
     hasMoreUserEmails: (state) => {
       return state.userEmails.length < state.userEmailsTotal
+    },
+
+    // Incoming email getters.
+    incomingOutcomeCounts: (state) => {
+      const counts = {}
+      for (const entry of state.incomingEntries) {
+        let outcome = entry.routing_outcome || 'Unknown'
+        // Normalize case: capitalize first letter
+        outcome = outcome.charAt(0).toUpperCase() + outcome.slice(1)
+        counts[outcome] = (counts[outcome] || 0) + 1
+      }
+      return counts
+    },
+
+    filteredIncomingEntries: (state) => {
+      let filtered = state.incomingEntries
+
+      if (state.incomingOutcomeFilter) {
+        filtered = filtered.filter(
+          (e) => e.routing_outcome === state.incomingOutcomeFilter
+        )
+      }
+
+      if (state.incomingSearch) {
+        const q = state.incomingSearch.toLowerCase()
+        filtered = filtered.filter(
+          (e) =>
+            (e.envelope_from || '').toLowerCase().includes(q) ||
+            (e.envelope_to || '').toLowerCase().includes(q) ||
+            (e.from_address || '').toLowerCase().includes(q) ||
+            (e.subject || '').toLowerCase().includes(q) ||
+            (e.routing_outcome || '').toLowerCase().includes(q)
+        )
+      }
+
+      return filtered
     },
 
     // Calculate derived statistics.
