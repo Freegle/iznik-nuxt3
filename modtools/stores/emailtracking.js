@@ -60,6 +60,9 @@ export const useEmailTrackingStore = defineStore({
     incomingSearch: '',
     incomingTimeRange: '24h',
     incomingOutcomeFilter: '',
+    incomingCounts: {},
+    incomingCountsTotal: 0,
+    incomingCountsLoading: false,
 
     // Bounce entries (from Loki logs).
     bounceEntries: [],
@@ -332,8 +335,18 @@ export const useEmailTrackingStore = defineStore({
       try {
         const params = {
           sources: 'incoming_mail',
-          limit: 500,
+          limit: 100,
           start: this.incomingTimeRange,
+        }
+
+        // Server-side search filtering.
+        if (this.incomingSearch) {
+          params.search = this.incomingSearch
+        }
+
+        // Server-side outcome filtering.
+        if (this.incomingOutcomeFilter) {
+          params.subtypes = this.incomingOutcomeFilter
         }
 
         if (append && this.incomingEntries.length > 0) {
@@ -371,11 +384,37 @@ export const useEmailTrackingStore = defineStore({
           this.incomingEntries = parsed
         }
 
-        this.incomingHasMore = logs.length >= 500
+        this.incomingHasMore = logs.length >= 100
       } catch (e) {
         this.incomingError = e.message || 'Failed to fetch incoming email logs'
       } finally {
         this.incomingLoading = false
+      }
+    },
+
+    async fetchIncomingCounts() {
+      this.incomingCountsLoading = true
+
+      try {
+        const params = {
+          sources: 'incoming_mail',
+          start: this.incomingTimeRange,
+        }
+
+        // Include search in counts so they reflect filtered totals.
+        if (this.incomingSearch) {
+          params.search = this.incomingSearch
+        }
+
+        const result = await api(this.config).systemlogs.fetchCounts(params)
+        this.incomingCounts = result?.counts || {}
+        this.incomingCountsTotal = result?.total || 0
+      } catch (e) {
+        console.error('Failed to fetch incoming counts:', e)
+        this.incomingCounts = {}
+        this.incomingCountsTotal = 0
+      } finally {
+        this.incomingCountsLoading = false
       }
     },
 
@@ -385,6 +424,8 @@ export const useEmailTrackingStore = defineStore({
       this.incomingError = null
       this.incomingSearch = ''
       this.incomingOutcomeFilter = ''
+      this.incomingCounts = {}
+      this.incomingCountsTotal = 0
     },
 
     async fetchBounceEvents() {
@@ -440,40 +481,20 @@ export const useEmailTrackingStore = defineStore({
       return state.userEmails.length < state.userEmailsTotal
     },
 
-    // Incoming email getters.
+    // Incoming email getters - counts come from server-side metric queries.
     incomingOutcomeCounts: (state) => {
       const counts = {}
-      for (const entry of state.incomingEntries) {
-        let outcome = entry.routing_outcome || 'Unknown'
-        // Normalize case: capitalize first letter
-        outcome = outcome.charAt(0).toUpperCase() + outcome.slice(1)
-        counts[outcome] = (counts[outcome] || 0) + 1
+      for (const [subtype, count] of Object.entries(state.incomingCounts)) {
+        // Normalize case: capitalize first letter.
+        const normalized = subtype.charAt(0).toUpperCase() + subtype.slice(1)
+        counts[normalized] = count
       }
       return counts
     },
 
+    // Entries are already filtered server-side by search and outcome.
     filteredIncomingEntries: (state) => {
-      let filtered = state.incomingEntries
-
-      if (state.incomingOutcomeFilter) {
-        filtered = filtered.filter(
-          (e) => e.routing_outcome === state.incomingOutcomeFilter
-        )
-      }
-
-      if (state.incomingSearch) {
-        const q = state.incomingSearch.toLowerCase()
-        filtered = filtered.filter(
-          (e) =>
-            (e.envelope_from || '').toLowerCase().includes(q) ||
-            (e.envelope_to || '').toLowerCase().includes(q) ||
-            (e.from_address || '').toLowerCase().includes(q) ||
-            (e.subject || '').toLowerCase().includes(q) ||
-            (e.routing_outcome || '').toLowerCase().includes(q)
-        )
-      }
-
-      return filtered
+      return state.incomingEntries
     },
 
     // Calculate derived statistics.

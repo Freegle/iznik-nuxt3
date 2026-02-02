@@ -242,30 +242,42 @@
       <!-- AMP Comparison Section -->
       <div v-if="emailTrackingStore.hasAMPStats" class="mt-4">
         <h5 class="mb-3">AMP vs Non-AMP Email Engagement</h5>
-        <p class="text-muted small mb-3">
-          <strong>Action Rate</strong> is the key comparable metric between AMP
-          and non-AMP emails. It measures the percentage of recipients who took
-          a meaningful action (clicked a link or replied). Open rates are shown
-          separately as they are not directly comparable due to tracking
-          limitations.
-        </p>
 
-        <!-- Show note when filtering by a type that has no AMP data -->
-        <div
-          v-if="!formattedAMPStats || formattedAMPStats.totalWithAMP === 0"
-          class="alert alert-info"
-        >
-          <span v-if="emailType">
-            No AMP data available for "{{ emailType }}" emails. AMP is currently
-            only enabled for ChatNotification emails. Select "All Types" or
-            "Chat Notification" to see AMP statistics.
-          </span>
-          <span v-else>
-            No AMP email data available for the selected period.
-          </span>
+        <!-- Show note when filtering by a type that doesn't use AMP -->
+        <div v-if="!isAmpCapableType" class="alert alert-info">
+          AMP comparison is not available for "{{ emailTypeLabel }}" emails
+          because they are not sent using AMP. Only Chat Notification emails
+          currently use AMP. Select "All Types" or "Chat Notification" to see
+          AMP statistics.
         </div>
 
-        <div class="charts-grid">
+        <!-- Show note when AMP type selected but no data in period -->
+        <div
+          v-else-if="!formattedAMPStats || formattedAMPStats.totalWithAMP === 0"
+          class="alert alert-info"
+        >
+          No AMP email data available for the selected period.
+        </div>
+
+        <!-- Only show AMP charts/tables when there is actual AMP data -->
+        <template v-else>
+          <p class="text-muted small mb-3">
+            <strong>Action Rate</strong> is the key comparable metric between
+            AMP and non-AMP emails. It measures the percentage of recipients who
+            took a meaningful action (clicked a link or replied). Open rates are
+            shown separately as they are not directly comparable due to tracking
+            limitations.
+          </p>
+        </template>
+
+        <div
+          v-if="
+            isAmpCapableType &&
+            formattedAMPStats &&
+            formattedAMPStats.totalWithAMP > 0
+          "
+          class="charts-grid"
+        >
           <!-- Left column: Pie chart + Bar chart -->
           <div class="chart-column">
             <!-- AMP/Non-AMP Proportion Pie Chart -->
@@ -725,6 +737,18 @@ const formattedStats = computed(() => {
     clickToOpenRate: stats.clickToOpenRate,
     bounceRate: stats.bounceRate,
   }
+})
+
+// Email types that are sent using AMP.
+const ampCapableTypes = ['', 'ChatNotification']
+
+const isAmpCapableType = computed(() => {
+  return ampCapableTypes.includes(emailType.value)
+})
+
+const emailTypeLabel = computed(() => {
+  const option = emailTypeOptions.find((o) => o.value === emailType.value)
+  return option ? option.text : emailType.value
 })
 
 const formattedAMPStats = computed(() => {

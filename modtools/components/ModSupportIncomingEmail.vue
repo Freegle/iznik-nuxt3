@@ -16,9 +16,9 @@
     />
 
     <!-- Headline stats cards -->
-    <div v-if="store.incomingEntries.length > 0" class="mb-3 stats-flex">
+    <div v-if="store.incomingCountsTotal > 0" class="mb-3 stats-flex">
       <ModEmailStatCard
-        :value="store.incomingEntries.length"
+        :value="store.incomingCountsTotal"
         label="Total"
         clickable
         :active="!store.incomingOutcomeFilter"
@@ -53,7 +53,9 @@
     <NoticeMessage
       v-if="
         !store.incomingLoading &&
+        !store.incomingCountsLoading &&
         !store.incomingError &&
+        store.incomingCountsTotal === 0 &&
         store.incomingEntries.length === 0
       "
       variant="warning"
@@ -68,9 +70,10 @@
     <!-- Search -->
     <div class="mb-3">
       <b-input
-        v-model="store.incomingSearch"
+        v-model="searchInput"
         placeholder="Search by from, to, subject, or outcome..."
         size="sm"
+        @input="onSearchInput"
       />
     </div>
 
@@ -149,6 +152,8 @@ const { formatEmailDate } = useEmailDateFormat()
 
 const showDetail = ref(false)
 const selectedEntry = ref(null)
+const searchInput = ref('')
+let searchTimeout = null
 
 const fields = [
   { key: 'timestamp', label: 'Time', sortable: true },
@@ -158,16 +163,29 @@ const fields = [
   { key: 'routing_outcome', label: 'Outcome', sortable: true },
 ]
 
+function fetchAll() {
+  store.fetchIncomingEmails()
+  store.fetchIncomingCounts()
+  store.fetchBounceEvents()
+}
+
 function onFilterFetch({ lokiRange, start, end }) {
-  // Use Loki relative range if available, otherwise fall back to ISO dates.
   if (lokiRange) {
     store.incomingTimeRange = lokiRange
   } else {
     store.incomingTimeRange = start
   }
 
-  store.fetchIncomingEmails()
-  store.fetchBounceEvents()
+  fetchAll()
+}
+
+function onSearchInput() {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    store.incomingSearch = searchInput.value
+    store.fetchIncomingEmails()
+    store.fetchIncomingCounts()
+  }, 500)
 }
 
 function loadMore() {
@@ -175,8 +193,9 @@ function loadMore() {
 }
 
 function filterOutcome(outcome) {
-  store.incomingOutcomeFilter =
-    store.incomingOutcomeFilter === outcome ? '' : outcome
+  const newOutcome = store.incomingOutcomeFilter === outcome ? '' : outcome
+  store.incomingOutcomeFilter = newOutcome
+  store.fetchIncomingEmails()
 }
 
 function onRowClick(item) {
