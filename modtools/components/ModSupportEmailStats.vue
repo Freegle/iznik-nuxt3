@@ -119,63 +119,48 @@
 
     <!-- Statistics Cards -->
     <div v-if="emailTrackingStore.hasStats" class="mb-4 stats-flex">
-      <div class="stat-card stat-card--reliable">
-        <div class="stat-value text-primary">
-          {{ formattedStats.totalSent.toLocaleString() }}
-        </div>
-        <div class="stat-label">Sent</div>
-      </div>
-      <div class="stat-card stat-card--unreliable">
-        <div class="stat-value text-success">
-          {{ formattedStats.openRate }}%
-        </div>
-        <div class="stat-label">
-          Opens
-          <small class="text-muted d-block">
-            {{ formattedStats.opened.toLocaleString() }}
-          </small>
-        </div>
-      </div>
-      <div class="stat-card stat-card--reliable">
-        <div class="stat-value text-info">{{ formattedStats.clickRate }}%</div>
-        <div class="stat-label">
-          Clicks
-          <small class="text-muted d-block">
-            {{ formattedStats.clicked.toLocaleString() }}
-          </small>
-        </div>
-      </div>
-      <div class="stat-card stat-card--reliable">
-        <div class="stat-value text-danger">
-          {{ formattedStats.bounceRate }}%
-        </div>
-        <div class="stat-label">
-          Bounces
-          <small class="text-muted d-block">
-            {{ formattedStats.bounced.toLocaleString() }}
-          </small>
-        </div>
-      </div>
-      <div class="stat-card stat-card--unreliable">
-        <div class="stat-value text-warning">
-          {{ formattedStats.clickToOpenRate }}%
-        </div>
-        <div class="stat-label">
-          Clicked
-          <small class="text-muted d-block"> once opened </small>
-        </div>
-      </div>
-      <div v-if="formattedAMPStats" class="stat-card stat-card--amp">
-        <div class="stat-value text-purple">
-          {{ formattedAMPStats.ampPercentage }}%
-        </div>
-        <div class="stat-label">
-          AMP
-          <small class="text-muted d-block">
-            {{ formattedAMPStats.totalWithAMP.toLocaleString() }} emails
-          </small>
-        </div>
-      </div>
+      <ModEmailStatCard
+        :value="formattedStats.totalSent"
+        label="Sent"
+        value-color="primary"
+        accent="reliable"
+      />
+      <ModEmailStatCard
+        :value="`${formattedStats.openRate}%`"
+        label="Opens"
+        :subtitle="`${formattedStats.opened.toLocaleString()}`"
+        value-color="success"
+        accent="unreliable"
+      />
+      <ModEmailStatCard
+        :value="`${formattedStats.clickRate}%`"
+        label="Clicks"
+        :subtitle="`${formattedStats.clicked.toLocaleString()}`"
+        value-color="info"
+        accent="reliable"
+      />
+      <ModEmailStatCard
+        :value="`${formattedStats.bounceRate}%`"
+        label="Bounces"
+        :subtitle="`${formattedStats.bounced.toLocaleString()}`"
+        value-color="danger"
+        accent="reliable"
+      />
+      <ModEmailStatCard
+        :value="`${formattedStats.clickToOpenRate}%`"
+        label="Clicked"
+        subtitle="once opened"
+        value-color="warning"
+        accent="unreliable"
+      />
+      <ModEmailStatCard
+        v-if="formattedAMPStats"
+        :value="`${formattedAMPStats.ampPercentage}%`"
+        label="AMP"
+        :subtitle="`${formattedAMPStats.totalWithAMP.toLocaleString()} emails`"
+        value-color="purple"
+        accent="amp"
+      />
     </div>
 
     <!-- No Stats Message -->
@@ -687,6 +672,7 @@ import { ref, computed, watch } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
 import ModEmailDateFilter from '~/modtools/components/ModEmailDateFilter.vue'
+import ModEmailStatCard from '~/modtools/components/ModEmailStatCard.vue'
 import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 
 const emailTrackingStore = useEmailTrackingStore()
@@ -1049,36 +1035,6 @@ function getVolumeChartOptions() {
   gap: 0.5rem;
 }
 
-.stat-card {
-  flex: 1 1 auto;
-  min-width: 100px;
-  max-width: 150px;
-  padding: 0.5rem;
-  background: #fff;
-  border: 1px solid #dee2e6;
-  text-align: center;
-}
-
-.stat-card--unreliable {
-  border-left: 3px solid #ffc107;
-}
-
-.stat-card--reliable {
-  border-left: 3px solid #28a745;
-}
-
-.stat-value {
-  font-size: 1.25rem;
-  font-weight: bold;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.125rem;
-}
-
 .smaller {
   font-size: 0.65rem !important;
   opacity: 0.8;
@@ -1088,13 +1044,6 @@ function getVolumeChartOptions() {
   font-size: 0.65rem !important;
   padding-top: 0.1rem !important;
   padding-bottom: 0.1rem !important;
-}
-
-@media (max-width: 576px) {
-  .stat-card {
-    min-width: 45%;
-    max-width: 48%;
-  }
 }
 
 /* Charts section */
@@ -1167,11 +1116,6 @@ function getVolumeChartOptions() {
 
 .gap-2 {
   gap: 0.5rem;
-}
-
-/* AMP Statistics */
-.stat-card--amp {
-  border-left: 3px solid #6f42c1;
 }
 
 .text-purple {

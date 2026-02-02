@@ -16,37 +16,24 @@
     />
 
     <!-- Headline stats cards -->
-    <div v-if="store.incomingEntries.length > 0" class="mb-3">
-      <div class="d-flex flex-wrap gap-2 mb-2">
-        <div
-          class="stat-card p-2 border rounded text-center"
-          :class="{
-            'border-primary': !store.incomingOutcomeFilter,
-            'bg-light': !store.incomingOutcomeFilter,
-          }"
-          role="button"
-          @click="filterOutcome('')"
-        >
-          <div class="stat-count font-weight-bold">
-            {{ store.incomingEntries.length }}
-          </div>
-          <div class="stat-label small text-muted">Total</div>
-        </div>
-        <div
-          v-for="(count, outcome) in store.incomingOutcomeCounts"
-          :key="outcome"
-          class="stat-card p-2 border rounded text-center"
-          :class="{
-            'border-primary': store.incomingOutcomeFilter === outcome,
-            'bg-light': store.incomingOutcomeFilter === outcome,
-          }"
-          role="button"
-          @click="filterOutcome(outcome)"
-        >
-          <div class="stat-count font-weight-bold">{{ count }}</div>
-          <div class="stat-label small text-muted">{{ outcome }}</div>
-        </div>
-      </div>
+    <div v-if="store.incomingEntries.length > 0" class="mb-3 stats-flex">
+      <ModEmailStatCard
+        :value="store.incomingEntries.length"
+        label="Total"
+        clickable
+        :active="!store.incomingOutcomeFilter"
+        value-color="primary"
+        @click="filterOutcome('')"
+      />
+      <ModEmailStatCard
+        v-for="(count, outcome) in store.incomingOutcomeCounts"
+        :key="outcome"
+        :value="count"
+        :label="outcome"
+        clickable
+        :active="store.incomingOutcomeFilter === outcome"
+        @click="filterOutcome(outcome)"
+      />
     </div>
 
     <!-- Loading -->
@@ -153,6 +140,7 @@ import NoticeMessage from '~/components/NoticeMessage.vue'
 import ModEmailDateFilter from '~/modtools/components/ModEmailDateFilter.vue'
 import ModIncomingEmailDetail from '~/modtools/components/ModIncomingEmailDetail.vue'
 import ModIncomingEmailCharts from '~/modtools/components/ModIncomingEmailCharts.vue'
+import ModEmailStatCard from '~/modtools/components/ModEmailStatCard.vue'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
 import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 
@@ -217,18 +205,10 @@ function outcomeVariant(outcome) {
 </script>
 
 <style scoped>
-.stat-card {
-  min-width: 80px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.stat-card:hover {
-  background-color: #f0f0f0;
-}
-
-.stat-count {
-  font-size: 1.25rem;
+.stats-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .clickable-rows :deep(tbody tr) {
