@@ -17,6 +17,7 @@
               class="mt-1 text-info"
             />
             <ModChatReviewUser
+              v-if="message.touser"
               :user="message.touser"
               class="ml-2"
               tag="To: "
@@ -61,7 +62,7 @@
           <ChatMessage
             :id="message.id"
             :chatid="message.chatid"
-            :pov="message.touser.id"
+            :pov="message.touser?.id"
             last
             highlight-emails
             is-m-t
@@ -70,7 +71,7 @@
           <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /-->
           <!-- :chatusers="chatusers" -->
         </div>
-        <ModSpammer v-if="message.touser.spammer" :user="message.touser" />
+        <ModSpammer v-if="message.touser?.spammer" :user="message.touser" />
         <div class="d-flex justify-content-between flex-wrap">
           <span>
             {{ timeago(message.date) }}
