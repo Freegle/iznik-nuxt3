@@ -310,7 +310,12 @@
             <!-- Posted by divider and section (shown on taller screens, after description) -->
             <client-only>
               <div v-if="poster" class="section-header section-header--poster">
-                <span class="section-header-text">POSTED BY</span>
+                <span>
+                  <span class="section-header-text">POSTED BY</span>
+                  <span class="section-header-name">{{
+                    poster.displayname
+                  }}</span>
+                </span>
                 <span
                   class="section-id-link"
                   @click.stop="showProfileModal = true"
@@ -1825,6 +1830,13 @@ onUnmounted(() => {
   @include media-breakpoint-up(md) {
     display: inline;
   }
+}
+
+.section-header-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: $color-gray--darker;
+  margin-left: 0.35rem;
 }
 
 .section-id-link {

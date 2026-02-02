@@ -56,93 +56,87 @@
     </b-modal>
   </span>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useNuxtApp } from '#app'
 import { useOurModal } from '~/composables/useOurModal'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const { modal, hide } = useOurModal()
-    const { supportOrAdmin } = useMe()
-    return { modal, hide, supportOrAdmin }
-  },
-  data: function () {
-    return {
-      overall: 'green',
-      status: null,
-      updated: null,
-      tried: false,
-    }
-  },
-  computed: {
-    outOfDate() {
-      // Check if we've managed to get it recently.
-      return !this.updated || Date.now() - this.updated >= 1000 * 600
-    },
-    error() {
-      return this.status ? this.status.error : false
-    },
-    warning() {
-      return this.outOfDate || (this.status && this.status.warning)
-    },
-    fine() {
-      return !this.error && !this.warning
-    },
-    headline() {
-      if (this.outOfDate) {
-        return 'Not sure'
-      } else if (this.warning) {
-        return 'Warning'
-      } else if (this.error) {
-        return 'Error'
-      } else {
-        return 'Fine'
-      }
-    },
-  },
-  mounted() {
-    this.checkStatus()
-    this.hide()
-  },
-  beforeUnmount() {
-    if (this.timer) {
-      clearTimeout(this.timer)
-    }
-  },
-  methods: {
-    async checkStatus() {
-      try {
-        this.status = await this.$api.status.fetch()
+const { $api } = useNuxtApp()
+const { modal, hide } = useOurModal()
+const { supportOrAdmin } = useMe()
 
-        this.tried = true
+const status = ref(null)
+const updated = ref(null)
+const tried = ref(false)
+let timer = null
 
-        if (this.status.ret === 0) {
-          this.updated = Date.now()
-        }
-      } catch (error) {
-        console.warn('Status API error:', error)
-        this.tried = true
-        this.status = {
-          ret: 1,
+const outOfDate = computed(() => {
+  // Check if we've managed to get it recently.
+  return !updated.value || Date.now() - updated.value >= 1000 * 600
+})
+
+const error = computed(() => (status.value ? status.value.error : false))
+
+const warning = computed(() => {
+  return outOfDate.value || (status.value && status.value.warning)
+})
+
+const headline = computed(() => {
+  if (outOfDate.value) {
+    return 'Not sure'
+  } else if (warning.value) {
+    return 'Warning'
+  } else if (error.value) {
+    return 'Error'
+  } else {
+    return 'Fine'
+  }
+})
+
+async function checkStatus() {
+  try {
+    status.value = await $api.status.fetch()
+
+    tried.value = true
+
+    if (status.value.ret === 0) {
+      updated.value = Date.now()
+    }
+  } catch (err) {
+    console.warn('Status API error:', err)
+    tried.value = true
+    status.value = {
+      ret: 1,
+      warning: true,
+      info: {
+        'Status API': {
           warning: true,
-          info: {
-            'Status API': {
-              warning: true,
-              warningtext: 'Cannot access status file - system status unknown',
-            },
-          },
-        }
-      }
+          warningtext: 'Cannot access status file - system status unknown',
+        },
+      },
+    }
+  }
 
-      this.timer = setTimeout(this.checkStatus, 30000)
-    },
-    clicked(e) {
-      this.modal.show()
-      e.preventDefault()
-      e.stopPropagation()
-    },
-  },
+  timer = setTimeout(checkStatus, 30000)
 }
+
+function clicked(e) {
+  modal.value.show()
+  e.preventDefault()
+  e.stopPropagation()
+}
+
+onMounted(() => {
+  checkStatus()
+  hide()
+})
+
+onBeforeUnmount(() => {
+  if (timer) {
+    clearTimeout(timer)
+  }
+})
 </script>
 <style scoped lang="scss">
 .trying {

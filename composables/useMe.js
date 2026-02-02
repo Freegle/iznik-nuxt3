@@ -188,10 +188,13 @@ export function useMe() {
   const recentDonor = computed(() => {
     const donated = me.value?.donated
 
-    // If donated and within last 31 days
+    // Bank transfer (External) donations get a 10-day grace period since they can arrive late.
+    // See also ADFREE_PERIOD and ADFREE_GRACE_PERIOD in iznik-server-go/utils/utils.go.
+    const days = me.value?.donatedtype === 'External' ? 41 : 31
+
     return (
       donated &&
-      new Date(donated) > new Date(Date.now() - 31 * 24 * 60 * 60 * 1000)
+      new Date(donated) > new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     )
   })
 

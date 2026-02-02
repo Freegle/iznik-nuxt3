@@ -124,8 +124,8 @@ test.describe('Reply Flow - New User Registration', () => {
     // Clear session to simulate new user
     await logoutIfLoggedIn(page)
 
-    // Navigate via explore page
-    await navigateToMessageViaExplore(page, 'FreeglePlayground')
+    // Navigate via explore page and find our specific message
+    await navigateToMessageViaExplore(page, 'FreeglePlayground', uniqueItem)
     await clickReplyButton(page)
 
     // Fill in reply as new user

@@ -185,251 +185,257 @@
     </NoticeMessage>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useChatStore } from '~/stores/chat'
 import { useMessageStore } from '~/stores/message'
 import { useSystemLogsStore } from '~/stores/systemlogs'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  setup() {
-    const chatStore = useChatStore()
-    const messageStore = useMessageStore()
-    const systemLogsStore = useSystemLogsStore()
-    const { supportOrAdmin } = useMe()
-    return { chatStore, messageStore, systemLogsStore, supportOrAdmin }
-  },
-  data() {
-    return {
-      error: false,
-      messageTerm: null,
-      id: 0,
-      showSystemLogs: false,
-      systemLogsBump: 0,
-      showEmailStats: false,
-      emailStatsBump: 0,
-      showIncomingEmail: false,
-      incomingEmailBump: 0,
-      showAIAssistant: false,
-      aiAssistantBump: 0,
-      activeTab: 0,
-      communitySubTab: 0,
-      logsSubTab: 0,
-      spamSubTab: 0,
-    }
-  },
-  computed: {
-    messages() {
-      return this.messageStore.all
-    },
-  },
-  created() {
-    const route = useRoute()
-    this.id = 'id' in route.params ? parseInt(route.params.id) : 0
-    this.chatStore.list = [] // this.chatStore.clear()
-    this.messageStore.clear()
-  },
-  mounted() {
-    // Handle tab query parameter after component is mounted.
-    const route = useRoute()
+// Stores
+const chatStore = useChatStore()
+const messageStore = useMessageStore()
+const systemLogsStore = useSystemLogsStore()
 
-    // Top-level tab mapping.
-    const topTabMap = {
-      user: 0,
-      community: 1,
-      message: 2,
-      logs: 3,
-      spam: 4,
-    }
+// Composables
+const { supportOrAdmin } = useMe()
 
-    // Sub-tab mappings.
-    const communitySubTabMap = {
-      find: 0,
-      list: 1,
-      contact: 2,
-      add: 3,
-      volunteers: 4,
-    }
+// Route
+const route = useRoute()
 
-    const logsSubTabMap = {
-      system: 0,
-      email: 1,
-      incoming: 2,
-      ai: 3,
-    }
+// Template refs
+const findGroupComponent = ref(null)
+const listGroupsComponent = ref(null)
+const worryWordsComponent = ref(null)
+const spamKeywordsComponent = ref(null)
 
-    const spamSubTabMap = {
-      worry: 0,
-      keywords: 1,
-    }
+// Local state (formerly data())
+const error = ref(false)
+const messageTerm = ref(null)
+const id = ref('id' in route.params ? parseInt(route.params.id) : 0)
+const showSystemLogs = ref(false)
+const systemLogsBump = ref(0)
+const showEmailStats = ref(false)
+const emailStatsBump = ref(0)
+const showIncomingEmail = ref(false)
+const incomingEmailBump = ref(0)
+const showAIAssistant = ref(false)
+const aiAssistantBump = ref(0)
+const activeTab = ref(0)
+const communitySubTab = ref(0)
+const logsSubTab = ref(0)
+const spamSubTab = ref(0)
 
-    const tabParam = route.query.tab
-    const subTabParam = route.query.subtab
+// Tab name to index mapping
+const topTabMap = {
+  user: 0,
+  community: 1,
+  message: 2,
+  logs: 3,
+  spam: 4,
+}
 
-    if (tabParam && topTabMap[tabParam] !== undefined) {
-      this.$nextTick(() => {
-        this.activeTab = topTabMap[tabParam]
+const communitySubTabMap = {
+  find: 0,
+  list: 1,
+  contact: 2,
+  add: 3,
+  volunteers: 4,
+}
 
-        // Handle sub-tabs.
-        if (tabParam === 'community') {
-          this.onCommunityTab()
-          if (subTabParam && communitySubTabMap[subTabParam] !== undefined) {
-            this.communitySubTab = communitySubTabMap[subTabParam]
-            if (subTabParam === 'find') {
-              this.onFindCommunityTab()
-            } else if (subTabParam === 'list') {
-              this.onListCommunitiesTab()
-            }
-          }
-        } else if (tabParam === 'logs') {
-          this.onLogsTab()
-          if (subTabParam && logsSubTabMap[subTabParam] !== undefined) {
-            this.logsSubTab = logsSubTabMap[subTabParam]
-            if (subTabParam === 'system') {
-              this.onSystemLogsTab()
-            } else if (subTabParam === 'email') {
-              this.onEmailStatsTab()
-            } else if (subTabParam === 'incoming') {
-              this.onIncomingEmailTab()
-            } else if (subTabParam === 'ai') {
-              this.onAIAssistantTab()
-            }
-          } else {
-            // Default to system logs.
-            this.onSystemLogsTab()
-          }
-        } else if (tabParam === 'spam') {
-          this.onSpamTab()
-          if (subTabParam && spamSubTabMap[subTabParam] !== undefined) {
-            this.spamSubTab = spamSubTabMap[subTabParam]
-            if (subTabParam === 'worry') {
-              this.onWorryWordsTab()
-            } else if (subTabParam === 'keywords') {
-              this.onSpamKeywordsTab()
-            }
+const logsSubTabMap = {
+  system: 0,
+  email: 1,
+  incoming: 2,
+  ai: 3,
+}
+
+const spamSubTabMap = {
+  worry: 0,
+  keywords: 1,
+}
+
+// Computed properties
+const messages = computed(() => {
+  return messageStore.all
+})
+
+// Initialize (formerly created hook)
+chatStore.list = [] // chatStore.clear()
+messageStore.clear()
+
+// Lifecycle
+onMounted(() => {
+  // Handle tab query parameter after component is mounted.
+  const tabParam = route.query.tab
+  const subTabParam = route.query.subtab
+
+  if (tabParam && topTabMap[tabParam] !== undefined) {
+    nextTick(() => {
+      activeTab.value = topTabMap[tabParam]
+
+      // Handle sub-tabs.
+      if (tabParam === 'community') {
+        onCommunityTab()
+        if (subTabParam && communitySubTabMap[subTabParam] !== undefined) {
+          communitySubTab.value = communitySubTabMap[subTabParam]
+          if (subTabParam === 'find') {
+            onFindCommunityTab()
+          } else if (subTabParam === 'list') {
+            onListCommunitiesTab()
           }
         }
-      })
-    }
-  },
-  methods: {
-    changedMessageTerm(term) {
-      this.messageTerm = term.trim()
-    },
-    async searchedMessage() {
-      const term = this.messageTerm
-      await this.messageStore.clearContext()
-      await this.messageStore.clear()
-
-      if (term) {
-        if (!isNaN(term)) {
-          // This is a raw message id
-          await this.searchById(term)
-        } else if (term.substring(0, 1) === '#' && !isNaN(term.substring(1))) {
-          // This is a #id
-          await this.searchById(term.substring(1))
+      } else if (tabParam === 'logs') {
+        onLogsTab()
+        if (subTabParam && logsSubTabMap[subTabParam] !== undefined) {
+          logsSubTab.value = logsSubTabMap[subTabParam]
+          if (subTabParam === 'system') {
+            onSystemLogsTab()
+          } else if (subTabParam === 'email') {
+            onEmailStatsTab()
+          } else if (subTabParam === 'incoming') {
+            onIncomingEmailTab()
+          } else if (subTabParam === 'ai') {
+            onAIAssistantTab()
+          }
         } else {
-          await this.searchBySubject(term)
+          // Default to system logs.
+          onSystemLogsTab()
+        }
+      } else if (tabParam === 'spam') {
+        onSpamTab()
+        if (subTabParam && spamSubTabMap[subTabParam] !== undefined) {
+          spamSubTab.value = spamSubTabMap[subTabParam]
+          if (subTabParam === 'worry') {
+            onWorryWordsTab()
+          } else if (subTabParam === 'keywords') {
+            onSpamKeywordsTab()
+          }
         }
       }
-    },
+    })
+  }
+})
 
-    async searchById(id) {
-      this.error = false
+// Methods
+function changedMessageTerm(term) {
+  messageTerm.value = term.trim()
+}
 
-      try {
-        const message = await this.messageStore.fetchMT({
-          id,
-          messagehistory: true,
-        })
-        if (message) this.messageStore.list[id] = message
-      } catch (e) {
-        console.log("Couldn't fetch", e)
-        this.error = true
-      }
-    },
-    async searchBySubject(subj) {
-      this.error = false
+async function searchedMessage() {
+  const term = messageTerm.value
+  await messageStore.clearContext()
+  await messageStore.clear()
 
-      await this.messageStore.searchMT({ term: subj, groupid: this.groupid })
-    },
+  if (term) {
+    if (!isNaN(term)) {
+      // This is a raw message id
+      await searchById(term)
+    } else if (term.substring(0, 1) === '#' && !isNaN(term.substring(1))) {
+      // This is a #id
+      await searchById(term.substring(1))
+    } else {
+      await searchBySubject(term)
+    }
+  }
+}
 
-    onCommunityTab() {
-      // Initialize community tab - load find communities by default.
-      this.$nextTick(() => {
-        this.onFindCommunityTab()
-      })
-    },
+async function searchById(msgId) {
+  error.value = false
 
-    async onFindCommunityTab() {
-      // Load communities when tab is selected
-      if (this.$refs.findGroupComponent) {
-        await this.$refs.findGroupComponent.loadCommunities()
-      }
-    },
+  try {
+    const message = await messageStore.fetchMT({
+      id: msgId,
+      messagehistory: true,
+    })
+    if (message) messageStore.list[msgId] = message
+  } catch (e) {
+    console.log("Couldn't fetch", e)
+    error.value = true
+  }
+}
 
-    async onWorryWordsTab() {
-      // Fetch worry words when tab is selected
-      if (this.$refs.worryWordsComponent) {
-        await this.$refs.worryWordsComponent.fetchWorryWords()
-      }
-    },
+async function searchBySubject(subj) {
+  error.value = false
+  await messageStore.searchMT({ term: subj, groupid: undefined })
+}
 
-    async onSpamKeywordsTab() {
-      // Fetch spam keywords when tab is selected
-      if (this.$refs.spamKeywordsComponent) {
-        await this.$refs.spamKeywordsComponent.fetchSpamKeywords()
-      }
-    },
+function onCommunityTab() {
+  // Initialize community tab - load find communities by default.
+  nextTick(() => {
+    onFindCommunityTab()
+  })
+}
 
-    async onListCommunitiesTab() {
-      // Fetch communities when tab is selected
-      if (this.$refs.listGroupsComponent) {
-        await this.$refs.listGroupsComponent.fetchCommunities()
-      }
-    },
+async function onFindCommunityTab() {
+  // Load communities when tab is selected
+  if (findGroupComponent.value) {
+    await findGroupComponent.value.loadCommunities()
+  }
+}
 
-    onLogsTab() {
-      // Initialize logs tab - show system logs by default.
-      this.$nextTick(() => {
-        this.onSystemLogsTab()
-      })
-    },
+async function onWorryWordsTab() {
+  // Fetch worry words when tab is selected
+  if (worryWordsComponent.value) {
+    await worryWordsComponent.value.fetchWorryWords()
+  }
+}
 
-    onSystemLogsTab() {
-      // Initialize system logs when tab is clicked.
-      this.systemLogsBump = Date.now()
-      this.showSystemLogs = true
-      this.systemLogsStore.clear()
-    },
+async function onSpamKeywordsTab() {
+  // Fetch spam keywords when tab is selected
+  if (spamKeywordsComponent.value) {
+    await spamKeywordsComponent.value.fetchSpamKeywords()
+  }
+}
 
-    onEmailStatsTab() {
-      // Initialize email stats when tab is clicked.
-      this.emailStatsBump = Date.now()
-      this.showEmailStats = true
-    },
+async function onListCommunitiesTab() {
+  // Fetch communities when tab is selected
+  if (listGroupsComponent.value) {
+    await listGroupsComponent.value.fetchCommunities()
+  }
+}
 
-    onIncomingEmailTab() {
-      this.incomingEmailBump = Date.now()
-      this.showIncomingEmail = true
-    },
+function onLogsTab() {
+  // Initialize logs tab - show system logs by default.
+  nextTick(() => {
+    onSystemLogsTab()
+  })
+}
 
-    onAIAssistantTab() {
-      // Initialize AI assistant when tab is clicked.
-      this.aiAssistantBump = Date.now()
-      this.showAIAssistant = true
-    },
+function onSystemLogsTab() {
+  // Initialize system logs when tab is clicked.
+  systemLogsBump.value = Date.now()
+  showSystemLogs.value = true
+  systemLogsStore.clear()
+}
 
-    onSpamTab() {
-      // Initialize spam tab - load worry words by default.
-      this.$nextTick(() => {
-        this.onWorryWordsTab()
-      })
-    },
-  },
+function onEmailStatsTab() {
+  // Initialize email stats when tab is clicked.
+  emailStatsBump.value = Date.now()
+  showEmailStats.value = true
+}
+
+function onIncomingEmailTab() {
+  incomingEmailBump.value = Date.now()
+  showIncomingEmail.value = true
+}
+
+function onAIAssistantTab() {
+  // Initialize AI assistant when tab is clicked.
+  aiAssistantBump.value = Date.now()
+  showAIAssistant.value = true
+}
+
+function onSpamTab() {
+  // Initialize spam tab - load worry words by default.
+  nextTick(() => {
+    onWorryWordsTab()
+  })
 }
 </script>
+
 <style scoped>
 .max {
   max-width: 300px;

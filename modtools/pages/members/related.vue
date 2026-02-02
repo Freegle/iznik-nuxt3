@@ -39,73 +39,51 @@
     </client-only>
   </div>
 </template>
-<script>
+<script setup>
+import { computed, onMounted } from 'vue'
 import { setupModMembers } from '~/composables/useModMembers'
 import { useMemberStore } from '~/stores/member'
-import { useGroupStore } from '@/stores/group'
-import { useMiscStore } from '@/stores/misc'
 
-export default {
-  setup() {
-    const groupStore = useGroupStore()
-    const memberStore = useMemberStore()
-    const miscStore = useMiscStore()
-    const { bump, collection, distance, groupid, loadMore } =
-      setupModMembers(true)
-    collection.value = 'Related'
-    return {
-      groupStore,
-      memberStore,
-      miscStore,
-      groupid,
-      bump,
-      distance,
-      loadMore,
+const memberStore = useMemberStore()
+const { bump, collection, distance, groupid, loadMore } = setupModMembers(true)
+collection.value = 'Related'
+
+// Computed
+const members = computed(() => {
+  if (!memberStore) return []
+  console.log('members related all list')
+  return Object.values(memberStore.list)
+})
+
+const visibleMembers = computed(() => {
+  const ret = members.value.filter((member) => {
+    if (groupid.value <= 0) {
+      // No group filter
+      return true
     }
-  },
-  data: function () {
-    return {}
-  },
-  computed: {
-    members() {
-      if (!this.memberStore) return []
-      console.log('members related all list')
-      return Object.values(this.memberStore.list)
-    },
-    visibleMembers() {
-      const ret = this.members.filter((member) => {
-        if (this.groupid <= 0) {
-          // No group filter
-          return true
-        }
 
-        let found = false
-        member.memberof.forEach((group) => {
-          if (parseInt(group.id) === this.groupid) {
-            found = true
-          }
-        })
+    let found = false
+    member.memberof.forEach((group) => {
+      if (parseInt(group.id) === groupid.value) {
+        found = true
+      }
+    })
 
-        member.relatedto.memberof.forEach((group) => {
-          if (parseInt(group.id) === this.groupid) {
-            found = true
-          }
-        })
+    member.relatedto.memberof.forEach((group) => {
+      if (parseInt(group.id) === groupid.value) {
+        found = true
+      }
+    })
 
-        return found
-      })
+    return found
+  })
 
-      return ret
-    },
-  },
-  mounted() {
-    // reset infiniteLoading on return to page
-    this.memberStore.clear()
-  },
-  methods: {
-    active(member) {
-      return member.messagehistory
-    },
-  },
-}
+  return ret
+})
+
+// Lifecycle
+onMounted(() => {
+  // reset infiniteLoading on return to page
+  memberStore.clear()
+})
 </script>

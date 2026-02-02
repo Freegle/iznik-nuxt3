@@ -61,17 +61,28 @@ async function clearSessionData(page) {
     }
   })
 
-  // Clear all browser storage
+  // Clear all browser storage and Pinia state
+  // IMPORTANT: Clear localStorage AFTER modifying Pinia stores, because the
+  // persistence plugin may write to localStorage when store values change.
+  // By clearing localStorage last, we ensure all persisted data is removed.
   await page.evaluate(() => {
-    try {
-      localStorage.clear()
-    } catch {
-      // Ignore
-    }
-    try {
-      sessionStorage.clear()
-    } catch {
-      // Ignore
+    // Clear Pinia stores FIRST (this may trigger persistence writes)
+    if (window.$nuxt && window.$nuxt.$pinia) {
+      for (const store of window.$nuxt.$pinia._s.values()) {
+        if (store.$reset) {
+          store.$reset()
+        }
+      }
+      // Explicitly clear loggedInEver which is preserved by auth store's logout()
+      const authStore = window.$nuxt.$pinia._s.get('auth')
+      if (authStore) {
+        authStore.loggedInEver = false
+        authStore.loginCount = 0
+        // Also clear auth tokens
+        authStore.auth = { jwt: null, persistent: null }
+        authStore.user = null
+        authStore.loginStateKnown = false
+      }
     }
 
     // Clear indexedDB
@@ -86,13 +97,18 @@ async function clearSessionData(page) {
         .catch(() => {})
     }
 
-    // Clear Pinia stores if they exist
-    if (window.$nuxt && window.$nuxt.$pinia) {
-      for (const store of window.$nuxt.$pinia._s.values()) {
-        if (store.$reset) {
-          store.$reset()
-        }
-      }
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear()
+    } catch {
+      // Ignore
+    }
+
+    // Clear localStorage LAST to ensure any persistence writes are cleared
+    try {
+      localStorage.clear()
+    } catch {
+      // Ignore
     }
   })
 

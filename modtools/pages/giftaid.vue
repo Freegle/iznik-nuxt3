@@ -168,260 +168,255 @@
     </p>
   </b-container>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import Papa from 'papaparse'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import dayjs from 'dayjs'
+import { useNuxtApp } from '#app'
 import { useDonationStore } from '~/stores/donations'
 import { useUserStore } from '~/stores/user'
 
-export default {
-  setup() {
-    const donationStore = useDonationStore()
-    const userStore = useUserStore()
-    return {
-      donationStore,
-      userStore,
+const { $api } = useNuxtApp()
+
+const donationStore = useDonationStore()
+const userStore = useUserStore()
+
+const giftaids = ref([])
+const search = ref(null)
+const results = ref([])
+const userid = ref(null)
+const amount = ref(null)
+const date = ref(new Date())
+const csv = ref(null)
+const csvError = ref(null)
+const csvTrace = ref(null)
+const csvTrace2 = ref(null)
+const showSubmitCSV = ref(false)
+const disableSubmitCSV = ref(false)
+const csvDonations = ref([])
+
+async function getGiftAid() {
+  const giftaidList = await $api.giftaid.list()
+
+  // Sort so that the easy ones are at the top.
+  giftaids.value = giftaidList.sort((a, b) => {
+    if (
+      (a.postcode && !b.postcode) ||
+      (a.fullname.includes(' ') && !b.fullname.includes(' '))
+    ) {
+      return -1
+    } else if (
+      (b.postcode && !a.postcode) ||
+      (b.fullname.includes(' ') && !a.fullname.includes(' '))
+    ) {
+      return 1
+    } else {
+      return 0
     }
-  },
-  data() {
-    return {
-      giftaids: [],
-      search: null,
-      results: [],
-      userid: null,
-      amount: null,
-      date: new Date(),
-      csv: null,
-      csvError: null,
-      csvTrace: null,
-      csvTrace2: null,
-      showSubmitCSV: false,
-      disableSubmitCSV: false,
-      csvDonations: [],
-    }
-  },
-  async mounted() {
-    // this.date = dayjs()
-    dayjs.extend(customParseFormat)
-    await this.getGiftAid()
-  },
-  methods: {
-    async getGiftAid() {
-      const giftaid = await this.$api.giftaid.list()
-
-      // Sort so that the easy ones are at the top.
-      this.giftaids = giftaid.sort((a, b) => {
-        if (
-          (a.postcode && !b.postcode) ||
-          (a.fullname.includes(' ') && !b.fullname.includes(' '))
-        ) {
-          return -1
-        } else if (
-          (b.postcode && !a.postcode) ||
-          (b.fullname.includes(' ') && !a.fullname.includes(' '))
-        ) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-    },
-    async doSearch(callback) {
-      this.results = await this.$api.giftaid.search(this.search)
-      callback()
-    },
-    checkSearch(e) {
-      if (e.keyCode === 13) {
-        this.doSearch()
-      }
-    },
-    recordDonation(callback) {
-      if (this.userid && this.amount >= 0 && this.date) {
-        this.donationStore.add(
-          this.userid,
-          this.amount,
-          this.date.toISOString()
-        )
-      }
-      callback()
-    },
-    async validateCSVDonations(callback) {
-      this.csvError = null
-      this.showSubmitCSV = false
-      this.csvDonations = []
-      this.csvTrace = ''
-
-      const res = Papa.parse(this.csv.trim())
-      console.log('res', res)
-
-      if (res.meta.delimiter !== ',') {
-        this.csvError =
-          "Data must be comma separated.  If you've used Excel, please use a text editor such as Notepad to open the CSV file, and copy and paste from there."
-        return
-      }
-
-      if (res.errors.length) {
-        this.csvError = res.errors[0].message
-        return
-      }
-
-      if (res.data?.length === 0) {
-        this.csvError = 'No data found.'
-        return
-      }
-      if (res.data[0].length !== 8) {
-        this.csvError = 'Expecting 8 columns. Found ' + res.data[0].length
-        return
-      }
-
-      if (res.data[0][0] !== 'Date') {
-        this.csvError =
-          "Expecting first column in first row to be 'Date'. Found " +
-          res.data[0][0] +
-          '.  Maybe you forgot the headers?'
-        return
-      }
-
-      if (res.data[0][1] !== 'Amt') {
-        this.csvError =
-          "Expecting second column in first row to be 'Amt'. Found " +
-          res.data[0][1] +
-          '.  Maybe you forgot the headers?'
-        return
-      }
-
-      if (res.data[0][3] !== 'ID / GA from Mod Tools') {
-        this.csvError =
-          "Expecting second column in first row to be 'ID / GA from Mod Tools'. Found " +
-          res.data[0][1] +
-          '.  Maybe you forgot the headers?'
-        return
-      }
-
-      // Headers look ok.  Scan the rest of the rows.
-      for (let i = 1; i < res.data.length; i++) {
-        const row = res.data[i]
-        if (row.length !== 8) {
-          this.csvError =
-            'Expecting 8 columns. Found ' + row.length + ' on row ' + (i + 1)
-          break
-        }
-        const date = dayjs(row[0], 'DD/MM/YYYY')
-        if (!date.isValid()) {
-          this.csvError = 'Invalid date ' + row[0] + ' on row ' + (i + 1)
-          break
-        }
-        const amount = parseFloat(row[1])
-        if (isNaN(amount)) {
-          this.csvError = 'Invalid amount on row ' + (i + 1)
-          break
-        }
-
-        const userid = parseInt(row[3].substring(3))
-        if (isNaN(userid)) {
-          this.csvError = 'Invalid user ID on row ' + (i + 1)
-          break
-        }
-
-        // Check if the userid matches a valid user.
-        await this.userStore.fetchMT({ id: userid })
-
-        const user = this.userStore.byId(userid)
-
-        if (!user?.id) {
-          this.csvError =
-            'User ID ' +
-            userid +
-            ' on row ' +
-            (i + 1) +
-            ' not found in the system.  Unsubscribed or merged?'
-        }
-
-        // Check if email found in user's emails
-        let emailFound = false
-        const email = row[4]
-        for (let j = 0; j < user?.emails?.length; j++) {
-          if (user.emails[j].email === email) {
-            emailFound = true
-            break
-          }
-        }
-
-        if (!emailFound) {
-          this.csvError =
-            'Email ' +
-            row[4] +
-            ' on row ' +
-            (i + 1) +
-            ' not found in the emails for user ID ' +
-            userid +
-            '.  Perhaps this is the wrong user ID, or the email has been removed?'
-          break
-        }
-
-        this.csvDonations.push({
-          date,
-          amount,
-          userid,
-          email,
-        })
-
-        this.csvTrace +=
-          date.format('YYYY-MM-DD') +
-          ' £' +
-          amount +
-          ' from #' +
-          userid +
-          ' (' +
-          email +
-          ')<br />'
-      }
-
-      if (!this.csvError) {
-        this.showSubmitCSV = true
-      }
-      callback()
-    },
-    async submitCSVDonations(callback) {
-      this.csvTrace2 = ''
-
-      for (let i = 0; i < this.csvDonations.length; i++) {
-        const donation = this.csvDonations[i]
-
-        const id = await this.donationStore.add(
-          donation.userid,
-          donation.amount,
-          donation.date.format('YYYY-MM-DD')
-        )
-
-        if (id) {
-          this.csvTrace2 +=
-            donation.date.format('YYYY-MM-DD') +
-            ' £' +
-            donation.amount +
-            ' from #' +
-            donation.userid +
-            ' (' +
-            donation.email +
-            ') - recorded<br />'
-        } else {
-          this.csvTrace2 +=
-            '<span class="text-error">' +
-            donation.date.format('YYYY-MM-DD') +
-            ' £' +
-            donation.amount +
-            ' from #' +
-            donation.userid +
-            ' (' +
-            donation.email +
-            ') - failed</span><br />'
-        }
-      }
-
-      this.disableSubmitCSV = true
-      callback()
-    },
-  },
+  })
 }
+
+async function doSearch(callback) {
+  results.value = await $api.giftaid.search(search.value)
+  if (callback) {
+    callback()
+  }
+}
+
+function checkSearch(e) {
+  if (e.keyCode === 13) {
+    doSearch()
+  }
+}
+
+function recordDonation(callback) {
+  if (userid.value && amount.value >= 0 && date.value) {
+    donationStore.add(userid.value, amount.value, date.value.toISOString())
+  }
+  callback()
+}
+
+async function validateCSVDonations(callback) {
+  csvError.value = null
+  showSubmitCSV.value = false
+  csvDonations.value = []
+  csvTrace.value = ''
+
+  const res = Papa.parse(csv.value.trim())
+  console.log('res', res)
+
+  if (res.meta.delimiter !== ',') {
+    csvError.value =
+      "Data must be comma separated.  If you've used Excel, please use a text editor such as Notepad to open the CSV file, and copy and paste from there."
+    return
+  }
+
+  if (res.errors.length) {
+    csvError.value = res.errors[0].message
+    return
+  }
+
+  if (res.data?.length === 0) {
+    csvError.value = 'No data found.'
+    return
+  }
+  if (res.data[0].length !== 8) {
+    csvError.value = 'Expecting 8 columns. Found ' + res.data[0].length
+    return
+  }
+
+  if (res.data[0][0] !== 'Date') {
+    csvError.value =
+      "Expecting first column in first row to be 'Date'. Found " +
+      res.data[0][0] +
+      '.  Maybe you forgot the headers?'
+    return
+  }
+
+  if (res.data[0][1] !== 'Amt') {
+    csvError.value =
+      "Expecting second column in first row to be 'Amt'. Found " +
+      res.data[0][1] +
+      '.  Maybe you forgot the headers?'
+    return
+  }
+
+  if (res.data[0][3] !== 'ID / GA from Mod Tools') {
+    csvError.value =
+      "Expecting second column in first row to be 'ID / GA from Mod Tools'. Found " +
+      res.data[0][1] +
+      '.  Maybe you forgot the headers?'
+    return
+  }
+
+  // Headers look ok.  Scan the rest of the rows.
+  for (let i = 1; i < res.data.length; i++) {
+    const row = res.data[i]
+    if (row.length !== 8) {
+      csvError.value =
+        'Expecting 8 columns. Found ' + row.length + ' on row ' + (i + 1)
+      break
+    }
+    const rowDate = dayjs(row[0], 'DD/MM/YYYY')
+    if (!rowDate.isValid()) {
+      csvError.value = 'Invalid date ' + row[0] + ' on row ' + (i + 1)
+      break
+    }
+    const rowAmount = parseFloat(row[1])
+    if (isNaN(rowAmount)) {
+      csvError.value = 'Invalid amount on row ' + (i + 1)
+      break
+    }
+
+    const rowUserid = parseInt(row[3].substring(3))
+    if (isNaN(rowUserid)) {
+      csvError.value = 'Invalid user ID on row ' + (i + 1)
+      break
+    }
+
+    // Check if the userid matches a valid user.
+    await userStore.fetchMT({ id: rowUserid })
+
+    const user = userStore.byId(rowUserid)
+
+    if (!user?.id) {
+      csvError.value =
+        'User ID ' +
+        rowUserid +
+        ' on row ' +
+        (i + 1) +
+        ' not found in the system.  Unsubscribed or merged?'
+    }
+
+    // Check if email found in user's emails
+    let emailFound = false
+    const email = row[4]
+    for (let j = 0; j < user?.emails?.length; j++) {
+      if (user.emails[j].email === email) {
+        emailFound = true
+        break
+      }
+    }
+
+    if (!emailFound) {
+      csvError.value =
+        'Email ' +
+        row[4] +
+        ' on row ' +
+        (i + 1) +
+        ' not found in the emails for user ID ' +
+        rowUserid +
+        '.  Perhaps this is the wrong user ID, or the email has been removed?'
+      break
+    }
+
+    csvDonations.value.push({
+      date: rowDate,
+      amount: rowAmount,
+      userid: rowUserid,
+      email,
+    })
+
+    csvTrace.value +=
+      rowDate.format('YYYY-MM-DD') +
+      ' £' +
+      rowAmount +
+      ' from #' +
+      rowUserid +
+      ' (' +
+      email +
+      ')<br />'
+  }
+
+  if (!csvError.value) {
+    showSubmitCSV.value = true
+  }
+  callback()
+}
+
+async function submitCSVDonations(callback) {
+  csvTrace2.value = ''
+
+  for (let i = 0; i < csvDonations.value.length; i++) {
+    const donation = csvDonations.value[i]
+
+    const id = await donationStore.add(
+      donation.userid,
+      donation.amount,
+      donation.date.format('YYYY-MM-DD')
+    )
+
+    if (id) {
+      csvTrace2.value +=
+        donation.date.format('YYYY-MM-DD') +
+        ' £' +
+        donation.amount +
+        ' from #' +
+        donation.userid +
+        ' (' +
+        donation.email +
+        ') - recorded<br />'
+    } else {
+      csvTrace2.value +=
+        '<span class="text-error">' +
+        donation.date.format('YYYY-MM-DD') +
+        ' £' +
+        donation.amount +
+        ' from #' +
+        donation.userid +
+        ' (' +
+        donation.email +
+        ') - failed</span><br />'
+    }
+  }
+
+  disableSubmitCSV.value = true
+  callback()
+}
+
+onMounted(async () => {
+  dayjs.extend(customParseFormat)
+  await getGiftAid()
+})
 </script>

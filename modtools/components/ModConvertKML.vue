@@ -16,27 +16,16 @@
     </b-card-body>
   </b-card>
 </template>
-<script>
+<script setup>
+import { ref } from 'vue'
 import { useLocationStore } from '@/stores/location'
 
-export default {
-  components: {},
-  setup() {
-    const locationStore = useLocationStore()
-    return {
-      locationStore,
-    }
-  },
-  data: function () {
-    return {
-      kml: null,
-      wkt: null,
-    }
-  },
-  methods: {
-    async convert() {
-      this.wkt = await this.locationStore.convertKML(this.kml)
-    },
-  },
+const locationStore = useLocationStore()
+
+const kml = ref(null)
+const wkt = ref(null)
+
+async function convert() {
+  wkt.value = await locationStore.convertKML(kml.value)
 }
 </script>

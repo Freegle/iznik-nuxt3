@@ -150,7 +150,7 @@
               label="Add Mod Message"
               variant="warning"
               class="mr-2 mb-1"
-              @handle="modnote"
+              @handle="showModnote"
             />
             <SpinButton
               v-if="!message.held || me.id === message.held.id"
@@ -224,216 +224,205 @@
     />
   </div>
 </template>
-<script>
-import { useChatStore } from '~/stores/chat'
+<script setup>
+import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 
-// We need an id for the store.  The null value is a special case used just for retrieving chat review messages.
-// const REVIEWCHAT = null
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
+  },
+  message: {
+    type: Object,
+    required: true,
+  },
+})
 
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    message: {
-      type: Object,
-      required: true,
-    },
-  },
-  emits: ['reload'],
-  setup() {
-    const chatStore = useChatStore()
-    const { me } = useMe()
-    return {
-      me,
-      chatStore,
-    }
-  },
-  data: function () {
-    return {
-      showOriginal: false,
-      showModChatNoteModal: false,
-    }
-  },
-  computed: {
-    chatusers() {
-      // This is a bit expensive in the store, so it's better to get it here and pass it down than potentially to
-      // get it in each message we render.
-      return this.chatStore.getUsers(this.id)
-    },
-    reviewreason() {
-      let ret = null
+const emit = defineEmits(['reload'])
 
-      if (this.message && this.message.reviewreason) {
-        switch (this.message.reviewreason) {
-          case 'Last': {
-            ret = 'Earlier message was held for review, so this one is too.'
-            break
-          }
-          case 'Force': {
-            ret = 'Possible spam.'
-            break
-          }
-          case 'Fully': {
-            ret = 'This member is set to have all chat messages reviewed.'
-            break
-          }
-          case 'TooMany': {
-            ret =
-              'This member has sent a lot of chat messages recently, which can indicate scammers/spammers.'
-            break
-          }
-          case 'User': {
-            ret =
-              'The member has been flagged for review, so this message was flagged too.  Please check the member logs for more info.'
-            break
-          }
-          case 'UnknownMessage': {
-            ret =
-              'This is a reply to a post we cannot find.  Sometimes that is a spammer using old data.'
-            break
-          }
-          case 'Spam': {
-            ret =
-              "This message failed spam checks, but we don't have any more information about why."
-            break
-          }
-          case 'CountryBlocked': {
-            ret = 'It comes from a country we are blocking.'
-            break
-          }
-          case 'IPUsedForDifferentUsers': {
-            ret =
-              'The same IP address has been used for a lot of different users.'
-            break
-          }
-          case 'IPUsedForDifferentGroups': {
-            ret =
-              ' The same IP address has been used for a lot of different groups.'
-            break
-          }
-          case 'SubjectUsedForDifferentGroups': {
-            ret =
-              'The same subject line has been used on a lot of different groups.'
-            break
-          }
-          case 'SpamAssassin': {
-            ret = 'The SpamAssassin filter thinks it might be spam.'
-            break
-          }
-          case 'Greetings spam': {
-            ret = 'It looks like a particular kind of greetings spam.'
-            break
-          }
-          case 'Referenced known spammer': {
-            ret = 'It refers to a known spammer.'
-            break
-          }
-          case 'Known spam keyword': {
-            ret = 'It uses a known spam keyword.'
-            break
-          }
-          case 'URL on DBL': {
-            ret = 'It refers to a suspicious website.'
-            break
-          }
-          case 'BulkVolunteerMail': {
-            ret = 'They have mailed many volunteer@ emails.'
-            break
-          }
-          case 'UsedOurDomain': {
-            ret = 'They have used our web domain in a suspicious way.'
-            break
-          }
-          case 'WorryWord': {
-            ret = 'It uses a known Worry Word.'
-            break
-          }
-          case 'Script': {
-            ret = 'It contains a suspicious <script> tag.'
-            break
-          }
-          case 'Link': {
-            ret = 'It contains a link.'
-            break
-          }
-          case 'Money': {
-            ret = 'It looks like it refers to money.'
-            break
-          }
-          case 'Email': {
-            ret = 'It contains an email address.'
-            break
-          }
-          case 'Language': {
-            ret =
-              'It might not be in English, so needs checking via Google Translate.'
-            break
-          }
-          case 'SameImage': {
-            ret =
-              'Same image sent many times recently, which sometimes indicates spam.'
-            break
-          }
-          case 'DodgyImage': {
-            ret = 'Suspect text or email found in image, so needs checking.'
-            break
-          }
-          default: {
-            ret = this.message.reviewreason
-          }
-        }
+const { $api } = useNuxtApp()
+const { me } = useMe()
+
+const modnote = ref(null)
+
+const showOriginal = ref(false)
+const showModChatNoteModal = ref(false)
+
+const reviewreason = computed(() => {
+  let ret = null
+
+  if (props.message && props.message.reviewreason) {
+    switch (props.message.reviewreason) {
+      case 'Last': {
+        ret = 'Earlier message was held for review, so this one is too.'
+        break
       }
+      case 'Force': {
+        ret = 'Possible spam.'
+        break
+      }
+      case 'Fully': {
+        ret = 'This member is set to have all chat messages reviewed.'
+        break
+      }
+      case 'TooMany': {
+        ret =
+          'This member has sent a lot of chat messages recently, which can indicate scammers/spammers.'
+        break
+      }
+      case 'User': {
+        ret =
+          'The member has been flagged for review, so this message was flagged too.  Please check the member logs for more info.'
+        break
+      }
+      case 'UnknownMessage': {
+        ret =
+          'This is a reply to a post we cannot find.  Sometimes that is a spammer using old data.'
+        break
+      }
+      case 'Spam': {
+        ret =
+          "This message failed spam checks, but we don't have any more information about why."
+        break
+      }
+      case 'CountryBlocked': {
+        ret = 'It comes from a country we are blocking.'
+        break
+      }
+      case 'IPUsedForDifferentUsers': {
+        ret = 'The same IP address has been used for a lot of different users.'
+        break
+      }
+      case 'IPUsedForDifferentGroups': {
+        ret =
+          ' The same IP address has been used for a lot of different groups.'
+        break
+      }
+      case 'SubjectUsedForDifferentGroups': {
+        ret =
+          'The same subject line has been used on a lot of different groups.'
+        break
+      }
+      case 'SpamAssassin': {
+        ret = 'The SpamAssassin filter thinks it might be spam.'
+        break
+      }
+      case 'Greetings spam': {
+        ret = 'It looks like a particular kind of greetings spam.'
+        break
+      }
+      case 'Referenced known spammer': {
+        ret = 'It refers to a known spammer.'
+        break
+      }
+      case 'Known spam keyword': {
+        ret = 'It uses a known spam keyword.'
+        break
+      }
+      case 'URL on DBL': {
+        ret = 'It refers to a suspicious website.'
+        break
+      }
+      case 'BulkVolunteerMail': {
+        ret = 'They have mailed many volunteer@ emails.'
+        break
+      }
+      case 'UsedOurDomain': {
+        ret = 'They have used our web domain in a suspicious way.'
+        break
+      }
+      case 'WorryWord': {
+        ret = 'It uses a known Worry Word.'
+        break
+      }
+      case 'Script': {
+        ret = 'It contains a suspicious <script> tag.'
+        break
+      }
+      case 'Link': {
+        ret = 'It contains a link.'
+        break
+      }
+      case 'Money': {
+        ret = 'It looks like it refers to money.'
+        break
+      }
+      case 'Email': {
+        ret = 'It contains an email address.'
+        break
+      }
+      case 'Language': {
+        ret =
+          'It might not be in English, so needs checking via Google Translate.'
+        break
+      }
+      case 'SameImage': {
+        ret =
+          'Same image sent many times recently, which sometimes indicates spam.'
+        break
+      }
+      case 'DodgyImage': {
+        ret = 'Suspect text or email found in image, so needs checking.'
+        break
+      }
+      default: {
+        ret = props.message.reviewreason
+      }
+    }
+  }
 
-      return ret
-    },
-  },
-  methods: {
-    reload() {
-      this.$emit('reload')
-    },
-    async release() {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'Release' })
-      this.$emit('reload')
-    },
-    async hold(callback) {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'Hold' })
-      this.$emit('reload')
-      callback()
-    },
-    async approve(callback) {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'Approve' })
-      this.$emit('reload')
-      callback()
-    },
-    async reject(callback) {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'Reject' })
-      // this.chatStore.removeMessageMT(REVIEWCHAT,this.message.id)
-      // console.log('reject',this.message.id, this.chatStore.messages[REVIEWCHAT])
-      this.$emit('reload')
-      callback()
-    },
-    async whitelist(callback) {
-      await this.$api.chat.sendMT({
-        id: this.message.id,
-        action: 'ApproveAllFuture',
-      })
-      this.$emit('reload')
-      callback()
-    },
-    modnote(callback) {
-      this.showModChatNoteModal = true
-      this.$refs.modnote?.show()
-      callback()
-    },
-    async redactEmails(callback) {
-      await this.$api.chat.sendMT({ id: this.message.id, action: 'Redact' })
-      this.$emit('reload')
-      callback()
-    },
-  },
+  return ret
+})
+
+function reload() {
+  emit('reload')
+}
+
+async function release() {
+  await $api.chat.sendMT({ id: props.message.id, action: 'Release' })
+  emit('reload')
+}
+
+async function hold(callback) {
+  await $api.chat.sendMT({ id: props.message.id, action: 'Hold' })
+  emit('reload')
+  callback()
+}
+
+async function approve(callback) {
+  await $api.chat.sendMT({ id: props.message.id, action: 'Approve' })
+  emit('reload')
+  callback()
+}
+
+async function reject(callback) {
+  await $api.chat.sendMT({ id: props.message.id, action: 'Reject' })
+  // chatStore.removeMessageMT(REVIEWCHAT, props.message.id)
+  // console.log('reject', props.message.id, chatStore.messages[REVIEWCHAT])
+  emit('reload')
+  callback()
+}
+
+async function whitelist(callback) {
+  await $api.chat.sendMT({
+    id: props.message.id,
+    action: 'ApproveAllFuture',
+  })
+  emit('reload')
+  callback()
+}
+
+function showModnote(callback) {
+  showModChatNoteModal.value = true
+  modnote.value?.show()
+  callback()
+}
+
+async function redactEmails(callback) {
+  await $api.chat.sendMT({ id: props.message.id, action: 'Redact' })
+  emit('reload')
+  callback()
 }
 </script>
 <style scoped lang="scss">

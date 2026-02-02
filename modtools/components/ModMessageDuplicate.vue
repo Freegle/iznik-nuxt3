@@ -14,42 +14,43 @@
     <span v-if="isPending" class="text-muted"> (pending)</span>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    message: {
-      type: Object,
-      required: true,
-    },
-  },
-  computed: {
-    groupid() {
-      let ret = 0
+<script setup>
+import { computed } from 'vue'
 
-      if (this.message && this.message.groups && this.message.groups.length) {
-        ret = this.message.groups[0].groupid
-      }
-      return ret
-    },
-    isPending() {
-      return (
-        this.message.collection === 'Pending' ||
-        this.message.collection === 'PendingOther'
-      )
-    },
-    duplicateLink() {
-      if (this.isPending) {
-        // Link to pending messages page with group and message to highlight.
-        return (
-          '/messages/pending?groupid=' +
-          this.groupid +
-          '&msgid=' +
-          this.message.id
-        )
-      }
-      // Link to approved messages with search term for approved duplicates.
-      return '/messages/approved/' + this.groupid + '/' + this.message.id
-    },
+const props = defineProps({
+  message: {
+    type: Object,
+    required: true,
   },
-}
+})
+
+const groupid = computed(() => {
+  let ret = 0
+
+  if (props.message && props.message.groups && props.message.groups.length) {
+    ret = props.message.groups[0].groupid
+  }
+  return ret
+})
+
+const isPending = computed(() => {
+  return (
+    props.message.collection === 'Pending' ||
+    props.message.collection === 'PendingOther'
+  )
+})
+
+const duplicateLink = computed(() => {
+  if (isPending.value) {
+    // Link to pending messages page with group and message to highlight.
+    return (
+      '/messages/pending?groupid=' +
+      groupid.value +
+      '&msgid=' +
+      props.message.id
+    )
+  }
+  // Link to approved messages with search term for approved duplicates.
+  return '/messages/approved/' + groupid.value + '/' + props.message.id
+})
 </script>

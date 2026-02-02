@@ -36,7 +36,7 @@ export async function fetchOurOffers() {
   // Get our offers.
   const myid = authStore.user?.id
 
-  let ours = myid ? await messageStore.fetchByUser(myid) : []
+  let ours = myid ? await messageStore.fetchByUser(myid, true) : []
 
   // Truncate to 100
   ours = ours.slice(0, 100)

@@ -5,47 +5,40 @@
     <option value="Owner">Owner</option>
   </b-form-select>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import { useMemberStore } from '~/stores/member'
 
-export default {
-  props: {
-    userid: {
-      type: Number,
-      required: true,
-    },
-    groupid: {
-      type: Number,
-      required: true,
-    },
-    role: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  userid: {
+    type: Number,
+    required: true,
   },
-  setup() {
-    const memberStore = useMemberStore()
-    return { memberStore }
+  groupid: {
+    type: Number,
+    required: true,
   },
-  data: function () {
-    return {
-      therole: null,
-    }
+  role: {
+    type: String,
+    required: true,
   },
-  mounted() {
-    this.therole = this.role
-  },
-  methods: {
-    async change(newval) {
-      const params = {
-        userid: this.userid,
-        groupid: this.groupid,
-        role: this.therole,
-      }
+})
 
-      await this.memberStore.update(params)
-    },
-  },
+const memberStore = useMemberStore()
+const therole = ref(null)
+
+onMounted(() => {
+  therole.value = props.role
+})
+
+async function change() {
+  const params = {
+    userid: props.userid,
+    groupid: props.groupid,
+    role: therole.value,
+  }
+
+  await memberStore.update(params)
 }
 </script>
 <style scoped>

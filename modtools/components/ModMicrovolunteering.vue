@@ -72,40 +72,22 @@
     </b-card>
   </div>
 </template>
-<script>
+<script setup>
+import { computed } from 'vue'
 import { useMicroVolunteeringStore } from '~/stores/microvolunteering'
-export default {
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-  },
-  setup() {
-    const microVolunteeringStore = useMicroVolunteeringStore()
-    return {
-      microVolunteeringStore,
-    }
-  },
-  computed: {
-    item() {
-      return this.microVolunteeringStore.byId(this.id)
-    },
-    email() {
-      let ret = null
 
-      if (this.item.user && this.item.user.emails) {
-        this.item.user.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
-      }
-
-      return ret
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-}
+})
+
+const microVolunteeringStore = useMicroVolunteeringStore()
+
+const item = computed(() => {
+  return microVolunteeringStore.byId(props.id)
+})
 </script>
 <style scoped lang="scss">
 //@import 'color-vars';

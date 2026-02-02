@@ -104,7 +104,8 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import dayjs from 'dayjs'
 import { HotTable, HotColumn } from '@handsontable/vue3'
 import { registerAllModules } from 'handsontable/registry'
@@ -114,136 +115,134 @@ import 'handsontable/dist/handsontable.full.css'
 registerAllModules()
 // https://handsontable.com/docs/javascript-data-grid/vue3-custom-renderer-example/
 
-export default {
-  components: {
-    HotTable,
-    HotColumn,
-  },
-  setup() {
-    const modGroupStore = useModGroupStore()
-    return { modGroupStore }
-  },
-  data: function () {
-    return {
-      busy: false,
-      fetched: false,
-      height: 600,
-      atts: [],
-    }
-  },
-  computed: {
-    groups() {
-      const ret = Object.values(this.modGroupStore.allGroups)
-      ret.sort((a, b) => {
-        return a.nameshort
-          .toLowerCase()
-          .localeCompare(b.nameshort.toLowerCase())
-      })
-      return ret
-    },
-  },
-  mounted() {
-    this.checkHeight()
-  },
-  beforeUnmount() {
-    if (this.heightTimer) {
-      clearTimeout(this.heightTimer)
-    }
-  },
-  methods: {
-    idRenderer(_instance, td, _row, _col, _prop, value) {
-      const group = this.groups[_row]
-      if (group && group.mentored) {
-        td.style.backgroundColor = 'lightblue'
-      }
-      td.innerHTML = value
-    },
-    dateRenderer(_instance, td, _row, _col, _prop, value) {
-      let val = '-'
-      td.style.textAlign = 'center'
+const modGroupStore = useModGroupStore()
 
-      if (value) {
-        val = dayjs(value).format('YYYY-MM-DD')
-      }
-      td.innerHTML = val
-    },
-    autoApprovesRenderer(_instance, td, _row, _col, _prop, value) {
-      const group = this.groups[_row]
-      let auto = parseInt(value)
-      if (group && group.publish) {
-        if (auto >= 50) {
-          td.style.backgroundColor = 'orange'
-        }
-      } else {
-        td.innerHTML = auto
-      }
-      td.style.textAlign = 'center'
-      auto = Math.abs(auto)
-      td.innerHTML = auto + '%'
-    },
-    centreRenderer(_instance, td, _row, _col, _prop, value) {
-      td.style.textAlign = 'center'
-      td.innerHTML = value
-    },
-    latlngRenderer(_instance, td, _row, _col, _prop, value) {
-      td.style.textAlign = 'center'
-      let val = parseFloat(value)
-      val = Math.round(val * 100) / 100
-      td.innerHTML = val
-    },
-    boolRenderer(_instance, td, _row, _col, _prop, value) {
-      td.style.textAlign = 'center'
-      td.innerHTML = value === 1 ? 'Y' : 'N'
-    },
-    caretakerRenderer(_instance, td, _row, _col, _prop, value) {
-      td.style.textAlign = 'center'
-      td.innerHTML = value ? 'Y' : 'N'
-    },
+const hot = ref(null)
+const busy = ref(false)
+const fetched = ref(false)
+const height = ref(600)
+let heightTimer = null
 
-    async fetchCommunities(callback) {
-      if (this.fetched) {
-        if (callback) callback()
-        return
-      }
+const groups = computed(() => {
+  const ret = Object.values(modGroupStore.allGroups)
+  ret.sort((a, b) => {
+    return a.nameshort.toLowerCase().localeCompare(b.nameshort.toLowerCase())
+  })
+  return ret
+})
 
-      this.busy = true
-      await this.modGroupStore.listMT({
-        grouptype: 'Freegle',
-        support: true,
-      })
+onMounted(() => {
+  checkHeight()
+})
 
-      // This prevents us rendering partial data that happens to be in store.
-      this.fetched = true
-      this.busy = false
-      if (callback) callback()
-    },
-    cells(row, col, prop) {
-      return {
-        editor: false,
-      }
-    },
-    afterRender() {
-      const inst = this.$refs.hot.hotInstance
+onBeforeUnmount(() => {
+  if (heightTimer) {
+    clearTimeout(heightTimer)
+  }
+})
 
-      // Freeze the name
-      const plugin = inst.getPlugin('ManualColumnFreeze')
-      plugin.freezeColumn(1)
-    },
-    checkHeight() {
-      if (process.client) {
-        const height = Math.floor(window.innerHeight)
-
-        if (this.$refs.hot) {
-          const rect = this.$refs.hot.$el.getBoundingClientRect()
-
-          this.height = height - rect.top - 50
-        }
-
-        this.heightTimer = setTimeout(this.checkHeight, 100)
-      }
-    },
-  },
+function idRenderer(_instance, td, _row, _col, _prop, value) {
+  const group = groups.value[_row]
+  if (group && group.mentored) {
+    td.style.backgroundColor = 'lightblue'
+  }
+  td.innerHTML = value
 }
+
+function dateRenderer(_instance, td, _row, _col, _prop, value) {
+  let val = '-'
+  td.style.textAlign = 'center'
+
+  if (value) {
+    val = dayjs(value).format('YYYY-MM-DD')
+  }
+  td.innerHTML = val
+}
+
+function autoApprovesRenderer(_instance, td, _row, _col, _prop, value) {
+  const group = groups.value[_row]
+  let auto = parseInt(value)
+  if (group && group.publish) {
+    if (auto >= 50) {
+      td.style.backgroundColor = 'orange'
+    }
+  } else {
+    td.innerHTML = auto
+  }
+  td.style.textAlign = 'center'
+  auto = Math.abs(auto)
+  td.innerHTML = auto + '%'
+}
+
+function centreRenderer(_instance, td, _row, _col, _prop, value) {
+  td.style.textAlign = 'center'
+  td.innerHTML = value
+}
+
+function latlngRenderer(_instance, td, _row, _col, _prop, value) {
+  td.style.textAlign = 'center'
+  let val = parseFloat(value)
+  val = Math.round(val * 100) / 100
+  td.innerHTML = val
+}
+
+function boolRenderer(_instance, td, _row, _col, _prop, value) {
+  td.style.textAlign = 'center'
+  td.innerHTML = value === 1 ? 'Y' : 'N'
+}
+
+function caretakerRenderer(_instance, td, _row, _col, _prop, value) {
+  td.style.textAlign = 'center'
+  td.innerHTML = value ? 'Y' : 'N'
+}
+
+async function fetchCommunities(callback) {
+  if (fetched.value) {
+    if (callback) callback()
+    return
+  }
+
+  busy.value = true
+  await modGroupStore.listMT({
+    grouptype: 'Freegle',
+    support: true,
+  })
+
+  // This prevents us rendering partial data that happens to be in store.
+  fetched.value = true
+  busy.value = false
+  if (callback) callback()
+}
+
+function cells() {
+  return {
+    editor: false,
+  }
+}
+
+function afterRender() {
+  const inst = hot.value.hotInstance
+
+  // Freeze the name
+  const plugin = inst.getPlugin('ManualColumnFreeze')
+  plugin.freezeColumn(1)
+}
+
+function checkHeight() {
+  if (import.meta.client) {
+    const windowHeight = Math.floor(window.innerHeight)
+
+    if (hot.value) {
+      const rect = hot.value.$el.getBoundingClientRect()
+
+      height.value = windowHeight - rect.top - 50
+    }
+
+    heightTimer = setTimeout(checkHeight, 100)
+  }
+}
+
+defineExpose({ fetchCommunities })
 </script>
 <style scoped>
 input {

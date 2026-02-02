@@ -39,51 +39,48 @@
     />
   </div>
 </template>
-<script>
-export default {
-  props: {
-    user: {
-      type: Object,
-      required: true,
-    },
-    tag: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    groupid: {
-      type: Number,
-      required: true,
-    },
-  },
-  emits: ['reload'],
-  data: function () {
-    return {
-      showAddCommentModal: false,
-    }
-  },
-  computed: {
-    email() {
-      let ret = null
+<script setup>
+import { ref, computed } from 'vue'
 
-      if (this.user && this.user.emails) {
-        this.user.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+  },
+  tag: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  groupid: {
+    type: Number,
+    required: true,
+  },
+})
+
+const emit = defineEmits(['reload'])
+
+const showAddCommentModal = ref(false)
+
+const email = computed(() => {
+  let ret = null
+
+  if (props.user && props.user.emails) {
+    props.user.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
       }
+    })
+  }
 
-      return ret
-    },
-  },
-  methods: {
-    addAComment() {
-      this.showAddCommentModal = true
-    },
-    updateComments() {
-      this.$emit('reload')
-    },
-  },
+  return ret
+})
+
+function addAComment() {
+  showAddCommentModal.value = true
+}
+
+function updateComments() {
+  emit('reload')
 }
 </script>

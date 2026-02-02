@@ -306,268 +306,271 @@
     />
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
 
-export default {
-  props: {
-    member: {
-      type: Object,
-      required: true,
-    },
-    spammerlist: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    footeractions: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    expandComments: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    sameip: {
-      type: Array,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  member: {
+    type: Object,
+    required: true,
   },
-  setup() {
-    const chatStore = useChatStore()
-    const memberStore = useMemberStore()
-    const userStore = useUserStore()
-    const modConfigStore = useModConfigStore()
-    const { me, myGroups, myGroup } = useMe()
-    return {
-      chatStore,
-      memberStore,
-      modConfigStore,
-      userStore,
-      me,
-      myGroups,
-      myGroup,
-    }
+  spammerlist: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
-  data: function () {
-    return {
-      saving: false,
-      saved: false,
-      showEmails: false,
-      type: null,
-      allmemberships: false,
-      showPostingHistoryModal: false,
-      showLogsModal: false,
-      showUnbanModal: false,
-      showUnbanModalTitle: '',
-      showModChatModal: false,
-      banned: false,
-      chatid: 0,
-    }
+  footeractions: {
+    type: Boolean,
+    required: false,
+    default: true,
   },
-  computed: {
-    email() {
-      // Depending on which context we're used it, we might or might not have an email returned.
-      let ret = this.member.email
+  expandComments: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  sameip: {
+    type: Array,
+    required: false,
+    default: null,
+  },
+})
 
-      if (!this.member.email && this.member.emails) {
-        this.member.emails.forEach((e) => {
-          if (!e.ourdomain && (!ret || e.preferred)) {
-            ret = e.email
-          }
-        })
+const chatStore = useChatStore()
+const memberStore = useMemberStore()
+const userStore = useUserStore()
+const modConfigStore = useModConfigStore()
+const { me, myGroups } = useMe()
+
+const history = ref(null)
+const logs = ref(null)
+const unbanConfirm = ref(null)
+const modChatModal = ref(null)
+
+const showEmails = ref(false)
+const type = ref(null)
+const showPostingHistoryModal = ref(false)
+const showLogsModal = ref(false)
+const showUnbanModal = ref(false)
+const showUnbanModalTitle = ref('')
+const showModChatModal = ref(false)
+const banned = ref(false)
+const chatid = ref(0)
+
+const email = computed(() => {
+  // Depending on which context we're used it, we might or might not have an email returned.
+  let ret = props.member.email
+
+  if (!props.member.email && props.member.emails) {
+    props.member.emails.forEach((e) => {
+      if (!e.ourdomain && (!ret || e.preferred)) {
+        ret = e.email
       }
+    })
+  }
 
-      return ret
-    },
-    groupid() {
-      return this.member.groupid
-    },
-    group() {
-      return this.myGroup(this.groupid)
-    },
-    modconfig() {
-      let ret = null
-      let configid = null
+  return ret
+})
 
-      this.myGroups.forEach((group) => {
-        if (group.id === this.groupid) {
-          configid = group.configid
+const groupid = computed(() => {
+  return props.member.groupid
+})
+
+const modconfig = computed(() => {
+  let ret = null
+  let configid = null
+
+  myGroups.value.forEach((group) => {
+    if (group.id === groupid.value) {
+      configid = group.configid
+    }
+  })
+  const configs = modConfigStore.configs
+  ret = configs.find((config) => config.id === configid)
+
+  return ret
+})
+
+const user = computed(() => {
+  return props.member
+})
+
+const isTN = computed(() => {
+  let ret = false
+  if (user.value) {
+    if (user.value.emails) {
+      user.value.emails.forEach((e) => {
+        if (e.email && e.email.includes('@user.trashnothing.com')) {
+          ret = true
         }
       })
-      const configs = this.modConfigStore.configs
-      ret = configs.find((config) => config.id === configid)
-
-      return ret
-    },
-    user() {
-      return this.member
-    },
-    isTN() {
-      let ret = false
-      if (this.user) {
-        if (this.user.emails) {
-          this.user.emails.forEach((e) => {
-            if (e.email && e.email.includes('@user.trashnothing.com')) {
-              ret = true
-            }
-          })
-        }
-      }
-
-      return ret
-    },
-    isLJ() {
-      return this.user && this.user.ljuserid
-    },
-    settings() {
-      if (this.user && this.user.settings && this.user.settings) {
-        return this.user.settings
-      } else {
-        return {}
-      }
-    },
-    notifications() {
-      let ret = {}
-
-      if (this.settings && this.settings.notifications) {
-        ret = this.settings.notifications
-      } else {
-        ret = {
-          email: true,
-          emailmine: false,
-          push: true,
-          facebook: true,
-          app: true,
-        }
-      }
-
-      return ret
-    },
-    relevantallowed: {
-      get() {
-        return this.user && Boolean(this.user.relevantallowed)
-      },
-      set(newval) {
-        this.user.relevantallowed = newval
-      },
-    },
-    newslettersallowed: {
-      get() {
-        return this.user && Boolean(this.user.newslettersallowed)
-      },
-      set(newval) {
-        this.user.newslettersallowed = newval
-      },
-    },
-    autorepost: {
-      get() {
-        return (
-          this.member && !this.isTN && Boolean(!this.member.autorepostsdisable)
-        )
-      },
-      setnewval() {},
-    },
-  },
-  mounted() {
-    if (this.member.banned) {
-      this.banned = true
     }
+  }
 
-    if (!this.user) {
-      // Fetch with info so that we can display more.
-      this.userStore.fetchMT({
-        id: this.member.userid,
-        info: true,
-      })
+  return ret
+})
+
+const isLJ = computed(() => {
+  return user.value && user.value.ljuserid
+})
+
+const settings = computed(() => {
+  if (user.value && user.value.settings && user.value.settings) {
+    return user.value.settings
+  } else {
+    return {}
+  }
+})
+
+const notifications = computed(() => {
+  let ret = {}
+
+  if (settings.value && settings.value.notifications) {
+    ret = settings.value.notifications
+  } else {
+    ret = {
+      email: true,
+      emailmine: false,
+      push: true,
+      facebook: true,
+      app: true,
     }
-  },
-  methods: {
-    showHistory(type = null) {
-      this.type = type
-      this.showPostingHistoryModal = true
-      this.$refs.history?.show()
-    },
-    showLogs() {
-      this.modmailsonly = false
-      this.showLogsModal = true
-      this.$refs.logs?.show()
-    },
-    settingsChange(param, groupid, val) {
-      const params = {
-        userid: this.member.userid,
-        groupid,
-      }
-      params[param] = val
-      this.memberStore.update(params)
-    },
-    async changeNotification(e, type) {
-      const settings = this.settings
-      const notifications = this.notifications
-      notifications[type] = e.value
-      settings.notifications = notifications
+  }
 
-      await this.userStore.edit({
-        id: this.user.id,
-        settings,
-      })
-    },
-    async changeRelevant(e) {
-      await this.userStore.edit({
-        id: this.user.id,
-        relevantallowed: e.value,
-      })
-    },
-    async changeNotifChitchat(e) {
-      const settings = this.user.settings
-      settings.notificationmails = e.value
-      await this.userStore.edit({
-        id: this.user.id,
-        settings,
-      })
-    },
-    async changeNewsletter(e) {
-      await this.userStore.edit({
-        id: this.user.id,
-        newslettersallowed: e.value,
-      })
-    },
-    async changeAutorepost(e) {
-      const settings = this.user.settings || {}
-      settings.autorepostsdisable = !e.value
-      await this.userStore.edit({
-        id: this.member.userid,
-        settings,
-      })
-    },
-    confirmUnban(member) {
-      this.showUnbanModal = true
-      this.showUnbanModalTitle = 'Unban #' + member.userid
-      this.$refs.unbanConfirm?.show()
-    },
-    async unban() {
-      this.showUnbanModal = false
-      await this.memberStore.unban(this.member.userid, this.groupid)
-      // eslint-disable-next-line vue/no-mutating-props
-      delete this.member.bandate
-      // eslint-disable-next-line vue/no-mutating-props
-      delete this.member.bannedby
-    },
-    async showChat() {
-      this.chatid = await this.chatStore.openChatToMods(
-        this.member.groupid,
-        this.member.userid
-      )
-      this.showModChatModal = true
-      this.$refs.modChatModal?.show()
-    },
+  return ret
+})
+
+const relevantallowed = computed({
+  get() {
+    return user.value && Boolean(user.value.relevantallowed)
   },
+  set(newval) {
+    user.value.relevantallowed = newval
+  },
+})
+
+const newslettersallowed = computed({
+  get() {
+    return user.value && Boolean(user.value.newslettersallowed)
+  },
+  set(newval) {
+    user.value.newslettersallowed = newval
+  },
+})
+
+const autorepost = computed({
+  get() {
+    return (
+      props.member && !isTN.value && Boolean(!props.member.autorepostsdisable)
+    )
+  },
+  set() {},
+})
+
+onMounted(() => {
+  if (props.member.banned) {
+    banned.value = true
+  }
+
+  if (!user.value) {
+    // Fetch with info so that we can display more.
+    userStore.fetchMT({
+      id: props.member.userid,
+      info: true,
+    })
+  }
+})
+
+function showHistory(typeArg = null) {
+  type.value = typeArg
+  showPostingHistoryModal.value = true
+  history.value?.show()
+}
+
+function showLogs() {
+  showLogsModal.value = true
+  logs.value?.show()
+}
+
+function settingsChange(param, groupidArg, val) {
+  const params = {
+    userid: props.member.userid,
+    groupid: groupidArg,
+  }
+  params[param] = val
+  memberStore.update(params)
+}
+
+async function changeNotification(e, notifType) {
+  const settingsObj = settings.value
+  const notificationsObj = notifications.value
+  notificationsObj[notifType] = e.value
+  settingsObj.notifications = notificationsObj
+
+  await userStore.edit({
+    id: user.value.id,
+    settings: settingsObj,
+  })
+}
+
+async function changeRelevant(e) {
+  await userStore.edit({
+    id: user.value.id,
+    relevantallowed: e.value,
+  })
+}
+
+async function changeNotifChitchat(e) {
+  const settingsObj = user.value.settings
+  settingsObj.notificationmails = e.value
+  await userStore.edit({
+    id: user.value.id,
+    settings: settingsObj,
+  })
+}
+
+async function changeNewsletter(e) {
+  await userStore.edit({
+    id: user.value.id,
+    newslettersallowed: e.value,
+  })
+}
+
+async function changeAutorepost(e) {
+  const settingsObj = user.value.settings || {}
+  settingsObj.autorepostsdisable = !e.value
+  await userStore.edit({
+    id: props.member.userid,
+    settings: settingsObj,
+  })
+}
+
+function confirmUnban(memberArg) {
+  showUnbanModal.value = true
+  showUnbanModalTitle.value = 'Unban #' + memberArg.userid
+  unbanConfirm.value?.show()
+}
+
+async function unban() {
+  showUnbanModal.value = false
+  await memberStore.unban(props.member.userid, groupid.value)
+  // eslint-disable-next-line vue/no-mutating-props
+  delete props.member.bandate
+  // eslint-disable-next-line vue/no-mutating-props
+  delete props.member.bannedby
+}
+
+async function showChat() {
+  chatid.value = await chatStore.openChatToMods(
+    props.member.groupid,
+    props.member.userid
+  )
+  showModChatModal.value = true
+  modChatModal.value?.show()
 }
 </script>

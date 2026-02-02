@@ -29,63 +29,60 @@
     </b-modal>
   </div>
 </template>
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
 import { Letter } from 'vue-letter'
 import { extract } from 'letterparser'
 import { useMessageStore } from '~/stores/message'
 import { useOurModal } from '~/composables/useOurModal'
 
-export default {
-  components: { Letter },
-  props: {
-    id: {
-      type: Number,
-      required: true,
-    },
-    collection: {
-      type: String,
-      required: false,
-      default: null,
-    },
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true,
   },
-  emits: ['hidden'],
-  setup() {
-    const { modal, hide } = useOurModal()
-    const messageStore = useMessageStore()
-    return { messageStore, modal, hide }
+  collection: {
+    type: String,
+    required: false,
+    default: null,
   },
-  data() {
-    return {
-      message: null,
-    }
-  },
-  computed: {
-    parsed() {
-      if (this.message) {
-        return this.message && this.message.message
-          ? extract(this.message.message)
-          : null
-      }
-      return null
-    },
-    text() {
-      return this.parsed ? this.parsed.text : null
-    },
-    html() {
-      return this.parsed ? this.parsed.html : null
-    },
-  },
-  async mounted() {
-    // Get message directly rather than via store, to get message mail source
-    this.message = await this.messageStore.fetchMT({
-      id: this.id,
-      messagehistory: true,
-    })
-  },
-  methods: {
-    onHide() {
-      this.$emit('hidden')
-    },
-  },
+})
+
+const emit = defineEmits(['hidden'])
+
+const { modal, hide, show } = useOurModal()
+const messageStore = useMessageStore()
+
+const message = ref(null)
+
+const parsed = computed(() => {
+  if (message.value) {
+    return message.value && message.value.message
+      ? extract(message.value.message)
+      : null
+  }
+  return null
+})
+
+const text = computed(() => {
+  return parsed.value ? parsed.value.text : null
+})
+
+const html = computed(() => {
+  return parsed.value ? parsed.value.html : null
+})
+
+onMounted(async () => {
+  // Get message directly rather than via store, to get message mail source
+  message.value = await messageStore.fetchMT({
+    id: props.id,
+    messagehistory: true,
+  })
+})
+
+function onHide() {
+  emit('hidden')
 }
+
+defineExpose({ show, hide })
 </script>
