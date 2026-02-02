@@ -50,6 +50,7 @@ const {
       displayname: 'Test User',
     }),
     fetch: vi.fn().mockResolvedValue(),
+    fetchMT: vi.fn().mockResolvedValue(),
   }
 
   const mockAuthStore = {
@@ -527,7 +528,7 @@ describe('ModChatFooter', () => {
     it('fetches user data when chat has user1id', async () => {
       mockChat.value = createChat({ user1id: 789 })
       await mountComponent()
-      expect(mockUserStore.fetch).toHaveBeenCalled()
+      expect(mockUserStore.fetchMT).toHaveBeenCalled()
     })
   })
 
