@@ -60,6 +60,11 @@ export const useEmailTrackingStore = defineStore({
     incomingSearch: '',
     incomingTimeRange: '24h',
     incomingOutcomeFilter: '',
+
+    // Bounce entries (from Loki logs).
+    bounceEntries: [],
+    bounceLoading: false,
+    bounceError: null,
   }),
   actions: {
     init(config) {
@@ -331,10 +336,7 @@ export const useEmailTrackingStore = defineStore({
           start: this.incomingTimeRange,
         }
 
-        if (
-          append &&
-          this.incomingEntries.length > 0
-        ) {
+        if (append && this.incomingEntries.length > 0) {
           const lastEntry =
             this.incomingEntries[this.incomingEntries.length - 1]
           params.end = lastEntry.timestamp
@@ -365,8 +367,7 @@ export const useEmailTrackingStore = defineStore({
 
         this.incomingHasMore = logs.length >= 500
       } catch (e) {
-        this.incomingError =
-          e.message || 'Failed to fetch incoming email logs'
+        this.incomingError = e.message || 'Failed to fetch incoming email logs'
       } finally {
         this.incomingLoading = false
       }
@@ -378,6 +379,39 @@ export const useEmailTrackingStore = defineStore({
       this.incomingError = null
       this.incomingSearch = ''
       this.incomingOutcomeFilter = ''
+    },
+
+    async fetchBounceEvents() {
+      this.bounceLoading = true
+      this.bounceError = null
+
+      try {
+        const params = {
+          sources: 'bounce',
+          limit: 500,
+          start: this.incomingTimeRange,
+        }
+
+        const result = await api(this.config).systemlogs.fetch(params)
+        const logs = result?.logs || []
+
+        this.bounceEntries = logs.map((log) => {
+          const raw = log.raw || {}
+          return {
+            id: log.id,
+            timestamp: log.timestamp,
+            email: raw.email || '',
+            user_id: raw.user_id || 0,
+            is_permanent: raw.is_permanent || false,
+            reason: raw.reason || '',
+            subtype: log.subtype || '',
+          }
+        })
+      } catch (e) {
+        this.bounceError = e.message || 'Failed to fetch bounce logs'
+      } finally {
+        this.bounceLoading = false
+      }
     },
   },
   getters: {

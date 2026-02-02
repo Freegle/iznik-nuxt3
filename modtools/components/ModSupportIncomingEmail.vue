@@ -7,32 +7,13 @@
       </p>
     </NoticeMessage>
 
-    <!-- Date range selector -->
-    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-      <b-button-group size="sm">
-        <b-button
-          v-for="range in timeRanges"
-          :key="range.value"
-          :variant="
-            store.incomingTimeRange === range.value
-              ? 'primary'
-              : 'outline-primary'
-          "
-          @click="setTimeRange(range.value)"
-        >
-          {{ range.label }}
-        </b-button>
-      </b-button-group>
-
-      <b-button
-        size="sm"
-        variant="outline-secondary"
-        :disabled="store.incomingLoading"
-        @click="refresh"
-      >
-        Refresh
-      </b-button>
-    </div>
+    <!-- Shared date filter -->
+    <ModEmailDateFilter
+      :loading="store.incomingLoading"
+      fetch-label="Fetch"
+      default-preset="day"
+      @fetch="onFilterFetch"
+    />
 
     <!-- Headline stats cards -->
     <div v-if="store.incomingEntries.length > 0" class="mb-3">
@@ -103,6 +84,9 @@
       logging is enabled and Loki is receiving logs.
     </NoticeMessage>
 
+    <!-- Charts -->
+    <ModIncomingEmailCharts />
+
     <!-- Results table -->
     <div v-if="store.filteredIncomingEntries.length > 0">
       <b-table
@@ -113,9 +97,11 @@
         small
         responsive
         :sort-by="[{ key: 'timestamp', order: 'desc' }]"
+        class="clickable-rows"
+        @row-clicked="onRowClick"
       >
         <template #cell(timestamp)="data">
-          {{ formatTime(data.value) }}
+          {{ formatEmailDate(data.value) }}
         </template>
         <template #cell(routing_outcome)="data">
           <b-badge :variant="outcomeVariant(data.value)">
@@ -155,22 +141,26 @@
         </b-button>
       </div>
     </div>
+
+    <!-- Detail modal -->
+    <ModIncomingEmailDetail v-model="showDetail" :entry="selectedEntry" />
   </div>
 </template>
 
 <script setup>
-import dayjs from 'dayjs'
+import { ref } from 'vue'
 import NoticeMessage from '~/components/NoticeMessage.vue'
+import ModEmailDateFilter from '~/modtools/components/ModEmailDateFilter.vue'
+import ModIncomingEmailDetail from '~/modtools/components/ModIncomingEmailDetail.vue'
+import ModIncomingEmailCharts from '~/modtools/components/ModIncomingEmailCharts.vue'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
+import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 
 const store = useEmailTrackingStore()
+const { formatEmailDate } = useEmailDateFormat()
 
-const timeRanges = [
-  { label: '1 hour', value: '1h' },
-  { label: '24 hours', value: '24h' },
-  { label: '7 days', value: '7d' },
-  { label: '30 days', value: '30d' },
-]
+const showDetail = ref(false)
+const selectedEntry = ref(null)
 
 const fields = [
   { key: 'timestamp', label: 'Time', sortable: true },
@@ -180,13 +170,16 @@ const fields = [
   { key: 'routing_outcome', label: 'Outcome', sortable: true },
 ]
 
-function setTimeRange(range) {
-  store.incomingTimeRange = range
-  store.fetchIncomingEmails()
-}
+function onFilterFetch({ lokiRange, start, end }) {
+  // Use Loki relative range if available, otherwise fall back to ISO dates.
+  if (lokiRange) {
+    store.incomingTimeRange = lokiRange
+  } else {
+    store.incomingTimeRange = start
+  }
 
-function refresh() {
   store.fetchIncomingEmails()
+  store.fetchBounceEvents()
 }
 
 function loadMore() {
@@ -198,8 +191,9 @@ function filterOutcome(outcome) {
     store.incomingOutcomeFilter === outcome ? '' : outcome
 }
 
-function formatTime(ts) {
-  return dayjs(ts).format('YYYY-MM-DD HH:mm:ss')
+function onRowClick(item) {
+  selectedEntry.value = item
+  showDetail.value = true
 }
 
 function outcomeVariant(outcome) {
@@ -211,16 +205,10 @@ function outcomeVariant(outcome) {
     ToVolunteers: 'primary',
     IncomingSpam: 'danger',
     ToSystem: 'dark',
+    dropped: 'secondary',
   }
   return variants[outcome] || 'light'
 }
-
-// Fetch on mount.
-onMounted(() => {
-  if (store.incomingEntries.length === 0) {
-    store.fetchIncomingEmails()
-  }
-})
 </script>
 
 <style scoped>
@@ -236,5 +224,9 @@ onMounted(() => {
 
 .stat-count {
   font-size: 1.25rem;
+}
+
+.clickable-rows :deep(tbody tr) {
+  cursor: pointer;
 }
 </style>

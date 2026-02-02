@@ -91,31 +91,13 @@
     </b-modal>
 
     <!-- Date Range Filter -->
-    <b-card class="mb-3 filter-card">
-      <b-form class="filter-form" inline @submit.prevent="fetchStats">
-        <label class="filter-label">Period:</label>
-        <b-form-select
-          v-model="datePreset"
-          :options="datePresetOptions"
-          size="sm"
-          style="width: 130px"
-        />
-        <template v-if="datePreset === 'custom'">
-          <label class="filter-label">From:</label>
-          <b-form-input
-            v-model="startDate"
-            type="datetime-local"
-            size="sm"
-            style="width: 175px"
-          />
-          <label class="filter-label">To:</label>
-          <b-form-input
-            v-model="endDate"
-            type="datetime-local"
-            size="sm"
-            style="width: 175px"
-          />
-        </template>
+    <ModEmailDateFilter
+      :loading="emailTrackingStore.statsLoading"
+      fetch-label="Fetch Stats"
+      default-preset="7days"
+      @fetch="onFilterFetch"
+    >
+      <template #extra-filters>
         <label class="filter-label">Type:</label>
         <b-form-select
           v-model="emailType"
@@ -123,20 +105,8 @@
           size="sm"
           style="width: 110px"
         />
-        <b-button
-          type="submit"
-          variant="primary"
-          size="sm"
-          :disabled="emailTrackingStore.statsLoading"
-        >
-          <span v-if="emailTrackingStore.statsLoading">
-            <b-spinner small class="mr-1" />
-            Loading...
-          </span>
-          <span v-else>Fetch Stats</span>
-        </b-button>
-      </b-form>
-    </b-card>
+      </template>
+    </ModEmailDateFilter>
 
     <!-- Error Message -->
     <NoticeMessage
@@ -662,11 +632,11 @@
         small
       >
         <template #cell(sent_at)="data">
-          {{ formatDate(data.value) }}
+          {{ formatEmailDate(data.value) }}
         </template>
         <template #cell(opened_at)="data">
           <span v-if="data.value" class="text-success">
-            {{ formatDate(data.value) }}
+            {{ formatEmailDate(data.value) }}
             <small v-if="data.item.opened_via" class="text-muted">
               ({{ data.item.opened_via }})
             </small>
@@ -675,7 +645,7 @@
         </template>
         <template #cell(clicked_at)="data">
           <span v-if="data.value" class="text-info">
-            {{ formatDate(data.value) }}
+            {{ formatEmailDate(data.value) }}
             <b-badge variant="info" class="ml-1">
               {{ data.item.links_clicked }} clicks
             </b-badge>
@@ -684,13 +654,13 @@
         </template>
         <template #cell(bounced_at)="data">
           <span v-if="data.value" class="text-danger">
-            {{ formatDate(data.value) }}
+            {{ formatEmailDate(data.value) }}
           </span>
           <span v-else class="text-muted">-</span>
         </template>
         <template #cell(unsubscribed_at)="data">
           <span v-if="data.value" class="text-warning">
-            {{ formatDate(data.value) }}
+            {{ formatEmailDate(data.value) }}
           </span>
           <span v-else class="text-muted">-</span>
         </template>
@@ -713,38 +683,20 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { GChart } from 'vue-google-charts'
 import { useEmailTrackingStore } from '~/modtools/stores/emailtracking'
+import ModEmailDateFilter from '~/modtools/components/ModEmailDateFilter.vue'
+import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 
 const emailTrackingStore = useEmailTrackingStore()
-
-// Default to last 7 days.
-const today = new Date()
-const sevenDaysAgo = new Date(today)
-sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-
-// Format as local ISO datetime for datetime-local inputs (adjusts for timezone)
-const toLocalISOString = (d) => {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 19)
-}
+const { formatEmailDate } = useEmailDateFormat()
 
 const showInfoModal = ref(false)
-const datePreset = ref('7days')
-const startDate = ref(toLocalISOString(sevenDaysAgo))
-const endDate = ref(toLocalISOString(today))
+const startDate = ref('')
+const endDate = ref('')
 const emailType = ref('')
 const userIdOrEmail = ref('')
-
-const datePresetOptions = [
-  { text: 'Last hour', value: 'hour' },
-  { text: 'Last 24 hours', value: 'day' },
-  { text: 'Last 7 days', value: '7days' },
-  { text: 'Last 30 days', value: '30days' },
-  { text: 'Custom dates', value: 'custom' },
-]
 
 const emailTypeOptions = [
   { text: 'All Types', value: '' },
@@ -935,31 +887,15 @@ const nonAMPResponseRateTotal = computed(() => {
   return (viaEmail + viaWeb).toFixed(1)
 })
 
-watch(datePreset, (newPreset) => {
-  // Handle period changes - set dates and fetch stats
-  onDatePresetChange(newPreset)
-})
-
 watch(emailType, () => {
   fetchStats()
 })
 
-watch(startDate, () => {
-  if (datePreset.value === 'custom') {
-    fetchStats()
-  }
-})
-
-watch(endDate, () => {
-  if (datePreset.value === 'custom') {
-    fetchStats()
-  }
-})
-
-onMounted(() => {
-  // Auto-fetch stats when the component is displayed.
+function onFilterFetch({ start, end }) {
+  startDate.value = start
+  endDate.value = end
   fetchStats()
-})
+}
 
 async function fetchStats() {
   emailTrackingStore.setFilters({
@@ -989,82 +925,6 @@ async function fetchUserEmails() {
 
 async function loadMoreUserEmails() {
   await emailTrackingStore.loadMoreUserEmails()
-}
-
-function onDatePresetChange(preset) {
-  const now = new Date()
-
-  let start
-  const end = now
-
-  switch (preset) {
-    case 'hour':
-      start = new Date(now)
-      start.setHours(start.getHours() - 1)
-      // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
-      startDate.value = formatDateTimeForAPI(start)
-      endDate.value = formatDateTimeForAPI(end)
-      fetchStats()
-      return
-    case 'day':
-      start = new Date(now)
-      start.setDate(start.getDate() - 1)
-      // For hour/day, send full datetime string (YYYY-MM-DD HH:MM:SS)
-      startDate.value = formatDateTimeForAPI(start)
-      endDate.value = formatDateTimeForAPI(end)
-      fetchStats()
-      return
-    case '7days':
-      start = new Date(now)
-      start.setDate(start.getDate() - 7)
-      break
-    case '30days':
-      start = new Date(now)
-      start.setDate(start.getDate() - 30)
-      break
-    case 'custom':
-      // Keep current dates, user will set them manually.
-      return
-    default:
-      start = new Date(now)
-      start.setDate(start.getDate() - 7)
-  }
-
-  // For longer periods, just use date (YYYY-MM-DD)
-  startDate.value = start.toISOString().split('T')[0]
-  endDate.value = now.toISOString().split('T')[0]
-  fetchStats()
-}
-
-function formatDateTimeForAPI(date) {
-  // Format as ISO 8601 local datetime (YYYY-MM-DDTHH:MM:SS)
-  // This format works with datetime-local inputs and the API
-  const pad = (n) => String(n).padStart(2, '0')
-  return (
-    date.getFullYear() +
-    '-' +
-    pad(date.getMonth() + 1) +
-    '-' +
-    pad(date.getDate()) +
-    'T' +
-    pad(date.getHours()) +
-    ':' +
-    pad(date.getMinutes()) +
-    ':' +
-    pad(date.getSeconds())
-  )
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
 }
 
 // Chart options for Google Charts.
@@ -1151,29 +1011,10 @@ function getVolumeChartOptions() {
   max-width: 1200px;
 }
 
-.filter-card {
-  background-color: #f8f9fa;
-}
-
-.filter-form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-@media (min-width: 768px) {
-  .filter-form {
-    flex-wrap: nowrap;
-  }
-}
-
 .filter-label {
-  font-weight: 500;
-  white-space: nowrap;
-  line-height: 31px; /* Match Bootstrap sm input height for vertical centering */
-  margin-top: 0 !important; /* Reset Bootstrap default margin */
-  margin-bottom: 0 !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .user-form {
