@@ -49,15 +49,6 @@
       </div>
     </div>
 
-    <!-- Search -->
-    <div class="mb-3">
-      <b-input
-        v-model="store.incomingSearch"
-        placeholder="Search by from, to, subject, or outcome..."
-        size="sm"
-      />
-    </div>
-
     <!-- Loading -->
     <div v-if="store.incomingLoading && !store.incomingEntries.length">
       <div class="text-center py-3">
@@ -87,6 +78,15 @@
     <!-- Charts -->
     <ModIncomingEmailCharts />
 
+    <!-- Search -->
+    <div class="mb-3">
+      <b-input
+        v-model="store.incomingSearch"
+        placeholder="Search by from, to, subject, or outcome..."
+        size="sm"
+      />
+    </div>
+
     <!-- Results table -->
     <div v-if="store.filteredIncomingEntries.length > 0">
       <b-table
@@ -105,7 +105,7 @@
         </template>
         <template #cell(routing_outcome)="data">
           <b-badge :variant="outcomeVariant(data.value)">
-            {{ data.value }}
+            {{ normalizeOutcome(data.value) }}
           </b-badge>
         </template>
         <template #cell(envelope_from)="data">
@@ -196,7 +196,13 @@ function onRowClick(item) {
   showDetail.value = true
 }
 
+function normalizeOutcome(outcome) {
+  if (!outcome) return 'Unknown'
+  return outcome.charAt(0).toUpperCase() + outcome.slice(1)
+}
+
 function outcomeVariant(outcome) {
+  const normalized = normalizeOutcome(outcome)
   const variants = {
     Approved: 'success',
     Pending: 'warning',
@@ -205,9 +211,8 @@ function outcomeVariant(outcome) {
     ToVolunteers: 'primary',
     IncomingSpam: 'danger',
     ToSystem: 'dark',
-    dropped: 'secondary',
   }
-  return variants[outcome] || 'light'
+  return variants[normalized] || 'light'
 }
 </script>
 

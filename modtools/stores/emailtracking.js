@@ -356,6 +356,12 @@ export const useEmailTrackingStore = defineStore({
             subject: raw.subject || '',
             message_id: raw.message_id || '',
             routing_outcome: raw.routing_outcome || log.subtype || '',
+            group_id: raw.group_id || null,
+            group_name: raw.group_name || '',
+            user_id: raw.user_id || null,
+            to_user_id: raw.to_user_id || null,
+            chat_id: raw.chat_id || null,
+            message_ref_id: raw.message_id_ref || null,
           }
         })
 
@@ -438,7 +444,9 @@ export const useEmailTrackingStore = defineStore({
     incomingOutcomeCounts: (state) => {
       const counts = {}
       for (const entry of state.incomingEntries) {
-        const outcome = entry.routing_outcome || 'Unknown'
+        let outcome = entry.routing_outcome || 'Unknown'
+        // Normalize case: capitalize first letter
+        outcome = outcome.charAt(0).toUpperCase() + outcome.slice(1)
         counts[outcome] = (counts[outcome] || 0) + 1
       }
       return counts

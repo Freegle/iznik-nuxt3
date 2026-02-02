@@ -40,9 +40,30 @@
             <th class="detail-label">Routing Outcome</th>
             <td>
               <b-badge :variant="outcomeVariant(entry.routing_outcome)">
-                {{ entry.routing_outcome }}
+                {{ normalizeOutcome(entry.routing_outcome) }}
               </b-badge>
             </td>
+          </tr>
+          <tr v-if="entry.group_name">
+            <th class="detail-label">Group</th>
+            <td>
+              {{ entry.group_name }}
+              <span v-if="entry.group_id" class="text-muted small">
+                (#{{ entry.group_id }})
+              </span>
+            </td>
+          </tr>
+          <tr v-if="entry.user_id">
+            <th class="detail-label">User</th>
+            <td>#{{ entry.user_id }}</td>
+          </tr>
+          <tr v-if="entry.to_user_id">
+            <th class="detail-label">To User</th>
+            <td>#{{ entry.to_user_id }}</td>
+          </tr>
+          <tr v-if="entry.chat_id">
+            <th class="detail-label">Chat</th>
+            <td>#{{ entry.chat_id }}</td>
           </tr>
         </tbody>
       </table>
@@ -74,7 +95,14 @@ const visible = computed({
   set: (val) => emit('update:modelValue', val),
 })
 
+function normalizeOutcome(outcome) {
+  if (!outcome) return 'Unknown'
+  // Capitalize first letter for consistency
+  return outcome.charAt(0).toUpperCase() + outcome.slice(1)
+}
+
 function outcomeVariant(outcome) {
+  const normalized = normalizeOutcome(outcome)
   const variants = {
     Approved: 'success',
     Pending: 'warning',
@@ -83,9 +111,8 @@ function outcomeVariant(outcome) {
     ToVolunteers: 'primary',
     IncomingSpam: 'danger',
     ToSystem: 'dark',
-    dropped: 'secondary',
   }
-  return variants[outcome] || 'light'
+  return variants[normalized] || 'light'
 }
 </script>
 
