@@ -502,8 +502,14 @@ export const useEmailTrackingStore = defineStore({
     formattedStats: (state) => {
       if (!state.stats) return null
 
+      // Calculate bounce rate from actual bounces if available.
+      const totalSent = state.stats.total_sent || 0
+      const totalBounces = state.stats.total_bounces || 0
+      const actualBounceRate =
+        totalSent > 0 ? (totalBounces / totalSent) * 100 : 0
+
       return {
-        totalSent: state.stats.total_sent || 0,
+        totalSent,
         opened: state.stats.opened || 0,
         clicked: state.stats.clicked || 0,
         bounced: state.stats.bounced || 0,
@@ -511,6 +517,11 @@ export const useEmailTrackingStore = defineStore({
         clickRate: (state.stats.click_rate || 0).toFixed(1),
         clickToOpenRate: (state.stats.click_to_open_rate || 0).toFixed(1),
         bounceRate: (state.stats.bounce_rate || 0).toFixed(1),
+        // Actual bounces from bounces_emails table (more accurate).
+        totalBounces,
+        permanentBounces: state.stats.permanent_bounces || 0,
+        temporaryBounces: state.stats.temporary_bounces || 0,
+        actualBounceRate: actualBounceRate.toFixed(1),
       }
     },
 

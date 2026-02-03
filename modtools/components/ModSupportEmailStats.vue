@@ -140,9 +140,9 @@
         accent="reliable"
       />
       <ModEmailStatCard
-        :value="`${formattedStats.bounceRate}%`"
+        :value="`${formattedStats.actualBounceRate}%`"
         label="Bounces"
-        :subtitle="`${formattedStats.bounced.toLocaleString()}`"
+        :subtitle="`${formattedStats.totalBounces.toLocaleString()} (${formattedStats.permanentBounces} perm)`"
         value-color="danger"
         accent="reliable"
       />
@@ -736,6 +736,11 @@ const formattedStats = computed(() => {
     clickRate: stats.clickRate,
     clickToOpenRate: stats.clickToOpenRate,
     bounceRate: stats.bounceRate,
+    // Actual bounces from bounces_emails table.
+    totalBounces: parseInt(stats.totalBounces) || 0,
+    permanentBounces: parseInt(stats.permanentBounces) || 0,
+    temporaryBounces: parseInt(stats.temporaryBounces) || 0,
+    actualBounceRate: stats.actualBounceRate,
   }
 })
 
