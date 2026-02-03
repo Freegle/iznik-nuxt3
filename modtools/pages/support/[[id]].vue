@@ -84,6 +84,28 @@
             </NoticeMessage>
           </b-tab>
 
+          <!-- Outgoing Email Tab -->
+          <b-tab @click="onEmailStatsTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Outgoing Email</h2>
+            </template>
+            <ModSupportEmailStats
+              v-if="showEmailStats"
+              :key="'emailstats-' + emailStatsBump"
+            />
+          </b-tab>
+
+          <!-- Incoming Email Tab -->
+          <b-tab @click="onIncomingEmailTab">
+            <template #title>
+              <h2 class="ml-2 mr-2">Incoming Email</h2>
+            </template>
+            <ModSupportIncomingEmail
+              v-if="showIncomingEmail"
+              :key="'incomingemail-' + incomingEmailBump"
+            />
+          </b-tab>
+
           <!-- Logs Tab with sub-tabs -->
           <b-tab @click="onLogsTab">
             <template #title>
@@ -122,24 +144,6 @@
                   <ModSystemLogs
                     v-if="showSystemLogs"
                     :key="'systemlogs-' + systemLogsBump"
-                  />
-                </b-tab>
-                <b-tab @click="onEmailStatsTab">
-                  <template #title>
-                    <span class="subtab-title">Outgoing Email</span>
-                  </template>
-                  <ModSupportEmailStats
-                    v-if="showEmailStats"
-                    :key="'emailstats-' + emailStatsBump"
-                  />
-                </b-tab>
-                <b-tab @click="onIncomingEmailTab">
-                  <template #title>
-                    <span class="subtab-title">Incoming Email</span>
-                  </template>
-                  <ModSupportIncomingEmail
-                    v-if="showIncomingEmail"
-                    :key="'incomingemail-' + incomingEmailBump"
                   />
                 </b-tab>
                 <b-tab @click="onAIAssistantTab">
@@ -233,8 +237,10 @@ const topTabMap = {
   user: 0,
   community: 1,
   message: 2,
-  logs: 3,
-  spam: 4,
+  outgoing: 3,
+  incoming: 4,
+  logs: 5,
+  spam: 6,
 }
 
 const communitySubTabMap = {
@@ -247,9 +253,7 @@ const communitySubTabMap = {
 
 const logsSubTabMap = {
   system: 0,
-  email: 1,
-  incoming: 2,
-  ai: 3,
+  ai: 1,
 }
 
 const spamSubTabMap = {
@@ -287,16 +291,16 @@ onMounted(() => {
             onListCommunitiesTab()
           }
         }
+      } else if (tabParam === 'outgoing') {
+        onEmailStatsTab()
+      } else if (tabParam === 'incoming') {
+        onIncomingEmailTab()
       } else if (tabParam === 'logs') {
         onLogsTab()
         if (subTabParam && logsSubTabMap[subTabParam] !== undefined) {
           logsSubTab.value = logsSubTabMap[subTabParam]
           if (subTabParam === 'system') {
             onSystemLogsTab()
-          } else if (subTabParam === 'email') {
-            onEmailStatsTab()
-          } else if (subTabParam === 'incoming') {
-            onIncomingEmailTab()
           } else if (subTabParam === 'ai') {
             onAIAssistantTab()
           }
