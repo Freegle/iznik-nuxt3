@@ -36,6 +36,7 @@ vi.mock('~/stores/chat', () => ({
 
 const mockUserStore = {
   fetch: vi.fn().mockResolvedValue({}),
+  fetchMT: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/user', () => ({
@@ -615,7 +616,7 @@ describe('ModChatPane', () => {
       await flushPromises()
 
       expect(mockChatStore.fetchMessages).toHaveBeenCalledWith(123)
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
+      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({ id: 789 })
     })
   })
 })

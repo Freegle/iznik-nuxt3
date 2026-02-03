@@ -9,7 +9,6 @@
     <ModChatModal
       v-if="showModal && id"
       :id="id"
-      ref="modChatModal"
       :pov="pov"
       @hidden="showModal = false"
     />
@@ -31,10 +30,8 @@ defineProps({
 })
 
 const showModal = ref(false)
-const modChatModal = ref(null)
 
 function view() {
   showModal.value = true
-  modChatModal.value?.show()
 }
 </script>
