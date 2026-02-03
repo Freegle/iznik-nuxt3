@@ -127,7 +127,7 @@
         </template>
         <template #cell(routing_outcome)="data">
           <b-badge :variant="outcomeVariant(data.value)">
-            {{ normalizeOutcome(data.value) }}
+            {{ formatOutcomeLabel(data.item) }}
           </b-badge>
         </template>
         <template #cell(envelope_from)="data">
@@ -274,6 +274,45 @@ function onRowClick(item) {
 function normalizeOutcome(outcome) {
   if (!outcome) return 'Unknown'
   return outcome.charAt(0).toUpperCase() + outcome.slice(1)
+}
+
+function formatOutcomeLabel(item) {
+  const outcome = normalizeOutcome(item.routing_outcome)
+  const reason = item.routing_reason || ''
+
+  // For ToSystem, add a brief indicator of what type
+  if (outcome === 'ToSystem' && reason) {
+    const reasonLower = reason.toLowerCase()
+    if (reasonLower.includes('bounce')) return 'System: Bounce'
+    if (reasonLower.includes('fbl')) return 'System: FBL'
+    if (reasonLower.includes('taken') || reasonLower.includes('received'))
+      return 'System: Outcome'
+    if (
+      reasonLower.includes('unsubscribe') ||
+      reasonLower.includes('digest off') ||
+      reasonLower.includes('events off') ||
+      reasonLower.includes('newsletters off') ||
+      reasonLower.includes('relevant off') ||
+      reasonLower.includes('volunteering off') ||
+      reasonLower.includes('notification mails off')
+    )
+      return 'System: Unsub'
+    if (reasonLower.includes('subscribe command')) return 'System: Sub'
+    if (reasonLower.includes('closed group')) return 'System: Closed'
+    return 'System'
+  }
+
+  // For Dropped/IncomingSpam, could also show brief reason
+  if (outcome === 'Dropped' && reason) {
+    const reasonLower = reason.toLowerCase()
+    if (reasonLower.includes('auto-reply')) return 'Dropped: Auto-reply'
+    if (reasonLower.includes('self-sent')) return 'Dropped: Self'
+    if (reasonLower.includes('spammer')) return 'Dropped: Spammer'
+    if (reasonLower.includes('bounce')) return 'Dropped: Bounce'
+    return 'Dropped'
+  }
+
+  return outcome
 }
 
 function outcomeVariant(outcome) {
