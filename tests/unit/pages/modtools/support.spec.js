@@ -255,12 +255,12 @@ describe('support/[[id]].vue page', () => {
     })
 
     it('sets logsSubTab from query param', async () => {
-      mockRouteQuery.value = { tab: 'logs', subtab: 'email' }
+      mockRouteQuery.value = { tab: 'logs', subtab: 'ai' } // 'ai' maps to index 1 in logsSubTabMap
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()
       await flushPromises()
       expect(wrapper.vm.activeTab).toBe(5) // Logs tab is now at index 5
-      expect(wrapper.vm.logsSubTab).toBe(1)
+      expect(wrapper.vm.logsSubTab).toBe(1) // 'ai' subtab is index 1
     })
   })
 })
