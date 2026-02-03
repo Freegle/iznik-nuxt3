@@ -85,6 +85,31 @@
           />
         </div>
       </div>
+
+      <!-- Bounces received -->
+      <div v-if="bounceStats.total > 0" class="stats-group mt-2">
+        <div class="stats-group-label text-danger">
+          <v-icon name="bi-envelope-x" class="me-1" />
+          Bounces Received
+        </div>
+        <div class="stats-flex">
+          <ModEmailStatCard
+            :value="bounceStats.total"
+            label="Total"
+            value-color="danger"
+          />
+          <ModEmailStatCard
+            :value="bounceStats.permanent"
+            label="Permanent"
+            value-color="danger"
+          />
+          <ModEmailStatCard
+            :value="bounceStats.temporary"
+            label="Temporary"
+            value-color="warning"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -243,6 +268,17 @@ const errorOutcomes = computed(() => {
   return Object.entries(store.incomingOutcomeCounts)
     .filter(([outcome]) => ERROR_OUTCOMES.includes(outcome))
     .map(([outcome, count]) => ({ outcome, count }))
+})
+
+const bounceStats = computed(() => {
+  const entries = store.bounceEntries || []
+  const permanent = entries.filter((e) => e.is_permanent).length
+  const temporary = entries.filter((e) => !e.is_permanent).length
+  return {
+    total: entries.length,
+    permanent,
+    temporary,
+  }
 })
 
 const showDetail = ref(false)
