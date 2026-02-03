@@ -81,7 +81,8 @@
             <em>Quicker Chat Review</em>
           </span>
           <span v-if="message.group">
-            <v-icon icon="info-circle" /> {{ message.touser.displayname }} is on
+            <v-icon icon="info-circle" /> {{ message.touser?.displayname }} is
+            on
             {{ message.group.namedisplay }}
             <span v-if="!message.widerchatreview">
               which you mod.
@@ -90,7 +91,7 @@
                   '/members/approved/' +
                   message.group.id +
                   '/' +
-                  message.touser.id
+                  message.touser?.id
                 "
                 variant="link"
                 class="p-0 border-0 align-top"
@@ -136,7 +137,7 @@
       <b-card-footer>
         <div class="d-flex flex-wrap justify-content-start">
           <template v-if="!message.widerchatreview">
-            <ModChatViewButton :id="message.chatid" :pov="message.touser.id" />
+            <ModChatViewButton :id="message.chatid" :pov="message.touser?.id" />
             <b-button
               v-if="message.held && me.id === message.held.id"
               variant="warning"
