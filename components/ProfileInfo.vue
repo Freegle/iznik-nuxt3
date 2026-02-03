@@ -30,41 +30,45 @@
         </span>
       </div>
 
-      <!-- Location -->
-      <div v-if="locationName" class="location-line">
-        {{ locationName }}
-      </div>
-
-      <!-- Distance and reply time -->
-      <div class="info-pills">
-        <span v-if="milesaway" class="info-pill">
-          <v-icon icon="map-marker-alt" /> {{ milesaway }}
-        </span>
-        <span v-if="replyTimeText" class="info-pill">
-          <v-icon icon="clock" /> {{ replyTimeText }}
+      <!-- Location and distance -->
+      <div v-if="locationName || milesaway" class="location-row">
+        <v-icon icon="map-marker-alt" class="location-icon" />
+        <span class="location-text">
+          <span v-if="locationName">{{ locationName }}</span>
+          <span v-if="locationName && milesaway" class="location-separator"
+            >·</span
+          >
+          <span v-if="milesaway">{{ milesaway }}</span>
         </span>
       </div>
 
-      <!-- Stats Row -->
-      <div class="stats-row">
-        <div class="stat-item">
-          <span class="stat-value">{{ user.info?.offers || 0 }}</span>
-          <span class="stat-label">OFFERs</span>
+      <!-- Reply time pill -->
+      <div v-if="replyTimeText" class="reply-pill">
+        <v-icon icon="clock" /> {{ replyTimeText }}
+      </div>
+
+      <!-- Stats Box -->
+      <div class="stats-box">
+        <div class="stats-box-title">
+          <span class="stats-box-title-text">IN THE LAST 90 DAYS</span>
         </div>
-        <div class="stat-divider" />
-        <div class="stat-item">
-          <span class="stat-value">{{ user.info?.wanteds || 0 }}</span>
-          <span class="stat-label">WANTEDs</span>
-        </div>
-        <div class="stat-divider" />
-        <div class="stat-item">
-          <span class="stat-value">{{ user.info?.replies || 0 }}</span>
-          <span class="stat-label">Replies</span>
-        </div>
-        <div class="stat-divider" />
-        <div class="stat-item">
-          <span class="stat-value">{{ user.info?.collected || 0 }}</span>
-          <span class="stat-label">Collected</span>
+        <div class="stats-row">
+          <div class="stat-item stat-offers">
+            <span class="stat-value">{{ user.info?.offers || 0 }}</span>
+            <span class="stat-label">OFFERs</span>
+          </div>
+          <div class="stat-item stat-wanteds">
+            <span class="stat-value">{{ user.info?.wanteds || 0 }}</span>
+            <span class="stat-label">WANTEDs</span>
+          </div>
+          <div class="stat-item stat-replies">
+            <span class="stat-value">{{ user.info?.replies || 0 }}</span>
+            <span class="stat-label">Replies</span>
+          </div>
+          <div class="stat-item stat-collected">
+            <span class="stat-value">{{ user.info?.collected || 0 }}</span>
+            <span class="stat-label">Collected</span>
+          </div>
         </div>
       </div>
 
@@ -352,48 +356,124 @@ const replyTimeText = computed(() => {
   font-size: 0.75rem;
 }
 
-// Location line
-.location-line {
+// Location row
+.location-row {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-  color: $color-gray--dark;
-  margin-top: 0.25rem;
-}
-
-// Info Pills
-.info-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.15rem;
+  align-items: flex-start;
   justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding: 0 1rem;
 }
 
-.info-pill {
+.location-icon {
+  color: $color-gray--dark;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.location-text {
+  font-size: 0.95rem;
+  color: $color-gray--darker;
+  text-align: center;
+  font-weight: 600;
+}
+
+.location-separator {
+  margin: 0 0.25rem;
+  color: $color-gray--base;
+}
+
+// Reply time pill
+.reply-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: $color-white;
+  background: $colour-success;
+  padding: 0.25rem 0.65rem;
+  border-radius: 1rem;
+  margin-top: 0.35rem;
+}
+
+// Stats Box
+.stats-box {
+  position: relative;
+  border: 1px solid $color-gray-3;
+  margin: 0.75rem 1rem 0;
+  padding: 0.75rem 0.5rem 0.5rem;
+}
+
+.stats-box-title {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: $color-white;
+  padding: 0 0.75rem;
+  line-height: 1;
+}
+
+.stats-box-title-text {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: $color-gray--base;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  display: block;
 }
 
 // Stats Row
 .stats-row {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 1.5rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem 1.5rem;
+  gap: 0.5rem;
+  padding: 0.25rem;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 60px;
+  justify-content: center;
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.stat-offers {
+  background: linear-gradient(
+    180deg,
+    rgba(40, 167, 69, 0.08) 0%,
+    rgba(40, 167, 69, 0.15) 100%
+  );
+}
+
+.stat-wanteds {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 123, 255, 0.08) 0%,
+    rgba(0, 123, 255, 0.15) 100%
+  );
+}
+
+.stat-replies {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 193, 7, 0.12) 0%,
+    rgba(255, 193, 7, 0.22) 100%
+  );
+}
+
+.stat-collected {
+  background: linear-gradient(
+    180deg,
+    rgba(111, 66, 193, 0.08) 0%,
+    rgba(111, 66, 193, 0.15) 100%
+  );
 }
 
 .stat-value {
@@ -407,12 +487,6 @@ const replyTimeText = computed(() => {
   color: $color-gray--dark;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 30px;
-  background: $color-gray-3;
 }
 
 // Action Buttons
