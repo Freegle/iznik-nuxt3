@@ -259,7 +259,7 @@ describe('support/[[id]].vue page', () => {
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()
       await flushPromises()
-      expect(wrapper.vm.activeTab).toBe(3)
+      expect(wrapper.vm.activeTab).toBe(5) // Logs tab is now at index 5
       expect(wrapper.vm.logsSubTab).toBe(1)
     })
   })
