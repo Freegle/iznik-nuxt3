@@ -49,7 +49,7 @@
       </div>
 
       <!-- Not delivered outcomes -->
-      <div v-if="notDeliveredOutcomes.length > 0" class="stats-group">
+      <div v-if="notDeliveredOutcomes.length > 0" class="stats-group mb-2">
         <div class="stats-group-label text-danger">
           <v-icon name="bi-x-circle" class="me-1" />
           Not Delivered
@@ -57,6 +57,25 @@
         <div class="stats-flex">
           <ModEmailStatCard
             v-for="item in notDeliveredOutcomes"
+            :key="item.outcome"
+            :value="item.count"
+            :label="item.outcome"
+            clickable
+            :active="store.incomingOutcomeFilter === item.outcome"
+            @click="filterOutcome(item.outcome)"
+          />
+        </div>
+      </div>
+
+      <!-- Error outcomes (failed to parse/process) -->
+      <div v-if="errorOutcomes.length > 0" class="stats-group">
+        <div class="stats-group-label text-warning">
+          <v-icon name="bi-exclamation-triangle" class="me-1" />
+          Error
+        </div>
+        <div class="stats-flex">
+          <ModEmailStatCard
+            v-for="item in errorOutcomes"
             :key="item.outcome"
             :value="item.count"
             :label="item.outcome"
@@ -182,7 +201,7 @@ import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 const store = useEmailTrackingStore()
 const { formatEmailDate } = useEmailDateFormat()
 
-// Define which outcomes are delivered vs not delivered
+// Define which outcomes are delivered vs not delivered vs error
 const DELIVERED_OUTCOMES = [
   'Pending',
   'Approved',
@@ -192,6 +211,7 @@ const DELIVERED_OUTCOMES = [
   'Receipt',
 ]
 const NOT_DELIVERED_OUTCOMES = ['Dropped', 'IncomingSpam']
+const ERROR_OUTCOMES = ['Error']
 
 // Computed properties to group outcomes
 const deliveredOutcomes = computed(() => {
@@ -216,6 +236,13 @@ const notDeliveredOutcomes = computed(() => {
         NOT_DELIVERED_OUTCOMES.indexOf(a.outcome) -
         NOT_DELIVERED_OUTCOMES.indexOf(b.outcome)
     )
+})
+
+const errorOutcomes = computed(() => {
+  if (!store.incomingOutcomeCounts) return []
+  return Object.entries(store.incomingOutcomeCounts)
+    .filter(([outcome]) => ERROR_OUTCOMES.includes(outcome))
+    .map(([outcome, count]) => ({ outcome, count }))
 })
 
 const showDetail = ref(false)
@@ -302,7 +329,7 @@ function formatOutcomeLabel(item) {
     return 'System'
   }
 
-  // For Dropped/IncomingSpam, could also show brief reason
+  // For Dropped, show brief reason
   if (outcome === 'Dropped' && reason) {
     const reasonLower = reason.toLowerCase()
     if (reasonLower.includes('auto-reply')) return 'Dropped: Auto-reply'
@@ -310,6 +337,14 @@ function formatOutcomeLabel(item) {
     if (reasonLower.includes('spammer')) return 'Dropped: Spammer'
     if (reasonLower.includes('bounce')) return 'Dropped: Bounce'
     return 'Dropped'
+  }
+
+  // For Error, show what failed
+  if (outcome === 'Error' && reason) {
+    const reasonLower = reason.toLowerCase()
+    if (reasonLower.includes('parse')) return 'Error: Parse'
+    if (reasonLower.includes('bounce')) return 'Error: Bounce'
+    return 'Error'
   }
 
   return outcome
@@ -325,6 +360,7 @@ function outcomeVariant(outcome) {
     ToVolunteers: 'primary',
     IncomingSpam: 'danger',
     ToSystem: 'dark',
+    Error: 'warning',
   }
   return variants[normalized] || 'light'
 }
