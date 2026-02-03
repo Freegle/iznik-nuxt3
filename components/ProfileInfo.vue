@@ -58,6 +58,11 @@
         </div>
         <div class="stat-divider" />
         <div class="stat-item">
+          <span class="stat-value">{{ user.info?.replies || 0 }}</span>
+          <span class="stat-label">Replies</span>
+        </div>
+        <div class="stat-divider" />
+        <div class="stat-item">
           <span class="stat-value">{{ user.info?.collected || 0 }}</span>
           <span class="stat-label">Collected</span>
         </div>

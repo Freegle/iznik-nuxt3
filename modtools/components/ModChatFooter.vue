@@ -534,9 +534,9 @@ const showConfirmModal = ref(false)
 const showAddCommentModal = ref(false)
 const modchatuser = ref(null)
 
-// MT: Fetch the user1 (member) for MT-specific modals
+// MT: Fetch the user1 (member) via v1 API to include comments/notes
 if (chat.value?.user1id) {
-  await userStore.fetch(chat.value.user1id)
+  await userStore.fetchMT({ id: chat.value.user1id })
   modchatuser.value = userStore.byId(chat.value.user1id)
 }
 

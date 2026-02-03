@@ -6,6 +6,7 @@
       size="lg"
       hide-header-close
       no-close-on-esc
+      @hidden="emit('hidden')"
     >
       <template #header>
         <div
@@ -161,6 +162,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const emit = defineEmits(['hidden'])
 
 const { modal, hide } = useOurModal()
 

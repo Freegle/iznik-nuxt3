@@ -51,6 +51,23 @@ export const useEmailTrackingStore = defineStore({
     // Pagination for user emails.
     limit: 50,
     offset: 0,
+
+    // Incoming email state (from Loki logs).
+    incomingEntries: [],
+    incomingLoading: false,
+    incomingError: null,
+    incomingHasMore: true,
+    incomingSearch: '',
+    incomingTimeRange: '24h',
+    incomingOutcomeFilter: '',
+    incomingCounts: {},
+    incomingCountsTotal: 0,
+    incomingCountsLoading: false,
+
+    // Bounce entries (from Loki logs).
+    bounceEntries: [],
+    bounceLoading: false,
+    bounceError: null,
   }),
   actions: {
     init(config) {
@@ -309,6 +326,140 @@ export const useEmailTrackingStore = defineStore({
         this.currentUserId = userId
       }
     },
+
+    // Incoming email actions.
+    async fetchIncomingEmails(append = false) {
+      this.incomingLoading = true
+      this.incomingError = null
+
+      try {
+        const params = {
+          sources: 'incoming_mail',
+          limit: 100,
+          start: this.incomingTimeRange,
+        }
+
+        // Server-side search filtering.
+        if (this.incomingSearch) {
+          params.search = this.incomingSearch
+        }
+
+        // Server-side outcome filtering.
+        if (this.incomingOutcomeFilter) {
+          params.subtypes = this.incomingOutcomeFilter
+        }
+
+        if (append && this.incomingEntries.length > 0) {
+          const lastEntry =
+            this.incomingEntries[this.incomingEntries.length - 1]
+          params.end = lastEntry.timestamp
+        }
+
+        const result = await api(this.config).systemlogs.fetch(params)
+        const logs = result?.logs || []
+
+        const parsed = logs.map((log) => {
+          const raw = log.raw || {}
+          return {
+            id: log.id,
+            timestamp: log.timestamp,
+            envelope_from: raw.envelope_from || '',
+            envelope_to: raw.envelope_to || '',
+            from_address: raw.from_address || '',
+            subject: raw.subject || '',
+            message_id: raw.message_id || '',
+            routing_outcome: raw.routing_outcome || log.subtype || '',
+            group_id: raw.group_id || null,
+            group_name: raw.group_name || '',
+            user_id: raw.user_id || null,
+            to_user_id: raw.to_user_id || null,
+            chat_id: raw.chat_id || null,
+            message_ref_id: raw.message_id_ref || null,
+          }
+        })
+
+        if (append) {
+          this.incomingEntries = [...this.incomingEntries, ...parsed]
+        } else {
+          this.incomingEntries = parsed
+        }
+
+        this.incomingHasMore = logs.length >= 100
+      } catch (e) {
+        this.incomingError = e.message || 'Failed to fetch incoming email logs'
+      } finally {
+        this.incomingLoading = false
+      }
+    },
+
+    async fetchIncomingCounts() {
+      this.incomingCountsLoading = true
+
+      try {
+        const params = {
+          sources: 'incoming_mail',
+          start: this.incomingTimeRange,
+        }
+
+        // Include search in counts so they reflect filtered totals.
+        if (this.incomingSearch) {
+          params.search = this.incomingSearch
+        }
+
+        const result = await api(this.config).systemlogs.fetchCounts(params)
+        this.incomingCounts = result?.counts || {}
+        this.incomingCountsTotal = result?.total || 0
+      } catch (e) {
+        console.error('Failed to fetch incoming counts:', e)
+        this.incomingCounts = {}
+        this.incomingCountsTotal = 0
+      } finally {
+        this.incomingCountsLoading = false
+      }
+    },
+
+    clearIncoming() {
+      this.incomingEntries = []
+      this.incomingHasMore = true
+      this.incomingError = null
+      this.incomingSearch = ''
+      this.incomingOutcomeFilter = ''
+      this.incomingCounts = {}
+      this.incomingCountsTotal = 0
+    },
+
+    async fetchBounceEvents() {
+      this.bounceLoading = true
+      this.bounceError = null
+
+      try {
+        const params = {
+          sources: 'bounce',
+          limit: 500,
+          start: this.incomingTimeRange,
+        }
+
+        const result = await api(this.config).systemlogs.fetch(params)
+        const logs = result?.logs || []
+
+        this.bounceEntries = logs.map((log) => {
+          const raw = log.raw || {}
+          return {
+            id: log.id,
+            timestamp: log.timestamp,
+            email: raw.email || '',
+            user_id: raw.user_id || 0,
+            is_permanent: raw.is_permanent || false,
+            reason: raw.reason || '',
+            subtype: log.subtype || '',
+          }
+        })
+      } catch (e) {
+        this.bounceError = e.message || 'Failed to fetch bounce logs'
+      } finally {
+        this.bounceLoading = false
+      }
+    },
   },
   getters: {
     hasStats: (state) => state.stats !== null,
@@ -328,6 +479,22 @@ export const useEmailTrackingStore = defineStore({
 
     hasMoreUserEmails: (state) => {
       return state.userEmails.length < state.userEmailsTotal
+    },
+
+    // Incoming email getters - counts come from server-side metric queries.
+    incomingOutcomeCounts: (state) => {
+      const counts = {}
+      for (const [subtype, count] of Object.entries(state.incomingCounts)) {
+        // Normalize case: capitalize first letter.
+        const normalized = subtype.charAt(0).toUpperCase() + subtype.slice(1)
+        counts[normalized] = count
+      }
+      return counts
+    },
+
+    // Entries are already filtered server-side by search and outcome.
+    filteredIncomingEntries: (state) => {
+      return state.incomingEntries
     },
 
     // Calculate derived statistics.
