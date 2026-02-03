@@ -44,6 +44,10 @@
               </b-badge>
             </td>
           </tr>
+          <tr v-if="entry.routing_reason">
+            <th class="detail-label">Reason</th>
+            <td>{{ entry.routing_reason }}</td>
+          </tr>
           <tr v-if="entry.group_name">
             <th class="detail-label">Group</th>
             <td>

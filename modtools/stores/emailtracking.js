@@ -369,6 +369,7 @@ export const useEmailTrackingStore = defineStore({
             subject: raw.subject || '',
             message_id: raw.message_id || '',
             routing_outcome: raw.routing_outcome || log.subtype || '',
+            routing_reason: raw.routing_reason || '',
             group_id: raw.group_id || null,
             group_name: raw.group_name || '',
             user_id: raw.user_id || null,

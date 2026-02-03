@@ -15,25 +15,57 @@
       @fetch="onFilterFetch"
     />
 
-    <!-- Headline stats cards -->
-    <div v-if="store.incomingCountsTotal > 0" class="mb-3 stats-flex">
-      <ModEmailStatCard
-        :value="store.incomingCountsTotal"
-        label="Total"
-        clickable
-        :active="!store.incomingOutcomeFilter"
-        value-color="primary"
-        @click="filterOutcome('')"
-      />
-      <ModEmailStatCard
-        v-for="(count, outcome) in store.incomingOutcomeCounts"
-        :key="outcome"
-        :value="count"
-        :label="outcome"
-        clickable
-        :active="store.incomingOutcomeFilter === outcome"
-        @click="filterOutcome(outcome)"
-      />
+    <!-- Headline stats cards - grouped by delivered/not delivered -->
+    <div v-if="store.incomingEntries.length > 0" class="mb-3">
+      <!-- Total -->
+      <div class="stats-flex mb-2">
+        <ModEmailStatCard
+          :value="store.incomingEntries.length"
+          label="Total"
+          clickable
+          :active="!store.incomingOutcomeFilter"
+          value-color="primary"
+          @click="filterOutcome('')"
+        />
+      </div>
+
+      <!-- Delivered outcomes -->
+      <div v-if="deliveredOutcomes.length > 0" class="stats-group mb-2">
+        <div class="stats-group-label text-success">
+          <v-icon name="bi-check-circle" class="me-1" />
+          Delivered
+        </div>
+        <div class="stats-flex">
+          <ModEmailStatCard
+            v-for="item in deliveredOutcomes"
+            :key="item.outcome"
+            :value="item.count"
+            :label="item.outcome"
+            clickable
+            :active="store.incomingOutcomeFilter === item.outcome"
+            @click="filterOutcome(item.outcome)"
+          />
+        </div>
+      </div>
+
+      <!-- Not delivered outcomes -->
+      <div v-if="notDeliveredOutcomes.length > 0" class="stats-group">
+        <div class="stats-group-label text-danger">
+          <v-icon name="bi-x-circle" class="me-1" />
+          Not Delivered
+        </div>
+        <div class="stats-flex">
+          <ModEmailStatCard
+            v-for="item in notDeliveredOutcomes"
+            :key="item.outcome"
+            :value="item.count"
+            :label="item.outcome"
+            clickable
+            :active="store.incomingOutcomeFilter === item.outcome"
+            @click="filterOutcome(item.outcome)"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -95,7 +127,7 @@
         </template>
         <template #cell(routing_outcome)="data">
           <b-badge :variant="outcomeVariant(data.value)">
-            {{ normalizeOutcome(data.value) }}
+            {{ formatOutcomeLabel(data.item) }}
           </b-badge>
         </template>
         <template #cell(envelope_from)="data">
@@ -138,7 +170,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import NoticeMessage from '~/components/NoticeMessage.vue'
 import ModEmailDateFilter from '~/modtools/components/ModEmailDateFilter.vue'
 import ModIncomingEmailDetail from '~/modtools/components/ModIncomingEmailDetail.vue'
@@ -149,6 +181,42 @@ import { useEmailDateFormat } from '~/modtools/composables/useEmailDateFormat'
 
 const store = useEmailTrackingStore()
 const { formatEmailDate } = useEmailDateFormat()
+
+// Define which outcomes are delivered vs not delivered
+const DELIVERED_OUTCOMES = [
+  'Pending',
+  'Approved',
+  'ToUser',
+  'ToVolunteers',
+  'ToSystem',
+  'Receipt',
+]
+const NOT_DELIVERED_OUTCOMES = ['Dropped', 'IncomingSpam']
+
+// Computed properties to group outcomes
+const deliveredOutcomes = computed(() => {
+  if (!store.incomingOutcomeCounts) return []
+  return Object.entries(store.incomingOutcomeCounts)
+    .filter(([outcome]) => DELIVERED_OUTCOMES.includes(outcome))
+    .map(([outcome, count]) => ({ outcome, count }))
+    .sort(
+      (a, b) =>
+        DELIVERED_OUTCOMES.indexOf(a.outcome) -
+        DELIVERED_OUTCOMES.indexOf(b.outcome)
+    )
+})
+
+const notDeliveredOutcomes = computed(() => {
+  if (!store.incomingOutcomeCounts) return []
+  return Object.entries(store.incomingOutcomeCounts)
+    .filter(([outcome]) => NOT_DELIVERED_OUTCOMES.includes(outcome))
+    .map(([outcome, count]) => ({ outcome, count }))
+    .sort(
+      (a, b) =>
+        NOT_DELIVERED_OUTCOMES.indexOf(a.outcome) -
+        NOT_DELIVERED_OUTCOMES.indexOf(b.outcome)
+    )
+})
 
 const showDetail = ref(false)
 const selectedEntry = ref(null)
@@ -208,6 +276,45 @@ function normalizeOutcome(outcome) {
   return outcome.charAt(0).toUpperCase() + outcome.slice(1)
 }
 
+function formatOutcomeLabel(item) {
+  const outcome = normalizeOutcome(item.routing_outcome)
+  const reason = item.routing_reason || ''
+
+  // For ToSystem, add a brief indicator of what type
+  if (outcome === 'ToSystem' && reason) {
+    const reasonLower = reason.toLowerCase()
+    if (reasonLower.includes('bounce')) return 'System: Bounce'
+    if (reasonLower.includes('fbl')) return 'System: FBL'
+    if (reasonLower.includes('taken') || reasonLower.includes('received'))
+      return 'System: Outcome'
+    if (
+      reasonLower.includes('unsubscribe') ||
+      reasonLower.includes('digest off') ||
+      reasonLower.includes('events off') ||
+      reasonLower.includes('newsletters off') ||
+      reasonLower.includes('relevant off') ||
+      reasonLower.includes('volunteering off') ||
+      reasonLower.includes('notification mails off')
+    )
+      return 'System: Unsub'
+    if (reasonLower.includes('subscribe command')) return 'System: Sub'
+    if (reasonLower.includes('closed group')) return 'System: Closed'
+    return 'System'
+  }
+
+  // For Dropped/IncomingSpam, could also show brief reason
+  if (outcome === 'Dropped' && reason) {
+    const reasonLower = reason.toLowerCase()
+    if (reasonLower.includes('auto-reply')) return 'Dropped: Auto-reply'
+    if (reasonLower.includes('self-sent')) return 'Dropped: Self'
+    if (reasonLower.includes('spammer')) return 'Dropped: Spammer'
+    if (reasonLower.includes('bounce')) return 'Dropped: Bounce'
+    return 'Dropped'
+  }
+
+  return outcome
+}
+
 function outcomeVariant(outcome) {
   const normalized = normalizeOutcome(outcome)
   const variants = {
@@ -228,6 +335,21 @@ function outcomeVariant(outcome) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.stats-group {
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  background-color: #f8f9fa;
+}
+
+.stats-group-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
 }
 
 .clickable-rows :deep(tbody tr) {
