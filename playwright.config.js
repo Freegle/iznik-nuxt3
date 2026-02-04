@@ -128,9 +128,6 @@ module.exports = defineConfig({
     SENTRY_TRACES_SAMPLE_RATE: '0',
   },
 
-  // Handles both global setup and teardown by returning a cleanup function
-  globalSetup: require.resolve('./tests/e2e/global-setup-teardown'),
-
   projects: [
     {
       name: 'chromium',
