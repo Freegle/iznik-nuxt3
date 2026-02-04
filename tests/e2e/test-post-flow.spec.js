@@ -127,12 +127,9 @@ test.describe('Post flow tests', () => {
     // Click on the chat entry to open the conversation
     console.log('Opening chat conversation to reply back')
     await chatEntries.first().click()
-    await page.waitForTimeout(timeouts.ui.transition)
 
     // Wait for the chat conversation to load
-    await page.waitForSelector('#chatmessage', {
-      timeout: timeouts.ui.appearance,
-    })
+    await expect(page.locator('#chatmessage')).toBeVisible()
 
     // Send a reply back to the person who messaged
     const replyMessage =
@@ -142,19 +139,18 @@ test.describe('Post flow tests', () => {
     console.log('Filled reply message from original user')
 
     // Click the send button
-    const sendButton = page
-      .locator('.btn:has-text("Send")')
-      .filter({ hasText: /send/i })
-      .first()
-    await sendButton.waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.appearance,
-    })
-    await sendButton.click()
+    const sendButton = page.getByRole('button', { name: 'Send' })
+    // Start waiting for network response before clicking send - note no await yet
+    const sendMessageResponse = page.waitForResponse(
+      async (response) =>
+        response.url().startsWith('http://apiv2.localhost/api/chat') &&
+        response.status() === 200 &&
+        response.request().method() === 'POST' &&
+        (await response.request().postDataJSON()).message === replyMessage
+    )
+    await sendButton.click() // Then send the message
     console.log('Sent reply from original user')
-
-    // Wait for the reply to be sent
-    await page.waitForTimeout(timeouts.ui.transition)
+    await sendMessageResponse // Then await the network response indicating message sent
 
     // Now withdraw the post using the fixture
     await withdrawPost({ item: result.item })
@@ -214,6 +210,8 @@ test.describe('Post flow tests', () => {
     await withdrawPost({ item: result.item })
   })
 
+  // TODO: needs updating to work with redesign. Now shows options page before email,
+  // and then opens account creation modal after clicking "Freegle it!".
   test.skip("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
@@ -367,16 +365,11 @@ test.describe('Post flow tests', () => {
 
     // Wait for the error message to appear after the API check
     console.log('Waiting for email validation error message to appear')
-    const errorMessage = page.locator('text=belongs to a different account')
-    await errorMessage.waitFor({
-      state: 'visible',
-      timeout: timeouts.api.default,
-    })
-
+    const errorMessage = page.locator('text=belongs to an existing account')
+    await expect(errorMessage).toBeVisible()
     console.log(
       'Email existence check working correctly - error message displayed'
     )
-    expect(await errorMessage.isVisible()).toBe(true)
 
     // Verify the "Freegle it!" button is no longer visible after error
     const isButtonVisible = await freegleButton

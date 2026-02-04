@@ -44,10 +44,9 @@ onMounted(async () => {
 
       if (restoreData.inProgress && restoreData.backupDate) {
         // A restore is currently in progress
-        const formattedDate = dayjs(
-          restoreData.backupDate,
-          'YYYYMMDD'
-        ).format('D MMM YYYY')
+        const formattedDate = dayjs(restoreData.backupDate, 'YYYYMMDD').format(
+          'D MMM YYYY'
+        )
         latestMessage.value = `Restoring backup from ${formattedDate}...`
         backupStatus.value = 'warning'
         isRestoring.value = true
