@@ -96,10 +96,6 @@ describe('MessageEditModal', () => {
             props: ['scrollable', 'size', 'titleClass'],
             emits: ['hidden'],
           },
-          draggable: {
-            template: '<div class="draggable"><slot /></div>',
-            props: ['modelValue', 'itemKey', 'animation', 'ghostClass'],
-          },
           PostPhoto: {
             template: '<div class="post-photo" />',
             props: [
@@ -182,9 +178,9 @@ describe('MessageEditModal', () => {
       expect(wrapper.find('.b-modal').exists()).toBe(true)
     })
 
-    it('renders message subject in title', () => {
+    it('renders form labels', () => {
       const wrapper = createWrapper()
-      expect(wrapper.text()).toContain('Test Subject')
+      expect(wrapper.text()).toContain('What is it?')
     })
 
     it('renders photo uploader', () => {
@@ -382,7 +378,7 @@ describe('MessageEditModal', () => {
   })
 
   describe('attachments', () => {
-    it('shows draggable when attachments exist', () => {
+    it('shows PostPhoto components when attachments exist', () => {
       mockMessageStore.byId.mockReturnValue({
         id: 1,
         subject: 'Test Subject',
@@ -399,13 +395,14 @@ describe('MessageEditModal', () => {
         groups: [{ groupid: 1 }],
       })
       const wrapper = createWrapper()
-      expect(wrapper.find('.photo-gallery').exists()).toBe(true)
-      expect(wrapper.find('.draggable').exists()).toBe(true)
+      expect(wrapper.find('.photo-grid').exists()).toBe(true)
+      expect(wrapper.findAll('.post-photo').length).toBe(2)
     })
 
-    it('hides photo gallery when no attachments', () => {
+    it('shows empty photo grid when no attachments', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('.photo-gallery').exists()).toBe(false)
+      expect(wrapper.find('.photo-grid').exists()).toBe(true)
+      expect(wrapper.findAll('.post-photo').length).toBe(0)
     })
   })
 })
