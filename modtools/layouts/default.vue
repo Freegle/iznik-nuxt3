@@ -25,13 +25,10 @@
           id="menu-option-modtools-discourse2"
           class="text-center p-0 mr-4"
         >
-          <div
+          <ExternalLink
             id="discourseIcon"
-            class="position-relative clickable"
-            role="button"
-            tabindex="0"
-            @click="discourse"
-            @keydown.enter="discourse"
+            href="https://discourse.ilovefreegle.org/"
+            class="position-relative d-block"
           >
             <v-icon :icon="['fab', 'discourse']" class="fa-2x" />
             <div class="d-none d-xl-block">Us</div>
@@ -42,7 +39,7 @@
             >
               {{ discourseCount }}
             </b-badge>
-          </div>
+          </ExternalLink>
         </b-nav-item>
         <ChatMenu
           v-if="loggedIn"
@@ -456,12 +453,6 @@ async function logOut() {
 function requestLogin() {
   console.log('MODTOOLS.VUE requestLogin')
   loginModal.value.show()
-}
-
-function discourse(e) {
-  window.open('https://discourse.ilovefreegle.org/')
-  e.stopPropagation()
-  e.preventDefault()
 }
 
 function clicklogo(e) {
