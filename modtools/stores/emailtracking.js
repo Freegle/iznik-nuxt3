@@ -641,7 +641,9 @@ export const useEmailTrackingStore = defineStore({
         const date = new Date(day.date)
         const openRate = day.sent > 0 ? (day.opened / day.sent) * 100 : 0
         const clickRate = day.sent > 0 ? (day.clicked / day.sent) * 100 : 0
-        const bounceRate = day.sent > 0 ? (day.bounced / day.sent) * 100 : 0
+        // Use total_bounces from bounces_emails table (more accurate than linked bounces)
+        const totalBounces = day.total_bounces || 0
+        const bounceRate = day.sent > 0 ? (totalBounces / day.sent) * 100 : 0
         data.push([date, openRate, clickRate, bounceRate])
       })
 

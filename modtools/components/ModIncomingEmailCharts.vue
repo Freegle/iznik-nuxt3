@@ -18,8 +18,8 @@
 
       <!-- Bounce Rate Chart -->
       <div class="chart-container">
-        <h6 class="chart-title">Bounce Rate</h6>
-        <div v-if="store.bounceLoading" class="chart-loading">
+        <h6 class="chart-title">Bounces Over Time</h6>
+        <div v-if="store.timeSeriesLoading" class="chart-loading">
           <span class="spinner-border spinner-border-sm me-2" />
           Loading bounce data...
         </div>
@@ -31,7 +31,7 @@
           class="chart"
         />
         <div v-else class="chart-empty text-muted">
-          No bounce data available.
+          No bounce data available for this period.
         </div>
       </div>
     </div>
@@ -115,17 +115,23 @@ const emailRateOptions = {
   animation: { startup: true, duration: 500, easing: 'out' },
 }
 
+// Use time series data from database (same source as stats) instead of Loki logs
 const bounceRateData = computed(() => {
-  const entries = store.bounceEntries
-  if (!entries || entries.length < 2) return null
+  const timeSeries = store.timeSeries
+  if (!timeSeries || timeSeries.length < 2) return null
 
-  const { buckets, categories, bucketMap } = bucketize(entries, 'subtype')
-  if (buckets.length < 2) return null
+  // Check if we have any bounce data
+  const hasBounces = timeSeries.some(
+    (day) => (day.total_bounces || 0) > 0 || (day.permanent_bounces || 0) > 0
+  )
+  if (!hasBounces) return null
 
-  const header = ['Time', ...categories]
-  const rows = buckets.map((ts) => {
-    const date = new Date(ts)
-    return [date, ...categories.map((cat) => bucketMap[ts][cat] || 0)]
+  const header = ['Date', 'Permanent', 'Temporary']
+  const rows = timeSeries.map((day) => {
+    const date = new Date(day.date)
+    const permanent = day.permanent_bounces || 0
+    const temporary = day.temporary_bounces || 0
+    return [date, permanent, temporary]
   })
 
   return [header, ...rows]
@@ -136,8 +142,8 @@ const bounceRateOptions = {
   legend: { position: 'bottom' },
   chartArea: { width: '85%', height: '65%' },
   vAxis: { title: 'Count', viewWindow: { min: 0 } },
-  hAxis: { title: 'Time' },
-  colors: ['#dc3545', '#ffc107'],
+  hAxis: { title: 'Date', format: 'dd MMM' },
+  colors: ['#dc3545', '#ffc107'], // Permanent = red, Temporary = yellow
   animation: { startup: true, duration: 500, easing: 'out' },
 }
 </script>

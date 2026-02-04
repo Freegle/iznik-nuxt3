@@ -16,11 +16,11 @@
     />
 
     <!-- Headline stats cards - grouped by delivered/not delivered -->
-    <div v-if="store.incomingEntries.length > 0" class="mb-3">
+    <div v-if="totalIncomingCount > 0" class="mb-3">
       <!-- Total -->
       <div class="stats-flex mb-2">
         <ModEmailStatCard
-          :value="store.incomingEntries.length"
+          :value="totalIncomingCount"
           label="Total"
           clickable
           :active="!store.incomingOutcomeFilter"
@@ -97,16 +97,25 @@
             :value="bounceStats.total"
             label="Total"
             value-color="danger"
+            clickable
+            :active="bounceFilter === 'all'"
+            @click="filterBounce('all')"
           />
           <ModEmailStatCard
             :value="bounceStats.permanent"
             label="Permanent"
             value-color="danger"
+            clickable
+            :active="bounceFilter === 'permanent'"
+            @click="filterBounce('permanent')"
           />
           <ModEmailStatCard
             :value="bounceStats.temporary"
             label="Temporary"
             value-color="warning"
+            clickable
+            :active="bounceFilter === 'temporary'"
+            @click="filterBounce('temporary')"
           />
         </div>
       </div>
@@ -154,9 +163,9 @@
     </div>
 
     <!-- Results table -->
-    <div v-if="store.filteredIncomingEntries.length > 0">
+    <div v-if="displayedEntries.length > 0">
       <b-table
-        :items="store.filteredIncomingEntries"
+        :items="displayedEntries"
         :fields="fields"
         striped
         hover
@@ -270,7 +279,23 @@ const errorOutcomes = computed(() => {
     .map(([outcome, count]) => ({ outcome, count }))
 })
 
+// Use actual total from counts, fall back to entries length if counts not loaded yet.
+const totalIncomingCount = computed(() => {
+  return store.incomingCountsTotal || store.incomingEntries.length
+})
+
+// Bounce stats from the email tracking stats API (bounces_emails table).
+// Falls back to Loki logs if stats not available.
 const bounceStats = computed(() => {
+  // Prefer stats from the database (via formattedStats getter).
+  if (store.formattedStats?.totalBounces > 0) {
+    return {
+      total: store.formattedStats.totalBounces,
+      permanent: store.formattedStats.permanentBounces,
+      temporary: store.formattedStats.temporaryBounces,
+    }
+  }
+  // Fall back to Loki logs if stats not available.
   const entries = store.bounceEntries || []
   const permanent = entries.filter((e) => e.is_permanent).length
   const temporary = entries.filter((e) => !e.is_permanent).length
@@ -284,6 +309,7 @@ const bounceStats = computed(() => {
 const showDetail = ref(false)
 const selectedEntry = ref(null)
 const searchInput = ref('')
+const bounceFilter = ref(null) // null, 'all', 'permanent', 'temporary'
 let searchTimeout = null
 
 const fields = [
@@ -298,6 +324,9 @@ function fetchAll() {
   store.fetchIncomingEmails()
   store.fetchIncomingCounts()
   store.fetchBounceEvents()
+  // Also fetch stats and time series to get accurate bounce data from database.
+  store.fetchStats()
+  store.fetchTimeSeries()
 }
 
 function onFilterFetch({ lokiRange, start, end }) {
@@ -305,6 +334,11 @@ function onFilterFetch({ lokiRange, start, end }) {
     store.incomingTimeRange = lokiRange
   } else {
     store.incomingTimeRange = start
+  }
+
+  // Set filters for stats endpoint to match the time range.
+  if (start) {
+    store.setFilters({ start, end: end || '' })
   }
 
   fetchAll()
@@ -324,10 +358,41 @@ function loadMore() {
 }
 
 function filterOutcome(outcome) {
+  // Clear bounce filter when selecting a different outcome.
+  bounceFilter.value = null
   const newOutcome = store.incomingOutcomeFilter === outcome ? '' : outcome
   store.incomingOutcomeFilter = newOutcome
   store.fetchIncomingEmails()
 }
+
+function filterBounce(type) {
+  // Toggle off if clicking the same filter.
+  if (bounceFilter.value === type) {
+    bounceFilter.value = null
+    store.incomingOutcomeFilter = ''
+    // Restore user's search term.
+    store.incomingSearch = searchInput.value
+  } else {
+    bounceFilter.value = type
+    // Bounces are routed as ToSystem, so filter to that outcome.
+    store.incomingOutcomeFilter = 'ToSystem'
+    // Add server-side search for bounce to filter efficiently.
+    // For permanent/temporary, include that in the search.
+    if (type === 'permanent') {
+      store.incomingSearch = 'permanent bounce'
+    } else if (type === 'temporary') {
+      store.incomingSearch = 'temporary bounce'
+    } else {
+      store.incomingSearch = 'bounce'
+    }
+  }
+  store.fetchIncomingEmails()
+}
+
+// Displayed entries - no client-side filtering needed now since server filters.
+const displayedEntries = computed(() => {
+  return store.filteredIncomingEntries
+})
 
 function onRowClick(item) {
   selectedEntry.value = item
