@@ -140,9 +140,11 @@
         accent="reliable"
       />
       <ModEmailStatCard
-        :value="`${formattedStats.bounceRate}%`"
+        :value="`${formattedStats.actualBounceRate}%`"
         label="Bounces"
-        :subtitle="`${formattedStats.bounced.toLocaleString()}`"
+        :subtitle="`${formattedStats.totalBounces.toLocaleString()} (${
+          formattedStats.permanentBounces
+        } perm)`"
         value-color="danger"
         accent="reliable"
       />
@@ -731,11 +733,17 @@ const formattedStats = computed(() => {
     totalSent: parseInt(stats.totalSent) || 0,
     opened: parseInt(stats.opened) || 0,
     clicked: parseInt(stats.clicked) || 0,
-    bounced: parseInt(stats.bounced) || 0,
+    // Bounces matched to specific tracked emails
+    linkedBounces: parseInt(stats.linkedBounces) || 0,
     openRate: stats.openRate,
     clickRate: stats.clickRate,
     clickToOpenRate: stats.clickToOpenRate,
     bounceRate: stats.bounceRate,
+    // All bounces from bounces_emails table (all incoming bounce notifications)
+    totalBounces: parseInt(stats.totalBounces) || 0,
+    permanentBounces: parseInt(stats.permanentBounces) || 0,
+    temporaryBounces: parseInt(stats.temporaryBounces) || 0,
+    actualBounceRate: stats.actualBounceRate,
   }
 })
 
@@ -940,7 +948,7 @@ async function loadMoreUserEmails() {
 // Chart options for Google Charts.
 function getEngagementChartOptions() {
   return {
-    title: 'Opens and Clicks Over Time',
+    title: 'Opens, Clicks, and Bounces Over Time',
     curveType: 'function',
     legend: { position: 'bottom' },
     chartArea: { width: '85%', height: '70%' },
@@ -956,6 +964,7 @@ function getEngagementChartOptions() {
     series: {
       0: { color: '#28a745' }, // Open rate - green
       1: { color: '#17a2b8' }, // Click rate - blue
+      2: { color: '#fd7e14' }, // Bounce rate - orange
     },
     animation: {
       startup: true,
@@ -967,7 +976,7 @@ function getEngagementChartOptions() {
 
 function getTypeComparisonOptions() {
   return {
-    title: 'Opens and Clicks by Email Type',
+    title: 'Opens, Clicks, and Bounces by Email Type',
     legend: { position: 'bottom' },
     chartArea: { width: '85%', height: '65%' },
     vAxis: {
@@ -981,6 +990,7 @@ function getTypeComparisonOptions() {
     series: {
       0: { color: '#28a745' }, // Open rate - green
       1: { color: '#17a2b8' }, // Click rate - blue
+      2: { color: '#fd7e14' }, // Bounce rate - orange
     },
     bar: { groupWidth: '70%' },
     animation: {

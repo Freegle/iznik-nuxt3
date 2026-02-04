@@ -78,6 +78,7 @@ function toChats(e) {
 .chat-menu-item,
 :deep(.nav-link) {
   color: $color-white !important;
+  cursor: pointer;
 
   &:hover,
   &:focus {

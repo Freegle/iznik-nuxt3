@@ -369,6 +369,7 @@ export const useEmailTrackingStore = defineStore({
             subject: raw.subject || '',
             message_id: raw.message_id || '',
             routing_outcome: raw.routing_outcome || log.subtype || '',
+            routing_reason: raw.routing_reason || '',
             group_id: raw.group_id || null,
             group_name: raw.group_name || '',
             user_id: raw.user_id || null,
@@ -501,15 +502,28 @@ export const useEmailTrackingStore = defineStore({
     formattedStats: (state) => {
       if (!state.stats) return null
 
+      // Calculate bounce rate from actual bounces if available.
+      const totalSent = state.stats.total_sent || 0
+      const totalBounces = state.stats.total_bounces || 0
+      const actualBounceRate =
+        totalSent > 0 ? (totalBounces / totalSent) * 100 : 0
+
       return {
-        totalSent: state.stats.total_sent || 0,
+        totalSent,
         opened: state.stats.opened || 0,
         clicked: state.stats.clicked || 0,
-        bounced: state.stats.bounced || 0,
+        // Bounces matched to specific tracked emails (via bounced_at timestamp)
+        linkedBounces: state.stats.linked_bounces || 0,
         openRate: (state.stats.open_rate || 0).toFixed(1),
         clickRate: (state.stats.click_rate || 0).toFixed(1),
         clickToOpenRate: (state.stats.click_to_open_rate || 0).toFixed(1),
+        // Bounce rate uses linked_bounces for backwards compatibility
         bounceRate: (state.stats.bounce_rate || 0).toFixed(1),
+        // All bounces from bounces_emails table (all incoming bounce notifications)
+        totalBounces,
+        permanentBounces: state.stats.permanent_bounces || 0,
+        temporaryBounces: state.stats.temporary_bounces || 0,
+        actualBounceRate: actualBounceRate.toFixed(1),
       }
     },
 
@@ -527,7 +541,7 @@ export const useEmailTrackingStore = defineStore({
         // AMP engagement
         ampOpened: state.ampStats.amp_opened || 0,
         ampClicked: state.ampStats.amp_clicked || 0,
-        ampBounced: state.ampStats.amp_bounced || 0,
+        ampLinkedBounces: state.ampStats.amp_linked_bounces || 0,
         ampReplied: state.ampStats.amp_replied || 0,
         ampOpenRate: (state.ampStats.amp_open_rate || 0).toFixed(1),
         ampClickRate: (state.ampStats.amp_click_rate || 0).toFixed(1),
@@ -563,7 +577,7 @@ export const useEmailTrackingStore = defineStore({
         // Non-AMP engagement (for comparison)
         nonAMPOpened: state.ampStats.non_amp_opened || 0,
         nonAMPClicked: state.ampStats.non_amp_clicked || 0,
-        nonAMPBounced: state.ampStats.non_amp_bounced || 0,
+        nonAMPLinkedBounces: state.ampStats.non_amp_linked_bounces || 0,
         nonAMPReplied: state.ampStats.non_amp_replied || 0,
         nonAMPOpenRate: (state.ampStats.non_amp_open_rate || 0).toFixed(1),
         nonAMPClickRate: (state.ampStats.non_amp_click_rate || 0).toFixed(1),
@@ -629,7 +643,9 @@ export const useEmailTrackingStore = defineStore({
         const date = new Date(day.date)
         const openRate = day.sent > 0 ? (day.opened / day.sent) * 100 : 0
         const clickRate = day.sent > 0 ? (day.clicked / day.sent) * 100 : 0
-        const bounceRate = day.sent > 0 ? (day.bounced / day.sent) * 100 : 0
+        // Use total_bounces from bounces_emails table (more accurate than linked bounces)
+        const totalBounces = day.total_bounces || 0
+        const bounceRate = day.sent > 0 ? (totalBounces / day.sent) * 100 : 0
         data.push([date, openRate, clickRate, bounceRate])
       })
 

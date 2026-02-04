@@ -419,15 +419,15 @@ platform :ios do
       next
     end
 
-    # Filter builds from the last 24 hours
-    cutoff_time = Time.now - (24 * 60 * 60)
+    # Filter builds from the last 7 days (to match weekly schedule)
+    cutoff_time = Time.now - (7 * 24 * 60 * 60)
     recent_builds = builds.select do |build|
       upload_time = Time.parse(build.uploaded_date)
       upload_time >= cutoff_time
     end
 
     if recent_builds.empty?
-      UI.message("ℹ️  No TestFlight builds uploaded in the last 24 hours")
+      UI.message("ℹ️  No TestFlight builds uploaded in the last 7 days")
       next
     end
 
@@ -450,7 +450,7 @@ platform :ios do
 
     build_number = latest_build.version
 
-    UI.message("📦 Found #{recent_builds.length} build(s) from last 24 hours")
+    UI.message("📦 Found #{recent_builds.length} build(s) from last 7 days")
     UI.message("📦 Latest build: version #{version}, build #{build_number}")
 
     # Get all App Store versions to diagnose blocking issues
