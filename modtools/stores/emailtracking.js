@@ -512,12 +512,14 @@ export const useEmailTrackingStore = defineStore({
         totalSent,
         opened: state.stats.opened || 0,
         clicked: state.stats.clicked || 0,
-        bounced: state.stats.bounced || 0,
+        // Bounces matched to specific tracked emails (via bounced_at timestamp)
+        linkedBounces: state.stats.linked_bounces || 0,
         openRate: (state.stats.open_rate || 0).toFixed(1),
         clickRate: (state.stats.click_rate || 0).toFixed(1),
         clickToOpenRate: (state.stats.click_to_open_rate || 0).toFixed(1),
+        // Bounce rate uses linked_bounces for backwards compatibility
         bounceRate: (state.stats.bounce_rate || 0).toFixed(1),
-        // Actual bounces from bounces_emails table (more accurate).
+        // All bounces from bounces_emails table (all incoming bounce notifications)
         totalBounces,
         permanentBounces: state.stats.permanent_bounces || 0,
         temporaryBounces: state.stats.temporary_bounces || 0,
@@ -539,7 +541,7 @@ export const useEmailTrackingStore = defineStore({
         // AMP engagement
         ampOpened: state.ampStats.amp_opened || 0,
         ampClicked: state.ampStats.amp_clicked || 0,
-        ampBounced: state.ampStats.amp_bounced || 0,
+        ampLinkedBounces: state.ampStats.amp_linked_bounces || 0,
         ampReplied: state.ampStats.amp_replied || 0,
         ampOpenRate: (state.ampStats.amp_open_rate || 0).toFixed(1),
         ampClickRate: (state.ampStats.amp_click_rate || 0).toFixed(1),
@@ -575,7 +577,7 @@ export const useEmailTrackingStore = defineStore({
         // Non-AMP engagement (for comparison)
         nonAMPOpened: state.ampStats.non_amp_opened || 0,
         nonAMPClicked: state.ampStats.non_amp_clicked || 0,
-        nonAMPBounced: state.ampStats.non_amp_bounced || 0,
+        nonAMPLinkedBounces: state.ampStats.non_amp_linked_bounces || 0,
         nonAMPReplied: state.ampStats.non_amp_replied || 0,
         nonAMPOpenRate: (state.ampStats.non_amp_open_rate || 0).toFixed(1),
         nonAMPClickRate: (state.ampStats.non_amp_click_rate || 0).toFixed(1),

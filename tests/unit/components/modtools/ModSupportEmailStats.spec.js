@@ -315,11 +315,15 @@ describe('ModSupportEmailStats', () => {
           totalSent: '100',
           opened: '50',
           clicked: '25',
-          bounced: '5',
+          linkedBounces: '5',
           openRate: '50.0',
           clickRate: '25.0',
           clickToOpenRate: '50.0',
           bounceRate: '5.0',
+          totalBounces: '10',
+          permanentBounces: '3',
+          temporaryBounces: '7',
+          actualBounceRate: '10.0',
         }
         const wrapper = mountComponent()
         const stats = wrapper.vm.formattedStats
@@ -327,7 +331,9 @@ describe('ModSupportEmailStats', () => {
         expect(stats.totalSent).toBe(100)
         expect(stats.opened).toBe(50)
         expect(stats.clicked).toBe(25)
-        expect(stats.bounced).toBe(5)
+        expect(stats.linkedBounces).toBe(5)
+        expect(stats.totalBounces).toBe(10)
+        expect(stats.permanentBounces).toBe(3)
       })
     })
 
@@ -533,7 +539,7 @@ describe('ModSupportEmailStats', () => {
       const wrapper = mountComponent()
       const options = wrapper.vm.getEngagementChartOptions()
 
-      expect(options.title).toBe('Opens and Clicks Over Time')
+      expect(options.title).toBe('Opens, Clicks, and Bounces Over Time')
       expect(options.curveType).toBe('function')
       expect(options.legend).toEqual({ position: 'bottom' })
     })
@@ -542,7 +548,7 @@ describe('ModSupportEmailStats', () => {
       const wrapper = mountComponent()
       const options = wrapper.vm.getTypeComparisonOptions()
 
-      expect(options.title).toBe('Opens and Clicks by Email Type')
+      expect(options.title).toBe('Opens, Clicks, and Bounces by Email Type')
     })
 
     it('returns volume chart options', () => {
