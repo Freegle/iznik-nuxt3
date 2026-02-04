@@ -120,6 +120,14 @@
                 <span v-if="timeAgoExpanded" class="group-time"
                   >{{ timeAgoExpanded }} ago</span
                 >
+                <span class="group-time-separator">·</span>
+                <nuxt-link
+                  :to="'/message/' + message.id"
+                  class="post-id-link"
+                  @click.stop
+                >
+                  #{{ message.id }}
+                </nuxt-link>
               </div>
             </div>
           </div>
@@ -173,7 +181,7 @@
           </div>
           <div class="action-buttons-right">
             <button
-              v-if="!message.outcomes?.length"
+              v-if="!message.outcomes?.length || props.action === 'extend'"
               class="action-btn action-btn--light"
               @click="edit"
             >
@@ -343,6 +351,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false,
+  },
+  action: {
+    type: String,
+    required: false,
+    default: null,
   },
 })
 
@@ -716,8 +729,14 @@ watch(replyuserids, (newVal) => {
   newVal.forEach((uid) => userStore.fetch(uid))
 })
 
-onMounted(() => {
+onMounted(async () => {
   expanded.value = props.expand
+
+  // Auto-open edit modal for extend action
+  if (props.action === 'extend') {
+    await messageStore.fetch(props.id, true)
+    showEditModal.value = true
+  }
 })
 </script>
 
@@ -1002,6 +1021,17 @@ onMounted(() => {
 
 .group-time {
   opacity: 0.7;
+}
+
+.post-id-link {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 0.6rem;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+  }
 }
 
 .action-buttons {

@@ -15,6 +15,7 @@
               :id="id"
               :show-old="true"
               :expand="true"
+              :action="action"
             />
             <b-alert v-else variant="warning" class="mt-2" :model-value="true">
               <h3>That post wasn't made from {{ me.email }}.</h3>
