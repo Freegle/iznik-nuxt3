@@ -733,12 +733,13 @@ const formattedStats = computed(() => {
     totalSent: parseInt(stats.totalSent) || 0,
     opened: parseInt(stats.opened) || 0,
     clicked: parseInt(stats.clicked) || 0,
-    bounced: parseInt(stats.bounced) || 0,
+    // Bounces matched to specific tracked emails
+    linkedBounces: parseInt(stats.linkedBounces) || 0,
     openRate: stats.openRate,
     clickRate: stats.clickRate,
     clickToOpenRate: stats.clickToOpenRate,
     bounceRate: stats.bounceRate,
-    // Actual bounces from bounces_emails table.
+    // All bounces from bounces_emails table (all incoming bounce notifications)
     totalBounces: parseInt(stats.totalBounces) || 0,
     permanentBounces: parseInt(stats.permanentBounces) || 0,
     temporaryBounces: parseInt(stats.temporaryBounces) || 0,
