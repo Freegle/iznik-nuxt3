@@ -11,9 +11,7 @@
         <div class="backbutton nav-back-btn">
           <v-icon icon="arrow-left" class="back-icon" />
         </div>
-        <div
-          class="name d-flex flex-column justify-content-around text-center"
-        >
+        <div class="name d-flex flex-column justify-content-around text-center">
           <h1 class="text-white truncate text-center header--size5 m-0">
             Loading...
           </h1>

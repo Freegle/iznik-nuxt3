@@ -1,5 +1,11 @@
 <template>
-  <span class="d-inline user-ratings" data-test-static="hello" :data-debug-id="id" :data-debug-myid="myid" :data-debug-mounted="mounted">
+  <span
+    class="d-inline user-ratings"
+    data-test-static="hello"
+    :data-debug-id="id"
+    :data-debug-myid="myid"
+    :data-debug-mounted="mounted"
+  >
     <span v-if="user?.info?.ratings">
       <span v-if="showName">
         {{ user.displayname }}
@@ -116,7 +122,12 @@ userStore.fetch(props.id, true)
 
 onMounted(() => {
   mounted.value = true
-  console.warn('UserRatings: onMounted called, id:', props.id, 'myid:', myid.value)
+  console.warn(
+    'UserRatings: onMounted called, id:',
+    props.id,
+    'myid:',
+    myid.value
+  )
 })
 
 const user = computed(() => {
@@ -160,7 +171,12 @@ const downtitle = computed(() => {
 })
 
 const rate = async (rating, reason, text) => {
-  console.warn('UserRatings: rate() called with:', rating, 'for user:', props.id)
+  console.warn(
+    'UserRatings: rate() called with:',
+    rating,
+    'for user:',
+    props.id
+  )
   await userStore.rate(props.id, rating, reason, text)
   console.warn('UserRatings: rate() completed, refreshing user data')
   // Explicitly refresh user data after rating to ensure UI updates
@@ -169,7 +185,10 @@ const rate = async (rating, reason, text) => {
 }
 
 const up = async () => {
-  console.warn('UserRatings: up() clicked, current Mine:', user.value?.info?.ratings?.Mine)
+  console.warn(
+    'UserRatings: up() clicked, current Mine:',
+    user.value?.info?.ratings?.Mine
+  )
   showDown.value = false
   if (user.value?.info?.ratings?.Mine === 'Up') {
     console.warn('UserRatings: Already rated up, showing remove modal')
@@ -186,7 +205,10 @@ const up = async () => {
 }
 
 const down = () => {
-  console.warn('UserRatings: down() clicked, current Mine:', user.value?.info?.ratings?.Mine)
+  console.warn(
+    'UserRatings: down() clicked, current Mine:',
+    user.value?.info?.ratings?.Mine
+  )
   showDown.value = false
 
   if (user.value?.info?.ratings?.Mine === 'Down') {

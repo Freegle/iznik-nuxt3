@@ -50,17 +50,11 @@ test.describe('Post validation tests', () => {
       await nextButton.click()
       console.log('Clicked Next without description')
 
-      // Wait for validation error to appear
-      await page.waitForTimeout(timeouts.ui.transition)
-
       // Check for the validation error message
-      const errorMessage = page.locator('.invalid-feedback').filter({
+      const errorMessage = page.locator('.invalid-feedback', {
         hasText: 'Please add a description',
       })
-      await errorMessage.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
+      await expect(errorMessage).toBeVisible()
       console.log(
         'Validation error appeared - description required when no photo'
       )
@@ -400,9 +394,6 @@ test.describe('Post validation tests', () => {
       await itemNameInput.fill('Test desktop validation item')
       console.log('Filled item name on desktop')
 
-      // Leave description empty - check validation still requires photo or description
-      await page.waitForTimeout(timeouts.ui.transition)
-
       // The validation message should still be present (modified to say photo or description required)
       // Look for any indication that we need a photo or description
       const descriptionInput = page.locator(
@@ -410,11 +401,8 @@ test.describe('Post validation tests', () => {
       )
 
       // Verify description field exists and is empty
-      if ((await descriptionInput.count()) > 0) {
-        const descriptionValue = await descriptionInput.first().inputValue()
-        expect(descriptionValue).toBe('')
-        console.log('Description field is empty as expected')
-      }
+      await expect(descriptionInput).toHaveValue('')
+      console.log('Description field is empty as expected')
 
       console.log(
         'Desktop validation test completed - validation prevents proceeding without photo or description'

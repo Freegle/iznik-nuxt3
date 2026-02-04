@@ -256,6 +256,7 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 404.*api\/session/, // Session API 404 can happen when trying to logout when not logged in.
       /Failed to load resource: the server responded with a status of 404.*delivery\.localhost/, // Delivery service 404 errors for missing images can happen during normal operation.
       /FedCM get\(\) rejects with/, // Not available in test
+      /Error retrieving a token./, // Also related to GSI FedCM, not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
       /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
@@ -518,66 +519,27 @@ const test = base.test.extend({
             `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
 
-          // Navigate with timeout
+          // Navigate with timeout.
+          // Uses waitUntil: 'load' by default, which indicates that the page is fully loaded.
           await page.goto(path, { timeout })
-
-          // Wait for initial load
-          // Don't use networkidle - the app has background polling that prevents idle state
-          await page.waitForLoadState('domcontentloaded', { timeout })
 
           // Wait for page to finish hydrating (loading spinner to disappear)
           // The LoadingIndicator component is always in the DOM but uses opacity for visibility.
           // We check if it's actually VISIBLE (opacity > 0), not just present in DOM.
-          try {
-            const loadingIndicator = page.locator('.loading-indicator')
-            const isVisible = await loadingIndicator
-              .evaluate((el) => {
-                const style = window.getComputedStyle(el)
-                return parseFloat(style.opacity) > 0
-              })
-              .catch(() => false)
-
-            if (isVisible) {
-              console.log(
-                'Loading indicator visible, waiting for it to hide...'
-              )
-              // Wait for opacity to become 0
-              await loadingIndicator.evaluate(
-                (el) => {
-                  return new Promise((resolve) => {
-                    const check = () => {
-                      const style = window.getComputedStyle(el)
-                      if (parseFloat(style.opacity) === 0) {
-                        resolve()
-                      } else {
-                        requestAnimationFrame(check)
-                      }
-                    }
-                    check()
-                  })
-                },
-                { timeout: 5000 }
-              )
-              console.log('Loading indicator hidden')
-            }
-          } catch (loadingError) {
-            // Loading indicator check failed or timed out - continue anyway
-            console.log(
-              `Loading indicator check (continuing anyway): ${
-                loadingError.message?.substring(0, 100) || 'unknown error'
-              }`
-            )
+          // Can't use Playwright's toBeVisible assertion since that doesn't check opacity.
+          const loadingIndicator = page.locator('.loading-indicator')
+          if (loadingIndicator.count() > 0) {
+            await base.expect(loadingIndicator).toHaveCSS('opacity', '0')
           }
 
           // Verify page content is visible
           const body = page.locator('body')
-          await body.waitFor({
-            state: 'visible',
+          await base.expect(body).toBeVisible({
             timeout: Math.min(timeout, 30000),
           })
 
           // Check if page contains error messages
-          const errorTextContent = await page.textContent('body')
+          const errorTextContent = await body.textContent()
 
           // Check for general error message
           if (errorTextContent.includes('Something went wrong')) {
@@ -668,6 +630,9 @@ const test = base.test.extend({
           // Re-throw with more context
           throw new Error(`Failed to navigate to ${path}: ${error.message}`)
         }
+
+        // If no error, then this navigation succeeded - no need to keep retrying.
+        break
       }
 
       // If we get here, navigation succeeded - return the page
@@ -892,7 +857,10 @@ test.afterAll(async () => {
 })
 
 // Progress tracking functions
-const PROGRESS_FILE = '/app/test-progress.json'
+const PROGRESS_FILE = path.join(
+  __dirname,
+  '../../test-results/test-progress.json'
+)
 
 const initializeProgressFile = () => {
   try {
@@ -1700,9 +1668,6 @@ const testWithFixtures = test.extend({
           console.log('Clicking withdraw button...')
           await withdrawButton.click()
         }
-
-        // Wait for any network activity after the click
-        await page.waitForTimeout(timeouts.ui.transition)
 
         // Look for any modals that might appear
         const modalSelectors = [

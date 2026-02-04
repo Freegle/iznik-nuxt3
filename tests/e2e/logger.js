@@ -147,6 +147,14 @@ function createLoggingProxy(target, targetName, visited = new Set()) {
     return target
   }
 
+  // Skip Playwright Locators because their constructor.name must remain intact
+  // to be able to use matchers like toHaveText(), toHaveValue(), etc.
+  // This is because these methods check the receiver object's constructor.name:
+  // https://github.com/microsoft/playwright/blob/e7bff526433b6dcb02801763ab5b1c6407902d47/packages/playwright/src/util.ts#L191
+  if (target.constructor.name === 'Locator') {
+    return target
+  }
+
   // Mark as visited to prevent cycles
   visited.add(target)
 

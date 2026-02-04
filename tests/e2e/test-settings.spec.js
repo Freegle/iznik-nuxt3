@@ -7,6 +7,44 @@ const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
 const { signUpViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
+/**
+ * @returns a promise to monitor network traffic
+ * and resolve when all required responses have been received,
+ * indicating that the user's new email settings are saved server-side.
+ */
+function getSaveSettingsPromise(page, level) {
+  const responsePromise1 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv1.localhost/api/session') &&
+      response.status() === 200 &&
+      response.request().method() === 'POST' &&
+      (await response.request().postDataJSON()).settings?.simplemail ===
+        level.value
+  )
+  const responsePromise2 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv2.localhost/api/user') &&
+      response.status() === 200 &&
+      response.request().method() === 'GET' &&
+      (await response.json()).settings?.simplemail === level.value
+  )
+  const responsePromise3 = page.waitForResponse(
+    async (response) =>
+      response.url().startsWith('http://apiv1.localhost/api/session') &&
+      response.status() === 200 &&
+      response.request().method() === 'GET' &&
+      (await response.json()).me?.settings?.simplemail === level.value
+  )
+
+  const saveSettingsPromise = Promise.all([
+    responsePromise1,
+    responsePromise2,
+    responsePromise3,
+  ])
+
+  return saveSettingsPromise
+}
+
 // Helper function to test email level settings
 async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   console.log(`Testing email level: ${level.text}`)
@@ -19,50 +57,27 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
   // Navigate to settings page
   await page.gotoAndVerify('/settings')
 
-  // Wait for the email settings section to load
-  await page.waitForSelector('text=Email Settings', {
-    timeout: timeouts.ui.appearance,
-  })
-
   // Get the email level select element - look for the select near the "Email level" text
-  let emailLevelSelect = page.locator('.email-select')
+  const emailLevelSelect = page.locator('.email-select')
 
-  // Wait for page to be fully loaded before screenshot
-  await page.waitForLoadState('domcontentloaded')
-  await page.waitForTimeout(timeouts.ui.settleTime)
+  // Handle edge case where select value default is equal to target value.
+  const selectedLevel = await emailLevelSelect.inputValue()
+  if (selectedLevel === level.value) {
+    // For now, this allows setting the select back to Standard (the default)
+    // and properly sending network events/actually testing that it changes and persists.
+    await emailLevelSelect.selectOption('None')
+  }
 
-  // Take screenshot before changing the setting
-  await takeScreenshot(`Email Level Before ${level.value}`)
-
-  // Select the email level
-  await emailLevelSelect.selectOption(level.value)
-
-  // Wait for the change to be processed - use settleTime instead of networkidle
-  await page.waitForTimeout(timeouts.ui.settleTime)
-
-  // Take screenshot after changing the setting
-  await takeScreenshot(`Email Level After ${level.value}`)
+  // Start waiting for network response before changing setting - note no await yet
+  const saveSettingsPromise = getSaveSettingsPromise(page, level)
+  await emailLevelSelect.selectOption(level.value) // Then select the email level
+  await saveSettingsPromise // Then await the network responses indicating settings saved
 
   // Reload the page to verify persistence
-  await page.reload({ waitUntil: 'domcontentloaded' })
-
-  // Wait for settings to load again
-  await page.waitForSelector('text=Email Settings', {
-    timeout: timeouts.ui.appearance,
-  })
-
-  emailLevelSelect = page.locator('.email-select')
-
-  // Wait for the select element to be ready
-  await emailLevelSelect.waitFor({ state: 'visible' })
-
-  // Take screenshot after page reload to verify persistence
-  await takeScreenshot(`Email Level Persisted ${level.value}`)
+  await page.reload()
 
   // Verify the selected value persisted
-  await page.waitForTimeout(timeouts.ui.settleTime)
-  const selectedValue = await emailLevelSelect.inputValue()
-  expect(selectedValue).toBe(level.value)
+  await expect(emailLevelSelect).toHaveValue(level.value)
 
   console.log(`✓ Email level ${level.text} saved and persisted correctly`)
 
@@ -74,9 +89,6 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 
     // Click to show advanced settings
     await advancedButton.click()
-
-    // Wait for advanced settings to appear
-    await page.waitForTimeout(timeouts.ui.transition)
 
     // Look for email frequency settings in advanced view
     const emailFrequencySection = page.locator(
@@ -118,7 +130,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 }
 
 test.describe('Settings Page - Email Level Settings', () => {
-  test.skip('Email level "Off" saves correctly and persists after page reload', async ({
+  test('Email level "Off" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -130,7 +142,7 @@ test.describe('Settings Page - Email Level Settings', () => {
   // TODO: Fix this test - it's failing with timeout issues after user registration
   // The test successfully registers a new user but then fails to properly save/verify email settings
   // Need to investigate why the settings page isn't working correctly after registration
-  test.skip('Email level "Basic" saves correctly and persists after page reload', async ({
+  test('Email level "Basic" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -139,7 +151,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
-  test.skip('Email level "Standard" saves correctly and persists after page reload', async ({
+  test('Email level "Standard" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -189,13 +201,9 @@ test.describe('Settings Page - Email Level Settings', () => {
 
       // Click to show advanced settings
       await advancedButton.click()
-      await page.waitForTimeout(timeouts.ui.transition)
 
       // Advanced settings should now be visible
-      await advancedSection.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
+      await expect(advancedSection).toBeVisible()
 
       // Take screenshot after showing advanced settings
       await takeScreenshot('Advanced Settings After Toggle')
