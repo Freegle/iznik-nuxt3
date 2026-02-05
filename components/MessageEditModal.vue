@@ -1,6 +1,7 @@
 <template>
   <b-modal
     ref="modal"
+    scrollable
     size="lg"
     hide-header
     body-class="edit-modal-body"
