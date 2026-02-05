@@ -294,13 +294,15 @@ function onModalHidden() {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
-/* Modal body background */
+/* Modal body background and height constraint for sticky ads */
 :deep(.edit-modal-body) {
   background: #f8f9fa;
   padding: 0.5rem;
+  max-height: calc(100vh - 200px) !important;
 
   @include media-breakpoint-up(md) {
     padding: 0.75rem;
+    max-height: calc(100vh - 350px) !important;
   }
 }
 
