@@ -84,29 +84,34 @@ export const useChatStore = defineStore({
       }
     },
     async fetchLatestChatsMT() {
-      // MT..
-      // const now = new Date()
+      try {
+        const authStore = useAuthStore()
+        const me = authStore.user
 
-      const authStore = useAuthStore()
-      const me = authStore.user
+        if (me && me.id) {
+          const newCount = await api(this.config).chat.unseenCountMT()
 
-      if (me && me.id) {
-        const newCount = await api(this.config).chat.unseenCountMT()
-
-        if (newCount !== this.currentCountMT) {
-          if (!this.lastSearchMT) {
+          if (newCount !== this.currentCountMT) {
+            // Always update the badge count, even during a search.
             this.currentCountMT = newCount
-            this.listChatsMT({
-              chattypes: ['User2Mod', 'Mod2Mod'],
-              summary: true,
-              noerror: true,
-            })
+
+            // Only refresh the chat list if we're not in a search, to avoid
+            // overwriting search results.
+            if (!this.lastSearchMT) {
+              this.listChatsMT({
+                chattypes: ['User2Mod', 'Mod2Mod'],
+                summary: true,
+                noerror: true,
+              })
+            }
           }
         }
+      } catch (e) {
+        console.log('Error fetching latest chats', e)
       }
 
       // Continuously check for updated chats. Would be nice if this was event driven instead but requires server work.
-      // No need to clear the timeout
+      // No need to clear the timeout. The try/catch ensures we always reach this point.
       setTimeout(this.fetchLatestChatsMT, 30000)
     },
     async fetchReviewChatsMT(id, params) {
