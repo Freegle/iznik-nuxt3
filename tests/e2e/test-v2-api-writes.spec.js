@@ -14,11 +14,12 @@ const { loginViaHomepage } = require('./utils/user')
 
 test.describe('V2 API Write Endpoint Tests', () => {
   test('POST /apiv2/messages/markseen returns 401 without auth', async ({
-    page,
+    context,
   }) => {
-    // Call the v2 endpoint directly without authentication
-    const response = await page.request.post(
-      `${page.url().split('/').slice(0, 3).join('/')}/apiv2/messages/markseen`,
+    // Call the v2 endpoint directly without authentication.
+    // The Go v2 API is at apiv2.localhost, not freegle-prod-local.localhost.
+    const response = await context.request.post(
+      'http://apiv2.localhost/api/messages/markseen',
       {
         data: { ids: [1] },
         headers: { 'Content-Type': 'application/json' },
