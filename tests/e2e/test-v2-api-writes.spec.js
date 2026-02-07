@@ -6,38 +6,49 @@
  * API calls and checking that pages using these endpoints load without errors.
  *
  * V2 write endpoints exercised:
- *   POST   /apiv2/address        - create address
- *   PATCH  /apiv2/address        - update address
- *   DELETE /apiv2/address/:id    - delete address
+ *   POST   /api/address        - create address
+ *   PATCH  /api/address        - update address
+ *   DELETE /api/address/:id    - delete address
  */
 const { test, expect } = require('./fixtures')
 const { timeouts } = require('./config')
+
+// The Go v2 API is at apiv2.localhost, not the Playwright baseURL
+const APIV2_BASE = 'http://apiv2.localhost/api'
 
 test.describe('V2 API Write Endpoints', () => {
   test('Unauthenticated POST to v2 address returns 401', async ({
     context,
   }) => {
-    const response = await context.request.post('/apiv2/address', {
-      data: { pafid: 1 },
-      headers: { 'Content-Type': 'application/json' },
-    })
+    const response = await context.request.post(
+      `${APIV2_BASE}/address`,
+      {
+        data: { pafid: 1 },
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
     expect(response.status()).toBe(401)
   })
 
   test('Unauthenticated DELETE to v2 address returns 401', async ({
     context,
   }) => {
-    const response = await context.request.delete('/apiv2/address/1')
+    const response = await context.request.delete(
+      `${APIV2_BASE}/address/1`
+    )
     expect(response.status()).toBe(401)
   })
 
   test('Unauthenticated PATCH to v2 address returns 401', async ({
     context,
   }) => {
-    const response = await context.request.patch('/apiv2/address', {
-      data: { id: 1, instructions: 'test' },
-      headers: { 'Content-Type': 'application/json' },
-    })
+    const response = await context.request.patch(
+      `${APIV2_BASE}/address`,
+      {
+        data: { id: 1, instructions: 'test' },
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
     expect(response.status()).toBe(401)
   })
 
