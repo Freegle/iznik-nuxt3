@@ -158,11 +158,20 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
   const chatmessage = computed(() => chatStore.messageById(messageId))
 
+  const isEmptyMessage = computed(() => {
+    const m = chatmessage.value?.message
+    return !m || !m.trim()
+  })
+
   const emessage = computed(() => {
     const m = chatmessage.value?.message
 
     if (m) {
       const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+
+      if (!trim) {
+        return '(empty message)'
+      }
 
       try {
         twem(trim)
@@ -173,7 +182,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
       return ret
     } else {
-      return null
+      return '(empty message)'
     }
   })
 
@@ -301,6 +310,7 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
     chat,
     chatmessage,
     emessage,
+    isEmptyMessage,
     messageIsFromCurrentUser,
     chatMessageProfileImage,
     chatMessageProfileName,
