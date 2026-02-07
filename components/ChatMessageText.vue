@@ -12,7 +12,10 @@
         size="sm"
       />
     </div>
-    <div class="chatMessage forcebreak chatMessage__owner">
+    <div
+      class="chatMessage forcebreak chatMessage__owner"
+      :class="{ 'chat-empty-message': isEmptyMessage }"
+    >
       <div>
         <!-- ModTools: clickable links enabled -->
         <template v-if="isModTools">
@@ -153,6 +156,7 @@ const {
   chat,
   chatmessage,
   emessage,
+  isEmptyMessage,
   messageIsFromCurrentUser,
   chatMessageProfileImage,
   chatMessageProfileName,
@@ -232,5 +236,10 @@ onMounted(async () => {
 :deep(.highlight) {
   color: $color-blue--base;
   background-color: initial;
+}
+
+.chat-empty-message {
+  font-style: italic;
+  color: $color-gray--dark;
 }
 </style>
