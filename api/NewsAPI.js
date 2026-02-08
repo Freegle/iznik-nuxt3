@@ -17,52 +17,52 @@ export default class NewsAPI extends BaseAPI {
   }
 
   async send(data) {
-    const { id } = await this.$post('/newsfeed', data)
+    const { id } = await this.$postv2('/newsfeed', data)
     return id
   }
 
   edit(id, message) {
-    return this.$patch('/newsfeed', { id, message, action: 'Edit' })
+    return this.$patchv2('/newsfeed', { id, message })
   }
 
   love(id) {
-    return this.$post('/newsfeed', { id, action: 'Love' })
+    return this.$postv2('/newsfeed', { id, action: 'Love' })
   }
 
   unlove(id) {
-    return this.$post('/newsfeed', { id, action: 'Unlove' })
+    return this.$postv2('/newsfeed', { id, action: 'Unlove' })
   }
 
   async unfollow(id) {
-    await this.$post('/newsfeed', { id, action: 'Unfollow' })
+    await this.$postv2('/newsfeed', { id, action: 'Unfollow' })
   }
 
   async report(id, reason) {
-    await this.$post('/newsfeed', { id, reason, action: 'Report' })
+    await this.$postv2('/newsfeed', { id, reason, action: 'Report' })
   }
 
   async referto(id, type) {
-    await this.$post('/newsfeed', { id, action: 'ReferTo' + type })
+    await this.$postv2('/newsfeed', { id, action: 'ReferTo' + type })
   }
 
-  async unhide(id, type) {
-    await this.$post('/newsfeed', { id, action: 'Unhide' })
+  async unhide(id) {
+    await this.$postv2('/newsfeed', { id, action: 'Unhide' })
   }
 
-  async hide(id, type) {
-    await this.$post('/newsfeed', { id, action: 'Hide' })
+  async hide(id) {
+    await this.$postv2('/newsfeed', { id, action: 'Hide' })
   }
 
-  async convertToStory(id, type) {
-    await this.$post('/newsfeed', { id, action: 'ConvertToStory' })
+  async convertToStory(id) {
+    await this.$postv2('/newsfeed', { id, action: 'ConvertToStory' })
   }
 
   async seen(id) {
-    await this.$post('/newsfeed?bump=' + id, { id, action: 'Seen' })
+    await this.$postv2('/newsfeed', { id, action: 'Seen' })
   }
 
   del(id) {
-    return this.$del('/newsfeed', { id })
+    return this.$delv2('/newsfeed/' + id)
   }
 
   async count(distance, log) {
