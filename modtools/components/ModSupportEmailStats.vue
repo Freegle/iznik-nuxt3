@@ -3,7 +3,7 @@
     <NoticeMessage variant="info" class="mb-3">
       <p class="mb-0">
         <strong>Email tracking statistics.</strong> Filter by date range and
-        email type to see aggregate metrics.
+        email type to see aggregate metrics. Trash Nothing users are excluded.
         <b-button
           variant="link"
           size="sm"
