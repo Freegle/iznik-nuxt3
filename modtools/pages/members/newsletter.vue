@@ -30,10 +30,11 @@ const stories = computed(() => {
 })
 
 onMounted(async () => {
-  console.log('newsletter mounted')
+  // V2: fetch stories that are reviewed+public but not yet reviewed for newsletter
   await storyStore.fetchMT({
-    newsletter: true,
-    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
+    reviewed: 1,
+    public: 1,
+    newsletterreviewed: 0,
   })
 })
 </script>

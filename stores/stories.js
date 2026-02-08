@@ -14,17 +14,17 @@ export const useStoryStore = defineStore({
       this.fetching = {}
     },
     async fetchMT(params) {
-      const { story, stories } = await api(this.config).stories.fetch(params)
-      if (params.id && story) {
-        this.list[story.id] = story
-      } else {
-        this.list = {}
+      // V2 pattern: list returns IDs, then fetch each story individually.
+      const ids = await api(this.config).stories.listv2(params)
 
-        if (stories) {
-          for (const story of stories) {
-            this.list[story.id] = story
-          }
-        }
+      this.list = {}
+
+      if (ids?.length) {
+        await Promise.all(
+          ids.map(async (id) => {
+            this.list[id] = await api(this.config).stories.fetchv2(id)
+          })
+        )
       }
     },
     async fetch(id, force) {
@@ -42,7 +42,9 @@ export const useStoryStore = defineStore({
       return this.list[id]
     },
     async fetchRecent(limit) {
-      this.recent = await api(this.config).stories.listv2(limit)
+      this.recent = await api(this.config).stories.listv2(
+        limit ? { limit } : {}
+      )
     },
     async fetchByAuthority(authorityid, limit) {
       // Not used enough to bother caching.

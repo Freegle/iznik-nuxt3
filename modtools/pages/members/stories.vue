@@ -30,9 +30,9 @@ const stories = computed(() => {
 })
 
 onMounted(async () => {
+  // V2: fetch unreviewed stories for moderation
   await storyStore.fetchMT({
     reviewed: 0,
-    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
   })
 })
 </script>
