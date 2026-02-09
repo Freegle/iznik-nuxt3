@@ -534,10 +534,20 @@ export default class BaseAPI {
   }
 
   $patchv2(path, params = {}, logError = true) {
-    return this.$requestv2('PATCH', path, { params }, logError)
+    return this.$requestv2(
+      'PATCH',
+      path,
+      { headers: { 'Content-Type': 'application/json' }, params },
+      logError
+    )
   }
 
   $delv2(path, params = {}, logError = true) {
-    return this.$requestv2('DELETE', path, { params }, logError)
+    return this.$requestv2(
+      'DELETE',
+      path,
+      { headers: { 'Content-Type': 'application/json' }, params },
+      logError
+    )
   }
 }
