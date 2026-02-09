@@ -16,6 +16,17 @@ globalThis.useNuxtApp = () => ({
   },
 })
 
+/* Mock user store - component fetches user by userid from the store */
+const mockUsers = {}
+const mockUserStore = {
+  byId: vi.fn((id) => mockUsers[id] || null),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModStoryReview', () => {
   const createStory = (overrides = {}) => ({
     id: 123,
@@ -23,21 +34,35 @@ describe('ModStoryReview', () => {
     story: 'This is my story about Freegle.',
     date: '2024-01-15T10:00:00Z',
     public: true,
-    groupid: 456,
-    groupname: 'Test Freegle Group',
-    user: {
-      id: 789,
-      email: 'testuser@example.com',
-      displayname: 'Test User',
-      profile: {
-        turl: 'https://example.com/profile.jpg',
-      },
-    },
-    photo: null,
+    userid: 789,
+    image: null,
     ...overrides,
   })
 
-  function mountComponent(props = {}) {
+  const createUser = (overrides = {}) => ({
+    id: 789,
+    email: 'testuser@example.com',
+    displayname: 'Test User',
+    profile: {
+      paththumb: 'https://example.com/profile.jpg',
+    },
+    ...overrides,
+  })
+
+  function mountComponent(props = {}, { user = true } = {}) {
+    // Set up the mock user in the store if requested
+    if (user === true) {
+      const story = props.story || createStory()
+      if (story.userid) {
+        mockUsers[story.userid] = createUser({ id: story.userid })
+      }
+    } else if (user && typeof user === 'object') {
+      const story = props.story || createStory()
+      if (story.userid) {
+        mockUsers[story.userid] = user
+      }
+    }
+
     return mount(ModStoryReview, {
       props: {
         story: createStory(),
@@ -95,6 +120,8 @@ describe('ModStoryReview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Clear mock users
+    Object.keys(mockUsers).forEach((key) => delete mockUsers[key])
   })
 
   describe('rendering', () => {
@@ -117,13 +144,6 @@ describe('ModStoryReview', () => {
       expect(wrapper.text()).toContain('This is my wonderful Freegle story.')
     })
 
-    it('shows the group name', () => {
-      const wrapper = mountComponent({
-        story: createStory({ groupname: 'Sheffield Freegle' }),
-      })
-      expect(wrapper.text()).toContain('Sheffield Freegle')
-    })
-
     it('shows the story id', () => {
       const wrapper = mountComponent({
         story: createStory({ id: 999 }),
@@ -140,31 +160,37 @@ describe('ModStoryReview', () => {
   })
 
   describe('user display', () => {
-    it('shows user email when user exists', () => {
-      const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: 'user@test.com',
-            displayname: 'John Doe',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-        }),
-      })
-      expect(wrapper.text()).toContain('user@test.com')
-    })
-
-    it('shows user id when user exists', () => {
-      const wrapper = mountComponent({
-        story: createStory({
+    it('shows user email when user exists in store', () => {
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: 456 }),
+        },
+        {
           user: {
             id: 456,
             email: 'user@test.com',
             displayname: 'John Doe',
-            profile: { turl: 'https://example.com/profile.jpg' },
+            profile: { paththumb: 'https://example.com/profile.jpg' },
           },
-        }),
-      })
+        }
+      )
+      expect(wrapper.text()).toContain('user@test.com')
+    })
+
+    it('shows user id when user exists in store', () => {
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: 456 }),
+        },
+        {
+          user: {
+            id: 456,
+            email: 'user@test.com',
+            displayname: 'John Doe',
+            profile: { paththumb: 'https://example.com/profile.jpg' },
+          },
+        }
+      )
       expect(wrapper.text()).toContain('456')
     })
 
@@ -173,19 +199,43 @@ describe('ModStoryReview', () => {
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
 
-    it('does not show user section when user is null', () => {
-      const wrapper = mountComponent({
-        story: createStory({ user: null }),
-      })
+    it('does not show user section when userid is null', () => {
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: null }),
+        },
+        { user: false }
+      )
       expect(wrapper.find('.profile-image').exists()).toBe(false)
     })
   })
 
-  describe('photo display', () => {
-    it('shows photo when present', () => {
+  describe('user store interaction', () => {
+    it('fetches user from store on mount', async () => {
+      mountComponent({
+        story: createStory({ userid: 789 }),
+      })
+      await flushPromises()
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
+    })
+
+    it('does not fetch user when userid is null', async () => {
+      mountComponent(
+        {
+          story: createStory({ userid: null }),
+        },
+        { user: false }
+      )
+      await flushPromises()
+      expect(mockUserStore.fetch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('image display', () => {
+    it('shows image when present', () => {
       const wrapper = mountComponent({
         story: createStory({
-          photo: { paththumb: 'https://example.com/story-photo.jpg' },
+          image: { paththumb: 'https://example.com/story-photo.jpg' },
         }),
       })
       const img = wrapper.find('.b-img')
@@ -193,9 +243,9 @@ describe('ModStoryReview', () => {
       expect(img.attributes('src')).toBe('https://example.com/story-photo.jpg')
     })
 
-    it('does not show photo when not present', () => {
+    it('does not show image when not present', () => {
       const wrapper = mountComponent({
-        story: createStory({ photo: null }),
+        story: createStory({ image: null }),
       })
       expect(wrapper.find('.b-img').exists()).toBe(false)
     })
@@ -258,15 +308,20 @@ describe('ModStoryReview', () => {
       expect(wrapper.text()).not.toContain('Good for newsletter')
     })
 
-    it('shows ChatButton when user exists', () => {
-      const wrapper = mountComponent()
+    it('shows ChatButton when userid exists', () => {
+      const wrapper = mountComponent({
+        story: createStory({ userid: 789 }),
+      })
       expect(wrapper.find('.chat-button').exists()).toBe(true)
     })
 
-    it('does not show ChatButton when user is null', () => {
-      const wrapper = mountComponent({
-        story: createStory({ user: null }),
-      })
+    it('does not show ChatButton when userid is null', () => {
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: null }),
+        },
+        { user: false }
+      )
       expect(wrapper.find('.chat-button').exists()).toBe(false)
     })
   })
@@ -378,27 +433,19 @@ describe('ModStoryReview', () => {
   describe('ChatButton props', () => {
     it('passes correct userid to ChatButton', () => {
       const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: 'test@example.com',
-            displayname: 'Test User',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-          groupid: 456,
-        }),
+        story: createStory({ userid: 123 }),
       })
-      /* ChatButton is stubbed so we verify it exists; the component receives
-         the props from the template binding which we cannot directly test
-         on a stub. Instead, verify the component renders with user data. */
       const chatButton = wrapper.find('.chat-button')
       expect(chatButton.exists()).toBe(true)
     })
 
-    it('does not render ChatButton when user is null', () => {
-      const wrapper = mountComponent({
-        story: createStory({ user: null }),
-      })
+    it('does not render ChatButton when userid is null', () => {
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: null }),
+        },
+        { user: false }
+      )
       const chatButton = wrapper.find('.chat-button')
       expect(chatButton.exists()).toBe(false)
     })
@@ -406,47 +453,55 @@ describe('ModStoryReview', () => {
 
   describe('edge cases', () => {
     it('handles story with minimal data', () => {
-      const wrapper = mountComponent({
-        story: {
-          id: 1,
-          headline: 'Minimal',
-          story: 'Text',
-          date: '2024-01-01',
-          public: true,
-          groupname: 'Group',
-          user: null,
-          photo: null,
+      const wrapper = mountComponent(
+        {
+          story: {
+            id: 1,
+            headline: 'Minimal',
+            story: 'Text',
+            date: '2024-01-01',
+            public: true,
+            userid: null,
+            image: null,
+          },
         },
-      })
+        { user: false }
+      )
       expect(wrapper.find('.card').exists()).toBe(true)
       expect(wrapper.text()).toContain('Minimal')
     })
 
     it('handles user without profile image gracefully', () => {
-      const wrapper = mountComponent({
-        story: createStory({
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: 123 }),
+        },
+        {
           user: {
             id: 123,
             email: 'test@example.com',
             displayname: 'Test',
-            profile: { turl: null },
+            profile: { paththumb: null },
           },
-        }),
-      })
+        }
+      )
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
 
     it('handles user with displayname but no email', () => {
-      const wrapper = mountComponent({
-        story: createStory({
+      const wrapper = mountComponent(
+        {
+          story: createStory({ userid: 123 }),
+        },
+        {
           user: {
             id: 123,
             email: null,
             displayname: 'Just Name',
-            profile: { turl: 'https://example.com/profile.jpg' },
+            profile: { paththumb: 'https://example.com/profile.jpg' },
           },
-        }),
-      })
+        }
+      )
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
   })
