@@ -14,6 +14,30 @@ describe('ProxyImage', () => {
         src: '/test/image.jpg',
         ...props,
       },
+      global: {
+        stubs: {
+          NuxtPicture: {
+            template:
+              '<span><img :src="src" :alt="alt" :width="width" :height="height" :loading="loading" :placeholder="placeholder" @error="$emit(\'error\', $event)" /></span>',
+            props: [
+              'src',
+              'alt',
+              'format',
+              'fit',
+              'preload',
+              'provider',
+              'modifiers',
+              'class',
+              'width',
+              'height',
+              'loading',
+              'sizes',
+              'placeholder',
+            ],
+            emits: ['error'],
+          },
+        },
+      },
     })
   }
 

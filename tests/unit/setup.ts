@@ -172,6 +172,28 @@ config.global.stubs = {
 
   // Stub NuxtLink
   NuxtLink: { template: '<a :href="to"><slot /></a>', props: ['to'] },
+
+  // Stub NuxtPicture (from @nuxt/image, auto-imported by Nuxt)
+  NuxtPicture: {
+    template:
+      '<span><img :src="src" :alt="alt" :width="width" :height="height" :loading="loading" :placeholder="placeholder" @error="$emit(\'error\', $event)" /></span>',
+    props: [
+      'src',
+      'alt',
+      'format',
+      'fit',
+      'preload',
+      'provider',
+      'modifiers',
+      'class',
+      'width',
+      'height',
+      'loading',
+      'sizes',
+      'placeholder',
+    ],
+    emits: ['error'],
+  },
 }
 
 // ============================================
