@@ -25,7 +25,7 @@
       <!-- Two-column layout wrapper for short wide screens -->
       <div class="two-column-wrapper">
         <!-- Photo Area with Ken Burns animation -->
-        <div class="photo-area" @click="showPhotosModal">
+        <div ref="photoAreaRef" class="photo-area" @click="showPhotosModal">
           <!-- Back button on photo (hidden in two-column) -->
           <button class="back-button" @click.stop="goBack">
             <v-icon icon="arrow-left" />
@@ -40,10 +40,11 @@
             :alt="successfulText"
           />
           <b-img
-            v-else-if="message.promised"
+            v-else-if="message.promised && photoAreaTallEnough"
             lazy
             src="/promised.jpg"
             class="status-overlay-image"
+            :class="{ 'status-overlay-image--large': photoAreaIsLarge }"
             alt="Promised"
           />
           <!-- Thumbnail carousel for multiple photos -->
@@ -302,7 +303,13 @@
                   </NuxtLink>
                 </div>
               </div>
-              <div class="description-content">
+              <div
+                class="description-content"
+                :class="{
+                  'description-content--promised':
+                    message.promised && !message.successful,
+                }"
+              >
                 <MessageTextBody :id="id" />
               </div>
             </div>
@@ -672,10 +679,13 @@ const showMessagePhotosModal = ref(false)
 const showReportModal = ref(false)
 const currentPhotoIndex = ref(0)
 const containerRef = ref(null)
+const photoAreaRef = ref(null)
+const photoAreaHeight = ref(0)
 const thumbnailsRef = ref(null)
 const thumbnailTouchStartX = ref(0)
 const thumbnailScrollStart = ref(0)
 let thumbnailScrollInterval = null
+let photoAreaObserver = null
 
 // Computed (additional to composable)
 const currentAttachment = computed(() => {
@@ -722,6 +732,9 @@ const isTwoColumnLayout = computed(() => {
   const isShortEnough = windowHeight.value <= 700
   return isWideEnough && isShortEnough
 })
+
+const photoAreaTallEnough = computed(() => photoAreaHeight.value >= 150)
+const photoAreaIsLarge = computed(() => photoAreaHeight.value >= 300)
 
 const posterAboutMe = computed(() => {
   const text = poster.value?.aboutme?.text
@@ -891,6 +904,15 @@ onMounted(() => {
   updateWindowHeight()
   window.addEventListener('resize', updateWindowHeight)
 
+  // Track photo area height for conditional overlay sizing
+  if (photoAreaRef.value) {
+    photoAreaHeight.value = photoAreaRef.value.clientHeight
+    photoAreaObserver = new ResizeObserver((entries) => {
+      photoAreaHeight.value = entries[0].contentRect.height
+    })
+    photoAreaObserver.observe(photoAreaRef.value)
+  }
+
   // Start auto-scroll hint for thumbnail carousel
   startThumbnailAutoScroll()
 })
@@ -933,6 +955,11 @@ onUnmounted(() => {
         window.matchMedia('(orientation: landscape)').matches
       )
     }
+  }
+
+  if (photoAreaObserver) {
+    photoAreaObserver.disconnect()
+    photoAreaObserver = null
   }
 
   stopThumbnailAutoScroll()
@@ -1336,6 +1363,14 @@ onUnmounted(() => {
   margin-left: -25%;
   margin-top: -15%;
   pointer-events: none;
+
+  /* When photo area is tall enough (>=300px), show larger overlay */
+  &--large {
+    width: 70%;
+    max-width: 450px;
+    margin-left: -35%;
+    margin-top: -20%;
+  }
 }
 
 // Thumbnail carousel at top of photo area
@@ -2021,9 +2056,35 @@ onUnmounted(() => {
   font-size: 1rem;
   line-height: 1.7;
   color: $color-gray--darker;
+  position: relative;
+  overflow: hidden;
 
   /* Ensure at least 2 lines visible */
   min-height: 3.4em;
+
+  /* Faded "PROMISED" watermark behind the description text */
+  &--promised::before {
+    content: 'PROMISED';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: clamp(2rem, 8vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: $color-orange--dark;
+    opacity: 0.25;
+    z-index: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* Description text sits above the watermark */
+  &--promised > :deep(*) {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .app-footer {
@@ -2100,6 +2161,16 @@ onUnmounted(() => {
   color: $color-orange--dark;
   font-size: 0.85rem;
   font-weight: 500;
+
+  /* Desktop: more prominent banner-style notice */
+  @include media-breakpoint-up(md) {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    background: rgba($color-orange--dark, 0.08);
+    border: 1px solid rgba($color-orange--dark, 0.25);
+    border-radius: 6px;
+  }
 }
 
 // Fullscreen map viewer
