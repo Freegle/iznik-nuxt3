@@ -6,7 +6,7 @@
     @mouseenter="fetch"
   >
     <ChatAvatar
-      :icon="chat.icon"
+      :icon="resolvedIcon"
       :name="chat.name"
       :supporter="chat.supporter"
       :unread-count="chat.unseen"
@@ -31,9 +31,11 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from '#imports'
+import { ref, computed, onMounted, watch } from '#imports'
 import { twem } from '~/composables/useTwem'
 import { useChatStore } from '~/stores/chat'
+import { useUserStore } from '~/stores/user'
+import { useMiscStore } from '~/stores/misc'
 import { timeago } from '~/composables/useTimeFormat'
 import ChatAvatar from '~/components/ChatAvatar'
 
@@ -50,11 +52,46 @@ const props = defineProps({
 })
 
 const chatStore = useChatStore()
+const userStore = useUserStore()
+const miscStore = useMiscStore()
 const fetched = ref(false)
 
 const chat = computed(() => {
   return chatStore.byChatId(props.id)
 })
+
+// On ModTools, resolve the user profile image instead of relying on chat.icon
+// which uses v1 tuimg_ URLs that only return default gravatars.
+const resolvedIcon = computed(() => {
+  if (miscStore.modtools && chat.value) {
+    const uid = chat.value.user1id || chat.value.user1?.id
+    if (uid) {
+      const user = userStore.byId(uid)
+      const turl = user?.profile?.turl || user?.profile?.paththumb
+      if (turl) {
+        return turl
+      }
+    }
+  }
+  return chat.value?.icon
+})
+
+// On ModTools, fetch the other user's profile so we have their profile image.
+if (miscStore.modtools) {
+  watch(
+    () => chat.value?.user1id || chat.value?.user1?.id,
+    async (uid) => {
+      if (uid && !userStore.byId(uid)) {
+        try {
+          await userStore.fetch(uid)
+        } catch (e) {
+          // Silently ignore - will fall back to chat.icon
+        }
+      }
+    },
+    { immediate: true }
+  )
+}
 
 const esnippet = computed(() => {
   if (chat.value?.snippet === 'null') {
