@@ -142,8 +142,10 @@ watch(
   { immediate: true }
 )
 
-function remove() {
+function remove(e) {
   confirm.value = true
+  e.preventDefault()
+  e.stopPropagation()
 }
 
 function removeConfirmed() {
