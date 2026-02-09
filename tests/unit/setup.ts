@@ -116,6 +116,7 @@ const mockNuxtApp = {
   public: {
     APIv1: 'http://apiv1.localhost',
     APIv2: 'http://apiv2.localhost',
+    USER_SITE: '',
     GOOGLE_MAPS_KEY: 'test-key',
     GOOGLE_CLIENT_ID: 'test-client-id',
     FACEBOOK_APPID: 'test-fb-id',
@@ -172,6 +173,27 @@ config.global.stubs = {
 
   // Stub NuxtLink
   NuxtLink: { template: '<a :href="to"><slot /></a>', props: ['to'] },
+
+  // Stub NuxtPicture (from @nuxt/image, auto-imported by Nuxt)
+  NuxtPicture: {
+    template:
+      '<span><img :src="src" :alt="alt" :width="width" :height="height" :loading="loading" :placeholder="placeholder" @error="$emit(\'error\', $event)" /></span>',
+    props: [
+      'src',
+      'alt',
+      'format',
+      'fit',
+      'preload',
+      'provider',
+      'modifiers',
+      'width',
+      'height',
+      'loading',
+      'sizes',
+      'placeholder',
+    ],
+    emits: ['error'],
+  },
 }
 
 // ============================================

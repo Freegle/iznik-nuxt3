@@ -563,6 +563,14 @@ describe('MessageExpanded', () => {
     it('shows "promised" overlay when message is promised', async () => {
       mockMessage.value.promised = true
       const wrapper = await createWrapper()
+
+      // The promised overlay requires photoAreaTallEnough (height >= 150).
+      // In tests there's no real DOM so photoAreaHeight defaults to 0.
+      // Set it directly on the inner component instance.
+      const inner = wrapper.findComponent(MessageExpanded)
+      inner.vm.photoAreaHeight = 200
+      await wrapper.vm.$nextTick()
+
       const overlay = wrapper.find('.status-overlay-image')
       expect(overlay.exists()).toBe(true)
       expect(overlay.attributes('src')).toBe('/promised.jpg')

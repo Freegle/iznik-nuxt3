@@ -40,7 +40,9 @@
     <ProxyImage
       v-else
       :src="validImage"
-      sizes="100px sm:25px"
+      :sizes="width + 'px'"
+      :width="width"
+      :height="width"
       :class-name="className"
       :alt="altText"
       @error="brokenProfileImage"
