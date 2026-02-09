@@ -11,11 +11,9 @@ export const useAuthorityStore = defineStore({
       this.config = config
     },
     async fetch(id) {
-      const ret = await api(this.config).authority.fetch({
-        id,
-      })
+      const ret = await api(this.config).authority.fetch(id)
 
-      this.list[id] = ret?.authority
+      this.list[id] = ret
 
       return this.list[id]
     },

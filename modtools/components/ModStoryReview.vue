@@ -3,25 +3,22 @@
     <b-card v-if="show" no-body>
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
-          <span v-if="story.user">
+          <span v-if="user">
             <ProfileImage
-              :image="story.user.profile.turl"
-              :name="story.user.displayname || story.user.email"
+              :image="user.profile?.paththumb"
+              :name="user.displayname || user.email"
               class="mr-1 ml-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail
               size="sm"
             />
-            <strong>{{ story.user.email }}</strong>
+            <strong>{{ user.email }}</strong>
             <span class="small">
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                story.user.id
+                user.id
               }}
             </span>
           </span>
-          <span>
-            member of <strong>{{ story.groupname }}</strong
-            >, posted {{ timeago(story.date) }}
-          </span>
+          <span> posted {{ timeago(story.date) }} </span>
           <span>
             <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
               story.id
@@ -34,7 +31,7 @@
         <h3>{{ story.headline }}</h3>
         <div class="d-flex font-weight-bold">
           {{ story.story }}
-          <b-img v-if="story.photo" thumbnail :src="story.photo.paththumb" />
+          <b-img v-if="story.image" thumbnail :src="story.image.paththumb" />
         </div>
         <NoticeMessage v-if="!story.public" variant="info" class="mt-1">
           They've said this story isn't public, so this is just for you to read
@@ -69,9 +66,8 @@
             </b-button>
           </div>
           <ChatButton
-            v-if="story.user"
-            :userid="story.user.id"
-            :groupid="story.groupid"
+            v-if="story.userid"
+            :userid="story.userid"
             title="Chat"
             variant="white"
             class="mr-2 mb-1"
@@ -82,9 +78,11 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '~/stores/user'
 
 const { $api } = useNuxtApp()
+const userStore = useUserStore()
 
 const props = defineProps({
   story: {
@@ -99,6 +97,16 @@ const props = defineProps({
 })
 
 const show = ref(true)
+
+const user = computed(() => {
+  return props.story.userid ? userStore.byId(props.story.userid) : null
+})
+
+onMounted(async () => {
+  if (props.story.userid) {
+    await userStore.fetch(props.story.userid)
+  }
+})
 
 async function useForNewsletter() {
   await $api.stories.useForNewsletter(props.story.id)

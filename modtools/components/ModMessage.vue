@@ -1223,10 +1223,10 @@ function photoAdd() {
 
 async function findHomeGroup() {
   if (props.message && props.message.lat && props.message.lng) {
-    const loc = await locationStore.fetch({
-      lat: props.message.lat,
-      lng: props.message.lng,
-    })
+    const loc = await locationStore.fetchByLatLng(
+      props.message.lat,
+      props.message.lng
+    )
 
     if (loc && loc.groupsnear && loc.groupsnear.length) {
       // The group might not be on TN.

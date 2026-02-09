@@ -12,6 +12,8 @@ const mockModGroupStore = {
 
 const mockLocationStore = {
   fetch: vi.fn(),
+  fetchByLatLng: vi.fn(),
+  typeahead: vi.fn(),
   add: vi.fn(),
   update: vi.fn(),
   delete: vi.fn(),

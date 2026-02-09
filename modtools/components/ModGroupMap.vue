@@ -928,12 +928,10 @@ async function search() {
   if (POSTCODE_REGEX.test(searchplace.value)) {
     // We have a probable postcode.  We can search for it.  This is because our list of postcodes is more
     // reliable than the Photon geocoder handling of postcodes.
-    const loc = await locationStore.fetch({
-      typeahead: searchplace.value,
-    })
+    const locations = await locationStore.typeahead(searchplace.value)
 
-    if (loc?.locations?.length > 0) {
-      const l0 = loc.locations[0]
+    if (locations?.length > 0) {
+      const l0 = locations[0]
       if (l0.area) {
         const latlng = new window.L.LatLng(l0.area.lat, l0.area.lng)
         mapObject.value.leafletObject.setView(latlng, 14)

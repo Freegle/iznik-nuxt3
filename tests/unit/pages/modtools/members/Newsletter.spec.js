@@ -124,8 +124,9 @@ describe('Newsletter Page', () => {
       await flushPromises()
 
       expect(mockStoryStore.fetchMT).toHaveBeenCalledWith({
-        newsletter: true,
-        dontzapfalsey: true,
+        reviewed: 1,
+        public: 1,
+        newsletterreviewed: 0,
       })
     })
 
