@@ -116,6 +116,7 @@ const mockNuxtApp = {
   public: {
     APIv1: 'http://apiv1.localhost',
     APIv2: 'http://apiv2.localhost',
+    USER_SITE: '',
     GOOGLE_MAPS_KEY: 'test-key',
     GOOGLE_CLIENT_ID: 'test-client-id',
     FACEBOOK_APPID: 'test-fb-id',
@@ -185,7 +186,6 @@ config.global.stubs = {
       'preload',
       'provider',
       'modifiers',
-      'class',
       'width',
       'height',
       'loading',

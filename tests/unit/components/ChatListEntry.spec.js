@@ -20,6 +20,18 @@ vi.mock('~/composables/useTimeFormat', () => ({
   timeago: vi.fn((date) => '2 hours ago'),
 }))
 
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => ({
+    byId: vi.fn(() => null),
+  }),
+}))
+
+vi.mock('~/stores/misc', () => ({
+  useMiscStore: () => ({
+    modtools: false,
+  }),
+}))
+
 describe('ChatListEntry', () => {
   beforeEach(() => {
     vi.clearAllMocks()

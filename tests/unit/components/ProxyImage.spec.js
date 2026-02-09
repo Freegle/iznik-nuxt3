@@ -27,7 +27,6 @@ describe('ProxyImage', () => {
               'preload',
               'provider',
               'modifiers',
-              'class',
               'width',
               'height',
               'loading',
