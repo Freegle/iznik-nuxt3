@@ -31,7 +31,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   rate(id, rating, reason, text) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       ratee: id,
       rating,
       action: 'Rate',
@@ -41,7 +41,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   ratingReviewed(ratingid) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       ratingid,
       action: 'RatingReviewed',
     })
@@ -52,11 +52,11 @@ export default class UserAPI extends BaseAPI {
   }
 
   addEmail(id, email, primary) {
-    return this.$post('/user', { id, action: 'AddEmail', email, primary })
+    return this.$postv2('/user', { id, action: 'AddEmail', email, primary })
   }
 
   removeEmail(id, email) {
-    return this.$post('/user', { id, action: 'RemoveEmail', email })
+    return this.$postv2('/user', { id, action: 'RemoveEmail', email })
   }
 
   add(email, logError = true) {
@@ -103,7 +103,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   engaged(engageid) {
-    return this.$post('/user', {
+    return this.$postv2('/user', {
       engageid,
     })
   }
