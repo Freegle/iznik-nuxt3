@@ -17,6 +17,7 @@ const {
   return {
     mockLocationStore: {
       fetch: vi.fn().mockResolvedValue(null),
+      fetchByLatLng: vi.fn().mockResolvedValue(null),
     },
     mockMemberStore: {
       update: vi.fn().mockResolvedValue(),
