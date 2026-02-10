@@ -6,15 +6,15 @@ export default class CommentAPI extends BaseAPI {
   }
 
   async add(data) {
-    const { id } = await this.$post('/comment', data)
+    const { id } = await this.$postv2('/comment', data)
     return id
   }
 
   save(data) {
-    return this.$put('/comment', data)
+    return this.$patchv2('/comment', data)
   }
 
   del(id) {
-    return this.$del('/comment', { id })
+    return this.$delv2('/comment/' + id)
   }
 }
