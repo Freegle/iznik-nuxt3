@@ -57,7 +57,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   deleteMessage(messageId) {
-    return this.$del(`/chatmessages?id=${messageId}`)
+    return this.$delv2(`/chatmessages?id=${messageId}`)
   }
 
   openChat(params, logError) {
@@ -92,7 +92,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   rsvp(id, chatid, value) {
-    return this.$patch('/chatmessages', {
+    return this.$patchv2('/chatmessages', {
       roomid: chatid,
       id,
       replyexpected: value,
