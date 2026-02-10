@@ -6,6 +6,6 @@ export default class UserSearchAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$del('/usersearch', { id })
+    return this.$delv2('/usersearch', { id })
   }
 }
