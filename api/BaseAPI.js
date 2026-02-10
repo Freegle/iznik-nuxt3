@@ -532,4 +532,31 @@ export default class BaseAPI {
   $getv2(path, params = {}, logError = true) {
     return this.$requestv2('GET', path, { params }, logError)
   }
+
+  $putv2(path, params = {}, logError = true) {
+    return this.$requestv2(
+      'PUT',
+      path,
+      { headers: { 'Content-Type': 'application/json' }, params },
+      logError
+    )
+  }
+
+  $patchv2(path, params = {}, logError = true) {
+    return this.$requestv2(
+      'PATCH',
+      path,
+      { headers: { 'Content-Type': 'application/json' }, params },
+      logError
+    )
+  }
+
+  $delv2(path, params = {}, logError = true) {
+    return this.$requestv2(
+      'DELETE',
+      path,
+      { headers: { 'Content-Type': 'application/json' }, params },
+      logError
+    )
+  }
 }
