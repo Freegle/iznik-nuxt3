@@ -69,7 +69,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   async sendMT(data) {
-    return await this.$post('/chatmessages', data)
+    return await this.$postv2('/chatmessages', data)
   }
 
   nudge(chatid) {
