@@ -48,7 +48,11 @@
 
         <!-- Link to another page -->
         <div v-if="currentNode.link" class="flow-link">
-          <nuxt-link :to="currentNode.link.to" class="link-btn">
+          <nuxt-link
+            :to="currentNode.link.to"
+            class="link-btn"
+            @click="onLinkClick(currentNode.link)"
+          >
             <v-icon
               v-if="currentNode.link.icon"
               :icon="currentNode.link.icon"
@@ -183,9 +187,11 @@ import NoticeMessage from '~/components/NoticeMessage'
 import SupportLink from '~/components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useAuthStore } from '~/stores/auth'
+import { useClientLog } from '~/composables/useClientLog'
 
 const authStore = useAuthStore()
 const loggedIn = computed(() => authStore.user !== null)
+const { action: logAction } = useClientLog()
 const contactGroupId = ref(null)
 
 // Contact section state (separate from main flow)
@@ -210,6 +216,7 @@ const helpTree = {
       { id: 'emails', label: 'Emails & notifications', icon: 'envelope' },
       { id: 'account', label: 'My account', icon: 'user' },
       { id: 'about', label: 'About Freegle', icon: 'info-circle' },
+      { id: 'donate', label: 'Can I donate?', icon: 'heart' },
     ],
   },
 
@@ -227,7 +234,7 @@ const helpTree = {
       { id: 'posting-choosing', label: 'Choosing who gets it', icon: 'users' },
       {
         id: 'posting-selling',
-        label: 'Can I sell freecycled items?',
+        label: 'Can I sell freegled items?',
         icon: 'shopping-cart',
       },
       { id: 'back-start', label: 'Back', icon: 'arrow-left' },
@@ -355,7 +362,6 @@ const helpTree = {
       },
       { id: 'about-how', label: 'How Freegle is run', icon: 'users' },
       { id: 'about-volunteer', label: 'Volunteering', icon: 'hands-helping' },
-      { id: 'about-donate', label: 'Donate', icon: 'heart' },
       { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
@@ -378,7 +384,9 @@ const helpTree = {
     text: 'Freegle is run by volunteers! You can help by becoming a supporter, helping run your local community, or volunteering nationally with publicity, fundraising, graphics, UX, or development.',
     link: { to: '/donate', text: 'Become a supporter', icon: 'heart' },
   },
-  'about-donate': {
+
+  // === DONATE (top-level) ===
+  donate: {
     text: "If you're able to donate, it helps keep Freegle running. Monthly donations are particularly helpful. We can claim Gift Aid if you're a UK taxpayer.",
     link: { to: '/donate', text: 'Donate to Freegle', icon: 'heart' },
   },
@@ -407,6 +415,11 @@ watch(
 )
 
 function selectOption(opt) {
+  logAction('help_option_click', {
+    option_id: opt.id,
+    option_label: opt.label,
+  })
+
   if (opt.id === 'start') {
     goToStart()
     return
@@ -418,6 +431,13 @@ function selectOption(opt) {
   }
 
   currentNodeId.value = opt.id
+}
+
+function onLinkClick(link) {
+  logAction('help_link_click', {
+    link_to: link.to,
+    link_text: link.text,
+  })
 }
 
 function goToStart() {

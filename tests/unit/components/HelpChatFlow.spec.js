@@ -96,7 +96,7 @@ describe('HelpChatFlow', () => {
       it('renders all main category options', () => {
         const wrapper = createWrapper()
         const options = wrapper.findAll('.flow-option')
-        expect(options.length).toBe(5)
+        expect(options.length).toBe(6)
       })
 
       it('displays Posting items option', () => {
@@ -124,16 +124,21 @@ describe('HelpChatFlow', () => {
         expect(wrapper.text()).toContain('About Freegle')
       })
 
+      it('displays Can I donate? option', () => {
+        const wrapper = createWrapper()
+        expect(wrapper.text()).toContain('Can I donate?')
+      })
+
       it('shows icons for each option', () => {
         const wrapper = createWrapper()
         const icons = wrapper.findAll('.option-icon')
-        expect(icons.length).toBe(5)
+        expect(icons.length).toBe(6)
       })
 
       it('shows chevrons for non-back options', () => {
         const wrapper = createWrapper()
         const chevrons = wrapper.findAll('.chevron')
-        expect(chevrons.length).toBe(5)
+        expect(chevrons.length).toBe(6)
       })
     })
 
@@ -254,6 +259,17 @@ describe('HelpChatFlow', () => {
         await aboutOption.trigger('click')
         expect(wrapper.text()).toContain(
           'What would you like to know about Freegle?'
+        )
+      })
+
+      it('navigates to Donate section when clicked', async () => {
+        const wrapper = createWrapper()
+        const donateOption = wrapper
+          .findAll('.flow-option')
+          .find((o) => o.text().includes('Can I donate?'))
+        await donateOption.trigger('click')
+        expect(wrapper.text()).toContain(
+          "If you're able to donate, it helps keep Freegle running"
         )
       })
 
@@ -571,7 +587,7 @@ describe('HelpChatFlow', () => {
           .findAll('.flow-option')
           .find((o) => o.text().includes('Posting items'))
         await postingOption.trigger('click')
-        expect(wrapper.text()).toContain('Can I sell freecycled items?')
+        expect(wrapper.text()).toContain('Can I sell freegled items?')
       })
 
       it('navigates to posting-taken and shows link to My Posts', async () => {
@@ -816,15 +832,6 @@ describe('HelpChatFlow', () => {
         expect(wrapper.text()).toContain('Volunteering')
       })
 
-      it('shows Donate option', async () => {
-        const wrapper = createWrapper()
-        const aboutOption = wrapper
-          .findAll('.flow-option')
-          .find((o) => o.text().includes('About Freegle'))
-        await aboutOption.trigger('click')
-        expect(wrapper.text()).toContain('Donate')
-      })
-
       it('navigates to about-integrations and shows partner info', async () => {
         const wrapper = createWrapper()
         const aboutOption = wrapper
@@ -841,7 +848,7 @@ describe('HelpChatFlow', () => {
         expect(wrapper.text()).toContain("we're friends with them")
       })
 
-      it('navigates to about-donate and shows link to donate page', async () => {
+      it('does not show Donate option (moved to top level)', async () => {
         const wrapper = createWrapper()
         const aboutOption = wrapper
           .findAll('.flow-option')
@@ -849,7 +856,28 @@ describe('HelpChatFlow', () => {
         await aboutOption.trigger('click')
         const donateOption = wrapper
           .findAll('.flow-option')
-          .find((o) => o.text().includes('Donate'))
+          .find((o) => o.text() === 'Donate')
+        expect(donateOption).toBeUndefined()
+      })
+    })
+
+    describe('donate path (top-level)', () => {
+      it('navigates to donate section when clicked', async () => {
+        const wrapper = createWrapper()
+        const donateOption = wrapper
+          .findAll('.flow-option')
+          .find((o) => o.text().includes('Can I donate?'))
+        await donateOption.trigger('click')
+        expect(wrapper.text()).toContain(
+          "If you're able to donate, it helps keep Freegle running"
+        )
+      })
+
+      it('shows link to donate page', async () => {
+        const wrapper = createWrapper()
+        const donateOption = wrapper
+          .findAll('.flow-option')
+          .find((o) => o.text().includes('Can I donate?'))
         await donateOption.trigger('click')
         expect(wrapper.find('.link-btn').attributes('data-to')).toBe('/donate')
         expect(wrapper.text()).toContain('Donate to Freegle')

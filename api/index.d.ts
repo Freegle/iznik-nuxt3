@@ -26,7 +26,6 @@ import EmailTrackingAPI from './EmailTrackingAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
-import InvitationAPI from './InvitationAPI.js'
 import IsochroneAPI from './IsochroneAPI.js'
 import JobAPI from './JobAPI.js'
 import LocationAPI from './LocationAPI.js'
@@ -72,7 +71,6 @@ interface API {
   giftaid: GiftAidAPI;
   group: GroupAPI;
   image: ImageAPI;
-  invitation: InvitationAPI;
   isochrone: IsochroneAPI;
   job: JobAPI;
   location: LocationAPI;
