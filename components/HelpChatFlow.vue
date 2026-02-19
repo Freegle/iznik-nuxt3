@@ -48,7 +48,11 @@
 
         <!-- Link to another page -->
         <div v-if="currentNode.link" class="flow-link">
-          <nuxt-link :to="currentNode.link.to" class="link-btn">
+          <nuxt-link
+            :to="currentNode.link.to"
+            class="link-btn"
+            @click="onLinkClick(currentNode.link)"
+          >
             <v-icon
               v-if="currentNode.link.icon"
               :icon="currentNode.link.icon"
@@ -183,9 +187,11 @@ import NoticeMessage from '~/components/NoticeMessage'
 import SupportLink from '~/components/SupportLink'
 import ExternalLink from '~/components/ExternalLink'
 import { useAuthStore } from '~/stores/auth'
+import { useClientLog } from '~/composables/useClientLog'
 
 const authStore = useAuthStore()
 const loggedIn = computed(() => authStore.user !== null)
+const { action: logAction } = useClientLog()
 const contactGroupId = ref(null)
 
 // Contact section state (separate from main flow)
@@ -409,6 +415,11 @@ watch(
 )
 
 function selectOption(opt) {
+  logAction('help_option_click', {
+    option_id: opt.id,
+    option_label: opt.label,
+  })
+
   if (opt.id === 'start') {
     goToStart()
     return
@@ -420,6 +431,13 @@ function selectOption(opt) {
   }
 
   currentNodeId.value = opt.id
+}
+
+function onLinkClick(link) {
+  logAction('help_link_click', {
+    link_to: link.to,
+    link_text: link.text,
+  })
 }
 
 function goToStart() {
