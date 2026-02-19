@@ -210,6 +210,7 @@ const helpTree = {
       { id: 'emails', label: 'Emails & notifications', icon: 'envelope' },
       { id: 'account', label: 'My account', icon: 'user' },
       { id: 'about', label: 'About Freegle', icon: 'info-circle' },
+      { id: 'donate', label: 'Can I donate?', icon: 'heart' },
     ],
   },
 
@@ -227,7 +228,7 @@ const helpTree = {
       { id: 'posting-choosing', label: 'Choosing who gets it', icon: 'users' },
       {
         id: 'posting-selling',
-        label: 'Can I sell freecycled items?',
+        label: 'Can I sell freegled items?',
         icon: 'shopping-cart',
       },
       { id: 'back-start', label: 'Back', icon: 'arrow-left' },
@@ -355,7 +356,6 @@ const helpTree = {
       },
       { id: 'about-how', label: 'How Freegle is run', icon: 'users' },
       { id: 'about-volunteer', label: 'Volunteering', icon: 'hands-helping' },
-      { id: 'about-donate', label: 'Donate', icon: 'heart' },
       { id: 'back-start', label: 'Back', icon: 'arrow-left' },
     ],
   },
@@ -378,7 +378,9 @@ const helpTree = {
     text: 'Freegle is run by volunteers! You can help by becoming a supporter, helping run your local community, or volunteering nationally with publicity, fundraising, graphics, UX, or development.',
     link: { to: '/donate', text: 'Become a supporter', icon: 'heart' },
   },
-  'about-donate': {
+
+  // === DONATE (top-level) ===
+  donate: {
     text: "If you're able to donate, it helps keep Freegle running. Monthly donations are particularly helpful. We can claim Gift Aid if you're a UK taxpayer.",
     link: { to: '/donate', text: 'Donate to Freegle', icon: 'heart' },
   },
