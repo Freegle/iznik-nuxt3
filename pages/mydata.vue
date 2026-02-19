@@ -376,27 +376,6 @@
                   </b-col>
                 </b-row>
               </ShowMore>
-              <h2>Invitations</h2>
-              <div class="row">
-                <div class="col-sm-6">
-                  Number of remaining invitations you can send to other people:
-                </div>
-                <div class="col-sm-6">
-                  {{
-                    status.data
-                      .Number_of_remaining_invitations_you_can_send_to_other_people
-                  }}
-                </div>
-              </div>
-              <br />
-              <ShowMore
-                v-slot="s"
-                :items="status.data.invitations"
-                keyfield="date"
-              >
-                You invited <em>{{ s.item.email }}</em> on
-                {{ dateonly(s.item.date) }}
-              </ShowMore>
               <h2>Posts</h2>
               <ShowMore :items="status.data.messages">
                 <template #item="s">
