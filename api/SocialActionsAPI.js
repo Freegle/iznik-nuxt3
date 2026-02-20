@@ -2,7 +2,8 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class SocialActionsAPI extends BaseAPI {
   fetch(params) {
-    return this.$getv2('/socialactions', params)
+    // V1: Go handler returns flat array but store expects {socialactions, popularposts}
+    return this.$get('/socialactions', params)
   }
 
   share(id, uid) {

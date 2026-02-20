@@ -1,14 +1,13 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class ModConfigsAPI extends BaseAPI {
-  fetchStdMsg(id) {
-    return this.$get('/stdmsg', {
-      id,
-    })
+  async fetchStdMsg(id) {
+    const ret = await this.$getv2('/stdmsg', { id })
+    return ret.stdmsg
   }
 
   async fetchConfig(params) {
-    const ret = await this.$get('/modconfig', params)
+    const ret = await this.$getv2('/modconfig', params)
     return ret.config
   }
 

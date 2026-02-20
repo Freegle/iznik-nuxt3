@@ -23,6 +23,6 @@ export default class NoticeboardAPI extends BaseAPI {
   }
 
   del(id) {
-    return this.$del('/noticeboard', { id })
+    return this.$requestv2('DELETE', '/noticeboard/' + id, {})
   }
 }
