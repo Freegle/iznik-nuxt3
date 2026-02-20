@@ -22,7 +22,7 @@
             </b-col>
             <b-col cols="8" md="6" class="text-success font-weight-bold">
               <ProfileImage
-                :image="user.profile.turl"
+                :image="user.profile?.turl"
                 :name="user.displayname"
                 is-thumbnail
                 size="sm"
