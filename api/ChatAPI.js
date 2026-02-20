@@ -49,7 +49,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   markRead(chatid, lastmsg, allowback) {
-    return this.$post('/chatrooms', {
+    return this.$postv2('/chatrooms', {
       id: chatid,
       lastmsgseen: lastmsg,
       allowback,
@@ -73,22 +73,22 @@ export default class ChatAPI extends BaseAPI {
   }
 
   nudge(chatid) {
-    return this.$post('/chatrooms', {
+    return this.$postv2('/chatrooms', {
       id: chatid,
       action: 'Nudge',
     })
   }
 
   hideChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Closed' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Closed' })
   }
 
   blockChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Blocked' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Blocked' })
   }
 
   unHideChat(chatid) {
-    return this.$post('/chatrooms', { id: chatid, status: 'Online' })
+    return this.$postv2('/chatrooms', { id: chatid, status: 'Online' })
   }
 
   rsvp(id, chatid, value) {
@@ -100,7 +100,7 @@ export default class ChatAPI extends BaseAPI {
   }
 
   typing(chatid) {
-    return this.$post('/chatrooms', { id: chatid, action: 'Typing' })
+    return this.$postv2('/chatrooms', { id: chatid, action: 'Typing' })
   }
 
   referToSupport(chatid) {
