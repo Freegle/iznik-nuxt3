@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class CommentAPI extends BaseAPI {
   fetch(params) {
-    return this.$get('/comment', params)
+    return this.$getv2('/comment', params)
   }
 
   async add(data) {
