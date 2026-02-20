@@ -5,7 +5,7 @@ import Stories from '~/modtools/pages/members/stories.vue'
 // Mock story store
 const mockStoryStore = {
   list: {},
-  fetchMT: vi.fn().mockResolvedValue({}),
+  fetchReviewing: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/stories', () => ({
@@ -111,17 +111,14 @@ describe('Stories Page', () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledWith({
-        reviewed: 0,
-        dontzapfalsey: true,
-      })
+      expect(mockStoryStore.fetchReviewing).toHaveBeenCalled()
     })
 
     it('fetches stories only once on mount', async () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledTimes(1)
+      expect(mockStoryStore.fetchReviewing).toHaveBeenCalledTimes(1)
     })
   })
 })
