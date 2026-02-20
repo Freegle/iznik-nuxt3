@@ -113,7 +113,6 @@ describe('Stories Page', () => {
 
       expect(mockStoryStore.fetchMT).toHaveBeenCalledWith({
         reviewed: 0,
-        dontzapfalsey: true,
       })
     })
 
