@@ -2,8 +2,8 @@ import BaseAPI from './BaseAPI'
 
 export default class SessionAPI extends BaseAPI {
   fetch(params) {
-    // Add the build date to the call.  This is used by the server to spot out of date apps, but we need
-    // to make it clear that we're not an app at all.
+    // V1 session fetch returns different format than V2 user endpoint.
+    // fetchv2() below is for the V2 user data. Keep this on V1.
     return this.$get('/session', params)
   }
 
@@ -12,7 +12,7 @@ export default class SessionAPI extends BaseAPI {
   }
 
   save(data, log) {
-    return this.$patch('/session', data, log)
+    return this.$patchv2('/session', data, log)
   }
 
   login(
@@ -34,7 +34,7 @@ export default class SessionAPI extends BaseAPI {
     },
     log
   ) {
-    return this.$post(
+    return this.$postv2(
       '/session',
       {
         email,
@@ -57,7 +57,7 @@ export default class SessionAPI extends BaseAPI {
   }
 
   logout() {
-    return this.$del('/session')
+    return this.$delv2('/session')
   }
 
   lostPassword(email, log) {
@@ -69,22 +69,22 @@ export default class SessionAPI extends BaseAPI {
   }
 
   forget() {
-    return this.$post('/session', { action: 'Forget' })
+    return this.$postv2('/session', { action: 'Forget' })
   }
 
   restore() {
-    return this.$patch('/session', { deleted: null })
+    return this.$patchv2('/session', { deleted: null })
   }
 
   related(userlist) {
-    return this.$post('/session', {
+    return this.$postv2('/session', {
       action: 'Related',
       userlist,
     })
   }
 
   yahooCodeLogin(yahoocodelogin) {
-    // ModTools
+    // ModTools - no V2 handler yet
     return this.$post('/session', {
       yahoocodelogin,
     })

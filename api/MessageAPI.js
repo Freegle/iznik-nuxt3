@@ -6,6 +6,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMT(params, logError = true) {
+    // MT fetch uses complex query params not supported by V2 yet
     return this.$get('/message', params, logError)
   }
 
@@ -42,16 +43,16 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
-    // console.error('MessageAPI fetchMessages', params)
+    // V1 /messages list endpoint - complex query, keep on V1
     return this.$get('/messages', params)
   }
 
   update(event) {
-    return this.$post('/message', event)
+    return this.$postv2('/message', event)
   }
 
   save(event) {
-    return this.$patch('/message', event)
+    return this.$patchv2('/message', event)
   }
 
   joinAndPost(id, email, options = {}, logError = true) {
@@ -72,15 +73,15 @@ export default class MessageAPI extends BaseAPI {
     const logErrorFn =
       options.logError !== undefined ? options.logError : logError
 
-    return this.$post('/message', params, logErrorFn)
+    return this.$postv2('/message', params, logErrorFn)
   }
 
   del(id) {
-    return this.$del('/message', { id })
+    return this.$delv2('/message', { id })
   }
 
   put(data) {
-    return this.$put('/message', data)
+    return this.$putv2('/message', data)
   }
 
   intend(id, outcome) {
@@ -130,7 +131,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   approve(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Approve',
       id,
       groupid,
@@ -141,7 +142,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   reply(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Reply',
       id,
       groupid,
@@ -152,7 +153,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   reject(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Reject',
       id,
       groupid,
@@ -163,7 +164,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   delete(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Delete',
       id,
       groupid,
@@ -174,7 +175,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   spam(id, groupid) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Spam',
       id,
       groupid,
@@ -182,35 +183,35 @@ export default class MessageAPI extends BaseAPI {
   }
 
   hold(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Hold',
       id,
     })
   }
 
   release(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Release',
       id,
     })
   }
 
   approveEdits(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'ApproveEdits',
       id,
     })
   }
 
   revertEdits(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'RevertEdits',
       id,
     })
   }
 
   partnerConsent(id, partner) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'PartnerConsent',
       id,
       partner,

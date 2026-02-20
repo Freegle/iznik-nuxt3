@@ -50,8 +50,7 @@ export default class NewsAPI extends BaseAPI {
   }
 
   async convertToStory(id) {
-    // No V2 handler for this action yet - stays on V1
-    await this.$post('/newsfeed', { id, action: 'ConvertToStory' })
+    await this.$postv2('/newsfeed', { id, action: 'ConvertToStory' })
   }
 
   async seen(id) {
