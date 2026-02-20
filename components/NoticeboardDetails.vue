@@ -96,8 +96,8 @@
           </div>
           <div>
             Added
-            <span v-if="noticeboard.addedby">
-              by {{ noticeboard.addedby.displayname }}
+            <span v-if="noticeboard.addedbyuser">
+              by {{ noticeboard.addedbyuser.displayname }}
             </span>
           </div>
         </div>
