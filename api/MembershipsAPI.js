@@ -2,15 +2,15 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class MembershipsAPI extends BaseAPI {
   update(data) {
-    return this.$patch('/memberships', data)
+    return this.$patchv2('/memberships', data)
   }
 
   joinGroup(data) {
-    return this.$put('/memberships', data)
+    return this.$putv2('/memberships', data)
   }
 
   leaveGroup(data) {
-    return this.$del('/memberships', data)
+    return this.$delv2('/memberships', data)
   }
 
   fetch(params, logError = true) {
@@ -23,7 +23,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   save(event) {
-    return this.$patch('/memberships', event)
+    return this.$patchv2('/memberships', event)
   }
 
   del(id) {
@@ -31,7 +31,7 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   put(data) {
-    return this.$put('/memberships', data)
+    return this.$putv2('/memberships', data)
   }
 
   reply(userid, groupid, subject = null, stdmsgid = null, body = null) {
