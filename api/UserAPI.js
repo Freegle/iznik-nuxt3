@@ -19,8 +19,18 @@ export default class UserAPI extends BaseAPI {
   }
 
   async fetchMT(params) {
-    // MT fetch uses complex query params not supported by V2 yet
-    return await this.$get('/user', params)
+    if (params.search) {
+      // Search mode - use dedicated search endpoint
+      const result = await this.$getv2('/user/search', { q: params.search })
+      return { users: result.users || [] }
+    }
+
+    // Single user fetch - use fetchmt endpoint
+    const user = await this.$getv2('/user/fetchmt', {
+      id: params.id,
+      modtools: params.info ? 'true' : undefined,
+    })
+    return { user }
   }
 
   async fetchByEmail(email, logError = true) {

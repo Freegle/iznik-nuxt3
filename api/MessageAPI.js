@@ -5,9 +5,13 @@ export default class MessageAPI extends BaseAPI {
     return this.$getv2('/message/' + id, {}, logError)
   }
 
-  fetchMT(params, logError = true) {
-    // MT fetch uses complex query params not supported by V2 yet
-    return this.$get('/message', params, logError)
+  async fetchMT(params, logError = true) {
+    const message = await this.$getv2(
+      '/message/' + params.id,
+      { messagehistory: params.messagehistory ? 'true' : undefined },
+      logError
+    )
+    return { message }
   }
 
   fetchByUser(id, active, logError = true) {
@@ -43,8 +47,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
-    // V1 /messages list endpoint - complex query, keep on V1
-    return this.$get('/messages', params)
+    return this.$getv2('/messages', params)
   }
 
   update(event) {

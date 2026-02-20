@@ -42,7 +42,7 @@ export default class LocationAPI extends BaseAPI {
   }
 
   convertKML(kml) {
-    return this.$post('/locations/kml', {
+    return this.$postv2('/locations/kml', {
       action: 'ConvertKML',
       kml,
     })
