@@ -66,28 +66,9 @@ onMounted(() => {
 async function loadMore($state) {
   busy.value = true
 
-  if (show.value < volunteerings.value.length) {
-    // This means that we will gradually add the volunteerings that we have fetched from the server into the DOM.
-    // Doing that means that we will complete our initial render more rapidly and thus appear faster.
-    show.value++
-    $state.loaded()
-  } else {
-    const currentCount = volunteerings.value.length
-    busy.value = false
-
-    await volunteeringStore.fetchMT({
-      limit: limit.value,
-      pending: true,
-    })
-
-    if (currentCount === volunteerings.value.length) {
-      $state.complete()
-    } else {
-      $state.loaded()
-      show.value++
-    }
-    busy.value = false
-  }
+  await volunteeringStore.fetchPending()
+  $state.complete()
+  busy.value = false
 }
 
 // Expose for template and tests
