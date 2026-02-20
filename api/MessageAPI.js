@@ -245,8 +245,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   async markSeen(ids) {
-    return await this.$post('/messages', {
-      action: 'MarkSeen',
+    return await this.$postv2('/messages/markseen', {
       ids,
     })
   }
