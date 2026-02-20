@@ -30,7 +30,7 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async patch(params) {
-    await this.$patch('/group', params)
+    await this.$patchv2('/group', params)
   }
 
   async add(params) {
