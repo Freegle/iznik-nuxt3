@@ -4,7 +4,6 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { addStrings, earliestDate } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
-import { useMiscStore } from '~/stores/misc'
 
 export const useVolunteeringStore = defineStore({
   id: 'volunteering',
@@ -23,80 +22,22 @@ export const useVolunteeringStore = defineStore({
       this.forUser = []
       this.forGroup = []
     },
-    async fetchMT(params) {
-      if (!params) {
-        params = {
-          systemwide: true,
-        }
-      } else if (!params.groupid) {
-        // Not a specific group - get all of them including systemwide ones.
-        params.systemwide = true
-      }
+    async fetchPending() {
+      // V2 pattern: get IDs of pending volunteering, then fetch each individually.
+      const ids =
+        (await api(this.config).volunteering.list({ pending: true })) || []
 
-      const { volunteering, volunteerings } = await api(
-        this.config
-      ).volunteering.fetchMT(params)
-
-      if (params && params.id) {
-        this.list[params.id] = volunteering
-      } else {
-        this.list = {}
-        for (const volunteering of volunteerings) {
-          if (this.list[volunteering.id]) continue
-          const item = addStrings(volunteering, false)
-          // Convert to v2 format
-          item.image = item.photo
-          item.userid = item.user?.id
-          item.groupsmt = item.groups
-          const groups = []
-          for (const group of item.groups) {
-            groups.push(group.id)
-          }
-          item.groups = groups
-          if (item.dates) {
-            // API returns dates in ISO8601 but our code wants them split into date and time
-            item.earliestDate = earliestDate(item.dates)
-            item.earliestDateOfAll = earliestDate(item.dates, true)
-            item.dates.forEach((date, index) => {
-              item.dates[index].starttime = dayjs(date.start).format('HH:mm')
-              item.dates[index].start = dayjs(date.start).format('YYYY-MM-DD')
-              item.dates[index].endtime = dayjs(date.end).format('HH:mm')
-              item.dates[index].end = dayjs(date.end).format('YYYY-MM-DD')
-            })
-          }
-          this.list[item.id] = item
-        }
-        // this.context = context
-      }
+      await Promise.all(ids.map((id) => this.fetch(id, true)))
     },
     async fetch(id, force) {
       try {
-        const miscStore = useMiscStore()
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]
             await nextTick()
           } else {
-            if (miscStore.modtools) {
-              this.fetching[id] = api(this.config).volunteering.fetchMT({
-                id,
-                pending: true,
-              })
-            } else {
-              this.fetching[id] = api(this.config).volunteering.fetch(id, false)
-            }
+            this.fetching[id] = api(this.config).volunteering.fetch(id, false)
             let item = await this.fetching[id]
-            if (item.volunteering) {
-              item = item.volunteering
-              item.image = item.photo
-              item.userid = item.user.id
-              item.groupsmt = item.groups
-              const groups = []
-              for (const group of item.groups) {
-                groups.push(group.id)
-              }
-              item.groups = groups
-            }
             item = addStrings(item, false)
 
             if (item.dates) {
