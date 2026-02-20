@@ -84,7 +84,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   intend(id, outcome) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'OutcomeIntended',
       id,
       outcome,
@@ -92,7 +92,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   view(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'View',
       id,
     })
@@ -218,7 +218,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   addBy(id, userid, count) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'AddBy',
       id,
       userid,
@@ -227,7 +227,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   removeBy(id, userid) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'RemoveBy',
       id,
       userid,
@@ -245,8 +245,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   async markSeen(ids) {
-    return await this.$post('/messages', {
-      action: 'MarkSeen',
+    return await this.$postv2('/messages/markseen', {
       ids,
     })
   }
