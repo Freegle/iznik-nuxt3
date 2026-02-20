@@ -10,14 +10,14 @@ export default class AddressAPI extends BaseAPI {
   }
 
   add(data) {
-    return this.$put('/address', data)
+    return this.$postv2('/address', data)
   }
 
   update(data) {
-    return this.$patch('/address', data)
+    return this.$patchv2('/address', data)
   }
 
   del(id) {
-    return this.$del('/address', { id })
+    return this.$delv2('/address/' + id)
   }
 }
