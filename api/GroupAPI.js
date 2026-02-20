@@ -6,8 +6,7 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async listMT(params) {
-    const { groups } = await this.$get('/groups', params)
-    return groups
+    return await this.$getv2('/group', params)
   }
 
   async fetchGroupMT(id, polygon, showmods, sponsors, tnkey, log) {
@@ -34,7 +33,7 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async add(params) {
-    const { id } = await this.$post('/group', params)
+    const { id } = await this.$postv2('/group', params)
     return id
   }
 

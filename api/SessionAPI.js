@@ -2,9 +2,7 @@ import BaseAPI from './BaseAPI'
 
 export default class SessionAPI extends BaseAPI {
   fetch(params) {
-    // V1 session fetch returns different format than V2 user endpoint.
-    // fetchv2() below is for the V2 user data. Keep this on V1.
-    return this.$get('/session', params)
+    return this.$getv2('/session', params)
   }
 
   fetchv2(params, log = true) {
