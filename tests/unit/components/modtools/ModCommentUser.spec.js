@@ -23,7 +23,7 @@ describe('ModCommentUser', () => {
         ],
         lastaccess: '2024-01-15',
         profile: {
-          turl: 'https://example.com/photo.jpg',
+          paththumb: 'https://example.com/photo.jpg',
         },
       },
     },
