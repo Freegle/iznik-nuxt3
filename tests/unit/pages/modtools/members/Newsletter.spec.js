@@ -5,7 +5,7 @@ import Newsletter from '~/modtools/pages/members/newsletter.vue'
 // Mock story store
 const mockStoryStore = {
   list: {},
-  fetchMT: vi.fn().mockResolvedValue({}),
+  fetchNewsletterReviewing: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/stories', () => ({
@@ -123,17 +123,14 @@ describe('Newsletter Page', () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledWith({
-        newsletter: true,
-        dontzapfalsey: true,
-      })
+      expect(mockStoryStore.fetchNewsletterReviewing).toHaveBeenCalled()
     })
 
     it('fetches stories only once on mount', async () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledTimes(1)
+      expect(mockStoryStore.fetchNewsletterReviewing).toHaveBeenCalledTimes(1)
     })
   })
 })
