@@ -2,20 +2,20 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class MergeAPI extends BaseAPI {
   async fetch(params) {
-    const ret = await this.$get('/merge', params)
+    const ret = await this.$getv2('/merge', params)
     return ret.merge
   }
 
   ask(params) {
-    return this.$put('/merge', params)
+    return this.$putv2('/merge', params)
   }
 
   ignore(params) {
-    return this.$del('/merge', params)
+    return this.$delv2('/merge', params)
   }
 
   accept(params) {
-    return this.$post('/merge', {
+    return this.$postv2('/merge', {
       id: params.id,
       uid: params.uid,
       user1: params.user1,
@@ -25,7 +25,7 @@ export default class MergeAPI extends BaseAPI {
   }
 
   reject(params) {
-    return this.$post('/merge', {
+    return this.$postv2('/merge', {
       id: params.id,
       uid: params.uid,
       user1: params.user1,

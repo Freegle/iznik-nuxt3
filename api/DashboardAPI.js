@@ -11,8 +11,7 @@ export default class DashboardAPI extends BaseAPI {
   }
 
   async fetchHeatmap(params) {
-    // Heatmap not yet implemented in Go v2, keep on v1
-    const { heatmap } = await this.$get('/dashboard', {
+    const { heatmap } = await this.$getv2('/dashboard', {
       heatmap: true,
     })
     return heatmap

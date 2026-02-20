@@ -420,6 +420,19 @@ export default class BaseAPI {
         headers,
       })
 
+      if (data && data.jwt && data.persistent) {
+        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
+        // in-flight API responses from restoring auth after an intentional logout.
+        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
+          console.log('JWT renewal: updating auth tokens from API response')
+          authStore.setAuth(data.jwt, data.persistent)
+        } else if (!authStore.auth.jwt) {
+          console.log(
+            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
+          )
+        }
+      }
+
       if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
         // not, depending on whether the page requires it.
@@ -527,5 +540,41 @@ export default class BaseAPI {
 
   $getv2(path, params = {}, logError = true) {
     return this.$requestv2('GET', path, { params }, logError)
+  }
+
+  $patchv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PATCH',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $putv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PUT',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $delv2(path, data, logError = true) {
+    return this.$requestv2(
+      'DELETE',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
   }
 }
