@@ -1,5 +1,5 @@
 <template>
-  <b-card bg-variant="white" no-body>
+  <b-card v-if="comment.user" bg-variant="white" no-body>
     <b-card-header class="d-flex justify-content-between flex-wrap">
       <div>
         <!-- eslint-disable-next-line -->
@@ -7,7 +7,7 @@
       </div>
       <div>
         <ProfileImage
-          :image="comment.user.profile.turl"
+          :image="comment.user.profile?.paththumb"
           :name="comment.user.displayname"
           class="ml-1 mb-1 inline"
           is-thumbnail
@@ -43,7 +43,7 @@ const props = defineProps({
 const email = computed(() => {
   let ret = null
 
-  if (!props.comment.user.email && props.comment.user.emails) {
+  if (!props.comment.user?.email && props.comment.user?.emails) {
     props.comment.user.emails.forEach((e) => {
       if (!e.ourdomain && (!ret || e.preferred)) {
         ret = e.email
