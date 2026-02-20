@@ -274,6 +274,42 @@ export default class BaseAPI {
     )
   }
 
+  $patchv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PATCH',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $putv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PUT',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $delv2(path, data, logError = true) {
+    return this.$requestv2(
+      'DELETE',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
   $postForm(path, data, logError = true) {
     // Don't set Content-Type - see https://stackoverflow.com/questions/39280438/fetch-missing-boundary-in-multipart-form-data-post
     return this.$request(
