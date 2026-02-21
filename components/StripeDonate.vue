@@ -57,6 +57,7 @@
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
 import * as Sentry from '@sentry/browser'
+import { Capacitor } from '@capacitor/core'
 import {
   Stripe,
   PaymentSheetEventsEnum,
@@ -71,6 +72,16 @@ const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const donationStore = useDonationStore()
 const mobileStore = useMobileStore()
+
+// Detect iOS robustly - mobileStore.isiOS can be overwritten asynchronously by
+// Device.getInfo() returning unexpected platform values on iPad.
+// Use Capacitor.getPlatform() as primary, user agent as fallback for iPad.
+const capacitorPlatform = Capacitor.getPlatform()
+const userAgentIsiOS =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document))
+const isiOS = capacitorPlatform === 'ios' || userAgentIsiOS
 
 const props = defineProps({
   price: {
@@ -163,7 +174,11 @@ onMounted(async () => {
       message: 'StripeDonate onMounted - app path',
       data: {
         isApp: isApp.value,
-        isiOS: mobileStore.isiOS,
+        isiOS,
+        capacitorPlatform,
+        userAgentIsiOS,
+        storeIsiOS: mobileStore.isiOS,
+        userAgent: navigator?.userAgent?.substring(0, 100),
         price: props.price,
         monthly: props.monthly,
       },
@@ -241,7 +256,7 @@ onMounted(async () => {
             message: 'PaymentSheet completed',
           })
         })
-        if (!mobileStore.isiOS) {
+        if (!isiOS) {
           Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
             console.log('Stripe GooglePayEventsEnum.Failed', e)
             Sentry.captureMessage('Stripe GooglePay failed', {
@@ -363,7 +378,7 @@ onMounted(async () => {
         }
 
         // Check payment method availability
-        if (!mobileStore.isiOS) {
+        if (!isiOS) {
           try {
             await Stripe.isGooglePayAvailable()
             isGooglePayAvailable.value = true
@@ -416,7 +431,7 @@ onMounted(async () => {
         tags: { stripe_step: 'app_init' },
         extra: {
           price: props.price,
-          isiOS: mobileStore.isiOS,
+          isiOS: isiOS,
           stripeInitialized,
         },
       })
