@@ -232,6 +232,12 @@ onMounted(async () => {
       }
     }
 
+    // In app mode, the Stripe PaymentSheet (PayPal/card) is always available
+    // once Stripe.initialize succeeds. Set this BEFORE any API calls that might
+    // fail, so we never incorrectly emit 'noPaymentMethods' and fall back to
+    // the web PayPal SDK (which doesn't work in Capacitor WebView).
+    isPayPalAvailable.value = true
+
     try {
       console.log('Stripe props.price', props.price)
       if (mobileStore.isApp) {
@@ -430,7 +436,6 @@ onMounted(async () => {
         }
         console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
         console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
-        isPayPalAvailable.value = true
 
         Sentry.captureMessage('App payment init complete', {
           level: 'info',
@@ -597,6 +602,43 @@ onMounted(async () => {
   loading.value = false
 })
 
+// Create payment intent on-demand if it wasn't ready at mount time (e.g., API error).
+async function ensureIntent() {
+  if (intent.value?.client_secret) {
+    return true
+  }
+
+  Sentry.captureMessage('Lazy intent creation - retrying', {
+    level: 'info',
+    tags: { stripe_step: 'lazy_intent' },
+    extra: { price: props.price, monthly: props.monthly },
+  })
+  await Sentry.flush(2000)
+
+  try {
+    if (props.monthly) {
+      intent.value = await donationStore.stripeSubscription(props.price)
+    } else {
+      intent.value = await donationStore.stripeIntent({
+        amount: props.price,
+      })
+    }
+
+    if (intent.value?.client_secret) {
+      return true
+    }
+  } catch (e) {
+    console.error('Lazy intent creation failed', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'lazy_intent_error' },
+    })
+    await Sentry.flush(2000)
+  }
+
+  error.value = 'Payment not ready. Please try again in a moment.'
+  return false
+}
+
 async function useGooglePay() {
   Sentry.addBreadcrumb({
     category: 'stripe',
@@ -605,13 +647,7 @@ async function useGooglePay() {
   })
 
   try {
-    if (!intent.value?.client_secret) {
-      console.error('Stripe: No payment intent available for Google Pay')
-      Sentry.captureMessage('Google Pay attempted without payment intent', {
-        tags: { stripe_step: 'googlepay_click' },
-        extra: { intentValue: JSON.stringify(intent.value) },
-      })
-      error.value = 'Payment not ready. Please try again.'
+    if (!(await ensureIntent())) {
       return
     }
 
@@ -664,14 +700,7 @@ async function usePayPalCard() {
   await Sentry.flush(2000)
 
   try {
-    if (!intent.value?.client_secret) {
-      console.error('Stripe: No payment intent available for PayPal/card')
-      Sentry.captureMessage('PayPal/card attempted without payment intent', {
-        tags: { stripe_step: 'paypal_no_intent' },
-        extra: { intentValue: JSON.stringify(intent.value) },
-      })
-      await Sentry.flush(2000)
-      error.value = 'Payment not ready. Please try again.'
+    if (!(await ensureIntent())) {
       return
     }
 
@@ -737,14 +766,7 @@ async function useApplePay() {
   await Sentry.flush(2000)
 
   try {
-    if (!intent.value?.client_secret) {
-      console.error('Stripe: No payment intent available for Apple Pay')
-      Sentry.captureMessage('Apple Pay attempted without payment intent', {
-        tags: { stripe_step: 'applepay_no_intent' },
-        extra: { intentValue: JSON.stringify(intent.value) },
-      })
-      await Sentry.flush(2000)
-      error.value = 'Payment not ready. Please try again.'
+    if (!(await ensureIntent())) {
       return
     }
 
