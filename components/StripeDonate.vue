@@ -241,126 +241,17 @@ onMounted(async () => {
     try {
       console.log('Stripe props.price', props.price)
       if (mobileStore.isApp) {
-        Sentry.captureMessage('About to add Stripe event listeners', {
+        // Skip native event listeners - they cause a native crash on iPad
+        // (the Stripe plugin's addListener triggers a fatal error in the
+        // WKWebView process). These listeners are only for debug logging;
+        // the actual payment flow uses await on presentPaymentSheet/
+        // presentApplePay/presentGooglePay which return results directly.
+        Sentry.captureMessage('Skipping Stripe event listeners (iPad crash fix)', {
           level: 'info',
-          tags: { stripe_step: 'pre_listeners' },
+          tags: { stripe_step: 'skip_listeners' },
           extra: { isiOS },
         })
         await Sentry.flush(2000)
-
-        Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
-          console.log('Stripe PaymentSheetEventsEnum.Failed', e)
-          Sentry.captureMessage('Stripe PaymentSheet failed', {
-            extra: { error: e },
-            tags: { stripe_step: 'payment_sheet_event' },
-          })
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
-          console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
-          Sentry.captureMessage('Stripe PaymentSheet failed to load', {
-            extra: { error: e },
-            tags: { stripe_step: 'payment_sheet_event' },
-          })
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Loaded')
-          Sentry.addBreadcrumb({
-            category: 'stripe',
-            message: 'PaymentSheet loaded',
-          })
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Canceled')
-          Sentry.addBreadcrumb({
-            category: 'stripe',
-            message: 'PaymentSheet canceled',
-          })
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Completed')
-          Sentry.addBreadcrumb({
-            category: 'stripe',
-            message: 'PaymentSheet completed',
-          })
-        })
-        if (!isiOS) {
-          Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
-            console.log('Stripe GooglePayEventsEnum.Failed', e)
-            Sentry.captureMessage('Stripe GooglePay failed', {
-              extra: { error: e },
-              tags: { stripe_step: 'googlepay_event' },
-            })
-          })
-          Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
-            console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
-            Sentry.captureMessage('Stripe GooglePay failed to load', {
-              extra: { error: e },
-              tags: { stripe_step: 'googlepay_event' },
-            })
-          })
-          Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
-            console.log('Stripe GooglePayEventsEnum.Loaded')
-          })
-          Stripe.addListener(GooglePayEventsEnum.Canceled, () => {
-            console.log('Stripe GooglePayEventsEnum.Canceled')
-          })
-          Stripe.addListener(GooglePayEventsEnum.Completed, () => {
-            console.log('Stripe GooglePayEventsEnum.Completed')
-          })
-        } else {
-          // iOS
-          Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
-            console.log('Stripe ApplePayEventsEnum.Failed', e)
-            Sentry.captureMessage('Stripe ApplePay failed', {
-              extra: { error: e },
-              tags: { stripe_step: 'applepay_event' },
-            })
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
-            console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
-            Sentry.captureMessage('Stripe ApplePay failed to load', {
-              extra: { error: e },
-              tags: { stripe_step: 'applepay_event' },
-            })
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayLoaded')
-            Sentry.addBreadcrumb({
-              category: 'stripe',
-              message: 'ApplePay loaded',
-            })
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayCompleted')
-            Sentry.addBreadcrumb({
-              category: 'stripe',
-              message: 'ApplePay completed',
-            })
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayCanceled')
-            Sentry.addBreadcrumb({
-              category: 'stripe',
-              message: 'ApplePay canceled',
-            })
-          })
-          Stripe.addListener(
-            ApplePayEventsEnum.applePayDidSelectShippingContact,
-            () => {
-              console.log(
-                'Stripe ApplePayEventsEnum.applePayDidSelectShippingContact'
-              )
-            }
-          )
-          Stripe.addListener(
-            ApplePayEventsEnum.applePayDidCreatePaymentMethod,
-            () => {
-              console.log(
-                'Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod'
-              )
-            }
-          )
-        }
 
         // Create payment intent - flush to Sentry before API call
         Sentry.captureMessage('About to create payment intent', {
