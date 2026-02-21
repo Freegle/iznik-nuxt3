@@ -169,32 +169,10 @@ const error = ref(null)
 
 onMounted(async () => {
   if (isApp.value) {
-    // Use captureMessage + flush (not just breadcrumbs) so events reach Sentry
-    // BEFORE any native Capacitor call that might crash the app process.
-    Sentry.captureMessage('StripeDonate onMounted - app path', {
-      level: 'info',
-      tags: { stripe_step: 'mount' },
-      extra: {
-        isApp: isApp.value,
-        isiOS,
-        capacitorPlatform,
-        userAgentIsiOS,
-        storeIsiOS: mobileStore.isiOS,
-        userAgent: navigator?.userAgent?.substring(0, 100),
-        price: props.price,
-        monthly: props.monthly,
-      },
-    })
-    await Sentry.flush(2000)
-
     const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
 
     if (!stripeKey) {
       console.error('Stripe publishableKey not available at mount')
-      Sentry.captureMessage('Stripe publishableKey missing at mount', {
-        extra: { runtimeConfigPublic: runtimeConfig.public },
-      })
-      await Sentry.flush(2000)
       emit('error')
       loading.value = false
       return
@@ -202,30 +180,15 @@ onMounted(async () => {
 
     if (!stripeInitialized) {
       try {
-        Sentry.captureMessage('About to call Stripe.initialize', {
-          level: 'info',
-          tags: { stripe_step: 'pre_initialize' },
-          extra: { stripeKey: stripeKey?.substring(0, 20) + '...' },
-        })
-        await Sentry.flush(2000)
-
-        console.log('Stripe.initialize', stripeKey)
         Stripe.initialize({
           publishableKey: stripeKey,
         })
         stripeInitialized = true
-
-        Sentry.captureMessage('Stripe.initialize succeeded', {
-          level: 'info',
-          tags: { stripe_step: 'initialize_ok' },
-        })
-        await Sentry.flush(2000)
       } catch (e) {
         console.error('Stripe.initialize failed', e)
         Sentry.captureException(e, {
           tags: { stripe_step: 'initialize' },
         })
-        await Sentry.flush(2000)
         emit('error')
         loading.value = false
         return
@@ -239,142 +202,52 @@ onMounted(async () => {
     isPayPalAvailable.value = true
 
     try {
-      console.log('Stripe props.price', props.price)
-      if (mobileStore.isApp) {
-        // Skip native event listeners - they cause a native crash on iPad
-        // (the Stripe plugin's addListener triggers a fatal error in the
-        // WKWebView process). These listeners are only for debug logging;
-        // the actual payment flow uses await on presentPaymentSheet/
-        // presentApplePay/presentGooglePay which return results directly.
-        Sentry.captureMessage('Skipping Stripe event listeners (iPad crash fix)', {
-          level: 'info',
-          tags: { stripe_step: 'skip_listeners' },
-          extra: { isiOS },
-        })
-        await Sentry.flush(2000)
+      // Skip native event listeners - they cause a native crash on iPad
+      // (the Stripe plugin's addListener triggers a fatal error in the
+      // WKWebView process). The actual payment flow uses await on
+      // presentPaymentSheet/presentApplePay/presentGooglePay directly.
 
-        // Create payment intent - flush to Sentry before API call
-        Sentry.captureMessage('About to create payment intent', {
-          level: 'info',
-          tags: { stripe_step: 'pre_intent' },
-          extra: {
-            price: props.price,
-            monthly: props.monthly,
-            hasConfig: !!donationStore.config,
-            apiV1: donationStore.config?.public?.APIv1?.substring(0, 40),
-          },
+      try {
+        if (props.monthly) {
+          intent.value = await donationStore.stripeSubscription(props.price)
+        } else {
+          intent.value = await donationStore.stripeIntent({
+            amount: props.price,
+          })
+        }
+      } catch (intentError) {
+        console.error('Payment intent creation failed', intentError)
+        Sentry.captureException(intentError, {
+          tags: { stripe_step: 'intent_error' },
         })
-        await Sentry.flush(2000)
+        // Don't re-throw - intent will be created lazily when user clicks a button
+      }
 
+      if (!intent.value?.client_secret) {
+        console.error('Payment intent returned no client_secret', intent.value)
+      }
+
+      // Check payment method availability
+      if (!isiOS) {
         try {
-          if (props.monthly) {
-            intent.value = await donationStore.stripeSubscription(props.price)
-            console.log('Stripe subscription Intent', intent.value)
-          } else {
-            intent.value = await donationStore.stripeIntent({
-              amount: props.price,
-            })
-            console.log('Stripe single payment Intent', intent.value)
-          }
-        } catch (intentError) {
-          // Catch intent creation errors separately for precise diagnostics
-          Sentry.captureMessage('Payment intent creation FAILED', {
-            level: 'error',
-            tags: { stripe_step: 'intent_error' },
-            extra: {
-              errorMessage: intentError?.message,
-              errorName: intentError?.name,
-              errorStack: intentError?.stack?.substring(0, 500),
-              price: props.price,
-              monthly: props.monthly,
-              hasConfig: !!donationStore.config,
-            },
-          })
-          await Sentry.flush(2000)
-          // Don't re-throw - continue to show buttons without intent
-          // Intent will be created lazily when user clicks a button
+          await Stripe.isGooglePayAvailable()
+          isGooglePayAvailable.value = true
+        } catch (e) {
+          console.log('Google Pay not available', e)
         }
-
-        if (!intent.value?.client_secret) {
-          console.error(
-            'Stripe: Payment intent creation returned no client_secret',
-            intent.value
-          )
-          Sentry.captureMessage(
-            'Payment intent missing client_secret in app',
-            {
-              extra: {
-                intentValue: JSON.stringify(intent.value),
-                price: props.price,
-                monthly: props.monthly,
-              },
-              tags: { stripe_step: 'create_intent' },
-            }
-          )
-          await Sentry.flush(2000)
-        } else {
-          Sentry.captureMessage('Payment intent created OK', {
-            level: 'info',
-            tags: { stripe_step: 'intent_ok' },
-            extra: { hasClientSecret: true, monthly: props.monthly },
-          })
-          await Sentry.flush(2000)
+      } else {
+        try {
+          await Stripe.isApplePayAvailable()
+          isApplePayAvailable.value = true
+        } catch (e) {
+          console.log('Apple Pay not available', e)
         }
-
-        // Check payment method availability - flush before each native call
-        if (!isiOS) {
-          Sentry.captureMessage('About to call isGooglePayAvailable', {
-            level: 'info',
-            tags: { stripe_step: 'pre_googlepay_check' },
-          })
-          await Sentry.flush(2000)
-
-          try {
-            await Stripe.isGooglePayAvailable()
-            isGooglePayAvailable.value = true
-          } catch (e) {
-            console.log('Google Pay not available', e)
-          }
-        } else {
-          Sentry.captureMessage('About to call isApplePayAvailable', {
-            level: 'info',
-            tags: { stripe_step: 'pre_applepay_check' },
-          })
-          await Sentry.flush(2000)
-
-          try {
-            await Stripe.isApplePayAvailable()
-            isApplePayAvailable.value = true
-          } catch (e) {
-            console.log('Apple Pay not available', e)
-          }
-        }
-        console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
-        console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
-
-        Sentry.captureMessage('App payment init complete', {
-          level: 'info',
-          tags: { stripe_step: 'init_complete' },
-          extra: {
-            googlePay: isGooglePayAvailable.value,
-            applePay: isApplePayAvailable.value,
-            payPal: isPayPalAvailable.value,
-            hasIntent: !!intent.value?.client_secret,
-          },
-        })
-        await Sentry.flush(2000)
       }
     } catch (e) {
       console.error('Stripe Exception', e.message, e)
       Sentry.captureException(e, {
         tags: { stripe_step: 'app_init' },
-        extra: {
-          price: props.price,
-          isiOS,
-          stripeInitialized,
-        },
       })
-      await Sentry.flush(2000)
     }
     if (
       isGooglePayAvailable.value ||
@@ -523,13 +396,6 @@ async function ensureIntent() {
     return true
   }
 
-  Sentry.captureMessage('Lazy intent creation - retrying', {
-    level: 'info',
-    tags: { stripe_step: 'lazy_intent' },
-    extra: { price: props.price, monthly: props.monthly },
-  })
-  await Sentry.flush(2000)
-
   try {
     if (props.monthly) {
       intent.value = await donationStore.stripeSubscription(props.price)
@@ -547,7 +413,6 @@ async function ensureIntent() {
     Sentry.captureException(e, {
       tags: { stripe_step: 'lazy_intent_error' },
     })
-    await Sentry.flush(2000)
   }
 
   error.value = 'Payment not ready. Please try again in a moment.'
@@ -555,18 +420,11 @@ async function ensureIntent() {
 }
 
 async function useGooglePay() {
-  Sentry.addBreadcrumb({
-    category: 'stripe',
-    message: 'useGooglePay clicked',
-    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
-  })
-
   try {
     if (!(await ensureIntent())) {
       return
     }
 
-    console.log('useGooglePay - creating')
     await Stripe.createGooglePay({
       paymentIntentClientSecret: intent.value.client_secret,
       merchantIdentifier: 'org.ilovefreegle.direct',
@@ -574,125 +432,60 @@ async function useGooglePay() {
       currency: 'GBP',
     })
 
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Google Pay created, presenting',
-    })
-
     const result = await Stripe.presentGooglePay()
-    console.log('Stripe presentGooglePay', result.paymentResult, result)
-
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Google Pay result',
-      data: { paymentResult: result.paymentResult },
-    })
 
     if (result.paymentResult === GooglePayEventsEnum.Completed) {
-      console.log('Stripe GooglePay successful')
       emit('success')
     }
   } catch (e) {
     console.error('Stripe Google Pay error', e)
     Sentry.captureException(e, {
       tags: { stripe_step: 'googlepay_flow' },
-      extra: {
-        message: e?.message,
-        code: e?.code,
-        hasIntent: !!intent.value?.client_secret,
-      },
     })
     error.value = 'Google Pay failed. Please try another method.'
   }
 }
 
 async function usePayPalCard() {
-  Sentry.captureMessage('usePayPalCard clicked', {
-    level: 'info',
-    tags: { stripe_step: 'paypal_click' },
-    extra: { hasIntent: !!intent.value?.client_secret, price: props.price },
-  })
-  await Sentry.flush(2000)
-
   try {
     if (!(await ensureIntent())) {
       return
     }
 
-    Sentry.captureMessage('About to call Stripe.createPaymentSheet', {
-      level: 'info',
-      tags: { stripe_step: 'pre_create_paymentsheet' },
-    })
-    await Sentry.flush(2000)
-
-    console.log('usePayPalCard - creating payment sheet')
     await Stripe.createPaymentSheet({
       paymentIntentClientSecret: intent.value.client_secret,
       merchantDisplayName: 'Freegle',
+      // Enable Apple Pay within the PaymentSheet so users can pay with
+      // Apple Pay even from the card/PayPal button flow.
+      enableApplePay: true,
+      applePayMerchantId: 'merchant.org.ilovefreegle.direct',
+      enableGooglePay: !isiOS,
+      countryCode: 'GB',
       // returnURL is required on iOS for external payment methods (PayPal etc)
       // and can cause crashes if missing (plugin issue #313).
-      // Capacitor iOS uses capacitor://localhost as the app's origin.
       returnURL: 'capacitor://localhost/stripe-redirect',
     })
 
-    Sentry.captureMessage('createPaymentSheet succeeded, about to presentPaymentSheet', {
-      level: 'info',
-      tags: { stripe_step: 'pre_present_paymentsheet' },
-    })
-    await Sentry.flush(2000)
-
     const result = await Stripe.presentPaymentSheet()
-    console.log('Stripe presentPaymentSheet', result.paymentResult, result)
-
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Payment sheet result',
-      data: { paymentResult: result.paymentResult },
-    })
 
     if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
-      console.log('Stripe PayPal/card successful')
       emit('success')
     }
   } catch (e) {
     console.error('Stripe PayPal/card error', e)
     Sentry.captureException(e, {
       tags: { stripe_step: 'paypal_flow' },
-      extra: {
-        message: e?.message,
-        code: e?.code,
-        hasIntent: !!intent.value?.client_secret,
-      },
     })
     error.value = 'Payment failed. Please try another method.'
   }
 }
 
 async function useApplePay() {
-  Sentry.captureMessage('useApplePay clicked', {
-    level: 'info',
-    tags: { stripe_step: 'applepay_click' },
-    extra: {
-      hasIntent: !!intent.value?.client_secret,
-      price: props.price,
-      priceType: typeof props.price,
-    },
-  })
-  await Sentry.flush(2000)
-
   try {
     if (!(await ensureIntent())) {
       return
     }
 
-    Sentry.captureMessage('About to call Stripe.createApplePay', {
-      level: 'info',
-      tags: { stripe_step: 'pre_create_applepay' },
-      extra: { amount: parseFloat(props.price) },
-    })
-    await Sentry.flush(2000)
-
-    console.log('useApplePay - creating')
     await Stripe.createApplePay({
       paymentIntentClientSecret: intent.value.client_secret,
       paymentSummaryItems: [
@@ -709,34 +502,15 @@ async function useApplePay() {
       currency: 'GBP',
     })
 
-    Sentry.captureMessage('createApplePay succeeded, about to presentApplePay', {
-      level: 'info',
-      tags: { stripe_step: 'pre_present_applepay' },
-    })
-    await Sentry.flush(2000)
-
     const result = await Stripe.presentApplePay()
-    console.log('Stripe presentApplePay', result.paymentResult, result)
-
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Apple Pay result',
-      data: { paymentResult: result.paymentResult },
-    })
 
     if (result.paymentResult === ApplePayEventsEnum.Completed) {
-      console.log('Stripe ApplePay successful')
       emit('success')
     }
   } catch (e) {
     console.error('Stripe Apple Pay error', e)
     Sentry.captureException(e, {
       tags: { stripe_step: 'applepay_flow' },
-      extra: {
-        message: e?.message,
-        code: e?.code,
-        hasIntent: !!intent.value?.client_secret,
-      },
     })
     error.value = 'Apple Pay failed. Please try another method.'
   }
