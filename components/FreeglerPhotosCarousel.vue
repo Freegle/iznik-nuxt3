@@ -165,8 +165,7 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
   padding-bottom: 0.5rem;
-  background-image: url('/wallpaper.png');
-  background-repeat: repeat;
+  background: linear-gradient(180deg, #f0f7ed 0%, #ffffff 100%);
 }
 
 .gallery-wall {

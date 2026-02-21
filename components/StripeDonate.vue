@@ -183,11 +183,7 @@ onMounted(async () => {
 
     try {
       console.log('Stripe props.price', props.price)
-      if (mobileStore.isApp && !mobileStore.isiOS) {
-        // Disable on iOS for now. Approval for use of Apple Pay is handled via Benevity.
-        // Freegle is registered with Benevity and we have submitted a request for Apple Pay
-        // verification. Once approved, remove the !mobileStore.isiOS condition to enable.
-
+      if (mobileStore.isApp) {
         Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
           console.log('Stripe PaymentSheetEventsEnum.Failed', e)
         })
@@ -492,7 +488,7 @@ async function useApplePay() {
         amount: props.price,
       },
     ],
-    merchantIdentifier: 'Freegle',
+    merchantIdentifier: 'merchant.org.ilovefreegle.direct',
     // merchantDisplayName: 'Freegle',
     countryCode: 'GB',
     currency: 'GBP',
