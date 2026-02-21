@@ -6,79 +6,72 @@
 
     <!-- Main Layout (all breakpoints) -->
     <div class="main-layout">
-      <!-- Hero Section with wallpaper background -->
-      <div class="hero-section">
-        <div class="hero-wallpaper">
-          <!-- Single frame for mobile (xs, sm) -->
-          <div class="d-block d-md-none hero-frame">
-            <FreeglerPhotos class="hero-photos" />
-          </div>
-          <!-- Triple frame carousel for tablet and desktop (md+) -->
-          <div class="d-none d-md-block">
-            <FreeglerPhotosCarousel />
-          </div>
-          <!-- Slogan on wallpaper - only for mobile, tablet carousel has its own -->
-          <div class="d-block d-md-none hero-slogan-section">
-            <h1 class="hero-title">
-              <span class="hero-line1">Share the love.</span>
-              <span class="hero-line2">Love the share.</span>
+      <!-- Hero: Full viewport photo mosaic with CTA overlay -->
+      <div class="hero-viewport">
+        <FreeglerPhotoGrid />
+        <div class="hero-overlay">
+          <div class="hero-glass-card">
+            <h1 class="hero-slogan">
+              <span class="slogan-line1">Share the love.</span>
+              <span class="slogan-line2">Love the share.</span>
             </h1>
-          </div>
-        </div>
-        <!-- CTA section below wallpaper -->
-        <div class="hero-cta">
-          <p class="hero-subtitle">Give and get stuff locally for free.</p>
-          <div class="action-buttons">
-            <client-only>
-              <NuxtLink
-                to="/give"
-                class="action-btn action-btn--give"
-                @click="clicked('give')"
-              >
-                <v-icon icon="gift" class="action-btn__icon" />
-                <span>Give</span>
-              </NuxtLink>
-              <NuxtLink
-                to="/find"
-                class="action-btn action-btn--find"
-                @click="clicked('ask')"
-              >
-                <v-icon icon="search" class="action-btn__icon" />
-                <span>Find</span>
-              </NuxtLink>
-              <template #fallback>
-                <a href="/give" class="action-btn action-btn--give">
-                  <span class="action-btn__icon-placeholder"></span>
+            <p class="hero-subtitle">Give and get stuff locally for free.</p>
+            <div class="action-buttons">
+              <client-only>
+                <NuxtLink
+                  to="/give"
+                  class="action-btn action-btn--give"
+                  @click="clicked('give')"
+                >
+                  <v-icon icon="gift" class="action-btn__icon" />
                   <span>Give</span>
-                </a>
-                <a href="/find" class="action-btn action-btn--find">
-                  <span class="action-btn__icon-placeholder"></span>
+                </NuxtLink>
+                <NuxtLink
+                  to="/find"
+                  class="action-btn action-btn--find"
+                  @click="clicked('ask')"
+                >
+                  <v-icon icon="search" class="action-btn__icon" />
                   <span>Find</span>
-                </a>
+                </NuxtLink>
+                <template #fallback>
+                  <a href="/give" class="action-btn action-btn--give">
+                    <span class="action-btn__icon-placeholder"></span>
+                    <span>Give</span>
+                  </a>
+                  <a href="/find" class="action-btn action-btn--find">
+                    <span class="action-btn__icon-placeholder"></span>
+                    <span>Find</span>
+                  </a>
+                </template>
+              </client-only>
+            </div>
+            <p class="browse-label">
+              <v-icon icon="map-marker-alt" class="browse-icon" />
+              Just browsing? See what's near you.
+            </p>
+            <client-only>
+              <PlaceAutocomplete
+                class="browse-input"
+                input-id="placeautocomplete-mobile"
+                labeltext=""
+                labeltext-sr="Enter your location"
+                @selected="explorePlace($event)"
+              />
+              <template #fallback>
+                <input
+                  type="text"
+                  class="form-control browse-input-ssr"
+                  placeholder="Type your location"
+                  disabled
+                />
               </template>
             </client-only>
+            <p class="photo-credit">
+              Photos of real freeglers by
+              <ExternalLink href="https://www.alexbamford.com/">Alex Bamford</ExternalLink>
+            </p>
           </div>
-          <p class="browse-label">
-            <v-icon icon="map-marker-alt" class="browse-icon" />
-            Just browsing? See what's near you.
-          </p>
-          <client-only>
-            <PlaceAutocomplete
-              class="browse-input"
-              input-id="placeautocomplete-mobile"
-              labeltext=""
-              labeltext-sr="Enter your location"
-              @selected="explorePlace($event)"
-            />
-            <template #fallback>
-              <input
-                type="text"
-                class="form-control browse-input-ssr"
-                placeholder="Type your location"
-                disabled
-              />
-            </template>
-          </client-only>
         </div>
       </div>
 
@@ -140,8 +133,7 @@ import { useGroupStore } from '~/stores/group'
 import MainFooter from '~/components/MainFooter'
 import BreakpointFettler from '~/components/BreakpointFettler.vue'
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
-import FreeglerPhotos from '~/components/FreeglerPhotos.vue'
-import FreeglerPhotosCarousel from '~/components/FreeglerPhotosCarousel.vue'
+import FreeglerPhotoGrid from '~/components/FreeglerPhotoGrid.vue'
 import ProxyImage from '~/components/ProxyImage.vue'
 import {
   computed,
@@ -302,10 +294,6 @@ onBeforeUnmount(() => {
 @import 'bootstrap/scss/mixins/_breakpoints';
 @import 'assets/css/_color-vars.scss';
 
-// ==========================================
-// Main Layout Styles
-// ==========================================
-
 .landing-page {
   min-height: 100vh;
 }
@@ -316,83 +304,72 @@ onBeforeUnmount(() => {
   min-height: 100vh;
 }
 
-// Hero Section - wallpaper covers entire section including CTA
-.hero-section {
-  text-align: center;
-  background-image: url('/wallpaper.png');
-  background-repeat: repeat;
-  background-size: auto;
-  padding-bottom: 1rem;
-}
-
-// Wrapper for frames and slogan
-.hero-wallpaper {
-  /* Wallpaper now on parent .hero-section */
-}
-
-.hero-frame {
+/* Hero viewport: photos fill the screen, CTA overlaid in center */
+.hero-viewport {
   position: relative;
-  max-width: min(100%, 38vh);
-  margin: 0 auto;
+  overflow: hidden;
+  min-height: calc(100vh - 60px);
+  min-height: calc(100dvh - 60px);
 }
 
-// Slogan section below frames, on wallpaper with frosted effect
-.hero-slogan-section {
-  padding: 0.75rem 1.5rem;
-  margin: 0 auto;
-  max-width: fit-content;
+/* Overlay positions the glass card in the center */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  padding: 60px 1rem 1rem;
+}
+
+/* Frosted glass card: only blurs the area behind the text */
+.hero-glass-card {
   text-align: center;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 24px $color-black-opacity-10;
+
+  @include media-breakpoint-up(md) {
+    padding: 1.5rem 2rem;
+  }
 }
 
-.hero-title {
-  font-size: clamp(1.1rem, 4vw, 1.5rem);
-  font-weight: 700;
-  line-height: 1.2;
-  margin: 0;
-  color: $colour-header;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+.hero-slogan {
+  font-size: clamp(1.5rem, 6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
 }
 
-.hero-line1 {
+.slogan-line1 {
   display: block;
+  color: $colour-header;
 }
 
-.hero-line2 {
+.slogan-line2 {
   display: block;
   color: $colour-success;
 }
 
-// CTA section below frame - card style with subtle green tint
-.hero-cta {
-  padding: 1rem 1rem 1.25rem;
-  margin: 1rem 0.75rem 0;
-  text-align: center;
-  background: linear-gradient(
-    135deg,
-    $color-green--bg-gradient 0%,
-    $color-white 100%
-  );
-  border: 1px solid rgba($colour-success, 0.15);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-}
-
 .hero-subtitle {
-  font-size: 0.95rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   color: $color-gray--darker;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-weight: 500;
 }
 
-// Action Buttons - compact
+/* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   justify-content: center;
-  margin-top: 0.5rem;
 }
 
 .action-btn {
@@ -400,12 +377,12 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   gap: clamp(0.3rem, 1vw, 0.5rem);
-  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 4vw, 2rem);
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  padding: clamp(0.6rem, 2vw, 0.85rem) clamp(1.25rem, 5vw, 2.5rem);
+  font-size: clamp(0.95rem, 2.5vw, 1.15rem);
   font-weight: 600;
   text-decoration: none;
   transition: transform 0.1s, box-shadow 0.15s;
-  min-width: clamp(80px, 20vw, 140px);
+  min-width: clamp(90px, 22vw, 150px);
 
   &:active {
     transform: scale(0.98);
@@ -468,7 +445,6 @@ onBeforeUnmount(() => {
 }
 
 .browse-input {
-  // Hide the label - we have our own
   :deep(label) {
     display: none !important;
   }
@@ -477,7 +453,7 @@ onBeforeUnmount(() => {
     border: 1px solid $color-gray--light;
     padding: 0.6rem 0.75rem;
     font-size: 0.9rem;
-    background: $color-gray--lighter;
+    background: rgba(255, 255, 255, 0.9);
     text-align: center;
 
     &::placeholder {
@@ -497,7 +473,6 @@ onBeforeUnmount(() => {
     }
   }
 
-  // Hide any extra elements that might show as white boxes
   :deep(.input-group-text),
   :deep(.btn),
   :deep(.autocomplete-clear) {
@@ -511,14 +486,13 @@ onBeforeUnmount(() => {
   }
 }
 
-/* SSR fallback input - matches browse-input styling exactly */
+/* SSR fallback input */
 .browse-input-ssr {
   width: 100%;
-  border: 2px solid $color-gray--dark;
-  border-radius: 0;
+  border: 1px solid $color-gray--light;
   padding: 0.6rem 0.75rem;
   font-size: 0.9rem;
-  background: $color-gray--lighter;
+  background: rgba(255, 255, 255, 0.9);
   text-align: center;
 
   &::placeholder {
@@ -533,9 +507,15 @@ onBeforeUnmount(() => {
   }
 }
 
-// Sample Offers Section
+.photo-credit {
+  font-size: 0.65rem;
+  color: $color-gray--normal;
+  margin: 0.75rem 0 0;
+}
+
+/* Sample Offers Section */
 .sample-section {
-  padding: 0.5rem;
+  padding: 1rem 0.5rem;
 }
 
 .sample-stack {
@@ -583,7 +563,7 @@ onBeforeUnmount(() => {
   }
 }
 
-// App Download Section
+/* App Download Section */
 .app-section {
   display: flex;
   justify-content: center;
@@ -591,7 +571,6 @@ onBeforeUnmount(() => {
   padding: 0.75rem 1rem;
   margin: 0 1rem;
   background: $color-gray--lighter;
-  border-radius: 12px;
 }
 
 .app-badge {

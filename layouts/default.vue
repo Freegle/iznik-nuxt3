@@ -20,9 +20,6 @@ const GoogleOneTap = defineAsyncComponent(() =>
 )
 const LoginModal = defineAsyncComponent(() => import('~/components/LoginModal'))
 
-const runtimeConfig = useRuntimeConfig()
-const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.IMAGE_DELIVERY
 const mobileStore = useMobileStore()
 
 let ready = false
@@ -35,22 +32,11 @@ if (process.client) {
   miscStore.apiCount = 0
 }
 
-if (proxy) {
-  // Add the wallpaper background, proxying it from our image CDN.
-  const bg =
-    'background-image: url("' +
-    proxy +
-    '?url=' +
-    userSite +
-    '/wallpaper.png' +
-    '&output=webp")'
-
-  useHead({
-    bodyAttrs: {
-      style: bg,
-    },
-  })
-}
+useHead({
+  bodyAttrs: {
+    style: 'background-color: #f8f9fa',
+  },
+})
 
 const bump = ref(0)
 const loginStateKnown = computed(() => authStore.loginStateKnown)
