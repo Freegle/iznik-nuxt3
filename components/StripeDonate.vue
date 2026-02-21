@@ -158,9 +158,17 @@ const error = ref(null)
 
 onMounted(async () => {
   if (isApp.value) {
-    // Initialize Stripe inside onMounted to ensure runtimeConfig is fully available.
-    // This fixes a race condition where some users see "you must provide publishableKey"
-    // error because the config wasn't hydrated yet at script setup time.
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'StripeDonate onMounted - app path',
+      data: {
+        isApp: isApp.value,
+        isiOS: mobileStore.isiOS,
+        price: props.price,
+        monthly: props.monthly,
+      },
+    })
+
     const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
 
     if (!stripeKey) {
@@ -174,11 +182,25 @@ onMounted(async () => {
     }
 
     if (!stripeInitialized) {
-      console.log('Stripe.initialize', stripeKey)
-      Stripe.initialize({
-        publishableKey: stripeKey,
-      })
-      stripeInitialized = true
+      try {
+        console.log('Stripe.initialize', stripeKey)
+        Stripe.initialize({
+          publishableKey: stripeKey,
+        })
+        stripeInitialized = true
+        Sentry.addBreadcrumb({
+          category: 'stripe',
+          message: 'Stripe.initialize succeeded',
+        })
+      } catch (e) {
+        console.error('Stripe.initialize failed', e)
+        Sentry.captureException(e, {
+          tags: { stripe_step: 'initialize' },
+        })
+        emit('error')
+        loading.value = false
+        return
+      }
     }
 
     try {
@@ -186,25 +208,53 @@ onMounted(async () => {
       if (mobileStore.isApp) {
         Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
           console.log('Stripe PaymentSheetEventsEnum.Failed', e)
+          Sentry.captureMessage('Stripe PaymentSheet failed', {
+            extra: { error: e },
+            tags: { stripe_step: 'payment_sheet_event' },
+          })
         })
         Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
           console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
+          Sentry.captureMessage('Stripe PaymentSheet failed to load', {
+            extra: { error: e },
+            tags: { stripe_step: 'payment_sheet_event' },
+          })
         })
         Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
           console.log('Stripe PaymentSheetEventsEnum.Loaded')
+          Sentry.addBreadcrumb({
+            category: 'stripe',
+            message: 'PaymentSheet loaded',
+          })
         })
         Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
           console.log('Stripe PaymentSheetEventsEnum.Canceled')
+          Sentry.addBreadcrumb({
+            category: 'stripe',
+            message: 'PaymentSheet canceled',
+          })
         })
         Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
           console.log('Stripe PaymentSheetEventsEnum.Completed')
+          Sentry.addBreadcrumb({
+            category: 'stripe',
+            message: 'PaymentSheet completed',
+          })
         })
         if (!mobileStore.isiOS) {
           Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
             console.log('Stripe GooglePayEventsEnum.Failed', e)
+            Sentry.captureMessage('Stripe GooglePay failed', {
+              extra: { error: e },
+              tags: { stripe_step: 'googlepay_event' },
+            })
           })
           Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
             console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
+            Sentry.captureMessage('Stripe GooglePay failed to load', {
+              extra: { error: e },
+              tags: { stripe_step: 'googlepay_event' },
+            })
           })
           Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
             console.log('Stripe GooglePayEventsEnum.Loaded')
@@ -219,18 +269,38 @@ onMounted(async () => {
           // iOS
           Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
             console.log('Stripe ApplePayEventsEnum.Failed', e)
+            Sentry.captureMessage('Stripe ApplePay failed', {
+              extra: { error: e },
+              tags: { stripe_step: 'applepay_event' },
+            })
           })
           Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
             console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
+            Sentry.captureMessage('Stripe ApplePay failed to load', {
+              extra: { error: e },
+              tags: { stripe_step: 'applepay_event' },
+            })
           })
           Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
             console.log('Stripe ApplePayEventsEnum.applePayLoaded')
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'ApplePay loaded',
+            })
           })
           Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
             console.log('Stripe ApplePayEventsEnum.applePayCompleted')
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'ApplePay completed',
+            })
           })
           Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
             console.log('Stripe ApplePayEventsEnum.applePayCanceled')
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'ApplePay canceled',
+            })
           })
           Stripe.addListener(
             ApplePayEventsEnum.applePayDidSelectShippingContact,
@@ -250,41 +320,106 @@ onMounted(async () => {
           )
         }
 
+        // Create payment intent
+        Sentry.addBreadcrumb({
+          category: 'stripe',
+          message: 'Creating payment intent',
+          data: { price: props.price, monthly: props.monthly },
+        })
+
         if (props.monthly) {
-          // monthly never set in app as not supported
           intent.value = await donationStore.stripeSubscription(props.price)
           console.log('Stripe subscription Intent', intent.value)
         } else {
           intent.value = await donationStore.stripeIntent({
             amount: props.price,
-            // test: true,
           })
           console.log('Stripe single payment Intent', intent.value)
         }
 
+        if (!intent.value?.client_secret) {
+          console.error(
+            'Stripe: Payment intent creation returned no client_secret',
+            intent.value
+          )
+          Sentry.captureMessage(
+            'Payment intent missing client_secret in app',
+            {
+              extra: {
+                intentValue: JSON.stringify(intent.value),
+                price: props.price,
+              },
+              tags: { stripe_step: 'create_intent' },
+            }
+          )
+        } else {
+          Sentry.addBreadcrumb({
+            category: 'stripe',
+            message: 'Payment intent created successfully',
+            data: {
+              hasClientSecret: !!intent.value.client_secret,
+            },
+          })
+        }
+
+        // Check payment method availability
         if (!mobileStore.isiOS) {
-          // Android
           try {
             await Stripe.isGooglePayAvailable()
             isGooglePayAvailable.value = true
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'Google Pay is available',
+            })
           } catch (e) {
-            // eg Not implemented on Device.
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'Google Pay not available',
+              data: { error: e?.message || String(e) },
+            })
           }
         } else {
-          // iOS
           try {
             await Stripe.isApplePayAvailable()
             isApplePayAvailable.value = true
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'Apple Pay is available',
+            })
           } catch (e) {
-            // eg Not implemented on Android.
+            console.log('Apple Pay not available', e)
+            Sentry.addBreadcrumb({
+              category: 'stripe',
+              message: 'Apple Pay not available',
+              data: { error: e?.message || String(e) },
+            })
           }
         }
         console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
         console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
         isPayPalAvailable.value = true
+
+        Sentry.addBreadcrumb({
+          category: 'stripe',
+          message: 'App payment init complete',
+          data: {
+            googlePay: isGooglePayAvailable.value,
+            applePay: isApplePayAvailable.value,
+            payPal: isPayPalAvailable.value,
+            hasIntent: !!intent.value?.client_secret,
+          },
+        })
       }
     } catch (e) {
-      console.log('Stripe Exception', e.message)
+      console.error('Stripe Exception', e.message, e)
+      Sentry.captureException(e, {
+        tags: { stripe_step: 'app_init' },
+        extra: {
+          price: props.price,
+          isiOS: mobileStore.isiOS,
+          stripeInitialized,
+        },
+      })
     }
     if (
       isGooglePayAvailable.value ||
@@ -428,79 +563,181 @@ onMounted(async () => {
 })
 
 async function useGooglePay() {
-  console.log('useGooglePay')
-  console.log('Stripe createGooglePay BEFORE')
-  // Prepare Google Pay
-  await Stripe.createGooglePay({
-    paymentIntentClientSecret: intent.value.client_secret,
-
-    merchantIdentifier: 'org.ilovefreegle.direct',
-    countryCode: 'GB',
-    currency: 'GBP',
+  Sentry.addBreadcrumb({
+    category: 'stripe',
+    message: 'useGooglePay clicked',
+    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
   })
-  console.log('Stripe createGooglePay AFTER')
 
-  // Present Google Pay
-  const result = await Stripe.presentGooglePay()
-  console.log('Stripe presentGooglePay', result.paymentResult, result)
-  if (result.paymentResult === GooglePayEventsEnum.Completed) {
-    // Happy path
-    console.log('Stripe GooglePay successful')
-    emit('success')
+  try {
+    if (!intent.value?.client_secret) {
+      console.error('Stripe: No payment intent available for Google Pay')
+      Sentry.captureMessage('Google Pay attempted without payment intent', {
+        tags: { stripe_step: 'googlepay_click' },
+        extra: { intentValue: JSON.stringify(intent.value) },
+      })
+      error.value = 'Payment not ready. Please try again.'
+      return
+    }
+
+    console.log('useGooglePay - creating')
+    await Stripe.createGooglePay({
+      paymentIntentClientSecret: intent.value.client_secret,
+      merchantIdentifier: 'org.ilovefreegle.direct',
+      countryCode: 'GB',
+      currency: 'GBP',
+    })
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Google Pay created, presenting',
+    })
+
+    const result = await Stripe.presentGooglePay()
+    console.log('Stripe presentGooglePay', result.paymentResult, result)
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Google Pay result',
+      data: { paymentResult: result.paymentResult },
+    })
+
+    if (result.paymentResult === GooglePayEventsEnum.Completed) {
+      console.log('Stripe GooglePay successful')
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe Google Pay error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'googlepay_flow' },
+      extra: {
+        message: e?.message,
+        code: e?.code,
+        hasIntent: !!intent.value?.client_secret,
+      },
+    })
+    error.value = 'Google Pay failed. Please try another method.'
   }
-  console.log('Stripe DONE')
 }
 
 async function usePayPalCard() {
-  console.log('usePayPalCard')
-  await Stripe.createPaymentSheet({
-    paymentIntentClientSecret: intent.value.client_secret,
-    // customerId: customer,
-    // customerEphemeralKeySecret: ephemeralKey,
-    // enableGooglePay: true,
-    // enableApplePay: false,
-    merchantDisplayName: 'Freegle',
-    /**
-     * iOS Only
-     * @url https://stripe.com/docs/payments/accept-a-payment?platform=ios&ui=payment-sheet#userinterfacestyle
-     * @default undefined
-     */
-    // returnURL:
+  Sentry.addBreadcrumb({
+    category: 'stripe',
+    message: 'usePayPalCard clicked',
+    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
   })
-  console.log('Stripe createPaymentSheet')
 
-  const result = await Stripe.presentPaymentSheet()
-  console.log('Stripe presentPaymentSheet', result.paymentResult, result)
-  if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
-    console.log('Stripe PayPal/card successful')
-    emit('success')
+  try {
+    if (!intent.value?.client_secret) {
+      console.error('Stripe: No payment intent available for PayPal/card')
+      Sentry.captureMessage('PayPal/card attempted without payment intent', {
+        tags: { stripe_step: 'paypal_click' },
+        extra: { intentValue: JSON.stringify(intent.value) },
+      })
+      error.value = 'Payment not ready. Please try again.'
+      return
+    }
+
+    console.log('usePayPalCard - creating payment sheet')
+    await Stripe.createPaymentSheet({
+      paymentIntentClientSecret: intent.value.client_secret,
+      merchantDisplayName: 'Freegle',
+    })
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Payment sheet created, presenting',
+    })
+
+    const result = await Stripe.presentPaymentSheet()
+    console.log('Stripe presentPaymentSheet', result.paymentResult, result)
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Payment sheet result',
+      data: { paymentResult: result.paymentResult },
+    })
+
+    if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
+      console.log('Stripe PayPal/card successful')
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe PayPal/card error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'paypal_flow' },
+      extra: {
+        message: e?.message,
+        code: e?.code,
+        hasIntent: !!intent.value?.client_secret,
+      },
+    })
+    error.value = 'Payment failed. Please try another method.'
   }
-  console.log('Stripe DONE')
 }
 
 async function useApplePay() {
-  console.log('useApplePay')
-  await Stripe.createApplePay({
-    paymentIntentClientSecret: intent.value.client_secret,
-    paymentSummaryItems: [
-      {
-        label: 'Freegle Donation',
-        amount: props.price,
-      },
-    ],
-    merchantIdentifier: 'merchant.org.ilovefreegle.direct',
-    // merchantDisplayName: 'Freegle',
-    countryCode: 'GB',
-    currency: 'GBP',
+  Sentry.addBreadcrumb({
+    category: 'stripe',
+    message: 'useApplePay clicked',
+    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
   })
-  // Present Apple Pay
-  const result = await Stripe.presentApplePay()
-  console.log('Stripe presentApplePay', result.paymentResult, result)
-  if (result.paymentResult === ApplePayEventsEnum.Completed) {
-    console.log('Stripe ApplePay successful')
-    emit('success')
+
+  try {
+    if (!intent.value?.client_secret) {
+      console.error('Stripe: No payment intent available for Apple Pay')
+      Sentry.captureMessage('Apple Pay attempted without payment intent', {
+        tags: { stripe_step: 'applepay_click' },
+        extra: { intentValue: JSON.stringify(intent.value) },
+      })
+      error.value = 'Payment not ready. Please try again.'
+      return
+    }
+
+    console.log('useApplePay - creating')
+    await Stripe.createApplePay({
+      paymentIntentClientSecret: intent.value.client_secret,
+      paymentSummaryItems: [
+        {
+          label: 'Freegle Donation',
+          amount: props.price,
+        },
+      ],
+      merchantIdentifier: 'merchant.org.ilovefreegle.direct',
+      countryCode: 'GB',
+      currency: 'GBP',
+    })
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Apple Pay created, presenting',
+    })
+
+    const result = await Stripe.presentApplePay()
+    console.log('Stripe presentApplePay', result.paymentResult, result)
+
+    Sentry.addBreadcrumb({
+      category: 'stripe',
+      message: 'Apple Pay result',
+      data: { paymentResult: result.paymentResult },
+    })
+
+    if (result.paymentResult === ApplePayEventsEnum.Completed) {
+      console.log('Stripe ApplePay successful')
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe Apple Pay error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'applepay_flow' },
+      extra: {
+        message: e?.message,
+        code: e?.code,
+        hasIntent: !!intent.value?.client_secret,
+      },
+    })
+    error.value = 'Apple Pay failed. Please try another method.'
   }
-  console.log('Stripe DONE')
 }
 </script>
 <style scoped lang="scss">
