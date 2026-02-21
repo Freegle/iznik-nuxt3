@@ -366,18 +366,42 @@ onMounted(async () => {
         Sentry.captureMessage('About to create payment intent', {
           level: 'info',
           tags: { stripe_step: 'pre_intent' },
-          extra: { price: props.price, monthly: props.monthly },
+          extra: {
+            price: props.price,
+            monthly: props.monthly,
+            hasConfig: !!donationStore.config,
+            apiV1: donationStore.config?.public?.APIv1?.substring(0, 40),
+          },
         })
         await Sentry.flush(2000)
 
-        if (props.monthly) {
-          intent.value = await donationStore.stripeSubscription(props.price)
-          console.log('Stripe subscription Intent', intent.value)
-        } else {
-          intent.value = await donationStore.stripeIntent({
-            amount: props.price,
+        try {
+          if (props.monthly) {
+            intent.value = await donationStore.stripeSubscription(props.price)
+            console.log('Stripe subscription Intent', intent.value)
+          } else {
+            intent.value = await donationStore.stripeIntent({
+              amount: props.price,
+            })
+            console.log('Stripe single payment Intent', intent.value)
+          }
+        } catch (intentError) {
+          // Catch intent creation errors separately for precise diagnostics
+          Sentry.captureMessage('Payment intent creation FAILED', {
+            level: 'error',
+            tags: { stripe_step: 'intent_error' },
+            extra: {
+              errorMessage: intentError?.message,
+              errorName: intentError?.name,
+              errorStack: intentError?.stack?.substring(0, 500),
+              price: props.price,
+              monthly: props.monthly,
+              hasConfig: !!donationStore.config,
+            },
           })
-          console.log('Stripe single payment Intent', intent.value)
+          await Sentry.flush(2000)
+          // Don't re-throw - continue to show buttons without intent
+          // Intent will be created lazily when user clicks a button
         }
 
         if (!intent.value?.client_secret) {
