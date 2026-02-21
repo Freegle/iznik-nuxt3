@@ -656,33 +656,46 @@ async function useGooglePay() {
 }
 
 async function usePayPalCard() {
-  Sentry.addBreadcrumb({
-    category: 'stripe',
-    message: 'usePayPalCard clicked',
-    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
+  Sentry.captureMessage('usePayPalCard clicked', {
+    level: 'info',
+    tags: { stripe_step: 'paypal_click' },
+    extra: { hasIntent: !!intent.value?.client_secret, price: props.price },
   })
+  await Sentry.flush(2000)
 
   try {
     if (!intent.value?.client_secret) {
       console.error('Stripe: No payment intent available for PayPal/card')
       Sentry.captureMessage('PayPal/card attempted without payment intent', {
-        tags: { stripe_step: 'paypal_click' },
+        tags: { stripe_step: 'paypal_no_intent' },
         extra: { intentValue: JSON.stringify(intent.value) },
       })
+      await Sentry.flush(2000)
       error.value = 'Payment not ready. Please try again.'
       return
     }
+
+    Sentry.captureMessage('About to call Stripe.createPaymentSheet', {
+      level: 'info',
+      tags: { stripe_step: 'pre_create_paymentsheet' },
+    })
+    await Sentry.flush(2000)
 
     console.log('usePayPalCard - creating payment sheet')
     await Stripe.createPaymentSheet({
       paymentIntentClientSecret: intent.value.client_secret,
       merchantDisplayName: 'Freegle',
+      // returnURL is required on iOS for external payment methods (PayPal etc)
+      // and can cause crashes if missing (plugin issue #313).
+      // Capacitor iOS uses capacitor://localhost as the app's origin.
+      returnURL: 'capacitor://localhost/stripe-redirect',
     })
 
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Payment sheet created, presenting',
+    Sentry.captureMessage('createPaymentSheet succeeded, about to presentPaymentSheet', {
+      level: 'info',
+      tags: { stripe_step: 'pre_present_paymentsheet' },
     })
+    await Sentry.flush(2000)
 
     const result = await Stripe.presentPaymentSheet()
     console.log('Stripe presentPaymentSheet', result.paymentResult, result)
@@ -712,22 +725,35 @@ async function usePayPalCard() {
 }
 
 async function useApplePay() {
-  Sentry.addBreadcrumb({
-    category: 'stripe',
-    message: 'useApplePay clicked',
-    data: { hasIntent: !!intent.value?.client_secret, price: props.price },
+  Sentry.captureMessage('useApplePay clicked', {
+    level: 'info',
+    tags: { stripe_step: 'applepay_click' },
+    extra: {
+      hasIntent: !!intent.value?.client_secret,
+      price: props.price,
+      priceType: typeof props.price,
+    },
   })
+  await Sentry.flush(2000)
 
   try {
     if (!intent.value?.client_secret) {
       console.error('Stripe: No payment intent available for Apple Pay')
       Sentry.captureMessage('Apple Pay attempted without payment intent', {
-        tags: { stripe_step: 'applepay_click' },
+        tags: { stripe_step: 'applepay_no_intent' },
         extra: { intentValue: JSON.stringify(intent.value) },
       })
+      await Sentry.flush(2000)
       error.value = 'Payment not ready. Please try again.'
       return
     }
+
+    Sentry.captureMessage('About to call Stripe.createApplePay', {
+      level: 'info',
+      tags: { stripe_step: 'pre_create_applepay' },
+      extra: { amount: parseFloat(props.price) },
+    })
+    await Sentry.flush(2000)
 
     console.log('useApplePay - creating')
     await Stripe.createApplePay({
@@ -735,7 +761,10 @@ async function useApplePay() {
       paymentSummaryItems: [
         {
           label: 'Freegle Donation',
-          amount: props.price,
+          // Amount MUST be a float, not integer. The native Swift code does
+          // item["amount"] as? NSNumber which returns nil for JS integers,
+          // causing a force-unwrap crash (plugin issue #351).
+          amount: parseFloat(props.price),
         },
       ],
       merchantIdentifier: 'merchant.org.ilovefreegle.direct',
@@ -743,10 +772,11 @@ async function useApplePay() {
       currency: 'GBP',
     })
 
-    Sentry.addBreadcrumb({
-      category: 'stripe',
-      message: 'Apple Pay created, presenting',
+    Sentry.captureMessage('createApplePay succeeded, about to presentApplePay', {
+      level: 'info',
+      tags: { stripe_step: 'pre_present_applepay' },
     })
+    await Sentry.flush(2000)
 
     const result = await Stripe.presentApplePay()
     console.log('Stripe presentApplePay', result.paymentResult, result)
