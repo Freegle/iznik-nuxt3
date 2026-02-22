@@ -13,14 +13,15 @@ export default class MembershipsAPI extends BaseAPI {
     return this.$delv2('/memberships', data)
   }
 
-  fetch(params, logError = true) {
-    // Keep on V1 — Go returns flat array, store expects {member: {...}}
-    return this.$get('/memberships', params, logError)
+  async fetch(params, logError = true) {
+    const members = await this.$getv2('/memberships', params, logError)
+    const member = Array.isArray(members) ? members[0] : members
+    return { member }
   }
 
-  fetchMembers(params) {
-    // Keep on V1 — Go returns flat array, store expects {members, context, ratings}
-    return this.$get('/memberships', params)
+  async fetchMembers(params) {
+    const members = await this.$getv2('/memberships', params)
+    return { members, context: null, ratings: [] }
   }
 
   save(event) {

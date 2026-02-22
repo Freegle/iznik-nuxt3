@@ -566,6 +566,18 @@ export default class BaseAPI {
     )
   }
 
+  $postFormv2(path, data, logError = true) {
+    return this.$requestv2(
+      'POST',
+      path,
+      {
+        formPost: true,
+      },
+      logError,
+      data
+    )
+  }
+
   $delv2(path, data, logError = true) {
     return this.$requestv2(
       'DELETE',

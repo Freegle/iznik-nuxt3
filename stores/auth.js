@@ -237,19 +237,11 @@ export const useAuthStore = defineStore({
       let worked = false
 
       try {
-        await this.$api.session.lostPassword(email, function (data) {
-          let logIt
+        const data = await this.$api.session.lostPassword(email)
 
-          if (data && data.ret === 2) {
-            // Don't log errors if the email is not recognised.
-            logIt = false
-            unknown = true
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
+        if (data && data.ret === 2) {
+          unknown = true
+        }
 
         worked = true
       } catch (e) {
@@ -263,19 +255,11 @@ export const useAuthStore = defineStore({
       let worked = false
 
       try {
-        await this.$api.session.unsubscribe(email, function (data) {
-          let logIt
+        const data = await this.$api.session.unsubscribe(email)
 
-          if (data && data.ret === 2) {
-            // Don't log errors if the email is not recognised.
-            logIt = false
-            unknown = true
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
+        if (data && data.ret === 2) {
+          unknown = true
+        }
 
         worked = true
       } catch (e) {

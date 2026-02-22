@@ -11,7 +11,7 @@ export default class ConfigAPI extends BaseAPI {
   }
 
   patchAdminv2(data) {
-    return this.$postOverride('PATCH', '/config/admin', data)
+    return this.$patchv2('/config/admin', data)
   }
 
   // Individual worry word management

@@ -191,7 +191,7 @@
         <ModMenuItemLeft
           link="/publicity"
           name="Publicity"
-          :count="['socialactions', 'popularposts']"
+          :count="[]"
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft

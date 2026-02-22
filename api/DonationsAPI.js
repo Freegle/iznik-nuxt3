@@ -15,12 +15,12 @@ export default class DonationsAPI extends BaseAPI {
   }
 
   stripeIntent(params) {
-    console.log('DonationsAPI.stripeIntent called with:', params)
-    console.log('this.config:', this.config)
+    // Keep on V1 — Go stripe endpoints not yet implemented
     return this.$post('/stripecreateintent', params)
   }
 
   stripeSubscription(amount) {
+    // Keep on V1 — Go stripe endpoints not yet implemented
     return this.$post('/stripecreatesubscription', {
       amount,
     })

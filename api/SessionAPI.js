@@ -61,14 +61,12 @@ export default class SessionAPI extends BaseAPI {
     return this.$delv2('/session')
   }
 
-  lostPassword(email, log) {
-    // Keep on V1 — caller uses log callback side effects for unknown email detection
-    return this.$post('/session', { action: 'LostPassword', email }, log)
+  lostPassword(email) {
+    return this.$postv2('/session', { action: 'LostPassword', email })
   }
 
-  unsubscribe(email, log) {
-    // Keep on V1 — caller uses log callback side effects for unknown email detection
-    return this.$post('/session', { action: 'Unsubscribe', email }, log)
+  unsubscribe(email) {
+    return this.$postv2('/session', { action: 'Unsubscribe', email })
   }
 
   forget() {
@@ -83,13 +81,6 @@ export default class SessionAPI extends BaseAPI {
     return this.$postv2('/session', {
       action: 'Related',
       userlist,
-    })
-  }
-
-  yahooCodeLogin(yahoocodelogin) {
-    // ModTools
-    return this.$post('/session', {
-      yahoocodelogin,
     })
   }
 }
