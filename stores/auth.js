@@ -311,71 +311,51 @@ export const useAuthStore = defineStore({
 
       const miscStore = useMiscStore()
 
-      // For non-ModTools, use the faster v2 API
-      if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
-        // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
+      // Try V2 API first (Go backend) - works for both Freegle and ModTools
+      if (this.auth.jwt || this.auth.persistent) {
         try {
-          me = await this.$api.session.fetchv2(
+          const sessionData = await this.$api.session.fetchv2(
             {
               webversion: this.config.public.BUILD_DATE,
             },
             false
           )
+
+          if (sessionData && sessionData.me) {
+            me = sessionData.me
+            groups = sessionData.groups || []
+
+            // V2 now returns work/discourse/configid
+            if (sessionData.work) this.work = sessionData.work
+            if (sessionData.discourse) this.discourse = sessionData.discourse
+          }
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
         }
 
-        if (me) {
-          groups = me.memberships
-          delete me.memberships
-
-          if (process.client) {
-            // Check the old API.  Partly in case we need a JWT, partly to check we are
-            // logged in on both.  No need to wait, though.
-            this.$api.session
-              .fetch({
-                webversion: this.config.public.BUILD_DATE,
-                components,
-              })
-              .then((ret) => {
-                let persistent = null
-                let jwt = null
-
-                if (ret) {
-                  ;({ me, persistent, jwt } = ret)
-                  if (me) {
-                    if (me.permissions && this.user) {
-                      this.user.permissions = me.permissions
-                    }
-                    if (!this.auth.jwt) {
-                      this.setAuth(jwt, persistent)
-                    }
-                    // ModTools: store work counts and discourse data
-                    if (ret.work) this.work = ret.work
-                    if (ret.discourse) this.discourse = ret.discourse
-                  } else {
-                    // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
-                    // which will then force a login when required and sort this out.
-                    console.error('Logged in on v2 API but not v1 API, log out')
-                    this.setAuth(null, null)
-                    this.setUser(null)
-                  }
+        if (me && miscStore.modtools && process.client) {
+          // ModTools: fetch permissions from V1 in background (V2 doesn't return permissions yet)
+          this.$api.session
+            .fetch({
+              webversion: this.config.public.BUILD_DATE,
+              components,
+            })
+            .then((ret) => {
+              if (ret && ret.me) {
+                if (ret.me.permissions && this.user) {
+                  this.user.permissions = ret.me.permissions
                 }
-              })
-              .catch((e) => {
-                // Need to catch this to prevent a Sentry error when we're logged out - which is a perfectly normal
-                // case.
-                console.log('Exception on old API', e)
-              })
-          }
+              }
+            })
+            .catch((e) => {
+              console.log('Exception on old API', e)
+            })
         }
       }
 
-      // ModTools always uses v1 API for work counts, permissions, configid etc.
-      // Also used as fallback if v2 API didn't work
+      // Fallback to V1 if V2 didn't work (e.g., no JWT/persistent yet, or V2 failed)
       if (!me) {
-        // Try the older API which will authenticate via the persistent token and PHP session.
         const ret = await this.$api.session.fetch({
           webversion: this.config.public.BUILD_DATE,
           components,
@@ -385,10 +365,8 @@ export const useAuthStore = defineStore({
         let jwt = null
 
         if (ret) {
-          const v1groups = ret.groups
           ;({ me, groups, persistent, jwt } = ret)
 
-          // ModTools: store work counts and discourse data
           if (ret.work) this.work = ret.work
           if (ret.discourse) this.discourse = ret.discourse
 
@@ -400,28 +378,24 @@ export const useAuthStore = defineStore({
           }
 
           if (jwt) {
-            // Now use the JWT on the new API.
+            // Now use the JWT on the V2 API for up-to-date data.
             try {
-              me = await this.$api.session.fetchv2({
+              const sessionData = await this.$api.session.fetchv2({
                 webversion: this.config.public.BUILD_DATE,
               })
+
+              if (sessionData && sessionData.me) {
+                me = sessionData.me
+                me.permissions = permissions
+                groups = sessionData.groups || []
+
+                // Use V2 work/discourse (more current)
+                if (sessionData.work) this.work = sessionData.work
+                if (sessionData.discourse)
+                  this.discourse = sessionData.discourse
+              }
             } catch (e) {
               console.log('exception')
-            }
-
-            if (me) {
-              me.permissions = permissions
-              groups = me.memberships
-              // ModTools: merge configid from v1 groups into v2 memberships
-              if (v1groups && groups) {
-                for (const g of groups) {
-                  const group = v1groups.find((v1g) => v1g.id === g.groupid)
-                  if (group) {
-                    g.configid = group.configid
-                  }
-                }
-              }
-              delete me.memberships
             }
           }
         }

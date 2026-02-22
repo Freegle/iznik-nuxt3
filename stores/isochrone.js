@@ -31,9 +31,7 @@ export const useIsochroneStore = defineStore({
         }
 
         if (!this.list.length) {
-          // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
-          // for us.
-          await api(this.config).isochrone.fetchv1()
+          // Retry - Go auto-creates a default isochrone if none exist.
           this.list = await api(this.config).isochrone.fetchv2()
         }
       }
