@@ -462,7 +462,10 @@ export default defineNuxtConfig({
           manualChunks(id) {
             if (id.includes('node_modules')) {
               if (id.includes('@sentry')) return 'vendor-sentry'
-              if (id.includes('leaflet') || id.includes('supercluster'))
+              if (
+                (id.includes('leaflet') || id.includes('supercluster')) &&
+                !id.includes('leaflet-gesture-handling')
+              )
                 return 'vendor-maps'
               if (id.includes('tus-js-client')) return 'vendor-upload'
               if (id.includes('@formatjs') || id.includes('intl-'))
