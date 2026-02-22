@@ -18,51 +18,43 @@ export default class VolunteeringAPI extends BaseAPI {
   }
 
   save(data) {
-    return this.$patchv2('/volunteering', data)
+    return this.$patch('/volunteering', data)
   }
 
   async add(data) {
-    const { id } = await this.$postv2('/volunteering', data)
+    const { id } = await this.$post('/volunteering', data)
     return id
   }
 
   addGroup(id, groupid) {
-    return this.$patchv2('/volunteering', { id, groupid, action: 'AddGroup' })
+    return this.$patch('/volunteering', { id, groupid, action: 'AddGroup' })
   }
 
   removeGroup(id, groupid) {
-    return this.$patchv2('/volunteering', {
-      id,
-      groupid,
-      action: 'RemoveGroup',
-    })
+    return this.$patch('/volunteering', { id, groupid, action: 'RemoveGroup' })
   }
 
   setPhoto(id, photoid) {
-    return this.$patchv2('/volunteering', { id, photoid, action: 'SetPhoto' })
+    return this.$patch('/volunteering', { id, photoid, action: 'SetPhoto' })
   }
 
   addDate(id, start, end) {
-    return this.$patchv2('/volunteering', { id, start, end, action: 'AddDate' })
+    return this.$patch('/volunteering', { id, start, end, action: 'AddDate' })
   }
 
   removeDate(id, dateid) {
-    return this.$patchv2('/volunteering', {
-      id,
-      dateid,
-      action: 'RemoveDate',
-    })
+    return this.$patch('/volunteering', { id, dateid, action: 'RemoveDate' })
   }
 
   del(id) {
-    return this.$requestv2('DELETE', '/volunteering/' + id, {})
+    return this.$del('/volunteering', { id })
   }
 
   renew(id) {
-    return this.$patchv2('/volunteering', { id, action: 'Renew' })
+    return this.$patch('/volunteering', { id, action: 'Renew' })
   }
 
   expire(id) {
-    return this.$patchv2('/volunteering', { id, action: 'Expire' })
+    return this.$patch('/volunteering', { id, action: 'Expire' })
   }
 }

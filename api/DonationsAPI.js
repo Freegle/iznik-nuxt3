@@ -11,7 +11,7 @@ export default class DonationsAPI extends BaseAPI {
   }
 
   add(userid, amount, date) {
-    return this.$putv2('/donations', { userid, amount, date })
+    return this.$put('/donations', { userid, amount, date })
   }
 
   stripeIntent(params) {

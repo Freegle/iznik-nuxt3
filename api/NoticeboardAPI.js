@@ -6,16 +6,16 @@ export default class NoticeboardAPI extends BaseAPI {
   }
 
   async add(data) {
-    const { id } = await this.$postv2('/noticeboard', data)
+    const { id } = await this.$post('/noticeboard', data)
     return id
   }
 
   save(data) {
-    return this.$patchv2('/noticeboard', data)
+    return this.$patch('/noticeboard', data)
   }
 
   action(data) {
-    return this.$postv2('/noticeboard', data)
+    return this.$post('/noticeboard', data)
   }
 
   del(id) {

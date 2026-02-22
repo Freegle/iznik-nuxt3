@@ -10,16 +10,14 @@ export default class AddressAPI extends BaseAPI {
   }
 
   add(data) {
-    return this.$postv2('/address', data)
+    return this.$put('/address', data)
   }
 
   update(data) {
-    return this.$patchv2('/address', data)
+    return this.$patch('/address', data)
   }
 
   del(id) {
-    return this.$requestv2('DELETE', '/address/' + id, {
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return this.$del('/address', { id })
   }
 }

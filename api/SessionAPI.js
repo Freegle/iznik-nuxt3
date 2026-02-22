@@ -61,11 +61,11 @@ export default class SessionAPI extends BaseAPI {
   }
 
   lostPassword(email, log) {
-    return this.$postv2('/session', { action: 'LostPassword', email }, log)
+    return this.$post('/session', { action: 'LostPassword', email }, log)
   }
 
   unsubscribe(email, log) {
-    return this.$postv2('/session', { action: 'Unsubscribe', email }, log)
+    return this.$post('/session', { action: 'Unsubscribe', email }, log)
   }
 
   forget() {
