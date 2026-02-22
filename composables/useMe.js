@@ -7,8 +7,7 @@ import { useTeamStore } from '~/stores/team'
 
 let fetchingPromise = null
 
-export async function fetchMe(hitServer, components) {
-  // MT components added
+export async function fetchMe(hitServer) {
   const authStore = useAuthStore()
 
   // We can be called in several ways.
@@ -28,12 +27,6 @@ export async function fetchMe(hitServer, components) {
   // Because multiple pages/components may call fetchMe to ensure that they have data they need, we
   // want to minimise the number of calls.  We have some fairly complex logic below to keep the number of parallel
   // calls down and return earlier if we happen to already be fetching what we need.
-
-  if (!components) components = [] // MT
-  // const miscStore = useMiscStore()
-  // if (miscStore.modtools) { // TODO Why did I add this?
-  //  components.push('expectedreplies')
-  // }
 
   let needToFetch = false
 
@@ -58,7 +51,7 @@ export async function fetchMe(hitServer, components) {
   }
 
   if (needToFetch) {
-    fetchingPromise = authStore.fetchUser(components) // MT
+    fetchingPromise = authStore.fetchUser()
 
     if (hitServer) {
       // We need to wait for the server before returning.

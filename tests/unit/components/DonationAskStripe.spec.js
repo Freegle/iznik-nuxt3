@@ -14,14 +14,8 @@ vi.mock('~/api', () => ({
   default: () => mockApi,
 }))
 
-const mockRuntimeConfig = {
-  public: {
-    APIv1: 'http://localhost:8192',
-  },
-}
-
 vi.mock('#app', () => ({
-  useRuntimeConfig: () => mockRuntimeConfig,
+  useRuntimeConfig: () => ({ public: {} }),
 }))
 
 vi.mock('~/stores/mobile', () => ({

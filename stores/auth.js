@@ -298,20 +298,12 @@ export const useAuthStore = defineStore({
 
       this.loginCount++
     },
-    async fetchUser(components) {
-      // ModTools passes components like ['work'] to fetch moderator work counts
+    async fetchUser() {
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
 
-      // Handle backwards compatibility - components might be boolean from old callers
-      if (typeof components === 'boolean') components = []
-      if (!components) components = []
-      components = ['me', ...components]
-
-      const miscStore = useMiscStore()
-
-      // Try V2 API first (Go backend) - works for both Freegle and ModTools
+      // Use V2 API (Go backend) - works for both Freegle and ModTools
       if (this.auth.jwt || this.auth.persistent) {
         try {
           const sessionData = await this.$api.session.fetchv2(
@@ -325,79 +317,17 @@ export const useAuthStore = defineStore({
             me = sessionData.me
             groups = sessionData.groups || []
 
-            // V2 now returns work/discourse/configid
             if (sessionData.work) this.work = sessionData.work
             if (sessionData.discourse) this.discourse = sessionData.discourse
+
+            // Store auth tokens from V2 response
+            if (sessionData.jwt || sessionData.persistent) {
+              this.setAuth(sessionData.jwt, sessionData.persistent)
+            }
           }
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
-        }
-
-        if (me && miscStore.modtools && process.client) {
-          // ModTools: fetch permissions from V1 in background (V2 doesn't return permissions yet)
-          this.$api.session
-            .fetch({
-              webversion: this.config.public.BUILD_DATE,
-              components,
-            })
-            .then((ret) => {
-              if (ret && ret.me) {
-                if (ret.me.permissions && this.user) {
-                  this.user.permissions = ret.me.permissions
-                }
-              }
-            })
-            .catch((e) => {
-              console.log('Exception on old API', e)
-            })
-        }
-      }
-
-      // Fallback to V1 if V2 didn't work (e.g., no JWT/persistent yet, or V2 failed)
-      if (!me) {
-        const ret = await this.$api.session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components,
-        })
-
-        let persistent = null
-        let jwt = null
-
-        if (ret) {
-          ;({ me, groups, persistent, jwt } = ret)
-
-          if (ret.work) this.work = ret.work
-          if (ret.discourse) this.discourse = ret.discourse
-
-          let permissions = null
-
-          if (me) {
-            permissions = me.permissions
-            this.setAuth(jwt, persistent)
-          }
-
-          if (jwt) {
-            // Now use the JWT on the V2 API for up-to-date data.
-            try {
-              const sessionData = await this.$api.session.fetchv2({
-                webversion: this.config.public.BUILD_DATE,
-              })
-
-              if (sessionData && sessionData.me) {
-                me = sessionData.me
-                me.permissions = permissions
-                groups = sessionData.groups || []
-
-                // Use V2 work/discourse (more current)
-                if (sessionData.work) this.work = sessionData.work
-                if (sessionData.discourse)
-                  this.discourse = sessionData.discourse
-              }
-            } catch (e) {
-              console.log('exception')
-            }
-          }
         }
       }
 

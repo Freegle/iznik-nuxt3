@@ -7,6 +7,10 @@ export default class ModConfigsAPI extends BaseAPI {
     })
   }
 
+  listConfigs(params) {
+    return this.$getv2('/modconfig', params)
+  }
+
   async fetchConfig(params) {
     const ret = await this.$getv2('/modconfig', params)
     return ret.config

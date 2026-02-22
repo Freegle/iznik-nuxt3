@@ -23,6 +23,7 @@ import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
 import EmailTrackingAPI from './EmailTrackingAPI.js'
+import ExportAPI from './ExportAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
@@ -66,6 +67,7 @@ interface API {
   domain: DomainAPI;
   donations: DonationsAPI;
   emailtracking: EmailTrackingAPI;
+  export: ExportAPI;
   giftaid: GiftAidAPI;
   group: GroupAPI;
   image: ImageAPI;

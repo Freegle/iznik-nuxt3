@@ -101,7 +101,6 @@ export default class MessageAPI extends BaseAPI {
   }
 
   async getIllustration(item) {
-    // Try Go API first (fast, cache-only), fall back to PHP API (can generate)
     try {
       const result = await this.$getv2(
         '/illustration',
@@ -113,19 +112,7 @@ export default class MessageAPI extends BaseAPI {
         return result.illustration
       }
     } catch (e) {
-      // Go API returned error or cache miss - fall back to PHP
-    }
-
-    // Fall back to PHP API which can generate new illustrations
-    try {
-      const result = await this.$get('/illustration', { item }, false)
-
-      if (result.ret === 0 && result.illustration) {
-        return result.illustration
-      }
-    } catch (e) {
-      // PHP API also failed
-      console.log('Illustration fetch failed:', e.message)
+      // Cache miss or error - no illustration available
     }
 
     return null

@@ -16,9 +16,8 @@ export const useModConfigStore = defineStore({
     },
 
     async fetch(params) {
-      const { configs } = await api(this.config).session.fetch({
-        components: params.all ? ['allconfigs'] : ['configs'],
-        modtools: true,
+      const configs = await api(this.config).modconfigs.listConfigs({
+        all: params.all,
       })
 
       if (configs) {

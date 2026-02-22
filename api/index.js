@@ -21,6 +21,7 @@ import DashboardAPI from './DashboardAPI.js'
 import DomainAPI from './DomainAPI.js'
 import DonationsAPI from './DonationsAPI.js'
 import EmailTrackingAPI from './EmailTrackingAPI.js'
+import ExportAPI from './ExportAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
@@ -66,6 +67,7 @@ export default (config) => {
     domain: new DomainAPI(options),
     donations: new DonationsAPI(options),
     emailtracking: new EmailTrackingAPI(options),
+    export: new ExportAPI(options),
     giftaid: new GiftAidAPI(options),
     group: new GroupAPI(options),
     image: new ImageAPI(options),

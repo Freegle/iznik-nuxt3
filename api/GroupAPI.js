@@ -27,6 +27,10 @@ export default class GroupAPI extends BaseAPI {
     return await this.$getv2('/group/' + id + '/message')
   }
 
+  fetchWork() {
+    return this.$getv2('/group/work')
+  }
+
   async patch(params) {
     await this.$patchv2('/group', params)
   }
