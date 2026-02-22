@@ -439,10 +439,6 @@ export default defineNuxtConfig({
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
         'twemoji',
-        '@vue-leaflet/vue-leaflet',
-        'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
-        'wicket/wicket-leaflet',
         '@vueup/vue-quill',
         'quill-html-edit-button',
         'vue-datepicker-next',
@@ -467,6 +463,20 @@ export default defineNuxtConfig({
                 return 'vendor-intl'
               if (id.includes('quill') || id.includes('parchment'))
                 return 'vendor-editor'
+              if (
+                id.includes('bootstrap-vue-next') ||
+                id.includes('bootstrap/js')
+              )
+                return 'vendor-bvn'
+              if (id.includes('@stripe')) return 'vendor-stripe'
+              if (
+                id.includes('@turf') ||
+                id.includes('supercluster') ||
+                id.includes('kdbush')
+              )
+                return 'vendor-geo'
+              if (id.includes('dayjs')) return 'vendor-dayjs'
+              if (id.includes('@capacitor')) return 'vendor-capacitor'
             }
           },
         },

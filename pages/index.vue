@@ -122,9 +122,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
-import MainFooter from '~/components/MainFooter'
-import BreakpointFettler from '~/components/BreakpointFettler.vue'
-import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import FreeglerPhotoGrid from '~/components/FreeglerPhotoGrid.vue'
 import ProxyImage from '~/components/ProxyImage.vue'
 import {
@@ -139,6 +136,16 @@ import {
 } from '#imports'
 import Api from '~/api'
 
+const MainFooter = defineAsyncComponent(() =>
+  import('~/components/MainFooter')
+)
+const BreakpointFettler = defineAsyncComponent(() =>
+  import('~/components/BreakpointFettler.vue')
+)
+const PlaceAutocomplete = defineAsyncComponent(() =>
+  import('~/components/PlaceAutocomplete.vue')
+)
+import ExternalLink from '~/components/ExternalLink.vue'
 const MobileVisualiseList = defineAsyncComponent(() =>
   import('~/components/MobileVisualiseList')
 )

@@ -2,7 +2,7 @@
   <NuxtPicture
     :format="format"
     :fit="fit"
-    :preload="preload"
+    :preload="preloadValue"
     provider="weserv"
     :src="fullSrc"
     :modifiers="modifiers"
@@ -13,12 +13,11 @@
     :loading="preload ? 'eager' : loading"
     :sizes="sizes"
     :placeholder="placeholder"
+    :img-attrs="imgAttrsComputed"
     @error="brokenImage"
   />
 </template>
 <script setup>
-import * as Sentry from '@sentry/browser'
-
 const props = defineProps({
   src: {
     type: String,
@@ -84,12 +83,30 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  fetchpriority: {
+    type: String,
+    required: false,
+    default: null,
+  },
 })
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
 
+const preloadValue = computed(() => {
+  if (!props.preload) return false
+  if (props.fetchpriority) return { fetchPriority: props.fetchpriority }
+  return true
+})
+
+const imgAttrsComputed = computed(() => {
+  if (props.fetchpriority) return { fetchpriority: props.fetchpriority }
+  return undefined
+})
+
 if (process.client && props.src.includes('gimg_0.jpg')) {
-  Sentry.captureMessage('Broken image: ' + props.src)
+  import('@sentry/browser').then((Sentry) => {
+    Sentry.captureMessage('Broken image: ' + props.src)
+  })
 }
 
 const fullSrc = computed(() => {
