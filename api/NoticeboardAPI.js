@@ -1,8 +1,12 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class NoticeboardAPI extends BaseAPI {
-  fetch(params) {
-    return this.$get('/noticeboard', params)
+  fetch(id) {
+    return this.$getv2('/noticeboard/' + id)
+  }
+
+  fetchList(params) {
+    return this.$getv2('/noticeboard', params)
   }
 
   async add(data) {
