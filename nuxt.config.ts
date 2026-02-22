@@ -896,15 +896,12 @@ export default defineNuxtConfig({
             checkCookieYes();
             `
                 : `
-            // No CookieYes configured (dev environment) - defer ad loading until
-            // after initial page render so PSI/performance is comparable to production
-            // where CookieYes consent introduces a natural delay.
-            console.log('No CookieYes to load, deferring ads until page idle')
-            window.addEventListener('load', function() {
-              requestIdleCallback
-                ? requestIdleCallback(window.postCookieYes)
-                : setTimeout(window.postCookieYes, 2000);
-            });
+            // No CookieYes configured (dev environment) - defer ad loading to
+            // simulate the natural delay that CookieYes consent introduces on
+            // production (user must read banner + click Accept, typically 5-15s).
+            // Without this, ads load instantly and dominate PSI measurements.
+            console.log('No CookieYes to load, deferring ads to simulate consent delay')
+            setTimeout(window.postCookieYes, 8000);
             `)
               : `
             // App build without cookies - no consent or ads needed
