@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
+import { useUserStore } from '~/stores/user'
 
 export const useCommentStore = defineStore({
   id: 'comment',
@@ -23,14 +24,48 @@ export const useCommentStore = defineStore({
         }
         delete params.context
       }
+
       const data = await api(this.config).comment.fetch(params)
+
       if (params && params.id) {
-        this.list[data.comment.id] = data.comment
+        // V2 single: flat comment returned directly (no wrapper)
+        this.list[data.id] = data
+        await this._fetchUsersForComments([data])
       } else {
+        // V2 list: {comments: [...], context: {...}}
         for (const comment of data.comments) {
           this.list[comment.id] = comment
         }
         this.context = data.context
+
+        await this._fetchUsersForComments(data.comments)
+      }
+    },
+    async _fetchUsersForComments(comments) {
+      // Collect unique user IDs from flat comments
+      const userIds = new Set()
+      for (const c of comments) {
+        if (c.userid) userIds.add(c.userid)
+        if (c.byuserid) userIds.add(c.byuserid)
+      }
+
+      if (userIds.size === 0) return
+
+      // Fetch users via user store (uses batching/caching)
+      const userStore = useUserStore()
+      await Promise.all([...userIds].map((id) => userStore.fetch(id)))
+
+      // Attach user objects to comments in our list
+      for (const c of comments) {
+        const stored = this.list[c.id]
+        if (!stored) continue
+
+        if (c.userid) {
+          stored.user = userStore.list[c.userid] || { id: c.userid }
+        }
+        if (c.byuserid) {
+          stored.byuser = userStore.list[c.byuserid] || { id: c.byuserid }
+        }
       }
     },
   },
