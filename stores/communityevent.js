@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import api from '~/api'
 import { earliestDate, addStrings } from '~/composables/useTimeFormat'
 import { useAuthStore } from '~/stores/auth'
+import { useMiscStore } from '@/stores/misc'
 
 export const useCommunityEventStore = defineStore({
   id: 'communityevent',
@@ -11,6 +12,7 @@ export const useCommunityEventStore = defineStore({
     list: {},
     forUser: [],
     forGroup: [],
+    context: false,
   }),
   actions: {
     init(config) {
@@ -21,16 +23,60 @@ export const useCommunityEventStore = defineStore({
       this.list = {}
       this.forUser = []
       this.forGroup = []
+      this.context = false
     },
-    async fetchPending() {
-      // V2 pattern: get IDs of pending events, then fetch each individually.
-      const ids =
-        (await api(this.config).communityevent.list({ pending: true })) || []
+    async fetchMT(params) {
+      const data = await api(this.config).communityevent.fetchMT(params)
+      let items = []
+      if (params && params.id) {
+        items = [data.communityevent]
+      } else {
+        items = data.communityevents
+        this.context = data.context
+      }
+      const done = [] // Seem to get lots of repeats so remove them
+      for (let j = 0; j < items.length; j++) {
+        const item = items[j]
+        if (done.includes(item.id)) continue
+        done.push(item.id)
+        item.earliestDate = earliestDate(item.dates)
+        item.earliestDateOfAll = earliestDate(item.dates, true)
+        addStrings(item, true)
+        for (let i = 0; i < item.dates.length; i++) {
+          const start = dayjs(item.dates[i].start)
+          const end = dayjs(item.dates[i].end)
+          item.dates[i].starttime = start.format('HH:mm')
+          item.dates[i].start = start.format('YYYY-MM-DD')
+          item.dates[i].endtime = end.format('HH:mm')
+          item.dates[i].end = end.format('YYYY-MM-DD')
+        }
+        // Fix up userid
+        if (item.user) item.userid = item.user.id
 
-      await Promise.all(ids.map((id) => this.fetch(id, true)))
+        // Convert array of groups to array of groupids
+        const groups = []
+        for (const g of item.groups) {
+          groups.push(g.id)
+        }
+        item.groups = groups
+
+        // Get photo into expected field
+        if (item.photo) item.image = item.photo
+
+        this.list[item.id] = item
+      }
     },
     async fetch(id, force) {
       try {
+        const miscStore = useMiscStore()
+        if (miscStore.modtools) {
+          await this.fetchMT({
+            id,
+            limit: 1,
+            pending: true,
+          })
+          return this.list[id]
+        }
         if (force || !this.list[id]) {
           if (this.fetching[id]) {
             await this.fetching[id]

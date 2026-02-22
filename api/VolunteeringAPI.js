@@ -5,8 +5,12 @@ export default class VolunteeringAPI extends BaseAPI {
     return this.$getv2('/volunteering/' + id, {}, logError)
   }
 
-  list(params) {
-    return this.$getv2('/volunteering', params)
+  fetchMT(params) {
+    return this.$get('/volunteering', params)
+  }
+
+  list(id) {
+    return this.$getv2('/volunteering')
   }
 
   listGroup(id) {

@@ -225,10 +225,7 @@ test.describe('Homepage tests', () => {
       `[DEBUG] Footer container found in ${Date.now() - footerStart}ms`
     )
 
-    // Breakpoint-specific tests - unified layout but different photo displays
-    // xs/sm: Single photo frame with .hero-line1 slogan
-    // md+: Carousel with .slogan-line1 slogan (inside carousel component)
-    const isMobilePhotoFrame = bp.name === 'xs' || bp.name === 'sm'
+    // All breakpoints use the same unified layout with photo grid + glass card overlay
     console.log(`[DEBUG] Starting breakpoint-specific tests for ${bp.name}`)
 
     // Common elements at all breakpoints
@@ -247,31 +244,13 @@ test.describe('Homepage tests', () => {
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(`[DEBUG] Sample grid found in ${Date.now() - visualiseStart}ms`)
 
-    if (isMobilePhotoFrame) {
-      console.log(`[DEBUG] Running mobile photo frame (${bp.name}) tests`)
-
-      // On xs/sm: Single photo frame with .hero-line1 slogan
-      console.log(`[DEBUG] Waiting for mobile slogan text (.hero-line1)`)
-      const mobileHeaderStart = Date.now()
-      await page
-        .locator('.hero-line1:has-text("Share the love")')
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] Mobile slogan found in ${Date.now() - mobileHeaderStart}ms`
-      )
-    } else {
-      console.log(`[DEBUG] Running carousel (${bp.name}) tests`)
-
-      // On md+: Carousel with .slogan-line1 slogan
-      console.log(`[DEBUG] Waiting for carousel slogan text (.slogan-line1)`)
-      const carouselSloganStart = Date.now()
-      await page
-        .locator('.slogan-line1:has-text("Share the love")')
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-      console.log(
-        `[DEBUG] Carousel slogan found in ${Date.now() - carouselSloganStart}ms`
-      )
-    }
+    // Slogan uses .slogan-line1 at all breakpoints (unified glass card layout)
+    console.log(`[DEBUG] Waiting for slogan text (.slogan-line1)`)
+    const sloganStart = Date.now()
+    await page
+      .locator('.slogan-line1:has-text("Share the love")')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Slogan found in ${Date.now() - sloganStart}ms`)
 
     console.log(`[DEBUG] Taking screenshot for ${bp.name}`)
     await takeTimestampedScreenshot(`homepage-${bp.name}`)

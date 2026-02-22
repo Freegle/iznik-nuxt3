@@ -2,7 +2,7 @@
   <div>
     <Highlighter
       v-if="message.matchedon"
-      :search-words="[message.matchedon.word]"
+      :search-words="[String(message.matchedon.word)]"
       :text-to-highlight="message.textbody"
       highlight-class-name="highlight"
       auto-escape

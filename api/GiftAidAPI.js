@@ -2,9 +2,12 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class GiftAidAPI extends BaseAPI {
   async get() {
-    // v2 API returns data directly without ret/status wrapper
-    const ret = await this.$getv2('/giftaid', {})
-    return ret
+    try {
+      // logError=false: v2 API returns 404 when user has no declaration
+      return await this.$getv2('/giftaid', {}, false)
+    } catch (e) {
+      return null
+    }
   }
 
   async list() {

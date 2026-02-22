@@ -9,12 +9,12 @@
             }}
           </b-col>
           <b-col cols="6" md="4">
-            <span v-if="!event.userid"> Added by the system </span>
+            <span v-if="!event.user.id"> Added by the system </span>
             <span v-else>
-              {{ eventUser?.displayname }}
+              {{ event.user.displayname }}
               <span class="text-muted">
                 <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                  event.userid
+                  event.user.id
                 }}
               </span>
             </span>
@@ -47,8 +47,8 @@
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <ChatButton
-          v-if="groups.length > 0 && event.userid"
-          :userid="event.userid"
+          v-if="groups.length > 0 && event.user.id"
+          :userid="event.user.id"
           :groupid="groups[0].id"
           title="Chat"
           variant="white"
@@ -67,10 +67,9 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useCommunityEventStore } from '~/stores/communityevent'
 import { useGroupStore } from '~/stores/group'
-import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
   event: {
@@ -81,25 +80,9 @@ const props = defineProps({
 
 const communityEventStore = useCommunityEventStore()
 const groupStore = useGroupStore()
-const userStore = useUserStore()
 
 const showModal = ref(false)
 const eventmodal = ref(null)
-
-// Fetch user details for display
-watch(
-  () => props.event?.userid,
-  (userid) => {
-    if (userid) {
-      userStore.fetch(userid)
-    }
-  },
-  { immediate: true }
-)
-
-const eventUser = computed(() => {
-  return props.event?.userid ? userStore.byId(props.event.userid) : null
-})
 
 const groups = computed(() => {
   const ret = []

@@ -377,11 +377,15 @@ export default class BaseAPI {
           )
         }
 
-        // URL encode the parameters, joining arrays as comma-separated for Go API
+        // URL encode the parameters, handling arrays specially for PHP
+        // PHP expects arrays as key[]=value1&key[]=value2
         const urlParams = new URLSearchParams()
         for (const [key, value] of Object.entries(config.params)) {
           if (Array.isArray(value)) {
-            urlParams.append(key, value.join(','))
+            // PHP array format: key[]=value1&key[]=value2
+            for (const item of value) {
+              urlParams.append(key + '[]', item)
+            }
           } else {
             urlParams.append(key, value)
           }

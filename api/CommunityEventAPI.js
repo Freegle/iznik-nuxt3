@@ -1,12 +1,16 @@
 import BaseAPI from '@/api/BaseAPI'
 
 export default class CommunityEventAPI extends BaseAPI {
+  fetchMT(params) {
+    return this.$get('/communityevent', params)
+  }
+
   fetch(id, logError = true) {
     return this.$getv2('/communityevent/' + id, {}, logError)
   }
 
-  list(params) {
-    return this.$getv2('/communityevent', params)
+  list(id) {
+    return this.$getv2('/communityevent')
   }
 
   listGroup(id) {
