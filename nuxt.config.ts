@@ -358,7 +358,6 @@ export default defineNuxtConfig({
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
-    'leaflet/dist/leaflet.css',
   ],
 
   build: {
@@ -458,6 +457,22 @@ export default defineNuxtConfig({
     build: {
       // Enable minification for production builds to reduce bundle size
       minify: production ? 'esbuild' : false,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('@sentry')) return 'vendor-sentry'
+              if (id.includes('leaflet') || id.includes('supercluster'))
+                return 'vendor-maps'
+              if (id.includes('tus-js-client')) return 'vendor-upload'
+              if (id.includes('@formatjs') || id.includes('intl-'))
+                return 'vendor-intl'
+              if (id.includes('quill') || id.includes('parchment'))
+                return 'vendor-editor'
+            }
+          },
+        },
+      },
     },
     css: {
       preprocessorOptions: {
@@ -991,6 +1006,38 @@ export default defineNuxtConfig({
           name: 'Awin',
           content: 'Awin',
         },
+      ],
+      link: [
+        {
+          rel: 'preconnect',
+          href: config.IMAGE_DELIVERY,
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'dns-prefetch',
+          href: config.IMAGE_DELIVERY,
+        },
+        {
+          rel: 'preconnect',
+          href: config.APIv2.replace('/apiv2', ''),
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'dns-prefetch',
+          href: config.APIv2.replace('/apiv2', ''),
+        },
+        ...(config.COOKIEYES
+          ? [
+              {
+                rel: 'preconnect',
+                href: 'https://cdn-cookieyes.com',
+              },
+              {
+                rel: 'dns-prefetch',
+                href: 'https://cdn-cookieyes.com',
+              },
+            ]
+          : []),
       ],
     },
   },

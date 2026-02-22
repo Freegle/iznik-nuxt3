@@ -1,6 +1,7 @@
 // plugins/leaflet.ts
 import { defineAsyncComponent } from 'vue'
 import { defineNuxtPlugin } from '#app'
+import 'leaflet/dist/leaflet.css'
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component(

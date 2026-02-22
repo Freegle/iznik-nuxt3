@@ -1,5 +1,5 @@
 <template>
-  <div class="photo-grid">
+  <div ref="gridRef" class="photo-grid">
     <div
       v-for="i in photoCount"
       :key="i"
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { useState } from '#imports'
+import { useState, ref, onMounted } from '#imports'
 
 const TOTAL_PHOTOS = 25
 
@@ -39,6 +39,31 @@ const photoCount = 15
 function photoSrc(index) {
   return '/landingpage/Freegler' + shuffledPhotos.value[index % TOTAL_PHOTOS] + '.jpeg'
 }
+
+const gridRef = ref(null)
+
+onMounted(() => {
+  if (!gridRef.value) return
+
+  const imgs = gridRef.value.querySelectorAll('img')
+
+  imgs.forEach((img) => {
+    if (img.complete && img.naturalWidth > 0) {
+      img.classList.add('loaded')
+    } else {
+      img.addEventListener(
+        'load',
+        () => img.classList.add('loaded'),
+        { once: true }
+      )
+      img.addEventListener(
+        'error',
+        () => img.classList.add('loaded'),
+        { once: true }
+      )
+    }
+  })
+})
 </script>
 
 <style scoped lang="scss">
@@ -72,6 +97,7 @@ function photoSrc(index) {
 .photo-cell {
   aspect-ratio: 3 / 4;
   overflow: hidden;
+  background: #d4b8a0;
 
   /* Mobile: show 4 (2x2) */
   &:nth-child(n+5) {
@@ -112,5 +138,14 @@ function photoSrc(index) {
   height: 100% !important;
   object-fit: cover;
   object-position: center 20%;
+}
+
+:deep(.grid-photo img) {
+  opacity: 0;
+  transition: opacity 0.4s ease-in;
+
+  &.loaded {
+    opacity: 1;
+  }
 }
 </style>
