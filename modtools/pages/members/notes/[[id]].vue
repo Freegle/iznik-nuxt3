@@ -65,7 +65,7 @@ const filteredComments = computed(() => {
       groupid.value === null ||
       groupid.value === c.groupid ||
       c.flag ||
-      c.byuserid === myid.value
+      c.byuser?.id === myid.value
     )
   })
 })

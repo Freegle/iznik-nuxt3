@@ -87,8 +87,8 @@ describe('members/notes/[[id]].vue page', () => {
 
     it('renders comment components for visible comments', async () => {
       mockCommentStore.sortedList = [
-        { id: 1, groupid: null, flag: false, byuserid: 2 },
-        { id: 2, groupid: null, flag: false, byuserid: 3 },
+        { id: 1, groupid: null, flag: false, byuser: { id: 2 } },
+        { id: 2, groupid: null, flag: false, byuser: { id: 3 } },
       ]
       const wrapper = mountComponent()
       wrapper.vm.show = 10
@@ -147,8 +147,8 @@ describe('members/notes/[[id]].vue page', () => {
     it('filteredComments includes my own comments regardless of group', () => {
       mockMyid.value = 5
       mockCommentStore.sortedList = [
-        { id: 1, groupid: 10, flag: false, byuserid: 5 },
-        { id: 2, groupid: 20, flag: false, byuserid: 3 },
+        { id: 1, groupid: 10, flag: false, byuser: { id: 5 } },
+        { id: 2, groupid: 20, flag: false, byuser: { id: 3 } },
       ]
       const wrapper = mountComponent()
       wrapper.vm.groupid = 20

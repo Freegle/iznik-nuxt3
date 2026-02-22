@@ -10,8 +10,7 @@ const mockNoticeboard = {
   lat: 51.5074,
   lng: -0.1278,
   added: '2024-01-15T10:00:00Z',
-  addedby: 42,
-  addedbyuser: { displayname: 'Test User' },
+  addedby: { displayname: 'Test User' },
   checks: [
     { id: 1, date: '2024-02-01', result: 'confirmed' },
     { id: 2, date: '2024-03-01', result: 'confirmed' },

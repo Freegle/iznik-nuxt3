@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import api from '~/api'
-import { useUserStore } from '~/stores/user'
 
 export const useNoticeboardStore = defineStore({
   id: 'noticeboard',
@@ -29,22 +28,15 @@ export const useNoticeboardStore = defineStore({
       })
     },
     async fetch(id) {
-      // V2: single GET returns flat noticeboard directly
-      const noticeboard = await api(this.config).noticeboard.fetch(id)
+      const { noticeboard, noticeboards } = await api(
+        this.config
+      ).noticeboard.fetch({
+        id,
+      })
 
-      this.list[id] = noticeboard
-
-      // Fetch user details for addedby and check userids
-      await this._fetchUsersForNoticeboard(noticeboard)
-
-      return this.list
-    },
-    async fetchList(params) {
-      const { noticeboards } = await api(this.config).noticeboard.fetchList(
-        params
-      )
-
-      if (noticeboards) {
+      if (noticeboard) {
+        this.list[id] = noticeboard
+      } else {
         for (const item of noticeboards) {
           this.list[item.id] = item
         }
@@ -53,40 +45,23 @@ export const useNoticeboardStore = defineStore({
       return this.list
     },
     async fetchAuthority(authorityid) {
-      return await this.fetchList({ authorityid })
-    },
-    async _fetchUsersForNoticeboard(noticeboard) {
-      const userIds = new Set()
+      const { noticeboard, noticeboards, members } = await api(
+        this.config
+      ).noticeboard.fetch({
+        authorityid,
+      })
 
-      if (noticeboard.addedby) {
-        userIds.add(noticeboard.addedby)
-      }
-
-      if (noticeboard.checks) {
-        for (const check of noticeboard.checks) {
-          if (check.userid) {
-            userIds.add(check.userid)
-          }
+      if (noticeboard) {
+        this.list[authorityid] = noticeboard
+      } else {
+        for (const item of noticeboards) {
+          this.list[item.id] = item
         }
+
+        this.members = members
       }
 
-      if (userIds.size === 0) return
-
-      const userStore = useUserStore()
-      await Promise.all([...userIds].map((id) => userStore.fetch(id)))
-
-      // Attach user objects
-      if (noticeboard.addedby) {
-        noticeboard.addedbyuser = userStore.list[noticeboard.addedby] || null
-      }
-
-      if (noticeboard.checks) {
-        for (const check of noticeboard.checks) {
-          if (check.userid) {
-            check.user = userStore.list[check.userid] || null
-          }
-        }
-      }
+      return this.list
     },
     async refresh(id) {
       await api(this.config).noticeboard.action({

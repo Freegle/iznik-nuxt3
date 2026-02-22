@@ -47,11 +47,14 @@
 
             <div v-if="parseFloat(amount)" class="payment-section">
               <DonationButton
-                v-if="payPalFallback"
+                v-if="payPalFallback && !isApp"
                 :key="amount + '-fallback'"
                 :text="'Donate £' + amount"
                 :value="amount"
               />
+              <p v-else-if="payPalFallback && isApp" class="text-muted">
+                Payment is temporarily unavailable. Please try again later.
+              </p>
               <StripeDonate
                 v-else
                 :key="amount + '-' + monthly + '-stripe'"
@@ -175,6 +178,7 @@ import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { buildHead } from '~/composables/useBuildHead'
 import { useAuthStore } from '~/stores/auth'
+import { useMobileStore } from '~/stores/mobile'
 import DonationButton from '~/components/DonationButton'
 import ExternalLink from '~/components/ExternalLink'
 import DonationThank from '~/components/DonationThank'
@@ -183,7 +187,9 @@ import StripeDonate from '~/components/StripeDonate'
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const authStore = useAuthStore()
+const mobileStore = useMobileStore()
 
+const isApp = ref(mobileStore.isApp)
 const monthly = ref(false)
 const success = ref(false)
 const payPalFallback = ref(false)

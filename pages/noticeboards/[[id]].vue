@@ -114,7 +114,7 @@ const goto = (noteboardId) => {
 await noticeboardStore.clear()
 
 if (!id || !noticeboardStore.list?.length) {
-  await noticeboardStore.fetchList()
+  await noticeboardStore.fetch()
 
   useHead(
     buildHead(

@@ -80,7 +80,7 @@
             <div v-else :class="subjectClass + ' font-weight-bold'">
               <Highlighter
                 v-if="message.matchedon"
-                :search-words="[message.matchedon.word]"
+                :search-words="[String(message.matchedon.word)]"
                 :text-to-highlight="eSubject"
                 highlight-class-name="highlight"
                 auto-escape
@@ -337,7 +337,7 @@
               >
                 <Highlighter
                   v-if="message.matchedon"
-                  :search-words="[message.matchedon.word]"
+                  :search-words="[String(message.matchedon.word)]"
                   :text-to-highlight="eBody"
                   highlight-class-name="highlight"
                   auto-escape
