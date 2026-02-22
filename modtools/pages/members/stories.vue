@@ -30,9 +30,6 @@ const stories = computed(() => {
 })
 
 onMounted(async () => {
-  await storyStore.fetchMT({
-    reviewed: 0,
-    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
-  })
+  await storyStore.fetchReviewing()
 })
 </script>

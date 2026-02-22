@@ -13,19 +13,29 @@ export const useStoryStore = defineStore({
       this.config = config
       this.fetching = {}
     },
-    async fetchMT(params) {
-      const { story, stories } = await api(this.config).stories.fetch(params)
-      if (params.id && story) {
-        this.list[story.id] = story
-      } else {
-        this.list = {}
+    async fetchReviewing() {
+      // V2 pattern: get IDs of stories needing review, then fetch each.
+      const ids =
+        (await api(this.config).stories.listv2({
+          reviewed: 0,
+          public: 0,
+          dontzapfalsey: true,
+        })) || []
 
-        if (stories) {
-          for (const story of stories) {
-            this.list[story.id] = story
-          }
-        }
-      }
+      this.list = {}
+      await Promise.all(ids.map((id) => this.fetch(id, true)))
+    },
+    async fetchNewsletterReviewing() {
+      // V2 pattern: get IDs of stories needing newsletter review.
+      // reviewed=1, public=1 are the defaults, so only need newsletterreviewed=0.
+      const ids =
+        (await api(this.config).stories.listv2({
+          newsletterreviewed: 0,
+          dontzapfalsey: true,
+        })) || []
+
+      this.list = {}
+      await Promise.all(ids.map((id) => this.fetch(id, true)))
     },
     async fetch(id, force) {
       if (force || !this.list[id]) {
@@ -42,7 +52,7 @@ export const useStoryStore = defineStore({
       return this.list[id]
     },
     async fetchRecent(limit) {
-      this.recent = await api(this.config).stories.listv2(limit)
+      this.recent = await api(this.config).stories.listv2({ limit })
     },
     async fetchByAuthority(authorityid, limit) {
       // Not used enough to bother caching.

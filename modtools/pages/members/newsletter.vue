@@ -30,10 +30,6 @@ const stories = computed(() => {
 })
 
 onMounted(async () => {
-  console.log('newsletter mounted')
-  await storyStore.fetchMT({
-    newsletter: true,
-    dontzapfalsey: true, // Stop BaseAPI from removing above zero value
-  })
+  await storyStore.fetchNewsletterReviewing()
 })
 </script>
