@@ -17,34 +17,22 @@
             </h1>
             <p class="hero-subtitle">Give and get stuff locally for free.</p>
             <div class="action-buttons">
-              <client-only>
-                <NuxtLink
-                  to="/give"
-                  class="action-btn action-btn--give"
-                  @click="clicked('give')"
-                >
-                  <v-icon icon="gift" class="action-btn__icon" />
-                  <span>Give</span>
-                </NuxtLink>
-                <NuxtLink
-                  to="/find"
-                  class="action-btn action-btn--find"
-                  @click="clicked('ask')"
-                >
-                  <v-icon icon="search" class="action-btn__icon" />
-                  <span>Find</span>
-                </NuxtLink>
-                <template #fallback>
-                  <a href="/give" class="action-btn action-btn--give">
-                    <span class="action-btn__icon-placeholder"></span>
-                    <span>Give</span>
-                  </a>
-                  <a href="/find" class="action-btn action-btn--find">
-                    <span class="action-btn__icon-placeholder"></span>
-                    <span>Find</span>
-                  </a>
-                </template>
-              </client-only>
+              <NuxtLink
+                to="/give"
+                class="action-btn action-btn--give"
+                @click="clicked('give')"
+              >
+                <v-icon icon="gift" class="action-btn__icon" />
+                <span>Give</span>
+              </NuxtLink>
+              <NuxtLink
+                to="/find"
+                class="action-btn action-btn--find"
+                @click="clicked('ask')"
+              >
+                <v-icon icon="search" class="action-btn__icon" />
+                <span>Find</span>
+              </NuxtLink>
             </div>
             <p class="browse-label">
               <v-icon icon="map-marker-alt" class="browse-icon" />
@@ -420,12 +408,6 @@ onBeforeUnmount(() => {
   justify-content: center;
   position: relative;
   top: -1px;
-}
-
-.action-btn__icon-placeholder {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
 }
 
 .browse-label {

@@ -361,6 +361,15 @@ export default defineNuxtConfig({
     'leaflet/dist/leaflet.css',
   ],
 
+  build: {
+    transpile: [
+      '@fortawesome/vue-fontawesome',
+      '@fortawesome/fontawesome-svg-core',
+      '@fortawesome/free-solid-svg-icons',
+      '@fortawesome/free-brands-svg-icons',
+    ],
+  },
+
   vite: {
     vue: {
       template: {
