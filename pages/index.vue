@@ -69,7 +69,9 @@
             </client-only>
             <p class="photo-credit">
               Photos of real freeglers by
-              <ExternalLink href="https://www.alexbamford.com/">Alex Bamford</ExternalLink>
+              <ExternalLink href="https://www.alexbamford.com/"
+                >Alex Bamford</ExternalLink
+              >
             </p>
           </div>
         </div>
@@ -95,7 +97,6 @@
           rel="noopener noreferrer"
         >
           <ProxyImage
-            preload
             alt="Get it on Google Play"
             class="app-badge"
             src="/en-play-badge.png"
@@ -108,7 +109,6 @@
           rel="noopener noreferrer"
         >
           <ProxyImage
-            preload
             alt="Download on the App Store"
             class="app-badge"
             src="/app-store-black-sm.png"
@@ -174,20 +174,6 @@ const head = buildHead(
     class: 'landing',
   }
 )
-
-// Preload some images to speed page load
-const userSite = runtimeConfig.public.USER_SITE
-const proxy = runtimeConfig.public.IMAGE_DELIVERY
-
-const logo = proxy + '?url=' + userSite + '/icon.png&output=webp&w=58'
-
-head.link = [
-  {
-    rel: 'preload',
-    as: 'image',
-    href: logo,
-  },
-]
 
 useHead(head)
 
