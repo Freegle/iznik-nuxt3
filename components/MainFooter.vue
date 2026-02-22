@@ -11,7 +11,6 @@
           class="sponsor-link test-sponsor-krystal"
         >
           <ProxyImage
-            preload
             src="/krystal.png"
             alt="Krystal Logo"
             class="sponsor-logo"
@@ -25,7 +24,6 @@
           class="sponsor-link test-sponsor-mythic"
         >
           <ProxyImage
-            preload
             src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
             class="sponsor-logo"
