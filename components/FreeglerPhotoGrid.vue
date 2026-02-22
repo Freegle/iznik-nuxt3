@@ -98,7 +98,7 @@ onMounted(() => {
 .photo-cell {
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: #3B8070;
+  background: $color-green--dark;
 
   /* Mobile: show 4 (2x2) */
   &:nth-child(n+5) {
