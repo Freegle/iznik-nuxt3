@@ -453,34 +453,6 @@ export default defineNuxtConfig({
     build: {
       // Enable minification for production builds to reduce bundle size
       minify: production ? 'esbuild' : false,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('@sentry')) return 'vendor-sentry'
-              if (id.includes('tus-js-client')) return 'vendor-upload'
-              if (id.includes('@formatjs') || id.includes('intl-'))
-                return 'vendor-intl'
-              if (id.includes('quill') || id.includes('parchment'))
-                return 'vendor-editor'
-              if (
-                id.includes('bootstrap-vue-next') ||
-                id.includes('bootstrap/js')
-              )
-                return 'vendor-bvn'
-              if (id.includes('@stripe')) return 'vendor-stripe'
-              if (
-                id.includes('@turf') ||
-                id.includes('supercluster') ||
-                id.includes('kdbush')
-              )
-                return 'vendor-geo'
-              if (id.includes('dayjs')) return 'vendor-dayjs'
-              if (id.includes('@capacitor')) return 'vendor-capacitor'
-            }
-          },
-        },
-      },
     },
     css: {
       preprocessorOptions: {
