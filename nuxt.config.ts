@@ -824,92 +824,92 @@ export default defineNuxtConfig({
               }
             };
 
-            function postGSI() {
-              if ('` +
-            config.COOKIEYES +
-            `' != 'null') {
-                // First we load CookieYes, which needs to be loaded before anything else, so that
-                // we have the cookie consent.
-                console.log('Load CookieYes');
-                loadScript('` +
-            config.COOKIEYES +
-            `', false)
-              
-                // Now we wait until the CookieYes script has set its own cookie.  
-                // This might be later than when the script has loaded in pure JS terms, but we
-                // need to be sure it's loaded before we can move on.
-                var retries = 10
-                
-                function checkCookieYes() {
-                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                    console.log('CookieYes cookie is set, so CookieYes is loaded');
-                    
-                    // Check that we have set the TCF string.  This only happens once the user 
-                    // has responded to the cookie banner.
-                  if (window.__tcfapi) {
-                    window.__tcfapi('getTCData', 2, (tcData, success) => {
-                      if (success && tcData && tcData.tcString) {
-                        console.log('TC data loaded and TC String set', tcData.tcString);
-                        window.postCookieYes();
-                      } else {
-                        console.log('Failed to get TC data or string, retry.')
-                        setTimeout(checkCookieYes, 100);
-                      }
-                    }, [1,2,3]);
+            // CookieYes and GSI load in parallel for faster startup.
+            // CookieYes has no dependency on GSI - they serve unrelated purposes:
+            //   - GSI: Google One Tap sign-in
+            //   - CookieYes: cookie consent banner and TCF compliance
+            // Previously CookieYes was loaded inside postGSI(), creating an unnecessary
+            // sequential bottleneck (GSI download must finish before CookieYes even starts).
+            ` +
+            ((!config.ISAPP || config.USE_COOKIES)
+              ? (config.COOKIEYES
+                ? `
+            // Load CookieYes immediately (no longer waits for GSI)
+            console.log('Load CookieYes');
+            loadScript('` + config.COOKIEYES + `', false)
+
+            // Wait until CookieYes has set its cookie and TCF consent is available.
+            var retries = 10
+
+            function checkCookieYes() {
+              if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                console.log('CookieYes cookie is set, so CookieYes is loaded');
+
+                // Check that we have set the TCF string.  This only happens once the user
+                // has responded to the cookie banner.
+                if (window.__tcfapi) {
+                  window.__tcfapi('getTCData', 2, (tcData, success) => {
+                    if (success && tcData && tcData.tcString) {
+                      console.log('TC data loaded and TC String set', tcData.tcString);
+                      window.postCookieYes();
                     } else {
-                      console.log('TCP API not yet loaded')
+                      console.log('Failed to get TC data or string, retry.')
                       setTimeout(checkCookieYes, 100);
                     }
-                  } else {
-                    console.log('CookieYes not yet loaded', retries)
-                    retries--
-                    
-                    if (retries > 0) {
-                      setTimeout(checkCookieYes, 100);
-                    } else {
-                      // It's not loaded within a reasonable length of time.  This may be because it's
-                      // blocked by a browser extension.  Try to fetch the script here - if this fails with 
-                      // an exception then it's likely to be because it's blocked.
-                      console.log('Try fetching script')
-                      fetch('` +
-            config.COOKIEYES +
-            `').then((response) => {
-                        console.log('Fetch returned', response)
-                        
-                        if (response.ok) {
-                          console.log('Worked, maybe just slow?')
-                          retries = 10  
-                          setTimeout(checkCookieYes, 100);
-                        } else {
-                          console.log('Failed - assume blocked and proceed')
-                          window.postCookieYes()
-                        }
-                      })
-                      .catch((error) => {
-                        // Assume blocked and proceed.
-                        console.log('Failed to fetch CookieYes script:', error.message)
-                        window.postCookieYes()
-                      });                    
-                    }
-                  }
+                  }, [1,2,3]);
+                } else {
+                  console.log('TCP API not yet loaded')
+                  setTimeout(checkCookieYes, 100);
                 }
-                
-                checkCookieYes();
               } else {
-                console.log('No CookieYes to load')
-                window.postCookieYes();
+                console.log('CookieYes not yet loaded', retries)
+                retries--
+
+                if (retries > 0) {
+                  setTimeout(checkCookieYes, 100);
+                } else {
+                  // It's not loaded within a reasonable length of time.  This may be because it's
+                  // blocked by a browser extension.  Try to fetch the script here - if this fails with
+                  // an exception then it's likely to be because it's blocked.
+                  console.log('Try fetching script')
+                  fetch('` + config.COOKIEYES + `').then((response) => {
+                    console.log('Fetch returned', response)
+
+                    if (response.ok) {
+                      console.log('Worked, maybe just slow?')
+                      retries = 10
+                      setTimeout(checkCookieYes, 100);
+                    } else {
+                      console.log('Failed - assume blocked and proceed')
+                      window.postCookieYes()
+                    }
+                  })
+                  .catch((error) => {
+                    // Assume blocked and proceed.
+                    console.log('Failed to fetch CookieYes script:', error.message)
+                    window.postCookieYes()
+                  });
+                }
               }
             }
-            ` +
-            (config.ISAPP
-              ? `
-            // App builds: Don't load GSI client script (apps use Capacitor plugin for Google login)
-            // For Android apps with cookies, call postGSI directly to load CookieYes and ads
-            ` + (config.USE_COOKIES ? `postGSI()` : ``)
+
+            checkCookieYes();
+            `
+                : `
+            // No CookieYes configured (dev environment) - proceed directly
+            console.log('No CookieYes to load')
+            window.postCookieYes();
+            `)
               : `
-            // Web builds: Load GSI client script and set callback to initialize ads
-            window.onGoogleLibraryLoad = postGSI
+            // App build without cookies - no consent or ads needed
+            `) +
+            (!config.ISAPP
+              ? `
+            // Web builds: Load GSI for Google One Tap sign-in (parallel with CookieYes)
             loadScript('https://accounts.google.com/gsi/client')
+            `
+              : `
+            // App builds: GSI not needed (apps use Capacitor plugin for Google login)
             `) +
             `
           } catch (e) {
@@ -1035,6 +1035,27 @@ export default defineNuxtConfig({
               {
                 rel: 'dns-prefetch',
                 href: 'https://cdn-cookieyes.com',
+              },
+            ]
+          : []),
+        ...(!config.ISAPP
+          ? [
+              {
+                rel: 'preconnect',
+                href: 'https://accounts.google.com',
+                crossorigin: 'anonymous',
+              },
+              {
+                rel: 'dns-prefetch',
+                href: 'https://accounts.google.com',
+              },
+            ]
+          : []),
+        ...(config.PLAYWIRE_PUB_ID
+          ? [
+              {
+                rel: 'dns-prefetch',
+                href: 'https://cdn.intergient.com',
               },
             ]
           : []),
