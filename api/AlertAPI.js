@@ -2,14 +2,14 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class AlertAPI extends BaseAPI {
   fetch(params) {
-    return this.$getv2('/alert', params)
+    return this.$get('/alert', params)
   }
 
   add(data) {
-    return this.$putv2('/alert', data)
+    return this.$put('/alert', data)
   }
 
   record(data) {
-    return this.$postv2('/alert', data)
+    return this.$post('/alert', data)
   }
 }

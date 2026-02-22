@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class IsochroneAPI extends BaseAPI {
   add(params) {
-    return this.$putv2('/isochrone', params)
+    return this.$put('/isochrone', params)
   }
 
   fetchv1(params) {
@@ -18,10 +18,10 @@ export default class IsochroneAPI extends BaseAPI {
   }
 
   patch(params) {
-    return this.$patchv2('/isochrone', params)
+    return this.$patch('/isochrone', params)
   }
 
   del(id) {
-    return this.$requestv2('DELETE', '/isochrone?id=' + id, {})
+    return this.$del('/isochrone', { id })
   }
 }

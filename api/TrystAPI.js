@@ -2,36 +2,33 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class TrystAPI extends BaseAPI {
   async add(data) {
-    const { id } = await this.$putv2('/tryst', data)
+    const { id } = await this.$put('/tryst', data)
     return id
   }
 
   edit(data) {
-    return this.$patchv2('/tryst', data)
+    return this.$patch('/tryst', data)
   }
 
   fetch(params) {
-    return this.$getv2('/tryst', params)
+    return this.$get('/tryst', params)
   }
 
   confirm(id) {
-    return this.$postv2('/tryst', {
+    return this.$post('/tryst', {
       id,
       confirm: true,
     })
   }
 
   decline(id) {
-    return this.$postv2('/tryst', {
+    return this.$post('/tryst', {
       id,
       decline: true,
     })
   }
 
   delete(data) {
-    // Go DELETE handler reads id from query params
-    return this.$requestv2('DELETE', '/tryst?id=' + data.id, {
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return this.$del('/tryst', data)
   }
 }

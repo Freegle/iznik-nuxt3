@@ -45,16 +45,17 @@ export const useStoryStore = defineStore({
       this.recent = await api(this.config).stories.listv2(limit)
     },
     async fetchByAuthority(authorityid, limit) {
-      // V2 pattern: get IDs filtered by authority, then fetch each.
-      const ids =
-        (await api(this.config).stories.listv2({
-          authorityid,
-          limit,
-        })) || []
+      // Not used enough to bother caching.
+      const ret = await api(this.config).stories.fetch({
+        authorityid,
+        limit,
+      })
 
-      const stories = await Promise.all(ids.map((id) => this.fetch(id, true)))
+      if (ret?.ret === 0) {
+        return ret.stories
+      }
 
-      return stories.filter(Boolean)
+      return []
     },
     async fetchByGroup(groupid, limit) {
       // Not used enough to bother caching.

@@ -6,9 +6,6 @@ export default class UserSearchAPI extends BaseAPI {
   }
 
   del(id) {
-    // Go DELETE handler reads id from query params
-    return this.$requestv2('DELETE', '/usersearch?id=' + id, {
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return this.$del('/usersearch', { id })
   }
 }

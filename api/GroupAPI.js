@@ -6,15 +6,17 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async listMT(params) {
-    return await this.$getv2('/group', params)
+    const { groups } = await this.$get('/groups', params)
+    return groups
   }
 
   async fetchGroupMT(id, polygon, showmods, sponsors, tnkey, log) {
-    return await this.$getv2(
-      '/group/' + id,
-      { polygon, showmods, sponsors, tnkey },
+    const { group } = await this.$get(
+      '/group',
+      { id, polygon, showmods, sponsors, tnkey },
       log
     )
+    return group
   }
 
   async fetch(id, log) {
@@ -28,18 +30,19 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async patch(params) {
-    await this.$patchv2('/group', params)
+    await this.$patch('/group', params)
   }
 
   async add(params) {
-    const { id } = await this.$postv2('/group', params)
+    const { id } = await this.$post('/group', params)
     return id
   }
 
   async removeFacebook(groupid, uid) {
-    await this.$postv2('/group/removefacebook', {
+    await this.$post('/group', {
       id: groupid,
       uid,
+      action: 'RemoveFacebook',
     })
   }
 }

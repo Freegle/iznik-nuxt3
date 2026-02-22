@@ -2,7 +2,7 @@ import BaseAPI from '@/api/BaseAPI'
 
 export default class LogsAPI extends BaseAPI {
   fetch(params) {
-    return this.$getv2('/logs', params)
+    return this.$get('/logs', params)
   }
 
   src(src) {

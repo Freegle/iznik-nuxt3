@@ -15,40 +15,36 @@ export default class StoriesAPI extends BaseAPI {
     )
   }
 
+  fetch(params) {
+    return this.$get('/stories', params)
+  }
+
   async add(data) {
-    const { id } = await this.$putv2('/story', data)
+    const { id } = await this.$put('/stories', data)
     return id
   }
 
   love(id) {
-    return this.$postv2('/story/like', { id })
+    return this.$post('/stories', { id, action: 'Like' })
   }
 
   unlove(id) {
-    return this.$postv2('/story/unlike', { id })
+    return this.$post('/stories', { id, action: 'Unlike' })
   }
 
   dontUseForPublicity(id) {
-    return this.$patchv2('/story', { id, reviewed: 1, public: 0 })
+    return this.$patch('/stories', { id, reviewed: 1, public: 0 })
   }
 
   useForPublicity(id) {
-    return this.$patchv2('/story', { id, reviewed: 1, public: 1 })
+    return this.$patch('/stories', { id, reviewed: 1, public: 1 })
   }
 
   useForNewsletter(id) {
-    return this.$patchv2('/story', {
-      id,
-      newsletterreviewed: 1,
-      newsletter: 1,
-    })
+    return this.$patch('/stories', { id, newsletterreviewed: 1, newsletter: 1 })
   }
 
   dontUseForNewsletter(id) {
-    return this.$patchv2('/story', {
-      id,
-      newsletterreviewed: 1,
-      newsletter: 0,
-    })
+    return this.$patch('/stories', { id, newsletterreviewed: 1, newsletter: 0 })
   }
 }

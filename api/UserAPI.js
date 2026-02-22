@@ -19,18 +19,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   async fetchMT(params) {
-    if (params.search) {
-      // Search mode - use dedicated search endpoint
-      const result = await this.$getv2('/user/search', { q: params.search })
-      return { users: result.users || [] }
-    }
-
-    // Single user fetch - use fetchmt endpoint
-    const user = await this.$getv2('/user/fetchmt', {
-      id: params.id,
-      modtools: params.info ? 'true' : undefined,
-    })
-    return { user }
+    return await this.$get('/user', params)
   }
 
   async fetchByEmail(email, logError = true) {
@@ -42,7 +31,7 @@ export default class UserAPI extends BaseAPI {
   }
 
   rate(id, rating, reason, text) {
-    return this.$postv2('/user', {
+    return this.$post('/user', {
       ratee: id,
       rating,
       action: 'Rate',
@@ -52,34 +41,34 @@ export default class UserAPI extends BaseAPI {
   }
 
   ratingReviewed(ratingid) {
-    return this.$postv2('/user', {
+    return this.$post('/user', {
       ratingid,
       action: 'RatingReviewed',
     })
   }
 
   unbounce(id) {
-    return this.$postv2('/user', { id, action: 'Unbounce' })
+    return this.$post('/user', { id, action: 'Unbounce' })
   }
 
   addEmail(id, email, primary) {
-    return this.$postv2('/user', { id, action: 'AddEmail', email, primary })
+    return this.$post('/user', { id, action: 'AddEmail', email, primary })
   }
 
   removeEmail(id, email) {
-    return this.$postv2('/user', { id, action: 'RemoveEmail', email })
+    return this.$post('/user', { id, action: 'RemoveEmail', email })
   }
 
   add(email, logError = true) {
-    return this.$putv2('/user', { email }, logError)
+    return this.$put('/user', { email }, logError)
   }
 
   signUp(params, logError = true) {
-    return this.$putv2('/user', params, logError)
+    return this.$put('/user', params, logError)
   }
 
   merge(email1, email2, id1, id2, reason) {
-    return this.$postv2('/user', {
+    return this.$post('/user', {
       email1,
       email2,
       id1,
@@ -90,31 +79,31 @@ export default class UserAPI extends BaseAPI {
   }
 
   save(event) {
-    return this.$patchv2('/user', event)
+    return this.$patch('/user', event)
   }
 
   muteOnChitChat(userid) {
-    return this.$patchv2('/user', {
+    return this.$patch('/user', {
       id: userid,
       newsfeedmodstatus: 'Suppressed',
     })
   }
 
   unMuteOnChitChat(userid) {
-    return this.$patchv2('/user', {
+    return this.$patch('/user', {
       id: userid,
       newsfeedmodstatus: 'Unmoderated',
     })
   }
 
   purge(id) {
-    return this.$delv2('/user', {
+    return this.$del('/user', {
       id,
     })
   }
 
   engaged(engageid) {
-    return this.$postv2('/user', {
+    return this.$post('/user', {
       engageid,
     })
   }

@@ -7,7 +7,7 @@ export default class DashboardAPI extends BaseAPI {
   }
 
   async fetchHeatmap(params) {
-    const { heatmap } = await this.$getv2('/dashboard', {
+    const { heatmap } = await this.$get('/dashboard', {
       heatmap: true,
     })
     return heatmap
