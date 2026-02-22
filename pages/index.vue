@@ -57,7 +57,9 @@
             </client-only>
             <p class="photo-credit">
               Photos of real freeglers by
-              <ExternalLink href="https://www.alexbamford.com/">Alex Bamford</ExternalLink>
+              <ExternalLink href="https://www.alexbamford.com/"
+                >Alex Bamford</ExternalLink
+              >
             </p>
           </div>
         </div>

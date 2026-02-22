@@ -1,10 +1,6 @@
 <template>
   <div ref="gridRef" class="photo-grid">
-    <div
-      v-for="i in photoCount"
-      :key="i"
-      class="photo-cell"
-    >
+    <div v-for="i in photoCount" :key="i" class="photo-cell">
       <ProxyImage
         :src="photoSrc(i - 1)"
         :preload="i <= 4"
@@ -37,7 +33,11 @@ const shuffledPhotos = useState('photo-grid-shuffle', () => {
 const photoCount = 15
 
 function photoSrc(index) {
-  return '/landingpage/Freegler' + shuffledPhotos.value[index % TOTAL_PHOTOS] + '.jpeg'
+  return (
+    '/landingpage/Freegler' +
+    shuffledPhotos.value[index % TOTAL_PHOTOS] +
+    '.jpeg'
+  )
 }
 
 const gridRef = ref(null)
@@ -51,19 +51,14 @@ onMounted(() => {
     if (img.complete && img.naturalWidth > 0) {
       img.classList.add('loaded')
     } else {
-      img.addEventListener(
-        'load',
-        () => img.classList.add('loaded'),
-        { once: true }
-      )
-      img.addEventListener(
-        'error',
-        () => img.classList.add('loaded'),
-        { once: true }
-      )
+      img.addEventListener('load', () => img.classList.add('loaded'), {
+        once: true,
+      })
+      img.addEventListener('error', () => img.classList.add('loaded'), {
+        once: true,
+      })
     }
   })
-
 })
 </script>
 
@@ -101,33 +96,33 @@ onMounted(() => {
   background: $color-green--dark;
 
   /* Mobile: show 4 (2x2) */
-  &:nth-child(n+5) {
+  &:nth-child(n + 5) {
     display: none;
   }
 
   /* Tablet: show 9 (3x3) */
   @include media-breakpoint-up(md) {
-    &:nth-child(n+5) {
+    &:nth-child(n + 5) {
       display: block;
     }
-    &:nth-child(n+10) {
+    &:nth-child(n + 10) {
       display: none;
     }
   }
 
   /* Desktop: show 12 (4x3) */
   @include media-breakpoint-up(lg) {
-    &:nth-child(n+10) {
+    &:nth-child(n + 10) {
       display: block;
     }
-    &:nth-child(n+13) {
+    &:nth-child(n + 13) {
       display: none;
     }
   }
 
   /* Wide desktop: show 15 (5x3) */
   @include media-breakpoint-up(xl) {
-    &:nth-child(n+13) {
+    &:nth-child(n + 13) {
       display: block;
     }
   }
