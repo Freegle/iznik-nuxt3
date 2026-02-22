@@ -7,7 +7,7 @@ import CommunityEventsPage from '~/modtools/pages/communityevents/[[groupid]].vu
 const mockCommunityEventStore = {
   list: {},
   clear: vi.fn(),
-  fetchPending: vi.fn(),
+  fetchMT: vi.fn(),
 }
 
 vi.mock('~/stores/communityevent', () => ({
@@ -20,6 +20,15 @@ const mockAuthStore = {
 
 vi.mock('@/stores/auth', () => ({
   useAuthStore: () => mockAuthStore,
+}))
+
+const mockMiscStore = {
+  get: vi.fn(),
+  set: vi.fn(),
+}
+
+vi.mock('@/stores/misc', () => ({
+  useMiscStore: () => mockMiscStore,
 }))
 
 describe('CommunityEventsPage', () => {
@@ -56,7 +65,7 @@ describe('CommunityEventsPage', () => {
     setActivePinia(createPinia())
     mockCommunityEventStore.list = {}
     mockAuthStore.work = { pendingevents: 5 }
-    mockCommunityEventStore.fetchPending.mockResolvedValue()
+    mockCommunityEventStore.fetchMT.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -138,7 +147,11 @@ describe('CommunityEventsPage', () => {
 
       await wrapper.vm.loadMore(mockState)
 
-      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalled()
+      expect(mockCommunityEventStore.fetchMT).toHaveBeenCalledWith({
+        context: null,
+        limit: 0,
+        pending: true,
+      })
       expect(mockState.complete).toHaveBeenCalled()
     })
 

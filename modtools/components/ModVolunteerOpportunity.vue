@@ -10,24 +10,29 @@
             }}
           </b-col>
           <b-col cols="6" md="4">
-            <span v-if="volunteering.userid">
-              {{ volUser?.displayname }}
+            <span v-if="volunteering.user">
+              {{ volunteering.user.displayname }}
               <span class="text-muted">
                 <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                  volunteering.userid
+                  volunteering.user.id
                 }}
               </span>
             </span>
             <span v-else> System added </span>
           </b-col>
           <b-col cols="12" md="4">
-            <span v-if="groups.length"> on {{ groups[0].nameshort }} </span>
+            <span v-if="volunteering.groupsmt && volunteering.groupsmt.length">
+              on {{ volunteering.groupsmt[0].nameshort }}
+            </span>
           </b-col>
         </b-row>
       </b-card-header>
       <b-card-body>
         <NoticeMessage
-          v-if="groups.length && groups[0].ourPostingStatus === 'PROHIBITED'"
+          v-if="
+            volunteering.groups.length &&
+            volunteering.groups[0].ourPostingStatus === 'PROHIBITED'
+          "
           variant="danger"
           class="mb-2"
         >
@@ -53,9 +58,9 @@
           v-if="
             volunteering.groups &&
             volunteering.groups.length &&
-            volunteering.userid
+            volunteering.user
           "
-          :userid="volunteering.userid"
+          :userid="volunteering.user.id"
           :groupid="volunteering.groups[0]"
           title="Chat"
           variant="white"
@@ -73,10 +78,8 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import { useVolunteeringStore } from '@/stores/volunteering'
-import { useGroupStore } from '~/stores/group'
-import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
   volunteering: {
@@ -86,38 +89,8 @@ const props = defineProps({
 })
 
 const volunteeringStore = useVolunteeringStore()
-const groupStore = useGroupStore()
-const userStore = useUserStore()
 
 const modalShown = ref(false)
-
-// Fetch user details for display
-watch(
-  () => props.volunteering?.userid,
-  (userid) => {
-    if (userid) {
-      userStore.fetch(userid)
-    }
-  },
-  { immediate: true }
-)
-
-const volUser = computed(() => {
-  return props.volunteering?.userid
-    ? userStore.byId(props.volunteering.userid)
-    : null
-})
-
-const groups = computed(() => {
-  const ret = []
-  props.volunteering?.groups?.forEach((id) => {
-    const group = groupStore?.get(id)
-    if (group) {
-      ret.push(group)
-    }
-  })
-  return ret
-})
 
 function edit() {
   modalShown.value = true
