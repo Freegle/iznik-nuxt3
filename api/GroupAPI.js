@@ -30,19 +30,18 @@ export default class GroupAPI extends BaseAPI {
   }
 
   async patch(params) {
-    await this.$patch('/group', params)
+    await this.$patchv2('/group', params)
   }
 
   async add(params) {
-    const { id } = await this.$post('/group', params)
+    const { id } = await this.$postv2('/group', params)
     return id
   }
 
   async removeFacebook(groupid, uid) {
-    await this.$post('/group', {
+    await this.$postv2('/group/removefacebook', {
       id: groupid,
       uid,
-      action: 'RemoveFacebook',
     })
   }
 }

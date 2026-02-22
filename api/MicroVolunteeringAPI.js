@@ -8,8 +8,7 @@ export default class MicroVolunteeringAPI extends BaseAPI {
   }
 
   response(params) {
-    // POST not yet migrated to v2, still uses v1
-    return this.$post('/microvolunteering', params)
+    return this.$postv2('/microvolunteering', params)
   }
 
   fetch(params) {
