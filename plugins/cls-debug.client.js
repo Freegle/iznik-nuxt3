@@ -1,7 +1,9 @@
 export default defineNuxtPlugin(() => {
   if (typeof PerformanceObserver === 'undefined') return
 
+  const CLS_THRESHOLD = 0.1
   let clsValue = 0
+  let reported = false
   const shifts = []
 
   const observer = new PerformanceObserver((list) => {
@@ -34,16 +36,43 @@ export default defineNuxtPlugin(() => {
           time: Math.round(entry.startTime),
           sources: details,
         })
-
-        console.warn(
-          `[CLS] shift=${entry.value.toFixed(4)} cumulative=${clsValue.toFixed(4)} time=${Math.round(entry.startTime)}ms`,
-          details
-        )
       }
     }
   })
 
   observer.observe({ type: 'layout-shift', buffered: true })
+
+  function reportToSentry() {
+    if (reported || clsValue < CLS_THRESHOLD) return
+    reported = true
+
+    const top5 = shifts
+      .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+      .slice(0, 5)
+
+    import('@sentry/browser').then((Sentry) => {
+      Sentry.withScope((scope) => {
+        scope.setLevel('warning')
+        scope.setTag('cls_value', clsValue.toFixed(3))
+        scope.setTag('viewport', `${window.innerWidth}x${window.innerHeight}`)
+        scope.setContext('cls_shifts', {
+          total_cls: clsValue.toFixed(4),
+          shift_count: shifts.length,
+          top_shifts: top5.map(
+            (s) =>
+              `${s.value} @ ${s.time}ms: ${s.sources.map((src) => src.selector).join(', ')}`
+          ),
+        })
+        Sentry.captureMessage(`CLS ${clsValue.toFixed(3)} exceeds threshold`)
+      })
+    })
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      reportToSentry()
+    }
+  })
 
   window.__getCLS = () => {
     console.table(shifts)
