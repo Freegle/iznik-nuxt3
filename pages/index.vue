@@ -38,23 +38,13 @@
               <v-icon icon="map-marker-alt" class="browse-icon" />
               Just browsing? See what's near you.
             </p>
-            <client-only>
-              <PlaceAutocomplete
-                class="browse-input"
-                input-id="placeautocomplete-mobile"
-                labeltext=""
-                labeltext-sr="Enter your location"
-                @selected="explorePlace($event)"
-              />
-              <template #fallback>
-                <input
-                  type="text"
-                  class="form-control browse-input-ssr"
-                  placeholder="Type your location"
-                  disabled
-                />
-              </template>
-            </client-only>
+            <PlaceAutocomplete
+              class="browse-input"
+              input-id="placeautocomplete-mobile"
+              labeltext=""
+              labeltext-sr="Enter your location"
+              @selected="explorePlace($event)"
+            />
             <p class="photo-credit">
               Photos of real freeglers by
               <ExternalLink href="https://www.alexbamford.com/">Alex Bamford</ExternalLink>
@@ -142,9 +132,7 @@ const MainFooter = defineAsyncComponent(() =>
 const BreakpointFettler = defineAsyncComponent(() =>
   import('~/components/BreakpointFettler.vue')
 )
-const PlaceAutocomplete = defineAsyncComponent(() =>
-  import('~/components/PlaceAutocomplete.vue')
-)
+import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import ExternalLink from '~/components/ExternalLink.vue'
 const MobileVisualiseList = defineAsyncComponent(() =>
   import('~/components/MobileVisualiseList')
@@ -470,27 +458,6 @@ onBeforeUnmount(() => {
   :deep(.btn),
   :deep(.autocomplete-clear) {
     display: none !important;
-  }
-
-  @include media-breakpoint-up(md) {
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* SSR fallback input */
-.browse-input-ssr {
-  width: 100%;
-  border: 1px solid $color-gray--light;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.9);
-  text-align: center;
-
-  &::placeholder {
-    color: $color-gray--normal;
-    text-align: center;
   }
 
   @include media-breakpoint-up(md) {
