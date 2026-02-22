@@ -913,7 +913,7 @@ export default defineNuxtConfig({
             `) +
             `
           } catch (e) {
-            console.error('Error initialising pbjs and googletag:', e.message);
+            console.error('Error initialising ads and consent:', e.message);
           }`,
         },
       ],

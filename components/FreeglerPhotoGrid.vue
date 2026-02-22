@@ -63,6 +63,7 @@ onMounted(() => {
       )
     }
   })
+
 })
 </script>
 
@@ -97,7 +98,7 @@ onMounted(() => {
 .photo-cell {
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: #d4b8a0;
+  background: #3B8070;
 
   /* Mobile: show 4 (2x2) */
   &:nth-child(n+5) {
