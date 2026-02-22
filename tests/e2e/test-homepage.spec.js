@@ -175,7 +175,35 @@ test.describe('Homepage tests', () => {
       .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(`[DEBUG] Location input found in ${Date.now() - placeStart}ms`)
 
-    // 3. App download links - unified layout uses .app-section at all breakpoints
+    // 3. Hero content checks - verify these BEFORE scrolling down to avoid
+    // overflow:hidden on hero-viewport causing Playwright to report elements as hidden
+    console.log(`[DEBUG] Starting hero content checks (before scrolling)`)
+
+    // Slogan uses .slogan-line1 at all breakpoints (unified glass card layout)
+    console.log(`[DEBUG] Waiting for slogan text (.slogan-line1)`)
+    const sloganStart = Date.now()
+    await page
+      .locator('.slogan-line1:has-text("Share the love")')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Slogan found in ${Date.now() - sloganStart}ms`)
+
+    // Subtitle text
+    console.log(`[DEBUG] Waiting for subtitle text`)
+    const subtitleStart = Date.now()
+    await page
+      .locator('text=Give and get stuff locally for free')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Subtitle found in ${Date.now() - subtitleStart}ms`)
+
+    // 4. Sample grid should be visible at all breakpoints
+    console.log(`[DEBUG] Waiting for sample-grid component`)
+    const visualiseStart = Date.now()
+    await page
+      .locator('.sample-grid')
+      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    console.log(`[DEBUG] Sample grid found in ${Date.now() - visualiseStart}ms`)
+
+    // 5. App download links - these require scrolling down
     console.log(
       `[DEBUG] Waiting for app download container with timeout ${timeouts.ui.appearance}ms`
     )
@@ -212,7 +240,7 @@ test.describe('Homepage tests', () => {
       `[DEBUG] App Store image found in ${Date.now() - appStoreStart}ms`
     )
 
-    // 4. Footer should always be visible
+    // 6. Footer should always be visible
     // Filter for visible footer since both mobile and desktop layouts exist in DOM
     console.log(
       `[DEBUG] Waiting for footer container with timeout ${timeouts.ui.appearance}ms`
@@ -223,36 +251,6 @@ test.describe('Homepage tests', () => {
     await footer.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
       `[DEBUG] Footer container found in ${Date.now() - footerStart}ms`
-    )
-
-    // All breakpoints use the same unified layout with photo grid + glass card overlay
-    console.log(`[DEBUG] Starting breakpoint-specific tests for ${bp.name}`)
-
-    // Common elements at all breakpoints
-    console.log(`[DEBUG] Waiting for subtitle text`)
-    const subtitleStart = Date.now()
-    await page
-      .locator('text=Give and get stuff locally for free')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-    console.log(`[DEBUG] Subtitle found in ${Date.now() - subtitleStart}ms`)
-
-    // Sample grid should be visible at all breakpoints
-    console.log(`[DEBUG] Waiting for sample-grid component`)
-    const visualiseStart = Date.now()
-    await page
-      .locator('.sample-grid')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-    console.log(`[DEBUG] Sample grid found in ${Date.now() - visualiseStart}ms`)
-
-    // Slogan uses .slogan-line1 at all breakpoints (unified glass card layout)
-    // Scroll back to top since we may have scrolled down to check the footer
-    console.log(`[DEBUG] Waiting for slogan text (.slogan-line1)`)
-    const sloganStart = Date.now()
-    const sloganLocator = page.locator('.slogan-line1:has-text("Share the love")')
-    await sloganLocator.scrollIntoViewIfNeeded()
-    await sloganLocator.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-    console.log(
-      `[DEBUG] Slogan found in ${Date.now() - sloganStart}ms`
     )
 
     console.log(`[DEBUG] Taking screenshot for ${bp.name}`)
