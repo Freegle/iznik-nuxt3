@@ -316,8 +316,6 @@ const graphOptions = computed(() => {
 
 const approvedSplit = (type) => {
   // We want to return the approved message count, adjusted by the message breakdown for this type.
-  if (!MessageBreakdown.value) return []
-
   type = type.replace('s', '')
 
   const factor =

@@ -60,7 +60,11 @@ onMounted(() => {
 async function loadMore($state) {
   busy.value = true
 
-  await communityEventStore.fetchPending()
+  await communityEventStore.fetchMT({
+    context: null,
+    limit: 0,
+    pending: true,
+  })
   $state.complete()
   busy.value = false
 }

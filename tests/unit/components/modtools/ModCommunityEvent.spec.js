@@ -19,22 +19,16 @@ vi.mock('~/stores/group', () => ({
   useGroupStore: () => mockGroupStore,
 }))
 
-const mockUserStore = {
-  fetch: vi.fn(),
-  byId: vi.fn(),
-}
-
-vi.mock('~/stores/user', () => ({
-  useUserStore: () => mockUserStore,
-}))
-
 describe('ModCommunityEvent', () => {
   const defaultProps = {
     event: {
       id: 123,
       pending: true,
       groups: [456],
-      userid: 789,
+      user: {
+        id: 789,
+        displayname: 'Test User',
+      },
     },
   }
 
@@ -42,11 +36,6 @@ describe('ModCommunityEvent', () => {
     id: 456,
     nameshort: 'TestGroup',
     ourPostingStatus: 'ALLOWED',
-  }
-
-  const mockUser = {
-    id: 789,
-    displayname: 'Test User',
   }
 
   function mountComponent(props = {}) {
@@ -110,8 +99,6 @@ describe('ModCommunityEvent', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockGroupStore.get.mockReturnValue(mockGroup)
-    mockUserStore.byId.mockReturnValue(mockUser)
-    mockUserStore.fetch.mockResolvedValue(mockUser)
   })
 
   describe('rendering', () => {
@@ -132,21 +119,16 @@ describe('ModCommunityEvent', () => {
       expect(wrapper.text()).toContain('123')
     })
 
-    it('renders user displayname from user store', () => {
+    it('renders user displayname when user has id', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Test User')
     })
 
-    it('fetches user on mount', () => {
-      mountComponent()
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(789)
-    })
-
-    it('renders "Added by the system" when no userid', () => {
+    it('renders "Added by the system" when user has no id', () => {
       const wrapper = mountComponent({
         event: {
           ...defaultProps.event,
-          userid: 0,
+          user: { id: 0, displayname: '' },
         },
       })
       expect(wrapper.text()).toContain('Added by the system')
@@ -172,16 +154,16 @@ describe('ModCommunityEvent', () => {
       expect(wrapper.text()).toContain('Delete')
     })
 
-    it('renders ChatButton when groups and userid exist', () => {
+    it('renders ChatButton when groups and user exist', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.chat-button').exists()).toBe(true)
     })
 
-    it('does not render ChatButton when no userid', () => {
+    it('does not render ChatButton when user has no id', () => {
       const wrapper = mountComponent({
         event: {
           ...defaultProps.event,
-          userid: 0,
+          user: { id: 0 },
         },
       })
       expect(wrapper.find('.chat-button').exists()).toBe(false)
