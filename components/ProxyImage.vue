@@ -2,7 +2,7 @@
   <NuxtPicture
     :format="format"
     :fit="fit"
-    :preload="preloadValue"
+    :preload="preload"
     provider="weserv"
     :src="fullSrc"
     :modifiers="modifiers"
@@ -11,7 +11,6 @@
     :width="width"
     :height="height"
     :loading="preload ? 'eager' : loading"
-    :img-attrs="preload ? { fetchpriority: 'high' } : undefined"
     :sizes="sizes"
     :placeholder="placeholder"
     @error="brokenImage"
@@ -88,11 +87,6 @@ const props = defineProps({
 })
 
 const isFluid = computed(() => (props.fluid ? 'img-fluid' : ''))
-
-const preloadValue = computed(() => {
-  if (!props.preload) return false
-  return { fetchPriority: 'high' }
-})
 
 if (process.client && props.src.includes('gimg_0.jpg')) {
   Sentry.captureMessage('Broken image: ' + props.src)

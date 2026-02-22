@@ -449,44 +449,6 @@ export default defineNuxtConfig({
     build: {
       // Enable minification for production builds to reduce bundle size
       minify: production ? 'esbuild' : false,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            // Split the massive vendor chunk into smaller, more cacheable pieces.
-            // The default splitVendorChunkPlugin puts everything into one ~970KB chunk.
-            if (id.includes('node_modules')) {
-              // Sentry - large error tracking library, not needed for initial render
-              if (id.includes('@sentry') || id.includes('@sentry-internal')) {
-                return 'vendor-sentry'
-              }
-              // core-js polyfills - only needed for older browsers
-              if (id.includes('core-js')) {
-                return 'vendor-polyfills'
-              }
-              // Leaflet maps - group into one chunk to avoid fragmentation
-              if (id.includes('leaflet') || id.includes('supercluster') || id.includes('wicket')) {
-                return 'vendor-maps'
-              }
-              // Uppy file upload - only needed on compose/upload pages
-              if (id.includes('@uppy') || id.includes('tus-js-client')) {
-                return 'vendor-upload'
-              }
-              // @formatjs intl polyfills - large, load separately
-              if (id.includes('@formatjs')) {
-                return 'vendor-intl'
-              }
-              // Rich text editor - only needed on compose pages
-              if (id.includes('quill') || id.includes('vue-quill')) {
-                return 'vendor-editor'
-              }
-              // Calendar - only needed on community events
-              if (id.includes('add-to-calendar') || id.includes('timezones-ical')) {
-                return 'vendor-calendar'
-              }
-            }
-          },
-        },
-      },
     },
     css: {
       preprocessorOptions: {
@@ -930,12 +892,6 @@ export default defineNuxtConfig({
             console.error('Error initialising pbjs and googletag:', e.message);
           }`,
         },
-      ],
-      link: [
-        { rel: 'preconnect', href: config.IMAGE_DELIVERY },
-        { rel: 'dns-prefetch', href: config.IMAGE_DELIVERY },
-        { rel: 'preconnect', href: config.APIv2 },
-        { rel: 'dns-prefetch', href: config.APIv2 },
       ],
       meta: [
         { charset: 'utf-8' },
