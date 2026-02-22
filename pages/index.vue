@@ -446,11 +446,6 @@ onBeforeUnmount(() => {
       border-color: $colour-success;
       background: $color-white;
       box-shadow: 0 0 0 2px rgba($colour-success, 0.15);
-      text-align: left;
-
-      &::placeholder {
-        text-align: left;
-      }
     }
   }
 
