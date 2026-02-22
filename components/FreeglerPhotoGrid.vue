@@ -11,7 +11,9 @@
         :loading="i > 4 ? 'lazy' : undefined"
         alt="Happy freegler with their freegled item. Photo by Alex Bamford."
         class-name="grid-photo"
-        sizes="(max-width: 576px) 50vw, (max-width: 768px) 33vw, (max-width: 992px) 25vw, 20vw"
+        :width="600"
+        :height="800"
+        sizes="(max-width: 576px) 188px, (max-width: 768px) 256px, 248px"
       />
     </div>
   </div>

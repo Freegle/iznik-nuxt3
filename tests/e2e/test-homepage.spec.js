@@ -245,11 +245,12 @@ test.describe('Homepage tests', () => {
     console.log(`[DEBUG] Sample grid found in ${Date.now() - visualiseStart}ms`)
 
     // Slogan uses .slogan-line1 at all breakpoints (unified glass card layout)
+    // Scroll back to top since we may have scrolled down to check the footer
     console.log(`[DEBUG] Waiting for slogan text (.slogan-line1)`)
     const sloganStart = Date.now()
-    await page
-      .locator('.slogan-line1:has-text("Share the love")')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
+    const sloganLocator = page.locator('.slogan-line1:has-text("Share the love")')
+    await sloganLocator.scrollIntoViewIfNeeded()
+    await sloganLocator.waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
     console.log(
       `[DEBUG] Slogan found in ${Date.now() - sloganStart}ms`
     )
