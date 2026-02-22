@@ -1,7 +1,12 @@
 // We list the icons we use explicitly because this reduces our bundle size.
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library, config } from '@fortawesome/fontawesome-svg-core'
+
+// Prevent fontawesome from injecting CSS via JavaScript at runtime.
+// The CSS is already loaded via nuxt.config.ts css array, so auto-injection
+// causes duplicate styles and SSR hydration mismatches.
+config.autoAddCss = false
 import {
   faAddressBook,
   faArrowCircleLeft,
