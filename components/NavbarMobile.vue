@@ -100,12 +100,12 @@
         </b-dropdown>
       </b-navbar>
       <nav
-        v-if="loggedIn"
         class="navbar-bottom d-xl-none"
         :class="{
           hideNavBarBottom: navBarBottomHidden,
           showNavBarBottom: !navBarBottomHidden,
           stickyAdRendered,
+          'navbar-not-logged-in': !loggedIn,
         }"
       >
         <NavbarMobileItem
@@ -362,24 +362,32 @@ const me = computed(() => useAuthStore().user)
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   height: 67px;
   box-sizing: border-box;
+  --ad-offset: 0px;
 
   @include media-breakpoint-up(md) {
     height: 76px;
   }
 }
 
+.navbar-bottom.navbar-not-logged-in {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Use CSS custom property for ad offset so transforms can be combined
+   without causing layout shifts (margin-bottom causes CLS, transforms don't) */
 .navbar-bottom.stickyAdRendered {
-  margin-bottom: $sticky-banner-height-mobile;
+  --ad-offset: #{-$sticky-banner-height-mobile};
 
   @media (min-height: $mobile-tall) {
-    margin-bottom: $sticky-banner-height-mobile-tall;
+    --ad-offset: #{-$sticky-banner-height-mobile-tall};
   }
 
   @include media-breakpoint-up(md) {
-    margin-bottom: $sticky-banner-height-desktop;
+    --ad-offset: #{-$sticky-banner-height-desktop};
 
     @media (min-height: $desktop-tall) {
-      margin-bottom: $sticky-banner-height-desktop-tall;
+      --ad-offset: #{-$sticky-banner-height-desktop-tall};
     }
   }
 }
@@ -489,7 +497,7 @@ const me = computed(() => useAuthStore().user)
 }
 
 .hideNavBarBottom {
-  transform: translateY(150px);
+  transform: translateY(calc(150px - var(--ad-offset, 0px)));
   transition: transform 0.25s cubic-bezier(0.4, 0, 1, 1);
 
   .navpost {
@@ -499,7 +507,7 @@ const me = computed(() => useAuthStore().user)
 }
 
 .showNavBarBottom {
-  transform: translateY(0px);
+  transform: translateY(var(--ad-offset, 0px));
   transition: transform 0.35s cubic-bezier(0, 0, 0.2, 1);
 
   .navpost {

@@ -12,7 +12,7 @@
     <h2 class="visually-hidden">List of wanteds and offers</h2>
     <div id="visobserver" v-observe-visibility="visibilityChanged" />
 
-    <div v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me">
+    <div v-if="initialFetchDone && !loading && selectedSort === 'Unseen' && showCountsUnseen && me">
       <MessageListCounts
         v-if="browseCount && !search"
         :count="browseCount"
@@ -20,9 +20,11 @@
       />
     </div>
 
-    <!-- Split view: unseen messages, divider, seen messages -->
+    <!-- Split view: unseen messages, divider, seen messages.
+         Gated on initialFetchDone to prevent CLS from divider appearing then
+         disappearing as message de-duplication changes seen/unseen split. -->
     <template
-      v-if="!loading && selectedSort === 'Unseen' && showCountsUnseen && me"
+      v-if="initialFetchDone && !loading && selectedSort === 'Unseen' && showCountsUnseen && me"
     >
       <!-- Unseen messages grid -->
       <ScrollGrid
@@ -237,12 +239,20 @@ const messageStore = useMessageStore()
 const { me, myid } = useMe()
 
 // Get the initial messages to show in a single call.
+// Wait for fetch to complete before enabling the split view (unseen/seen),
+// because de-duplication after fetch can change seen/unseen categorization,
+// causing CLS when the divider section appears then disappears.
+const initialFetchDone = ref(false)
 const initialIds = props.messagesForList
   ?.slice(0, MIN_TO_SHOW)
   .map((message) => message.id)
 
 if (initialIds?.length) {
-  messageStore.fetchMultiple(initialIds)
+  messageStore.fetchMultiple(initialIds).finally(() => {
+    initialFetchDone.value = true
+  })
+} else {
+  initialFetchDone.value = true
 }
 
 // Data
