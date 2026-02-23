@@ -681,14 +681,18 @@ export function useReplyStateMachine(messageId) {
         // Persist the new user flag
         persistState()
 
-        // Fetch the user data
-        await fetchMe(true)
-        log('Fetched new user data', { myid: myid.value })
-
+        // Transition BEFORE fetchMe to prevent race condition:
+        // fetchMe triggers the `me` watcher which calls onLoginSuccess(),
+        // which also transitions to JOINING_GROUP and calls handleJoinGroup().
+        // By transitioning first, onLoginSuccess()'s guard
+        // (state === AUTHENTICATING) fails, preventing double execution.
         transitionTo(ReplyState.JOINING_GROUP, {
           event: ReplyEvent.REGISTRATION_SUCCESS,
           isNewUser: true,
         })
+
+        await fetchMe(true)
+        log('Fetched new user data', { myid: myid.value })
 
         await handleJoinGroup(callback)
       } else {
