@@ -4,7 +4,6 @@
 </template>
 <script setup>
 import { computed } from 'vue'
-import { AppLauncher } from '@capacitor/app-launcher'
 import { useMobileStore } from '@/stores/mobile'
 
 const props = defineProps({
@@ -25,11 +24,12 @@ const target = computed(() => {
 })
 
 function openInBrowser() {
-  // APP
   const mobileStore = useMobileStore()
   if (mobileStore.isApp) {
     const url = carefulHref.value
-    AppLauncher.openUrl({ url })
+    import('@capacitor/app-launcher').then(({ AppLauncher }) => {
+      AppLauncher.openUrl({ url })
+    })
     return false
   }
   return true

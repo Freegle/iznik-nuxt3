@@ -439,10 +439,6 @@ export default defineNuxtConfig({
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
         'twemoji',
-        '@vue-leaflet/vue-leaflet',
-        'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
-        'wicket/wicket-leaflet',
         '@vueup/vue-quill',
         'quill-html-edit-button',
         'vue-datepicker-next',
@@ -457,20 +453,6 @@ export default defineNuxtConfig({
     build: {
       // Enable minification for production builds to reduce bundle size
       minify: production ? 'esbuild' : false,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('@sentry')) return 'vendor-sentry'
-              if (id.includes('tus-js-client')) return 'vendor-upload'
-              if (id.includes('@formatjs') || id.includes('intl-'))
-                return 'vendor-intl'
-              if (id.includes('quill') || id.includes('parchment'))
-                return 'vendor-editor'
-            }
-          },
-        },
-      },
     },
     css: {
       preprocessorOptions: {
