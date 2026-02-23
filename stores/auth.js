@@ -303,19 +303,39 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      // Use V2 API (Go backend) - GET /user returns flat User object
+      // Use V2 API (Go backend) - GET /session returns {me, groups, work, discourse, ...}
       if (this.auth.jwt || this.auth.persistent) {
         try {
-          const userData = await this.$api.session.fetchv2(
+          const sessionData = await this.$api.session.fetchv2(
             {
               webversion: this.config.public.BUILD_DATE,
             },
             false
           )
 
-          if (userData && userData.id) {
-            me = userData
-            groups = userData.memberships || []
+          if (sessionData && sessionData.me && sessionData.me.id) {
+            me = sessionData.me
+
+            // Attach emails to the user object for client code that accesses user.emails.
+            me.emails = sessionData.emails || []
+
+            groups = sessionData.groups || []
+
+            // Update JWT/persistent if returned (session refresh).
+            if (sessionData.jwt) {
+              this.setAuth(
+                sessionData.jwt,
+                sessionData.persistent || this.auth.persistent
+              )
+            }
+
+            // ModTools work counts and Discourse stats.
+            if (sessionData.work) {
+              this.work = sessionData.work
+            }
+            if (sessionData.discourse) {
+              this.discourse = sessionData.discourse
+            }
           }
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
@@ -533,10 +553,6 @@ export const useAuthStore = defineStore({
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
-    },
-    async yahooCodeLogin(code) {
-      // ModTools
-      return await this.$api.session.yahooCodeLogin(code)
     },
     async merge(params) {
       // ModTools - merge two user accounts

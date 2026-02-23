@@ -4,7 +4,7 @@ import api from '~/api'
 export const useAuthorityStore = defineStore({
   id: 'authority',
   state: () => ({
-    list: [],
+    list: {},
   }),
   actions: {
     init(config) {

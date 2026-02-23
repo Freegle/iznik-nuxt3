@@ -82,7 +82,7 @@ export const useCommunityEventStore = defineStore({
     },
     async delete(id) {
       await api(this.config).communityevent.del(id)
-      this.list[id] = null
+      delete this.list[id]
     },
     async setDates(params) {
       const promises = []
