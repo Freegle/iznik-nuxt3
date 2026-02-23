@@ -57,6 +57,7 @@
               :height="containerHeight"
               :zoom="1"
               @zoom-change="(zoomed) => handleZoomChange(index, zoomed)"
+              @scale-change="(scale) => handleScaleChange(index, scale)"
             />
           </div>
         </div>
@@ -71,6 +72,39 @@
           :class="{ active: index === currentIndex }"
           @click.stop="goToImage(index)"
         />
+      </div>
+
+      <!-- Desktop zoom slider -->
+      <div class="zoom-controls" @click.stop>
+        <button
+          class="zoom-btn"
+          :disabled="currentScale <= 1"
+          @click="zoomOut"
+        >
+          <v-icon icon="minus" />
+        </button>
+        <div
+          ref="sliderTrack"
+          class="zoom-track"
+          @pointerdown="onSliderPointerDown"
+        >
+          <div
+            class="zoom-fill"
+            :style="{ width: sliderPercent + '%' }"
+          />
+          <div
+            class="zoom-thumb"
+            :style="{ left: sliderPercent + '%' }"
+          />
+        </div>
+        <button
+          class="zoom-btn"
+          :disabled="currentScale >= 5"
+          @click="zoomIn"
+        >
+          <v-icon icon="plus" />
+        </button>
+        <span class="zoom-level">{{ currentScale.toFixed(1) }}x</span>
       </div>
     </div>
   </Teleport>
@@ -141,10 +175,69 @@ const PINCH_COOLDOWN_MS = 400 // Block swipes for 400ms after pinch
 // Refs to PinchMe components for resetTransform
 const pinchRefs = reactive({})
 
+// Desktop zoom slider state
+const currentScale = ref(1)
+const sliderTrack = ref(null)
+const SLIDER_MIN = 1
+const SLIDER_MAX = 5
+
+const sliderPercent = computed(() => {
+  const clamped = Math.min(Math.max(currentScale.value, SLIDER_MIN), SLIDER_MAX)
+  return ((clamped - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100
+})
+
 // Handle zoom state change from PinchMe
 function handleZoomChange(index, isZoomed) {
   console.log('[ZOOM] handleZoomChange index:', index, 'isZoomed:', isZoomed)
   zoomStates[index] = isZoomed
+}
+
+// Handle actual scale value from PinchMe (for slider sync)
+function handleScaleChange(index, scale) {
+  if (index === currentIndex.value) {
+    currentScale.value = scale
+  }
+}
+
+function applyScale(scale) {
+  const rounded = Math.round(scale * 10) / 10
+  currentScale.value = rounded
+  const pinch = pinchRefs[currentIndex.value]
+  if (pinch?.setScale) {
+    pinch.setScale(rounded)
+  }
+}
+
+function scaleFromPointer(e) {
+  const rect = sliderTrack.value.getBoundingClientRect()
+  const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1)
+  return SLIDER_MIN + ratio * (SLIDER_MAX - SLIDER_MIN)
+}
+
+function onSliderPointerDown(e) {
+  e.preventDefault()
+  e.stopPropagation()
+  const track = sliderTrack.value
+  track.setPointerCapture(e.pointerId)
+  applyScale(scaleFromPointer(e))
+
+  const onMove = (ev) => applyScale(scaleFromPointer(ev))
+  const onUp = () => {
+    track.removeEventListener('pointermove', onMove)
+    track.removeEventListener('pointerup', onUp)
+  }
+  track.addEventListener('pointermove', onMove)
+  track.addEventListener('pointerup', onUp)
+}
+
+function zoomIn() {
+  const newScale = Math.min(currentScale.value + 0.5, 5)
+  applyScale(newScale)
+}
+
+function zoomOut() {
+  const newScale = Math.max(currentScale.value - 0.5, 1)
+  applyScale(newScale)
 }
 
 // Check if current image is zoomed
@@ -323,6 +416,7 @@ function goToImage(index) {
     }
     // Clear zoom state since we're resetting
     zoomStates[index] = false
+    currentScale.value = 1
   })
 
   setTimeout(() => {
@@ -531,6 +625,100 @@ onUnmounted(() => {
     background: #fff;
     transform: scale(1.25);
   }
+}
+
+/* Desktop zoom slider */
+.zoom-controls {
+  position: absolute;
+  bottom: env(safe-area-inset-bottom, 0);
+  right: 1rem;
+  margin-bottom: 1.5rem;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.4rem 0.75rem;
+  border-radius: 2rem;
+  z-index: 10001;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .zoom-controls {
+    display: flex;
+  }
+}
+
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+.zoom-track {
+  position: relative;
+  width: 120px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+}
+
+.zoom-fill {
+  position: absolute;
+  left: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.zoom-thumb {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.zoom-level {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  min-width: 2.5rem;
+  text-align: center;
 }
 
 :deep(.pinchwrapper) {
