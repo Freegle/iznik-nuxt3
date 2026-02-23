@@ -124,6 +124,31 @@ describe('VolunteeringPage', () => {
       await loadPromise
       expect(wrapper.vm.busy).toBe(false)
     })
+
+    it('accumulates volunteerings across multiple loadMore calls', async () => {
+      let callCount = 0
+      mockVolunteeringStore.fetchPending.mockImplementation(() => {
+        callCount++
+        // Simulate store accumulating items
+        mockVolunteeringStore.list[callCount] = {
+          id: callCount,
+          title: `Vol ${callCount}`,
+        }
+        return Promise.resolve()
+      })
+
+      const wrapper = mountComponent()
+      const mockState = { complete: vi.fn() }
+
+      await wrapper.vm.loadMore(mockState)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.volunteerings).toHaveLength(1)
+
+      await wrapper.vm.loadMore(mockState)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.volunteerings).toHaveLength(2)
+      expect(mockVolunteeringStore.fetchPending).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('watcher behavior', () => {

@@ -1476,7 +1476,7 @@ async function saveMembershipSetting(name, val) {
     userid: myid.value,
     settings,
   })
-  fetchMe(true, ['groups'])
+  fetchMe(true)
 }
 
 function uploadProfile() {

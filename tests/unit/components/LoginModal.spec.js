@@ -533,7 +533,7 @@ describe('LoginModal', () => {
     })
 
     it('shows error when login fails', async () => {
-      mockLogin.mockRejectedValue(new LoginError(2, 'Invalid credentials'))
+      mockLogin.mockRejectedValue(new LoginError(400, 'Invalid credentials'))
       const wrapper = createWrapper()
       await flushPromises()
 
@@ -628,7 +628,7 @@ describe('LoginModal', () => {
     })
 
     it('shows error when sign up fails', async () => {
-      mockSignUp.mockRejectedValue(new SignUpError(2, 'Email already exists'))
+      mockSignUp.mockRejectedValue(new SignUpError(409, 'Email already exists'))
       const wrapper = createWrapper()
       await flushPromises()
 

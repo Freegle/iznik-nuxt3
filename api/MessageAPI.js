@@ -108,7 +108,7 @@ export default class MessageAPI extends BaseAPI {
         false // Don't log errors - ret=3 is expected for cache miss
       )
 
-      if (result.ret === 0 && result.illustration) {
+      if (result.illustration) {
         return result.illustration
       }
     } catch (e) {

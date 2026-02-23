@@ -138,7 +138,7 @@ describe('CommunityEventsPage', () => {
 
       await wrapper.vm.loadMore(mockState)
 
-      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalled()
+      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalledTimes(1)
       expect(mockState.complete).toHaveBeenCalled()
     })
 
@@ -151,6 +151,31 @@ describe('CommunityEventsPage', () => {
       expect(wrapper.vm.busy).toBe(true)
       await loadPromise
       expect(wrapper.vm.busy).toBe(false)
+    })
+
+    it('accumulates events across multiple loadMore calls', async () => {
+      let callCount = 0
+      mockCommunityEventStore.fetchPending.mockImplementation(() => {
+        callCount++
+        mockCommunityEventStore.list[callCount] = {
+          id: callCount,
+          title: `Event ${callCount}`,
+        }
+        return Promise.resolve()
+      })
+
+      const wrapper = mountComponent()
+      const mockState = { complete: vi.fn() }
+
+      await wrapper.vm.loadMore(mockState)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.events).toHaveLength(1)
+
+      await wrapper.vm.loadMore(mockState)
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.events).toHaveLength(2)
+      expect(mockCommunityEventStore.fetchPending).toHaveBeenCalledTimes(2)
+      expect(mockState.complete).toHaveBeenCalledTimes(2)
     })
   })
 })

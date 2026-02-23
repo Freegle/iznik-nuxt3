@@ -11,7 +11,6 @@ import { useMiscStore } from '~/stores/misc'
 import { useLoggingContextStore } from '~/stores/loggingContext'
 import { getTraceHeaders } from '~/composables/useTrace'
 
-// Re-export the error classes for backward compatibility
 export { APIError, MaintenanceError, LoginError, SignUpError }
 
 let requestId = 0
@@ -196,15 +195,6 @@ export default class BaseAPI {
       useMiscStore().api(-1)
     }
 
-    // HTTP errors are real errors.
-    //
-    // data.ret holds the server error.
-    // - 1 means not logged in, and that's ok.
-    // - POSTs to session can return errors we want to handle.
-    // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
-    //   probably do the right thing.
-    // - otherwise throw an exception.
-    //
     // Accept all 2xx status codes as successful (200, 201, 204, etc.)
     if (status < 200 || status >= 300) {
       const statusstr = status?.toString()

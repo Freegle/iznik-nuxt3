@@ -186,48 +186,36 @@ export const useAuthStore = defineStore({
       this.$api = api
     },
     async forget() {
-      const { ret } = await this.$api.session.forget()
+      await this.$api.session.forget()
       await this.logout()
-      return ret
     },
     async restore() {
-      const { ret } = await this.$api.session.restore()
+      await this.$api.session.restore()
       await this.fetchUser()
-      return ret
     },
     async login(params) {
       try {
         const res = await this.$api.session.login(params, function (data) {
-          let logIt
-
-          if (data && (data.ret === 2 || data.ret === 3)) {
-            // Don't log errors for wrong email/password.
-            logIt = false
-          } else {
-            logIt = true
-          }
-
-          return logIt
+          // Don't log expected errors for wrong email/password (HTTP 400).
+          return data?.error !== 400
         })
 
-        const { ret, status, persistent, jwt } = res
-
-        if (ret === 0) {
-          // Successful login.
-          this.setAuth(jwt, persistent)
-
-          // Login succeeded.  Get the user from the new API.
-          await this.fetchUser()
-        } else {
-          // Login failed.
-          throw new LoginError(ret, status)
-        }
+        const { persistent, jwt } = res
+        this.setAuth(jwt, persistent)
+        await this.fetchUser()
       } catch (e) {
-        if (e.response?.data?.ret) {
-          throw new LoginError(e.response?.data?.ret, e.response?.data?.status)
-        } else {
+        if (e instanceof LoginError) {
           throw e
         }
+
+        if (e.response?.status) {
+          throw new LoginError(
+            e.response.status,
+            e.response.data?.message || 'Login failed'
+          )
+        }
+
+        throw e
       }
 
       this.loginCount++
@@ -237,30 +225,25 @@ export const useAuthStore = defineStore({
       let worked = false
 
       try {
-        const data = await this.$api.session.lostPassword(email)
-
-        if (data && data.ret === 2) {
-          unknown = true
-        }
-
+        await this.$api.session.lostPassword(email)
         worked = true
       } catch (e) {
-        console.log('Lost password error', e)
+        if (e.response?.status === 404) {
+          unknown = true
+          worked = true
+        } else {
+          console.log('Lost password error', e)
+        }
       }
 
       return { unknown, worked }
     },
     async unsubscribe(email) {
-      let unknown = false
+      const unknown = false
       let worked = false
 
       try {
-        const data = await this.$api.session.unsubscribe(email)
-
-        if (data && data.ret === 2) {
-          unknown = true
-        }
-
+        await this.$api.session.unsubscribe(email)
         worked = true
       } catch (e) {
         console.log('Unsubscribe error', e)
@@ -271,29 +254,29 @@ export const useAuthStore = defineStore({
     async signUp(params) {
       try {
         const res = await this.$api.user.signUp(params, false)
-        const { ret, status, jwt, persistent } = res
+        const { jwt, persistent } = res
 
-        if (res.ret === 0) {
-          this.forceLogin = false
-
-          this.setAuth(jwt, persistent)
-
-          // We need to fetch the user to get the groups, persistent token etc.
-          await this.fetchUser()
-        } else {
-          // Register failed.
-          throw new SignUpError(ret, status)
-        }
+        this.forceLogin = false
+        this.setAuth(jwt, persistent)
+        await this.fetchUser()
       } catch (e) {
         console.log('exception', e?.response?.data)
-        if (e?.response?.data?.ret === 2) {
-          throw new SignUpError(2, e.response.data.status)
-        } else {
+
+        if (e instanceof SignUpError) {
+          throw e
+        }
+
+        if (e.response?.status === 409) {
           throw new SignUpError(
-            e?.response?.data?.ret,
-            e?.response?.data?.status
+            409,
+            e.response.data?.message || 'That email is already in use'
           )
         }
+
+        throw new SignUpError(
+          e.response?.status,
+          e.response?.data?.message || 'Registration failed'
+        )
       }
 
       this.loginCount++
@@ -414,33 +397,8 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      let data = null
-
-      try {
-        data = await this.$api.session.save(params, function (data) {
-          let logIt
-
-          if (data && data.ret === 10) {
-            // Don't log errors for verification mails
-            logIt = false
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
-
-        await this.fetchUser()
-      } catch (e) {
-        console.log('Save email error', e.response)
-        if (e?.response?.data?.ret === 10) {
-          // Return the error code for the verification mail.
-          data = e?.response?.data
-        } else {
-          throw e
-        }
-      }
-
+      const data = await this.$api.session.save(params)
+      await this.fetchUser()
       return data
     },
     async saveMicrovolunteering(value) {
@@ -461,18 +419,7 @@ export const useAuthStore = defineStore({
     },
     async saveAndGet(params) {
       console.log('Save and get', params)
-      await this.$api.session.save(params, function (data) {
-        let logIt
-
-        if (data && data.ret === 10) {
-          // Don't log errors for verification mails
-          logIt = false
-        } else {
-          logIt = true
-        }
-
-        return logIt
-      })
+      await this.$api.session.save(params)
       console.log('Saved')
       const user = await this.fetchUser()
       console.log('Fetched user', JSON.stringify(user))
@@ -522,16 +469,9 @@ export const useAuthStore = defineStore({
               },
             },
           }
-          const data = await this.$api.session.save(params)
-          if (data.ret === 0) {
-            mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
-            console.log('savePushId: saved OK')
-          } else {
-            // 1 === Not logged in
-            console.log(
-              'savePushId: Not logged in: OK will try again when signed in'
-            )
-          }
+          await this.$api.session.save(params)
+          mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
+          console.log('savePushId: saved OK')
         }
       }
     },

@@ -662,7 +662,7 @@ export function useReplyStateMachine(messageId) {
       const ret = await instance.proxy.$api.user.add(email.value, false)
       log('Registration API response:', ret)
 
-      if (ret.ret === 0 && ret.password) {
+      if (ret.password) {
         // New user registered successfully
         log('New user registered')
         isNewUser.value = true
