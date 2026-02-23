@@ -303,27 +303,19 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
-      // Use V2 API (Go backend) - works for both Freegle and ModTools
+      // Use V2 API (Go backend) - GET /user returns flat User object
       if (this.auth.jwt || this.auth.persistent) {
         try {
-          const sessionData = await this.$api.session.fetchv2(
+          const userData = await this.$api.session.fetchv2(
             {
               webversion: this.config.public.BUILD_DATE,
             },
             false
           )
 
-          if (sessionData && sessionData.me) {
-            me = sessionData.me
-            groups = sessionData.groups || []
-
-            if (sessionData.work) this.work = sessionData.work
-            if (sessionData.discourse) this.discourse = sessionData.discourse
-
-            // Store auth tokens from V2 response
-            if (sessionData.jwt || sessionData.persistent) {
-              this.setAuth(sessionData.jwt, sessionData.persistent)
-            }
+          if (userData && userData.id) {
+            me = userData
+            groups = userData.memberships || []
           }
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.

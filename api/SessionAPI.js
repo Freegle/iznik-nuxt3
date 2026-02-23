@@ -2,7 +2,7 @@ import BaseAPI from './BaseAPI'
 
 export default class SessionAPI extends BaseAPI {
   fetchv2(params, log = true) {
-    return this.$getv2('/session', params, log)
+    return this.$getv2('/user', params, log)
   }
 
   save(data, log) {
