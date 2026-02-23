@@ -114,9 +114,17 @@ export const useComposeStore = defineStore({
         email,
       }
 
-      const { id } = await this.$api.message.put(data)
+      const ret = await this.$api.message.put(data)
+
+      // For unauthenticated users, Go creates a user and returns auth tokens.
+      // Store them so the subsequent JoinAndPost call is authenticated.
+      if (ret.jwt && ret.persistent) {
+        const authStore = useAuthStore()
+        authStore.setAuth(ret.jwt, ret.persistent)
+      }
+
       this._progress++
-      return id
+      return ret.id
     },
     async submitDraft(id, email, options = {}) {
       console.log('Submit draft', id, email, options)
