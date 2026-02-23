@@ -240,7 +240,7 @@ const isSaveButtonDisabled = computed(() => {
   return !edittextbody.value && !attachments.value?.length
 })
 
-async function save() {
+async function save(finishSpinner) {
   triedToSave.value = true
 
   if (edititem.value && (edittextbody.value || attachments.value?.length)) {
@@ -265,8 +265,9 @@ async function save() {
         deadline.value && deadline.value > '1970-01-01' ? deadline.value : null,
     }
 
-    hide()
     await messageStore.patch(params)
+    finishSpinner()
+    hide()
   }
 }
 
