@@ -43,7 +43,7 @@
         <b-button variant="white" class="mr-1" @click="edit">
           <v-icon icon="pen" /> Edit
         </b-button>
-        <b-button variant="danger" class="mr-1" @click="deleteme">
+        <b-button variant="danger" class="mr-1" @click="confirmDelete">
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <ChatButton
@@ -63,6 +63,14 @@
       :start-edit="true"
       :ismod="true"
       @hidden="showModal = false"
+    />
+    <ConfirmModal
+      v-if="showDeleteConfirm"
+      ref="confirmDeleteModal"
+      title="Delete Event"
+      message="Are you sure you want to delete this community event?"
+      @confirm="deleteme"
+      @hidden="showDeleteConfirm = false"
     />
   </div>
 </template>
@@ -85,6 +93,7 @@ const userStore = useUserStore()
 
 const showModal = ref(false)
 const eventmodal = ref(null)
+const showDeleteConfirm = ref(false)
 
 // Fetch user details for display
 watch(
@@ -118,8 +127,13 @@ function edit() {
   eventmodal.value?.show()
 }
 
+function confirmDelete() {
+  showDeleteConfirm.value = true
+}
+
 function deleteme() {
   communityEventStore.delete(props.event.id)
+  showDeleteConfirm.value = false
 }
 
 function approve() {

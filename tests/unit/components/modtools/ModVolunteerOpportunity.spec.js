@@ -103,6 +103,9 @@ describe('ModVolunteerOpportunity', () => {
             template: '<div class="volunteer-modal" />',
             props: ['id', 'volunteering', 'startEdit'],
           },
+          ConfirmModal: {
+            template: '<div class="confirm-modal" />',
+          },
         },
       },
     })

@@ -5,6 +5,7 @@
         :src="photoSrc(i - 1)"
         :preload="i <= 4"
         :loading="i > 4 ? 'lazy' : undefined"
+        :fetchpriority="i === 1 ? 'high' : undefined"
         alt="Happy freegler with their freegled item. Photo by Alex Bamford."
         class-name="grid-photo"
         :width="600"

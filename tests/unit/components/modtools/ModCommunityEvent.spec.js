@@ -101,6 +101,9 @@ describe('ModCommunityEvent', () => {
               show: vi.fn(),
             },
           },
+          ConfirmModal: {
+            template: '<div class="confirm-modal" />',
+          },
         },
       },
     })

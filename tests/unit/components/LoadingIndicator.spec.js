@@ -53,7 +53,7 @@ describe('LoadingIndicator', () => {
       const wrapper = createWrapper()
       const img = wrapper.find('.b-img')
       expect(img.attributes('width')).toBe('100px')
-      expect(img.attributes('height')).toBe('100px')
+      expect(img.attributes('height')).toBe('85px')
     })
 
     it('uses custom width', () => {
@@ -132,9 +132,9 @@ describe('LoadingIndicator', () => {
       expect(wrapper.props('width')).toBe(100)
     })
 
-    it('has height prop defaulting to 100', () => {
+    it('has height prop defaulting to 85', () => {
       const wrapper = createWrapper()
-      expect(wrapper.props('height')).toBe(100)
+      expect(wrapper.props('height')).toBe(85)
     })
 
     it('has throttle prop defaulting to 0', () => {

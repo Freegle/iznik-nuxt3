@@ -324,7 +324,9 @@ describe('NavbarMobile', () => {
 
     it('hides bottom navbar when not logged in', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('.navbar-bottom').exists()).toBe(false)
+      expect(wrapper.find('.navbar-bottom').classes()).toContain(
+        'navbar-not-logged-in'
+      )
     })
 
     it('hides profile dropdown when not logged in', () => {

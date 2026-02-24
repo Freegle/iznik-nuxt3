@@ -38,23 +38,13 @@
               <v-icon icon="map-marker-alt" class="browse-icon" />
               Just browsing? See what's near you.
             </p>
-            <client-only>
-              <PlaceAutocomplete
-                class="browse-input"
-                input-id="placeautocomplete-mobile"
-                labeltext=""
-                labeltext-sr="Enter your location"
-                @selected="explorePlace($event)"
-              />
-              <template #fallback>
-                <input
-                  type="text"
-                  class="form-control browse-input-ssr"
-                  placeholder="Type your location"
-                  disabled
-                />
-              </template>
-            </client-only>
+            <PlaceAutocomplete
+              class="browse-input"
+              input-id="placeautocomplete-mobile"
+              labeltext=""
+              labeltext-sr="Enter your location"
+              @selected="explorePlace($event)"
+            />
             <p class="photo-credit">
               Photos of real freeglers by
               <ExternalLink href="https://www.alexbamford.com/"
@@ -124,9 +114,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useMobileStore } from '@/stores/mobile'
 import { useMessageStore } from '~/stores/message'
 import { useGroupStore } from '~/stores/group'
-import MainFooter from '~/components/MainFooter'
-import BreakpointFettler from '~/components/BreakpointFettler.vue'
-import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import FreeglerPhotoGrid from '~/components/FreeglerPhotoGrid.vue'
 import ProxyImage from '~/components/ProxyImage.vue'
 import {
@@ -141,6 +128,14 @@ import {
 } from '#imports'
 import Api from '~/api'
 
+const MainFooter = defineAsyncComponent(() =>
+  import('~/components/MainFooter')
+)
+const BreakpointFettler = defineAsyncComponent(() =>
+  import('~/components/BreakpointFettler.vue')
+)
+import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
+import ExternalLink from '~/components/ExternalLink.vue'
 const MobileVisualiseList = defineAsyncComponent(() =>
   import('~/components/MobileVisualiseList')
 )
@@ -396,12 +391,12 @@ onBeforeUnmount(() => {
 }
 
 .action-btn--find {
-  background: $colour-secondary;
+  background: #0081a2;
   color: white;
-  box-shadow: 0 2px 8px rgba($colour-secondary, 0.3);
+  box-shadow: 0 2px 8px rgba(#0081a2, 0.3);
 
   &:hover {
-    background: darken($colour-secondary, 5%);
+    background: darken(#0081a2, 5%);
     color: white;
     text-decoration: none;
   }
@@ -453,11 +448,6 @@ onBeforeUnmount(() => {
       border-color: $colour-success;
       background: $color-white;
       box-shadow: 0 0 0 2px rgba($colour-success, 0.15);
-      text-align: left;
-
-      &::placeholder {
-        text-align: left;
-      }
     }
   }
 
@@ -465,27 +455,6 @@ onBeforeUnmount(() => {
   :deep(.btn),
   :deep(.autocomplete-clear) {
     display: none !important;
-  }
-
-  @include media-breakpoint-up(md) {
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* SSR fallback input */
-.browse-input-ssr {
-  width: 100%;
-  border: 1px solid $color-gray--light;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.9);
-  text-align: center;
-
-  &::placeholder {
-    color: $color-gray--normal;
-    text-align: center;
   }
 
   @include media-breakpoint-up(md) {
