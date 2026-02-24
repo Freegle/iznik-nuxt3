@@ -4,7 +4,7 @@ import { useRuntimeConfig, defineNuxtPlugin } from '#imports'
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
 
-  const host = config.public.MATOMO_HOST
+  const host = config.public.MATOMO_HOST?.replace(/\/+$/, '')
 
   if (host) {
     try {

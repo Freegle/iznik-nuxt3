@@ -240,7 +240,7 @@ describe('OurUploader', () => {
       const uploaderComp = wrapper.findComponent(OurUploader)
       uploaderComp.vm.busy = true
       await flushPromises()
-      expect(wrapper.find('.b-img[src="/loader.gif"]').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
 
     it('hides camera icon when busy', async () => {

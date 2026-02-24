@@ -217,9 +217,8 @@ describe('ModChatModal', () => {
       const component = getModChatModal(wrapper)
       component.vm.chat2 = createChat()
       await nextTick()
-      const img = wrapper.find('img')
-      expect(img.exists()).toBe(true)
-      expect(img.attributes('src')).toBe('/loader.gif')
+      const spinner = wrapper.find('.spinner-border')
+      expect(spinner.exists()).toBe(true)
     })
   })
 

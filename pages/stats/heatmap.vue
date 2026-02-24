@@ -6,7 +6,7 @@
         <div v-if="!fetched" class="text-center">
           <h4>Crunching the numbers...</h4>
           <p>This may take a minute.</p>
-          <b-img lazy src="/loader.gif" alt="Loading" />
+          <Spinner :size="50" />
         </div>
         <div v-else>
           <p class="text-center">

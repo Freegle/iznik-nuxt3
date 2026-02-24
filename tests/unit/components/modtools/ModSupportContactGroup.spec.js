@@ -468,8 +468,8 @@ describe('ModSupportContactGroup', () => {
       wrapper.vm.busy = true
       await wrapper.vm.$nextTick()
 
-      const img = wrapper.find('img[src="/loader.gif"]')
-      expect(img.exists()).toBe(true)
+      const spinner = wrapper.find('.spinner-border')
+      expect(spinner.exists()).toBe(true)
     })
 
     it('shows Show history button when not busy and no alerts', async () => {

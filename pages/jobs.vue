@@ -20,7 +20,7 @@
         </div>
 
         <div v-if="busy" class="jobs-loading">
-          <b-img lazy src="/loader.gif" alt="Loading" width="60px" />
+          <Spinner :size="30" />
           <span>Finding jobs...</span>
         </div>
 

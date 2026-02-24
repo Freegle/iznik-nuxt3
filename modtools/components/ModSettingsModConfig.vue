@@ -37,7 +37,7 @@
         </b-input-group>
       </div>
     </div>
-    <b-img v-if="loading" src="~static/loader.gif" class="d-block mt-2" />
+    <Spinner v-if="loading" :size="50" class="d-block mt-2" />
     <div v-else-if="configid && config">
       <NoticeMessage v-if="config.protected" variant="info" class="mb-2">
         <v-icon icon="lock" />

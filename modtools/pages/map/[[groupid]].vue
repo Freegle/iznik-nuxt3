@@ -7,7 +7,7 @@
         <ModGroupMap v-else groups :caretaker="caretaker" overlaps />
       </div>
       <div v-else class="d-flex justify-content-around">
-        <b-img src="/loader.gif" alt="Loading..." width="100px" />
+        <Spinner :size="50" />
       </div>
     </div>
   </client-only>

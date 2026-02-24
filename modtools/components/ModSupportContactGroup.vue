@@ -97,7 +97,7 @@
           :alert="alert"
         />
       </div>
-      <b-img v-else-if="busy" src="/loader.gif" alt="Loading" class="d-block" />
+      <Spinner v-else-if="busy" :size="50" class="d-block" />
       <b-button
         v-else
         variant="white"

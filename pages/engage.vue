@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 d-flex justify-content-center text-center">
     <client-only>
-      <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+      <Spinner :size="50" />
     </client-only>
   </div>
 </template>

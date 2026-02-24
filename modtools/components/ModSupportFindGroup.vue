@@ -198,12 +198,7 @@
         disabled
         class="mr-2"
       />
-      <b-img
-        v-if="fetchingVolunteers"
-        src="/loader.gif"
-        alt="Loading"
-        class="d-block"
-      />
+      <Spinner v-if="fetchingVolunteers" :size="50" class="d-block" />
       <ModSupportFindGroupVolunteer
         v-for="volunteer in sortedVolunteers"
         :key="'volunteer-' + volunteer.id"

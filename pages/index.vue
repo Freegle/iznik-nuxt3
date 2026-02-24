@@ -389,12 +389,12 @@ onBeforeUnmount(() => {
 }
 
 .action-btn--find {
-  background: $colour-secondary;
+  background: #0081a2;
   color: white;
-  box-shadow: 0 2px 8px rgba($colour-secondary, 0.3);
+  box-shadow: 0 2px 8px rgba(#0081a2, 0.3);
 
   &:hover {
-    background: darken($colour-secondary, 5%);
+    background: darken(#0081a2, 5%);
     color: white;
     text-decoration: none;
   }
