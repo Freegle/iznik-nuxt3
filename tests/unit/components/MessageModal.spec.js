@@ -133,7 +133,7 @@ describe('MessageModal', () => {
     it('shows loader when message not available', () => {
       mockMessageStore.byId.mockReturnValue(null)
       const wrapper = createWrapper()
-      expect(wrapper.find('.b-img[src="/loader.gif"]').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 

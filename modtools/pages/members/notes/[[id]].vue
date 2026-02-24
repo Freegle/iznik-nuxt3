@@ -28,7 +28,7 @@
         </template>
         <template #spinner>
           <span>
-            <b-img lazy src="/loader.gif" alt="Loading" />
+            <Spinner :size="50" />
           </span>
         </template>
       </infinite-loading>

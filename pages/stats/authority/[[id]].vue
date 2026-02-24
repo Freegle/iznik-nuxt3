@@ -4,7 +4,7 @@
       <b-col class="text-center">
         <h4>Crunching the numbers...</h4>
         <p>This may take a minute.</p>
-        <b-img lazy src="/loader.gif" alt="Loading" />
+        <Spinner :size="50" />
       </b-col>
     </b-row>
     <div>

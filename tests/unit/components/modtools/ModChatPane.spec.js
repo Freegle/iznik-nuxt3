@@ -235,7 +235,7 @@ describe('ModChatPane', () => {
       pane.vm.chatBusy = true
       await wrapper.vm.$nextTick()
 
-      expect(wrapper.find('img[src="/loader.gif"]').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 

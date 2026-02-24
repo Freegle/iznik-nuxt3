@@ -4,25 +4,15 @@
     :style="{ opacity: isLoading ? 1 : 0 }"
     :class="{ 'loading-indicator--transitioned': withTransition }"
   >
-    <b-img
-      lazy
-      src="/loader.gif"
-      alt="Loading"
-      :width="`${width}px`"
-      :height="`${height}px`"
-    />
+    <Spinner :size="size" />
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
-  width: {
+  size: {
     type: Number,
-    default: 100,
-  },
-  height: {
-    type: Number,
-    default: 85,
+    default: 50,
   },
   throttle: {
     type: Number,

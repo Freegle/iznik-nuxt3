@@ -98,8 +98,7 @@ describe('ModLogs', () => {
 
     it('shows loader gif in spinner slot', () => {
       const wrapper = createWrapper()
-      const img = wrapper.find('img')
-      expect(img.attributes('src')).toBe('/loader.gif')
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 

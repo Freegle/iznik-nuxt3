@@ -56,7 +56,7 @@
       <template #no-results />
       <template #no-more />
       <template #spinner>
-        <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+        <Spinner :size="50" />
       </template>
     </infinite-loading>
   </b-dropdown>

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
 import LoadingIndicator from '~/components/LoadingIndicator.vue'
+import Spinner from '~/components/Spinner.vue'
 
 const mockIsLoading = ref(false)
 
@@ -9,6 +10,9 @@ const mockIsLoading = ref(false)
 globalThis.useLoadingIndicator = vi.fn(() => ({
   isLoading: mockIsLoading,
 }))
+
+// Mock the auto-imported computed
+globalThis.computed = (fn) => ({ value: fn() })
 
 describe('LoadingIndicator', () => {
   beforeEach(() => {
@@ -22,13 +26,7 @@ describe('LoadingIndicator', () => {
         ...props,
       },
       global: {
-        stubs: {
-          'b-img': {
-            template:
-              '<img class="b-img" :src="src" :alt="alt" :width="width" :height="height" />',
-            props: ['src', 'alt', 'width', 'height', 'lazy'],
-          },
-        },
+        components: { Spinner },
       },
     })
   }
@@ -39,40 +37,25 @@ describe('LoadingIndicator', () => {
       expect(wrapper.find('.loading-indicator').exists()).toBe(true)
     })
 
-    it('renders loading image', () => {
+    it('renders spinner', () => {
       const wrapper = createWrapper()
-      const img = wrapper.find('.b-img')
-      expect(img.exists()).toBe(true)
-      expect(img.attributes('src')).toBe('/loader.gif')
-      expect(img.attributes('alt')).toBe('Loading')
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 
-  describe('dimensions', () => {
-    it('uses default width and height', () => {
+  describe('size', () => {
+    it('uses default size of 50', () => {
       const wrapper = createWrapper()
-      const img = wrapper.find('.b-img')
-      expect(img.attributes('width')).toBe('100px')
-      expect(img.attributes('height')).toBe('85px')
+      const spinner = wrapper.find('.spinner-border')
+      expect(spinner.attributes('style')).toContain('width: 50px')
+      expect(spinner.attributes('style')).toContain('height: 50px')
     })
 
-    it('uses custom width', () => {
-      const wrapper = createWrapper({ width: 50 })
-      const img = wrapper.find('.b-img')
-      expect(img.attributes('width')).toBe('50px')
-    })
-
-    it('uses custom height', () => {
-      const wrapper = createWrapper({ height: 75 })
-      const img = wrapper.find('.b-img')
-      expect(img.attributes('height')).toBe('75px')
-    })
-
-    it('uses custom width and height together', () => {
-      const wrapper = createWrapper({ width: 200, height: 150 })
-      const img = wrapper.find('.b-img')
-      expect(img.attributes('width')).toBe('200px')
-      expect(img.attributes('height')).toBe('150px')
+    it('uses custom size', () => {
+      const wrapper = createWrapper({ size: 30 })
+      const spinner = wrapper.find('.spinner-border')
+      expect(spinner.attributes('style')).toContain('width: 30px')
+      expect(spinner.attributes('style')).toContain('height: 30px')
     })
   })
 
@@ -127,14 +110,9 @@ describe('LoadingIndicator', () => {
   })
 
   describe('props', () => {
-    it('has width prop defaulting to 100', () => {
+    it('has size prop defaulting to 50', () => {
       const wrapper = createWrapper()
-      expect(wrapper.props('width')).toBe(100)
-    })
-
-    it('has height prop defaulting to 85', () => {
-      const wrapper = createWrapper()
-      expect(wrapper.props('height')).toBe(85)
+      expect(wrapper.props('size')).toBe(50)
     })
 
     it('has throttle prop defaulting to 0', () => {
