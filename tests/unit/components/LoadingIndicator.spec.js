@@ -11,9 +11,6 @@ globalThis.useLoadingIndicator = vi.fn(() => ({
   isLoading: mockIsLoading,
 }))
 
-// Mock the auto-imported computed
-globalThis.computed = (fn) => ({ value: fn() })
-
 describe('LoadingIndicator', () => {
   beforeEach(() => {
     vi.clearAllMocks()

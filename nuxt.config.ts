@@ -266,7 +266,8 @@ export default defineNuxtConfig({
     'pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
-    '@bootstrap-vue-next/nuxt',
+    ['@bootstrap-vue-next/nuxt', { css: false }],
+
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
     // We are using Playwire so we don't load AdSense ourselves.
@@ -384,7 +385,7 @@ export default defineNuxtConfig({
         'jwt-decode',
         'leaflet',
         'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
+
         'wicket/wicket-leaflet',
         '@vue-leaflet/vue-leaflet',
         'leaflet-control-geocoder/src/control',
@@ -888,8 +889,26 @@ export default defineNuxtConfig({
             `) +
             (!config.ISAPP
               ? `
-            // Web builds: Load GSI for Google One Tap sign-in (parallel with CookieYes)
-            loadScript('https://accounts.google.com/gsi/client')
+            // Web builds: Load GSI for Google One Tap sign-in.
+            // Defer for new visitors (no reason to expect auto-login), load immediately
+            // for returning users where One Tap may auto-sign-in.
+            var hasLoggedInBefore = false;
+            try {
+              var authData = JSON.parse(localStorage.getItem('auth') || '{}');
+              hasLoggedInBefore = authData.loggedInEver || !!authData.auth?.persistent;
+            } catch(e) {}
+
+            if (hasLoggedInBefore) {
+              loadScript('https://accounts.google.com/gsi/client');
+            } else {
+              // Defer GSI until browser is idle or 5s, whichever comes first
+              var loadGSI = function() { loadScript('https://accounts.google.com/gsi/client'); };
+              if ('requestIdleCallback' in window) {
+                requestIdleCallback(loadGSI, { timeout: 5000 });
+              } else {
+                setTimeout(loadGSI, 5000);
+              }
+            }
             `
               : `
             // App builds: GSI not needed (apps use Capacitor plugin for Google login)
