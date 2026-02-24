@@ -174,6 +174,12 @@ config.global.stubs = {
   // Stub NuxtLink
   NuxtLink: { template: '<a :href="to"><slot /></a>', props: ['to'] },
 
+  // Stub Spinner (auto-imported by Nuxt)
+  Spinner: {
+    template: '<div class="spinner-border" role="status" />',
+    props: ['size'],
+  },
+
   // Stub NuxtPicture (from @nuxt/image, auto-imported by Nuxt)
   NuxtPicture: {
     template:
