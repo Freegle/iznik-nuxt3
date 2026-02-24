@@ -184,6 +184,10 @@ export default class BaseAPI {
         status = e.response.status
       }
 
+      if (e?.data) {
+        data = e.data
+      }
+
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
