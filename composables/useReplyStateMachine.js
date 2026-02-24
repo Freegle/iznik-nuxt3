@@ -724,15 +724,28 @@ export function useReplyStateMachine(messageId) {
     log('onLoginSuccess() called', {
       state: state.value,
       hasReply: !!replyText.value,
+      hasEmail: !!email.value,
+      myid: myid.value,
+      chatButtonRef: !!chatButtonRef.value,
     })
 
     // Handle login success from AUTHENTICATING state (normal flow)
     if (state.value === ReplyState.AUTHENTICATING && replyText.value) {
       log('Resuming after login from AUTHENTICATING')
-      transitionTo(ReplyState.JOINING_GROUP, {
-        event: ReplyEvent.LOGIN_SUCCESS,
-      })
-      await handleJoinGroup()
+      try {
+        transitionTo(ReplyState.JOINING_GROUP, {
+          event: ReplyEvent.LOGIN_SUCCESS,
+        })
+        await handleJoinGroup()
+      } catch (e) {
+        logError(
+          'onLoginSuccess failed during resume',
+          e,
+          state.value,
+          messageId
+        )
+        fallbackToComposing('login_resume_error')
+      }
       return
     }
 
