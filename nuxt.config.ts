@@ -68,6 +68,10 @@ console.log('prerenderRoutes:', prerenderRoutes)
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
+  vitalizer: {
+    disableStylesheets: 'entry',
+  },
+
   // Rendering modes are confusing.
   //
   // - target can be:
@@ -267,6 +271,8 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-vite-legacy',
     ['@bootstrap-vue-next/nuxt', { css: false }],
+    'nuxt-vitalizer',
+
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
     // We are using Playwire so we don't load AdSense ourselves.
@@ -384,7 +390,7 @@ export default defineNuxtConfig({
         'jwt-decode',
         'leaflet',
         'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
+
         'wicket/wicket-leaflet',
         '@vue-leaflet/vue-leaflet',
         'leaflet-control-geocoder/src/control',
