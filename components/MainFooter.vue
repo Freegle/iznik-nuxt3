@@ -92,7 +92,7 @@
 
 .sponsors-label {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: #595959;
   margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -126,7 +126,7 @@
 
 .charity-text {
   font-size: 0.8rem;
-  color: $color-gray--dark;
+  color: #595959;
   margin-bottom: 0.75rem;
 }
 

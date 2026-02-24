@@ -44,20 +44,14 @@
           </h1>
         </div>
         <div class="d-flex align-items-center">
-          <b-nav>
-            <b-nav-item>
-              <nuxt-link
-                v-if="!loggedIn"
-                no-prefetch
-                class="test-signinbutton"
-                :disabled="signInDisabled"
-              >
-                <div class="btn btn-white mr-2" @click="requestLogin">
-                  Log in or Join
-                </div>
-              </nuxt-link>
-            </b-nav-item>
-          </b-nav>
+          <button
+            v-if="!loggedIn"
+            class="btn btn-white mr-2 test-signinbutton"
+            :disabled="signInDisabled"
+            @click="requestLogin"
+          >
+            Log in or Join
+          </button>
         </div>
         <div v-if="isApp && loggedIn" class="text-white mr-3">
           <div class="notifwrapper">

@@ -22,7 +22,7 @@ const props = defineProps({
   },
   height: {
     type: Number,
-    default: 100,
+    default: 85,
   },
   throttle: {
     type: Number,
