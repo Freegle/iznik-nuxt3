@@ -176,8 +176,15 @@ config.global.stubs = {
 
   // Stub Spinner (auto-imported by Nuxt)
   Spinner: {
-    template: '<div class="spinner-border" role="status" />',
+    template: '<div class="spinner-border" role="status" :style="spinnerStyle" />',
     props: ['size'],
+    setup(props) {
+      const spinnerStyle = computed(() => ({
+        width: `${props.size || 50}px`,
+        height: `${props.size || 50}px`,
+      }))
+      return { spinnerStyle }
+    },
   },
 
   // Stub NuxtPicture (from @nuxt/image, auto-imported by Nuxt)
