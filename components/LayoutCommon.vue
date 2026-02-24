@@ -69,7 +69,9 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <img src="/loader.gif" loading="lazy" alt="Loading..." width="100px" />
+        <div class="spinner-border" style="width: 50px; height: 50px; color: #61AE24" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or

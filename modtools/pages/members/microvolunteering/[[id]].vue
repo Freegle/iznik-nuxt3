@@ -12,7 +12,7 @@
       />
 
       <div v-if="busy" class="d-flex justify-content-around">
-        <b-img lazy src="/loader.gif" alt="Loading" />
+        <Spinner :size="50" />
       </div>
       <div v-else-if="!groupid" class="mt-2">
         <NoticeMessage variant="warning">

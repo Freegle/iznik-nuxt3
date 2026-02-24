@@ -332,7 +332,7 @@
     </div>
     <div v-else class="w-100">
       <div class="col text-center">
-        <b-img src="/loader.gif" alt="Loading..." width="100px" />
+        <Spinner :size="50" />
       </div>
     </div>
   </div>

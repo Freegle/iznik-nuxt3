@@ -8,7 +8,7 @@
           icon="camera"
           class="camera text-faded"
         />
-        <b-img v-if="busy" src="/loader.gif" class="fit-cover fadein loader" />
+        <Spinner v-if="busy" :size="50" class="fadein" />
         <div
           v-else-if="multiple || !modelValue.length"
           class="d-flex justify-content-around"

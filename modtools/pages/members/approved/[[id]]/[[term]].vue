@@ -56,7 +56,7 @@
           @infinite="loadMore"
         >
           <template #spinner>
-            <b-img lazy src="/loader.gif" alt="Loading" />
+            <Spinner :size="50" />
           </template>
           <template #complete>
             <notice-message v-if="!members?.length">

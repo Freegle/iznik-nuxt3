@@ -15,7 +15,7 @@
           </b-button>
         </NoticeMessage>
         <div v-else class="d-flex justify-content-around">
-          <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+          <Spinner :size="50" />
         </div>
       </b-col>
     </b-row>
