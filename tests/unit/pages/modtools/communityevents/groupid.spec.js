@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import CommunityEventsPage from '~/modtools/pages/communityevents/[[groupid]].vue'
 
-// Mock stores
-const mockCommunityEventStore = {
+// Mock stores - reactive so computed properties re-evaluate when list is mutated
+const mockCommunityEventStore = reactive({
   list: {},
   clear: vi.fn(),
   fetchPending: vi.fn(),
-}
+})
 
 vi.mock('~/stores/communityevent', () => ({
   useCommunityEventStore: () => mockCommunityEventStore,

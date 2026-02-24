@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import VolunteeringPage from '~/modtools/pages/volunteering/[[id]].vue'
 
-// Mock stores
-const mockVolunteeringStore = {
+// Mock stores - reactive so computed properties re-evaluate when list is mutated
+const mockVolunteeringStore = reactive({
   list: {},
   clear: vi.fn(),
   fetchPending: vi.fn(),
-}
+})
 
 vi.mock('@/stores/volunteering', () => ({
   useVolunteeringStore: () => mockVolunteeringStore,
