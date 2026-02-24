@@ -68,10 +68,6 @@ console.log('prerenderRoutes:', prerenderRoutes)
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
-  vitalizer: {
-    disableStylesheets: 'entry',
-  },
-
   // Rendering modes are confusing.
   //
   // - target can be:
@@ -271,7 +267,6 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-vite-legacy',
     ['@bootstrap-vue-next/nuxt', { css: false }],
-    'nuxt-vitalizer',
 
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
