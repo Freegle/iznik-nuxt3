@@ -17,11 +17,11 @@ export default defineNuxtPlugin(() => {
           const selector = el
             ? el.id
               ? '#' + el.id
-              : el.className
-                ? el.tagName.toLowerCase() +
-                  '.' +
-                  String(el.className).split(' ').slice(0, 2).join('.')
-                : el.tagName.toLowerCase()
+              : el.className && el.tagName
+              ? el.tagName.toLowerCase() +
+                '.' +
+                String(el.className).split(' ').slice(0, 2).join('.')
+              : (el.tagName || 'unknown').toLowerCase()
             : '(removed)'
           return {
             selector,
@@ -60,7 +60,9 @@ export default defineNuxtPlugin(() => {
           shift_count: shifts.length,
           top_shifts: top5.map(
             (s) =>
-              `${s.value} @ ${s.time}ms: ${s.sources.map((src) => src.selector).join(', ')}`
+              `${s.value} @ ${s.time}ms: ${s.sources
+                .map((src) => src.selector)
+                .join(', ')}`
           ),
         })
         Sentry.captureMessage(`CLS ${clsValue.toFixed(3)} exceeds threshold`)
