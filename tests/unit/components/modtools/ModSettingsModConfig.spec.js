@@ -574,13 +574,13 @@ describe('ModSettingsModConfig', () => {
       )
       const wrapper = mountComponent()
       // During the async fetch, loading should be true
-      expect(wrapper.find('.loader').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
 
     it('hides loader when loading completes', async () => {
       const wrapper = mountComponent()
       await flushPromises()
-      expect(wrapper.find('.loader').exists()).toBe(false)
+      expect(wrapper.find('.spinner-border').exists()).toBe(false)
     })
   })
 
