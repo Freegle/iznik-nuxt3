@@ -188,6 +188,9 @@
           >Privacy Policy</nuxt-link
         >.
       </p>
+      <p v-if="isModTools" class="small text-muted mt-1 mb-0 text-center">
+        By logging in, you confirm your groups remain affiliated with Freegle.
+      </p>
     </div>
   </b-modal>
 </template>
@@ -244,6 +247,7 @@ const marketingConsent = computed({
   get: () => miscStore.marketingConsent,
   set: (value) => miscStore.setMarketingConsent(value),
 })
+const isModTools = computed(() => miscStore.modtools)
 const showModal = ref(false)
 const pleaseShowModal = ref(false)
 const showSignUp = ref(false)

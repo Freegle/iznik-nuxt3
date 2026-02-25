@@ -197,6 +197,13 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
+        // Tell the server if this is a ModTools login so it can auto-confirm
+        // group affiliation for Owners.
+        const miscStore = useMiscStore()
+        if (miscStore.modtools) {
+          params.modtools = true
+        }
+
         const res = await this.$api.session.login(params, function (data) {
           let logIt
 

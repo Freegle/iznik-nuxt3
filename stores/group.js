@@ -100,13 +100,6 @@ export const useGroupStore = defineStore({
         this.messages[id] = messages
       }
     },
-    async confirmAffiliation(params) {
-      await api(this.config).group.patch({
-        id: params.id,
-        affiliationconfirmed: new Date().toISOString(),
-      })
-      await this.fetch(params.id)
-    },
     async addgroup(params) {
       const id = await api(this.config).group.add({
         grouptype: 'Freegle',
