@@ -27,6 +27,7 @@ const {
   mockForceLogin,
   mockMarketingConsent,
   mockSetMarketingConsent,
+  mockModtools,
   mockIsApp,
   mockIsiOS,
   mockOsVersion,
@@ -43,6 +44,7 @@ const {
     mockForceLogin: { value: false },
     mockMarketingConsent: { value: true },
     mockSetMarketingConsent: vi.fn(),
+    mockModtools: { value: false },
     mockIsApp: { value: false },
     mockIsiOS: { value: false },
     mockOsVersion: { value: '16.0' },
@@ -85,6 +87,9 @@ vi.mock('~/stores/misc', () => ({
       return mockMarketingConsent.value
     },
     setMarketingConsent: mockSetMarketingConsent,
+    get modtools() {
+      return mockModtools.value
+    },
   }),
 }))
 
@@ -896,6 +901,24 @@ describe('LoginModal', () => {
       const wrapper = createWrapper()
       await flushPromises()
       expect(wrapper.text()).toContain('OR')
+    })
+  })
+
+  describe('ModTools affiliation disclaimer', () => {
+    it('does not show affiliation disclaimer on Freegle site', async () => {
+      mockModtools.value = false
+      mockForceLogin.value = true
+      const wrapper = createWrapper()
+      await flushPromises()
+      expect(wrapper.text()).not.toContain('affiliated with Freegle')
+    })
+
+    it('shows affiliation disclaimer on ModTools', async () => {
+      mockModtools.value = true
+      mockForceLogin.value = true
+      const wrapper = createWrapper()
+      await flushPromises()
+      expect(wrapper.text()).toContain('affiliated with Freegle')
     })
   })
 })
