@@ -95,7 +95,7 @@ describe('MyPostsPostsList', () => {
     it('renders loading state when loading', () => {
       const wrapper = createWrapper({ loading: true })
       expect(wrapper.find('.loading-state').exists()).toBe(true)
-      expect(wrapper.find('.b-img').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
 
     it('renders empty state when no posts', () => {

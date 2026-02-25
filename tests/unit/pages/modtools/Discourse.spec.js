@@ -57,7 +57,7 @@ describe('Discourse Page', () => {
 
     it('renders the loading image', () => {
       const wrapper = mountComponent()
-      expect(wrapper.find('img').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 
