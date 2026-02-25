@@ -76,11 +76,7 @@
 
       <!-- Desktop zoom slider -->
       <div class="zoom-controls" @click.stop>
-        <button
-          class="zoom-btn"
-          :disabled="currentScale <= 1"
-          @click="zoomOut"
-        >
+        <button class="zoom-btn" :disabled="currentScale <= 1" @click="zoomOut">
           <v-icon icon="minus" />
         </button>
         <div
@@ -88,20 +84,10 @@
           class="zoom-track"
           @pointerdown="onSliderPointerDown"
         >
-          <div
-            class="zoom-fill"
-            :style="{ width: sliderPercent + '%' }"
-          />
-          <div
-            class="zoom-thumb"
-            :style="{ left: sliderPercent + '%' }"
-          />
+          <div class="zoom-fill" :style="{ width: sliderPercent + '%' }" />
+          <div class="zoom-thumb" :style="{ left: sliderPercent + '%' }" />
         </div>
-        <button
-          class="zoom-btn"
-          :disabled="currentScale >= 5"
-          @click="zoomIn"
-        >
+        <button class="zoom-btn" :disabled="currentScale >= 5" @click="zoomIn">
           <v-icon icon="plus" />
         </button>
         <span class="zoom-level">{{ currentScale.toFixed(1) }}x</span>
@@ -496,8 +482,10 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   display: flex;
   align-items: center;
@@ -507,7 +495,7 @@ onUnmounted(() => {
   font-size: 1.25rem;
 
   &:active {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -556,8 +544,10 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: none;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   cursor: pointer;
   z-index: 10001;
