@@ -1,8 +1,7 @@
 import { computed } from 'vue'
-import cloneDeep from 'lodash.clonedeep'
 import Wkt from 'wicket'
 import { useAuthStore } from '~/stores/auth'
-// import { useMiscStore } from './stores/misc'
+import { useGroupStore } from '~/stores/group'
 import { useTeamStore } from '~/stores/team'
 
 let fetchingPromise = null
@@ -113,18 +112,35 @@ export function useMe() {
     let ret = []
 
     if (me.value) {
+      const groupStore = useGroupStore()
+
       ret = authStore.groups.map((g) => {
-        // Memberships have an id of the membership whereas we want the groups to have the id of the group.
-        const g2 = cloneDeep(g)
-        g2.id = g.groupid
-        delete g2.groupid
-        return g2
+        // Merge membership-specific data with cached group details.
+        const groupData = groupStore.get(g.groupid) || {}
+        const merged = {
+          id: g.groupid,
+          role: g.role,
+          emailfrequency: g.emailfrequency,
+          eventsallowed: g.eventsallowed,
+          volunteeringallowed: g.volunteeringallowed,
+          configid: g.configid,
+          // Group-level fields from the cached group store.
+          namedisplay: groupData.namedisplay || groupData.nameshort || '',
+          nameshort: groupData.nameshort || '',
+          type: groupData.type || '',
+          region: groupData.region || '',
+          bbox: groupData.bbox || null,
+          lat: groupData.lat || null,
+          lng: groupData.lng || null,
+          settings: groupData.settings || null,
+        }
+        return merged
       })
 
       // Sort by namedisplay case insensitive
       ret.sort((a, b) => {
-        const aName = a.namedisplay.toLowerCase()
-        const bName = b.namedisplay.toLowerCase()
+        const aName = (a.namedisplay || '').toLowerCase()
+        const bName = (b.namedisplay || '').toLowerCase()
         return aName < bName ? -1 : aName > bName ? 1 : 0
       })
     }

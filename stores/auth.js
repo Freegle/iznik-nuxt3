@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { LoginError, SignUpError } from '~/api/APIErrors'
 import { useComposeStore } from '~/stores/compose'
+import { useGroupStore } from '~/stores/group'
 import api from '~/api'
 import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
@@ -303,6 +304,15 @@ export const useAuthStore = defineStore({
             me.emails = sessionData.emails || []
 
             groups = sessionData.groups || []
+
+            // Fetch full group details for each membership. The session response
+            // only returns membership-specific data (groupid, role, etc.) - group
+            // details (name, type, region, bbox) come from the cached group store.
+            if (groups.length > 0) {
+              const groupStore = useGroupStore()
+
+              await Promise.all(groups.map((g) => groupStore.fetch(g.groupid)))
+            }
 
             // Update JWT/persistent if returned (session refresh).
             if (sessionData.jwt) {

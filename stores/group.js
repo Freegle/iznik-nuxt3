@@ -84,7 +84,13 @@ export const useGroupStore = defineStore({
         if (groups) {
           groups.forEach((g) => {
             this.allGroups[g.nameshort.toLowerCase()] = g
-            this.list[g.id] = g
+
+            // Don't overwrite full group data (fetched via GET /group/{id},
+            // which includes settings, bbox, etc.) with summary data from
+            // the list endpoint (GET /group) which lacks those fields.
+            if (!this.list[g.id] || !this.list[g.id].settings) {
+              this.list[g.id] = g
+            }
           })
         }
       }
