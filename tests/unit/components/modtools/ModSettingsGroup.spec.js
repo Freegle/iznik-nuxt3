@@ -16,6 +16,7 @@ const mockAuthStore = {
 
 const mockModConfigStore = {
   configs: [],
+  fetch: vi.fn().mockResolvedValue(undefined),
 }
 
 const mockShortlinkStore = {
@@ -49,11 +50,7 @@ vi.mock('~/composables/useMe', () => ({
 
 vi.mock('#app', () => ({
   useNuxtApp: () => ({
-    $api: {
-      session: {
-        fetch: vi.fn().mockResolvedValue({}),
-      },
-    },
+    $api: {},
   }),
 }))
 

@@ -5,8 +5,8 @@ export default class StoriesAPI extends BaseAPI {
     return this.$getv2('/story/' + id, {}, logError)
   }
 
-  listv2(limit) {
-    return this.$getv2('/story' + (limit ? '?limit=' + limit : ''))
+  listv2(params = {}) {
+    return this.$getv2('/story', params)
   }
 
   byGroupv2(groupid, limit) {
@@ -16,35 +16,35 @@ export default class StoriesAPI extends BaseAPI {
   }
 
   fetch(params) {
-    return this.$get('/stories', params)
+    return this.$getv2('/story', params)
   }
 
   async add(data) {
-    const { id } = await this.$put('/stories', data)
+    const { id } = await this.$putv2('/story', data)
     return id
   }
 
   love(id) {
-    return this.$post('/stories', { id, action: 'Like' })
+    return this.$postv2('/story/like', { id })
   }
 
   unlove(id) {
-    return this.$post('/stories', { id, action: 'Unlike' })
+    return this.$postv2('/story/unlike', { id })
   }
 
   dontUseForPublicity(id) {
-    return this.$patch('/stories', { id, reviewed: 1, public: 0 })
+    return this.$patchv2('/story', { id, reviewed: 1, public: 0 })
   }
 
   useForPublicity(id) {
-    return this.$patch('/stories', { id, reviewed: 1, public: 1 })
+    return this.$patchv2('/story', { id, reviewed: 1, public: 1 })
   }
 
   useForNewsletter(id) {
-    return this.$patch('/stories', { id, newsletterreviewed: 1, newsletter: 1 })
+    return this.$patchv2('/story', { id, newsletterreviewed: 1, newsletter: 1 })
   }
 
   dontUseForNewsletter(id) {
-    return this.$patch('/stories', { id, newsletterreviewed: 1, newsletter: 0 })
+    return this.$patchv2('/story', { id, newsletterreviewed: 1, newsletter: 0 })
   }
 }

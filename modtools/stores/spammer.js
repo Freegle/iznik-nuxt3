@@ -76,7 +76,7 @@ export const useSpammerStore = defineStore({
         reason: params.reason,
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
     },
     async confirm(params) {
       await api(this.config).spammers.patch({
@@ -85,7 +85,7 @@ export const useSpammerStore = defineStore({
         collection: 'Spammer',
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },
@@ -99,7 +99,7 @@ export const useSpammerStore = defineStore({
 
       this.removeFromList(params.id)
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
     },
     async remove(params) {
       await api(this.config).spammers.del({
@@ -107,7 +107,7 @@ export const useSpammerStore = defineStore({
         userid: params.userid,
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },
@@ -119,7 +119,7 @@ export const useSpammerStore = defineStore({
         collection: 'Whitelisted',
       })
 
-      await fetchMe(true, ['work', 'group'])
+      await fetchMe(true)
 
       this.removeFromList(params.id)
     },

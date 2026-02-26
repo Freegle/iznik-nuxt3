@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { LoginError, SignUpError } from '~/api/APIErrors'
 import { useComposeStore } from '~/stores/compose'
+import { useGroupStore } from '~/stores/group'
 import api from '~/api'
 import { useMobileStore } from '@/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
@@ -186,14 +187,12 @@ export const useAuthStore = defineStore({
       this.$api = api
     },
     async forget() {
-      const { ret } = await this.$api.session.forget()
+      await this.$api.session.forget()
       await this.logout()
-      return ret
     },
     async restore() {
-      const { ret } = await this.$api.session.restore()
+      await this.$api.session.restore()
       await this.fetchUser()
-      return ret
     },
     async login(params) {
       try {
@@ -205,36 +204,26 @@ export const useAuthStore = defineStore({
         }
 
         const res = await this.$api.session.login(params, function (data) {
-          let logIt
-
-          if (data && (data.ret === 2 || data.ret === 3)) {
-            // Don't log errors for wrong email/password.
-            logIt = false
-          } else {
-            logIt = true
-          }
-
-          return logIt
+          // Don't log expected errors for wrong email/password (HTTP 400).
+          return data?.error !== 400
         })
 
-        const { ret, status, persistent, jwt } = res
-
-        if (ret === 0) {
-          // Successful login.
-          this.setAuth(jwt, persistent)
-
-          // Login succeeded.  Get the user from the new API.
-          await this.fetchUser()
-        } else {
-          // Login failed.
-          throw new LoginError(ret, status)
-        }
+        const { persistent, jwt } = res
+        this.setAuth(jwt, persistent)
+        await this.fetchUser()
       } catch (e) {
-        if (e.response?.data?.ret) {
-          throw new LoginError(e.response?.data?.ret, e.response?.data?.status)
-        } else {
+        if (e instanceof LoginError) {
           throw e
         }
+
+        if (e.response?.status) {
+          throw new LoginError(
+            e.response.status,
+            e.response.data?.message || 'Login failed'
+          )
+        }
+
+        throw e
       }
 
       this.loginCount++
@@ -244,46 +233,25 @@ export const useAuthStore = defineStore({
       let worked = false
 
       try {
-        await this.$api.session.lostPassword(email, function (data) {
-          let logIt
-
-          if (data && data.ret === 2) {
-            // Don't log errors if the email is not recognised.
-            logIt = false
-            unknown = true
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
-
+        await this.$api.session.lostPassword(email)
         worked = true
       } catch (e) {
-        console.log('Lost password error', e)
+        if (e.response?.status === 404) {
+          unknown = true
+          worked = true
+        } else {
+          console.log('Lost password error', e)
+        }
       }
 
       return { unknown, worked }
     },
     async unsubscribe(email) {
-      let unknown = false
+      const unknown = false
       let worked = false
 
       try {
-        await this.$api.session.unsubscribe(email, function (data) {
-          let logIt
-
-          if (data && data.ret === 2) {
-            // Don't log errors if the email is not recognised.
-            logIt = false
-            unknown = true
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
-
+        await this.$api.session.unsubscribe(email)
         worked = true
       } catch (e) {
         console.log('Unsubscribe error', e)
@@ -294,159 +262,84 @@ export const useAuthStore = defineStore({
     async signUp(params) {
       try {
         const res = await this.$api.user.signUp(params, false)
-        const { ret, status, jwt, persistent } = res
+        const { jwt, persistent } = res
 
-        if (res.ret === 0) {
-          this.forceLogin = false
-
-          this.setAuth(jwt, persistent)
-
-          // We need to fetch the user to get the groups, persistent token etc.
-          await this.fetchUser()
-        } else {
-          // Register failed.
-          throw new SignUpError(ret, status)
-        }
+        this.forceLogin = false
+        this.setAuth(jwt, persistent)
+        await this.fetchUser()
       } catch (e) {
         console.log('exception', e?.response?.data)
-        if (e?.response?.data?.ret === 2) {
-          throw new SignUpError(2, e.response.data.status)
-        } else {
+
+        if (e instanceof SignUpError) {
+          throw e
+        }
+
+        if (e.response?.status === 409) {
           throw new SignUpError(
-            e?.response?.data?.ret,
-            e?.response?.data?.status
+            409,
+            e.response.data?.message || 'That email is already in use'
           )
         }
+
+        throw new SignUpError(
+          e.response?.status,
+          e.response?.data?.message || 'Registration failed'
+        )
       }
 
       this.loginCount++
     },
-    async fetchUser(components) {
-      // ModTools passes components like ['work'] to fetch moderator work counts
+    async fetchUser() {
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
 
-      // Handle backwards compatibility - components might be boolean from old callers
-      if (typeof components === 'boolean') components = []
-      if (!components) components = []
-      components = ['me', ...components]
-
-      const miscStore = useMiscStore()
-
-      // For non-ModTools, use the faster v2 API
-      if (!miscStore.modtools && (this.auth.jwt || this.auth.persistent)) {
-        // We have auth info.  The new API can authenticate using either the JWT or the persistent token.
+      // Use V2 API (Go backend) - GET /session returns {me, groups, work, discourse, ...}
+      if (this.auth.jwt || this.auth.persistent) {
         try {
-          me = await this.$api.session.fetchv2(
+          const sessionData = await this.$api.session.fetchv2(
             {
               webversion: this.config.public.BUILD_DATE,
             },
             false
           )
+
+          if (sessionData && sessionData.me && sessionData.me.id) {
+            me = sessionData.me
+
+            // Attach emails to the user object for client code that accesses user.emails.
+            me.emails = sessionData.emails || []
+
+            groups = sessionData.groups || []
+
+            // Fetch full group details for each membership. The session response
+            // only returns membership-specific data (groupid, role, etc.) - group
+            // details (name, type, region, bbox) come from the cached group store.
+            if (groups.length > 0) {
+              const groupStore = useGroupStore()
+
+              await Promise.all(groups.map((g) => groupStore.fetch(g.groupid)))
+            }
+
+            // Update JWT/persistent if returned (session refresh).
+            if (sessionData.jwt) {
+              this.setAuth(
+                sessionData.jwt,
+                sessionData.persistent || this.auth.persistent
+              )
+            }
+
+            // ModTools work counts and Discourse stats.
+            if (sessionData.work) {
+              this.work = sessionData.work
+            }
+            if (sessionData.discourse) {
+              this.discourse = sessionData.discourse
+            }
+          }
         } catch (e) {
           // Failed.  This can validly happen with a 404 if the JWT is invalid.
           console.log('Exception fetching user')
-        }
-
-        if (me) {
-          groups = me.memberships
-          delete me.memberships
-
-          if (process.client) {
-            // Check the old API.  Partly in case we need a JWT, partly to check we are
-            // logged in on both.  No need to wait, though.
-            this.$api.session
-              .fetch({
-                webversion: this.config.public.BUILD_DATE,
-                components,
-              })
-              .then((ret) => {
-                let persistent = null
-                let jwt = null
-
-                if (ret) {
-                  ;({ me, persistent, jwt } = ret)
-                  if (me) {
-                    if (me.permissions && this.user) {
-                      this.user.permissions = me.permissions
-                    }
-                    if (!this.auth.jwt) {
-                      this.setAuth(jwt, persistent)
-                    }
-                    // ModTools: store work counts and discourse data
-                    if (ret.work) this.work = ret.work
-                    if (ret.discourse) this.discourse = ret.discourse
-                  } else {
-                    // We are logged in on the v2 API but not the v1 API.  Force ourselves to be logged out,
-                    // which will then force a login when required and sort this out.
-                    console.error('Logged in on v2 API but not v1 API, log out')
-                    this.setAuth(null, null)
-                    this.setUser(null)
-                  }
-                }
-              })
-              .catch((e) => {
-                // Need to catch this to prevent a Sentry error when we're logged out - which is a perfectly normal
-                // case.
-                console.log('Exception on old API', e)
-              })
-          }
-        }
-      }
-
-      // ModTools always uses v1 API for work counts, permissions, configid etc.
-      // Also used as fallback if v2 API didn't work
-      if (!me) {
-        // Try the older API which will authenticate via the persistent token and PHP session.
-        const ret = await this.$api.session.fetch({
-          webversion: this.config.public.BUILD_DATE,
-          components,
-        })
-
-        let persistent = null
-        let jwt = null
-
-        if (ret) {
-          const v1groups = ret.groups
-          ;({ me, groups, persistent, jwt } = ret)
-
-          // ModTools: store work counts and discourse data
-          if (ret.work) this.work = ret.work
-          if (ret.discourse) this.discourse = ret.discourse
-
-          let permissions = null
-
-          if (me) {
-            permissions = me.permissions
-            this.setAuth(jwt, persistent)
-          }
-
-          if (jwt) {
-            // Now use the JWT on the new API.
-            try {
-              me = await this.$api.session.fetchv2({
-                webversion: this.config.public.BUILD_DATE,
-              })
-            } catch (e) {
-              console.log('exception')
-            }
-
-            if (me) {
-              me.permissions = permissions
-              groups = me.memberships
-              // ModTools: merge configid from v1 groups into v2 memberships
-              if (v1groups && groups) {
-                for (const g of groups) {
-                  const group = v1groups.find((v1g) => v1g.id === g.groupid)
-                  if (group) {
-                    g.configid = group.configid
-                  }
-                }
-              }
-              delete me.memberships
-            }
-          }
         }
       }
 
@@ -521,33 +414,8 @@ export const useAuthStore = defineStore({
       return data
     },
     async saveEmail(params) {
-      let data = null
-
-      try {
-        data = await this.$api.session.save(params, function (data) {
-          let logIt
-
-          if (data && data.ret === 10) {
-            // Don't log errors for verification mails
-            logIt = false
-          } else {
-            logIt = true
-          }
-
-          return logIt
-        })
-
-        await this.fetchUser()
-      } catch (e) {
-        console.log('Save email error', e.response)
-        if (e?.response?.data?.ret === 10) {
-          // Return the error code for the verification mail.
-          data = e?.response?.data
-        } else {
-          throw e
-        }
-      }
-
+      const data = await this.$api.session.save(params)
+      await this.fetchUser()
       return data
     },
     async saveMicrovolunteering(value) {
@@ -568,18 +436,7 @@ export const useAuthStore = defineStore({
     },
     async saveAndGet(params) {
       console.log('Save and get', params)
-      await this.$api.session.save(params, function (data) {
-        let logIt
-
-        if (data && data.ret === 10) {
-          // Don't log errors for verification mails
-          logIt = false
-        } else {
-          logIt = true
-        }
-
-        return logIt
-      })
+      await this.$api.session.save(params)
       console.log('Saved')
       const user = await this.fetchUser()
       console.log('Fetched user', JSON.stringify(user))
@@ -629,16 +486,9 @@ export const useAuthStore = defineStore({
               },
             },
           }
-          const data = await this.$api.session.save(params)
-          if (data.ret === 0) {
-            mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
-            console.log('savePushId: saved OK')
-          } else {
-            // 1 === Not logged in
-            console.log(
-              'savePushId: Not logged in: OK will try again when signed in'
-            )
-          }
+          await this.$api.session.save(params)
+          mobileStore.acceptedMobilePushId = mobileStore.mobilePushId
+          console.log('savePushId: saved OK')
         }
       }
     },
@@ -660,10 +510,6 @@ export const useAuthStore = defineStore({
         await api(this.config).user.removeEmail(this.user.id, email)
         await this.fetchUser()
       }
-    },
-    async yahooCodeLogin(code) {
-      // ModTools
-      return await this.$api.session.yahooCodeLogin(code)
     },
     async merge(params) {
       // ModTools - merge two user accounts

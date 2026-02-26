@@ -511,12 +511,7 @@ function loginNative(e) {
       .catch((e) => {
         console.log('Login error', e)
         if (e instanceof LoginError) {
-          // Check if login failed due to email issues
-          if (e.status.includes('email') || e.status.includes('Email')) {
-            nativeLoginError.value = 'Please enter a valid email address.'
-          } else {
-            nativeLoginError.value = e.status
-          }
+          nativeLoginError.value = e.status
         } else {
           throw e // let others bubble up
         }

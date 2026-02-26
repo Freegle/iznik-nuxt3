@@ -274,7 +274,7 @@ async function markAll() {
       }
     })
   })
-  fetchMe(true, ['work'])
+  fetchMe(true)
 }
 
 // Lifecycle

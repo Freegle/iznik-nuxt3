@@ -11,17 +11,15 @@ export default class DonationsAPI extends BaseAPI {
   }
 
   add(userid, amount, date) {
-    return this.$put('/donations', { userid, amount, date })
+    return this.$putv2('/donations', { userid, amount, date })
   }
 
   stripeIntent(params) {
-    console.log('DonationsAPI.stripeIntent called with:', params)
-    console.log('this.config:', this.config)
-    return this.$post('/stripecreateintent', params)
+    return this.$postv2('/stripecreateintent', params)
   }
 
   stripeSubscription(amount) {
-    return this.$post('/stripecreatesubscription', {
+    return this.$postv2('/stripecreatesubscription', {
       amount,
     })
   }

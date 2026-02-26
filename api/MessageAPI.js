@@ -5,8 +5,11 @@ export default class MessageAPI extends BaseAPI {
     return this.$getv2('/message/' + id, {}, logError)
   }
 
-  fetchMT(params, logError = true) {
-    return this.$get('/message', params, logError)
+  async fetchMT(params, logError = true) {
+    const { id, ...rest } = params
+    const data = await this.$getv2('/message/' + id, rest, logError)
+    // Go returns the message directly; wrap for store compatibility
+    return { message: data }
   }
 
   fetchByUser(id, active, logError = true) {
@@ -42,16 +45,15 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
-    // console.error('MessageAPI fetchMessages', params)
-    return this.$get('/messages', params)
+    return this.$getv2('/messages', params)
   }
 
   update(event) {
-    return this.$post('/message', event)
+    return this.$postv2('/message', event)
   }
 
   save(event) {
-    return this.$patch('/message', event)
+    return this.$patchv2('/message', event)
   }
 
   joinAndPost(id, email, options = {}, logError = true) {
@@ -72,19 +74,19 @@ export default class MessageAPI extends BaseAPI {
     const logErrorFn =
       options.logError !== undefined ? options.logError : logError
 
-    return this.$post('/message', params, logErrorFn)
+    return this.$postv2('/message', params, logErrorFn)
   }
 
   del(id) {
-    return this.$del('/message', { id })
+    return this.$delv2('/message/' + id)
   }
 
   put(data) {
-    return this.$put('/message', data)
+    return this.$putv2('/message', data)
   }
 
   intend(id, outcome) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'OutcomeIntended',
       id,
       outcome,
@@ -92,14 +94,13 @@ export default class MessageAPI extends BaseAPI {
   }
 
   view(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'View',
       id,
     })
   }
 
   async getIllustration(item) {
-    // Try Go API first (fast, cache-only), fall back to PHP API (can generate)
     try {
       const result = await this.$getv2(
         '/illustration',
@@ -107,30 +108,18 @@ export default class MessageAPI extends BaseAPI {
         false // Don't log errors - ret=3 is expected for cache miss
       )
 
-      if (result.ret === 0 && result.illustration) {
+      if (result.illustration) {
         return result.illustration
       }
     } catch (e) {
-      // Go API returned error or cache miss - fall back to PHP
-    }
-
-    // Fall back to PHP API which can generate new illustrations
-    try {
-      const result = await this.$get('/illustration', { item }, false)
-
-      if (result.ret === 0 && result.illustration) {
-        return result.illustration
-      }
-    } catch (e) {
-      // PHP API also failed
-      console.log('Illustration fetch failed:', e.message)
+      // Cache miss or error - no illustration available
     }
 
     return null
   }
 
   approve(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Approve',
       id,
       groupid,
@@ -141,7 +130,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   reply(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Reply',
       id,
       groupid,
@@ -152,7 +141,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   reject(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Reject',
       id,
       groupid,
@@ -163,7 +152,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   delete(id, groupid, subject = null, stdmsgid = null, body = null) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Delete',
       id,
       groupid,
@@ -174,7 +163,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   spam(id, groupid) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Spam',
       id,
       groupid,
@@ -182,35 +171,35 @@ export default class MessageAPI extends BaseAPI {
   }
 
   hold(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Hold',
       id,
     })
   }
 
   release(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'Release',
       id,
     })
   }
 
   approveEdits(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'ApproveEdits',
       id,
     })
   }
 
   revertEdits(id) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'RevertEdits',
       id,
     })
   }
 
   partnerConsent(id, partner) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'PartnerConsent',
       id,
       partner,
@@ -218,7 +207,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   addBy(id, userid, count) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'AddBy',
       id,
       userid,
@@ -227,7 +216,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   removeBy(id, userid) {
-    return this.$post('/message', {
+    return this.$postv2('/message', {
       action: 'RemoveBy',
       id,
       userid,
@@ -245,8 +234,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   async markSeen(ids) {
-    return await this.$post('/messages', {
-      action: 'MarkSeen',
+    return await this.$postv2('/messages/markseen', {
       ids,
     })
   }

@@ -31,9 +31,7 @@ export const useIsochroneStore = defineStore({
         }
 
         if (!this.list.length) {
-          // Most likely a 403 error, which we get when there is no isochrone.  Call the old API, which will create one
-          // for us.
-          await api(this.config).isochrone.fetchv1()
+          // Retry - Go auto-creates a default isochrone if none exist.
           this.list = await api(this.config).isochrone.fetchv2()
         }
       }
@@ -111,7 +109,7 @@ export const useIsochroneStore = defineStore({
             swlat = swlat === null ? thissw.lat : Math.min(swlat, thissw.lat)
             swlng = swlng === null ? thissw.lng : Math.min(swlng, thissw.lng)
             nelat = nelat === null ? thisne.lat : Math.max(nelat, thisne.lat)
-            nelng = nelng === null ? thisne.lng : Math.min(nelng, thisne.lng)
+            nelng = nelng === null ? thisne.lng : Math.max(nelng, thisne.lng)
           } catch (e) {
             console.log('WKT parse error on isochrone', i.id, e, i)
           }

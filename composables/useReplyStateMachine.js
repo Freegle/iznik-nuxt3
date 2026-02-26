@@ -662,7 +662,7 @@ export function useReplyStateMachine(messageId) {
       const ret = await instance.proxy.$api.user.add(email.value, false)
       log('Registration API response:', ret)
 
-      if (ret.ret === 0 && ret.password) {
+      if (ret.password) {
         // New user registered successfully
         log('New user registered')
         isNewUser.value = true
@@ -681,14 +681,18 @@ export function useReplyStateMachine(messageId) {
         // Persist the new user flag
         persistState()
 
-        // Fetch the user data
-        await fetchMe(true)
-        log('Fetched new user data', { myid: myid.value })
-
+        // Transition BEFORE fetchMe to prevent race condition:
+        // fetchMe triggers the `me` watcher which calls onLoginSuccess(),
+        // which also transitions to JOINING_GROUP and calls handleJoinGroup().
+        // By transitioning first, onLoginSuccess()'s guard
+        // (state === AUTHENTICATING) fails, preventing double execution.
         transitionTo(ReplyState.JOINING_GROUP, {
           event: ReplyEvent.REGISTRATION_SUCCESS,
           isNewUser: true,
         })
+
+        await fetchMe(true)
+        log('Fetched new user data', { myid: myid.value })
 
         await handleJoinGroup(callback)
       } else {
@@ -720,15 +724,28 @@ export function useReplyStateMachine(messageId) {
     log('onLoginSuccess() called', {
       state: state.value,
       hasReply: !!replyText.value,
+      hasEmail: !!email.value,
+      myid: myid.value,
+      chatButtonRef: !!chatButtonRef.value,
     })
 
     // Handle login success from AUTHENTICATING state (normal flow)
     if (state.value === ReplyState.AUTHENTICATING && replyText.value) {
       log('Resuming after login from AUTHENTICATING')
-      transitionTo(ReplyState.JOINING_GROUP, {
-        event: ReplyEvent.LOGIN_SUCCESS,
-      })
-      await handleJoinGroup()
+      try {
+        transitionTo(ReplyState.JOINING_GROUP, {
+          event: ReplyEvent.LOGIN_SUCCESS,
+        })
+        await handleJoinGroup()
+      } catch (e) {
+        logError(
+          'onLoginSuccess failed during resume',
+          e,
+          state.value,
+          messageId
+        )
+        fallbackToComposing('login_resume_error')
+      }
       return
     }
 

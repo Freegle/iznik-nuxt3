@@ -69,7 +69,10 @@
               :value="String(price)"
               class="mb-4"
             />
-            <p v-else-if="payPalFallback && isApp" class="text-muted text-center mb-4">
+            <p
+              v-else-if="payPalFallback && isApp"
+              class="text-muted text-center mb-4"
+            >
               Payment is temporarily unavailable. Please try again later.
             </p>
             <div ref="belowStripe" />

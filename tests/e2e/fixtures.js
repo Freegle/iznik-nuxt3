@@ -281,6 +281,10 @@ const test = base.test.extend({
       /Refused to apply inline style because it violates the following Content Security Policy directive/,
       /Content Security Policy directive.*style-src/,
       /Either the 'unsafe-inline' keyword.*is required to enable inline execution/,
+      // V2 API expected error responses during normal flows
+      /Failed to load resource: the server responded with a status of 409.*api\/user/, // 409 Conflict when registering an existing email (expected in reply flow)
+      /Failed to load resource: the server responded with a status of 401.*api\/tryst/, // 401 when not logged in (tryst requires auth)
+      /Failed to load resource: the server responded with a status of 401.*api\/session/, // 401 when checking session while not logged in
     ]
 
     // Initialize the working copy of allowed error patterns

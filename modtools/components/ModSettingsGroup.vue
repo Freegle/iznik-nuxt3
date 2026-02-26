@@ -1041,7 +1041,6 @@ import { useAuthStore } from '~/stores/auth'
 import { useModConfigStore } from '~/stores/modconfig'
 import { useModGroupStore } from '@/stores/modgroup'
 import { useMe } from '~/composables/useMe'
-import { useNuxtApp } from '#app'
 
 const props = defineProps({
   initialGroup: {
@@ -1051,7 +1050,6 @@ const props = defineProps({
   },
 })
 
-const { $api } = useNuxtApp()
 const authStore = useAuthStore()
 const modGroupStore = useModGroupStore()
 const modConfigStore = useModConfigStore()
@@ -1451,10 +1449,7 @@ async function fetchGroup() {
 }
 
 async function fetchConfigs() {
-  await $api.session.fetch({
-    components: ['configs'],
-    modtools: true,
-  })
+  await modConfigStore.fetch({})
 }
 
 function changedrule(rule, newval) {
@@ -1481,7 +1476,7 @@ async function saveMembershipSetting(name, val) {
     userid: myid.value,
     settings,
   })
-  fetchMe(true, ['groups'])
+  fetchMe(true)
 }
 
 function uploadProfile() {

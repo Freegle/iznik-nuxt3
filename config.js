@@ -8,11 +8,7 @@ const CONFIG = {
   NODE_ENV: process.env.NODE_ENV,
   USE_COOKIES: process.env.USE_COOKIES === 'True', // 'True' or 'False'
 
-  // Legacy API, especially mod ops.
-  // APIv1: process.env.IZNIK_API_V1 || 'https://fdapidbg.ilovefreegle.org/api',
-  APIv1: process.env.IZNIK_API_V1 || 'https://fdapilive.ilovefreegle.org/api',
-
-  // New style API, for fast read ops.
+  // Go API for all operations.
   APIv2: process.env.IZNIK_API_V2 || 'https://api.ilovefreegle.org/apiv2',
 
   // This is where the user site is.

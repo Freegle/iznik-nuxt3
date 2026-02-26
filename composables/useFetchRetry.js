@@ -41,14 +41,14 @@ export function fetchRetry(fetch) {
       return [true, false]
     }
 
-    // Retry on pretty much any error except those which can legitimately be returned by the API server.  These are
-    // the low 400s.
-    if (error !== null || response?.status > 404) {
+    // Retry on network errors or server errors (5xx).  Don't retry client errors (4xx) - these are legitimate
+    // API responses (e.g. 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict).
+    if (error !== null || response?.status >= 500) {
       console.log('Error - retry', error, response?.status)
       return [true, false]
     }
 
-    if (response?.status === 200) {
+    if (response?.status >= 200 && response?.status < 300) {
       try {
         const data = await response.json()
 
@@ -57,20 +57,35 @@ export function fetchRetry(fetch) {
           console.log('Success but no data - retry')
           return [true, false]
         } else {
-          // 200 response with valid JSON.  This is the rule not the exception.
           return [false, true, data]
         }
       } catch (e) {
-        // JSON parse failed.  That shouldn't happen, so retry.
+        if (response?.status === 204) {
+          // 204 No Content - no body expected, that's fine.
+          return [false, true, null]
+        }
+
+        // JSON parse failed on a response that should have had a body.  Retry.
         return [true, false]
       }
     } else {
-      // Some error that we aren't supposed to retry.
+      // Client error (4xx) that we aren't supposed to retry.  Parse the response body if available
+      // so callers can access error details.
+      let responseData = null
+
+      try {
+        responseData = await response.json()
+      } catch (e) {
+        // No JSON body - that's OK for error responses.
+      }
+
       if (!error) {
-        error = new FetchError(
+        const fetchError = new FetchError(
           'Request failed with ' + response?.status,
           response
         )
+        fetchError.data = responseData
+        error = fetchError
       }
 
       return [false, false, null, error]

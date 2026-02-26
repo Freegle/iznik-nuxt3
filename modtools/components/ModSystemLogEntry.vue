@@ -720,7 +720,7 @@ const byUser = computed(() => {
 
 const displayGroup = computed(() => {
   if (props.log.group_id) {
-    return groupStore.list[props.log.group_id]
+    return groupStore.get(props.log.group_id)
   }
   return null
 })
@@ -906,7 +906,7 @@ watch(
 watch(
   () => props.log.group_id,
   (id) => {
-    if (id && !groupStore.list[id]) {
+    if (id && !groupStore.get(id)) {
       fetchGroup(id)
     }
   },

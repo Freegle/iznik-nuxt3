@@ -4,18 +4,17 @@ import api from '~/api'
 export const useAuthorityStore = defineStore({
   id: 'authority',
   state: () => ({
-    list: [],
+    list: {},
   }),
   actions: {
     init(config) {
       this.config = config
     },
     async fetch(id) {
-      const ret = await api(this.config).authority.fetch({
-        id,
-      })
+      // Go GET /authority/:id returns Authority object directly
+      const ret = await api(this.config).authority.fetch(id)
 
-      this.list[id] = ret?.authority
+      this.list[id] = ret
 
       return this.list[id]
     },

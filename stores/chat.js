@@ -149,18 +149,15 @@ export const useChatStore = defineStore({
         since = dayjs(this.searchSince).toISOString()
       }
 
-      // TODO Amend ChatAPI v2 to support chattypes
       let chats = []
       const miscStore = useMiscStore() // MT
       if (miscStore.modtools) {
         const { chatrooms } = await api(this.config).chat.listChatsMT({
-          // v1: /chat/rooms
           chattypes: ['User2Mod', 'Mod2Mod'],
         })
         chats = chatrooms
       } else {
         chats = await api(this.config).chat.listChats(
-          // v2: /chat
           since,
           search,
           keepChat,

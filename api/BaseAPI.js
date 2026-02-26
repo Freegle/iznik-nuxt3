@@ -7,12 +7,10 @@ import {
 } from './APIErrors'
 import { fetchRetry } from '~/composables/useFetchRetry'
 import { useAuthStore } from '~/stores/auth'
-import { useMobileStore } from '~/stores/mobile'
 import { useMiscStore } from '~/stores/misc'
 import { useLoggingContextStore } from '~/stores/loggingContext'
 import { getTraceHeaders } from '~/composables/useTrace'
 
-// Re-export the error classes for backward compatibility
 export { APIError, MaintenanceError, LoginError, SignUpError }
 
 let requestId = 0
@@ -27,234 +25,6 @@ const ourFetch = fetchRetry(fetch)
 export default class BaseAPI {
   constructor(config) {
     this.config = config
-  }
-
-  async $request(method, path, config, logError = true, body = null) {
-    let status = null
-    let data = null
-
-    try {
-      const headers = config.headers ? config.headers : {}
-
-      const authStore = useAuthStore()
-      const mobileStore = useMobileStore()
-      const miscStore = useMiscStore()
-
-      // Add trace headers for distributed tracing.
-      const traceHeaders = getTraceHeaders()
-      Object.assign(headers, traceHeaders)
-
-      // Add logging context headers.
-      try {
-        const loggingCtx = useLoggingContextStore()
-        const loggingHeaders = loggingCtx.getHeaders()
-        Object.assign(headers, loggingHeaders)
-      } catch (e) {
-        // Store may not be initialized on server-side.
-      }
-
-      if (authStore.auth.persistent) {
-        // Use the persistent token (a kind of JWT) to authenticate the request.
-        headers.Authorization =
-          'Iznik ' + JSON.stringify(authStore.auth.persistent)
-      }
-
-      const loggedInAs = authStore.user?.id
-
-      if (loggedInAs) {
-        // Add the user ID as a query parameter to the path, checking whether there already are any
-        // query parameters.
-        path += (path.includes('?') ? '&' : '?') + 'loggedInAs=' + loggedInAs
-      }
-
-      // Add requestId to the path, checking whether there already are any query parameters.
-      path += (path.includes('?') ? '&' : '?') + 'requestid=' + requestId++
-
-      headers['Cache-Control'] =
-        'max-age=0, must-revalidate, no-cache, no-store, private'
-
-      if (method === 'GET' && config?.params) {
-        // Remove falsey values from the params, unless dontzapfalsey is set.
-        // This is needed when we want to pass 0 as a value (e.g., reviewed: 0).
-        const keepFalsey = config.params.dontzapfalsey
-        delete config.params.dontzapfalsey
-
-        if (!keepFalsey) {
-          config.params = Object.fromEntries(
-            Object.entries(config.params).filter(([_, v]) => v)
-          )
-        }
-
-        // URL encode the parameters, handling arrays specially for PHP
-        // PHP expects arrays as key[]=value1&key[]=value2
-        const urlParams = new URLSearchParams()
-        for (const [key, value] of Object.entries(config.params)) {
-          if (Array.isArray(value)) {
-            // PHP array format: key[]=value1&key[]=value2
-            for (const item of value) {
-              urlParams.append(key + '[]', item)
-            }
-          } else {
-            urlParams.append(key, value)
-          }
-        }
-        const urlParamsStr = urlParams.toString()
-
-        if (urlParamsStr.length) {
-          path += '&' + urlParamsStr
-        }
-      } else if (method !== 'POST') {
-        // Any parameters are passed in config.params.
-        if (!config?.params) {
-          config.params = {}
-        }
-
-        config.params.modtools = miscStore.modtools
-        config.params.app = mobileStore.isApp
-
-        // JSON-encode these for to pass.
-        body = JSON.stringify(config.params)
-      } else if (!config?.formPost) {
-        // Parameters will be passed in config.data.
-        if (!config.data) {
-          config.data = {}
-        }
-
-        config.data.modtools = miscStore.modtools
-        config.data.app = mobileStore.isApp
-        body = JSON.stringify(config.data)
-      }
-
-      await miscStore.waitForOnline()
-      miscStore.api(1)
-      ;[status, data] = await ourFetch(this.config.public.APIv1 + path, {
-        ...config,
-        body,
-        method,
-        headers,
-      })
-
-      if (data.jwt && data.persistent) {
-        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
-        // in-flight API responses from restoring auth after an intentional logout.
-        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
-          console.log('JWT renewal: updating auth tokens from API response')
-          authStore.setAuth(data.jwt, data.persistent)
-        } else if (!authStore.auth.jwt) {
-          console.log(
-            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
-          )
-        }
-      }
-    } catch (e) {
-      if (e.message.match(/.*aborted.*/i)) {
-        // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
-        // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
-        // Swallow these by returning a problem that never resolves.  Possible memory leak but it's a rare case.
-        console.log('Aborted - ignore')
-        return new Promise(function (resolve) {})
-      }
-    } finally {
-      useMiscStore().api(-1)
-    }
-
-    // HTTP errors are real errors.
-    //
-    // We've sometimes seen 200 response codes with no returned data (I saw this myself on a train with flaky
-    // signal).  So that's an error if it happens.
-    //
-    // data.ret holds the server error.
-    // - 1 means not logged in, and that's ok.
-    // - POSTs to session can return errors we want to handle.
-    // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
-    //   probably do the right thing.
-    // - otherwise throw an exception.
-    if (
-      status !== 200 ||
-      !data ||
-      (data.ret !== 0 &&
-        !(data.ret === 1 && data.status === 'Not logged in') &&
-        !(path === '/session' && method === 'POST') &&
-        data.ret !== 999)
-    ) {
-      const retstr = data && data.ret ? data.ret : 'Unknown'
-      const statusstr = data && data.status ? data.status : 'Unknown'
-
-      if (retstr === 111) {
-        // Down for maintenance
-        console.log('Down for maintenance')
-        throw new MaintenanceError(data.ret, 'Maintenance error')
-      } else {
-        // Whether or not we log this error to Sentry depends.  Most errors are worth logging, because they're unexpected.
-        // But some API calls are expected to fail, and throw an exception which is then handled in the code.  We don't
-        // want to log those, otherwise we will spend time investigating them in Sentry.  So we have a parameter which
-        // indicates whether we want to log this to Sentry - which can be a boolean or a function for more complex
-        // decisions.
-        const log = typeof logError === 'function' ? logError(data) : logError
-        console.log('Log it?', log)
-
-        if (
-          log &&
-          (status !== null || retstr !== 'Unknown' || statusstr !== 'Unknown')
-        ) {
-          // Sentry is only initialized on the client, so check before calling
-          if (typeof Sentry?.captureMessage === 'function') {
-            Sentry.captureMessage(
-              'API request failed ' +
-                path +
-                ' returned HTTP ' +
-                status +
-                ' ret ' +
-                retstr +
-                ' status ' +
-                statusstr
-            )
-          }
-        }
-
-        const message = [
-          'API Error',
-          method,
-          path,
-          '->',
-          `ret: ${retstr} status: ${statusstr}`,
-        ].join(' ')
-
-        throw new APIError(
-          {
-            request: {
-              path,
-              method,
-              headers: config.headers,
-              params: config.params,
-              data: config.data,
-            },
-            response: {
-              status,
-              data,
-            },
-          },
-          message
-        )
-      }
-    }
-
-    return data
-  }
-
-  $get(path, params = {}, logError = true) {
-    return this.$request('GET', path, { params }, logError)
-  }
-
-  $post(path, data, logError = true) {
-    return this.$request(
-      'POST',
-      path,
-      {
-        data,
-      },
-      logError
-    )
   }
 
   $postv2(path, data, logError = true) {
@@ -272,45 +42,6 @@ export default class BaseAPI {
       },
       logError
     )
-  }
-
-  $postForm(path, data, logError = true) {
-    // Don't set Content-Type - see https://stackoverflow.com/questions/39280438/fetch-missing-boundary-in-multipart-form-data-post
-    return this.$request(
-      'POST',
-      path,
-      {
-        formPost: true,
-      },
-      logError,
-      data
-    )
-  }
-
-  $postOverride(overrideMethod, path, data, logError = true) {
-    return this.$request(
-      'POST',
-      path,
-      {
-        data,
-        headers: {
-          'X-HTTP-Method-Override': overrideMethod,
-        },
-      },
-      logError
-    )
-  }
-
-  $put(path, data, logError = true) {
-    return this.$postOverride('PUT', path, data, logError)
-  }
-
-  $patch(path, data, logError = true) {
-    return this.$postOverride('PATCH', path, data, logError)
-  }
-
-  $del(path, data, config = {}, logError = true) {
-    return this.$postOverride('DELETE', path, data, logError)
   }
 
   async $requestv2(method, path, config, logError = true, body = null) {
@@ -377,15 +108,11 @@ export default class BaseAPI {
           )
         }
 
-        // URL encode the parameters, handling arrays specially for PHP
-        // PHP expects arrays as key[]=value1&key[]=value2
+        // URL encode the parameters, joining arrays as comma-separated for Go API
         const urlParams = new URLSearchParams()
         for (const [key, value] of Object.entries(config.params)) {
           if (Array.isArray(value)) {
-            // PHP array format: key[]=value1&key[]=value2
-            for (const item of value) {
-              urlParams.append(key + '[]', item)
-            }
+            urlParams.append(key, value.join(','))
           } else {
             urlParams.append(key, value)
           }
@@ -424,6 +151,19 @@ export default class BaseAPI {
         headers,
       })
 
+      if (data && data.jwt && data.persistent) {
+        // Server returned new auth tokens.  We only update if we already have auth - this prevents stale
+        // in-flight API responses from restoring auth after an intentional logout.
+        if (authStore.auth.jwt && data.jwt !== authStore.auth.jwt) {
+          console.log('JWT renewal: updating auth tokens from API response')
+          authStore.setAuth(data.jwt, data.persistent)
+        } else if (!authStore.auth.jwt) {
+          console.log(
+            'JWT renewal blocked: no existing auth (likely logged out), ignoring stale API response'
+          )
+        }
+      }
+
       if (status === 401) {
         // Not authorised - our JWT and/or persistent token must be wrong.  Clear them.  This may force a login, or
         // not, depending on whether the page requires it.
@@ -444,6 +184,10 @@ export default class BaseAPI {
         status = e.response.status
       }
 
+      if (e?.data) {
+        data = e.data
+      }
+
       if (e.message.match(/.*aborted.*/i)) {
         // We've seen requests get aborted immediately after beforeunload().  Makes sense to abort the requests
         // when you're leaving a page.  No point in rippling those errors up to result in Sentry errors.
@@ -455,15 +199,6 @@ export default class BaseAPI {
       useMiscStore().api(-1)
     }
 
-    // HTTP errors are real errors.
-    //
-    // data.ret holds the server error.
-    // - 1 means not logged in, and that's ok.
-    // - POSTs to session can return errors we want to handle.
-    // - 999 can happen if people double-click, and we should just quietly drop it because the first click will
-    //   probably do the right thing.
-    // - otherwise throw an exception.
-    //
     // Accept all 2xx status codes as successful (200, 201, 204, etc.)
     if (status < 200 || status >= 300) {
       const statusstr = status?.toString()
@@ -531,5 +266,53 @@ export default class BaseAPI {
 
   $getv2(path, params = {}, logError = true) {
     return this.$requestv2('GET', path, { params }, logError)
+  }
+
+  $patchv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PATCH',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $putv2(path, data, logError = true) {
+    return this.$requestv2(
+      'PUT',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
+  }
+
+  $postFormv2(path, data, logError = true) {
+    return this.$requestv2(
+      'POST',
+      path,
+      {
+        formPost: true,
+      },
+      logError,
+      data
+    )
+  }
+
+  $delv2(path, data, logError = true) {
+    return this.$requestv2(
+      'DELETE',
+      path,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        params: data,
+      },
+      logError
+    )
   }
 }

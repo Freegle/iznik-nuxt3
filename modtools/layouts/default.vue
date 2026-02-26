@@ -189,12 +189,6 @@
           @mobilehidemenu="mobilehidemenu"
         />
         <ModMenuItemLeft
-          link="/publicity"
-          name="Publicity"
-          :count="['socialactions', 'popularposts']"
-          @mobilehidemenu="mobilehidemenu"
-        />
-        <ModMenuItemLeft
           link="/admins"
           name="Admins"
           :count="['pendingadmins']"

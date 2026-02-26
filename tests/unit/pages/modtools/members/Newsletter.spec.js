@@ -5,7 +5,7 @@ import Newsletter from '~/modtools/pages/members/newsletter.vue'
 // Mock story store
 const mockStoryStore = {
   list: {},
-  fetchMT: vi.fn().mockResolvedValue({}),
+  fetchNewsletterReviewing: vi.fn().mockResolvedValue({}),
 }
 
 vi.mock('~/stores/stories', () => ({
@@ -68,7 +68,7 @@ describe('Newsletter Page', () => {
       expect(storyComponent.attributes('data-story-id')).toBe('42')
     })
 
-    it('passes newsletter prop to ModStoryReview', async () => {
+    it('passes newsletter prop as true to ModStoryReview', async () => {
       mockStoryStore.list = {
         1: { id: 1, headline: 'Story 1' },
       }
@@ -76,8 +76,20 @@ describe('Newsletter Page', () => {
       await flushPromises()
 
       const storyComponent = wrapper.find('.mod-story-review')
-      // Boolean props render as empty string when true in Vue 3
-      expect(storyComponent.attributes('data-newsletter')).toBeDefined()
+      // Boolean prop `newsletter` is passed as true (renders as empty string in HTML attributes)
+      expect(storyComponent.attributes('data-newsletter')).toBe('')
+    })
+
+    it('passes correct story data to ModStoryReview', async () => {
+      mockStoryStore.list = {
+        42: { id: 42, headline: 'My great story', body: 'Details here' },
+      }
+      const wrapper = mountComponent()
+      await flushPromises()
+
+      const storyComponent = wrapper.find('.mod-story-review')
+      expect(storyComponent.attributes('data-story-id')).toBe('42')
+      expect(storyComponent.exists()).toBe(true)
     })
 
     it('hides empty message when stories exist', async () => {
@@ -123,17 +135,14 @@ describe('Newsletter Page', () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledWith({
-        newsletter: true,
-        dontzapfalsey: true,
-      })
+      expect(mockStoryStore.fetchNewsletterReviewing).toHaveBeenCalled()
     })
 
     it('fetches stories only once on mount', async () => {
       mountComponent()
       await flushPromises()
 
-      expect(mockStoryStore.fetchMT).toHaveBeenCalledTimes(1)
+      expect(mockStoryStore.fetchNewsletterReviewing).toHaveBeenCalledTimes(1)
     })
   })
 })

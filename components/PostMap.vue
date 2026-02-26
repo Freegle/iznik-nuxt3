@@ -510,7 +510,7 @@ watch(groupsInBounds, (newval) => {
 })
 // Add missing myGroup function
 function myGroup(groupId) {
-  return groupStore.list?.find((g) => g.id === groupId) || {}
+  return groupStore.get(groupId) || {}
 }
 
 // Lifecycle hooks
