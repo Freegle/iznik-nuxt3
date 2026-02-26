@@ -145,7 +145,7 @@ const selectedGroup = computed({
 const groups = computed(() => {
   let ret = []
   if (props.listall) {
-    ret = Object.values(groupStore.list).filter((g) => {
+    ret = Object.values(groupStore.summaryList).filter((g) => {
       return g.id
     })
   } else {

@@ -214,7 +214,7 @@ async function batchFetchEntities() {
   }
 
   // Batch fetch groups that aren't already in the store
-  const missingGroupIds = groupIds.filter((id) => !groupStore.list[id])
+  const missingGroupIds = groupIds.filter((id) => !groupStore.get(id))
   if (missingGroupIds.length > 0) {
     const BATCH_SIZE = 20
     for (let i = 0; i < missingGroupIds.length; i += BATCH_SIZE) {

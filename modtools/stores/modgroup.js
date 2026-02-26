@@ -43,7 +43,7 @@ export const useModGroupStore = defineStore({
           this.clear()
         }
         // Get ALL groups into base groupStore once
-        if (Object.keys(groupStore.list).length === 0) {
+        if (Object.keys(groupStore.summaryList).length === 0) {
           console.log('getModGroups fetch ALL base groups')
           await groupStore.fetch()
           console.log('getModGroups fetched ALL base groups')

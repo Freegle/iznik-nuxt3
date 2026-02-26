@@ -89,11 +89,10 @@ const messages = computed(() => {
       return !props.type || props.type === message.type
     })
 
-    const allGroups = groupStore.list
-
     ret.forEach((message) => {
-      if (allGroups && allGroups[message.groupid]) {
-        message.groupname = allGroups[message.groupid].namedisplay
+      const group = groupStore.get(message.groupid)
+      if (group) {
+        message.groupname = group.namedisplay
       } else {
         message.groupname = '#' + message.groupid
       }

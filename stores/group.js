@@ -6,6 +6,7 @@ export const useGroupStore = defineStore({
   id: 'group',
   state: () => ({
     list: {},
+    summaryList: {},
     messages: {},
     allGroups: {},
     _remember: {},
@@ -17,6 +18,7 @@ export const useGroupStore = defineStore({
     },
     clear() {
       this.list = {}
+      this.summaryList = {}
       this.messages = {}
       this.allGroups = {}
       this._remember = {}
@@ -35,6 +37,7 @@ export const useGroupStore = defineStore({
             if (groups) {
               groups.forEach((g) => {
                 this.allGroups[g.nameshort.toLowerCase()] = g
+                this.summaryList[g.id] = g
               })
             }
           }
@@ -78,19 +81,15 @@ export const useGroupStore = defineStore({
 
         return this.list[id]
       } else {
-        // Fetching all groups.
+        // Fetching all groups - store in summaryList (separate from the
+        // full group cache in list) so summary data never overwrites
+        // detailed data fetched via GET /group/{id}.
         const groups = await api(this.config).group.list()
 
         if (groups) {
           groups.forEach((g) => {
             this.allGroups[g.nameshort.toLowerCase()] = g
-
-            // Don't overwrite full group data (fetched via GET /group/{id},
-            // which includes settings, bbox, etc.) with summary data from
-            // the list endpoint (GET /group) which lacks those fields.
-            if (!this.list[g.id] || !this.list[g.id].settings) {
-              this.list[g.id] = g
-            }
+            this.summaryList[g.id] = g
           })
         }
       }
@@ -144,21 +143,26 @@ export const useGroupStore = defineStore({
       let ret = null
 
       if (!isNaN(idOrName)) {
-        // Numeric - find by id
+        // Numeric - find by id. Prefer full data from list, fall back to summaryList.
         idOrName = parseInt(idOrName)
-        return state.list[idOrName] ? state.list[idOrName] : null
+        return state.list[idOrName] || state.summaryList[idOrName] || null
       } else {
-        // Not - scan for match
+        // Not numeric - scan for match by name. Check list first, then summaryList.
         const lower = (idOrName + '').toLowerCase()
 
-        Object.keys(state.list).forEach((key) => {
+        for (const key of Object.keys(state.list)) {
           const group = state.list[key]
-          if (group) {
-            if (group.nameshort.toLowerCase() === lower) {
-              ret = group
-            }
+          if (group && group.nameshort.toLowerCase() === lower) {
+            return group
           }
-        })
+        }
+
+        for (const key of Object.keys(state.summaryList)) {
+          const group = state.summaryList[key]
+          if (group && group.nameshort.toLowerCase() === lower) {
+            ret = group
+          }
+        }
       }
 
       return ret
