@@ -1212,7 +1212,15 @@ const testWithFixtures = test.extend({
           )
           await logoutIfLoggedIn(page, false)
 
-          // Wait for the email input to appear as the page reacts to logout
+          // Reload so the page re-renders in logged-out state
+          await page.reload({
+            timeout: timeouts.navigation.default,
+          })
+          await page.waitForLoadState('domcontentloaded', {
+            timeout: timeouts.navigation.default,
+          })
+
+          // Wait for the email input to appear after reload
           const retryEmailInput = page
             .locator('input[name="email"], input.email, input[type="email"]')
             .first()
