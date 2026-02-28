@@ -129,7 +129,7 @@ const rulesGroup = computed(() => {
   const mygroupsList = myGroups.value // myGroups has correct role
   for (const groupItem of groups.value) {
     const mygroup = mygroupsList.find((g) => g.id === groupItem.id)
-    const groupRules = groupItem.rules ? JSON.parse(groupItem.rules) : null
+    const groupRules = groupItem.rules || null
     const missingRules = groupItem.rules
       ? [
           'limitgroups',

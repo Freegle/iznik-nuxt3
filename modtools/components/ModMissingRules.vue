@@ -109,7 +109,7 @@ const newRulesMissing = computed(() => {
       group.rules &&
       group.publish
     ) {
-      const rules = group.rules ? JSON.parse(group.rules) : []
+      const rules = group.rules || []
 
       // Check if the rules object is missing any values from ['A', 'B', 'C'] or if the values are null
       const newRules = [
