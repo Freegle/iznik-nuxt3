@@ -118,25 +118,7 @@ const houseInvalid = computed(() => {
 })
 
 const email = computed(() => {
-  if (!editgiftaid.value) return null
-
-  const e = editgiftaid.value.email
-  if (!e) return null
-
-  // V2 API returns email as a string; V1 returned an array of email objects.
-  if (typeof e === 'string') return e
-
-  if (Array.isArray(e)) {
-    let emailVal = null
-    e.forEach((item) => {
-      if (!item.ourdomain && (item.preferred || emailVal === null)) {
-        emailVal = item.email
-      }
-    })
-    return emailVal
-  }
-
-  return null
+  return editgiftaid.value?.email || null
 })
 
 function save(callback) {
