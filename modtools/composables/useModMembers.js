@@ -8,7 +8,7 @@ const busy = ref(false)
 const context = ref(null)
 const groupid = ref(0)
 const group = ref(null)
-const limit = ref(2)
+const limit = ref(10)
 const search = ref('')
 const filter = ref('0')
 // const workType = ref(null)
@@ -45,7 +45,10 @@ const members = computed(() => {
           new Date(a.groups[0].arrival).getTime()
         )
       } else {
-        return new Date(b.joined).getTime() - new Date(a.joined).getTime()
+        return (
+          new Date(b.added || b.joined).getTime() -
+          new Date(a.added || a.joined).getTime()
+        )
       }
     })
   } else {
@@ -86,7 +89,6 @@ const loadMore = async function ($state) {
       groupid: groupid.value,
       collection: collection.value,
       modtools: true,
-      summary: 'false', // Use as string to ensure it gets through
       context: context.value,
       limit: limit.value,
       search: search.value,
@@ -146,7 +148,7 @@ export function setupModMembers(reset) {
     context.value = null
     groupid.value = 0
     group.value = null
-    limit.value = 2
+    limit.value = 10
     search.value = ''
     filter.value = '0'
     show.value = 0

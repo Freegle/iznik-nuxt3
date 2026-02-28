@@ -3,6 +3,16 @@ import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
 import ModMemberships from '~/modtools/components/ModMemberships.vue'
 
+// Mock user store
+let mockUserData = null
+const mockUserStore = {
+  byId: vi.fn((id) => mockUserData),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModMemberships', () => {
   const createUser = (overrides = {}) => ({
     id: 456,
@@ -43,10 +53,11 @@ describe('ModMemberships', () => {
       added: `2024-01-${String(i + 1).padStart(2, '0')}`,
     }))
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, userOverrides = {}) {
+    mockUserData = createUser(userOverrides)
     return mount(ModMemberships, {
       props: {
-        user: createUser(),
+        userid: 456,
         ...props,
       },
       global: {
@@ -66,6 +77,7 @@ describe('ModMemberships', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUserData = null
   })
 
   describe('rendering', () => {
@@ -78,9 +90,7 @@ describe('ModMemberships', () => {
       ['null', null],
       ['empty array', []],
     ])('shows "Not on any communities" when memberof is %s', (_, memberof) => {
-      const wrapper = mountComponent({
-        user: createUser({ memberof }),
-      })
+      const wrapper = mountComponent({}, { memberof })
       expect(wrapper.text()).toContain('Not on any communities')
     })
 
@@ -91,8 +101,9 @@ describe('ModMemberships', () => {
     })
 
     it('truncates long group names to 32 characters', () => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [
             {
               id: 1,
@@ -101,8 +112,8 @@ describe('ModMemberships', () => {
               added: '2024-01-01T10:00:00Z',
             },
           ],
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain('This Is A Very Long Group Name T...')
       expect(wrapper.text()).not.toContain('That Exceeds Limit')
     })
@@ -115,15 +126,14 @@ describe('ModMemberships', () => {
 
   describe('memberof computed', () => {
     it('returns null when user has no memberof', () => {
-      const wrapper = mountComponent({
-        user: createUser({ memberof: null }),
-      })
+      const wrapper = mountComponent({}, { memberof: null })
       expect(wrapper.vm.memberof).toBeNull()
     })
 
     it('sorts memberships by date descending (newest first)', () => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [
             {
               id: 1,
@@ -144,17 +154,15 @@ describe('ModMemberships', () => {
               added: '2024-03-01T10:00:00Z',
             },
           ],
-        }),
-      })
+        }
+      )
       expect(wrapper.vm.memberof[0].namedisplay).toBe('New Group')
       expect(wrapper.vm.memberof[1].namedisplay).toBe('Mid Group')
       expect(wrapper.vm.memberof[2].namedisplay).toBe('Old Group')
     })
 
     it('shows first 3 memberships by default, all when allmemberships is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({ memberof: createGroups(5) }),
-      })
+      const wrapper = mountComponent({}, { memberof: createGroups(5) })
 
       // Default: shows first 3
       expect(wrapper.vm.memberof.length).toBe(3)
@@ -180,9 +188,7 @@ describe('ModMemberships', () => {
     ])(
       'returns correct count when %s',
       async (_, userOverrides, allmemberships, expected) => {
-        const wrapper = mountComponent({
-          user: createUser(userOverrides),
-        })
+        const wrapper = mountComponent({}, userOverrides)
         if (allmemberships) {
           wrapper.vm.allmemberships = true
           await wrapper.vm.$nextTick()
@@ -195,9 +201,10 @@ describe('ModMemberships', () => {
   describe('expand badge', () => {
     it('shows/hides badge based on hidden memberships and toggles allmemberships', async () => {
       // With hidden memberships - badge shows
-      const wrapperWithHidden = mountComponent({
-        user: createUser({ memberof: createGroups(4) }),
-      })
+      const wrapperWithHidden = mountComponent(
+        {},
+        { memberof: createGroups(4) }
+      )
       expect(wrapperWithHidden.text()).toContain('+1 groups')
       expect(wrapperWithHidden.vm.allmemberships).toBe(false)
 
@@ -207,17 +214,16 @@ describe('ModMemberships', () => {
       expect(wrapperWithHidden.vm.allmemberships).toBe(true)
 
       // Without hidden memberships - no badge
-      const wrapperNoHidden = mountComponent({
-        user: createUser({ memberof: createGroups(1) }),
-      })
+      const wrapperNoHidden = mountComponent({}, { memberof: createGroups(1) })
       expect(wrapperNoHidden.text()).not.toContain('+')
     })
   })
 
   describe('applied groups', () => {
     it('shows applied groups and filters out existing memberships', () => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [
             {
               id: 1,
@@ -227,7 +233,12 @@ describe('ModMemberships', () => {
             },
           ],
           applied: [
-            { id: 1, userid: 456, namedisplay: 'Group 1', added: '2024-06-01' }, // Same id as memberof
+            {
+              id: 1,
+              userid: 456,
+              namedisplay: 'Group 1',
+              added: '2024-06-01',
+            }, // Same id as memberof
             {
               id: 2,
               userid: 456,
@@ -235,8 +246,8 @@ describe('ModMemberships', () => {
               added: '2024-06-01',
             },
           ],
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain('Applied Group')
       expect(wrapper.text()).toContain('joined')
       expect(wrapper.vm.filteredApplied.length).toBe(1)
@@ -244,19 +255,18 @@ describe('ModMemberships', () => {
     })
 
     it('returns empty array when user has no applied', () => {
-      const wrapper = mountComponent({
-        user: createUser({ applied: null }),
-      })
+      const wrapper = mountComponent({}, { applied: null })
       expect(wrapper.vm.filteredApplied).toEqual([])
     })
 
     it('shows first 3 applied by default, all when allapplied is true', async () => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [],
           applied: createApplied(5),
-        }),
-      })
+        }
+      )
 
       // Default: shows first 3
       expect(wrapper.vm.visibleApplied.length).toBe(3)
@@ -275,12 +285,13 @@ describe('ModMemberships', () => {
     ])(
       'returns correct count when %s',
       async (_, appliedCount, allapplied, expected) => {
-        const wrapper = mountComponent({
-          user: createUser({
+        const wrapper = mountComponent(
+          {},
+          {
             memberof: [],
             applied: createApplied(appliedCount),
-          }),
-        })
+          }
+        )
         if (allapplied) {
           wrapper.vm.allapplied = true
           await wrapper.vm.$nextTick()
@@ -290,12 +301,13 @@ describe('ModMemberships', () => {
     )
 
     it('shows applied badge when hidden applied exist', () => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [],
           applied: createApplied(4),
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain('+1 applied')
     })
   })
@@ -321,8 +333,9 @@ describe('ModMemberships', () => {
         true,
       ],
     ])('applies %s', (_, daysBack, selector, shouldExist) => {
-      const wrapper = mountComponent({
-        user: createUser({
+      const wrapper = mountComponent(
+        {},
+        {
           memberof: [
             {
               id: 1,
@@ -331,8 +344,8 @@ describe('ModMemberships', () => {
               added: dayjs().subtract(daysBack, 'days').toISOString(),
             },
           ],
-        }),
-      })
+        }
+      )
       expect(wrapper.find(selector).exists()).toBe(shouldExist)
     })
   })

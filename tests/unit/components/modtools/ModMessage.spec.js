@@ -45,7 +45,12 @@ const {
     },
     mockUserStore: {
       fetch: vi.fn().mockResolvedValue(),
-      byId: vi.fn().mockReturnValue({ id: 456, displayname: 'Updated User' }),
+      fetchMT: vi.fn().mockResolvedValue(),
+      byId: vi.fn().mockReturnValue({
+        id: 456,
+        displayname: 'Updated User',
+        memberof: [{ id: 789 }],
+      }),
     },
     mockMe: { id: 999, displayname: 'Test Mod' },
     mockMyModGroups: [
@@ -264,7 +269,7 @@ describe('ModMessage', () => {
           },
           ModComments: {
             template: '<div class="mod-comments"><slot /></div>',
-            props: ['user'],
+            props: ['userid'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer"><slot /></div>',
@@ -293,7 +298,7 @@ describe('ModMessage', () => {
           },
           ModMessageUserInfo: {
             template: '<div class="mod-message-user-info"><slot /></div>',
-            props: ['message', 'user', 'modinfo', 'groupid'],
+            props: ['userid', 'modinfo', 'groupid', 'milesaway'],
           },
           SettingsGroup: {
             template: '<div class="settings-group"><slot /></div>',
@@ -435,19 +440,19 @@ describe('ModMessage', () => {
   })
 
   describe('Computed: membership', () => {
-    it('returns membership for the group, undefined when no match', () => {
+    it('returns membership for the group from store user', () => {
       const wrapper = mountComponent()
       expect(wrapper.vm.membership).toEqual({ id: 789 })
+    })
 
-      const message2 = createTestMessage({
-        fromuser: {
-          id: 456,
-          displayname: 'Test User',
-          memberof: [{ id: 999 }],
-        },
+    it('returns undefined when no matching group in store user', () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Test User',
+        memberof: [{ id: 999 }],
       })
-      const wrapper2 = mountComponent({ message: message2 })
-      expect(wrapper2.vm.membership).toBe(undefined)
+      const wrapper = mountComponent()
+      expect(wrapper.vm.membership).toBe(undefined)
     })
   })
 
@@ -614,10 +619,13 @@ describe('ModMessage', () => {
   })
 
   describe('updateComments', () => {
-    it('updates message fromuser from store', () => {
+    it('re-fetches user from store', () => {
       const wrapper = mountComponent()
       wrapper.vm.updateComments()
-      expect(mockUserStore.byId).toHaveBeenCalledWith(456)
+      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({
+        id: 456,
+        modtools: true,
+      })
     })
   })
 
@@ -647,15 +655,13 @@ describe('ModMessage', () => {
 
   describe('Spammer indicator', () => {
     it('shows ModSpammer when user is a spammer', async () => {
-      const message = createTestMessage({
-        fromuser: {
-          id: 456,
-          displayname: 'Spam User',
-          spammer: { collection: 'Spammer' },
-          memberof: [{ id: 789 }],
-        },
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Spam User',
+        spammer: { collection: 'Spammer' },
+        memberof: [{ id: 789 }],
       })
-      const wrapper = mountComponent({ message, summary: false })
+      const wrapper = mountComponent({ summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.find('.mod-spammer').exists()).toBe(true)
     })
@@ -697,15 +703,13 @@ describe('ModMessage', () => {
 
   describe('Active distance warning', () => {
     it('shows warning for large active distance', async () => {
-      const message = createTestMessage({
-        fromuser: {
-          id: 456,
-          displayname: 'Test User',
-          activedistance: 100,
-          memberof: [{ id: 789 }],
-        },
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Test User',
+        activedistance: 100,
+        memberof: [{ id: 789 }],
       })
-      const wrapper = mountComponent({ message, summary: false })
+      const wrapper = mountComponent({ summary: false })
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('100 miles apart')
     })
@@ -867,7 +871,7 @@ describe('ModMessage', () => {
   describe('User summary display', () => {
     it('shows user displayname in summary mode', () => {
       const wrapper = mountComponent({ summary: true })
-      expect(wrapper.text()).toContain('Test User')
+      expect(wrapper.text()).toContain('Updated User')
     })
   })
 

@@ -86,6 +86,8 @@ async function updatedPhoto() {
 }
 
 :deep(img) {
-  width: 100%;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
 }
 </style>

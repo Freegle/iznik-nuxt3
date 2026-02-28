@@ -32,8 +32,13 @@ export const useUserStore = defineStore({
       const ret = await api(this.config).user.fetchByEmail(email, false)
       return ret?.exists
     },
-    async fetchMT(params) {
+    async fetchMT(params, force = false) {
       // id, info, search, emailhistory
+      const id = parseInt(params.id)
+      if (!force && id && this.list[id]) {
+        return this.list[id]
+      }
+
       params.info = true
       const { user, users } = await api(this.config).user.fetchMT(params)
       if (user) {

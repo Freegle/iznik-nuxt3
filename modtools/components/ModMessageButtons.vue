@@ -85,7 +85,7 @@
         label="Delete as Spam"
       />
       <SpinButton
-        v-if="message.type === 'Offer' && !message.outcomes.length"
+        v-if="message.type === 'Offer' && !message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="check"
@@ -95,7 +95,7 @@
         @handle="outcome($event, 'Taken')"
       />
       <SpinButton
-        v-if="message.type === 'Wanted' && !message.outcomes.length"
+        v-if="message.type === 'Wanted' && !message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="check"
@@ -105,7 +105,7 @@
         @handle="outcome($event, 'Received')"
       />
       <SpinButton
-        v-if="!message.outcomes.length"
+        v-if="!message.outcomes?.length"
         variant="white"
         class="m-1"
         icon-name="trash-alt"

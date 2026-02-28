@@ -120,10 +120,10 @@ const highlightEmailFrequencyIfOn = computed(() => {
 
 const emailfreq = computed({
   get() {
-    if (membership.value) {
+    if (membership.value && membership.value.emailfrequency != null) {
       return membership.value.emailfrequency.toString()
     }
-    return props.emailfrequency?.toString()
+    return (props.emailfrequency ?? 24).toString()
   },
   async set(newval) {
     await changeValue('emailfrequency', newval)

@@ -143,7 +143,7 @@ describe('ModSupportUser', () => {
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModMergeButton: {
             template: '<button class="merge-button" />',

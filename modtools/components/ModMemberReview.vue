@@ -25,7 +25,7 @@
         <div><v-icon icon="hashtag" />{{ member.userid }}</div>
       </b-card-header>
       <b-card-body>
-        <ModComments :user="member" />
+        <ModComments :userid="member.id" />
         <ModSpammer v-if="member.spammer" :user="member" />
         <NoticeMessage v-if="member.systemrole !== 'User'" variant="info">
           This freegler has role: {{ member.systemrole }}.

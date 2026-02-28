@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-2 small">
+  <div v-if="user" class="mt-2 small">
     <div v-if="memberof && memberof.length">
       <div
         v-for="m in memberof"
@@ -66,25 +66,32 @@
 <script setup>
 import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
+import { useUserStore } from '~/stores/user'
 
 const MEMBERSHIPS_SHOW = 3
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
+})
+
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return userStore.byId(props.userid)
 })
 
 const allmemberships = ref(false)
 const allapplied = ref(false)
 
 const memberof = computed(() => {
-  if (!props.user || !props.user.memberof) {
+  if (!user.value?.memberof) {
     return null
   }
 
-  const ms = [...props.user.memberof]
+  const ms = [...user.value.memberof]
 
   ms.sort(function (a, b) {
     return new Date(b.added).getTime() - new Date(a.added).getTime()
@@ -100,22 +107,20 @@ const memberof = computed(() => {
 const hiddenmemberofs = computed(() => {
   return allmemberships.value
     ? 0
-    : props.user &&
-      props.user.memberof &&
-      props.user.memberof.length > MEMBERSHIPS_SHOW
-    ? props.user.memberof.length - MEMBERSHIPS_SHOW
+    : user.value?.memberof?.length > MEMBERSHIPS_SHOW
+    ? user.value.memberof.length - MEMBERSHIPS_SHOW
     : 0
 })
 
 const filteredApplied = computed(() => {
-  if (!props.user || !props.user.applied || !props.user.memberof) {
+  if (!user.value?.applied || !user.value?.memberof) {
     return []
   }
 
   // Filter out anything we're already on.
-  const ms = props.user.applied.filter((g) => {
+  const ms = user.value.applied.filter((g) => {
     let member = false
-    props.user.memberof.forEach((h) => {
+    user.value.memberof.forEach((h) => {
       if (h.id === g.id) {
         member = true
       }

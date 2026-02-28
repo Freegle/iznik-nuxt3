@@ -87,8 +87,9 @@ export const useMemberStore = defineStore({
 
       if (this.instance === instance) {
         for (let i = 0; i < members.length; i++) {
-          // The server doesn't return the collection but this is useful to have in the store.
-          members[i].collection = params.collection
+          // Ensure collection and groupid are set from params as fallback.
+          if (!members[i].collection) members[i].collection = params.collection
+          if (!members[i].groupid) members[i].groupid = params.groupid
         }
         received += members.length
         members.forEach((member) => {

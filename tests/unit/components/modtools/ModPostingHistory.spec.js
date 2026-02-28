@@ -30,9 +30,11 @@ describe('ModPostingHistory', () => {
     },
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, userOverrides = {}) {
+    const userData = { ...defaultUser, ...userOverrides }
+    mockUserStore.byId.mockReturnValue(userData)
     return mount(ModPostingHistory, {
-      props: { user: defaultUser, ...props },
+      props: { userid: 123, ...props },
       global: {
         stubs: {
           'b-badge': {
@@ -84,7 +86,7 @@ describe('ModPostingHistory', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.byId.mockReturnValue(defaultUser)
     mockUserStore.fetch.mockResolvedValue({})
   })
 
@@ -121,14 +123,14 @@ describe('ModPostingHistory', () => {
     })
 
     it('applies danger variant to modmails badge when modmails > 0', () => {
-      const wrapper = mountComponent({ user: { ...defaultUser, modmails: 5 } })
+      const wrapper = mountComponent({}, { modmails: 5 })
       const badges = wrapper.findAll('.badge')
       const modmailsBadge = badges[2]
       expect(modmailsBadge.classes()).toContain('danger')
     })
 
     it('applies light variant to modmails badge when modmails is 0', () => {
-      const wrapper = mountComponent({ user: { ...defaultUser, modmails: 0 } })
+      const wrapper = mountComponent({}, { modmails: 0 })
       const badges = wrapper.findAll('.badge')
       const modmailsBadge = badges[2]
       expect(modmailsBadge.classes()).toContain('light')
@@ -154,13 +156,11 @@ describe('ModPostingHistory', () => {
     })
 
     it('hides reply badges when userinfo is null', () => {
-      const userWithoutInfo = {
-        id: 123,
-        modmails: 0,
-        messagehistory: [],
-      }
-      mockUserStore.byId.mockReturnValue(null)
-      const wrapper = mountComponent({ user: userWithoutInfo })
+      const wrapper = mountComponent(
+        {},
+        { info: undefined, modmails: 0, messagehistory: [] }
+      )
+      // byId returns the user above which has no info, and byId for the fallback also returns same
       const badges = wrapper.findAll('.badge')
       // Should only have 3 badges: offers, wanteds, modmails
       expect(badges.length).toBe(3)
@@ -209,16 +209,12 @@ describe('ModPostingHistory', () => {
       })
 
       it('returns 0 when no message history', () => {
-        const wrapper = mountComponent({
-          user: { ...defaultUser, messagehistory: null },
-        })
+        const wrapper = mountComponent({}, { messagehistory: null })
         expect(wrapper.vm.offers).toBe(0)
       })
 
       it('returns 0 when empty message history', () => {
-        const wrapper = mountComponent({
-          user: { ...defaultUser, messagehistory: [] },
-        })
+        const wrapper = mountComponent({}, { messagehistory: [] })
         expect(wrapper.vm.offers).toBe(0)
       })
     })
@@ -230,47 +226,22 @@ describe('ModPostingHistory', () => {
       })
 
       it('returns 0 when no message history', () => {
-        const wrapper = mountComponent({
-          user: { ...defaultUser, messagehistory: null },
-        })
+        const wrapper = mountComponent({}, { messagehistory: null })
         expect(wrapper.vm.wanteds).toBe(0)
       })
     })
 
     describe('userinfo', () => {
-      it('returns info from user prop if available', () => {
+      it('returns info from store user if available', () => {
         const wrapper = mountComponent()
         expect(wrapper.vm.userinfo).toEqual(defaultUser.info)
       })
 
-      it('returns info from userStore if user prop has no info', () => {
-        const userFromStore = {
-          id: 123,
-          info: { replies: 10, repliesoffer: 5, replieswanted: 5 },
-        }
-        mockUserStore.byId.mockReturnValue(userFromStore)
-
-        const userWithoutInfo = { id: 123, modmails: 0, messagehistory: [] }
-        const wrapper = mountComponent({ user: userWithoutInfo })
-
-        expect(wrapper.vm.userinfo).toEqual(userFromStore.info)
-      })
-
-      it('returns null when no info available anywhere', () => {
-        mockUserStore.byId.mockReturnValue(null)
-
-        const userWithoutInfo = { id: 123, modmails: 0, messagehistory: [] }
-        const wrapper = mountComponent({ user: userWithoutInfo })
-
-        expect(wrapper.vm.userinfo).toBeNull()
-      })
-
-      it('returns null when userStore user has no info', () => {
-        mockUserStore.byId.mockReturnValue({ id: 123 })
-
-        const userWithoutInfo = { id: 123, modmails: 0, messagehistory: [] }
-        const wrapper = mountComponent({ user: userWithoutInfo })
-
+      it('returns null when no info available', () => {
+        const wrapper = mountComponent(
+          {},
+          { info: undefined, modmails: 0, messagehistory: [] }
+        )
         expect(wrapper.vm.userinfo).toBeNull()
       })
     })
@@ -380,10 +351,9 @@ describe('ModPostingHistory', () => {
 
   describe('onMounted', () => {
     it('fetches user if user.info is not present', async () => {
-      const userWithoutInfo = { id: 456, modmails: 0, messagehistory: [] }
-      mountComponent({ user: userWithoutInfo })
+      mountComponent({}, { info: undefined, modmails: 0, messagehistory: [] })
       await flushPromises()
-      expect(mockUserStore.fetch).toHaveBeenCalledWith(456)
+      expect(mockUserStore.fetch).toHaveBeenCalledWith(123)
     })
 
     it('does not fetch user if user.info is present', async () => {
@@ -447,48 +417,48 @@ describe('ModPostingHistory', () => {
 
   describe('edge cases', () => {
     it('handles user with undefined messagehistory', () => {
-      const wrapper = mountComponent({
-        user: { id: 123, modmails: 0 },
-      })
+      const wrapper = mountComponent(
+        {},
+        { messagehistory: undefined, modmails: 0 }
+      )
       expect(wrapper.vm.offers).toBe(0)
       expect(wrapper.vm.wanteds).toBe(0)
     })
 
     it('handles empty expectedreplies showing 0', () => {
-      const userWithNoExpected = {
-        ...defaultUser,
-        info: { ...defaultUser.info, expectedreplies: 0 },
-      }
-      const wrapper = mountComponent({ user: userWithNoExpected })
+      const wrapper = mountComponent(
+        {},
+        { info: { ...defaultUser.info, expectedreplies: 0 } }
+      )
       const badges = wrapper.findAll('.badge')
       const expectedRepliesBadge = badges[5]
       expect(expectedRepliesBadge.classes()).toContain('light')
     })
 
     it('handles undefined expectedreplies', () => {
-      const userWithUndefinedExpected = {
-        ...defaultUser,
-        info: { replies: 5, repliesoffer: 3, replieswanted: 2 },
-      }
-      const wrapper = mountComponent({ user: userWithUndefinedExpected })
+      const wrapper = mountComponent(
+        {},
+        { info: { replies: 5, repliesoffer: 3, replieswanted: 2 } }
+      )
       const badges = wrapper.findAll('.badge')
       const expectedRepliesBadge = badges[5]
       expect(expectedRepliesBadge.text()).toContain('0')
     })
 
     it('counts correctly with mixed message types', () => {
-      const userWithMixedHistory = {
-        ...defaultUser,
-        messagehistory: [
-          { id: 1, type: 'Offer' },
-          { id: 2, type: 'Wanted' },
-          { id: 3, type: 'Offer' },
-          { id: 4, type: 'Offer' },
-          { id: 5, type: 'Wanted' },
-          { id: 6, type: 'Other' },
-        ],
-      }
-      const wrapper = mountComponent({ user: userWithMixedHistory })
+      const wrapper = mountComponent(
+        {},
+        {
+          messagehistory: [
+            { id: 1, type: 'Offer' },
+            { id: 2, type: 'Wanted' },
+            { id: 3, type: 'Offer' },
+            { id: 4, type: 'Offer' },
+            { id: 5, type: 'Wanted' },
+            { id: 6, type: 'Other' },
+          ],
+        }
+      )
       expect(wrapper.vm.offers).toBe(3)
       expect(wrapper.vm.wanteds).toBe(2)
     })
@@ -527,14 +497,15 @@ describe('ModPostingHistory', () => {
     })
 
     it('returns 0 for non-existent types', () => {
-      const userWithHistory = {
-        ...defaultUser,
-        messagehistory: [
-          { id: 1, type: 'Offer' },
-          { id: 2, type: 'Wanted' },
-        ],
-      }
-      const wrapper = mountComponent({ user: userWithHistory })
+      const wrapper = mountComponent(
+        {},
+        {
+          messagehistory: [
+            { id: 1, type: 'Offer' },
+            { id: 2, type: 'Wanted' },
+          ],
+        }
+      )
       // No 'Other' type counted in offers or wanteds
       expect(wrapper.vm.offers).toBe(1)
       expect(wrapper.vm.wanteds).toBe(1)
@@ -566,16 +537,17 @@ describe('ModPostingHistory', () => {
     })
 
     it('applies light variant when replies is 0', () => {
-      const userWithNoReplies = {
-        ...defaultUser,
-        info: {
-          replies: 0,
-          repliesoffer: 0,
-          replieswanted: 0,
-          expectedreplies: 0,
-        },
-      }
-      const wrapper = mountComponent({ user: userWithNoReplies })
+      const wrapper = mountComponent(
+        {},
+        {
+          info: {
+            replies: 0,
+            repliesoffer: 0,
+            replieswanted: 0,
+            expectedreplies: 0,
+          },
+        }
+      )
       const badges = wrapper.findAll('.badge')
       // Offer reply badge
       expect(badges[3].classes()).toContain('light')

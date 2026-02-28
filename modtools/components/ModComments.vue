@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div v-if="user">
     <ModComment
       v-for="comment in comments"
-      :key="'modcomments-' + user.id + '-' + comment.id"
+      :key="'modcomments-' + userid + '-' + comment.id"
       :comment="comment"
       :user="user"
       :expand-comments="expandComments"
@@ -23,10 +23,11 @@
 import { ref, computed } from 'vue'
 import pluralize from 'pluralize'
 import { useMe } from '~/composables/useMe'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     default: null,
   },
   expandComments: {
@@ -39,6 +40,11 @@ const props = defineProps({
 const emit = defineEmits(['updateComments', 'editing'])
 
 const { oneOfMyGroups } = useMe()
+const userStore = useUserStore()
+
+const user = computed(() => {
+  return props.userid ? userStore.byId(props.userid) : null
+})
 
 const showAll = ref(false)
 
@@ -48,7 +54,7 @@ const showMore = computed(() => {
 })
 
 const sortedComments = computed(() => {
-  const ret = props.user ? props.user.comments : []
+  const ret = user.value ? user.value.comments : []
 
   if (ret) {
     ret.sort((a, b) => {

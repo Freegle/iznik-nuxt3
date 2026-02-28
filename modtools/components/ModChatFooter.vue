@@ -46,7 +46,7 @@
           </notice-message>
           <ModComments
             v-if="mod && chat && chat.chattype === 'User2Mod' && otheruser"
-            :user="otheruser"
+            :userid="otheruser.id"
             class="mt-1"
             @editing="editing"
           />

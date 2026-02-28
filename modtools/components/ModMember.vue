@@ -12,16 +12,17 @@
         </div>
         <div>
           <ProfileImage
-            :image="member.profile.turl"
-            :name="member.displayname"
+            :image="user.profile?.turl"
+            :name="user.displayname || member.fullname"
             class="ml-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
-          {{ member.displayname }}
+          {{ user.displayname || member.fullname }}
         </div>
-        <div v-if="member.joined">
-          <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}
+        <div v-if="member.added || member.joined">
+          <v-icon icon="calendar-alt" />
+          {{ datetimeshort(member.added || member.joined) }}
         </div>
         <div><v-icon icon="hashtag" />{{ member.userid }}</div>
       </b-card-header>
@@ -50,24 +51,23 @@
             />
           </NoticeMessage>
         </div>
-        <ModComments :user="member" :expand-comments="expandComments" />
-        <ModSpammer v-if="member.spammer" :user="member" :sameip="sameip" />
-        <NoticeMessage
-          v-if="member.suspectreason"
-          variant="danger"
-          class="mb-2"
-        >
-          This freegler is flagged: {{ member.suspectreason }}
+        <ModComments
+          :userid="member.userid"
+          :expand-comments="expandComments"
+        />
+        <ModSpammer v-if="user.spammer" :user="user" :sameip="sameip" />
+        <NoticeMessage v-if="user.suspectreason" variant="danger" class="mb-2">
+          This freegler is flagged: {{ user.suspectreason }}
         </NoticeMessage>
         <NoticeMessage
-          v-if="member.activedistance > 50"
+          v-if="user.activedistance > 50"
           variant="warning"
           class="mb-2"
         >
           This freegler recently active on groups
-          {{ member.activedistance }} miles apart.
+          {{ user.activedistance }} miles apart.
         </NoticeMessage>
-        <ModBouncing v-if="member.bouncing" :user="member" />
+        <ModBouncing v-if="user.bouncing" :user="user" />
         <NoticeMessage v-if="member.bandate">
           Banned
           <span :title="datetime(member.bandate)">{{
@@ -82,11 +82,9 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="border border-info p-1 flex-grow-1 mr-1">
             <SettingsGroup
-              v-if="groupid && member.ourpostingstatus"
+              v-if="groupid"
               :emailfrequency="member.emailfrequency"
               :membership-m-t="member"
-              :moderation="member.ourpostingstatus"
-              :userid="member.userid"
               xclass="border border-info p-1 flex-grow-1 mr-1"
               @update:emailfrequency="
                 settingsChange('emailfrequency', groupid, $event)
@@ -107,10 +105,10 @@
             />
           </div>
           <div>
-            <ModMemberSummary :member="member" />
-            <ModMemberEngagement :member="member" />
-            <div v-if="member.info && member.info.publiclocation">
-              Public location: {{ member.info.publiclocation.location }}
+            <ModMemberSummary :member="user" />
+            <ModMemberEngagement :member="user" />
+            <div v-if="user.info && user.info.publiclocation">
+              Public location: {{ user.info.publiclocation.location }}
             </div>
             <ModMemberActions
               v-if="!footeractions"
@@ -118,10 +116,10 @@
               :groupid="groupid"
               :banned="Boolean(member.bandate)"
             />
-            <ModMemberships :user="member" />
-            <ModMemberLogins :member="member" />
+            <ModMemberships :userid="member.userid" />
+            <ModMemberLogins :member="user" />
             <b-button
-              v-if="member.emails && member.emails.length"
+              v-if="user.emails && user.emails.length"
               variant="link"
               @click="showEmails = !showEmails"
             >
@@ -129,15 +127,15 @@
               <span v-if="showEmails">
                 <span class="d-inline d-sm-none"> Hide </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', user.emails.length, true) }}
                 </span>
               </span>
               <span v-else>
                 <span class="d-inline d-sm-none">
-                  {{ member.emails.length }}
+                  {{ user.emails.length }}
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', user.emails.length, true) }}
                 </span>
               </span>
             </b-button>
@@ -149,7 +147,7 @@
               View profile
             </b-button>
             <div v-if="showEmails">
-              <div v-for="e in member.emails" :key="e.id">
+              <div v-for="e in user.emails" :key="e.id">
                 {{ e.email }} <v-icon v-if="e.preferred" icon="star" />
               </div>
             </div>
@@ -280,7 +278,7 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :user="member"
+      :user="user"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
@@ -307,7 +305,7 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useModConfigStore } from '~/stores/modconfig'
@@ -363,11 +361,11 @@ const banned = ref(false)
 const chatid = ref(0)
 
 const email = computed(() => {
-  // Depending on which context we're used it, we might or might not have an email returned.
-  let ret = props.member.email
+  // Email comes from full user data (fetched via userStore.fetchMT).
+  let ret = user.value?.email
 
-  if (!props.member.email && props.member.emails) {
-    props.member.emails.forEach((e) => {
+  if (!ret && user.value?.emails) {
+    user.value.emails.forEach((e) => {
       if (!e.ourdomain && (!ret || e.preferred)) {
         ret = e.email
       }
@@ -381,23 +379,36 @@ const groupid = computed(() => {
   return props.member.groupid
 })
 
-const modconfig = computed(() => {
-  let ret = null
-  let configid = null
-
+const configid = computed(() => {
+  let id = null
   myGroups.value.forEach((group) => {
     if (group.id === groupid.value) {
-      configid = group.configid
+      id = group.configid
     }
   })
-  const configs = modConfigStore.configs
-  ret = configs.find((config) => config.id === configid)
-
-  return ret
+  return id
 })
 
+const modconfig = computed(() => {
+  if (!configid.value) return null
+  return modConfigStore.configsById[configid.value] || null
+})
+
+watch(
+  configid,
+  async (id) => {
+    if (id) {
+      await modConfigStore.fetchById(id)
+    }
+  },
+  { immediate: true }
+)
+
 const user = computed(() => {
-  return props.member
+  // Full user data from store, populated by fetchMT on mount.
+  // Falls back to props.member for fields not yet loaded.
+  const storeUser = userStore.list[props.member.userid]
+  return storeUser || props.member
 })
 
 const isTN = computed(() => {
@@ -477,8 +488,8 @@ onMounted(() => {
     banned.value = true
   }
 
-  if (!user.value) {
-    // Fetch with info so that we can display more.
+  // Fetch full user data via V2 pattern - cached in userStore.
+  if (props.member.userid) {
     userStore.fetchMT({
       id: props.member.userid,
       info: true,

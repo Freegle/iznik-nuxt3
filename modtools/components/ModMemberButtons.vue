@@ -193,17 +193,21 @@ const allowAutoSend = ref(true)
 const showAddCommentModal = ref(false)
 
 function hasCollection(coll) {
-  let ret = false
-
-  if (props.member.memberof) {
-    props.member.memberof.forEach((group) => {
-      if (group.id === props.member.groupid && group.collection === coll) {
-        ret = true
-      }
-    })
+  // V2: collection returned directly on the membership object.
+  if (props.member.collection === coll) {
+    return true
   }
 
-  return ret
+  // V1 fallback: check memberof array.
+  if (props.member.memberof) {
+    for (const group of props.member.memberof) {
+      if (group.id === props.member.groupid && group.collection === coll) {
+        return true
+      }
+    }
+  }
+
+  return false
 }
 
 const approved = computed(() => hasCollection('Approved'))
@@ -220,7 +224,7 @@ const validActions = computed(() => {
 })
 
 const filterByAction = computed(() => {
-  if (props.modconfig) {
+  if (props.modconfig?.stdmsgs) {
     return props.modconfig.stdmsgs.filter((stdmsg) => {
       return validActions.value.includes(stdmsg.action)
     })
@@ -230,7 +234,7 @@ const filterByAction = computed(() => {
 })
 
 const filtered = computed(() => {
-  if (props.modconfig) {
+  if (props.modconfig?.stdmsgs) {
     return filterByAction.value.filter((stdmsg) => {
       return showRare.value || !parseInt(stdmsg.rarelyused)
     })

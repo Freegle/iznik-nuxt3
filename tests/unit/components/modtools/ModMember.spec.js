@@ -146,7 +146,7 @@ describe('ModMember', () => {
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['user', 'expandComments'],
+            props: ['userid', 'expandComments'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer" />',
@@ -174,7 +174,7 @@ describe('ModMember', () => {
           },
           ModMemberships: {
             template: '<div class="mod-memberships" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModMemberLogins: {
             template: '<div class="mod-member-logins" />',

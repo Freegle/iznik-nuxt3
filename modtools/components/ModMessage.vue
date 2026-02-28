@@ -29,7 +29,7 @@
                 class="mr-1"
                 size="lg"
                 :disabled-except-for="memberGroupIds"
-                :disabled="editmessage.fromuser?.tnuserid"
+                :disabled="fromUser?.tnuserid"
               />
               <div
                 v-if="editmessage.item && editmessage.location"
@@ -154,10 +154,10 @@
           </div>
           <div class="d-flex">
             <div
-              v-if="summary && message && message.fromuser"
+              v-if="summary && message && fromUser"
               class="text-info font-weight-bold mr-2"
             >
-              {{ message.fromuser.displayname }}
+              {{ fromUser.displayname }}
             </div>
             <div v-if="expanded" class="d-flex">
               <div class="d-flex flex-column align-content-end">
@@ -245,22 +245,19 @@
                 </NoticeMessage>
               </div>
             </div>
-            <div v-if="message.fromuser">
+            <div v-if="fromUser">
               <ModComments
-                :user="message.fromuser"
+                :userid="fromUserId"
                 @update-comments="updateComments"
               />
-              <ModSpammer
-                v-if="message.fromuser.spammer"
-                :user="message.fromuser"
-              />
+              <ModSpammer v-if="fromUser.spammer" :user="fromUser" />
               <NoticeMessage
-                v-if="message.fromuser.activedistance > 50"
+                v-if="fromUser.activedistance > 50"
                 variant="warning"
                 class="mb-2"
               >
                 This freegler recently active on groups
-                {{ message.fromuser.activedistance }} miles apart.
+                {{ fromUser.activedistance }} miles apart.
               </NoticeMessage>
             </div>
             <NoticeMessage v-if="outsideUK" variant="warning" class="mb-2">
@@ -390,11 +387,9 @@
               class="rounded border border-info p-2 d-flex justify-content-between flex-wrap"
             >
               <ModMessageUserInfo
-                v-if="
-                  message.fromuser && message.groups && message.groups.length
-                "
+                v-if="fromUser && message.groups && message.groups.length"
                 :message="message"
-                :user="message.fromuser"
+                :userid="fromUserId"
                 modinfo
                 :groupid="message.groups[0].groupid"
               />
@@ -416,11 +411,7 @@
             </div>
             <div class="d-flex justify-content-between flex-wrap">
               <b-button
-                v-if="
-                  message.fromuser &&
-                  !message.fromuser.ljuserid &&
-                  !message.fromuser.tnuserid
-                "
+                v-if="fromUser && !fromUser.ljuserid && !fromUser.tnuserid"
                 variant="link"
                 @click="toggleMail"
               >
@@ -436,11 +427,7 @@
                 </span>
               </b-button>
               <b-button
-                v-if="
-                  message.fromuser &&
-                  message.fromuser.emails &&
-                  message.fromuser.emails.length
-                "
+                v-if="fromUser && fromUser.emails && fromUser.emails.length"
                 variant="link"
                 @click="showEmails = !showEmails"
               >
@@ -448,23 +435,17 @@
                   <span class="d-inline d-sm-none"> Hide </span>
                   <span class="d-none d-sm-inline">
                     Hide
-                    {{
-                      pluralise('email', message.fromuser.emails.length, true)
-                    }}
+                    {{ pluralise('email', fromUser.emails.length, true) }}
                   </span>
                 </span>
                 <span v-else>
                   <span class="d-inline d-sm-none">
                     <v-icon icon="envelope" />
-                    {{
-                      pluralise('email', message.fromuser.emails.length, true)
-                    }}
+                    {{ pluralise('email', fromUser.emails.length, true) }}
                   </span>
                   <span class="d-none d-sm-inline">
                     Show
-                    {{
-                      pluralise('email', message.fromuser.emails.length, true)
-                    }}
+                    {{ pluralise('email', fromUser.emails.length, true) }}
                   </span>
                 </span>
               </b-button>
@@ -490,21 +471,21 @@
               :emailfrequency="membership.emailfrequency"
               :membership-m-t="membership"
               class="border border-info mt-2 p-1"
-              :userid="message.fromuser.id"
+              :userid="fromUserId"
               @update:emailfrequency="settingsChange('emailfrequency', $event)"
               @update:eventsallowed="settingsChange('eventsallowed', $event)"
               @update:volunteeringallowed="
                 settingsChange('volunteeringallowed', $event)
               "
             />
-            <div v-if="showEmails">
-              <div v-for="email in message.fromuser.emails" :key="email.id">
+            <div v-if="showEmails && fromUser">
+              <div v-for="email in fromUser.emails" :key="email.id">
                 {{ email.email }} <v-icon v-if="email.preferred" icon="star" />
               </div>
             </div>
             <ModMemberActions
               v-if="showActions && message.groups && message.groups.length"
-              :userid="message.fromuser.id"
+              :userid="fromUserId"
               :groupid="message.groups[0].groupid"
               @commentadded="updateComments"
             />
@@ -599,7 +580,7 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :user="message.fromuser"
+      :user="fromUser"
       :safelist="false"
     />
     <div ref="bottom" />
@@ -678,22 +659,22 @@ const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const userStore = useUserStore()
 
-// V2 API returns fromuser as a numeric ID. Fetch the full user object from
-// the store and replace the ID so the rest of the component can use it.
-const fromuserPending = ref(false)
-if (props.message.fromuser && typeof props.message.fromuser === 'number') {
-  const uid = props.message.fromuser
-  // eslint-disable-next-line vue/no-mutating-props
-  props.message.fromuser = userStore.byId(uid) || null
-  if (!props.message.fromuser) {
-    fromuserPending.value = true
-    userStore.fetchMT({ id: uid, modtools: true }).then(() => {
-      // eslint-disable-next-line vue/no-mutating-props
-      props.message.fromuser = userStore.byId(uid)
-      fromuserPending.value = false
-    })
-  }
+// V2 API returns fromuser as a numeric ID. Resolve from user store reactively.
+const fromUserId = computed(() => {
+  const fu = props.message.fromuser
+  if (!fu) return null
+  return typeof fu === 'number' ? fu : fu.id
+})
+
+// Trigger a fetch if the user isn't in the store yet.
+if (fromUserId.value && !userStore.byId(fromUserId.value)) {
+  userStore.fetchMT({ id: fromUserId.value, modtools: true })
 }
+
+const fromUser = computed(() => {
+  if (!fromUserId.value) return null
+  return userStore.byId(fromUserId.value) || null
+})
 const { typeOptions } = setupKeywords()
 const { me, myid } = useMe()
 const { myModGroups, myModGroup } = useModMe()
@@ -740,11 +721,7 @@ const messageGroup = computed(() => {
 })
 
 const messageHistory = computed(() => {
-  return props.message &&
-    props.message.fromuser &&
-    props.message.fromuser.messagehistory
-    ? props.message.fromuser.messagehistory
-    : []
+  return fromUser.value?.messagehistory || []
 })
 
 const group = computed(() => {
@@ -801,11 +778,8 @@ const eBody = computed(() => {
 const membership = computed(() => {
   let ret = null
 
-  if (groupid.value) {
-    ret =
-      props.message.fromuser &&
-      props.message.fromuser.memberof &&
-      props.message.fromuser.memberof.find((g) => g.id === groupid.value)
+  if (groupid.value && fromUser.value?.memberof) {
+    ret = fromUser.value.memberof.find((g) => g.id === groupid.value)
   }
 
   return ret
@@ -963,10 +937,8 @@ const duplicates = computed(() => {
 })
 
 const memberGroupIds = computed(() => {
-  return props.message &&
-    props.message.fromuser &&
-    props.message.fromuser.memberof
-    ? props.message.fromuser.memberof.map((g) => g.id)
+  return fromUser.value?.memberof
+    ? fromUser.value.memberof.map((g) => g.id)
     : []
 })
 
@@ -1019,8 +991,11 @@ onBeforeUnmount(() => {
 })
 
 function updateComments() {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.message.fromuser = userStore.byId(props.message.fromuser.id)
+  // fromUser is a computed from userStore.byId, so it auto-updates when the store changes.
+  // Force a re-fetch to get updated comments.
+  if (fromUserId.value) {
+    userStore.fetchMT({ id: fromUserId.value, modtools: true })
+  }
 }
 
 function imageAdded(id) {
@@ -1135,7 +1110,7 @@ async function save() {
 
 function settingsChange(param, val) {
   const params = {
-    userid: props.message.fromuser.id,
+    userid: fromUserId.value,
     groupid: groupid.value,
   }
   params[param] = val
@@ -1145,9 +1120,9 @@ function settingsChange(param, val) {
 async function toggleMail() {
   showMailSettings.value = !showMailSettings.value
 
-  if (showMailSettings.value) {
+  if (showMailSettings.value && fromUserId.value) {
     // Get the user into the store for SettingsGroup.
-    await userStore.fetch(props.message.fromuser.id)
+    await userStore.fetch(fromUserId.value)
   }
 }
 
@@ -1194,12 +1169,8 @@ function checkHistory(duplicateCheck) {
   const dupids = []
   const crossids = []
 
-  if (
-    props.message &&
-    props.message.fromuser &&
-    props.message.fromuser.messagehistory
-  ) {
-    props.message.fromuser.messagehistory.forEach((message) => {
+  if (fromUser.value?.messagehistory) {
+    fromUser.value.messagehistory.forEach((message) => {
       if (
         message.id !== props.message.id &&
         duplicateAge.value &&

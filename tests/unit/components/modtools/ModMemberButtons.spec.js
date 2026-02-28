@@ -586,5 +586,17 @@ describe('ModMemberButtons', () => {
       expect(wrapper.vm.filtered.length).toBe(0)
       expect(wrapper.vm.filterByAction.length).toBe(0)
     })
+
+    it('handles modconfig without stdmsgs (list endpoint data)', () => {
+      const wrapper = mountComponent({
+        member: createMember({
+          memberof: [{ id: 789, collection: 'Approved' }],
+          groupid: 789,
+        }),
+        modconfig: { id: 1, name: 'Test Config' },
+      })
+      expect(wrapper.vm.filtered.length).toBe(0)
+      expect(wrapper.vm.filterByAction.length).toBe(0)
+    })
   })
 })

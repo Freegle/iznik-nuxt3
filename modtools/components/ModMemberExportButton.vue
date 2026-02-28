@@ -41,10 +41,19 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
 import saveAs from 'save-file'
-import { createObjectCsvWriter } from 'csv-writer'
 import { useMemberStore } from '~/stores/member'
 import { useOurModal } from '~/composables/useOurModal'
 import { useModGroupStore } from '~/stores/modgroup'
+// csv-writer uses Node.js 'fs' which can't run in the browser.
+// Use a simple inline CSV stringifier instead.
+function csvEscape(val) {
+  if (val == null) return ''
+  const str = String(val)
+  if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"'
+  }
+  return str
+}
 
 const props = defineProps({
   groupid: {
@@ -168,26 +177,25 @@ async function exportChunk() {
     })
   } else {
     // Got them all.
-    const writer = createObjectCsvWriter({
-      path: 'members.csv',
-      header: [
-        { id: 'id', title: 'Id' },
-        { id: 'name', title: 'Name' },
-        { id: 'email', title: 'Email' },
-        { id: 'joined', title: 'Joined' },
-        { id: 'lastactive', title: 'Last Active' },
-        { id: 'role', title: 'Role' },
-        { id: 'otheremails', title: 'Other Emails' },
-        { id: 'settings', title: 'Settings' },
-        { id: 'postingstatus', title: 'Posting Status' },
-        { id: 'bouncing', title: 'Bouncing' },
-        { id: 'trustlevel', title: 'MicroVolunteering' },
-        { id: 'comments', title: 'Comments' },
-      ],
-    })
-    const str =
-      writer.csvStringifier.getHeaderString() +
-      writer.csvStringifier.stringifyRecords(exportList.value)
+    const headers = [
+      { id: 'id', title: 'Id' },
+      { id: 'name', title: 'Name' },
+      { id: 'email', title: 'Email' },
+      { id: 'joined', title: 'Joined' },
+      { id: 'lastactive', title: 'Last Active' },
+      { id: 'role', title: 'Role' },
+      { id: 'otheremails', title: 'Other Emails' },
+      { id: 'settings', title: 'Settings' },
+      { id: 'postingstatus', title: 'Posting Status' },
+      { id: 'bouncing', title: 'Bouncing' },
+      { id: 'trustlevel', title: 'MicroVolunteering' },
+      { id: 'comments', title: 'Comments' },
+    ]
+    const headerLine = headers.map((h) => csvEscape(h.title)).join(',')
+    const rows = exportList.value.map((record) =>
+      headers.map((h) => csvEscape(record[h.id])).join(',')
+    )
+    const str = headerLine + '\n' + rows.join('\n') + '\n'
     const blob = new Blob([str], { type: 'text/csv;charset=utf-8' })
     modalButtonLabel.value = 'Done'
     await saveAs(blob, 'members.csv')

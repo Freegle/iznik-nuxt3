@@ -117,7 +117,7 @@ describe('ModMemberReview', () => {
           },
           ModComments: {
             template: '<div class="mod-comments" />',
-            props: ['user'],
+            props: ['userid'],
           },
           ModSpammer: {
             template: '<div class="mod-spammer" />',

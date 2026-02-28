@@ -50,7 +50,7 @@
         This user has support rights.
       </NoticeMessage>
       <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
-      <ModComments :user="user" />
+      <ModComments :userid="user.id" />
 
       <div class="d-flex flex-wrap">
         <b-button variant="white" class="mr-2 mb-1" @click="spamReport">
