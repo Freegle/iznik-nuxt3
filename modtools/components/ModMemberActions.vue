@@ -55,6 +55,7 @@ import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 import { useMemberStore } from '~/stores/member'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/modtools/composables/useModMe'
 
 const props = defineProps({
   userid: {
@@ -81,6 +82,7 @@ const props = defineProps({
 const emit = defineEmits(['commentadded'])
 
 const { $api } = useNuxtApp()
+const { checkWork } = useModMe()
 const groupStore = useGroupStore()
 const memberStore = useMemberStore()
 const userStore = useUserStore()
@@ -132,6 +134,7 @@ async function remove() {
 
 function removeConfirmed() {
   memberStore.remove(props.userid, props.groupid)
+  checkWork(true)
 }
 
 async function ban() {
@@ -161,6 +164,7 @@ async function banConfirmed(reason) {
       reason,
     flag: true,
   })
+  checkWork(true)
 }
 
 async function addAComment() {

@@ -85,10 +85,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useGroupStore } from '@/stores/group'
+import { useModMe } from '~/modtools/composables/useModMe'
 
 const { $api } = useNuxtApp()
 const userStore = useUserStore()
 const groupStore = useGroupStore()
+const { checkWork } = useModMe()
 
 const props = defineProps({
   story: {
@@ -146,15 +148,18 @@ onMounted(async () => {
 async function useForNewsletter() {
   await $api.stories.useForNewsletter(props.story.id)
   show.value = false
+  checkWork(true)
 }
 
 async function useForPublicity() {
   await $api.stories.useForPublicity(props.story.id)
   show.value = false
+  checkWork(true)
 }
 
 async function dontUseForPublicity() {
   await $api.stories.dontUseForPublicity(props.story.id)
   show.value = false
+  checkWork(true)
 }
 </script>

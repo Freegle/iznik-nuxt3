@@ -229,6 +229,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
+import { useModMe } from '~/modtools/composables/useModMe'
 
 const props = defineProps({
   id: {
@@ -245,6 +246,7 @@ const emit = defineEmits(['reload'])
 
 const { $api } = useNuxtApp()
 const { me } = useMe()
+const { checkWork } = useModMe()
 
 const modnote = ref(null)
 
@@ -384,25 +386,27 @@ function reload() {
 async function release() {
   await $api.chat.sendMT({ id: props.message.id, action: 'Release' })
   emit('reload')
+  checkWork(true)
 }
 
 async function hold(callback) {
   await $api.chat.sendMT({ id: props.message.id, action: 'Hold' })
   emit('reload')
+  checkWork(true)
   callback()
 }
 
 async function approve(callback) {
   await $api.chat.sendMT({ id: props.message.id, action: 'Approve' })
   emit('reload')
+  checkWork(true)
   callback()
 }
 
 async function reject(callback) {
   await $api.chat.sendMT({ id: props.message.id, action: 'Reject' })
-  // chatStore.removeMessageMT(REVIEWCHAT, props.message.id)
-  // console.log('reject', props.message.id, chatStore.messages[REVIEWCHAT])
   emit('reload')
+  checkWork(true)
   callback()
 }
 
@@ -412,6 +416,7 @@ async function whitelist(callback) {
     action: 'ApproveAllFuture',
   })
   emit('reload')
+  checkWork(true)
   callback()
 }
 

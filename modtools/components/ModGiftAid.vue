@@ -84,6 +84,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useNuxtApp } from '#app'
+import { useModMe } from '~/modtools/composables/useModMe'
 
 const props = defineProps({
   giftaid: {
@@ -93,6 +94,7 @@ const props = defineProps({
 })
 
 const { $api } = useNuxtApp()
+const { checkWork } = useModMe()
 
 const editgiftaid = ref(false)
 const hide = ref(false)
@@ -116,18 +118,25 @@ const houseInvalid = computed(() => {
 })
 
 const email = computed(() => {
-  let emailVal = null
-  if (!editgiftaid.value) return emailVal
+  if (!editgiftaid.value) return null
 
-  if (editgiftaid.value?.email) {
-    editgiftaid.value.email.forEach((e) => {
-      if (!e.ourdomain && (e.preferred || emailVal === null)) {
-        emailVal = e.email
+  const e = editgiftaid.value.email
+  if (!e) return null
+
+  // V2 API returns email as a string; V1 returned an array of email objects.
+  if (typeof e === 'string') return e
+
+  if (Array.isArray(e)) {
+    let emailVal = null
+    e.forEach((item) => {
+      if (!item.ourdomain && (item.preferred || emailVal === null)) {
+        emailVal = item.email
       }
     })
+    return emailVal
   }
 
-  return emailVal
+  return null
 })
 
 function save(callback) {
@@ -149,6 +158,7 @@ function reviewed(callback) {
   $api.giftaid.edit(editgiftaid.value.id, null, null, null, null, null, true)
   if (callback) callback()
   hide.value = true
+  checkWork(true)
 }
 
 function giveup(callback) {
@@ -167,6 +177,7 @@ function giveup(callback) {
       true
     )
     hide.value = true
+    checkWork(true)
   }
   callback()
 }
