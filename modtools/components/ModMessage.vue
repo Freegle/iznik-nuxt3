@@ -800,24 +800,36 @@ const membership = computed(() => {
   return ret
 })
 
-const modconfig = computed(() => {
-  let ret = null
-  let configid = null
+const configid = computed(() => {
+  let id = null
 
   myModGroups.value.forEach((grp) => {
     if (grp.id === groupid.value) {
-      configid = grp.mysettings?.configid
+      id = grp.mysettings?.configid
     }
   })
 
-  const configs = modconfigStore.configs
-  ret = configs.find((config) => config.id === configid)
-  if (!ret) {
-    ret = configs.find((config) => config.default)
+  if (!id) {
+    const defaultConfig = modconfigStore.configs.find(
+      (config) => config.default
+    )
+    id = defaultConfig?.id
   }
 
-  return ret
+  return id
 })
+
+const modconfig = ref(null)
+
+watch(
+  configid,
+  async (id) => {
+    if (id) {
+      modconfig.value = await modconfigStore.fetchById(id)
+    }
+  },
+  { immediate: true }
+)
 
 const subjectClass = computed(() => {
   let ret = 'text-success'

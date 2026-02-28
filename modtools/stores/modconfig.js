@@ -5,6 +5,8 @@ export const useModConfigStore = defineStore({
   id: 'modconfig',
   state: () => ({
     configs: [],
+    // Cache of full configs (with stdmsgs) keyed by ID.
+    configsById: {},
     // We have a current one.  This is so that we can configure it without interfering with our main list until
     // we save it.
     current: null,
@@ -23,6 +25,20 @@ export const useModConfigStore = defineStore({
       if (configs) {
         this.configs = configs
       }
+    },
+
+    async fetchById(id) {
+      if (!id) return null
+
+      if (!this.configsById[id]) {
+        const config = await api(this.config).modconfigs.fetchConfig({ id })
+
+        if (config) {
+          this.configsById[id] = config
+        }
+      }
+
+      return this.configsById[id] || null
     },
 
     async fetchConfig(params) {
