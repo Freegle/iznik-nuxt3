@@ -40,6 +40,12 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
+vi.mock('~/modtools/composables/useModMe', () => ({
+  useModMe: () => ({
+    checkWork: vi.fn(),
+  }),
+}))
+
 // Mock useNuxtApp
 const mockApi = {
   comment: {

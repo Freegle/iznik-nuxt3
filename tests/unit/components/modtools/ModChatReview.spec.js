@@ -18,6 +18,12 @@ vi.mock('~/composables/useMe', () => ({
   }),
 }))
 
+vi.mock('~/modtools/composables/useModMe', () => ({
+  useModMe: () => ({
+    checkWork: vi.fn(),
+  }),
+}))
+
 describe('ModChatReview', () => {
   const createTestMessage = (overrides = {}) => ({
     id: 123,

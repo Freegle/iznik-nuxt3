@@ -16,23 +16,56 @@ globalThis.useNuxtApp = () => ({
   },
 })
 
+/* Mock stores */
+const mockUserStore = {
+  byId: vi.fn(),
+  fetchMT: vi.fn().mockResolvedValue(null),
+}
+
+const mockGroupStore = {
+  get: vi.fn(),
+  fetch: vi.fn().mockResolvedValue(null),
+}
+
+vi.mock('@/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+vi.mock('@/stores/group', () => ({
+  useGroupStore: () => mockGroupStore,
+}))
+
+vi.mock('~/modtools/composables/useModMe', () => ({
+  useModMe: () => ({
+    checkWork: vi.fn(),
+  }),
+}))
+
 describe('ModStoryReview', () => {
+  const defaultUser = {
+    id: 789,
+    email: 'testuser@example.com',
+    displayname: 'Test User',
+    profile: {
+      turl: 'https://example.com/profile.jpg',
+    },
+    emails: [{ email: 'testuser@example.com' }],
+    memberships: [{ groupid: 456 }],
+  }
+
+  const defaultGroup = {
+    id: 456,
+    namedisplay: 'Test Freegle Group',
+    nameshort: 'TestFreegle',
+  }
+
   const createStory = (overrides = {}) => ({
     id: 123,
     headline: 'Test Headline',
     story: 'This is my story about Freegle.',
     date: '2024-01-15T10:00:00Z',
     public: true,
-    groupid: 456,
-    groupname: 'Test Freegle Group',
-    user: {
-      id: 789,
-      email: 'testuser@example.com',
-      displayname: 'Test User',
-      profile: {
-        turl: 'https://example.com/profile.jpg',
-      },
-    },
+    userid: 789,
     photo: null,
     ...overrides,
   })
@@ -95,6 +128,11 @@ describe('ModStoryReview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: user found in store
+    mockUserStore.byId.mockReturnValue(defaultUser)
+    mockUserStore.fetchMT.mockResolvedValue(defaultUser)
+    mockGroupStore.get.mockReturnValue(defaultGroup)
+    mockGroupStore.fetch.mockResolvedValue(defaultGroup)
   })
 
   describe('rendering', () => {
@@ -117,11 +155,9 @@ describe('ModStoryReview', () => {
       expect(wrapper.text()).toContain('This is my wonderful Freegle story.')
     })
 
-    it('shows the group name', () => {
-      const wrapper = mountComponent({
-        story: createStory({ groupname: 'Sheffield Freegle' }),
-      })
-      expect(wrapper.text()).toContain('Sheffield Freegle')
+    it('shows the group name from store', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.text()).toContain('Test Freegle Group')
     })
 
     it('shows the story id', () => {
@@ -140,30 +176,15 @@ describe('ModStoryReview', () => {
   })
 
   describe('user display', () => {
-    it('shows user email when user exists', () => {
-      const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: 'user@test.com',
-            displayname: 'John Doe',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-        }),
-      })
-      expect(wrapper.text()).toContain('user@test.com')
+    it('shows user email when user exists in store', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.text()).toContain('testuser@example.com')
     })
 
-    it('shows user id when user exists', () => {
+    it('shows user id when user exists in store', () => {
+      mockUserStore.byId.mockReturnValue({ ...defaultUser, id: 456 })
       const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 456,
-            email: 'user@test.com',
-            displayname: 'John Doe',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-        }),
+        story: createStory({ userid: 456 }),
       })
       expect(wrapper.text()).toContain('456')
     })
@@ -173,9 +194,10 @@ describe('ModStoryReview', () => {
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
 
-    it('does not show user section when user is null', () => {
+    it('does not show user section when user not in store', () => {
+      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
-        story: createStory({ user: null }),
+        story: createStory({ userid: null }),
       })
       expect(wrapper.find('.profile-image').exists()).toBe(false)
     })
@@ -258,14 +280,15 @@ describe('ModStoryReview', () => {
       expect(wrapper.text()).not.toContain('Good for newsletter')
     })
 
-    it('shows ChatButton when user exists', () => {
+    it('shows ChatButton when user exists in store', () => {
       const wrapper = mountComponent()
       expect(wrapper.find('.chat-button').exists()).toBe(true)
     })
 
-    it('does not show ChatButton when user is null', () => {
+    it('does not show ChatButton when user not in store', () => {
+      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
-        story: createStory({ user: null }),
+        story: createStory({ userid: null }),
       })
       expect(wrapper.find('.chat-button').exists()).toBe(false)
     })
@@ -376,28 +399,16 @@ describe('ModStoryReview', () => {
   })
 
   describe('ChatButton props', () => {
-    it('passes correct userid to ChatButton', () => {
-      const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: 'test@example.com',
-            displayname: 'Test User',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-          groupid: 456,
-        }),
-      })
-      /* ChatButton is stubbed so we verify it exists; the component receives
-         the props from the template binding which we cannot directly test
-         on a stub. Instead, verify the component renders with user data. */
+    it('renders ChatButton when user exists in store', () => {
+      const wrapper = mountComponent()
       const chatButton = wrapper.find('.chat-button')
       expect(chatButton.exists()).toBe(true)
     })
 
-    it('does not render ChatButton when user is null', () => {
+    it('does not render ChatButton when user not in store', () => {
+      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
-        story: createStory({ user: null }),
+        story: createStory({ userid: null }),
       })
       const chatButton = wrapper.find('.chat-button')
       expect(chatButton.exists()).toBe(false)
@@ -406,6 +417,7 @@ describe('ModStoryReview', () => {
 
   describe('edge cases', () => {
     it('handles story with minimal data', () => {
+      mockUserStore.byId.mockReturnValue(null)
       const wrapper = mountComponent({
         story: {
           id: 1,
@@ -413,8 +425,7 @@ describe('ModStoryReview', () => {
           story: 'Text',
           date: '2024-01-01',
           public: true,
-          groupname: 'Group',
-          user: null,
+          userid: null,
           photo: null,
         },
       })
@@ -423,30 +434,22 @@ describe('ModStoryReview', () => {
     })
 
     it('handles user without profile image gracefully', () => {
-      const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: 'test@example.com',
-            displayname: 'Test',
-            profile: { turl: null },
-          },
-        }),
+      mockUserStore.byId.mockReturnValue({
+        ...defaultUser,
+        profile: { turl: null },
       })
+      const wrapper = mountComponent()
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
 
     it('handles user with displayname but no email', () => {
-      const wrapper = mountComponent({
-        story: createStory({
-          user: {
-            id: 123,
-            email: null,
-            displayname: 'Just Name',
-            profile: { turl: 'https://example.com/profile.jpg' },
-          },
-        }),
+      mockUserStore.byId.mockReturnValue({
+        ...defaultUser,
+        email: null,
+        emails: [],
+        displayname: 'Just Name',
       })
+      const wrapper = mountComponent()
       expect(wrapper.find('.profile-image').exists()).toBe(true)
     })
   })
@@ -521,6 +524,66 @@ describe('ModStoryReview', () => {
       const wrapper = mountComponent()
       const hashtagIcons = wrapper.findAll('i[data-icon="hashtag"]')
       expect(hashtagIcons.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('onMounted', () => {
+    it('fetches user from store on mount', async () => {
+      mountComponent({ story: createStory({ userid: 789 }) })
+      await flushPromises()
+      expect(mockUserStore.fetchMT).toHaveBeenCalledWith({ id: 789 })
+    })
+
+    it('fetches group after user fetch when user has memberships', async () => {
+      mockUserStore.fetchMT.mockResolvedValue(defaultUser)
+      mountComponent({ story: createStory({ userid: 789 }) })
+      await flushPromises()
+      expect(mockGroupStore.fetch).toHaveBeenCalledWith(456)
+    })
+
+    it('does not fetch when story has no userid', async () => {
+      mountComponent({ story: createStory({ userid: null }) })
+      await flushPromises()
+      expect(mockUserStore.fetchMT).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('computed properties', () => {
+    it('storyUser returns user from store', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.vm.storyUser).toEqual(defaultUser)
+    })
+
+    it('storyUser returns null when no userid', () => {
+      const wrapper = mountComponent({
+        story: createStory({ userid: null }),
+      })
+      expect(wrapper.vm.storyUser).toBeNull()
+    })
+
+    it('primaryEmail returns first email from emails array', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.vm.primaryEmail).toBe('testuser@example.com')
+    })
+
+    it('primaryEmail falls back to email field', () => {
+      mockUserStore.byId.mockReturnValue({
+        ...defaultUser,
+        emails: [],
+        email: 'fallback@example.com',
+      })
+      const wrapper = mountComponent()
+      expect(wrapper.vm.primaryEmail).toBe('fallback@example.com')
+    })
+
+    it('firstGroupId returns first membership groupid', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.vm.firstGroupId).toBe(456)
+    })
+
+    it('groupName returns group namedisplay from store', () => {
+      const wrapper = mountComponent()
+      expect(wrapper.vm.groupName).toBe('Test Freegle Group')
     })
   })
 })

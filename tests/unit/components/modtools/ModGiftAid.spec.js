@@ -14,6 +14,12 @@ vi.mock('#app', () => ({
   }),
 }))
 
+vi.mock('~/modtools/composables/useModMe', () => ({
+  useModMe: () => ({
+    checkWork: vi.fn(),
+  }),
+}))
+
 config.global.mocks = {
   ...config.global.mocks,
   timeago: vi.fn(() => '2 days ago'),
@@ -30,10 +36,7 @@ describe('ModGiftAid', () => {
     timestamp: '2024-01-01T12:00:00Z',
     period: '2024',
     donations: 50,
-    email: [
-      { email: 'test@example.com', ourdomain: false, preferred: true },
-      { email: 'other@freegle.org', ourdomain: true, preferred: false },
-    ],
+    email: 'test@example.com',
   }
 
   const invalidGiftaid = {
@@ -205,45 +208,20 @@ describe('ModGiftAid', () => {
     })
 
     describe('email', () => {
-      it('returns preferred non-ourdomain email', async () => {
+      it('returns email string from V2 API', async () => {
         const wrapper = mountComponent()
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBe('test@example.com')
       })
 
-      it('returns first non-ourdomain email if none preferred', async () => {
-        const giftaid = {
-          ...validGiftaid,
-          email: [
-            { email: 'personal@gmail.com', ourdomain: false, preferred: false },
-            { email: 'freegle@freegle.org', ourdomain: true, preferred: true },
-          ],
-        }
-        const wrapper = mountComponent({ giftaid })
-        await wrapper.vm.$nextTick()
-        expect(wrapper.vm.email).toBe('personal@gmail.com')
-      })
-
-      it('returns null when no email array', async () => {
+      it('returns null when no email', async () => {
         const wrapper = mountComponent({ giftaid: invalidGiftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBeNull()
       })
 
-      it('returns null when email array is empty', async () => {
-        const giftaid = { ...validGiftaid, email: [] }
-        const wrapper = mountComponent({ giftaid })
-        await wrapper.vm.$nextTick()
-        expect(wrapper.vm.email).toBeNull()
-      })
-
-      it('skips ourdomain emails', async () => {
-        const giftaid = {
-          ...validGiftaid,
-          email: [
-            { email: 'freegle@freegle.org', ourdomain: true, preferred: true },
-          ],
-        }
+      it('returns null when email is empty string', async () => {
+        const giftaid = { ...validGiftaid, email: '' }
         const wrapper = mountComponent({ giftaid })
         await wrapper.vm.$nextTick()
         expect(wrapper.vm.email).toBeNull()

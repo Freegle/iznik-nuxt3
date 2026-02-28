@@ -144,7 +144,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: '{}',
+          rules: {},
           namedisplay: 'Test Group',
         },
       }
@@ -161,7 +161,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: '{}',
+          rules: {},
           namedisplay: 'Test',
         },
       }
@@ -176,7 +176,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: '{}',
+          rules: {},
           namedisplay: 'Test Group',
         },
       }
@@ -192,7 +192,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: JSON.stringify({
+          rules: {
             limitgroups: true,
             wastecarrier: false,
             carboot: true,
@@ -201,7 +201,7 @@ describe('ModMissingRules', () => {
             pondlife: false,
             copyright: true,
             porn: false,
-          }),
+          },
           namedisplay: 'Test Group',
         },
       }
@@ -216,7 +216,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: JSON.stringify({
+          rules: {
             limitgroups: 'yes', // String instead of boolean
             wastecarrier: true,
             carboot: true,
@@ -225,7 +225,7 @@ describe('ModMissingRules', () => {
             pondlife: true,
             copyright: true,
             porn: true,
-          }),
+          },
           namedisplay: 'Test Group',
         },
       }
@@ -241,7 +241,7 @@ describe('ModMissingRules', () => {
           id: 1,
           type: 'Freegle',
           publish: true,
-          rules: '{}', // All 8 rules missing
+          rules: {}, // All 8 rules missing
           namedisplay: 'Test Group',
         },
       }
