@@ -120,9 +120,14 @@ describe('spammers.vue page', () => {
       expect(wrapper.vm.spammers).toEqual(mockSpammers)
     })
 
-    it('moves byuser into spammer object', () => {
+    it('passes through store data with byuser already enriched', () => {
+      // byuser enrichment now happens in the store, not the page
       const mockSpammers = [
-        { id: 1, user: { spammer: {} }, byuser: { id: 10 } },
+        {
+          id: 1,
+          user: { spammer: { byuser: { id: 10 } } },
+          byuser: { id: 10 },
+        },
       ]
       mockSpammerStore.getList.mockReturnValue(mockSpammers)
       const wrapper = mountComponent()

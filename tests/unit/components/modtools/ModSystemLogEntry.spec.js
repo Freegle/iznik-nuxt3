@@ -46,7 +46,7 @@ vi.mock('~/stores/user', () => ({
 // Mock group store
 const mockGroupStore = {
   list: {},
-  get: vi.fn().mockReturnValue(null),
+  get: vi.fn((id) => mockGroupStore.list[id] || null),
   fetch: vi.fn(),
 }
 
