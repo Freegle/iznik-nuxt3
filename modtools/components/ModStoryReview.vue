@@ -3,23 +3,23 @@
     <b-card v-if="show" no-body>
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
-          <span v-if="story.user">
+          <span v-if="storyUser">
             <ProfileImage
-              :image="story.user.profile.turl"
-              :name="story.user.displayname || story.user.email"
+              :image="storyUser.profile?.turl"
+              :name="storyUser.displayname || primaryEmail"
               class="mr-1 ml-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail
               size="sm"
             />
-            <strong>{{ story.user.email }}</strong>
+            <strong>{{ primaryEmail || storyUser.displayname }}</strong>
             <span class="small">
               <v-icon icon="hashtag" scale="0.75" class="text-muted" />{{
-                story.user.id
+                storyUser.id
               }}
             </span>
           </span>
           <span>
-            member of <strong>{{ story.groupname }}</strong
+            member of <strong>{{ groupName }}</strong
             >, posted {{ timeago(story.date) }}
           </span>
           <span>
@@ -69,9 +69,9 @@
             </b-button>
           </div>
           <ChatButton
-            v-if="story.user"
-            :userid="story.user.id"
-            :groupid="story.groupid"
+            v-if="storyUser"
+            :userid="storyUser.id"
+            :groupid="firstGroupId"
             title="Chat"
             variant="white"
             class="mr-2 mb-1"
@@ -82,9 +82,13 @@
   </div>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { useGroupStore } from '@/stores/group'
 
 const { $api } = useNuxtApp()
+const userStore = useUserStore()
+const groupStore = useGroupStore()
 
 const props = defineProps({
   story: {
@@ -99,6 +103,45 @@ const props = defineProps({
 })
 
 const show = ref(true)
+
+const storyUser = computed(() => {
+  return props.story?.userid ? userStore.byId(props.story.userid) : null
+})
+
+const primaryEmail = computed(() => {
+  const u = storyUser.value
+  if (u?.emails?.length) {
+    return u.emails[0].email
+  }
+  return u?.email || null
+})
+
+const firstGroupId = computed(() => {
+  const u = storyUser.value
+  if (u?.memberships?.length) {
+    return u.memberships[0].groupid
+  }
+  return null
+})
+
+const groupName = computed(() => {
+  const gid = firstGroupId.value
+  if (gid) {
+    const g = groupStore.get(gid)
+    return g?.namedisplay || g?.nameshort || ''
+  }
+  return ''
+})
+
+onMounted(async () => {
+  if (props.story?.userid) {
+    const u = await userStore.fetchMT({ id: props.story.userid })
+    // Fetch the first group so we can show its name.
+    if (u?.memberships?.length) {
+      await groupStore.fetch(u.memberships[0].groupid)
+    }
+  }
+})
 
 async function useForNewsletter() {
   await $api.stories.useForNewsletter(props.story.id)
