@@ -670,12 +670,6 @@ const props = defineProps({
 
 const emit = defineEmits(['destroy'])
 
-// If viewing message within chat then fromuser is a number and so must be zapped
-if (props.message.fromuser && typeof props.message.fromuser === 'number') {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.message.fromuser = null
-}
-
 const locationStore = useLocationStore()
 const memberStore = useMemberStore()
 const messageStore = useMessageStore()
@@ -683,6 +677,23 @@ const miscStore = useMiscStore()
 const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const userStore = useUserStore()
+
+// V2 API returns fromuser as a numeric ID. Fetch the full user object from
+// the store and replace the ID so the rest of the component can use it.
+const fromuserPending = ref(false)
+if (props.message.fromuser && typeof props.message.fromuser === 'number') {
+  const uid = props.message.fromuser
+  // eslint-disable-next-line vue/no-mutating-props
+  props.message.fromuser = userStore.byId(uid) || null
+  if (!props.message.fromuser) {
+    fromuserPending.value = true
+    userStore.fetchMT({ id: uid, modtools: true }).then(() => {
+      // eslint-disable-next-line vue/no-mutating-props
+      props.message.fromuser = userStore.byId(uid)
+      fromuserPending.value = false
+    })
+  }
+}
 const { typeOptions } = setupKeywords()
 const { me, myid } = useMe()
 const { myModGroups, myModGroup } = useModMe()
