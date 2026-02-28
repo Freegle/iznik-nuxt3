@@ -190,6 +190,11 @@ describe('messages/approved/[[id]]/[[term]].vue page', () => {
       mockBusy.value = false
       const wrapper = mountComponent()
       await wrapper.vm.$nextTick()
+      // The component gates "Nothing found" behind a `loaded` ref that
+      // becomes true only after loadMore() completes.  Before that it
+      // shows "Please wait...".
+      wrapper.vm.loaded = true
+      await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('Nothing found')
     })
 

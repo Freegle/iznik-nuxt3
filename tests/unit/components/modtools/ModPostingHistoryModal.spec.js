@@ -4,11 +4,13 @@ import { ref } from 'vue'
 import ModPostingHistoryModal from '~/modtools/components/ModPostingHistoryModal.vue'
 
 // Mock stores
+const groupData = {
+  123: { namedisplay: 'Test Group 1' },
+  456: { namedisplay: 'Test Group 2' },
+}
+
 const mockGroupStore = {
-  list: {
-    123: { namedisplay: 'Test Group 1' },
-    456: { namedisplay: 'Test Group 2' },
-  },
+  get: (id) => groupData[id] || null,
 }
 
 const mockHide = vi.fn()

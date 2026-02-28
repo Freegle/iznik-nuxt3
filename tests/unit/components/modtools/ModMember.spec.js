@@ -7,6 +7,7 @@ import ModMember from '~/modtools/components/ModMember.vue'
 const mockUserStore = {
   fetchMT: vi.fn(),
   edit: vi.fn(),
+  list: {},
 }
 
 const mockMemberStore = {
@@ -16,6 +17,8 @@ const mockMemberStore = {
 
 const mockModConfigStore = {
   configs: [],
+  configsById: {},
+  fetchById: vi.fn(),
 }
 
 const mockChatStore = {
@@ -260,10 +263,13 @@ describe('ModMember', () => {
     vi.clearAllMocks()
     mockUserStore.fetchMT.mockResolvedValue()
     mockUserStore.edit.mockResolvedValue()
+    mockUserStore.list = {}
     mockMemberStore.update.mockResolvedValue()
     mockMemberStore.unban.mockResolvedValue()
     mockChatStore.openChatToMods.mockResolvedValue(12345)
     mockModConfigStore.configs = [{ id: 1, name: 'Test Config' }]
+    mockModConfigStore.configsById = { 1: { id: 1, name: 'Test Config' } }
+    mockModConfigStore.fetchById.mockResolvedValue()
   })
 
   describe('rendering', () => {
@@ -617,7 +623,7 @@ describe('ModMember', () => {
       const wrapper = mountComponent({
         member: createMember({ groupid: 999 }),
       })
-      expect(wrapper.vm.modconfig).toBeUndefined()
+      expect(wrapper.vm.modconfig).toBeNull()
     })
 
     it('relevantallowed returns boolean value', () => {

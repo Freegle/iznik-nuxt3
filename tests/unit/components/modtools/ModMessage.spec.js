@@ -870,6 +870,11 @@ describe('ModMessage', () => {
 
   describe('User summary display', () => {
     it('shows user displayname in summary mode', () => {
+      mockUserStore.byId.mockReturnValue({
+        id: 456,
+        displayname: 'Updated User',
+        memberof: [{ id: 789 }],
+      })
       const wrapper = mountComponent({ summary: true })
       expect(wrapper.text()).toContain('Updated User')
     })
