@@ -24,6 +24,7 @@ const mockGroupStore = {
     1: { id: 1, namedisplay: 'Group 1' },
     2: { id: 2, namedisplay: 'Group 2' },
   },
+  summaryList: {},
   fetch: vi.fn().mockResolvedValue(undefined),
 }
 

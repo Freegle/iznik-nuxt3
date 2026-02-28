@@ -39,6 +39,12 @@ const {
           subjreg: /^(OFFER|WANTED):/i,
         },
       ],
+      fetchById: vi.fn().mockResolvedValue({
+        id: 1,
+        default: true,
+        coloursubj: true,
+        subjreg: /^(OFFER|WANTED):/i,
+      }),
     },
     mockModGroupStore: {
       fetchIfNeedBeMT: vi.fn().mockResolvedValue({}),
