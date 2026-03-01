@@ -33,8 +33,8 @@
         :item-key="(el) => `thumb-${el.id || el.tempId}`"
         :animation="150"
         ghost-class="ghost"
-        @start="dragging = true"
-        @end="dragging = false"
+        @start="onDragStart"
+        @end="onDragEnd"
       >
         <template #item="{ element, index }">
           <div
@@ -157,6 +157,7 @@ import {
   ref,
   shallowRef,
   watch,
+  nextTick,
   defineAsyncComponent,
   reactive,
   computed,
@@ -231,6 +232,10 @@ const uppyModalOpen = ref(false)
 // Local state
 const photos = ref([...props.modelValue])
 const dragging = ref(false)
+// Flag to suppress the modelValue watcher from resetting photos during/after a
+// drag reorder.  Without this, the round-trip (photos -> emit -> parent store ->
+// modelValue prop) replaces the array mid-drag and vuedraggable reverts the order.
+const suppressModelValueSync = ref(false)
 const showSourceModal = ref(false)
 const showQualityModal = ref(false)
 const qualityModalTitle = ref('')
@@ -260,10 +265,16 @@ function selectPhoto(index) {
   }
 }
 
-// Sync with parent
+// Sync with parent — but NOT during or immediately after a drag reorder.
+// During drag, vuedraggable has already updated photos in place; the round-trip
+// through the parent would replace the array and snap items back to their old order.
 watch(
   () => props.modelValue,
   (newVal) => {
+    if (suppressModelValueSync.value) {
+      return
+    }
+
     // Only update if different to avoid loops
     if (JSON.stringify(newVal) !== JSON.stringify(photos.value)) {
       photos.value = [...newVal]
@@ -534,6 +545,23 @@ function retakePhoto() {
 
   // Re-open photo options
   openPhotoOptions()
+}
+
+// Drag reorder handlers — suppress the modelValue watcher during and briefly
+// after a drag so the round-trip through the parent store doesn't reset the order.
+function onDragStart() {
+  dragging.value = true
+  suppressModelValueSync.value = true
+}
+
+function onDragEnd() {
+  dragging.value = false
+  // Keep suppression active for one more tick so the watcher cycle from the
+  // photos -> emit -> parent -> modelValue round-trip completes without
+  // resetting the array.
+  nextTick(() => {
+    suppressModelValueSync.value = false
+  })
 }
 
 // Handle drag enter - open Uppy for web browsers
