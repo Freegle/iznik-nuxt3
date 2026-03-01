@@ -1,8 +1,15 @@
 <template>
   <div class="app-photo-uploader" @dragenter="onDragEnter">
     <!-- Featured photo - always shows first photo (the primary one for post) -->
+    <!-- Drop target: dragging a thumbnail here makes it the primary photo -->
     <Transition name="fade">
-      <div v-if="selectedPhoto" class="featured-photo">
+      <div
+        v-if="selectedPhoto"
+        class="featured-photo"
+        :class="{ 'drop-target-active': dragging }"
+        @dragover.prevent
+        @drop="onDropFeatured"
+      >
         <PhotoCard
           :ouruid="selectedPhoto.ouruid"
           :src="
@@ -166,8 +173,10 @@ import {
 } from 'vue'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
 import * as tus from 'tus-js-client'
+// eslint-disable-next-line import/default
 import Uppy from '@uppy/core'
 import { DashboardModal } from '@uppy/vue'
+// eslint-disable-next-line import/default, import/namespace, import/no-named-as-default, import/no-named-as-default-member
 import Tus from '@uppy/tus'
 import Compressor from '@uppy/compressor'
 import PhotoCard from './PhotoCard.vue'
@@ -549,13 +558,22 @@ function retakePhoto() {
 
 // Drag reorder handlers — suppress the modelValue watcher during and briefly
 // after a drag so the round-trip through the parent store doesn't reset the order.
-function onDragStart() {
+// Store reference to the dragged photo object (not index) for robustness.
+let draggedPhoto = null
+
+function onDragStart(evt) {
   dragging.value = true
   suppressModelValueSync.value = true
+  // evt.oldIndex is the SortableJS DOM index among visible thumbnails.
+  // The featured photo (index 0) is hidden from the strip via v-if, so
+  // SortableJS indices are offset by 1 from the photos array indices.
+  const arrayIndex = evt.oldIndex + 1
+  draggedPhoto = photos.value[arrayIndex] ?? null
 }
 
 function onDragEnd() {
   dragging.value = false
+  draggedPhoto = null
   // Keep suppression active for one more tick so the watcher cycle from the
   // photos -> emit -> parent -> modelValue round-trip completes without
   // resetting the array.
@@ -564,9 +582,32 @@ function onDragEnd() {
   })
 }
 
-// Handle drag enter - open Uppy for web browsers
-function onDragEnter() {
-  if (!isApp.value && uppy.value) {
+// Handle a thumbnail being dropped onto the featured photo area.
+// This makes the dragged photo the primary (moves it to position 0).
+function onDropFeatured() {
+  if (draggedPhoto) {
+    const index = photos.value.indexOf(draggedPhoto)
+    if (index > 0) {
+      selectPhoto(index)
+    }
+  }
+
+  dragging.value = false
+  draggedPhoto = null
+  nextTick(() => {
+    suppressModelValueSync.value = false
+  })
+}
+
+// Handle drag enter - open Uppy for web browsers (external file drops only)
+function onDragEnter(event) {
+  // Only open the upload modal for external file drops (from desktop/file explorer),
+  // not for internal DOM element drags (e.g. photo reorder via vuedraggable).
+  if (
+    !isApp.value &&
+    uppy.value &&
+    event.dataTransfer?.types?.includes('Files')
+  ) {
     openUppyModal()
   }
 }
@@ -688,6 +729,12 @@ onBeforeUnmount(() => {
 .featured-photo {
   margin-bottom: 1rem;
   max-width: 280px;
+  transition: outline 0.15s ease;
+}
+
+.drop-target-active {
+  outline: 3px dashed $color-green-background;
+  outline-offset: 4px;
 }
 
 .featured-photo :deep(.photo-card) {
