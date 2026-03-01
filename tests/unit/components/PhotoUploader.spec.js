@@ -709,7 +709,7 @@ describe('PhotoUploader', () => {
         ],
       })
 
-      wrapper.vm.onDragStart()
+      wrapper.vm.onDragStart({ oldIndex: 0 })
 
       expect(wrapper.vm.dragging).toBe(true)
       expect(wrapper.vm.suppressModelValueSync).toBe(true)
@@ -723,7 +723,7 @@ describe('PhotoUploader', () => {
         ],
       })
 
-      wrapper.vm.onDragStart()
+      wrapper.vm.onDragStart({ oldIndex: 0 })
       expect(wrapper.vm.suppressModelValueSync).toBe(true)
 
       wrapper.vm.onDragEnd()
@@ -745,8 +745,8 @@ describe('PhotoUploader', () => {
         ],
       })
 
-      // Simulate drag start
-      wrapper.vm.onDragStart()
+      // Simulate drag start (oldIndex 0 = first visible thumbnail = photos[1])
+      wrapper.vm.onDragStart({ oldIndex: 0 })
 
       // Simulate vuedraggable reordering the array (swap index 1 and 2)
       const reordered = [
@@ -782,7 +782,7 @@ describe('PhotoUploader', () => {
       })
 
       // Simulate full drag cycle
-      wrapper.vm.onDragStart()
+      wrapper.vm.onDragStart({ oldIndex: 0 })
       wrapper.vm.onDragEnd()
       await flushPromises()
 
@@ -1176,13 +1176,22 @@ describe('PhotoUploader', () => {
       mockMobileStore.isApp = false
     })
 
-    it('onDragEnter opens uppy in web mode', async () => {
+    it('onDragEnter opens uppy in web mode for file drops', async () => {
       createWrapper()
       await flushPromises()
 
-      wrapper.vm.onDragEnter()
+      wrapper.vm.onDragEnter({ dataTransfer: { types: ['Files'] } })
 
       expect(wrapper.vm.uppyModalOpen).toBe(true)
+    })
+
+    it('onDragEnter does nothing for internal drags', async () => {
+      createWrapper()
+      await flushPromises()
+
+      wrapper.vm.onDragEnter({ dataTransfer: { types: ['text/plain'] } })
+
+      expect(wrapper.vm.uppyModalOpen).toBe(false)
     })
 
     it('onDragEnter does nothing in app mode', async () => {
@@ -1190,7 +1199,7 @@ describe('PhotoUploader', () => {
       createWrapper()
       await flushPromises()
 
-      wrapper.vm.onDragEnter()
+      wrapper.vm.onDragEnter({ dataTransfer: { types: ['Files'] } })
 
       expect(wrapper.vm.uppyModalOpen).toBe(false)
     })
