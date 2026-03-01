@@ -699,6 +699,110 @@ describe('PhotoUploader', () => {
       // The component listens for dragenter
       expect(container.exists()).toBe(true)
     })
+
+    it('onDragStart suppresses modelValue sync', () => {
+      createWrapper({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 2, ouruid: 'uid2' },
+          { id: 3, ouruid: 'uid3' },
+        ],
+      })
+
+      wrapper.vm.onDragStart()
+
+      expect(wrapper.vm.dragging).toBe(true)
+      expect(wrapper.vm.suppressModelValueSync).toBe(true)
+    })
+
+    it('onDragEnd re-enables modelValue sync after nextTick', async () => {
+      createWrapper({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 2, ouruid: 'uid2' },
+        ],
+      })
+
+      wrapper.vm.onDragStart()
+      expect(wrapper.vm.suppressModelValueSync).toBe(true)
+
+      wrapper.vm.onDragEnd()
+      expect(wrapper.vm.dragging).toBe(false)
+      // Still suppressed immediately after onDragEnd
+      expect(wrapper.vm.suppressModelValueSync).toBe(true)
+
+      // After nextTick, suppression is lifted
+      await flushPromises()
+      expect(wrapper.vm.suppressModelValueSync).toBe(false)
+    })
+
+    it('does not reset photos from modelValue during drag', async () => {
+      createWrapper({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 2, ouruid: 'uid2' },
+          { id: 3, ouruid: 'uid3' },
+        ],
+      })
+
+      // Simulate drag start
+      wrapper.vm.onDragStart()
+
+      // Simulate vuedraggable reordering the array (swap index 1 and 2)
+      const reordered = [
+        wrapper.vm.photos[0],
+        wrapper.vm.photos[2],
+        wrapper.vm.photos[1],
+      ]
+      wrapper.vm.photos = reordered
+
+      // Simulate parent updating modelValue back (this is the round-trip
+      // that previously caused the revert bug)
+      await wrapper.setProps({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 3, ouruid: 'uid3' },
+          { id: 2, ouruid: 'uid2' },
+        ],
+      })
+      await flushPromises()
+
+      // Photos should keep the reordered state, NOT snap back
+      expect(wrapper.vm.photos[0].id).toBe(1)
+      expect(wrapper.vm.photos[1].id).toBe(3)
+      expect(wrapper.vm.photos[2].id).toBe(2)
+    })
+
+    it('resumes modelValue sync after drag completes', async () => {
+      createWrapper({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 2, ouruid: 'uid2' },
+        ],
+      })
+
+      // Simulate full drag cycle
+      wrapper.vm.onDragStart()
+      wrapper.vm.onDragEnd()
+      await flushPromises()
+
+      // Sync should be re-enabled now
+      expect(wrapper.vm.suppressModelValueSync).toBe(false)
+
+      // Simulate parent adding a new photo externally
+      await wrapper.setProps({
+        modelValue: [
+          { id: 1, ouruid: 'uid1' },
+          { id: 2, ouruid: 'uid2' },
+          { id: 99, ouruid: 'uid99' },
+        ],
+      })
+      await flushPromises()
+
+      // Should sync the new photo from parent
+      expect(wrapper.vm.photos.length).toBe(3)
+      expect(wrapper.vm.photos[2].id).toBe(99)
+    })
   })
 
   describe('v-model sync', () => {
