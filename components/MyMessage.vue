@@ -747,6 +747,7 @@ onMounted(async () => {
 
 .my-message-mobile {
   margin-bottom: 12px;
+  min-height: 1px;
 }
 
 .message-card {
