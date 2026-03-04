@@ -50,7 +50,7 @@ function toChats(e) {
     e.stopImmediatePropagation()
   }
 
-  if (e?.ctrlKey) {
+  if (e?.ctrlKey || e?.metaKey) {
     // New tab modifier
     window.open('/chats', '_BLANK')
   } else if (e?.shiftKey) {

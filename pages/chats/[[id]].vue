@@ -123,7 +123,7 @@
                         chat: true,
                         active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(c.id)"
+                      @click="gotoChat(c.id, $event)"
                     >
                       <ChatListEntry
                         v-if="c.lastmsg > 0"
@@ -140,7 +140,7 @@
                         chat: true,
                         active: selectedChatId === c?.id,
                       }"
-                      @click="gotoChat(c.id)"
+                      @click="gotoChat(c.id, $event)"
                     >
                       <ChatListEntry
                         v-if="c.lastmsg > 0"
@@ -531,7 +531,22 @@ async function markAllRead() {
   chatStore.fetchChats()
 }
 
-function gotoChat(id) {
+function gotoChat(id, event) {
+  const baseUrl = id ? '/chats/' + id : '/chats'
+  const UrlToChat = search.value ? baseUrl + '?search=' + search.value : baseUrl
+
+  // New tab modifier
+  if (event?.ctrlKey || event?.metaKey) {
+    window.open(UrlToChat, '_BLANK')
+    return
+  }
+
+  // New window modifier
+  if (event?.shiftKey) {
+    window.open(UrlToChat, '_NEW')
+    return
+  }
+
   const router = useRouter()
 
   if (selectedChatId.value) {
@@ -540,15 +555,9 @@ function gotoChat(id) {
     // This means that history won't get updated, which means that Back will go to the top-level /chats page.
     // That is nice behaviour otherwise you have to hit Back a lot if you've viewed several chats.
     selectedChatId.value = id
-    let url = id ? '/chats/' + id : '/chats'
-
-    if (search.value) {
-      url += '?search=' + search.value
-    }
-
-    router.replace(url)
+    router.replace(UrlToChat)
   } else {
-    router.push(id ? '/chats/' + id : '/chats')
+    router.push(baseUrl)
   }
 }
 
