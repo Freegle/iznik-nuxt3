@@ -864,6 +864,8 @@ const PROGRESS_FILE = path.join(
 
 const initializeProgressFile = () => {
   try {
+    const dir = path.dirname(PROGRESS_FILE)
+    fs.mkdirSync(dir, { recursive: true })
     const initialProgress = {
       totalTests: 0,
       completedTests: 0,
