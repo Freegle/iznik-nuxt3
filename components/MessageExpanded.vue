@@ -323,10 +323,7 @@
                     poster.displayname
                   }}</span>
                 </span>
-                <span
-                  class="section-id-link"
-                  @click.stop="showProfileModal = true"
-                >
+                <span class="section-id-link" @click.stop="onClickPosterIdLink">
                   #{{ poster.id }}
                 </span>
               </div>
@@ -870,6 +867,19 @@ function sent() {
   setTimeout(() => {
     emit('close')
   }, 1500)
+}
+
+function onClickPosterIdLink(e) {
+  if (e?.ctrlKey || e?.metaKey) {
+    // New tab modifier
+    window.open(`/profile/${poster.value.id}`, '_BLANK')
+  } else if (e?.shiftKey) {
+    // New window modifier
+    window.open(`/profile/${poster.value.id}`, '_NEW')
+  } else {
+    // Show modal normally
+    showProfileModal.value = true
+  }
 }
 
 // Handle browser back button/swipe
@@ -1877,6 +1887,8 @@ onUnmounted(() => {
 .section-id-link {
   font-size: 0.7rem;
   font-weight: 500;
+  cursor: pointer;
+
   color: $color-gray--base;
   text-decoration: none;
 
