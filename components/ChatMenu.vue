@@ -50,7 +50,16 @@ function toChats(e) {
     e.stopImmediatePropagation()
   }
 
-  router.push('/chats')
+  if (e?.ctrlKey) {
+    // New tab modifier
+    window.open('/chats', '_BLANK')
+  } else if (e?.shiftKey) {
+    // New window modifier
+    window.open('/chats', '_NEW')
+  } else {
+    // Normal navigation
+    router.push('/chats')
+  }
 }
 </script>
 <style scoped lang="scss">
