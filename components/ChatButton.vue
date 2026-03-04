@@ -5,7 +5,7 @@
         :size="size"
         :variant="variant"
         :class="btnClass + ' d-none d-sm-inline'"
-        @click="gotoChat(true)"
+        @click="gotoChat"
       >
         <v-icon v-if="showIcon" icon="comments" />
         <span v-if="title" :class="titleClass">
@@ -16,7 +16,7 @@
         :size="size"
         :variant="variant"
         :class="btnClass + ' d-inline-block d-sm-none'"
-        @click="gotoChat(false)"
+        @click="gotoChat"
       >
         <v-icon v-if="showIcon" icon="comments" />
         <span v-if="title" :class="titleClass">
@@ -91,8 +91,38 @@ const router = useRouter()
 // Use me and myid computed properties from useMe composable for consistency
 const { me, myid } = useMe()
 
-const gotoChat = () => {
-  openChat(null, null, null)
+const gotoChat = async (e) => {
+  // No modifier keys = normal navigation
+  if (!e || !(e.ctrlKey || e.metaKey || e.shiftKey)) {
+    openChat(null, null, null)
+    return
+  }
+
+  // Get the chatId for this user from the store
+  let chatId
+
+  try {
+    chatId = await chatStore.openChatToUser({
+      userid: props.userid,
+      chattype: props.chattype,
+    })
+  } catch (e) {
+    action('chat_open_failed', {
+      error: e.message,
+      userid: props.userid,
+    })
+    return
+  }
+
+  if (e.ctrlKey || e.metaKey) {
+    // New tab modifier
+    window.open(`/chats/${chatId}`, '_BLANK')
+  } else if (e.shiftKey) {
+    // New window modifier
+    window.open(`/chats/${chatId}`, '_NEW')
+  } else {
+    console.warn('Unexpected modifier key combination', e)
+  }
 }
 
 const openChat = async (event, firstmessage, firstmsgid) => {
