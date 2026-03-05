@@ -29,7 +29,14 @@
         </div>
         <div v-else>
           <notice-message class="mt-2">
-            <div v-if="message.promisedtoyou">This is promised to you.</div>
+            <div
+              v-if="
+                message.promisedtoyou ||
+                (chat && chat.otheruid === message.fromuser)
+              "
+            >
+              This is promised to you.
+            </div>
             <div v-else>This is promised to someone else at the moment.</div>
           </notice-message>
         </div>
