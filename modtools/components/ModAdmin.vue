@@ -104,62 +104,74 @@
             Newsletter - will not be sent to members who have opted out.
           </span>
         </NoticeMessage>
-        <b-form-group
-          label="Subject of ADMIN:"
-          label-for="subject"
-          label-class="mb-0"
+        <NoticeMessage
+          v-if="admin.editprotected"
+          variant="warning"
+          class="mb-2"
         >
-          <b-form-input
-            id="subject"
-            v-model="admin.subject"
-            class="mb-3"
-            placeholder="Subject (don't include ADMIN - added automatically)"
-          />
-        </b-form-group>
-        <b-form-group
-          label="Body of ADMIN:"
-          label-for="body"
-          label-class="mb-0"
-        >
-          <b-form-textarea
-            id="body"
-            v-model="admin.text"
-            class="mb-3"
-            placeholder="Put your message in here.  Plain-text only."
-            rows="15"
-          />
-        </b-form-group>
-        <b-form-group
-          label="Call To Action text:"
-          label-for="ctatext"
-          label-class="mb-0"
-        >
-          <b-form-input
-            id="ctatext"
-            v-model="admin.ctatext"
-            class="mb-3"
-            placeholder="(Option) Text for a big button"
-          />
-        </b-form-group>
-        <b-form-group
-          label="Call To Action link:"
-          label-for="ctalink"
-          label-class="mb-0"
-        >
-          <b-form-input
-            id="ctalink"
-            v-model="admin.ctalink"
-            class="mb-3"
-            placeholder="(Optional) Link for a big button"
-          />
-        </b-form-group>
+          This admin uses a pre-designed template and can't be edited. You can
+          approve it to send, or delete it if it's not suitable for your group.
+        </NoticeMessage>
+        <template v-if="!admin.template">
+          <b-form-group
+            label="Subject of ADMIN:"
+            label-for="subject"
+            label-class="mb-0"
+          >
+            <b-form-input
+              id="subject"
+              v-model="admin.subject"
+              class="mb-3"
+              placeholder="Subject (don't include ADMIN - added automatically)"
+            />
+          </b-form-group>
+          <b-form-group
+            label="Body of ADMIN:"
+            label-for="body"
+            label-class="mb-0"
+          >
+            <b-form-textarea
+              id="body"
+              v-model="admin.text"
+              class="mb-3"
+              placeholder="Put your message in here.  Plain-text only."
+              rows="15"
+            />
+          </b-form-group>
+          <b-form-group
+            label="Call To Action text:"
+            label-for="ctatext"
+            label-class="mb-0"
+          >
+            <b-form-input
+              id="ctatext"
+              v-model="admin.ctatext"
+              class="mb-3"
+              placeholder="(Option) Text for a big button"
+            />
+          </b-form-group>
+          <b-form-group
+            label="Call To Action link:"
+            label-for="ctalink"
+            label-class="mb-0"
+          >
+            <b-form-input
+              id="ctalink"
+              v-model="admin.ctalink"
+              class="mb-3"
+              placeholder="(Optional) Link for a big button"
+            />
+          </b-form-group>
+        </template>
       </b-card-body>
       <b-card-footer v-if="expanded && admin.pending">
         <b-button v-if="!admin.heldby" variant="warning" @click="deleteIt">
           <v-icon icon="trash-alt" /> Delete
         </b-button>
         <b-button
-          v-if="!admin.heldby || admin.heldby === myid"
+          v-if="
+            !admin.editprotected && (!admin.heldby || admin.heldby === myid)
+          "
           variant="white"
           @click="save"
         >
@@ -286,7 +298,9 @@ function release() {
 }
 
 async function approve() {
-  await save()
+  if (!admin.value.editprotected) {
+    await save()
+  }
 
   await adminsStore.approve({ id: admin.value.id })
 
