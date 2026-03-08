@@ -6,6 +6,7 @@
         :class="{
           allowAd,
           stickyAdRendered,
+          adNotShown: !adRendering && stickyAdRendered === 0,
         }"
       >
         <!--        Breakpoint {{ breakpoint }}-->
@@ -69,7 +70,11 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <div class="spinner-border" style="width: 50px; height: 50px; color: #61AE24" role="status">
+        <div
+          class="spinner-border"
+          style="width: 50px; height: 50px; color: #61ae24"
+          role="status"
+        >
           <span class="visually-hidden">Loading...</span>
         </div>
         <p>
@@ -129,14 +134,18 @@ import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
-import ChatButton from '~/components/ChatButton'
 import VisibleWhen from '~/components/VisibleWhen.vue'
-import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
-import DeletedRestore from '~/components/DeletedRestore.vue'
 import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
-import { useMobileStore } from '@/stores/mobile' // APP
+import { useMobileStore } from '@/stores/mobile'
+const ChatButton = defineAsyncComponent(() => import('~/components/ChatButton'))
+const InterestedInOthersModal = defineAsyncComponent(() =>
+  import('~/components/InterestedInOthersModal.vue')
+)
+const DeletedRestore = defineAsyncComponent(() =>
+  import('~/components/DeletedRestore.vue')
+) // APP
 
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
@@ -447,7 +456,7 @@ body.modal-open {
 }
 
 .aboveSticky {
-  &.allowAd.stickyAdRendered {
+  &.allowAd {
     padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
     @media (min-height: $mobile-tall) {
@@ -460,6 +469,10 @@ body.modal-open {
       @media (min-height: $desktop-tall) {
         padding-bottom: calc($sticky-banner-height-desktop-tall + 2px);
       }
+    }
+
+    &.adNotShown {
+      padding-bottom: 0;
     }
   }
 }
