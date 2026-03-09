@@ -34,7 +34,9 @@
             <template #title>
               <h2 class="ml-2 mr-2">Create</h2>
             </template>
+            <label for="groupidcreate" class="font-weight-bold">Group:</label>
             <ModGroupSelect
+              id="groupidcreate"
               v-model="groupidcreate"
               modonly
               :systemwide="supportOrAdmin"
@@ -63,8 +65,8 @@
                   </li>
                   <li>
                     Newsletter - people can opt out (via the setting which
-                    mentions "to remind you"). These are less important or
-                    encouragements to freegle more.
+                    mentions "to remind you"). These are encouragements to
+                    freegle more, fundraising mails or newsletters.
                   </li>
                 </ul>
                 <OurToggle
@@ -77,6 +79,32 @@
                   :labels="{ checked: 'Essential', unchecked: 'Newsletter' }"
                   variant="modgreen"
                 />
+              </b-form-group>
+              <b-form-group
+                v-if="!essential && supportOrAdmin"
+                label="Template:"
+                label-for="template"
+                label-class="mb-0"
+              >
+                <b-form-select
+                  id="template"
+                  v-model="selectedTemplate"
+                  class="mb-2"
+                >
+                  <option :value="null">None (plain text)</option>
+                  <option value="little-free-shop-2026">
+                    Little Free Shop 2026
+                  </option>
+                </b-form-select>
+                <NoticeMessage
+                  v-if="selectedTemplate"
+                  class="mt-1 mb-1"
+                  variant="warning"
+                >
+                  This admin will use a pre-designed email template. Members
+                  will see the templated version. Editing will be disabled after
+                  creation.
+                </NoticeMessage>
               </b-form-group>
               <b-form-group
                 label="Subject of ADMIN:"
@@ -231,6 +259,7 @@ const ctalink = ref(null)
 const creating = ref(false)
 const created = ref(false)
 const essential = ref(true)
+const selectedTemplate = ref(null)
 
 // Computed properties
 const pendingcount = computed(() => {
@@ -296,14 +325,21 @@ async function create() {
   creating.value = true
 
   if ((ctatext.value && ctalink.value) || (!ctatext.value && !ctalink.value)) {
-    await adminsStore.add({
+    const params = {
       groupid: groupidcreate.value > 0 ? groupidcreate.value : null,
       subject: subject.value,
       text: body.value,
       ctatext: ctatext.value,
       ctalink: ctalink.value,
       essential: essential.value,
-    })
+    }
+
+    if (selectedTemplate.value) {
+      params.template = selectedTemplate.value
+      params.editprotected = true
+    }
+
+    await adminsStore.add(params)
 
     creating.value = false
     created.value = true
