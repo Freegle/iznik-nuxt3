@@ -150,10 +150,6 @@ describe('PendingPage', () => {
           ModMessages: {
             template: '<div class="mod-messages" />',
           },
-          ModAffiliationConfirmModal: {
-            template: '<div class="mod-affiliation-modal" />',
-            props: ['groupid'],
-          },
           'b-button': {
             template: '<button @click="$emit(\'click\')"><slot /></button>',
             props: ['variant'],

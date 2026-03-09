@@ -49,11 +49,6 @@
       </div>
       <NoticeMessage v-else class="mt-2"> Please wait... </NoticeMessage>
 
-      <ModAffiliationConfirmModal
-        v-if="affiliationGroup"
-        ref="affiliation"
-        :groupid="affiliationGroup"
-      />
       <!--ModRulesModal v-if="rulesGroup" ref="rules" /-->
 
       <div ref="end" />
@@ -104,7 +99,6 @@ const { me, myGroups } = useMe()
 // Data
 const showCakeModal = ref(false)
 const showAimsModal = ref(false)
-const affiliationGroup = ref(null)
 const shownRulePopup = ref(false)
 const bump = ref(0)
 const highlightMsgId = ref(null)
@@ -202,31 +196,6 @@ onMounted(async () => {
     highlightMsgId.value = parseInt(route.query.msgid)
   }
 
-  // Consider affiliation ask.
-  const lastask = miscStore.get('lastaffiliationask')
-  const now = new Date().getTime()
-
-  // Ask for affiliation not too frequently.
-  if (!lastask || now - lastask > 7 * 24 * 60 * 60 * 1000) {
-    function shuffleArray(array) {
-      return array.sort(() => Math.random() - 0.5)
-    }
-    const shuffledGroups = shuffleArray([...groups.value])
-
-    for (const groupItem of shuffledGroups) {
-      if (groupItem.myrole === 'Owner' || groupItem.myrole === 'Moderator') {
-        const postdate = dayjs(groupItem.affiliationconfirmed)
-        const daysago = dayjs().diff(postdate, 'day')
-        if (!groupItem.affiliationconfirmed || daysago > 365) {
-          affiliationGroup.value = groupItem.id
-          break
-        }
-      }
-    }
-
-    miscStore.set({ key: 'lastaffiliationask', value: now })
-  }
-
   // AIMS
   const user = authStore.user
   const lastaimsshow = user?.settings?.lastaimsshow
@@ -304,7 +273,6 @@ async function loadMore($state) {
 defineExpose({
   showCakeModal,
   showAimsModal,
-  affiliationGroup,
   bump,
   highlightMsgId,
   urlOverride,

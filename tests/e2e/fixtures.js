@@ -868,6 +868,8 @@ const PROGRESS_FILE = path.join(
 
 const initializeProgressFile = () => {
   try {
+    const dir = path.dirname(PROGRESS_FILE)
+    fs.mkdirSync(dir, { recursive: true })
     const initialProgress = {
       totalTests: 0,
       completedTests: 0,
@@ -1212,15 +1214,7 @@ const testWithFixtures = test.extend({
           )
           await logoutIfLoggedIn(page, false)
 
-          // Reload so the page re-renders in logged-out state
-          await page.reload({
-            timeout: timeouts.navigation.default,
-          })
-          await page.waitForLoadState('domcontentloaded', {
-            timeout: timeouts.navigation.default,
-          })
-
-          // Wait for the email input to appear after reload
+          // Wait for the email input to appear as the page reacts to logout
           const retryEmailInput = page
             .locator('input[name="email"], input.email, input[type="email"]')
             .first()

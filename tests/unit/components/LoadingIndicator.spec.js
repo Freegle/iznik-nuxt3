@@ -43,16 +43,14 @@ describe('LoadingIndicator', () => {
   describe('size', () => {
     it('uses default size of 50', () => {
       const wrapper = createWrapper()
-      const spinner = wrapper.find('.spinner-border')
-      expect(spinner.attributes('style')).toContain('width: 50px')
-      expect(spinner.attributes('style')).toContain('height: 50px')
+      const spinnerComponent = wrapper.findComponent(Spinner)
+      expect(spinnerComponent.props('size')).toBe(50)
     })
 
     it('uses custom size', () => {
       const wrapper = createWrapper({ size: 30 })
-      const spinner = wrapper.find('.spinner-border')
-      expect(spinner.attributes('style')).toContain('width: 30px')
-      expect(spinner.attributes('style')).toContain('height: 30px')
+      const spinnerComponent = wrapper.findComponent(Spinner)
+      expect(spinnerComponent.props('size')).toBe(30)
     })
   })
 

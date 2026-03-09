@@ -25,6 +25,7 @@ export default class SessionAPI extends BaseAPI {
       appversion,
       applecredentials,
       applelogin,
+      modtools,
     },
     log
   ) {
@@ -45,6 +46,7 @@ export default class SessionAPI extends BaseAPI {
         appversion,
         applecredentials,
         applelogin,
+        modtools,
       },
       log
     )

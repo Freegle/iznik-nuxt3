@@ -1,8 +1,6 @@
 <template>
   <div v-if="!me" class="landing-page">
-    <client-only>
-      <BreakpointFettler />
-    </client-only>
+    <LazyBreakpointFettler hydrate-on-idle />
 
     <!-- Main Layout (all breakpoints) -->
     <div class="main-layout">
@@ -62,9 +60,7 @@
             <div class="loading-shimmer-ssr"></div>
           </div>
         </div>
-        <client-only>
-          <MobileVisualiseList class="sample-grid" />
-        </client-only>
+        <LazyMobileVisualiseList hydrate-on-visible class="sample-grid" />
       </div>
 
       <!-- App Download -->
@@ -75,10 +71,10 @@
           rel="noopener noreferrer"
         >
           <ProxyImage
-            preload
             alt="Get it on Google Play"
             class="app-badge"
             src="/en-play-badge.png"
+            loading="lazy"
             :width="201"
             :height="60"
             sizes="100px"
@@ -90,10 +86,10 @@
           rel="noopener noreferrer"
         >
           <ProxyImage
-            preload
             alt="Download on the App Store"
             class="app-badge"
             src="/app-store-black-sm.png"
+            loading="lazy"
             :width="203"
             :height="60"
             sizes="100px"
@@ -102,7 +98,7 @@
       </div>
 
       <!-- Footer -->
-      <MainFooter class="thefooter" />
+      <LazyMainFooter hydrate-on-visible class="thefooter" />
     </div>
   </div>
 </template>
@@ -122,23 +118,13 @@ import {
   onMounted,
   onBeforeUnmount,
   nextTick,
-  defineAsyncComponent,
   useHead,
   useRuntimeConfig,
 } from '#imports'
 import Api from '~/api'
 
-const MainFooter = defineAsyncComponent(() =>
-  import('~/components/MainFooter')
-)
-const BreakpointFettler = defineAsyncComponent(() =>
-  import('~/components/BreakpointFettler.vue')
-)
 import PlaceAutocomplete from '~/components/PlaceAutocomplete.vue'
 import ExternalLink from '~/components/ExternalLink.vue'
-const MobileVisualiseList = defineAsyncComponent(() =>
-  import('~/components/MobileVisualiseList')
-)
 
 // Setup
 const runtimeConfig = useRuntimeConfig()
@@ -533,5 +519,6 @@ onBeforeUnmount(() => {
 .app-badge {
   height: 32px;
   width: auto;
+  aspect-ratio: 201 / 60;
 }
 </style>

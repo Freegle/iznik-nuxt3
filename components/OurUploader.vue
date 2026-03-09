@@ -1,6 +1,6 @@
 <template>
   <client-only>
-    <div class="wrapper" @dragenter="openModal">
+    <div class="wrapper" @dragenter="onDragEnter">
       <div class="d-flex flex-column justify-content-around">
         <v-icon
           v-if="!busy"
@@ -47,8 +47,10 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill'
 import { shouldPolyfill as shouldPolyfillPlural } from '@formatjs/intl-pluralrules/should-polyfill'
+// eslint-disable-next-line import/default
 import Uppy from '@uppy/core'
 import { DashboardModal } from '@uppy/vue'
+// eslint-disable-next-line import/default, import/namespace, import/no-named-as-default, import/no-named-as-default-member
 import Tus from '@uppy/tus'
 import Compressor from '@uppy/compressor'
 import { Camera, CameraSource, CameraResultType } from '@capacitor/camera'
@@ -155,6 +157,14 @@ function resetUpload() {
   if (upload) {
     upload.abort()
     upload = null
+  }
+}
+
+function onDragEnter(event) {
+  // Only open the upload modal for external file drops (from desktop/file explorer),
+  // not for internal DOM element drags (e.g. photo reorder via vuedraggable).
+  if (event.dataTransfer?.types?.includes('Files')) {
+    openModal()
   }
 }
 

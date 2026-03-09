@@ -196,6 +196,13 @@ export const useAuthStore = defineStore({
     },
     async login(params) {
       try {
+        // Tell the server if this is a ModTools login so it can auto-confirm
+        // group affiliation for Owners.
+        const miscStore = useMiscStore()
+        if (miscStore.modtools) {
+          params.modtools = true
+        }
+
         const res = await this.$api.session.login(params, function (data) {
           // Don't log expected errors for wrong email/password (HTTP 400).
           return data?.error !== 400

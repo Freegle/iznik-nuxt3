@@ -91,27 +91,38 @@
         <!-- Photo section - at the bottom, compact -->
         <div class="form-card photo-card">
           <label class="form-label">Photos</label>
-          <div class="photo-grid">
-            <PostPhoto
-              v-for="(photo, index) in attachments"
-              :id="photo.id"
-              :key="photo.id || index"
-              :path="photo.path"
-              :paththumb="photo.paththumb"
-              :ouruid="photo.ouruid"
-              :externalmods="photo.externalmods"
-              class="photo-item"
-              @remove="removePhoto"
-            />
-            <div class="photo-add">
-              <OurUploader
-                v-model="attachments"
-                type="Message"
-                multiple
-                compact
+          <draggable
+            v-model="attachments"
+            class="photo-grid"
+            :item-key="(el) => `edit-photo-${el.id}`"
+            :animation="150"
+            ghost-class="ghost"
+            @start="dragging = true"
+            @end="dragging = false"
+          >
+            <template #item="{ element }">
+              <PostPhoto
+                :id="element.id"
+                :key="element.id"
+                :path="element.path"
+                :paththumb="element.paththumb"
+                :ouruid="element.ouruid"
+                :externalmods="element.externalmods"
+                class="photo-item"
+                @remove="removePhoto"
               />
-            </div>
-          </div>
+            </template>
+            <template #footer>
+              <div v-if="!dragging" class="photo-add">
+                <OurUploader
+                  v-model="attachments"
+                  type="Message"
+                  multiple
+                  compact
+                />
+              </div>
+            </template>
+          </draggable>
         </div>
       </div>
 
@@ -138,6 +149,7 @@
 
 <script setup>
 import { ref, computed, defineAsyncComponent, toRaw } from 'vue'
+import draggable from 'vuedraggable'
 import NumberIncrementDecrement from './NumberIncrementDecrement'
 import PostPhoto from './PostPhoto.vue'
 import { useMessageStore } from '~/stores/message'
@@ -173,6 +185,7 @@ const message = toRaw(messageStore.byId(props.id))
 const textbody = message.textbody
 const itemName = message.item?.name
 const attachments = ref(message.attachments || [])
+const dragging = ref(false)
 const triedToSave = ref(false)
 const item = ref(null)
 
@@ -265,9 +278,14 @@ async function save(finishSpinner) {
         deadline.value && deadline.value > '1970-01-01' ? deadline.value : null,
     }
 
-    await messageStore.patch(params)
+    // Emit 'hidden' synchronously before patching. The patch() call removes then
+    // re-adds the message in the store, which unmounts/remounts the v-if block in
+    // MyMessage.vue containing this modal. We must set showEditModal=false in the
+    // parent before that happens, otherwise useOurModal's onMounted reopens the modal.
+    // We can't rely on hide()'s async b-modal transition completing in time.
     finishSpinner()
-    hide()
+    emit('hidden')
+    await messageStore.patch(params)
   }
 }
 
@@ -505,6 +523,10 @@ function onModalHidden() {
     max-width: 100px !important;
     max-height: 100px !important;
   }
+}
+
+.ghost {
+  opacity: 0.5;
 }
 
 .photo-add {

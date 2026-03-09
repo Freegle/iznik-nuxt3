@@ -3,8 +3,8 @@
     <div v-for="i in photoCount" :key="i" class="photo-cell">
       <ProxyImage
         :src="photoSrc(i - 1)"
-        :preload="i <= 4"
-        :loading="i > 4 ? 'lazy' : undefined"
+        :preload="i <= 2"
+        :loading="i > 6 ? 'lazy' : undefined"
         :fetchpriority="i === 1 ? 'high' : undefined"
         alt="Happy freegler with their freegled item. Photo by Alex Bamford."
         class-name="grid-photo"

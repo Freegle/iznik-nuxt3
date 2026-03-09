@@ -197,16 +197,22 @@ export default defineNuxtConfig({
     '/volunteerings/**': { isr: 3600 },
 
     // Allow CORS for chunk fetches - required for Netlify hosting.
+    // Immutable cache for hashed assets — these filenames change on every build.
     '/_nuxt/**': {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers':
           'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+        'Cache-Control': 'public, max-age=31536000, immutable',
       },
     },
   },
 
   nitro: {
+    // Pre-compress assets for faster serving. Disabled for app builds because
+    // Android Gradle treats foo.js and foo.js.gz as duplicate resources.
+    compressPublicAssets: config.ISAPP ? false : { brotli: true, gzip: true },
+
     prerender: prerenderRoutes
       ? {
           routes: ['/404.html', '/sitemap.xml'],
@@ -266,6 +272,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-vite-legacy',
     ['@bootstrap-vue-next/nuxt', { css: false }],
+    'nuxt-vitalizer',
 
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
@@ -1028,12 +1035,12 @@ export default defineNuxtConfig({
         },
         {
           rel: 'preconnect',
-          href: config.APIv2.replace('/apiv2', ''),
+          href: new URL(config.APIv2).origin,
           crossorigin: 'anonymous',
         },
         {
           rel: 'dns-prefetch',
-          href: config.APIv2.replace('/apiv2', ''),
+          href: new URL(config.APIv2).origin,
         },
         ...(config.COOKIEYES
           ? [
