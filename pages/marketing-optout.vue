@@ -50,39 +50,33 @@ const key = route.query.k
 
 const status = ref('processing')
 
-onMounted(() => {
-  // Safety timeout: if nothing resolves within 10s, show failure
-  const safetyTimer = setTimeout(() => {
-    if (status.value === 'processing') {
-      console.log('Marketing opt-out safety timeout')
-      status.value = 'failed'
-    }
-  }, 10000)
-
+onMounted(async () => {
   if (!uid || !key) {
-    clearTimeout(safetyTimer)
     status.value = 'failed'
     return
   }
 
-  authStore
-    .login({ u: uid, k: key })
-    .then(async () => {
-      const loggedInAs = authStore.user?.id
+  try {
+    // app.vue handles u/k login globally, so we just need to wait for
+    // the auth state to settle, then check if we're logged in as the
+    // expected user.
+    // Poll for loginStateKnown (set by fetchUser in the login flow).
+    const deadline = Date.now() + 10000
+    while (!authStore.loginStateKnown && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 200))
+    }
 
-      if (loggedInAs === uid) {
-        await authStore.saveAndGet({ relevantallowed: false })
-        clearTimeout(safetyTimer)
-        status.value = 'success'
-      } else {
-        clearTimeout(safetyTimer)
-        status.value = 'failed'
-      }
-    })
-    .catch((e) => {
-      console.log('Marketing opt-out failed', e)
-      clearTimeout(safetyTimer)
+    const loggedInAs = authStore.user?.id
+
+    if (loggedInAs === uid) {
+      await authStore.saveAndGet({ relevantallowed: false })
+      status.value = 'success'
+    } else {
       status.value = 'failed'
-    })
+    }
+  } catch (e) {
+    console.log('Marketing opt-out failed', e)
+    status.value = 'failed'
+  }
 })
 </script>
