@@ -43,7 +43,6 @@ console.log('isNetlify:', isNetlify)
 const prerenderRoutes = process.env.NUXT_NITRO_PRERENDER_ROUTES !== 'false'
 console.log('prerenderRoutes:', prerenderRoutes)
 
-
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
@@ -198,16 +197,22 @@ export default defineNuxtConfig({
     '/volunteerings/**': { isr: 3600 },
 
     // Allow CORS for chunk fetches - required for Netlify hosting.
+    // Immutable cache for hashed assets — these filenames change on every build.
     '/_nuxt/**': {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers':
           'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+        'Cache-Control': 'public, max-age=31536000, immutable',
       },
     },
   },
 
   nitro: {
+    // Pre-compress assets for faster serving. Disabled for app builds because
+    // Android Gradle treats foo.js and foo.js.gz as duplicate resources.
+    compressPublicAssets: config.ISAPP ? false : { brotli: true, gzip: true },
+
     prerender: prerenderRoutes
       ? {
           routes: ['/404.html', '/sitemap.xml'],
@@ -267,6 +272,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'nuxt-vite-legacy',
     ['@bootstrap-vue-next/nuxt', { css: false }],
+    'nuxt-vitalizer',
 
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
@@ -471,56 +477,61 @@ export default defineNuxtConfig({
       config.NODE_ENV === 'test'
         ? []
         : config.ISAPP && production
-          ? [
-              // App builds with Sentry: include chunk splitting for better loading
-              splitVendorChunkPlugin(),
-              sentryVitePlugin({
-                org: 'freegle',
-                project: 'capacitor',
-                authToken: config.SENTRY_AUTH_TOKEN,
-                // For non-strict mode (debug builds), log errors but don't fail the build
-                errorHandler: config.SENTRY_STRICT
-                  ? undefined // Use default (throw on error)
-                  : (err) => {
-                      console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
-                    },
-                // Disable release management for non-strict mode to avoid API timeouts
-                release: config.SENTRY_STRICT
-                  ? undefined // Use default release management
-                  : { create: false, finalize: false },
-              }),
-            ]
-          : config.ISAPP
-            ? [
-                // App builds without Sentry: still need chunk splitting
-                splitVendorChunkPlugin(),
-              ]
-            : [
-                splitVendorChunkPlugin(),
-                VitePWA({
-                  registerType: 'autoUpdate',
-                  workbox: {
-                    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        ? [
+            // App builds with Sentry: include chunk splitting for better loading
+            splitVendorChunkPlugin(),
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'capacitor',
+              authToken: config.SENTRY_AUTH_TOKEN,
+              // For non-strict mode (debug builds), log errors but don't fail the build
+              errorHandler: config.SENTRY_STRICT
+                ? undefined // Use default (throw on error)
+                : (err) => {
+                    console.warn(
+                      '⚠️ Sentry error (non-fatal in debug mode):',
+                      err.message
+                    )
                   },
-                }),
-                eslintPlugin({
-                  exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
-                }),
-                sentryVitePlugin({
-                  org: 'freegle',
-                  // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
-                  project: config.IS_MT ? 'modtools' : 'nuxt3',
-                  // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
-                  errorHandler: (err) => {
-                    // Only log warning for gateway timeouts, fail for other errors
-                    if (err.message && err.message.includes('504')) {
-                      console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
-                    } else {
-                      throw err
-                    }
-                  },
-                }),
-              ],
+              // Disable release management for non-strict mode to avoid API timeouts
+              release: config.SENTRY_STRICT
+                ? undefined // Use default release management
+                : { create: false, finalize: false },
+            }),
+          ]
+        : config.ISAPP
+        ? [
+            // App builds without Sentry: still need chunk splitting
+            splitVendorChunkPlugin(),
+          ]
+        : [
+            splitVendorChunkPlugin(),
+            VitePWA({
+              registerType: 'autoUpdate',
+              workbox: {
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+              },
+            }),
+            eslintPlugin({
+              exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
+            }),
+            sentryVitePlugin({
+              org: 'freegle',
+              // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
+              project: config.IS_MT ? 'modtools' : 'nuxt3',
+              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+              errorHandler: (err) => {
+                // Only log warning for gateway timeouts, fail for other errors
+                if (err.message && err.message.includes('504')) {
+                  console.warn(
+                    '⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully'
+                  )
+                } else {
+                  throw err
+                }
+              },
+            }),
+          ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
@@ -812,12 +823,14 @@ export default defineNuxtConfig({
             // Previously CookieYes was loaded inside postGSI(), creating an unnecessary
             // sequential bottleneck (GSI download must finish before CookieYes even starts).
             ` +
-            ((!config.ISAPP || config.USE_COOKIES)
-              ? (config.COOKIEYES
+            (!config.ISAPP || config.USE_COOKIES
+              ? config.COOKIEYES
                 ? `
             // Load CookieYes immediately (no longer waits for GSI)
             console.log('Load CookieYes');
-            loadScript('` + config.COOKIEYES + `', false)
+            loadScript('` +
+                  config.COOKIEYES +
+                  `', false)
 
             // Wait until CookieYes has set its cookie and TCF consent is available.
             var retries = 10
@@ -853,7 +866,9 @@ export default defineNuxtConfig({
                   // blocked by a browser extension.  Try to fetch the script here - if this fails with
                   // an exception then it's likely to be because it's blocked.
                   console.log('Try fetching script')
-                  fetch('` + config.COOKIEYES + `').then((response) => {
+                  fetch('` +
+                  config.COOKIEYES +
+                  `').then((response) => {
                     console.log('Fetch returned', response)
 
                     if (response.ok) {
@@ -883,7 +898,7 @@ export default defineNuxtConfig({
             // Without this, ads load instantly and dominate PSI measurements.
             console.log('No CookieYes to load, deferring ads to simulate consent delay')
             setTimeout(window.postCookieYes, 8000);
-            `)
+            `
               : `
             // App build without cookies - no consent or ads needed
             `) +
@@ -1021,12 +1036,12 @@ export default defineNuxtConfig({
         },
         {
           rel: 'preconnect',
-          href: config.APIv2.replace('/apiv2', ''),
+          href: new URL(config.APIv2).origin,
           crossorigin: 'anonymous',
         },
         {
           rel: 'dns-prefetch',
-          href: config.APIv2.replace('/apiv2', ''),
+          href: new URL(config.APIv2).origin,
         },
         ...(config.COOKIEYES
           ? [
