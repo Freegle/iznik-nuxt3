@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="admin">
     <b-card no-body>
       <b-card-header class="clickme" @click.prevent="expanded = !expanded">
         <b-row>
@@ -104,15 +104,18 @@
             Newsletter - will not be sent to members who have opted out.
           </span>
         </NoticeMessage>
-        <NoticeMessage
-          v-if="admin.editprotected"
-          variant="warning"
-          class="mb-2"
-        >
-          This admin uses a pre-designed template and can't be edited. You can
-          approve it to send, or delete it if it's not suitable for your group.
-        </NoticeMessage>
-        <template v-if="!admin.template">
+        <template v-if="admin.template">
+          <NoticeMessage variant="warning" class="mb-2">
+            This admin uses a pre-designed template and can't be edited. You can
+            approve it to send, or delete it if it's not suitable for your
+            group.
+          </NoticeMessage>
+          <p><strong>Subject:</strong> {{ admin.subject }}</p>
+          <ModAdminPreviewLittleFreeShop2026
+            v-if="admin.template === 'little-free-shop-2026'"
+          />
+        </template>
+        <template v-else>
           <b-form-group
             label="Subject of ADMIN:"
             label-for="subject"
@@ -234,24 +237,24 @@ const showConfirmModal = ref(false)
 const admin = computed(() => adminsStore.get(props.id))
 
 const groupname = computed(() => {
-  let ret = null
+  if (!admin.value) return null
   const group = groupStore.get(admin.value.groupid)
 
   if (group) {
-    ret = group.namedisplay
+    return group.namedisplay
   }
 
-  return ret
+  return null
 })
 
 const holder = computed(() => {
-  return admin.value.heldby ? userStore.byId(admin.value.heldby) : null
+  return admin.value?.heldby ? userStore.byId(admin.value.heldby) : null
 })
 
 onMounted(() => {
   expanded.value = props.open
 
-  if (admin.value.heldby) {
+  if (admin.value?.heldby) {
     // Get them in store so we can display their name.
     userStore.fetch(admin.value.heldby)
   }
