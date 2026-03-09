@@ -61,7 +61,7 @@ import { Zoompinch as ZoomPinch } from 'zoompinch'
 import { onBeforeUnmount, computed, watch } from 'vue'
 import { ref } from '#imports'
 
-const emit = defineEmits(['zoom-change'])
+const emit = defineEmits(['zoom-change', 'scale-change'])
 
 const props = defineProps({
   attachment: {
@@ -123,10 +123,23 @@ watch(isZoomed, (newValue) => {
   emit('zoom-change', newValue)
 })
 
+// Emit actual scale value for zoom slider
+watch(
+  () => transform.value.scale,
+  (newScale) => {
+    emit('scale-change', newScale)
+  }
+)
+
+function setScale(scale) {
+  transform.value.scale = scale
+}
+
 defineExpose({
   isZoomed,
   transform,
   resetTransform,
+  setScale,
 })
 
 function fit() {

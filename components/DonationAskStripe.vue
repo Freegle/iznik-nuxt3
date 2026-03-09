@@ -64,11 +64,14 @@
               />
             </div>
             <DonationButton
-              v-if="payPalFallback"
+              v-if="payPalFallback && !isApp"
               :text="`Donate £${price} with PayPal`"
               :value="String(price)"
               class="mb-4"
             />
+            <p v-else-if="payPalFallback && isApp" class="text-muted text-center mb-4">
+              Payment is temporarily unavailable. Please try again later.
+            </p>
             <div ref="belowStripe" />
           </div>
 
@@ -105,6 +108,7 @@ import DonationIntroText from './DonationIntroText'
 import DonationBirthdayDisplay from './DonationBirthdayDisplay'
 import DonationTraditionalExtras from './DonationTraditionalExtras'
 import Api from '~/api'
+import { useMobileStore } from '~/stores/mobile'
 
 const props = defineProps({
   groupid: {
@@ -163,6 +167,8 @@ const emit = defineEmits(['score', 'success', 'cancel'])
 
 const runtimeConfig = useRuntimeConfig()
 const api = Api(runtimeConfig)
+const mobileStore = useMobileStore()
+const isApp = ref(mobileStore.isApp)
 
 const monthly = ref(false)
 const price = ref(props.default)

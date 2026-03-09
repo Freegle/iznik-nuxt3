@@ -240,7 +240,7 @@ describe('OurUploader', () => {
       const uploaderComp = wrapper.findComponent(OurUploader)
       uploaderComp.vm.busy = true
       await flushPromises()
-      expect(wrapper.find('.b-img[src="/loader.gif"]').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
 
     it('hides camera icon when busy', async () => {
@@ -475,15 +475,30 @@ describe('OurUploader', () => {
       expect(mockDashboardPlugin.openModal).toHaveBeenCalled()
     })
 
-    it('opens modal on dragenter event', async () => {
+    it('opens modal on dragenter with Files (external file drop)', async () => {
       mockIsApp.value = false
       const mockDashboardPlugin = { openModal: vi.fn() }
       mockUppy.getPlugin.mockReturnValue(mockDashboardPlugin)
 
       const wrapper = await createWrapper()
-      await wrapper.find('.wrapper').trigger('dragenter')
+      await wrapper.find('.wrapper').trigger('dragenter', {
+        dataTransfer: { types: ['Files'] },
+      })
 
       expect(mockDashboardPlugin.openModal).toHaveBeenCalled()
+    })
+
+    it('does NOT open modal on dragenter without Files (internal drag reorder)', async () => {
+      mockIsApp.value = false
+      const mockDashboardPlugin = { openModal: vi.fn() }
+      mockUppy.getPlugin.mockReturnValue(mockDashboardPlugin)
+
+      const wrapper = await createWrapper()
+      await wrapper.find('.wrapper').trigger('dragenter', {
+        dataTransfer: { types: ['text/plain'] },
+      })
+
+      expect(mockDashboardPlugin.openModal).not.toHaveBeenCalled()
     })
   })
 

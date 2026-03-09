@@ -231,9 +231,7 @@ describe('ModChatHeader', () => {
         mockOtheruser.value = otheruser
         const wrapper = await mountComponent()
         expect(wrapper.find('.outer').exists()).toBe(!showsLoading)
-        expect(wrapper.find('img[alt="Loading..."]').exists()).toBe(
-          showsLoading
-        )
+        expect(wrapper.find('.spinner-border').exists()).toBe(showsLoading)
       }
     )
 

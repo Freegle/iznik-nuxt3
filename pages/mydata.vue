@@ -376,27 +376,6 @@
                   </b-col>
                 </b-row>
               </ShowMore>
-              <h2>Invitations</h2>
-              <div class="row">
-                <div class="col-sm-6">
-                  Number of remaining invitations you can send to other people:
-                </div>
-                <div class="col-sm-6">
-                  {{
-                    status.data
-                      .Number_of_remaining_invitations_you_can_send_to_other_people
-                  }}
-                </div>
-              </div>
-              <br />
-              <ShowMore
-                v-slot="s"
-                :items="status.data.invitations"
-                keyfield="date"
-              >
-                You invited <em>{{ s.item.email }}</em> on
-                {{ dateonly(s.item.date) }}
-              </ShowMore>
               <h2>Posts</h2>
               <ShowMore :items="status.data.messages">
                 <template #item="s">
@@ -777,7 +756,7 @@
                 This may take a few minutes, so please keep this tab open and be
                 patient...
               </notice-message>
-              <b-img lazy src="/loader.gif" alt="Loading" />
+              <Spinner :size="50" />
               <b-alert variant="success" show>
                 Your data export has been started...
               </b-alert>
@@ -787,7 +766,7 @@
                 This may take a few minutes, so please keep this tab open and be
                 patient...
               </notice-message>
-              <b-img lazy src="/loader.gif" alt="Loading" />
+              <Spinner :size="50" />
               <b-alert variant="warning" show>
                 You're in a queue (sorry). Data exports ahead of you:
                 {{ status.infront }}
@@ -798,17 +777,17 @@
                 This may take a few minutes, so please keep this tab open and be
                 patient...
               </notice-message>
-              <b-img lazy src="/loader.gif" alt="Loading" />
+              <Spinner :size="50" />
               <b-alert variant="warning" show>
                 Your export will start soon...
               </b-alert>
             </div>
             <div v-else class="text-center">
-              <b-img lazy src="/loader.gif" alt="Loading" />
+              <Spinner :size="50" />
             </div>
           </div>
           <div v-else class="text-center">
-            <b-img lazy src="/loader.gif" alt="Loading" />
+            <Spinner :size="50" />
           </div>
         </div>
       </b-col>

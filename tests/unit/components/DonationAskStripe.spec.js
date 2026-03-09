@@ -24,6 +24,12 @@ vi.mock('#app', () => ({
   useRuntimeConfig: () => mockRuntimeConfig,
 }))
 
+vi.mock('~/stores/mobile', () => ({
+  useMobileStore: () => ({
+    isApp: false,
+  }),
+}))
+
 describe('DonationAskStripe', () => {
   beforeEach(() => {
     vi.clearAllMocks()

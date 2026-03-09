@@ -122,7 +122,7 @@
     <section v-else-if="loading" class="loading-section">
       <b-container>
         <div class="text-center py-5">
-          <b-img src="/loader.gif" alt="Loading celebration..." />
+          <Spinner :size="50" />
           <p class="mt-3 text-muted">Preparing the birthday celebration...</p>
         </div>
       </b-container>

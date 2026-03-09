@@ -24,7 +24,6 @@ import EmailTrackingAPI from './EmailTrackingAPI.js'
 import GiftAidAPI from './GiftAidAPI.js'
 import GroupAPI from './GroupAPI.js'
 import ImageAPI from './ImageAPI.js'
-import InvitationAPI from './InvitationAPI.js'
 import IsochroneAPI from './IsochroneAPI.js'
 import JobAPI from './JobAPI.js'
 import LocationAPI from './LocationAPI.js'
@@ -72,7 +71,6 @@ export default (config) => {
     giftaid: new GiftAidAPI(options),
     group: new GroupAPI(options),
     image: new ImageAPI(options),
-    invitation: new InvitationAPI(options),
     isochrone: new IsochroneAPI(options),
     job: new JobAPI(options),
     location: new LocationAPI(options),

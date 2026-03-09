@@ -43,7 +43,6 @@ console.log('isNetlify:', isNetlify)
 const prerenderRoutes = process.env.NUXT_NITRO_PRERENDER_ROUTES !== 'false'
 console.log('prerenderRoutes:', prerenderRoutes)
 
-
 /* if (config.COOKIEYES) { // cookieyesapp.js NO LONGER NEEDED AS HOSTNAME IS https://ilovefreegle.org
   console.log('CHECK COOKIEYES SCRIPT CHANGES')
   const cookieyesBase = fs.readFileSync('public/js/cookieyes-base.js').toString()
@@ -198,16 +197,22 @@ export default defineNuxtConfig({
     '/volunteerings/**': { isr: 3600 },
 
     // Allow CORS for chunk fetches - required for Netlify hosting.
+    // Immutable cache for hashed assets — these filenames change on every build.
     '/_nuxt/**': {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers':
           'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+        'Cache-Control': 'public, max-age=31536000, immutable',
       },
     },
   },
 
   nitro: {
+    // Pre-compress assets for faster serving. Disabled for app builds because
+    // Android Gradle treats foo.js and foo.js.gz as duplicate resources.
+    compressPublicAssets: config.ISAPP ? false : { brotli: true, gzip: true },
+
     prerender: prerenderRoutes
       ? {
           routes: ['/404.html', '/sitemap.xml'],
@@ -266,7 +271,9 @@ export default defineNuxtConfig({
     'pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
     'nuxt-vite-legacy',
-    '@bootstrap-vue-next/nuxt',
+    ['@bootstrap-vue-next/nuxt', { css: false }],
+    'nuxt-vitalizer',
+
     process.env.GTM_ID ? '@zadigetvoltaire/nuxt-gtm' : null,
     // @nuxt/test-utils/module is added automatically by vitest config
     // We are using Playwire so we don't load AdSense ourselves.
@@ -358,8 +365,16 @@ export default defineNuxtConfig({
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
-    'leaflet/dist/leaflet.css',
   ],
+
+  build: {
+    transpile: [
+      '@fortawesome/vue-fontawesome',
+      '@fortawesome/fontawesome-svg-core',
+      '@fortawesome/free-solid-svg-icons',
+      '@fortawesome/free-brands-svg-icons',
+    ],
+  },
 
   vite: {
     vue: {
@@ -376,7 +391,7 @@ export default defineNuxtConfig({
         'jwt-decode',
         'leaflet',
         'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
+
         'wicket/wicket-leaflet',
         '@vue-leaflet/vue-leaflet',
         'leaflet-control-geocoder/src/control',
@@ -431,10 +446,6 @@ export default defineNuxtConfig({
         'vue-highlight-words',
         '@chenfengyuan/vue-number-input',
         'twemoji',
-        '@vue-leaflet/vue-leaflet',
-        'leaflet/dist/leaflet-src.esm',
-        'leaflet-gesture-handling',
-        'wicket/wicket-leaflet',
         '@vueup/vue-quill',
         'quill-html-edit-button',
         'vue-datepicker-next',
@@ -466,56 +477,61 @@ export default defineNuxtConfig({
       config.NODE_ENV === 'test'
         ? []
         : config.ISAPP && production
-          ? [
-              // App builds with Sentry: include chunk splitting for better loading
-              splitVendorChunkPlugin(),
-              sentryVitePlugin({
-                org: 'freegle',
-                project: 'capacitor',
-                authToken: config.SENTRY_AUTH_TOKEN,
-                // For non-strict mode (debug builds), log errors but don't fail the build
-                errorHandler: config.SENTRY_STRICT
-                  ? undefined // Use default (throw on error)
-                  : (err) => {
-                      console.warn('⚠️ Sentry error (non-fatal in debug mode):', err.message)
-                    },
-                // Disable release management for non-strict mode to avoid API timeouts
-                release: config.SENTRY_STRICT
-                  ? undefined // Use default release management
-                  : { create: false, finalize: false },
-              }),
-            ]
-          : config.ISAPP
-            ? [
-                // App builds without Sentry: still need chunk splitting
-                splitVendorChunkPlugin(),
-              ]
-            : [
-                splitVendorChunkPlugin(),
-                VitePWA({
-                  registerType: 'autoUpdate',
-                  workbox: {
-                    maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        ? [
+            // App builds with Sentry: include chunk splitting for better loading
+            splitVendorChunkPlugin(),
+            sentryVitePlugin({
+              org: 'freegle',
+              project: 'capacitor',
+              authToken: config.SENTRY_AUTH_TOKEN,
+              // For non-strict mode (debug builds), log errors but don't fail the build
+              errorHandler: config.SENTRY_STRICT
+                ? undefined // Use default (throw on error)
+                : (err) => {
+                    console.warn(
+                      '⚠️ Sentry error (non-fatal in debug mode):',
+                      err.message
+                    )
                   },
-                }),
-                eslintPlugin({
-                  exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
-                }),
-                sentryVitePlugin({
-                  org: 'freegle',
-                  // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
-                  project: config.IS_MT ? 'modtools' : 'nuxt3',
-                  // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
-                  errorHandler: (err) => {
-                    // Only log warning for gateway timeouts, fail for other errors
-                    if (err.message && err.message.includes('504')) {
-                      console.warn('⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully')
-                    } else {
-                      throw err
-                    }
-                  },
-                }),
-              ],
+              // Disable release management for non-strict mode to avoid API timeouts
+              release: config.SENTRY_STRICT
+                ? undefined // Use default release management
+                : { create: false, finalize: false },
+            }),
+          ]
+        : config.ISAPP
+        ? [
+            // App builds without Sentry: still need chunk splitting
+            splitVendorChunkPlugin(),
+          ]
+        : [
+            splitVendorChunkPlugin(),
+            VitePWA({
+              registerType: 'autoUpdate',
+              workbox: {
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+              },
+            }),
+            eslintPlugin({
+              exclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
+            }),
+            sentryVitePlugin({
+              org: 'freegle',
+              // ModTools layer overrides this to 'modtools', base config uses 'nuxt3'
+              project: config.IS_MT ? 'modtools' : 'nuxt3',
+              // Handle Sentry API timeouts (504s) gracefully - sourcemaps upload is the critical part
+              errorHandler: (err) => {
+                // Only log warning for gateway timeouts, fail for other errors
+                if (err.message && err.message.includes('504')) {
+                  console.warn(
+                    '⚠️ Sentry release finalize timed out (504) - sourcemaps were uploaded successfully'
+                  )
+                } else {
+                  throw err
+                }
+              },
+            }),
+          ],
   },
 
   // Note that this is not the standard @vitejs/plugin-legacy, but https://www.npmjs.com/package/nuxt-vite-legacy
@@ -800,96 +816,121 @@ export default defineNuxtConfig({
               }
             };
 
-            function postGSI() {
-              if ('` +
-            config.COOKIEYES +
-            `' != 'null') {
-                // First we load CookieYes, which needs to be loaded before anything else, so that
-                // we have the cookie consent.
-                console.log('Load CookieYes');
-                loadScript('` +
-            config.COOKIEYES +
-            `', false)
-              
-                // Now we wait until the CookieYes script has set its own cookie.  
-                // This might be later than when the script has loaded in pure JS terms, but we
-                // need to be sure it's loaded before we can move on.
-                var retries = 10
-                
-                function checkCookieYes() {
-                  if (document.cookie.indexOf('cookieyes-consent') > -1) {
-                    console.log('CookieYes cookie is set, so CookieYes is loaded');
-                    
-                    // Check that we have set the TCF string.  This only happens once the user 
-                    // has responded to the cookie banner.
-                  if (window.__tcfapi) {
-                    window.__tcfapi('getTCData', 2, (tcData, success) => {
-                      if (success && tcData && tcData.tcString) {
-                        console.log('TC data loaded and TC String set', tcData.tcString);
-                        window.postCookieYes();
-                      } else {
-                        console.log('Failed to get TC data or string, retry.')
-                        setTimeout(checkCookieYes, 100);
-                      }
-                    }, [1,2,3]);
+            // CookieYes and GSI load in parallel for faster startup.
+            // CookieYes has no dependency on GSI - they serve unrelated purposes:
+            //   - GSI: Google One Tap sign-in
+            //   - CookieYes: cookie consent banner and TCF compliance
+            // Previously CookieYes was loaded inside postGSI(), creating an unnecessary
+            // sequential bottleneck (GSI download must finish before CookieYes even starts).
+            ` +
+            (!config.ISAPP || config.USE_COOKIES
+              ? config.COOKIEYES
+                ? `
+            // Load CookieYes immediately (no longer waits for GSI)
+            console.log('Load CookieYes');
+            loadScript('` +
+                  config.COOKIEYES +
+                  `', false)
+
+            // Wait until CookieYes has set its cookie and TCF consent is available.
+            var retries = 10
+
+            function checkCookieYes() {
+              if (document.cookie.indexOf('cookieyes-consent') > -1) {
+                console.log('CookieYes cookie is set, so CookieYes is loaded');
+
+                // Check that we have set the TCF string.  This only happens once the user
+                // has responded to the cookie banner.
+                if (window.__tcfapi) {
+                  window.__tcfapi('getTCData', 2, (tcData, success) => {
+                    if (success && tcData && tcData.tcString) {
+                      console.log('TC data loaded and TC String set', tcData.tcString);
+                      window.postCookieYes();
                     } else {
-                      console.log('TCP API not yet loaded')
+                      console.log('Failed to get TC data or string, retry.')
                       setTimeout(checkCookieYes, 100);
                     }
-                  } else {
-                    console.log('CookieYes not yet loaded', retries)
-                    retries--
-                    
-                    if (retries > 0) {
-                      setTimeout(checkCookieYes, 100);
-                    } else {
-                      // It's not loaded within a reasonable length of time.  This may be because it's
-                      // blocked by a browser extension.  Try to fetch the script here - if this fails with 
-                      // an exception then it's likely to be because it's blocked.
-                      console.log('Try fetching script')
-                      fetch('` +
-            config.COOKIEYES +
-            `').then((response) => {
-                        console.log('Fetch returned', response)
-                        
-                        if (response.ok) {
-                          console.log('Worked, maybe just slow?')
-                          retries = 10  
-                          setTimeout(checkCookieYes, 100);
-                        } else {
-                          console.log('Failed - assume blocked and proceed')
-                          window.postCookieYes()
-                        }
-                      })
-                      .catch((error) => {
-                        // Assume blocked and proceed.
-                        console.log('Failed to fetch CookieYes script:', error.message)
-                        window.postCookieYes()
-                      });                    
-                    }
-                  }
+                  }, [1,2,3]);
+                } else {
+                  console.log('TCP API not yet loaded')
+                  setTimeout(checkCookieYes, 100);
                 }
-                
-                checkCookieYes();
               } else {
-                console.log('No CookieYes to load')
-                window.postCookieYes();
+                console.log('CookieYes not yet loaded', retries)
+                retries--
+
+                if (retries > 0) {
+                  setTimeout(checkCookieYes, 100);
+                } else {
+                  // It's not loaded within a reasonable length of time.  This may be because it's
+                  // blocked by a browser extension.  Try to fetch the script here - if this fails with
+                  // an exception then it's likely to be because it's blocked.
+                  console.log('Try fetching script')
+                  fetch('` +
+                  config.COOKIEYES +
+                  `').then((response) => {
+                    console.log('Fetch returned', response)
+
+                    if (response.ok) {
+                      console.log('Worked, maybe just slow?')
+                      retries = 10
+                      setTimeout(checkCookieYes, 100);
+                    } else {
+                      console.log('Failed - assume blocked and proceed')
+                      window.postCookieYes()
+                    }
+                  })
+                  .catch((error) => {
+                    // Assume blocked and proceed.
+                    console.log('Failed to fetch CookieYes script:', error.message)
+                    window.postCookieYes()
+                  });
+                }
               }
             }
-            ` +
-            (config.ISAPP
-              ? `
-            // App builds: Don't load GSI client script (apps use Capacitor plugin for Google login)
-            // For Android apps with cookies, call postGSI directly to load CookieYes and ads
-            ` + (config.USE_COOKIES ? `postGSI()` : ``)
+
+            checkCookieYes();
+            `
+                : `
+            // No CookieYes configured (dev environment) - defer ad loading to
+            // simulate the natural delay that CookieYes consent introduces on
+            // production (user must read banner + click Accept, typically 5-15s).
+            // Without this, ads load instantly and dominate PSI measurements.
+            console.log('No CookieYes to load, deferring ads to simulate consent delay')
+            setTimeout(window.postCookieYes, 8000);
+            `
               : `
-            // Web builds: Load GSI client script and set callback to initialize ads
-            window.onGoogleLibraryLoad = postGSI
-            loadScript('https://accounts.google.com/gsi/client')
+            // App build without cookies - no consent or ads needed
+            `) +
+            (!config.ISAPP
+              ? `
+            // Web builds: Load GSI for Google One Tap sign-in.
+            // Defer for new visitors (no reason to expect auto-login), load immediately
+            // for returning users where One Tap may auto-sign-in.
+            var hasLoggedInBefore = false;
+            try {
+              var authData = JSON.parse(localStorage.getItem('auth') || '{}');
+              hasLoggedInBefore = authData.loggedInEver || !!authData.auth?.persistent;
+            } catch(e) {}
+
+            if (hasLoggedInBefore) {
+              loadScript('https://accounts.google.com/gsi/client');
+            } else {
+              // Defer GSI until browser is idle or 5s, whichever comes first
+              var loadGSI = function() { loadScript('https://accounts.google.com/gsi/client'); };
+              if ('requestIdleCallback' in window) {
+                requestIdleCallback(loadGSI, { timeout: 5000 });
+              } else {
+                setTimeout(loadGSI, 5000);
+              }
+            }
+            `
+              : `
+            // App builds: GSI not needed (apps use Capacitor plugin for Google login)
             `) +
             `
           } catch (e) {
-            console.error('Error initialising pbjs and googletag:', e.message);
+            console.error('Error initialising ads and consent:', e.message);
           }`,
         },
       ],
@@ -982,6 +1023,59 @@ export default defineNuxtConfig({
           name: 'Awin',
           content: 'Awin',
         },
+      ],
+      link: [
+        {
+          rel: 'preconnect',
+          href: config.IMAGE_DELIVERY,
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'dns-prefetch',
+          href: config.IMAGE_DELIVERY,
+        },
+        {
+          rel: 'preconnect',
+          href: new URL(config.APIv2).origin,
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'dns-prefetch',
+          href: new URL(config.APIv2).origin,
+        },
+        ...(config.COOKIEYES
+          ? [
+              {
+                rel: 'preconnect',
+                href: 'https://cdn-cookieyes.com',
+              },
+              {
+                rel: 'dns-prefetch',
+                href: 'https://cdn-cookieyes.com',
+              },
+            ]
+          : []),
+        ...(!config.ISAPP
+          ? [
+              {
+                rel: 'preconnect',
+                href: 'https://accounts.google.com',
+                crossorigin: 'anonymous',
+              },
+              {
+                rel: 'dns-prefetch',
+                href: 'https://accounts.google.com',
+              },
+            ]
+          : []),
+        ...(config.PLAYWIRE_PUB_ID
+          ? [
+              {
+                rel: 'dns-prefetch',
+                href: 'https://cdn.intergient.com',
+              },
+            ]
+          : []),
       ],
     },
   },

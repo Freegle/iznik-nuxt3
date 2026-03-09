@@ -57,6 +57,7 @@
 <script setup>
 import { loadStripe } from '@stripe/stripe-js'
 import * as Sentry from '@sentry/browser'
+import { Capacitor } from '@capacitor/core'
 import {
   Stripe,
   PaymentSheetEventsEnum,
@@ -71,6 +72,16 @@ const runtimeConfig = useRuntimeConfig()
 const userSite = runtimeConfig.public.USER_SITE
 const donationStore = useDonationStore()
 const mobileStore = useMobileStore()
+
+// Detect iOS robustly - mobileStore.isiOS can be overwritten asynchronously by
+// Device.getInfo() returning unexpected platform values on iPad.
+// Use Capacitor.getPlatform() as primary, user agent as fallback for iPad.
+const capacitorPlatform = Capacitor.getPlatform()
+const userAgentIsiOS =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document))
+const isiOS = capacitorPlatform === 'ios' || userAgentIsiOS
 
 const props = defineProps({
   price: {
@@ -158,137 +169,85 @@ const error = ref(null)
 
 onMounted(async () => {
   if (isApp.value) {
-    // Initialize Stripe inside onMounted to ensure runtimeConfig is fully available.
-    // This fixes a race condition where some users see "you must provide publishableKey"
-    // error because the config wasn't hydrated yet at script setup time.
     const stripeKey = runtimeConfig.public.STRIPE_PUBLISHABLE_KEY
 
     if (!stripeKey) {
       console.error('Stripe publishableKey not available at mount')
-      Sentry.captureMessage('Stripe publishableKey missing at mount', {
-        extra: { runtimeConfigPublic: runtimeConfig.public },
-      })
       emit('error')
       loading.value = false
       return
     }
 
     if (!stripeInitialized) {
-      console.log('Stripe.initialize', stripeKey)
-      Stripe.initialize({
-        publishableKey: stripeKey,
-      })
-      stripeInitialized = true
+      try {
+        Stripe.initialize({
+          publishableKey: stripeKey,
+        })
+        stripeInitialized = true
+      } catch (e) {
+        console.error('Stripe.initialize failed', e)
+        Sentry.captureException(e, {
+          tags: { stripe_step: 'initialize' },
+        })
+        emit('error')
+        loading.value = false
+        return
+      }
     }
 
+    // In app mode, the Stripe PaymentSheet (PayPal/card) is always available
+    // once Stripe.initialize succeeds. Set this BEFORE any API calls that might
+    // fail, so we never incorrectly emit 'noPaymentMethods' and fall back to
+    // the web PayPal SDK (which doesn't work in Capacitor WebView).
+    isPayPalAvailable.value = true
+
     try {
-      console.log('Stripe props.price', props.price)
-      if (mobileStore.isApp && !mobileStore.isiOS) {
-        // Disable on iOS for now. Approval for use of Apple Pay is handled via Benevity.
-        // Freegle is registered with Benevity and we have submitted a request for Apple Pay
-        // verification. Once approved, remove the !mobileStore.isiOS condition to enable.
+      // Skip native event listeners - they cause a native crash on iPad
+      // (the Stripe plugin's addListener triggers a fatal error in the
+      // WKWebView process). The actual payment flow uses await on
+      // presentPaymentSheet/presentApplePay/presentGooglePay directly.
 
-        Stripe.addListener(PaymentSheetEventsEnum.Failed, (e) => {
-          console.log('Stripe PaymentSheetEventsEnum.Failed', e)
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.FailedToLoad, (e) => {
-          console.log('Stripe PaymentSheetEventsEnum.FailedToLoad', e)
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Loaded, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Loaded')
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Canceled, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Canceled')
-        })
-        Stripe.addListener(PaymentSheetEventsEnum.Completed, () => {
-          console.log('Stripe PaymentSheetEventsEnum.Completed')
-        })
-        if (!mobileStore.isiOS) {
-          Stripe.addListener(GooglePayEventsEnum.Failed, (e) => {
-            console.log('Stripe GooglePayEventsEnum.Failed', e)
-          })
-          Stripe.addListener(GooglePayEventsEnum.FailedToLoad, (e) => {
-            console.log('Stripe GooglePayEventsEnum.FailedToLoad', e)
-          })
-          Stripe.addListener(GooglePayEventsEnum.Loaded, () => {
-            console.log('Stripe GooglePayEventsEnum.Loaded')
-          })
-          Stripe.addListener(GooglePayEventsEnum.Canceled, () => {
-            console.log('Stripe GooglePayEventsEnum.Canceled')
-          })
-          Stripe.addListener(GooglePayEventsEnum.Completed, () => {
-            console.log('Stripe GooglePayEventsEnum.Completed')
-          })
-        } else {
-          // iOS
-          Stripe.addListener(ApplePayEventsEnum.applePayFailed, (e) => {
-            console.log('Stripe ApplePayEventsEnum.Failed', e)
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayFailedToLoad, (e) => {
-            console.log('Stripe ApplePayEventsEnum.applePayFailedToLoad', e)
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayLoaded, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayLoaded')
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayCompleted, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayCompleted')
-          })
-          Stripe.addListener(ApplePayEventsEnum.applePayCanceled, () => {
-            console.log('Stripe ApplePayEventsEnum.applePayCanceled')
-          })
-          Stripe.addListener(
-            ApplePayEventsEnum.applePayDidSelectShippingContact,
-            () => {
-              console.log(
-                'Stripe ApplePayEventsEnum.applePayDidSelectShippingContact'
-              )
-            }
-          )
-          Stripe.addListener(
-            ApplePayEventsEnum.applePayDidCreatePaymentMethod,
-            () => {
-              console.log(
-                'Stripe ApplePayEventsEnum.applePayDidCreatePaymentMethod'
-              )
-            }
-          )
-        }
-
+      try {
         if (props.monthly) {
-          // monthly never set in app as not supported
           intent.value = await donationStore.stripeSubscription(props.price)
-          console.log('Stripe subscription Intent', intent.value)
         } else {
           intent.value = await donationStore.stripeIntent({
             amount: props.price,
-            // test: true,
           })
-          console.log('Stripe single payment Intent', intent.value)
         }
+      } catch (intentError) {
+        console.error('Payment intent creation failed', intentError)
+        Sentry.captureException(intentError, {
+          tags: { stripe_step: 'intent_error' },
+        })
+        // Don't re-throw - intent will be created lazily when user clicks a button
+      }
 
-        if (!mobileStore.isiOS) {
-          // Android
-          try {
-            await Stripe.isGooglePayAvailable()
-            isGooglePayAvailable.value = true
-          } catch (e) {
-            // eg Not implemented on Device.
-          }
-        } else {
-          // iOS
-          try {
-            await Stripe.isApplePayAvailable()
-            isApplePayAvailable.value = true
-          } catch (e) {
-            // eg Not implemented on Android.
-          }
+      if (!intent.value?.client_secret) {
+        console.error('Payment intent returned no client_secret', intent.value)
+      }
+
+      // Check payment method availability
+      if (!isiOS) {
+        try {
+          await Stripe.isGooglePayAvailable()
+          isGooglePayAvailable.value = true
+        } catch (e) {
+          console.log('Google Pay not available', e)
         }
-        console.log('Stripe isGooglePayAvailable', isGooglePayAvailable.value)
-        console.log('Stripe isApplePayAvailable', isApplePayAvailable.value)
-        isPayPalAvailable.value = true
+      } else {
+        try {
+          await Stripe.isApplePayAvailable()
+          isApplePayAvailable.value = true
+        } catch (e) {
+          console.log('Apple Pay not available', e)
+        }
       }
     } catch (e) {
-      console.log('Stripe Exception', e.message)
+      console.error('Stripe Exception', e.message, e)
+      Sentry.captureException(e, {
+        tags: { stripe_step: 'app_init' },
+      })
     }
     if (
       isGooglePayAvailable.value ||
@@ -431,80 +390,130 @@ onMounted(async () => {
   loading.value = false
 })
 
-async function useGooglePay() {
-  console.log('useGooglePay')
-  console.log('Stripe createGooglePay BEFORE')
-  // Prepare Google Pay
-  await Stripe.createGooglePay({
-    paymentIntentClientSecret: intent.value.client_secret,
-
-    merchantIdentifier: 'org.ilovefreegle.direct',
-    countryCode: 'GB',
-    currency: 'GBP',
-  })
-  console.log('Stripe createGooglePay AFTER')
-
-  // Present Google Pay
-  const result = await Stripe.presentGooglePay()
-  console.log('Stripe presentGooglePay', result.paymentResult, result)
-  if (result.paymentResult === GooglePayEventsEnum.Completed) {
-    // Happy path
-    console.log('Stripe GooglePay successful')
-    emit('success')
+// Create payment intent on-demand if it wasn't ready at mount time (e.g., API error).
+async function ensureIntent() {
+  if (intent.value?.client_secret) {
+    return true
   }
-  console.log('Stripe DONE')
+
+  try {
+    if (props.monthly) {
+      intent.value = await donationStore.stripeSubscription(props.price)
+    } else {
+      intent.value = await donationStore.stripeIntent({
+        amount: props.price,
+      })
+    }
+
+    if (intent.value?.client_secret) {
+      return true
+    }
+  } catch (e) {
+    console.error('Lazy intent creation failed', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'lazy_intent_error' },
+    })
+  }
+
+  error.value = 'Payment not ready. Please try again in a moment.'
+  return false
+}
+
+async function useGooglePay() {
+  try {
+    if (!(await ensureIntent())) {
+      return
+    }
+
+    await Stripe.createGooglePay({
+      paymentIntentClientSecret: intent.value.client_secret,
+      merchantIdentifier: 'org.ilovefreegle.direct',
+      countryCode: 'GB',
+      currency: 'GBP',
+    })
+
+    const result = await Stripe.presentGooglePay()
+
+    if (result.paymentResult === GooglePayEventsEnum.Completed) {
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe Google Pay error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'googlepay_flow' },
+    })
+    error.value = 'Google Pay failed. Please try another method.'
+  }
 }
 
 async function usePayPalCard() {
-  console.log('usePayPalCard')
-  await Stripe.createPaymentSheet({
-    paymentIntentClientSecret: intent.value.client_secret,
-    // customerId: customer,
-    // customerEphemeralKeySecret: ephemeralKey,
-    // enableGooglePay: true,
-    // enableApplePay: false,
-    merchantDisplayName: 'Freegle',
-    /**
-     * iOS Only
-     * @url https://stripe.com/docs/payments/accept-a-payment?platform=ios&ui=payment-sheet#userinterfacestyle
-     * @default undefined
-     */
-    // returnURL:
-  })
-  console.log('Stripe createPaymentSheet')
+  try {
+    if (!(await ensureIntent())) {
+      return
+    }
 
-  const result = await Stripe.presentPaymentSheet()
-  console.log('Stripe presentPaymentSheet', result.paymentResult, result)
-  if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
-    console.log('Stripe PayPal/card successful')
-    emit('success')
+    await Stripe.createPaymentSheet({
+      paymentIntentClientSecret: intent.value.client_secret,
+      merchantDisplayName: 'Freegle',
+      // Enable Apple Pay within the PaymentSheet so users can pay with
+      // Apple Pay even from the card/PayPal button flow.
+      enableApplePay: true,
+      applePayMerchantId: 'merchant.org.ilovefreegle.direct',
+      enableGooglePay: !isiOS,
+      countryCode: 'GB',
+      // returnURL is required on iOS for external payment methods (PayPal etc)
+      // and can cause crashes if missing (plugin issue #313).
+      returnURL: 'capacitor://localhost/stripe-redirect',
+    })
+
+    const result = await Stripe.presentPaymentSheet()
+
+    if (result.paymentResult === PaymentSheetEventsEnum.Completed) {
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe PayPal/card error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'paypal_flow' },
+    })
+    error.value = 'Payment failed. Please try another method.'
   }
-  console.log('Stripe DONE')
 }
 
 async function useApplePay() {
-  console.log('useApplePay')
-  await Stripe.createApplePay({
-    paymentIntentClientSecret: intent.value.client_secret,
-    paymentSummaryItems: [
-      {
-        label: 'Freegle Donation',
-        amount: props.price,
-      },
-    ],
-    merchantIdentifier: 'Freegle',
-    // merchantDisplayName: 'Freegle',
-    countryCode: 'GB',
-    currency: 'GBP',
-  })
-  // Present Apple Pay
-  const result = await Stripe.presentApplePay()
-  console.log('Stripe presentApplePay', result.paymentResult, result)
-  if (result.paymentResult === ApplePayEventsEnum.Completed) {
-    console.log('Stripe ApplePay successful')
-    emit('success')
+  try {
+    if (!(await ensureIntent())) {
+      return
+    }
+
+    await Stripe.createApplePay({
+      paymentIntentClientSecret: intent.value.client_secret,
+      paymentSummaryItems: [
+        {
+          label: 'Freegle Donation',
+          // Amount MUST be a float, not integer. The native Swift code does
+          // item["amount"] as? NSNumber which returns nil for JS integers,
+          // causing a force-unwrap crash (plugin issue #351).
+          amount: parseFloat(props.price),
+        },
+      ],
+      merchantIdentifier: 'merchant.org.ilovefreegle.direct',
+      countryCode: 'GB',
+      currency: 'GBP',
+    })
+
+    const result = await Stripe.presentApplePay()
+
+    if (result.paymentResult === ApplePayEventsEnum.Completed) {
+      emit('success')
+    }
+  } catch (e) {
+    console.error('Stripe Apple Pay error', e)
+    Sentry.captureException(e, {
+      tags: { stripe_step: 'applepay_flow' },
+    })
+    error.value = 'Apple Pay failed. Please try another method.'
   }
-  console.log('Stripe DONE')
 }
 </script>
 <style scoped lang="scss">

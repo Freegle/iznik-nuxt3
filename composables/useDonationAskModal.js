@@ -91,11 +91,6 @@ export function useDonationAskModal(requestedVariant = null) {
         console.error('Get variant failed')
       }
     }
-    if (mobileStore.isApp && mobileStore.isiOS && variant.value === 'stripe') {
-      variant.value = 'buttons2510'
-      console.log('stripe uDAM iOS', variant.value)
-    }
-
     showDonationAskModal.value = true
 
     // Record the show

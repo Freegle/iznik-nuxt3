@@ -175,7 +175,7 @@
         </div>
       </div>
       <div v-else-if="chatBusy" class="text-center">
-        <b-img class="float-end" src="/loader.gif" width="100px" />
+        <Spinner :size="50" class="float-end" />
       </div>
       <ChatFooter
         v-bind="$props"

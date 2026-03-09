@@ -9,11 +9,9 @@
       View larger image
     </div>
     <div class="photobadge d-flex">
-      <client-only>
-        <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
-          1 / {{ attachments?.length }} <v-icon icon="camera" />
-        </b-badge>
-      </client-only>
+      <b-badge v-if="attachments?.length > 1" @click="$emit('zoom')">
+        1 / {{ attachments?.length }} <v-icon icon="camera" />
+      </b-badge>
     </div>
     <div v-if="!attachments?.length && sampleImage" class="sample-badge">
       Photo of similar item

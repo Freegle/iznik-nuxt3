@@ -56,7 +56,7 @@
           @infinite="loadMore"
         >
           <template #spinner>
-            <b-img lazy src="/loader.gif" alt="Loading" />
+            <Spinner :size="50" />
           </template>
           <template #complete>
             <notice-message v-if="!members?.length">
@@ -92,10 +92,12 @@ modMembers.collection.value = 'Approved'
 // Initialize groupid and search from route
 const route = useRoute()
 let gid = 0
-if ('id' in route.params && route.params.id) gid = parseInt(route.params.id)
+if (route.params && 'id' in route.params && route.params.id)
+  gid = parseInt(route.params.id)
 modMembers.groupid.value = gid
 let termInit = ''
-if ('term' in route.params && route.params.term) termInit = route.params.term
+if (route.params && 'term' in route.params && route.params.term)
+  termInit = route.params.term
 modMembers.search.value = termInit
 
 const { myGroups } = useMe()
@@ -127,7 +129,7 @@ const banmodal = ref(null)
 const id = computed(() => {
   try {
     const route = useRoute()
-    if ('id' in route.params && route.params.id) {
+    if (route.params && 'id' in route.params && route.params.id) {
       return parseInt(route.params.id)
     }
   } catch (e) {
@@ -138,7 +140,8 @@ const id = computed(() => {
 
 const term = computed(() => {
   const route = useRoute()
-  if ('term' in route.params && route.params.term) return route.params.term
+  if (route.params && 'term' in route.params && route.params.term)
+    return route.params.term
   return null
 })
 
@@ -175,7 +178,7 @@ onMounted(() => {
   groupid.value = id.value
   chosengroupid.value = id.value
   search.value = ''
-  if ('term' in route.params && route.params.term) {
+  if (route.params && 'term' in route.params && route.params.term) {
     search.value = route.params.term
   }
 

@@ -12,8 +12,55 @@ $carousel-control-icon-width:        48px;
 $carousel-control-prev-icon-bg:      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="black" aria-hidden="true" width="48" height="48" viewBox="0 0 512 512" focusable="false" class="rounded-circle fa-icon" style="font-size: 3em;"><g><path stroke-width="20" stroke="white" fill="black" d="M256 504c-137 0-248-111-248-248s111-248 248-248 248 111 248 248-111 248-248 248zM284.9 360.4l-75.5-72.4h182.6c13.3 0 24-10.7 24-24v-16c0-13.3-10.7-24-24-24h-182.6l75.5-72.4c9.7-9.3 9.9-24.8 0.4-34.3l-11-10.9c-9.4-9.4-24.6-9.4-33.9 0l-132.7 132.6c-9.4 9.4-9.4 24.6 0 33.9l132.7 132.7c9.4 9.4 24.6 9.4 33.9 0l11-10.9c9.5-9.5 9.3-25-0.4-34.3z"></path></g></svg>');
 $carousel-control-next-icon-bg:      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="black" aria-hidden="true" width="48" height="48" viewBox="0 0 512 512" focusable="false" class="rounded-circle fa-icon" style="font-size: 3em;"><g><path stroke-width="20" stroke="white" fill="black" d="M256 8c137 0 248 111 248 248s-111 248-248 248-248-111-248-248 111-248 248-248zM227.1 151.6l75.5 72.4h-182.6c-13.3 0-24 10.7-24 24v16c0 13.3 10.7 24 24 24h182.6l-75.5 72.4c-9.7 9.3-9.9 24.8-0.4 34.3l11 10.9c9.4 9.4 24.6 9.4 33.9 0l132.7-132.6c9.4-9.4 9.4-24.6 0-33.9l-132.7-132.8c-9.4-9.4-24.6-9.4-33.9 0l-11 10.9c-9.5 9.6-9.3 25.1 0.4 34.4z"></path></g></svg>');
 
-// Then include the Bootstrap and Bootstrap Vue CSS, which should pick up our customisations.
-@import "bootstrap/scss/bootstrap";
+/* Then include the Bootstrap and Bootstrap Vue CSS, which should pick up our customisations. */
+
+/* Configuration (required) */
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+/* Layout & components (only what we use) */
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+/* @import "bootstrap/scss/accordion"; — unused */
+/* @import "bootstrap/scss/breadcrumb"; — unused (custom-styled breadcrumbs only) */
+/* @import "bootstrap/scss/pagination"; — unused */
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+/* @import "bootstrap/scss/toasts"; — unused (project uses vue-toasted) */
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+/* @import "bootstrap/scss/offcanvas"; — unused */
+/* @import "bootstrap/scss/placeholders"; — unused */
+
+/* Helpers */
+@import "bootstrap/scss/helpers";
+
+/* Utilities */
+@import "bootstrap/scss/utilities/api";
+
 @import 'bootstrap-vue-next/dist/bootstrap-vue-next.css';
 
 // Missing for some reason...

@@ -42,13 +42,18 @@ export function calculateMapHeight(heightFraction) {
 
 export async function loadLeaflet() {
   if (process.client && !window.L) {
+    // Load Leaflet CSS alongside the JS (lazy-loaded so non-map pages skip it)
+    await import('leaflet/dist/leaflet.css')
+
     // Rebuild the object to avoid "not extensible" issues when loading old-fashioned leaflet plugins.
     window.L = { ...(await import('leaflet/dist/leaflet-src.esm')) }
-    window.L.Map.addInitHook(
-      'addHandler',
-      'gestureHandling',
-      await import('leaflet-gesture-handling').GestureHandling
+
+    // Use our own ESM gesture handler instead of the npm package which accesses
+    // global L at module-evaluation time and breaks bundler optimisations.
+    const { registerGestureHandling } = await import(
+      '~/composables/gestureHandling'
     )
+    registerGestureHandling(window.L)
 
     window.Wkt = await import('wicket')
     await import('wicket/wicket-leaflet')

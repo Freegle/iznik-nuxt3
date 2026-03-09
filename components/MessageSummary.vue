@@ -18,6 +18,8 @@
       src="/freegled.jpg"
       class="status-overlay-image"
       :alt="successfulText"
+      width="421"
+      height="90"
     />
     <b-img
       v-else-if="message.promised && showPromised"
@@ -25,6 +27,8 @@
       src="/promised.jpg"
       class="status-overlay-image"
       alt="Promised"
+      width="421"
+      height="90"
     />
 
     <!-- Photo area with overlay -->

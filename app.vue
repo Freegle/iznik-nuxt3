@@ -261,11 +261,9 @@ const shouldShowNavbar = computed(() => {
 //   }
 // })
 
-console.log(performance.now())
 try {
   if (route.query.u && route.query.k) {
     // We are impersonating.
-    console.log(performance.now())
     try {
       // Clear the related list.  This avoids accidentally flagging members as related if people forget to close
       // an incognito tab while impersonating.

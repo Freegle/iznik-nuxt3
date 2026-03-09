@@ -134,7 +134,10 @@ const brokenImage = ref(false)
 const isDefaultImage = computed(() => {
   const img = props.image
   if (!img) return true
-  if (img.includes('defaultprofile')) return true
+  // Only check the path portion for 'defaultprofile' - the URL may contain it
+  // in query params as a fallback (e.g. trashnothing profile-image?default=...defaultprofile.png)
+  const path = img.split('?')[0]
+  if (path.includes('defaultprofile')) return true
   if (brokenImage.value) return true
   return false
 })

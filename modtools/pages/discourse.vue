@@ -4,7 +4,7 @@
       This should redirect you back to Discourse. If it doesn't, mail
       geeks@ilovefreegle.org.
     </p>
-    <b-img src="/loader.gif" alt="Loading" />
+    <Spinner :size="50" />
   </div>
 </template>
 <script setup>

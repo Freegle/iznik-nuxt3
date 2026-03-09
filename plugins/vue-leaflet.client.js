@@ -5,9 +5,10 @@ import { defineNuxtPlugin } from '#app'
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component(
     'l-map',
-    defineAsyncComponent(() =>
-      import('@vue-leaflet/vue-leaflet/src/components/LMap')
-    )
+    defineAsyncComponent(async () => {
+      await import('leaflet/dist/leaflet.css')
+      return import('@vue-leaflet/vue-leaflet/src/components/LMap')
+    })
   )
   nuxtApp.vueApp.component(
     'l-marker',

@@ -479,19 +479,22 @@ describe('StripeDonate', () => {
       expect(component.vm.isApplePayAvailable).toBe(false)
     })
 
-    it('shows no payment methods message on iOS', async () => {
+    it('shows PayPal button on iOS even when Apple Pay unavailable', async () => {
       const wrapper = await createWrapper()
 
-      expect(wrapper.text()).toContain(
+      // PayPal is available on all app platforms including iOS
+      expect(wrapper.find('button[aria-label*="PayPay"]').exists()).toBe(true)
+      // No "sorry" message because PayPal is available
+      expect(wrapper.text()).not.toContain(
         'Sorry, there are no payments methods available'
       )
     })
 
-    it('emits noPaymentMethods on iOS', async () => {
+    it('emits loaded on iOS when PayPal is available', async () => {
       const wrapper = await createWrapper()
 
       const component = wrapper.findComponent(StripeDonate)
-      expect(component.emitted('noPaymentMethods')).toBeTruthy()
+      expect(component.emitted('loaded')).toBeTruthy()
     })
   })
 

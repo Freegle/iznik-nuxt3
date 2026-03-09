@@ -397,11 +397,12 @@ describe('ModSupportContactGroup', () => {
       const html = wrapper.html()
       expect(html).toContain('info@...')
       expect(html).toContain('support@...')
-      expect(html).toContain('councils@...')
+      expect(html).toContain('partnerships@...')
       expect(html).toContain('mentors@...')
       expect(html).toContain('newgroups@...')
       expect(html).toContain('geeks@...')
       expect(html).toContain('board@...')
+      expect(html).toContain('chair@...')
       expect(html).toContain('returningofficer@...')
       expect(html).toContain('volunteers@...')
       expect(html).toContain('volunteersupport@...')
@@ -468,8 +469,8 @@ describe('ModSupportContactGroup', () => {
       wrapper.vm.busy = true
       await wrapper.vm.$nextTick()
 
-      const img = wrapper.find('img[src="/loader.gif"]')
-      expect(img.exists()).toBe(true)
+      const spinner = wrapper.find('.spinner-border')
+      expect(spinner.exists()).toBe(true)
     })
 
     it('shows Show history button when not busy and no alerts', async () => {

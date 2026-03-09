@@ -36,7 +36,7 @@
 
     <!-- Loading state -->
     <div v-if="loading" class="loading-state">
-      <b-img lazy src="/loader.gif" alt="Loading..." width="60px" />
+      <Spinner :size="30" />
     </div>
 
     <!-- Posts list -->
@@ -50,7 +50,7 @@
           />
           <template #fallback>
             <div class="loading-placeholder">
-              <b-img lazy src="/loader.gif" alt="Loading" width="80px" />
+              <Spinner :size="40" />
             </div>
           </template>
         </Suspense>

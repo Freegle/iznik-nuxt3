@@ -39,7 +39,7 @@
       </b-row>
       <b-row v-if="loading">
         <b-col class="text-center">
-          <b-img v-if="loading" lazy src="/loader.gif" alt="Loading..." />
+          <Spinner v-if="loading" :size="50" />
         </b-col>
       </b-row>
       <div v-if="dataready">

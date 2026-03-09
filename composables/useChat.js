@@ -160,14 +160,16 @@ export function useChatMessageBase(chatId, messageId, pov = null) {
 
   const isEmptyMessage = computed(() => {
     const m = chatmessage.value?.message
-    return !m || !m.trim()
+    return !m || !String(m).trim()
   })
 
   const emessage = computed(() => {
     const m = chatmessage.value?.message
 
     if (m) {
-      const trim = m.replace(/(\r\n|\r|\n){2,}/g, '$1\n').trim()
+      const trim = String(m)
+        .replace(/(\r\n|\r|\n){2,}/g, '$1\n')
+        .trim()
 
       if (!trim) {
         return '(empty message)'

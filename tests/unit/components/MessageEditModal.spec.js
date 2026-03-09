@@ -167,6 +167,12 @@ describe('MessageEditModal', () => {
             props: ['variant', 'disabled', 'iconName', 'label'],
             emits: ['handle'],
           },
+          draggable: {
+            template:
+              '<div class="draggable"><slot name="item" v-for="(el, i) in modelValue" :element="el" :index="i" /><slot name="footer" /></div>',
+            props: ['modelValue', 'itemKey', 'animation', 'ghostClass'],
+            emits: ['update:modelValue', 'start', 'end'],
+          },
         },
       },
     })
@@ -403,6 +409,42 @@ describe('MessageEditModal', () => {
       const wrapper = createWrapper()
       expect(wrapper.find('.photo-grid').exists()).toBe(true)
       expect(wrapper.findAll('.post-photo').length).toBe(0)
+    })
+
+    it('wraps photos in draggable component for reordering', () => {
+      mockMessageStore.byId.mockReturnValue({
+        id: 1,
+        subject: 'Test Subject',
+        textbody: 'Test description',
+        type: 'Offer',
+        availablenow: 1,
+        deadline: null,
+        location: { name: 'AB1 2CD' },
+        item: { name: 'Test Item' },
+        attachments: [
+          { id: 1, path: '/test1.jpg' },
+          { id: 2, path: '/test2.jpg' },
+        ],
+        groups: [{ groupid: 1 }],
+      })
+      const wrapper = createWrapper()
+      expect(wrapper.find('.draggable').exists()).toBe(true)
+      expect(wrapper.findAll('.post-photo').length).toBe(2)
+    })
+
+    it('hides uploader during drag', async () => {
+      const wrapper = createWrapper()
+      expect(wrapper.find('.our-uploader').exists()).toBe(true)
+
+      // Simulate drag start
+      wrapper.vm.dragging = true
+      await flushPromises()
+      expect(wrapper.find('.our-uploader').exists()).toBe(false)
+
+      // Simulate drag end
+      wrapper.vm.dragging = false
+      await flushPromises()
+      expect(wrapper.find('.our-uploader').exists()).toBe(true)
     })
   })
 })

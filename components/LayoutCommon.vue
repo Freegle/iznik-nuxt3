@@ -6,6 +6,7 @@
         :class="{
           allowAd,
           stickyAdRendered,
+          adNotShown: !adRendering && stickyAdRendered === 0,
         }"
       >
         <!--        Breakpoint {{ breakpoint }}-->
@@ -69,7 +70,13 @@
       style="display: none"
     >
       <div class="text-center bg-white p-2">
-        <img src="/loader.gif" loading="lazy" alt="Loading..." width="100px" />
+        <div
+          class="spinner-border"
+          style="width: 50px; height: 50px; color: #61ae24"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
         <p>
           <span>Loading...</span><br /><span class="font-weight-bold"
             >Stuck here? We couldn't load our Javascript. Try refreshing. Or
@@ -127,14 +134,18 @@ import { useNotificationStore } from '~/stores/notification'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
 import { useChatStore } from '~/stores/chat'
-import ChatButton from '~/components/ChatButton'
 import VisibleWhen from '~/components/VisibleWhen.vue'
-import InterestedInOthersModal from '~/components/InterestedInOthersModal.vue'
-import DeletedRestore from '~/components/DeletedRestore.vue'
 import DaDisableCTA from '~/components/DaDisableCTA.vue'
 import { useReplyToPost } from '~/composables/useReplyToPost'
 import { useMe } from '~/composables/useMe'
-import { useMobileStore } from '@/stores/mobile' // APP
+import { useMobileStore } from '@/stores/mobile'
+const ChatButton = defineAsyncComponent(() => import('~/components/ChatButton'))
+const InterestedInOthersModal = defineAsyncComponent(() =>
+  import('~/components/InterestedInOthersModal.vue')
+)
+const DeletedRestore = defineAsyncComponent(() =>
+  import('~/components/DeletedRestore.vue')
+) // APP
 
 const { replyToSend, replyToUser, replyToPost } = useReplyToPost()
 
@@ -165,7 +176,7 @@ const videoAd = ref(true)
 // Store access
 const miscStore = useMiscStore()
 const authStore = useAuthStore()
-const { me, myid, loggedIn } = useMe()
+const { me, myid, loggedIn, recentDonor } = useMe()
 const route = useRoute()
 
 // Computed properties
@@ -173,6 +184,8 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 const routePath = computed(() => route?.path)
 const allowAd = computed(() => {
   // We don't want to show the ad on the landing page when logged out - looks tacky.
+  // Recent donors don't see ads, so don't reserve space for them (avoids CLS).
+  if (recentDonor.value) return false
   return routePath.value !== '/' || loggedIn.value
 })
 // Keep constant margin - navbar is fixed position so content shouldn't shift when it hides/shows
@@ -445,7 +458,7 @@ body.modal-open {
 }
 
 .aboveSticky {
-  &.allowAd.stickyAdRendered {
+  &.allowAd {
     padding-bottom: calc($sticky-banner-height-mobile + 2px);
 
     @media (min-height: $mobile-tall) {
@@ -458,6 +471,10 @@ body.modal-open {
       @media (min-height: $desktop-tall) {
         padding-bottom: calc($sticky-banner-height-desktop-tall + 2px);
       }
+    }
+
+    &.adNotShown {
+      padding-bottom: 0;
     }
   }
 }

@@ -168,7 +168,7 @@ describe('NotificationOptions', () => {
 
     it('shows loading spinner', () => {
       const wrapper = createWrapper()
-      expect(wrapper.find('.b-img').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 

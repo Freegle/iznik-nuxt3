@@ -24,7 +24,7 @@
           @infinite="fetchChunk"
         >
           <template #spinner>
-            <b-img src="/loader.gif" alt="Loading" width="100px" />
+            <Spinner :size="50" />
           </template>
         </infinite-loading>
       </template>

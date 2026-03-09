@@ -99,7 +99,7 @@ import { useIsochroneStore } from '~/stores/isochrone'
 import { useAuthorityStore } from '~/stores/authority'
 import { useAuthStore } from '~/stores/auth'
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css'
-import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
+import '~/assets/css/gesture-handling.css'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({

@@ -45,7 +45,7 @@ describe('MessageSkeleton', () => {
       const wrapper = createWrapper()
       const content = wrapper.find('.skeleton-content')
       expect(content.find('.skeleton-line--title').exists()).toBe(true)
-      expect(content.findAll('.skeleton-line').length).toBe(3)
+      expect(content.findAll('.skeleton-line').length).toBe(6)
     })
 
     it('photo area is sibling of content', () => {

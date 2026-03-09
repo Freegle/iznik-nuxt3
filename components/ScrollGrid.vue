@@ -62,7 +62,7 @@
         <template #complete><span /></template>
         <template #spinner>
           <div class="text-center">
-            <b-img lazy src="/loader.gif" alt="Loading" width="100px" />
+            <Spinner :size="50" />
           </div>
         </template>
       </infinite-loading>

@@ -62,6 +62,27 @@
           for details.
         </p>
       </div>
+
+      <!-- Error messages -->
+      <NoticeMessage v-if="notAllowed" variant="danger" class="mt-2">
+        You are not allowed to post on this community.
+      </NoticeMessage>
+      <NoticeMessage
+        v-else-if="unvalidatedEmail"
+        variant="danger"
+        class="mt-2"
+      >
+        You tried to post using an email address which has not yet been
+        validated. Please check your mailbox (including spam) and validate the
+        email, then try again.
+      </NoticeMessage>
+      <NoticeMessage v-else-if="wentWrong" variant="danger" class="mt-2">
+        Something went wrong. Please try again, and if this keeps happening
+        then contact
+        <ExternalLink href="mailto:support@ilovefreegle.org">
+          support </ExternalLink
+        >.
+      </NoticeMessage>
     </div>
 
     <!-- Footer with Freegle it button -->
@@ -134,6 +155,9 @@ const {
   submitting,
   loggedIn,
   emailIsntOurs,
+  notAllowed,
+  unvalidatedEmail,
+  wentWrong,
 } = await setup('Wanted')
 
 // Can submit if postcode is valid, group not closed, no group issues, and either logged in or email is valid
@@ -155,25 +179,30 @@ watch(email, () => {
 async function submitWanted() {
   emailBelongsToSomeoneElse.value = false
 
-  if (emailIsntOurs.value) {
-    // Need to check if it's ok to use
-    const inuse = await userStore.emailIsInUse(email.value)
+  try {
+    if (emailIsntOurs.value) {
+      // Need to check if it's ok to use
+      const inuse = await userStore.emailIsInUse(email.value)
 
-    if (inuse) {
-      if (!loggedIn.value) {
-        // User is not logged in and the email belongs to an existing account.
-        // Force them to log in rather than showing the merge dialog.
-        authStore.forceLogin = true
+      if (inuse) {
+        if (!loggedIn.value) {
+          // User is not logged in and the email belongs to an existing account.
+          // Force them to log in rather than showing the merge dialog.
+          authStore.forceLogin = true
+          return
+        }
+        // User is logged in but trying to use an email from a different account.
+        // Show the merge dialog.
+        emailBelongsToSomeoneElse.value = true
         return
       }
-      // User is logged in but trying to use an email from a different account.
-      // Show the merge dialog.
-      emailBelongsToSomeoneElse.value = true
-      return
     }
-  }
 
-  await freegleIt('Wanted', router)
+    await freegleIt('Wanted', router)
+  } catch (e) {
+    console.error('Error in submitWanted():', e)
+    wentWrong.value = true
+  }
 }
 </script>
 

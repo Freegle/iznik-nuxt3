@@ -864,6 +864,8 @@ const PROGRESS_FILE = path.join(
 
 const initializeProgressFile = () => {
   try {
+    const dir = path.dirname(PROGRESS_FILE)
+    fs.mkdirSync(dir, { recursive: true })
     const initialProgress = {
       totalTests: 0,
       completedTests: 0,
@@ -1201,11 +1203,27 @@ const testWithFixtures = test.extend({
           `Found displayed email: "${displayedEmail}", expected: "${email}"`
         )
         if (displayedEmail !== email) {
-          throw new Error(
-            `Expected email ${email} but found ${displayedEmail} displayed on page`
+          // Wrong user is logged in - clear session so the page reactively
+          // switches to the email input form, then fill in the correct email.
+          console.log(
+            `Wrong user logged in (${displayedEmail}), clearing session to use ${email}`
           )
+          await logoutIfLoggedIn(page, false)
+
+          // Wait for the email input to appear as the page reacts to logout
+          const retryEmailInput = page
+            .locator('input[name="email"], input.email, input[type="email"]')
+            .first()
+          await retryEmailInput.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
+          })
+          await retryEmailInput.click()
+          await retryEmailInput.fill(email)
+          console.log(`Filled email ${email} after clearing wrong session`)
+        } else {
+          console.log(`Verified displayed email matches expected: ${email}`)
         }
-        console.log(`Verified displayed email matches expected: ${email}`)
       } else if (winner === 'notLoggedIn') {
         console.log('User not logged in, filling email input')
 

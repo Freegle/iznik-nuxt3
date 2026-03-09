@@ -109,7 +109,7 @@ describe('members/microvolunteering/[[id]].vue page', () => {
       const wrapper = mountComponent()
       wrapper.vm.busy = true
       await wrapper.vm.$nextTick()
-      expect(wrapper.find('img').exists()).toBe(true)
+      expect(wrapper.find('.spinner-border').exists()).toBe(true)
     })
   })
 

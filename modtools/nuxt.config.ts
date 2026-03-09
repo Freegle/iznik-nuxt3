@@ -26,7 +26,6 @@ export default defineNuxtConfig({
   css: [
     '@fortawesome/fontawesome-svg-core/styles.css',
     '/assets/css/global.scss',
-    'leaflet/dist/leaflet.css',
   ],
   runtimeConfig: {
     public: {

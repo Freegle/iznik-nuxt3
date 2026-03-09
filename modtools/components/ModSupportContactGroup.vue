@@ -14,11 +14,12 @@
         <option value="null">-- Please choose --</option>
         <option value="info">info@...</option>
         <option value="support">support@...</option>
-        <option value="councils">councils@...</option>
+        <option value="councils">partnerships@...</option>
         <option value="mentors">mentors@...</option>
         <option value="newgroups">newgroups@...</option>
         <option value="geeks">geeks@...</option>
         <option value="board">board@...</option>
+        <option value="chair">chair@...</option>
         <option value="ro">returningofficer@...</option>
         <option value="volunteers">volunteers@...</option>
         <option value="centralmods">volunteersupport@...</option>
@@ -97,7 +98,7 @@
           :alert="alert"
         />
       </div>
-      <b-img v-else-if="busy" src="/loader.gif" alt="Loading" class="d-block" />
+      <Spinner v-else-if="busy" :size="50" class="d-block" />
       <b-button
         v-else
         variant="white"

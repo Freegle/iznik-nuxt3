@@ -2,9 +2,22 @@
   <div class="message-skeleton">
     <div class="skeleton-photo-area" />
     <div class="skeleton-content">
-      <div class="skeleton-line skeleton-line--title" />
+      <!-- Matches .content-header (tag badge + title + location) -->
+      <div class="skeleton-header">
+        <div class="skeleton-tag" />
+        <div class="skeleton-title-group">
+          <div class="skeleton-line skeleton-line--title" />
+          <div class="skeleton-line skeleton-line--subtitle" />
+        </div>
+      </div>
+      <!-- Matches .content-description (2 lines) -->
       <div class="skeleton-line skeleton-line--text" />
       <div class="skeleton-line skeleton-line--text skeleton-line--short" />
+      <!-- Matches .content-meta (location + time) -->
+      <div class="skeleton-meta">
+        <div class="skeleton-line skeleton-line--meta" />
+        <div class="skeleton-line skeleton-line--meta" />
+      </div>
     </div>
   </div>
 </template>
@@ -52,14 +65,57 @@
 
 .skeleton-content {
   display: none;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem;
   flex: 1;
 
-  @include media-breakpoint-up(lg) {
+  @include media-breakpoint-up(md) {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
+    min-height: 0;
+    border: 1px solid $color-gray--light;
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
+
+  @include media-breakpoint-up(lg) {
+    padding: 1rem 1.5rem;
+    gap: 0.5rem;
+    border: none;
+    border-left: 1px solid $color-gray--light;
+    box-shadow: none;
+    overflow: hidden;
+    min-width: 0;
+  }
+}
+
+/* Matches .content-header grid layout */
+.skeleton-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.skeleton-tag {
+  width: 55px;
+  height: 1.5rem;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.skeleton-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Matches .content-meta at bottom */
+.skeleton-meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .skeleton-line {
@@ -67,8 +123,13 @@
   background: rgba(0, 0, 0, 0.06);
 
   &--title {
-    width: 60%;
-    height: 1rem;
+    width: 70%;
+    height: 0.95rem;
+  }
+
+  &--subtitle {
+    width: 40%;
+    height: 0.75rem;
   }
 
   &--text {
@@ -76,7 +137,12 @@
   }
 
   &--short {
-    width: 40%;
+    width: 55%;
+  }
+
+  &--meta {
+    width: 60px;
+    height: 0.7rem;
   }
 }
 </style>

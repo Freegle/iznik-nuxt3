@@ -117,7 +117,7 @@
             @infinite="loadMore"
           >
             <template #spinner>
-              <b-img lazy src="/loader.gif" alt="Loading" />
+              <Spinner :size="50" />
             </template>
           </infinite-loading>
           <div v-if="chatmessages.length === 0">No messages</div>
