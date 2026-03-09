@@ -34,7 +34,9 @@
             <template #title>
               <h2 class="ml-2 mr-2">Create</h2>
             </template>
+            <label for="groupidcreate" class="font-weight-bold">Group:</label>
             <ModGroupSelect
+              id="groupidcreate"
               v-model="groupidcreate"
               modonly
               :systemwide="supportOrAdmin"
@@ -63,8 +65,8 @@
                   </li>
                   <li>
                     Newsletter - people can opt out (via the setting which
-                    mentions "to remind you"). These are less important or
-                    encouragements to freegle more.
+                    mentions "to remind you"). These are encouragements to
+                    freegle more, fundraising mails or newsletters.
                   </li>
                 </ul>
                 <OurToggle
@@ -79,75 +81,105 @@
                 />
               </b-form-group>
               <b-form-group
-                label="Subject of ADMIN:"
-                label-for="subject"
+                v-if="!essential && supportOrAdmin"
+                label="Template:"
+                label-for="template"
                 label-class="mb-0"
               >
-                <Field
-                  id="subject"
-                  v-model="subject"
-                  name="subject"
-                  type="text"
-                  placeholder="Subject (don't include ADMIN - added automatically)"
-                  :rules="validateSubject"
-                  class="form-control"
-                />
-                <ErrorMessage
-                  name="subject"
-                  class="text-danger font-weight-bold"
-                />
+                <b-form-select
+                  id="template"
+                  v-model="selectedTemplate"
+                  class="mb-2"
+                >
+                  <option :value="null">None</option>
+                  <option value="little-free-shop-2026">
+                    Little Free Shop 2026
+                  </option>
+                </b-form-select>
               </b-form-group>
-              <b-form-group
-                label="Body of ADMIN:"
-                label-for="body"
-                label-class="mb-0"
-              >
-                <Field
-                  id="body"
-                  v-model="body"
-                  as="textarea"
-                  name="body"
-                  rows="15"
-                  max-rows="8"
-                  spellcheck="true"
-                  type="textarea"
-                  placeholder="Put your message in here.  Plain-text only."
-                  :rules="validateBody"
-                  class="form-control"
-                />
-                <ErrorMessage
-                  name="body"
-                  class="text-danger font-weight-bold"
-                />
-              </b-form-group>
-              <p>
-                You can optionally add a big button into the ADMIN, and specify
-                where it will go.
-              </p>
-              <b-form-group
-                label="Call To Action text:"
-                label-for="ctatext"
-                label-class="mb-0"
-              >
-                <b-form-input
-                  id="ctatext"
-                  v-model="ctatext"
-                  class="mb-3"
-                  placeholder="(Option) Text for a big button"
-                />
-              </b-form-group>
-              <b-form-group
-                label="Call To Action link:"
-                label-for="ctalink"
-                label-class="mb-0"
-              >
-                <b-form-input
-                  id="ctalink"
-                  v-model="ctalink"
-                  class="mb-3"
-                  placeholder="(Optional) Link for a big button"
-                />
-              </b-form-group>
+              <div v-if="selectedTemplate">
+                <NoticeMessage class="mt-1 mb-3" variant="warning">
+                  This admin uses a pre-designed email template. The subject,
+                  body and donate buttons are all built into the template.
+                  Editing will be disabled after creation.
+                </NoticeMessage>
+                <p>
+                  <strong>Subject:</strong>
+                  {{ templateDefaults[selectedTemplate]?.subject }}
+                </p>
+              </div>
+              <div v-else>
+                <b-form-group
+                  label="Subject of ADMIN:"
+                  label-for="subject"
+                  label-class="mb-0"
+                >
+                  <Field
+                    id="subject"
+                    v-model="subject"
+                    name="subject"
+                    type="text"
+                    placeholder="Subject (don't include ADMIN - added automatically)"
+                    :rules="validateSubject"
+                    class="form-control"
+                  />
+                  <ErrorMessage
+                    name="subject"
+                    class="text-danger font-weight-bold"
+                  />
+                </b-form-group>
+                <b-form-group
+                  label="Body of ADMIN:"
+                  label-for="body"
+                  label-class="mb-0"
+                >
+                  <Field
+                    id="body"
+                    v-model="body"
+                    as="textarea"
+                    name="body"
+                    rows="15"
+                    max-rows="8"
+                    spellcheck="true"
+                    type="textarea"
+                    placeholder="Put your message in here.  Plain-text only."
+                    :rules="validateBody"
+                    class="form-control"
+                  />
+                  <ErrorMessage
+                    name="body"
+                    class="text-danger font-weight-bold"
+                  />
+                </b-form-group>
+                <p>
+                  You can optionally add a big button into the ADMIN, and
+                  specify where it will go.
+                </p>
+                <b-form-group
+                  label="Call To Action text:"
+                  label-for="ctatext"
+                  label-class="mb-0"
+                >
+                  <b-form-input
+                    id="ctatext"
+                    v-model="ctatext"
+                    class="mb-3"
+                    placeholder="(Option) Text for a big button"
+                  />
+                </b-form-group>
+                <b-form-group
+                  label="Call To Action link:"
+                  label-for="ctalink"
+                  label-class="mb-0"
+                >
+                  <b-form-input
+                    id="ctalink"
+                    v-model="ctalink"
+                    class="mb-3"
+                    placeholder="(Optional) Link for a big button"
+                  />
+                </b-form-group>
+              </div>
             </VeeForm>
             <b-button
               class="mt-2 mb-2"
@@ -231,6 +263,13 @@ const ctalink = ref(null)
 const creating = ref(false)
 const created = ref(false)
 const essential = ref(true)
+const selectedTemplate = ref(null)
+
+const templateDefaults = {
+  'little-free-shop-2026': {
+    subject: 'Could you help us start a Little Free Shop?',
+  },
+}
 
 // Computed properties
 const pendingcount = computed(() => {
@@ -288,32 +327,51 @@ function fetchPrevious() {
 }
 
 async function create() {
-  const validate = await form.value.validate()
-  if (!validate.valid) {
-    return
-  }
+  let params
 
-  creating.value = true
+  if (selectedTemplate.value) {
+    const defaults = templateDefaults[selectedTemplate.value]
+    params = {
+      groupid: groupidcreate.value > 0 ? groupidcreate.value : null,
+      subject: defaults.subject,
+      text: '(template)',
+      essential: false,
+      template: selectedTemplate.value,
+      editprotected: true,
+    }
+  } else {
+    const validate = await form.value.validate()
+    if (!validate.valid) {
+      return
+    }
 
-  if ((ctatext.value && ctalink.value) || (!ctatext.value && !ctalink.value)) {
-    await adminsStore.add({
+    if (
+      (ctatext.value && !ctalink.value) ||
+      (!ctatext.value && ctalink.value)
+    ) {
+      return
+    }
+
+    params = {
       groupid: groupidcreate.value > 0 ? groupidcreate.value : null,
       subject: subject.value,
       text: body.value,
       ctatext: ctatext.value,
       ctalink: ctalink.value,
       essential: essential.value,
-    })
-
-    creating.value = false
-    created.value = true
-
-    setTimeout(() => {
-      created.value = false
-    }, 2000)
-
-    checkWork(true)
+    }
   }
+
+  creating.value = true
+  await adminsStore.add(params)
+  creating.value = false
+  created.value = true
+
+  setTimeout(() => {
+    created.value = false
+  }, 2000)
+
+  checkWork(true)
 }
 
 async function fetchAdmins(groupid) {
