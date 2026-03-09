@@ -50,26 +50,28 @@ const key = route.query.k
 
 const status = ref('processing')
 
-if (uid && key) {
-  try {
-    await authStore.login({
-      u: uid,
-      k: key,
-    })
+onMounted(async () => {
+  if (uid && key) {
+    try {
+      await authStore.login({
+        u: uid,
+        k: key,
+      })
 
-    const loggedInAs = authStore.user?.id
+      const loggedInAs = authStore.user?.id
 
-    if (loggedInAs === uid) {
-      await authStore.saveAndGet({ relevantallowed: false })
-      status.value = 'success'
-    } else {
+      if (loggedInAs === uid) {
+        await authStore.saveAndGet({ relevantallowed: false })
+        status.value = 'success'
+      } else {
+        status.value = 'failed'
+      }
+    } catch (e) {
+      console.log('Marketing opt-out failed', e)
       status.value = 'failed'
     }
-  } catch (e) {
-    console.log('Marketing opt-out failed', e)
+  } else {
     status.value = 'failed'
   }
-} else {
-  status.value = 'failed'
-}
+})
 </script>
