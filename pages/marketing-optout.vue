@@ -54,7 +54,7 @@ onMounted(async () => {
   if (uid && key) {
     try {
       const loginTimeout = new Promise((_resolve, reject) =>
-        setTimeout(() => reject(new Error('Login timeout')), 30000)
+        setTimeout(() => reject(new Error('Login timeout')), 10000)
       )
 
       await Promise.race([
