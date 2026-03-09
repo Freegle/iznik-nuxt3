@@ -209,7 +209,9 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    compressPublicAssets: { brotli: true, gzip: true },
+    // Pre-compress assets for faster serving. Disabled for app builds because
+    // Android Gradle treats foo.js and foo.js.gz as duplicate resources.
+    compressPublicAssets: config.ISAPP ? false : { brotli: true, gzip: true },
 
     prerender: prerenderRoutes
       ? {
