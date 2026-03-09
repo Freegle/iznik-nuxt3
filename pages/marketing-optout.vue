@@ -53,10 +53,17 @@ const status = ref('processing')
 onMounted(async () => {
   if (uid && key) {
     try {
-      await authStore.login({
-        u: uid,
-        k: key,
-      })
+      const loginTimeout = new Promise((_resolve, reject) =>
+        setTimeout(() => reject(new Error('Login timeout')), 30000)
+      )
+
+      await Promise.race([
+        authStore.login({
+          u: uid,
+          k: key,
+        }),
+        loginTimeout,
+      ])
 
       const loggedInAs = authStore.user?.id
 
