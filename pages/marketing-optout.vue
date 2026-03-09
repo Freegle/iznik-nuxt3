@@ -50,35 +50,39 @@ const key = route.query.k
 
 const status = ref('processing')
 
-onMounted(async () => {
-  if (uid && key) {
-    try {
-      const loginTimeout = new Promise((_resolve, reject) =>
-        setTimeout(() => reject(new Error('Login timeout')), 10000)
-      )
+onMounted(() => {
+  // Safety timeout: if nothing resolves within 10s, show failure
+  const safetyTimer = setTimeout(() => {
+    if (status.value === 'processing') {
+      console.log('Marketing opt-out safety timeout')
+      status.value = 'failed'
+    }
+  }, 10000)
 
-      await Promise.race([
-        authStore.login({
-          u: uid,
-          k: key,
-        }),
-        loginTimeout,
-      ])
+  if (!uid || !key) {
+    clearTimeout(safetyTimer)
+    status.value = 'failed'
+    return
+  }
 
+  authStore
+    .login({ u: uid, k: key })
+    .then(async () => {
       const loggedInAs = authStore.user?.id
 
       if (loggedInAs === uid) {
         await authStore.saveAndGet({ relevantallowed: false })
+        clearTimeout(safetyTimer)
         status.value = 'success'
       } else {
+        clearTimeout(safetyTimer)
         status.value = 'failed'
       }
-    } catch (e) {
+    })
+    .catch((e) => {
       console.log('Marketing opt-out failed', e)
+      clearTimeout(safetyTimer)
       status.value = 'failed'
-    }
-  } else {
-    status.value = 'failed'
-  }
+    })
 })
 </script>
