@@ -281,6 +281,7 @@ const test = base.test.extend({
       /Refused to apply inline style because it violates the following Content Security Policy directive/,
       /Content Security Policy directive.*style-src/,
       /Either the 'unsafe-inline' keyword.*is required to enable inline execution/,
+      /Only one navigator\.credentials\.get request may be outstanding/, // Can happen when multiple credential requests overlap
     ]
 
     // Initialize the working copy of allowed error patterns
