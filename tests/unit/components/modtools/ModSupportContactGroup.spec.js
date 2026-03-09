@@ -397,7 +397,7 @@ describe('ModSupportContactGroup', () => {
       const html = wrapper.html()
       expect(html).toContain('info@...')
       expect(html).toContain('support@...')
-      expect(html).toContain('councils@...')
+      expect(html).toContain('partnerships@...')
       expect(html).toContain('mentors@...')
       expect(html).toContain('newgroups@...')
       expect(html).toContain('geeks@...')

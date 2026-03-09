@@ -14,7 +14,7 @@
         <option value="null">-- Please choose --</option>
         <option value="info">info@...</option>
         <option value="support">support@...</option>
-        <option value="councils">councils@...</option>
+        <option value="councils">partnerships@...</option>
         <option value="mentors">mentors@...</option>
         <option value="newgroups">newgroups@...</option>
         <option value="geeks">geeks@...</option>
