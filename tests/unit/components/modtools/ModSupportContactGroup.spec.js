@@ -402,6 +402,7 @@ describe('ModSupportContactGroup', () => {
       expect(html).toContain('newgroups@...')
       expect(html).toContain('geeks@...')
       expect(html).toContain('board@...')
+      expect(html).toContain('chair@...')
       expect(html).toContain('returningofficer@...')
       expect(html).toContain('volunteers@...')
       expect(html).toContain('volunteersupport@...')

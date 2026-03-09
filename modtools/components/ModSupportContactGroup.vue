@@ -19,6 +19,7 @@
         <option value="newgroups">newgroups@...</option>
         <option value="geeks">geeks@...</option>
         <option value="board">board@...</option>
+        <option value="chair">chair@...</option>
         <option value="ro">returningofficer@...</option>
         <option value="volunteers">volunteers@...</option>
         <option value="centralmods">volunteersupport@...</option>
