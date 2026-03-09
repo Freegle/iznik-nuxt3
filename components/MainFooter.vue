@@ -11,10 +11,10 @@
           class="sponsor-link test-sponsor-krystal"
         >
           <ProxyImage
-            preload
             src="/krystal.png"
             alt="Krystal Logo"
             class="sponsor-logo"
+            loading="lazy"
             :width="165"
             :height="87"
             sizes="75px md:100px lg:165px"
@@ -27,10 +27,10 @@
           class="sponsor-link test-sponsor-mythic"
         >
           <ProxyImage
-            preload
             src="/mythic-beasts.png"
             alt="Mythic Beasts Logo"
             class="sponsor-logo"
+            loading="lazy"
             :width="165"
             :height="75"
             sizes="75px md:100px lg:165px"

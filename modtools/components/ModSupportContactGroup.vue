@@ -14,11 +14,12 @@
         <option value="null">-- Please choose --</option>
         <option value="info">info@...</option>
         <option value="support">support@...</option>
-        <option value="councils">councils@...</option>
+        <option value="councils">partnerships@...</option>
         <option value="mentors">mentors@...</option>
         <option value="newgroups">newgroups@...</option>
         <option value="geeks">geeks@...</option>
         <option value="board">board@...</option>
+        <option value="chair">chair@...</option>
         <option value="ro">returningofficer@...</option>
         <option value="volunteers">volunteers@...</option>
         <option value="centralmods">volunteersupport@...</option>
