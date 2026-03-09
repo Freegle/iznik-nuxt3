@@ -176,7 +176,7 @@ const videoAd = ref(true)
 // Store access
 const miscStore = useMiscStore()
 const authStore = useAuthStore()
-const { me, myid, loggedIn } = useMe()
+const { me, myid, loggedIn, recentDonor } = useMe()
 const route = useRoute()
 
 // Computed properties
@@ -184,6 +184,8 @@ const stickyAdRendered = computed(() => miscStore.stickyAdRendered)
 const routePath = computed(() => route?.path)
 const allowAd = computed(() => {
   // We don't want to show the ad on the landing page when logged out - looks tacky.
+  // Recent donors don't see ads, so don't reserve space for them (avoids CLS).
+  if (recentDonor.value) return false
   return routePath.value !== '/' || loggedIn.value
 })
 // Keep constant margin - navbar is fixed position so content shouldn't shift when it hides/shows
