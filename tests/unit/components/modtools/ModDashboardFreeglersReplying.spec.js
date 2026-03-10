@@ -274,6 +274,22 @@ describe('ModDashboardFreeglersReplying', () => {
     })
   })
 
+  describe('Go API data shape (no profile field)', () => {
+    it('renders without crashing when user has no profile field (actual Go dashboard API response)', () => {
+      // The Go dashboard API returns {id, displayname, replies} with no profile field
+      mockUsersReplying.value = [
+        {
+          id: 1,
+          displayname: 'User Without Profile',
+          replies: 5,
+        },
+      ]
+      const wrapper = mountComponent()
+      expect(wrapper.text()).toContain('User Without Profile')
+      expect(wrapper.text()).toContain('5 replies')
+    })
+  })
+
   describe('loading and data transitions', () => {
     it('shows data when loading completes', async () => {
       mockLoading.value = true

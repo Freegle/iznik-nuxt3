@@ -2,7 +2,7 @@
   <b-row class="mb-2">
     <b-col cols="4">
       <ProfileImage
-        :image="member.profile.turl"
+        :image="member.profile?.turl || member.profile?.paththumb"
         :name="member.displayname"
         class="mr-2"
         size="lg"

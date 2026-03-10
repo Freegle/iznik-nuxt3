@@ -10,7 +10,7 @@
         </div>
         <div>
           <ProfileImage
-            :image="member.profile.turl"
+            :image="member.profile?.turl || member.profile?.paththumb"
             :name="member.displayname"
             class="ml-1 mb-1 inline"
             is-thumbnail

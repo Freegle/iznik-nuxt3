@@ -7,7 +7,7 @@
       </div>
       <div>
         <ProfileImage
-          :image="comment.user.profile.turl"
+          :image="comment.user.profile?.turl || comment.user.profile?.paththumb"
           :name="comment.user.displayname"
           class="ml-1 mb-1 inline"
           is-thumbnail
