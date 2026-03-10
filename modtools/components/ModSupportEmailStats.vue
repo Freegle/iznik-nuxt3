@@ -700,6 +700,7 @@ const userIdOrEmail = ref('')
 
 const emailTypeOptions = [
   { text: 'All Types', value: '' },
+  { text: 'Admin', value: 'Admin' },
   { text: 'Chat Notification', value: 'ChatNotification' },
   {
     text: 'Chat Notification (User to Mod)',
