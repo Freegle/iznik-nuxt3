@@ -180,7 +180,9 @@ const messageIsNew = computed(() => {
 const postcode = computed(() => {
   let ret = null
 
-  const postcodeMatch = chatmessage.value?.message.match(POSTCODE_REGEX)
+  const msg = chatmessage.value?.message
+  const postcodeMatch =
+    typeof msg === 'string' ? msg.match(POSTCODE_REGEX) : null
 
   if (postcodeMatch?.length) {
     if (!postcodeMatch[0].includes(' ')) {
