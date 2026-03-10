@@ -173,7 +173,9 @@
         </b-button>
         <b-button
           v-if="
-            !admin.editprotected && (!admin.heldby || admin.heldby === myid)
+            !admin.editprotected &&
+            !admin.template &&
+            (!admin.heldby || admin.heldby === myid)
           "
           variant="white"
           @click="save"
@@ -301,7 +303,7 @@ function release() {
 }
 
 async function approve() {
-  if (!admin.value.editprotected) {
+  if (!admin.value.editprotected && !admin.value.template) {
     await save()
   }
 
