@@ -106,6 +106,9 @@ describe('ModAdmin', () => {
             template: '<div class="confirm-modal"><slot /></div>',
           },
           ExternalLink: { template: '<a><slot /></a>' },
+          ModAdminPreviewLittleFreeShop2026: {
+            template: '<div class="preview-stub" />',
+          },
           'v-icon': true,
         },
         mocks: {
