@@ -5,7 +5,7 @@
         <div class="d-flex justify-content-between flex-wrap w-100">
           <span v-if="story.user">
             <ProfileImage
-              :image="story.user.profile.turl"
+              :image="story.user.profile?.turl || story.user.profile?.paththumb"
               :name="story.user.displayname || story.user.email"
               class="mr-1 ml-1 mb-1 mt-1 inline breakgrid"
               is-thumbnail

@@ -592,7 +592,14 @@ export const useMessageStore = defineStore({
         action: 'Move',
       })
 
-      await this.fetch(params.id, true)
+      // Use fetchMT (PHP API) not fetch (Go API) - the Go API returns fromuser
+      // as a bare numeric ID, losing the full user object with profile data that
+      // ModTools components need. Same pattern as hold() and release().
+      const { message } = await api(this.config).message.fetchMT({
+        id: params.id,
+        messagehistory: true,
+      })
+      this.list[message.id] = message
     },
     async searchMember(term, groupid) {
       const { messages } = await api(this.config).message.fetchMessages({
