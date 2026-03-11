@@ -25,6 +25,22 @@ test.describe('ModTools move message', () => {
       timeout: timeouts.navigation.initial,
     })
 
+    // Dismiss any modal that may appear (e.g. "Would you like some cake?")
+    const closeButton = page.locator(
+      '.modal.show .btn-close, .modal.show button:has-text("Close")'
+    )
+    if (
+      await closeButton
+        .first()
+        .isVisible({ timeout: 3000 })
+        .catch(() => false)
+    ) {
+      await closeButton.first().click()
+      await expect(closeButton.first())
+        .not.toBeVisible({ timeout: 5000 })
+        .catch(() => {})
+    }
+
     // Wait for page to load and be authenticated
     // The communities dropdown appears when logged in as a moderator
     const groupSelect = page.locator('#communitieslist')

@@ -24,6 +24,22 @@ test.describe('ModTools hold and release message', () => {
       timeout: timeouts.navigation.initial,
     })
 
+    // Dismiss any modal that may appear (e.g. "Would you like some cake?")
+    const closeButton = page.locator(
+      '.modal.show .btn-close, .modal.show button:has-text("Close")'
+    )
+    if (
+      await closeButton
+        .first()
+        .isVisible({ timeout: 3000 })
+        .catch(() => false)
+    ) {
+      await closeButton.first().click()
+      await expect(closeButton.first())
+        .not.toBeVisible({ timeout: 5000 })
+        .catch(() => {})
+    }
+
     // Wait for group select to appear (indicates page is loaded and authenticated)
     const groupSelect = page.locator('#communitieslist')
     await expect(groupSelect).toBeVisible({
