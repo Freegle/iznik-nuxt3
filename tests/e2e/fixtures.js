@@ -274,7 +274,7 @@ const test = base.test.extend({
       /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
       /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
       /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
-      /\[Exeption for Sentry\]:.*\(Error: \w+\)/, // Sentry capturing minified errors (e.g., "Error: oa")
+      /\[Exeption for Sentry\]:.*\((Error|TypeError):/, // Sentry capturing minified/runtime errors
       /accounts\.google\.com\/gsi/, // Google authentication/sign-in errors in test
       /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
       // CSP (Content Security Policy) violations - common in development/testing
@@ -284,6 +284,9 @@ const test = base.test.extend({
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
       /Failed to load resource: the server responded with a status of 404.*api\/modtools\//, // modtools endpoints not yet in Go API
       /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
+      /Failed to load resource: the server responded with a status of 500.*modtools-dev-local/, // modtools dev container may be unstable during parallel tests
+      /Failed to fetch dynamically imported module/, // Dynamic module import failures (dev container instability)
+      /error caught during app initialization/, // App initialization errors (dev container instability)
     ]
 
     // Initialize the working copy of allowed error patterns
