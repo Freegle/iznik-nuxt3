@@ -48,12 +48,14 @@
       </b-col>
       <b-col cols="6" md="4" class="">
         <SpinButton
+          class="mb-2"
           variant="white"
           icon-name="save"
           label="Save Changes"
           @handle="save"
         />
         <SpinButton
+          class="mb-2"
           variant="warning"
           icon-name="trash-alt"
           label="Give Up"
@@ -61,6 +63,7 @@
           @handle="giveup"
         />
         <SpinButton
+          class="mb-2"
           variant="success"
           icon-name="check"
           label="Looks Good"
