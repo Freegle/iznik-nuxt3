@@ -287,6 +287,8 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 401.*api\/session/, // 401 when checking session while not logged in
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
       /Failed to load resource.*freegle-dev-local/, // Freegle dev site may not be running during ModTools tests
+      /Failed to load resource: the server responded with a status of 404.*api\/modtools\//, // modtools endpoints not yet in Go API
+      /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
     ]
 
     // Initialize the working copy of allowed error patterns

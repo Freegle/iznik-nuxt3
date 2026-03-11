@@ -976,7 +976,9 @@ watch(
 
 onMounted(() => {
   expanded.value = !props.summary
-  attachments.value = props.message.attachments
+  attachments.value = Array.isArray(props.message.attachments)
+    ? props.message.attachments
+    : []
   findHomeGroup()
 })
 
@@ -1057,8 +1059,10 @@ async function save() {
 
   const attids = []
 
-  for (const att of attachments.value) {
-    attids.push(att.id)
+  if (Array.isArray(attachments.value)) {
+    for (const att of attachments.value) {
+      attids.push(att.id)
+    }
   }
 
   if (editmessage.value.item && editmessage.value.location) {

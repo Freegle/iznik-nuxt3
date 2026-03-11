@@ -25,28 +25,28 @@ test.describe('ModTools move message', () => {
       timeout: timeouts.navigation.initial,
     })
 
-    // Dismiss any modal that may appear (e.g. "Would you like some cake?")
-    const closeButton = page.locator(
-      '.modal.show .btn-close, .modal.show button:has-text("Close")'
-    )
-    if (
-      await closeButton
-        .first()
-        .isVisible({ timeout: 3000 })
-        .catch(() => false)
-    ) {
-      await closeButton.first().click()
-      await expect(closeButton.first())
-        .not.toBeVisible({ timeout: 5000 })
-        .catch(() => {})
-    }
-
     // Wait for page to load and be authenticated
     // The communities dropdown appears when logged in as a moderator
     const groupSelect = page.locator('#communitieslist')
     await expect(groupSelect).toBeVisible({
       timeout: timeouts.navigation.slowPage,
     })
+
+    // Dismiss the cake modal if it appears (it overlays the page after load).
+    // Use JS to remove the modal and backdrop since clicking Close can leave
+    // the backdrop behind due to animation timing.
+    await page.evaluate(() => {
+      const modal = document.getElementById('modcakemodal')
+      if (modal) {
+        modal.classList.remove('show')
+        modal.style.display = 'none'
+      }
+      document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
+      document.body.classList.remove('modal-open')
+      document.body.style.removeProperty('overflow')
+      document.body.style.removeProperty('padding-right')
+    })
+    await page.waitForTimeout(500)
 
     // Find the FreeglePlayground option
     const playgroundOption = groupSelect.locator(
