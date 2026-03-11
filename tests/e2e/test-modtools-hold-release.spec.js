@@ -48,17 +48,28 @@ test.describe('ModTools hold and release message', () => {
 
     // Select a group that has pending messages.
     // Find first group option that has a count indicator (e.g. "Freegle Playground2 (2)")
-    const groupOptions = await groupSelect.locator('option').all()
+    // Work counts load asynchronously, so poll until an option with counts appears.
     let targetGroupValue = null
-    for (const option of groupOptions) {
-      const text = await option.textContent()
-      const value = await option.getAttribute('value')
-      if (value && value !== '0' && /\(\d+\)/.test(text)) {
-        targetGroupValue = value
-        break
-      }
-    }
-    expect(targetGroupValue).toBeTruthy()
+    await expect
+      .poll(
+        async () => {
+          const options = await groupSelect.locator('option').all()
+          for (const option of options) {
+            const text = await option.textContent()
+            const value = await option.getAttribute('value')
+            if (value && value !== '0' && /\(\d+\)/.test(text)) {
+              targetGroupValue = value
+              return true
+            }
+          }
+          return false
+        },
+        {
+          message: 'Waiting for group options with pending message counts',
+          timeout: timeouts.navigation.slowPage,
+        }
+      )
+      .toBe(true)
     await groupSelect.selectOption(targetGroupValue)
 
     // Wait for message cards to load
