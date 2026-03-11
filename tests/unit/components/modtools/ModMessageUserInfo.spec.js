@@ -54,7 +54,7 @@ describe('ModMessageUserInfo', () => {
       openwanteds: 1,
     },
     supporter: false,
-    memberof: [
+    memberships: [
       {
         id: 789,
         added: '2023-01-15',
@@ -284,10 +284,10 @@ describe('ModMessageUserInfo', () => {
         expect(wrapper.vm.membership).toBeNull()
       })
 
-      it('returns null when user has no memberof', () => {
+      it('returns null when user has no memberships', () => {
         const wrapper = mountComponent(
           { modinfo: true, groupid: 789 },
-          { memberof: null }
+          { memberships: null }
         )
         expect(wrapper.vm.membership).toBeNull()
       })
@@ -386,7 +386,7 @@ describe('ModMessageUserInfo', () => {
 
       const wrapper = mountComponent(
         { modinfo: true, groupid: 789 },
-        { memberof: [{ id: 789, added: recentDate.toISOString() }] }
+        { memberships: [{ id: 789, added: recentDate.toISOString() }] }
       )
       expect(wrapper.vm.joinedAge).toBeLessThanOrEqual(31)
     })

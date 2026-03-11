@@ -3,8 +3,10 @@ import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
 import api from '~/api'
 import { useAuthStore } from '~/stores/auth'
+import { useGroupStore } from '~/stores/group'
 import { useMessageStore } from '~/stores/message'
 import { useMiscStore } from '~/stores/misc'
+import { useUserStore } from '~/stores/user'
 
 export const useChatStore = defineStore({
   id: 'chat',
@@ -135,6 +137,41 @@ export const useChatStore = defineStore({
         this.listByChatId[m.chatid] = m.chatroom
         this.listByChatMessageId[m.id] = m
       })
+
+      // V2 pattern: fetch user and group details by ID, then attach to messages.
+      const userStore = useUserStore()
+      const groupStore = useGroupStore()
+
+      const userIds = new Set()
+      const groupIds = new Set()
+
+      for (const m of deduped) {
+        if (m.fromuserid) userIds.add(m.fromuserid)
+        if (m.touserid) userIds.add(m.touserid)
+        if (m.groupid) groupIds.add(m.groupid)
+        if (m.groupidfrom) groupIds.add(m.groupidfrom)
+      }
+
+      await Promise.all([
+        ...[...userIds].map((uid) => userStore.fetch(uid)),
+        ...[...groupIds].map((gid) => groupStore.fetch(gid)),
+      ])
+
+      for (const m of deduped) {
+        if (m.fromuserid) {
+          m.fromuser = userStore.list[m.fromuserid] || null
+        }
+        if (m.touserid) {
+          m.touser = userStore.list[m.touserid] || null
+        }
+        if (m.groupid) {
+          m.group = groupStore.get(m.groupid) || null
+        }
+        if (m.groupidfrom) {
+          m.groupfrom = groupStore.get(m.groupidfrom) || null
+        }
+      }
+
       this.messages[id] = deduped
     },
     removeMessageMT(chatid, id) {

@@ -87,8 +87,8 @@ const groupName = computed(() => {
 
   if (props.rating.rater) {
     const rater = userStore.byId(props.rating.rater)
-    if (rater && rater.memberof) {
-      rater.memberof.forEach((g) => {
+    if (rater && rater.memberships) {
+      rater.memberships.forEach((g) => {
         if (g.id === props.rating.groupid && amAModOn(g.id)) {
           ret = g.namedisplay
         }

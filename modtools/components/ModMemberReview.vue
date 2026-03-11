@@ -191,8 +191,8 @@ const isLJ = computed(() => {
 const allmemberof = computed(() => {
   let ms = []
 
-  if (props.member && props.member.memberof) {
-    ms = props.member.memberof
+  if (props.member && props.member.memberships) {
+    ms = props.member.memberships
   }
 
   if (!ms) {

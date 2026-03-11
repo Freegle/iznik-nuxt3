@@ -352,7 +352,6 @@ async function searchById(msgId) {
   try {
     const message = await messageStore.fetchMT({
       id: msgId,
-      messagehistory: true,
     })
     if (message) messageStore.list[msgId] = message
   } catch (e) {

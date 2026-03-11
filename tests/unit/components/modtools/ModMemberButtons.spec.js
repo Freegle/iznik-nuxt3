@@ -59,7 +59,7 @@ describe('ModMemberButtons', () => {
     groupid: 789,
     membershipid: 111,
     bandate: null,
-    memberof: [],
+    memberships: [],
     spammer: null,
     suspectreason: null,
     heldby: null,
@@ -222,7 +222,7 @@ describe('ModMemberButtons', () => {
     it('shows Mail button for approved members', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
       })
@@ -232,7 +232,7 @@ describe('ModMemberButtons', () => {
     it('shows spamignore button for approved members with suspectreason', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
           suspectreason: 'Test reason',
         }),
@@ -244,7 +244,7 @@ describe('ModMemberButtons', () => {
     it('hides spamignore when no suspectreason', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
           suspectreason: null,
         }),
@@ -261,7 +261,7 @@ describe('ModMemberButtons', () => {
     it('returns true when member is in collection', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 789, collection: 'Approved' },
             { id: 999, collection: 'Pending' },
           ],
@@ -274,17 +274,17 @@ describe('ModMemberButtons', () => {
     it('returns false when member not in collection', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Pending' }],
+          memberships: [{ id: 789, collection: 'Pending' }],
           groupid: 789,
         }),
       })
       expect(wrapper.vm.approved).toBe(false)
     })
 
-    it('returns false when memberof is undefined', () => {
+    it('returns false when memberships is undefined', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: undefined,
+          memberships: undefined,
           groupid: 789,
         }),
       })
@@ -296,7 +296,7 @@ describe('ModMemberButtons', () => {
     it('returns approved member actions when approved', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
       })
@@ -309,7 +309,7 @@ describe('ModMemberButtons', () => {
     it('returns empty array when not approved', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [],
+          memberships: [],
           groupid: 789,
         }),
       })
@@ -321,7 +321,7 @@ describe('ModMemberButtons', () => {
     it('filters stdmsgs by valid actions', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -351,7 +351,7 @@ describe('ModMemberButtons', () => {
     it('hides rarely used messages by default', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -376,7 +376,7 @@ describe('ModMemberButtons', () => {
     it('shows rarely used messages when showRare is true', async () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -402,7 +402,7 @@ describe('ModMemberButtons', () => {
     it('calculates rareToShow count correctly', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -432,7 +432,7 @@ describe('ModMemberButtons', () => {
     it('shows expand button when rare messages exist', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([
@@ -567,7 +567,7 @@ describe('ModMemberButtons', () => {
     it('handles empty modconfig stdmsgs', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: createModConfig([]),
@@ -578,7 +578,7 @@ describe('ModMemberButtons', () => {
     it('handles null modconfig', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: null,
@@ -590,7 +590,7 @@ describe('ModMemberButtons', () => {
     it('handles modconfig without stdmsgs (list endpoint data)', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789, collection: 'Approved' }],
+          memberships: [{ id: 789, collection: 'Approved' }],
           groupid: 789,
         }),
         modconfig: { id: 1, name: 'Test Config' },

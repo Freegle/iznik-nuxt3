@@ -198,9 +198,9 @@ function hasCollection(coll) {
     return true
   }
 
-  // V1 fallback: check memberof array.
-  if (props.member.memberof) {
-    for (const group of props.member.memberof) {
+  // V1 fallback: check memberships array.
+  if (props.member.memberships) {
+    for (const group of props.member.memberships) {
       if (group.id === props.member.groupid && group.collection === coll) {
         return true
       }

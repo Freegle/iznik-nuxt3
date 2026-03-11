@@ -87,11 +87,11 @@ const allmemberships = ref(false)
 const allapplied = ref(false)
 
 const memberof = computed(() => {
-  if (!user.value?.memberof) {
+  if (!user.value?.memberships) {
     return null
   }
 
-  const ms = [...user.value.memberof]
+  const ms = [...user.value.memberships]
 
   ms.sort(function (a, b) {
     return new Date(b.added).getTime() - new Date(a.added).getTime()
@@ -107,20 +107,20 @@ const memberof = computed(() => {
 const hiddenmemberofs = computed(() => {
   return allmemberships.value
     ? 0
-    : user.value?.memberof?.length > MEMBERSHIPS_SHOW
-    ? user.value.memberof.length - MEMBERSHIPS_SHOW
+    : user.value?.memberships?.length > MEMBERSHIPS_SHOW
+    ? user.value.memberships.length - MEMBERSHIPS_SHOW
     : 0
 })
 
 const filteredApplied = computed(() => {
-  if (!user.value?.applied || !user.value?.memberof) {
+  if (!user.value?.applied || !user.value?.memberships) {
     return []
   }
 
   // Filter out anything we're already on.
   const ms = user.value.applied.filter((g) => {
     let member = false
-    user.value.memberof.forEach((h) => {
+    user.value.memberships.forEach((h) => {
       if (h.id === g.id) {
         member = true
       }

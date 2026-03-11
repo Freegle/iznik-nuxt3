@@ -286,6 +286,7 @@ const test = base.test.extend({
       /Failed to load resource: the server responded with a status of 401.*api\/tryst/, // 401 when not logged in (tryst requires auth)
       /Failed to load resource: the server responded with a status of 401.*api\/session/, // 401 when checking session while not logged in
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
+      /Failed to load resource.*freegle-dev-local/, // Freegle dev site may not be running during ModTools tests
     ]
 
     // Initialize the working copy of allowed error patterns

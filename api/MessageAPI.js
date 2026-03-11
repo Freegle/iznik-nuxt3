@@ -7,9 +7,7 @@ export default class MessageAPI extends BaseAPI {
 
   async fetchMT(params, logError = true) {
     const { id, ...rest } = params
-    const data = await this.$getv2('/message/' + id, rest, logError)
-    // Go returns the message directly; wrap for store compatibility
-    return { message: data }
+    return await this.$getv2('/message/' + id, rest, logError)
   }
 
   fetchByUser(id, active, logError = true) {
@@ -45,7 +43,7 @@ export default class MessageAPI extends BaseAPI {
   }
 
   fetchMessages(params) {
-    return this.$getv2('/messages', params)
+    return this.$getv2('/modtools/messages', params)
   }
 
   update(event) {

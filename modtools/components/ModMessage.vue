@@ -122,13 +122,7 @@
               display-message-link
             />
             <div
-              v-if="
-                homegroup &&
-                message &&
-                message.groups &&
-                message.groups.length &&
-                homegroup !== message.groups[0].namedisplay
-              "
+              v-if="homegroup && group && homegroup !== group.namedisplay"
               class="small text-danger"
             >
               Possibly should be on {{ homegroup }}
@@ -778,8 +772,8 @@ const eBody = computed(() => {
 const membership = computed(() => {
   let ret = null
 
-  if (groupid.value && fromUser.value?.memberof) {
-    ret = fromUser.value.memberof.find((g) => g.id === groupid.value)
+  if (groupid.value && fromUser.value?.memberships) {
+    ret = fromUser.value.memberships.find((g) => g.id === groupid.value)
   }
 
   return ret
@@ -937,8 +931,8 @@ const duplicates = computed(() => {
 })
 
 const memberGroupIds = computed(() => {
-  return fromUser.value?.memberof
-    ? fromUser.value.memberof.map((g) => g.id)
+  return fromUser.value?.memberships
+    ? fromUser.value.memberships.map((g) => g.id)
     : []
 })
 

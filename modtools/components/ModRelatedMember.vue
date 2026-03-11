@@ -66,7 +66,7 @@ function posted(member) {
 }
 
 function isMember(member) {
-  return member.memberof && member.memberof.length
+  return member.memberships && member.memberships.length
 }
 
 function count(l, r) {
@@ -194,11 +194,11 @@ const activeSameDay = computed(() => {
 })
 
 const groupsInCommon = computed(() => {
-  const common = user1.value.memberof.filter((group) => {
+  const common = user1.value.memberships.filter((group) => {
     const gid = group.id
     let found = false
 
-    user2.value.memberof.forEach((group2) => {
+    user2.value.memberships.forEach((group2) => {
       if (group2.id === gid) {
         found = true
       }

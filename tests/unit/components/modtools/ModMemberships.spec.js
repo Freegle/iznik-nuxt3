@@ -17,7 +17,7 @@ describe('ModMemberships', () => {
   const createUser = (overrides = {}) => ({
     id: 456,
     displayname: 'Test User',
-    memberof: [
+    memberships: [
       {
         id: 1,
         membershipid: 101,
@@ -89,12 +89,15 @@ describe('ModMemberships', () => {
     it.each([
       ['null', null],
       ['empty array', []],
-    ])('shows "Not on any communities" when memberof is %s', (_, memberof) => {
-      const wrapper = mountComponent({}, { memberof })
-      expect(wrapper.text()).toContain('Not on any communities')
-    })
+    ])(
+      'shows "Not on any communities" when memberships is %s',
+      (_, memberships) => {
+        const wrapper = mountComponent({}, { memberships })
+        expect(wrapper.text()).toContain('Not on any communities')
+      }
+    )
 
-    it('shows group names when memberof has entries', () => {
+    it('shows group names when memberships has entries', () => {
       const wrapper = mountComponent()
       expect(wrapper.text()).toContain('Group One')
       expect(wrapper.text()).toContain('Group Two')
@@ -104,7 +107,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             {
               id: 1,
               membershipid: 101,
@@ -124,9 +127,9 @@ describe('ModMemberships', () => {
     })
   })
 
-  describe('memberof computed', () => {
-    it('returns null when user has no memberof', () => {
-      const wrapper = mountComponent({}, { memberof: null })
+  describe('memberships computed', () => {
+    it('returns null when user has no memberships', () => {
+      const wrapper = mountComponent({}, { memberships: null })
       expect(wrapper.vm.memberof).toBeNull()
     })
 
@@ -134,7 +137,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             {
               id: 1,
               membershipid: 101,
@@ -162,7 +165,7 @@ describe('ModMemberships', () => {
     })
 
     it('shows first 3 memberships by default, all when allmemberships is true', async () => {
-      const wrapper = mountComponent({}, { memberof: createGroups(5) })
+      const wrapper = mountComponent({}, { memberships: createGroups(5) })
 
       // Default: shows first 3
       expect(wrapper.vm.memberof.length).toBe(3)
@@ -176,15 +179,15 @@ describe('ModMemberships', () => {
 
   describe('hiddenmemberofs computed', () => {
     it.each([
-      ['allmemberships is true', { memberof: createGroups(4) }, true, 0],
+      ['allmemberships is true', { memberships: createGroups(4) }, true, 0],
       [
-        'memberof has 3 or fewer entries',
-        { memberof: createGroups(2) },
+        'memberships has 3 or fewer entries',
+        { memberships: createGroups(2) },
         false,
         0,
       ],
-      ['memberof is null', { memberof: null }, false, 0],
-      ['more than 3 memberships', { memberof: createGroups(5) }, false, 2],
+      ['memberships is null', { memberships: null }, false, 0],
+      ['more than 3 memberships', { memberships: createGroups(5) }, false, 2],
     ])(
       'returns correct count when %s',
       async (_, userOverrides, allmemberships, expected) => {
@@ -203,7 +206,7 @@ describe('ModMemberships', () => {
       // With hidden memberships - badge shows
       const wrapperWithHidden = mountComponent(
         {},
-        { memberof: createGroups(4) }
+        { memberships: createGroups(4) }
       )
       expect(wrapperWithHidden.text()).toContain('+1 groups')
       expect(wrapperWithHidden.vm.allmemberships).toBe(false)
@@ -214,7 +217,10 @@ describe('ModMemberships', () => {
       expect(wrapperWithHidden.vm.allmemberships).toBe(true)
 
       // Without hidden memberships - no badge
-      const wrapperNoHidden = mountComponent({}, { memberof: createGroups(1) })
+      const wrapperNoHidden = mountComponent(
+        {},
+        { memberships: createGroups(1) }
+      )
       expect(wrapperNoHidden.text()).not.toContain('+')
     })
   })
@@ -224,7 +230,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             {
               id: 1,
               membershipid: 101,
@@ -238,7 +244,7 @@ describe('ModMemberships', () => {
               userid: 456,
               namedisplay: 'Group 1',
               added: '2024-06-01',
-            }, // Same id as memberof
+            }, // Same id as memberships
             {
               id: 2,
               userid: 456,
@@ -263,7 +269,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [],
+          memberships: [],
           applied: createApplied(5),
         }
       )
@@ -288,7 +294,7 @@ describe('ModMemberships', () => {
         const wrapper = mountComponent(
           {},
           {
-            memberof: [],
+            memberships: [],
             applied: createApplied(appliedCount),
           }
         )
@@ -304,7 +310,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [],
+          memberships: [],
           applied: createApplied(4),
         }
       )
@@ -336,7 +342,7 @@ describe('ModMemberships', () => {
       const wrapper = mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             {
               id: 1,
               membershipid: 101,

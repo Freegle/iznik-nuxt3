@@ -616,8 +616,8 @@ const admin = computed(() => {
 })
 
 const freegleMemberships = computed(() => {
-  return user.value && user.value.memberof
-    ? user.value.memberof
+  return user.value && user.value.memberships
+    ? user.value.memberships
         .filter((m) => m.type === 'Freegle')
         .sort(function (a, b) {
           return a.nameshort

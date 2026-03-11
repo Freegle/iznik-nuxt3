@@ -137,7 +137,7 @@ const showConfirmModal = ref(false)
 const groupid = computed(() => {
   let ret = null
 
-  props.member.memberof.forEach((h) => {
+  props.member.memberships.forEach((h) => {
     if (h.id === props.membership.id) {
       ret = h.id
     }

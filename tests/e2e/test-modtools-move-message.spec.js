@@ -9,61 +9,16 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
+const { loginModToolsViaAPI } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
-
-// testmod@test.com is created by testenv.php with password 'freegle'
-const MOD_EMAIL = 'testmod@test.com'
-const MOD_PASSWORD = 'freegle'
-
-/**
- * Log in via the API and inject auth tokens into localStorage.
- * This bypasses the UI login which is unreliable on dev containers due to HMR.
- */
-async function loginViaAPI(page) {
-  // First navigate to ModTools so localStorage is on the correct origin
-  await page.goto(`${MODTOOLS_URL}/login`, {
-    timeout: timeouts.navigation.initial,
-    waitUntil: 'domcontentloaded',
-  })
-
-  // Call the login API from within the page context (same origin for cookies)
-  const authData = await page.evaluate(
-    async ({ email, password }) => {
-      const res = await fetch('http://apiv1.localhost/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, modtools: true }),
-      })
-      const data = await res.json()
-      if (data.ret !== 0) {
-        throw new Error(`Login failed: ${data.status}`)
-      }
-      return { jwt: data.jwt, persistent: data.persistent }
-    },
-    { email: MOD_EMAIL, password: MOD_PASSWORD }
-  )
-
-  // Inject auth tokens into localStorage (matching the Pinia auth store format)
-  await page.evaluate((tokens) => {
-    localStorage.setItem(
-      'auth',
-      JSON.stringify({
-        auth: {
-          jwt: tokens.jwt,
-          persistent: tokens.persistent,
-        },
-      })
-    )
-  }, authData)
-}
 
 test.describe('ModTools move message', () => {
   test('moving a message between groups should not cause turl error', async ({
     page,
   }) => {
     // Step 1: Log in via API and inject auth tokens
-    await loginViaAPI(page)
+    await loginModToolsViaAPI(page)
 
     // Step 2: Navigate to approved messages (auth tokens in localStorage)
     await page.goto(`${MODTOOLS_URL}/messages/approved`, {

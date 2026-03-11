@@ -108,11 +108,11 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.id).toBe(789)
     })
 
-    it('finds group in user.memberof array when groupid matches', () => {
+    it('finds group in user.memberships array when groupid matches', () => {
       const wrapper = createWrapper({
         groupid: 111,
         user: {
-          memberof: [
+          memberships: [
             { id: 111, nameshort: 'MemberGroup', namedisplay: 'Member Group' },
           ],
         },
@@ -136,11 +136,11 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.id).toBe(222)
     })
 
-    it('finds group in byuser.memberof array when user lookup fails', () => {
+    it('finds group in byuser.memberships array when user lookup fails', () => {
       const wrapper = createWrapper({
         groupid: 333,
         byuser: {
-          memberof: [
+          memberships: [
             {
               id: 333,
               nameshort: 'ByUserMember',
@@ -207,7 +207,7 @@ describe('ModLogGroup', () => {
               namedisplay: 'Applied First',
             },
           ],
-          memberof: [
+          memberships: [
             {
               id: 444,
               nameshort: 'MemberSecond',
@@ -220,12 +220,12 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.nameshort).toBe('AppliedFirst')
     })
 
-    it('falls back to memberof when not in applied', () => {
+    it('falls back to memberships when not in applied', () => {
       const wrapper = createWrapper({
         groupid: 555,
         user: {
           applied: [{ id: 999, nameshort: 'Other', namedisplay: 'Other' }],
-          memberof: [
+          memberships: [
             { id: 555, nameshort: 'InMemberof', namedisplay: 'In Memberof' },
           ],
         },
@@ -237,7 +237,7 @@ describe('ModLogGroup', () => {
       const wrapper = createWrapper({
         groupid: 666,
         user: {
-          memberof: [
+          memberships: [
             { id: 666, nameshort: 'OnlyMember', namedisplay: 'Only Member' },
           ],
         },
@@ -245,12 +245,12 @@ describe('ModLogGroup', () => {
       expect(wrapper.vm.loggroup.nameshort).toBe('OnlyMember')
     })
 
-    it('handles user with empty applied and memberof arrays', () => {
+    it('handles user with empty applied and memberships arrays', () => {
       const wrapper = createWrapper({
         groupid: 777,
         user: {
           applied: [],
-          memberof: [],
+          memberships: [],
         },
       })
       // Should fall back to myGroup or null

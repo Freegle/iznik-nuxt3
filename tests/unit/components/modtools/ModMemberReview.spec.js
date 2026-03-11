@@ -46,7 +46,7 @@ describe('ModMemberReview', () => {
     bandate: null,
     spammer: null,
     supporter: false,
-    memberof: [
+    memberships: [
       {
         id: 789,
         membershipid: 111,
@@ -344,11 +344,11 @@ describe('ModMemberReview', () => {
     })
   })
 
-  describe('memberof filtering', () => {
+  describe('memberships filtering', () => {
     it('shows first 3 memberships by default', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -363,7 +363,7 @@ describe('ModMemberReview', () => {
     it('shows all memberships when allmemberships is true', async () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -380,7 +380,7 @@ describe('ModMemberReview', () => {
     it('calculates hiddenmemberofs correctly', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },
@@ -395,7 +395,7 @@ describe('ModMemberReview', () => {
     it('shows expand badge when hidden groups exist', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [
+          memberships: [
             { id: 1, membershipid: 1, added: '2024-01-01' },
             { id: 2, membershipid: 2, added: '2024-01-02' },
             { id: 3, membershipid: 3, added: '2024-01-03' },

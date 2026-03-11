@@ -39,8 +39,8 @@ function scanUserForGroup(user) {
       })
     }
 
-    if (!ret && user.memberof) {
-      user.memberof.forEach((g) => {
+    if (!ret && user.memberships) {
+      user.memberships.forEach((g) => {
         if (g.id === props.log.groupid) {
           ret = g
         }

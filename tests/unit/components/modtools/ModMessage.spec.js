@@ -55,7 +55,7 @@ const {
       byId: vi.fn().mockReturnValue({
         id: 456,
         displayname: 'Updated User',
-        memberof: [{ id: 789 }],
+        memberships: [{ id: 789 }],
       }),
     },
     mockMe: { id: 999, displayname: 'Test Mod' },
@@ -161,7 +161,7 @@ describe('ModMessage', () => {
       spammer: null,
       activedistance: 10,
       emails: [{ id: 1, email: 'test@example.com', preferred: true }],
-      memberof: [{ id: 789 }],
+      memberships: [{ id: 789 }],
       messagehistory: [],
     },
     location: { name: 'SW1A 1AA', lat: 51.5, lng: -0.1 },
@@ -455,7 +455,7 @@ describe('ModMessage', () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,
         displayname: 'Test User',
-        memberof: [{ id: 999 }],
+        memberships: [{ id: 999 }],
       })
       const wrapper = mountComponent()
       expect(wrapper.vm.membership).toBe(undefined)
@@ -665,7 +665,7 @@ describe('ModMessage', () => {
         id: 456,
         displayname: 'Spam User',
         spammer: { collection: 'Spammer' },
-        memberof: [{ id: 789 }],
+        memberships: [{ id: 789 }],
       })
       const wrapper = mountComponent({ summary: false })
       await wrapper.vm.$nextTick()
@@ -713,7 +713,7 @@ describe('ModMessage', () => {
         id: 456,
         displayname: 'Test User',
         activedistance: 100,
-        memberof: [{ id: 789 }],
+        memberships: [{ id: 789 }],
       })
       const wrapper = mountComponent({ summary: false })
       await wrapper.vm.$nextTick()
@@ -879,7 +879,7 @@ describe('ModMessage', () => {
       mockUserStore.byId.mockReturnValue({
         id: 456,
         displayname: 'Updated User',
-        memberof: [{ id: 789 }],
+        memberships: [{ id: 789 }],
       })
       const wrapper = mountComponent({ summary: true })
       expect(wrapper.text()).toContain('Updated User')

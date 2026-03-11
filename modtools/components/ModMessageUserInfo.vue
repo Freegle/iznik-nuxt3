@@ -116,8 +116,8 @@ const user = computed(() => {
 const membership = computed(() => {
   let ret = null
 
-  if (props.groupid && user.value?.memberof) {
-    ret = user.value.memberof.find((g) => {
+  if (props.groupid && user.value?.memberships) {
+    ret = user.value.memberships.find((g) => {
       return g.id === props.groupid
     })
 

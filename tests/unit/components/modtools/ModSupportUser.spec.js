@@ -53,7 +53,7 @@ describe('ModSupportUser', () => {
     systemrole: 'User',
     bouncing: false,
     spammer: null,
-    memberof: [],
+    memberships: [],
     emails: [{ id: 1, email: 'test@example.com', preferred: true }],
     applied: [],
     membershiphistory: [],
@@ -333,7 +333,7 @@ describe('ModSupportUser', () => {
       const wrapper = await mountComponent(
         {},
         {
-          memberof: [
+          memberships: [
             { id: 1, nameshort: 'ZGroup', type: 'Freegle' },
             { id: 2, nameshort: 'AGroup', type: 'Freegle' },
             { id: 3, nameshort: 'Other', type: 'Other' },

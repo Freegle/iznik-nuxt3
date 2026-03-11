@@ -32,7 +32,7 @@ describe('ModMemberReviewActions', () => {
   const createMember = (overrides = {}) => ({
     userid: 456,
     displayname: 'Test User',
-    memberof: [
+    memberships: [
       { id: 789, namedisplay: 'Test Group' },
       { id: 111, namedisplay: 'Other Group' },
     ],
@@ -306,7 +306,7 @@ describe('ModMemberReviewActions', () => {
     it('returns group id when member is part of membership', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 789 }, { id: 111 }],
+          memberships: [{ id: 789 }, { id: 111 }],
         }),
         membership: createMembership({ id: 789 }),
       })
@@ -316,7 +316,7 @@ describe('ModMemberReviewActions', () => {
     it('returns null when member is not part of membership', () => {
       const wrapper = mountComponent({
         member: createMember({
-          memberof: [{ id: 111 }],
+          memberships: [{ id: 111 }],
         }),
         membership: createMembership({ id: 789 }),
       })

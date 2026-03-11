@@ -30,7 +30,7 @@ describe('ModRelatedMember', () => {
       ],
       lastaccess: now.subtract(1, 'day').toISOString(),
       messagehistory: [{ id: 101, subject: 'Test post' }],
-      memberof: [{ id: 10, namedisplay: 'Group 1' }],
+      memberships: [{ id: 10, namedisplay: 'Group 1' }],
       relatedto: {
         id: 2,
         displayname: 'User Two',
@@ -45,7 +45,7 @@ describe('ModRelatedMember', () => {
         ],
         lastaccess: now.subtract(2, 'day').toISOString(),
         messagehistory: [],
-        memberof: [{ id: 10, namedisplay: 'Group 1' }],
+        memberships: [{ id: 10, namedisplay: 'Group 1' }],
       },
       ...overrides,
     }
@@ -134,7 +134,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: now.subtract(5, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -153,7 +153,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: now.subtract(1, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -173,7 +173,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -196,7 +196,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -213,7 +213,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -230,7 +230,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [{ id: 2 }],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -243,7 +243,7 @@ describe('ModRelatedMember', () => {
   describe('whichjoined computed', () => {
     it('returns Both when both are members', () => {
       const member = createMember({
-        memberof: [{ id: 10 }],
+        memberships: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -251,7 +251,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [{ id: 20 }],
+          memberships: [{ id: 20 }],
         },
       })
       const wrapper = mountComponent({ member })
@@ -260,7 +260,7 @@ describe('ModRelatedMember', () => {
 
     it('returns Neither when neither is a member', () => {
       const member = createMember({
-        memberof: [],
+        memberships: [],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -268,7 +268,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -288,7 +288,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -311,7 +311,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -328,7 +328,7 @@ describe('ModRelatedMember', () => {
 
     it('returns falsy when no groups in common', () => {
       const member = createMember({
-        memberof: [{ id: 10 }],
+        memberships: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'User Two',
@@ -336,7 +336,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [{ id: 20 }],
+          memberships: [{ id: 20 }],
         },
       })
       const wrapper = mountComponent({ member })
@@ -378,7 +378,7 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -403,7 +403,7 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -435,7 +435,7 @@ describe('ModRelatedMember', () => {
           ],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -452,7 +452,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -464,7 +464,7 @@ describe('ModRelatedMember', () => {
     it('returns true when similar and groups in common', () => {
       const member = createMember({
         displayname: 'John Smith',
-        memberof: [{ id: 10 }],
+        memberships: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name for actual similarity
@@ -472,7 +472,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [{ id: 10 }],
+          memberships: [{ id: 10 }],
         },
       })
       const wrapper = mountComponent({ member })
@@ -484,7 +484,7 @@ describe('ModRelatedMember', () => {
       const member = createMember({
         displayname: 'John Smith',
         lastaccess: today.add(10, 'hour').toISOString(),
-        memberof: [],
+        memberships: [],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name for actual similarity
@@ -492,7 +492,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: today.add(14, 'hour').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -502,7 +502,7 @@ describe('ModRelatedMember', () => {
     it('returns false when similar but no groups/same day', () => {
       const member = createMember({
         displayname: 'John Smith',
-        memberof: [],
+        memberships: [],
         lastaccess: dayjs().subtract(5, 'day').toISOString(),
         relatedto: {
           id: 2,
@@ -511,7 +511,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(10, 'day').toISOString(),
           messagehistory: [],
-          memberof: [],
+          memberships: [],
         },
       })
       const wrapper = mountComponent({ member })
@@ -523,7 +523,7 @@ describe('ModRelatedMember', () => {
     it('shows Probably the same badge when true', () => {
       const member = createMember({
         displayname: 'John Smith',
-        memberof: [{ id: 10 }],
+        memberships: [{ id: 10 }],
         relatedto: {
           id: 2,
           displayname: 'John Smith', // Use identical name
@@ -531,7 +531,7 @@ describe('ModRelatedMember', () => {
           emails: [],
           lastaccess: dayjs().subtract(2, 'day').toISOString(),
           messagehistory: [],
-          memberof: [{ id: 10 }],
+          memberships: [{ id: 10 }],
         },
       })
       const wrapper = mountComponent({ member })

@@ -96,13 +96,13 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         1: {
           id: 1,
-          memberof: [{ id: 1 }],
-          relatedto: { memberof: [{ id: 2 }] },
+          memberships: [{ id: 1 }],
+          relatedto: { memberships: [{ id: 2 }] },
         },
         2: {
           id: 2,
-          memberof: [{ id: 1 }],
-          relatedto: { memberof: [{ id: 2 }] },
+          memberships: [{ id: 1 }],
+          relatedto: { memberships: [{ id: 2 }] },
         },
       }
       const wrapper = mountComponent()
@@ -116,8 +116,8 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         42: {
           id: 42,
-          memberof: [{ id: 1 }],
-          relatedto: { memberof: [{ id: 1 }] },
+          memberships: [{ id: 1 }],
+          relatedto: { memberships: [{ id: 1 }] },
         },
       }
       const wrapper = mountComponent()
@@ -136,8 +136,8 @@ describe('Related Page', () => {
 
     it('converts member list object to array', () => {
       mockMemberStore.list = {
-        1: { id: 1, memberof: [], relatedto: { memberof: [] } },
-        2: { id: 2, memberof: [], relatedto: { memberof: [] } },
+        1: { id: 1, memberships: [], relatedto: { memberships: [] } },
+        2: { id: 2, memberships: [], relatedto: { memberships: [] } },
       }
       const wrapper = mountComponent()
       const members = wrapper.vm.members
@@ -149,13 +149,13 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         1: {
           id: 1,
-          memberof: [{ id: 5 }],
-          relatedto: { memberof: [{ id: 6 }] },
+          memberships: [{ id: 5 }],
+          relatedto: { memberships: [{ id: 6 }] },
         },
         2: {
           id: 2,
-          memberof: [{ id: 7 }],
-          relatedto: { memberof: [{ id: 8 }] },
+          memberships: [{ id: 7 }],
+          relatedto: { memberships: [{ id: 8 }] },
         },
       }
       mockGroupid.value = 0
@@ -168,8 +168,8 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         1: {
           id: 1,
-          memberof: [{ id: 5 }],
-          relatedto: { memberof: [{ id: 6 }] },
+          memberships: [{ id: 5 }],
+          relatedto: { memberships: [{ id: 6 }] },
         },
       }
       mockGroupid.value = -1
@@ -182,13 +182,13 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         1: {
           id: 1,
-          memberof: [{ id: 5 }],
-          relatedto: { memberof: [{ id: 6 }] },
+          memberships: [{ id: 5 }],
+          relatedto: { memberships: [{ id: 6 }] },
         },
         2: {
           id: 2,
-          memberof: [{ id: 7 }],
-          relatedto: { memberof: [{ id: 8 }] },
+          memberships: [{ id: 7 }],
+          relatedto: { memberships: [{ id: 8 }] },
         },
       }
       mockGroupid.value = 5
@@ -202,13 +202,13 @@ describe('Related Page', () => {
       mockMemberStore.list = {
         1: {
           id: 1,
-          memberof: [{ id: 5 }],
-          relatedto: { memberof: [{ id: 6 }] },
+          memberships: [{ id: 5 }],
+          relatedto: { memberships: [{ id: 6 }] },
         },
         2: {
           id: 2,
-          memberof: [{ id: 7 }],
-          relatedto: { memberof: [{ id: 5 }] },
+          memberships: [{ id: 7 }],
+          relatedto: { memberships: [{ id: 5 }] },
         },
       }
       mockGroupid.value = 5

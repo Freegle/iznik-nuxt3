@@ -113,6 +113,7 @@ export const useModGroupStore = defineStore({
             if (g.role) {
               group.role = g.role
             }
+            group.mysettings = g
           }
         }
 

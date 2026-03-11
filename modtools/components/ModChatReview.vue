@@ -106,12 +106,12 @@
             }}
           </span>
         </div>
-        <ModSpammer v-if="message.fromuser.spammer" :user="message.fromuser" />
+        <ModSpammer v-if="message.fromuser?.spammer" :user="message.fromuser" />
         <div class="d-flex justify-content-around">
-          <div v-if="!message.widerchatreview">
+          <div v-if="!message.widerchatreview && message.fromuser">
             <span>
               <!-- eslint-disable-next-line -->
-              <v-icon icon="info-circle" /> {{ message.fromuser.displayname }} is
+              <v-icon icon="info-circle" /> {{ message.fromuser?.displayname }} is
               <span>
                 <span v-if="message.groupfrom"
                   >on {{ message.groupfrom.namedisplay }}, which you mod. </span
