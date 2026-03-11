@@ -282,6 +282,8 @@ const test = base.test.extend({
       /Content Security Policy directive.*style-src/,
       /Either the 'unsafe-inline' keyword.*is required to enable inline execution/,
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
+      /Failed to load resource: the server responded with a status of 404.*api\/modtools\//, // modtools endpoints not yet in Go API
+      /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
     ]
 
     // Initialize the working copy of allowed error patterns
