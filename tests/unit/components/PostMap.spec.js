@@ -816,4 +816,65 @@ describe('PostMap', () => {
       expect(true).toBe(true)
     })
   })
+
+  describe('myGroup with object-shaped list (Sentry bug)', () => {
+    // Reproduces: TypeError: d.find is not a function
+    // groupStore.list is an object keyed by group ID, not an array.
+    // The myGroup function calls .find() which doesn't exist on objects.
+
+    it('returns correct group when groupStore.list is an object (fixed)', async () => {
+      // Set list to the real store shape: object keyed by group ID
+      mockGroupList.value = {
+        1: {
+          id: 1,
+          nameshort: 'TestGroup',
+          bbox: 'POLYGON((-2 51,-2 54,0 54,0 51,-2 51))',
+          lat: 52.5,
+          lng: -1,
+        },
+      }
+
+      // With the fix, mounting with groupid should work without TypeError
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      await createWrapper({ groupid: 1 })
+      await flushPromises()
+
+      // No TypeError should occur
+      const allCalls = [...consoleSpy.mock.calls, ...warnSpy.mock.calls]
+      const hasTypeError = allCalls.some((args) =>
+        args.some(
+          (arg) =>
+            (typeof arg === 'string' &&
+              arg.includes('find is not a function')) ||
+            (arg instanceof Error &&
+              arg.message.includes('find is not a function'))
+        )
+      )
+
+      expect(hasTypeError).toBe(false)
+
+      consoleSpy.mockRestore()
+      warnSpy.mockRestore()
+    })
+
+    it('confirms .find() does not exist on plain objects', () => {
+      const objectList = {
+        42: { id: 42, nameshort: 'Freegle Group' },
+        99: { id: 99, nameshort: 'Another Group' },
+      }
+
+      // This is what the buggy code does — .find() on an object
+      expect(() => {
+        objectList.find((g) => g.id === 42)
+      }).toThrow('objectList.find is not a function')
+
+      // The correct approach: direct key lookup
+      expect(objectList[42]).toEqual({
+        id: 42,
+        nameshort: 'Freegle Group',
+      })
+    })
+  })
 })

@@ -458,6 +458,21 @@ describe('ModMemberReview', () => {
     })
   })
 
+  describe('Go API data shape', () => {
+    it('renders without crashing when member profile has paththumb instead of turl (V2 API format)', () => {
+      // The Go V2 user API returns profile with path/paththumb, not url/turl
+      const wrapper = mountComponent({
+        member: createMember({
+          profile: {
+            path: 'https://example.com/uimg_456.jpg',
+            paththumb: 'https://example.com/tuimg_456.jpg',
+          },
+        }),
+      })
+      expect(wrapper.text()).toContain('Test User')
+    })
+  })
+
   describe('emails toggle', () => {
     it('starts with showEmails false', () => {
       const wrapper = mountComponent()

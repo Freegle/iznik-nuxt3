@@ -166,6 +166,11 @@ config.global.stubs = {
     template:
       '<div class="card"><slot /><slot name="header" /><slot name="footer" /></div>',
   },
+  'b-form-select': {
+    template:
+      '<select class="form-select" :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><slot /></select>',
+    props: ['modelValue', 'id', 'options'],
+  },
 
   // Stub FontAwesome
   'v-icon': { template: '<i :class="icon"></i>', props: ['icon'] },

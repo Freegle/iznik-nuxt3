@@ -218,7 +218,7 @@ function userOptions(small) {
     value: -1,
     html:
       currentlySelectedUsers.value.length >= 1
-        ? '<em>-- Add someone else --</em>'
+        ? '<em>-- Add another person --</em>'
         : userOptionsChoose(small),
   })
 

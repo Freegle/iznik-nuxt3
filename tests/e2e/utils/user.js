@@ -1270,9 +1270,121 @@ async function getMyGroups(page) {
   }
 }
 
+/**
+ * Logs into ModTools by navigating to the ModTools base URL and completing
+ * the login modal. ModTools is a separate Nuxt app with separate auth from
+ * the Freegle site.
+ *
+ * @param {import('@playwright/test').Page} page - Playwright page object
+ * @param {string} email - Email address to log in with
+ * @param {string} [password='freegle'] - Password to use
+ * @returns {Promise<boolean>} - Returns true if login was successful
+ */
+async function loginViaModTools(page, email, password = 'freegle') {
+  const { environment } = require('../config')
+  const modtoolsBaseUrl = environment.modtoolsBaseUrl
+
+  console.log(`Starting ModTools login for: ${email}`)
+
+  // Navigate to ModTools root — it redirects unauthenticated users to /login
+  await page.goto(`${modtoolsBaseUrl}/`, {
+    timeout: timeouts.navigation.initial,
+  })
+
+  // Wait for the login modal to appear (same pattern as test-modtools-login.spec.js)
+  const loginModal = page.locator('#loginModal')
+  await loginModal.first().waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+
+  // Switch to login mode if we're in signup mode
+  const loginLink = page
+    .locator('.test-already-a-freegler')
+    .filter({ visible: true })
+    .first()
+  const loginLinkVisible = await loginLink.isVisible().catch(() => false)
+
+  if (loginLinkVisible) {
+    console.log('Switching from signup to login mode')
+    await loginLink.click()
+    // Wait for fullname field to disappear
+    const fullnameField = page.locator('#fullname, input[name="fullname"]')
+    try {
+      await fullnameField.waitFor({ state: 'hidden', timeout: 3000 })
+    } catch {
+      console.log('Mode switch may not have completed, continuing...')
+    }
+  }
+
+  // Fill in credentials
+  const emailField = page
+    .locator('input[type="email"], input[name="email"]')
+    .first()
+  const passwordField = page
+    .locator('input[type="password"], input[name="password"]')
+    .first()
+
+  await emailField.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  await emailField.fill(email)
+  await passwordField.fill(password)
+
+  // Click the login button scoped to the modal
+  const submitButton = page
+    .locator(
+      '#loginModal button:has-text("Log in"):not([disabled]):not(.disabled)'
+    )
+    .first()
+  const submitVisible = await submitButton.isVisible().catch(() => false)
+
+  if (!submitVisible) {
+    console.log('Login button not found in modal')
+    return false
+  }
+
+  await submitButton.click()
+  console.log('Clicked login button')
+
+  // Wait for the modal to close (indicates successful login)
+  try {
+    await loginModal.waitFor({
+      state: 'hidden',
+      timeout: timeouts.ui.appearance,
+    })
+    console.log('Login modal closed — login successful')
+  } catch {
+    // Check for error message
+    const errorText = await page
+      .locator('.alert-danger, .text-danger')
+      .first()
+      .textContent()
+      .catch(() => '')
+    if (errorText) {
+      console.log(`Login failed with error: ${errorText}`)
+      return false
+    }
+    console.log('Modal did not close but no error found, continuing...')
+  }
+
+  // Wait for auth to persist to localStorage
+  try {
+    await waitForAuthPersistence(page)
+  } catch {
+    console.log(
+      'Auth persistence check timed out, but login may have succeeded'
+    )
+  }
+
+  return true
+}
+
 module.exports = {
   signUpViaHomepage,
   loginViaHomepage,
+  loginViaModTools,
   unsubscribeManually,
   logoutIfLoggedIn,
   getMyGroups,

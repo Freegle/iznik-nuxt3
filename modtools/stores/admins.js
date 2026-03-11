@@ -28,7 +28,15 @@ export const useAdminsStore = defineStore({
       }
     },
     async add(params) {
-      await api(this.config).admins.add(params)
+      const id = await api(this.config).admins.add(params)
+
+      if (id && (params.template || params.editprotected)) {
+        await api(this.config).admins.patch({
+          id,
+          template: params.template,
+          editprotected: params.editprotected,
+        })
+      }
     },
     async approve(params) {
       await api(this.config).admins.patch({

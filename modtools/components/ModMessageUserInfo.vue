@@ -7,7 +7,7 @@
     >
       <span class="text-muted small d-flex justify-content-between">
         <ProfileImage
-          :image="user.profile.turl"
+          :image="user.profile?.turl || user.profile?.paththumb"
           :name="user.displayname"
           class="ml-1 mb-1 inline"
           is-thumbnail
