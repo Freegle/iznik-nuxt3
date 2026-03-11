@@ -395,14 +395,15 @@ describe('ModMessageUserInfo', () => {
   describe('Go API data shape', () => {
     it('renders without crashing when user profile has paththumb instead of turl (V2 API format)', () => {
       // The Go V2 user API returns profile with path/paththumb, not url/turl
-      const wrapper = mountComponent({
-        user: createTestUser({
+      const wrapper = mountComponent(
+        {},
+        {
           profile: {
             path: 'https://example.com/uimg_123.jpg',
             paththumb: 'https://example.com/tuimg_123.jpg',
           },
-        }),
-      })
+        }
+      )
       expect(wrapper.text()).toContain('Test User')
       const profileImage = wrapper.find('.profile-image')
       expect(profileImage.attributes('data-image')).toBe(
