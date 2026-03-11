@@ -201,7 +201,6 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.searchedMessage()
       expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
         id: '12345',
-        messagehistory: true,
       })
     })
 
@@ -211,7 +210,6 @@ describe('support/[[id]].vue page', () => {
       await wrapper.vm.searchedMessage()
       expect(mockMessageStore.fetchMT).toHaveBeenCalledWith({
         id: '12345',
-        messagehistory: true,
       })
     })
 
