@@ -174,7 +174,8 @@
           Privacy is a complicated and important area, which we take seriously.
           If you have questions or concerns, please
           <nuxt-link no-prefetch to="/help"> contact us</nuxt-link>. Our
-          registered address is Weaver's Field, Loud Bridge, Chipping PR3 2NX.
+          registered address is 64a North Road, Ormesby, Great Yarmouth, Norfolk
+          NR29 3LE.
         </p>
         <p>
           If you're unhappy, you can also contact the Information Commissioner's
