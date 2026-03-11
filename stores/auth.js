@@ -219,7 +219,7 @@ export const useAuthStore = defineStore({
         if (e.response?.status) {
           throw new LoginError(
             e.response.status,
-            e.response.data?.message || 'Login failed'
+            e.response.data?.status || 'Login failed'
           )
         }
 
