@@ -1,6 +1,10 @@
 import BaseAPI from './BaseAPI'
 
 export default class SessionAPI extends BaseAPI {
+  fetch(params) {
+    return this.$getv2('/session', params)
+  }
+
   fetchv2(params, log = true) {
     return this.$getv2('/session', params, log)
   }
@@ -25,7 +29,6 @@ export default class SessionAPI extends BaseAPI {
       appversion,
       applecredentials,
       applelogin,
-      modtools,
     },
     log
   ) {
@@ -46,7 +49,6 @@ export default class SessionAPI extends BaseAPI {
         appversion,
         applecredentials,
         applelogin,
-        modtools,
       },
       log
     )
@@ -56,12 +58,12 @@ export default class SessionAPI extends BaseAPI {
     return this.$delv2('/session')
   }
 
-  lostPassword(email) {
-    return this.$postv2('/session', { action: 'LostPassword', email })
+  lostPassword(email, log) {
+    return this.$postv2('/session', { action: 'LostPassword', email }, log)
   }
 
-  unsubscribe(email) {
-    return this.$postv2('/session', { action: 'Unsubscribe', email })
+  unsubscribe(email, log) {
+    return this.$postv2('/session', { action: 'Unsubscribe', email }, log)
   }
 
   forget() {
@@ -76,6 +78,13 @@ export default class SessionAPI extends BaseAPI {
     return this.$postv2('/session', {
       action: 'Related',
       userlist,
+    })
+  }
+
+  yahooCodeLogin(yahoocodelogin) {
+    // ModTools - no V2 handler yet
+    return this.$post('/session', {
+      yahoocodelogin,
     })
   }
 }

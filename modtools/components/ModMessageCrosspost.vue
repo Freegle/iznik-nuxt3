@@ -9,10 +9,10 @@
         {{ timeago(message.arrival) }} on <em>{{ groupname }}</em>
       </nuxt-link>
     </span>
-    <span v-if="message.collection != 'Approved'">
+    <span v-if="collection && collection != 'Approved'">
       <span class="text-muted">in</span>
       <span class="text-danger">
-        {{ message.collection }}
+        {{ collection }}
       </span>
     </span>
     <span v-else-if="message.outcome">, now {{ message.outcome }}</span
@@ -38,8 +38,15 @@ const message = computed(() => {
   return messageStore.byId(props.messageid)
 })
 
+const messageGroupId = computed(() => {
+  if (!message.value) return null
+  // Individual message fetch returns groups array, not top-level groupid
+  if (message.value.groups?.length) return message.value.groups[0].groupid
+  return message.value.groupid || null
+})
+
 watch(
-  () => message.value?.groupid,
+  () => messageGroupId.value,
   (groupid) => {
     if (groupid) {
       const g = groupStore.get(groupid)
@@ -53,11 +60,17 @@ watch(
 )
 
 const group = computed(() => {
-  return message.value ? groupStore.get(message.value.groupid) : null
+  return messageGroupId.value ? groupStore.get(messageGroupId.value) : null
 })
 
 const groupname = computed(() => {
   return group.value ? group.value.namedisplay : null
+})
+
+const collection = computed(() => {
+  if (!message.value) return null
+  if (message.value.groups?.length) return message.value.groups[0].collection
+  return message.value.collection || null
 })
 
 onMounted(() => {

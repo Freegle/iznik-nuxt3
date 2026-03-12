@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -39,7 +39,7 @@ test.describe('ModTools Page Loads', () => {
     page,
   }) => {
     // Issue #22: Member Review page fails to load
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -61,7 +61,7 @@ test.describe('ModTools Page Loads', () => {
 
   test('Edits page loads without errors', async ({ page }) => {
     // Issue #25: Edits page fails
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -85,7 +85,7 @@ test.describe('ModTools Page Loads', () => {
     page,
   }) => {
     // Issue #24: Chat Review shows "something went wrong"
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -107,7 +107,7 @@ test.describe('ModTools Page Loads', () => {
 
   test('Admins page loads and shows admin users', async ({ page }) => {
     // Issue #20: Admins page broken
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {

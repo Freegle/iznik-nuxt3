@@ -445,6 +445,7 @@ function loginNative(e) {
                 })
                 .catch((err) => {
                   console.error('Failed to save credentials', err)
+                  pleaseShowModal.value = false
                 })
             } catch (e) {
               pleaseShowModal.value = false
@@ -539,6 +540,7 @@ function loginNative(e) {
               })
               .catch((err) => {
                 console.error('Failed to save credentials', err)
+                pleaseShowModal.value = false
               })
           } catch (e) {
             console.log('Failed to save credentials2', e)
@@ -971,6 +973,8 @@ defineExpose({
   show,
   hide,
   tryLater,
+  showModal,
+  email,
 })
 </script>
 <style scoped lang="scss">

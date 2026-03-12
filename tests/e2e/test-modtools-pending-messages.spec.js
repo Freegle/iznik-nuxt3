@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -39,7 +39,7 @@ test.describe('ModTools Pending Messages', () => {
     page,
   }) => {
     // Issue #29: pending messages display "This message is blank"
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -91,7 +91,7 @@ test.describe('ModTools Pending Messages', () => {
     page,
   }) => {
     // Issue #19: member info shows "not on any community"
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -141,7 +141,7 @@ test.describe('ModTools Pending Messages', () => {
 
   test('notification count badge is reasonable', async ({ page }) => {
     // Issue #17: notification count is wildly wrong
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     await page.goto(`${MODTOOLS_URL}/modtools/dashboard`, {
       timeout: timeouts.navigation.initial,

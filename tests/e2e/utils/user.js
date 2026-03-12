@@ -1298,200 +1298,80 @@ async function loginViaModTools(page, email, password = 'freegle') {
     timeout: timeouts.ui.appearance,
   })
 
-  // Define locators (same pattern as loginViaHomepage)
-  const loginLink = page
-    .locator('.test-already-a-freegler')
-    .filter({ visible: true })
-    .first()
+  const fullnameField = page.locator('#fullname, input[name="fullname"]')
+
+  // Wait for modal form to be ready (email + password fields present)
+  await page.waitForFunction(
+    () => {
+      const emailEl = document.querySelector(
+        'input[type="email"], input[name="email"]'
+      )
+      const passwordEl = document.querySelector(
+        'input[type="password"], input[name="password"]'
+      )
+      return emailEl && passwordEl
+    },
+    { timeout: timeouts.ui.appearance }
+  )
+
+  // Switch to login mode if in signup mode (fullname field visible)
+  const fullnameVisible = await fullnameField.isVisible().catch(() => false)
+  if (fullnameVisible) {
+    console.log('In signup mode, switching to login mode')
+    const loginLink = page
+      .locator('.test-already-a-freegler')
+      .filter({ visible: true })
+      .first()
+    await loginLink.click()
+    // Wait until fullname field is hidden — this confirms we're in login mode
+    await fullnameField.waitFor({ state: 'hidden', timeout: 10000 })
+    console.log('Switched to login mode')
+  }
+
+  // Verify we're in login mode — the submit button must say "Log in"
+  const loginButton = page.locator(
+    '#loginModal button[type="submit"]:has-text("Log in")'
+  )
+  await loginButton.first().waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+
+  // Fill credentials
   const emailField = page
     .locator('input[type="email"], input[name="email"]')
     .first()
   const passwordField = page
     .locator('input[type="password"], input[name="password"]')
     .first()
-  const fullnameField = page.locator('#fullname, input[name="fullname"]')
 
-  // Wait for modal to be ready
-  try {
-    await page.waitForFunction(
-      () => {
-        const loginLinkEl = document.querySelector('.test-already-a-freegler')
-        const emailEl = document.querySelector(
-          'input[type="email"], input[name="email"]'
-        )
-        const passwordEl = document.querySelector(
-          'input[type="password"], input[name="password"]'
-        )
-        const loginLinkVisible =
-          loginLinkEl && getComputedStyle(loginLinkEl).display !== 'none'
-        const formFieldsPresent = emailEl && passwordEl
-        return loginLinkVisible || formFieldsPresent
-      },
-      { timeout: timeouts.ui.appearance }
-    )
-  } catch {
-    console.log('Failed to find modal elements, continuing anyway...')
-  }
-
-  // Switch to login mode if in signup mode
-  const fullnameVisible = await fullnameField.isVisible().catch(() => false)
-  const loginLinkVisible = await loginLink.isVisible().catch(() => false)
-
-  if (fullnameVisible && loginLinkVisible) {
-    console.log('Switching from signup to login mode')
-    await loginLink.click()
-    try {
-      await fullnameField.waitFor({ state: 'hidden', timeout: 3000 })
-      console.log('Switched to login mode')
-    } catch {
-      console.log('Mode switch may not have completed, continuing...')
-    }
-  }
-
-  // Fill in credentials using type() for reliable Vue reactivity
-  await emailField.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
   console.log(`Typing email: ${email}`)
-  await emailField.type(email)
+  await emailField.fill(email)
 
-  await passwordField.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
   console.log('Typing password')
-  await passwordField.type(password)
+  await passwordField.fill(password)
 
-  // Find and click the submit button (same selectors as loginViaHomepage)
-  const submitSelectors = [
-    '#loginModal button:has-text("Log in"):not([disabled]):not([disable]):not(.disabled)',
-    '#loginModal button:has-text("Join Freegle!"):not([disabled]):not([disable]):not(.disabled)',
-    '#loginModal button[type="submit"]:not([disabled]):not([disable]):not(.disabled)',
-  ]
+  // Click the Log in button (never Join Freegle!)
+  await loginButton.first().click()
+  console.log('Clicked Log in button')
 
-  let submitButton = null
-  for (const selector of submitSelectors) {
-    const button = page.locator(selector)
-    const count = await button.count()
-    if (count > 0) {
-      const isVisible = await button
-        .first()
-        .isVisible({ timeout: 2000 })
-        .catch(() => false)
-      const isEnabled = await button
-        .first()
-        .isEnabled()
-        .catch(() => false)
-      if (isVisible && isEnabled) {
-        submitButton = button.first()
-        break
-      }
-    }
-  }
-
-  if (!submitButton) {
-    console.log('Login button not found in modal')
-    return false
-  }
-
-  await submitButton.click()
-  console.log('Clicked login button')
-
-  // Wait for the modal to close (indicates successful login)
-  try {
-    await loginModal.waitFor({
-      state: 'detached',
-      timeout: timeouts.ui.appearance,
-    })
-    console.log('Login modal closed — login successful')
-  } catch {
-    // Check for error message
-    const errorText = await page
-      .locator('.alert-danger, .text-danger')
-      .first()
-      .textContent()
-      .catch(() => '')
-    if (errorText) {
-      console.log(`Login failed with error: ${errorText}`)
-      return false
-    }
-    // Modal might still be open but login might have succeeded
-    const modalVisible = await loginModal.isVisible().catch(() => false)
-    if (!modalVisible) {
-      console.log('Login modal not visible — login likely successful')
-    } else {
-      console.log('Modal did not close but no error found, continuing...')
-    }
-  }
+  // Wait for the modal to close (v-if="!loggedIn" removes it from DOM)
+  await loginModal.waitFor({
+    state: 'detached',
+    timeout: timeouts.navigation.slowPage,
+  })
+  console.log('Login modal closed — login successful')
 
   // Wait for auth to persist to localStorage
-  try {
-    await waitForAuthPersistence(page)
-  } catch {
-    console.log(
-      'Auth persistence check timed out, but login may have succeeded'
-    )
-  }
+  await waitForAuthPersistence(page)
 
   return true
-}
-
-/**
- * Log in to ModTools via the API and inject auth tokens into localStorage.
- * This bypasses the UI login which can be unreliable on dev containers due to HMR.
- *
- * @param {import('@playwright/test').Page} page
- * @param {string} email
- * @param {string} password
- */
-async function loginModToolsViaAPI(
-  page,
-  email = 'testmod@test.com',
-  password = 'freegle'
-) {
-  const modtoolsBaseUrl =
-    process.env.TEST_MODTOOLS_BASE_URL || 'http://modtools-dev-local.localhost'
-
-  await page.goto(`${modtoolsBaseUrl}/login`, {
-    timeout: 90000,
-    waitUntil: 'domcontentloaded',
-  })
-
-  const authData = await page.evaluate(
-    async ({ email, password }) => {
-      const res = await fetch('http://apiv1.localhost/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, modtools: true }),
-      })
-      const data = await res.json()
-      if (data.ret !== 0) {
-        throw new Error(`Login failed: ${data.status}`)
-      }
-      return { jwt: data.jwt, persistent: data.persistent }
-    },
-    { email, password }
-  )
-
-  await page.evaluate((tokens) => {
-    localStorage.setItem(
-      'auth',
-      JSON.stringify({
-        auth: {
-          jwt: tokens.jwt,
-          persistent: tokens.persistent,
-        },
-      })
-    )
-  }, authData)
 }
 
 module.exports = {
   signUpViaHomepage,
   loginViaHomepage,
   loginViaModTools,
-  loginModToolsViaAPI,
   unsubscribeManually,
   logoutIfLoggedIn,
   getMyGroups,

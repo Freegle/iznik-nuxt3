@@ -15,6 +15,7 @@ export const useModGroupStore = defineStore({
     received: false,
     sessionGroups: false,
     failedGroups: [],
+    cachedWorkData: null,
   }),
   actions: {
     init(config) {
@@ -56,7 +57,9 @@ export const useModGroupStore = defineStore({
           try {
             const workData = await this.$api.group.fetchWork()
             if (workData && Array.isArray(workData)) {
-              // Update work for each of our groups
+              // Cache work data so it can be applied when groups are loaded later.
+              this.cachedWorkData = workData
+              // Update work for any groups already loaded.
               for (const group of Object.values(this.list)) {
                 const w = workData.find((w) => w.groupid === group.id)
                 if (w) {
@@ -112,23 +115,32 @@ export const useModGroupStore = defineStore({
           if (g) {
             if (g.role) {
               group.role = g.role
+              group.myrole = g.role
             }
             group.mysettings = g
           }
         }
 
-        // Fetch per-group work counts if not already populated.
+        // Apply cached work counts if available, otherwise fetch.
         if (!group.work) {
-          try {
-            const workData = await this.$api.group.fetchWork()
-            if (workData && Array.isArray(workData)) {
-              const w = workData.find((w) => w.groupid === group.id)
-              if (w) {
-                group.work = w
-              }
+          if (this.cachedWorkData) {
+            const w = this.cachedWorkData.find((w) => w.groupid === group.id)
+            if (w) {
+              group.work = w
             }
-          } catch (e) {
-            // Non-fatal — work counts are supplementary.
+          } else {
+            try {
+              const workData = await this.$api.group.fetchWork()
+              if (workData && Array.isArray(workData)) {
+                this.cachedWorkData = workData
+                const w = workData.find((w) => w.groupid === group.id)
+                if (w) {
+                  group.work = w
+                }
+              }
+            } catch (e) {
+              // Non-fatal — work counts are supplementary.
+            }
           }
         }
 

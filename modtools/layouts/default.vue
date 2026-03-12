@@ -475,16 +475,12 @@ function googleLoggedIn() {
 }
 
 function googleLoaded() {
-  if (
-    loginModal.value &&
-    loginModal.value.showModal &&
-    loginModal.value.email
-  ) {
-    console.log(
-      'Showing login modal - leave well alone',
-      loginModal.value.email
-    )
+  if (loginModal.value && loginModal.value.showModal) {
+    // The login modal is already showing — don't re-render it or we'll
+    // destroy any form state the user (or test automation) has entered.
+    console.log('Login modal already showing - not re-rendering')
   } else {
+    // We need to force the login modal to rerender
     bumpLogin.value++
   }
 }

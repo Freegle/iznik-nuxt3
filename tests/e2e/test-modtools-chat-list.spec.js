@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -37,7 +37,7 @@ async function assertNoErrors(page) {
 test.describe('ModTools Chat List', () => {
   test('chat list does not crash with undefined error', async ({ page }) => {
     // Issue #27: chat list crashes with undefined error
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -61,7 +61,7 @@ test.describe('ModTools Chat List', () => {
     page,
   }) => {
     // Issue #26: User2Mod chats show group name instead of member name
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     await page.goto(`${MODTOOLS_URL}/chats`, {
       timeout: timeouts.navigation.initial,

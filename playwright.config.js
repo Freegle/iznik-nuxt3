@@ -30,7 +30,7 @@ module.exports = defineConfig({
   testMatch,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 1,
+  retries: 0,
   workers: 11, // Parallel workers - testing 11 to improve CI performance
   maxFailures: 0,
   reporter: [

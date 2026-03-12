@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -30,7 +30,7 @@ test.describe('ModTools Member Logs', () => {
     page,
   }) => {
     // Issue #28: member logs loop infinitely, never stop loading
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -114,7 +114,7 @@ test.describe('ModTools Member Logs', () => {
 
   test('member logs show subject lines for messages', async ({ page }) => {
     // Issue #15: member logs missing subject lines
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     // Navigate to approved members (always has data)
     await page.goto(`${MODTOOLS_URL}/members/approved`, {

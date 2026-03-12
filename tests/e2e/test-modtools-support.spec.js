@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -37,7 +37,7 @@ async function assertNoErrors(page) {
 test.describe('ModTools Support Tools', () => {
   test('Support Tools user search does not crash', async ({ page }) => {
     // Issue #8: Support Tools crashes on search
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -76,7 +76,7 @@ test.describe('ModTools Support Tools', () => {
 
   test('Support Tools community search returns results', async ({ page }) => {
     // Issue #8: Support Tools community search broken
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     const errors = []
     page.on('pageerror', (error) => {

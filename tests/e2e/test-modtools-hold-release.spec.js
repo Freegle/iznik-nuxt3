@@ -8,7 +8,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -17,7 +17,7 @@ test.describe('ModTools hold and release message', () => {
     page,
   }) => {
     // Step 1: Log in via API and inject auth tokens
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     // Step 2: Navigate to pending messages
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {

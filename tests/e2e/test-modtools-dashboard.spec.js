@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { loginModToolsViaAPI } = require('./utils/user')
+const { loginViaModTools } = require('./utils/user')
 
 const MODTOOLS_URL = environment.modtoolsBaseUrl
 
@@ -39,7 +39,7 @@ test.describe('ModTools Dashboard', () => {
     page,
   }) => {
     // Issue #2/#4: groups list empty after login
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -73,7 +73,7 @@ test.describe('ModTools Dashboard', () => {
   })
 
   test('dashboard loads without errors', async ({ page }) => {
-    await loginModToolsViaAPI(page)
+    await loginViaModTools(page, 'testmod@test.com')
 
     // Collect page errors
     const errors = []

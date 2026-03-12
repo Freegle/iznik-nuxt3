@@ -514,7 +514,7 @@
         </b-row>
       </b-card-body>
       <b-card-footer v-if="!noactions && expanded">
-        <div v-if="message.heldby && message.heldby.id !== myid">
+        <div v-if="message.heldby && heldbyId !== myid">
           This message is held by someone else. The buttons are hidden so you
           don't click them by accident. Please check with them before releasing
           the message.
@@ -529,8 +529,7 @@
         <div
           v-if="
             pending &&
-            (!message.heldby ||
-              (message.heldby && message.heldby.id === myid)) &&
+            (!message.heldby || (message.heldby && heldbyId === myid)) &&
             !editing
           "
           class="text-end mb-1"
@@ -541,8 +540,7 @@
         </div>
         <ModMessageButtons
           v-if="
-            (!message.heldby ||
-              (message.heldby && message.heldby.id === myid)) &&
+            (!message.heldby || (message.heldby && heldbyId === myid)) &&
             !editing
           "
           :messageid="message.id"

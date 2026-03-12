@@ -73,13 +73,13 @@
               <div v-if="userinfo && userinfo.publiclocation">
                 Public location: {{ userinfo.publiclocation.location }}
               </div>
-              <div v-if="userinfo && userinfo.privateposition">
-                Private location: {{ userinfo.privateposition.loc }}
+              <div v-if="user && user.privateposition">
+                Private location: {{ user.privateposition.loc }}
               </div>
             </div>
             <MessageMap
-              v-if="userinfo && userinfo.privateposition"
-              :position="userinfo.privateposition"
+              v-if="user && user.privateposition"
+              :position="user.privateposition"
               :boundary="firstgrouppolygon"
               class="mt-2"
             />
