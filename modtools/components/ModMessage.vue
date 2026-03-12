@@ -220,13 +220,13 @@
               </NoticeMessage>
               <div v-if="message.heldby">
                 <NoticeMessage variant="warning" class="mb-2">
-                  <p v-if="me.id === message.heldby.id">
+                  <p v-if="me.id === heldbyId">
                     You held this. Other people will see a warning to check with
                     you before releasing it. If you release it, it will stay in
                     Pending.
                   </p>
                   <p v-else>
-                    Held by <strong>{{ message.heldby.displayname }}</strong
+                    Held by <strong>{{ heldbyName }}</strong
                     >. Please check with them before releasing it.
                   </p>
                   <ModMessageButton
@@ -585,6 +585,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import Highlighter from 'vue-highlight-words'
 
+import { useAuthStore } from '~/stores/auth'
 import { useLocationStore } from '~/stores/location'
 import { useMessageStore } from '~/stores/message'
 import { useUserStore } from '~/stores/user'
@@ -645,6 +646,7 @@ const props = defineProps({
 
 const emit = defineEmits(['destroy'])
 
+const authStore = useAuthStore()
 const locationStore = useLocationStore()
 const memberStore = useMemberStore()
 const messageStore = useMessageStore()
@@ -769,11 +771,28 @@ const eBody = computed(() => {
   return twem(props.message.textbody)
 })
 
+// Handle heldby as either numeric ID (Go API) or object (PHP API).
+const heldbyId = computed(() => {
+  const h = props.message.heldby
+  if (!h) return null
+  return Number.isInteger(h) ? h : h.id
+})
+
+const heldbyName = computed(() => {
+  const h = props.message.heldby
+  if (!h) return ''
+  if (Number.isInteger(h)) {
+    const user = userStore.byId(h)
+    return user?.displayname || ''
+  }
+  return h.displayname || ''
+})
+
 const membership = computed(() => {
   let ret = null
 
   if (groupid.value && fromUser.value?.memberships) {
-    ret = fromUser.value.memberships.find((g) => g.id === groupid.value)
+    ret = fromUser.value.memberships.find((g) => g.groupid === groupid.value)
   }
 
   return ret
@@ -782,11 +801,17 @@ const membership = computed(() => {
 const configid = computed(() => {
   let id = null
 
-  myModGroups.value.forEach((grp) => {
-    if (grp.id === groupid.value) {
-      id = grp.mysettings?.configid
+  // Look up configid from authStore.groups (always populated from session)
+  // rather than relying on modGroupStore.list[].mysettings which may not be
+  // populated yet due to a race condition with fetchGroupMT().
+  if (groupid.value && authStore.groups) {
+    const sessionGroup = authStore.groups.find(
+      (g) => parseInt(g.groupid) === parseInt(groupid.value)
+    )
+    if (sessionGroup?.configid) {
+      id = sessionGroup.configid
     }
-  })
+  }
 
   if (!id) {
     const defaultConfig = modconfigStore.configs.find(
@@ -947,6 +972,17 @@ watch(
   }
 )
 
+// When expanding, force-fetch the full message to get all attachments.
+// The list endpoint only returns the first image for performance.
+watch(expanded, async (newVal) => {
+  if (newVal && props.message?.id) {
+    const fresh = await messageStore.fetch(props.message.id, true)
+    if (fresh?.attachments) {
+      attachments.value = fresh.attachments
+    }
+  }
+})
+
 watch(
   () => props.nextAfterRemoved,
   (newVal) => {
@@ -980,6 +1016,11 @@ onMounted(() => {
     ? props.message.attachments
     : []
   findHomeGroup()
+
+  // Fetch heldby user if message is held (Go API returns numeric ID).
+  if (props.message.heldby && Number.isInteger(props.message.heldby)) {
+    userStore.fetch(props.message.heldby)
+  }
 })
 
 onBeforeUnmount(() => {

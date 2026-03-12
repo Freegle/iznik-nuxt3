@@ -36,7 +36,7 @@ const chatsShown = computed(() => {
 
 function loadMoreChats($state) {
   // We use an infinite load for the list because it's a lot of DOM to add at initial page load.
-  if (showChats.value < props.chats.length) {
+  if (props.chats && showChats.value < props.chats.length) {
     showChats.value += 10
     $state.loaded()
   } else {

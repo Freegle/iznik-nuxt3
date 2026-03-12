@@ -40,6 +40,7 @@ onMounted(async () => {
   // Get CGAs and DPAs for all groups - but no locations
   await modGroupStore.listMT({
     grouptype: 'Freegle',
+    polygon: true,
   })
 
   loaded.value = true

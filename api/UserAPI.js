@@ -24,6 +24,10 @@ export default class UserAPI extends BaseAPI {
     return { user: data }
   }
 
+  async search(q) {
+    return await this.$getv2('/user/search', { q })
+  }
+
   async fetchByEmail(email, logError = true) {
     return await this.$getv2('/user/byemail/' + email, {}, logError)
   }

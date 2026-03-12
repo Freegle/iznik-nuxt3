@@ -71,12 +71,9 @@ export const useMemberStore = defineStore({
       // results.
       const instance = this.instance
 
-      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
+      // V2 API expects context as a simple ID value
       if (params.context && typeof params.context === 'object') {
-        for (const key of Object.keys(params.context)) {
-          params[`context[${key}]`] = params.context[key]
-        }
-        delete params.context
+        params.context = params.context.id
       }
 
       const { members, context, ratings } = await api(

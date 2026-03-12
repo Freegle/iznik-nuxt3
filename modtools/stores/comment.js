@@ -17,12 +17,9 @@ export const useCommentStore = defineStore({
       this.context = null
     },
     async fetch(params) {
-      // Convert context object to URL-safe format (URLSearchParams can't serialize objects)
-      if (params.context) {
-        for (const key of Object.keys(params.context)) {
-          params[`context[${key}]`] = params.context[key]
-        }
-        delete params.context
+      // V2 API expects context as a simple ID value
+      if (params.context && typeof params.context === 'object') {
+        params.context = params.context.id
       }
 
       const data = await api(this.config).comment.fetch(params)

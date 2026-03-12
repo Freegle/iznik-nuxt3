@@ -37,7 +37,8 @@ export const useSpammerStore = defineStore({
 
       delete params.context
       if (this.context) {
-        params['context[id]'] = this.context.id
+        // V2 API expects context as a simple ID value
+        params.context = this.context.id
       }
 
       const { spammers, context } = await api(this.config).spammers.fetch(

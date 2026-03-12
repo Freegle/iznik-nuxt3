@@ -340,7 +340,7 @@ watch(groupid, async (id) => {
 })
 
 async function loadallgroups(callback) {
-  await modGroupStore.listMT({ grouptype: 'Freegle' })
+  await modGroupStore.listMT({ grouptype: 'Freegle', support: true })
   if (callback) callback()
 }
 

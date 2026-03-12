@@ -33,7 +33,7 @@ function scanUserForGroup(user) {
   if (user) {
     if (user.applied) {
       user.applied.forEach((g) => {
-        if (g.id === props.log.groupid) {
+        if (g.groupid === props.log.groupid) {
           ret = g
         }
       })
@@ -41,7 +41,7 @@ function scanUserForGroup(user) {
 
     if (!ret && user.memberships) {
       user.memberships.forEach((g) => {
-        if (g.id === props.log.groupid) {
+        if (g.groupid === props.log.groupid) {
           ret = g
         }
       })
