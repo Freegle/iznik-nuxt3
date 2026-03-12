@@ -198,16 +198,11 @@ const simpleEmailSetting = computed(() => {
   return me.value?.settings?.simplemail ? me.value.settings.simplemail : 'Full'
 })
 
-watch(
-  simpleEmailSettingLocal,
-  async (newValue) => {
-    simpleEmailSettingLocal.value = newValue
-    const settings = me.value.settings
-    settings.simplemail = newValue
-    await authStore.saveAndGet({ settings })
-  },
-  { immediate: true }
-)
+watch(simpleEmailSettingLocal, async (newValue) => {
+  const settings = me.value.settings
+  settings.simplemail = newValue
+  await authStore.saveAndGet({ settings })
+})
 
 const checkSimplicity = computed(() => {
   let ret = true
