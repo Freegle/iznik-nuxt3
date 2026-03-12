@@ -95,6 +95,6 @@ const options = computed(() => {
 </script>
 <style scoped>
 .sel {
-  max-width: 200px;
+  width: auto;
 }
 </style>
