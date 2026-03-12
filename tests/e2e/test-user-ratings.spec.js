@@ -60,7 +60,7 @@ test.describe('User ratings tests', () => {
     const chatEntry = page.locator('.chat-entry').first()
     await chatEntry.waitFor({ state: 'visible', timeout: timeouts.background })
     await chatEntry.click()
-    await page.waitForTimeout(timeouts.ui.transition)
+    await page.waitForTimeout(timeouts.ui.settleTime)
 
     // Dismiss the "Contact details" modal if it appears
     const contactDetailsModal = page.locator(

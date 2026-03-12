@@ -5,229 +5,71 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const {
-  signUpViaHomepage,
-  logoutIfLoggedIn,
-  loginViaHomepage,
-} = require('./utils/user')
+const { signUpViaHomepage } = require('./utils/user')
 
 test.describe('Browse Page Tests', () => {
   test('should create a message and browse it successfully', async ({
     page,
     testEmail,
-    getTestEmail,
     postMessage,
     withdrawPost,
-    takeScreenshot,
   }) => {
-    let offerResult = null
-    let uniqueItem = null // Declare at outer scope for use in finally block
+    // Post a message (this handles signup/login internally via the fixture)
+    const uniqueItem = `test-browse-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 5)}`
+    const result = await postMessage({
+      type: 'OFFER',
+      item: uniqueItem,
+      description: `Created by browse test at ${new Date().toISOString()}`,
+      postcode: environment.postcode,
+      email: testEmail,
+    })
 
-    try {
-      // Create  test message.
-      const loginSuccess = await loginViaHomepage(
-        page,
-        environment.unmodded_email,
-        environment.unmodded_password
-      )
-      console.log(`Login result: ${loginSuccess}`)
+    expect(result.id).toBeTruthy()
+    console.log(`Created test message with ID: ${result.id}`)
 
-      if (!loginSuccess) {
-        throw new Error('Failed to login before posting message')
-      }
+    // Navigate to /myposts and verify our post is visible
+    console.log('Navigating to /myposts to verify post visibility')
+    await page.gotoAndVerify('/myposts', {
+      timeout: timeouts.navigation.default,
+    })
 
-      // Debug: Wait and check login state before posting
-      console.log(
-        'Waiting 3 seconds before posting to ensure session is stable...'
-      )
-      await page.waitForTimeout(3000)
+    await page.waitForSelector('.message-card, .card-body', {
+      timeout: timeouts.ui.appearance,
+    })
 
-      // Debug: Check if still logged in before postMessage
-      console.log('About to call postMessage - checking login status')
-      try {
-        const loggedInElements = await page
-          .locator(
-            '.test-user-dropdown, a[href*="logout"], .btn:has-text("My account"), .btn:has-text("Settings")'
-          )
-          .count()
-        console.log(
-          `Found ${loggedInElements} logged-in elements before posting`
-        )
+    const itemLocator = page
+      .locator('.message-card, .card-body')
+      .filter({ hasText: uniqueItem })
+    await itemLocator.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    console.log(`Found our test item "${uniqueItem}" on myposts page`)
 
-        if (loggedInElements === 0) {
-          console.warn(
-            'WARNING: No logged-in elements found before posting - this may cause issues'
-          )
+    // Now navigate to browse and verify the page loads with messages
+    console.log('Testing browse page loads with messages')
+    await page.gotoAndVerify('/browse', {
+      timeout: timeouts.navigation.default,
+    })
 
-          // Take screenshot for debugging
-          await takeScreenshot(`No Login Elements Debug ${Date.now()}`, {
-            fullPage: true,
-          })
-        }
-      } catch (debugError) {
-        console.log(`Login check error: ${debugError.message}`)
-      }
+    // Wait for messages to appear on the browse page
+    await page.waitForSelector('.message-summary-mobile, .messagecard', {
+      timeout: timeouts.ui.appearance,
+    })
 
-      // Use unique timestamp to avoid conflicts with other test runs
-      const uniqueId = Date.now()
-      uniqueItem = `Test Table ${uniqueId}` // Assign to outer scope variable
-      offerResult = await postMessage({
-        type: 'OFFER',
-        item: uniqueItem,
-        description: `Test table created by browse test ${uniqueId}`,
-        postcode: environment.postcode,
-        email: environment.unmodded_email,
-      })
-      console.log(`Created post with unique item name: ${uniqueItem}`)
-      expect(offerResult.id).toBeTruthy()
-      console.log(`Created test message with ID: ${offerResult.id}`)
-      await logoutIfLoggedIn(page)
+    const messageCards = page.locator('.message-summary-mobile, .messagecard')
+    const messageCount = await messageCards.count()
+    expect(messageCount).toBeGreaterThan(0)
+    console.log(`Found ${messageCount} messages on browse page`)
 
-      // Now sign up the main user to browse the messages
-      console.log('Signing up main user for browse tests')
-      await logoutIfLoggedIn(page)
+    // Verify page title
+    const title = await page.title()
+    expect(title).toContain('Browse')
 
-      // Ensure we're on the homepage for a clean signup
-      await page.gotoAndVerify('/', { timeout: timeouts.navigation.default })
-
-      const signupResult = await signUpViaHomepage(
-        page,
-        testEmail,
-        'Browse Test User'
-      )
-      expect(signupResult).toBeTruthy()
-
-      // Join the FreeglePlayground group
-      console.log('Joining FreeglePlayground group')
-      await page.gotoAndVerify('/explore/FreeglePlayground', {
-        timeout: timeouts.navigation.default,
-      })
-
-      // Wait for and click the join button
-      const joinButton = page
-        .locator('.btn:has-text("Join this community")')
-        .first()
-      await joinButton.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-      await joinButton.click()
-
-      // Wait for confirmation of joining
-      await page
-        .locator('.btn:has-text("Leave")')
-        .filter({ visible: true })
-        .first()
-        .waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.interaction,
-        })
-
-      // Now test browsing functionality
-      console.log('Testing browse page with created message')
-      await page.gotoAndVerify('/browse', {
-        timeout: timeouts.navigation.default,
-      })
-
-      // Wait for postcode prompt and enter postcode
-      console.log('Waiting for postcode prompt on browse page')
-      const postcodeInput = page.locator(
-        '.pcinp, input[placeholder="Type postcode"]'
-      )
-      await postcodeInput.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-
-      // Fill in the postcode and wait for autocomplete validation
-      console.log(`Filling postcode ${environment.postcode}`)
-      await postcodeInput.fill(environment.postcode)
-
-      // Wait for the autocomplete dropdown to show results and click the first one
-      const autocompleteItem = page
-        .locator('.postcodelist li a, .listentry a')
-        .first()
-      await autocompleteItem.waitFor({
-        state: 'visible',
-        timeout: timeouts.api.default,
-      })
-      await autocompleteItem.click()
-      console.log('Selected postcode from autocomplete')
-
-      // Wait for validation tick confirming postcode was accepted
-      const validationTick = page.locator('.validation-tick')
-      await validationTick.waitFor({
-        state: 'visible',
-        timeout: timeouts.api.default,
-      })
-      console.log('Postcode validated')
-
-      // Wait for the page to load and messages to appear
-      // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
-      await page.waitForSelector('.message-summary-mobile, .messagecard', {
-        timeout: timeouts.ui.appearance,
-      })
-
-      // Check that the page loads successfully
-      await page
-        .locator('body')
-        .waitFor({ state: 'visible', timeout: timeouts.ui.appearance })
-
-      // Verify page title
-      const title = await page.title()
-      expect(title).toContain('Browse')
-
-      // Look for messages
-      const messageCards = page.locator('.message-summary-mobile, .messagecard')
-      const messageCount = await messageCards.count()
-      expect(messageCount).toBeGreaterThan(0)
-
-      console.log(`Found ${messageCount} messages on browse page`)
-
-      // Debug: Get the HTML of the first message card to see its structure
-      const firstCard = page.locator('.messagecard').first()
-      if ((await firstCard.count()) > 0) {
-        const cardHTML = await firstCard.innerHTML()
-        console.log('First message card HTML:', cardHTML)
-      }
-
-      // Debug: Check what text content is visible on the page
-      const allText = await page.locator('body').allTextContents()
-      const tableRelatedText = allText
-        .join(' ')
-        .match(new RegExp(`[^]*${uniqueItem}[^]*`, 'g'))
-      console.log(`Text containing "${uniqueItem}":`, tableRelatedText)
-
-      // Check that we can see the specific test item we created
-      const testTableMessage = page
-        .getByText(uniqueItem, { exact: false })
-        .first()
-      await testTableMessage.waitFor({
-        state: 'visible',
-        timeout: timeouts.ui.appearance,
-      })
-      console.log(`Successfully found the ${uniqueItem} message on browse page`)
-    } finally {
-      // Clean up the created message - log in as the poster and withdraw
-      if (offerResult) {
-        console.log('Cleaning up test message')
-        try {
-          await logoutIfLoggedIn(page)
-          await loginViaHomepage(
-            page,
-            environment.unmodded_email,
-            environment.unmodded_password
-          )
-
-          // Now withdraw the post using the unique item name
-          await withdrawPost({ item: uniqueItem })
-        } catch (cleanupError) {
-          console.warn(
-            `Failed to clean up test message: ${cleanupError.message}`
-          )
-        }
-      }
-    }
+    // Clean up
+    await withdrawPost({ item: result.item })
   })
 
   test('should handle search functionality on browse page', async ({

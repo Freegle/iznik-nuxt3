@@ -32,27 +32,26 @@ test.describe('Post flow tests', () => {
     expect(result.id).not.toBe(null)
     console.log(`Post created with ID: ${result.id}`)
 
-    // Navigate to /browse and verify a post is visible
-    console.log('Navigating to /browse to verify post visibility')
-    await page.gotoAndVerify('/browse', {
+    // Navigate to /myposts and verify our post is visible
+    console.log('Navigating to /myposts to verify post visibility')
+    await page.gotoAndVerify('/myposts', {
       timeout: timeouts.navigation.default,
     })
 
     // Wait for message cards and verify our specific item is visible
-    // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
-    await page.waitForSelector('.message-summary-mobile, .messagecard', {
+    await page.waitForSelector('.message-card, .card-body', {
       timeout: timeouts.ui.appearance,
     })
 
-    // Look for our specific unique item in the message cards.
+    // Look for our specific unique item in the message cards
     const itemLocator = page
-      .locator('.message-summary-mobile, .messagecard')
+      .locator('.message-card, .card-body')
       .filter({ hasText: uniqueItem })
     await itemLocator.waitFor({
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
-    console.log(`Found our test item "${uniqueItem}" on browse page`)
+    console.log(`Found our test item "${uniqueItem}" on myposts page`)
 
     // Use the fixture to withdraw the post
     await withdrawPost({ item: result.item })

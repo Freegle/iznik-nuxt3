@@ -33,23 +33,23 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
       (response) =>
         response.url().includes('/api/session') &&
         response.status() === 200 &&
-        response.request().method() === 'POST'
+        response.request().method() === 'PATCH'
     )
     await emailLevelSelect.selectOption('None')
     await savePromise1
     console.log('Reset to None first since default matches target')
   }
 
-  // Wait for the POST that saves the setting
+  // Wait for the PATCH that saves the setting (V2 API uses PATCH for session updates)
   const savePromise = page.waitForResponse(
     (response) =>
       response.url().includes('/api/session') &&
       response.status() === 200 &&
-      response.request().method() === 'POST'
+      response.request().method() === 'PATCH'
   )
   await emailLevelSelect.selectOption(level.value)
   await savePromise
-  console.log(`Setting saved via POST, now verifying with reload`)
+  console.log(`Setting saved via PATCH, now verifying with reload`)
 
   // Reload the page to verify persistence
   await page.reload()
