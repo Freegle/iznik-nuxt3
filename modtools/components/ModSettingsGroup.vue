@@ -828,6 +828,17 @@
               or all caretaker communities
               <!-- eslint-disable-next-line -->
               <nuxt-link to="/map/caretaker">here</nuxt-link>.
+              See also
+              <ExternalLink
+                href="https://wiki.ilovefreegle.org/Community_Mapping"
+                >Community Mapping</ExternalLink
+              >
+              and
+              <ExternalLink
+                href="https://wiki.ilovefreegle.org/Freegle_Affiliated_Community_Area_Guidelines"
+                >Area Guidelines</ExternalLink
+              >
+              on the wiki.
             </b-form-text>
             <b-form-group label="Areas">
               <b-form-text class="mb-2">

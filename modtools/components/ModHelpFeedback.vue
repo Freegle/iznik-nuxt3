@@ -18,6 +18,12 @@
       the ones where you're most likely to want to do something. You can use the
       dropdown filter to view the others.
     </p>
+    <p>
+      More info
+      <ExternalLink href="https://wiki.ilovefreegle.org/Feedback"
+        >on the wiki</ExternalLink
+      >.
+    </p>
   </NoticeMessage>
   <b-button v-else variant="link" class="float-end pt-0" @click="toggleHelp">
     Help
