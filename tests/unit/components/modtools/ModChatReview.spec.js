@@ -35,6 +35,12 @@ vi.mock('~/stores/chat', () => ({
   useChatStore: () => mockChatStore,
 }))
 
+vi.mock('~/stores/auth', () => ({
+  useAuthStore: () => ({
+    groups: [{ groupid: 789, role: 'Moderator', active: 1 }],
+  }),
+}))
+
 describe('ModChatReview', () => {
   const createTestMessage = (overrides = {}) => ({
     id: 123,
