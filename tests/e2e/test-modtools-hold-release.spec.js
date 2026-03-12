@@ -30,21 +30,32 @@ test.describe('ModTools hold and release message', () => {
       timeout: timeouts.navigation.slowPage,
     })
 
-    // Dismiss the cake modal if it appears (it overlays the page after load).
-    // Use JS to remove the modal and backdrop since clicking Close can leave
-    // the backdrop behind due to animation timing.
-    await page.evaluate(() => {
-      const modal = document.getElementById('modcakemodal')
-      if (modal) {
-        modal.classList.remove('show')
-        modal.style.display = 'none'
-      }
-      document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove())
-      document.body.classList.remove('modal-open')
-      document.body.style.removeProperty('overflow')
-      document.body.style.removeProperty('padding-right')
-    })
+    // Dismiss any modals (cake modal, etc.) that overlay the page after load.
+    // Use JS to forcefully remove all modals and backdrops, including those
+    // rendered via Vue teleport into #teleports.
+    async function dismissAllModals() {
+      await page.evaluate(() => {
+        // Remove all visible modals
+        document
+          .querySelectorAll('.modal.show, .modal[style*="display: block"]')
+          .forEach((el) => {
+            el.classList.remove('show')
+            el.style.display = 'none'
+          })
+        // Remove all backdrops (including those in #teleports)
+        document
+          .querySelectorAll('.modal-backdrop')
+          .forEach((el) => el.remove())
+        // Reset body state
+        document.body.classList.remove('modal-open')
+        document.body.style.removeProperty('overflow')
+        document.body.style.removeProperty('padding-right')
+      })
+    }
+    await dismissAllModals()
     await page.waitForTimeout(500)
+    // Dismiss again in case Vue re-rendered a modal/backdrop
+    await dismissAllModals()
 
     // Select a group that has pending messages.
     // Find first group option that has a count indicator (e.g. "Freegle Playground2 (2)")
@@ -92,6 +103,9 @@ test.describe('ModTools hold and release message', () => {
     await expect(holdButton).toBeVisible({
       timeout: timeouts.ui.appearance,
     })
+
+    // Dismiss any late-appearing modals before clicking
+    await dismissAllModals()
     await holdButton.click()
 
     // Handle confirmation dialog if it appears
