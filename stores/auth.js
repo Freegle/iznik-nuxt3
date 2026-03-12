@@ -327,6 +327,12 @@ export const useAuthStore = defineStore({
       let me = null
       let groups = null
 
+      // Guard: init() must be called before fetchUser() to set up this.$api
+      if (!this.$api) {
+        console.warn('fetchUser called before init() - skipping')
+        return null
+      }
+
       // Handle backwards compatibility - components might be boolean from old callers
       if (typeof components === 'boolean') components = []
       if (!components) components = []
