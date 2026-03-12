@@ -210,9 +210,7 @@ test.describe('Post flow tests', () => {
     await withdrawPost({ item: result.item })
   })
 
-  // TODO: needs updating to work with redesign. Now shows options page before email,
-  // and then opens account creation modal after clicking "Freegle it!".
-  test.skip("Email existence check - prevents posting with someone else's email", async ({
+  test("Email existence check - prevents posting with someone else's email", async ({
     page,
     testEmail,
     postMessage,

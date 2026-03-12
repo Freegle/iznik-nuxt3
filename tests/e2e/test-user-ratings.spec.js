@@ -9,8 +9,7 @@ const { environment, timeouts } = require('./config')
 const { loginViaHomepage, logoutIfLoggedIn } = require('./utils/user')
 
 test.describe('User ratings tests', () => {
-  // Skip: This test is flaky and being worked on in fix/user-ratings branch
-  test.skip('Rate and unrate a user via chat', async ({
+  test('Rate and unrate a user via chat', async ({
     page,
     testEmail,
     getTestEmail,

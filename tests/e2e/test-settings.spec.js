@@ -130,7 +130,7 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 }
 
 test.describe('Settings Page - Email Level Settings', () => {
-  test.skip('Email level "Off" saves correctly and persists after page reload', async ({
+  test('Email level "Off" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -139,10 +139,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
-  // TODO: Fix this test - it's failing with timeout issues after user registration
-  // The test successfully registers a new user but then fails to properly save/verify email settings
-  // Need to investigate why the settings page isn't working correctly after registration
-  test.skip('Email level "Basic" saves correctly and persists after page reload', async ({
+  test('Email level "Basic" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
@@ -151,7 +148,7 @@ test.describe('Settings Page - Email Level Settings', () => {
     await testEmailLevelSetting(page, testEmail, level, takeScreenshot)
   })
 
-  test.skip('Email level "Standard" saves correctly and persists after page reload', async ({
+  test('Email level "Standard" saves correctly and persists after page reload', async ({
     page,
     testEmail,
     takeScreenshot,
