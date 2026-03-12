@@ -133,6 +133,8 @@ export function useMe() {
           lat: groupData.lat || null,
           lng: groupData.lng || null,
           settings: groupData.settings || null,
+          profile: groupData.profile || null,
+          tagline: groupData.tagline || null,
         }
         return merged
       })
