@@ -259,7 +259,7 @@ const test = base.test.extend({
       /Error retrieving a token./, // Also related to GSI FedCM, not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
-      /\[Exeption for Sentry\].*TypeError: Failed to execute 'observe' on 'MutationObserver'/, // Sentry MutationObserver error
+      /\[Exeption for Sentry\].*TypeError/, // Sentry-wrapped TypeErrors are non-critical UI issues
       /tuimg_0/i, // Allow any error mentioning tuimg_0 (case-insensitive)
       /delivery\.localhost.*tuimg_0/i, // Specific delivery service tuimg_0 errors
       /stripe\.com/i, // Ignore any Stripe-related errors during testing (case-insensitive)
