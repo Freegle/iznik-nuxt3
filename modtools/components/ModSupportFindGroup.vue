@@ -22,15 +22,15 @@
       >
         {{ group.namedisplay }}
       </h4>
-      <div class="d-flex">
+      <div class="d-flex flex-wrap">
         <OurToggle
           :model-value="Boolean(group.publish)"
           :height="36"
-          :width="150"
+          :width="170"
           :font-size="14"
           :labels="{ unchecked: 'Not visible', checked: 'Visible on site' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.ontn)"
@@ -39,16 +39,16 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on TN', checked: 'On TN' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onlovejunk)"
           :height="36"
-          :width="150"
+          :width="190"
           :font-size="14"
           :labels="{ unchecked: 'Not on LoveJunk', checked: 'On LoveJunk' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <OurToggle
           :model-value="Boolean(group.onmap)"
@@ -57,7 +57,7 @@
           :font-size="14"
           :labels="{ unchecked: 'Not on map', checked: 'On map' }"
           disabled
-          class="mr-2"
+          class="mr-2 mb-1"
         />
         <b-form-group>
           <b-form-select
