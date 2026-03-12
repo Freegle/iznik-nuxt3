@@ -52,6 +52,7 @@ export const useUserStore = defineStore({
       }
 
       params.info = true
+      params.modtools = true
       const { user, users } = await api(this.config).user.fetchMT(params)
       if (user) {
         this.list[user.id] = user

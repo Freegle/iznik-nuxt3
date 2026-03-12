@@ -30,7 +30,9 @@
       </template>
 
       <template #footer>
-        <b-button variant="primary" @click="hide"> Close </b-button>
+        <b-button variant="primary" :disabled="busy" @click="hide">
+          Close
+        </b-button>
       </template>
     </b-modal>
   </div>

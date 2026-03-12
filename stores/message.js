@@ -473,9 +473,13 @@ export const useMessageStore = defineStore({
       // Response is IDs only — fetch full details for each.
       await Promise.all(
         data.messages.map(async (id) => {
-          const message = await this.fetchMT({ id })
-          if (message) {
-            this.list[message.id] = message
+          try {
+            const message = await this.fetchMT({ id })
+            if (message) {
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
           }
         })
       )
@@ -498,14 +502,19 @@ export const useMessageStore = defineStore({
       }
 
       // Fetch full message details in parallel for each ID.
+      // Individual fetches may 404 if a message was deleted between listing and fetching.
       await Promise.all(
         messageIDs.map(async (id) => {
-          const message = await this.fetchMT({
-            id,
-          })
-          if (message) {
-            if (!message.subject) message.subject = ''
-            this.list[message.id] = message
+          try {
+            const message = await this.fetchMT({
+              id,
+            })
+            if (message) {
+              if (!message.subject) message.subject = ''
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
           }
         })
       )
@@ -621,9 +630,13 @@ export const useMessageStore = defineStore({
       // Response is IDs only — fetch full details for each.
       await Promise.all(
         data.messages.map(async (id) => {
-          const message = await this.fetchMT({ id })
-          if (message) {
-            this.list[message.id] = message
+          try {
+            const message = await this.fetchMT({ id })
+            if (message) {
+              this.list[message.id] = message
+            }
+          } catch (e) {
+            console.log('Failed to fetch message', id, e?.message)
           }
         })
       )
