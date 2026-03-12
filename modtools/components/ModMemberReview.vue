@@ -5,47 +5,52 @@
         <div>
           <div v-if="isLJ">LoveJunk user #{{ user.ljuserid }}</div>
           <!-- eslint-disable-next-line -->
-          <v-icon icon="envelope" />
+          <v-icon icon="envelope" class="me-1" />
           <ExternalLink :href="'mailto:' + email">{{ email }}</ExternalLink>
         </div>
         <div>
           <ProfileImage
-            :image="member.profile?.turl || member.profile?.paththumb"
-            :name="member.displayname"
+            v-if="user"
+            :image="user.profile?.turl || user.profile?.paththumb"
+            :name="user.displayname"
             class="ml-1 mb-1 inline"
             is-thumbnail
             size="sm"
           />
-          {{ member.displayname }}
-          <ModSupporter v-if="member.supporter" class="d-inline" />
+          {{ user ? user.displayname : member.fullname }}
+          <ModSupporter v-if="user && user.supporter" class="d-inline" />
         </div>
-        <div v-if="member.joined">
-          <v-icon icon="calendar-alt" /> {{ datetimeshort(member.joined) }}
+        <div v-if="member.joined || member.added">
+          <v-icon icon="calendar-alt" />
+          {{ datetimeshort(member.joined || member.added) }}
         </div>
         <div><v-icon icon="hashtag" />{{ member.userid }}</div>
       </b-card-header>
       <b-card-body>
-        <ModComments :userid="member.id" />
-        <ModSpammer v-if="member.spammer" :user="member" />
-        <NoticeMessage v-if="member.systemrole !== 'User'" variant="info">
-          This freegler has role: {{ member.systemrole }}.
+        <ModComments :userid="member.userid" />
+        <ModSpammer v-if="member.spammer" :userid="member.userid" />
+        <NoticeMessage
+          v-if="user && user.systemrole && user.systemrole !== 'User'"
+          variant="info"
+        >
+          This freegler has role: {{ user.systemrole }}.
         </NoticeMessage>
         <NoticeMessage
-          v-if="member.suspectreason"
+          v-if="user && user.suspectreason"
           variant="danger"
           class="mb-2"
         >
-          This freegler is flagged: {{ member.suspectreason }}
+          This freegler is flagged: {{ user.suspectreason }}
         </NoticeMessage>
         <NoticeMessage
-          v-if="member.activedistance > 50"
+          v-if="user && user.activedistance > 50"
           variant="warning"
           class="mb-2"
         >
           This freegler recently active on groups
-          {{ member.activedistance }} miles apart.
+          {{ user.activedistance }} miles apart.
         </NoticeMessage>
-        <ModBouncing v-if="member.bouncing" :user="member" />
+        <ModBouncing v-if="user && user.bouncing" :userid="member.userid" />
         <NoticeMessage v-if="member.bandate">
           Banned
           <span :title="datetime(member.bandate)">{{
@@ -56,31 +61,31 @@
         </NoticeMessage>
         <div class="d-flex justify-content-between flex-wrap">
           <div>
-            <ModMemberSummary :member="member" />
+            <ModMemberSummary :userid="member.userid" />
             <div
-              v-if="member.lastaccess"
+              v-if="lastaccess"
               :class="'mb-1 ' + (inactive ? 'text-danger' : '')"
             >
-              Last active: {{ timeago(member.lastaccess) }}
+              Last active: {{ timeago(lastaccess) }}
               <span v-if="inactive"> - won't send mails </span>
             </div>
             <div class="d-flex justify-content-between flex-wrap">
-              <div v-if="member.info && member.info.publiclocation">
-                Public location: {{ member.info.publiclocation.location }}
+              <div v-if="userinfo && userinfo.publiclocation">
+                Public location: {{ userinfo.publiclocation.location }}
               </div>
-              <div v-if="member.info && member.info.privateposition">
-                Private location: {{ member.info.privateposition.loc }}
+              <div v-if="userinfo && userinfo.privateposition">
+                Private location: {{ userinfo.privateposition.loc }}
               </div>
             </div>
             <MessageMap
-              v-if="member.info && member.info.privateposition"
-              :position="member.info.privateposition"
+              v-if="userinfo && userinfo.privateposition"
+              :position="userinfo.privateposition"
               :boundary="firstgrouppolygon"
               class="mt-2"
             />
-            <ModMemberLogins :member="member" />
+            <ModMemberLogins :userid="member.userid" />
             <b-button
-              v-if="member.emails && member.emails.length"
+              v-if="userEmails && userEmails.length"
               variant="link"
               @click="showEmails = !showEmails"
             >
@@ -88,15 +93,15 @@
               <span v-if="showEmails">
                 <span class="d-inline d-sm-none"> Hide </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', userEmails.length, true) }}
                 </span>
               </span>
               <span v-else>
                 <span class="d-inline d-sm-none">
-                  {{ member.emails.length }}
+                  {{ userEmails.length }}
                 </span>
                 <span class="d-none d-sm-inline">
-                  Show {{ pluralise('email', member.emails.length, true) }}
+                  Show {{ pluralise('email', userEmails.length, true) }}
                 </span>
               </span>
             </b-button>
@@ -112,7 +117,7 @@
               View profile
             </b-button>
             <div v-if="showEmails">
-              <div v-for="e in member.emails" :key="e.id">
+              <div v-for="e in userEmails" :key="e.id">
                 {{ e.email }} <v-icon v-if="e.preferred" icon="star" />
               </div>
             </div>
@@ -121,9 +126,8 @@
         <ModMemberReviewActions
           v-for="m in memberof"
           :key="'membership-' + m.membershipid"
-          :memberid="member.id"
-          :membership="m"
-          :member="member"
+          :membershipid="m.membershipid"
+          :userid="member.userid"
           class="p-1 mr-1"
           @forcerefresh="forcerefresh"
         />
@@ -140,7 +144,7 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :user="member"
+      :userid="member.userid"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
@@ -156,17 +160,21 @@
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '~/stores/user'
+import { useMemberStore } from '~/stores/member'
 import { useModGroupStore } from '~/stores/modgroup'
 import { useModMe } from '~/composables/useModMe'
 
 const MEMBERSHIPS_SHOW = 3
 
 const props = defineProps({
-  member: {
-    type: Object,
+  membershipid: {
+    type: Number,
     required: true,
   },
 })
+
+const memberStore = useMemberStore()
+const member = computed(() => memberStore.get(props.membershipid))
 
 const emit = defineEmits(['forcerefresh'])
 
@@ -191,8 +199,8 @@ const isLJ = computed(() => {
 const allmemberof = computed(() => {
   let ms = []
 
-  if (props.member && props.member.memberships) {
-    ms = props.member.memberships
+  if (member.value && member.value.memberships) {
+    ms = member.value.memberships
   }
 
   if (!ms) {
@@ -247,15 +255,17 @@ const firstgrouppolygon = computed(() => {
 })
 
 const email = computed(() => {
-  // Depending on which context we're used it, we might or might not have an email returned.
-  let ret = props.member.email
+  let ret = null
 
-  if (!props.member.email && props.member.emails) {
-    props.member.emails.forEach((e) => {
-      if (!e.ourdomain && (!ret || e.preferred)) {
-        ret = e.email
-      }
-    })
+  if (user.value) {
+    ret = user.value.email
+    if (!ret && user.value.emails) {
+      user.value.emails.forEach((e) => {
+        if (!e.ourdomain && (!ret || e.preferred)) {
+          ret = e.email
+        }
+      })
+    }
   }
 
   return ret
@@ -269,24 +279,34 @@ const hiddenmemberofs = computed(() => {
     : 0
 })
 
+const userEmails = computed(() => {
+  return user.value?.emails
+})
+
+const lastaccess = computed(() => {
+  return user.value?.lastaccess
+})
+
+const userinfo = computed(() => {
+  return user.value?.info
+})
+
 const inactive = computed(() => {
   // This code matches server code in sendOurMails.
   return (
-    props.member &&
-    props.member.lastaccess &&
-    dayjs().diff(dayjs(props.member.lastaccess), 'day') >= 365 / 2
+    lastaccess.value && dayjs().diff(dayjs(lastaccess.value), 'day') >= 365 / 2
   )
 })
 
 const user = computed(() => {
-  return userStore.byId(props.member.userid)
+  return member.value ? userStore.byId(member.value.userid) : null
 })
 
 onMounted(() => {
-  if (!props.member.info) {
-    // Fetch with info so that we can display more.
+  // Always fetch full user data with info for display.
+  if (member.value) {
     userStore.fetchMT({
-      id: props.member.userid,
+      id: member.value.userid,
       info: true,
     })
   }

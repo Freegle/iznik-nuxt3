@@ -3,8 +3,8 @@
     <ModComment
       v-for="comment in comments"
       :key="'modcomments-' + userid + '-' + comment.id"
-      :comment="comment"
-      :user="user"
+      :commentid="comment.id"
+      :userid="userid"
       :expand-comments="expandComments"
       @updated="updated"
       @editing="editing"

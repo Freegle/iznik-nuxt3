@@ -7,12 +7,14 @@ import ModVolunteerOpportunity from '~/modtools/components/ModVolunteerOpportuni
 const mockDelete = vi.fn()
 const mockSave = vi.fn()
 const mockRemove = vi.fn()
+const mockByIdVolunteering = vi.fn()
 
 vi.mock('@/stores/volunteering', () => ({
   useVolunteeringStore: () => ({
     delete: mockDelete,
     save: mockSave,
     remove: mockRemove,
+    byId: mockByIdVolunteering,
   }),
 }))
 
@@ -34,13 +36,15 @@ vi.mock('~/stores/user', () => ({
 }))
 
 describe('ModVolunteerOpportunity', () => {
+  const defaultVolunteering = {
+    id: 123,
+    pending: true,
+    groups: [456],
+    userid: 789,
+  }
+
   const defaultProps = {
-    volunteering: {
-      id: 123,
-      pending: true,
-      groups: [456],
-      userid: 789,
-    },
+    volunteeringid: 123,
   }
 
   const mockGroup = {
@@ -54,7 +58,10 @@ describe('ModVolunteerOpportunity', () => {
     displayname: 'Test User',
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, volunteeringOverrides = {}) {
+    const volunteering = { ...defaultVolunteering, ...volunteeringOverrides }
+    mockByIdVolunteering.mockReturnValue(volunteering)
+
     return mount(ModVolunteerOpportunity, {
       props: { ...defaultProps, ...props },
       global: {
@@ -117,6 +124,7 @@ describe('ModVolunteerOpportunity', () => {
     mockDelete.mockResolvedValue()
     mockSave.mockResolvedValue()
     mockRemove.mockResolvedValue()
+    mockByIdVolunteering.mockReturnValue(defaultVolunteering)
     mockGroupStore.get.mockReturnValue(mockGroup)
     mockUserStore.byId.mockReturnValue(mockUser)
     mockUserStore.fetch.mockResolvedValue(mockUser)
@@ -129,9 +137,7 @@ describe('ModVolunteerOpportunity', () => {
     })
 
     it('does not render when not pending', () => {
-      const wrapper = mountComponent({
-        volunteering: { ...defaultProps.volunteering, pending: false },
-      })
+      const wrapper = mountComponent({}, { pending: false })
       expect(wrapper.find('.card').exists()).toBe(false)
     })
 
@@ -141,9 +147,7 @@ describe('ModVolunteerOpportunity', () => {
     })
 
     it('shows System added when no userid', () => {
-      const wrapper = mountComponent({
-        volunteering: { ...defaultProps.volunteering, userid: 0 },
-      })
+      const wrapper = mountComponent({}, { userid: 0 })
       expect(wrapper.text()).toContain('System added')
     })
 
@@ -183,9 +187,7 @@ describe('ModVolunteerOpportunity', () => {
     })
 
     it('does not render ChatButton when no userid', () => {
-      const wrapper = mountComponent({
-        volunteering: { ...defaultProps.volunteering, userid: 0 },
-      })
+      const wrapper = mountComponent({}, { userid: 0 })
       expect(wrapper.find('.chat-button').exists()).toBe(false)
     })
 

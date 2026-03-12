@@ -74,7 +74,7 @@
               <ModMessage
                 v-for="message in messages"
                 :key="'message-' + message.id"
-                :message="message"
+                :messageid="message.id"
                 noactions
               />
             </div>

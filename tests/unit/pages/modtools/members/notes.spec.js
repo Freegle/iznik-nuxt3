@@ -46,8 +46,8 @@ describe('members/notes/[[id]].vue page', () => {
           },
           ModCommentUser: {
             template:
-              '<div class="mod-comment-user" :data-comment-id="comment.id" />',
-            props: ['comment'],
+              '<div class="mod-comment-user" :data-comment-id="commentid" />',
+            props: ['commentid'],
           },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',

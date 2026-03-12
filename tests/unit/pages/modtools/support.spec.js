@@ -87,7 +87,7 @@ describe('support/[[id]].vue page', () => {
           },
           ModMessage: {
             template: '<div class="mod-message" />',
-            props: ['message', 'noactions'],
+            props: ['messageid', 'noactions'],
           },
           ModSystemLogs: {
             template: '<div class="mod-system-logs" />',

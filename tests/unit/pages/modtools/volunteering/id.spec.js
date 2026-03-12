@@ -31,8 +31,8 @@ describe('VolunteeringPage', () => {
         stubs: {
           ModVolunteerOpportunity: {
             template:
-              '<div class="mod-volunteer-opportunity" :data-id="volunteering.id" />',
-            props: ['id', 'volunteering'],
+              '<div class="mod-volunteer-opportunity" :data-id="volunteeringid" />',
+            props: ['id', 'volunteeringid'],
           },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',

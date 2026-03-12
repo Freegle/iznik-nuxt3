@@ -27,12 +27,22 @@ const mockGroupStore = {
   fetch: vi.fn().mockResolvedValue(null),
 }
 
+let mockStoryData = {}
+
+const mockStoryStore = {
+  byId: (id) => mockStoryData[id] || null,
+}
+
 vi.mock('@/stores/user', () => ({
   useUserStore: () => mockUserStore,
 }))
 
 vi.mock('@/stores/group', () => ({
   useGroupStore: () => mockGroupStore,
+}))
+
+vi.mock('@/stores/stories', () => ({
+  useStoryStore: () => mockStoryStore,
 }))
 
 vi.mock('~/modtools/composables/useModMe', () => ({
@@ -70,11 +80,20 @@ describe('ModStoryReview', () => {
     ...overrides,
   })
 
+  function populateStoryStore(story) {
+    mockStoryData[story.id] = story
+  }
+
   function mountComponent(props = {}) {
+    // Convert old-style story prop to storyid and populate store
+    const { story: storyProp, ...otherProps } = props
+    const story = storyProp || createStory()
+    populateStoryStore(story)
+
     return mount(ModStoryReview, {
       props: {
-        story: createStory(),
-        ...props,
+        storyid: story.id,
+        ...otherProps,
       },
       global: {
         stubs: {
@@ -128,6 +147,7 @@ describe('ModStoryReview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockStoryData = {}
     // Default: user found in store
     mockUserStore.byId.mockReturnValue(defaultUser)
     mockUserStore.fetchMT.mockResolvedValue(defaultUser)

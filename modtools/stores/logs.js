@@ -143,8 +143,8 @@ export const useLogsStore = defineStore({
     },
   },
   getters: {
-    get: (state) => (id) => {
-      return state.listById(id)
+    byId: (state) => (id) => {
+      return state.list.find((l) => l.id === id) || null
     },
   },
 })

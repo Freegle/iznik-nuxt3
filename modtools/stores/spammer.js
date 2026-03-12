@@ -217,6 +217,10 @@ export const useSpammerStore = defineStore({
     },
   },
   getters: {
+    byId: (state) => (id) => {
+      return state.list.find((s) => parseInt(s.id) === parseInt(id)) || null
+    },
+
     getList: (state) => (collection) => {
       return state.list.filter((s) => s.collection === collection)
     },

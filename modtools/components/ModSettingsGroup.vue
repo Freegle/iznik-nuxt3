@@ -79,7 +79,7 @@
               <ModSettingShortlink
                 v-for="shortlink in shortlinks"
                 :key="'shortlink-' + shortlink.id"
-                :shortlink="shortlink"
+                :shortlinkid="shortlink.id"
               />
             </div>
             <p>
@@ -910,12 +910,6 @@
                   </p>
                 </NoticeMessage>
               </div>
-              <ModSettingsGroupFacebook
-                v-for="facebook in group.facebook"
-                :key="'facebook-' + facebook.id"
-                :groupid="group.id"
-                :facebook="facebook"
-              />
             </div>
             <NoticeMessage v-else variant="warning">
               <p>

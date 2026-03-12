@@ -1,5 +1,5 @@
 <template>
-  <span v-if="log.msgid">
+  <span v-if="log && log.msgid">
     <span v-if="log.message">
       <a
         :href="'https://www.ilovefreegle.org/message/' + log.msgid"
@@ -13,7 +13,7 @@
       <span v-if="!notext && log.text && log.text.length > 0">
         with <em>{{ log.text }} </em></span
       >
-      <ModLogStdMsg :log="log" /> <ModLogGroup :log="log" :tag="tag" />
+      <ModLogStdMsg :logid="logid" /> <ModLogGroup :logid="logid" :tag="tag" />
     </span>
     <span v-else>
       <v-icon icon="hashtag" class="text-muted" scale="0.75" />{{ log.msgid }}
@@ -23,12 +23,12 @@
 </template>
 <script setup>
 import { computed } from 'vue'
+import { useLogsStore } from '~/stores/logs'
 
 const props = defineProps({
-  log: {
-    type: Object,
-    required: false,
-    default: null,
+  logid: {
+    type: Number,
+    required: true,
   },
   notext: {
     type: Boolean,
@@ -42,10 +42,14 @@ const props = defineProps({
   },
 })
 
+const logsStore = useLogsStore()
+
+const log = computed(() => logsStore.byId(props.logid))
+
 const messagesubject = computed(() => {
-  if (props.log.message) {
-    return props.log.message.subject
-      ? props.log.message.subject
+  if (log.value?.message) {
+    return log.value.message.subject
+      ? log.value.message.subject
       : '(Blank subject line)'
   } else {
     return '(Message now deleted)'

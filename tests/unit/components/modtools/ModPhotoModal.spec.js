@@ -6,6 +6,7 @@ import ModPhotoModal from '~/modtools/components/ModPhotoModal.vue'
 // Mock the message store
 const mockMessageStore = {
   patch: vi.fn().mockResolvedValue({}),
+  byId: vi.fn(),
 }
 
 vi.mock('~/stores/message', () => ({
@@ -49,30 +50,36 @@ const PostPhotoStub = defineComponent({
 })
 
 describe('ModPhotoModal', () => {
-  const defaultProps = {
-    attachment: {
-      id: 123,
-      path: '/photos/test-image.jpg',
-      paththumb: '/photos/test-image-thumb.jpg',
-    },
-    message: {
-      id: 456,
-      subject: 'Test Message Subject',
-      attachments: [
-        { id: 123, path: '/photos/test-image.jpg' },
-        { id: 124, path: '/photos/other-image.jpg' },
-        { id: 125, path: '/photos/third-image.jpg' },
-      ],
-    },
-    externalmods: {
-      rotate: 90,
-      brightness: 1.2,
-    },
+  const defaultMessage = {
+    id: 456,
+    subject: 'Test Message Subject',
+    attachments: [
+      {
+        id: 123,
+        path: '/photos/test-image.jpg',
+        paththumb: '/photos/test-image-thumb.jpg',
+        mods: JSON.stringify({ rotate: 90, brightness: 1.2 }),
+      },
+      { id: 124, path: '/photos/other-image.jpg' },
+      { id: 125, path: '/photos/third-image.jpg' },
+    ],
   }
 
   function mountComponent(props = {}) {
+    // Set up message store based on props
+    const messageData = props._messageData || defaultMessage
+    const messageid = props.messageid || messageData.id
+    const attachmentid = props.attachmentid || 123
+
+    mockMessageStore.byId.mockImplementation((id) => {
+      if (id === messageid) return messageData
+      return null
+    })
+
+    const { _messageData, ...componentProps } = props
+
     return mount(ModPhotoModal, {
-      props: { ...defaultProps, ...props },
+      props: { messageid, attachmentid, ...componentProps },
       global: {
         stubs: {
           'b-modal': {
@@ -101,6 +108,7 @@ describe('ModPhotoModal', () => {
     vi.clearAllMocks()
     mockMessageStore.patch.mockReset()
     mockMessageStore.patch.mockResolvedValue({})
+    mockMessageStore.byId.mockReturnValue(defaultMessage)
   })
 
   describe('rendering', () => {
@@ -154,50 +162,56 @@ describe('ModPhotoModal', () => {
   })
 
   describe('props validation', () => {
-    it('accepts required attachment prop', () => {
+    it('accepts required messageid prop', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('attachment').id).toBe(123)
+      expect(wrapper.props('messageid')).toBe(456)
     })
 
-    it('accepts required message prop', () => {
+    it('accepts required attachmentid prop', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('message').id).toBe(456)
+      expect(wrapper.props('attachmentid')).toBe(123)
     })
 
-    it('accepts required externalmods prop', () => {
+    it('computes externalmods from attachment mods field', () => {
       const wrapper = mountComponent()
-      expect(wrapper.props('externalmods')).toEqual({
+      expect(wrapper.vm.externalmods).toEqual({
         rotate: 90,
         brightness: 1.2,
       })
     })
 
-    it('handles empty externalmods', () => {
+    it('handles attachment with no mods', () => {
       const wrapper = mountComponent({
-        externalmods: {},
+        _messageData: {
+          id: 456,
+          subject: 'Test',
+          attachments: [{ id: 123, path: '/photos/test.jpg' }],
+        },
       })
-      expect(wrapper.props('externalmods')).toEqual({})
-    })
-
-    it('handles complex externalmods object', () => {
-      const complexMods = {
-        rotate: 180,
-        brightness: 0.8,
-        contrast: 1.5,
-        filters: ['grayscale', 'blur'],
-        crop: { x: 10, y: 20, width: 100, height: 100 },
-      }
-      const wrapper = mountComponent({
-        externalmods: complexMods,
-      })
-      expect(wrapper.props('externalmods')).toEqual(complexMods)
+      expect(wrapper.vm.externalmods).toEqual({})
     })
   })
 
   describe('modal id uniqueness', () => {
     it('generates unique modal id for different attachments', () => {
-      const wrapper1 = mountComponent({ attachment: { id: 100 } })
-      const wrapper2 = mountComponent({ attachment: { id: 200 } })
+      const msg1 = {
+        id: 456,
+        subject: 'Test',
+        attachments: [{ id: 100, path: '/a.jpg' }],
+      }
+      const msg2 = {
+        id: 456,
+        subject: 'Test',
+        attachments: [{ id: 200, path: '/b.jpg' }],
+      }
+      const wrapper1 = mountComponent({
+        attachmentid: 100,
+        _messageData: msg1,
+      })
+      const wrapper2 = mountComponent({
+        attachmentid: 200,
+        _messageData: msg2,
+      })
 
       const id1 = wrapper1.find('.b-modal').attributes('id')
       const id2 = wrapper2.find('.b-modal').attributes('id')
@@ -240,7 +254,8 @@ describe('ModPhotoModal', () => {
 
     it('calls patch with correct message id for different messages', async () => {
       const wrapper = mountComponent({
-        message: {
+        messageid: 999,
+        _messageData: {
           id: 999,
           subject: 'Another Message',
           attachments: [{ id: 123 }],
@@ -285,7 +300,7 @@ describe('ModPhotoModal', () => {
 
     it('handles removing the last attachment', async () => {
       const wrapper = mountComponent({
-        message: {
+        _messageData: {
           id: 456,
           subject: 'Single Photo Message',
           attachments: [{ id: 123, path: '/photos/only-image.jpg' }],
@@ -304,7 +319,8 @@ describe('ModPhotoModal', () => {
 
     it('includes all remaining attachments when one is removed', async () => {
       const wrapper = mountComponent({
-        message: {
+        attachmentid: 1,
+        _messageData: {
           id: 456,
           subject: 'Many Photos',
           attachments: [
@@ -346,7 +362,9 @@ describe('ModPhotoModal', () => {
   describe('message title', () => {
     it('displays message subject in modal title', () => {
       const wrapper = mountComponent({
-        message: {
+        messageid: 1,
+        attachmentid: 1,
+        _messageData: {
           id: 1,
           subject: 'OFFER: Free sofa (London)',
           attachments: [{ id: 1 }],
@@ -359,7 +377,9 @@ describe('ModPhotoModal', () => {
 
     it('handles empty subject', () => {
       const wrapper = mountComponent({
-        message: {
+        messageid: 1,
+        attachmentid: 1,
+        _messageData: {
           id: 1,
           subject: '',
           attachments: [{ id: 1 }],
@@ -372,7 +392,9 @@ describe('ModPhotoModal', () => {
       const longSubject =
         'OFFER: This is a very long subject line that goes on and on with lots of detail about the item being offered'
       const wrapper = mountComponent({
-        message: {
+        messageid: 1,
+        attachmentid: 1,
+        _messageData: {
           id: 1,
           subject: longSubject,
           attachments: [{ id: 1 }],
@@ -384,16 +406,18 @@ describe('ModPhotoModal', () => {
 
   describe('edge cases', () => {
     it('handles message with empty attachments array', async () => {
+      // When attachment is not found, the component won't render (v-if="attachment")
+      // So we test removePhoto directly
       const wrapper = mountComponent({
-        message: {
+        _messageData: {
           id: 456,
           subject: 'No Attachments',
           attachments: [],
         },
       })
-      const postPhoto = wrapper.findComponent({ name: 'PostPhoto' })
-
-      await postPhoto.vm.$emit('remove', 123)
+      // attachment computed will be undefined since attachmentid 123 not found in empty array
+      // The modal won't render due to v-if="attachment", so we test the method directly
+      await wrapper.vm.removePhoto(123)
       await flushPromises()
 
       expect(mockMessageStore.patch).toHaveBeenCalledWith({
@@ -404,14 +428,29 @@ describe('ModPhotoModal', () => {
 
     it('handles attachment with only id property', () => {
       const wrapper = mountComponent({
-        attachment: { id: 999 },
+        attachmentid: 999,
+        _messageData: {
+          id: 456,
+          subject: 'Test',
+          attachments: [{ id: 999 }],
+        },
       })
       expect(wrapper.find('.b-modal').attributes('id')).toBe('photoModal-999')
     })
 
-    it('handles externalmods with null values', () => {
+    it('handles externalmods with null mods string', () => {
       const wrapper = mountComponent({
-        externalmods: { rotate: null, brightness: null },
+        _messageData: {
+          id: 456,
+          subject: 'Test',
+          attachments: [
+            {
+              id: 123,
+              path: '/photos/test.jpg',
+              mods: JSON.stringify({ rotate: null, brightness: null }),
+            },
+          ],
+        },
       })
       const postPhoto = wrapper.find('.post-photo')
       const externalmods = JSON.parse(postPhoto.attributes('data-externalmods'))

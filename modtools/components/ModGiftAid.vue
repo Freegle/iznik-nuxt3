@@ -88,16 +88,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useNuxtApp } from '#app'
 import { useModMe } from '~/modtools/composables/useModMe'
+import { useGiftAidStore } from '~/modtools/stores/giftaid'
 
 const props = defineProps({
-  giftaid: {
-    type: Object,
+  giftaidid: {
+    type: Number,
     required: true,
   },
 })
 
 const { $api } = useNuxtApp()
 const { checkWork } = useModMe()
+const giftAidStore = useGiftAidStore()
 
 const editgiftaid = ref(false)
 const hide = ref(false)
@@ -168,6 +170,6 @@ function giveup(callback) {
 }
 
 onMounted(() => {
-  editgiftaid.value = props.giftaid
+  editgiftaid.value = giftAidStore.byId(props.giftaidid)
 })
 </script>

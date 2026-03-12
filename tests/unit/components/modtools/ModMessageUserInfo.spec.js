@@ -56,7 +56,7 @@ describe('ModMessageUserInfo', () => {
     supporter: false,
     memberships: [
       {
-        id: 789,
+        groupid: 789,
         added: '2023-01-15',
       },
     ],
@@ -90,7 +90,7 @@ describe('ModMessageUserInfo', () => {
           },
           ModModeration: {
             template: '<div class="mod-moderation" />',
-            props: ['user', 'membership'],
+            props: ['userid', 'membership'],
           },
           ModPostingHistory: {
             template: '<div class="mod-posting-history" />',
@@ -287,7 +287,7 @@ describe('ModMessageUserInfo', () => {
       it('returns null when user has no memberships', () => {
         const wrapper = mountComponent(
           { modinfo: true, groupid: 789 },
-          { memberships: null }
+          { memberships: undefined }
         )
         expect(wrapper.vm.membership).toBeNull()
       })
@@ -386,7 +386,7 @@ describe('ModMessageUserInfo', () => {
 
       const wrapper = mountComponent(
         { modinfo: true, groupid: 789 },
-        { memberships: [{ id: 789, added: recentDate.toISOString() }] }
+        { memberships: [{ groupid: 789, added: recentDate.toISOString() }] }
       )
       expect(wrapper.vm.joinedAge).toBeLessThanOrEqual(31)
     })
@@ -437,7 +437,7 @@ describe('ModMessageUserInfo', () => {
             ModSupporter: { template: '<span />' },
             ModModeration: {
               template: '<div />',
-              props: ['user', 'membership'],
+              props: ['userid', 'membership'],
             },
             ModPostingHistory: { template: '<div />', props: ['userid'] },
             ModMemberships: { template: '<div />', props: ['userid'] },

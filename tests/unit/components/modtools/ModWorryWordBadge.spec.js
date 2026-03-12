@@ -6,23 +6,35 @@ import ModWorryWordBadge from '~/modtools/components/ModWorryWordBadge.vue'
 // Mock the store
 const mockDeleteWorryword = vi.fn()
 
+const defaultWorryword = {
+  id: 123,
+  keyword: 'worry_word',
+  type: 'Review',
+}
+
+// Mutable array so tests can swap the store data
+let mockWorrywords = [defaultWorryword]
+
 vi.mock('~/stores/systemconfig', () => ({
   useSystemConfigStore: () => ({
     isLoading: false,
     deleteWorryword: mockDeleteWorryword,
+    get worrywords() {
+      return mockWorrywords
+    },
   }),
 }))
 
 describe('ModWorryWordBadge', () => {
   const defaultProps = {
-    worryword: {
-      id: 123,
-      keyword: 'worry_word',
-      type: 'Review',
-    },
+    worrywordid: 123,
   }
 
-  function mountComponent(props = {}) {
+  function mountComponent(props = {}, storeWorryword = null) {
+    if (storeWorryword) {
+      mockWorrywords = [storeWorryword]
+    }
+
     return mount(ModWorryWordBadge, {
       props: { ...defaultProps, ...props },
       global: {
@@ -54,6 +66,7 @@ describe('ModWorryWordBadge', () => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
     mockDeleteWorryword.mockResolvedValue()
+    mockWorrywords = [defaultWorryword]
   })
 
   describe('rendering', () => {
@@ -63,9 +76,10 @@ describe('ModWorryWordBadge', () => {
     })
 
     it('shows REGEX prefix for regex pattern', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, keyword: 'REGEX:pattern' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, keyword: 'REGEX:pattern' }
+      )
       expect(wrapper.text()).toContain('REGEX:')
     })
 
@@ -75,9 +89,10 @@ describe('ModWorryWordBadge', () => {
     })
 
     it('shows type prefix when type is not Review', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, type: 'Regulated' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, type: 'Regulated' }
+      )
       expect(wrapper.text()).toContain('REGULATED:')
     })
 
@@ -94,9 +109,10 @@ describe('ModWorryWordBadge', () => {
 
   describe('computed properties', () => {
     it('isRegexPattern returns true for REGEX: prefix', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, keyword: 'REGEX:pattern' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, keyword: 'REGEX:pattern' }
+      )
       expect(wrapper.vm.isRegexPattern).toBe(true)
     })
 
@@ -106,9 +122,10 @@ describe('ModWorryWordBadge', () => {
     })
 
     it('displayText strips REGEX: prefix', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, keyword: 'REGEX:mypattern' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, keyword: 'REGEX:mypattern' }
+      )
       expect(wrapper.vm.displayText).toBe('mypattern')
     })
 
@@ -123,48 +140,54 @@ describe('ModWorryWordBadge', () => {
     })
 
     it('worrywordVariant returns warning for Regulated', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, type: 'Regulated' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, type: 'Regulated' }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('warning')
     })
 
     it('worrywordVariant returns danger for Regulated regex', () => {
-      const wrapper = mountComponent({
-        worryword: {
-          ...defaultProps.worryword,
+      const wrapper = mountComponent(
+        {},
+        {
+          ...defaultWorryword,
           type: 'Regulated',
           keyword: 'REGEX:pattern',
-        },
-      })
+        }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('danger')
     })
 
     it('worrywordVariant returns danger for Reportable', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, type: 'Reportable' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, type: 'Reportable' }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('danger')
     })
 
     it('worrywordVariant returns info for Medicine', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, type: 'Medicine' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, type: 'Medicine' }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('info')
     })
 
     it('worrywordVariant returns success for Allowed', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, type: 'Allowed' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, type: 'Allowed' }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('success')
     })
 
     it('worrywordVariant returns info for Review regex', () => {
-      const wrapper = mountComponent({
-        worryword: { ...defaultProps.worryword, keyword: 'REGEX:pattern' },
-      })
+      const wrapper = mountComponent(
+        {},
+        { ...defaultWorryword, keyword: 'REGEX:pattern' }
+      )
       expect(wrapper.vm.worrywordVariant).toBe('info')
     })
   })

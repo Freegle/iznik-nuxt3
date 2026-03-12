@@ -3,11 +3,21 @@ import { mount } from '@vue/test-utils'
 import dayjs from 'dayjs'
 import ModMemberRating from '~/modtools/components/ModMemberRating.vue'
 
+// Mock member store
+const mockMemberStore = {
+  ratings: [],
+  ratingById: vi.fn(),
+}
+
 // Mock user store
 const mockUserStore = {
   byId: vi.fn(),
   ratingReviewed: vi.fn(),
 }
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
+}))
 
 vi.mock('~/stores/user', () => ({
   useUserStore: () => mockUserStore,
@@ -37,10 +47,16 @@ describe('ModMemberRating', () => {
   })
 
   function mountComponent(props = {}) {
+    const ratingData = props.rating || createRating()
+
+    mockMemberStore.ratingById.mockImplementation((id) => {
+      if (parseInt(id) === parseInt(ratingData.id)) return ratingData
+      return undefined
+    })
+
     return mount(ModMemberRating, {
       props: {
-        rating: createRating(),
-        ...props,
+        ratingid: ratingData.id,
       },
       global: {
         stubs: {

@@ -4,7 +4,7 @@
     class="mr-2 mb-2 p-2"
     style="font-size: 0.9rem"
   >
-    <small v-if="spamKeyword.type === 'Regex'" class="mr-1 text-muted"
+    <small v-if="spamKeyword?.type === 'Regex'" class="mr-1 text-muted"
       >REGEX:</small
     >
     {{ displayText }}
@@ -34,13 +34,19 @@ import { ref, computed } from 'vue'
 import { useSystemConfigStore } from '~/stores/systemconfig'
 
 const props = defineProps({
-  spamKeyword: {
-    type: Object,
+  spamKeywordId: {
+    type: Number,
     required: true,
   },
 })
 
 const systemConfigStore = useSystemConfigStore()
+
+const spamKeyword = computed(() => {
+  return systemConfigStore.spam_keywords.find(
+    (k) => k.id === props.spamKeywordId
+  )
+})
 
 const showDeleteConfirm = ref(false)
 const deleteConfirmMessage = ref('')
@@ -50,12 +56,12 @@ const isLoading = computed(() => {
 })
 
 const displayText = computed(() => {
-  return props.spamKeyword.word
+  return spamKeyword.value?.word
 })
 
 const spamKeywordVariant = computed(() => {
   // Color-code based on action: Review, Spam, Whitelist
-  switch (props.spamKeyword.action) {
+  switch (spamKeyword.value?.action) {
     case 'Review':
       return 'warning'
     case 'Spam':
@@ -68,12 +74,12 @@ const spamKeywordVariant = computed(() => {
 })
 
 function confirmDelete() {
-  deleteConfirmMessage.value = `Are you sure you want to delete the spam keyword "${props.spamKeyword.word}"? This will affect system-wide message filtering and cannot be undone.`
+  deleteConfirmMessage.value = `Are you sure you want to delete the spam keyword "${spamKeyword.value?.word}"? This will affect system-wide message filtering and cannot be undone.`
   showDeleteConfirm.value = true
 }
 
 async function handleDelete() {
-  await systemConfigStore.deleteSpamKeyword(props.spamKeyword.id)
+  await systemConfigStore.deleteSpamKeyword(props.spamKeywordId)
   showDeleteConfirm.value = false
   deleteConfirmMessage.value = ''
 }

@@ -50,7 +50,7 @@
         <ModMember
           v-for="(spammer, index) in visibleSpammers"
           :key="'spammer-' + tabIndex + '-' + spammer.id"
-          :member="spammer.user"
+          :membershipid="spammer.user.id"
           :sameip="spammer.sameip"
           class="mb-1"
           :index="index"

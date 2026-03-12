@@ -59,8 +59,8 @@ describe('Related Page', () => {
           },
           ModRelatedMember: {
             template:
-              '<div class="mod-related-member" :data-member-id="member.id" />',
-            props: ['member'],
+              '<div class="mod-related-member" :data-member-id="memberid" />',
+            props: ['memberid'],
           },
           'infinite-loading': {
             template:

@@ -1,45 +1,55 @@
 <template>
-  <div v-if="member">
+  <div v-if="user">
     <div
-      v-if="member.lastaccess"
+      v-if="user.lastaccess"
       :class="'mb-1 ' + (inactive ? 'text-danger' : '')"
     >
-      Last active: {{ timeago(member.lastaccess) }}
+      Last active: {{ timeago(user.lastaccess) }}
       <span v-if="inactive"> - won't send mails </span>
       <b-badge :variant="variant">
         {{ engagement }}
       </b-badge>
-      <ModSupporter v-if="member.supporter" class="small" />
+      <ModSupporter v-if="user.supporter" class="small" />
     </div>
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import dayjs from 'dayjs'
+import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  member: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
 })
 
+const userStore = useUserStore()
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
+
 const inactive = computed(() => {
-  // This code matches server code in sendOurMails.
   return (
-    props.member &&
-    props.member.lastaccess &&
-    dayjs().diff(dayjs(props.member.lastaccess), 'days') >= 365 / 2
+    user.value &&
+    user.value.lastaccess &&
+    dayjs().diff(dayjs(user.value.lastaccess), 'days') >= 365 / 2
   )
 })
 
 const engagement = computed(() => {
-  if (!props.member) {
+  if (!user.value) {
     return null
   }
 
-  // Map a few of the server values.
-  switch (props.member.engagement) {
+  switch (user.value.engagement) {
     case 'At Risk': {
       return 'Dormant Soon'
     }
@@ -47,20 +57,19 @@ const engagement = computed(() => {
       return 'Very Frequent'
     }
     default: {
-      return props.member.engagement
+      return user.value.engagement
     }
   }
 })
 
 const variant = computed(() => {
-  if (!props.member) {
+  if (!user.value) {
     return null
   }
 
-  // Colour-code based on engagement.
   let ret = 'light'
 
-  switch (props.member.engagement) {
+  switch (user.value.engagement) {
     case 'New': {
       ret = 'info'
       break

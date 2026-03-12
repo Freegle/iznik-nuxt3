@@ -29,8 +29,8 @@ describe('Stories Page', () => {
           },
           ModStoryReview: {
             template:
-              '<div class="mod-story-review" :data-story-id="story.id" />',
-            props: ['story'],
+              '<div class="mod-story-review" :data-story-id="storyid" />',
+            props: ['storyid'],
           },
         },
       },

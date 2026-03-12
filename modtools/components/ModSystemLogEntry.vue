@@ -521,13 +521,14 @@ import {
   formatLogTimestamp,
   parseLaravelLogLevel,
 } from '../composables/useSystemLogFormatter'
+import { useSystemLogsStore } from '../stores/systemlogs'
 import { useUserStore } from '~/stores/user'
 import { useGroupStore } from '~/stores/group'
 import api from '~/api'
 
 const props = defineProps({
-  log: {
-    type: Object,
+  logId: {
+    type: Number,
     required: true,
   },
   count: {
@@ -554,8 +555,12 @@ const props = defineProps({
 
 const emit = defineEmits(['filter-trace', 'filter-session', 'filter-ip'])
 
+const systemLogsStore = useSystemLogsStore()
 const userStore = useUserStore()
 const groupStore = useGroupStore()
+
+// Look up the log object from the store by ID.
+const log = computed(() => systemLogsStore.getLog(props.logId) || {})
 
 const userLoading = ref(false)
 const groupLoading = ref(false)
@@ -567,38 +572,38 @@ const headersLoading = ref(false)
 const headersError = ref(null)
 
 const formattedTime = computed(() => {
-  return formatLogTimestamp(props.log.timestamp, 'short')
+  return formatLogTimestamp(log.value.timestamp, 'short')
 })
 
 const fullTimestamp = computed(() => {
-  return formatLogTimestamp(props.log.timestamp, 'full')
+  return formatLogTimestamp(log.value.timestamp, 'full')
 })
 
 const firstTime = computed(() => {
   return formatLogTimestamp(
-    props.firstTimestamp || props.log.timestamp,
+    props.firstTimestamp || log.value.timestamp,
     'short'
   )
 })
 
 const lastTime = computed(() => {
-  return formatLogTimestamp(props.lastTimestamp || props.log.timestamp, 'short')
+  return formatLogTimestamp(props.lastTimestamp || log.value.timestamp, 'short')
 })
 
 const sourceLabel = computed(() => {
   // For logs_table, determine if this is a user action or a mod action.
   // User actions: User type logs where byuser_id equals user_id or is null.
   // Mod actions: Logs where byuser_id differs from user_id (mod acting on user).
-  if (props.log.source === 'logs_table') {
+  if (log.value.source === 'logs_table') {
     const isModAction =
-      props.log.byuser_id &&
-      props.log.user_id &&
-      props.log.byuser_id !== props.log.user_id
+      log.value.byuser_id &&
+      log.value.user_id &&
+      log.value.byuser_id !== log.value.user_id
     return isModAction ? 'Mod' : 'User'
   }
 
   // Laravel batch logs - show as "Email" since they're mostly email-related
-  if (props.log.source === 'laravel-batch') {
+  if (log.value.source === 'laravel-batch') {
     return 'Email'
   }
 
@@ -609,31 +614,31 @@ const sourceLabel = computed(() => {
     email: 'Email',
     batch: 'Batch',
   }
-  return labels[props.log.source] || props.log.source
+  return labels[log.value.source] || log.value.source
 })
 
 const sourceVariant = computed(() => {
   // For logs_table, use primary (blue) for user actions, secondary (gray) for mod actions.
-  if (props.log.source === 'logs_table') {
+  if (log.value.source === 'logs_table') {
     const isModAction =
-      props.log.byuser_id &&
-      props.log.user_id &&
-      props.log.byuser_id !== props.log.user_id
+      log.value.byuser_id &&
+      log.value.user_id &&
+      log.value.byuser_id !== log.value.user_id
     return isModAction ? 'secondary' : 'primary'
   }
   // Laravel batch logs are email-related, use success (green)
-  if (props.log.source === 'laravel-batch') {
+  if (log.value.source === 'laravel-batch') {
     return 'success'
   }
-  return getLogSourceVariant(props.log.source)
+  return getLogSourceVariant(log.value.source)
 })
 
 const levelClass = computed(() => {
-  return getLogLevelClass(props.log)
+  return getLogLevelClass(log.value)
 })
 
 const actionText = computed(() => {
-  return formatLogText(props.log)
+  return formatLogText(log.value)
 })
 
 const actionTextClean = computed(() => {
@@ -644,7 +649,7 @@ const actionTextClean = computed(() => {
   // Replace user #ID with username
   if (displayUser.value?.displayname) {
     text = text.replace(
-      new RegExp(`user #${props.log.user_id}\\b`, 'gi'),
+      new RegExp(`user #${log.value.user_id}\\b`, 'gi'),
       displayUser.value.displayname
     )
   }
@@ -652,7 +657,7 @@ const actionTextClean = computed(() => {
   // Replace group #ID with group name
   if (displayGroup.value?.nameshort) {
     text = text.replace(
-      new RegExp(`group #${props.log.group_id}\\b`, 'gi'),
+      new RegExp(`group #${log.value.group_id}\\b`, 'gi'),
       displayGroup.value.nameshort
     )
   }
@@ -664,15 +669,15 @@ const duration = computed(() => {
   // Extract duration from action text or raw data
   const match = actionText.value.match(/\((\d+ms)\)/)
   if (match) return match[1]
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   if (raw.duration_ms) return `${Math.round(raw.duration_ms)}ms`
   return null
 })
 
 const rawApiCall = computed(() => {
   // Show raw API call for API source logs
-  if (props.log.source !== 'api') return null
-  const raw = props.log.raw || {}
+  if (log.value.source !== 'api') return null
+  const raw = log.value.raw || {}
   const method = raw.method || 'GET'
   // v2 uses 'path' (e.g., "/apiv2/messages"), v1 uses 'call' (e.g., "messages")
   let endpoint = raw.endpoint || raw.path || raw.call
@@ -690,53 +695,53 @@ const entryClass = computed(() => {
   // For API logs, only show error styling for actual server errors:
   // - HTTP 5xx status codes only
   // Normal responses like "not logged in" (ret=1) are NOT errors.
-  if (props.log.source === 'api') {
-    const raw = props.log.raw || {}
+  if (log.value.source === 'api') {
+    const raw = log.value.raw || {}
     const statusCode = raw.status_code || raw.status || 200
     if (statusCode >= 500) {
       classes.push('log-error')
     }
-  } else if (props.log.level === 'error') {
+  } else if (log.value.level === 'error') {
     classes.push('log-error')
-  } else if (props.log.level === 'warn') {
+  } else if (log.value.level === 'warn') {
     classes.push('log-warn')
   }
   return classes
 })
 
 const displayUser = computed(() => {
-  if (props.log.user_id) {
-    return userStore.list[props.log.user_id]
+  if (log.value.user_id) {
+    return userStore.list[log.value.user_id]
   }
   return null
 })
 
 const byUser = computed(() => {
-  if (props.log.byuser_id) {
-    return userStore.list[props.log.byuser_id]
+  if (log.value.byuser_id) {
+    return userStore.list[log.value.byuser_id]
   }
   return null
 })
 
 const displayGroup = computed(() => {
-  if (props.log.group_id) {
-    return groupStore.get(props.log.group_id)
+  if (log.value.group_id) {
+    return groupStore.get(log.value.group_id)
   }
   return null
 })
 
 const messageSubject = computed(() => {
   // Try to get subject from raw data
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.message?.subject || raw.subject || null
 })
 
 const formattedRaw = computed(() => {
-  return JSON.stringify(props.log.raw || {}, null, 2)
+  return JSON.stringify(log.value.raw || {}, null, 2)
 })
 
 const ipAddress = computed(() => {
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   const ip = raw.ip || raw.ip_address || raw.client_ip || null
   // Filter out placeholder addresses that aren't useful.
   if (ip === '0.0.0.0' || ip === '::') {
@@ -747,7 +752,7 @@ const ipAddress = computed(() => {
 
 const sessionUrl = computed(() => {
   // Get the page URL from client logs.
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.url || null
 })
 
@@ -765,35 +770,35 @@ const sessionUrlDisplay = computed(() => {
 })
 
 const queryParams = computed(() => {
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.query_params || null
 })
 
 const requestBody = computed(() => {
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.request_body || null
 })
 
 const responseBody = computed(() => {
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.response_body || null
 })
 
 // Check if this is an API log (headers are logged separately for both v1 and v2)
 const isApiLog = computed(() => {
-  return props.log.source === 'api'
+  return log.value.source === 'api'
 })
 
 // Get the request_id for correlation with headers
 const requestId = computed(() => {
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.request_id || null
 })
 
 /* Device info parsing for session_start and client logs */
 const deviceInfo = computed(() => {
-  const raw = props.log.raw || {}
-  const ua = raw.user_agent || props.log.user_agent || ''
+  const raw = log.value.raw || {}
+  const ua = raw.user_agent || log.value.user_agent || ''
   if (!ua) return null
 
   const info = {
@@ -868,7 +873,7 @@ const hasDeviceInfo = computed(() => {
 
 const sentryEventId = computed(() => {
   // Get Sentry event ID from raw data for error logs.
-  const raw = props.log.raw || {}
+  const raw = log.value.raw || {}
   return raw.sentry_event_id || null
 })
 
@@ -880,11 +885,11 @@ const sentryUrl = computed(() => {
 })
 
 const laravelLevel = computed(() => {
-  return parseLaravelLogLevel(props.log)
+  return parseLaravelLogLevel(log.value)
 })
 
 watch(
-  () => props.log.user_id,
+  () => log.value.user_id,
   (id) => {
     if (id && !userStore.list[id]) {
       fetchUser(id)
@@ -894,7 +899,7 @@ watch(
 )
 
 watch(
-  () => props.log.byuser_id,
+  () => log.value.byuser_id,
   (id) => {
     if (id && !userStore.list[id]) {
       fetchUser(id)
@@ -904,7 +909,7 @@ watch(
 )
 
 watch(
-  () => props.log.group_id,
+  () => log.value.group_id,
   (id) => {
     if (id && !groupStore.get(id)) {
       fetchGroup(id)
@@ -966,12 +971,12 @@ function filterByIp() {
 
 function filterByTraceAndClose() {
   showModal.value = false
-  emit('filter-trace', props.log.trace_id)
+  emit('filter-trace', log.value.trace_id)
 }
 
 function filterBySessionAndClose() {
   showModal.value = false
-  emit('filter-session', props.log.session_id)
+  emit('filter-session', log.value.session_id)
 }
 
 function filterByIpAndClose() {
@@ -996,11 +1001,11 @@ async function fetchApiHeaders() {
       )
     } else {
       // Fallback to timestamp-based matching for older logs
-      const raw = props.log.raw || {}
+      const raw = log.value.raw || {}
       response = await api(config).systemlogs.fetchHeadersByTimestamp(
-        props.log.timestamp,
+        log.value.timestamp,
         raw.endpoint || raw.call,
-        props.log.user_id
+        log.value.user_id
       )
     }
 

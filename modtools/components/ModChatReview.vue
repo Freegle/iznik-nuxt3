@@ -5,7 +5,7 @@
         <div class="d-flex justify-content-between flex-wrap">
           <div class="d-flex justify-content-start flex-wrap">
             <ModChatReviewUser
-              :user="message.fromuser"
+              :userid="message.fromuser.id"
               class="mr-2"
               tag="From: "
               :groupid="message.group ? message.group.id : 0"
@@ -18,7 +18,7 @@
             />
             <ModChatReviewUser
               v-if="message.touser"
-              :user="message.touser"
+              :userid="message.touser.id"
               class="ml-2"
               tag="To: "
               :groupid="message.group ? message.group.id : 0"
@@ -71,7 +71,10 @@
           <!-- OLD ChatMessage :chatid="message.chatroom.id" :chatmessage="message" :otheruser="message.fromuser" last highlight-emails :id="message.id" /-->
           <!-- :chatusers="chatusers" -->
         </div>
-        <ModSpammer v-if="message.touser?.spammer" :user="message.touser" />
+        <ModSpammer
+          v-if="message.touser?.spammer"
+          :userid="message.touser.id"
+        />
         <div class="d-flex justify-content-between flex-wrap">
           <span>
             {{ timeago(message.date) }}
@@ -106,7 +109,10 @@
             }}
           </span>
         </div>
-        <ModSpammer v-if="message.fromuser?.spammer" :user="message.fromuser" />
+        <ModSpammer
+          v-if="message.fromuser?.spammer"
+          :userid="message.fromuser.id"
+        />
         <div class="d-flex justify-content-around">
           <div v-if="!message.widerchatreview && message.fromuser">
             <span>
@@ -230,17 +236,22 @@
 import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/modtools/composables/useModMe'
+import { useChatStore } from '~/stores/chat'
 
 const props = defineProps({
   id: {
     type: Number,
     required: true,
   },
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
 })
+
+const chatStore = useChatStore()
+
+const message = computed(() => chatStore.messageById(props.messageid))
 
 const emit = defineEmits(['reload'])
 
@@ -256,8 +267,8 @@ const showModChatNoteModal = ref(false)
 const reviewreason = computed(() => {
   let ret = null
 
-  if (props.message && props.message.reviewreason) {
-    switch (props.message.reviewreason) {
+  if (message.value && message.value.reviewreason) {
+    switch (message.value.reviewreason) {
       case 'Last': {
         ret = 'Earlier message was held for review, so this one is too.'
         break
@@ -371,7 +382,7 @@ const reviewreason = computed(() => {
         break
       }
       default: {
-        ret = props.message.reviewreason
+        ret = message.value.reviewreason
       }
     }
   }
@@ -384,27 +395,27 @@ function reload() {
 }
 
 async function release() {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Release' })
+  await $api.chat.sendMT({ id: props.messageid, action: 'Release' })
   emit('reload')
   checkWork(true)
 }
 
 async function hold(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Hold' })
+  await $api.chat.sendMT({ id: props.messageid, action: 'Hold' })
   emit('reload')
   checkWork(true)
   callback()
 }
 
 async function approve(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Approve' })
+  await $api.chat.sendMT({ id: props.messageid, action: 'Approve' })
   emit('reload')
   checkWork(true)
   callback()
 }
 
 async function reject(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Reject' })
+  await $api.chat.sendMT({ id: props.messageid, action: 'Reject' })
   emit('reload')
   checkWork(true)
   callback()
@@ -412,7 +423,7 @@ async function reject(callback) {
 
 async function whitelist(callback) {
   await $api.chat.sendMT({
-    id: props.message.id,
+    id: props.messageid,
     action: 'ApproveAllFuture',
   })
   emit('reload')
@@ -427,7 +438,7 @@ function showModnote(callback) {
 }
 
 async function redactEmails(callback) {
-  await $api.chat.sendMT({ id: props.message.id, action: 'Redact' })
+  await $api.chat.sendMT({ id: props.messageid, action: 'Redact' })
   emit('reload')
   callback()
 }

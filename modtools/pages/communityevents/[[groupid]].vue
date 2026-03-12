@@ -5,7 +5,7 @@
       :key="'eventlist-' + event.id"
       class="p-0 mt-2"
     >
-      <ModCommunityEvent :event="event" />
+      <ModCommunityEvent :eventid="event.id" />
     </div>
     <NoticeMessage v-if="!Object.keys(events).length && !busy" class="mt-2">
       There are no community events to review at the moment. This will refresh

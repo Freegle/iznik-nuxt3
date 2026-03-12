@@ -128,6 +128,11 @@ describe('admins.vue page', () => {
               '<input class="form-input" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
             props: ['modelValue', 'id'],
           },
+          'b-form-select': {
+            template:
+              '<select class="form-select" :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><slot /></select>',
+            props: ['modelValue'],
+          },
           'v-icon': { template: '<span class="icon-stub" />' },
         },
         ...options.global,

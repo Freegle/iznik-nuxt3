@@ -68,7 +68,7 @@
               </b-td>
               <b-td>
                 <ModMicrovolunteeringDetailsButton
-                  :user="userActivity[user.userid][0].user"
+                  :userid="user.userid"
                   :items="userActivity[user.userid]"
                 />
               </b-td>

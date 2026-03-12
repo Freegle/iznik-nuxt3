@@ -282,14 +282,8 @@ describe('ModSettingsGroup', () => {
             emits: ['change'],
           },
           ModSettingShortlink: {
-            template:
-              '<div class="shortlink" :data-name="shortlink.name"></div>',
-            props: ['shortlink'],
-          },
-          ModSettingsGroupFacebook: {
-            template:
-              '<div class="facebook-setting" :data-id="facebook.id"></div>',
-            props: ['groupid', 'facebook'],
+            template: '<div class="shortlink" :data-id="shortlinkid"></div>',
+            props: ['shortlinkid'],
           },
           ModGroupPostVisibility: {
             template: '<div class="post-visibility"></div>',
@@ -489,7 +483,7 @@ describe('ModSettingsGroup', () => {
       let wrapper = mountComponent({}, { facebook: [] })
       expect(wrapper.text()).toContain('not linked to Facebook')
 
-      // Valid Facebook connection renders settings
+      // Valid Facebook connection does not show "not linked" warning
       wrapper = mountComponent(
         {},
         {
@@ -503,7 +497,7 @@ describe('ModSettingsGroup', () => {
           ],
         }
       )
-      expect(wrapper.find('.facebook-setting').exists()).toBe(true)
+      expect(wrapper.text()).not.toContain('not linked to Facebook')
 
       // Invalid Facebook connection shows error
       wrapper = mountComponent(

@@ -1,21 +1,29 @@
-import { describe, it, expect, vi } from 'vitest'
-import { mount, config } from '@vue/test-utils'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mount } from '@vue/test-utils'
 import ModMemberLogins from '~/modtools/components/ModMemberLogins.vue'
 
-// Mock the timeago global
-config.global.mocks = {
-  ...config.global.mocks,
-  timeago: vi.fn((date) => '2 days ago'),
+// Mock user store
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
 }
 
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
 describe('ModMemberLogins', () => {
+  const createUser = (overrides = {}) => ({
+    id: 456,
+    logins: [],
+    ...overrides,
+  })
+
   function mountModMemberLogins(memberOverrides = {}) {
-    const defaultMember = {
-      logins: [],
-      ...memberOverrides,
-    }
+    const userData = createUser(memberOverrides)
+    mockUserStore.byId.mockReturnValue(userData)
     return mount(ModMemberLogins, {
-      props: { member: defaultMember },
+      props: { userid: userData.id },
       global: {
         stubs: {
           'b-badge': {
@@ -30,6 +38,12 @@ describe('ModMemberLogins', () => {
       },
     })
   }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUserStore.byId.mockReturnValue(null)
+    mockUserStore.fetch.mockResolvedValue()
+  })
 
   describe('rendering', () => {
     it('renders a div container', () => {

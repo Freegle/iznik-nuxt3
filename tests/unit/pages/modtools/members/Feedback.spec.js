@@ -137,8 +137,8 @@ describe('Feedback Page', () => {
           },
           ModMemberRating: {
             template:
-              '<div class="mod-member-rating" :data-rating-id="rating.id" />',
-            props: ['rating'],
+              '<div class="mod-member-rating" :data-rating-id="ratingid" />',
+            props: ['ratingid'],
           },
           'infinite-loading': {
             template:

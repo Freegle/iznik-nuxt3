@@ -57,9 +57,9 @@
       <!-- Tree View -->
       <ModSystemLogTreeNode
         v-for="node in logsAsTree"
-        :key="node.trace_id || node.log?.id"
+        :key="node.nodeKey || node.trace_id || node.log?.id"
         ref="treeNodes"
-        :node="node"
+        :node-key="node.nodeKey"
         :hide-user-column="isFilteringByUser"
         @filter-trace="filterByTrace"
         @filter-session="filterBySession"

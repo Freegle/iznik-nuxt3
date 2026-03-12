@@ -34,6 +34,24 @@ export const useMemberStore = defineStore({
         }
       })
     },
+    async approve(params) {
+      await api(this.config).memberships.approveMember(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    },
+    async reject(params) {
+      await api(this.config).memberships.rejectMember(
+        params.id,
+        params.groupid,
+        params.subject,
+        params.stdmsgid,
+        params.body
+      )
+    },
     async reply(params) {
       await api(this.config).memberships.reply(
         params.id,
@@ -89,11 +107,42 @@ export const useMemberStore = defineStore({
           if (!members[i].groupid) members[i].groupid = params.groupid
         }
         received += members.length
-        members.forEach((member) => {
-          // console.log('member',member.displayname,member.id)
-          member.rawindex = this.rawindex++
-          this.list[member.id] = member
-        })
+
+        if (params.collection === 'Spam') {
+          // V2 API returns one row per membership. V1 grouped by userid and
+          // nested all memberships under one entry.  Replicate that here so
+          // the review page shows one card per user.
+          const byUser = {}
+          members.forEach((member) => {
+            const uid = member.userid
+            if (!byUser[uid]) {
+              byUser[uid] = {
+                ...member,
+                memberships: [],
+              }
+            }
+            byUser[uid].memberships.push({
+              id: member.groupid,
+              membershipid: member.id,
+              added: member.added,
+              collection: member.collection,
+              role: member.role,
+              heldby: member.heldby,
+              reviewrequestedat: member.reviewrequestedat,
+              reviewedat: member.reviewedat,
+              reviewreason: member.reviewreason,
+            })
+          })
+          Object.values(byUser).forEach((member) => {
+            member.rawindex = this.rawindex++
+            this.list[member.id] = member
+          })
+        } else {
+          members.forEach((member) => {
+            member.rawindex = this.rawindex++
+            this.list[member.id] = member
+          })
+        }
 
         if (ratings && ratings.length) {
           this.ratings = ratings
@@ -220,6 +269,8 @@ export const useMemberStore = defineStore({
       if (ret) return ret[0]
       return ret
     },
-    // getRatings: state => state.ratings
+    ratingById: (state) => (id) => {
+      return state.ratings.find((r) => parseInt(r.id) === parseInt(id))
+    },
   },
 })

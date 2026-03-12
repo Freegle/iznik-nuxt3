@@ -29,8 +29,8 @@ describe('Newsletter Page', () => {
           },
           ModStoryReview: {
             template:
-              '<div class="mod-story-review" :data-story-id="story.id" :data-newsletter="newsletter" />',
-            props: ['story', 'newsletter'],
+              '<div class="mod-story-review" :data-story-id="storyid" :data-newsletter="newsletter" />',
+            props: ['storyid', 'newsletter'],
           },
         },
       },

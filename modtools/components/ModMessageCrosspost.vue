@@ -1,5 +1,5 @@
 <template>
-  <div class="small">
+  <div v-if="message" class="small">
     <span class="text-danger">
       Crosspost
       <v-icon icon="hashtag" class="text-muted" scale="0.5" />
@@ -20,20 +20,40 @@
   </div>
 </template>
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useGroupStore } from '~/stores/group'
+import { useMessageStore } from '~/stores/message'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
 })
 
+const messageStore = useMessageStore()
 const groupStore = useGroupStore()
 
+const message = computed(() => {
+  return messageStore.byId(props.messageid)
+})
+
+watch(
+  () => message.value?.groupid,
+  (groupid) => {
+    if (groupid) {
+      const g = groupStore.get(groupid)
+
+      if (!g) {
+        groupStore.fetch(groupid)
+      }
+    }
+  },
+  { immediate: true }
+)
+
 const group = computed(() => {
-  return groupStore.get(props.message.groupid)
+  return message.value ? groupStore.get(message.value.groupid) : null
 })
 
 const groupname = computed(() => {
@@ -41,10 +61,8 @@ const groupname = computed(() => {
 })
 
 onMounted(() => {
-  const g = groupStore.get(props.message.groupid)
-
-  if (!g) {
-    groupStore.fetch(props.message.groupid)
+  if (!message.value) {
+    messageStore.fetch(props.messageid)
   }
 })
 </script>

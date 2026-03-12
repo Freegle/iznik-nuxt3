@@ -17,7 +17,7 @@
         :key="'memberlist-' + member.id"
         class="p-0 mt-2"
       >
-        <ModRelatedMember :member="member" @processed="bump++" />
+        <ModRelatedMember :memberid="member.id" @processed="bump++" />
       </div>
 
       <infinite-loading

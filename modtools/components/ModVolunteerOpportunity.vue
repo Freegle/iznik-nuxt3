@@ -87,8 +87,8 @@ import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  volunteering: {
-    type: Object,
+  volunteeringid: {
+    type: Number,
     required: true,
   },
 })
@@ -97,12 +97,16 @@ const volunteeringStore = useVolunteeringStore()
 const groupStore = useGroupStore()
 const userStore = useUserStore()
 
+const volunteering = computed(() =>
+  volunteeringStore.byId(props.volunteeringid)
+)
+
 const modalShown = ref(false)
 const showDeleteConfirm = ref(false)
 
 // Fetch user details for display
 watch(
-  () => props.volunteering?.userid,
+  () => volunteering.value?.userid,
   (userid) => {
     if (userid) {
       userStore.fetch(userid)
@@ -112,14 +116,14 @@ watch(
 )
 
 const volUser = computed(() => {
-  return props.volunteering?.userid
-    ? userStore.byId(props.volunteering.userid)
+  return volunteering.value?.userid
+    ? userStore.byId(volunteering.value.userid)
     : null
 })
 
 const groups = computed(() => {
   const ret = []
-  props.volunteering?.groups?.forEach((id) => {
+  volunteering.value?.groups?.forEach((id) => {
     const group = groupStore?.get(id)
     if (group) {
       ret.push(group)
@@ -137,15 +141,15 @@ function confirmDelete() {
 }
 
 function deleteme() {
-  volunteeringStore.delete(props.volunteering.id)
+  volunteeringStore.delete(volunteering.value.id)
   showDeleteConfirm.value = false
 }
 
 function approve() {
   volunteeringStore.save({
-    id: props.volunteering.id,
+    id: volunteering.value.id,
     pending: false,
   })
-  volunteeringStore.remove(props.volunteering.id)
+  volunteeringStore.remove(volunteering.value.id)
 }
 </script>

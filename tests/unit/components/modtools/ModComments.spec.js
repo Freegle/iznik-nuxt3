@@ -42,8 +42,8 @@ describe('ModComments', () => {
         stubs: {
           ModComment: {
             template:
-              '<div class="mod-comment" :data-id="comment.id">{{ comment.user1 }}</div>',
-            props: ['comment', 'user', 'expandComments'],
+              '<div class="mod-comment" :data-id="commentid">comment-{{ commentid }}</div>',
+            props: ['commentid', 'userid', 'expandComments'],
           },
           'b-button': {
             template:

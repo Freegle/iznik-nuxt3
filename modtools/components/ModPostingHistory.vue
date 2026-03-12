@@ -65,7 +65,7 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :user="user"
+      :userid="userid"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />

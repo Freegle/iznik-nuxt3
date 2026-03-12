@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-wrap">
+  <div v-if="member" class="d-flex flex-wrap">
     <div v-if="spam" class="d-inline d-flex flex-wrap">
       <ModMemberActions
         v-if="actions && member.groupid"
@@ -7,11 +7,13 @@
         :groupid="member.groupid"
         :banned="Boolean(member.bandate)"
         class="mr-1"
-        :spam="spam"
+        :spammerid="spam?.id"
       />
       <ModMemberButton
         v-if="spamignore"
-        :member="member"
+        :userid="member.userid"
+        :groupid="member.groupid"
+        :spammerid="member.spammer?.id"
         variant="primary"
         icon="check"
         spamignore
@@ -20,7 +22,9 @@
       <div v-if="member.spammer.collection === 'PendingAdd'" class="d-inline">
         <ModMemberButton
           v-if="hasPermissionSpamAdmin && !member.heldby"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="primary"
           icon="check"
           spamconfirm
@@ -31,7 +35,9 @@
         </b-button>
         <ModMemberButton
           v-if="hasPermissionSpamAdmin && !member.heldby"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="danger"
           icon="trash-alt"
           spamremove
@@ -39,7 +45,9 @@
         />
         <ModMemberButton
           v-if="hasPermissionSpamAdmin && !member.heldby"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="primary"
           icon="check"
           spamsafelist
@@ -47,7 +55,9 @@
         />
         <ModMemberButton
           v-else-if="!member.heldby"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="primary"
           icon="times"
           spamrequestremove
@@ -55,7 +65,9 @@
         />
         <ModMemberButton
           v-if="hasPermissionSpamAdmin && !member.heldby"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="warning"
           icon="pause"
           spamhold
@@ -68,7 +80,9 @@
       >
         <ModMemberButton
           v-if="hasPermissionSpamAdmin"
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="danger"
           icon="trash-alt"
           spamremove
@@ -76,7 +90,9 @@
         />
         <ModMemberButton
           v-else
-          :member="member"
+          :userid="member.userid"
+          :groupid="member.groupid"
+          :spammerid="member.spammer?.id"
           variant="primary"
           icon="times"
           spamrequestremove
@@ -94,7 +110,8 @@
       />
       <ModMemberButton
         v-if="spamignore && member.suspectreason"
-        :member="member"
+        :userid="member.userid"
+        :groupid="member.groupid"
         variant="primary"
         icon="check"
         spamignore
@@ -102,7 +119,9 @@
       />
       <ModMemberButton
         class="ml-1 mr-1"
-        :member="member"
+        :userid="member.userid"
+        :groupid="member.groupid"
+        :membershipid="member.id"
         variant="white"
         icon="envelope"
         leave
@@ -117,7 +136,9 @@
         :icon="icon(stdmsg)"
         :label="stdmsg.title"
         :stdmsgid="stdmsg.id"
-        :member="member"
+        :userid="member.userid"
+        :groupid="member.groupid"
+        :membershipid="member.id"
         class="mr-1"
         :autosend="Boolean(stdmsg.autosend && allowAutoSend)"
       />
@@ -149,7 +170,7 @@
       </div>
       <ModCommentAddModal
         v-if="showAddCommentModal"
-        :user="member"
+        :userid="member.userid"
         @hidden="showAddCommentModal = false"
       />
     </client-only>
@@ -161,16 +182,18 @@ import ModMemberButton from './ModMemberButton'
 import ModMemberActions from './ModMemberActions'
 import ModCommentAddModal from '~/components/ModCommentAddModal'
 import { useModMe } from '~/composables/useModMe'
+import { useMemberStore } from '~/stores/member'
+import { useModConfigStore } from '~/stores/modconfig'
 
 const OurToggle = defineAsyncComponent(() => import('~/components/OurToggle'))
 
 const props = defineProps({
-  member: {
-    type: Object,
+  membershipid: {
+    type: Number,
     required: true,
   },
-  modconfig: {
-    type: Object,
+  modconfigid: {
+    type: Number,
     required: false,
     default: null,
   },
@@ -188,20 +211,27 @@ const props = defineProps({
 
 const { hasPermissionSpamAdmin } = useModMe()
 
+const memberStore = useMemberStore()
+const modConfigStore = useModConfigStore()
+const modconfig = computed(
+  () => modConfigStore.configsById?.[props.modconfigid]
+)
+const member = computed(() => memberStore.get(props.membershipid))
+
 const showRare = ref(false)
 const allowAutoSend = ref(true)
 const showAddCommentModal = ref(false)
 
 function hasCollection(coll) {
   // V2: collection returned directly on the membership object.
-  if (props.member.collection === coll) {
+  if (member.value.collection === coll) {
     return true
   }
 
   // V1 fallback: check memberships array.
-  if (props.member.memberships) {
-    for (const group of props.member.memberships) {
-      if (group.id === props.member.groupid && group.collection === coll) {
+  if (member.value.memberships) {
+    for (const group of member.value.memberships) {
+      if (group.id === member.value.groupid && group.collection === coll) {
         return true
       }
     }
@@ -212,7 +242,7 @@ function hasCollection(coll) {
 
 const approved = computed(() => hasCollection('Approved'))
 
-const spam = computed(() => props.member.spammer)
+const spam = computed(() => member.value.spammer)
 
 const validActions = computed(() => {
   // The standard messages we show depend on the valid ones for this type of member.
@@ -224,8 +254,8 @@ const validActions = computed(() => {
 })
 
 const filterByAction = computed(() => {
-  if (props.modconfig?.stdmsgs) {
-    return props.modconfig.stdmsgs.filter((stdmsg) => {
+  if (modconfig.value?.stdmsgs) {
+    return modconfig.value.stdmsgs.filter((stdmsg) => {
       return validActions.value.includes(stdmsg.action)
     })
   }
@@ -234,7 +264,7 @@ const filterByAction = computed(() => {
 })
 
 const filtered = computed(() => {
-  if (props.modconfig?.stdmsgs) {
+  if (modconfig.value?.stdmsgs) {
     return filterByAction.value.filter((stdmsg) => {
       return showRare.value || !parseInt(stdmsg.rarelyused)
     })

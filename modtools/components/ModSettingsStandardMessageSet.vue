@@ -42,7 +42,7 @@
         <template #item="{ element }">
           <ModSettingsStandardMessageButton
             v-if="visible(element)"
-            :stdmsg="element"
+            :stdmsgid="element.id"
           />
         </template>
       </draggable>
@@ -51,7 +51,7 @@
       <span v-for="stdmsg in stdmsgscopy" :key="'stdmsg-' + stdmsg.id">
         <ModSettingsStandardMessageButton
           v-if="visible(stdmsg)"
-          :stdmsg="stdmsg"
+          :stdmsgid="stdmsg.id"
         />
       </span>
     </div>
@@ -72,6 +72,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { copyStdMsgs } from '~/composables/useStdMsgs'
 import { useModConfigStore } from '~/stores/modconfig'
+import { useStdmsgStore } from '~/stores/stdmsg'
 
 const props = defineProps({
   cc: {
@@ -94,6 +95,14 @@ const props = defineProps({
 })
 
 const modConfigStore = useModConfigStore()
+const stdmsgStore = useStdmsgStore()
+
+// Populate the stdmsg store from config stdmsgs so child components can look up by ID.
+function populateStdmsgStore(cfg) {
+  if (cfg && cfg.stdmsgs) {
+    cfg.stdmsgs.forEach((s) => stdmsgStore.set(s))
+  }
+}
 
 const ccopts = [
   { value: 'Nobody', text: 'Nobody' },
@@ -112,10 +121,12 @@ const config = computed(() => {
 
 watch(config, (newval) => {
   stdmsgscopy.value = copyStdMsgs(newval)
+  populateStdmsgStore(newval)
 })
 
 onMounted(() => {
   stdmsgscopy.value = copyStdMsgs(config.value)
+  populateStdmsgStore(config.value)
 })
 
 function updateOrder() {

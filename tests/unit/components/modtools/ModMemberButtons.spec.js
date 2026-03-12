@@ -3,6 +3,23 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, h } from 'vue'
 import ModMemberButtons from '~/modtools/components/ModMemberButtons.vue'
 
+const mockMemberStore = {
+  get: vi.fn(),
+  list: {},
+}
+
+const mockModConfigStore = {
+  configsById: {},
+}
+
+vi.mock('~/stores/member', () => ({
+  useMemberStore: () => mockMemberStore,
+}))
+
+vi.mock('~/stores/modconfig', () => ({
+  useModConfigStore: () => mockModConfigStore,
+}))
+
 // Mock useModMe composable
 vi.mock('~/composables/useModMe', () => ({
   useModMe: () => ({
@@ -71,10 +88,19 @@ describe('ModMemberButtons', () => {
   })
 
   function mountComponent(props = {}) {
+    const memberData = props.member ? props.member : createMember()
+    const { member: _unused, modconfig, ...restProps } = props
+    mockMemberStore.get.mockReturnValue(memberData)
+    if (modconfig) {
+      mockModConfigStore.configsById = { 1: modconfig }
+    } else {
+      mockModConfigStore.configsById = {}
+    }
     return mount(ModMemberButtons, {
       props: {
-        member: createMember(),
-        ...props,
+        membershipid: memberData.id,
+        modconfigid: modconfig ? 1 : null,
+        ...restProps,
       },
       global: {
         stubs: {
@@ -138,6 +164,9 @@ describe('ModMemberButtons', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockMemberStore.get.mockReturnValue(null)
+    mockMemberStore.list = {}
+    mockModConfigStore.configsById = {}
   })
 
   describe('rendering', () => {

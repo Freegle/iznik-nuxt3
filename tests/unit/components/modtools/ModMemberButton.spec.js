@@ -22,8 +22,17 @@ const mockStdmsgStore = {
   fetch: vi.fn(),
 }
 
+const mockUserStore = {
+  byId: vi.fn(),
+  fetch: vi.fn(),
+}
+
 vi.mock('~/stores/member', () => ({
   useMemberStore: () => mockMemberStore,
+}))
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
 }))
 
 vi.mock('~/stores/spammer', () => ({
@@ -41,27 +50,32 @@ vi.mock('~/composables/useMe', () => ({
 }))
 
 describe('ModMemberButton', () => {
-  const defaultMember = {
-    id: 123,
+  const defaultProps = {
     userid: 456,
-    displayname: 'Test User',
     groupid: 789,
     membershipid: 111,
-    spammer: {
-      id: 222,
-    },
-  }
-
-  const defaultProps = {
-    member: defaultMember,
+    spammerid: 222,
     variant: 'primary',
     label: 'Test Button',
     icon: 'check',
   }
 
   function mountComponent(props = {}) {
+    const mergedProps = { ...defaultProps, ...props }
+
+    // Set up user store mock
+    mockUserStore.byId.mockImplementation((id) => {
+      if (id === mergedProps.userid) {
+        return {
+          id: mergedProps.userid,
+          displayname: 'Test User',
+        }
+      }
+      return null
+    })
+
     return mount(ModMemberButton, {
-      props: { ...defaultProps, ...props },
+      props: mergedProps,
       global: {
         stubs: {
           SpinButton: {
@@ -79,12 +93,12 @@ describe('ModMemberButton', () => {
           },
           ModSpammerReport: {
             template: '<div class="spam-report-modal" />',
-            props: ['user'],
+            props: ['userid'],
             methods: { show: vi.fn() },
           },
           ModStdMessageModal: {
             template: '<div class="std-message-modal" />',
-            props: ['stdmsg', 'member', 'autosend'],
+            props: ['stdmsgid', 'stdmsgaction', 'membershipid', 'autosend'],
             methods: { show: vi.fn(), fillin: vi.fn() },
           },
         },
@@ -143,15 +157,6 @@ describe('ModMemberButton', () => {
     it('returns null for non-primary variant', () => {
       const wrapper = mountComponent({ variant: 'danger' })
       expect(wrapper.vm.spinclass).toBeNull()
-    })
-  })
-
-  describe('groupid computed', () => {
-    it('returns member groupid', () => {
-      const wrapper = mountComponent({
-        member: { ...defaultMember, groupid: 555 },
-      })
-      expect(wrapper.vm.groupid).toBe(555)
     })
   })
 
@@ -259,7 +264,7 @@ describe('ModMemberButton', () => {
       await flushPromises()
       expect(mockMemberStore.reviewHold).toHaveBeenCalledWith({
         membershipid: 111,
-        groupid: 123, // Falls back to member.id when reviewgroupid not set
+        groupid: 789,
       })
     })
 
@@ -279,7 +284,7 @@ describe('ModMemberButton', () => {
       await flushPromises()
       expect(mockMemberStore.reviewRelease).toHaveBeenCalledWith({
         membershipid: 111,
-        groupid: 123,
+        groupid: 789,
       })
     })
 
@@ -303,7 +308,7 @@ describe('ModMemberButton', () => {
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(wrapper.vm.showStdMsgModal).toBe(true)
-      expect(wrapper.vm.stdmsg).toEqual({ action: 'Leave Member' })
+      expect(wrapper.vm.stdmsgAction).toBe('Leave Member')
     })
 
     it('fetches stdmsg when stdmsgid provided', async () => {
@@ -345,19 +350,11 @@ describe('ModMemberButton', () => {
   })
 
   describe('edge cases', () => {
-    it('handles member without spammer property gracefully', async () => {
-      const memberWithoutSpammer = {
-        id: 123,
-        userid: 456,
-        displayname: 'Test User',
-        groupid: 789,
-        membershipid: 111,
-      }
+    it('handles reviewhold without spammer property', async () => {
       const wrapper = mountComponent({
-        member: memberWithoutSpammer,
+        spammerid: null,
         reviewhold: true,
       })
-      // reviewhold doesn't need spammer, should work
       await wrapper.find('button').trigger('click')
       await flushPromises()
       expect(mockMemberStore.reviewHold).toHaveBeenCalled()
@@ -367,7 +364,6 @@ describe('ModMemberButton', () => {
       const wrapper = mountComponent({ delete: true })
       const button = wrapper.find('button')
       await button.trigger('click')
-      // The callback is called by SpinButton stub in @handle
       expect(wrapper.emitted('pressed')).toBeTruthy()
     })
   })

@@ -60,7 +60,7 @@
     </span>
     <ModModeration
       v-if="modinfo && membership"
-      :user="user"
+      :userid="userid"
       :membership="membership"
       class="order-2 order-md-3 order-lg-4"
     />
@@ -118,7 +118,7 @@ const membership = computed(() => {
 
   if (props.groupid && user.value?.memberships) {
     ret = user.value.memberships.find((g) => {
-      return g.id === props.groupid
+      return g.groupid === props.groupid
     })
 
     if (ret) {

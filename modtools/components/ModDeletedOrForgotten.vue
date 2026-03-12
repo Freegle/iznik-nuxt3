@@ -26,10 +26,26 @@
   </div>
 </template>
 <script setup>
-defineProps({
-  user: {
-    type: Object,
+import { computed, watch } from 'vue'
+import { useUserStore } from '~/stores/user'
+
+const props = defineProps({
+  userid: {
+    type: Number,
     default: null,
   },
 })
+
+const userStore = useUserStore()
+const user = computed(() =>
+  props.userid ? userStore.byId(props.userid) : null
+)
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
 </script>

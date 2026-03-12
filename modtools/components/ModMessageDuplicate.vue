@@ -1,5 +1,5 @@
 <template>
-  <div class="text-danger small">
+  <div v-if="message" class="text-danger small">
     Duplicate of
     <v-icon icon="hashtag" class="text-muted" scale="0.5" /><nuxt-link
       :to="duplicateLink"
@@ -15,28 +15,48 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { useMessageStore } from '~/stores/message'
+
+const messageStore = useMessageStore()
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
 })
 
+const message = computed(() => {
+  if (props.messageid) {
+    return messageStore.byId(props.messageid) || null
+  }
+  return null
+})
+
+watch(
+  () => props.messageid,
+  async (newVal) => {
+    if (newVal) {
+      await messageStore.fetch(newVal)
+    }
+  },
+  { immediate: true }
+)
+
 const groupid = computed(() => {
   let ret = 0
 
-  if (props.message && props.message.groups && props.message.groups.length) {
-    ret = props.message.groups[0].groupid
+  if (message.value && message.value.groups && message.value.groups.length) {
+    ret = message.value.groups[0].groupid
   }
   return ret
 })
 
 const isPending = computed(() => {
   return (
-    props.message.collection === 'Pending' ||
-    props.message.collection === 'PendingOther'
+    message.value?.collection === 'Pending' ||
+    message.value?.collection === 'PendingOther'
   )
 })
 
@@ -47,10 +67,10 @@ const duplicateLink = computed(() => {
       '/messages/pending?groupid=' +
       groupid.value +
       '&msgid=' +
-      props.message.id
+      message.value.id
     )
   }
   // Link to approved messages with search term for approved duplicates.
-  return '/messages/approved/' + groupid.value + '/' + props.message.id
+  return '/messages/approved/' + groupid.value + '/' + message.value.id
 })
 </script>

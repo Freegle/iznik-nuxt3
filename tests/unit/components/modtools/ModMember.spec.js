@@ -13,6 +13,8 @@ const mockUserStore = {
 const mockMemberStore = {
   update: vi.fn(),
   unban: vi.fn(),
+  list: {},
+  get: vi.fn(),
 }
 
 const mockModConfigStore = {
@@ -93,10 +95,13 @@ describe('ModMember', () => {
   })
 
   function mountComponent(props = {}) {
+    const memberData = props.member ? props.member : createMember()
+    const { member: _unused, ...restProps } = props
+    mockMemberStore.get.mockReturnValue(memberData)
     return mount(ModMember, {
       props: {
-        member: createMember(),
-        ...props,
+        membershipid: memberData.id,
+        ...restProps,
       },
       global: {
         stubs: {
@@ -266,6 +271,8 @@ describe('ModMember', () => {
     mockUserStore.list = {}
     mockMemberStore.update.mockResolvedValue()
     mockMemberStore.unban.mockResolvedValue()
+    mockMemberStore.list = {}
+    mockMemberStore.get.mockReturnValue(null)
     mockChatStore.openChatToMods.mockResolvedValue(12345)
     mockModConfigStore.configs = [{ id: 1, name: 'Test Config' }]
     mockModConfigStore.configsById = { 1: { id: 1, name: 'Test Config' } }
@@ -612,18 +619,18 @@ describe('ModMember', () => {
       expect(wrapper.vm.notifications.emailmine).toBe(false)
     })
 
-    it('modconfig returns matching config from myGroups', () => {
+    it('configid returns matching config id from myGroups', () => {
       const wrapper = mountComponent({
         member: createMember({ groupid: 789 }),
       })
-      expect(wrapper.vm.modconfig).toEqual({ id: 1, name: 'Test Config' })
+      expect(wrapper.vm.configid).toBe(1)
     })
 
-    it('modconfig returns null when no matching config', () => {
+    it('configid returns null when no matching config', () => {
       const wrapper = mountComponent({
         member: createMember({ groupid: 999 }),
       })
-      expect(wrapper.vm.modconfig).toBeNull()
+      expect(wrapper.vm.configid).toBeNull()
     })
 
     it('relevantallowed returns boolean value', () => {

@@ -16,10 +16,11 @@ export const useStdmsgStore = defineStore({
     set(stdmsg) {
       this.stdmsgs[stdmsg.id] = stdmsg
     },
+    byId(id) {
+      return this.stdmsgs[id] || null
+    },
     byid(id) {
-      return this.stdmsgs.find((msg) => {
-        return msg.id === id
-      })
+      return this.byId(id)
     },
     async fetch(id) {
       const { stdmsg } = await api(this.config).modconfigs.fetchStdMsg(id)

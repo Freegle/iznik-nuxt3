@@ -81,8 +81,8 @@ import { useGroupStore } from '~/stores/group'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  event: {
-    type: Object,
+  eventid: {
+    type: Number,
     required: true,
   },
 })
@@ -91,13 +91,15 @@ const communityEventStore = useCommunityEventStore()
 const groupStore = useGroupStore()
 const userStore = useUserStore()
 
+const event = computed(() => communityEventStore.byId(props.eventid))
+
 const showModal = ref(false)
 const eventmodal = ref(null)
 const showDeleteConfirm = ref(false)
 
 // Fetch user details for display
 watch(
-  () => props.event?.userid,
+  () => event.value?.userid,
   (userid) => {
     if (userid) {
       userStore.fetch(userid)
@@ -107,12 +109,12 @@ watch(
 )
 
 const eventUser = computed(() => {
-  return props.event?.userid ? userStore.byId(props.event.userid) : null
+  return event.value?.userid ? userStore.byId(event.value.userid) : null
 })
 
 const groups = computed(() => {
   const ret = []
-  props.event?.groups?.forEach((id) => {
+  event.value?.groups?.forEach((id) => {
     const group = groupStore?.get(id)
 
     if (group) {
@@ -132,13 +134,13 @@ function confirmDelete() {
 }
 
 function deleteme() {
-  communityEventStore.delete(props.event.id)
+  communityEventStore.delete(event.value.id)
   showDeleteConfirm.value = false
 }
 
 function approve() {
   communityEventStore.save({
-    id: props.event.id,
+    id: event.value.id,
     pending: false,
   })
 }

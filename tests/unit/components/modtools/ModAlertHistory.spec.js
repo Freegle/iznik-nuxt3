@@ -11,20 +11,28 @@ vi.mock('#imports', async () => {
   }
 })
 
-describe('ModAlertHistory', () => {
-  const defaultAlert = {
-    id: 1,
-    created: '2024-01-01T10:00:00',
-    complete: '2024-01-01T12:00:00',
-    subject: 'Test Alert',
-    group: {
-      nameshort: 'Test Group',
-    },
-  }
+const defaultAlert = {
+  id: 1,
+  created: '2024-01-01T10:00:00',
+  complete: '2024-01-01T12:00:00',
+  subject: 'Test Alert',
+  group: {
+    nameshort: 'Test Group',
+  },
+}
 
+const mockAlertStore = {
+  get: vi.fn((id) => (id === 1 ? defaultAlert : null)),
+}
+
+vi.mock('~/stores/alert', () => ({
+  useAlertStore: () => mockAlertStore,
+}))
+
+describe('ModAlertHistory', () => {
   function mountComponent(props = {}) {
     return mount(ModAlertHistory, {
-      props: { alert: defaultAlert, ...props },
+      props: { alertid: 1, ...props },
       global: {
         stubs: {
           'b-row': { template: '<div class="row"><slot /></div>' },
@@ -50,6 +58,9 @@ describe('ModAlertHistory', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAlertStore.get.mockImplementation((id) =>
+      id === 1 ? defaultAlert : null
+    )
   })
 
   describe('rendering', () => {

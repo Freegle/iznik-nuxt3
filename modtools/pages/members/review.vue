@@ -10,7 +10,10 @@
         :key="'memberlist-' + member.id"
         class="p-0 mt-2"
       >
-        <ModMemberReview :member="member" @forcerefresh="forcerefresh" />
+        <ModMemberReview
+          :membershipid="member.id"
+          @forcerefresh="forcerefresh"
+        />
       </div>
 
       <infinite-loading

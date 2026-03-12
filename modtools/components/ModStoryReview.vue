@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-card v-if="show" no-body>
+    <b-card v-if="story && show" no-body>
       <b-card-header>
         <div class="d-flex justify-content-between flex-wrap w-100">
           <span v-if="storyUser">
@@ -85,16 +85,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useGroupStore } from '@/stores/group'
+import { useStoryStore } from '@/stores/stories'
 import { useModMe } from '~/modtools/composables/useModMe'
 
 const { $api } = useNuxtApp()
 const userStore = useUserStore()
 const groupStore = useGroupStore()
+const storyStore = useStoryStore()
 const { checkWork } = useModMe()
 
 const props = defineProps({
-  story: {
-    type: Object,
+  storyid: {
+    type: Number,
     required: true,
   },
   newsletter: {
@@ -104,10 +106,12 @@ const props = defineProps({
   },
 })
 
+const story = computed(() => storyStore.byId(props.storyid))
+
 const show = ref(true)
 
 const storyUser = computed(() => {
-  return props.story?.userid ? userStore.byId(props.story.userid) : null
+  return story.value?.userid ? userStore.byId(story.value.userid) : null
 })
 
 const primaryEmail = computed(() => {
@@ -136,8 +140,8 @@ const groupName = computed(() => {
 })
 
 onMounted(async () => {
-  if (props.story?.userid) {
-    const u = await userStore.fetchMT({ id: props.story.userid })
+  if (story.value?.userid) {
+    const u = await userStore.fetchMT({ id: story.value.userid })
     // Fetch the first group so we can show its name.
     if (u?.memberships?.length) {
       await groupStore.fetch(u.memberships[0].groupid)
@@ -146,19 +150,19 @@ onMounted(async () => {
 })
 
 async function useForNewsletter() {
-  await $api.stories.useForNewsletter(props.story.id)
+  await $api.stories.useForNewsletter(story.value.id)
   show.value = false
   checkWork(true)
 }
 
 async function useForPublicity() {
-  await $api.stories.useForPublicity(props.story.id)
+  await $api.stories.useForPublicity(story.value.id)
   show.value = false
   checkWork(true)
 }
 
 async function dontUseForPublicity() {
-  await $api.stories.dontUseForPublicity(props.story.id)
+  await $api.stories.dontUseForPublicity(story.value.id)
   show.value = false
   checkWork(true)
 }

@@ -27,23 +27,25 @@
         <div><v-icon icon="hashtag" />{{ member.userid }}</div>
       </b-card-header>
       <b-card-body>
-        <ModDeletedOrForgotten v-if="user" :user="user" />
+        <ModDeletedOrForgotten v-if="user" :userid="member.userid" />
         <NoticeMessage v-if="banned" variant="danger" class="mb-2">
           This freegler is banned from this group.
         </NoticeMessage>
-        <div v-if="member.heldby">
+        <div v-if="heldByUser">
           <NoticeMessage variant="warning" class="mb-2">
-            <p v-if="me.id === member.heldby.id">
+            <p v-if="me.id === heldByUser.id">
               You held this member. Other people will see a warning to check
               with you before releasing them.
             </p>
             <p v-else>
-              Held by <strong>{{ member.heldby.displayname }}</strong
+              Held by <strong>{{ heldByUser.displayname }}</strong
               >. Please check before releasing them.
             </p>
             <ModMemberButton
-              v-if="member.heldby"
-              :member="member"
+              v-if="heldByUser"
+              :userid="member.userid"
+              :groupid="member.groupid"
+              :spammerid="user.spammer?.id"
               variant="warning"
               icon="play"
               release
@@ -55,7 +57,11 @@
           :userid="member.userid"
           :expand-comments="expandComments"
         />
-        <ModSpammer v-if="user.spammer" :user="user" :sameip="sameip" />
+        <ModSpammer
+          v-if="user.spammer"
+          :userid="member.userid"
+          :sameip="sameip"
+        />
         <NoticeMessage v-if="user.suspectreason" variant="danger" class="mb-2">
           This freegler is flagged: {{ user.suspectreason }}
         </NoticeMessage>
@@ -67,7 +73,7 @@
           This freegler recently active on groups
           {{ user.activedistance }} miles apart.
         </NoticeMessage>
-        <ModBouncing v-if="user.bouncing" :user="user" />
+        <ModBouncing v-if="user.bouncing" :userid="member.userid" />
         <NoticeMessage v-if="member.bandate">
           Banned
           <span :title="datetime(member.bandate)">{{
@@ -98,15 +104,14 @@
             />
             <div class="fw-bold mt-1">Moderation status:</div>
             <ModModeration
-              :user="user"
               :userid="member.userid"
               :membership="member"
               class="order-2 order-md-3 order-lg-4"
             />
           </div>
           <div>
-            <ModMemberSummary :member="user" />
-            <ModMemberEngagement :member="user" />
+            <ModMemberSummary :userid="member.userid" />
+            <ModMemberEngagement :userid="member.userid" />
             <div v-if="user.info && user.info.publiclocation">
               Public location: {{ user.info.publiclocation.location }}
             </div>
@@ -117,7 +122,7 @@
               :banned="Boolean(member.bandate)"
             />
             <ModMemberships :userid="member.userid" />
-            <ModMemberLogins :member="user" />
+            <ModMemberLogins :userid="member.userid" />
             <b-button
               v-if="user.emails && user.emails.length"
               variant="link"
@@ -245,8 +250,8 @@
       </b-card-body>
       <b-card-footer class="d-flex justify-content-between flex-wrap">
         <ModMemberButtons
-          :member="member"
-          :modconfig="modconfig"
+          :membershipid="member.id"
+          :modconfigid="configid"
           :actions="footeractions"
         />
         <div
@@ -278,7 +283,7 @@
     <ModPostingHistoryModal
       v-if="showPostingHistoryModal"
       ref="history"
-      :user="user"
+      :userid="member.userid"
       :type="type"
       @hidden="showPostingHistoryModal = false"
     />
@@ -313,8 +318,8 @@ import { useChatStore } from '~/stores/chat'
 import { useMe } from '~/composables/useMe'
 
 const props = defineProps({
-  member: {
-    type: Object,
+  membershipid: {
+    type: Number,
     required: true,
   },
   spammerlist: {
@@ -341,6 +346,8 @@ const props = defineProps({
 
 const chatStore = useChatStore()
 const memberStore = useMemberStore()
+
+const member = computed(() => memberStore.get(props.membershipid))
 const userStore = useUserStore()
 const modConfigStore = useModConfigStore()
 const { me, myGroups } = useMe()
@@ -376,7 +383,7 @@ const email = computed(() => {
 })
 
 const groupid = computed(() => {
-  return props.member.groupid
+  return member.value?.groupid
 })
 
 const configid = computed(() => {
@@ -387,11 +394,6 @@ const configid = computed(() => {
     }
   })
   return id
-})
-
-const modconfig = computed(() => {
-  if (!configid.value) return null
-  return modConfigStore.configsById[configid.value] || null
 })
 
 watch(
@@ -407,8 +409,17 @@ watch(
 const user = computed(() => {
   // Full user data from store, populated by fetchMT on mount.
   // Falls back to props.member for fields not yet loaded.
-  const storeUser = userStore.list[props.member.userid]
-  return storeUser || props.member
+  const storeUser = userStore.list[member.value?.userid]
+  return storeUser || member.value
+})
+
+// V2 API returns heldby as a numeric user ID, not an object.
+const heldByUser = computed(() => {
+  const hb = member.value?.heldby
+  if (!hb) return null
+  // V1 compat: heldby might already be an object
+  if (typeof hb === 'object') return hb
+  return userStore.byId(hb) || { id: hb, displayname: '#' + hb }
 })
 
 const isTN = computed(() => {
@@ -477,23 +488,29 @@ const newslettersallowed = computed({
 const autorepost = computed({
   get() {
     return (
-      props.member && !isTN.value && Boolean(!props.member.autorepostsdisable)
+      member.value && !isTN.value && Boolean(!member.value.autorepostsdisable)
     )
   },
   set() {},
 })
 
 onMounted(() => {
-  if (props.member.banned) {
+  if (member.value?.banned) {
     banned.value = true
   }
 
   // Fetch full user data via V2 pattern - cached in userStore.
-  if (props.member.userid) {
+  if (member.value?.userid) {
     userStore.fetchMT({
-      id: props.member.userid,
+      id: member.value.userid,
       info: true,
     })
+  }
+
+  // V2 API returns heldby as a numeric ID — fetch the user so we can show their name.
+  const hb = member.value?.heldby
+  if (hb && typeof hb !== 'object' && !userStore.byId(hb)) {
+    userStore.fetch(hb)
   }
 })
 
@@ -510,7 +527,7 @@ function showLogs() {
 
 function settingsChange(param, groupidArg, val) {
   const params = {
-    userid: props.member.userid,
+    userid: member.value?.userid,
     groupid: groupidArg,
   }
   params[param] = val
@@ -556,7 +573,7 @@ async function changeAutorepost(e) {
   const settingsObj = user.value.settings || {}
   settingsObj.autorepostsdisable = !e.value
   await userStore.edit({
-    id: props.member.userid,
+    id: member.value?.userid,
     settings: settingsObj,
   })
 }
@@ -569,17 +586,19 @@ function confirmUnban(memberArg) {
 
 async function unban() {
   showUnbanModal.value = false
-  await memberStore.unban(props.member.userid, groupid.value)
-  // eslint-disable-next-line vue/no-mutating-props
-  delete props.member.bandate
-  // eslint-disable-next-line vue/no-mutating-props
-  delete props.member.bannedby
+  await memberStore.unban(member.value?.userid, groupid.value)
+  // Update the member in the store
+  const m = memberStore.get(props.membershipid)
+  if (m) {
+    delete m.bandate
+    delete m.bannedby
+  }
 }
 
 async function showChat() {
   chatid.value = await chatStore.openChatToMods(
-    props.member.groupid,
-    props.member.userid
+    member.value?.groupid,
+    member.value?.userid
   )
   showModChatModal.value = true
   modChatModal.value?.show()

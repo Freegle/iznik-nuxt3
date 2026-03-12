@@ -30,8 +30,8 @@ describe('CommunityEventsPage', () => {
         plugins: [createPinia()],
         stubs: {
           ModCommunityEvent: {
-            template: '<div class="mod-community-event" :data-id="event.id" />',
-            props: ['event'],
+            template: '<div class="mod-community-event" :data-id="eventid" />',
+            props: ['eventid'],
           },
           NoticeMessage: {
             template: '<div class="notice-message"><slot /></div>',

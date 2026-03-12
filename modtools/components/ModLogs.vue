@@ -10,7 +10,7 @@
 
     <hr class="d-block d-md-none" />
 
-    <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
+    <ModLog v-for="log in logs" :key="'log-' + log.id" :logid="log.id" />
 
     <infinite-loading :distance="distance" @infinite="loadMore">
       <template #spinner>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="message">
     <div ref="top" style="position: relative; top: -66px" />
     <b-card bg-variant="white" no-body>
       <b-card-header class="p-1 p-md-2">
@@ -131,18 +131,18 @@
             <ModMessageDuplicate
               v-for="(duplicate, index) in duplicates"
               :key="'duplicate-' + duplicate.id + '-' + index"
-              :message="duplicate"
+              :messageid="duplicate.id"
             />
             <ModMessageCrosspost
               v-for="crosspost in crossposts"
               :key="'crosspost-' + crosspost.id"
-              :message="crosspost"
+              :messageid="crosspost.id"
             />
             <div v-if="expanded">
               <ModMessageRelated
                 v-for="related in message.related"
                 :key="'related-' + related.id"
-                :message="related"
+                :messageid="related.id"
               />
             </div>
           </div>
@@ -230,7 +230,7 @@
                     >. Please check with them before releasing it.
                   </p>
                   <ModMessageButton
-                    :message="message"
+                    :messageid="message.id"
                     variant="warning"
                     icon="play"
                     release
@@ -244,7 +244,7 @@
                 :userid="fromUserId"
                 @update-comments="updateComments"
               />
-              <ModSpammer v-if="fromUser.spammer" :user="fromUser" />
+              <ModSpammer v-if="fromUser.spammer" :userid="fromUserId" />
               <NoticeMessage
                 v-if="fromUser.activedistance > 50"
                 variant="warning"
@@ -274,8 +274,8 @@
               <ModMessageMicroVolunteering
                 v-for="m in message.microvolunteering"
                 :key="'microvolunteering-' + m.id"
-                :message="message"
-                :microvolunteering="m"
+                :messageid="message.id"
+                :microvolunteeringid="m.id"
                 class="mb-1"
               />
               <b-button
@@ -298,7 +298,7 @@
               </b-button>
               <p class="text-muted small" />
             </div>
-            <ModMessageWorry v-if="message.worry" :message="message" />
+            <ModMessageWorry v-if="message.worry" :messageid="message.id" />
             <div v-if="expanded">
               <!-- eslint-disable-next-line -->
               <b-form-textarea v-if="editing" v-model="message.textbody" rows="8" class="mb-3" />
@@ -356,7 +356,10 @@
                   >
                     Removed
                   </div>
-                  <ModPhoto :message="message" :attachment="attachment" />
+                  <ModPhoto
+                    :messageid="messageid"
+                    :attachmentid="attachment.id"
+                  />
                 </div>
               </div>
               <MessageReplyInfo
@@ -542,8 +545,8 @@
               (message.heldby && message.heldby.id === myid)) &&
             !editing
           "
-          :message="message"
-          :modconfig="modconfig"
+          :messageid="message.id"
+          :modconfigid="configid"
           :editreview="editreview"
           :cantpost="membership && membership.ourpostingstatus === 'PROHIBITED'"
         />
@@ -574,7 +577,7 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :user="fromUser"
+      :userid="fromUserId"
       :safelist="false"
     />
     <div ref="bottom" />
@@ -603,8 +606,8 @@ import { useModGroupStore } from '@/stores/modgroup'
 import { twem } from '~/composables/useTwem'
 
 const props = defineProps({
-  message: {
-    type: Object,
+  messageid: {
+    type: Number,
     required: true,
   },
   editreview: {
@@ -655,17 +658,36 @@ const modconfigStore = useModConfigStore()
 const modGroupStore = useModGroupStore()
 const userStore = useUserStore()
 
+const message = computed(() => messageStore.byId(props.messageid))
+
+watch(
+  () => props.messageid,
+  async (id) => {
+    if (id && !messageStore.byId(id)) {
+      await messageStore.fetch(id)
+    }
+  },
+  { immediate: true }
+)
+
 // V2 API returns fromuser as a numeric ID. Resolve from user store reactively.
 const fromUserId = computed(() => {
-  const fu = props.message.fromuser
+  if (!message.value) return null
+  const fu = message.value.fromuser
   if (!fu) return null
   return typeof fu === 'number' ? fu : fu.id
 })
 
 // Trigger a fetch if the user isn't in the store yet.
-if (fromUserId.value && !userStore.byId(fromUserId.value)) {
-  userStore.fetchMT({ id: fromUserId.value, modtools: true })
-}
+watch(
+  fromUserId,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) {
+      userStore.fetchMT({ id: uid, modtools: true })
+    }
+  },
+  { immediate: true }
+)
 
 const fromUser = computed(() => {
   if (!fromUserId.value) return null
@@ -700,8 +722,8 @@ const groupid = computed(() => {
   // moved from mixins/keywords
   let ret = 0
 
-  if (props.message && props.message.groups && props.message.groups.length) {
-    ret = props.message.groups[0].groupid
+  if (message.value && message.value.groups && message.value.groups.length) {
+    ret = message.value.groups[0].groupid
   }
   return ret
 })
@@ -709,8 +731,8 @@ const groupid = computed(() => {
 const messageGroup = computed(() => {
   let ret = null
 
-  if (props.message && props.message.groups && props.message.groups.length) {
-    ret = props.message.groups[0].groupid
+  if (message.value && message.value.groups && message.value.groups.length) {
+    ret = message.value.groups[0].groupid
   }
 
   return ret
@@ -733,15 +755,15 @@ const group = computed(() => {
 const position = computed(() => {
   let ret = null
 
-  if (props.message) {
-    if (props.message.location) {
+  if (message.value) {
+    if (message.value.location) {
       // This is what we put in for message submitted on FD.
-      ret = props.message.location
-    } else if (props.message.lat || props.message.lng) {
+      ret = message.value.location
+    } else if (message.value.lat || message.value.lng) {
       // This happens for TN messages
       ret = {
-        lat: props.message.lat,
-        lng: props.message.lng,
+        lat: message.value.lat,
+        lng: message.value.lng,
       }
     }
   }
@@ -764,22 +786,26 @@ const pending = computed(() => {
 })
 
 const eSubject = computed(() => {
-  return twem(props.message.subject)
+  if (!message.value) return ''
+  return twem(message.value.subject)
 })
 
 const eBody = computed(() => {
-  return twem(props.message.textbody)
+  if (!message.value) return ''
+  return twem(message.value.textbody)
 })
 
 // Handle heldby as either numeric ID (Go API) or object (PHP API).
 const heldbyId = computed(() => {
-  const h = props.message.heldby
+  if (!message.value) return null
+  const h = message.value.heldby
   if (!h) return null
   return Number.isInteger(h) ? h : h.id
 })
 
 const heldbyName = computed(() => {
-  const h = props.message.heldby
+  if (!message.value) return ''
+  const h = message.value.heldby
   if (!h) return ''
   if (Number.isInteger(h)) {
     const user = userStore.byId(h)
@@ -838,10 +864,10 @@ watch(
 const subjectClass = computed(() => {
   let ret = 'text-success'
 
-  if (modconfig.value && modconfig.value.coloursubj) {
+  if (message.value && modconfig.value && modconfig.value.coloursubj) {
     ret =
-      props.message.subject?.match &&
-      props.message.subject.match(modconfig.value.subjreg)
+      message.value.subject?.match &&
+      message.value.subject.match(modconfig.value.subjreg)
         ? 'text-success'
         : 'text-danger'
   }
@@ -850,14 +876,14 @@ const subjectClass = computed(() => {
 })
 
 const oldSubject = computed(() => {
-  if (!props.editreview || !props.message || !props.message.edits) {
+  if (!props.editreview || !message.value || !message.value.edits) {
     return null
   }
 
   // Edits are in descending time order.
   let oldest = null
 
-  props.message.edits.forEach((edit) => {
+  message.value.edits.forEach((edit) => {
     if (edit.reviewrequired && edit.oldsubject) {
       oldest = edit.oldsubject
     }
@@ -867,7 +893,7 @@ const oldSubject = computed(() => {
 })
 
 const newSubject = computed(() => {
-  if (!props.editreview || !props.message || !props.message.edits) {
+  if (!props.editreview || !message.value || !message.value.edits) {
     return null
   }
 
@@ -875,7 +901,7 @@ const newSubject = computed(() => {
   // Edits are in descending time order.
   let newest = null
 
-  props.message.edits.forEach((edit) => {
+  message.value.edits.forEach((edit) => {
     if (edit.reviewrequired) {
       if (edit.newsubject && !newest) {
         newest = edit.newsubject
@@ -887,14 +913,14 @@ const newSubject = computed(() => {
 })
 
 const oldBody = computed(() => {
-  if (!props.editreview || !props.message || !props.message.edits) {
+  if (!props.editreview || !message.value || !message.value.edits) {
     return null
   }
 
   // Edits are in descending time order.
   let oldest = null
 
-  props.message.edits.forEach((edit) => {
+  message.value.edits.forEach((edit) => {
     if (edit.reviewrequired && edit.oldtext) {
       oldest = edit.oldtext
     }
@@ -904,15 +930,15 @@ const oldBody = computed(() => {
 })
 
 const newBody = computed(() => {
-  if (!props.editreview || !props.message || !props.message.edits) {
+  if (!props.editreview || !message.value || !message.value.edits) {
     return null
   }
 
   // Find the newest and oldest texts; intermediates are just confusing.
   // Edits are in descending time order.
-  let newest = props.message.textbody
+  let newest = message.value.textbody
 
-  props.message.edits.forEach((edit) => {
+  message.value.edits.forEach((edit) => {
     if (edit.reviewrequired) {
       if (edit.newtext && !newest) {
         newest = edit.newtext
@@ -926,8 +952,9 @@ const newBody = computed(() => {
 const duplicateAge = computed(() => {
   let ret = 31
   let check = false
+  if (!message.value?.groups) return null
 
-  props.message.groups.forEach((g) => {
+  message.value.groups.forEach((g) => {
     const grp = myModGroup(g.groupid)
 
     // console.log("duplicateAge group", group?.settings?.duplicates)
@@ -938,7 +965,7 @@ const duplicateAge = computed(() => {
       grp.settings.duplicates.check
     ) {
       check = true
-      const msgtype = props.message.type.toLowerCase()
+      const msgtype = message.value.type.toLowerCase()
       ret = Math.min(ret, grp.settings.duplicates[msgtype])
     }
   })
@@ -975,8 +1002,8 @@ watch(
 // When expanding, force-fetch the full message to get all attachments.
 // The list endpoint only returns the first image for performance.
 watch(expanded, async (newVal) => {
-  if (newVal && props.message?.id) {
-    const fresh = await messageStore.fetch(props.message.id, true)
+  if (newVal && message.value?.id) {
+    const fresh = await messageStore.fetch(message.value.id, true)
     if (fresh?.attachments) {
       attachments.value = fresh.attachments
     }
@@ -986,7 +1013,7 @@ watch(expanded, async (newVal) => {
 watch(
   () => props.nextAfterRemoved,
   (newVal) => {
-    if (newVal === props.message.id) {
+    if (message.value && newVal === message.value.id) {
       // This message is the one after one which has just been removed.  Make sure the top is visible.
       bottom.value.scrollIntoView()
       top.value.scrollIntoView(true)
@@ -999,10 +1026,10 @@ watch(
   async (newVal) => {
     // We want to ensure that we have the groups for any message history, so that we can use them in canonSubj.
     // console.log('ModMessage: watch messageHistory',newVal)
-    await newVal.forEach(async function (message) {
-      if (!historyGroups[message.groupid]) {
-        historyGroups[message.groupid] = await modGroupStore.fetchIfNeedBeMT(
-          message.groupid
+    await newVal.forEach(async function (histMsg) {
+      if (!historyGroups[histMsg.groupid]) {
+        historyGroups[histMsg.groupid] = await modGroupStore.fetchIfNeedBeMT(
+          histMsg.groupid
         )
       }
     })
@@ -1012,19 +1039,23 @@ watch(
 
 onMounted(() => {
   expanded.value = !props.summary
-  attachments.value = Array.isArray(props.message.attachments)
-    ? props.message.attachments
-    : []
-  findHomeGroup()
+  if (message.value) {
+    attachments.value = Array.isArray(message.value.attachments)
+      ? message.value.attachments
+      : []
+    findHomeGroup()
 
-  // Fetch heldby user if message is held (Go API returns numeric ID).
-  if (props.message.heldby && Number.isInteger(props.message.heldby)) {
-    userStore.fetch(props.message.heldby)
+    // Fetch heldby user if message is held (Go API returns numeric ID).
+    if (message.value.heldby && Number.isInteger(message.value.heldby)) {
+      userStore.fetch(message.value.heldby)
+    }
   }
 })
 
 onBeforeUnmount(() => {
-  emit('destroy', props.message.id, props.next)
+  if (message.value) {
+    emit('destroy', message.value.id, props.next)
+  }
 })
 
 function updateComments() {
@@ -1038,8 +1069,8 @@ function updateComments() {
 function imageAdded(id) {
   let ret = false
 
-  if (props.editreview && props.message && props.message.edits) {
-    props.message.edits.forEach((edit) => {
+  if (props.editreview && message.value && message.value.edits) {
+    message.value.edits.forEach((edit) => {
       const n = edit.newimages ? JSON.parse(edit.newimages) : []
       const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
       if (n.includes(id) && !o.includes(id)) {
@@ -1054,8 +1085,8 @@ function imageAdded(id) {
 function imageRemoved(id) {
   let ret = false
 
-  if (props.editreview && props.message && props.message.edits) {
-    props.message.edits.forEach((edit) => {
+  if (props.editreview && message.value && message.value.edits) {
+    message.value.edits.forEach((edit) => {
       const n = edit.newimages ? JSON.parse(edit.newimages) : []
       const o = edit.oldimages ? JSON.parse(edit.oldimages) : []
       if (!n.includes(id) && o.includes(id)) {
@@ -1070,8 +1101,8 @@ function imageRemoved(id) {
 function hasCollection(coll) {
   let ret = false
 
-  if (props.message.groups) {
-    props.message.groups.forEach((grp) => {
+  if (message.value?.groups) {
+    message.value.groups.forEach((grp) => {
       if (grp.collection === coll) {
         ret = true
       }
@@ -1082,12 +1113,11 @@ function hasCollection(coll) {
 }
 
 function postcodeSelect(pc) {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.message.location = pc
+  message.value.location = pc
 }
 
 function startEdit() {
-  editmessage.value = props.message
+  editmessage.value = message.value
   editing.value = true
   miscStore.modtoolsediting = true
   editmessage.value.groups.forEach((grp) => {
@@ -1204,40 +1234,41 @@ function canonSubj(message) {
 
 function checkHistory(duplicateCheck) {
   const ret = []
-  const subj = canonSubj(props.message)
+  if (!message.value) return ret
+  const subj = canonSubj(message.value)
   const dupids = []
   const crossids = []
 
   if (fromUser.value?.messagehistory) {
-    fromUser.value.messagehistory.forEach((message) => {
+    fromUser.value.messagehistory.forEach((histMsg) => {
       if (
-        message.id !== props.message.id &&
+        histMsg.id !== message.value.id &&
         duplicateAge.value &&
-        message.daysago <= duplicateAge.value
+        histMsg.daysago <= duplicateAge.value
       ) {
-        // if( duplicateCheck) console.log('checkHistory check',message)
-        if (canonSubj(message) === subj) {
+        // if( duplicateCheck) console.log('checkHistory check',histMsg)
+        if (canonSubj(histMsg) === subj) {
           // No point displaying any group tag in the duplicate.
-          message.subject = message.subject.replace(/\[.*\](.*)/, '$1')
+          histMsg.subject = histMsg.subject.replace(/\[.*\](.*)/, '$1')
 
           // Check whether there are groups in common.
-          const groupsInCommon = props.message.groups
+          const groupsInCommon = message.value.groups
             .map((g) => g.groupid)
-            .filter((g) => g === message.groupid).length
+            .filter((g) => g === histMsg.groupid).length
 
-          const key = message.id + '-' + message.arrival
+          const key = histMsg.id + '-' + histMsg.arrival
 
           if (duplicateCheck && groupsInCommon) {
             // Same group - so this is a duplicate
             if (!dupids[key]) {
               dupids[key] = true
-              ret.push(message)
+              ret.push(histMsg)
             }
           } else if (!duplicateCheck && !groupsInCommon) {
             // Different group - so this is a crosspost.
             if (!crossids[key]) {
               crossids[key] = true
-              ret.push(message)
+              ret.push(histMsg)
             }
           }
         }
@@ -1255,10 +1286,10 @@ function photoAdd() {
 }
 
 async function findHomeGroup() {
-  if (props.message && props.message.lat && props.message.lng) {
+  if (message.value && message.value.lat && message.value.lng) {
     const loc = await locationStore.fetch({
-      lat: props.message.lat,
-      lng: props.message.lng,
+      lat: message.value.lat,
+      lng: message.value.lng,
     })
 
     if (loc && loc.groupsnear && loc.groupsnear.length) {
@@ -1274,11 +1305,11 @@ function cancelEdit() {
   miscStore.modtoolsediting = false
 
   // Fetch the message again to revert any changes.
-  messageStore.fetch(props.message.id)
+  messageStore.fetch(message.value.id)
 }
 
 async function backToPending(callback) {
-  await messageStore.backToPending(props.message.id)
+  await messageStore.backToPending(message.value.id)
   callback()
 }
 

@@ -16,7 +16,7 @@
             Some old logs are removed to save space: login/logout after 1 year,
             bounces over 90 days, logs about deleted messages, deleted users.
           </p>
-          <ModLog v-for="log in logs" :key="'log-' + log.id" :log="log" />
+          <ModLog v-for="log in logs" :key="'log-' + log.id" :logid="log.id" />
         </div>
         <infinite-loading
           :distance="200"

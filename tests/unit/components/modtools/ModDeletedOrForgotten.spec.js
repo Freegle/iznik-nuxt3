@@ -9,17 +9,32 @@ vi.mock('~/composables/useDateFormat', () => ({
   }),
 }))
 
-describe('ModDeletedOrForgotten', () => {
-  const defaultProps = {
-    user: {
-      deleted: '2024-01-15',
-      forgotten: null,
-    },
-  }
+const defaultUser = {
+  id: 123,
+  deleted: '2024-01-15',
+  forgotten: null,
+}
 
-  function mountComponent(props = {}) {
+const mockUserStore = {
+  byId: vi.fn((id) => null),
+  fetch: vi.fn().mockResolvedValue({}),
+}
+
+vi.mock('~/stores/user', () => ({
+  useUserStore: () => mockUserStore,
+}))
+
+describe('ModDeletedOrForgotten', () => {
+  function mountComponent(props = {}, userOverrides = {}) {
+    const uid = props.userid || 123
+    const user =
+      userOverrides === null
+        ? null
+        : { ...defaultUser, ...userOverrides, id: uid }
+    mockUserStore.byId.mockReturnValue(user)
+
     return mount(ModDeletedOrForgotten, {
-      props: { ...defaultProps, ...props },
+      props: { userid: uid, ...props },
       global: {
         stubs: {
           NoticeMessage: {
@@ -39,15 +54,27 @@ describe('ModDeletedOrForgotten', () => {
   })
 
   describe('rendering', () => {
-    it('does not render when user is null', () => {
-      const wrapper = mountComponent({ user: null })
+    it('does not render when userid is null', () => {
+      mockUserStore.byId.mockReturnValue(null)
+      const wrapper = mount(ModDeletedOrForgotten, {
+        props: { userid: null },
+        global: {
+          stubs: {
+            NoticeMessage: {
+              template: '<div class="notice"><slot /></div>',
+              props: ['variant'],
+            },
+          },
+          mocks: {
+            dateonly: (date) => `formatted: ${date}`,
+          },
+        },
+      })
       expect(wrapper.find('.notice').exists()).toBe(false)
     })
 
     it('does not render when user is not deleted', () => {
-      const wrapper = mountComponent({
-        user: { deleted: null },
-      })
+      const wrapper = mountComponent({}, { deleted: null })
       expect(wrapper.find('.notice').exists()).toBe(false)
     })
 
@@ -68,22 +95,24 @@ describe('ModDeletedOrForgotten', () => {
     })
 
     it('shows forgotten message when data is removed', () => {
-      const wrapper = mountComponent({
-        user: {
+      const wrapper = mountComponent(
+        {},
+        {
           deleted: '2024-01-15',
           forgotten: '2024-01-30',
-        },
-      })
+        }
+      )
       expect(wrapper.text()).toContain('data was removed')
     })
 
     it('does not show recovery message when forgotten', () => {
-      const wrapper = mountComponent({
-        user: {
+      const wrapper = mountComponent(
+        {},
+        {
           deleted: '2024-01-15',
           forgotten: '2024-01-30',
-        },
-      })
+        }
+      )
       expect(wrapper.text()).not.toContain('recover their account')
     })
   })

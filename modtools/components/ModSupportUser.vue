@@ -42,14 +42,14 @@
       </b-row>
     </b-card-header>
     <b-card-body v-if="expanded" class="p-1">
-      <ModBouncing v-if="user.bouncing" :user="user" class="mb-2" />
+      <ModBouncing v-if="user.bouncing" :userid="user.id" class="mb-2" />
       <NoticeMessage v-if="user.systemrole === 'Admin'" class="mb-2">
         This user has admin rights.
       </NoticeMessage>
       <NoticeMessage v-if="user.systemrole === 'Support'" class="mb-2">
         This user has support rights.
       </NoticeMessage>
-      <ModSpammer v-if="user.spammer" class="mb-2" :user="user" />
+      <ModSpammer v-if="user.spammer" class="mb-2" :userid="user.id" />
       <ModComments :userid="user.id" />
 
       <div class="d-flex flex-wrap">
@@ -94,7 +94,7 @@
           <v-icon icon="tag" /> Add note
         </b-button>
       </div>
-      <ModDeletedOrForgotten v-if="user" :user="user" />
+      <ModDeletedOrForgotten v-if="user" :userid="user.id" />
       <h3 class="mt-2">Trust Level</h3>
       <p>This controls whether someone is asked to do micromoderation tasks.</p>
       <p>
@@ -219,7 +219,7 @@
         </b-col>
       </b-row>
       <h3 class="mt-2">Logins</h3>
-      <ModMemberLogins :member="user" />
+      <ModMemberLogins :userid="user.id" />
       <div class="d-flex justify-content-between flex-wrap">
         <b-input-group class="mt-2">
           <b-form-input
@@ -272,10 +272,10 @@
       <div v-if="memberships && memberships.length">
         <div
           v-for="membership in memberships"
-          :key="'membership-' + membership.id"
+          :key="'membership-' + membership.membershipid"
         >
           <ModSupportMembership
-            :membership="membership"
+            :membershipid="membership.membershipid"
             :userid="user.id"
             @fetchuser="fetchUser"
           />
@@ -351,7 +351,7 @@
       </div>
       <div v-else>No application history.</div>
       <h3 class="mt-2">Posting History</h3>
-      <ModMemberSummary :member="user" />
+      <ModMemberSummary :userid="user.id" />
       <div v-if="messageHistoriesShown.length">
         <b-row
           v-for="message in messageHistoriesShown"
@@ -540,12 +540,12 @@
     <ModSpammerReport
       v-if="showSpamModal"
       ref="spamConfirm"
-      :user="reportUser"
+      :userid="id"
       @hidden="showSpamModal = false"
     />
     <ModCommentAddModal
       v-if="showAddCommentModal"
-      :user="user"
+      :userid="id"
       @added="updateComments"
       @hidden="showAddCommentModal = false"
     />
@@ -601,14 +601,6 @@ const preferredemail = computed(() => {
   const pref = user.value.emails.find((e) => e.preferred)
   if (pref) return pref.email
   return user.value.emails[0].email
-})
-
-const reportUser = computed(() => {
-  return {
-    // Due to inconsistencies about userid vs id in objects.
-    userid: user.value.id,
-    displayname: user.value.displayname,
-  }
 })
 
 const admin = computed(() => {

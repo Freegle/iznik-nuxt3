@@ -9,29 +9,40 @@ vi.mock('~/composables/useDateFormat', () => ({
   }),
 }))
 
-describe('ModCommentUser', () => {
-  const defaultProps = {
-    comment: {
-      id: 100,
-      user1: 'Test comment',
-      user: {
-        id: 123,
-        displayname: 'Test User',
-        email: null,
-        emails: [
-          { email: 'test@example.com', preferred: true, ourdomain: false },
-        ],
-        lastaccess: '2024-01-15',
-        profile: {
-          paththumb: 'https://example.com/photo.jpg',
-        },
-      },
+const defaultComment = {
+  id: 100,
+  user1: 'Test comment',
+  userid: 123,
+  user: {
+    id: 123,
+    displayname: 'Test User',
+    email: null,
+    emails: [{ email: 'test@example.com', preferred: true, ourdomain: false }],
+    lastaccess: '2024-01-15',
+    profile: {
+      paththumb: 'https://example.com/photo.jpg',
     },
-  }
+  },
+}
 
-  function mountComponent(props = {}) {
+const mockCommentStore = {
+  byId: vi.fn((id) => (id === 100 ? defaultComment : null)),
+}
+
+vi.mock('~/modtools/stores/comment', () => ({
+  useCommentStore: () => mockCommentStore,
+}))
+
+describe('ModCommentUser', () => {
+  function mountComponent(props = {}, commentOverrides = {}) {
+    const comment = { ...defaultComment, ...commentOverrides }
+    const commentId = props.commentid || comment.id
+    mockCommentStore.byId.mockReturnValue(
+      Object.keys(commentOverrides).length > 0 ? comment : defaultComment
+    )
+
     return mount(ModCommentUser, {
-      props: { ...defaultProps, ...props },
+      props: { commentid: commentId, ...props },
       global: {
         stubs: {
           'b-card': {
@@ -57,7 +68,7 @@ describe('ModCommentUser', () => {
           },
           ModComment: {
             template: '<div class="mod-comment" />',
-            props: ['comment', 'user'],
+            props: ['commentid', 'userid'],
           },
         },
         mocks: {
@@ -69,6 +80,7 @@ describe('ModCommentUser', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCommentStore.byId.mockReturnValue(defaultComment)
   })
 
   describe('rendering', () => {
@@ -89,15 +101,15 @@ describe('ModCommentUser', () => {
     })
 
     it('does not render last access when not present', () => {
-      const wrapper = mountComponent({
-        comment: {
-          ...defaultProps.comment,
+      const wrapper = mountComponent(
+        {},
+        {
           user: {
-            ...defaultProps.comment.user,
+            ...defaultComment.user,
             lastaccess: null,
           },
-        },
-      })
+        }
+      )
       expect(wrapper.text()).not.toContain('Active')
     })
 
@@ -119,37 +131,37 @@ describe('ModCommentUser', () => {
     })
 
     it('returns null when user has no emails array', () => {
-      const wrapper = mountComponent({
-        comment: {
-          ...defaultProps.comment,
+      const wrapper = mountComponent(
+        {},
+        {
           user: {
-            ...defaultProps.comment.user,
+            ...defaultComment.user,
             emails: [],
           },
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe(null)
     })
 
     it('returns null when user has email property set', () => {
-      const wrapper = mountComponent({
-        comment: {
-          ...defaultProps.comment,
+      const wrapper = mountComponent(
+        {},
+        {
           user: {
-            ...defaultProps.comment.user,
+            ...defaultComment.user,
             email: 'direct@example.com',
           },
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe(null)
     })
 
     it('skips ourdomain emails', () => {
-      const wrapper = mountComponent({
-        comment: {
-          ...defaultProps.comment,
+      const wrapper = mountComponent(
+        {},
+        {
           user: {
-            ...defaultProps.comment.user,
+            ...defaultComment.user,
             emails: [
               {
                 email: 'internal@ourdomain.com',
@@ -163,17 +175,17 @@ describe('ModCommentUser', () => {
               },
             ],
           },
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe('external@example.com')
     })
 
     it('prefers preferred email', () => {
-      const wrapper = mountComponent({
-        comment: {
-          ...defaultProps.comment,
+      const wrapper = mountComponent(
+        {},
+        {
           user: {
-            ...defaultProps.comment.user,
+            ...defaultComment.user,
             emails: [
               {
                 email: 'first@example.com',
@@ -187,14 +199,14 @@ describe('ModCommentUser', () => {
               },
             ],
           },
-        },
-      })
+        }
+      )
       expect(wrapper.vm.email).toBe('preferred@example.com')
     })
   })
 
   describe('props', () => {
-    it('passes comment to ModComment', () => {
+    it('passes commentid to ModComment', () => {
       const wrapper = mountComponent()
       // ModComment is stubbed, check stub exists
       expect(wrapper.find('.mod-comment').exists()).toBe(true)

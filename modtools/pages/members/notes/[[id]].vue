@@ -7,7 +7,7 @@
       <ModCommentUser
         v-for="comment in visibleComments"
         :key="'commentlist-' + comment.id"
-        :comment="comment"
+        :commentid="comment.id"
         class="p-0 mt-2"
       />
       <NoticeMessage v-if="!comments.length && !busy" class="mt-2">

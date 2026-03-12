@@ -7,7 +7,7 @@
     >
       <ModVolunteerOpportunity
         :id="volunteering.id"
-        :volunteering="volunteering"
+        :volunteeringid="volunteering.id"
       />
     </div>
 

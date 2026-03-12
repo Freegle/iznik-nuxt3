@@ -20,8 +20,14 @@ export default class MembershipsAPI extends BaseAPI {
   }
 
   async fetchMembers(params) {
-    const members = await this.$getv2('/memberships', params)
-    return { members, context: null, ratings: [] }
+    const ret = await this.$getv2('/memberships', params)
+
+    // Happiness collection returns { members, ratings }; others return an array.
+    if (ret && ret.members !== undefined) {
+      return { members: ret.members, context: null, ratings: ret.ratings || [] }
+    }
+
+    return { members: ret, context: null, ratings: [] }
   }
 
   save(event) {
@@ -34,6 +40,28 @@ export default class MembershipsAPI extends BaseAPI {
 
   put(data) {
     return this.$putv2('/memberships', data)
+  }
+
+  approveMember(userid, groupid, subject = null, stdmsgid = null, body = null) {
+    return this.$postv2('/memberships', {
+      action: 'Approve',
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
+    })
+  }
+
+  rejectMember(userid, groupid, subject = null, stdmsgid = null, body = null) {
+    return this.$postv2('/memberships', {
+      action: 'Reject',
+      userid,
+      groupid,
+      subject,
+      stdmsgid,
+      body,
+    })
   }
 
   reply(userid, groupid, subject = null, stdmsgid = null, body = null) {

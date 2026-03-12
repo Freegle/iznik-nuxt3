@@ -1,14 +1,15 @@
 <template>
   <div>
     <b-modal
-      :id="'modCommentModal-' + user.id"
+      :id="'modCommentModal-' + userid"
       ref="modal"
       size="lg"
       no-stacking
       @hidden="onHide"
     >
       <template #title>
-        Edit Note for {{ user.displayname }} <span v-if="groupname">on</span>
+        Edit Note for {{ user ? user.displayname : '#' + userid }}
+        <span v-if="groupname">on</span>
         {{ groupname }}
       </template>
       <template #default>
@@ -95,13 +96,13 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useOurModal } from '~/composables/useOurModal'
 import { useUserStore } from '~/stores/user'
 
 const props = defineProps({
-  user: {
-    type: Object,
+  userid: {
+    type: Number,
     required: true,
   },
   comment: {
@@ -119,6 +120,16 @@ const emit = defineEmits(['hidden', 'edited'])
 
 const userStore = useUserStore()
 const { modal, hide } = useOurModal()
+
+const user = computed(() => userStore.byId(props.userid))
+
+watch(
+  () => props.userid,
+  (uid) => {
+    if (uid && !userStore.byId(uid)) userStore.fetch(uid)
+  },
+  { immediate: true }
+)
 
 const editcomment = ref(false)
 const placeholders = [

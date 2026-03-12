@@ -3,10 +3,10 @@
     <b-card-body>
       <b-row>
         <b-col cols="12" md="6">
-          <ModMember :member="user1" />
+          <ModMember :membershipid="user1.id" />
         </b-col>
         <b-col cols="12" md="6">
-          <ModMember :member="user2" />
+          <ModMember :membershipid="user2.id" />
         </b-col>
       </b-row>
       <div class="d-flex flex-wrap justify-content-start pills mt-2">
@@ -51,8 +51,8 @@ import { useMemberStore } from '~/stores/member'
 const LONG_THRESHOLD = 4
 
 const props = defineProps({
-  member: {
-    type: Object,
+  memberid: {
+    type: Number,
     required: true,
   },
 })
@@ -60,6 +60,8 @@ const props = defineProps({
 const emit = defineEmits(['processed'])
 
 const memberStore = useMemberStore()
+
+const member = computed(() => memberStore.get(props.memberid))
 
 function posted(member) {
   return member.messagehistory && member.messagehistory.length
@@ -165,17 +167,17 @@ function findLongest(str1, str2) {
 }
 
 const user1 = computed(() => {
-  const m1 = new Date(props.member.lastaccess)
-  const m2 = new Date(props.member.relatedto.lastaccess)
+  const m1 = new Date(member.value.lastaccess)
+  const m2 = new Date(member.value.relatedto.lastaccess)
 
-  return m1 > m2 ? props.member : props.member.relatedto
+  return m1 > m2 ? member.value : member.value.relatedto
 })
 
 const user2 = computed(() => {
-  const m1 = new Date(props.member.lastaccess)
-  const m2 = new Date(props.member.relatedto.lastaccess)
+  const m1 = new Date(member.value.lastaccess)
+  const m2 = new Date(member.value.relatedto.lastaccess)
 
-  return m1 <= m2 ? props.member : props.member.relatedto
+  return m1 <= m2 ? member.value : member.value.relatedto
 })
 
 const posted1 = computed(() => posted(user1.value))
@@ -245,7 +247,7 @@ function updateWork() {
 }
 
 async function ask() {
-  await memberStore.askMerge(props.member.id, {
+  await memberStore.askMerge(props.memberid, {
     user1: user1.value.id,
     user2: user2.value.id,
   })
@@ -254,7 +256,7 @@ async function ask() {
 }
 
 async function ignore() {
-  await memberStore.ignoreMerge(props.member.id, {
+  await memberStore.ignoreMerge(props.memberid, {
     user1: user1.value.id,
     user2: user2.value.id,
   })
