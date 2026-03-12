@@ -114,7 +114,9 @@
           :userid="message.fromuser.id"
         />
         <div class="d-flex justify-content-around">
-          <div v-if="!message.widerchatreview && message.fromuser">
+          <div
+            v-if="!message.widerchatreview && isActiveMod && message.fromuser"
+          >
             <span>
               <!-- eslint-disable-next-line -->
               <v-icon icon="info-circle" /> {{ message.fromuser?.displayname }} is
@@ -142,7 +144,7 @@
       </b-card-body>
       <b-card-footer>
         <div class="d-flex flex-wrap justify-content-start">
-          <template v-if="!message.widerchatreview">
+          <template v-if="!message.widerchatreview && isActiveMod">
             <ModChatViewButton :id="message.chatid" :pov="message.touser?.id" />
             <b-button
               v-if="message.held && me.id === message.held.id"
@@ -178,7 +180,7 @@
             class="mr-2 mb-1"
             @handle="approve"
           />
-          <template v-if="!message.widerchatreview">
+          <template v-if="!message.widerchatreview && isActiveMod">
             <SpinButton
               v-if="!message.held"
               icon-name="check"
@@ -237,6 +239,7 @@ import { ref, computed } from 'vue'
 import { useMe } from '~/composables/useMe'
 import { useModMe } from '~/modtools/composables/useModMe'
 import { useChatStore } from '~/stores/chat'
+import { useAuthStore } from '~/stores/auth'
 
 const props = defineProps({
   id: {
@@ -250,8 +253,17 @@ const props = defineProps({
 })
 
 const chatStore = useChatStore()
+const authStore = useAuthStore()
 
 const message = computed(() => chatStore.messageById(props.messageid))
+
+const isActiveMod = computed(() => {
+  const groupid = message.value?.group?.id
+  if (!groupid) return true
+  const membership = authStore.groups?.find((g) => g.groupid === groupid)
+  if (membership?.active === 0) return false
+  return true
+})
 
 const emit = defineEmits(['reload'])
 
