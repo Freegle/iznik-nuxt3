@@ -70,6 +70,10 @@ describe('ModSettingsPersonal', () => {
               '<button class="btn" :class="\'btn-\' + variant" :to="to" @click="$emit(\'click\', $event)"><slot /></button>',
             props: ['variant', 'to'],
           },
+          ExternalLink: {
+            template: '<a class="external-link"><slot /></a>',
+            props: ['href'],
+          },
           SpinButton: {
             template:
               '<button class="spin-button" @click="handleClick"><slot>{{ label }}</slot></button>',

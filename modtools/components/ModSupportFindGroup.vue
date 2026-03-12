@@ -10,7 +10,7 @@
       "
       :disabled="loading"
     />
-    <div v-if="group && group.url">
+    <div v-if="group && group.nameshort">
       <h3 class="mt-2">
         {{ group.nameshort }}
       </h3>
@@ -81,9 +81,9 @@
       >.
       <br />
       <br />
-      <ModClipboard v-if="group.url" class="mr-3 mb-1" :value="group.url" />
+      <ModClipboard v-if="groupUrl" class="mr-3 mb-1" :value="groupUrl" />
       Explore page:
-      <ExternalLink :href="group.url">{{ group.url }}</ExternalLink>
+      <ExternalLink :href="groupUrl">{{ groupUrl }}</ExternalLink>
       <br />
       <ModClipboard
         v-if="group.modsemail"
@@ -264,6 +264,11 @@ const groupid = computed(() => {
 
 const group = computed(() => {
   return modGroupStore.get(groupid.value)
+})
+
+const groupUrl = computed(() => {
+  if (!group.value?.nameshort) return null
+  return 'https://www.ilovefreegle.org/explore/' + group.value.nameshort
 })
 
 const volunteers = computed(() => {

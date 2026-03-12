@@ -8,8 +8,17 @@ const mockLogsStore = {
   byId: vi.fn(),
 }
 
+// Mock message store (V2: messages fetched into store by ModLog.vue)
+const mockMessageStore = {
+  byId: vi.fn().mockReturnValue(null),
+}
+
 vi.mock('~/stores/logs', () => ({
   useLogsStore: () => mockLogsStore,
+}))
+
+vi.mock('~/stores/message', () => ({
+  useMessageStore: () => mockMessageStore,
 }))
 
 describe('ModLogMessage', () => {

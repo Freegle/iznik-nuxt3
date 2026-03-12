@@ -3,6 +3,14 @@
     <client-only>
       <ScrollToTop />
       <ModHelpMemberReview />
+      <ModGroupSelect
+        v-model="groupid"
+        all
+        modonly
+        systemwide
+        :work="['spammembers']"
+        remember="membersreview"
+      />
       <ModPostcodeTester />
 
       <div
@@ -55,7 +63,7 @@ modMembers.group.value = null
 modMembers.limit.value = 100
 
 // Destructure for template access
-const { distance, visibleMembers, loadMore } = modMembers
+const { distance, groupid, visibleMembers, loadMore } = modMembers
 
 // Reactive state (was data())
 const bump = ref(0)

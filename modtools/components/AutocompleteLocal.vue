@@ -118,8 +118,16 @@ function onArrowUp() {
 }
 
 function onEnter() {
-  search.value = results.value[arrowCounter.value]
-  emit('input', search.value)
+  if (
+    results.value.length > 0 &&
+    arrowCounter.value >= 0 &&
+    arrowCounter.value < results.value.length
+  ) {
+    search.value = results.value[arrowCounter.value]
+  } else if (results.value.length > 0) {
+    search.value = results.value[0]
+  }
+  emit('update:modelValue', search.value)
   isOpen.value = false
   arrowCounter.value = -1
 }
