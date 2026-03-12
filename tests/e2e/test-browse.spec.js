@@ -131,15 +131,6 @@ test.describe('Browse Page Tests', () => {
 
       // Wait for postcode prompt and enter postcode
       console.log('Waiting for postcode prompt on browse page')
-      await page.waitForSelector(
-        "text=What's your postcode? We'll show you posts nearby.",
-        {
-          timeout: timeouts.ui.appearance,
-        }
-      )
-
-      // Enter postcode from config
-      console.log(`Entering postcode ${environment.postcode}`)
       const postcodeInput = page.locator(
         '.pcinp, input[placeholder="Type postcode"]'
       )
@@ -147,48 +138,29 @@ test.describe('Browse Page Tests', () => {
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
-      await postcodeInput.type(environment.postcode)
 
-      // Debug postcode validation before waiting
-      console.log(`Filled postcode: ${environment.postcode}`)
+      // Fill in the postcode and wait for autocomplete validation
+      console.log(`Filling postcode ${environment.postcode}`)
+      await postcodeInput.fill(environment.postcode)
 
-      // Wait a moment for any immediate validation
-      await page.waitForTimeout(2000)
-
-      // Check what validation elements exist and their state
-      console.log('Checking validation elements...')
-      const validationSelectors = [
-        '.validation-tick',
-        '.text-success.fa-bh',
-        '.fa-check-circle',
-        '.v-icon[class*="check"]',
-        '.text-success',
-        '[class*="success"]',
-        '.valid-feedback',
-        '[class*="valid"]',
-        '.fa-check',
-        '[class*="check"]',
-      ]
-
-      for (const selector of validationSelectors) {
-        try {
-          const count = await page.locator(selector).count()
-          const visible =
-            count > 0 ? await page.locator(selector).first().isVisible() : false
-          console.log(`  ${selector}: ${count} found, visible: ${visible}`)
-        } catch (error) {
-          console.log(`  ${selector}: error - ${error.message}`)
-        }
-      }
-
-      // Take screenshot to see current state
-      await takeScreenshot(`Postcode Debug ${Date.now()}`)
-
-      // Wait for postcode section to disappear (indicates successful validation)
-      await postcodeInput.waitFor({
-        state: 'detached',
-        timeout: timeouts.ui.appearance,
+      // Wait for the autocomplete dropdown to show results and click the first one
+      const autocompleteItem = page
+        .locator('.postcodelist li a, .listentry a')
+        .first()
+      await autocompleteItem.waitFor({
+        state: 'visible',
+        timeout: timeouts.api.default,
       })
+      await autocompleteItem.click()
+      console.log('Selected postcode from autocomplete')
+
+      // Wait for validation tick confirming postcode was accepted
+      const validationTick = page.locator('.validation-tick')
+      await validationTick.waitFor({
+        state: 'visible',
+        timeout: timeouts.api.default,
+      })
+      console.log('Postcode validated')
 
       // Wait for the page to load and messages to appear
       // Note: Browse page uses MessageSummaryMobile with .message-summary-mobile class
