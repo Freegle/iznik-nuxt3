@@ -670,16 +670,13 @@ const membershipHistoriesUnshown = computed(() => {
 })
 
 const messageHistoriesShown = computed(() => {
-  return showAllMessageHistories.value
-    ? user.value.messagehistory
-    : user.value.messagehistory.slice(0, SHOW)
+  const history = user.value.messagehistory || []
+  return showAllMessageHistories.value ? history : history.slice(0, SHOW)
 })
 
 const messageHistoriesUnshown = computed(() => {
-  const ret =
-    user.value.messagehistory.length > SHOW
-      ? user.value.messagehistory.length - SHOW
-      : 0
+  const history = user.value.messagehistory || []
+  const ret = history.length > SHOW ? history.length - SHOW : 0
   return ret
 })
 
@@ -756,13 +753,17 @@ onMounted(async () => {
 async function fetchUser() {
   if (props.id) {
     await userStore.fetchMT({
-      search: props.id,
+      id: props.id,
+      modtools: true,
       emailhistory: true,
       info: true,
     })
     user.value = userStore.byId(props.id)
     if (user.value && user.value.spammer && user.value.spammer.byuserid) {
-      await userStore.fetchMT({ search: user.value.spammer.byuserid })
+      await userStore.fetchMT({
+        id: user.value.spammer.byuserid,
+        modtools: true,
+      })
       user.value.spammer.byuser = await userStore.fetch(
         user.value.spammer.byuserid
       )
