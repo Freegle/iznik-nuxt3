@@ -284,9 +284,9 @@ async function fillReplyForm(
  * Helper: Click the Reply button to expand reply section
  */
 async function clickReplyButton(page) {
-  // Wait for page to be stable before trying to interact
-  // This prevents "Execution context was destroyed" errors after navigation
-  await page.waitForLoadState('domcontentloaded')
+  // Wait for page to be fully loaded (not just domcontentloaded) so that
+  // Vue has had time to hydrate SSR-rendered components and attach event handlers.
+  await page.waitForLoadState('load')
 
   // Try footer reply button first (mobile/single column), then inline
   let replyButton = page.locator('.app-footer .reply-button:has-text("Reply")')
@@ -310,15 +310,36 @@ async function clickReplyButton(page) {
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await replyButton.click()
-  console.log('[Reply] Clicked Reply button')
 
-  // Wait for reply section to expand
-  await page.locator('textarea[name="reply"]').waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
-  console.log('[Reply] Reply section expanded')
+  // Retry clicking Reply — Vue SSR hydration may not have attached the event
+  // handler yet when the button first becomes visible. Try up to 3 times.
+  const replyTextarea = page.locator('textarea[name="reply"]')
+  const MAX_RETRIES = 3
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    await replyButton.click()
+    console.log(`[Reply] Clicked Reply button (attempt ${attempt})`)
+
+    try {
+      await replyTextarea.waitFor({
+        state: 'visible',
+        timeout: attempt < MAX_RETRIES ? 5000 : timeouts.ui.appearance,
+      })
+      console.log('[Reply] Reply section expanded')
+      return
+    } catch {
+      if (attempt < MAX_RETRIES) {
+        console.log(
+          '[Reply] Reply textarea not visible yet, retrying after delay...'
+        )
+        await page.waitForTimeout(1000)
+      } else {
+        throw new Error(
+          'Reply textarea did not appear after clicking Reply button'
+        )
+      }
+    }
+  }
 }
 
 /**
