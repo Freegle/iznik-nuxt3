@@ -19,13 +19,12 @@
       >
         {{ groups[group.groupid].namedisplay }}
       </nuxt-link>
-      &nbsp;
       <client-only>
         <b-button
           v-if="showSummaryDetails"
           variant="link"
           :to="'/message/' + message.id"
-          class="text-faded text-decoration-none"
+          class="text-faded text-decoration-none p-0 ms-2"
           size="xs"
         >
           #{{ message.id }}
