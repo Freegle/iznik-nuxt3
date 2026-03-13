@@ -209,8 +209,6 @@ const history = page.getNavigationHistory();
 const summary = page.getNavigationSummary();
 console.log(`Had ${summary.hardCount} hard navigations and ${summary.softCount} soft navigations`);
 
-// Reset the navigation inactivity timer for long operations without navigation
-page.resetNavigationTimer();
 ```
 
 ### Navigation Logging
@@ -229,64 +227,16 @@ Navigation summary: 5 total (1 hard, 4 soft)
 
 On test failure, the complete navigation history is printed for debugging.
 
-### Navigation Inactivity Timeout
+### Timeout Strategy
 
-The test framework includes an automatic timeout mechanism to detect when tests might be stuck or frozen. If no navigation events occur for **9 minutes**, the test will automatically fail with a detailed error message.
+Stuck tests are handled by Playwright's built-in timeout mechanisms:
 
-This helps identify tests that have become stuck in an infinite loop, hit an unexpected error, or are experiencing browser issues.
+- **Test timeout** (600s): Overall limit per test in `playwright.config.js`
+- **Navigation timeout** (60-90s): Per-navigation via `timeouts.navigation.*`
+- **Action timeout** (30s): Per-action via `timeouts.api.default`
+- **Expect timeout** (60s): Per-assertion via `timeouts.api.slowApi`
 
-#### How It Works
-
-1. A timer starts when the test begins
-2. The timer resets automatically whenever a navigation event occurs
-3. If 9 minutes pass without any navigation, the test fails with a clear error message
-4. A screenshot is automatically captured to help diagnose the issue
-
-#### For Long Operations
-
-Some legitimate test scenarios may involve long operations without navigation (e.g., complex calculations, uploading large files). In these cases, you can manually reset the inactivity timer:
-
-```javascript
-// Reset the navigation timeout when performing a long operation without navigation
-await page.resetNavigationTimer();
-```
-
-#### Example
-
-```javascript
-test('processing a large dataset', async ({ page }) => {
-  await page.goto('/data-processor');
-  
-  // Start a long operation that doesn't involve navigation
-  await page.click('.test-start-processing');
-  
-  // Wait for progress indicators
-  for (let i = 1; i <= 10; i++) {
-    // Check if progress indicator has updated
-    await page.locator('.test-progress-value')
-      .waitFor({ state: 'visible', timeout: timeouts.ui.slow });
-      
-    // Important: Reset the navigation timer during this long operation
-    page.resetNavigationTimer();
-    
-    console.log(`Processing step ${i}/10 completed`);
-  }
-  
-  // After processing completes, continue with the test
-  await page.click('.test-view-results');
-});
-```
-
-#### Common Causes of Navigation Inactivity
-
-If a test fails with a navigation inactivity timeout, check for:
-
-1. Infinite loops in test code
-2. Modal dialogs or overlays blocking interaction
-3. Network issues preventing page loading
-4. Missing elements causing waitFor conditions to timeout
-5. Browser crashes or freezes
-6. Resource-intensive operations causing browser unresponsiveness
+All `waitFor*` calls should use explicit timeouts from `config.js` constants. Never use `{ timeout: 0 }` (infinite wait) or hardcoded timeout values.
 
 ## Test-Friendly Selectors
 

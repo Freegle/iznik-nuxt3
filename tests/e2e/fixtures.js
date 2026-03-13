@@ -393,70 +393,9 @@ const test = base.test.extend({
       }
     })
 
-    // Track navigation events and setup navigation inactivity timeout
-    let navigationInactivityTimer = null
-    let lastTimerResetAt = null
-    let timerResetCount = 0
-    const MAX_NAVIGATION_INACTIVITY =
-      timeouts.navigation.inactivity || 9 * 60 * 1000 // Default to 9 minutes in milliseconds
-
-    // Create a function to reset the inactivity timer
-    const resetNavigationInactivityTimer = () => {
-      timerResetCount++
-      lastTimerResetAt = Date.now()
-
-      // Clear any existing timer
-      if (navigationInactivityTimer) {
-        clearTimeout(navigationInactivityTimer)
-      }
-
-      // Set a new timer
-      navigationInactivityTimer = setTimeout(() => {
-        const lastNavTimestamp =
-          navigationEvents.length > 0
-            ? new Date(navigationEvents[navigationEvents.length - 1].timestamp)
-            : new Date(0)
-
-        const inactivityDuration = Date.now() - lastNavTimestamp.getTime()
-        const timeSinceLastReset = lastTimerResetAt
-          ? (Date.now() - lastTimerResetAt) / 1000
-          : 'never'
-
-        console.error(`\n\n==== NAVIGATION INACTIVITY TIMEOUT ====`)
-        console.error(
-          `No navigation events detected for ${
-            inactivityDuration / 1000
-          } seconds (threshold: ${MAX_NAVIGATION_INACTIVITY / 1000} seconds)`
-        )
-        console.error(`Last navigation: ${lastNavTimestamp.toISOString()}`)
-        console.error(
-          `Timer was last reset ${timeSinceLastReset}s ago (reset #${timerResetCount})`
-        )
-        console.error(`Current URL: ${page.url()}`)
-        console.error(
-          `==== TERMINATING TEST DUE TO NAVIGATION INACTIVITY ====\n\n`
-        )
-
-        // Take screenshot before failing
-        page
-          .screenshot({
-            path: getScreenshotPath(`navigation-inactivity-${Date.now()}.png`),
-            fullPage: true,
-          })
-          .catch((err) => console.error('Failed to capture screenshot:', err))
-
-        // Force test to fail
-        throw new Error(
-          `Navigation inactivity timeout: No navigation events detected for ${
-            inactivityDuration / 1000
-          } seconds (timer last reset ${timeSinceLastReset}s ago, reset #${timerResetCount}). Test execution may be stuck.`
-        )
-      }, MAX_NAVIGATION_INACTIVITY)
-    }
-
-    // Start the initial timer
-    resetNavigationInactivityTimer()
-
+    // Track navigation events for debugging (no timer — Playwright's own
+    // test timeout at 600s handles stuck tests reliably without the race
+    // conditions inherent in a custom setTimeout-based inactivity timer).
     page.on('framenavigated', (frame) => {
       if (frame === page.mainFrame()) {
         const isHardNavigation =
@@ -472,14 +411,8 @@ const test = base.test.extend({
         })
 
         console.log(`[${timestamp}] [NAVIGATION:${navType}] ${url}`)
-
-        // Reset the inactivity timer whenever a navigation event occurs
-        resetNavigationInactivityTimer()
       }
     })
-
-    // Add method to manually reset navigation timer (useful for long operations)
-    page.resetNavigationTimer = resetNavigationInactivityTimer
 
     // Methods to access console errors
     page.consoleErrors = () => consoleErrors
@@ -543,11 +476,6 @@ const test = base.test.extend({
           console.log(
             `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
-
-          // Reset navigation timer before each attempt to prevent inactivity timeout during retries
-          if (page.resetNavigationTimer) {
-            page.resetNavigationTimer()
-          }
 
           // Navigate with timeout and configurable waitUntil strategy.
           // Default 'load' waits for all resources; 'domcontentloaded' is faster
@@ -674,13 +602,6 @@ const test = base.test.extend({
     const performTeardown = async (options = {}) => {
       const timeout = options.timeout || timeouts.teardown.networkIdle
       try {
-        // Clear the navigation inactivity timer during teardown
-        if (navigationInactivityTimer) {
-          clearTimeout(navigationInactivityTimer)
-          navigationInactivityTimer = null
-          console.log('Navigation inactivity timer cleared during teardown')
-        }
-
         // Clear browser storage before ending the test
         try {
           await page
@@ -764,15 +685,6 @@ const test = base.test.extend({
         await page.waitForLoadState('domcontentloaded', { timeout })
         return true
       } catch (error) {
-        // Clear the navigation inactivity timer even if teardown fails
-        if (navigationInactivityTimer) {
-          clearTimeout(navigationInactivityTimer)
-          navigationInactivityTimer = null
-          console.log(
-            'Navigation inactivity timer cleared during teardown (after error)'
-          )
-        }
-
         console.warn(`Teardown warning: ${error.message}`)
         // Take a screenshot if network doesn't become idle
         await page.screenshot({
@@ -815,26 +727,12 @@ const test = base.test.extend({
       // Call use() with the logging page instead of the original page
       await use(loggingPage)
 
-      // Clear navigation inactivity timer after test completes successfully
-      if (navigationInactivityTimer) {
-        clearTimeout(navigationInactivityTimer)
-        navigationInactivityTimer = null
-        console.log('Navigation inactivity timer cleared after successful test')
-      }
-
       // Log navigation summary at the end of successful tests
       const navSummary = loggingPage.getNavigationSummary()
       console.log(
         `Navigation summary: ${navSummary.total} total (${navSummary.hardCount} hard, ${navSummary.softCount} soft)`
       )
     } catch (error) {
-      // Clear navigation inactivity timer even if test fails
-      if (navigationInactivityTimer) {
-        clearTimeout(navigationInactivityTimer)
-        navigationInactivityTimer = null
-        console.log('Navigation inactivity timer cleared after test failure')
-      }
-
       // Take a full page screenshot on any test failure
       const screenshotPath = getScreenshotPath(`test-failure-${Date.now()}.png`)
       await loggingPage.screenshot({ path: screenshotPath, fullPage: true })
@@ -1050,27 +948,12 @@ const testWithFixtures = test.extend({
       const pageTitle = await page.title()
       base.expect(pageTitle).toContain(type.toUpperCase())
 
-      // Reset navigation inactivity timer before form-filling operations
-      if (page.resetNavigationTimer) {
-        console.log('[postMessage] Resetting nav timer before item fill')
-        page.resetNavigationTimer()
-      } else {
-        console.warn('[postMessage] page.resetNavigationTimer NOT available!')
-      }
-
-      // Fill in the item type using fill() instead of type() with delay
-      // fill() triggers Vue v-model reactivity via input event and is instantaneous
+      // Fill in the item type using fill() — triggers Vue v-model via input event
       const itemInput = page.locator(
         '[id^="what"], .type-input, input[placeholder*="give"]'
       )
       await itemInput.click()
       await itemInput.fill(item)
-
-      // Reset timer before description fill
-      if (page.resetNavigationTimer) {
-        console.log('[postMessage] Resetting nav timer before description fill')
-        page.resetNavigationTimer()
-      }
 
       // Fill in the post details
       await page.waitForSelector(
@@ -1126,18 +1009,9 @@ const testWithFixtures = test.extend({
         { timeout: timeouts.ui.appearance }
       )
 
-      // Scroll to bottom of page to ensure Next button is visible
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-      await page.waitForTimeout(500) // Allow scroll to complete
-
       // Click the Next/Continue button to go to location page
-      // Target the modernized Next button
+      // Playwright's click() auto-scrolls the element into view
       await page.locator('.next-btn:has-text("Next")').click()
-
-      // Reset timer before location section
-      if (page.resetNavigationTimer) {
-        page.resetNavigationTimer()
-      }
 
       // Fill in location details
       await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
@@ -1158,18 +1032,8 @@ const testWithFixtures = test.extend({
         timeout: timeouts.api.default,
       })
 
-      // Click the Next/Continue button
-      // Scroll to bottom of page to ensure Next button is visible
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-      await page.waitForTimeout(500) // Allow scroll to complete
-
-      // Target the modernized Next button
+      // Click the Next/Continue button (Playwright auto-scrolls)
       await page.locator('.next-btn:has-text("Next")').click()
-
-      // Reset timer before options/email section
-      if (page.resetNavigationTimer) {
-        page.resetNavigationTimer()
-      }
 
       // For OFFER posts, handle the /give/options page (delivery and deadline options)
       // WANTED posts go directly to whoami (no options page)
@@ -1205,11 +1069,7 @@ const testWithFixtures = test.extend({
         await noDeadlineButton.click()
         console.log('Clicked "No deadline" for deadline option')
 
-        // Click Next to go to email/whoami page
-        await page.evaluate(() =>
-          window.scrollTo(0, document.body.scrollHeight)
-        )
-        await page.waitForTimeout(500)
+        // Click Next to go to email/whoami page (Playwright auto-scrolls)
         await page.locator('.next-btn:has-text("Next")').click()
       }
 
@@ -1287,10 +1147,6 @@ const testWithFixtures = test.extend({
         fullPage: true,
       })
 
-      // Scroll to bottom of page to ensure "Freegle it!" button is visible
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-      await page.waitForTimeout(500) // Allow scroll to complete
-
       // Wait for validation to complete and the button to appear using web assertions
       console.log(
         'Waiting for Freegle it button to appear after email validation'
@@ -1307,8 +1163,10 @@ const testWithFixtures = test.extend({
 
       console.log('Button appeared, submit')
 
-      // Small delay to allow Vue to fully hydrate event handlers
-      await page.waitForTimeout(1000)
+      // Wait for Vue to attach event handlers by checking the button is enabled
+      await base.expect(freegleButton).toBeEnabled({
+        timeout: timeouts.ui.appearance,
+      })
 
       // Set up console listener to capture browser errors
       const consoleMessages = []
@@ -1326,11 +1184,6 @@ const testWithFixtures = test.extend({
       }
       page.on('console', consoleListener)
 
-      // Reset timer before submission (email validation and submit can be slow)
-      if (page.resetNavigationTimer) {
-        page.resetNavigationTimer()
-      }
-
       // Click the Submit/Post button to finalize
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
@@ -1347,10 +1200,6 @@ const testWithFixtures = test.extend({
         console.log('Submit button clicked via JavaScript')
       }
       console.log('Submit button clicked successfully')
-
-      // Give a moment for any immediate navigation to start
-      await page.waitForTimeout(500)
-      console.log('Current URL after submit click + 500ms:', page.url())
 
       // Wait for page url to contain myposts
       console.log('Waiting for navigation to My Posts page')
@@ -1940,11 +1789,6 @@ const testWithFixtures = test.extend({
       // Create a completely fresh browser context to ensure clean state
       // This is more reliable than trying to clear storage/cookies
       // Use explicit viewport to avoid two-column layout (triggered at width >= 992px AND height <= 800px)
-      // Reset the main page's navigation inactivity timer since work will happen
-      // in a fresh context and the main page will be idle during this time.
-      if (page.resetNavigationTimer) {
-        page.resetNavigationTimer()
-      }
       const browser = page.context().browser()
       const freshContext = await browser.newContext({
         viewport: { width: 1280, height: 900 },
