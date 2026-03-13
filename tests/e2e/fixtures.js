@@ -395,11 +395,16 @@ const test = base.test.extend({
 
     // Track navigation events and setup navigation inactivity timeout
     let navigationInactivityTimer = null
+    let lastTimerResetAt = null
+    let timerResetCount = 0
     const MAX_NAVIGATION_INACTIVITY =
       timeouts.navigation.inactivity || 9 * 60 * 1000 // Default to 9 minutes in milliseconds
 
     // Create a function to reset the inactivity timer
     const resetNavigationInactivityTimer = () => {
+      timerResetCount++
+      lastTimerResetAt = Date.now()
+
       // Clear any existing timer
       if (navigationInactivityTimer) {
         clearTimeout(navigationInactivityTimer)
@@ -413,6 +418,9 @@ const test = base.test.extend({
             : new Date(0)
 
         const inactivityDuration = Date.now() - lastNavTimestamp.getTime()
+        const timeSinceLastReset = lastTimerResetAt
+          ? (Date.now() - lastTimerResetAt) / 1000
+          : 'never'
 
         console.error(`\n\n==== NAVIGATION INACTIVITY TIMEOUT ====`)
         console.error(
@@ -421,6 +429,9 @@ const test = base.test.extend({
           } seconds (threshold: ${MAX_NAVIGATION_INACTIVITY / 1000} seconds)`
         )
         console.error(`Last navigation: ${lastNavTimestamp.toISOString()}`)
+        console.error(
+          `Timer was last reset ${timeSinceLastReset}s ago (reset #${timerResetCount})`
+        )
         console.error(`Current URL: ${page.url()}`)
         console.error(
           `==== TERMINATING TEST DUE TO NAVIGATION INACTIVITY ====\n\n`
@@ -438,7 +449,7 @@ const test = base.test.extend({
         throw new Error(
           `Navigation inactivity timeout: No navigation events detected for ${
             inactivityDuration / 1000
-          } seconds. Test execution may be stuck.`
+          } seconds (timer last reset ${timeSinceLastReset}s ago, reset #${timerResetCount}). Test execution may be stuck.`
         )
       }, MAX_NAVIGATION_INACTIVITY)
     }
@@ -1039,25 +1050,25 @@ const testWithFixtures = test.extend({
       const pageTitle = await page.title()
       base.expect(pageTitle).toContain(type.toUpperCase())
 
-      // Reset navigation inactivity timer before long form-filling operations
-      // (typing with delay doesn't generate navigation events)
+      // Reset navigation inactivity timer before form-filling operations
       if (page.resetNavigationTimer) {
+        console.log('[postMessage] Resetting nav timer before item fill')
         page.resetNavigationTimer()
+      } else {
+        console.warn('[postMessage] page.resetNavigationTimer NOT available!')
       }
 
-      // Fill in the item type (item) using type() to trigger Vue reactivity
-      await page
-        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-        .click()
-      await page
-        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-        .clear()
-      await page
-        .locator('[id^="what"], .type-input, input[placeholder*="give"]')
-        .type(item, { delay: 100 })
+      // Fill in the item type using fill() instead of type() with delay
+      // fill() triggers Vue v-model reactivity via input event and is instantaneous
+      const itemInput = page.locator(
+        '[id^="what"], .type-input, input[placeholder*="give"]'
+      )
+      await itemInput.click()
+      await itemInput.fill(item)
 
-      // Reset timer before description typing
+      // Reset timer before description fill
       if (page.resetNavigationTimer) {
+        console.log('[postMessage] Resetting nav timer before description fill')
         page.resetNavigationTimer()
       }
 
@@ -1067,22 +1078,12 @@ const testWithFixtures = test.extend({
         { timeout: timeouts.ui.appearance }
       )
 
-      // Add the description using type() to trigger Vue reactivity
-      await page
-        .locator(
-          '[id^="description"], textarea.description, textarea.form-control'
-        )
-        .click()
-      await page
-        .locator(
-          '[id^="description"], textarea.description, textarea.form-control'
-        )
-        .clear()
-      await page
-        .locator(
-          '[id^="description"], textarea.description, textarea.form-control'
-        )
-        .type(description, { delay: 50 })
+      // Fill description using fill() instead of type() with delay
+      const descInput = page.locator(
+        '[id^="description"], textarea.description, textarea.form-control'
+      )
+      await descInput.click()
+      await descInput.fill(description)
 
       // Wait for Vue reactivity to process the form changes and make the Next button available
       // This replaces the fixed 2000ms wait with a responsive check
