@@ -501,7 +501,7 @@ watch(
 )
 
 watch(graphType, () => {
-  maybeFetch()
+  maybeFetch(true)
 })
 
 // This is experimental code for if we find a way to fetch stats faster on the server for different units.

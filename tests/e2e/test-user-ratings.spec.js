@@ -37,6 +37,13 @@ test.describe('User ratings tests', () => {
     const replyEmail = getTestEmail('rater')
     await logoutIfLoggedIn(page)
 
+    // replyToMessageWithSignup works in a fresh browser context, so the main
+    // page will be idle. Reset the navigation inactivity timer to prevent the
+    // watchdog from killing the test while the fresh context does its work.
+    if (page.resetNavigationTimer) {
+      page.resetNavigationTimer()
+    }
+
     const replySuccess = await replyToMessageWithSignup({
       messageId: result.id,
       itemName: result.item,

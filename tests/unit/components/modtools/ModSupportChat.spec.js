@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
@@ -25,8 +25,28 @@ describe('ModSupportChat', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setActivePinia(createPinia())
+
+    const store = {
+      list: [],
+      listMT: [],
+      listByChatId: {
+        123: { ...defaultChat },
+      },
+      messageById: () => null,
+      byChatId(id) {
+        return this.listByChatId[id] || null
+      },
+      fetchMessages: async () => {},
+      fetchMT: async () => {},
+    }
+
+    globalThis.__mockChatStore = store
+
     chatStore = useChatStore()
-    chatStore.listByChatId[123] = { ...defaultChat }
+  })
+
+  afterEach(() => {
+    globalThis.__mockChatStore = null
   })
 
   function mountComponent(props = {}, chatOverrides = null) {

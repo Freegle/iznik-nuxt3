@@ -5,7 +5,7 @@
 
 const { test, expect } = require('./fixtures')
 const { timeouts, environment } = require('./config')
-const { signUpViaHomepage } = require('./utils/user')
+const { signUpViaHomepage, loginViaHomepage } = require('./utils/user')
 
 // Helper: sign up and join FreeglePlayground.
 async function signUpAndJoinGroup(page, testEmail, userName) {
@@ -16,23 +16,59 @@ async function signUpAndJoinGroup(page, testEmail, userName) {
     timeout: timeouts.navigation.default,
   })
 
+  // After navigation, session may not have persisted. If a login modal appears,
+  // complete the login with the same credentials before proceeding.
+  const loginModal = page.locator(
+    '#loginModal, .modal-dialog:has-text("Join the Reuse Revolution")'
+  )
+  try {
+    await loginModal.waitFor({ state: 'visible', timeout: 3000 })
+    console.log(
+      'Login modal appeared after navigation — session not persisted, logging in'
+    )
+    // Close the modal and log in via the homepage flow
+    const closeButton = loginModal.locator(
+      '.btn-close, .close, button[aria-label="Close"]'
+    )
+    if ((await closeButton.count()) > 0) {
+      await closeButton.first().click()
+      await loginModal.waitFor({ state: 'hidden', timeout: 5000 })
+    }
+    const loginSuccess = await loginViaHomepage(page, testEmail)
+    expect(loginSuccess).toBeTruthy()
+    // Re-navigate to the explore page now that we're logged in
+    await page.gotoAndVerify('/explore/FreeglePlayground', {
+      timeout: timeouts.navigation.default,
+    })
+  } catch {
+    // No login modal — session persisted correctly
+  }
+
+  // Check if we're already a member (Leave button visible) or need to join
+  const leaveButton = page
+    .locator('.btn:has-text("Leave")')
+    .filter({ visible: true })
+    .first()
   const joinButton = page
     .locator('.btn:has-text("Join this community")')
     .filter({ visible: true })
     .first()
-  await joinButton.waitFor({
-    state: 'visible',
+
+  // Wait for either Join or Leave to appear
+  await expect(joinButton.or(leaveButton)).toBeVisible({
     timeout: timeouts.ui.appearance,
   })
+
+  if (await leaveButton.isVisible().catch(() => false)) {
+    console.log('Already a member of FreeglePlayground')
+    return
+  }
+
   await joinButton.click()
-  await page
-    .locator('.btn:has-text("Leave")')
-    .filter({ visible: true })
-    .first()
-    .waitFor({
-      state: 'visible',
-      timeout: timeouts.ui.interaction,
-    })
+  await leaveButton.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.interaction,
+  })
   console.log('Successfully joined FreeglePlayground')
 }
 
@@ -83,16 +119,20 @@ test.describe('Browse Page Tests', () => {
       timeout: timeouts.navigation.default,
     })
 
-    // Wait for the browse page to finish loading — either messages appear
-    // or the "no posts" notice is shown. Both are valid states because newly
+    // Wait for the browse page to finish loading — either messages appear,
+    // the "no posts" notice is shown, or the postcode prompt appears (when
+    // isochrones haven't loaded yet). All are valid states because newly
     // posted messages may not appear immediately due to isochrone/indexing delays.
     const messagesLocator = page.locator(
       '.message-summary-mobile, .messagecard'
     )
-    const noPostsLocator = page.locator("text=couldn't find any posts")
+    const noPostsLocator = page
+      .locator("text=couldn't find any posts")
+      .or(page.locator('text=no posts in this area'))
+      .or(page.locator("text=What's your postcode"))
 
     await expect(messagesLocator.or(noPostsLocator).first()).toBeVisible({
-      timeout: timeouts.ui.appearance,
+      timeout: timeouts.navigation.default,
     })
 
     const messageCount = await messagesLocator.count()

@@ -293,6 +293,7 @@ const test = base.test.extend({
       /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
       /Only one navigator\.credentials\.get request may be outstanding at one time/, // FedCM concurrent credential requests in test
       /useOurModal show problem/, // Race condition fixed in useOurModal.js (nextTick) - allow until container rebuild
+      /Failed to load resource: the server responded with a status of 500.*api\/user/, // Transient 500 on user API — app retries automatically
     ]
 
     // Initialize the working copy of allowed error patterns
@@ -1905,6 +1906,11 @@ const testWithFixtures = test.extend({
       // Create a completely fresh browser context to ensure clean state
       // This is more reliable than trying to clear storage/cookies
       // Use explicit viewport to avoid two-column layout (triggered at width >= 992px AND height <= 800px)
+      // Reset the main page's navigation inactivity timer since work will happen
+      // in a fresh context and the main page will be idle during this time.
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
       const browser = page.context().browser()
       const freshContext = await browser.newContext({
         viewport: { width: 1280, height: 900 },

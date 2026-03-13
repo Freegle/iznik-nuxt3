@@ -31,9 +31,9 @@
       </b-card-header>
       <b-card-body>
         <!-- eslint-disable-next-line -->
-        <h3>{{ story.headline }}</h3>
+        <h3>{{ twem(story.headline) }}</h3>
         <div class="d-flex font-weight-bold">
-          {{ story.story }}
+          {{ twem(story.story) }}
           <b-img v-if="story.photo" thumbnail :src="story.photo.paththumb" />
         </div>
         <NoticeMessage v-if="!story.public" variant="info" class="mt-1">
@@ -87,6 +87,7 @@ import { useUserStore } from '@/stores/user'
 import { useGroupStore } from '@/stores/group'
 import { useStoryStore } from '@/stores/stories'
 import { useModMe } from '~/modtools/composables/useModMe'
+import { twem } from '~/composables/useTwem'
 
 const { $api } = useNuxtApp()
 const userStore = useUserStore()

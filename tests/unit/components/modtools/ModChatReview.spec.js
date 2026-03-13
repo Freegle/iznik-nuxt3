@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import dayjs from 'dayjs'
 import ModChatReview from '~/modtools/components/ModChatReview.vue'
 
@@ -24,22 +25,12 @@ vi.mock('~/modtools/composables/useModMe', () => ({
   }),
 }))
 
-// Mock chat store with messageById getter
+// Chat store is globally mocked via vitest.config alias → tests/unit/mocks/chat-store.js
+// Set test data via globalThis.__mockChatStore in beforeEach
 let mockMessageData = null
 
-const mockChatStore = {
-  messageById: vi.fn((id) => mockMessageData),
-}
-
-vi.mock('~/stores/chat', () => ({
-  useChatStore: () => mockChatStore,
-}))
-
-vi.mock('~/stores/auth', () => ({
-  useAuthStore: () => ({
-    groups: [{ groupid: 789, role: 'Moderator', active: 1 }],
-  }),
-}))
+// Auth store is globally mocked via vitest.config alias → tests/unit/mocks/auth-store.js
+// Set test data via globalThis.__mockAuthStore in beforeEach
 
 describe('ModChatReview', () => {
   const createTestMessage = (overrides = {}) => ({
@@ -67,6 +58,7 @@ describe('ModChatReview', () => {
         messageid: 123,
       },
       global: {
+        plugins: [createPinia()],
         stubs: {
           'b-card': {
             template:
@@ -140,8 +132,15 @@ describe('ModChatReview', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    setActivePinia(createPinia())
     mockSendMT.mockResolvedValue({})
     mockMessageData = null
+    globalThis.__mockChatStore = {
+      messageById: vi.fn(() => mockMessageData),
+    }
+    globalThis.__mockAuthStore = {
+      groups: [{ groupid: 789, role: 'Moderator', active: 1 }],
+    }
   })
 
   describe('rendering', () => {
