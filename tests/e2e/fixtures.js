@@ -1039,6 +1039,12 @@ const testWithFixtures = test.extend({
       const pageTitle = await page.title()
       base.expect(pageTitle).toContain(type.toUpperCase())
 
+      // Reset navigation inactivity timer before long form-filling operations
+      // (typing with delay doesn't generate navigation events)
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
+
       // Fill in the item type (item) using type() to trigger Vue reactivity
       await page
         .locator('[id^="what"], .type-input, input[placeholder*="give"]')
@@ -1049,6 +1055,11 @@ const testWithFixtures = test.extend({
       await page
         .locator('[id^="what"], .type-input, input[placeholder*="give"]')
         .type(item, { delay: 100 })
+
+      // Reset timer before description typing
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
 
       // Fill in the post details
       await page.waitForSelector(
@@ -1122,6 +1133,11 @@ const testWithFixtures = test.extend({
       // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
 
+      // Reset timer before location section
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
+
       // Fill in location details
       await page.waitForSelector('.pcinp, input[placeholder="Type postcode"]', {
         timeout: timeouts.ui.appearance,
@@ -1148,6 +1164,11 @@ const testWithFixtures = test.extend({
 
       // Target the modernized Next button
       await page.locator('.next-btn:has-text("Next")').click()
+
+      // Reset timer before options/email section
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
 
       // For OFFER posts, handle the /give/options page (delivery and deadline options)
       // WANTED posts go directly to whoami (no options page)
@@ -1303,6 +1324,11 @@ const testWithFixtures = test.extend({
         }
       }
       page.on('console', consoleListener)
+
+      // Reset timer before submission (email validation and submit can be slow)
+      if (page.resetNavigationTimer) {
+        page.resetNavigationTimer()
+      }
 
       // Click the Submit/Post button to finalize
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
