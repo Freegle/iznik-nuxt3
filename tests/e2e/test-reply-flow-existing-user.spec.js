@@ -17,6 +17,7 @@ const {
   navigateToMessageViaExplore,
   clickReplyButton,
   fillReplyForm,
+  waitForNuxtHydration,
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Existing User Forced Login', () => {
@@ -60,7 +61,9 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
     })
 
     // Click send - this should trigger the forced login flow.
-    // Retry if the login modal doesn't appear (Vue hydration race).
+    // Wait for Vue hydration so the click handler is attached.
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
@@ -68,30 +71,16 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       state: 'visible',
       timeout: timeouts.ui.appearance,
     })
+    await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
-
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      await sendButton.click()
-      console.log(`[Test] Clicked Send (attempt ${attempt})`)
-      try {
-        await loginModal.waitFor({
-          state: 'visible',
-          timeout: attempt < 3 ? 10000 : timeouts.ui.appearance,
-        })
-        break
-      } catch {
-        if (attempt === 3) {
-          throw new Error(
-            'Login modal did not appear after clicking Send your reply'
-          )
-        }
-        console.log('[Test] Login modal not visible yet, retrying...')
-        await page.waitForTimeout(1000)
-      }
-    }
+    await loginModal.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     console.log('[Test] Login modal appeared for existing user')
 
     // Complete login - need to fill both email and password
@@ -208,34 +197,26 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       collectText: 'Can collect anytime',
     })
 
-    // Click send — retry if login modal doesn't appear (Vue hydration race)
+    // Click send — wait for hydration so event handler is attached
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
+    await sendButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
-
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      await sendButton.click()
-      console.log(`[Test] Clicked Send (attempt ${attempt})`)
-      try {
-        await loginModal.waitFor({
-          state: 'visible',
-          timeout: attempt < 3 ? 10000 : timeouts.ui.appearance,
-        })
-        break
-      } catch {
-        if (attempt === 3) {
-          throw new Error(
-            'Login modal did not appear after clicking Send your reply'
-          )
-        }
-        console.log('[Test] Login modal not visible yet, retrying...')
-        await page.waitForTimeout(1000)
-      }
-    }
+    await loginModal.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     console.log('[Test] Login modal appeared')
 
     // Complete login - need to fill both email and password
@@ -340,34 +321,26 @@ test.describe('Reply Flow - Existing User Forced Login', () => {
       collectText: 'Can collect anytime',
     })
 
-    // Click send — retry if login modal doesn't appear (Vue hydration race)
+    // Click send — wait for hydration so event handler is attached
+    await waitForNuxtHydration(page)
+
     const sendButton = page
       .locator('.btn:has-text("Send your reply")')
       .filter({ visible: true })
+    await sendButton.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+    await sendButton.click()
+    console.log('[Test] Clicked Send your reply')
 
     const loginModal = page.locator('.modal-content').filter({
       hasText: 'Log in',
     })
-
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      await sendButton.click()
-      console.log(`[Test] Clicked Send (attempt ${attempt})`)
-      try {
-        await loginModal.waitFor({
-          state: 'visible',
-          timeout: attempt < 3 ? 10000 : timeouts.ui.appearance,
-        })
-        break
-      } catch {
-        if (attempt === 3) {
-          throw new Error(
-            'Login modal did not appear after clicking Send your reply'
-          )
-        }
-        console.log('[Test] Login modal not visible yet, retrying...')
-        await page.waitForTimeout(1000)
-      }
-    }
+    await loginModal.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
     console.log('[Test] Login modal appeared')
 
     // Complete login - need to fill both email and password

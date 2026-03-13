@@ -281,12 +281,29 @@ async function fillReplyForm(
 }
 
 /**
+ * Helper: Wait for Nuxt/Vue app to be fully hydrated.
+ * SSR renders HTML immediately but event handlers aren't attached until
+ * Vue hydrates. Clicking a button before hydration completes does nothing.
+ * This is a real UX issue — users see a button but it doesn't respond.
+ */
+async function waitForNuxtHydration(page) {
+  await page.waitForFunction(
+    () => {
+      const nuxtRoot = document.querySelector('#__nuxt')
+      return nuxtRoot && nuxtRoot.__vue_app__
+    },
+    { timeout: 15000 }
+  )
+}
+
+/**
  * Helper: Click the Reply button to expand reply section
  */
 async function clickReplyButton(page) {
-  // Wait for page to be fully loaded (not just domcontentloaded) so that
-  // Vue has had time to hydrate SSR-rendered components and attach event handlers.
+  // Wait for page to be fully loaded and Vue to hydrate SSR components.
+  // Without this, buttons are visible but have no event handlers attached.
   await page.waitForLoadState('load')
+  await waitForNuxtHydration(page)
 
   // Try footer reply button first (mobile/single column), then inline
   let replyButton = page.locator('.app-footer .reply-button:has-text("Reply")')
@@ -311,35 +328,16 @@ async function clickReplyButton(page) {
     timeout: timeouts.ui.appearance,
   })
 
-  // Retry clicking Reply — Vue SSR hydration may not have attached the event
-  // handler yet when the button first becomes visible. Try up to 3 times.
+  // Click once — hydration should be complete by now
+  await replyButton.click()
+  console.log('[Reply] Clicked Reply button')
+
   const replyTextarea = page.locator('textarea[name="reply"]')
-  const MAX_RETRIES = 3
-
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    await replyButton.click()
-    console.log(`[Reply] Clicked Reply button (attempt ${attempt})`)
-
-    try {
-      await replyTextarea.waitFor({
-        state: 'visible',
-        timeout: attempt < MAX_RETRIES ? 5000 : timeouts.ui.appearance,
-      })
-      console.log('[Reply] Reply section expanded')
-      return
-    } catch {
-      if (attempt < MAX_RETRIES) {
-        console.log(
-          '[Reply] Reply textarea not visible yet, retrying after delay...'
-        )
-        await page.waitForTimeout(1000)
-      } else {
-        throw new Error(
-          'Reply textarea did not appear after clicking Reply button'
-        )
-      }
-    }
-  }
+  await replyTextarea.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  console.log('[Reply] Reply section expanded')
 }
 
 /**
@@ -419,6 +417,7 @@ async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
 module.exports = {
   waitForAuthInLocalStorage,
   waitForAuthHydration,
+  waitForNuxtHydration,
   dismissLoginModalIfPresent,
   navigateToMessageViaBrowse,
   navigateToMessageViaExplore,
