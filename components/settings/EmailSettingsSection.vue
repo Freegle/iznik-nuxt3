@@ -182,6 +182,7 @@ const authStore = useAuthStore()
 // State
 const showAdvanced = ref(false)
 const simpleEmailSettingLocal = ref('Full')
+const savingEmailSetting = ref(false)
 const notificationSettingsLocal = ref({
   email: true,
   emailmine: false,
@@ -199,9 +200,14 @@ const simpleEmailSetting = computed(() => {
 })
 
 watch(simpleEmailSettingLocal, async (newValue) => {
-  const settings = me.value.settings
-  settings.simplemail = newValue
-  await authStore.saveAndGet({ settings })
+  savingEmailSetting.value = true
+  try {
+    const settings = me.value.settings
+    settings.simplemail = newValue
+    await authStore.saveAndGet({ settings })
+  } finally {
+    savingEmailSetting.value = false
+  }
 })
 
 const checkSimplicity = computed(() => {
@@ -339,12 +345,16 @@ const leaveGroup = async (id) => {
   emit('update')
 }
 
-// Update local refs when props change
+// Update local refs when props change.
+// Skip syncing email setting while a save is in progress to prevent the
+// fetchUser() response from overwriting a pending user-initiated change.
 watch(
   () => me.value,
   (newVal) => {
     if (newVal) {
-      simpleEmailSettingLocal.value = simpleEmailSetting.value
+      if (!savingEmailSetting.value) {
+        simpleEmailSettingLocal.value = simpleEmailSetting.value
+      }
       notificationSettingsLocal.value = { ...notificationSettings.value }
       notificationmailsLocal.value = notificationmails.value
       relevantallowedLocal.value = relevantallowed.value
