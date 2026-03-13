@@ -404,15 +404,28 @@ test.describe('Reply Flow - Edge Cases', () => {
         timeout: timeouts.ui.appearance,
       })
 
+      // The modal may open in signup mode (showing name field + "Join Freegle!").
+      // Click the "Log in" button in the modal header to switch to login mode.
+      const logInButton = loginModal.locator(
+        'button:has-text("Log in"), a:has-text("Log in")'
+      )
+      if (
+        await logInButton
+          .first()
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await logInButton.first().click()
+        console.log('[Test] Switched modal to login mode')
+      }
+
       // Wait for email input to be fully rendered and interactive
       const emailInput = loginModal.locator('input[type="email"]')
       await emailInput.waitFor({
         state: 'visible',
         timeout: timeouts.ui.appearance,
       })
-      // Clear any pre-filled value and use type() for more realistic input
-      await emailInput.clear()
-      await emailInput.type(loginEmail, { delay: 10 })
+      await emailInput.fill(loginEmail)
 
       const passwordInput = loginModal.locator('input[type="password"]')
       await passwordInput.waitFor({
@@ -421,11 +434,11 @@ test.describe('Reply Flow - Edge Cases', () => {
       })
       await passwordInput.fill(DEFAULT_TEST_PASSWORD)
 
-      // Small delay to let VeeForm validation settle
-      await page.waitForTimeout(timeouts.ui.settleTime)
-
-      // Press Enter to submit the form (more reliable than clicking button)
-      await passwordInput.press('Enter')
+      // Click the Log in button to submit
+      const submitButton = loginModal.locator(
+        'button:has-text("Log in"), button[type="submit"]'
+      )
+      await submitButton.last().click()
       console.log('[Test] Completed navbar login')
 
       // Wait for login modal to close
