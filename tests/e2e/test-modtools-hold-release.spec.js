@@ -58,63 +58,28 @@ test.describe('ModTools hold and release message', () => {
     await dismissAllModals()
 
     // Select a group that has pending messages.
-    // Work counts load asynchronously via fetchWork(), so first try to find a group
-    // with a count indicator (e.g. "Freegle Playground2 (2)"). If counts don't load
-    // within a reasonable time, fall back to trying each group until one shows messages.
+    // Work counts load asynchronously, so poll until an option with counts appears.
     let targetGroupValue = null
-
-    // First attempt: poll for a group with counts (shorter timeout)
-    try {
-      await expect
-        .poll(
-          async () => {
-            const options = await groupSelect.locator('option').all()
-            for (const option of options) {
-              const text = await option.textContent()
-              const value = await option.getAttribute('value')
-              if (value && value !== '0' && /\(\d+\)/.test(text)) {
-                targetGroupValue = value
-                return true
-              }
+    await expect
+      .poll(
+        async () => {
+          const options = await groupSelect.locator('option').all()
+          for (const option of options) {
+            const text = await option.textContent()
+            const value = await option.getAttribute('value')
+            if (value && value !== '0' && /\(\d+\)/.test(text)) {
+              targetGroupValue = value
+              return true
             }
-            return false
-          },
-          {
-            message: 'Waiting for group options with pending message counts',
-            timeout: 30000,
-            intervals: [1000, 2000, 5000],
           }
-        )
-        .toBe(true)
-    } catch {
-      // Fallback: try each non-zero group until one shows message cards
-      console.log(
-        'Work counts did not load in time, trying groups individually'
-      )
-      const options = await groupSelect.locator('option').all()
-      for (const option of options) {
-        const value = await option.getAttribute('value')
-        if (value && value !== '0') {
-          await groupSelect.selectOption(value)
-          try {
-            await page
-              .locator('.card')
-              .first()
-              .waitFor({ state: 'visible', timeout: 10000 })
-            targetGroupValue = value
-            break
-          } catch {
-            // No messages in this group, try next
-          }
+          return false
+        },
+        {
+          message: 'Waiting for group options with pending message counts',
+          timeout: timeouts.navigation.slowPage,
         }
-      }
-      if (!targetGroupValue) {
-        throw new Error(
-          'No group with pending messages found (counts never loaded and no group had visible messages)'
-        )
-      }
-    }
-
+      )
+      .toBe(true)
     await groupSelect.selectOption(targetGroupValue)
 
     // Wait for message cards to load

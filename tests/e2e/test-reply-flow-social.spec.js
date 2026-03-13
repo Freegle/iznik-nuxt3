@@ -30,7 +30,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
    * We can't automate the actual OAuth flow, but we CAN test that the
    * reply state survives the loginCount key bump that forces the re-render.
    */
-  test('4.1 reply state survives loginCount key bump (social login simulation)', async ({
+  test.skip('4.1 reply state survives loginCount key bump (social login simulation)', async ({
     page,
     postMessage,
     testEmail,

@@ -37,12 +37,13 @@ test.describe('User ratings tests', () => {
     const replyEmail = getTestEmail('rater')
     await logoutIfLoggedIn(page)
 
-    await replyToMessageWithSignup({
+    const replySuccess = await replyToMessageWithSignup({
       messageId: result.id,
       itemName: result.item,
       email: replyEmail,
     })
 
+    expect(replySuccess).toBeTruthy()
     console.log('User B replied successfully')
 
     // Log back in as User A to see the chat with User B

@@ -385,14 +385,9 @@ async function signUpViaHomepage(
   // Generate display name if not provided
   const fullName = displayName || `Test User ${Date.now()}`
 
-  // Fill in the name field
-  await fullnameInput.waitFor({
-    state: 'visible',
-    timeout: timeouts.ui.appearance,
-  })
-  await fullnameInput.type(fullName)
-
-  // Fill in the email field
+  // Fill email FIRST — the EmailValidator component does an async domain check
+  // that can trigger a Vue re-render, which may clear other fields. By filling
+  // email first, any re-render happens before we fill the name.
   const emailInput = page
     .locator('input[type="email"], input[name="email"]')
     .first()
@@ -400,7 +395,7 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await emailInput.type(email)
+  await emailInput.fill(email)
 
   // Fill in the password field
   const passwordInput = page
@@ -410,7 +405,14 @@ async function signUpViaHomepage(
     state: 'visible',
     timeout: timeouts.ui.appearance,
   })
-  await passwordInput.type(password)
+  await passwordInput.fill(password)
+
+  // Fill in the name field LAST so it isn't cleared by EmailValidator re-renders
+  await fullnameInput.waitFor({
+    state: 'visible',
+    timeout: timeouts.ui.appearance,
+  })
+  await fullnameInput.fill(fullName)
 
   // Handle marketing consent if specified
   if (marketingConsent !== null) {

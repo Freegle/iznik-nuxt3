@@ -34,60 +34,29 @@ async function assertNoErrors(page) {
   expect(body).not.toContain('Cannot read properties of undefined')
 }
 
-// Helper: select a group with pending messages, with fallback if work counts don't load.
+// Helper: select a group with pending messages.
 async function selectGroupWithPendingMessages(page, groupSelect) {
   let targetGroupValue = null
-
-  // First attempt: poll for a group with counts (shorter timeout)
-  try {
-    await expect
-      .poll(
-        async () => {
-          const options = await groupSelect.locator('option').all()
-          for (const option of options) {
-            const text = await option.textContent()
-            const value = await option.getAttribute('value')
-            if (value && value !== '0' && /\(\d+\)/.test(text)) {
-              targetGroupValue = value
-              return true
-            }
+  await expect
+    .poll(
+      async () => {
+        const options = await groupSelect.locator('option').all()
+        for (const option of options) {
+          const text = await option.textContent()
+          const value = await option.getAttribute('value')
+          if (value && value !== '0' && /\(\d+\)/.test(text)) {
+            targetGroupValue = value
+            return true
           }
-          return false
-        },
-        {
-          message: 'Waiting for group options with pending message counts',
-          timeout: 30000,
-          intervals: [1000, 2000, 5000],
         }
-      )
-      .toBe(true)
-  } catch {
-    // Fallback: try each non-zero group until one shows message cards
-    console.log('Work counts did not load in time, trying groups individually')
-    const options = await groupSelect.locator('option').all()
-    for (const option of options) {
-      const value = await option.getAttribute('value')
-      if (value && value !== '0') {
-        await groupSelect.selectOption(value)
-        try {
-          await page
-            .locator('.card')
-            .first()
-            .waitFor({ state: 'visible', timeout: 10000 })
-          targetGroupValue = value
-          break
-        } catch {
-          // No messages in this group, try next
-        }
+        return false
+      },
+      {
+        message: 'Waiting for group options with pending message counts',
+        timeout: timeouts.navigation.slowPage,
       }
-    }
-    if (!targetGroupValue) {
-      throw new Error(
-        'No group with pending messages found (counts never loaded and no group had visible messages)'
-      )
-    }
-  }
-
+    )
+    .toBe(true)
   await groupSelect.selectOption(targetGroupValue)
   return targetGroupValue
 }

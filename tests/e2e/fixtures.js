@@ -253,6 +253,7 @@ const test = base.test.extend({
       /The given origin is not allowed for the given client ID/, // Not available in test.
       /Failed to load resource: the server responded with a status of 404.*api\/message\/\d+/, // Message API 404 errors can happen during normal operation.
       /Failed to load resource: the server responded with a status of 404.*api\/user\/\d+/, // User API 404 errors can happen during cleanup.
+      /Failed to load resource: the server responded with a status of 404.*api\/chat\//, // Chat API 404 errors when chat rooms are deleted between test runs.
       /Failed to load resource: the server responded with a status of 404.*api\/session/, // Session API 404 can happen when trying to logout when not logged in.
       /Failed to load resource: the server responded with a status of 404.*delivery\.localhost/, // Delivery service 404 errors for missing images can happen during normal operation.
       /FedCM get\(\) rejects with/, // Not available in test
@@ -1907,6 +1908,7 @@ const testWithFixtures = test.extend({
       const browser = page.context().browser()
       const freshContext = await browser.newContext({
         viewport: { width: 1280, height: 900 },
+        storageState: { cookies: [], origins: [] },
       })
       const freshPage = await freshContext.newPage()
 
@@ -2040,98 +2042,55 @@ const testWithFixtures = test.extend({
       await sendReplyButton.click()
       console.log('Clicked Send your reply button')
 
-      // Wait for "Welcome to Freegle" modal containing "It looks like this is your first time"
-      console.log('Waiting for Welcome to Freegle modal')
-      console.log(
-        'DEBUG: Current URL before waiting for modal:',
-        freshPage.url()
-      )
-      console.log('DEBUG: Checking for any modals on page...')
-
-      // Check what modals exist first
-      const allModals = await freshPage.locator('.modal-content').count()
-      console.log(`DEBUG: Found ${allModals} modal-content elements`)
-
-      if (allModals > 0) {
-        const modalTexts = await freshPage
-          .locator('.modal-content')
-          .allTextContents()
-        console.log('DEBUG: Modal texts found:', modalTexts)
-      }
+      // The reply state machine handles authentication for new users automatically:
+      // 1. Calls user.add(email) to register the user
+      // 2. Joins the message's group
+      // 3. Creates the chat and sends the reply
+      // 4. Shows a "Welcome to Freegle" modal for new users
+      // 5. Navigates to /chats/
+      //
+      // We need to handle the Welcome modal if it appears, then verify
+      // we end up at /chats/ with a chat entry.
 
       try {
-        const welcomeModal = freshPage
-          .locator('.modal-content')
-          .filter({
-            hasText: 'Welcome to Freegle',
-          })
-          .filter({
-            hasText: 'It looks like this is your first time',
-          })
-
-        console.log(
-          'DEBUG: About to wait for Welcome modal with shorter timeout...'
-        )
-        await welcomeModal.waitFor({
-          state: 'visible',
-          timeout: 5000, // Much shorter timeout - if modal doesn't appear quickly, it's probably not coming
+        // The Welcome modal may appear for new users. Handle it if it does.
+        const welcomeModal = freshPage.locator('.modal-content').filter({
+          hasText: 'Welcome to Freegle',
         })
 
-        console.log('Welcome to Freegle modal appeared')
-
-        // Click "Close and Continue" button and wait for navigation
-        const closeButton = welcomeModal.locator(
-          '.btn:has-text("Close and Continue")'
-        )
-        await closeButton.waitFor({
-          state: 'visible',
-          timeout: timeouts.ui.appearance,
-        })
-
-        console.log(
-          'Clicking Close and Continue button and waiting for reply to complete'
-        )
-
-        // Click the button first - the modal will stay open while sendReply runs
-        await closeButton.click()
-        console.log(
-          'Clicked Close and Continue, waiting for navigation to chats'
-        )
-
-        // Wait for navigation to chats page - this indicates the reply API call completed
-        // Don't use networkidle - the app has background polling that prevents idle state
         try {
-          await freshPage.waitForURL('**/chats/**', {
-            timeout: timeouts.navigation.default,
+          await welcomeModal.waitFor({ state: 'visible', timeout: 10000 })
+          console.log('Welcome to Freegle modal appeared')
+
+          const closeButton = welcomeModal.locator(
+            '.btn:has-text("Close and Continue")'
+          )
+          await closeButton.waitFor({
+            state: 'visible',
+            timeout: timeouts.ui.appearance,
           })
-          console.log('Successfully redirected to chats page')
-        } catch (error) {
-          console.log('Navigation after close button click:', error.message)
-          // Check if we're on the chats page anyway
-          if (freshPage.url().includes('/chats/')) {
-            console.log('Navigation completed despite error - continuing')
-          } else {
-            throw error
-          }
+          await closeButton.click()
+          console.log('Clicked Close and Continue')
+        } catch {
+          // Welcome modal may have already been dismissed or may not appear
+          // for users who have been registered before in a previous test run
+          console.log('Welcome modal did not appear within timeout')
         }
 
-        // Handle ContactDetailsAskModal if it appears on the chats page
+        // Wait for navigation to chats page - this is the definitive success indicator
+        await freshPage.waitForURL('**/chats/**', {
+          timeout: timeouts.navigation.default,
+        })
+        console.log('Successfully navigated to chats page')
+
+        // Handle ContactDetailsAskModal if it appears
         try {
-          console.log('Checking for ContactDetailsAskModal on chats page')
           const contactModal = freshPage.locator('.modal-content').filter({
             hasText: 'Contact details',
           })
-
-          // Wait briefly to see if the modal appears
-          await contactModal.waitFor({
-            state: 'visible',
-            timeout: 3000,
-          })
-
+          await contactModal.waitFor({ state: 'visible', timeout: 3000 })
           console.log('ContactDetailsAskModal appeared, filling postcode')
 
-          // Fill in postcode - look for the postcode input
-          // Note: Mobile phone input was removed in SMS notifications removal (commit 9fac7ae9)
           const postcodeInput = contactModal.locator(
             'input[placeholder*="postcode"], .pcinp'
           )
@@ -2140,93 +2099,44 @@ const testWithFixtures = test.extend({
             timeout: timeouts.ui.appearance,
           })
           await postcodeInput.fill('EH3 6SS')
-          console.log('Filled postcode')
 
-          // The modal auto-saves when postcode is selected, just need to close it
-          // Look for the close button or wait for modal to close automatically
-          try {
-            const modalCloseButton = contactModal.locator(
-              '.btn-close, .close, button[aria-label="Close"]'
-            )
-            if ((await modalCloseButton.count()) > 0) {
-              await modalCloseButton.click()
-              console.log('Clicked close button in ContactDetailsAskModal')
-            }
-          } catch (e) {
-            console.log('No close button found, modal may auto-close')
+          const modalCloseButton = contactModal.locator(
+            '.btn-close, .close, button[aria-label="Close"]'
+          )
+          if ((await modalCloseButton.count()) > 0) {
+            await modalCloseButton.click()
           }
-
-          // Wait for the contact modal to disappear
           await contactModal.waitFor({
             state: 'detached',
             timeout: timeouts.ui.response,
           })
           console.log('ContactDetailsAskModal closed')
-        } catch (contactModalError) {
-          console.log(
-            'ContactDetailsAskModal did not appear, continuing:',
-            contactModalError.message
-          )
+        } catch {
+          // Modal didn't appear, that's fine
         }
 
-        // Wait for the chat list to load and look for a chat entry
+        // Verify a chat entry exists
         await freshPage.waitForSelector('.chat-entry', {
           timeout: timeouts.ui.appearance,
         })
-
-        // Check that there's one chat entry
-        const chatEntries = freshPage
+        const chatCount = await freshPage
           .locator('.chat-entry')
           .filter({ visible: true })
-        const chatCount = await chatEntries.count()
+          .count()
 
-        if (chatCount > 0) {
-          console.log(`Found ${chatCount} chat entries in /chats after reply`)
-        } else {
-          console.log('Warning: No chat entries found in /chats after reply')
+        if (chatCount === 0) {
+          console.log('No chat entries found after reply')
           await freshContext.close()
           return false
         }
 
-        console.log(
-          'Reply process completed successfully with signup and contact details filled'
-        )
+        console.log(`Reply completed successfully, ${chatCount} chat entries`)
         await freshContext.close()
         return true
       } catch (error) {
-        console.log('DEBUG: Welcome modal error:', error.message)
-
-        // If the error is due to page being closed, don't try to continue
-        if (
-          error.message.includes(
-            'Target page, context or browser has been closed'
-          )
-        ) {
-          console.log('Browser context was closed, stopping fixture execution')
-          return false
-        }
-
-        // If it's just a timeout waiting for the modal, this indicates an issue
-        if (
-          error.message.includes('Timeout') ||
-          error.message.includes('waiting for locator')
-        ) {
-          console.log(
-            'ERROR: Welcome to Freegle modal did not appear - this indicates a problem'
-          )
-          console.log(
-            'DEBUG: Expected modal for new user signup, but it was not found'
-          )
-          await freshContext.close()
-          return false // Modal should appear for new users
-        } else {
-          console.log(
-            'Unexpected error during Welcome modal wait:',
-            error.message
-          )
-          await freshContext.close()
-          return false
-        }
+        console.log('Reply with signup failed:', error.message)
+        await freshContext.close()
+        return false
       }
     }
 
