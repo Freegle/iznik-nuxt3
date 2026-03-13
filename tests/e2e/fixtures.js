@@ -525,6 +525,7 @@ const test = base.test.extend({
     page.gotoAndVerify = async (path, options = {}) => {
       const timeout = options.timeout || timeouts.navigation.default
       const maxRetries = options.maxRetries || 3
+      const waitUntil = options.waitUntil || 'load'
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -532,9 +533,15 @@ const test = base.test.extend({
             `Navigating to ${path} with timeout ${timeout}ms (attempt ${attempt}/${maxRetries})`
           )
 
-          // Navigate with timeout.
-          // Uses waitUntil: 'load' by default, which indicates that the page is fully loaded.
-          await page.goto(path, { timeout })
+          // Reset navigation timer before each attempt to prevent inactivity timeout during retries
+          if (page.resetNavigationTimer) {
+            page.resetNavigationTimer()
+          }
+
+          // Navigate with timeout and configurable waitUntil strategy.
+          // Default 'load' waits for all resources; 'domcontentloaded' is faster
+          // for pages with external resources (e.g., Stripe, PayPal) that may be slow in CI.
+          await page.goto(path, { timeout, waitUntil })
 
           // Wait for page to finish hydrating (loading spinner to disappear)
           // The LoadingIndicator component is always in the DOM but uses opacity for visibility.

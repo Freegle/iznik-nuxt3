@@ -89,7 +89,9 @@ test.describe('V2 API Page Tests', () => {
     page,
     waitForNuxtPageLoad,
   }) => {
-    await page.gotoAndVerify('/donate')
+    // Donate page loads external Stripe/PayPal resources that may be slow in CI.
+    // Use domcontentloaded to avoid hanging on external resource loading.
+    await page.gotoAndVerify('/donate', { waitUntil: 'domcontentloaded' })
     await waitForNuxtPageLoad({ timeout: timeouts.navigation.default })
 
     // Page title should indicate donations

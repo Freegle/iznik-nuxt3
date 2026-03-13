@@ -455,8 +455,8 @@ async function signUpViaHomepage(
   console.log('Waiting for confirmation after registration')
 
   try {
-    // Wait for redirect to explore page or myposts, which happens after successful registration
-    await page.waitForURL(/\/(explore|myposts)/, {
+    // Wait for redirect to explore, myposts, or browse page after successful registration
+    await page.waitForURL(/\/(explore|myposts|browse)/, {
       timeout: timeouts.navigation.default,
     })
 
@@ -465,6 +465,8 @@ async function signUpViaHomepage(
       console.log('Redirected to explore page - registration successful')
     } else if (currentUrl.includes('/myposts')) {
       console.log('Redirected to myposts page - registration successful')
+    } else if (currentUrl.includes('/browse')) {
+      console.log('Redirected to browse page - registration successful')
     }
 
     // Wait for auth to be persisted to localStorage before returning

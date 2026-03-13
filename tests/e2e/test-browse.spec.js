@@ -129,6 +129,7 @@ test.describe('Browse Page Tests', () => {
     const noPostsLocator = page
       .locator("text=couldn't find any posts")
       .or(page.locator('text=no posts in this area'))
+      .or(page.locator("text=Sorry, we didn't find anything"))
       .or(page.locator("text=What's your postcode"))
 
     await expect(messagesLocator.or(noPostsLocator).first()).toBeVisible({
