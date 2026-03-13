@@ -23,6 +23,13 @@ export function fetchRetry(fetch) {
       return [false, false, null, new Error('Too many retries, give up')]
     }
 
+    // Don't retry aborted requests — these are intentional cancellations
+    // (e.g. all pending requests are aborted during logout to prevent stale
+    // responses from re-establishing session cookies).
+    if (error?.name === 'AbortError') {
+      return [false, false, null, error]
+    }
+
     if (miscStore?.unloading) {
       // Don't retry if we're unloading.
       console.log("Unloading - don't retry")

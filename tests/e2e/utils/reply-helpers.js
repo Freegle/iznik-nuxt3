@@ -300,9 +300,9 @@ async function waitForNuxtHydration(page) {
  * Helper: Click the Reply button to expand reply section
  */
 async function clickReplyButton(page) {
-  // Wait for page to be fully loaded and Vue to hydrate SSR components.
+  // Wait for Vue to hydrate SSR components.
   // Without this, buttons are visible but have no event handlers attached.
-  await page.waitForLoadState('load')
+  // Don't use waitForLoadState('load') — it hangs if the load event already fired.
   await waitForNuxtHydration(page)
 
   // Try footer reply button first (mobile/single column), then inline
@@ -344,6 +344,9 @@ async function clickReplyButton(page) {
  * Helper: Click Send and wait for result
  */
 async function clickSendAndWait(page, { expectWelcomeModal = false } = {}) {
+  // Ensure Vue has hydrated so @click handlers are attached to SSR-rendered buttons
+  await waitForNuxtHydration(page)
+
   const sendButton = page
     .locator('.btn:has-text("Send your reply")')
     .filter({ visible: true })

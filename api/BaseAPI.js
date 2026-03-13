@@ -15,6 +15,16 @@ export { APIError, MaintenanceError, LoginError, SignUpError }
 
 let requestId = 0
 
+// Global AbortController for all API requests. Aborting this cancels every
+// in-flight request, preventing stale responses (and their Set-Cookie headers)
+// from arriving after an intentional logout.
+let globalAbortController = new AbortController()
+
+export function abortAllPendingRequests() {
+  globalAbortController.abort()
+  globalAbortController = new AbortController()
+}
+
 // let timer = 0
 
 // We add fetch retrying.
@@ -149,6 +159,7 @@ export default class BaseAPI {
         body,
         method,
         headers,
+        signal: globalAbortController.signal,
       })
 
       if (data && data.jwt && data.persistent) {

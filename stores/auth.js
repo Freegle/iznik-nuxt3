@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { SocialLogin } from '@capgo/capacitor-social-login'
 import { LoginError, SignUpError } from '~/api/APIErrors'
+import { abortAllPendingRequests } from '~/api/BaseAPI'
 import { useComposeStore } from '~/stores/compose'
 import { useGroupStore } from '~/stores/group'
 import api from '~/api'
@@ -133,8 +134,16 @@ export const useAuthStore = defineStore({
         setTimeout(this.disableGoogleAutoselect, 100)
       }
     },
+    // Abort all in-flight API requests. Used before logout to prevent
+    // stale responses from arriving with Set-Cookie headers that would
+    // re-establish the session cookie after we've cleared it.
+    abortPendingRequests() {
+      abortAllPendingRequests()
+    },
     async logout() {
       const mobileStore = useMobileStore()
+
+      this.abortPendingRequests()
 
       await this.$api.session.logout()
 

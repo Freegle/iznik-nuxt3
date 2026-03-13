@@ -16,166 +16,102 @@ const { waitForModal } = require('./ui')
  */
 async function waitForAuthPersistence(page) {
   console.log('Waiting for auth to be persisted to localStorage...')
-  try {
-    await page.waitForFunction(
-      () => {
-        try {
-          const authData = localStorage.getItem('auth')
-          if (!authData) return false
-          const parsed = JSON.parse(authData)
-          // Check the nested auth object for jwt or persistent token
-          const tokens = parsed?.auth
-          return !!(tokens?.jwt || tokens?.persistent)
-        } catch (e) {
-          return false
-        }
-      },
-      { timeout: timeouts.ui.appearance }
-    )
-    console.log('Auth persisted to localStorage')
-  } catch (error) {
-    console.log(`Warning: Auth persistence check timed out: ${error.message}`)
-    // Don't throw - the login may still have succeeded but persistence is slow
-  }
+  await page.waitForFunction(
+    () => {
+      try {
+        const authData = localStorage.getItem('auth')
+        if (!authData) return false
+        const parsed = JSON.parse(authData)
+        // Check the nested auth object for jwt or persistent token
+        const tokens = parsed?.auth
+        return !!(tokens?.jwt || tokens?.persistent)
+      } catch (e) {
+        return false
+      }
+    },
+    { timeout: 30000 }
+  )
+  console.log('Auth persisted to localStorage')
 }
 
 /**
- * Clears all session data from the current page WITHOUT navigating.
- * This is a fast operation that just clears storage and cookies.
+ * Clears browser cookies and storage without navigating.
  * @param {import('@playwright/test').Page} page - Current Playwright page object
  * @returns {Promise<void>}
  */
 async function clearSessionData(page) {
-  // First, call the logout API to clear server-side session
-  await page.evaluate(async () => {
-    try {
-      await fetch('/api/session', {
-        method: 'POST',
-        headers: {
-          'X-HTTP-Method-Override': 'DELETE',
-          'Content-Type': 'application/json',
-        },
-      })
-    } catch {
-      // Ignore errors - user might not be logged in
-    }
-  })
-
-  // Clear all browser storage and Pinia state
-  // IMPORTANT: Clear localStorage AFTER modifying Pinia stores, because the
-  // persistence plugin may write to localStorage when store values change.
-  // By clearing localStorage last, we ensure all persisted data is removed.
   await page.evaluate(() => {
-    // Clear Pinia stores FIRST (this may trigger persistence writes)
-    if (window.$nuxt && window.$nuxt.$pinia) {
-      for (const store of window.$nuxt.$pinia._s.values()) {
-        if (store.$reset) {
-          store.$reset()
-        }
-      }
-      // Explicitly clear loggedInEver which is preserved by auth store's logout()
-      const authStore = window.$nuxt.$pinia._s.get('auth')
-      if (authStore) {
-        authStore.loggedInEver = false
-        authStore.loginCount = 0
-        // Also clear auth tokens
-        authStore.auth = { jwt: null, persistent: null }
-        authStore.user = null
-        authStore.loginStateKnown = false
-      }
-    }
-
-    // Clear indexedDB
-    if (window.indexedDB && window.indexedDB.databases) {
-      window.indexedDB
-        .databases()
-        .then((databases) => {
-          databases.forEach((db) => {
-            window.indexedDB.deleteDatabase(db.name)
-          })
-        })
-        .catch(() => {})
-    }
-
-    // Clear sessionStorage
-    try {
-      sessionStorage.clear()
-    } catch {
-      // Ignore
-    }
-
-    // Clear localStorage LAST to ensure any persistence writes are cleared
     try {
       localStorage.clear()
-    } catch {
-      // Ignore
-    }
+    } catch {}
+    try {
+      sessionStorage.clear()
+    } catch {}
   })
 
-  // Clear all cookies
   const context = page.context()
   await context.clearCookies()
 }
 
 /**
- * Clears all session data from the current page to simulate logout.
+ * Logs out by clicking the actual logout button in the UI.
+ * Falls back to clearing cookies/storage if no logout button is found
+ * (e.g. user is not logged in).
  * @param {import('@playwright/test').Page} page - Current Playwright page object
- * @param {boolean} [navigateToHome=true] - Whether to navigate to homepage after clearing (slower but ensures fresh state)
- * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object with cleared session
+ * @param {boolean} [navigateToHome=true] - Whether to navigate to homepage after logout
+ * @returns {Promise<import('@playwright/test').Page>} - Returns the same page object
  */
 async function logoutIfLoggedIn(page, navigateToHome = true) {
-  console.log('Clearing all session data to simulate fresh browser state')
+  console.log('Logging out via UI')
 
   try {
-    await clearSessionData(page)
-    console.log('Cleared session data')
+    // Check if the logout button is visible (desktop or mobile)
+    const desktopLogout = page.locator('#menu-option-logout')
+    const mobileLogout = page.locator('text=Logout').filter({ visible: true })
 
-    // Only navigate if explicitly requested (for backwards compatibility)
+    const isDesktopVisible = await desktopLogout.isVisible().catch(() => false)
+    const isMobileVisible = await mobileLogout.isVisible().catch(() => false)
+
+    if (isDesktopVisible) {
+      console.log('Clicking desktop logout button')
+      // Allow 401 errors from in-flight API requests that complete after logout
+      page.addAllowedErrorPattern(
+        /Failed to load resource: the server responded with a status of 401/
+      )
+      await desktopLogout.click()
+    } else if (isMobileVisible) {
+      console.log('Clicking mobile logout button')
+      // Allow 401 errors from in-flight API requests that complete after logout
+      page.addAllowedErrorPattern(
+        /Failed to load resource: the server responded with a status of 401/
+      )
+      await mobileLogout.click()
+    } else {
+      console.log('No logout button visible — clearing cookies/storage')
+      await clearSessionData(page)
+    }
+
     if (navigateToHome) {
       await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
       console.log('Navigated to homepage')
-
-      // Wait for DOM to be ready - don't use networkidle as the app has background polling
-      // that can prevent network from becoming idle, causing timeouts in parallel runs
-      await page.waitForLoadState('domcontentloaded', {
-        timeout: timeouts.navigation.default,
-      })
-
-      // Verify logged-out state by checking localStorage auth is cleared
-      const isLoggedOut = await page.evaluate(() => {
-        try {
-          const authData = localStorage.getItem('auth')
-          if (!authData) return true
-          const parsed = JSON.parse(authData)
-          const tokens = parsed?.auth
-          // Check if there are any valid tokens remaining
-          return !(tokens?.jwt || tokens?.persistent)
-        } catch (e) {
-          return true // If we can't parse, assume logged out
-        }
-      })
-
-      if (!isLoggedOut) {
-        console.log(
-          'Warning: Auth data still present after logout, clearing again'
-        )
-        // Try clearing again
-        await clearSessionData(page)
-        // Reload to ensure fresh state
-        await page.reload({ timeout: timeouts.navigation.initial })
-        // Wait for DOM to be ready - don't use networkidle as the app has background polling
-        await page.waitForLoadState('domcontentloaded', {
-          timeout: timeouts.navigation.default,
-        })
-      }
-
-      console.log('Verified logged-out state')
     }
+
+    // Ensure cookies/storage are fully cleared after logout
+    await clearSessionData(page)
+
+    // Don't reset allowed error patterns here — the 401 response from in-flight
+    // requests may arrive asynchronously after this point. Each test gets a fresh
+    // browser context so patterns don't leak between tests.
 
     return page
   } catch (error) {
-    console.error(`Error clearing session data: ${error.message}`)
-    throw error
+    console.error(`Error during logout: ${error.message}`)
+    // Fall back to clearing cookies/storage
+    await clearSessionData(page)
+    if (navigateToHome) {
+      await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
+    }
+    return page
   }
 }
 
@@ -297,11 +233,11 @@ async function signUpViaHomepage(
     console.log('Cleared session data before signup')
   }
 
-  // Navigate to homepage if we're not already there
-  const currentUrl = page.url()
-  if (!currentUrl.endsWith('/') && !currentUrl.endsWith('/?')) {
-    await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
-  }
+  // Always navigate to homepage — even if already there.  After clearSessionData,
+  // the in-memory Pinia store still has stale state (e.g. loggedInEver=true).
+  // A fresh page load re-hydrates from the now-empty localStorage so the login
+  // modal opens in signup mode rather than login mode.
+  await page.gotoAndVerify('/', { timeout: timeouts.navigation.initial })
 
   // Wait for page to be fully loaded with JavaScript
   // Don't use networkidle - the app has background polling that prevents idle state
@@ -372,9 +308,16 @@ async function signUpViaHomepage(
     }
   }
 
-  // Check if we're in register mode by looking for the name input
+  // Check if we're in register mode by looking for the name input.
+  // Wait for it — the modal may still be animating or the signUp computed
+  // may not have resolved yet (especially on first visit where it defaults to signup).
   const fullnameInput = page.locator('#fullname, input[name="fullname"]')
-  if (!(await fullnameInput.isVisible().catch(() => false))) {
+  try {
+    await fullnameInput.waitFor({
+      state: 'visible',
+      timeout: timeouts.ui.appearance,
+    })
+  } catch {
     console.log('Could not find or switch to register mode')
     return false
   }

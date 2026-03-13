@@ -100,7 +100,7 @@ module.exports = defineConfig({
     baseURL: process.env.TEST_BASE_URL || 'http://freegle-dev-local.localhost',
     testEmailDomain: process.env.TEST_EMAIL_DOMAIN || 'yahoogroups.com',
     // viewport set at test level for better control
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
     // Video recording configuration

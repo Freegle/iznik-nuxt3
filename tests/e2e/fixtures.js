@@ -294,6 +294,8 @@ const test = base.test.extend({
       /Only one navigator\.credentials\.get request may be outstanding at one time/, // FedCM concurrent credential requests in test
       /useOurModal show problem/, // Race condition fixed in useOurModal.js (nextTick) - allow until container rebuild
       /Failed to load resource: the server responded with a status of 500.*api\/user/, // Transient 500 on user API — app retries automatically
+      /Failed to load resource: the server responded with a status of 500.*connect\.facebook\.net/, // Facebook SDK transient 500 errors
+      /Refused to execute script from.*connect\.facebook\.net.*MIME type/, // Facebook SDK MIME type error when returning error page
     ]
 
     // Initialize the working copy of allowed error patterns
@@ -1188,17 +1190,11 @@ const testWithFixtures = test.extend({
       console.log('=== POST-SUBMISSION NAVIGATION DEBUG START ===')
       console.log('Current URL before submit button click:', page.url())
 
-      // Try multiple click methods to ensure it works
-      try {
-        // First try normal Playwright click with force
-        await freegleButton.click({ force: true })
-        console.log('Submit button clicked with force:true')
-      } catch (clickError) {
-        console.log('Force click failed, trying JS click:', clickError.message)
-        // Fallback to JavaScript click if Playwright click fails
-        await freegleButton.evaluate((el) => el.click())
-        console.log('Submit button clicked via JavaScript')
-      }
+      // Click without force: true — Playwright's default actionability checks
+      // ensure the button is stable and receiving events. With force: true, the
+      // click can land before Vue has attached the @click handler, especially
+      // on client-only rendered pages.
+      await freegleButton.click()
       console.log('Submit button clicked successfully')
 
       // Wait for page url to contain myposts

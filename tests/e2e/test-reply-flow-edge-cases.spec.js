@@ -20,6 +20,7 @@ const {
   clickReplyButton,
   fillReplyForm,
   clickSendAndWait,
+  waitForNuxtHydration,
 } = require('./utils/reply-helpers')
 
 test.describe('Reply Flow - Edge Cases', () => {
@@ -303,6 +304,9 @@ test.describe('Reply Flow - Edge Cases', () => {
         collectText: 'Can collect anytime',
       })
 
+      // Ensure Vue hydration is complete so @click handlers are attached
+      await waitForNuxtHydration(page)
+
       // Click send multiple times rapidly
       const sendButton = page
         .locator('.btn:has-text("Send your reply")')
@@ -312,8 +316,7 @@ test.describe('Reply Flow - Edge Cases', () => {
         timeout: timeouts.ui.appearance,
       })
 
-      // Rapid double-click - use force:true to attempt click on disabled button
-      // The button should be disabled after first click, preventing double submission
+      // Rapid double-click - the button should be disabled after first click
       await sendButton.click()
       console.log('[Test] Clicked Send button first time')
 
