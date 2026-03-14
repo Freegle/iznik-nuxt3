@@ -399,9 +399,30 @@ const test = base.test.extend({
 
         // Check if this is a critical (not allowed) error and fail immediately
         if (!isAllowedError(fullErrorText)) {
+          // Include recent API error details so CI artifacts show what actually happened
+          const recentApiErrors = apiErrors
+            .slice(-5)
+            .map(
+              (e) =>
+                `  ${e.method} ${e.url} → ${e.status}` +
+                (e.responseBody
+                  ? ` | ${e.responseBody.substring(0, 200)}`
+                  : '') +
+                (e.requestBody
+                  ? ` | Body: ${e.requestBody.substring(0, 200)}`
+                  : '')
+            )
+            .join('\n')
+          const apiContext = recentApiErrors
+            ? `\nRecent API errors:\n${recentApiErrors}`
+            : ''
+
           console.error('CRITICAL CONSOLE ERROR DETECTED:', fullErrorWithStack)
+          if (apiContext) {
+            console.error(apiContext)
+          }
           throw new Error(
-            `Critical console error detected: ${fullErrorWithStack}`
+            `Critical console error detected: ${fullErrorWithStack}${apiContext}`
           )
         }
       }
@@ -427,6 +448,57 @@ const test = base.test.extend({
         console.log(`[${timestamp}] [NAVIGATION:${navType}] ${url}`)
       }
     })
+
+    // Track API error responses with full request details for diagnostics.
+    // Browser console only shows "Failed to load resource: 400" with no method,
+    // body, or response — this captures everything needed to debug.
+    const apiErrors = []
+    page.on('response', async (response) => {
+      const status = response.status()
+      const url = response.url()
+
+      // Only track API errors (4xx/5xx) on our own API endpoints
+      if (status >= 400 && url.includes('/api')) {
+        const request = response.request()
+        const entry = {
+          timestamp: new Date().toISOString(),
+          method: request.method(),
+          url,
+          status,
+          requestHeaders: request.headers(),
+        }
+
+        // Capture request body for non-GET requests
+        if (request.method() !== 'GET') {
+          try {
+            entry.requestBody = request.postData()
+          } catch {
+            // postData() can fail for some request types
+          }
+        }
+
+        // Capture response body (may contain error message from server)
+        try {
+          entry.responseBody = await response.text().catch(() => null)
+        } catch {
+          // response.text() can fail if response was aborted
+        }
+
+        apiErrors.push(entry)
+        console.log(
+          `[API ERROR] ${entry.method} ${url} → ${status}` +
+            (entry.responseBody
+              ? ` | Response: ${entry.responseBody.substring(0, 200)}`
+              : '') +
+            (entry.requestBody
+              ? ` | Request: ${entry.requestBody.substring(0, 200)}`
+              : '')
+        )
+      }
+    })
+
+    // Access captured API errors (method, URL, request body, response body)
+    page.apiErrors = () => apiErrors
 
     // Methods to access console errors
     page.consoleErrors = () => consoleErrors
