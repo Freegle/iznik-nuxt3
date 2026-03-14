@@ -94,26 +94,30 @@ test.describe('Reply Flow - Social Login Simulation', () => {
       timeout: timeouts.ui.appearance,
     })
 
-    // Define form field locators
-    const modalEmailInput = page
+    // Define form field locators — scoped to #loginModal to avoid
+    // picking up the reply form's email input behind the modal
+    const modal = page.locator('#loginModal').first()
+    const modalEmailInput = modal
       .locator('input[type="email"], input[name="email"]')
       .first()
-    const passwordField = page
+    const passwordField = modal
       .locator('input[type="password"], input[name="password"]')
       .first()
-    const fullnameField = page.locator('#fullname, input[name="fullname"]')
-    const loginLink = page
+    const fullnameField = modal.locator('#fullname, input[name="fullname"]')
+    const loginLink = modal
       .locator('.test-already-a-freegler')
       .filter({ visible: true })
       .first()
 
-    // Wait for modal to be ready
+    // Wait for modal form fields to be ready
     await page.waitForFunction(
       () => {
-        const emailEl = document.querySelector(
+        const modal = document.querySelector('#loginModal')
+        if (!modal) return false
+        const emailEl = modal.querySelector(
           'input[type="email"], input[name="email"]'
         )
-        const passwordEl = document.querySelector(
+        const passwordEl = modal.querySelector(
           'input[type="password"], input[name="password"]'
         )
         return emailEl && passwordEl
