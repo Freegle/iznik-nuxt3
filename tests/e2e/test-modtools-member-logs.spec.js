@@ -28,9 +28,10 @@ async function dismissAllModals(page) {
 test.describe('ModTools Member Logs', () => {
   test('member logs do not loop infinitely and stop loading', async ({
     page,
+    testEnv,
   }) => {
     // Issue #28: member logs loop infinitely, never stop loading
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -112,9 +113,12 @@ test.describe('ModTools Member Logs', () => {
     expect(errors).toHaveLength(0)
   })
 
-  test('member logs show subject lines for messages', async ({ page }) => {
+  test('member logs show subject lines for messages', async ({
+    page,
+    testEnv,
+  }) => {
     // Issue #15: member logs missing subject lines
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     // Navigate to approved members (always has data)
     await page.goto(`${MODTOOLS_URL}/members/approved`, {

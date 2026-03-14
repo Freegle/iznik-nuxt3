@@ -24,6 +24,7 @@ async function waitForAuthInLocalStorage(page) {
         return false
       }
     },
+    null,
     { timeout: timeouts.ui.appearance }
   )
   console.log('[Auth] Auth found in localStorage')
@@ -54,6 +55,7 @@ async function waitForAuthHydration(page) {
         return true // Parse error means no valid auth, continue
       }
     },
+    null,
     { timeout: timeouts.ui.appearance }
   )
   console.log('[Auth] Page stabilized and auth hydrated')
@@ -292,7 +294,8 @@ async function waitForNuxtHydration(page) {
       const nuxtRoot = document.querySelector('#__nuxt')
       return nuxtRoot && nuxtRoot.__vue_app__
     },
-    { timeout: 15000 }
+    null,
+    { timeout: timeouts.ui.appearance }
   )
 }
 

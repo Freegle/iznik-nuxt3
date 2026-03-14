@@ -145,7 +145,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
           // Check if it is an exception, and if so, log it.
           if (event.exception) {
             console.error(
-              `[Exeption for Sentry]: (${hint.originalException})`,
+              `[Exception for Sentry]: (${hint.originalException})`,
               {
                 event,
                 hint,

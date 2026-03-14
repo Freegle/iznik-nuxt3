@@ -302,6 +302,7 @@ export const useAuthStore = defineStore({
       // We're so vain, we probably think this call is about us.
       let me = null
       let groups = null
+      let serverError = false
 
       // Use V2 API (Go backend) - GET /session returns {me, groups, work, discourse, ...}
       if (this.auth.jwt || this.auth.persistent) {
@@ -347,8 +348,14 @@ export const useAuthStore = defineStore({
             }
           }
         } catch (e) {
-          // Failed.  This can validly happen with a 404 if the JWT is invalid.
-          console.log('Exception fetching user')
+          // 401/404 means our JWT is genuinely invalid — BaseAPI already clears
+          // auth for 401.  Any other error (500, network timeout) is a server
+          // problem — the JWT may still be valid so we must not wipe it.
+          const status = e?.response?.status
+          if (status && status !== 401 && status !== 404) {
+            serverError = true
+          }
+          console.log('Exception fetching user, status', status)
         }
       }
 
@@ -405,8 +412,8 @@ export const useAuthStore = defineStore({
             console.log('No local marketing consent to sync')
           }
         }
-      } else {
-        // Any auth info must be invalid.
+      } else if (!serverError) {
+        // No user returned and no server error — auth is genuinely invalid.
         this.setAuth(null, null)
         this.setUser(null)
       }

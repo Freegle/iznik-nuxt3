@@ -178,43 +178,55 @@ const test = base.test.extend({
     await use(emailGenerator)
   },
 
-  // Auto-apply progress tracking to all tests
-  // eslint-disable-next-line no-empty-pattern
-  progressTracker: async ({}, use) => {
-    const testInfo = test.info()
-    const testId = `${testInfo.file}::${testInfo.title}`
+  // Isolated test environment per test file (for parallel execution).
+  // Reads pre-generated environment data from test-envs.json.
+  // Environments are created by create-test-env.php before the test run.
 
-    // Register test start
-    updateProgress({
-      testId,
-      title: testInfo.title,
-      status: 'running',
-      startTime: Date.now(),
-      retry: testInfo.retry,
-    })
+  testEnv: [
+    // eslint-disable-next-line no-empty-pattern
+    async ({}, use, testInfo) => {
+      // Derive prefix from filename: test-modtools-hold-release.spec.js -> mtholdrelease
+      const filename = path.basename(testInfo.file, '.spec.js')
+      const prefix = filename
+        .replace('test-modtools-', 'mt')
+        .replace('test-', '')
+        .replace(/-/g, '')
 
-    try {
-      await use({})
-      // Test completed successfully
-      updateProgress({
-        testId,
-        status: 'completed',
-        endTime: Date.now(),
+      // Read pre-generated environments (created before test run)
+      const envsPath = path.join(__dirname, 'test-envs.json')
+      try {
+        const envsData = JSON.parse(fs.readFileSync(envsPath, 'utf-8'))
+        const env = envsData[prefix]
+        if (env) {
+          console.log(
+            `Test environment loaded: group=${env.group.name}, mod=${env.mod.email}`
+          )
+          await use(env)
+          return
+        }
+        console.warn(`No pre-generated environment for prefix "${prefix}"`)
+      } catch (error) {
+        console.error(`Failed to read test-envs.json: ${error.message}`)
+      }
+
+      // Fall back to shared FreeglePlayground environment
+      console.log('Falling back to shared FreeglePlayground environment')
+      await use({
+        group: { id: null, name: 'FreeglePlayground' },
+        group2: { id: null, name: 'FreeglePlayground2' },
+        mod: { id: null, email: 'testmod@test.com' },
+        user: { id: null, email: 'test@test.com' },
+        user2: { id: null, email: 'test3@test.com' },
+        messages: { offer: null, wanted: null },
+        pending: { offer: null, wanted: null },
+        chats: { user2user: null, user2mod: null },
       })
-    } catch (error) {
-      // Test failed
-      updateProgress({
-        testId,
-        status: 'failed',
-        endTime: Date.now(),
-        error: error.message,
-      })
-      throw error
-    }
-  },
+    },
+    { scope: 'test' },
+  ],
 
   // Override the page fixture to use our isolated context
-  page: async ({ context, progressTracker }, use) => {
+  page: async ({ context }, use) => {
     // Create a page in our isolated context
     const page = await context.newPage()
     console.log(`Created new page in isolated context`)
@@ -260,7 +272,7 @@ const test = base.test.extend({
       /Error retrieving a token./, // Also related to GSI FedCM, not available in test
       /Hydration completed but contains mismatches/, // Not ideal, but not visible to user
       /ResizeObserver loop limit exceeded/, // Non-critical UI warning
-      /\[Exeption for Sentry\].*TypeError/, // Sentry-wrapped TypeErrors are non-critical UI issues
+      // NOTE: Do NOT add a broad Sentry catch-all — Sentry errors are critical. Only specific known patterns below.
       /tuimg_0/i, // Allow any error mentioning tuimg_0 (case-insensitive)
       /delivery\.localhost.*tuimg_0/i, // Specific delivery service tuimg_0 errors
       /stripe\.com/i, // Ignore any Stripe-related errors during testing (case-insensitive)
@@ -275,8 +287,8 @@ const test = base.test.extend({
       /Refused to frame/, // Can happen in test.
       /Failed to load resource.*sentry/, // Sentry errors can happen in test environments
       /Error in map idle TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Leaflet map errors in test environment
-      /\[Exeption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
-      /\[Exeption for Sentry\]:.*\(Error: \w+\)/, // Sentry capturing minified errors (e.g., "Error: oa")
+      /\[Exc?eption for Sentry\]:.*TypeError: Cannot read properties of undefined \(reading '_leaflet_pos'\)/, // Sentry capturing leaflet errors
+      /\[Exc?eption for Sentry\]:.*\(Error: \w+\)/, // Sentry capturing minified errors (e.g., "Error: oa")
       /accounts\.google\.com\/gsi/, // Google authentication/sign-in errors in test
       /malformed JSON response:.*Error 400 \(Bad Request\)/, // Google API malformed JSON responses
       // CSP (Content Security Policy) violations - common in development/testing
@@ -290,7 +302,7 @@ const test = base.test.extend({
       /TrustedScript/, // Vite dev server HMR uses eval() which triggers Trusted Types CSP
       /Failed to load resource.*freegle-dev-local/, // Freegle dev site may not be running during ModTools tests
       /Failed to load resource: the server responded with a status of 404.*api\/modtools\//, // modtools endpoints not yet in Go API
-      /\[Exeption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
+      /\[Exc?eption for Sentry\]:.*\/modtools\/modconfig/, // modconfig endpoint not yet in Go API
       /Only one navigator\.credentials\.get request may be outstanding at one time/, // FedCM concurrent credential requests in test
       /useOurModal show problem/, // Race condition fixed in useOurModal.js (nextTick) - allow until container rebuild
       /Failed to load resource: the server responded with a status of 500.*api\/user/, // Transient 500 on user API — app retries automatically
@@ -788,112 +800,16 @@ test.afterAll(async () => {
 })
 
 // Progress tracking functions
-const PROGRESS_FILE = path.join(
-  __dirname,
-  '../../test-results/test-progress.json'
-)
-
-const initializeProgressFile = () => {
-  try {
-    const dir = path.dirname(PROGRESS_FILE)
-    fs.mkdirSync(dir, { recursive: true })
-    const initialProgress = {
-      totalTests: 0,
-      completedTests: 0,
-      failedTests: 0,
-      runningTests: 0,
-      tests: {},
-      startTime: Date.now(),
-      lastUpdate: Date.now(),
-    }
-    fs.writeFileSync(PROGRESS_FILE, JSON.stringify(initialProgress, null, 2))
-    console.log('Initialized test progress tracking file')
-  } catch (error) {
-    console.warn('Failed to initialize progress file:', error.message)
-  }
-}
-
-const updateProgress = (testUpdate) => {
-  try {
-    let progress
-    try {
-      progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
-    } catch (readError) {
-      // File doesn't exist or is corrupted, initialize it
-      initializeProgressFile()
-      progress = JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'))
-    }
-
-    const { testId, title, status, startTime, endTime, error, retry } =
-      testUpdate
-
-    // Update or add test entry
-    if (!progress.tests[testId]) {
-      progress.tests[testId] = {
-        title,
-        status: 'pending',
-        attempts: [],
-      }
-      progress.totalTests = Object.keys(progress.tests).length
-    }
-
-    const testEntry = progress.tests[testId]
-
-    // Handle retry attempts
-    if (status === 'running') {
-      const attempt = {
-        status: 'running',
-        startTime,
-        retry: retry || 0,
-      }
-      testEntry.attempts.push(attempt)
-      testEntry.status = 'running'
-    } else if (status === 'completed' || status === 'failed') {
-      // Update the latest attempt
-      const latestAttempt = testEntry.attempts[testEntry.attempts.length - 1]
-      if (latestAttempt) {
-        latestAttempt.status = status
-        latestAttempt.endTime = endTime
-        if (error) latestAttempt.error = error
-      }
-      testEntry.status = status
-    }
-
-    // Recalculate totals based on final test statuses (not attempts)
-    const testStatuses = Object.values(progress.tests).map((t) => t.status)
-    progress.completedTests = testStatuses.filter(
-      (s) => s === 'completed'
-    ).length
-    progress.failedTests = testStatuses.filter((s) => s === 'failed').length
-    progress.runningTests = testStatuses.filter((s) => s === 'running').length
-
-    progress.lastUpdate = Date.now()
-
-    fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2))
-
-    console.log(
-      `Progress: ${progress.completedTests + progress.failedTests}/${
-        progress.totalTests
-      } tests completed (${progress.runningTests} running)`
-    )
-  } catch (error) {
-    console.warn('Failed to update progress:', error.message)
-  }
-}
-
-// Initialize progress tracking after function definitions
-initializeProgressFile()
-
 // Define our extended test with custom fixtures
 const testWithFixtures = test.extend({
-  postMessage: async ({ page, setNewUserPassword }, use) => {
+  postMessage: async ({ page, setNewUserPassword, testEnv }, use) => {
     /**
      * Helper function to post a message to Freegle
      * @param {Object} options - Configuration options for posting
      * @param {string} options.type - The type of post ('OFFER' or 'WANTED')
      * @param {string} options.item - The item title/name
      * @param {string} options.description - The item description
-     * @param {string} options.postcode - The postcode for the item
+     * @param {string} options.postcode - The postcode for the item (defaults to testEnv postcode)
      * @param {string} options.email - The email to use for posting
      * @returns {Promise<{id: string|null, description: string}>} - Information about the created post
      */
@@ -902,7 +818,7 @@ const testWithFixtures = test.extend({
         type = 'OFFER',
         item = 'test post - please delete',
         description = `Created by automated test at ${new Date().toISOString()}`,
-        postcode = environment.postcode,
+        postcode = testEnv?.postcode || environment.postcode,
         email,
       } = options
 
@@ -1008,6 +924,7 @@ const testWithFixtures = test.extend({
             (desktopBtn && desktopBtn.offsetParent !== null)
           )
         },
+        null,
         { timeout: timeouts.ui.appearance }
       )
 
@@ -1414,6 +1331,7 @@ const testWithFixtures = test.extend({
               false
           )
         },
+        null,
         { timeout }
       )
     }
@@ -1458,6 +1376,7 @@ const testWithFixtures = test.extend({
                 false
             )
           },
+          null,
           { timeout: options.timeout || 30000 }
         )
       }

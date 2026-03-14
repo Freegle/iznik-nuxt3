@@ -31,12 +31,13 @@ module.exports = defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  workers: 1, // Sequential execution to isolate functional failures from load issues
+  workers: 11, // Parallel workers for test isolation validation
   maxFailures: 0,
   reporter: [
     ['list'],
     ['html', { open: process.env.CI ? 'never' : 'always', host: '0.0.0.0' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['./tests/e2e/status-reporter.js'],
     // Only include monocart reporter when explicitly enabled via env var
     ...(process.env.ENABLE_MONOCART_REPORTER === 'true'
       ? [

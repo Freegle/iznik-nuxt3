@@ -8,7 +8,7 @@
  */
 
 const { test, expect } = require('./fixtures')
-const { environment, timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
+const { timeouts, DEFAULT_TEST_PASSWORD } = require('./config')
 const {
   loginViaHomepage,
   logoutIfLoggedIn,
@@ -51,7 +51,7 @@ test.describe('Reply Flow - Social Login Simulation', () => {
       type: 'OFFER',
       item: uniqueItem,
       description: 'Test item for social login simulation',
-      postcode: environment.postcode,
+
       email: testEmail,
     })
     expect(result.id).toBeTruthy()

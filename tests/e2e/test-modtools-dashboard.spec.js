@@ -37,9 +37,10 @@ async function assertNoErrors(page) {
 test.describe('ModTools Dashboard', () => {
   test('after login, groups should be visible (not empty)', async ({
     page,
+    testEnv,
   }) => {
     // Issue #2/#4: groups list empty after login
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     await page.goto(`${MODTOOLS_URL}/messages/pending`, {
       timeout: timeouts.navigation.initial,
@@ -72,8 +73,8 @@ test.describe('ModTools Dashboard', () => {
       .toBeGreaterThan(0)
   })
 
-  test('dashboard loads without errors', async ({ page }) => {
-    await loginViaModTools(page, 'testmod@test.com')
+  test('dashboard loads without errors', async ({ page, testEnv }) => {
+    await loginViaModTools(page, testEnv.mod.email)
 
     // Collect page errors
     const errors = []

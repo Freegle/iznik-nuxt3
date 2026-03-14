@@ -13,7 +13,8 @@ async function testEmailLevelSetting(page, testEmail, level, takeScreenshot) {
 
   // Sign up to access settings page
   await page.gotoAndVerify('/')
-  await signUpViaHomepage(page, testEmail, 'Test User')
+  const signupResult = await signUpViaHomepage(page, testEmail, 'Test User')
+  expect(signupResult).toBeTruthy()
 
   // Navigate to settings page
   await page.gotoAndVerify('/settings')
@@ -143,9 +144,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     takeScreenshot,
   }) => {
     // Sign up and navigate to settings
-    // Don't use networkidle - the app has background polling that prevents idle state
     await page.gotoAndVerify('/')
-    await signUpViaHomepage(page, testEmail, 'Test User')
+    const signupResult = await signUpViaHomepage(page, testEmail, 'Test User')
+    expect(signupResult).toBeTruthy()
+
     await page.gotoAndVerify('/settings')
 
     // Wait for email settings section
@@ -220,9 +222,10 @@ test.describe('Settings Page - Email Level Settings', () => {
     takeScreenshot,
   }) => {
     // Sign up and navigate to settings
-    // Don't use networkidle - the app has background polling that prevents idle state
     await page.gotoAndVerify('/')
-    await signUpViaHomepage(page, testEmail, 'Test User')
+    const signupResult = await signUpViaHomepage(page, testEmail, 'Test User')
+    expect(signupResult).toBeTruthy()
+
     await page.gotoAndVerify('/settings')
 
     // Wait for email settings section

@@ -3,8 +3,7 @@
  * Test that moving a message between groups in ModTools does not cause
  * a full-page "Cannot read properties of undefined (reading 'turl')" error.
  *
- * Uses testmod@test.com (created by testenv.php) which is a moderator of
- * FreeglePlayground and FreeglePlayground2, with approved test messages.
+ * Uses testEnv fixture for isolated test group and moderator.
  */
 
 const { test, expect } = require('./fixtures')
@@ -16,9 +15,10 @@ const MODTOOLS_URL = environment.modtoolsBaseUrl
 test.describe('ModTools move message', () => {
   test('moving a message between groups should not cause turl error', async ({
     page,
+    testEnv,
   }) => {
     // Step 1: Log in via API and inject auth tokens
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     // Step 2: Navigate to approved messages (auth tokens in localStorage)
     await page.goto(`${MODTOOLS_URL}/messages/approved`, {
@@ -48,9 +48,9 @@ test.describe('ModTools move message', () => {
     })
     await page.waitForTimeout(500)
 
-    // Find the FreeglePlayground option
+    // Find the test group option
     const playgroundOption = groupSelect.locator(
-      'option:has-text("FreeglePlayground")'
+      `option:has-text("${testEnv.group.name}")`
     )
     await expect(playgroundOption.first()).toBeAttached({
       timeout: timeouts.ui.appearance,

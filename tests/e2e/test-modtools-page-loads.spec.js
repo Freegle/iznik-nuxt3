@@ -37,9 +37,10 @@ async function assertNoErrors(page) {
 test.describe('ModTools Page Loads', () => {
   test('Member Review page loads and shows members or "no members" message without errors', async ({
     page,
+    testEnv,
   }) => {
     // Issue #22: Member Review page fails to load
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -59,9 +60,9 @@ test.describe('ModTools Page Loads', () => {
     expect(errors).toHaveLength(0)
   })
 
-  test('Edits page loads without errors', async ({ page }) => {
+  test('Edits page loads without errors', async ({ page, testEnv }) => {
     // Issue #25: Edits page fails
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -83,9 +84,10 @@ test.describe('ModTools Page Loads', () => {
 
   test('Chat Review page loads without "something went wrong"', async ({
     page,
+    testEnv,
   }) => {
     // Issue #24: Chat Review shows "something went wrong"
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
@@ -105,9 +107,9 @@ test.describe('ModTools Page Loads', () => {
     expect(errors).toHaveLength(0)
   })
 
-  test('Admins page loads and shows admin users', async ({ page }) => {
+  test('Admins page loads and shows admin users', async ({ page, testEnv }) => {
     // Issue #20: Admins page broken
-    await loginViaModTools(page, 'testmod@test.com')
+    await loginViaModTools(page, testEnv.mod.email)
 
     const errors = []
     page.on('pageerror', (error) => {
