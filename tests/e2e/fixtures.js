@@ -452,6 +452,12 @@ const test = base.test.extend({
     // Track API error responses with full request details for diagnostics.
     // Browser console only shows "Failed to load resource: 400" with no method,
     // body, or response — this captures everything needed to debug.
+    //
+    // IMPORTANT: Push entry to array SYNCHRONOUSLY (before any await) so the
+    // console error handler can see it. The browser fires 'console' and
+    // 'response' events near-simultaneously for failed requests — if we await
+    // response.text() before pushing, the entry won't be in apiErrors when
+    // the console handler throws.
     const apiErrors = []
     page.on('response', async (response) => {
       const status = response.status()
@@ -465,10 +471,9 @@ const test = base.test.extend({
           method: request.method(),
           url,
           status,
-          requestHeaders: request.headers(),
         }
 
-        // Capture request body for non-GET requests
+        // Capture request body synchronously (postData() is sync)
         if (request.method() !== 'GET') {
           try {
             entry.requestBody = request.postData()
@@ -477,14 +482,16 @@ const test = base.test.extend({
           }
         }
 
-        // Capture response body (may contain error message from server)
+        // Push to array IMMEDIATELY so console handler can see it
+        apiErrors.push(entry)
+
+        // Then fetch response body asynchronously and update the entry
         try {
           entry.responseBody = await response.text().catch(() => null)
         } catch {
           // response.text() can fail if response was aborted
         }
 
-        apiErrors.push(entry)
         console.log(
           `[API ERROR] ${entry.method} ${url} → ${status}` +
             (entry.responseBody
