@@ -1330,4 +1330,5 @@ module.exports = {
   logoutIfLoggedIn,
   getMyGroups,
   clearSessionData,
+  waitForEnabledSignInButton,
 }
